@@ -25,15 +25,16 @@
     </style>
 
     <style name="PermissionGrantTitleIcon">
-        <item name="layout_width">36dp</item>
-        <item name="layout_height">36dp</item>
+        <item name="layout_width">24dp</item>
+        <item name="layout_height">24dp</item>
+        <item name="layout_marginBottom">12dp</item>
         <item name="tint">?attr/colorAccent</item>
         <item name="scaleType">fitCenter</item>
     </style>
 
     <style name="PermissionGrantTitleMessage"
            parent="@style/TextAppearance.DeviceDefault">
-        <item name="paddingStart">22dp</item>
+        <item name="gravity">center</item>
         <item name="textSize">20sp</item>
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
@@ -46,54 +47,20 @@
     </style>
 
     <style name="PermissionGrantDescription">
-        <item name="layout_marginTop">20dp</item>
         <item name="layout_marginStart">24dp</item>
-        <item name="layout_marginBottom">16dp</item>
         <item name="layout_marginEnd">24dp</item>
     </style>
 
     <style name="PermissionGrantContent">
-        <item name="layout_marginStart">16dp</item>
+        <item name="layout_marginStart">24dp</item>
         <item name="layout_marginEnd">24dp</item>
-    </style>
-
-    <style name="PermissionGrantRadioGroup">
-        <item name="layout_marginStart">8dp</item>
-        <item name="layout_marginTop">-4dp</item>
-    </style>
-
-    <style name="PermissionGrantRadioButton"
-           parent="@style/Widget.DeviceDefault.CompoundButton.RadioButton">
-        <item name="paddingStart">16dp</item>
-        <item name="paddingTop">8dp</item>
-        <item name="paddingBottom">8dp</item>
-        <item name="textSize">16sp</item>
     </style>
 
     <style name="PermissionGrantDetailMessage"
            parent="@style/TextAppearance.DeviceDefault">
-        <item name="layout_marginStart">8dp</item>
-        <item name="layout_marginBottom">4dp</item>
+        <item name="layout_marginTop">18dp</item>
         <item name="textColor">?attr/textColorPrimary</item>
         <item name="textSize">16sp</item>
-    </style>
-
-    <style name="PermissionGrantDetailMessageSpace">
-        <item name="layout_height">8dp</item>
-    </style>
-
-    <style name="PermissionGrantCheckbox"
-           parent="@style/Widget.DeviceDefault.CompoundButton.CheckBox">
-        <item name="paddingStart">16dp</item>
-        <item name="textColor">?attr/textColorSecondary</item>
-        <item name="buttonTint">?attr/textColorSecondary</item>
-        <item name="textSize">16sp</item>
-    </style>
-
-    <style name="PermissionGrantButtonBar">
-        <item name="layout_marginStart">24dp</item>
-        <item name="layout_marginEnd">16dp</item>
-        <item name="layout_marginBottom">4dp</item>
     </style>
 
     <!-- styles for the permission review screen. -->
