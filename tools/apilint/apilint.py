@@ -267,6 +267,18 @@ def _parse_stream_to_generator(f):
                         raise TypeError("send() must be followed by next(), not send()")
 
 
+def _retry_iterator(it):
+    """Wraps an iterator, such that calling send(True) on it will redeliver the same element"""
+    for e in it:
+        while True:
+            retry = yield e
+            if not retry:
+                break
+            # send() was called, asking us to redeliver clazz on next(). Still need to yield
+            # a dummy value to the send() first though.
+            if (yield "Returning clazz on next()"):
+                raise TypeError("send() must be followed by next(), not send()")
+
 def _parse_to_matching_class(classes, needle):
     """Takes a classes generator and parses it until it returns the class we're looking for
 
@@ -276,8 +288,8 @@ def _parse_to_matching_class(classes, needle):
         if clazz.pkg.name < needle.pkg.name:
             # We haven't reached the right package yet
             continue
-        if clazz.name < needle.name:
-            # We haven't reached the right class yet
+        if clazz.pkg.name == needle.pkg.name and clazz.fullname < needle.fullname:
+            # We're in the right package, but not the right class yet
             continue
         if clazz.fullname == needle.fullname:
             return clazz
