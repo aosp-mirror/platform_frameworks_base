@@ -355,6 +355,30 @@ easier.
         <item name="fontFamily">@string/config_bodyFontFamilyMedium</item>
     </style>
     <style name="TextAppearance.DeviceDefault.Widget.Toolbar.Title" parent="TextAppearance.DeviceDefault.Widget.ActionBar.Title"/>
+    <style name="TextAppearance.DeviceDefault.Widget.Toolbar.Subtitle" parent="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle"/>
+    <style name="TextAppearance.DeviceDefault.Body1" parent="TextAppearance.Material.Body1">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Body2" parent="TextAppearance.Material.Body2">
+        <item name="fontFamily">@string/config_bodyFontFamilyMedium</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Subhead" parent="TextAppearance.Material.Subhead">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Headline" parent="TextAppearance.Material.Headline">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Display1" parent="TextAppearance.Material.Display1">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Title" parent="TextAppearance.Material.Title">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Caption" parent="TextAppearance.Material.Caption">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.ListItem" parent="TextAppearance.DeviceDefault.Subhead"/>
+    <style name="TextAppearance.DeviceDefault.ListItemSecondary" parent="TextAppearance.DeviceDefault.Body1"/>
 
     <!-- Preference Styles -->
     <style name="Preference.DeviceDefault" parent="Preference.Material"/>
