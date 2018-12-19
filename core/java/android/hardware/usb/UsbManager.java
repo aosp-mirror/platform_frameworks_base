@@ -18,6 +18,7 @@
 package android.hardware.usb;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
@@ -39,9 +40,10 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -97,15 +99,11 @@ public class UsbManager {
      * Broadcast Action: A broadcast for USB port changes.
      *
      * This intent is sent when a USB port is added, removed, or changes state.
-     * <ul>
-     * <li> {@link #EXTRA_PORT} containing the {@link android.hardware.usb.UsbPort}
-     * for the port.
-     * <li> {@link #EXTRA_PORT_STATUS} containing the {@link android.hardware.usb.UsbPortStatus}
-     * for the port, or null if the port has been removed
-     * </ul>
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
     public static final String ACTION_USB_PORT_CHANGED =
             "android.hardware.usb.action.USB_PORT_CHANGED";
 
@@ -796,34 +794,44 @@ public class UsbManager {
      * device class (which supports all types of ports despite its name).
      * </p>
      *
-     * @return The list of USB ports, or null if none.
+     * @return The list of USB ports
      *
      * @hide
      */
-    @UnsupportedAppUsage
-    public UsbPort[] getPorts() {
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public @NonNull List<UsbPort> getPorts() {
         if (mService == null) {
-            return null;
+            return Collections.emptyList();
         }
+
+        List<ParcelableUsbPort> parcelablePorts;
         try {
-            return mService.getPorts();
+            parcelablePorts = mService.getPorts();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+
+        if (parcelablePorts == null) {
+            return Collections.emptyList();
+        } else {
+            int numPorts = parcelablePorts.size();
+
+            ArrayList<UsbPort> ports = new ArrayList<>(numPorts);
+            for (int i = 0; i < numPorts; i++) {
+                ports.add(parcelablePorts.get(i).getUsbPort(this));
+            }
+
+            return ports;
         }
     }
 
     /**
-     * Gets the status of the specified USB port.
-     *
-     * @param port The port to query.
-     * @return The status of the specified USB port, or null if unknown.
+     * Should only be called by {@link UsbPort#getStatus}.
      *
      * @hide
      */
-    @UnsupportedAppUsage
-    public UsbPortStatus getPortStatus(UsbPort port) {
-        Preconditions.checkNotNull(port, "port must not be null");
-
+    UsbPortStatus getPortStatus(UsbPort port) {
         try {
             return mService.getPortStatus(port.getId());
         } catch (RemoteException e) {
@@ -832,29 +840,11 @@ public class UsbManager {
     }
 
     /**
-     * Sets the desired role combination of the port.
-     * <p>
-     * The supported role combinations depend on what is connected to the port and may be
-     * determined by consulting
-     * {@link UsbPortStatus#isRoleCombinationSupported UsbPortStatus.isRoleCombinationSupported}.
-     * </p><p>
-     * Note: This function is asynchronous and may fail silently without applying
-     * the requested changes.  If this function does cause a status change to occur then
-     * a {@link #ACTION_USB_PORT_CHANGED} broadcast will be sent.
-     * </p>
-     *
-     * @param powerRole The desired power role: {@link UsbPort#POWER_ROLE_SOURCE}
-     * or {@link UsbPort#POWER_ROLE_SINK}, or 0 if no power role.
-     * @param dataRole The desired data role: {@link UsbPort#DATA_ROLE_HOST}
-     * or {@link UsbPort#DATA_ROLE_DEVICE}, or 0 if no data role.
+     * Should only be called by {@link UsbPort#setRoles}.
      *
      * @hide
      */
-    @UnsupportedAppUsage
-    public void setPortRoles(UsbPort port, int powerRole, int dataRole) {
-        Preconditions.checkNotNull(port, "port must not be null");
-        UsbPort.checkRoles(powerRole, dataRole);
-
+    void setPortRoles(UsbPort port, int powerRole, int dataRole) {
         Log.d(TAG, "setPortRoles Package:" + mContext.getPackageName());
         try {
             mService.setPortRoles(port.getId(), powerRole, dataRole);
