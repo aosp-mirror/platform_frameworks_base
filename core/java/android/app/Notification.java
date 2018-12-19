@@ -3130,6 +3130,10 @@ public class Notification implements Parcelable
         return mAppOverlayIntent;
     }
 
+    /**
+     * Returns whether the platform is allowed (by the app developer) to generate contextual actions
+     * for this notification.
+     */
     public boolean getAllowSystemGeneratedContextualActions() {
         return mAllowSystemGeneratedContextualActions;
     }
