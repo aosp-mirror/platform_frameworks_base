@@ -12820,6 +12820,17 @@ public final class Settings {
                 "privileged_device_identifier_3p_check_relaxed";
 
         /**
+         * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
+         * permission check for preloaded non-privileged apps.
+         *
+         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
+         *
+         * @hide
+         */
+        public static final String PRIVILEGED_DEVICE_IDENTIFIER_NON_PRIV_CHECK_RELAXED =
+                "privileged_device_identifier_non_priv_check_relaxed";
+
+        /**
          * If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will be ignored
          * and restoring to lower version of platform API will be skipped.
          *
