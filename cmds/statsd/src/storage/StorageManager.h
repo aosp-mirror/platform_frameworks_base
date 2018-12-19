@@ -68,10 +68,12 @@ public:
     static bool hasConfigMetricsReport(const ConfigKey& key);
 
     /**
-     * Appends ConfigMetricsReport found on disk to the specific proto and
-     * delete it.
+     * Appends the ConfigMetricsReport found on disk to the specifid proto
+     * and, if erase_data, deletes it from disk.
      */
-    static void appendConfigMetricsReport(const ConfigKey& key, ProtoOutputStream* proto);
+    static void appendConfigMetricsReport(const ConfigKey& key,
+                                          ProtoOutputStream* proto,
+                                          bool erase_data);
 
     /**
      * Call to load the saved configs from disk.

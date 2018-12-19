@@ -296,6 +296,7 @@ void StatsService::dumpIncidentSection(int out) {
                                  ADB_DUMP, &proto);
         proto.end(reportsListToken);
         proto.flush(out);
+        proto.clear();
     }
 }
 
