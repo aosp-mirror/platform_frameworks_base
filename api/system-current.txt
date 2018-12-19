@@ -4864,6 +4864,7 @@ package android.permission {
     method public abstract int onCountPermissionApps(java.util.List<java.lang.String>, boolean, boolean);
     method public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
     method public abstract void onGetRuntimePermissionsBackup(android.os.UserHandle, java.io.OutputStream);
+    method public abstract java.util.List<android.permission.RuntimePermissionUsageInfo> onPermissionUsageResult(boolean, long);
     method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
     method public abstract java.util.Map<java.lang.String, java.util.List<java.lang.String>> onRevokeRuntimePermissions(java.util.Map<java.lang.String, java.util.List<java.lang.String>>, boolean, int, java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
@@ -4892,11 +4893,12 @@ package android.permission {
   public final class RuntimePermissionUsageInfo implements android.os.Parcelable {
     ctor public RuntimePermissionUsageInfo(java.lang.CharSequence, int);
     method public int describeContents();
-    method public java.lang.CharSequence getName();
     method public int getAppAccessCount();
+    method public java.lang.CharSequence getName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionUsageInfo> CREATOR;
   }
+
 }
 
 package android.permissionpresenterservice {
@@ -7252,7 +7254,6 @@ package android.telephony.ims {
     method public void callSessionInviteParticipantsRequestDelivered();
     method public void callSessionInviteParticipantsRequestFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMayHandover(int, int);
-    method public void callSessionRttAudioIndicatorChanged(android.telephony.ims.ImsStreamMediaProfile);
     method public void callSessionMergeComplete(android.telephony.ims.stub.ImsCallSessionImplBase);
     method public void callSessionMergeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMergeStarted(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
@@ -7263,6 +7264,7 @@ package android.telephony.ims {
     method public void callSessionResumeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionResumeReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionResumed(android.telephony.ims.ImsCallProfile);
+    method public void callSessionRttAudioIndicatorChanged(android.telephony.ims.ImsStreamMediaProfile);
     method public void callSessionRttMessageReceived(java.lang.String);
     method public void callSessionRttModifyRequestReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionRttModifyResponseReceived(int);
