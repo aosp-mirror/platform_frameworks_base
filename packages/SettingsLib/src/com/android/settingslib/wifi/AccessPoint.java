@@ -43,6 +43,7 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
+import android.net.wifi.hotspot2.ProvisioningCallback;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -1016,6 +1017,17 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /**
+     * Starts the OSU Provisioning flow.
+     */
+    public void startOsuProvisioning() {
+        mContext.getSystemService(WifiManager.class).startSubscriptionProvisioning(
+                mOsuProvider,
+                new AccessPointProvisioningCallback(),
+                ThreadUtils.getUiThreadHandler()
+        );
+    }
+
+    /**
      * Return whether the given {@link WifiInfo} is for this access point.
      * If the current AP does not have a network Id then the config is used to
      * match based on SSID and security.
@@ -1492,5 +1504,28 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     private static boolean isVerboseLoggingEnabled() {
         return WifiTracker.sVerboseLogging || Log.isLoggable(TAG, Log.VERBOSE);
+    }
+
+    /**
+     * Callbacks relaying changes to the OSU provisioning status started in startOsuProvisioning().
+     *
+     * All methods are invoked on the Main Thread
+     */
+    private class AccessPointProvisioningCallback extends ProvisioningCallback {
+        // TODO: Remove logs and implement summary changing logic for these provisioning callbacks.
+        @Override
+        @MainThread public void onProvisioningFailure(int status) {
+            Log.i(TAG, "[qal] Provisioning failed with status: " + status);
+        }
+
+        @Override
+        @MainThread public void onProvisioningComplete() {
+            Log.i(TAG, "[qal] Provisioning Complete");
+        }
+
+        @Override
+        @MainThread public void onProvisioningStatus(int status) {
+            Log.i(TAG, "[qal] Provisioning status: " + status);
+        }
     }
 }
