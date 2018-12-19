@@ -842,25 +842,13 @@ public class NotificationManagerService extends SystemService {
                         // Report to usage stats that notification was made visible
                         if (DBG) Slog.d(TAG, "Marking notification as visible " + nv.key);
                         reportSeen(r);
-
-                        // If the newly visible notification has smart suggestions
-                        // then log that the user has seen them.
-                        if ((r.getNumSmartRepliesAdded() > 0 || r.getNumSmartActionsAdded() > 0)
-                                && !r.hasSeenSmartReplies()) {
-                            r.setSeenSmartReplies(true);
-                            LogMaker logMaker = r.getLogMaker()
-                                    .setCategory(MetricsEvent.SMART_REPLY_VISIBLE)
-                                    .addTaggedData(MetricsEvent.NOTIFICATION_SMART_REPLY_COUNT,
-                                            r.getNumSmartRepliesAdded())
-                                    .addTaggedData(MetricsEvent.NOTIFICATION_SMART_ACTION_COUNT,
-                                            r.getNumSmartActionsAdded())
-                                    .addTaggedData(
-                                            MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
-                                            r.getSuggestionsGeneratedByAssistant());
-                            mMetricsLogger.write(logMaker);
-                        }
                     }
                     r.setVisibility(true, nv.rank, nv.count);
+                    // hasBeenVisiblyExpanded must be called after updating the expansion state of
+                    // the NotificationRecord to ensure the expansion state is up-to-date.
+                    if (r.hasBeenVisiblyExpanded()) {
+                        logSmartSuggestionsVisible(r);
+                    }
                     maybeRecordInterruptionLocked(r);
                     nv.recycle();
                 }
@@ -884,6 +872,11 @@ public class NotificationManagerService extends SystemService {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     r.stats.onExpansionChanged(userAction, expanded);
+                    // hasBeenVisiblyExpanded must be called after updating the expansion state of
+                    // the NotificationRecord to ensure the expansion state is up-to-date.
+                    if (r.hasBeenVisiblyExpanded()) {
+                        logSmartSuggestionsVisible(r);
+                    }
                     final long now = System.currentTimeMillis();
                     if (userAction) {
                         MetricsLogger.action(r.getItemLogMaker()
@@ -960,6 +953,26 @@ public class NotificationManagerService extends SystemService {
             }
         }
     };
+
+    @VisibleForTesting
+    void logSmartSuggestionsVisible(NotificationRecord r) {
+        // If the newly visible notification has smart suggestions
+        // then log that the user has seen them.
+        if ((r.getNumSmartRepliesAdded() > 0 || r.getNumSmartActionsAdded() > 0)
+                && !r.hasSeenSmartReplies()) {
+            r.setSeenSmartReplies(true);
+            LogMaker logMaker = r.getLogMaker()
+                    .setCategory(MetricsEvent.SMART_REPLY_VISIBLE)
+                    .addTaggedData(MetricsEvent.NOTIFICATION_SMART_REPLY_COUNT,
+                            r.getNumSmartRepliesAdded())
+                    .addTaggedData(MetricsEvent.NOTIFICATION_SMART_ACTION_COUNT,
+                            r.getNumSmartActionsAdded())
+                    .addTaggedData(
+                            MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
+                            r.getSuggestionsGeneratedByAssistant());
+            mMetricsLogger.write(logMaker);
+        }
+    }
 
     @GuardedBy("mNotificationLock")
     private void clearSoundLocked() {

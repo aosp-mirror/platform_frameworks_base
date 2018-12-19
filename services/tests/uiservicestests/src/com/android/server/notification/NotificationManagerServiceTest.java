@@ -208,6 +208,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static class TestableNotificationManagerService extends NotificationManagerService {
         int countSystemChecks = 0;
         boolean isSystemUid = true;
+        int countLogSmartSuggestionsVisible = 0;
 
         public TestableNotificationManagerService(Context context) {
             super(context);
@@ -244,6 +245,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         protected void handleSavePolicyFile() {
             return;
         }
+
+        @Override
+        void logSmartSuggestionsVisible(NotificationRecord r) {
+            super.logSmartSuggestionsVisible(r);
+            countLogSmartSuggestionsVisible++;
+        }
+
+
     }
 
     private class TestableToastCallback extends ITransientNotification.Stub {
@@ -3782,5 +3791,44 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 generatedByAssistant);
         verify(mAssistants).notifyAssistantActionClicked(
                 eq(r.sbn), eq(actionIndex), eq(action), eq(generatedByAssistant));
+    }
+
+    @Test
+    public void testLogSmartSuggestionsVisible_triggerOnExpandAndVisible() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true);
+        NotificationVisibility[] notificationVisibility = new NotificationVisibility[] {
+                NotificationVisibility.obtain(r.getKey(), 0, 0, true)
+        };
+        mService.mNotificationDelegate.onNotificationVisibilityChanged(notificationVisibility,
+                new NotificationVisibility[0]);
+
+        assertEquals(1, mService.countLogSmartSuggestionsVisible);
+    }
+
+    @Test
+    public void testLogSmartSuggestionsVisible_noTriggerOnExpand() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true);
+
+        assertEquals(0, mService.countLogSmartSuggestionsVisible);
+    }
+
+    @Test
+    public void testLogSmartSuggestionsVisible_noTriggerOnVisible() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        NotificationVisibility[] notificationVisibility = new NotificationVisibility[] {
+                NotificationVisibility.obtain(r.getKey(), 0, 0, true)
+        };
+        mService.mNotificationDelegate.onNotificationVisibilityChanged(notificationVisibility,
+                new NotificationVisibility[0]);
+
+        assertEquals(0, mService.countLogSmartSuggestionsVisible);
     }
 }

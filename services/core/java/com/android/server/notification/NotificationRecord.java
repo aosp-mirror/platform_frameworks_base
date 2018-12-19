@@ -1166,6 +1166,13 @@ public final class NotificationRecord {
         mHasSeenSmartReplies = hasSeenSmartReplies;
     }
 
+    /**
+     * Returns whether this notification has been visible and expanded at the same time.
+     */
+    public boolean hasBeenVisiblyExpanded() {
+        return stats.hasBeenVisiblyExpanded();
+    }
+
     public void setSystemGeneratedSmartActions(
             ArrayList<Notification.Action> systemGeneratedSmartActions) {
         mSystemGeneratedSmartActions = systemGeneratedSmartActions;

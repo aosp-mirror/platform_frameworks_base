@@ -916,6 +916,13 @@ public class NotificationUsageStats {
             updateVisiblyExpandedStats();
         }
 
+        /**
+         * Returns whether this notification has been visible and expanded at the same.
+         */
+        public boolean hasBeenVisiblyExpanded() {
+            return posttimeToFirstVisibleExpansionMs >= 0;
+        }
+
         private void updateVisiblyExpandedStats() {
             long elapsedNowMs = SystemClock.elapsedRealtime();
             if (isExpanded && isVisible) {
