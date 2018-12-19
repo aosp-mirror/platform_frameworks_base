@@ -52,7 +52,9 @@ class TaskSnapshotPersister {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotPersister" : TAG_WM;
     private static final String SNAPSHOTS_DIRNAME = "snapshots";
     private static final String REDUCED_POSTFIX = "_reduced";
-    static final float REDUCED_SCALE = ActivityManager.isLowRamDeviceStatic() ? 0.6f : 0.5f;
+    private static final float REDUCED_SCALE = .5f;
+    private static final float LOW_RAM_REDUCED_SCALE = .6f;
+    private static final float LOW_RAM_RECENTS_REDUCED_SCALE = .1f;
     static final boolean DISABLE_FULL_SIZED_BITMAPS = ActivityManager.isLowRamDeviceStatic();
     private static final long DELAY_MS = 100;
     private static final int QUALITY = 95;
@@ -71,6 +73,7 @@ class TaskSnapshotPersister {
     private boolean mStarted;
     private final Object mLock = new Object();
     private final DirectoryResolver mDirectoryResolver;
+    private final float mReducedScale;
 
     /**
      * The list of ids of the tasks that have been persisted since {@link #removeObsoleteFiles} was
@@ -79,8 +82,16 @@ class TaskSnapshotPersister {
     @GuardedBy("mLock")
     private final ArraySet<Integer> mPersistedTaskIdsSinceLastRemoveObsolete = new ArraySet<>();
 
-    TaskSnapshotPersister(DirectoryResolver resolver) {
+    TaskSnapshotPersister(WindowManagerService service, DirectoryResolver resolver) {
         mDirectoryResolver = resolver;
+        if (service.mLowRamTaskSnapshotsAndRecents) {
+            // Use very low res snapshots if we are using Go version of recents.
+            mReducedScale = LOW_RAM_RECENTS_REDUCED_SCALE;
+        } else {
+            // TODO(122671846) Replace the low RAM value scale with the above when it is fully built
+            mReducedScale = ActivityManager.isLowRamDeviceStatic()
+                    ? LOW_RAM_REDUCED_SCALE : REDUCED_SCALE;
+        }
     }
 
     /**
@@ -142,6 +153,15 @@ class TaskSnapshotPersister {
                 mLock.notifyAll();
             }
         }
+    }
+
+    /**
+     * Gets the scaling the persister uses for low resolution task snapshots.
+     *
+     * @return the reduced scale of task snapshots when they are set to be low res
+     */
+    float getReducedScale() {
+        return mReducedScale;
     }
 
     @TestApi
@@ -350,8 +370,8 @@ class TaskSnapshotPersister {
             final Bitmap reduced = mSnapshot.isReducedResolution()
                     ? swBitmap
                     : Bitmap.createScaledBitmap(swBitmap,
-                            (int) (bitmap.getWidth() * REDUCED_SCALE),
-                            (int) (bitmap.getHeight() * REDUCED_SCALE), true /* filter */);
+                            (int) (bitmap.getWidth() * mReducedScale),
+                            (int) (bitmap.getHeight() * mReducedScale), true /* filter */);
             try {
                 FileOutputStream reducedFos = new FileOutputStream(reducedFile);
                 reduced.compress(JPEG, QUALITY, reducedFos);
