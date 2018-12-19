@@ -120,7 +120,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                         android.Manifest.permission.INTERACT_ACROSS_PROFILES, callingUid,
                         -1, true);
                 if (permissionFlag != PackageManager.PERMISSION_GRANTED
-                        || !mInjector.getUserManager().isSameProfileGroup(callerUserId, userId)) {
+                        || !isSameProfileGroup(callerUserId, userId)) {
                     throw new SecurityException("Attempt to launch activity without required "
                             + android.Manifest.permission.INTERACT_ACROSS_PROFILES + " permission"
                             + " or target user is not in the same profile group.");
@@ -204,6 +204,15 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             }
             throw new SecurityException("Attempt to launch activity without "
                     + " category Intent.CATEGORY_LAUNCHER or activity is not exported" + component);
+        } finally {
+            mInjector.restoreCallingIdentity(ident);
+        }
+    }
+
+    private boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId) {
+        final long ident = mInjector.clearCallingIdentity();
+        try {
+            return mInjector.getUserManager().isSameProfileGroup(callerUserId, userId);
         } finally {
             mInjector.restoreCallingIdentity(ident);
         }
