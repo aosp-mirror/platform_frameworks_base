@@ -20124,10 +20124,10 @@ public class PackageManagerService extends IPackageManager.Stub
         ContentObserver co = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
-                boolean ephemeralFeatureDisabled =
+                final boolean ephemeralFeatureDisabled =
                         Global.getInt(resolver, Global.ENABLE_EPHEMERAL_FEATURE, 1) == 0;
                 for (int userId : UserManagerService.getInstance().getUserIds()) {
-                    boolean instantAppsDisabledForUser =
+                    final boolean instantAppsDisabledForUser =
                             ephemeralFeatureDisabled || Secure.getIntForUser(resolver,
                                     Secure.INSTANT_APPS_ENABLED, 1, userId) == 0;
                     mWebInstantAppsDisabled.put(userId, instantAppsDisabledForUser);
