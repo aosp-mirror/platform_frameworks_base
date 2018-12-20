@@ -33,7 +33,6 @@ import android.os.Process;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -470,7 +469,6 @@ public class DependencyProvider {
     @Singleton
     @Provides
     public UiOffloadThread provideUiOffloadThread() {
-        Log.d("TestTest", "provideUiOffloadThread");
         return new UiOffloadThread();
     }
 

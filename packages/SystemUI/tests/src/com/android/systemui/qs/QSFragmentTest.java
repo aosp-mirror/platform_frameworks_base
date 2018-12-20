@@ -34,11 +34,13 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -122,6 +124,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
-        return new QSFragment(new RemoteInputQuickSettingsDisabler(context));
+        return new QSFragment(new RemoteInputQuickSettingsDisabler(context),
+                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()));
     }
 }
