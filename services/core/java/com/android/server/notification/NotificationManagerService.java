@@ -1952,9 +1952,11 @@ public class NotificationManagerService extends SystemService {
      */
     @GuardedBy("mNotificationLock")
     protected void reportSeen(NotificationRecord r) {
-        mAppUsageStats.reportEvent(r.sbn.getPackageName(),
-                getRealUserId(r.sbn.getUserId()),
-                UsageEvents.Event.NOTIFICATION_SEEN);
+        if (!r.isProxied()) {
+            mAppUsageStats.reportEvent(r.sbn.getPackageName(),
+                    getRealUserId(r.sbn.getUserId()),
+                    UsageEvents.Event.NOTIFICATION_SEEN);
+        }
     }
 
     protected int calculateSuppressedVisualEffects(Policy incomingPolicy, Policy currPolicy,

@@ -232,11 +232,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         @Override
-        protected void reportSeen(NotificationRecord r) {
-            return;
-        }
-
-        @Override
         protected void reportUserInteraction(NotificationRecord r) {
             return;
         }
@@ -3823,12 +3818,35 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
 
-        NotificationVisibility[] notificationVisibility = new NotificationVisibility[] {
+        NotificationVisibility[] notificationVisibility = new NotificationVisibility[]{
                 NotificationVisibility.obtain(r.getKey(), 0, 0, true)
         };
         mService.mNotificationDelegate.onNotificationVisibilityChanged(notificationVisibility,
                 new NotificationVisibility[0]);
 
         assertEquals(0, mService.countLogSmartSuggestionsVisible);
+    }
+
+    public void testReportSeen_delegated() {
+        Notification.Builder nb =
+                new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                        .setContentTitle("foo")
+                        .setSmallIcon(android.R.drawable.sym_def_app_icon);
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, "opPkg", 0, "tag", mUid, 0,
+                nb.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r =  new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.reportSeen(r);
+        verify(mAppUsageStats, never()).reportEvent(anyString(), anyInt(), anyInt());
+
+    }
+
+    @Test
+    public void testReportSeen_notDelegated() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+
+        mService.reportSeen(r);
+        verify(mAppUsageStats, times(1)).reportEvent(anyString(), anyInt(), anyInt());
     }
 }
