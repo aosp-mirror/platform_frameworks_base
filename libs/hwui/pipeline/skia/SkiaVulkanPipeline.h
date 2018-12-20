@@ -25,7 +25,7 @@ namespace skiapipeline {
 
 class SkiaVulkanPipeline : public SkiaPipeline {
 public:
-    SkiaVulkanPipeline(renderthread::RenderThread& thread);
+    explicit SkiaVulkanPipeline(renderthread::RenderThread& thread);
     virtual ~SkiaVulkanPipeline() {}
 
     renderthread::MakeCurrentResult makeCurrent() override;
