@@ -70,6 +70,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.sysprop.DisplayProperties;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -6829,7 +6830,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 // Layout debugging
-                boolean layout = SystemProperties.getBoolean(View.DEBUG_LAYOUT_PROPERTY, false);
+                boolean layout = DisplayProperties.debug_layout().orElse(false);
                 if (layout != mAttachInfo.mDebugLayout) {
                     mAttachInfo.mDebugLayout = layout;
                     if (!mHandler.hasMessages(MSG_INVALIDATE_WORLD)) {
