@@ -99,6 +99,7 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
     private final TemperatureColorStore mColorStore = new TemperatureColorStore();
     private final TemperatureBackgroundAnimator mBackgroundAnimator;
     private final TemperatureTextAnimator mTextAnimator;
+    boolean mDisplayInFahrenheit = false;
 
     public AnimatedTemperatureView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -193,6 +194,9 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
      */
     @Override
     public void setTemp(float temp) {
+        if (mDisplayInFahrenheit) {
+            temp = convertToFahrenheit(temp);
+        }
         mTextAnimator.setTemp(temp);
         if (Float.isNaN(temp)) {
             mBackgroundAnimator.hideCircle();
@@ -217,6 +221,11 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
         }
 
         mBackgroundAnimator.animateOpen();
+    }
+
+    @Override
+    public void setDisplayInFahrenheit(boolean displayInFahrenheit) {
+        mDisplayInFahrenheit = displayInFahrenheit;
     }
 
     boolean isMinValue(float temp) {

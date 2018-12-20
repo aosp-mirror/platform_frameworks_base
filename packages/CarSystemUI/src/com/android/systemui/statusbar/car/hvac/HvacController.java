@@ -16,7 +16,11 @@
 
 package com.android.systemui.statusbar.car.hvac;
 
+import static android.car.VehicleAreaType.VEHICLE_AREA_TYPE_GLOBAL;
+import static android.car.VehiclePropertyIds.HVAC_TEMPERATURE_DISPLAY_UNITS;
+
 import android.car.Car;
+import android.car.VehicleUnit;
 import android.car.hardware.CarPropertyValue;
 import android.car.hardware.hvac.CarHvacManager;
 import android.car.hardware.hvac.CarHvacManager.CarHvacEventCallback;
@@ -167,7 +171,17 @@ public class HvacController {
     private void initComponent(TemperatureView view) {
         int id = view.getPropertyId();
         int zone = view.getAreaId();
+
         try {
+            if (mHvacManager != null
+                    && mHvacManager.isPropertyAvailable(HVAC_TEMPERATURE_DISPLAY_UNITS,
+                            VEHICLE_AREA_TYPE_GLOBAL)) {
+                if (mHvacManager.getIntProperty(HVAC_TEMPERATURE_DISPLAY_UNITS,
+                        VEHICLE_AREA_TYPE_GLOBAL) == VehicleUnit.FAHRENHEIT) {
+                    view.setDisplayInFahrenheit(true);
+                }
+
+            }
             if (mHvacManager == null || !mHvacManager.isPropertyAvailable(id, zone)) {
                 view.setTemp(Float.NaN);
                 return;

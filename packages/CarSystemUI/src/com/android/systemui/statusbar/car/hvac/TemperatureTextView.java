@@ -36,6 +36,7 @@ public class TemperatureTextView extends TextView implements TemperatureView {
     private final int mAreaId;
     private final int mPropertyId;
     private final String mTempFormat;
+    private boolean mDisplayFahrenheit = false;
 
     public TemperatureTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -57,7 +58,15 @@ public class TemperatureTextView extends TextView implements TemperatureView {
             setText("--");
             return;
         }
+        if (mDisplayFahrenheit) {
+            temp = convertToFahrenheit(temp);
+        }
         setText(String.format(mTempFormat, temp));
+    }
+
+    @Override
+    public void setDisplayInFahrenheit(boolean displayFahrenheit) {
+        mDisplayFahrenheit = displayFahrenheit;
     }
 
     /**
