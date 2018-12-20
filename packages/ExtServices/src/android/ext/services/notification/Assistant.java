@@ -294,7 +294,7 @@ public class Assistant extends NotificationAssistantService {
             synchronized (mkeyToImpressions) {
                 ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,
                         createChannelImpressionsWithThresholds());
-                if (stats.hasSeen()) {
+                if (stats != null && stats.hasSeen()) {
                     ci.incrementViews();
                     updatedImpressions = true;
                 }

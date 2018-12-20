@@ -3849,4 +3849,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.reportSeen(r);
         verify(mAppUsageStats, times(1)).reportEvent(anyString(), anyInt(), anyInt());
     }
+
+    @Test
+    public void testNotificationStats_notificationError() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", mUid, 0,
+                new Notification.Builder(mContext, mTestNotificationChannel.getId()).build(),
+                new UserHandle(mUid), null, 0);
+        NotificationRecord update = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+        mService.addEnqueuedNotification(update);
+        assertNull(update.sbn.getNotification().getSmallIcon());
+
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(update.getKey());
+        runnable.run();
+        waitForIdle();
+
+        ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
+        verify(mListeners).notifyRemovedLocked(any(), anyInt(), captor.capture());
+        assertNotNull(captor.getValue());
+    }
 }
