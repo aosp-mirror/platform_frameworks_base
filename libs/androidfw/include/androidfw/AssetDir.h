@@ -78,7 +78,7 @@ private:
     class FileInfo {
     public:
         FileInfo(void) {}
-        FileInfo(const String8& path)      // useful for e.g. svect.indexOf
+        explicit FileInfo(const String8& path)      // useful for e.g. svect.indexOf
             : mFileName(path), mFileType(kFileTypeUnknown)
             {}
         ~FileInfo(void) {}

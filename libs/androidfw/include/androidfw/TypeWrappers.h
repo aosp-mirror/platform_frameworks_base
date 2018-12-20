@@ -23,7 +23,7 @@
 namespace android {
 
 struct TypeVariant {
-    TypeVariant(const ResTable_type* data);
+    explicit TypeVariant(const ResTable_type* data);
 
     class iterator {
     public:
