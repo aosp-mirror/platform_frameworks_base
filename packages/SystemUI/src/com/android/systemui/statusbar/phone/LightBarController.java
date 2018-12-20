@@ -34,9 +34,13 @@ import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Controls how light status bar flag applies to the icons.
  */
+@Singleton
 public class LightBarController implements BatteryController.BatteryStateChangeCallback, Dumpable {
 
     private static final float NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD = 0.1f;
@@ -78,6 +82,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private final Context mContext;
 
+    @Inject
     public LightBarController(Context ctx) {
         mDarkModeColor = Color.valueOf(ctx.getColor(R.color.dark_mode_icon_color_single_tone));
         mStatusBarIconController = Dependency.get(DarkIconDispatcher.class);

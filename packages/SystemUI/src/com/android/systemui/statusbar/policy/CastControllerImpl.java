@@ -44,8 +44,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 
 /** Platform implementation of the cast controller. **/
+@Singleton
 public class CastControllerImpl implements CastController {
     private static final String TAG = "CastController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -63,6 +67,7 @@ public class CastControllerImpl implements CastController {
     private boolean mCallbackRegistered;
     private MediaProjectionInfo mProjection;
 
+    @Inject
     public CastControllerImpl(Context context) {
         mContext = context;
         mMediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);

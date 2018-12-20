@@ -16,10 +16,14 @@ package com.android.systemui;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Created by {@link Dependency} on SystemUI startup. Add tasks which need to be executed only
  * after all other dependencies have been created.
  */
+@Singleton
 public class InitController {
 
     /**
@@ -28,6 +32,10 @@ public class InitController {
     private boolean mTasksExecuted = false;
 
     private final ArrayList<Runnable> mTasks = new ArrayList<>();
+
+    @Inject
+    public InitController() {
+    }
 
     /**
      * Add a task to be executed after {@link Dependency#start()}

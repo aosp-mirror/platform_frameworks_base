@@ -221,7 +221,8 @@ public class SystemUIFactory {
     }
 
     @Singleton
-    @Component(modules = {SystemUIFactory.class, DependencyProvider.class, ContextHolder.class})
+    @Component(modules = {SystemUIFactory.class, DependencyProvider.class, DependencyBinder.class,
+            ContextHolder.class})
     public interface SystemUIRootComponent {
         @Singleton
         Dependency.DependencyInjector createDependency();

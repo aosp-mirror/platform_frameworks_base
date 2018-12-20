@@ -22,6 +22,8 @@ import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
 
+import static com.android.systemui.Dependency.BG_LOOPER_NAME;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -65,7 +67,6 @@ import com.android.systemui.statusbar.policy.MobileSignalController.MobileIconGr
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
@@ -74,7 +75,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 /** Platform implementation of the network controller. **/
+@Singleton
 public class NetworkControllerImpl extends BroadcastReceiver
         implements NetworkController, DemoMode, DataUsageController.NetworkNameProvider,
         ConfigurationChangedReceiver, Dumpable {
@@ -154,7 +160,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     /**
      * Construct this controller object and register for updates.
      */
-    public NetworkControllerImpl(Context context, Looper bgLooper,
+    @Inject
+    public NetworkControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper,
             DeviceProvisionedController deviceProvisionedController) {
         this(context, (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE),

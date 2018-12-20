@@ -55,6 +55,12 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class SecurityControllerImpl extends CurrentUserTracker implements SecurityController {
 
     private static final String TAG = "SecurityController";
@@ -90,6 +96,9 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     // Needs to be cached here since the query has to be asynchronous
     private ArrayMap<Integer, Boolean> mHasCACerts = new ArrayMap<Integer, Boolean>();
 
+    /**
+     */
+    @Inject
     public SecurityControllerImpl(Context context) {
         this(context, null);
     }

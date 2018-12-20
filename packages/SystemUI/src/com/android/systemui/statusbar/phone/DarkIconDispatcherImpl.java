@@ -29,6 +29,12 @@ import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class DarkIconDispatcherImpl implements DarkIconDispatcher {
 
     private final LightBarTransitionsController mTransitionsController;
@@ -40,6 +46,9 @@ public class DarkIconDispatcherImpl implements DarkIconDispatcher {
     private int mDarkModeIconColorSingleTone;
     private int mLightModeIconColorSingleTone;
 
+    /**
+     */
+    @Inject
     public DarkIconDispatcherImpl(Context context) {
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);

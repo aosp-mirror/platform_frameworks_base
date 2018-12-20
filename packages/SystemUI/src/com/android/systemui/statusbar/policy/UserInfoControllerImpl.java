@@ -40,6 +40,12 @@ import com.android.systemui.R;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class UserInfoControllerImpl implements UserInfoController {
 
     private static final String TAG = "UserInfoController";
@@ -53,6 +59,9 @@ public class UserInfoControllerImpl implements UserInfoController {
     private Drawable mUserDrawable;
     private String mUserAccount;
 
+    /**
+     */
+    @Inject
     public UserInfoControllerImpl(Context context) {
         mContext = context;
         IntentFilter filter = new IntentFilter();

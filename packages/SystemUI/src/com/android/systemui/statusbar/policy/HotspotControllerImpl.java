@@ -29,6 +29,12 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class HotspotControllerImpl implements HotspotController, WifiManager.SoftApCallback {
 
     private static final String TAG = "HotspotController";
@@ -43,6 +49,9 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     private int mNumConnectedDevices;
     private boolean mWaitingForTerminalState;
 
+    /**
+     */
+    @Inject
     public HotspotControllerImpl(Context context) {
         mContext = context;
         mConnectivityManager =

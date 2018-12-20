@@ -16,6 +16,9 @@
 
 package com.android.systemui.util.leak;
 
+import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
+
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -39,9 +42,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 /**
  * Dumps data to debug leaks and posts a notification to share the data.
  */
+@Singleton
 public class LeakReporter {
 
     static final String TAG = "LeakReporter";
@@ -56,7 +64,9 @@ public class LeakReporter {
     private final LeakDetector mLeakDetector;
     private final String mLeakReportEmail;
 
-    public LeakReporter(Context context, LeakDetector leakDetector, String leakReportEmail) {
+    @Inject
+    public LeakReporter(Context context, LeakDetector leakDetector,
+            @Nullable @Named(LEAK_REPORT_EMAIL_NAME) String leakReportEmail) {
         mContext = context;
         mLeakDetector = leakDetector;
         mLeakReportEmail = leakReportEmail;

@@ -39,10 +39,14 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Default implementation of a {@link BatteryController}. This controller monitors for battery
  * level change events that are broadcasted by the system.
  */
+@Singleton
 public class BatteryControllerImpl extends BroadcastReceiver implements BatteryController {
     private static final String TAG = "BatteryController";
 
@@ -68,6 +72,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private Estimate mEstimate;
     private long mLastEstimateTimestamp = -1;
 
+    @Inject
     public BatteryControllerImpl(Context context) {
         this(context, context.getSystemService(PowerManager.class));
     }
