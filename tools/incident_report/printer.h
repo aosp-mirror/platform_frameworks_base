@@ -22,7 +22,7 @@
 class Out
 {
 public:
-    Out(int fd);
+    explicit Out(int fd);
     ~Out();
 
     void printf(const char* format, ...);
