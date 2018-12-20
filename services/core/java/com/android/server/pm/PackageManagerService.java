@@ -888,7 +888,7 @@ public class PackageManagerService extends IPackageManager.Stub
     volatile boolean mSystemReady;
     volatile boolean mSafeMode;
     volatile boolean mHasSystemUidErrors;
-    private volatile boolean mWebInstantAppsDisabled;
+    private volatile SparseBooleanArray mWebInstantAppsDisabled = new SparseBooleanArray();
 
     ApplicationInfo mAndroidApplication;
     final ActivityInfo mResolveActivity = new ActivityInfo();
@@ -5904,8 +5904,8 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Returns whether or not instant apps have been disabled remotely.
      */
-    private boolean areWebInstantAppsDisabled() {
-        return mWebInstantAppsDisabled;
+    private boolean areWebInstantAppsDisabled(int userId) {
+        return mWebInstantAppsDisabled.get(userId);
     }
 
     private boolean isInstantAppResolutionAllowed(
@@ -5936,7 +5936,7 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             if (intent.getData() == null || TextUtils.isEmpty(intent.getData().getHost())) {
                 return false;
-            } else if (areWebInstantAppsDisabled()) {
+            } else if (areWebInstantAppsDisabled(userId)) {
                 return false;
             }
         }
@@ -6816,7 +6816,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private List<ResolveInfo> applyPostResolutionFilter(List<ResolveInfo> resolveInfos,
             String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid,
             boolean resolveForStart, int userId, Intent intent) {
-        final boolean blockInstant = intent.isWebIntent() && areWebInstantAppsDisabled();
+        final boolean blockInstant = intent.isWebIntent() && areWebInstantAppsDisabled(userId);
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
             // remove locally resolved instant app web results when disabled
@@ -20124,16 +20124,21 @@ public class PackageManagerService extends IPackageManager.Stub
         ContentObserver co = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
-                mWebInstantAppsDisabled =
-                        (Global.getInt(resolver, Global.ENABLE_EPHEMERAL_FEATURE, 1) == 0) ||
-                                (Secure.getInt(resolver, Secure.INSTANT_APPS_ENABLED, 1) == 0);
+                boolean ephemeralFeatureDisabled =
+                        Global.getInt(resolver, Global.ENABLE_EPHEMERAL_FEATURE, 1) == 0;
+                for (int userId : UserManagerService.getInstance().getUserIds()) {
+                    boolean instantAppsDisabledForUser =
+                            ephemeralFeatureDisabled || Secure.getIntForUser(resolver,
+                                    Secure.INSTANT_APPS_ENABLED, 1, userId) == 0;
+                    mWebInstantAppsDisabled.put(userId, instantAppsDisabledForUser);
+                }
             }
         };
         mContext.getContentResolver().registerContentObserver(android.provider.Settings.Global
                         .getUriFor(Global.ENABLE_EPHEMERAL_FEATURE),
-                false, co, UserHandle.USER_SYSTEM);
+                false, co, UserHandle.USER_ALL);
         mContext.getContentResolver().registerContentObserver(android.provider.Settings.Secure
-                        .getUriFor(Secure.INSTANT_APPS_ENABLED), false, co, UserHandle.USER_SYSTEM);
+                        .getUriFor(Secure.INSTANT_APPS_ENABLED), false, co, UserHandle.USER_ALL);
         co.onChange(true);
 
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being
