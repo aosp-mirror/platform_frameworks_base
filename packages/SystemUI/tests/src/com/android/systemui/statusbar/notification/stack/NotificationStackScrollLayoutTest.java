@@ -130,7 +130,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mContext);
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         Dependency.get(InitController.class).executePostInitTasks();
-        mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, null, mHeadsUpManager,
+        mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, mHeadsUpManager,
                 mNotificationData);
 
 

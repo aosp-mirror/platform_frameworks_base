@@ -96,8 +96,6 @@ public class NotificationEntryManager implements
     private final AmbientPulseManager mAmbientPulseManager =
             Dependency.get(AmbientPulseManager.class);
     private final BubbleController mBubbleController = Dependency.get(BubbleController.class);
-    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider =
-            Dependency.get(NotificationInterruptionStateProvider.class);
 
     // Lazily retrieved dependencies
     private NotificationRemoteInputManager mRemoteInputManager;
@@ -109,7 +107,6 @@ public class NotificationEntryManager implements
 
     protected IStatusBarService mBarService;
     private NotificationPresenter mPresenter;
-    private NotificationEntryListener mCallback;
     protected PowerManager mPowerManager;
     private NotificationListenerService.RankingMap mLatestRankingMap;
     protected HeadsUpManager mHeadsUpManager;
@@ -186,11 +183,10 @@ public class NotificationEntryManager implements
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
-            NotificationListContainer listContainer, NotificationEntryListener callback,
+            NotificationListContainer listContainer,
             HeadsUpManager headsUpManager) {
         mPresenter = presenter;
         mUpdateNotificationViewsCallback = mPresenter::updateNotificationViews;
-        mCallback = callback;
         mHeadsUpManager = headsUpManager;
         mNotificationData.setHeadsUpManager(mHeadsUpManager);
         mListContainer = listContainer;
@@ -256,7 +252,9 @@ public class NotificationEntryManager implements
             // system process is dead if we're here.
         }
 
-        mCallback.onPerformRemoveNotification(n);
+        for (NotificationEntryListener listener : mNotificationEntryListeners) {
+            listener.onPerformRemoveNotification(n);
+        }
     }
 
     @Override
@@ -313,7 +311,9 @@ public class NotificationEntryManager implements
         mNotificationData.add(shadeEntry);
         tagForeground(shadeEntry.notification);
         updateNotifications();
-        mCallback.onNotificationAdded(shadeEntry);
+        for (NotificationEntryListener listener : mNotificationEntryListeners) {
+            listener.onNotificationAdded(shadeEntry);
+        }
 
         maybeScheduleUpdateNotificationViews(shadeEntry);
     }
@@ -370,7 +370,9 @@ public class NotificationEntryManager implements
         }
 
         if (entry == null) {
-            mCallback.onNotificationRemoved(key, null /* old */);
+            for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                listener.onNotificationRemoved(key, null /* old */);
+            }
             return;
         }
 
@@ -406,7 +408,9 @@ public class NotificationEntryManager implements
 
         StatusBarNotification old = removeNotificationViews(key, ranking);
 
-        mCallback.onNotificationRemoved(key, old);
+        for (NotificationEntryListener listener : mNotificationEntryListeners) {
+            listener.onNotificationRemoved(key, old);
+        }
     }
 
     private StatusBarNotification removeNotificationViews(String key,
@@ -598,7 +602,6 @@ public class NotificationEntryManager implements
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onEntryUpdated(entry);
         }
-        mCallback.onEntryUpdated(entry);
 
         maybeScheduleUpdateNotificationViews(entry);
     }

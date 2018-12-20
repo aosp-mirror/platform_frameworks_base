@@ -104,7 +104,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private ExpandableNotificationRow mRow;
     @Mock private NotificationListContainer mListContainer;
     @Mock
-    private NotificationEntryListener mCallback;
+    private NotificationEntryListener mEntryListener;
     @Mock
     private NotificationRowBinder.BindRowCallback mBindCallback;
     @Mock private HeadsUpManager mHeadsUpManager;
@@ -232,7 +232,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager = new TestableNotificationEntryManager(mContext, mBarService);
         Dependency.get(InitController.class).executePostInitTasks();
-        mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mCallback, mHeadsUpManager);
+        mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
+        mEntryManager.addNotificationEntryListener(mEntryListener);
 
         NotificationRowBinder notificationRowBinder = Dependency.get(NotificationRowBinder.class);
         notificationRowBinder.setUpWithPresenter(
@@ -272,7 +273,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mRemoteInputManager).bindRow(entry.getRow());
 
         // Row content inflation:
-        verify(mCallback).onNotificationAdded(entry);
+        verify(mEntryListener).onNotificationAdded(entry);
         verify(mPresenter).updateNotificationViews();
 
         assertEquals(mEntryManager.getNotificationData().get(mSbn.getKey()), entry);
@@ -300,7 +301,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         verify(mPresenter).updateNotificationViews();
         verify(mForegroundServiceController).updateNotification(eq(mSbn), anyInt());
-        verify(mCallback).onEntryUpdated(mEntry);
+        verify(mEntryListener).onEntryUpdated(mEntry);
         assertNotNull(mEntry.getRow());
         assertEquals(mEntry.userSentiment,
                 NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
@@ -322,7 +323,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mForegroundServiceController).removeNotification(mSbn);
         verify(mListContainer).cleanUpViewStateForEntry(mEntry);
         verify(mPresenter).updateNotificationViews();
-        verify(mCallback).onNotificationRemoved(mSbn.getKey(), mSbn);
+        verify(mEntryListener).onNotificationRemoved(mSbn.getKey(), mSbn);
         verify(mRow).setRemoved();
 
         assertNull(mEntryManager.getNotificationData().get(mSbn.getKey()));

@@ -57,7 +57,7 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationListContainer mListContainer;
     @Mock
-    private NotificationEntryListener mEntryManagerCallback;
+    private NotificationEntryListener mEntryListener;
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private RemoteInputController.Delegate mDelegate;
     @Mock private NotificationRemoteInputManager.Callback mRemoteInputManagerCallback;
@@ -87,8 +87,8 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
         NotificationViewHierarchyManager viewHierarchyManager =
                 Dependency.get(NotificationViewHierarchyManager.class);
         Dependency.get(InitController.class).executePostInitTasks();
-        entryManager.setUpWithPresenter(mPresenter, mListContainer, mEntryManagerCallback,
-                mHeadsUpManager);
+        entryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
+        entryManager.addNotificationEntryListener(mEntryListener);
         gutsManager.setUpWithPresenter(mPresenter, mListContainer,
                 mCheckSaveListener, mOnSettingsClickListener);
         notificationLogger.setUpWithContainer(mListContainer);

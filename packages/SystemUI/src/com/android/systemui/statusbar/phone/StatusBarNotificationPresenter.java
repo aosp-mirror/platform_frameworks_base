@@ -200,8 +200,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             };
 
             mViewHierarchyManager.setUpWithPresenter(this, notifListContainer);
-            mEntryManager.setUpWithPresenter(
-                    this, notifListContainer, notificationEntryListener, mHeadsUpManager);
+            mEntryManager.setUpWithPresenter(this, notifListContainer, mHeadsUpManager);
+            mEntryManager.addNotificationEntryListener(notificationEntryListener);
             mNotificationRowBinder.setUpWithPresenter(this, notifListContainer, mHeadsUpManager,
                     mEntryManager, this);
             mNotificationInterruptionStateProvider.setUpWithPresenter(

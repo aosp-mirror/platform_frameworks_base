@@ -150,7 +150,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private NotificationPresenter mNotificationPresenter;
     @Mock
-    private NotificationEntryListener mCallback;
+    private NotificationEntryListener mEntryListener;
     @Mock private BubbleController mBubbleController;
     @Mock
     private NotificationFilter mNotificationFilter;
@@ -250,7 +250,8 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.putComponent(StatusBar.class, mStatusBar);
         Dependency.get(InitController.class).executePostInitTasks();
         mEntryManager.setUpForTest(mock(NotificationPresenter.class), mStackScroller,
-                mCallback, mHeadsUpManager, mNotificationData);
+                mHeadsUpManager, mNotificationData);
+        mEntryManager.addNotificationEntryListener(mEntryListener);
         mNotificationLogger.setUpWithContainer(mStackScroller);
 
         TestableLooper.get(this).setMessageHandler(m -> {
@@ -754,10 +755,9 @@ public class StatusBarTest extends SysuiTestCase {
 
         public void setUpForTest(NotificationPresenter presenter,
                 NotificationListContainer listContainer,
-                NotificationEntryListener callback,
                 HeadsUpManagerPhone headsUpManager,
                 NotificationData notificationData) {
-            super.setUpWithPresenter(presenter, listContainer, callback, headsUpManager);
+            super.setUpWithPresenter(presenter, listContainer, headsUpManager);
             mNotificationData = notificationData;
         }
     }
