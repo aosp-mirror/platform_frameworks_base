@@ -3078,7 +3078,7 @@ public class AppOpsManager {
      */
     public int unsafeCheckOpRaw(String op, int uid, String packageName) {
         try {
-            return mService.checkOperation(strOpToOp(op), uid, packageName);
+            return mService.checkOperationRaw(strOpToOp(op), uid, packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

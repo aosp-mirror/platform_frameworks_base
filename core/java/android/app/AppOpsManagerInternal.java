@@ -37,10 +37,11 @@ public abstract class AppOpsManagerInternal {
          * @param uid The UID for which to check.
          * @param packageName The package for which to check.
          * @param superImpl The super implementation.
+         * @param raw Whether to check the raw op i.e. not interpret the mode based on UID state.
          * @return The app op check result.
          */
-        int checkOperation(int code, int uid, String packageName,
-                TriFunction<Integer, Integer, String, Integer> superImpl);
+        int checkOperation(int code, int uid, String packageName, boolean raw,
+                QuadFunction<Integer, Integer, String, Boolean, Integer> superImpl);
 
         /**
          * Allows overriding check audio operation behavior.
