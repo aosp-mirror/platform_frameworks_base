@@ -2934,6 +2934,8 @@
         <public name="foregroundServiceType" />
         <public name="hasFragileUserData" />
         <public name="minAspectRatio" />
+        <!-- @hide @SystemApi -->
+        <public name="inheritShowWhenLocked" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">
