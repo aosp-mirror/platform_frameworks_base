@@ -1345,8 +1345,12 @@ public class PermissionManagerService {
                                     sourcePermNum++) {
                                 String sourcePerm = sourcePerms.valueAt(sourcePermNum);
 
-                                if (appOpsManager.unsafeCheckOpNoThrow(permissionToOp(sourcePerm),
-                                        getUid(userId, getAppId(pkg.applicationInfo.uid)), pkgName)
+                                if (ps.hasRuntimePermission(sourcePerm, userId)
+                                        && ps.getRuntimePermissionState(sourcePerm, userId)
+                                        .isGranted()
+                                        && appOpsManager.unsafeCheckOpNoThrow(
+                                                permissionToOp(sourcePerm), getUid(userId,
+                                                getAppId(pkg.applicationInfo.uid)), pkgName)
                                         == MODE_ALLOWED) {
                                     setAppOpMode(sourcePerm, pkg, userId, MODE_FOREGROUND);
                                 }
