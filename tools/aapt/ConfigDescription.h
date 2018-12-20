@@ -29,7 +29,7 @@ struct ConfigDescription : public android::ResTable_config {
         size = sizeof(android::ResTable_config);
     }
 
-    ConfigDescription(const android::ResTable_config&o) {  // NOLINT(implicit)
+    ConfigDescription(const android::ResTable_config&o) {  // NOLINT(google-explicit-constructor)
         *static_cast<android::ResTable_config*>(this) = o;
         size = sizeof(android::ResTable_config);
     }

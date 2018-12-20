@@ -71,7 +71,7 @@ class SymbolTable {
     bool is_dynamic = false;
   };
 
-  SymbolTable(NameMangler* mangler);
+  explicit SymbolTable(NameMangler* mangler);
 
   // Overrides the default ISymbolTableDelegate, which allows a custom defined strategy for
   // looking up resources from a set of sources.

@@ -173,10 +173,12 @@ class ValueEqImpl : public ::testing::MatcherInterface<T> {
 template <typename TValue>
 class ValueEqMatcher {
  public:
+  // NOLINTNEXTLINE(google-explicit-constructor)
   ValueEqMatcher(TValue expected) : expected_(std::move(expected)) {
   }
 
   template <typename T>
+  // NOLINTNEXTLINE(google-explicit-constructor)
   operator ::testing::Matcher<T>() const {
     return ::testing::Matcher<T>(new ValueEqImpl<T>(&expected_));
   }
@@ -188,10 +190,12 @@ class ValueEqMatcher {
 template <typename TValue>
 class ValueEqPointerMatcher {
  public:
+  // NOLINTNEXTLINE(google-explicit-constructor)
   ValueEqPointerMatcher(const TValue* expected) : expected_(expected) {
   }
 
   template <typename T>
+  // NOLINTNEXTLINE(google-explicit-constructor)
   operator ::testing::Matcher<T>() const {
     return ::testing::Matcher<T>(new ValueEqImpl<T>(expected_));
   }
