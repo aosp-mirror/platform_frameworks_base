@@ -73,7 +73,7 @@ class TypeDescriptor {
   bool operator<(const TypeDescriptor& rhs) const { return descriptor_ < rhs.descriptor_; }
 
  private:
-  TypeDescriptor(std::string descriptor) : descriptor_{descriptor} {}
+  explicit TypeDescriptor(std::string descriptor) : descriptor_{descriptor} {}
 
   const std::string descriptor_;
 };
@@ -83,7 +83,7 @@ class TypeDescriptor {
 class Prototype {
  public:
   template <typename... TypeDescriptors>
-  Prototype(TypeDescriptor return_type, TypeDescriptors... param_types)
+  explicit Prototype(TypeDescriptor return_type, TypeDescriptors... param_types)
       : return_type_{return_type}, param_types_{param_types...} {}
 
   // Encode this prototype into the dex file.
