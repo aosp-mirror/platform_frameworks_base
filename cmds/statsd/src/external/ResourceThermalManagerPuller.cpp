@@ -17,7 +17,7 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
-#include <android/hardware/thermal/1.0/IThermal.h>
+#include <android/hardware/thermal/2.0/IThermal.h>
 #include "external/ResourceThermalManagerPuller.h"
 #include "external/StatsPuller.h"
 
@@ -31,10 +31,11 @@
 using android::hardware::hidl_death_recipient;
 using android::hardware::hidl_vec;
 using android::hidl::base::V1_0::IBase;
-using android::hardware::thermal::V1_0::IThermal;
-using android::hardware::thermal::V1_0::Temperature;
-using android::hardware::thermal::V1_0::ThermalStatus;
-using android::hardware::thermal::V1_0::ThermalStatusCode;
+using ::android::hardware::thermal::V2_0::IThermal;
+using ::android::hardware::thermal::V2_0::Temperature;
+using ::android::hardware::thermal::V2_0::TemperatureType;
+using ::android::hardware::thermal::V1_0::ThermalStatus;
+using ::android::hardware::thermal::V1_0::ThermalStatusCode;
 using android::hardware::Return;
 using android::hardware::Void;
 
@@ -49,7 +50,7 @@ namespace os {
 namespace statsd {
 
 bool getThermalHalLocked();
-sp<android::hardware::thermal::V1_0::IThermal> gThermalHal = nullptr;
+sp<android::hardware::thermal::V2_0::IThermal> gThermalHal = nullptr;
 std::mutex gThermalHalMutex;
 
 struct ThermalHalDeathRecipient : virtual public hidl_death_recipient {
@@ -107,7 +108,7 @@ bool ResourceThermalManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* da
     data->clear();
     bool resultSuccess = true;
 
-    Return<void> ret = gThermalHal->getTemperatures(
+    Return<void> ret = gThermalHal->getCurrentTemperatures(false, TemperatureType::SKIN,
             [&](ThermalStatus status, const hidl_vec<Temperature>& temps) {
         if (status.code != ThermalStatusCode::SUCCESS) {
             ALOGE("Failed to get temperatures from ThermalHAL. Status: %d", status.code);
@@ -121,7 +122,7 @@ bool ResourceThermalManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* da
                 ptr->write((static_cast<int>(temps[i].type)));
                 ptr->write(temps[i].name);
                 // Convert the temperature to an int.
-                int32_t temp = static_cast<int>(temps[i].currentValue * 10);
+                int32_t temp = static_cast<int>(temps[i].value * 10);
                 ptr->write(temp);
                 ptr->init();
                 data->push_back(ptr);

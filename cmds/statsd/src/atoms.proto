@@ -2786,13 +2786,14 @@ message BatteryLevel {
  *   frameworks/base/cmds/statsd/src/external/ResourceThermalManagerPuller.cpp
  */
 message Temperature {
-    // The type of temperature being reported. Eg. CPU, GPU, SKIN, BATTERY.
+    // The type of temperature being reported. Eg. CPU, GPU, SKIN, BATTERY, BCL_.
     optional android.os.TemperatureTypeEnum sensor_location = 1;
 
     // The name of the temperature source. Eg. CPU0
     optional string sensor_name = 2;
 
     // Temperature in tenths of a degree C.
+    // For BCL, it is decimillivolt, decimilliamps, and percentage * 10.
     optional int32 temperature_deci_celsius = 3;
 }
 
