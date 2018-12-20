@@ -57,21 +57,13 @@ public class AppOpsControllerImpl implements AppOpsController,
     @GuardedBy("mNotedItems")
     private final List<AppOpItem> mNotedItems = new ArrayList<>();
 
-    protected static final int[] OPS;
-    protected static final String[] OPS_STRING = new String[] {
-            AppOpsManager.OPSTR_CAMERA,
-            AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW,
-            AppOpsManager.OPSTR_RECORD_AUDIO,
-            AppOpsManager.OPSTR_COARSE_LOCATION,
-            AppOpsManager.OPSTR_FINE_LOCATION};
-
-    static {
-        int numOps = OPS_STRING.length;
-        OPS = new int[numOps];
-        for (int i = 0; i < numOps; i++) {
-            OPS[i] = AppOpsManager.strOpToOp(OPS_STRING[i]);
-        }
-    }
+    protected static final int[] OPS = new int[] {
+            AppOpsManager.OP_CAMERA,
+            AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
+            AppOpsManager.OP_RECORD_AUDIO,
+            AppOpsManager.OP_COARSE_LOCATION,
+            AppOpsManager.OP_FINE_LOCATION
+    };
 
     public AppOpsControllerImpl(Context context, Looper bgLooper) {
         mContext = context;
@@ -92,7 +84,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     protected void setListening(boolean listening) {
         if (listening) {
             mAppOps.startWatchingActive(OPS, this);
-            mAppOps.startWatchingNoted(OPS_STRING, this);
+            mAppOps.startWatchingNoted(OPS, this);
         } else {
             mAppOps.stopWatchingActive(this);
             mAppOps.stopWatchingNoted(this);
@@ -254,14 +246,13 @@ public class AppOpsControllerImpl implements AppOpsController,
     }
 
     @Override
-    public void onOpNoted(String code, int uid, String packageName, int result) {
+    public void onOpNoted(int code, int uid, String packageName, int result) {
         if (DEBUG) {
             Log.w(TAG, "Op: " + code + " with result " + AppOpsManager.MODE_NAMES[result]);
         }
         if (result != AppOpsManager.MODE_ALLOWED) return;
-        int op_code = AppOpsManager.strOpToOp(code);
-        addNoted(op_code, uid, packageName);
-        notifySuscribers(op_code, uid, packageName, true);
+        addNoted(code, uid, packageName);
+        notifySuscribers(code, uid, packageName, true);
     }
 
     private void notifySuscribers(int code, int uid, String packageName, boolean active) {

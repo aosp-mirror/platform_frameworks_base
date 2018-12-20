@@ -86,7 +86,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 mCallback);
         mController.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
-        mController.onOpNoted(AppOpsManager.OPSTR_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
                 AppOpsManager.MODE_ALLOWED);
         verify(mCallback).onActiveStateChanged(AppOpsManager.OP_RECORD_AUDIO,
                 TEST_UID, TEST_PACKAGE_NAME, true);
@@ -136,7 +136,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 TEST_UID, TEST_PACKAGE_NAME, true);
         mController.onOpActiveChanged(AppOpsManager.OP_CAMERA,
                 TEST_UID, TEST_PACKAGE_NAME, true);
-        mController.onOpNoted(AppOpsManager.OPSTR_FINE_LOCATION,
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION,
                 TEST_UID, TEST_PACKAGE_NAME, AppOpsManager.MODE_ALLOWED);
         assertEquals(3, mController.getActiveAppOps().size());
     }
@@ -147,7 +147,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 TEST_UID, TEST_PACKAGE_NAME, true);
         mController.onOpActiveChanged(AppOpsManager.OP_CAMERA,
                 TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
-        mController.onOpNoted(AppOpsManager.OPSTR_FINE_LOCATION,
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION,
                 TEST_UID, TEST_PACKAGE_NAME, AppOpsManager.MODE_ALLOWED);
         assertEquals(2,
                 mController.getActiveAppOpsForUser(UserHandle.getUserId(TEST_UID)).size());
@@ -158,7 +158,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
     @Test
     public void opNotedScheduledForRemoval() {
         mController.setBGHandler(mMockHandler);
-        mController.onOpNoted(AppOpsManager.OPSTR_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
                 AppOpsManager.MODE_ALLOWED);
         verify(mMockHandler).scheduleRemoval(any(AppOpItem.class), anyLong());
     }
