@@ -4305,14 +4305,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             final File subtypeFile = new File(inputMethodDir, ADDITIONAL_SUBTYPES_FILE_NAME);
             mAdditionalInputMethodSubtypeFile = new AtomicFile(subtypeFile, "input-subtypes");
-            if (!subtypeFile.exists()) {
-                // If "subtypes.xml" doesn't exist, create a blank file.
-                writeAdditionalInputMethodSubtypes(
-                        mAdditionalSubtypesMap, mAdditionalInputMethodSubtypeFile, methodMap);
-            } else {
-                readAdditionalInputMethodSubtypes(
-                        mAdditionalSubtypesMap, mAdditionalInputMethodSubtypeFile);
-            }
+            readAdditionalInputMethodSubtypes(mAdditionalSubtypesMap,
+                    mAdditionalInputMethodSubtypeFile);
         }
 
         private void deleteAllInputMethodSubtypes(String imiId) {
@@ -4352,6 +4346,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private static void writeAdditionalInputMethodSubtypes(
                 ArrayMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile,
                 ArrayMap<String, InputMethodInfo> methodMap) {
+            if (allSubtypes.isEmpty()) {
+                if (subtypesFile.exists()) {
+                    subtypesFile.delete();
+                }
+                return;
+            }
+
             // Safety net for the case that this function is called before methodMap is set.
             final boolean isSetMethodMap = methodMap != null && methodMap.size() > 0;
             FileOutputStream fos = null;
@@ -4408,6 +4409,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 ArrayMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile) {
             if (allSubtypes == null || subtypesFile == null) return;
             allSubtypes.clear();
+            if (!subtypesFile.exists()) {
+                // Not having the file means there is no additional subtype.
+                return;
+            }
             try (final FileInputStream fis = subtypesFile.openRead()) {
                 final XmlPullParser parser = Xml.newPullParser();
                 parser.setInput(fis, StandardCharsets.UTF_8.name());
