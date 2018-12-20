@@ -30,7 +30,7 @@
         </activity>
     </application>
 
-    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
         android:targetPackage="android.net.wifi.test"
         android:label="Frameworks Wifi API Tests">
     </instrumentation>

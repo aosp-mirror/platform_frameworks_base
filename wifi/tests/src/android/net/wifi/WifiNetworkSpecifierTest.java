@@ -26,8 +26,9 @@ import android.net.MacAddress;
 import android.net.MatchAllNetworkSpecifier;
 import android.os.Parcel;
 import android.os.PatternMatcher;
-import android.support.test.filters.SmallTest;
 import android.util.Pair;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 

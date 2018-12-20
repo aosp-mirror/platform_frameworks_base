@@ -25,8 +25,9 @@ import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Policy;
 import android.net.wifi.hotspot2.pps.UpdateParameter;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
 import android.util.Base64;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 

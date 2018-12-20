@@ -22,14 +22,13 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.validateMockitoUsage;
 
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
-import android.net.wifi.WifiScanner.ScanSettings;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
-
 
 /**
  * Unit tests for {@link android.net.wifi.WifiScanner}.
