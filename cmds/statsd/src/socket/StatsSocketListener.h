@@ -35,7 +35,7 @@ namespace statsd {
 
 class StatsSocketListener : public SocketListener, public virtual android::RefBase {
 public:
-    StatsSocketListener(const sp<LogListener>& listener);
+    explicit StatsSocketListener(const sp<LogListener>& listener);
 
     virtual ~StatsSocketListener();
 

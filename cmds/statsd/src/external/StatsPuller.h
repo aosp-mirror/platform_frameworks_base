@@ -33,7 +33,7 @@ namespace statsd {
 
 class StatsPuller : public virtual RefBase {
 public:
-    StatsPuller(const int tagId);
+    explicit StatsPuller(const int tagId);
 
     virtual ~StatsPuller() {}
 

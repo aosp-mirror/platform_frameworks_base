@@ -42,7 +42,7 @@ namespace statsd {
  * Timestamps are in seconds since epoch in a uint32, so will fail in year 2106.
  */
 struct InternalAlarm : public RefBase {
-    InternalAlarm(uint32_t timestampSec) : timestampSec(timestampSec) {
+    explicit InternalAlarm(uint32_t timestampSec) : timestampSec(timestampSec) {
     }
 
     const uint32_t timestampSec;
