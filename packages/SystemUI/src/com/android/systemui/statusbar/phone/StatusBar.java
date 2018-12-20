@@ -191,6 +191,7 @@ import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -377,6 +378,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NotificationGutsManager mGutsManager;
     protected NotificationLogger mNotificationLogger;
     protected NotificationEntryManager mEntryManager;
+    private NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
     private NotificationRowBinder mNotificationRowBinder;
     protected NotificationViewHierarchyManager mViewHierarchyManager;
     protected ForegroundServiceController mForegroundServiceController;
@@ -622,6 +624,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGutsManager = Dependency.get(NotificationGutsManager.class);
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         mEntryManager = Dependency.get(NotificationEntryManager.class);
+        mNotificationInterruptionStateProvider =
+                Dependency.get(NotificationInterruptionStateProvider.class);
         mNotificationRowBinder = Dependency.get(NotificationRowBinder.class);
         mViewHierarchyManager = Dependency.get(NotificationViewHierarchyManager.class);
         mForegroundServiceController = Dependency.get(ForegroundServiceController.class);
@@ -1413,7 +1417,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         if ((diff1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) {
-            mEntryManager.setDisableNotificationAlerts(
+            mNotificationInterruptionStateProvider.setDisableNotificationAlerts(
                     (state1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0);
         }
 

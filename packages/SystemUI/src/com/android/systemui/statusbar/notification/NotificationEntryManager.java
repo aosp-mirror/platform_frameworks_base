@@ -17,43 +17,30 @@ package com.android.systemui.statusbar.notification;
 
 import static com.android.systemui.bubbles.BubbleController.DEBUG_DEMOTE_TO_NOTIF;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY;
-import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.Nullable;
 import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.database.ContentObserver;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.provider.Settings;
-import android.service.dreams.DreamService;
-import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.EventLog;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.EventLogTags;
 import com.android.systemui.ForegroundServiceController;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
@@ -64,7 +51,6 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.NotificationUpdateHandler;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -97,8 +83,6 @@ public class NotificationEntryManager implements
         BubbleController.BubbleDismissListener {
     private static final String TAG = "NotificationEntryMgr";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final boolean ENABLE_HEADS_UP = true;
-    private static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
     public static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
 
@@ -109,7 +93,6 @@ public class NotificationEntryManager implements
             Dependency.get(NotificationGroupManager.class);
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final DeviceProvisionedController mDeviceProvisionedController =
             Dependency.get(DeviceProvisionedController.class);
     private final VisualStabilityManager mVisualStabilityManager =
@@ -119,6 +102,8 @@ public class NotificationEntryManager implements
     private final AmbientPulseManager mAmbientPulseManager =
             Dependency.get(AmbientPulseManager.class);
     private final BubbleController mBubbleController = Dependency.get(BubbleController.class);
+    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider =
+            Dependency.get(NotificationInterruptionStateProvider.class);
 
     // Lazily retrieved dependencies
     private NotificationRemoteInputManager mRemoteInputManager;
@@ -130,23 +115,18 @@ public class NotificationEntryManager implements
     private final Handler mDeferredNotificationViewUpdateHandler;
     private Runnable mUpdateNotificationViewsCallback;
 
-    protected IDreamManager mDreamManager;
     protected IStatusBarService mBarService;
     private NotificationPresenter mPresenter;
-    private Callback mCallback;
+    private NotificationEntryListener mCallback;
     protected PowerManager mPowerManager;
     private NotificationListenerService.RankingMap mLatestRankingMap;
     protected HeadsUpManager mHeadsUpManager;
     protected NotificationData mNotificationData;
-    private ContentObserver mHeadsUpObserver;
-    protected boolean mUseHeadsUp = false;
-    private boolean mDisableNotificationAlerts;
     protected NotificationListContainer mListContainer;
     @VisibleForTesting
     final ArrayList<NotificationLifetimeExtender> mNotificationLifetimeExtenders
             = new ArrayList<>();
-    private NotificationViewHierarchyManager.StatusBarStateListener mStatusBarStateListener;
-    @Nullable private AlertTransferListener mAlertTransferListener;
+    private final List<NotificationEntryListener> mNotificationEntryListeners = new ArrayList<>();
 
     private final DeviceProvisionedController.DeviceProvisionedListener
             mDeviceProvisionedListener =
@@ -156,11 +136,6 @@ public class NotificationEntryManager implements
                     updateNotifications();
                 }
             };
-
-    public void setDisableNotificationAlerts(boolean disableNotificationAlerts) {
-        mDisableNotificationAlerts = disableNotificationAlerts;
-        mHeadsUpObserver.onChange(true);
-    }
 
     public void destroy() {
         mDeviceProvisionedController.removeCallback(mDeviceProvisionedListener);
@@ -177,8 +152,6 @@ public class NotificationEntryManager implements
                 pw.println(entry.notification);
             }
         }
-        pw.print("  mUseHeadsUp=");
-        pw.println(mUseHeadsUp);
     }
 
     public NotificationEntryManager(Context context) {
@@ -186,15 +159,14 @@ public class NotificationEntryManager implements
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mBubbleController.setDismissListener(this /* bubbleEventListener */);
         mNotificationData = new NotificationData();
         mDeferredNotificationViewUpdateHandler = new Handler();
     }
 
-    public void setAlertTransferListener(AlertTransferListener listener) {
-        mAlertTransferListener = listener;
+    /** Adds a {@link NotificationEntryListener}. */
+    public void addNotificationEntryListener(NotificationEntryListener listener) {
+        mNotificationEntryListeners.add(listener);
     }
 
     /**
@@ -236,7 +208,7 @@ public class NotificationEntryManager implements
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
-            NotificationListContainer listContainer, Callback callback,
+            NotificationListContainer listContainer, NotificationEntryListener callback,
             HeadsUpManager headsUpManager) {
         mPresenter = presenter;
         mUpdateNotificationViewsCallback = mPresenter::updateNotificationViews;
@@ -244,36 +216,6 @@ public class NotificationEntryManager implements
         mHeadsUpManager = headsUpManager;
         mNotificationData.setHeadsUpManager(mHeadsUpManager);
         mListContainer = listContainer;
-
-        mHeadsUpObserver = new ContentObserver(Dependency.get(Dependency.MAIN_HANDLER)) {
-            @Override
-            public void onChange(boolean selfChange) {
-                boolean wasUsing = mUseHeadsUp;
-                mUseHeadsUp = ENABLE_HEADS_UP && !mDisableNotificationAlerts
-                        && Settings.Global.HEADS_UP_OFF != Settings.Global.getInt(
-                        mContext.getContentResolver(),
-                        Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
-                        Settings.Global.HEADS_UP_OFF);
-                Log.d(TAG, "heads up is " + (mUseHeadsUp ? "enabled" : "disabled"));
-                if (wasUsing != mUseHeadsUp) {
-                    if (!mUseHeadsUp) {
-                        Log.d(TAG,
-                                "dismissing any existing heads up notification on disable event");
-                        mHeadsUpManager.releaseAllImmediately();
-                    }
-                }
-            }
-        };
-
-        if (ENABLE_HEADS_UP) {
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED),
-                    true,
-                    mHeadsUpObserver);
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(SETTING_HEADS_UP_TICKER), true,
-                    mHeadsUpObserver);
-        }
 
         mNotificationLifetimeExtenders.add(mHeadsUpManager);
         mNotificationLifetimeExtenders.add(mAmbientPulseManager);
@@ -285,20 +227,6 @@ public class NotificationEntryManager implements
         }
 
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
-
-        mHeadsUpObserver.onChange(true); // set up
-
-        getRowBinder().setInterruptionStateProvider(new InterruptionStateProvider() {
-            @Override
-            public boolean shouldHeadsUp(NotificationData.Entry entry) {
-                return NotificationEntryManager.this.shouldHeadsUp(entry);
-            }
-
-            @Override
-            public boolean shouldPulse(NotificationData.Entry entry) {
-                return NotificationEntryManager.this.shouldPulse(entry);
-            }
-        });
     }
 
     public NotificationData getNotificationData() {
@@ -320,14 +248,6 @@ public class NotificationEntryManager implements
     @Override
     public void onReorderingAllowed() {
         updateNotifications();
-    }
-
-    private boolean shouldSuppressFullScreenIntent(NotificationData.Entry entry) {
-        if (mPresenter.isDeviceInVrMode()) {
-            return true;
-        }
-
-        return mNotificationData.shouldSuppressFullScreenIntent(entry);
     }
 
     public void performRemoveNotification(StatusBarNotification n) {
@@ -441,7 +361,7 @@ public class NotificationEntryManager implements
         if ((inflatedFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
             // Possible for shouldHeadsUp to change between the inflation starting and ending.
             // If it does and we no longer need to heads up, we should free the view.
-            if (shouldHeadsUp(entry)) {
+            if (mNotificationInterruptionStateProvider.shouldHeadsUp(entry)) {
                 mHeadsUpManager.showNotification(entry);
                 // Mark as seen immediately
                 setNotificationShown(entry.notification);
@@ -450,7 +370,7 @@ public class NotificationEntryManager implements
             }
         }
         if ((inflatedFlags & FLAG_CONTENT_VIEW_AMBIENT) != 0) {
-            if (shouldPulse(entry)) {
+            if (mNotificationInterruptionStateProvider.shouldPulse(entry)) {
                 mAmbientPulseManager.showNotification(entry);
             } else {
                 entry.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_AMBIENT);
@@ -474,8 +394,8 @@ public class NotificationEntryManager implements
                     mVisualStabilityManager.onLowPriorityUpdated(entry);
                     mPresenter.updateNotificationViews();
                 }
-                if (mAlertTransferListener != null) {
-                    mAlertTransferListener.onEntryReinflated(entry);
+                for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                    listener.onEntryReinflated(entry);
                 }
             }
         }
@@ -492,8 +412,10 @@ public class NotificationEntryManager implements
         final NotificationData.Entry entry = mNotificationData.get(key);
 
         abortExistingInflation(key);
-        if (mAlertTransferListener != null && entry != null) {
-            mAlertTransferListener.onEntryRemoved(entry);
+        if (entry != null) {
+            for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                listener.onEntryRemoved(entry);
+            }
         }
 
         // Attempt to remove notifications from their alert managers (heads up, ambient pulse).
@@ -650,51 +572,15 @@ public class NotificationEntryManager implements
         mNotificationData.updateRanking(rankingMap);
         NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
         rankingMap.getRanking(key, ranking);
-        NotificationData.Entry shadeEntry = createNotificationEntry(notification, ranking);
-        boolean isHeadsUped = shouldHeadsUp(shadeEntry);
-        if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
-            if (shouldSuppressFullScreenIntent(shadeEntry)) {
-                if (DEBUG) {
-                    Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + key);
-                }
-            } else if (mNotificationData.getImportance(key)
-                    < NotificationManager.IMPORTANCE_HIGH) {
-                if (DEBUG) {
-                    Log.d(TAG, "No Fullscreen intent: not important enough: "
-                            + key);
-                }
-            } else {
-                // Stop screensaver if the notification has a fullscreen intent.
-                // (like an incoming phone call)
-                Dependency.get(UiOffloadThread.class).submit(() -> {
-                    try {
-                        mDreamManager.awaken();
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-                // not immersive & a fullscreen alert should be shown
-                if (DEBUG)
-                    Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
-                try {
-                    EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
-                            key);
-                    notification.getNotification().fullScreenIntent.send();
-                    shadeEntry.notifyFullScreenIntentLaunched();
-                    mMetricsLogger.count("note_fullscreen", 1);
-                } catch (PendingIntent.CanceledException e) {
-                }
-            }
-        }
+        NotificationData.Entry entry = createNotificationEntry(notification, ranking);
         abortExistingInflation(key);
 
         mForegroundServiceController.addNotification(notification,
                 mNotificationData.getImportance(key));
 
-        mPendingNotifications.put(key, shadeEntry);
-        if (mAlertTransferListener != null) {
-            mAlertTransferListener.onPendingEntryAdded(shadeEntry);
+        mPendingNotifications.put(key, entry);
+        for (NotificationEntryListener listener : mNotificationEntryListeners) {
+            listener.onPendingEntryAdded(entry);
         }
     }
 
@@ -767,9 +653,11 @@ public class NotificationEntryManager implements
 
         boolean alertAgain = alertAgain(entry, entry.notification.getNotification());
         if (getShadeController().isDozing()) {
-            updateAlertState(entry, shouldPulse(entry), alertAgain, mAmbientPulseManager);
+            updateAlertState(entry, mNotificationInterruptionStateProvider.shouldPulse(entry),
+                    alertAgain, mAmbientPulseManager);
         } else {
-            updateAlertState(entry, shouldHeadsUp(entry), alertAgain, mHeadsUpManager);
+            updateAlertState(entry, mNotificationInterruptionStateProvider.shouldHeadsUp(entry),
+                    alertAgain, mHeadsUpManager);
         }
         updateNotifications();
 
@@ -828,7 +716,7 @@ public class NotificationEntryManager implements
 
         // By comparing the old and new UI adjustments, reinflate the view accordingly.
         for (NotificationData.Entry entry : entries) {
-            mNotificationRowBinder.onNotificationRankingUpdated(
+            getRowBinder().onNotificationRankingUpdated(
                     entry,
                     oldImportances.get(entry.key),
                     oldAdjustments.get(entry.key),
@@ -851,182 +739,6 @@ public class NotificationEntryManager implements
         }
     }
 
-    public void setStatusBarStateListener(
-            NotificationViewHierarchyManager.StatusBarStateListener listener) {
-        mStatusBarStateListener  = listener;
-    }
-
-    /**
-     * Whether the notification should peek in from the top and alert the user.
-     *
-     * @param entry the entry to check
-     * @return true if the entry should heads up, false otherwise
-     */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
-    public boolean shouldHeadsUp(NotificationData.Entry entry) {
-        StatusBarNotification sbn = entry.notification;
-
-        if (getShadeController().isDozing()) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: device is dozing: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        // TODO: need to changes this, e.g. should still heads up in expanded shade, might want
-        // message bubble from the bubble to go through heads up path
-        boolean inShade = mStatusBarStateListener != null
-                && mStatusBarStateListener.getCurrentState() == SHADE;
-        if (entry.isBubble() && !entry.isBubbleDismissed() && inShade) {
-            return false;
-        }
-
-        if (!canAlertCommon(entry)) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: notification shouldn't alert: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (!mUseHeadsUp || mPresenter.isDeviceInVrMode()) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: no huns or vr mode");
-            }
-            return false;
-        }
-
-        boolean isDreaming = false;
-        try {
-            isDreaming = mDreamManager.isDreaming();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to query dream manager.", e);
-        }
-        boolean inUse = mPowerManager.isScreenOn() && !isDreaming;
-
-        if (!inUse) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: not in use: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (mNotificationData.shouldSuppressPeek(entry)) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: suppressed by DND: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (isSnoozedPackage(sbn)) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: snoozed package: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (entry.hasJustLaunchedFullScreenIntent()) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: recent fullscreen: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (mNotificationData.getImportance(sbn.getKey()) < NotificationManager.IMPORTANCE_HIGH) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: unimportant notification: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (!mCallback.canHeadsUp(entry, sbn)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Whether or not the notification should "pulse" on the user's display when the phone is
-     * dozing.  This displays the ambient view of the notification.
-     *
-     * @param entry the entry to check
-     * @return true if the entry should ambient pulse, false otherwise
-     */
-    private boolean shouldPulse(NotificationData.Entry entry) {
-        StatusBarNotification sbn = entry.notification;
-
-        if (!getShadeController().isDozing()) {
-            if (DEBUG) {
-                Log.d(TAG, "No pulsing: not dozing: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (!canAlertCommon(entry)) {
-            if (DEBUG) {
-                Log.d(TAG, "No pulsing: notification shouldn't alert: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (mNotificationData.shouldSuppressAmbient(entry)) {
-            if (DEBUG) {
-                Log.d(TAG, "No pulsing: ambient effect suppressed: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (mNotificationData.getImportance(sbn.getKey())
-                < NotificationManager.IMPORTANCE_DEFAULT) {
-            if (DEBUG) {
-                Log.d(TAG, "No pulsing: not important enough: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        Bundle extras = sbn.getNotification().extras;
-        CharSequence title = extras.getCharSequence(Notification.EXTRA_TITLE);
-        CharSequence text = extras.getCharSequence(Notification.EXTRA_TEXT);
-        if (TextUtils.isEmpty(title) && TextUtils.isEmpty(text)) {
-            if (DEBUG) {
-                Log.d(TAG, "No pulsing: title and text are empty: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Common checks between heads up alerting and ambient pulse alerting.  See
-     * {@link NotificationEntryManager#shouldHeadsUp(NotificationData.Entry)} and
-     * {@link NotificationEntryManager#shouldPulse(NotificationData.Entry)}.  Notifications that
-     * fail any of these checks should not alert at all.
-     *
-     * @param entry the entry to check
-     * @return true if these checks pass, false if the notification should not alert
-     */
-    protected boolean canAlertCommon(NotificationData.Entry entry) {
-        StatusBarNotification sbn = entry.notification;
-
-        if (mNotificationData.shouldFilterOut(entry)) {
-            if (DEBUG) {
-                Log.d(TAG, "No alerting: filtered notification: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        // Don't alert notifications that are suppressed due to group alert behavior
-        if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
-            if (DEBUG) {
-                Log.d(TAG, "No alerting: suppressed due to group alert behavior");
-            }
-            return false;
-        }
-
-        return true;
-    }
-
     private void setNotificationShown(StatusBarNotification n) {
         setNotificationsShown(new String[]{n.getKey()});
     }
@@ -1037,10 +749,6 @@ public class NotificationEntryManager implements
         } catch (RuntimeException e) {
             Log.d(TAG, "failed setNotificationsShown: ", e);
         }
-    }
-
-    private boolean isSnoozedPackage(StatusBarNotification sbn) {
-        return mHeadsUpManager.isSnoozed(sbn.getPackageName());
     }
 
     /**
@@ -1075,65 +783,5 @@ public class NotificationEntryManager implements
      */
     public Iterable<NotificationData.Entry> getPendingNotificationsIterator() {
         return mPendingNotifications.values();
-    }
-
-    /**
-     * Interface for retrieving heads-up and pulsing state for an entry.
-     */
-    public interface InterruptionStateProvider {
-        /**
-         * Whether the provided entry should be marked as heads-up when inflated.
-         */
-        boolean shouldHeadsUp(NotificationData.Entry entry);
-
-        /**
-         * Whether the provided entry should be marked as pulsing (displayed in ambient) when
-         * inflated.
-         */
-        boolean shouldPulse(NotificationData.Entry entry);
-    }
-
-    /**
-     * Callback for NotificationEntryManager.
-     */
-    public interface Callback {
-
-        /**
-         * Called when a new entry is created.
-         *
-         * @param shadeEntry entry that was created
-         */
-        void onNotificationAdded(NotificationData.Entry shadeEntry);
-
-        /**
-         * Called when a notification was updated.
-         *
-         * @param notification notification that was updated
-         */
-        void onNotificationUpdated(StatusBarNotification notification);
-
-        /**
-         * Called when a notification was removed.
-         *
-         * @param key key of notification that was removed
-         * @param old StatusBarNotification of the notification before it was removed
-         */
-        void onNotificationRemoved(String key, StatusBarNotification old);
-
-        /**
-         * Removes a notification immediately.
-         *
-         * @param statusBarNotification notification that is being removed
-         */
-        void onPerformRemoveNotification(StatusBarNotification statusBarNotification);
-
-        /**
-         * Returns true if NotificationEntryManager can heads up this notification.
-         *
-         * @param entry entry of the notification that might be heads upped
-         * @param sbn notification that might be heads upped
-         * @return true if the notification can be heads upped
-         */
-        boolean canHeadsUp(NotificationData.Entry entry, StatusBarNotification sbn);
     }
 }

@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
@@ -196,6 +197,13 @@ public class SystemUIFactory {
     @Provides
     public NotificationListener provideNotificationListener(Context context) {
         return new NotificationListener(context);
+    }
+
+    @Singleton
+    @Provides
+    public NotificationInterruptionStateProvider provideNotificationInterruptionStateProvider(
+            Context context) {
+        return new NotificationInterruptionStateProvider(context);
     }
 
     @Module

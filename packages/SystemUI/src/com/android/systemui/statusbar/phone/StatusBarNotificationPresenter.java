@@ -57,7 +57,9 @@ import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -91,6 +93,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             Dependency.get(NotificationEntryManager.class);
     private final NotificationRowBinder mNotificationRowBinder =
             Dependency.get(NotificationRowBinder.class);
+    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider =
+            Dependency.get(NotificationInterruptionStateProvider.class);
     private final NotificationMediaManager mMediaManager =
             Dependency.get(NotificationMediaManager.class);
     protected AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
@@ -169,10 +173,37 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
         NotificationListContainer notifListContainer = (NotificationListContainer) stackScroller;
         Dependency.get(InitController.class).addPostInitTask(() -> {
+            NotificationEntryListener notificationEntryListener = new NotificationEntryListener() {
+                @Override
+                public void onNotificationAdded(Entry entry) {
+                    // Recalculate the position of the sliding windows and the titles.
+                    mShadeController.updateAreThereNotifications();
+                }
+
+                @Override
+                public void onNotificationUpdated(StatusBarNotification notification) {
+                    mShadeController.updateAreThereNotifications();
+                }
+
+                @Override
+                public void onNotificationRemoved(String key, StatusBarNotification old) {
+                    StatusBarNotificationPresenter.this.onNotificationRemoved(key, old);
+                }
+
+                @Override
+                public void onPerformRemoveNotification(
+                        StatusBarNotification statusBarNotification) {
+                    StatusBarNotificationPresenter.this.onPerformRemoveNotification();
+                }
+            };
+
             mViewHierarchyManager.setUpWithPresenter(this, notifListContainer);
-            mEntryManager.setUpWithPresenter(this, notifListContainer, this, mHeadsUpManager);
+            mEntryManager.setUpWithPresenter(
+                    this, notifListContainer, notificationEntryListener, mHeadsUpManager);
             mNotificationRowBinder.setUpWithPresenter(this, notifListContainer, mHeadsUpManager,
                     mEntryManager, this);
+            mNotificationInterruptionStateProvider.setUpWithPresenter(
+                    this, mHeadsUpManager, this::canHeadsUp);
             mLockscreenUserManager.setUpWithPresenter(this);
             mMediaManager.setUpWithPresenter(this);
             Dependency.get(NotificationGutsManager.class).setUpWithPresenter(this,
@@ -222,10 +253,9 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 || mActivityLaunchAnimator.isAnimationRunning();
     }
 
-    @Override
-    public void onPerformRemoveNotification(StatusBarNotification n) {
+    private void onPerformRemoveNotification() {
         if (mNotificationPanel.hasPulsingNotifications() &&
-                    !mAmbientPulseManager.hasNotifications()) {
+                !mAmbientPulseManager.hasNotifications()) {
             // We were showing a pulse for a notification, but no notifications are pulsing anymore.
             // Finish the pulse.
             mDozeScrimController.pulseOutNow();
@@ -249,18 +279,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mNotificationPanel.updateNotificationViews();
     }
 
-    @Override
-    public void onNotificationAdded(Entry shadeEntry) {
-        // Recalculate the position of the sliding windows and the titles.
-        mShadeController.updateAreThereNotifications();
-    }
-
-    @Override
-    public void onNotificationUpdated(StatusBarNotification notification) {
-        mShadeController.updateAreThereNotifications();
-    }
-
-    @Override
     public void onNotificationRemoved(String key, StatusBarNotification old) {
         if (SPEW) Log.d(TAG, "removeNotification key=" + key + " old=" + old);
 
@@ -282,7 +300,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         return !mEntryManager.getNotificationData().getActiveNotifications().isEmpty();
     }
 
-    @Override
     public boolean canHeadsUp(Entry entry, StatusBarNotification sbn) {
         if (mShadeController.isDozing()) {
             return false;
