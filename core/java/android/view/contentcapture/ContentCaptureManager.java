@@ -66,7 +66,7 @@ public final class ContentCaptureManager {
     @NonNull
     private final Handler mHandler;
 
-    private ContentCaptureSession mMainSession;
+    private ActivityContentCaptureSession mMainSession;
 
     /** @hide */
     public ContentCaptureManager(@NonNull Context context,
@@ -110,7 +110,7 @@ public final class ContentCaptureManager {
         // 4.Close (and delete) these sessions when onActivityStopped() is called.
         // 5.Figure out whether each session will have its own mDisabled AtomicBoolean.
         if (mMainSession == null) {
-            mMainSession = new ContentCaptureSession(mContext, mHandler, mService,
+            mMainSession = new ActivityContentCaptureSession(mContext, mHandler, mService,
                     mDisabled, Preconditions.checkNotNull(context));
         } else {
             throw new IllegalStateException("Manager already has a session: " + mMainSession);
@@ -127,12 +127,12 @@ public final class ContentCaptureManager {
      * @hide
      */
     @NonNull
-    public ContentCaptureSession getMainContentCaptureSession() {
+    public ActivityContentCaptureSession getMainContentCaptureSession() {
         // TODO(b/121033016): figure out how to manage the "default" session when it support
         // multiple sessions (can't just be the first one, as it could be closed).
         if (mMainSession == null) {
-            mMainSession = new ContentCaptureSession(mContext, mHandler, mService, mDisabled,
-                    /* contentCaptureContext=  */ null);
+            mMainSession = new ActivityContentCaptureSession(mContext, mHandler, mService,
+                    mDisabled, /* clientContext= */ null);
             if (VERBOSE) {
                 Log.v(TAG, "getDefaultContentCaptureSession(): created " + mMainSession);
             }
