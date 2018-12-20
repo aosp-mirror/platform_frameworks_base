@@ -90,17 +90,18 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.power.V1_0.PowerHint;
-import android.os.Build;
 import android.os.FactoryTest;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.IntArray;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -110,6 +111,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.ResolverActivity;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
@@ -346,35 +348,53 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     /**
-     * This starts home activity on displays that can have system decorations and only if the
-     * home activity can have multiple instances.
+     * This starts home activity on displays that can have system decorations based on displayId -
+     * Default display always use primary home component.
+     * For Secondary displays, the home activity must have category SECONDARY_HOME and then resolves
+     * according to the priorities listed below.
+     *  - If default home is not set, always use the secondary home defined in the config.
+     *  - Use currently selected primary home activity.
+     *  - Use the activity in the same package as currently selected primary home activity.
+     *    If there are multiple activities matched, use first one.
+     *  - Use the secondary home defined in the config.
      */
     boolean startHomeOnDisplay(int userId, String reason, int displayId) {
-        final Intent homeIntent = mService.getHomeIntent();
-        final ActivityInfo aInfo = resolveHomeActivity(userId, homeIntent);
+        Intent homeIntent;
+        ActivityInfo aInfo;
+        if (displayId == DEFAULT_DISPLAY) {
+            homeIntent = mService.getHomeIntent();
+            aInfo = resolveHomeActivity(userId, homeIntent);
+        } else {
+            Pair<ActivityInfo, Intent> info = resolveSecondaryHomeActivity(userId, displayId);
+            aInfo = info.first;
+            homeIntent = info.second;
+        }
         if (aInfo == null) {
             return false;
         }
 
-        if (!canStartHomeOnDisplay(aInfo, displayId,
-                false /* allowInstrumenting */)) {
+        if (!canStartHomeOnDisplay(aInfo, displayId, false /* allowInstrumenting */)) {
             return false;
         }
 
+        // Updates the home component of the intent.
+        homeIntent.setComponent(new ComponentName(aInfo.applicationInfo.packageName, aInfo.name));
+        homeIntent.setFlags(homeIntent.getFlags() | FLAG_ACTIVITY_NEW_TASK);
         // Update the reason for ANR debugging to verify if the user activity is the one that
         // actually launched.
         final String myReason = reason + ":" + userId + ":" + UserHandle.getUserId(
-                aInfo.applicationInfo.uid);
+                aInfo.applicationInfo.uid) + ":" + displayId;
         mService.getActivityStartController().startHomeActivity(homeIntent, aInfo, myReason,
                 displayId);
         return true;
     }
 
     /**
-     * This resolves the home activity info and updates the home component of the given intent.
+     * This resolves the home activity info.
      * @return the home activity info if any.
      */
-    private ActivityInfo resolveHomeActivity(int userId, Intent homeIntent) {
+    @VisibleForTesting
+    ActivityInfo resolveHomeActivity(int userId, Intent homeIntent) {
         final int flags = ActivityManagerService.STOCK_PM_FLAGS;
         final ComponentName comp = homeIntent.getComponent();
         ActivityInfo aInfo = null;
@@ -400,11 +420,80 @@ class RootActivityContainer extends ConfigurationContainer
             return null;
         }
 
-        homeIntent.setComponent(new ComponentName(aInfo.applicationInfo.packageName, aInfo.name));
         aInfo = new ActivityInfo(aInfo);
         aInfo.applicationInfo = mService.getAppInfoForUser(aInfo.applicationInfo, userId);
-        homeIntent.setFlags(homeIntent.getFlags() | FLAG_ACTIVITY_NEW_TASK);
         return aInfo;
+    }
+
+    @VisibleForTesting
+    Pair<ActivityInfo, Intent> resolveSecondaryHomeActivity(int userId, int displayId) {
+        if (displayId == DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException(
+                    "resolveSecondaryHomeActivity: Should not be DEFAULT_DISPLAY");
+        }
+        // Resolve activities in the same package as currently selected primary home activity.
+        Intent homeIntent = mService.getHomeIntent();
+        ActivityInfo aInfo = resolveHomeActivity(userId, homeIntent);
+        if (aInfo != null) {
+            if (ResolverActivity.class.getName().equals(aInfo.name)) {
+                // Always fallback to secondary home component if default home is not set.
+                aInfo = null;
+            } else {
+                // Look for secondary home activities in the currently selected default home
+                // package.
+                homeIntent = mService.getSecondaryHomeIntent(aInfo.applicationInfo.packageName);
+                final List<ResolveInfo> resolutions = resolveActivities(userId, homeIntent);
+                final int size = resolutions.size();
+                final String targetName = aInfo.name;
+                aInfo = null;
+                for (int i = 0; i < size; i++) {
+                    ResolveInfo resolveInfo = resolutions.get(i);
+                    // We need to traverse all resolutions to check if the currently selected
+                    // default home activity is present.
+                    if (resolveInfo.activityInfo.name.equals(targetName)) {
+                        aInfo = resolveInfo.activityInfo;
+                        break;
+                    }
+                }
+                if (aInfo == null && size > 0) {
+                    // First one is the best.
+                    aInfo = resolutions.get(0).activityInfo;
+                }
+            }
+        }
+
+        if (aInfo != null) {
+            if (!canStartHomeOnDisplay(aInfo, displayId, false /* allowInstrumenting */)) {
+                aInfo = null;
+            }
+        }
+
+        // Fallback to secondary home component.
+        if (aInfo == null) {
+            homeIntent = mService.getSecondaryHomeIntent(null);
+            aInfo = resolveHomeActivity(userId, homeIntent);
+        }
+        return Pair.create(aInfo, homeIntent);
+    }
+
+    /**
+     * Retrieve all activities that match the given intent.
+     * The list should already ordered from best to worst matched.
+     * {@link android.content.pm.PackageManager#queryIntentActivities}
+     */
+    @VisibleForTesting
+    List<ResolveInfo> resolveActivities(int userId, Intent homeIntent) {
+        List<ResolveInfo> resolutions;
+        try {
+            final String resolvedType =
+                    homeIntent.resolveTypeIfNeeded(mService.mContext.getContentResolver());
+            resolutions = AppGlobals.getPackageManager().queryIntentActivities(homeIntent,
+                    resolvedType, ActivityManagerService.STOCK_PM_FLAGS, userId).getList();
+
+        } catch (RemoteException e) {
+            resolutions = new ArrayList<>();
+        }
+        return resolutions;
     }
 
     boolean resumeHomeActivity(ActivityRecord prev, String reason, int displayId) {
@@ -457,6 +546,14 @@ class RootActivityContainer extends ConfigurationContainer
             return true;
         }
 
+        final boolean deviceProvisioned = Settings.Global.getInt(
+                mService.mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        if (displayId != DEFAULT_DISPLAY && displayId != INVALID_DISPLAY && !deviceProvisioned) {
+            // Can't launch home on secondary display before device is provisioned.
+            return false;
+        }
+
         final ActivityDisplay display = getActivityDisplay(displayId);
         if (display == null || display.isRemoved() || !display.supportsSystemDecorations()) {
             // Can't launch home on display that doesn't support system decorations.
@@ -464,13 +561,9 @@ class RootActivityContainer extends ConfigurationContainer
         }
 
         final boolean supportMultipleInstance = homeInfo.launchMode != LAUNCH_SINGLE_TASK
-                && homeInfo.launchMode != LAUNCH_SINGLE_INSTANCE
-                && homeInfo.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q;
+                && homeInfo.launchMode != LAUNCH_SINGLE_INSTANCE;
         if (!supportMultipleInstance) {
-            // Can't launch home on other displays if it requested to be single instance. Also we
-            // don't allow home applications that target before Q to have multiple home activity
-            // instances because they may not be expected to have multiple home scenario and
-            // haven't explicitly request for single instance.
+            // Can't launch home on secondary displays if it requested to be single instance.
             return false;
         }
 
