@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -53,6 +54,7 @@ public class NumericTextView extends TextView {
 
     private OnValueChangedListener mListener;
 
+    @UnsupportedAppUsage
     public NumericTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
