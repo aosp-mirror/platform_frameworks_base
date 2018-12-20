@@ -198,7 +198,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     @Override
     void onChildPositionChanged() {
-        mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /* updateInputWindows */);
+        mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
+                !mWmService.mPerDisplayFocusEnabled /* updateInputWindows */);
     }
 
     DisplayContent getDisplayContent(int displayId) {
