@@ -31,116 +31,71 @@ import java.util.Comparator;
 public class BarViewInfo implements Comparable<BarViewInfo> {
 
     private final Drawable mIcon;
-    private View.OnClickListener mListener;
-    private @StringRes int mSummaryRes;
+    private View.OnClickListener mClickListener;
+    @StringRes
+    private int mSummary;
     // A number indicates this bar's height. The larger number shows a higher bar view.
-    private int mBarNumber;
+    private int mHeight;
     // A real height of bar view.
-    private int mBarHeight;
+    private int mNormalizedHeight;
 
     /**
      * Construct a BarViewInfo instance.
      *
-     * @param icon the icon of bar view.
-     * @param barNumber the number of bar view. The larger number show a more height of bar view.
-     * @param summaryRes the resource identifier of the string resource to be displayed
-     * @return BarViewInfo object.
+     * @param icon      The icon of bar view.
+     * @param barHeight The height of bar view. Larger number shows a higher bar view.
+     * @param summary   The string resource id for summary.
      */
-    public BarViewInfo(Drawable icon, @IntRange(from = 0) int barNumber,
-            @StringRes int summaryRes) {
+    public BarViewInfo(Drawable icon, @IntRange(from = 0) int barHeight, @StringRes int summary) {
         mIcon = icon;
-        mBarNumber = barNumber;
-        mSummaryRes = summaryRes;
+        mHeight = barHeight;
+        mSummary = summary;
     }
 
     /**
-     * Set number for bar view.
-     *
-     * @param barNumber the number of bar view. The larger number shows a higher bar view.
-     */
-    public void setBarNumber(@IntRange(from = 0) int barNumber) {
-        mBarNumber = barNumber;
-    }
-
-    /**
-     * Set summary resource for bar view
-     *
-     * @param resId the resource identifier of the string resource to be displayed
-     */
-    public void setSummary(@StringRes int resId) {
-        mSummaryRes = resId;
-    }
-
-    /**
-     * Set a click listner for bar view.
-     *
-     * @param listener the click listner is attached on bar view.
+     * Set a click listener for bar view.
      */
     public void setClickListener(@Nullable View.OnClickListener listener) {
-        mListener = listener;
-    }
-
-    /**
-     * Get the icon of bar view.
-     *
-     * @return Drawable the icon of bar view.
-     */
-    public Drawable getIcon() {
-        return mIcon;
-    }
-
-    /**
-     * Get the OnClickListener of bar view.
-     *
-     * @return View.OnClickListener the click listner of bar view.
-     */
-    public View.OnClickListener getListener() {
-        return mListener;
-    }
-
-    /**
-     * Get the real height of bar view.
-     *
-     * @return the real height of bar view.
-     */
-    public int getBarHeight() {
-        return mBarHeight;
-    }
-
-    /**
-     * Get summary resource of bar view.
-     *
-     * @return summary resource of bar view.
-     */
-    public int getSummaryRes() {
-        return mSummaryRes;
-    }
-
-    /**
-     * Get the number of app uses this permisssion.
-     *
-     * @return the number of app uses this permission.
-     */
-    public int getBarNumber() {
-        return mBarNumber;
+        mClickListener = listener;
     }
 
     @Override
     public int compareTo(BarViewInfo other) {
         // Descending order
-        return Comparator.comparingInt((BarViewInfo barViewInfo) -> barViewInfo.mBarNumber)
+        return Comparator.comparingInt((BarViewInfo barViewInfo) -> barViewInfo.mHeight)
                 .compare(other, this);
     }
 
-    /**
-     * Set a real height for bar view.
-     *
-     * <p>This method should not be called by outside. It usually should be called by
-     * {@link BarChartPreference#caculateAllBarViewsHeight}
-     *
-     * @param barHeight the real bar height for bar view.
-     */
-    void setBarHeight(@IntRange(from = 0) int barHeight) {
-        mBarHeight = barHeight;
+    void setHeight(@IntRange(from = 0) int height) {
+        mHeight = height;
+    }
+
+    void setSummary(@StringRes int resId) {
+        mSummary = resId;
+    }
+
+    Drawable getIcon() {
+        return mIcon;
+    }
+
+    int getHeight() {
+        return mHeight;
+    }
+
+    View.OnClickListener getClickListener() {
+        return mClickListener;
+    }
+
+    @StringRes
+    int getSummary() {
+        return mSummary;
+    }
+
+    void setNormalizedHeight(@IntRange(from = 0) int barHeight) {
+        mNormalizedHeight = barHeight;
+    }
+
+    int getNormalizedHeight() {
+        return mNormalizedHeight;
     }
 }

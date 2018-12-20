@@ -30,7 +30,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.VisibleForTesting;
 
 /**
- * A extension view for bar chart.
+ * {@link View} for a single vertical bar with icon and summary.
  */
 public class BarView extends LinearLayout {
 
@@ -41,24 +41,11 @@ public class BarView extends LinearLayout {
     private TextView mBarTitle;
     private TextView mBarSummary;
 
-    /**
-     * Constructs a new BarView with the given context's theme.
-     *
-     * @param context The Context the view is running in, through which it can
-     *                access the current theme, resources, etc.
-     */
     public BarView(Context context) {
         super(context);
         init();
     }
 
-    /**
-     * Constructs a new BarView with the given context's theme and the supplied
-     * attribute set.
-     *
-     * @param context the Context the view is running in
-     * @param attrs the attributes of the XML tag that is inflating the view.
-     */
     public BarView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
@@ -77,17 +64,16 @@ public class BarView extends LinearLayout {
     }
 
     /**
-     * This helps update the bar view UI with a {@link BarViewInfo}.
-     *
-     * @param barViewInfo A {@link BarViewInfo} saves bar view status.
+     * Updates the view with a {@link BarViewInfo}.
      */
-    public void updateBarViewUI(BarViewInfo barViewInfo) {
+    void updateView(BarViewInfo barViewInfo) {
+        setOnClickListener(barViewInfo.getClickListener());
         //Set height of bar view
-        mBarView.getLayoutParams().height = barViewInfo.getBarHeight();
+        mBarView.getLayoutParams().height = barViewInfo.getNormalizedHeight();
         mIcon.setImageDrawable(barViewInfo.getIcon());
         // For now, we use the bar number as title.
-        mBarTitle.setText(Integer.toString(barViewInfo.getBarNumber()));
-        mBarSummary.setText(barViewInfo.getSummaryRes());
+        mBarTitle.setText(Integer.toString(barViewInfo.getHeight()));
+        mBarSummary.setText(barViewInfo.getSummary());
     }
 
     @VisibleForTesting
@@ -106,9 +92,9 @@ public class BarView extends LinearLayout {
         setGravity(Gravity.CENTER);
 
         mBarView = findViewById(R.id.bar_view);
-        mIcon = (ImageView) findViewById(R.id.icon_view);
-        mBarTitle = (TextView) findViewById(R.id.bar_title);
-        mBarSummary = (TextView) findViewById(R.id.bar_summary);
+        mIcon = findViewById(R.id.icon_view);
+        mBarTitle = findViewById(R.id.bar_title);
+        mBarSummary = findViewById(R.id.bar_summary);
     }
 
     private void setOnClickListner(View.OnClickListener listener) {

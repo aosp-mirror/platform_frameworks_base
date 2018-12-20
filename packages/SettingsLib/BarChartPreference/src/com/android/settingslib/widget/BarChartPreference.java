@@ -31,7 +31,7 @@ import androidx.preference.PreferenceViewHolder;
 import java.util.Arrays;
 
 /**
- * This BarChartPreference shows four bar views in this preference at most.
+ * This BarChartPreference shows up to four bar views in this preference at most.
  *
  * <p>The following code sample shows a typical use, with an XML layout and code to initialize the
  * contents of the BarChartPreference:
@@ -74,71 +74,28 @@ public class BarChartPreference extends Preference {
     };
 
     private int mMaxBarHeight;
-    private @StringRes int mTitleId;
-    private @StringRes int mDetailsId;
+    @StringRes
+    private int mTitleId;
+    @StringRes
+    private int mDetailsId;
     private BarViewInfo[] mBarViewsInfo;
     private View.OnClickListener mDetailsOnClickListener;
 
-    /**
-     * Constructs a new BarChartPreference with the given context's theme.
-     * It sets a layout with settings bar chart style
-     *
-     * @param context The Context the view is running in, through which it can
-     *                access the current theme, resources, etc.
-     */
     public BarChartPreference(Context context) {
         super(context);
         init();
     }
 
-    /**
-     * Constructs a new BarChartPreference with the given context's theme and the supplied
-     * attribute set.
-     * It sets a layout with settings bar chart style
-     *
-     * @param context the Context the view is running in
-     * @param attrs the attributes of the XML tag that is inflating the view.
-     */
     public BarChartPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    /**
-     * Constructs a new BarChartPreference with the given context's theme, the supplied
-     * attribute set, and default style attribute.
-     * It sets a layout with settings bar chart style
-     *
-     * @param context The Context the view is running in, through which it can
-     *                access the current theme, resources, etc.
-     * @param attrs The attributes of the XML tag that is inflating the view.
-     * @param defStyleAttr An attribute in the current theme that contains a
-     *                     reference to a style resource that supplies default
-     *                     values for the view. Can be 0 to not look for
-     *                     defaults.
-     */
     public BarChartPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
-    /**
-     * Constructs a new BarChartPreference with the given context's theme, the supplied
-     * attribute set, and default styles.
-     * It sets a layout with settings bar chart style
-     *
-     * @param context The Context the view is running in, through which it can
-     *                access the current theme, resources, etc.
-     * @param attrs The attributes of the XML tag that is inflating the view.
-     * @param defStyleAttr An attribute in the current theme that contains a
-     *                     reference to a style resource that supplies default
-     *                     values for the view. Can be 0 to not look for
-     *                     defaults.
-     * @param defStyleRes  A resource identifier of a style resource that
-     *                     supplies default values for the view, used only if
-     *                     defStyleAttr is 0 or can not be found in the theme.
-     *                     Can be 0 to not look for defaults.
-     */
     public BarChartPreference(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -172,8 +129,6 @@ public class BarChartPreference extends Preference {
     /**
      * Set all bar view information which you'd like to show in preference.
      *
-     * <p>This method helps you do a sort by {@linkBarViewInfo#mBarNumber} in descending order.
-     *
      * @param barViewsInfo the barViewsInfo contain at least one {@link BarViewInfo}.
      */
     public void setAllBarViewsInfo(@NonNull BarViewInfo[] barViewsInfo) {
@@ -181,7 +136,7 @@ public class BarChartPreference extends Preference {
         // Do a sort in descending order, the first element would have max {@link
         // BarViewInfo#mBarNumber}
         Arrays.sort(mBarViewsInfo);
-        caculateAllBarViewsHeight();
+        calculateAllBarViewHeights();
         notifyChanged();
     }
 
@@ -224,19 +179,19 @@ public class BarChartPreference extends Preference {
                 continue;
             }
             barView.setVisibility(View.VISIBLE);
-            barView.updateBarViewUI(mBarViewsInfo[index]);
+            barView.updateView(mBarViewsInfo[index]);
         }
     }
 
-    private void caculateAllBarViewsHeight() {
+    private void calculateAllBarViewHeights() {
         // Since we sorted this array in advance, the first element must have the max {@link
-        // BarViewInfo#mBarNumber}.
-        final int maxBarViewNumber = mBarViewsInfo[0].getBarNumber();
-        // If the max number of bar view is zero, then we don't caculate the unit for bar height.
-        final int unit = maxBarViewNumber == 0 ? 0 : mMaxBarHeight / maxBarViewNumber;
+        // BarViewInfo#mHeight}.
+        final int maxBarHeight = mBarViewsInfo[0].getHeight();
+        // If the max number of bar view is zero, then we don't calculate the unit for bar height.
+        final int unit = maxBarHeight == 0 ? 0 : mMaxBarHeight / maxBarHeight;
 
         for (BarViewInfo barView : mBarViewsInfo) {
-            barView.setBarHeight(barView.getBarNumber() * unit);
+            barView.setNormalizedHeight(barView.getHeight() * unit);
         }
     }
 }

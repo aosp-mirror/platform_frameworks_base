@@ -208,4 +208,18 @@ public class BarChartPreferenceTest {
         assertThat(mBarView1.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mBarView1.getSummary()).isEqualTo(mContext.getText(R.string.debug_app));
     }
+
+    @Test
+    public void setAllBarViewsInfo_setClickListenerForBarView_barViewAttachClickListener() {
+        final BarViewInfo viewInfo = new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app);
+        viewInfo.setClickListener(v -> {
+        });
+        final BarViewInfo[] barViewsInfo = new BarViewInfo[]{viewInfo};
+
+        mPreference.setAllBarViewsInfo(barViewsInfo);
+        mPreference.onBindViewHolder(mHolder);
+
+        assertThat(mBarView1.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mBarView1.hasOnClickListeners()).isTrue();
+    }
 }
