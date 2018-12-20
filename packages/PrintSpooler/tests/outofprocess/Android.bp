@@ -19,7 +19,7 @@ android_test {
 
     libs: ["android.test.runner.stubs"],
     static_libs: [
-        "android-support-test",
+        "androidx.test.rules",
         "ub-uiautomator",
         "mockito-target-minus-junit4",
         "print-test-util-lib",
