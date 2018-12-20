@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -54,6 +55,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -1594,6 +1597,29 @@ public class PackageInstaller {
         public static final int INVALID_ID = -1;
         /** {@hide} */
         private static final int[] NO_SESSIONS = {};
+
+        /** @hide */
+        @IntDef(value = {NO_ERROR, VERIFICATION_FAILED, ACTIVATION_FAILED})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface StagedSessionErrorCode{}
+        /**
+         * Constant indicating that no error occurred during the preparation or the activation of
+         * this staged session.
+         */
+        public static final int NO_ERROR = 0;
+
+        /**
+         * Constant indicating that an error occurred during the verification phase (pre-reboot) of
+         * this staged session.
+         */
+        public static final int VERIFICATION_FAILED = 1;
+
+        /**
+         * Constant indicating that an error occurred during the activation phase (post-reboot) of
+         * this staged session.
+         */
+        public static final int ACTIVATION_FAILED = 2;
+
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int sessionId;
@@ -1653,6 +1679,14 @@ public class PackageInstaller {
         public int[] childSessionIds = NO_SESSIONS;
 
         /** {@hide} */
+        public boolean isSessionApplied;
+        /** {@hide} */
+        public boolean isSessionReady;
+        /** {@hide} */
+        public boolean isSessionFailed;
+        private int mStagedSessionErrorCode;
+
+        /** {@hide} */
         @UnsupportedAppUsage
         public SessionInfo() {
         }
@@ -1686,6 +1720,10 @@ public class PackageInstaller {
             if (childSessionIds == null) {
                 childSessionIds = NO_SESSIONS;
             }
+            isSessionApplied = source.readBoolean();
+            isSessionReady = source.readBoolean();
+            isSessionFailed = source.readBoolean();
+            mStagedSessionErrorCode = source.readInt();
         }
 
         /**
@@ -1970,6 +2008,44 @@ public class PackageInstaller {
             return childSessionIds;
         }
 
+        /**
+         * Whether the staged session has been applied successfully, meaning that all of its
+         * packages have been activated and no further action is required.
+         * Only meaningful if {@code isStaged} is true.
+         */
+        public boolean isSessionApplied() {
+            return isSessionApplied;
+        }
+
+        /**
+         * Whether the staged session is ready to be applied at next reboot. Only meaningful if
+         * {@code isStaged} is true.
+         */
+        public boolean isSessionReady() {
+            return isSessionReady;
+        }
+
+        /**
+         * Whether something went wrong and the staged session is declared as failed, meaning that
+         * it will be ignored at next reboot. Only meaningful if {@code isStaged} is true.
+         */
+        public boolean isSessionFailed() {
+            return isSessionFailed;
+        }
+
+        /**
+         * If something went wrong with a staged session, clients can check this error code to
+         * understand which kind of failure happened. Only meaningful if {@code isStaged} is true.
+         */
+        public int getStagedSessionErrorCode() {
+            return mStagedSessionErrorCode;
+        }
+
+        /** {@hide} */
+        public void setStagedSessionErrorCode(@StagedSessionErrorCode int errorCode) {
+            mStagedSessionErrorCode = errorCode;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -2001,6 +2077,10 @@ public class PackageInstaller {
             dest.writeBoolean(isStaged);
             dest.writeInt(parentSessionId);
             dest.writeIntArray(childSessionIds);
+            dest.writeBoolean(isSessionApplied);
+            dest.writeBoolean(isSessionReady);
+            dest.writeBoolean(isSessionFailed);
+            dest.writeInt(mStagedSessionErrorCode);
         }
 
         public static final Parcelable.Creator<SessionInfo>
