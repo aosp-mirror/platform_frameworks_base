@@ -386,13 +386,6 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public void setBackupProvisioned(boolean isProvisioned) throws RemoteException {
-        /*
-         * This is now a no-op; provisioning is simply the device's own setup state.
-         */
-    }
-
-    @Override
     public boolean isBackupEnabledForUser(@UserIdInt int userId) throws RemoteException {
         BackupManagerService svc = mService;
         return (svc != null) ? svc.isBackupEnabled(userId) : false;

@@ -510,19 +510,6 @@ public class TrampolineTest {
     }
 
     @Test
-    public void setBackupProvisioned_calledBeforeInitialize_ignored() throws RemoteException {
-        mTrampoline.setBackupProvisioned(true);
-        verifyNoMoreInteractions(mBackupManagerServiceMock);
-    }
-
-    @Test
-    public void setBackupProvisioned_forwarded() throws RemoteException {
-        mTrampoline.initializeService();
-        mTrampoline.setBackupProvisioned(true);
-        verifyNoMoreInteractions(mBackupManagerServiceMock);
-    }
-
-    @Test
     public void isBackupEnabled_calledBeforeInitialize_ignored() throws RemoteException {
         assertFalse(mTrampoline.isBackupEnabled());
         verifyNoMoreInteractions(mBackupManagerServiceMock);
