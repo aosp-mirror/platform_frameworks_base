@@ -129,6 +129,7 @@ import android.util.TimeUtils;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.AppFuseMount;
 import com.android.internal.os.BackgroundThread;
@@ -1709,6 +1710,10 @@ class StorageManagerService extends IStorageManager.Stub
                 ServiceManager.getService("package"));
         mIAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
+        try {
+            mIAppOpsService.startWatchingMode(OP_REQUEST_INSTALL_PACKAGES, null, mAppOpsCallback);
+        } catch (RemoteException e) {
+        }
         mHandler.obtainMessage(H_SYSTEM_READY).sendToTarget();
     }
 
@@ -3239,6 +3244,15 @@ class StorageManagerService extends IStorageManager.Stub
             Binder.restoreCallingIdentity(token);
         }
     }
+
+    private IAppOpsCallback.Stub mAppOpsCallback = new IAppOpsCallback.Stub() {
+        @Override
+        public void opChanged(int op, int uid, String packageName) throws RemoteException {
+            if (!ENABLE_ISOLATED_STORAGE) return;
+
+            remountUidExternalStorage(uid, getMountMode(uid, packageName));
+        }
+    };
 
     private static final Pattern PATTERN_TRANSLATE = Pattern.compile(
             "(?i)^(/storage/[^/]+/(?:[0-9]+/)?)(.*)");
