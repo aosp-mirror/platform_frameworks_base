@@ -855,4 +855,92 @@ public class SmartReplyViewTest extends SysuiTestCase {
         assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(2));
         assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(2), mView.getChildAt(3));
     }
+
+    /**
+     * Test to ensure that we try to add all possible actions - if we find one action that's too
+     * long we just skip that one rather than quitting altogether.
+     */
+    @Test
+    public void testMeasure_skipTooLongActions() {
+        String[] choices = new String[] {};
+        String[] actions = new String[] {
+                "a1", "a2", "this action is soooooooo long it's ridiculous", "a4"};
+
+        // All actions should be displayed as DOUBLE-line smart action buttons.
+        ViewGroup expectedView = buildExpectedView(new String[] {}, 1 /* lineCount */,
+                createActions(new String[] {"a1", "a2", "a4"}));
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setSmartRepliesAndActions(choices, actions);
+        mView.measure(
+                MeasureSpec.makeMeasureSpec(expectedView.getMeasuredWidth(), MeasureSpec.AT_MOST),
+                MeasureSpec.UNSPECIFIED);
+
+        assertEqualMeasures(expectedView, mView);
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(1));
+        assertReplyButtonHidden(mView.getChildAt(2));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(2), mView.getChildAt(3));
+    }
+
+    /**
+     * Test to ensure that we try to add all possible replies - if we find one reply that's too
+     * long we just skip that one rather than quitting altogether.
+     */
+    @Test
+    public void testMeasure_skipTooLongReplies() {
+        String[] choices = new String[] {
+                "r1", "r2", "this reply is soooooooo long it's ridiculous", "r4"};
+        String[] actions = new String[] {};
+
+        // All replies should be displayed as single-line smart reply buttons.
+        ViewGroup expectedView = buildExpectedView(new String[] {"r1", "r2", "r4"},
+                1 /* lineCount */, Collections.emptyList());
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setSmartRepliesAndActions(choices, actions);
+        mView.measure(
+                MeasureSpec.makeMeasureSpec(expectedView.getMeasuredWidth(), MeasureSpec.AT_MOST),
+                MeasureSpec.UNSPECIFIED);
+
+        assertEqualMeasures(expectedView, mView);
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(1));
+        assertReplyButtonHidden(mView.getChildAt(2));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(2), mView.getChildAt(3));
+    }
+
+    /**
+     * Test to ensure that we try to add all possible replies and actions - if we find a reply or
+     * action that's too long we just skip that one rather than quitting altogether.
+     */
+    @Test
+    public void testMeasure_skipTooLongRepliesAndActions() {
+        String[] choices = new String[] {
+                "r1", "r2", "this reply is soooooooo long it's ridiculous", "r4"};
+        String[] actions = new String[] {
+                "a1", "ThisActionIsSooooooooLongItsRidiculousIPromise"};
+
+        // All replies should be displayed as single-line smart reply buttons.
+        ViewGroup expectedView = buildExpectedView(new String[] {"r1", "r2", "r4"},
+                1 /* lineCount */, createActions(new String[] {"a1"}));
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setSmartRepliesAndActions(choices, actions);
+        mView.measure(
+                MeasureSpec.makeMeasureSpec(expectedView.getMeasuredWidth(), MeasureSpec.AT_MOST),
+                MeasureSpec.UNSPECIFIED);
+
+        assertEqualMeasures(expectedView, mView);
+        assertReplyButtonShownWithEqualMeasures(
+                expectedView.getChildAt(0), mView.getChildAt(0)); // r1
+        assertReplyButtonShownWithEqualMeasures(
+                expectedView.getChildAt(1), mView.getChildAt(1)); // r2
+        assertReplyButtonHidden(mView.getChildAt(2)); // long reply
+        assertReplyButtonShownWithEqualMeasures(
+                expectedView.getChildAt(2), mView.getChildAt(3)); // r4
+        assertReplyButtonShownWithEqualMeasures(
+                expectedView.getChildAt(3), mView.getChildAt(4)); // a1
+        assertReplyButtonHidden(mView.getChildAt(5)); // long action
+    }
 }
