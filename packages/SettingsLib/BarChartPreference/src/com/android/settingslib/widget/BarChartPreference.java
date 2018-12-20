@@ -165,8 +165,12 @@ public class BarChartPreference extends Preference {
 
     private void bindChartDetailsView(PreferenceViewHolder holder) {
         final Button detailsView = (Button) holder.findViewById(R.id.bar_chart_details);
-        detailsView.setText(mDetailsId);
-        detailsView.setOnClickListener(mDetailsOnClickListener);
+        if (mDetailsId == 0) {
+            detailsView.setVisibility(View.GONE);
+        } else {
+            detailsView.setText(mDetailsId);
+            detailsView.setOnClickListener(mDetailsOnClickListener);
+        }
     }
 
     private void updateBarChart(PreferenceViewHolder holder) {
