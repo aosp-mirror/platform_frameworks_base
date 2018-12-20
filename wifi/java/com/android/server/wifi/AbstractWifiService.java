@@ -124,7 +124,8 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
     }
 
     @Override
-    public List<OsuProvider> getMatchingOsuProviders(List<ScanResult> scanResults) {
+    public Map<OsuProvider, List<ScanResult>> getMatchingOsuProviders(
+            List<ScanResult> scanResults) {
         throw new UnsupportedOperationException();
     }
 
