@@ -65,7 +65,6 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -1646,29 +1645,40 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
+    public int checkOperationRaw(int code, int uid, String packageName) {
+        return checkOperationInternal(code, uid, packageName, true /*raw*/);
+    }
+
+    @Override
     public int checkOperation(int code, int uid, String packageName) {
+        return checkOperationInternal(code, uid, packageName, false /*raw*/);
+    }
+
+    private int checkOperationInternal(int code, int uid, String packageName, boolean raw) {
         final CheckOpsDelegate delegate;
         synchronized (this) {
             delegate = mCheckOpsDelegate;
         }
         if (delegate == null) {
-            return checkOperationImpl(code, uid, packageName);
+            return checkOperationImpl(code, uid, packageName, raw);
         }
-        return delegate.checkOperation(code, uid, packageName,
+        return delegate.checkOperation(code, uid, packageName, raw,
                     AppOpsService.this::checkOperationImpl);
     }
 
-    private int checkOperationImpl(int code, int uid, String packageName) {
+    private int checkOperationImpl(int code, int uid, String packageName,
+                boolean raw) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
         }
-        return checkOperationUnchecked(code, uid, resolvedPackageName);
+        return checkOperationUnchecked(code, uid, resolvedPackageName, raw);
     }
 
-    private int checkOperationUnchecked(int code, int uid, String packageName) {
+    private int checkOperationUnchecked(int code, int uid, String packageName,
+                boolean raw) {
         synchronized (this) {
             if (isOpRestrictedLocked(uid, code, packageName)) {
                 return AppOpsManager.MODE_IGNORED;
@@ -1677,7 +1687,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             UidState uidState = getUidStateLocked(uid, false);
             if (uidState != null && uidState.opModes != null
                     && uidState.opModes.indexOfKey(code) >= 0) {
-                return uidState.evalMode(uidState.opModes.get(code));
+                final int rawMode = uidState.opModes.get(code);
+                return raw ? rawMode : uidState.evalMode(rawMode);
             }
             Op op = getOpLocked(code, uid, packageName, false, true, false);
             if (op == null) {
