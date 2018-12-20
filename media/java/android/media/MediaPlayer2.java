@@ -793,7 +793,7 @@ public class MediaPlayer2 implements AutoCloseable
 
     // throws IllegalArgumentException if dsd is null or underline PFD of dsd has been closed.
     private void checkDataSourceDesc(DataSourceDesc dsd) {
-        if (dsd != null) {
+        if (dsd == null) {
             throw new IllegalArgumentException("dsd is expected to be non null");
         }
         if (dsd instanceof FileDataSourceDesc) {
