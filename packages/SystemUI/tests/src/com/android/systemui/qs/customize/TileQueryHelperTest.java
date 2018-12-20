@@ -218,4 +218,12 @@ public class TileQueryHelperTest extends SysuiTestCase {
         }
         assertFalse(specs.contains("other"));
     }
+
+    @Test
+    public void testQueryTiles_nullSetting() {
+        Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.QS_TILES, null);
+        mContext.getOrCreateTestableResources().addOverride(R.string.quick_settings_tiles_stock,
+                STOCK_TILES);
+        mTileQueryHelper.queryTiles(mQSTileHost);
+    }
 }
