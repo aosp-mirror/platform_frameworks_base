@@ -12954,12 +12954,11 @@ public final class Settings {
          * <p>Possible values are:
          *
          * <ul>
-         *   <li>If set to {@link #CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_DEFAULT}, it will only
-         *   be set if the OEM provides and defines the service name by overlaying
-         *   {@code config_defaultContentCaptureService} (this is the "default" mode)
-         *   <li>If set to {@link #CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_ALWAYS}, it will
-         *   always be enabled, even when the resource is not overlaid (this is useful during
-         *   development and/or to run the CTS tests on AOSP builds).
+         *   <li>If set to {@code default}, it will only be set if the OEM provides and defines the
+         *   service name by overlaying {@code config_defaultContentCaptureService} (this is the
+         *   "default" mode)
+         *   <li>If set to {@code always}, it will always be enabled, even when the resource is not
+         *   overlaid (this is useful during development and to run the CTS tests on AOSP builds).
          *   <li>Otherwise, it's explicitly disabled (this could work as a "kill switch" so OEMs
          *   can disable it remotely in case of emergency by setting to something else (like
          *   {@code "false"}); notice that it's also disabled if the OEM doesn't explicitly set one
@@ -12970,11 +12969,6 @@ public final class Settings {
          */
         public static final String CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED =
                 "content_capture_service_explicitly_enabled";
-
-        /** @hide */
-        public static final String CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_DEFAULT = "default";
-        /** @hide */
-        public static final String CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_ALWAYS = "always";
 
         /** {@hide} */
         public static final String ISOLATED_STORAGE_LOCAL = "isolated_storage_local";

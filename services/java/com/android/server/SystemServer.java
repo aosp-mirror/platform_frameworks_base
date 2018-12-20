@@ -2125,11 +2125,11 @@ public final class SystemServer {
             return;
         }
         switch (settings) {
-            case Settings.Global.CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_ALWAYS:
+            case "always":
                 // Should be used only during development
                 Slog.d(TAG, "ContentCaptureService explicitly enabled by Settings");
                 break;
-            case Settings.Global.CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_DEFAULT:
+            case "default":
                 // Default case: check if OEM overlaid the resource that defines the service.
                 final String serviceName = context.getString(
                         com.android.internal.R.string.config_defaultContentCaptureService);
