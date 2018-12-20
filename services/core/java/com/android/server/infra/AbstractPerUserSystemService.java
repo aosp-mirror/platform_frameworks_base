@@ -55,8 +55,6 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
 
     protected final M mMaster;
 
-    private final ServiceNameResolver mServiceNameResolver;
-
     /**
      * Whether service was disabled for user due to {@link UserManager} restrictions.
      */
@@ -72,13 +70,9 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     @GuardedBy("mLock")
     private ServiceInfo mServiceInfo;
 
-    protected AbstractPerUserSystemService(@NonNull M master,
-            @NonNull ServiceNameResolver serviceNamer, @NonNull Object lock,
+    protected AbstractPerUserSystemService(@NonNull M master, @NonNull Object lock,
             @UserIdInt int userId) {
         mMaster = master;
-        mServiceNameResolver = serviceNamer;
-        mServiceNameResolver
-                .setOnTemporaryServiceNameChangedCallback(() -> updateLocked(mDisabled));
         mLock = lock;
         mUserId = userId;
     }
@@ -86,11 +80,20 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     /**
      * Creates a new {@link ServiceInfo} for the given service name.
      *
+     * <p><b>MUST</b> be overridden by subclasses that bind to an {@link AbstractRemoteService}.
+     *
      * @throws NameNotFoundException if the service does not exist.
      * @throws SecurityException if the service does not have the proper permissions to be bound to.
+     * @throws UnsupportedOperationException if subclass binds to a remote service but does not
+     * overrides it.
+     *
+     * @return new {@link ServiceInfo},
      */
-    protected abstract ServiceInfo newServiceInfo(@NonNull ComponentName serviceComponent)
-            throws NameNotFoundException;
+    protected @NonNull ServiceInfo newServiceInfo(
+            @SuppressWarnings("unused") @NonNull ComponentName serviceComponent)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException("not overridden");
+    }
 
     /**
      * Callback called when an app has been updated.
@@ -134,37 +137,39 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
 
         mSetupComplete = isSetupCompletedLocked();
         mDisabled = disabled;
-        ComponentName serviceComponent = null;
-        ServiceInfo serviceInfo = null;
-        final String componentName = getComponentNameLocked();
-        if (!TextUtils.isEmpty(componentName)) {
+        if (mMaster.mServiceNameResolver != null) {
+            ComponentName serviceComponent = null;
+            ServiceInfo serviceInfo = null;
+            final String componentName = getComponentNameLocked();
+            if (!TextUtils.isEmpty(componentName)) {
+                try {
+                    serviceComponent = ComponentName.unflattenFromString(componentName);
+                    serviceInfo = AppGlobals.getPackageManager().getServiceInfo(serviceComponent,
+                            0, mUserId);
+                    if (serviceInfo == null) {
+                        Slog.e(mTag, "Bad service name: " + componentName);
+                    }
+                } catch (RuntimeException | RemoteException e) {
+                    Slog.e(mTag, "Error getting service info for '" + componentName + "': " + e);
+                    serviceInfo = null;
+                }
+            }
             try {
-                serviceComponent = ComponentName.unflattenFromString(componentName);
-                serviceInfo = AppGlobals.getPackageManager().getServiceInfo(serviceComponent,
-                        0, mUserId);
-                if (serviceInfo == null) {
-                    Slog.e(mTag, "Bad service name: " + componentName);
+                if (serviceInfo != null) {
+                    mServiceInfo = newServiceInfo(serviceComponent);
+                    if (mMaster.debug) {
+                        Slog.d(mTag, "Set component for user " + mUserId + " as " + mServiceInfo);
+                    }
+                } else {
+                    mServiceInfo = null;
+                    if (mMaster.debug) {
+                        Slog.d(mTag, "Reset component for user " + mUserId + ":" + componentName);
+                    }
                 }
-            } catch (RuntimeException | RemoteException e) {
-                Slog.e(mTag, "Error getting service info for '" + componentName + "': " + e);
-                serviceInfo = null;
-            }
-        }
-        try {
-            if (serviceInfo != null) {
-                mServiceInfo = newServiceInfo(serviceComponent);
-                if (mMaster.debug) {
-                    Slog.d(mTag, "Set component for user " + mUserId + " as " + mServiceInfo);
-                }
-            } else {
+            } catch (Exception e) {
+                Slog.e(mTag, "Bad ServiceInfo for '" + componentName + "': " + e);
                 mServiceInfo = null;
-                if (mMaster.debug) {
-                    Slog.d(mTag, "Reset component for user " + mUserId + ":" + componentName);
-                }
             }
-        } catch (Exception e) {
-            Slog.e(mTag, "Bad ServiceInfo for '" + componentName + "': " + e);
-            mServiceInfo = null;
         }
         return wasEnabled != isEnabledLocked();
     }
@@ -200,15 +205,15 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
      * Gets the current name of the service, which is either the default service or the
      *  {@link #setTemporaryServiceLocked(String, int) temporary one}.
      */
-    protected final String getComponentNameLocked() {
-        return mServiceNameResolver.getServiceNameLocked();
+    protected final @Nullable String getComponentNameLocked() {
+        return mMaster.mServiceNameResolver.getServiceName(mUserId);
     }
 
     /**
      * Checks whether the current service for the user was temporarily set.
      */
     public final boolean isTemporaryServiceSetLocked() {
-        return mServiceNameResolver.isTemporaryLocked();
+        return mMaster.mServiceNameResolver.isTemporary(mUserId);
     }
 
     /**
@@ -219,14 +224,14 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
      * to the default component after this timeout expires).
      */
     protected final void setTemporaryServiceLocked(@NonNull String componentName, int durationMs) {
-        mServiceNameResolver.setTemporaryServiceLocked(componentName, durationMs);
+        mMaster.mServiceNameResolver.setTemporaryService(mUserId, componentName, durationMs);
     }
 
     /**
      * Resets the temporary service implementation to the default component.
      */
     protected final void resetTemporaryServiceLocked() {
-        mServiceNameResolver.resetTemporaryServiceLocked();
+        mMaster.mServiceNameResolver.resetTemporaryService(mUserId);
     }
 
     /**
@@ -274,6 +279,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     /**
      * Whether the service should log debug statements.
      */
+    //TODO(b/117779333): consider using constants for these guards
     public final boolean isDebug() {
         return mMaster.debug;
     }
@@ -281,6 +287,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     /**
      * Whether the service should log verbose statements.
      */
+    //TODO(b/117779333): consider using constants for these guards
     public final boolean isVerbose() {
         return mMaster.verbose;
     }
@@ -313,13 +320,16 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     @GuardedBy("mLock")
     protected void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
         pw.print(prefix); pw.print("User: "); pw.println(mUserId);
+        if (mMaster.mServiceNameResolver != null) {
+            pw.print(prefix); pw.print("Name resolver: ");
+            mMaster.mServiceNameResolver.dumpShort(pw, mUserId); pw.println();
+        }
         pw.print(prefix); pw.print("Disabled by UserManager: "); pw.println(mDisabled);
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         if (mServiceInfo != null) {
             pw.print(prefix); pw.print("Service UID: ");
             pw.println(mServiceInfo.applicationInfo.uid);
         }
-        pw.print(prefix); pw.print("Name resolver: "); mServiceNameResolver.dumpShortLocked(pw);
         pw.println();
     }
 }

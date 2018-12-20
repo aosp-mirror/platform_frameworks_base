@@ -74,6 +74,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractMasterSystemService;
+import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -182,7 +183,9 @@ public final class AutofillManagerService
     private int mSupportedSmartSuggestionModes;
 
     public AutofillManagerService(Context context) {
-        super(context, UserManager.DISALLOW_AUTOFILL);
+        super(context,
+                new SecureSettingsServiceNameResolver(context, Settings.Secure.AUTOFILL_SERVICE),
+                UserManager.DISALLOW_AUTOFILL);
         mUi = new AutoFillUI(ActivityThread.currentActivityThread().getSystemUiContext());
         mAm = LocalServices.getService(ActivityManagerInternal.class);
 
@@ -523,7 +526,7 @@ public final class AutofillManagerService
         synchronized (mLock) {
             final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
             if (service != null) {
-                service.mAugmentedAutofillResolver.setTemporaryServiceLocked(serviceName,
+                service.mAugmentedAutofillResolver.setTemporaryService(userId, serviceName,
                         durationMs);
             }
         }
@@ -535,7 +538,7 @@ public final class AutofillManagerService
         synchronized (mLock) {
             final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
             if (service != null) {
-                service.mAugmentedAutofillResolver.resetTemporaryServiceLocked();
+                service.mAugmentedAutofillResolver.resetTemporaryService(userId);
             }
         }
     }

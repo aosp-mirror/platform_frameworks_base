@@ -43,7 +43,6 @@ import android.view.contentcapture.ContentCaptureSession;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.server.infra.AbstractPerUserSystemService;
-import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -65,8 +64,7 @@ final class ContentCapturePerUserService
 
     protected ContentCapturePerUserService(
             ContentCaptureManagerService master, Object lock, @UserIdInt int userId) {
-        super(master, new FrameworkResourcesServiceNameResolver(master.getContext(), userId, lock,
-                com.android.internal.R.string.config_defaultContentCaptureService), lock, userId);
+        super(master, lock, userId);
     }
 
     @Override // from PerUserSystemService
