@@ -5050,7 +5050,7 @@ package android.service.carrier {
 
 package android.service.contentcapture {
 
-  public final class ContentCaptureEventsRequest implements android.os.Parcelable {
+  public final deprecated class ContentCaptureEventsRequest implements android.os.Parcelable {
     method public int describeContents();
     method public java.util.List<android.view.contentcapture.ContentCaptureEvent> getEvents();
     method public void writeToParcel(android.os.Parcel, int);
@@ -5062,7 +5062,8 @@ package android.service.contentcapture {
     method public final java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
     method public final java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
     method public void onActivitySnapshot(android.view.contentcapture.ContentCaptureSessionId, android.service.contentcapture.SnapshotData);
-    method public void onContentCaptureEventsRequest(android.view.contentcapture.ContentCaptureSessionId, android.service.contentcapture.ContentCaptureEventsRequest);
+    method public void onContentCaptureEvent(android.view.contentcapture.ContentCaptureSessionId, android.view.contentcapture.ContentCaptureEvent);
+    method public deprecated void onContentCaptureEventsRequest(android.view.contentcapture.ContentCaptureSessionId, android.service.contentcapture.ContentCaptureEventsRequest);
     method public void onCreateContentCaptureSession(android.view.contentcapture.ContentCaptureContext, android.view.contentcapture.ContentCaptureSessionId);
     method public void onDestroyContentCaptureSession(android.view.contentcapture.ContentCaptureSessionId);
     method public final void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);

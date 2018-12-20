@@ -29,7 +29,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-// TODO(b/111276913): add javadocs / implement Parcelable / implement
 /** @hide */
 @SystemApi
 public final class ContentCaptureEvent implements Parcelable {
@@ -72,6 +71,7 @@ public final class ContentCaptureEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType{}
 
+    private final @NonNull String mSessionId;
     private final int mType;
     private final long mEventTime;
     private final int mFlags;
@@ -80,21 +80,21 @@ public final class ContentCaptureEvent implements Parcelable {
     private @Nullable CharSequence mText;
 
     /** @hide */
-    public ContentCaptureEvent(int type, long eventTime, int flags) {
+    public ContentCaptureEvent(@NonNull String sessionId, int type, long eventTime, int flags) {
+        mSessionId = sessionId;
         mType = type;
         mEventTime = eventTime;
         mFlags = flags;
     }
 
-
     /** @hide */
-    public ContentCaptureEvent(int type, int flags) {
-        this(type, System.currentTimeMillis(), flags);
+    public ContentCaptureEvent(@NonNull String sessionId, int type, int flags) {
+        this(sessionId, type, System.currentTimeMillis(), flags);
     }
 
     /** @hide */
-    public ContentCaptureEvent(int type) {
-        this(type, /* flags= */ 0);
+    public ContentCaptureEvent(@NonNull String sessionId, int type) {
+        this(sessionId, type, /* flags= */ 0);
     }
 
     /** @hide */
@@ -104,12 +104,20 @@ public final class ContentCaptureEvent implements Parcelable {
     }
 
     /** @hide */
+    @NonNull
+    public String getSessionId() {
+        return mSessionId;
+    }
+
+    /** @hide */
+    @NonNull
     public ContentCaptureEvent setViewNode(@NonNull ViewNode node) {
         mNode = Preconditions.checkNotNull(node);
         return this;
     }
 
     /** @hide */
+    @NonNull
     public ContentCaptureEvent setText(@Nullable CharSequence text) {
         mText = text;
         return this;
@@ -214,6 +222,7 @@ public final class ContentCaptureEvent implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(mSessionId);
         parcel.writeInt(mType);
         parcel.writeLong(mEventTime);
         parcel.writeInt(mFlags);
@@ -227,10 +236,12 @@ public final class ContentCaptureEvent implements Parcelable {
 
         @Override
         public ContentCaptureEvent createFromParcel(Parcel parcel) {
+            final String sessionId = parcel.readString();
             final int type = parcel.readInt();
             final long eventTime  = parcel.readLong();
             final int flags = parcel.readInt();
-            final ContentCaptureEvent event = new ContentCaptureEvent(type, eventTime, flags);
+            final ContentCaptureEvent event =
+                    new ContentCaptureEvent(sessionId, type, eventTime, flags);
             final AutofillId id = parcel.readParcelable(null);
             if (id != null) {
                 event.setAutofillId(id);
