@@ -627,9 +627,13 @@ class PackageManagerShellCommand extends ShellCommand {
                     pw.print("=");
                 }
                 pw.print(info.packageName);
-                if (showVersionCode && !isApex) {
+                if (showVersionCode) {
                     pw.print(" versionCode:");
-                    pw.print(info.applicationInfo.versionCode);
+                    if (info.applicationInfo != null) {
+                        pw.print(info.applicationInfo.versionCode);
+                    } else {
+                        pw.print(info.versionCode);
+                    }
                 }
                 if (listInstaller && !isApex) {
                     pw.print("  installer=");
@@ -2701,7 +2705,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Prints all system libraries.");
         pw.println("");
         pw.println("  list packages [-f] [-d] [-e] [-s] [-3] [-i] [-l] [-u] [-U] ");
-        pw.println("      [--apex-only] [--uid UID] [--user USER_ID] [FILTER]");
+        pw.println("      [--show-versioncode] [--apex-only] [--uid UID] [--user USER_ID] [FILTER]");
         pw.println("    Prints all packages; optionally only those whose name contains");
         pw.println("    the text in FILTER.  Options are:");
         pw.println("      -f: see their associated file");
@@ -2714,6 +2718,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -l: ignored (used for compatibility with older releases)");
         pw.println("      -U: also show the package UID");
         pw.println("      -u: also include uninstalled packages");
+        pw.println("      --show-versioncode: also show the version code");
         pw.println("      --apex-only: only show APEX packages");
         pw.println("      --uid UID: filter to only show packages with the given UID");
         pw.println("      --user USER_ID: only list packages belonging to the given user");
