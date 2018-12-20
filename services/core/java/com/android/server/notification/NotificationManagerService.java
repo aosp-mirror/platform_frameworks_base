@@ -4939,7 +4939,7 @@ public class NotificationManagerService extends SystemService {
                         Slog.e(TAG, "Not posting notification without small icon: " + notification);
                         if (old != null && !old.isCanceled) {
                             mListeners.notifyRemovedLocked(r,
-                                    NotificationListenerService.REASON_ERROR, null);
+                                    NotificationListenerService.REASON_ERROR, r.getStats());
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
