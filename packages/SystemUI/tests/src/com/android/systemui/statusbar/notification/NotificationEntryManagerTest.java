@@ -300,7 +300,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         verify(mPresenter).updateNotificationViews();
         verify(mForegroundServiceController).updateNotification(eq(mSbn), anyInt());
-        verify(mCallback).onNotificationUpdated(mSbn);
+        verify(mCallback).onEntryUpdated(mEntry);
         assertNotNull(mEntry.getRow());
         assertEquals(mEntry.userSentiment,
                 NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);

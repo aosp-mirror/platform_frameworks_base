@@ -17,6 +17,8 @@ package com.android.systemui.statusbar.notification;
 
 import android.service.notification.StatusBarNotification;
 
+import com.android.systemui.statusbar.notification.row.NotificationInflater;
+
 /**
  * Listener interface for changes sent by NotificationEntryManager.
  */
@@ -37,7 +39,14 @@ public interface NotificationEntryListener {
     /**
      * Called when a notification was updated.
      */
-    default void onNotificationUpdated(StatusBarNotification notification) {
+    default void onEntryUpdated(NotificationData.Entry entry) {
+    }
+
+    /**
+     * Called when a notification's views are inflated for the first time.
+     */
+    default void onEntryInflated(NotificationData.Entry entry,
+            @NotificationInflater.InflationFlag int inflatedFlags) {
     }
 
     /**

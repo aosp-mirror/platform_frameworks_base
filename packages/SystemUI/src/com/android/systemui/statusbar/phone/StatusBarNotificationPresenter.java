@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
+import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -129,7 +130,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             DozeScrimController dozeScrimController,
             ScrimController scrimController,
             ActivityLaunchAnimator activityLaunchAnimator,
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            NotificationAlertingManager notificationAlertingManager) {
         mContext = context;
         mNotificationPanel = panel;
         mHeadsUpManager = headsUp;
@@ -181,7 +183,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 }
 
                 @Override
-                public void onNotificationUpdated(StatusBarNotification notification) {
+                public void onEntryUpdated(Entry entry) {
                     mShadeController.updateAreThereNotifications();
                 }
 
@@ -212,6 +214,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             onUserSwitched(mLockscreenUserManager.getCurrentUserId());
         });
         Dependency.get(ConfigurationController.class).addCallback(this);
+
+        notificationAlertingManager.setHeadsUpManager(mHeadsUpManager);
     }
 
     @Override

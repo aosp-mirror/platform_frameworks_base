@@ -91,6 +91,7 @@ import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -153,6 +154,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private BubbleController mBubbleController;
     @Mock
     private NotificationFilter mNotificationFilter;
+    @Mock
+    private NotificationAlertingManager mNotificationAlertingManager;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -180,6 +183,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mDeviceProvisionedController);
         mDependency.injectMockDependency(BubbleController.class);
         mDependency.injectTestDependency(NotificationFilter.class, mNotificationFilter);
+        mDependency.injectTestDependency(NotificationAlertingManager.class,
+                mNotificationAlertingManager);
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
         mPowerManager = new PowerManager(mContext, powerManagerService,
