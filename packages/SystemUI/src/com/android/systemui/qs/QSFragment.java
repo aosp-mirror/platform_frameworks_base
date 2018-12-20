@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
+import com.android.systemui.util.InjectionInflationController;
 
 import javax.inject.Inject;
 
@@ -76,16 +77,20 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     private boolean mQsDisabled;
 
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
+    private final InjectionInflationController mInjectionInflater;
 
     @Inject
-    public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler) {
+    public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
+            InjectionInflationController injectionInflater) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
+        mInjectionInflater = injectionInflater;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
-        inflater = inflater.cloneInContext(new ContextThemeWrapper(getContext(), R.style.qs_theme));
+        inflater = mInjectionInflater.injectable(
+                inflater.cloneInContext(new ContextThemeWrapper(getContext(), R.style.qs_theme)));
         return inflater.inflate(R.layout.qs_panel, container, false);
     }
 

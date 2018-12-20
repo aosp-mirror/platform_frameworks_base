@@ -147,6 +147,52 @@ then the FragmentHostManager can do this for you.
 FragmentHostManager.get(view).create(NavigationBarFragment.class);
 ```
 
+### Using injection with Views
+
+Generally, you shouldn't need to inject for a view, as the view should
+be relatively self contained and logic that requires injection should be
+moved to a higher level construct such as a Fragment or a top-level SystemUI
+component, see above for how to do injection for both of which.
+
+Still here? Yeah, ok, sysui has a lot of pre-existing views that contain a
+lot of code that could benefit from injection and will need to be migrated
+off from Dependency#get uses. Similar to how fragments are injected, the view
+needs to be added to the interface
+com.android.systemui.util.InjectionInflationController$ViewInstanceCreator.
+
+```java
+public interface ViewInstanceCreator {
++   QuickStatusBarHeader createQsHeader();
+}
+```
+
+Presumably you need to inflate that view from XML (otherwise why do you
+need anything special? see earlier sections about generic injection). To obtain
+an inflater that supports injected objects, call InjectionInflationController#injectable,
+which will wrap the inflater it is passed in one that can create injected
+objects when needed.
+
+```java
+@Override
+public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+        Bundle savedInstanceState) {
+    return mInjectionInflater.injectable(inflater).inflate(R.layout.my_layout, container, false);
+}
+```
+
+There is one other important thing to note about injecting with views. SysUI
+already has a Context in its global dagger component, so if you simply inject
+a Context, you will not get the one that the view should have with proper
+theming. Because of this, always ensure to tag views that have @Inject with
+the @Named view context.
+
+```java
+public CustomView(@Named(VIEW_CONTEXT) Context themedViewContext, AttributeSet attrs,
+        OtherCustomDependency something) {
+    ...
+}
+```
+
 ## TODO List
 
  - Eliminate usages of Depndency#get

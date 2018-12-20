@@ -42,7 +42,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
@@ -55,6 +54,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.volume.VolumeDialogComponent;
 
 import java.util.function.Consumer;
@@ -223,5 +223,10 @@ public class SystemUIFactory {
          */
         @Singleton
         FragmentService.FragmentCreator createFragmentCreator();
+
+        /**
+         * ViewCreator generates all Views that need injection.
+         */
+        InjectionInflationController.ViewCreator createViewCreator();
     }
 }
