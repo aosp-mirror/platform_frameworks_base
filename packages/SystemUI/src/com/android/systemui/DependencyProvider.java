@@ -415,6 +415,7 @@ public class DependencyProvider {
 
     @Singleton
     @Provides
+    @Nullable
     public LocalBluetoothManager provideLocalBluetoothController(Context context,
             @Named(BG_HANDLER_NAME) Handler bgHandler) {
         return LocalBluetoothManager.create(context, bgHandler,

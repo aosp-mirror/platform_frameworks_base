@@ -218,6 +218,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<FragmentService> mFragmentService;
     @Inject Lazy<ExtensionController> mExtensionController;
     @Inject Lazy<PluginDependencyProvider> mPluginDependencyProvider;
+    @Nullable
     @Inject Lazy<LocalBluetoothManager> mLocalBluetoothManager;
     @Inject Lazy<VolumeDialogController> mVolumeDialogController;
     @Inject Lazy<MetricsLogger> mMetricsLogger;
