@@ -4056,7 +4056,7 @@ public class NotificationManagerService extends SystemService {
                 final ArraySet<ComponentName> listeners =
                     mListenersDisablingEffects.valueAt(i);
                 for (int j = 0; j < listeners.size(); j++) {
-                    final ComponentName componentName = listeners.valueAt(i);
+                    final ComponentName componentName = listeners.valueAt(j);
                     componentName.writeToProto(proto,
                             ListenersDisablingEffectsProto.LISTENER_COMPONENTS);
                 }
@@ -4201,8 +4201,8 @@ public class NotificationManagerService extends SystemService {
                     final int listenerSize = listeners.size();
 
                     for (int j = 0; j < listenerSize; j++) {
-                        if (i > 0) pw.print(',');
-                        final ComponentName listener = listeners.valueAt(i);
+                        if (j > 0) pw.print(',');
+                        final ComponentName listener = listeners.valueAt(j);
                         if (listener != null) {
                             pw.print(listener);
                         }
