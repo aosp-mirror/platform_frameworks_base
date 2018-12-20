@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -331,6 +332,27 @@ public class CachedBluetoothDeviceManagerTest {
         mCachedDeviceManager.getSubDeviceSummary(mCachedDevice1);
 
         verify(mCachedDevice2).getConnectionSummary();
+    }
+
+    /**
+     * Test to verify isSubDevice_validSubDevice().
+     */
+    @Test
+    public void isSubDevice_validSubDevice() {
+        doReturn(HISYNCID1).when(mHearingAidProfile).getHiSyncId(mDevice1);
+        mCachedDeviceManager.addDevice(mDevice1);
+
+        // Both device are not sub device in default value.
+        assertThat(mCachedDeviceManager.isSubDevice(mDevice1)).isFalse();
+        assertThat(mCachedDeviceManager.isSubDevice(mDevice2)).isFalse();
+
+        // Add Device-2 as sub device of Device-1 with same HiSyncId.
+        doReturn(HISYNCID1).when(mHearingAidProfile).getHiSyncId(mDevice2);
+        mCachedDeviceManager.addDevice(mDevice2);
+
+        // Verify Device-2 is sub device, but Device-1 is not.
+        assertThat(mCachedDeviceManager.isSubDevice(mDevice2)).isTrue();
+        assertThat(mCachedDeviceManager.isSubDevice(mDevice1)).isFalse();
     }
 
     /**
