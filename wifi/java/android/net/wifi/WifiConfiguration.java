@@ -708,6 +708,12 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
+     * This Wifi configuration is expected for OSU(Online Sign Up) of Passpoint Release 2.
+     * @hide
+     */
+    public boolean osu;
+
+    /**
      * @hide
      * Last time the system was connected to this configuration.
      */
@@ -1645,6 +1651,7 @@ public class WifiConfiguration implements Parcelable {
         selfAdded = false;
         didSelfAdd = false;
         ephemeral = false;
+        osu = false;
         trusted = true; // Networks are considered trusted by default.
         meteredHint = false;
         meteredOverride = METERED_OVERRIDE_NONE;
@@ -1755,6 +1762,7 @@ public class WifiConfiguration implements Parcelable {
         if (this.selfAdded) sbuf.append(" selfAdded");
         if (this.validatedInternetAccess) sbuf.append(" validatedInternetAccess");
         if (this.ephemeral) sbuf.append(" ephemeral");
+        if (this.osu) sbuf.append(" osu");
         if (this.trusted) sbuf.append(" trusted");
         if (this.meteredHint) sbuf.append(" meteredHint");
         if (this.useExternalScores) sbuf.append(" useExternalScores");
@@ -2244,6 +2252,7 @@ public class WifiConfiguration implements Parcelable {
             validatedInternetAccess = source.validatedInternetAccess;
             isLegacyPasspointConfig = source.isLegacyPasspointConfig;
             ephemeral = source.ephemeral;
+            osu = source.osu;
             trusted = source.trusted;
             meteredHint = source.meteredHint;
             meteredOverride = source.meteredOverride;
@@ -2340,6 +2349,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(recentFailure.getAssociationStatus());
         dest.writeParcelable(mRandomizedMacAddress, flags);
         dest.writeInt(macRandomizationSetting);
+        dest.writeInt(osu ? 1 : 0);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -2410,6 +2420,7 @@ public class WifiConfiguration implements Parcelable {
                 config.recentFailure.setAssociationStatus(in.readInt());
                 config.mRandomizedMacAddress = in.readParcelable(null);
                 config.macRandomizationSetting = in.readInt();
+                config.osu = in.readInt() != 0;
                 return config;
             }
 
