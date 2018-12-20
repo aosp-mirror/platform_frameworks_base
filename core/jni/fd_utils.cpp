@@ -148,7 +148,7 @@ class FileDescriptorInfo {
   const bool is_sock;
 
  private:
-  FileDescriptorInfo(int fd);
+  explicit FileDescriptorInfo(int fd);
 
   FileDescriptorInfo(struct stat stat, const std::string& file_path, int fd, int open_flags,
                      int fd_flags, int fs_flags, off_t offset);
