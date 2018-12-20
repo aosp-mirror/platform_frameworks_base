@@ -175,6 +175,32 @@ public class BackupManagerServiceTest {
         assertThat(serviceUsers.get(mUserOneId)).isEqualTo(mUserOneService);
     }
 
+    /** Test that the service unregisters users when stopped. */
+    @Test
+    public void testStopServiceForUser_forRegisteredUser_unregistersCorrectUser() throws Exception {
+        BackupManagerService backupManagerService =
+                createServiceAndRegisterUser(mUserOneId, mUserOneService);
+        backupManagerService.startServiceForUser(mUserTwoId, mUserTwoService);
+
+        backupManagerService.stopServiceForUser(mUserOneId);
+
+        SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getServiceUsers();
+        assertThat(serviceUsers.size()).isEqualTo(1);
+        assertThat(serviceUsers.get(mUserOneId)).isNull();
+        assertThat(serviceUsers.get(mUserTwoId)).isEqualTo(mUserTwoService);
+    }
+
+    /** Test that the service unregisters users when stopped. */
+    @Test
+    public void testStopServiceForUser_forUnknownUser_doesNothing() throws Exception {
+        BackupManagerService backupManagerService = createService();
+
+        backupManagerService.stopServiceForUser(mUserOneId);
+
+        SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getServiceUsers();
+        assertThat(serviceUsers.size()).isEqualTo(0);
+    }
+
     /**
      * Test that the backup services throws a {@link SecurityException} if the caller does not have
      * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.

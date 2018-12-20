@@ -124,6 +124,10 @@ public class BackupManagerService {
         }
     }
 
+    // ---------------------------------------------
+    // USER LIFECYCLE CALLBACKS
+    // ---------------------------------------------
+
     /**
      * Starts the backup service for user {@code userId} by creating a new instance of {@link
      * UserBackupManagerService} and registering it with this service.
@@ -151,6 +155,12 @@ public class BackupManagerService {
             // Can't happen, it's a local object.
         }
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    /** Stops the backup service for user {@code userId} when the user is stopped. */
+    @VisibleForTesting
+    protected void stopServiceForUser(int userId) {
+        mServiceUsers.remove(userId);
     }
 
     SparseArray<UserBackupManagerService> getServiceUsers() {
@@ -819,6 +829,11 @@ public class BackupManagerService {
                 sInstance.initializeService();
             }
             sInstance.unlockUser(userId);
+        }
+
+        @Override
+        public void onStopUser(int userId) {
+            sInstance.stopUser(userId);
         }
     }
 }

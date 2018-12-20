@@ -198,6 +198,26 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     /**
+     * Called from {@link BackupManagerService.Lifecycle} when a user {@code userId} is stopped.
+     * Offloads work onto the handler thread {@link #mHandlerThread} to keep stopping time low.
+     */
+    void stopUser(int userId) {
+        if (userId != UserHandle.USER_SYSTEM && !isMultiUserEnabled()) {
+            Slog.i(TAG, "Multi-user disabled, cannot stop service for user: " + userId);
+            return;
+        }
+
+        postToHandler(
+                () -> {
+                    BackupManagerService service = mService;
+                    if (service != null) {
+                        Slog.i(TAG, "Stopping service for user: " + userId);
+                        service.stopServiceForUser(userId);
+                    }
+                });
+    }
+
+    /**
      * Only privileged callers should be changing the backup state. This method only acts on {@link
      * UserHandle#USER_SYSTEM} and is a no-op if passed non-system users. Deactivating backup in the
      * system user also deactivates backup in all users.
