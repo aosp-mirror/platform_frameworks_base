@@ -2811,15 +2811,6 @@ public class UserBackupManagerService {
         }
     }
 
-    /** Mark the backup service as having been provisioned. */
-    public void setBackupProvisioned(boolean available) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "setBackupProvisioned");
-        /*
-         * This is now a no-op; provisioning is simply the device's own setup state.
-         */
-    }
-
     /** Report whether the backup mechanism is currently enabled. */
     public boolean isBackupEnabled() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
@@ -2867,19 +2858,6 @@ public class UserBackupManagerService {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "listAllTransportComponents");
         return mTransportManager.getRegisteredTransportComponents();
-    }
-
-    /** Report all system whitelisted transports. */
-    public String[] getTransportWhitelist() {
-        // No permission check, intentionally.
-        Set<ComponentName> whitelistedComponents = mTransportManager.getTransportWhitelist();
-        String[] whitelistedTransports = new String[whitelistedComponents.size()];
-        int i = 0;
-        for (ComponentName component : whitelistedComponents) {
-            whitelistedTransports[i] = component.flattenToShortString();
-            i++;
-        }
-        return whitelistedTransports;
     }
 
     /**

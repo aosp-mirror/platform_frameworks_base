@@ -287,7 +287,7 @@ public class Trampoline extends IBackupManager.Stub {
     public void dataChangedForUser(int userId, String packageName) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.dataChanged(packageName);
+            svc.dataChanged(userId, packageName);
         }
     }
 
@@ -301,7 +301,7 @@ public class Trampoline extends IBackupManager.Stub {
             int userId, String[] transportNames, IBackupObserver observer) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.initializeTransports(transportNames, observer);
+            svc.initializeTransports(userId, transportNames, observer);
         }
     }
 
@@ -310,7 +310,7 @@ public class Trampoline extends IBackupManager.Stub {
             throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.clearBackupData(transportName, packageName);
+            svc.clearBackupData(userId, transportName, packageName);
         }
     }
 
@@ -325,7 +325,7 @@ public class Trampoline extends IBackupManager.Stub {
             throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.agentConnected(packageName, agent);
+            svc.agentConnected(userId, packageName, agent);
         }
     }
 
@@ -338,7 +338,7 @@ public class Trampoline extends IBackupManager.Stub {
     public void agentDisconnectedForUser(int userId, String packageName) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.agentDisconnected(packageName);
+            svc.agentDisconnected(userId, packageName);
         }
     }
 
@@ -352,7 +352,7 @@ public class Trampoline extends IBackupManager.Stub {
             throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.restoreAtInstall(packageName, token);
+            svc.restoreAtInstall(userId, packageName, token);
         }
     }
 
@@ -379,7 +379,7 @@ public class Trampoline extends IBackupManager.Stub {
     public void setAutoRestoreForUser(int userId, boolean doAutoRestore) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.setAutoRestore(doAutoRestore);
+            svc.setAutoRestore(userId, doAutoRestore);
         }
     }
 
@@ -390,10 +390,9 @@ public class Trampoline extends IBackupManager.Stub {
 
     @Override
     public void setBackupProvisioned(boolean isProvisioned) throws RemoteException {
-        BackupManagerService svc = mService;
-        if (svc != null) {
-            svc.setBackupProvisioned(isProvisioned);
-        }
+        /*
+         * This is now a no-op; provisioning is simply the device's own setup state.
+         */
     }
 
     @Override
@@ -448,7 +447,7 @@ public class Trampoline extends IBackupManager.Stub {
             throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.fullTransportBackup(packageNames);
+            svc.fullTransportBackup(userId, packageNames);
         }
     }
 
@@ -471,7 +470,7 @@ public class Trampoline extends IBackupManager.Stub {
             throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.acknowledgeAdbBackupOrRestore(token, allow,
+            svc.acknowledgeAdbBackupOrRestore(userId, token, allow,
                     curPassword, encryptionPassword, observer);
         }
     }
@@ -489,7 +488,7 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public String getCurrentTransportForUser(int userId) throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.getCurrentTransport() : null;
+        return (svc != null) ? svc.getCurrentTransport(userId) : null;
     }
 
     @Override
@@ -505,13 +504,13 @@ public class Trampoline extends IBackupManager.Stub {
     @Nullable
     public ComponentName getCurrentTransportComponentForUser(int userId) {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.getCurrentTransportComponent() : null;
+        return (svc != null) ? svc.getCurrentTransportComponent(userId) : null;
     }
 
     @Override
     public String[] listAllTransportsForUser(int userId) throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.listAllTransports() : null;
+        return (svc != null) ? svc.listAllTransports(userId) : null;
     }
 
     @Override
@@ -522,7 +521,7 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public ComponentName[] listAllTransportComponentsForUser(int userId) throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.listAllTransportComponents() : null;
+        return (svc != null) ? svc.listAllTransportComponents(userId) : null;
     }
 
     @Override
@@ -543,6 +542,7 @@ public class Trampoline extends IBackupManager.Stub {
         BackupManagerService svc = mService;
         if (svc != null) {
             svc.updateTransportAttributes(
+                    userId,
                     transportComponent,
                     name,
                     configurationIntent,
@@ -556,7 +556,7 @@ public class Trampoline extends IBackupManager.Stub {
     public String selectBackupTransportForUser(int userId, String transport)
             throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.selectBackupTransport(transport) : null;
+        return (svc != null) ? svc.selectBackupTransport(userId, transport) : null;
     }
 
     @Override
@@ -569,7 +569,7 @@ public class Trampoline extends IBackupManager.Stub {
             ISelectBackupTransportCallback listener) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.selectBackupTransportAsync(transport, listener);
+            svc.selectBackupTransportAsync(userId, transport, listener);
         } else {
             if (listener != null) {
                 try {
@@ -585,7 +585,7 @@ public class Trampoline extends IBackupManager.Stub {
     public Intent getConfigurationIntentForUser(int userId, String transport)
             throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.getConfigurationIntent(transport) : null;
+        return (svc != null) ? svc.getConfigurationIntent(userId, transport) : null;
     }
 
     @Override
@@ -597,7 +597,7 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public String getDestinationStringForUser(int userId, String transport) throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.getDestinationString(transport) : null;
+        return (svc != null) ? svc.getDestinationString(userId, transport) : null;
     }
 
     @Override
@@ -609,7 +609,7 @@ public class Trampoline extends IBackupManager.Stub {
     public Intent getDataManagementIntentForUser(int userId, String transport)
             throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.getDataManagementIntent(transport) : null;
+        return (svc != null) ? svc.getDataManagementIntent(userId, transport) : null;
     }
 
     @Override
@@ -622,7 +622,7 @@ public class Trampoline extends IBackupManager.Stub {
     public String getDataManagementLabelForUser(int userId, String transport)
             throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.getDataManagementLabel(transport) : null;
+        return (svc != null) ? svc.getDataManagementLabel(userId, transport) : null;
     }
 
     @Override
@@ -635,33 +635,33 @@ public class Trampoline extends IBackupManager.Stub {
     public IRestoreSession beginRestoreSessionForUser(
             int userId, String packageName, String transportID) throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.beginRestoreSession(packageName, transportID) : null;
+        return (svc != null) ? svc.beginRestoreSession(userId, packageName, transportID) : null;
     }
 
     @Override
     public void opComplete(int token, long result) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.opComplete(token, result);
+            svc.opComplete(binderGetCallingUserId(), token, result);
         }
     }
 
     @Override
     public long getAvailableRestoreTokenForUser(int userId, String packageName) {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.getAvailableRestoreToken(packageName) : 0;
+        return (svc != null) ? svc.getAvailableRestoreToken(userId, packageName) : 0;
     }
 
     @Override
     public boolean isAppEligibleForBackupForUser(int userId, String packageName) {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.isAppEligibleForBackup(packageName) : false;
+        return (svc != null) ? svc.isAppEligibleForBackup(userId, packageName) : false;
     }
 
     @Override
     public String[] filterAppsEligibleForBackupForUser(int userId, String[] packages) {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.filterAppsEligibleForBackup(packages) : null;
+        return (svc != null) ? svc.filterAppsEligibleForBackup(userId, packages) : null;
     }
 
     @Override

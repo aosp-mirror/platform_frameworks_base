@@ -117,7 +117,7 @@ public class BackupManagerService {
      * @param userId User id on which the backup operation is being requested.
      * @param message A message to include in the exception if it is thrown.
      */
-    private void enforceCallingPermissionOnUserId(int userId, String message) {
+    private void enforceCallingPermissionOnUserId(@UserIdInt int userId, String message) {
         if (Binder.getCallingUserHandle().getIdentifier() != userId) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
@@ -170,9 +170,14 @@ public class BackupManagerService {
      * @param userId The id of the user to retrieve its instance of {@link
      *     UserBackupManagerService}.
      * @param caller A {@link String} identifying the caller for logging purposes.
+     * @throws SecurityException if {@code userId} is different from the calling user id and the
+     * caller does NOT have the android.permission.INTERACT_ACROSS_USERS_FULL permission.
      */
     @Nullable
-    private UserBackupManagerService getServiceForUser(@UserIdInt int userId, String caller) {
+    @VisibleForTesting
+    UserBackupManagerService getServiceForUserIfCallerHasPermission(
+            @UserIdInt int userId, String caller) {
+        enforceCallingPermissionOnUserId(userId, caller);
         UserBackupManagerService userBackupManagerService = mServiceUsers.get(userId);
         if (userBackupManagerService == null) {
             Slog.w(TAG, "Called " + caller + " for unknown user: " + userId);
@@ -196,9 +201,9 @@ public class BackupManagerService {
      * backup for their app {@code packageName}. Only used for apps participating in key-value
      * backup.
      */
-    public void dataChanged(String packageName) {
+    public void dataChanged(@UserIdInt int userId, String packageName) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "dataChanged()");
+                getServiceForUserIfCallerHasPermission(userId, "dataChanged()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.dataChanged(packageName);
@@ -209,9 +214,9 @@ public class BackupManagerService {
      * Callback: a requested backup agent has been instantiated. This should only be called from the
      * {@link ActivityManager}.
      */
-    public void agentConnected(String packageName, IBinder agentBinder) {
+    public void agentConnected(@UserIdInt int userId, String packageName, IBinder agentBinder) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "agentConnected()");
+                getServiceForUserIfCallerHasPermission(userId, "agentConnected()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.agentConnected(packageName, agentBinder);
@@ -222,9 +227,9 @@ public class BackupManagerService {
      * Callback: a backup agent has failed to come up, or has unexpectedly quit. This should only be
      * called from the {@link ActivityManager}.
      */
-    public void agentDisconnected(String packageName) {
+    public void agentDisconnected(@UserIdInt int userId, String packageName) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "agentDisconnected()");
+                getServiceForUserIfCallerHasPermission(userId, "agentDisconnected()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.agentDisconnected(packageName);
@@ -235,9 +240,9 @@ public class BackupManagerService {
      * Used by a currently-active backup agent to notify the service that it has completed its given
      * outstanding asynchronous backup/restore operation.
      */
-    public void opComplete(int token, long result) {
+    public void opComplete(@UserIdInt int userId, int token, long result) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "opComplete()");
+                getServiceForUserIfCallerHasPermission(userId, "opComplete()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.opComplete(token, result);
@@ -249,9 +254,10 @@ public class BackupManagerService {
     // ---------------------------------------------
 
     /** Run an initialize operation for the given transports {@code transportNames}. */
-    public void initializeTransports(String[] transportNames, IBackupObserver observer) {
+    public void initializeTransports(
+            @UserIdInt int userId, String[] transportNames, IBackupObserver observer) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "initializeTransports()");
+                getServiceForUserIfCallerHasPermission(userId, "initializeTransports()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.initializeTransports(transportNames, observer);
@@ -262,9 +268,9 @@ public class BackupManagerService {
      * Clear the given package {@code packageName}'s backup data from the transport {@code
      * transportName}.
      */
-    public void clearBackupData(String transportName, String packageName) {
+    public void clearBackupData(@UserIdInt int userId, String transportName, String packageName) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "clearBackupData()");
+                getServiceForUserIfCallerHasPermission(userId, "clearBackupData()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.clearBackupData(transportName, packageName);
@@ -273,9 +279,9 @@ public class BackupManagerService {
 
     /** Return the name of the currently active transport. */
     @Nullable
-    public String getCurrentTransport() {
+    public String getCurrentTransport(@UserIdInt int userId) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "getCurrentTransport()");
+                getServiceForUserIfCallerHasPermission(userId, "getCurrentTransport()");
 
         return userBackupManagerService == null
                 ? null
@@ -287,9 +293,9 @@ public class BackupManagerService {
      * null} if no transport selected or if the transport selected is not registered.
      */
     @Nullable
-    public ComponentName getCurrentTransportComponent() {
+    public ComponentName getCurrentTransportComponent(@UserIdInt int userId) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "getCurrentTransportComponent()");
+                getServiceForUserIfCallerHasPermission(userId, "getCurrentTransportComponent()");
 
         return userBackupManagerService == null
                 ? null
@@ -298,9 +304,9 @@ public class BackupManagerService {
 
     /** Report all known, available backup transports by name. */
     @Nullable
-    public String[] listAllTransports() {
+    public String[] listAllTransports(@UserIdInt int userId) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "listAllTransports()");
+                getServiceForUserIfCallerHasPermission(userId, "listAllTransports()");
 
         return userBackupManagerService == null
                 ? null
@@ -309,9 +315,9 @@ public class BackupManagerService {
 
     /** Report all known, available backup transports by {@link ComponentName}. */
     @Nullable
-    public ComponentName[] listAllTransportComponents() {
+    public ComponentName[] listAllTransportComponents(@UserIdInt int userId) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "listAllTransportComponents()");
+                getServiceForUserIfCallerHasPermission(userId, "listAllTransportComponents()");
 
         return userBackupManagerService == null
                 ? null
@@ -321,12 +327,14 @@ public class BackupManagerService {
     /** Report all system whitelisted transports. */
     @Nullable
     public String[] getTransportWhitelist() {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "getTransportWhitelist()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.getTransportWhitelist();
+        // No permission check, intentionally.
+        String[] whitelistedTransports = new String[mTransportWhitelist.size()];
+        int i = 0;
+        for (ComponentName component : mTransportWhitelist) {
+            whitelistedTransports[i] = component.flattenToShortString();
+            i++;
+        }
+        return whitelistedTransports;
     }
 
     /**
@@ -353,6 +361,7 @@ public class BackupManagerService {
      *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
      */
     public void updateTransportAttributes(
+            @UserIdInt int userId,
             ComponentName transportComponent,
             String name,
             @Nullable Intent configurationIntent,
@@ -360,7 +369,7 @@ public class BackupManagerService {
             @Nullable Intent dataManagementIntent,
             String dataManagementLabel) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "updateTransportAttributes()");
+                getServiceForUserIfCallerHasPermission(userId, "updateTransportAttributes()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.updateTransportAttributes(
@@ -381,9 +390,9 @@ public class BackupManagerService {
      */
     @Deprecated
     @Nullable
-    public String selectBackupTransport(String transportName) {
+    public String selectBackupTransport(@UserIdInt int userId, String transportName) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "selectBackupTransport()");
+                getServiceForUserIfCallerHasPermission(userId, "selectBackupTransport()");
 
         return userBackupManagerService == null
                 ? null
@@ -395,9 +404,11 @@ public class BackupManagerService {
      * with the result upon completion.
      */
     public void selectBackupTransportAsync(
-            ComponentName transportComponent, ISelectBackupTransportCallback listener) {
+            @UserIdInt int userId,
+            ComponentName transportComponent,
+            ISelectBackupTransportCallback listener) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "selectBackupTransportAsync()");
+                getServiceForUserIfCallerHasPermission(userId, "selectBackupTransportAsync()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.selectBackupTransportAsync(transportComponent, listener);
@@ -410,9 +421,9 @@ public class BackupManagerService {
      * returns {@code null}.
      */
     @Nullable
-    public Intent getConfigurationIntent(String transportName) {
+    public Intent getConfigurationIntent(@UserIdInt int userId, String transportName) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "getConfigurationIntent()");
+                getServiceForUserIfCallerHasPermission(userId, "getConfigurationIntent()");
 
         return userBackupManagerService == null
                 ? null
@@ -429,9 +440,9 @@ public class BackupManagerService {
      * @return The current destination string or null if the transport is not registered.
      */
     @Nullable
-    public String getDestinationString(String transportName) {
+    public String getDestinationString(@UserIdInt int userId, String transportName) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "getDestinationString()");
+                getServiceForUserIfCallerHasPermission(userId, "getDestinationString()");
 
         return userBackupManagerService == null
                 ? null
@@ -440,9 +451,9 @@ public class BackupManagerService {
 
     /** Supply the manage-data intent for the given transport. */
     @Nullable
-    public Intent getDataManagementIntent(String transportName) {
+    public Intent getDataManagementIntent(@UserIdInt int userId, String transportName) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "getDataManagementIntent()");
+                getServiceForUserIfCallerHasPermission(userId, "getDataManagementIntent()");
 
         return userBackupManagerService == null
                 ? null
@@ -454,9 +465,9 @@ public class BackupManagerService {
      * transport.
      */
     @Nullable
-    public String getDataManagementLabel(String transportName) {
+    public String getDataManagementLabel(@UserIdInt int userId, String transportName) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "getDataManagementLabel()");
+                getServiceForUserIfCallerHasPermission(userId, "getDataManagementLabel()");
 
         return userBackupManagerService == null
                 ? null
@@ -469,9 +480,8 @@ public class BackupManagerService {
 
     /** Enable/disable the backup service. This is user-configurable via backup settings. */
     public void setBackupEnabled(@UserIdInt int userId, boolean enable) {
-        enforceCallingPermissionOnUserId(userId, "setBackupEnabled");
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(userId, "setBackupEnabled()");
+                getServiceForUserIfCallerHasPermission(userId, "setBackupEnabled()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.setBackupEnabled(enable);
@@ -479,22 +489,12 @@ public class BackupManagerService {
     }
 
     /** Enable/disable automatic restore of app data at install time. */
-    public void setAutoRestore(boolean autoRestore) {
+    public void setAutoRestore(@UserIdInt int userId, boolean autoRestore) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "setAutoRestore()");
+                getServiceForUserIfCallerHasPermission(userId, "setAutoRestore()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.setAutoRestore(autoRestore);
-        }
-    }
-
-    /** Mark the backup service as having been provisioned (device has gone through SUW). */
-    public void setBackupProvisioned(boolean provisioned) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "setBackupProvisioned()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.setBackupProvisioned(provisioned);
         }
     }
 
@@ -502,9 +502,8 @@ public class BackupManagerService {
      * Return {@code true} if the backup mechanism is currently enabled, else returns {@code false}.
      */
     public boolean isBackupEnabled(@UserIdInt int userId) {
-        enforceCallingPermissionOnUserId(userId, "isBackupEnabled");
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(userId, "isBackupEnabled()");
+                getServiceForUserIfCallerHasPermission(userId, "isBackupEnabled()");
 
         return userBackupManagerService != null && userBackupManagerService.isBackupEnabled();
     }
@@ -514,9 +513,9 @@ public class BackupManagerService {
     // ---------------------------------------------
 
     /** Checks if the given package {@code packageName} is eligible for backup. */
-    public boolean isAppEligibleForBackup(String packageName) {
+    public boolean isAppEligibleForBackup(@UserIdInt int userId, String packageName) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "isAppEligibleForBackup()");
+                getServiceForUserIfCallerHasPermission(userId, "isAppEligibleForBackup()");
 
         return userBackupManagerService != null
                 && userBackupManagerService.isAppEligibleForBackup(packageName);
@@ -526,9 +525,9 @@ public class BackupManagerService {
      * Returns from the inputted packages {@code packages}, the ones that are eligible for backup.
      */
     @Nullable
-    public String[] filterAppsEligibleForBackup(String[] packages) {
+    public String[] filterAppsEligibleForBackup(@UserIdInt int userId, String[] packages) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "filterAppsEligibleForBackup()");
+                getServiceForUserIfCallerHasPermission(userId, "filterAppsEligibleForBackup()");
 
         return userBackupManagerService == null
                 ? null
@@ -540,9 +539,8 @@ public class BackupManagerService {
      * they have pending updates.
      */
     public void backupNow(@UserIdInt int userId) {
-        enforceCallingPermissionOnUserId(userId, "backupNow");
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(userId, "backupNow()");
+                getServiceForUserIfCallerHasPermission(userId, "backupNow()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.backupNow();
@@ -559,9 +557,8 @@ public class BackupManagerService {
             IBackupObserver observer,
             IBackupManagerMonitor monitor,
             int flags) {
-        enforceCallingPermissionOnUserId(userId, "requestBackup");
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(userId, "requestBackup()");
+                getServiceForUserIfCallerHasPermission(userId, "requestBackup()");
 
         return userBackupManagerService == null
                 ? BackupManager.ERROR_BACKUP_NOT_ALLOWED
@@ -570,9 +567,8 @@ public class BackupManagerService {
 
     /** Cancel all running backup operations. */
     public void cancelBackups(@UserIdInt int userId) {
-        enforceCallingPermissionOnUserId(userId, "cancelBackups");
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(userId, "cancelBackups()");
+                getServiceForUserIfCallerHasPermission(userId, "cancelBackups()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.cancelBackups();
@@ -589,7 +585,7 @@ public class BackupManagerService {
      */
     public boolean beginFullBackup(FullBackupJob scheduledJob) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "beginFullBackup()");
+                getServiceForUserIfCallerHasPermission(UserHandle.USER_SYSTEM, "beginFullBackup()");
 
         return userBackupManagerService != null
                 && userBackupManagerService.beginFullBackup(scheduledJob);
@@ -601,7 +597,7 @@ public class BackupManagerService {
      */
     public void endFullBackup() {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "endFullBackup()");
+                getServiceForUserIfCallerHasPermission(UserHandle.USER_SYSTEM, "endFullBackup()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.endFullBackup();
@@ -611,9 +607,9 @@ public class BackupManagerService {
     /**
      * Run a full backup pass for the given packages {@code packageNames}. Used by 'adb shell bmgr'.
      */
-    public void fullTransportBackup(String[] packageNames) {
+    public void fullTransportBackup(@UserIdInt int userId, String[] packageNames) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "fullTransportBackup()");
+                getServiceForUserIfCallerHasPermission(userId, "fullTransportBackup()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.fullTransportBackup(packageNames);
@@ -628,9 +624,9 @@ public class BackupManagerService {
      * Used to run a restore pass for an application that is being installed. This should only be
      * called from the {@link PackageManager}.
      */
-    public void restoreAtInstall(String packageName, int token) {
+    public void restoreAtInstall(@UserIdInt int userId, String packageName, int token) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "restoreAtInstall()");
+                getServiceForUserIfCallerHasPermission(userId, "restoreAtInstall()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.restoreAtInstall(packageName, token);
@@ -642,9 +638,10 @@ public class BackupManagerService {
      * {@code transportName}.
      */
     @Nullable
-    public IRestoreSession beginRestoreSession(String packageName, String transportName) {
+    public IRestoreSession beginRestoreSession(
+            @UserIdInt int userId, String packageName, String transportName) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "beginRestoreSession()");
+                getServiceForUserIfCallerHasPermission(userId, "beginRestoreSession()");
 
         return userBackupManagerService == null
                 ? null
@@ -655,9 +652,9 @@ public class BackupManagerService {
      * Get the restore-set token for the best-available restore set for this {@code packageName}:
      * the active set if possible, else the ancestral one. Returns zero if none available.
      */
-    public long getAvailableRestoreToken(String packageName) {
+    public long getAvailableRestoreToken(@UserIdInt int userId, String packageName) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "getAvailableRestoreToken()");
+                getServiceForUserIfCallerHasPermission(userId, "getAvailableRestoreToken()");
 
         return userBackupManagerService == null
                 ? 0
@@ -671,7 +668,8 @@ public class BackupManagerService {
     /** Sets the backup password used when running adb backup. */
     public boolean setBackupPassword(String currentPassword, String newPassword) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "setBackupPassword()");
+                getServiceForUserIfCallerHasPermission(
+                        UserHandle.USER_SYSTEM, "setBackupPassword()");
 
         return userBackupManagerService != null
                 && userBackupManagerService.setBackupPassword(currentPassword, newPassword);
@@ -680,7 +678,8 @@ public class BackupManagerService {
     /** Returns {@code true} if adb backup was run with a password, else returns {@code false}. */
     public boolean hasBackupPassword() {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "hasBackupPassword()");
+                getServiceForUserIfCallerHasPermission(
+                        UserHandle.USER_SYSTEM, "hasBackupPassword()");
 
         return userBackupManagerService != null && userBackupManagerService.hasBackupPassword();
     }
@@ -703,9 +702,8 @@ public class BackupManagerService {
             boolean doCompress,
             boolean doKeyValue,
             String[] packageNames) {
-        enforceCallingPermissionOnUserId(userId, "adbBackup");
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(userId, "adbBackup()");
+                getServiceForUserIfCallerHasPermission(userId, "adbBackup()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.adbBackup(
@@ -728,9 +726,8 @@ public class BackupManagerService {
      * requires on-screen confirmation by the user.
      */
     public void adbRestore(@UserIdInt int userId, ParcelFileDescriptor fd) {
-        enforceCallingPermissionOnUserId(userId, "setBackupEnabled");
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(userId, "adbRestore()");
+                getServiceForUserIfCallerHasPermission(userId, "adbRestore()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.adbRestore(fd);
@@ -742,13 +739,14 @@ public class BackupManagerService {
      * to require a user-facing disclosure about the operation.
      */
     public void acknowledgeAdbBackupOrRestore(
+            @UserIdInt int userId,
             int token,
             boolean allow,
             String currentPassword,
             String encryptionPassword,
             IFullBackupRestoreObserver observer) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "acknowledgeAdbBackupOrRestore()");
+                getServiceForUserIfCallerHasPermission(userId, "acknowledgeAdbBackupOrRestore()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.acknowledgeAdbBackupOrRestore(
@@ -763,7 +761,7 @@ public class BackupManagerService {
     /** Prints service state for 'dumpsys backup'. */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         UserBackupManagerService userBackupManagerService =
-                getServiceForUser(UserHandle.USER_SYSTEM, "dump()");
+                getServiceForUserIfCallerHasPermission(UserHandle.USER_SYSTEM, "dump()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.dump(fd, pw, args);
