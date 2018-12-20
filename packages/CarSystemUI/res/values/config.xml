@@ -32,7 +32,7 @@
          SystemUi b/c it can't be overlayed at this level for now
     -->
     <string-array name="config_systemUIServiceComponents" translatable="false">
-        <item>com.android.systemui.Dependency</item>
+        <item>com.android.systemui.Dependency$DependencyCreator</item>
         <item>com.android.systemui.util.NotificationChannels</item>
         <item>com.android.systemui.statusbar.CommandQueue$CommandQueueStart</item>
         <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
