@@ -237,7 +237,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
-        mNotificationEntryListener.onEntryRemoved(childEntry);
+        mNotificationEntryListener.onEntryRemoved(childEntry.key, null, false);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
     }

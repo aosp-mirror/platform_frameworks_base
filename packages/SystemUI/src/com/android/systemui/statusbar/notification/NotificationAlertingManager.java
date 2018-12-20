@@ -80,8 +80,9 @@ public class NotificationAlertingManager {
             }
 
             @Override
-            public void onEntryRemoved(NotificationData.Entry entry) {
-                stopAlerting(entry);
+            public void onEntryRemoved(
+                    String key, StatusBarNotification old, boolean lifetimeExtended) {
+                stopAlerting(key);
             }
         });
     }
@@ -159,24 +160,23 @@ public class NotificationAlertingManager {
         }
     }
 
-    private void stopAlerting(NotificationData.Entry entry) {
+    private void stopAlerting(final String key) {
         // Attempt to remove notifications from their alert managers (heads up, ambient pulse).
         // Though the remove itself may fail, it lets the manager know to remove as soon as
         // possible.
-        if (mHeadsUpManager.isAlerting(entry.key)) {
+        if (mHeadsUpManager.isAlerting(key)) {
             // A cancel() in response to a remote input shouldn't be delayed, as it makes the
             // sending look longer than it takes.
             // Also we should not defer the removal if reordering isn't allowed since otherwise
             // some notifications can't disappear before the panel is closed.
             boolean ignoreEarliestRemovalTime =
-                    mRemoteInputManager.getController().isSpinning(entry.key)
+                    mRemoteInputManager.getController().isSpinning(key)
                             && !FORCE_REMOTE_INPUT_HISTORY
                             || !mVisualStabilityManager.isReorderingAllowed();
-            mHeadsUpManager.removeNotification(entry.key, ignoreEarliestRemovalTime);
+            mHeadsUpManager.removeNotification(key, ignoreEarliestRemovalTime);
         }
-        if (mAmbientPulseManager.isAlerting(entry.key)) {
-            mAmbientPulseManager.removeNotification(entry.key,
-                    false /* ignoreEarliestRemovalTime */);
+        if (mAmbientPulseManager.isAlerting(key)) {
+            mAmbientPulseManager.removeNotification(key, false /* ignoreEarliestRemovalTime */);
         }
     }
 }

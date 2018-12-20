@@ -323,7 +323,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mForegroundServiceController).removeNotification(mSbn);
         verify(mListContainer).cleanUpViewStateForEntry(mEntry);
         verify(mPresenter).updateNotificationViews();
-        verify(mEntryListener).onNotificationRemoved(mSbn.getKey(), mSbn);
+        verify(mEntryListener).onEntryRemoved(mSbn.getKey(), mSbn, false /* lifetimeExtended */);
         verify(mRow).setRemoved();
 
         assertNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
@@ -347,6 +347,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         assertNotNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
         verify(extender).setShouldManageLifetime(mEntry, true /* shouldManage */);
+        verify(mEntryListener).onEntryRemoved(mSbn.getKey(), null, true /* lifetimeExtended */);
     }
 
     @Test

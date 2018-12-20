@@ -363,53 +363,49 @@ public class NotificationEntryManager implements
         final NotificationData.Entry entry = mNotificationData.get(key);
 
         abortExistingInflation(key);
+
+        StatusBarNotification old = null;
+        boolean lifetimeExtended = false;
+
         if (entry != null) {
-            for (NotificationEntryListener listener : mNotificationEntryListeners) {
-                listener.onEntryRemoved(entry);
-            }
-        }
-
-        if (entry == null) {
-            for (NotificationEntryListener listener : mNotificationEntryListeners) {
-                listener.onNotificationRemoved(key, null /* old */);
-            }
-            return;
-        }
-
-        // If a manager needs to keep the notification around for whatever reason, we return early
-        // and keep the notification
-        if (!forceRemove) {
-            for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
-                if (extender.shouldExtendLifetime(entry)) {
-                    mLatestRankingMap = ranking;
-                    extender.setShouldManageLifetime(entry, true /* shouldManage */);
-                    return;
+            // If a manager needs to keep the notification around for whatever reason, we
+            // keep the notification
+            if (!forceRemove) {
+                for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
+                    if (extender.shouldExtendLifetime(entry)) {
+                        mLatestRankingMap = ranking;
+                        extender.setShouldManageLifetime(entry, true /* shouldManage */);
+                        lifetimeExtended = true;
+                        break;
+                    }
                 }
             }
+
+            if (!lifetimeExtended) {
+                // At this point, we are guaranteed the notification will be removed
+
+                // Ensure any managers keeping the lifetime extended stop managing the entry
+                for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
+                    extender.setShouldManageLifetime(entry, false /* shouldManage */);
+                }
+
+                getMediaManager().onNotificationRemoved(key);
+                mForegroundServiceController.removeNotification(entry.notification);
+
+                if (entry.rowExists()) {
+                    entry.removeRow();
+                    mListContainer.cleanUpViewStateForEntry(entry);
+                }
+
+                // Let's remove the children if this was a summary
+                handleGroupSummaryRemoved(key);
+
+                old = removeNotificationViews(key, ranking);
+            }
         }
-
-        // At this point, we are guaranteed the notification will be removed
-
-        // Ensure any managers keeping the lifetime extended stop managing the entry
-        for (NotificationLifetimeExtender extender: mNotificationLifetimeExtenders) {
-            extender.setShouldManageLifetime(entry, false /* shouldManage */);
-        }
-
-        getMediaManager().onNotificationRemoved(key);
-        mForegroundServiceController.removeNotification(entry.notification);
-
-        if (entry.rowExists()) {
-            entry.removeRow();
-            mListContainer.cleanUpViewStateForEntry(entry);
-        }
-
-        // Let's remove the children if this was a summary
-        handleGroupSummaryRemoved(key);
-
-        StatusBarNotification old = removeNotificationViews(key, ranking);
 
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
-            listener.onNotificationRemoved(key, old);
+            listener.onEntryRemoved(key, old, lifetimeExtended);
         }
     }
 

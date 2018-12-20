@@ -60,24 +60,19 @@ public interface NotificationEntryListener {
      * Called when a notification has been removed (either because the user swiped it away or
      * because the developer retracted it).
      *
-     * TODO: combine this with onNotificationRemoved().
-     */
-    default void onEntryRemoved(NotificationData.Entry entry) {
-    }
-
-    /**
-     * Called when a notification was removed.
-     *
      * @param key key of notification that was removed
      * @param old StatusBarNotification of the notification before it was removed
+     * @param lifetimeExtended true if something is artificially extending how long the notification
+     *                         stays visible after it's removed
      */
-    default void onNotificationRemoved(String key, StatusBarNotification old) {
+    default void onEntryRemoved(
+            String key, StatusBarNotification old, boolean lifetimeExtended) {
     }
 
     /**
      * Removes a notification immediately.
      *
-     * TODO: combine this with onNotificationRemoved().
+     * TODO: combine this with onEntryRemoved().
      */
     default void onPerformRemoveNotification(StatusBarNotification statusBarNotification) {
     }
