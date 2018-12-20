@@ -37,12 +37,8 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.time.DateTimeException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeParseException;
 
 /**
  * Controller for managing night display and color mode settings.
@@ -149,28 +145,6 @@ public final class ColorDisplayController {
         }
         return Secure.putIntForUser(mContext.getContentResolver(),
                 Secure.NIGHT_DISPLAY_ACTIVATED, activated ? 1 : 0, mUserId);
-    }
-
-    /**
-     * Returns the time when Night display's activation state last changed, or {@code null} if it
-     * has never been changed.
-     */
-    public LocalDateTime getLastActivatedTime() {
-        final ContentResolver cr = mContext.getContentResolver();
-        final String lastActivatedTime = Secure.getStringForUser(
-                cr, Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, mUserId);
-        if (lastActivatedTime != null) {
-            try {
-                return LocalDateTime.parse(lastActivatedTime);
-            } catch (DateTimeParseException ignored) {}
-            // Uses the old epoch time.
-            try {
-                return LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(Long.parseLong(lastActivatedTime)),
-                    ZoneId.systemDefault());
-            } catch (DateTimeException|NumberFormatException ignored) {}
-        }
-        return null;
     }
 
     /**
