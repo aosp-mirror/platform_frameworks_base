@@ -1613,6 +1613,13 @@ public final class ProcessList {
                 app.addPackage(info.packageName, info.versionCode, mService.mProcessStats);
                 checkSlow(startTime, "startProcess: done, added package to proc");
                 return app;
+            } else if (app.getActiveInstrumentation() != null) {
+                // We don't want to kill running instrumentation.
+                if (DEBUG_PROCESSES) {
+                    Slog.v(TAG_PROCESSES, "Instrumentation already running: " + app);
+                }
+                checkSlow(startTime, "startProcess: keep instrumentation proc");
+                return app;
             }
 
             // An application record is attached to a previous process,
