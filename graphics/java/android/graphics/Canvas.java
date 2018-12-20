@@ -556,7 +556,7 @@ public class Canvas extends BaseCanvas {
      * @hide
      */
     public int saveUnclippedLayer(int left, int top, int right, int bottom) {
-        return nSaveLayer(mNativeCanvasWrapper, left, top, right, bottom, 0, 0);
+        return nSaveUnclippedLayer(mNativeCanvasWrapper, left, top, right, bottom);
     }
 
     /**
@@ -1394,6 +1394,8 @@ public class Canvas extends BaseCanvas {
     @CriticalNative
     private static native int nSaveLayerAlpha(long nativeCanvas, float l, float t, float r, float b,
             int alpha, int layerFlags);
+    @CriticalNative
+    private static native int nSaveUnclippedLayer(long nativeCanvas, int l, int t, int r, int b);
     @CriticalNative
     private static native boolean nRestore(long canvasHandle);
     @CriticalNative

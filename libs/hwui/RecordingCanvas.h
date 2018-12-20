@@ -75,6 +75,7 @@ private:
     void save();
     void saveLayer(const SkRect*, const SkPaint*, const SkImageFilter*, const SkImage*,
                    const SkMatrix*, SkCanvas::SaveLayerFlags);
+    void saveBehind(const SkRect*);
     void restore();
 
     void concat(const SkMatrix&);
@@ -146,6 +147,7 @@ public:
     void willSave() override;
     SaveLayerStrategy getSaveLayerStrategy(const SaveLayerRec&) override;
     void willRestore() override;
+    bool onDoSaveBehind(const SkRect*) override;
 
     void onFlush() override;
 

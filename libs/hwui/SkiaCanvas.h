@@ -74,6 +74,7 @@ public:
                           SaveFlags::Flags flags) override;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
                                SaveFlags::Flags flags) override;
+    virtual int saveUnclippedLayer(int left, int top, int right, int bottom) override;
 
     virtual void getMatrix(SkMatrix* outMatrix) const override;
     virtual void setMatrix(const SkMatrix& matrix) override;

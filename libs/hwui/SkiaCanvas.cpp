@@ -24,6 +24,7 @@
 #include "hwui/PaintFilter.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 
+#include <SkAndroidFrameworkUtils.h>
 #include <SkAnimatedImage.h>
 #include <SkCanvasStateUtils.h>
 #include <SkColorFilter.h>
@@ -183,6 +184,11 @@ int SkiaCanvas::saveLayerAlpha(float left, float top, float right, float bottom,
         return this->saveLayer(left, top, right, bottom, &alphaPaint, flags);
     }
     return this->saveLayer(left, top, right, bottom, nullptr, flags);
+}
+
+int SkiaCanvas::saveUnclippedLayer(int left, int top, int right, int bottom) {
+    SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
+    return SkAndroidFrameworkUtils::SaveBehind(mCanvas, &bounds);
 }
 
 class SkiaCanvas::Clip {

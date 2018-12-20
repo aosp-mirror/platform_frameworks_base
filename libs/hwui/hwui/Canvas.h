@@ -196,6 +196,7 @@ public:
                           SaveFlags::Flags flags) = 0;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
                                SaveFlags::Flags flags) = 0;
+    virtual int saveUnclippedLayer(int, int, int, int) = 0;
 
     // Matrix
     virtual void getMatrix(SkMatrix* outMatrix) const = 0;
