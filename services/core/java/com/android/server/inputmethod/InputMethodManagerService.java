@@ -3275,7 +3275,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final int packageNum = packageInfos.length;
                 for (int i = 0; i < packageNum; ++i) {
                     if (packageInfos[i].equals(imi.getPackageName())) {
-                        mFileManager.addInputMethodSubtypes(imi, subtypes);
+                        if (subtypes.length > 0) {
+                            mFileManager.addInputMethodSubtypes(imi, subtypes);
+                        } else {
+                            mFileManager.deleteAllInputMethodSubtypes(imi.getId());
+                        }
                         final long ident = Binder.clearCallingIdentity();
                         try {
                             buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
