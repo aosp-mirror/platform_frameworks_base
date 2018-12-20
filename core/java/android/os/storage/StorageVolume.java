@@ -16,6 +16,7 @@
 
 package android.os.storage;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -345,6 +346,32 @@ public final class StorageVolume implements Parcelable {
         final Intent intent = new Intent(ACTION_OPEN_EXTERNAL_DIRECTORY);
         intent.putExtra(EXTRA_STORAGE_VOLUME, this);
         intent.putExtra(EXTRA_DIRECTORY_NAME, directoryName);
+        return intent;
+    }
+
+    /**
+     * Builds an {@link Intent#ACTION_OPEN_DOCUMENT_TREE} to allow the user to grant access to any
+     * directory subtree (or entire volume) from the {@link android.provider.DocumentsProvider}s
+     * available on the device. The initial location of the document navigation will be the root of
+     * this {@link StorageVolume}.
+     *
+     * Note that the returned {@link Intent} simply suggests that the user picks this {@link
+     * StorageVolume} by default, but the user may select a different location. Callers must respect
+     * the user's chosen location, even if it is different from the originally requested location.
+     *
+     * @return intent to {@link Intent#ACTION_OPEN_DOCUMENT_TREE} initially showing the contents
+     *         of this {@link StorageVolume}
+     * @see Intent#ACTION_OPEN_DOCUMENT_TREE
+     */
+    @NonNull public Intent createOpenDocumentTreeIntent() {
+        final String rootId = isEmulated()
+                ? DocumentsContract.EXTERNAL_STORAGE_PRIMARY_EMULATED_ROOT_ID
+                : mFsUuid;
+        final Uri rootUri = DocumentsContract.buildRootUri(
+                DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY, rootId);
+        final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                .putExtra(DocumentsContract.EXTRA_INITIAL_URI, rootUri)
+                .putExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, true);
         return intent;
     }
 

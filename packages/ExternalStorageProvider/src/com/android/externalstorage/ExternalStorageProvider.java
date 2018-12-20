@@ -67,7 +67,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
 
     private static final boolean DEBUG = false;
 
-    public static final String AUTHORITY = "com.android.externalstorage.documents";
+    public static final String AUTHORITY = DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY;
 
     private static final Uri BASE_URI =
             new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY).build();
@@ -96,7 +96,8 @@ public class ExternalStorageProvider extends FileSystemProvider {
         public boolean reportAvailableBytes = true;
     }
 
-    private static final String ROOT_ID_PRIMARY_EMULATED = "primary";
+    private static final String ROOT_ID_PRIMARY_EMULATED =
+            DocumentsContract.EXTERNAL_STORAGE_PRIMARY_EMULATED_ROOT_ID;
     private static final String ROOT_ID_HOME = "home";
 
     private StorageManager mStorageManager;
