@@ -46,6 +46,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -89,6 +90,7 @@ public class DeviceIdleControllerTest {
     private DeviceIdleController mDeviceIdleController;
     private AnyMotionDetectorForTest mAnyMotionDetector;
     private AppStateTrackerForTest mAppStateTracker;
+    private DeviceIdleController.Constants mConstants;
     private InjectorForTest mInjector;
 
     private MockitoSession mMockingSession;
@@ -97,7 +99,7 @@ public class DeviceIdleControllerTest {
     @Mock
     private ConnectivityService mConnectivityService;
     @Mock
-    private DeviceIdleController.Constants mConstants;
+    private ContentResolver mContentResolver;
     @Mock
     private IActivityManager mIActivityManager;
     @Mock
@@ -139,13 +141,6 @@ public class DeviceIdleControllerTest {
         }
 
         @Override
-        DeviceIdleController.Constants getConstants(DeviceIdleController controller,
-                Handler handler,
-                ContentResolver resolver) {
-            return mConstants;
-        }
-
-        @Override
         LocationManager getLocationManager() {
             return locationManager;
         }
@@ -167,6 +162,11 @@ public class DeviceIdleControllerTest {
         AnyMotionDetectorForTest() {
             super(mPowerManager, mock(Handler.class), mock(SensorManager.class),
                     mock(DeviceIdleCallback.class), 0.5f);
+        }
+
+        @Override
+        public boolean hasSensor() {
+            return true;
         }
 
         @Override
@@ -221,6 +221,7 @@ public class DeviceIdleControllerTest {
         mAppStateTracker = new AppStateTrackerForTest(getContext(), Looper.getMainLooper());
         mAnyMotionDetector = new AnyMotionDetectorForTest();
         mInjector = new InjectorForTest(getContext());
+        doNothing().when(mContentResolver).registerContentObserver(any(), anyBoolean(), any());
         mDeviceIdleController = new DeviceIdleController(getContext(), mInjector);
         spyOn(mDeviceIdleController);
         doNothing().when(mDeviceIdleController).publishBinderService(any(), any());
@@ -228,6 +229,10 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         mDeviceIdleController.setDeepEnabledForTest(true);
         mDeviceIdleController.setLightEnabledForTest(true);
+
+        // Get the same Constants object that mDeviceIdleController got.
+        mConstants = mInjector.getConstants(mDeviceIdleController,
+                mInjector.getHandler(mDeviceIdleController), mContentResolver);
     }
 
     @After
@@ -1456,8 +1461,8 @@ public class DeviceIdleControllerTest {
 
     private void setAlarmSoon(boolean isSoon) {
         if (isSoon) {
-            doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
-                    mAlarmManager).getNextWakeFromIdleTime();
+            doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2)
+                    .when(mAlarmManager).getNextWakeFromIdleTime();
         } else {
             doReturn(Long.MAX_VALUE).when(mAlarmManager).getNextWakeFromIdleTime();
         }
