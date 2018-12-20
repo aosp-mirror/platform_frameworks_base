@@ -18,7 +18,7 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Fragment;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -46,10 +46,11 @@ import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.InjectionInflationController;
+import com.android.systemui.util.LifecycleFragment;
 
 import javax.inject.Inject;
 
-public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
+public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Callbacks {
     private static final String TAG = "QS";
     private static final boolean DEBUG = false;
     private static final String EXTRA_EXPANDED = "expanded";
@@ -81,9 +82,12 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
-            InjectionInflationController injectionInflater) {
+            InjectionInflationController injectionInflater,
+            Context context) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mInjectionInflater = injectionInflater;
+        SysUiServiceProvider.getComponent(context, CommandQueue.class)
+                .observe(getLifecycle(), this);
     }
 
     @Override
@@ -118,13 +122,6 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
                 mQSPanel.getTileLayout().restoreInstanceState(savedInstanceState);
             }
         }
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallback(this);
-    }
-
-    @Override
-    public void onDestroyView() {
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallback(this);
-        super.onDestroyView();
     }
 
     @Override

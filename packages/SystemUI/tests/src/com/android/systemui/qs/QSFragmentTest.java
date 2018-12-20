@@ -125,6 +125,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         return new QSFragment(new RemoteInputQuickSettingsDisabler(context),
-                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()));
+                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()),
+                context);
     }
 }
