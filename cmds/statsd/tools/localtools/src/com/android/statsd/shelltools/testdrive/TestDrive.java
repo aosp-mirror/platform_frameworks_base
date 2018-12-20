@@ -16,209 +16,193 @@
 package com.android.statsd.shelltools.testdrive;
 
 import com.android.internal.os.StatsdConfigProto.AtomMatcher;
+import com.android.internal.os.StatsdConfigProto.EventMetric;
+import com.android.internal.os.StatsdConfigProto.FieldFilter;
+import com.android.internal.os.StatsdConfigProto.GaugeMetric;
 import com.android.internal.os.StatsdConfigProto.SimpleAtomMatcher;
 import com.android.internal.os.StatsdConfigProto.StatsdConfig;
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
 import com.android.os.AtomsProto.Atom;
 import com.android.os.StatsLog.ConfigMetricsReport;
 import com.android.os.StatsLog.ConfigMetricsReportList;
+import com.android.os.StatsLog.StatsLogReport;
 import com.android.statsd.shelltools.Utils;
 
 import com.google.common.io.Files;
-import com.google.protobuf.TextFormat;
-import com.google.protobuf.TextFormat.ParseException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class TestDrive {
 
-    public static final int PULL_ATOM_START = 10000;
-    public static final long ATOM_MATCHER_ID = 1234567;
+    private static final int METRIC_ID_BASE = 1111;
+    private static final long ATOM_MATCHER_ID_BASE = 1234567;
+    private static final int PULL_ATOM_START = 10000;
+    private static final long CONFIG_ID = 54321;
+    private static final String[] ALLOWED_LOG_SOURCES = {
+        "AID_GRAPHICS",
+        "AID_INCIDENTD",
+        "AID_STATSD",
+        "AID_RADIO",
+        "com.android.systemui",
+        "com.android.vending",
+        "AID_SYSTEM",
+        "AID_ROOT",
+        "AID_BLUETOOTH",
+        "AID_LMKD"
+    };
+    private static final Logger LOGGER = Logger.getLogger(TestDrive.class.getName());
 
-    public static final long CONFIG_ID = 54321;
-
-    private static boolean mIsPushedAtom = false;
-
-    private static final Logger logger = Logger.getLogger(TestDrive.class.getName());
+    private final Set<Long> mTrackedMetrics = new HashSet<>();
 
     public static void main(String[] args) {
         TestDrive testDrive = new TestDrive();
-        Utils.setUpLogger(logger, false);
+        Set<Integer> trackedAtoms = new HashSet<>();
+        Utils.setUpLogger(LOGGER, false);
+        String remoteConfigPath = null;
 
-        if (args.length != 1) {
-            logger.log(Level.SEVERE, "Usage: ./test_drive <atomId>");
+        if (args.length < 1) {
+            LOGGER.log(Level.SEVERE, "Usage: ./test_drive <atomId1> <atomId2> ... <atomIdN>");
             return;
         }
-        int atomId;
+
+        for (int i = 0; i < args.length; i++) {
+            try {
+                int atomId = Integer.valueOf(args[i]);
+                if (Atom.getDescriptor().findFieldByNumber(atomId) == null) {
+                    LOGGER.log(Level.SEVERE, "No such atom found: " + args[i]);
+                    continue;
+                }
+                trackedAtoms.add(atomId);
+            } catch (NumberFormatException e) {
+                LOGGER.log(Level.SEVERE, "Bad atom id provided: " + args[i]);
+                continue;
+            }
+        }
+
         try {
-            atomId = Integer.valueOf(args[0]);
-        } catch (NumberFormatException e) {
-            logger.log(Level.SEVERE, "Bad atom id provided: " + args[0]);
-            return;
-        }
-        if (Atom.getDescriptor().findFieldByNumber(atomId) == null) {
-            logger.log(Level.SEVERE, "No such atom found: " + args[0]);
-            return;
-        }
-        mIsPushedAtom = atomId < PULL_ATOM_START;
-
-
-        try {
-            StatsdConfig config = testDrive.createConfig(atomId);
+            StatsdConfig config = testDrive.createConfig(trackedAtoms);
             if (config == null) {
-                logger.log(Level.SEVERE, "Failed to create valid config.");
+                LOGGER.log(Level.SEVERE, "Failed to create valid config.");
                 return;
             }
-            testDrive.pushConfig(config);
-            logger.info("Pushed the following config to statsd:");
-            logger.info(config.toString());
-            if (mIsPushedAtom) {
-                logger.info(
+            remoteConfigPath = testDrive.pushConfig(config);
+            LOGGER.info("Pushed the following config to statsd:");
+            LOGGER.info(config.toString());
+            if (!hasPulledAtom(trackedAtoms)) {
+                LOGGER.info(
                         "Now please play with the device to trigger the event. All events should "
                                 + "be dumped after 1 min ...");
                 Thread.sleep(60_000);
             } else {
                 // wait for 2 min
-                logger.info("Now wait for 2 minutes ...");
+                LOGGER.info("Now wait for 2 minutes ...");
                 Thread.sleep(120_000);
             }
             testDrive.dumpMetrics();
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to test drive: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Failed to test drive: " + e.getMessage(), e);
         } finally {
             testDrive.removeConfig();
-        }
-    }
-
-    private void pushConfig(StatsdConfig config) throws IOException, InterruptedException {
-        File configFile = File.createTempFile("statsdconfig", ".config");
-        configFile.deleteOnExit();
-        Files.write(config.toByteArray(), configFile);
-        String remotePath = "/data/local/tmp/" + configFile.getName();
-        Utils.runCommand(null, logger, "adb", "push", configFile.getAbsolutePath(), remotePath);
-        Utils.runCommand(null, logger,
-                "adb", "shell", "cat", remotePath, "|", Utils.CMD_UPDATE_CONFIG,
-                String.valueOf(CONFIG_ID));
-    }
-
-    private void removeConfig() {
-        try {
-            Utils.runCommand(null, logger, 
-                    "adb", "shell", Utils.CMD_REMOVE_CONFIG, String.valueOf(CONFIG_ID));
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to remove config: " + e.getMessage());
-        }
-    }
-
-    private StatsdConfig createConfig(int atomId) {
-        try {
-            if (mIsPushedAtom) {
-                return createSimpleEventMetricConfig(atomId);
-            } else {
-                return createSimpleGaugeMetricConfig(atomId);
+            if (remoteConfigPath != null) {
+                try {
+                    Utils.runCommand(null, LOGGER, "adb", "shell", "rm", remoteConfigPath);
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING,
+                            "Unable to remove remote config file: " + remoteConfigPath, e);
+                }
             }
-        } catch (ParseException e) {
-            logger.log(
-                    Level.SEVERE,
-                    "Failed to parse the config! line: "
-                            + e.getLine()
-                            + " col: "
-                            + e.getColumn()
-                            + " "
-                            + e.getMessage());
         }
-        return null;
     }
 
-    private StatsdConfig createSimpleEventMetricConfig(int atomId) throws ParseException {
-        StatsdConfig.Builder baseBuilder = getSimpleEventMetricBaseConfig();
-        baseBuilder.addAtomMatcher(createAtomMatcher(atomId));
-        return baseBuilder.build();
+    private void dumpMetrics() throws Exception {
+        ConfigMetricsReportList reportList = Utils.getReportList(CONFIG_ID, true, false, LOGGER);
+        // We may get multiple reports. Take the last one.
+        ConfigMetricsReport report = reportList.getReports(reportList.getReportsCount() - 1);
+        for (StatsLogReport statsLog : report.getMetricsList()) {
+            if (mTrackedMetrics.contains(statsLog.getMetricId())) {
+                LOGGER.info(statsLog.toString());
+            }
+        }
     }
 
-    private StatsdConfig createSimpleGaugeMetricConfig(int atomId) throws ParseException {
-        StatsdConfig.Builder baseBuilder = getSimpleGaugeMetricBaseConfig();
-        baseBuilder.addAtomMatcher(createAtomMatcher(atomId));
-        return baseBuilder.build();
+    private StatsdConfig createConfig(Set<Integer> atomIds) {
+        long metricId = METRIC_ID_BASE;
+        long atomMatcherId = ATOM_MATCHER_ID_BASE;
+
+        StatsdConfig.Builder builder = StatsdConfig.newBuilder();
+        builder
+            .addAllAllowedLogSource(Arrays.asList(ALLOWED_LOG_SOURCES))
+            .setHashStringsInMetricReport(false);
+
+        for (int atomId : atomIds) {
+            if (isPulledAtom(atomId)) {
+                builder.addAtomMatcher(createAtomMatcher(atomId, atomMatcherId));
+                GaugeMetric.Builder gaugeMetricBuilder = GaugeMetric.newBuilder();
+                gaugeMetricBuilder
+                    .setId(metricId)
+                    .setWhat(atomMatcherId)
+                    .setGaugeFieldsFilter(FieldFilter.newBuilder().setIncludeAll(true).build())
+                    .setBucket(TimeUnit.ONE_MINUTE);
+                builder.addGaugeMetric(gaugeMetricBuilder.build());
+            } else {
+                EventMetric.Builder eventMetricBuilder = EventMetric.newBuilder();
+                eventMetricBuilder
+                    .setId(metricId)
+                    .setWhat(atomMatcherId);
+                builder.addEventMetric(eventMetricBuilder.build());
+                builder.addAtomMatcher(createAtomMatcher(atomId, atomMatcherId));
+            }
+            atomMatcherId++;
+            mTrackedMetrics.add(metricId++);
+        }
+        return builder.build();
     }
 
-    private AtomMatcher createAtomMatcher(int atomId) {
+    private static AtomMatcher createAtomMatcher(int atomId, long matcherId) {
         AtomMatcher.Builder atomMatcherBuilder = AtomMatcher.newBuilder();
         atomMatcherBuilder
-                .setId(ATOM_MATCHER_ID)
+                .setId(matcherId)
                 .setSimpleAtomMatcher(SimpleAtomMatcher.newBuilder().setAtomId(atomId));
         return atomMatcherBuilder.build();
     }
 
-    private StatsdConfig.Builder getSimpleEventMetricBaseConfig() throws ParseException {
-        StatsdConfig.Builder builder = StatsdConfig.newBuilder();
-        TextFormat.merge(EVENT_BASE_CONFIG_SRTR, builder);
-        return builder;
+    private static String pushConfig(StatsdConfig config) throws IOException, InterruptedException {
+        File configFile = File.createTempFile("statsdconfig", ".config");
+        configFile.deleteOnExit();
+        Files.write(config.toByteArray(), configFile);
+        String remotePath = "/data/local/tmp/" + configFile.getName();
+        Utils.runCommand(null, LOGGER, "adb", "push", configFile.getAbsolutePath(), remotePath);
+        Utils.runCommand(null, LOGGER,
+                "adb", "shell", "cat", remotePath, "|", Utils.CMD_UPDATE_CONFIG,
+                String.valueOf(CONFIG_ID));
+        return remotePath;
     }
 
-    private StatsdConfig.Builder getSimpleGaugeMetricBaseConfig() throws ParseException {
-        StatsdConfig.Builder builder = StatsdConfig.newBuilder();
-        TextFormat.merge(GAUGE_BASE_CONFIG_STR, builder);
-        return builder;
-    }
-
-    private void dumpMetrics() throws Exception {
-        ConfigMetricsReportList reportList = Utils.getReportList(CONFIG_ID, true, false, logger);
-        // We may get multiple reports. Take the last one.
-        ConfigMetricsReport report = reportList.getReports(reportList.getReportsCount() - 1);
-        // Really should be only one metric.
-        if (report.getMetricsCount() != 1) {
-            logger.log(Level.SEVERE,
-                    "Only one report metric expected, got " + report.getMetricsCount());
-            return;
+    private static void removeConfig() {
+        try {
+            Utils.runCommand(null, LOGGER,
+                    "adb", "shell", Utils.CMD_REMOVE_CONFIG, String.valueOf(CONFIG_ID));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to remove config: " + e.getMessage());
         }
-
-        logger.info("Got following metric data dump:");
-        logger.info(report.getMetrics(0).toString());
     }
 
-    private static final String EVENT_BASE_CONFIG_SRTR =
-            "id: 12345\n"
-                    + "event_metric {\n"
-                    + "  id: 1111\n"
-                    + "  what: 1234567\n"
-                    + "}\n"
-                    + "allowed_log_source: \"AID_GRAPHICS\"\n"
-                    + "allowed_log_source: \"AID_INCIDENTD\"\n"
-                    + "allowed_log_source: \"AID_STATSD\"\n"
-                    + "allowed_log_source: \"AID_RADIO\"\n"
-                    + "allowed_log_source: \"com.android.systemui\"\n"
-                    + "allowed_log_source: \"com.android.vending\"\n"
-                    + "allowed_log_source: \"AID_SYSTEM\"\n"
-                    + "allowed_log_source: \"AID_ROOT\"\n"
-                    + "allowed_log_source: \"AID_BLUETOOTH\"\n"
-                    + "allowed_log_source: \"AID_LMKD\"\n"
-                    + "\n"
-                    + "hash_strings_in_metric_report: false";
+    private static boolean isPulledAtom(int atomId) {
+        return atomId >= PULL_ATOM_START;
+    }
 
-    private static final String GAUGE_BASE_CONFIG_STR =
-            "id: 56789\n"
-                    + "gauge_metric {\n"
-                    + "  id: 2222\n"
-                    + "  what: 1234567\n"
-                    + "  gauge_fields_filter {\n"
-                    + "    include_all: true\n"
-                    + "  }\n"
-                    + "  bucket: ONE_MINUTE\n"
-                    + "}\n"
-                    + "allowed_log_source: \"AID_GRAPHICS\"\n"
-                    + "allowed_log_source: \"AID_INCIDENTD\"\n"
-                    + "allowed_log_source: \"AID_STATSD\"\n"
-                    + "allowed_log_source: \"AID_RADIO\"\n"
-                    + "allowed_log_source: \"com.android.systemui\"\n"
-                    + "allowed_log_source: \"com.android.vending\"\n"
-                    + "allowed_log_source: \"AID_SYSTEM\"\n"
-                    + "allowed_log_source: \"AID_ROOT\"\n"
-                    + "allowed_log_source: \"AID_BLUETOOTH\"\n"
-                    + "allowed_log_source: \"AID_LMKD\"\n"
-                    + "\n"
-                    + "hash_strings_in_metric_report: false";
-
+    private static boolean hasPulledAtom(Set<Integer> atoms) {
+        for (Integer i : atoms) {
+            if (isPulledAtom(i)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
