@@ -2023,7 +2023,7 @@ public final class ActiveServices {
                 if (!mAm.validateAssociationAllowedLocked(callingPackage, callingUid,
                         name.getPackageName(), sInfo.applicationInfo.uid)) {
                     String msg = "association not allowed between packages "
-                            + callingPackage + " and " + r.packageName;
+                            + callingPackage + " and " + name.getPackageName();
                     Slog.w(TAG, "Service lookup failed: " + msg);
                     return new ServiceLookupResult(null, msg);
                 }
