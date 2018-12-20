@@ -318,7 +318,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
-import com.android.server.appop.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
 import com.android.server.DisplayThread;
@@ -337,6 +336,7 @@ import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
+import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
@@ -10628,7 +10628,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProtoUtils.toDuration(proto, ActivityManagerServiceDumpProcessesProto.LAST_IDLE_TIME, mLastIdleTime, now);
             proto.write(ActivityManagerServiceDumpProcessesProto.LOW_RAM_SINCE_LAST_IDLE_MS, getLowRamTimeSinceIdle(now));
         }
-
     }
 
     void writeProcessesToGcToProto(ProtoOutputStream proto, long fieldId, String dumpPackage) {

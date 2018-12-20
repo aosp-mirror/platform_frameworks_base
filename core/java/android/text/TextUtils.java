@@ -33,8 +33,7 @@ import android.icu.text.Edits;
 import android.icu.util.ULocale;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemProperties;
-import android.provider.Settings;
+import android.sysprop.DisplayProperties;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AccessibilityClickableSpan;
 import android.text.style.AccessibilityURLSpan;
@@ -2059,7 +2058,7 @@ public class TextUtils {
         return ((locale != null && !locale.equals(Locale.ROOT)
                         && ULocale.forLocale(locale).isRightToLeft())
                 // If forcing into RTL layout mode, return RTL as default
-                || SystemProperties.getBoolean(Settings.Global.DEVELOPMENT_FORCE_RTL, false))
+                || DisplayProperties.debug_force_rtl().orElse(false))
             ? View.LAYOUT_DIRECTION_RTL
             : View.LAYOUT_DIRECTION_LTR;
     }
