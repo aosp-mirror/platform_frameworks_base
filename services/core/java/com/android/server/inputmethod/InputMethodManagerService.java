@@ -73,6 +73,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -4300,9 +4301,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     ? new File(Environment.getDataDirectory(), SYSTEM_PATH)
                     : Environment.getUserSystemDirectory(userId);
             final File inputMethodDir = new File(systemDir, INPUT_METHOD_PATH);
-            if (!inputMethodDir.exists() && !inputMethodDir.mkdirs()) {
-                Slog.w(TAG, "Couldn't create dir.: " + inputMethodDir.getAbsolutePath());
-            }
             final File subtypeFile = new File(inputMethodDir, ADDITIONAL_SUBTYPES_FILE_NAME);
             mAdditionalInputMethodSubtypeFile = new AtomicFile(subtypeFile, "input-subtypes");
             readAdditionalInputMethodSubtypes(mAdditionalSubtypesMap,
@@ -4350,6 +4348,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (subtypesFile.exists()) {
                     subtypesFile.delete();
                 }
+                final File parentDir = subtypesFile.getBaseFile().getParentFile();
+                if (parentDir != null && FileUtils.listFilesOrEmpty(parentDir).length == 0) {
+                    if (!parentDir.delete()) {
+                        Slog.e(TAG, "Failed to delete the empty parent directory " + parentDir);
+                    }
+                }
+                return;
+            }
+
+            final File parentDir = subtypesFile.getBaseFile().getParentFile();
+            if (!parentDir.exists() && !parentDir.mkdirs()) {
+                Slog.e(TAG, "Failed to create a parent directory " + parentDir);
                 return;
             }
 
