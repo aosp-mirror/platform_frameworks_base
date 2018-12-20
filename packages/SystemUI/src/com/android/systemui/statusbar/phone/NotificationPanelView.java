@@ -53,6 +53,7 @@ import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
@@ -133,7 +134,7 @@ public class NotificationPanelView extends PanelView implements
     public static final int FLING_COLLAPSE = 1;
 
     /**
-     * Fing until QS is completely hidden.
+     * Fling until QS is completely hidden.
      */
     public static final int FLING_HIDE = 2;
 
@@ -358,6 +359,10 @@ public class NotificationPanelView extends PanelView implements
         super.onFinishInflate();
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
+
+        KeyguardClockSwitch keyguardClockSwitch = findViewById(R.id.keyguard_clock_container);
+        ViewGroup bigClockContainer = findViewById(R.id.big_clock_container);
+        keyguardClockSwitch.setBigClockContainer(bigClockContainer);
 
         mNotificationContainerParent = findViewById(R.id.notification_container_parent);
         mNotificationStackScroller = findViewById(R.id.notification_stack_scroller);

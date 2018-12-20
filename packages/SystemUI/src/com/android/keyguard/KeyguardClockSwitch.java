@@ -35,7 +35,11 @@ public class KeyguardClockSwitch extends RelativeLayout {
     /**
      * Frame for default and custom clock.
      */
-    private FrameLayout mClockFrame;
+    private FrameLayout mSmallClockFrame;
+    /**
+     * Container for big custom clock.
+     */
+    private ViewGroup mBigClockContainer;
     /**
      * Status area (date and other stuff) shown below the clock. Plugin can decide whether
      * or not to show it below the alternate clock.
@@ -46,22 +50,27 @@ public class KeyguardClockSwitch extends RelativeLayout {
             new PluginListener<ClockPlugin>() {
                 @Override
                 public void onPluginConnected(ClockPlugin plugin, Context pluginContext) {
-                    View view = plugin.getView();
-                    if (view != null) {
-                        disconnectPlugin();
+                    disconnectPlugin();
+                    View smallClockView = plugin.getView();
+                    if (smallClockView != null) {
                         // For now, assume that the most recently connected plugin is the
                         // selected clock face. In the future, the user should be able to
                         // pick a clock face from the available plugins.
-                        mClockPlugin = plugin;
-                        mClockFrame.addView(view, -1,
+                        mSmallClockFrame.addView(smallClockView, -1,
                                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                         ViewGroup.LayoutParams.WRAP_CONTENT));
                         initPluginParams();
                         mClockView.setVisibility(View.GONE);
-                        if (!plugin.shouldShowStatusArea()) {
-                            mKeyguardStatusArea.setVisibility(View.GONE);
-                        }
                     }
+                    View bigClockView = plugin.getBigClockView();
+                    if (bigClockView != null && mBigClockContainer != null) {
+                        mBigClockContainer.addView(bigClockView);
+                        mBigClockContainer.setVisibility(View.VISIBLE);
+                    }
+                    if (!plugin.shouldShowStatusArea()) {
+                        mKeyguardStatusArea.setVisibility(View.GONE);
+                    }
+                    mClockPlugin = plugin;
                 }
 
                 @Override
@@ -86,7 +95,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mClockView = findViewById(R.id.default_clock_view);
-        mClockFrame = findViewById(R.id.clock_view);
+        mSmallClockFrame = findViewById(R.id.clock_view);
         mKeyguardStatusArea = findViewById(R.id.keyguard_status_area);
     }
 
@@ -101,6 +110,20 @@ public class KeyguardClockSwitch extends RelativeLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(PluginManager.class).removePluginListener(mClockPluginListener);
+    }
+
+    /**
+     * Set container for big clock face appearing behind NSSL and KeyguardStatusView.
+     */
+    public void setBigClockContainer(ViewGroup container) {
+        if (mClockPlugin != null && container != null) {
+            View bigClockView = mClockPlugin.getBigClockView();
+            if (bigClockView != null) {
+                container.addView(bigClockView);
+                container.setVisibility(View.VISIBLE);
+            }
+        }
+        mBigClockContainer = container;
     }
 
     /**
@@ -199,9 +222,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private void disconnectPlugin() {
         if (mClockPlugin != null) {
-            View view = mClockPlugin.getView();
-            if (view != null) {
-                mClockFrame.removeView(view);
+            View smallClockView = mClockPlugin.getView();
+            if (smallClockView != null) {
+                mSmallClockFrame.removeView(smallClockView);
+            }
+            if (mBigClockContainer != null) {
+                mBigClockContainer.removeAllViews();
+                mBigClockContainer.setVisibility(View.GONE);
             }
             mClockPlugin = null;
         }

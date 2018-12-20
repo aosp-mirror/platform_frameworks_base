@@ -25,6 +25,12 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent" >
 
+    <FrameLayout
+        android:id="@+id/big_clock_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
     <include
         layout="@layout/keyguard_status_view"
         android:visibility="gone" />

@@ -36,6 +36,13 @@ public interface ClockPlugin extends Plugin {
     View getView();
 
     /**
+     * Get clock view for a large clock that appears behind NSSL.
+     */
+    default View getBigClockView() {
+        return null;
+    }
+
+    /**
      * Set clock paint style.
      * @param style The new style to set in the paint.
      */
