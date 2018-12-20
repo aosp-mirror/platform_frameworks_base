@@ -49,7 +49,6 @@ import android.view.SurfaceControl;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -70,9 +69,9 @@ final class InputMonitor {
     private final UpdateInputForAllWindowsConsumer mUpdateInputForAllWindowsConsumer =
             new UpdateInputForAllWindowsConsumer();
 
-    private int mDisplayId;
+    private final int mDisplayId;
 
-    SurfaceControl.Transaction mInputTransaction = new SurfaceControl.Transaction();
+    private final SurfaceControl.Transaction mInputTransaction;
 
     /**
      * The set of input consumer added to the window manager by name, which consumes input events
@@ -109,6 +108,7 @@ final class InputMonitor {
     public InputMonitor(WindowManagerService service, int displayId) {
         mService = service;
         mDisplayId = displayId;
+        mInputTransaction = mService.mRoot.getDisplayContent(mDisplayId).getPendingTransaction();
     }
 
     private void addInputConsumer(String name, InputConsumerImpl consumer) {
@@ -397,7 +397,7 @@ final class InputMonitor {
                 wallpaperInputConsumer.show(mInputTransaction, 0);
             }
 
-            mInputTransaction.apply();
+            dc.scheduleAnimation();
 
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
