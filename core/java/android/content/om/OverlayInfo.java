@@ -18,8 +18,7 @@ package android.content.om;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
-import android.os.Build;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -32,8 +31,10 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public final class OverlayInfo implements Parcelable {
 
+    /** @hide */
     @IntDef(prefix = "STATE_", value = {
             STATE_UNKNOWN,
             STATE_MISSING_TARGET,
@@ -44,6 +45,7 @@ public final class OverlayInfo implements Parcelable {
             STATE_TARGET_UPGRADING,
             STATE_OVERLAY_UPGRADING,
     })
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {}
 
@@ -52,17 +54,23 @@ public final class OverlayInfo implements Parcelable {
      * objects exposed outside the {@link
      * com.android.server.om.OverlayManagerService} should never have this
      * state.
+     *
+     * @hide
      */
     public static final int STATE_UNKNOWN = -1;
 
     /**
      * The target package of the overlay is not installed. The overlay cannot be enabled.
+     *
+     * @hide
      */
     public static final int STATE_MISSING_TARGET = 0;
 
     /**
      * Creation of idmap file failed (e.g. no matching resources). The overlay
      * cannot be enabled.
+     *
+     * @hide
      */
     public static final int STATE_NO_IDMAP = 1;
 
@@ -70,6 +78,7 @@ public final class OverlayInfo implements Parcelable {
      * The overlay is currently disabled. It can be enabled.
      *
      * @see IOverlayManager#setEnabled
+     * @hide
      */
     public static final int STATE_DISABLED = 2;
 
@@ -77,18 +86,21 @@ public final class OverlayInfo implements Parcelable {
      * The overlay is currently enabled. It can be disabled.
      *
      * @see IOverlayManager#setEnabled
+     * @hide
      */
     public static final int STATE_ENABLED = 3;
 
     /**
      * The target package is currently being upgraded; the state will change
      * once the package installation has finished.
+     * @hide
      */
     public static final int STATE_TARGET_UPGRADING = 4;
 
     /**
      * The overlay package is currently being upgraded; the state will change
      * once the package installation has finished.
+     * @hide
      */
     public static final int STATE_OVERLAY_UPGRADING = 5;
 
@@ -96,6 +108,7 @@ public final class OverlayInfo implements Parcelable {
      * The overlay package is currently enabled because it is marked as
      * 'static'. It cannot be disabled but will change state if for instance
      * its target is uninstalled.
+     * @hide
      */
     public static final int STATE_ENABLED_STATIC = 6;
 
@@ -103,40 +116,52 @@ public final class OverlayInfo implements Parcelable {
      * Overlay category: theme.
      * <p>
      * Change how Android (including the status bar, dialogs, ...) looks.
+     *
+     * @hide
      */
     public static final String CATEGORY_THEME = "android.theme";
 
     /**
      * Package name of the overlay package
+     *
+     * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public final String packageName;
 
     /**
      * Package name of the target package
+     *
+     * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @SystemApi
     public final String targetPackageName;
 
     /**
      * Category of the overlay package
+     *
+     * @hide
      */
+    @SystemApi
     public final String category;
 
     /**
      * Full path to the base APK for this overlay package
+     * @hide
      */
     public final String baseCodePath;
 
     /**
      * The state of this OverlayInfo as defined by the STATE_* constants in this class.
+     * @hide
      */
-    @UnsupportedAppUsage
     public final @State int state;
 
     /**
      * User handle for which this overlay applies
+     * @hide
      */
+    @SystemApi
     public final int userId;
 
     /**
@@ -161,12 +186,15 @@ public final class OverlayInfo implements Parcelable {
      *
      * @param source the source OverlayInfo to base the new instance on
      * @param state the new state for the source OverlayInfo
+     *
+     * @hide
      */
     public OverlayInfo(@NonNull OverlayInfo source, @State int state) {
         this(source.packageName, source.targetPackageName, source.category, source.baseCodePath,
                 state, source.userId, source.priority, source.isStatic);
     }
 
+    /** @hide */
     public OverlayInfo(@NonNull String packageName, @NonNull String targetPackageName,
             @NonNull String category, @NonNull String baseCodePath, int state, int userId,
             int priority, boolean isStatic) {
@@ -181,6 +209,7 @@ public final class OverlayInfo implements Parcelable {
         ensureValidState();
     }
 
+    /** @hide */
     public OverlayInfo(Parcel source) {
         packageName = source.readString();
         targetPackageName = source.readString();
@@ -255,8 +284,9 @@ public final class OverlayInfo implements Parcelable {
      * Disabled overlay packages are installed but are currently not in use.
      *
      * @return true if the overlay is enabled, else false.
+     * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public boolean isEnabled() {
         switch (state) {
             case STATE_ENABLED:
@@ -272,6 +302,7 @@ public final class OverlayInfo implements Parcelable {
      * debugging purposes.
      *
      * @return a human readable String representing the state.
+     * @hide
      */
     public static String stateToString(@State int state) {
         switch (state) {

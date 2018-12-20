@@ -42,6 +42,8 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
+import android.content.om.IOverlayManager;
+import android.content.om.OverlayManager;
 import android.content.pm.CrossProfileApps;
 import android.content.pm.ICrossProfileApps;
 import android.content.pm.IShortcutService;
@@ -1033,6 +1035,14 @@ final class SystemServiceRegistry {
             public ShortcutManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.SHORTCUT_SERVICE);
                 return new ShortcutManager(ctx, IShortcutService.Stub.asInterface(b));
+            }});
+
+        registerService(Context.OVERLAY_SERVICE, OverlayManager.class,
+                new CachedServiceFetcher<OverlayManager>() {
+            @Override
+            public OverlayManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getServiceOrThrow(Context.OVERLAY_SERVICE);
+                return new OverlayManager(ctx, IOverlayManager.Stub.asInterface(b));
             }});
 
         registerService(Context.NETWORK_WATCHLIST_SERVICE, NetworkWatchlistManager.class,
