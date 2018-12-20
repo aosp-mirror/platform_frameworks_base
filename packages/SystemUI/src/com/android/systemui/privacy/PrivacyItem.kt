@@ -44,7 +44,7 @@ data class PrivacyApplication(val packageName: String, val context: Context)
         return applicationName.compareTo(other.applicationName)
     }
 
-    var icon: Drawable? = null
+    var icon: Drawable = context.getDrawable(android.R.drawable.sym_def_app_icon)
     var applicationName: String
 
     init {
