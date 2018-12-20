@@ -19,6 +19,7 @@ package android.content.om;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -114,7 +115,7 @@ public final class OverlayInfo implements Parcelable {
     /**
      * Package name of the target package
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final String targetPackageName;
 
     /**

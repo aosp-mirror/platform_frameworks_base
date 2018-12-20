@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -81,7 +82,7 @@ public final class RouteInfo implements Parcelable {
 
     // Derived data members.
     // TODO: remove these.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final boolean mIsHost;
     private final boolean mHasGateway;
 
@@ -265,7 +266,7 @@ public final class RouteInfo implements Parcelable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean isHost() {
         return (mDestination.getAddress() instanceof Inet4Address &&
                 mDestination.getPrefixLength() == 32) ||

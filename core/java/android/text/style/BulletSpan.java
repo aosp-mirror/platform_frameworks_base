@@ -24,6 +24,7 @@ import android.annotation.Px;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Build;
 import android.os.Parcel;
 import android.text.Layout;
 import android.text.ParcelableSpan;
@@ -69,14 +70,14 @@ public class BulletSpan implements LeadingMarginSpan, ParcelableSpan {
     private static final int STANDARD_COLOR = 0;
 
     @Px
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mGapWidth;
     @Px
     private final int mBulletRadius;
     @ColorInt
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mColor;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final boolean mWantColor;
 
     /**

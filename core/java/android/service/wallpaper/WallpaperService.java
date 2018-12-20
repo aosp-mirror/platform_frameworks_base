@@ -35,6 +35,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -197,7 +198,7 @@ public abstract class WallpaperService extends Service {
 
         final Object mLock = new Object();
         boolean mOffsetMessageEnqueued;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         float mPendingXOffset;
         float mPendingYOffset;
         float mPendingXOffsetStep;

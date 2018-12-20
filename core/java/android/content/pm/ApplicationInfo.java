@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1449,9 +1450,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             return sCollator.compare(sa.toString(), sb.toString());
         }
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private final Collator   sCollator = Collator.getInstance();
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private PackageManager   mPM;
     }
 
@@ -1693,7 +1694,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * 
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void disableCompatibilityMode() {
         flags |= (FLAG_SUPPORTS_LARGE_SCREENS | FLAG_SUPPORTS_NORMAL_SCREENS |
                 FLAG_SUPPORTS_SMALL_SCREENS | FLAG_RESIZEABLE_FOR_SCREENS |
@@ -1829,7 +1830,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return pm.getDefaultActivityIcon();
     }
     
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean isPackageUnavailable(PackageManager pm) {
         try {
             return pm.getPackageInfo(packageName, 0) == null;

@@ -17,6 +17,7 @@
 package com.android.internal.net;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -52,7 +53,7 @@ public class VpnProfile implements Cloneable, Parcelable {
     public String name = "";           // 0
     @UnsupportedAppUsage
     public int type = TYPE_PPTP;       // 1
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public String server = "";         // 2
     @UnsupportedAppUsage
     public String username = "";       // 3

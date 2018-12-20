@@ -2226,12 +2226,12 @@ public class AccountManager {
     }
 
     private abstract class AmsTask extends FutureTask<Bundle> implements AccountManagerFuture<Bundle> {
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final IAccountManagerResponse mResponse;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final Handler mHandler;
         final AccountManagerCallback<Bundle> mCallback;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final Activity mActivity;
         public AmsTask(Activity activity, Handler handler, AccountManagerCallback<Bundle> callback) {
             super(new Callable<Bundle>() {
@@ -2556,13 +2556,13 @@ public class AccountManager {
         }
         volatile AccountManagerFuture<Bundle> mFuture = null;
         final String mAccountType;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final String mAuthTokenType;
         final String[] mFeatures;
         final Bundle mAddAccountOptions;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final Bundle mLoginOptions;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final AccountManagerCallback<Bundle> mMyCallback;
         private volatile int mNumAccounts = 0;
 

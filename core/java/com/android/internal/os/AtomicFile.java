@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.FileUtils;
 import android.util.Log;
 
@@ -51,7 +52,7 @@ public final class AtomicFile {
         mBackupName = new File(baseName.getPath() + ".bak");
     }
     
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public File getBaseFile() {
         return mBaseName;
     }

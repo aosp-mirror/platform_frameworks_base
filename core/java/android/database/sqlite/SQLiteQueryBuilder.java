@@ -53,11 +53,11 @@ public class SQLiteQueryBuilder {
     private Map<String, String> mProjectionMap = null;
     private List<Pattern> mProjectionGreylist = null;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mTables = "";
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private StringBuilder mWhereClause = null;  // lazily created
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean mDistinct;
     private SQLiteDatabase.CursorFactory mFactory;
     private boolean mStrict;
@@ -800,7 +800,7 @@ public class SQLiteQueryBuilder {
         return query.toString();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String[] computeProjection(String[] projectionIn) {
         if (projectionIn != null && projectionIn.length > 0) {
             if (mProjectionMap != null) {

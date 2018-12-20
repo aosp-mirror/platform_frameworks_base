@@ -19,6 +19,7 @@ package android.content.pm;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.apex.ApexInfo;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -514,7 +515,7 @@ public class PackageInfo implements Parcelable {
         }
     };
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private PackageInfo(Parcel source) {
         packageName = source.readString();
         splitNames = source.createStringArray();

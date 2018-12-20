@@ -429,7 +429,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @ViewDebug.ExportedProperty(category = "text")
     @UnsupportedAppUsage
     private int mCurTextColor;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mCurHintTextColor;
     private boolean mFreezesText;
 
@@ -10013,7 +10013,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         && mSavedMarqueeModeLayout.getLineWidth(0) > width));
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private void startMarquee() {
         // Do not ellipsize EditText
         if (getKeyListener() != null) return;
@@ -10056,7 +10056,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private void startStopMarquee(boolean start) {
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (start) {

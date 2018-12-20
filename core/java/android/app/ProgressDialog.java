@@ -22,6 +22,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -64,7 +65,7 @@ public class ProgressDialog extends AlertDialog {
      */
     public static final int STYLE_HORIZONTAL = 1;
     
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private ProgressBar mProgress;
     @UnsupportedAppUsage
     private TextView mMessageView;

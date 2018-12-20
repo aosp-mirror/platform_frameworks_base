@@ -29,6 +29,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -316,7 +317,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * The drawable used to draw the selector
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     Drawable mSelector;
 
     /**
@@ -677,7 +678,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * ID of the active pointer. This is used to retain consistency during
      * drags/flings if multiple pointers are used.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mActivePointerId = INVALID_POINTER;
 
     /**
@@ -6571,7 +6572,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             @ViewDebug.IntToString(from = ITEM_VIEW_TYPE_IGNORE, to = "ITEM_VIEW_TYPE_IGNORE"),
             @ViewDebug.IntToString(from = ITEM_VIEW_TYPE_HEADER_OR_FOOTER, to = "ITEM_VIEW_TYPE_HEADER_OR_FOOTER")
         })
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         int viewType;
 
         /**

@@ -18,6 +18,7 @@ package android.net;
 
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -289,7 +290,7 @@ public class NetworkFactory extends Handler {
         sendMessage(obtainMessage(CMD_CANCEL_REQUEST, networkRequest));
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setScoreFilter(int score) {
         sendMessage(obtainMessage(CMD_SET_SCORE, score, 0));
     }
@@ -307,7 +308,7 @@ public class NetworkFactory extends Handler {
         Log.d(LOG_TAG, s);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         pw.println(toString());

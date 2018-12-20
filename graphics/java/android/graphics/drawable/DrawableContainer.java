@@ -29,6 +29,7 @@ import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
@@ -736,7 +737,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         /**
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         protected DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;
