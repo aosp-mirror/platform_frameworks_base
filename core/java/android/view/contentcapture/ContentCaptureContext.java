@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.TaskInfo;
 import android.content.ComponentName;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -76,7 +77,7 @@ public final class ContentCaptureContext implements Parcelable {
 
     /**
      * Flag indicating if this object has the app-provided context (which is set on
-     * {@link ContentCaptureManager#createContentCaptureSession(ContentCaptureContext)}).
+     * {@link ContentCaptureSession#createContentCaptureSession(ContentCaptureContext)}).
      */
     private final boolean mHasClientContext;
 
@@ -90,6 +91,9 @@ public final class ContentCaptureContext implements Parcelable {
     private final int mTaskId;
     private final int mDisplayId;
     private final int mFlags;
+
+    // Fields below are set by the service upon "delivery" and are not marshalled in the parcel
+    private @Nullable String mParentSessionId;
 
     /** @hide */
     public ContentCaptureContext(@Nullable ContentCaptureContext clientContext,
@@ -153,13 +157,30 @@ public final class ContentCaptureContext implements Parcelable {
     }
 
     /**
-     * Gets the activity associated with this context.
+     * Gets the activity associated with this context, or {@code null} when it is a child session.
      *
      * @hide
      */
     @SystemApi
-    public @NonNull ComponentName getActivityComponent() {
+    public @Nullable ComponentName getActivityComponent() {
         return mComponentName;
+    }
+
+    /**
+     * Gets the id of the session that originated this session (through
+     * {@link ContentCaptureSession#createContentCaptureSession(ContentCaptureContext)}),
+     * or {@code null} if this is the main session associated with the Activity's {@link Context}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @Nullable ContentCaptureSessionId getParentSessionId() {
+        return mParentSessionId == null ?  null : new ContentCaptureSessionId(mParentSessionId);
+    }
+
+    /** @hide */
+    public void setParentSessionId(@NonNull String parentSessionId) {
+        mParentSessionId = parentSessionId;
     }
 
     /**
@@ -242,6 +263,9 @@ public final class ContentCaptureContext implements Parcelable {
         pw.print("comp="); pw.print(ComponentName.flattenToShortString(mComponentName));
         pw.print(", taskId="); pw.print(mTaskId);
         pw.print(", displayId="); pw.print(mDisplayId);
+        if (mParentSessionId != null) {
+            pw.print(", parentId="); pw.print(mParentSessionId);
+        }
         if (mFlags > 0) {
             pw.print(", flags="); pw.print(mFlags);
         }
@@ -262,6 +286,9 @@ public final class ContentCaptureContext implements Parcelable {
                 .append(", taskId=").append(mTaskId)
                 .append(", displayId=").append(mDisplayId)
                 .append(", flags=").append(mFlags);
+        if (mParentSessionId != null) {
+            builder.append(", parentId=").append(mParentSessionId);
+        }
         if (mExtras != null) {
             // NOTE: cannot print because it could contain PII
             builder.append(", hasExtras");
@@ -320,9 +347,9 @@ public final class ContentCaptureContext implements Parcelable {
                 final int taskId = parcel.readInt();
                 final int displayId = parcel.readInt();
                 final int flags = parcel.readInt();
-                        return new ContentCaptureContext(clientContext, componentName, taskId,
-                                displayId, flags);
-                    }
+                return new ContentCaptureContext(clientContext, componentName, taskId, displayId,
+                        flags);
+            }
         }
 
         @Override

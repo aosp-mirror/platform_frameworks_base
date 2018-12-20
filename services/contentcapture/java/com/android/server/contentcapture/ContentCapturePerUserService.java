@@ -24,7 +24,6 @@ import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUC
 
 import android.Manifest;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.assist.AssistContent;
@@ -39,7 +38,6 @@ import android.os.RemoteException;
 import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
 import android.util.Slog;
-import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureSession;
 
 import com.android.internal.annotations.GuardedBy;
@@ -114,8 +112,8 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     public void startSessionLocked(@NonNull IBinder activityToken,
             @NonNull ComponentName componentName, int taskId, int displayId,
-            @NonNull String sessionId, int uid, @Nullable ContentCaptureContext clientContext,
-            int flags, boolean bindInstantServiceAllowed, @NonNull IResultReceiver clientReceiver) {
+            @NonNull String sessionId, int uid, int flags, boolean bindInstantServiceAllowed,
+            @NonNull IResultReceiver clientReceiver) {
         if (!isEnabledLocked()) {
             setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED, /* binder=*/ null);
             return;
@@ -142,7 +140,7 @@ final class ContentCapturePerUserService
 
         final ContentCaptureServerSession newSession = new ContentCaptureServerSession(getContext(),
                 mUserId, mLock, activityToken, this, serviceComponentName, componentName, taskId,
-                displayId, sessionId, uid, clientContext, flags, bindInstantServiceAllowed,
+                displayId, sessionId, uid, flags, bindInstantServiceAllowed,
                 mMaster.verbose);
         if (mMaster.verbose) {
             Slog.v(TAG, "startSession(): new session for "

@@ -7570,6 +7570,7 @@ package android.view.contentcapture {
     method public int getDisplayId();
     method public android.os.Bundle getExtras();
     method public int getFlags();
+    method public android.view.contentcapture.ContentCaptureSessionId getParentSessionId();
     method public int getTaskId();
     method public android.net.Uri getUri();
     field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
