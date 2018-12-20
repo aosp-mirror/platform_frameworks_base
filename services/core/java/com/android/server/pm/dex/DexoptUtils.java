@@ -22,7 +22,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.os.ClassLoaderFactory;
-import com.android.server.pm.PackageDexOptimizer;
 
 import java.io.File;
 import java.util.List;
@@ -275,15 +274,11 @@ public final class DexoptUtils {
     /**
      * Encodes a single class loader dependency starting from {@param path} and
      * {@param classLoaderName}.
-     * When classpath is {@link PackageDexOptimizer#SKIP_SHARED_LIBRARY_CHECK}, the method returns
-     * the same. This special property is used only during OTA.
      * NOTE: Keep this in sync with the dexopt expectations! Right now that is either "PCL[path]"
      * for a PathClassLoader or "DLC[path]" for a DelegateLastClassLoader.
      */
     /*package*/ static String encodeClassLoader(String classpath, String classLoaderName) {
-        if (classpath.equals(PackageDexOptimizer.SKIP_SHARED_LIBRARY_CHECK)) {
-            return classpath;
-        }
+        classpath.getClass();  // Throw NPE if classpath is null
         String classLoaderDexoptEncoding = classLoaderName;
         if (ClassLoaderFactory.isPathClassLoaderName(classLoaderName)) {
             classLoaderDexoptEncoding = "PCL";
@@ -306,16 +301,10 @@ public final class DexoptUtils {
     /**
      * Links to dependencies together in a format accepted by dexopt.
      * For the special case when either of cl1 or cl2 equals
-     * {@link PackageDexOptimizer#SKIP_SHARED_LIBRARY_CHECK}, the method returns the same. This
-     * property is used only during OTA.
      * NOTE: Keep this in sync with the dexopt expectations! Right now that is a list of split
      * dependencies {@see encodeClassLoader} separated by ';'.
      */
     /*package*/ static String encodeClassLoaderChain(String cl1, String cl2) {
-        if (cl1.equals(PackageDexOptimizer.SKIP_SHARED_LIBRARY_CHECK) ||
-                cl2.equals(PackageDexOptimizer.SKIP_SHARED_LIBRARY_CHECK)) {
-            return PackageDexOptimizer.SKIP_SHARED_LIBRARY_CHECK;
-        }
         if (cl1.isEmpty()) return cl2;
         if (cl2.isEmpty()) return cl1;
         return cl1 + ";" + cl2;
