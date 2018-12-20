@@ -106,7 +106,9 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
     fprintf(out, "#include <mutex>\n");
     fprintf(out, "#include <chrono>\n");
     fprintf(out, "#include <thread>\n");
+    fprintf(out, "#ifdef __ANDROID__\n");
     fprintf(out, "#include <cutils/properties.h>\n");
+    fprintf(out, "#endif\n");
     fprintf(out, "#include <stats_event_list.h>\n");
     fprintf(out, "#include <log/log.h>\n");
     fprintf(out, "#include <statslog.h>\n");
@@ -117,7 +119,11 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
     fprintf(out, "namespace util {\n");
     fprintf(out, "// the single event tag id for all stats logs\n");
     fprintf(out, "const static int kStatsEventTag = 1937006964;\n");
+    fprintf(out, "#ifdef __ANDROID__\n");
     fprintf(out, "const static bool kStatsdEnabled = property_get_bool(\"ro.statsd.enable\", true);\n");
+    fprintf(out, "#else\n");
+    fprintf(out, "const static bool kStatsdEnabled = false;\n");
+    fprintf(out, "#endif\n");
 
     std::set<string> kTruncatingAtomNames = {"mobile_radio_power_state_changed",
                                              "audio_state_changed",
