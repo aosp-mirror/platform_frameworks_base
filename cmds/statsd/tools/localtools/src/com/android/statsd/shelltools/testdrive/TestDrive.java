@@ -194,6 +194,7 @@ public class TestDrive {
                     + "allowed_log_source: \"AID_SYSTEM\"\n"
                     + "allowed_log_source: \"AID_ROOT\"\n"
                     + "allowed_log_source: \"AID_BLUETOOTH\"\n"
+                    + "allowed_log_source: \"AID_LMKD\"\n"
                     + "\n"
                     + "hash_strings_in_metric_report: false";
 
@@ -216,6 +217,7 @@ public class TestDrive {
                     + "allowed_log_source: \"AID_SYSTEM\"\n"
                     + "allowed_log_source: \"AID_ROOT\"\n"
                     + "allowed_log_source: \"AID_BLUETOOTH\"\n"
+                    + "allowed_log_source: \"AID_LMKD\"\n"
                     + "\n"
                     + "hash_strings_in_metric_report: false";
 
