@@ -52,8 +52,8 @@ public class AppOpsNotedWatcherTest {
         // Try to start watching noted ops
         final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
         try {
-            appOpsManager.startWatchingNoted(new String[]{AppOpsManager.OPSTR_FINE_LOCATION,
-                    AppOpsManager.OPSTR_RECORD_AUDIO}, listener);
+            appOpsManager.startWatchingNoted(new int[]{AppOpsManager.OP_FINE_LOCATION,
+                    AppOpsManager.OP_RECORD_AUDIO}, listener);
             fail("Watching noted ops shoudl require " + Manifest.permission.WATCH_APPOPS);
         } catch (SecurityException expected) {
             /*ignored*/
@@ -67,23 +67,23 @@ public class AppOpsNotedWatcherTest {
 
         // Start watching noted ops
         final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
-        appOpsManager.startWatchingNoted(new String[]{AppOpsManager.OPSTR_FINE_LOCATION,
-                AppOpsManager.OPSTR_CAMERA}, listener);
+        appOpsManager.startWatchingNoted(new int[]{AppOpsManager.OP_FINE_LOCATION,
+                AppOpsManager.OP_CAMERA}, listener);
 
         // Note some ops
-        appOpsManager.noteOp(AppOpsManager.OPSTR_FINE_LOCATION, Process.myUid(),
+        appOpsManager.noteOp(AppOpsManager.OP_FINE_LOCATION, Process.myUid(),
                 getContext().getPackageName());
-        appOpsManager.noteOp(AppOpsManager.OPSTR_CAMERA, Process.myUid(),
+        appOpsManager.noteOp(AppOpsManager.OP_CAMERA, Process.myUid(),
                 getContext().getPackageName());
 
         // Verify that we got called for the ops being noted
         final InOrder inOrder = inOrder(listener);
         inOrder.verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
-                .times(1)).onOpNoted(eq(AppOpsManager.OPSTR_FINE_LOCATION),
+                .times(1)).onOpNoted(eq(AppOpsManager.OP_FINE_LOCATION),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
                 eq(AppOpsManager.MODE_ALLOWED));
         inOrder.verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
-                .times(1)).onOpNoted(eq(AppOpsManager.OPSTR_CAMERA),
+                .times(1)).onOpNoted(eq(AppOpsManager.OP_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
                 eq(AppOpsManager.MODE_ALLOWED));
 

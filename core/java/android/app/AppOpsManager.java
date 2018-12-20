@@ -2496,7 +2496,7 @@ public class AppOpsManager {
          * @param packageName The package performing the operation.
          * @param result The result of the note.
          */
-        void onOpNoted(String code, int uid, String packageName, int result);
+        void onOpNoted(int code, int uid, String packageName, int result);
     }
 
     /**
@@ -2953,7 +2953,7 @@ public class AppOpsManager {
      * @hide
      */
     @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
-    public void startWatchingNoted(@NonNull String[] ops, @NonNull OnOpNotedListener callback) {
+    public void startWatchingNoted(@NonNull int[] ops, @NonNull OnOpNotedListener callback) {
         IAppOpsNotedCallback cb;
         synchronized (mNotedWatchers) {
             cb = mNotedWatchers.get(callback);
@@ -2963,17 +2963,13 @@ public class AppOpsManager {
             cb = new IAppOpsNotedCallback.Stub() {
                 @Override
                 public void opNoted(int op, int uid, String packageName, int mode) {
-                    callback.onOpNoted(sOpToString[op], uid, packageName, mode);
+                    callback.onOpNoted(op, uid, packageName, mode);
                 }
             };
             mNotedWatchers.put(callback, cb);
         }
         try {
-            final int[] opCodes = new int[ops.length];
-            for (int i = 0; i < opCodes.length; i++) {
-                opCodes[i] = strOpToOp(ops[i]);
-            }
-            mService.startWatchingNoted(opCodes, cb);
+            mService.startWatchingNoted(ops, cb);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2983,7 +2979,7 @@ public class AppOpsManager {
      * Stop watching for noted app ops. An app op may be immediate or long running.
      * Unregistering a non-registered callback has no effect.
      *
-     * @see #startWatchingNoted(String[], OnOpNotedListener)
+     * @see #startWatchingNoted(int[], OnOpNotedListener)
      * @see #noteOp(String, int, String)
      *
      * @hide
