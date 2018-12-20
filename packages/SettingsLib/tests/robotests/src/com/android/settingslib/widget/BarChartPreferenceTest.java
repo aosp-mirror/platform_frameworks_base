@@ -89,10 +89,30 @@ public class BarChartPreferenceTest {
     }
 
     @Test
+    public void initializeBarChart_noBarViewSet_shouldShowTitleAndEmptyView() {
+        final BarChartInfo barChartInfo = new BarChartInfo.Builder()
+                .setTitle(R.string.debug_app)
+                .setEmptyText(R.string.debug_app)
+                .build();
+
+        mPreference.initializeBarChart(barChartInfo);
+        // We don't add any bar view yet.
+        mPreference.onBindViewHolder(mHolder);
+
+        assertThat(mBarChartView.findViewById(R.id.bar_chart_title).getVisibility())
+                .isEqualTo(View.VISIBLE);
+        assertThat(mBarChartView.findViewById(R.id.empty_view).getVisibility())
+                .isEqualTo(View.VISIBLE);
+        assertThat(mBarChartView.findViewById(R.id.bar_views_container).getVisibility())
+                .isEqualTo(View.GONE);
+    }
+
+    @Test
     public void initializeBarChart_detailsSet_shouldShowBarChartDetailsView() {
         final BarChartInfo barChartInfo = new BarChartInfo.Builder()
                 .setTitle(R.string.debug_app)
                 .setDetails(R.string.debug_app)
+                .addBarViewInfo(new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app))
                 .build();
 
         mPreference.initializeBarChart(barChartInfo);
@@ -107,6 +127,7 @@ public class BarChartPreferenceTest {
         // We don't call BarChartInfo.Builder#setDetails yet.
         final BarChartInfo barChartInfo = new BarChartInfo.Builder()
                 .setTitle(R.string.debug_app)
+                .addBarViewInfo(new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app))
                 .build();
 
         mPreference.initializeBarChart(barChartInfo);
@@ -122,6 +143,7 @@ public class BarChartPreferenceTest {
                 .setDetails(R.string.debug_app)
                 .setDetailsOnClickListener(v -> {
                 })
+                .addBarViewInfo(new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app))
                 .build();
 
         mPreference.initializeBarChart(barChartInfo);

@@ -140,7 +140,17 @@ public class BarChartPreference extends Preference {
         holder.setDividerAllowedAbove(true);
         holder.setDividerAllowedBelow(true);
 
+        // We must show title of bar chart.
         bindChartTitleView(holder);
+
+        final BarViewInfo[] barViewInfos = mBarChartInfo.getBarViewInfos();
+        // If there is no any bar view, we just show an empty text.
+        if (barViewInfos == null || barViewInfos.length == 0) {
+            setEmptyViewVisible(holder, true /* visible */);
+            return;
+        }
+        setEmptyViewVisible(holder, false /* visible */);
+
         bindChartDetailsView(holder);
         updateBarChart(holder);
     }
@@ -205,5 +215,17 @@ public class BarChartPreference extends Preference {
         for (BarViewInfo barView : barViewInfos) {
             barView.setNormalizedHeight(barView.getHeight() * unit);
         }
+    }
+
+    private void setEmptyViewVisible(PreferenceViewHolder holder, boolean visible) {
+        final View barViewsContainer = holder.findViewById(R.id.bar_views_container);
+        final TextView emptyView = (TextView) holder.findViewById(R.id.empty_view);
+        final int emptyTextRes = mBarChartInfo.getEmptyText();
+
+        if (emptyTextRes != 0) {
+            emptyView.setText(emptyTextRes);
+        }
+        emptyView.setVisibility(visible ? View.VISIBLE : View.GONE);
+        barViewsContainer.setVisibility(visible ? View.GONE : View.VISIBLE);
     }
 }
