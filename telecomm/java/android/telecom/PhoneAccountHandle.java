@@ -168,7 +168,7 @@ public final class PhoneAccountHandle implements Parcelable {
         }
     };
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private PhoneAccountHandle(Parcel in) {
         this(ComponentName.CREATOR.createFromParcel(in),
                 in.readString(),

@@ -316,19 +316,19 @@ public class ServiceState implements Parcelable {
     @RilRadioTechnology
     private int mRilDataRadioTechnology;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean mCssIndicator;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mNetworkId;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mSystemId;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mCdmaRoamingIndicator;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mCdmaDefaultRoamingIndicator;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mCdmaEriIconIndex;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mCdmaEriIconMode;
 
     @UnsupportedAppUsage
@@ -1070,7 +1070,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setDataRegState(int state) {
         mDataRegState = state;
         if (VDBG) Rlog.d(LOG_TAG, "[ServiceState] setDataRegState=" + mDataRegState);
@@ -1100,7 +1100,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setVoiceRoamingType(@RoamingType int type) {
         NetworkRegistrationState regState = getNetworkRegistrationState(
                 NetworkRegistrationState.DOMAIN_CS, AccessNetworkConstants.TransportType.WWAN);
@@ -1121,7 +1121,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setDataRoamingType(@RoamingType int type) {
         NetworkRegistrationState regState = getNetworkRegistrationState(
                 NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WWAN);
@@ -1138,7 +1138,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setEmergencyOnly(boolean emergencyOnly) {
         mIsEmergencyOnly = emergencyOnly;
     }
@@ -1146,7 +1146,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setCdmaRoamingIndicator(int roaming) {
         this.mCdmaRoamingIndicator = roaming;
     }
@@ -1154,7 +1154,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setCdmaDefaultRoamingIndicator (int roaming) {
         this.mCdmaDefaultRoamingIndicator = roaming;
     }
@@ -1162,7 +1162,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setCdmaEriIconIndex(int index) {
         this.mCdmaEriIconIndex = index;
     }
@@ -1170,7 +1170,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setCdmaEriIconMode(int mode) {
         this.mCdmaEriIconMode = mode;
     }
@@ -1231,7 +1231,7 @@ public class ServiceState implements Parcelable {
      * @param b second obj
      * @return true if two objects equal or both are null
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static boolean equalsHandlesNulls (Object a, Object b) {
         return (a == null) ? (b == null) : a.equals (b);
     }
@@ -1376,7 +1376,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setCssIndicator(int css) {
         this.mCssIndicator = (css != 0);
     }
@@ -1555,7 +1555,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public int getCssIndicator() {
         return this.mCssIndicator ? 1 : 0;
     }
@@ -1615,7 +1615,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static boolean bearerBitmapHasCdma(int radioTechnologyBitmap) {
         return (RIL_RADIO_CDMA_TECHNOLOGY_BITMASK & radioTechnologyBitmap) != 0;
     }

@@ -17,6 +17,7 @@
 package android.text.method;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 /**
  * This transformation method causes any carriage return characters (\r)
@@ -50,6 +51,6 @@ extends ReplacementTransformationMethod {
         return sInstance;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static HideReturnsTransformationMethod sInstance;
 }

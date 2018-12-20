@@ -612,7 +612,7 @@ public class CompatibilityInfo implements Parcelable {
         dest.writeFloat(applicationInvertedScale);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final Parcelable.Creator<CompatibilityInfo> CREATOR
             = new Parcelable.Creator<CompatibilityInfo>() {
         @Override

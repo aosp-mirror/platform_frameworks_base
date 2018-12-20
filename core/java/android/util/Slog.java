@@ -17,6 +17,7 @@
 package android.util;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 /**
  * @hide
@@ -105,7 +106,7 @@ public final class Slog {
      * will always be handled asynchronously.  Primarily for use by coding running within
      * the system process.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static int wtfStack(String tag, String msg) {
         return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, true, true);
     }

@@ -130,7 +130,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     private boolean mShowing = false;
     private boolean mCanceled = false;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final Handler mHandler = new Handler();
 
     private static final int DISMISS = 0x43;
