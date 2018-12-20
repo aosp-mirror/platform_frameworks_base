@@ -96,6 +96,7 @@ genrule {
 
 cc_library_shared {
     name: "libstatslog",
+    host_supported: true,
     generated_sources: ["statslog.cpp"],
     generated_headers: ["statslog.h"],
     cflags: [
@@ -105,8 +106,19 @@ cc_library_shared {
     export_generated_headers: ["statslog.h"],
     shared_libs: [
         "liblog",
-        "libutils",
         "libcutils",
     ],
     static_libs: ["libstatssocket"],
+    target: {
+        android: {
+            shared_libs: [
+                "libutils",
+            ],
+        },
+        host: {
+            static_libs: [
+                "libutils",
+            ],
+        },
+    },
 }
