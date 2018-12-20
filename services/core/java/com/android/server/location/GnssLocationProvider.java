@@ -642,6 +642,17 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 Log.e(TAG, "unable to parse SUPL_ES: " + suplESProperty);
             }
         }
+
+        String emergencyExtensionSecondsString
+                = properties.getProperty("ES_EXTENSION_SEC", "0");
+        try {
+            int emergencyExtensionSeconds =
+                    Integer.parseInt(emergencyExtensionSecondsString);
+            mNIHandler.setEmergencyExtensionSeconds(emergencyExtensionSeconds);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "unable to parse ES_EXTENSION_SEC: "
+                    + emergencyExtensionSecondsString);
+        }
     }
 
     private void loadPropertiesFromResource(Context context,
