@@ -4096,10 +4096,15 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private static String[] getPackagesForUid(int uid) {
         String[] packageNames = null;
-        try {
-            packageNames = AppGlobals.getPackageManager().getPackagesForUid(uid);
-        } catch (RemoteException e) {
-            /* ignore - local call */
+
+        // Very early during boot the package manager is not yet or not yet fully started. At this
+        // time there are no packages yet.
+        if (AppGlobals.getPackageManager() != null) {
+            try {
+                packageNames = AppGlobals.getPackageManager().getPackagesForUid(uid);
+            } catch (RemoteException e) {
+                /* ignore - local call */
+            }
         }
         if (packageNames == null) {
             return EmptyArray.STRING;
@@ -4269,9 +4274,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         @Override
-        public void setMode(int code, int uid, @NonNull String packageName, int mode,
-                boolean isPrivileged) {
-            AppOpsService.this.setMode(code, uid, packageName, mode, false, isPrivileged);
+        public void setUidMode(int code, int uid, int mode) {
+            AppOpsService.this.setUidMode(code, uid, mode);
         }
     }
 }
