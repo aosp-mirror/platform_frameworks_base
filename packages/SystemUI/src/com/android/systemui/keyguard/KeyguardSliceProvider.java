@@ -41,6 +41,8 @@ import androidx.slice.builders.ListBuilder.RowBuilder;
 import androidx.slice.builders.SliceAction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmControllerImpl;
@@ -49,6 +51,7 @@ import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -100,20 +103,27 @@ public class KeyguardSliceProvider extends SliceProvider implements
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (Intent.ACTION_TIME_TICK.equals(action)
-                    || Intent.ACTION_DATE_CHANGED.equals(action)
-                    || Intent.ACTION_TIME_CHANGED.equals(action)
-                    || Intent.ACTION_TIMEZONE_CHANGED.equals(action)
-                    || Intent.ACTION_LOCALE_CHANGED.equals(action)) {
-                if (Intent.ACTION_LOCALE_CHANGED.equals(action)
-                        || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
-                    // need to get a fresh date format
-                    mHandler.post(KeyguardSliceProvider.this::cleanDateFormat);
-                }
+            if (Intent.ACTION_DATE_CHANGED.equals(action)) {
                 mHandler.post(KeyguardSliceProvider.this::updateClock);
+            } else if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
+                mHandler.post(KeyguardSliceProvider.this::cleanDateFormat);
             }
         }
     };
+
+    @VisibleForTesting
+    final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onTimeChanged() {
+                    mHandler.post(KeyguardSliceProvider.this::updateClock);
+                }
+
+                @Override
+                public void onTimeZoneChanged(TimeZone timeZone) {
+                    mHandler.post(KeyguardSliceProvider.this::cleanDateFormat);
+                }
+            };
 
     public KeyguardSliceProvider() {
         this(new Handler());
@@ -250,11 +260,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_DATE_CHANGED);
-        filter.addAction(Intent.ACTION_TIME_CHANGED);
-        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
         getContext().registerReceiver(mIntentReceiver, filter, null /* permission*/,
                 null /* scheduler */);
+        getKeyguardUpdateMonitor().registerCallback(mKeyguardUpdateMonitorCallback);
         mRegistered = true;
     }
 
@@ -299,5 +308,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
                     mUpdateNextAlarm, mHandler);
         }
         updateNextAlarm();
+    }
+
+    @VisibleForTesting
+    protected KeyguardUpdateMonitor getKeyguardUpdateMonitor() {
+        return KeyguardUpdateMonitor.getInstance(getContext());
     }
 }

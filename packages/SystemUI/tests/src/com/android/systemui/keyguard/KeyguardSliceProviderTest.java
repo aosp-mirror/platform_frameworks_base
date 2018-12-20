@@ -19,13 +19,13 @@ package com.android.systemui.keyguard;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.app.AlarmManager;
 import android.content.ContentResolver;
-import android.content.Intent;
 import android.net.Uri;
 import android.provider.Settings;
 import android.support.test.filters.SmallTest;
@@ -40,6 +40,7 @@ import androidx.slice.SliceSpecs;
 import androidx.slice.builders.ListBuilder;
 import androidx.slice.core.SliceQuery;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Assert;
@@ -91,7 +92,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
 
     @Test
     public void cleansDateFormat() {
-        mProvider.mIntentReceiver.onReceive(getContext(), new Intent(Intent.ACTION_TIMEZONE_CHANGED));
+        mProvider.mKeyguardUpdateMonitorCallback.onTimeZoneChanged(null);
         TestableLooper.get(this).processAllMessages();
         Assert.assertEquals("Date format should have been cleaned.", 1 /* expected */,
                 mProvider.mCleanDateFormatInvokations);
@@ -99,7 +100,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
 
     @Test
     public void updatesClock() {
-        mProvider.mIntentReceiver.onReceive(getContext(), new Intent(Intent.ACTION_TIME_TICK));
+        mProvider.mKeyguardUpdateMonitorCallback.onTimeChanged();
         TestableLooper.get(this).processAllMessages();
         verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
     }
@@ -168,6 +169,11 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         void cleanDateFormat() {
             super.cleanDateFormat();
             mCleanDateFormatInvokations++;
+        }
+
+        @Override
+        public KeyguardUpdateMonitor getKeyguardUpdateMonitor() {
+            return mock(KeyguardUpdateMonitor.class);
         }
 
         @Override
