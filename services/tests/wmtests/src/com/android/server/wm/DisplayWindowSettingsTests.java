@@ -22,10 +22,10 @@ import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,11 +43,13 @@ import android.view.Surface;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.server.policy.WindowManagerPolicy;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockitoSession;
 
 import java.io.File;
 
@@ -94,6 +96,12 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     @After
     public void tearDown() {
         deleteRecursively(TEST_FOLDER);
+
+        // TODO(b/121296525): We may want to restore other display settings (not only overscans in
+        // testPersistOverscan*test) on mPrimaryDisplay and mSecondaryDisplay back to default
+        // values after each test finishes, since we are going to reuse a singleton
+        // WindowManagerService instance among all tests that extend {@link WindowTestsBase} class
+        // (b/113239988).
     }
 
     @Test
@@ -245,21 +253,35 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     @Test
     public void testPersistOverscanInSameInstance() {
         final DisplayInfo info = mPrimaryDisplay.getDisplayInfo();
-        mTarget.setOverscanLocked(info, 1 /* left */, 2 /* top */, 3 /* right */, 4 /* bottom */);
+        try {
+            mTarget.setOverscanLocked(info, 1 /* left */, 2 /* top */, 3 /* right */,
+                    4 /* bottom */);
 
-        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+            mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
-        assertOverscan(mPrimaryDisplay, 1 /* left */, 2 /* top */, 3 /* right */, 4 /* bottom */);
+            assertOverscan(mPrimaryDisplay, 1 /* left */, 2 /* top */, 3 /* right */,
+                    4 /* bottom */);
+        } finally {
+            mTarget.setOverscanLocked(info, 0, 0, 0, 0);
+            mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+        }
     }
 
     @Test
     public void testPersistOverscanAcrossInstances() {
         final DisplayInfo info = mPrimaryDisplay.getDisplayInfo();
-        mTarget.setOverscanLocked(info, 1 /* left */, 2 /* top */, 3 /* right */, 4 /* bottom */);
+        try {
+            mTarget.setOverscanLocked(info, 10 /* left */, 20 /* top */, 30 /* right */,
+                    40 /* bottom */);
 
-        applySettingsToDisplayByNewInstance(mPrimaryDisplay);
+            applySettingsToDisplayByNewInstance(mPrimaryDisplay);
 
-        assertOverscan(mPrimaryDisplay, 1 /* left */, 2 /* top */, 3 /* right */, 4 /* bottom */);
+            assertOverscan(mPrimaryDisplay, 10 /* left */, 20 /* top */, 30 /* right */,
+                    40 /* bottom */);
+        } finally {
+            mTarget.setOverscanLocked(info, 0, 0, 0, 0);
+            mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+        }
     }
 
     @Test
@@ -389,26 +411,32 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mTarget.setUserRotation(mPrimaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
                 Surface.ROTATION_0);
 
+        final MockitoSession mockitoSession = ExtendedMockito.mockitoSession()
+                .startMocking();
         final DisplayRotation displayRotation = mock(DisplayRotation.class);
-        mPrimaryDisplay = spy(mPrimaryDisplay);
-        when(mPrimaryDisplay.getDisplayRotation()).thenReturn(displayRotation);
+        spyOn(mPrimaryDisplay);
+        doReturn(displayRotation).when(mPrimaryDisplay).getDisplayRotation();
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         verify(displayRotation).restoreSettings(anyInt(), anyInt(), eq(false));
+        mockitoSession.finishMocking();
     }
 
     @Test
     public void testSetFixedToUserRotation() {
         mTarget.setFixedToUserRotation(mPrimaryDisplay, true);
 
+        final MockitoSession mockitoSession = ExtendedMockito.mockitoSession()
+                .startMocking();
         final DisplayRotation displayRotation = mock(DisplayRotation.class);
-        mPrimaryDisplay = spy(mPrimaryDisplay);
-        when(mPrimaryDisplay.getDisplayRotation()).thenReturn(displayRotation);
+        spyOn(mPrimaryDisplay);
+        doReturn(displayRotation).when(mPrimaryDisplay).getDisplayRotation();
 
         applySettingsToDisplayByNewInstance(mPrimaryDisplay);
 
         verify(displayRotation).restoreSettings(anyInt(), anyInt(), eq(true));
+        mockitoSession.finishMocking();
     }
 
     private static void assertOverscan(DisplayContent display, int left, int top, int right,
