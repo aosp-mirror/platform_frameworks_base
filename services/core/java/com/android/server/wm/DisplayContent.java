@@ -397,9 +397,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final Matrix mTmpMatrix = new Matrix();
     private final Region mTmpRegion = new Region();
 
-
     /** Used for handing back size of display */
     private final Rect mTmpBounds = new Rect();
+
+    private final Configuration mTmpConfiguration = new Configuration();
 
     /** Remove this display when animation on it has completed. */
     private boolean mDeferredRemoval;
@@ -1156,6 +1157,36 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mWmService.mH.obtainMessage(SEND_NEW_CONFIGURATION, this).sendToTarget();
     }
 
+    @Override
+    boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
+            ConfigurationContainer requestingContainer) {
+        final Configuration config = updateOrientationFromAppTokens(
+                getRequestedOverrideConfiguration(), freezeDisplayToken, false);
+        // If display rotation class tells us that it doesn't consider app requested orientation,
+        // this display won't rotate just because of an app changes its requested orientation. Thus
+        // it indicates that this display chooses not to handle this request.
+        final boolean handled = getDisplayRotation().respectAppRequestedOrientation();
+        if (config == null) {
+            return handled;
+        }
+
+        if (handled && requestingContainer instanceof ActivityRecord) {
+            final ActivityRecord activityRecord = (ActivityRecord) requestingContainer;
+            final boolean kept = mWmService.mAtmService.updateDisplayOverrideConfigurationLocked(
+                    config, activityRecord, false /* deferResume */, getDisplayId());
+            activityRecord.frozenBeforeDestroy = true;
+            if (!kept) {
+                mWmService.mAtmService.mRootActivityContainer.resumeFocusedStacksTopActivities();
+            }
+        } else {
+            // We have a new configuration to push so we need to update ATMS for now.
+            // TODO: Clean up display configuration push between ATMS and WMS after unification.
+            mWmService.mAtmService.updateDisplayOverrideConfigurationLocked(
+                    config, null /* starting */, false /* deferResume */, getDisplayId());
+        }
+        return handled;
+    }
+
     /**
      * Determine the new desired orientation of this display.
      *
@@ -1169,7 +1200,56 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return updateOrientationFromAppTokens(false /* forceUpdate */);
     }
 
-    boolean updateOrientationFromAppTokens(boolean forceUpdate) {
+    /**
+     * Update orientation of the target display, returning a non-null new Configuration if it has
+     * changed from the current orientation. If a non-null configuration is returned, someone must
+     * call {@link WindowManagerService#setNewDisplayOverrideConfiguration(Configuration,
+     * DisplayContent)} to tell the window manager it can unfreeze the screen. This will typically
+     * be done by calling {@link WindowManagerService#sendNewConfiguration(int)}.
+     */
+    Configuration updateOrientationFromAppTokens(Configuration currentConfig,
+            IBinder freezeDisplayToken, boolean forceUpdate) {
+        if (!mDisplayReady) {
+            return null;
+        }
+
+        Configuration config = null;
+        if (updateOrientationFromAppTokens(forceUpdate)) {
+            // If we changed the orientation but mOrientationChangeComplete is already true,
+            // we used seamless rotation, and we don't need to freeze the screen.
+            if (freezeDisplayToken != null && !mWmService.mRoot.mOrientationChangeComplete) {
+                final AppWindowToken atoken = getAppWindowToken(freezeDisplayToken);
+                if (atoken != null) {
+                    atoken.startFreezingScreen();
+                }
+            }
+            config = new Configuration();
+            computeScreenConfiguration(config);
+        } else if (currentConfig != null) {
+            // No obvious action we need to take, but if our current state mismatches the
+            // activity manager's, update it, disregarding font scale, which should remain set
+            // to the value of the previous configuration.
+            // Here we're calling Configuration#unset() instead of setToDefaults() because we
+            // need to keep override configs clear of non-empty values (e.g. fontSize).
+            mTmpConfiguration.unset();
+            mTmpConfiguration.updateFrom(currentConfig);
+            computeScreenConfiguration(mTmpConfiguration);
+            if (currentConfig.diff(mTmpConfiguration) != 0) {
+                mWaitingForConfig = true;
+                setLayoutNeeded();
+                int[] anim = new int[2];
+                getDisplayPolicy().selectRotationAnimationLw(anim);
+
+                mWmService.startFreezingDisplayLocked(anim[0], anim[1], this);
+                config = new Configuration(mTmpConfiguration);
+            }
+        }
+
+        return config;
+    }
+
+
+    private boolean updateOrientationFromAppTokens(boolean forceUpdate) {
         final int req = getOrientation();
         if (req != mLastOrientation || forceUpdate) {
             mLastOrientation = req;
