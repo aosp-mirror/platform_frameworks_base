@@ -22,7 +22,6 @@ import android.util.Log;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -34,8 +33,6 @@ public class KeyguardEnvironmentImpl implements KeyguardEnvironment {
             Dependency.get(NotificationLockscreenUserManager.class);
     private final DeviceProvisionedController mDeviceProvisionedController =
             Dependency.get(DeviceProvisionedController.class);
-    private final NotificationMediaManager mMediaManager =
-            Dependency.get(NotificationMediaManager.class);
 
     public KeyguardEnvironmentImpl() {
     }

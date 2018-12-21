@@ -37,6 +37,7 @@ import android.media.session.PlaybackState;
 import android.os.Handler;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -45,8 +46,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
@@ -63,6 +64,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * Handles tasks and state related to media notifications. For example, there is a 'current' media
@@ -83,9 +86,9 @@ public class NotificationMediaManager implements Dumpable {
 
     // Late binding, also @Nullable due to being in com.android.systemui.statusbar.phone package
     @Nullable
-    private ShadeController mShadeController;
+    private Lazy<ShadeController> mShadeController;
     @Nullable
-    private StatusBarWindowController mStatusBarWindowController;
+    private Lazy<StatusBarWindowController> mStatusBarWindowController;
 
     @Nullable
     private BiometricUnlockController mBiometricUnlockController;
@@ -135,37 +138,30 @@ public class NotificationMediaManager implements Dumpable {
         }
     };
 
-    @Nullable
-    private ShadeController getShadeController() {
-        if (mShadeController == null) {
-            mShadeController = Dependency.get(ShadeController.class);
-        }
-        return mShadeController;
-    }
-
-    @Nullable
-    private StatusBarWindowController getWindowController() {
-        if (mStatusBarWindowController == null) {
-            mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
-        }
-        return mStatusBarWindowController;
-    }
-
-    private NotificationEntryManager getEntryManager() {
-        if (mEntryManager == null) {
-            mEntryManager = Dependency.get(NotificationEntryManager.class);
-        }
-        return mEntryManager;
-    }
-
     @Inject
-    public NotificationMediaManager(Context context) {
+    public NotificationMediaManager(
+            Context context,
+            Lazy<ShadeController> shadeController,
+            Lazy<StatusBarWindowController> statusBarWindowController,
+            NotificationEntryManager notificationEntryManager) {
         mContext = context;
         mMediaListeners = new ArrayList<>();
         mMediaSessionManager
                 = (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
         // TODO: use MediaSessionManager.SessionListener to hook us up to future updates
         // in session state
+        mShadeController = shadeController;
+        mStatusBarWindowController = statusBarWindowController;
+        mEntryManager = notificationEntryManager;
+        notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
+            @Override
+            public void onEntryRemoved(String key, StatusBarNotification old,
+                    boolean lifetimeExtended, boolean removedByUser) {
+                if (!lifetimeExtended) {
+                    onNotificationRemoved(key);
+                }
+            }
+        });
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {
@@ -191,9 +187,8 @@ public class NotificationMediaManager implements Dumpable {
         if (mMediaNotificationKey == null) {
             return null;
         }
-        NotificationEntryManager manager = getEntryManager();
-        synchronized (manager.getNotificationData()) {
-            Entry entry = manager.getNotificationData().get(mMediaNotificationKey);
+        synchronized (mEntryManager.getNotificationData()) {
+            Entry entry = mEntryManager.getNotificationData().get(mMediaNotificationKey);
             if (entry == null || entry.expandedIcon == null) {
                 return null;
             }
@@ -214,10 +209,9 @@ public class NotificationMediaManager implements Dumpable {
     public void findAndUpdateMediaNotifications() {
         boolean metaDataChanged = false;
 
-        NotificationEntryManager manager = getEntryManager();
-        synchronized (manager.getNotificationData()) {
-            ArrayList<Entry> activeNotifications = manager
-                    .getNotificationData().getActiveNotifications();
+        synchronized (mEntryManager.getNotificationData()) {
+            ArrayList<Entry> activeNotifications =
+                    mEntryManager.getNotificationData().getActiveNotifications();
             final int N = activeNotifications.size();
 
             // Promote the media notification with a controller in 'playing' state, if any.
@@ -305,7 +299,7 @@ public class NotificationMediaManager implements Dumpable {
         }
 
         if (metaDataChanged) {
-            getEntryManager().updateNotifications();
+            mEntryManager.updateNotifications();
         }
 
         dispatchUpdateMediaMetaData(metaDataChanged, true /* allowEnterAnimation */);
@@ -440,8 +434,9 @@ public class NotificationMediaManager implements Dumpable {
             }
         }
 
-        boolean hideBecauseOccluded = getShadeController() != null
-                && getShadeController().isOccluded();
+        ShadeController shadeController = mShadeController.get();
+        StatusBarWindowController windowController = mStatusBarWindowController.get();
+        boolean hideBecauseOccluded = shadeController != null && shadeController.isOccluded();
 
         final boolean hasArtwork = artworkDrawable != null;
         mColorExtractor.setHasBackdrop(hasArtwork);
@@ -464,8 +459,8 @@ public class NotificationMediaManager implements Dumpable {
                     mBackdrop.animate().cancel();
                     mBackdrop.setAlpha(1f);
                 }
-                if (getWindowController() != null) {
-                    getWindowController().setBackdropShowing(true);
+                if (windowController != null) {
+                    windowController.setBackdropShowing(true);
                 }
                 metaDataChanged = true;
                 if (DEBUG_MEDIA) {
@@ -512,8 +507,8 @@ public class NotificationMediaManager implements Dumpable {
                 if (DEBUG_MEDIA) {
                     Log.v(TAG, "DEBUG_MEDIA: Fading out album artwork");
                 }
-                boolean cannotAnimateDoze = getShadeController() != null
-                        && getShadeController().isDozing()
+                boolean cannotAnimateDoze = shadeController != null
+                        && shadeController.isDozing()
                         && !ScrimState.AOD.getAnimateChange();
                 if (mBiometricUnlockController != null && mBiometricUnlockController.getMode()
                         == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
@@ -522,12 +517,12 @@ public class NotificationMediaManager implements Dumpable {
                     // We are unlocking directly - no animation!
                     mBackdrop.setVisibility(View.GONE);
                     mBackdropBack.setImageDrawable(null);
-                    if (getWindowController() != null) {
-                        getWindowController().setBackdropShowing(false);
+                    if (windowController != null) {
+                        windowController.setBackdropShowing(false);
                     }
                 } else {
-                    if (getWindowController() != null) {
-                        getWindowController().setBackdropShowing(false);
+                    if (windowController != null) {
+                        windowController.setBackdropShowing(false);
                     }
                     mBackdrop.animate()
                             .alpha(0)

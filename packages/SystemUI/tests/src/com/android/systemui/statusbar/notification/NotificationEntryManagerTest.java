@@ -61,7 +61,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -118,7 +117,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private NotificationGroupManager mGroupManager;
     @Mock private NotificationGutsManager mGutsManager;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
-    @Mock private NotificationMediaManager mMediaManager;
     @Mock private NotificationListener mNotificationListener;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private VisualStabilityManager mVisualStabilityManager;
@@ -204,7 +202,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
         mDependency.injectTestDependency(NotificationGutsManager.class, mGutsManager);
         mDependency.injectTestDependency(NotificationRemoteInputManager.class, mRemoteInputManager);
-        mDependency.injectTestDependency(NotificationMediaManager.class, mMediaManager);
         mDependency.injectTestDependency(NotificationListener.class, mNotificationListener);
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);
@@ -319,7 +316,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mBarService, never()).onNotificationError(any(), any(), anyInt(), anyInt(), anyInt(),
                 any(), anyInt());
 
-        verify(mMediaManager).onNotificationRemoved(mSbn.getKey());
         verify(mForegroundServiceController).removeNotification(mSbn);
         verify(mListContainer).cleanUpViewStateForEntry(mEntry);
         verify(mPresenter).updateNotificationViews();

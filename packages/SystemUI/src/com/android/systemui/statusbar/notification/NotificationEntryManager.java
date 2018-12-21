@@ -41,7 +41,6 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
@@ -99,7 +98,6 @@ public class NotificationEntryManager implements
 
     // Lazily retrieved dependencies
     private NotificationRemoteInputManager mRemoteInputManager;
-    private NotificationMediaManager mMediaManager;
     private NotificationRowBinder mNotificationRowBinder;
 
     private final Handler mDeferredNotificationViewUpdateHandler;
@@ -166,13 +164,6 @@ public class NotificationEntryManager implements
             mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
         }
         return mRemoteInputManager;
-    }
-
-    private NotificationMediaManager getMediaManager() {
-        if (mMediaManager == null) {
-            mMediaManager = Dependency.get(NotificationMediaManager.class);
-        }
-        return mMediaManager;
     }
 
     private NotificationRowBinder getRowBinder() {
@@ -390,7 +381,6 @@ public class NotificationEntryManager implements
                     extender.setShouldManageLifetime(entry, false /* shouldManage */);
                 }
 
-                getMediaManager().onNotificationRemoved(key);
                 mForegroundServiceController.removeNotification(entry.notification);
 
                 if (entry.rowExists()) {
