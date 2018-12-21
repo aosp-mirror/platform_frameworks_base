@@ -1065,6 +1065,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (isStaged()) {
             // STOPSHIP: implement staged sessions
             mStagedSessionReady = true;
+            mPm.sendSessionUpdatedBroadcast(generateInfo(), userId);
             dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
             return;
         }

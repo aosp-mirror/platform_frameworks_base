@@ -19629,6 +19629,17 @@ public class PackageManagerService extends IPackageManager.Stub
         return getHomeActivitiesAsUser(allHomeCandidates, UserHandle.getCallingUserId());
     }
 
+    /**
+     * Send a {@code PackageInstaller.ACTION_SESSION_UPDATED} broadcast intent, containing
+     * the {@code sessionInfo} in the extra field {@code PackageInstaller.EXTRA_SESSION}.
+     */
+    public void sendSessionUpdatedBroadcast(PackageInstaller.SessionInfo sessionInfo,
+            int userId) {
+        Intent sessionUpdatedIntent = new Intent(PackageInstaller.ACTION_SESSION_UPDATED)
+                .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo);
+        mContext.sendBroadcastAsUser(sessionUpdatedIntent, UserHandle.of(userId));
+    }
+
     public void sendSessionCommitBroadcast(PackageInstaller.SessionInfo sessionInfo, int userId) {
         UserManagerService ums = UserManagerService.getInstance();
         if (ums != null) {

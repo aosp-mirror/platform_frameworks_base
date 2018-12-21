@@ -611,6 +611,7 @@
     <protected-broadcast android:name="android.intent.action.DOCK_ACTIVE" />
 
     <!-- Added in Q -->
+    <protected-broadcast android:name="android.content.pm.action.SESSION_UPDATED" />
 
     <!-- For CarIdlenessTracker -->
     <protected-broadcast android:name="com.android.server.jobscheduler.GARAGE_MODE_ON" />
