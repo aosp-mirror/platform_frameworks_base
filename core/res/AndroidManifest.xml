@@ -3379,6 +3379,11 @@
     <permission android:name="android.permission.REVOKE_RUNTIME_PERMISSIONS"
          android:protectionLevel="signature|installer|verifier" />
 
+    <!-- @SystemApi Allows the system to read runtime permission state.
+        @hide -->
+    <permission android:name="android.permission.GET_RUNTIME_PERMISSIONS"
+                android:protectionLevel="signature" />
+
     <!-- @hide Allows an application to observe permission changes. -->
     <permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"
         android:protectionLevel="signature|privileged" />

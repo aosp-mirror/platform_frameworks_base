@@ -62,6 +62,7 @@ package android {
     field public static final java.lang.String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final java.lang.String GET_APP_OPS_STATS = "android.permission.GET_APP_OPS_STATS";
     field public static final java.lang.String GET_PROCESS_STATE_AND_OOM_SCORE = "android.permission.GET_PROCESS_STATE_AND_OOM_SCORE";
+    field public static final java.lang.String GET_RUNTIME_PERMISSIONS = "android.permission.GET_RUNTIME_PERMISSIONS";
     field public static final java.lang.String GET_TOP_ACTIVITY_INFO = "android.permission.GET_TOP_ACTIVITY_INFO";
     field public static final java.lang.String GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS = "android.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS";
     field public static final java.lang.String GRANT_RUNTIME_PERMISSIONS = "android.permission.GRANT_RUNTIME_PERMISSIONS";
@@ -4655,6 +4656,16 @@ package android.os.storage {
 
 package android.permission {
 
+  public abstract class PermissionControllerService extends android.app.Service {
+    ctor public PermissionControllerService();
+    method public final void attachBaseContext(android.content.Context);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract int onCountPermissionApps(java.util.List<java.lang.String>, boolean, boolean);
+    method public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
+    method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
+  }
+
   public final class PermissionManager {
     method public java.util.List<android.permission.PermissionManager.SplitPermissionInfo> getSplitPermissions();
   }
@@ -4673,16 +4684,6 @@ package android.permission {
     method public boolean isStandard();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionPresentationInfo> CREATOR;
-  }
-
-  public abstract class RuntimePermissionPresenterService extends android.app.Service {
-    ctor public RuntimePermissionPresenterService();
-    method public final void attachBaseContext(android.content.Context);
-    method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract int onCountPermissionApps(java.util.List<java.lang.String>, boolean, boolean);
-    method public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
-    method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
-    field public static final java.lang.String SERVICE_INTERFACE = "android.permission.RuntimePermissionPresenterService";
   }
 
 }

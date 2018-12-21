@@ -16,8 +16,8 @@
 package com.android.settingslib.applications;
 
 import android.content.Context;
+import android.permission.PermissionControllerManager;
 import android.permission.RuntimePermissionPresentationInfo;
-import android.permission.RuntimePermissionPresenter;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -28,9 +28,9 @@ public class PermissionsSummaryHelper  {
 
     public static void getPermissionSummary(Context context, String pkg,
             final PermissionsResultCallback callback) {
-        final RuntimePermissionPresenter presenter =
-                RuntimePermissionPresenter.getInstance(context);
-        presenter.getAppPermissions(pkg, permissions -> {
+        final PermissionControllerManager permController =
+                context.getSystemService(PermissionControllerManager.class);
+        permController.getAppPermissions(pkg, permissions -> {
             final int permissionCount = permissions.size();
 
             int grantedStandardCount = 0;

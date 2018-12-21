@@ -16,13 +16,16 @@
 
 package android.permission;
 
-import static android.permission.RuntimePermissionPresenterService.SERVICE_INTERFACE;
+import static android.permission.PermissionControllerService.SERVICE_INTERFACE;
 
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,7 +37,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 import com.android.internal.infra.AbstractRemoteService;
 
@@ -42,29 +44,24 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This class provides information about runtime permissions for a specific
- * app or all apps. This information is dedicated for presentation purposes
- * and does not necessarily reflect the individual permissions requested/
- * granted to an app as the platform may be grouping permissions to improve
- * presentation and help the user make an informed choice. For example, all
- * runtime permissions in the same permission group may be presented as a
- * single permission in the UI.
+ * Interface for communicating with the permission controller from system apps. All UI operations
+ * regarding permissions and any changes to the permission state should flow through this
+ * interface.
  *
  * @hide
  */
-public final class RuntimePermissionPresenter {
-    private static final String TAG = "RuntimePermPresenter";
+@SystemService(Context.PERMISSION_CONTROLLER_SERVICE)
+public final class PermissionControllerManager {
+    private static final String TAG = PermissionControllerManager.class.getSimpleName();
 
     /**
      * The key for retrieving the result from the returned bundle.
-     *
-     * @hide
      */
     public static final String KEY_RESULT =
-            "android.permission.RuntimePermissionPresenter.key.result";
+            "android.permission.PermissionControllerManager.key.result";
 
     /**
-     * Listener for delivering the result of {@link #getAppPermissions}.
+     * Callback for delivering the result of {@link #getAppPermissions}.
      */
     public interface OnGetAppPermissionResultCallback {
         /**
@@ -77,7 +74,7 @@ public final class RuntimePermissionPresenter {
     }
 
     /**
-     * Listener for delivering the result of {@link #countPermissionApps}.
+     * Callback for delivering the result of {@link #countPermissionApps}.
      */
     public interface OnCountPermissionAppsResultCallback {
         /**
@@ -89,29 +86,9 @@ public final class RuntimePermissionPresenter {
         void onCountPermissionApps(int numApps);
     }
 
-    private static final Object sLock = new Object();
-
-    @GuardedBy("sLock")
-    private static RuntimePermissionPresenter sInstance;
-
     private final RemoteService mRemoteService;
 
-    /**
-     * Gets the singleton runtime permission presenter.
-     *
-     * @param context Context for accessing resources.
-     * @return The singleton instance.
-     */
-    public static RuntimePermissionPresenter getInstance(@NonNull Context context) {
-        synchronized (sLock) {
-            if (sInstance == null) {
-                sInstance = new RuntimePermissionPresenter(context.getApplicationContext());
-            }
-            return sInstance;
-        }
-    }
-
-    private RuntimePermissionPresenter(@NonNull Context context) {
+    public PermissionControllerManager(@NonNull Context context) {
         Intent intent = new Intent(SERVICE_INTERFACE);
         intent.setPackage(context.getPackageManager().getPermissionControllerPackageName());
         ResolveInfo serviceInfo = context.getPackageManager().resolveService(intent, 0);
@@ -127,6 +104,7 @@ public final class RuntimePermissionPresenter {
      * @param callback Callback to receive the result.
      * @param handler Handler on which to invoke the callback.
      */
+    @RequiresPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS)
     public void getAppPermissions(@NonNull String packageName,
             @NonNull OnGetAppPermissionResultCallback callback, @Nullable Handler handler) {
         checkNotNull(packageName);
@@ -142,6 +120,7 @@ public final class RuntimePermissionPresenter {
      * @param packageName The package for which to revoke
      * @param permissionName The permission to revoke
      */
+    @RequiresPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
     public void revokeRuntimePermission(@NonNull String packageName,
             @NonNull String permissionName) {
         checkNotNull(packageName);
@@ -160,6 +139,7 @@ public final class RuntimePermissionPresenter {
      * @param callback Callback to receive the result
      * @param handler Handler on which to invoke the callback
      */
+    @RequiresPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS)
     public void countPermissionApps(@NonNull List<String> permissionNames,
             boolean countOnlyGranted, boolean countSystem,
             @NonNull OnCountPermissionAppsResultCallback callback, @Nullable Handler handler) {
@@ -175,8 +155,7 @@ public final class RuntimePermissionPresenter {
      * A connection to the remote service
      */
     static final class RemoteService extends
-            AbstractMultiplePendingRequestsRemoteService<RemoteService,
-                    IRuntimePermissionPresenter>  {
+            AbstractMultiplePendingRequestsRemoteService<RemoteService, IPermissionController> {
         private static final long UNBIND_TIMEOUT_MILLIS = 10000;
         private static final long MESSAGE_TIMEOUT_MILLIS = 30000;
 
@@ -200,9 +179,8 @@ public final class RuntimePermissionPresenter {
         }
 
         @Override
-        protected @NonNull IRuntimePermissionPresenter getServiceInterface(
-                @NonNull IBinder binder) {
-            return IRuntimePermissionPresenter.Stub.asInterface(binder);
+        protected @NonNull IPermissionController getServiceInterface(@NonNull IBinder binder) {
+            return IPermissionController.Stub.asInterface(binder);
         }
 
         @Override
@@ -217,13 +195,12 @@ public final class RuntimePermissionPresenter {
 
         @Override
         public void scheduleRequest(@NonNull PendingRequest<RemoteService,
-                IRuntimePermissionPresenter> pendingRequest) {
+                IPermissionController> pendingRequest) {
             super.scheduleRequest(pendingRequest);
         }
 
         @Override
-        public void scheduleAsyncRequest(
-                @NonNull AsyncRequest<IRuntimePermissionPresenter> request) {
+        public void scheduleAsyncRequest(@NonNull AsyncRequest<IPermissionController> request) {
             super.scheduleAsyncRequest(request);
         }
     }
@@ -232,7 +209,7 @@ public final class RuntimePermissionPresenter {
      * Request for {@link #getAppPermissions}
      */
     private static final class PendingGetAppPermissionRequest extends
-            AbstractRemoteService.PendingRequest<RemoteService, IRuntimePermissionPresenter> {
+            AbstractRemoteService.PendingRequest<RemoteService, IPermissionController> {
         private final @NonNull String mPackageName;
         private final @NonNull OnGetAppPermissionResultCallback mCallback;
 
@@ -282,7 +259,7 @@ public final class RuntimePermissionPresenter {
      * Request for {@link #revokeRuntimePermission}
      */
     private static final class PendingRevokeAppPermissionRequest
-            implements AbstractRemoteService.AsyncRequest<IRuntimePermissionPresenter> {
+            implements AbstractRemoteService.AsyncRequest<IPermissionController> {
         private final @NonNull String mPackageName;
         private final @NonNull String mPermissionName;
 
@@ -293,7 +270,7 @@ public final class RuntimePermissionPresenter {
         }
 
         @Override
-        public void run(IRuntimePermissionPresenter remoteInterface) {
+        public void run(IPermissionController remoteInterface) {
             try {
                 remoteInterface.revokeRuntimePermission(mPackageName, mPermissionName);
             } catch (RemoteException e) {
@@ -306,7 +283,7 @@ public final class RuntimePermissionPresenter {
      * Request for {@link #countPermissionApps}
      */
     private static final class PendingCountPermissionAppsRequest extends
-            AbstractRemoteService.PendingRequest<RemoteService, IRuntimePermissionPresenter> {
+            AbstractRemoteService.PendingRequest<RemoteService, IPermissionController> {
         private final @NonNull List<String> mPermissionNames;
         private final @NonNull OnCountPermissionAppsResultCallback mCallback;
         private final boolean mCountOnlyGranted;

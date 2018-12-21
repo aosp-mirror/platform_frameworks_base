@@ -144,6 +144,7 @@ import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.health.SystemHealthManager;
 import android.os.storage.StorageManager;
+import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
@@ -1162,6 +1163,13 @@ final class SystemServiceRegistry {
                     @Override
                     public PermissionManager createService(ContextImpl ctx) {
                         return new PermissionManager(ctx.getOuterContext());
+                    }});
+
+        registerService(Context.PERMISSION_CONTROLLER_SERVICE, PermissionControllerManager.class,
+                new CachedServiceFetcher<PermissionControllerManager>() {
+                    @Override
+                    public PermissionControllerManager createService(ContextImpl ctx) {
+                        return new PermissionControllerManager(ctx.getOuterContext());
                     }});
 
         registerService(Context.ROLE_SERVICE, RoleManager.class,

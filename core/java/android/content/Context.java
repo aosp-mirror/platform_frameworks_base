@@ -3993,6 +3993,14 @@ public abstract class Context {
     public static final String PERMISSION_SERVICE = "permission";
 
     /**
+     * Official published name of the (internal) permission controller service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.app.backup.IBackupManager IBackupManager} for communicating
      * with the backup mechanism.
