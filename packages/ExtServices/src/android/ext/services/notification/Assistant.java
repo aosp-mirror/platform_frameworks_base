@@ -117,7 +117,7 @@ public class Assistant extends NotificationAssistantService {
         mPackageManager = ActivityThread.getPackageManager();
         mSettings = mSettingsFactory.createAndRegister(mHandler,
                 getApplicationContext().getContentResolver(), getUserId(), this::updateThresholds);
-        mSmartActionsHelper = new SmartActionsHelper();
+        mSmartActionsHelper = new SmartActionsHelper(getContext(), mSettings);
         mNotificationCategorizer = new NotificationCategorizer();
         mAgingHelper = new AgingHelper(getContext(),
                 mNotificationCategorizer,
@@ -215,10 +215,8 @@ public class Assistant extends NotificationAssistantService {
             return null;
         }
         NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel);
-        ArrayList<Notification.Action> actions =
-                mSmartActionsHelper.suggestActions(this, entry, mSettings);
-        ArrayList<CharSequence> replies =
-                mSmartActionsHelper.suggestReplies(this, entry, mSettings);
+        ArrayList<Notification.Action> actions = mSmartActionsHelper.suggestActions(entry);
+        ArrayList<CharSequence> replies = mSmartActionsHelper.suggestReplies(entry);
         return createEnqueuedNotificationAdjustment(entry, actions, replies);
     }
 
@@ -343,6 +341,7 @@ public class Assistant extends NotificationAssistantService {
                 if (entry != null) {
                     entry.setSeen();
                     mAgingHelper.onNotificationSeen(entry);
+                    mSmartActionsHelper.onNotificationSeen(entry);
                 }
             }
         } catch (Throwable e) {
@@ -351,34 +350,46 @@ public class Assistant extends NotificationAssistantService {
     }
 
     @Override
-    public void onNotificationExpansionChanged(String key, boolean isUserAction,
+    public void onNotificationExpansionChanged(@NonNull String key, boolean isUserAction,
             boolean isExpanded) {
         if (DEBUG) {
-            Log.i(TAG,
-                    "onNotificationExpansionChanged " + key + ", isUserAction =" + isUserAction
-                            + ", isExpanded = isExpanded");
+            Log.d(TAG, "onNotificationExpansionChanged() called with: key = [" + key
+                    + "], isUserAction = [" + isUserAction + "], isExpanded = [" + isExpanded
+                    + "]");
+        }
+        NotificationEntry entry = mLiveNotifications.get(key);
+
+        if (entry != null) {
+            entry.setExpanded(isExpanded);
+            mSmartActionsHelper.onNotificationExpansionChanged(entry, isUserAction, isExpanded);
         }
     }
 
     @Override
-    public void onNotificationDirectReply(String key) {
+    public void onNotificationDirectReply(@NonNull String key) {
         if (DEBUG) Log.i(TAG, "onNotificationDirectReply " + key);
+        mSmartActionsHelper.onNotificationDirectReply(key);
     }
 
     @Override
-    public void onSuggestedReplySent(String key, CharSequence reply, int source) {
+    public void onSuggestedReplySent(@NonNull String key, @NonNull CharSequence reply,
+            @Source int source) {
         if (DEBUG) {
             Log.d(TAG, "onSuggestedReplySent() called with: key = [" + key + "], reply = [" + reply
                     + "], source = [" + source + "]");
         }
+        mSmartActionsHelper.onSuggestedReplySent(key, reply, source);
     }
 
     @Override
-    public void onActionClicked(String key, Notification.Action action, int source) {
+    public void onActionClicked(@NonNull String key, @NonNull Notification.Action action,
+            @Source int source) {
         if (DEBUG) {
-            Log.d(TAG, "onActionClicked() called with: key = [" + key + "], action = [" + action.title
-                    + "], source = [" + source + "]");
+            Log.d(TAG,
+                    "onActionClicked() called with: key = [" + key + "], action = [" + action.title
+                            + "], source = [" + source + "]");
         }
+        mSmartActionsHelper.onActionClicked(key, action, source);
     }
 
     @Override

@@ -17,6 +17,7 @@
 package android.view.textclassifier;
 
 import android.app.Person;
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 
@@ -28,7 +29,10 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -82,6 +86,29 @@ public final class ActionsSuggestionsHelper {
         }
         return nativeMessages.toArray(
                 new ActionsSuggestionsModel.ConversationMessage[nativeMessages.size()]);
+    }
+
+    /**
+     * Returns the result id for logging.
+     */
+    public static String createResultId(
+            Context context,
+            List<ConversationActions.Message> messages,
+            int modelVersion,
+            List<Locale> modelLocales) {
+        final StringJoiner localesJoiner = new StringJoiner(",");
+        for (Locale locale : modelLocales) {
+            localesJoiner.add(locale.toLanguageTag());
+        }
+        final String modelName = String.format(
+                Locale.US, "%s_v%d", localesJoiner.toString(), modelVersion);
+        final int hash = Objects.hash(
+                messages.stream()
+                        .map(ConversationActions.Message::getText)
+                        .collect(Collectors.toList()),
+                context.getPackageName());
+        return SelectionSessionLogger.SignatureParser.createSignature(
+                SelectionSessionLogger.CLASSIFIER_ID, modelName, hash);
     }
 
     private static final class PersonEncoder {
