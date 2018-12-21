@@ -150,61 +150,38 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     /**
-     * Initialize {@link BackupManagerService} if the backup service is not disabled. Only the
-     * system user can initialize the service.
-     */
-    /* package */ void initializeService(int userId) {
-        if (mGlobalDisable) {
-            Slog.i(TAG, "Backup service not supported");
-            return;
-        }
-
-        if (userId != UserHandle.USER_SYSTEM) {
-            Slog.i(TAG, "Cannot initialize backup service for non-system user: " + userId);
-            return;
-        }
-
-        synchronized (mStateLock) {
-            if (!mSuppressFile.exists()) {
-                mService = createBackupManagerService();
-            } else {
-                Slog.i(TAG, "Backup service inactive");
-            }
-        }
-    }
-
-    /**
      * Called from {@link BackupManagerService.Lifecycle} when the system user is unlocked. Attempts
-     * to initialize {@link BackupManagerService} and set backup state for the system user.
+     * to initialize {@link BackupManagerService}. Offloads work onto the handler thread {@link
+     * #mHandlerThread} to keep unlock time low.
      */
-    void initializeServiceAndUnlockSystemUser() {
+    void initializeService() {
         postToHandler(
                 () -> {
-                    // Initialize the backup service.
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup init");
-                    initializeService(UserHandle.USER_SYSTEM);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-
-                    // Start the service for the system user.
-                    BackupManagerService service = mService;
-                    if (service != null) {
-                        Slog.i(TAG, "Starting service for system user");
-                        service.startServiceForUser(UserHandle.USER_SYSTEM);
-                        Slog.i(TAG, "Unlocking system user");
-                        service.unlockSystemUser();
+                    if (mGlobalDisable) {
+                        Slog.i(TAG, "Backup service not supported");
+                        return;
                     }
+
+                    synchronized (mStateLock) {
+                        if (!mSuppressFile.exists()) {
+                            mService = createBackupManagerService();
+                        } else {
+                            Slog.i(TAG, "Backup service inactive");
+                        }
+                    }
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 });
     }
 
     /**
-     * Called from {@link BackupManagerService.Lifecycle} when a non-system user {@code userId} is
-     * unlocked. Starts the backup service for this user if the service supports multi-user.
-     * Offloads work onto the handler thread {@link #mHandlerThread} to keep unlock time low.
+     * Called from {@link BackupManagerService.Lifecycle} when a user {@code userId} is unlocked.
+     * Starts the backup service for this user if it's the system user or if the service supports
+     * multi-user. Offloads work onto the handler thread {@link #mHandlerThread} to keep unlock time
+     * low.
      */
-    // TODO(b/120212806): Consolidate service start for system and non-system users when system
-    // user-only logic is removed.
     void unlockUser(int userId) {
-        if (!isMultiUserEnabled()) {
+        if (userId != UserHandle.USER_SYSTEM && !isMultiUserEnabled()) {
             Slog.i(TAG, "Multi-user disabled, cannot start service for user: " + userId);
             return;
         }

@@ -125,20 +125,6 @@ public class BackupManagerService {
     }
 
     /**
-     * Called through Trampoline from {@link Lifecycle#onUnlockUser(int)}. We run the heavy work on
-     * a background thread to keep the unlock time down.
-     */
-    public void unlockSystemUser() {
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
-        try {
-            sInstance.setBackupEnabled(readBackupEnableState(UserHandle.USER_SYSTEM));
-        } catch (RemoteException e) {
-            // can't happen; it's a local object
-        }
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-    }
-
-    /**
      * Starts the backup service for user {@code userId} by creating a new instance of {@link
      * UserBackupManagerService} and registering it with this service.
      */
@@ -152,10 +138,19 @@ public class BackupManagerService {
 
     /**
      * Starts the backup service for user {@code userId} by registering its instance of {@link
-     * UserBackupManagerService} with this service.
+     * UserBackupManagerService} with this service and setting enabled state.
      */
     void startServiceForUser(int userId, UserBackupManagerService userBackupManagerService) {
         mServiceUsers.put(userId, userBackupManagerService);
+
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
+        try {
+            // TODO(b/121198604): Make enable file per-user and clean up indirection.
+            mTrampoline.setBackupEnabledForUser(userId, readBackupEnableState(userId));
+        } catch (RemoteException e) {
+            // Can't happen, it's a local object.
+        }
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     SparseArray<UserBackupManagerService> getServiceUsers() {
@@ -171,7 +166,7 @@ public class BackupManagerService {
      *     UserBackupManagerService}.
      * @param caller A {@link String} identifying the caller for logging purposes.
      * @throws SecurityException if {@code userId} is different from the calling user id and the
-     * caller does NOT have the android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *     caller does NOT have the android.permission.INTERACT_ACROSS_USERS_FULL permission.
      */
     @Nullable
     @VisibleForTesting
@@ -821,10 +816,9 @@ public class BackupManagerService {
         @Override
         public void onUnlockUser(int userId) {
             if (userId == UserHandle.USER_SYSTEM) {
-                sInstance.initializeServiceAndUnlockSystemUser();
-            } else {
-                sInstance.unlockUser(userId);
+                sInstance.initializeService();
             }
+            sInstance.unlockUser(userId);
         }
     }
 }
