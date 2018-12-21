@@ -1,0 +1,9 @@
+# Per http://go/westworld-local-development#step3-test-atom-and-metric-locally-on-device ,
+# In one terminal:
+make statsd_testdrive
+./out/host/linux-x86/bin/statsd_testdrive 122
+
+# In another terminal:
+mma -j $(nproc) log_rescueparty_reset_event_reported
+adb push $OUT/testcases/log_rescueparty_reset_event_reported/arm64/log_rescueparty_reset_event_reported /data
+adb shell /data/log_rescueparty_reset_event_reported 1234
