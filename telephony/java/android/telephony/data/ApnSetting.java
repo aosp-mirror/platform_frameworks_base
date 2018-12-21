@@ -140,15 +140,19 @@ public class ApnSetting implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface AuthType {}
 
-    // Possible values for protocol.
-    /** Protocol type for IP. */
+    // Possible values for protocol which is defined in TS 27.007 section 10.1.1.
+    /** Internet protocol. */
     public static final int PROTOCOL_IP = 0;
-    /** Protocol type for IPV6. */
+    /** Internet protocol, version 6. */
     public static final int PROTOCOL_IPV6 = 1;
-    /** Protocol type for IPV4V6. */
+    /** Virtual PDP type introduced to handle dual IP stack UE capability. */
     public static final int PROTOCOL_IPV4V6 = 2;
-    /** Protocol type for PPP. */
+    /** Point to point protocol. */
     public static final int PROTOCOL_PPP = 3;
+    /** Transfer of Non-IP data to external packet data network. */
+    public static final int PROTOCOL_NON_IP = 4;
+    /** Transfer of Unstructured data to the Data Network via N6. */
+    public static final int PROTOCOL_UNSTRUCTURED = 5;
 
     /** @hide */
     @IntDef(prefix = { "PROTOCOL_" }, value = {
@@ -156,6 +160,8 @@ public class ApnSetting implements Parcelable {
         PROTOCOL_IPV6,
         PROTOCOL_IPV4V6,
         PROTOCOL_PPP,
+        PROTOCOL_NON_IP,
+        PROTOCOL_UNSTRUCTURED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtocolType {}
@@ -217,11 +223,15 @@ public class ApnSetting implements Parcelable {
         PROTOCOL_STRING_MAP.put("IPV6", PROTOCOL_IPV6);
         PROTOCOL_STRING_MAP.put("IPV4V6", PROTOCOL_IPV4V6);
         PROTOCOL_STRING_MAP.put("PPP", PROTOCOL_PPP);
+        PROTOCOL_STRING_MAP.put("NON-IP", PROTOCOL_NON_IP);
+        PROTOCOL_STRING_MAP.put("UNSTRUCTURED", PROTOCOL_UNSTRUCTURED);
         PROTOCOL_INT_MAP = new ArrayMap<Integer, String>();
         PROTOCOL_INT_MAP.put(PROTOCOL_IP, "IP");
         PROTOCOL_INT_MAP.put(PROTOCOL_IPV6, "IPV6");
         PROTOCOL_INT_MAP.put(PROTOCOL_IPV4V6, "IPV4V6");
         PROTOCOL_INT_MAP.put(PROTOCOL_PPP, "PPP");
+        PROTOCOL_INT_MAP.put(PROTOCOL_NON_IP, "NON-IP");
+        PROTOCOL_INT_MAP.put(PROTOCOL_UNSTRUCTURED, "UNSTRUCTURED");
 
         MVNO_TYPE_STRING_MAP = new ArrayMap<String, Integer>();
         MVNO_TYPE_STRING_MAP.put("spn", MVNO_TYPE_SPN);
