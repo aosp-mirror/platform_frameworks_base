@@ -27,7 +27,6 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarStateController;
@@ -59,11 +58,9 @@ public class NotificationLogger implements StateListener {
             new ArraySet<>();
 
     // Dependencies:
-    private final NotificationListenerService mNotificationListener =
-            Dependency.get(NotificationListener.class);
-    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
-    protected NotificationEntryManager mEntryManager
-            = Dependency.get(NotificationEntryManager.class);
+    private final NotificationListenerService mNotificationListener;
+    private final UiOffloadThread mUiOffloadThread;
+    protected NotificationEntryManager mEntryManager;
 
     protected Handler mHandler = new Handler();
     protected IStatusBarService mBarService;
@@ -150,11 +147,17 @@ public class NotificationLogger implements StateListener {
     };
 
     @Inject
-    public NotificationLogger() {
+    public NotificationLogger(NotificationListener notificationListener,
+            UiOffloadThread uiOffloadThread,
+            NotificationEntryManager entryManager,
+            StatusBarStateController statusBarStateController) {
+        mNotificationListener = notificationListener;
+        mUiOffloadThread = uiOffloadThread;
+        mEntryManager = entryManager;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         // Not expected to be destroyed, don't need to unsubscribe
-        Dependency.get(StatusBarStateController.class).addCallback(this);
+        statusBarStateController.addCallback(this);
     }
 
     public void setUpWithContainer(NotificationListContainer listContainer) {
