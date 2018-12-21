@@ -25,7 +25,7 @@ namespace statsd {
 
 class StatsCompanionServicePuller : public StatsPuller {
 public:
-    StatsCompanionServicePuller(int tagId);
+    explicit StatsCompanionServicePuller(int tagId);
     bool PullInternal(vector<std::shared_ptr<LogEvent> >* data) override;
 
     void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService) override;

@@ -33,7 +33,7 @@ using std::string;
 class ConfigKey {
 public:
     ConfigKey();
-    explicit ConfigKey(const ConfigKey& that);
+    ConfigKey(const ConfigKey& that);
     ConfigKey(int uid, const int64_t& id);
     ~ConfigKey();
 
