@@ -6481,12 +6481,17 @@ package android.telephony.euicc {
     method public void getDownloadableSubscriptionMetadata(android.telephony.euicc.DownloadableSubscription, android.app.PendingIntent);
     method public int getOtaStatus();
     field public static final java.lang.String ACTION_OTA_STATUS_CHANGED = "android.telephony.euicc.action.OTA_STATUS_CHANGED";
+    field public static final java.lang.String ACTION_PROFILE_SELECTION = "android.telephony.euicc.action.PROFILE_SELECTION";
     field public static final java.lang.String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION = "android.telephony.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
+    field public static final int EUICC_ACTIVATION_TYPE_BACKUP = 2; // 0x2
+    field public static final int EUICC_ACTIVATION_TYPE_DEFAULT = 1; // 0x1
+    field public static final int EUICC_ACTIVATION_TYPE_TRANSFER = 3; // 0x3
     field public static final int EUICC_OTA_FAILED = 2; // 0x2
     field public static final int EUICC_OTA_IN_PROGRESS = 1; // 0x1
     field public static final int EUICC_OTA_NOT_NEEDED = 4; // 0x4
     field public static final int EUICC_OTA_STATUS_UNAVAILABLE = 5; // 0x5
     field public static final int EUICC_OTA_SUCCEEDED = 3; // 0x3
+    field public static final java.lang.String EXTRA_ACTIVATION_TYPE = "android.telephony.euicc.extra.ACTIVATION_TYPE";
     field public static final java.lang.String EXTRA_EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS = "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS";
     field public static final java.lang.String EXTRA_FORCE_PROVISION = "android.telephony.euicc.extra.FORCE_PROVISION";
   }
