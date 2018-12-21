@@ -29,6 +29,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +50,8 @@ public class RemoteInputQuickSettingsDisablerTest extends SysuiTestCase {
         mCommandQueue = mock(CommandQueue.class);
         mContext.putComponent(CommandQueue.class, mCommandQueue);
 
-        mRemoteInputQuickSettingsDisabler = new RemoteInputQuickSettingsDisabler(mContext);
+        mRemoteInputQuickSettingsDisabler = new RemoteInputQuickSettingsDisabler(mContext,
+                mock(ConfigurationController.class));
     }
 
     @Test
