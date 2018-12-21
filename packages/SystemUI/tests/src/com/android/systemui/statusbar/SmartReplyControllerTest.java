@@ -70,9 +70,9 @@ public class SmartReplyControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(NotificationEntryManager.class,
                 mNotificationEntryManager);
-        mDependency.injectTestDependency(IStatusBarService.class, mIStatusBarService);
 
-        mSmartReplyController = new SmartReplyController();
+        mSmartReplyController = new SmartReplyController(mNotificationEntryManager,
+                mIStatusBarService);
         mDependency.injectTestDependency(SmartReplyController.class,
                 mSmartReplyController);
 
