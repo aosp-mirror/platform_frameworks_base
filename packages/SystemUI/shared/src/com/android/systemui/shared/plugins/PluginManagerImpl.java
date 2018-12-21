@@ -258,7 +258,8 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                     Log.v(TAG, "Reloading " + pkg);
                 }
             }
-            if (Intent.ACTION_PACKAGE_REPLACED.equals(intent.getAction())) {
+            if (Intent.ACTION_PACKAGE_REPLACED.equals(intent.getAction())
+                    && componentName != null) {
                 @PluginEnabler.DisableReason int disableReason =
                         getPluginEnabler().getDisableReason(componentName);
                 if (disableReason == PluginEnabler.DISABLED_FROM_EXPLICIT_CRASH
