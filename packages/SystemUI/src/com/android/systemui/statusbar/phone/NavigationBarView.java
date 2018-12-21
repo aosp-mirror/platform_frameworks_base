@@ -276,7 +276,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         @Override
         public void onBackButtonVisibilityChanged(boolean visible) {
-            getBackButton().setVisibility(visible ? VISIBLE : GONE);
+            if (!inScreenPinning()) {
+                getBackButton().setVisibility(visible ? VISIBLE : GONE);
+            }
         }
 
         @Override
@@ -940,6 +942,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void showPinningEnterExitToast(boolean entering) {
         if (entering) {
             mScreenPinningNotify.showPinningStartToast();
+
+            // TODO(b/112934365): remove after prototype finished, only needed to escape from pin
+            getBackButton().setVisibility(VISIBLE);
         } else {
             mScreenPinningNotify.showPinningExitToast();
         }
