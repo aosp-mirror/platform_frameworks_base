@@ -410,7 +410,7 @@ struct WorkerThreadData : public virtual RefBase {
     bool workerDone;
     status_t workerError;
 
-    WorkerThreadData(const WorkerThreadSection* section);
+    explicit WorkerThreadData(const WorkerThreadSection* section);
     virtual ~WorkerThreadData();
 };
 
