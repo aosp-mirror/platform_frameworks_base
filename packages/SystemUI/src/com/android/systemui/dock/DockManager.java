@@ -22,22 +22,22 @@ package com.android.systemui.dock;
 public interface DockManager {
 
     /**
-     * Uninitialized / unknown dock states
+     * Uninitialized / undocking dock states
      */
     int STATE_NONE = 0;
     /**
      * The state for docking
      */
-    int STATE_DOCKING = 1;
+    int STATE_DOCKED = 1;
     /**
-     * The state for undocking
+     * The state for docking without showing UI
      */
-    int STATE_UNDOCKING = 2;
+    int STATE_DOCKED_HIDE = 2;
 
     /**
      * Add a dock event listener into manager
      *
-     * @param callback A  {@link DockEventListener} which want to add
+     * @param callback A {@link DockEventListener} which want to add
      */
     void addListener(DockEventListener callback);
 

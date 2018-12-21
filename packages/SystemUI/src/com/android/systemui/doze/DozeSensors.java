@@ -359,7 +359,9 @@ public class DozeSensors {
         }
 
         protected boolean enabledBySetting() {
-            if (TextUtils.isEmpty(mSetting)) {
+            if (!mConfig.enabled(UserHandle.USER_CURRENT)) {
+                return false;
+            } else if (TextUtils.isEmpty(mSetting)) {
                 return true;
             }
             return Settings.Secure.getIntForUser(mResolver, mSetting, mSettingDefault ? 1 : 0,
