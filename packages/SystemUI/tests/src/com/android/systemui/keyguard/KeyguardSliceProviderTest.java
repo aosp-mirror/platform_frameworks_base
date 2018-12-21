@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 
 import android.app.AlarmManager;
 import android.content.ContentResolver;
+import android.media.MediaMetadata;
 import android.net.Uri;
 import android.provider.Settings;
 import android.support.test.filters.SmallTest;
@@ -42,6 +43,7 @@ import androidx.slice.core.SliceQuery;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationMediaManager;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -63,6 +65,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     private ContentResolver mContentResolver;
     @Mock
     private AlarmManager mAlarmManager;
+    @Mock
+    private NotificationMediaManager mNotificationMediaManager;
     private TestableKeyguardSliceProvider mProvider;
     private boolean mIsZenMode;
 
@@ -72,6 +76,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         mIsZenMode = false;
         mProvider = new TestableKeyguardSliceProvider();
         mProvider.attachInfo(getContext(), null);
+        mProvider.initDependencies();
         SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));
     }
 
@@ -88,6 +93,16 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
                 android.app.slice.Slice.HINT_TITLE,
                 null /* nonHints */);
         Assert.assertNotNull("Slice must provide a title.", text);
+    }
+
+    @Test
+    public void onBindSlice_readsMedia() {
+        MediaMetadata metadata = mock(MediaMetadata.class);
+        mProvider.onMetadataChanged(metadata);
+        mProvider.onBindSlice(mProvider.getUri());
+        verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_TITLE));
+        verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_ARTIST));
+        verify(mNotificationMediaManager).getMediaIcon();
     }
 
     @Test
@@ -136,12 +151,18 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     public void addZenMode_addedToSlice() {
         ListBuilder listBuilder = spy(new ListBuilder(getContext(), mProvider.getUri(),
             ListBuilder.INFINITY));
-        mProvider.addZenMode(listBuilder);
+        mProvider.addZenModeLocked(listBuilder);
         verify(listBuilder, never()).addRow(any(ListBuilder.RowBuilder.class));
 
         mIsZenMode = true;
-        mProvider.addZenMode(listBuilder);
+        mProvider.addZenModeLocked(listBuilder);
         verify(listBuilder).addRow(any(ListBuilder.RowBuilder.class));
+    }
+
+    @Test
+    public void onMetadataChanged_updatesSlice() {
+        mProvider.onMetadataChanged(mock(MediaMetadata.class));
+        verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
     }
 
     private class TestableKeyguardSliceProvider extends KeyguardSliceProvider {
@@ -166,8 +187,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         }
 
         @Override
-        void cleanDateFormat() {
-            super.cleanDateFormat();
+        void cleanDateFormatLocked() {
+            super.cleanDateFormatLocked();
             mCleanDateFormatInvokations++;
         }
 
@@ -177,8 +198,13 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         }
 
         @Override
-        protected String getFormattedDate() {
-            return super.getFormattedDate() + mCounter++;
+        protected String getFormattedDateLocked() {
+            return super.getFormattedDateLocked() + mCounter++;
+        }
+
+        @Override
+        public void initDependencies() {
+            mMediaManager = mNotificationMediaManager;
         }
     }
 

@@ -25,11 +25,10 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -47,6 +46,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
@@ -94,14 +94,11 @@ public class NotificationMediaManager implements Dumpable {
     @Nullable
     private LockscreenWallpaper mLockscreenWallpaper;
 
-    protected final PorterDuffXfermode mSrcXferMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
-    protected final PorterDuffXfermode mSrcOverXferMode =
-            new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
-
     private final Handler mHandler = Dependency.get(MAIN_HANDLER);
 
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
+    private final ArrayList<MediaListener> mMediaListeners;
 
     protected NotificationPresenter mPresenter;
     private MediaController mMediaController;
@@ -122,7 +119,7 @@ public class NotificationMediaManager implements Dumpable {
             if (state != null) {
                 if (!isPlaybackActive(state.getState())) {
                     clearCurrentMediaNotification();
-                    mPresenter.updateMediaMetaData(true, true);
+                    dispatchUpdateMediaMetaData(true /* changed */, true /* allowAnimation */);
                 }
             }
         }
@@ -134,7 +131,7 @@ public class NotificationMediaManager implements Dumpable {
                 Log.v(TAG, "DEBUG_MEDIA: onMetadataChanged: " + metadata);
             }
             mMediaMetadata = metadata;
-            mPresenter.updateMediaMetaData(true, true);
+            dispatchUpdateMediaMetaData(true /* changed */, true /* allowAnimation */);
         }
     };
 
@@ -164,6 +161,7 @@ public class NotificationMediaManager implements Dumpable {
     @Inject
     public NotificationMediaManager(Context context) {
         mContext = context;
+        mMediaListeners = new ArrayList<>();
         mMediaSessionManager
                 = (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
         // TODO: use MediaSessionManager.SessionListener to hook us up to future updates
@@ -177,7 +175,7 @@ public class NotificationMediaManager implements Dumpable {
     public void onNotificationRemoved(String key) {
         if (key.equals(mMediaNotificationKey)) {
             clearCurrentMediaNotification();
-            mPresenter.updateMediaMetaData(true, true);
+            dispatchUpdateMediaMetaData(true /* changed */, true /* allowEnterAnimation */);
         }
     }
 
@@ -189,20 +187,44 @@ public class NotificationMediaManager implements Dumpable {
         return mMediaMetadata;
     }
 
+    public Icon getMediaIcon() {
+        if (mMediaNotificationKey == null) {
+            return null;
+        }
+        NotificationEntryManager manager = getEntryManager();
+        synchronized (manager.getNotificationData()) {
+            Entry entry = manager.getNotificationData().get(mMediaNotificationKey);
+            if (entry == null || entry.expandedIcon == null) {
+                return null;
+            }
+
+            return entry.expandedIcon.getSourceIcon();
+        }
+    }
+
+    public void addCallback(MediaListener callback) {
+        mMediaListeners.add(callback);
+        callback.onMetadataChanged(mMediaMetadata);
+    }
+
+    public void removeCallback(MediaListener callback) {
+        mMediaListeners.remove(callback);
+    }
+
     public void findAndUpdateMediaNotifications() {
         boolean metaDataChanged = false;
 
         NotificationEntryManager manager = getEntryManager();
         synchronized (manager.getNotificationData()) {
-            ArrayList<NotificationData.Entry> activeNotifications = manager
+            ArrayList<Entry> activeNotifications = manager
                     .getNotificationData().getActiveNotifications();
             final int N = activeNotifications.size();
 
             // Promote the media notification with a controller in 'playing' state, if any.
-            NotificationData.Entry mediaNotification = null;
+            Entry mediaNotification = null;
             MediaController controller = null;
             for (int i = 0; i < N; i++) {
-                final NotificationData.Entry entry = activeNotifications.get(i);
+                final Entry entry = activeNotifications.get(i);
 
                 if (entry.isMediaNotification()) {
                     final MediaSession.Token token =
@@ -242,7 +264,7 @@ public class NotificationMediaManager implements Dumpable {
                             final String pkg = aController.getPackageName();
 
                             for (int i = 0; i < N; i++) {
-                                final NotificationData.Entry entry = activeNotifications.get(i);
+                                final Entry entry = activeNotifications.get(i);
                                 if (entry.notification.getPackageName().equals(pkg)) {
                                     if (DEBUG_MEDIA) {
                                         Log.v(TAG, "DEBUG_MEDIA: found controller matching "
@@ -286,14 +308,22 @@ public class NotificationMediaManager implements Dumpable {
             getEntryManager().updateNotifications();
         }
 
-        if (mPresenter != null) {
-            mPresenter.updateMediaMetaData(metaDataChanged, true);
-        }
+        dispatchUpdateMediaMetaData(metaDataChanged, true /* allowEnterAnimation */);
     }
 
     public void clearCurrentMediaNotification() {
         mMediaNotificationKey = null;
         clearCurrentMediaNotificationSession();
+    }
+
+    private void dispatchUpdateMediaMetaData(boolean changed, boolean allowEnterAnimation) {
+        if (mPresenter != null) {
+            mPresenter.updateMediaMetaData(changed, allowEnterAnimation);
+        }
+        ArrayList<MediaListener> callbacks = new ArrayList<>(mMediaListeners);
+        for (int i = 0; i < callbacks.size(); i++) {
+            callbacks.get(i).onMetadataChanged(mMediaMetadata);
+        }
     }
 
     @Override
@@ -552,4 +582,8 @@ public class NotificationMediaManager implements Dumpable {
             mBackdropFront.setImageDrawable(null);
         }
     };
+
+    public interface MediaListener {
+        void onMetadataChanged(MediaMetadata metadata);
+    }
 }
