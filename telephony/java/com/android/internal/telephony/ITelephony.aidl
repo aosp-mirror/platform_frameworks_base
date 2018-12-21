@@ -1816,4 +1816,16 @@ interface ITelephony {
      * Enable or disable a logical modem stack associated with the slotIndex.
      */
     boolean enableModemForSlot(int slotIndex, boolean enable);
+
+    /**
+     * Indicate if the enablement of multi SIM functionality is restricted.
+     * @hide
+     */
+    void setMultisimCarrierRestriction(boolean isMultisimCarrierRestricted);
+
+    /**
+     * Returns if the usage of multiple SIM cards at the same time is restricted.
+     * @hide
+     */
+    boolean isMultisimCarrierRestricted();
 }
