@@ -53,195 +53,172 @@ const int64_t NO_ALARM_UPDATE = INT64_MAX;
 const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // wifi_bytes_transfer
         {android::util::WIFI_BYTES_TRANSFER,
-         {{2, 3, 4, 5},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER)}},
+         {.additiveFields = {2, 3, 4, 5},
+          .puller = new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER)}},
         // wifi_bytes_transfer_by_fg_bg
         {android::util::WIFI_BYTES_TRANSFER_BY_FG_BG,
-         {{3, 4, 5, 6},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER_BY_FG_BG)}},
+         {.additiveFields = {3, 4, 5, 6},
+          .puller = new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER_BY_FG_BG)}},
         // mobile_bytes_transfer
         {android::util::MOBILE_BYTES_TRANSFER,
-         {{2, 3, 4, 5},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER)}},
+         {.additiveFields = {2, 3, 4, 5},
+          .puller = new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER)}},
         // mobile_bytes_transfer_by_fg_bg
         {android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG,
-         {{3, 4, 5, 6},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG)}},
+         {.additiveFields = {3, 4, 5, 6},
+          .puller =
+                  new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG)}},
         // bluetooth_bytes_transfer
         {android::util::BLUETOOTH_BYTES_TRANSFER,
-         {{2, 3},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::BLUETOOTH_BYTES_TRANSFER)}},
+         {.additiveFields = {2, 3},
+          .puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_BYTES_TRANSFER)}},
         // kernel_wakelock
         {android::util::KERNEL_WAKELOCK,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},
+         {.puller = new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},
         // subsystem_sleep_state
-        {android::util::SUBSYSTEM_SLEEP_STATE,
-         {{}, 1 * NS_PER_SEC, new SubsystemSleepStatePuller()}},
+        {android::util::SUBSYSTEM_SLEEP_STATE, {.puller = new SubsystemSleepStatePuller()}},
         // on_device_power_measurement
-        {android::util::ON_DEVICE_POWER_MEASUREMENT, {{}, 1 * NS_PER_SEC, new PowerStatsPuller()}},
+        {android::util::ON_DEVICE_POWER_MEASUREMENT, {.puller = new PowerStatsPuller()}},
         // cpu_time_per_freq
         {android::util::CPU_TIME_PER_FREQ,
-         {{3}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::CPU_TIME_PER_FREQ)}},
+         {.additiveFields = {3},
+          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_FREQ)}},
         // cpu_time_per_uid
         {android::util::CPU_TIME_PER_UID,
-         {{2, 3},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID)}},
+         {.additiveFields = {2, 3},
+          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID)}},
         // cpu_time_per_uid_freq
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         {android::util::CPU_TIME_PER_UID_FREQ,
-         {{4},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID_FREQ)}},
+         {.additiveFields = {4},
+          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID_FREQ)}},
         // cpu_active_time
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         {android::util::CPU_ACTIVE_TIME,
-         {{2}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::CPU_ACTIVE_TIME)}},
+         {.additiveFields = {2},
+          .puller = new StatsCompanionServicePuller(android::util::CPU_ACTIVE_TIME)}},
         // cpu_cluster_time
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         {android::util::CPU_CLUSTER_TIME,
-         {{3}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::CPU_CLUSTER_TIME)}},
+         {.additiveFields = {3},
+          .puller = new StatsCompanionServicePuller(android::util::CPU_CLUSTER_TIME)}},
         // wifi_activity_energy_info
         {android::util::WIFI_ACTIVITY_INFO,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_INFO)}},
+         {.puller = new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_INFO)}},
         // modem_activity_info
         {android::util::MODEM_ACTIVITY_INFO,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::MODEM_ACTIVITY_INFO)}},
+         {.puller = new StatsCompanionServicePuller(android::util::MODEM_ACTIVITY_INFO)}},
         // bluetooth_activity_info
         {android::util::BLUETOOTH_ACTIVITY_INFO,
-         {{},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::BLUETOOTH_ACTIVITY_INFO)}},
+         {.puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_ACTIVITY_INFO)}},
         // system_elapsed_realtime
         {android::util::SYSTEM_ELAPSED_REALTIME,
-         {{},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME)}},
+         {.pullTimeoutNs = NS_PER_SEC / 2,
+          .coolDownNs = NS_PER_SEC,
+          .puller = new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME)}},
         // system_uptime
         {android::util::SYSTEM_UPTIME,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
+         {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
         // remaining_battery_capacity
         {android::util::REMAINING_BATTERY_CAPACITY,
-         {{},
-          1 * NS_PER_SEC,
-          new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)}},
+         {.puller = new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)}},
         // full_battery_capacity
         {android::util::FULL_BATTERY_CAPACITY,
-         {{},
-          1 * NS_PER_SEC,
-          new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}},
+         {.puller = new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}},
         // battery_voltage
         {android::util::BATTERY_VOLTAGE,
-         {{}, 1 * NS_PER_SEC, new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
-        // battery_level
+         {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
+        // battery_voltage
         {android::util::BATTERY_LEVEL,
-         {{}, 1 * NS_PER_SEC, new ResourceHealthManagerPuller(android::util::BATTERY_LEVEL)}},
+         {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_LEVEL)}},
         // process_memory_state
         {android::util::PROCESS_MEMORY_STATE,
-         {{4, 5, 6, 7, 8, 9},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
+         {.additiveFields = {4, 5, 6, 7, 8, 9},
+          .puller = new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
         // native_process_memory_state
         {android::util::NATIVE_PROCESS_MEMORY_STATE,
-         {{3, 4, 5, 6},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::NATIVE_PROCESS_MEMORY_STATE)}},
+         {.additiveFields = {3, 4, 5, 6},
+          .puller = new StatsCompanionServicePuller(android::util::NATIVE_PROCESS_MEMORY_STATE)}},
         {android::util::PROCESS_MEMORY_HIGH_WATER_MARK,
-         {{3},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
+         {.additiveFields = {3},
+          .puller =
+                  new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
         // temperature
-        {android::util::TEMPERATURE, {{}, 1 * NS_PER_SEC, new ResourceThermalManagerPuller()}},
+        {android::util::TEMPERATURE, {.puller = new ResourceThermalManagerPuller()}},
         // binder_calls
         {android::util::BINDER_CALLS,
-         {{4, 5, 6, 8, 12},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::BINDER_CALLS)}},
+         {.additiveFields = {4, 5, 6, 8, 12},
+          .puller = new StatsCompanionServicePuller(android::util::BINDER_CALLS)}},
         // binder_calls_exceptions
         {android::util::BINDER_CALLS_EXCEPTIONS,
-         {{},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::BINDER_CALLS_EXCEPTIONS)}},
+         {.puller = new StatsCompanionServicePuller(android::util::BINDER_CALLS_EXCEPTIONS)}},
         // looper_stats
         {android::util::LOOPER_STATS,
-         {{5, 6, 7, 8, 9},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::LOOPER_STATS)}},
+         {.additiveFields = {5, 6, 7, 8, 9},
+          .puller = new StatsCompanionServicePuller(android::util::LOOPER_STATS)}},
         // Disk Stats
         {android::util::DISK_STATS,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::DISK_STATS)}},
+         {.puller = new StatsCompanionServicePuller(android::util::DISK_STATS)}},
         // Directory usage
         {android::util::DIRECTORY_USAGE,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::DIRECTORY_USAGE)}},
+         {.puller = new StatsCompanionServicePuller(android::util::DIRECTORY_USAGE)}},
         // Size of app's code, data, and cache
         {android::util::APP_SIZE,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::APP_SIZE)}},
+         {.puller = new StatsCompanionServicePuller(android::util::APP_SIZE)}},
         // Size of specific categories of files. Eg. Music.
         {android::util::CATEGORY_SIZE,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
+         {.puller = new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
         // Number of fingerprints registered to each user.
         {android::util::NUM_FINGERPRINTS,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS)}},
+         {.puller = new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS)}},
         // ProcStats.
         {android::util::PROC_STATS,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::PROC_STATS)}},
+         {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS)}},
         // ProcStatsPkgProc.
         {android::util::PROC_STATS_PKG_PROC,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::PROC_STATS_PKG_PROC)}},
+         {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS_PKG_PROC)}},
         // Disk I/O stats per uid.
         {android::util::DISK_IO,
-         {{2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
-          3 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::DISK_IO)}},
+         {.additiveFields = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+          .coolDownNs = 3 * NS_PER_SEC,
+          .puller = new StatsCompanionServicePuller(android::util::DISK_IO)}},
         // PowerProfile constants for power model calculations.
         {android::util::POWER_PROFILE,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::POWER_PROFILE)}},
+         {.puller = new StatsCompanionServicePuller(android::util::POWER_PROFILE)}},
         // Process cpu stats. Min cool-down is 5 sec, inline with what AcitivityManagerService uses.
         {android::util::PROCESS_CPU_TIME,
-         {{} /* additive fields */,
-          5 * NS_PER_SEC /* min cool-down in seconds*/,
-          new StatsCompanionServicePuller(android::util::PROCESS_CPU_TIME)}},
+         {.coolDownNs = 5 * NS_PER_SEC /* min cool-down in seconds*/,
+          .puller = new StatsCompanionServicePuller(android::util::PROCESS_CPU_TIME)}},
         {android::util::CPU_TIME_PER_THREAD_FREQ,
-         {{7, 9, 11, 13, 15, 17, 19, 21},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
+         {.additiveFields = {7, 9, 11, 13, 15, 17, 19, 21},
+          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
         // DeviceCalculatedPowerUse.
         {android::util::DEVICE_CALCULATED_POWER_USE,
-         {{},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_USE)}},
+         {.puller = new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_USE)}},
         // DeviceCalculatedPowerBlameUid.
         {android::util::DEVICE_CALCULATED_POWER_BLAME_UID,
-         {{},  // BatteryStats already merged isolated with host ids so it's unnecessary here.
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_BLAME_UID)}},
+         {.puller = new StatsCompanionServicePuller(
+                  android::util::DEVICE_CALCULATED_POWER_BLAME_UID)}},
         // DeviceCalculatedPowerBlameOther.
         {android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER,
-         {{},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER)}},
+         {.puller = new StatsCompanionServicePuller(
+                  android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER)}},
         // BuildInformation.
         {android::util::BUILD_INFORMATION,
-         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::BUILD_INFORMATION)}},
+         {.puller = new StatsCompanionServicePuller(android::util::BUILD_INFORMATION)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
 }
 
-bool StatsPullerManager::Pull(const int tagId, const int64_t timeNs,
-                                  vector<shared_ptr<LogEvent>>* data) {
+bool StatsPullerManager::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
     VLOG("Initiating pulling %d", tagId);
 
     if (kAllPullAtomInfo.find(tagId) != kAllPullAtomInfo.end()) {
-        bool ret = kAllPullAtomInfo.find(tagId)->second.puller->Pull(timeNs, data);
+        bool ret = kAllPullAtomInfo.find(tagId)->second.puller->Pull(data);
         VLOG("pulled %d items", (int)data->size());
         return ret;
     } else {
@@ -333,8 +310,9 @@ void StatsPullerManager::UnRegisterReceiver(int tagId, wp<PullDataReceiver> rece
     }
 }
 
-void StatsPullerManager::OnAlarmFired(const int64_t currentTimeNs) {
+void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
     AutoMutex _l(mLock);
+    int64_t wallClockNs = getWallClockNs();
 
     int64_t minNextPullTimeNs = NO_ALARM_UPDATE;
 
@@ -344,7 +322,7 @@ void StatsPullerManager::OnAlarmFired(const int64_t currentTimeNs) {
         vector<ReceiverInfo*> receivers = vector<ReceiverInfo*>();
         if (pair.second.size() != 0) {
             for (ReceiverInfo& receiverInfo : pair.second) {
-                if (receiverInfo.nextPullTimeNs <= currentTimeNs) {
+                if (receiverInfo.nextPullTimeNs <= elapsedTimeNs) {
                     receivers.push_back(&receiverInfo);
                 } else {
                     if (receiverInfo.nextPullTimeNs < minNextPullTimeNs) {
@@ -360,22 +338,38 @@ void StatsPullerManager::OnAlarmFired(const int64_t currentTimeNs) {
 
     for (const auto& pullInfo : needToPull) {
         vector<shared_ptr<LogEvent>> data;
-        if (Pull(pullInfo.first, currentTimeNs, &data)) {
-            for (const auto& receiverInfo : pullInfo.second) {
-                sp<PullDataReceiver> receiverPtr = receiverInfo->receiver.promote();
-                if (receiverPtr != nullptr) {
-                    receiverPtr->onDataPulled(data);
-                    // we may have just come out of a coma, compute next pull time
-                    receiverInfo->nextPullTimeNs =
-                            (currentTimeNs - receiverInfo->nextPullTimeNs) /
-                                receiverInfo->intervalNs * receiverInfo->intervalNs +
-                            receiverInfo->intervalNs + receiverInfo->nextPullTimeNs;
-                    if (receiverInfo->nextPullTimeNs < minNextPullTimeNs) {
-                        minNextPullTimeNs = receiverInfo->nextPullTimeNs;
-                    }
-                } else {
-                    VLOG("receiver already gone.");
+        if (!Pull(pullInfo.first, &data)) {
+            VLOG("pull failed at %lld, will try again later", (long long)elapsedTimeNs);
+            continue;
+        }
+        StatsdStats::getInstance().notePullDelay(pullInfo.first,
+                                                 getElapsedRealtimeNs() - elapsedTimeNs);
+
+        // Convention is to mark pull atom timestamp at request time.
+        // If we pull at t0, puller starts at t1, finishes at t2, and send back
+        // at t3, we mark t0 as its timestamp, which should correspond to its
+        // triggering event, such as condition change at t0.
+        // Here the triggering event is alarm fired from AlarmManager.
+        // In ValueMetricProducer and GaugeMetricProducer we do same thing
+        // when pull on condition change, etc.
+        for (auto& event : data) {
+            event->setElapsedTimestampNs(elapsedTimeNs);
+            event->setLogdWallClockTimestampNs(wallClockNs);
+        }
+
+        for (const auto& receiverInfo : pullInfo.second) {
+            sp<PullDataReceiver> receiverPtr = receiverInfo->receiver.promote();
+            if (receiverPtr != nullptr) {
+                receiverPtr->onDataPulled(data);
+                // we may have just come out of a coma, compute next pull time
+                int numBucketsAhead =
+                        (elapsedTimeNs - receiverInfo->nextPullTimeNs) / receiverInfo->intervalNs;
+                receiverInfo->nextPullTimeNs += (numBucketsAhead + 1) * receiverInfo->intervalNs;
+                if (receiverInfo->nextPullTimeNs < minNextPullTimeNs) {
+                    minNextPullTimeNs = receiverInfo->nextPullTimeNs;
                 }
+            } else {
+                VLOG("receiver already gone.");
             }
         }
     }

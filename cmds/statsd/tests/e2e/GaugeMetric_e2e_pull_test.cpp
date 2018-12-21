@@ -48,6 +48,7 @@ StatsdConfig CreateStatsdConfig(const GaugeMetric::SamplingType sampling_type) {
     *gaugeMetric->mutable_dimensions_in_what() =
         CreateDimensions(android::util::TEMPERATURE, {2/* sensor name field */ });
     gaugeMetric->set_bucket(FIVE_MINUTES);
+    gaugeMetric->set_max_pull_delay_sec(INT_MAX);
     config.set_hash_strings_in_metric_report(false);
 
     return config;
@@ -57,7 +58,7 @@ StatsdConfig CreateStatsdConfig(const GaugeMetric::SamplingType sampling_type) {
 
 TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     auto config = CreateStatsdConfig(GaugeMetric::RANDOM_ONE_SAMPLE);
-    int64_t baseTimeNs = 10 * NS_PER_SEC;
+    int64_t baseTimeNs = getElapsedRealtimeNs();
     int64_t configAddedTimeNs = 10 * 60 * NS_PER_SEC + baseTimeNs;
     int64_t bucketSizeNs =
         TimeUnitToBucketSizeInMillis(config.gauge_metric(0).bucket()) * 1000000;
@@ -202,7 +203,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
 
 TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents) {
     auto config = CreateStatsdConfig(GaugeMetric::CONDITION_CHANGE_TO_TRUE);
-    int64_t baseTimeNs = 10 * NS_PER_SEC;
+    int64_t baseTimeNs = getElapsedRealtimeNs();
     int64_t configAddedTimeNs = 10 * 60 * NS_PER_SEC + baseTimeNs;
     int64_t bucketSizeNs =
         TimeUnitToBucketSizeInMillis(config.gauge_metric(0).bucket()) * 1000000;
@@ -303,7 +304,7 @@ TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents) {
 
 TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
     auto config = CreateStatsdConfig(GaugeMetric::RANDOM_ONE_SAMPLE);
-    int64_t baseTimeNs = 10 * NS_PER_SEC;
+    int64_t baseTimeNs = getElapsedRealtimeNs();
     int64_t configAddedTimeNs = 10 * 60 * NS_PER_SEC + baseTimeNs;
     int64_t bucketSizeNs =
         TimeUnitToBucketSizeInMillis(config.gauge_metric(0).bucket()) * 1000000;

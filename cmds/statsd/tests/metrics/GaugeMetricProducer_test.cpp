@@ -90,6 +90,7 @@ TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition) {
     metric.set_id(metricId);
     metric.set_bucket(ONE_MINUTE);
     metric.mutable_gauge_fields_filter()->set_include_all(false);
+    metric.set_max_pull_delay_sec(INT_MAX);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(1);
@@ -106,9 +107,8 @@ TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
-            .WillOnce(Invoke([](int tagId, int64_t timeNs,
-                                vector<std::shared_ptr<LogEvent>>* data) {
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
                 event->write(3);
@@ -266,6 +266,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
     GaugeMetric metric;
     metric.set_id(metricId);
     metric.set_bucket(ONE_MINUTE);
+    metric.set_max_pull_delay_sec(INT_MAX);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(2);
@@ -281,10 +282,9 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
             .WillOnce(Return(false))
-            .WillOnce(Invoke([](int tagId, int64_t timeNs,
-                                vector<std::shared_ptr<LogEvent>>* data) {
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, eventUpgradeTimeNs);
                 event->write("some value");
@@ -341,6 +341,7 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition) {
     GaugeMetric metric;
     metric.set_id(metricId);
     metric.set_bucket(ONE_MINUTE);
+    metric.set_max_pull_delay_sec(INT_MAX);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(2);
@@ -357,9 +358,8 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
-            .WillOnce(Invoke([](int tagId, int64_t timeNs,
-                                vector<std::shared_ptr<LogEvent>>* data) {
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
                 event->write("some value");
@@ -420,6 +420,7 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition) {
     metric.set_bucket(ONE_MINUTE);
     metric.mutable_gauge_fields_filter()->set_include_all(true);
     metric.set_condition(StringToId("APP_DIED"));
+    metric.set_max_pull_delay_sec(INT_MAX);
     auto dim = metric.mutable_dimensions_in_what();
     dim->set_field(tagId);
     dim->add_child()->set_field(1);
@@ -454,9 +455,8 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
-            .WillOnce(Invoke([](int tagId, int64_t timeNs,
-                                vector<std::shared_ptr<LogEvent>>* data) {
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
                 event->write(1000);
@@ -502,11 +502,12 @@ TEST(GaugeMetricProducerTest, TestPulledEventsAnomalyDetection) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, _, _)).WillOnce(Return(false));
+    EXPECT_CALL(*pullerManager, Pull(tagId, _)).WillOnce(Return(false));
 
     GaugeMetric metric;
     metric.set_id(metricId);
     metric.set_bucket(ONE_MINUTE);
+    metric.set_max_pull_delay_sec(INT_MAX);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(2);
@@ -591,6 +592,7 @@ TEST(GaugeMetricProducerTest, TestPullOnTrigger) {
     metric.set_bucket(ONE_MINUTE);
     metric.set_sampling_type(GaugeMetric::FIRST_N_SAMPLES);
     metric.mutable_gauge_fields_filter()->set_include_all(false);
+    metric.set_max_pull_delay_sec(INT_MAX);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(1);
@@ -604,9 +606,8 @@ TEST(GaugeMetricProducerTest, TestPullOnTrigger) {
         new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-    EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
-            .WillOnce(Invoke([](int tagId, int64_t timeNs,
-                                vector<std::shared_ptr<LogEvent>>* data) {
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
                 event->write(4);
@@ -614,8 +615,7 @@ TEST(GaugeMetricProducerTest, TestPullOnTrigger) {
                 data->push_back(event);
                 return true;
             }))
-            .WillOnce(Invoke([](int tagId, int64_t timeNs,
-                                vector<std::shared_ptr<LogEvent>>* data) {
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 20);
                 event->write(5);
@@ -664,6 +664,7 @@ TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
     metric.set_bucket(ONE_MINUTE);
     metric.set_sampling_type(GaugeMetric::FIRST_N_SAMPLES);
     metric.mutable_gauge_fields_filter()->set_include_all(true);
+    metric.set_max_pull_delay_sec(INT_MAX);
     auto dimensionMatcher = metric.mutable_dimensions_in_what();
     // use field 1 as dimension.
     dimensionMatcher->set_field(tagId);
@@ -678,9 +679,8 @@ TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
         new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-    EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
-            .WillOnce(Invoke([](int tagId, int64_t timeNs,
-                                vector<std::shared_ptr<LogEvent>>* data) {
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 3);
                 event->write(3);
@@ -689,8 +689,7 @@ TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
                 data->push_back(event);
                 return true;
             }))
-            .WillOnce(Invoke([](int tagId, int64_t timeNs,
-                                vector<std::shared_ptr<LogEvent>>* data) {
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
                 event->write(4);
@@ -699,8 +698,7 @@ TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
                 data->push_back(event);
                 return true;
             }))
-            .WillOnce(Invoke([](int tagId, int64_t timeNs,
-                                vector<std::shared_ptr<LogEvent>>* data) {
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 20);
                 event->write(4);

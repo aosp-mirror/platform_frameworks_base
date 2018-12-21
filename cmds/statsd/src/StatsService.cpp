@@ -704,7 +704,7 @@ status_t StatsService::cmd_log_app_breadcrumb(int out, const Vector<String8>& ar
 status_t StatsService::cmd_print_pulled_metrics(int out, const Vector<String8>& args) {
     int s = atoi(args[1].c_str());
     vector<shared_ptr<LogEvent> > stats;
-    if (mPullerManager->Pull(s, getElapsedRealtimeNs(), &stats)) {
+    if (mPullerManager->Pull(s, &stats)) {
         for (const auto& it : stats) {
             dprintf(out, "Pull from %d: %s\n", s, it->ToString().c_str());
         }

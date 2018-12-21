@@ -373,6 +373,16 @@ void StatsdStats::notePullDataError(int pullAtomId) {
     mPulledAtomStats[pullAtomId].dataError++;
 }
 
+void StatsdStats::notePullTimeout(int pullAtomId) {
+    lock_guard<std::mutex> lock(mLock);
+    mPulledAtomStats[pullAtomId].pullTimeout++;
+}
+
+void StatsdStats::notePullExceedMaxDelay(int pullAtomId) {
+    lock_guard<std::mutex> lock(mLock);
+    mPulledAtomStats[pullAtomId].pullExceedMaxDelay++;
+}
+
 void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
 
@@ -429,6 +439,8 @@ void StatsdStats::resetInternalLocked() {
         pullStats.second.maxPullDelayNs = 0;
         pullStats.second.numPullDelay = 0;
         pullStats.second.dataError = 0;
+        pullStats.second.pullTimeout = 0;
+        pullStats.second.pullExceedMaxDelay = 0;
     }
 }
 
@@ -535,13 +547,16 @@ void StatsdStats::dumpStats(int out) const {
     dprintf(out, "********Pulled Atom stats***********\n");
     for (const auto& pair : mPulledAtomStats) {
         dprintf(out,
-                "Atom %d->(total pull)%ld, (pull from cache)%ld, (min pull interval)%ld, (average "
-                "pull time nanos)%lld, (max pull time nanos)%lld, (average pull delay nanos)%lld, "
-                "(max pull delay nanos)%lld, (data error)%ld\n",
+                "Atom %d->(total pull)%ld, (pull from cache)%ld, (min pull interval)%ld \n"
+                "  (average pull time nanos)%lld, (max pull time nanos)%lld, (average pull delay "
+                "nanos)%lld, "
+                "  (max pull delay nanos)%lld, (data error)%ld\n"
+                "  (pull timeout)%ld, (pull exceed max delay)%ld\n",
                 (int)pair.first, (long)pair.second.totalPull, (long)pair.second.totalPullFromCache,
                 (long)pair.second.minPullIntervalSec, (long long)pair.second.avgPullTimeNs,
                 (long long)pair.second.maxPullTimeNs, (long long)pair.second.avgPullDelayNs,
-                (long long)pair.second.maxPullDelayNs, pair.second.dataError);
+                (long long)pair.second.maxPullDelayNs, pair.second.dataError,
+                pair.second.pullTimeout, pair.second.pullExceedMaxDelay);
     }
 
     if (mAnomalyAlarmRegisteredStats > 0) {

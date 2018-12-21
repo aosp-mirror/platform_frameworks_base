@@ -26,6 +26,7 @@
 #include <vector>
 #include "PullDataReceiver.h"
 #include "StatsPuller.h"
+#include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 
 namespace android {
@@ -36,11 +37,19 @@ typedef struct {
     // The field numbers of the fields that need to be summed when merging
     // isolated uid with host uid.
     std::vector<int> additiveFields;
-    // How long should the puller wait before doing an actual pull again. Default
-    // 1 sec. Set this to 0 if this is handled elsewhere.
+    // Minimum time before this puller does actual pull again.
+    // Pullers can cause significant impact to system health and battery.
+    // So that we don't pull too frequently.
+    // If a pull request comes before cooldown, a cached version from previous pull
+    // will be returned.
     int64_t coolDownNs = 1 * NS_PER_SEC;
     // The actual puller
     sp<StatsPuller> puller;
+    // Max time allowed to pull this atom.
+    // We cannot reliably kill a pull thread. So we don't terminate the puller.
+    // The data is discarded if the pull takes longer than this and mHasGoodData
+    // marked as false.
+    int64_t pullTimeoutNs = StatsdStats::kPullMaxDelayNs;
 } PullAtomInfo;
 
 class StatsPullerManager : public virtual RefBase {
@@ -61,13 +70,18 @@ public:
     // Verify if we know how to pull for this matcher
     bool PullerForMatcherExists(int tagId) const;
 
-    void OnAlarmFired(const int64_t timeNs);
+    void OnAlarmFired(int64_t elapsedTimeNs);
 
-    // Use respective puller to pull the data. The returned data will have
-    // elapsedTimeNs set as timeNs and will have wallClockTimeNs set as current
-    // wall clock time.
-    virtual bool Pull(const int tagId, const int64_t timeNs,
-                      vector<std::shared_ptr<LogEvent>>* data);
+    // Pulls the most recent data.
+    // The data may be served from cache if consecutive pulls come within
+    // mCoolDownNs.
+    // Returns true if the pull was successful.
+    // Returns false when
+    //   1) the pull fails
+    //   2) pull takes longer than mPullTimeoutNs (intrinsic to puller)
+    // If the metric wants to make any change to the data, like timestamps, they
+    // should make a copy as this data may be shared with multiple metrics.
+    virtual bool Pull(int tagId, vector<std::shared_ptr<LogEvent>>* data);
 
     // Clear pull data cache immediately.
     int ForceClearPullerCache();

@@ -160,6 +160,8 @@ private:
 
     GaugeMetric::SamplingType mSamplingType;
 
+    const int64_t mMaxPullDelayNs;
+
     // apply a whitelist on the original input
     std::shared_ptr<vector<FieldValue>> getGaugeFields(const LogEvent& event);
 

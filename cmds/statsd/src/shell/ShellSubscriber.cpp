@@ -131,8 +131,7 @@ void ShellSubscriber::startPull(int64_t token, int64_t intervalMillis) {
                     VLOG("pull atom %d now", pullInfo.mPullerMatcher.atom_id());
 
                     vector<std::shared_ptr<LogEvent>> data;
-                    mPullerMgr->Pull(pullInfo.mPullerMatcher.atom_id(), nowMillis * 1000000L,
-                                     &data);
+                    mPullerMgr->Pull(pullInfo.mPullerMatcher.atom_id(), &data);
                     VLOG("pulled %zu atoms", data.size());
                     if (data.size() > 0) {
                         writeToOutputLocked(data, pullInfo.mPullerMatcher);
