@@ -51,8 +51,10 @@ namespace idmap2 {
 
 class Idmap2BinaryTests : public Idmap2Tests {};
 
-static void AssertIdmap(const Idmap& idmap, const std::string& target_apk_path,
-                        const std::string& overlay_apk_path) {
+namespace {
+
+void AssertIdmap(const Idmap& idmap, const std::string& target_apk_path,
+                 const std::string& overlay_apk_path) {
   // check that the idmap file looks reasonable (IdmapTests is responsible for
   // more in-depth verification)
   ASSERT_EQ(idmap.GetHeader()->GetMagic(), kIdmapMagic);
@@ -66,6 +68,8 @@ static void AssertIdmap(const Idmap& idmap, const std::string& target_apk_path,
   do {                                                                                  \
     ASSERT_NO_FATAL_FAILURE(AssertIdmap(idmap_ref, target_apk_path, overlay_apk_path)); \
   } while (0)
+
+}  // namespace
 
 TEST_F(Idmap2BinaryTests, Create) {
   // clang-format off

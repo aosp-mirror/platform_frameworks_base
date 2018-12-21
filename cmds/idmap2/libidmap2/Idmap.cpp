@@ -39,6 +39,8 @@
 namespace android {
 namespace idmap2 {
 
+namespace {
+
 #define EXTRACT_TYPE(resid) ((0x00ff0000 & (resid)) >> 16)
 
 #define EXTRACT_ENTRY(resid) (0x0000ffff & (resid))
@@ -56,7 +58,7 @@ struct MatchingResources {
   std::map<TypeId, std::set<std::pair<ResourceId, ResourceId>>> map;
 };
 
-static bool WARN_UNUSED Read16(std::istream& stream, uint16_t* out) {
+bool WARN_UNUSED Read16(std::istream& stream, uint16_t* out) {
   uint16_t value;
   if (stream.read(reinterpret_cast<char*>(&value), sizeof(uint16_t))) {
     *out = dtohl(value);
@@ -65,7 +67,7 @@ static bool WARN_UNUSED Read16(std::istream& stream, uint16_t* out) {
   return false;
 }
 
-static bool WARN_UNUSED Read32(std::istream& stream, uint32_t* out) {
+bool WARN_UNUSED Read32(std::istream& stream, uint32_t* out) {
   uint32_t value;
   if (stream.read(reinterpret_cast<char*>(&value), sizeof(uint32_t))) {
     *out = dtohl(value);
@@ -75,7 +77,7 @@ static bool WARN_UNUSED Read32(std::istream& stream, uint32_t* out) {
 }
 
 // a string is encoded as a kIdmapStringLength char array; the array is always null-terminated
-static bool WARN_UNUSED ReadString(std::istream& stream, char out[kIdmapStringLength]) {
+bool WARN_UNUSED ReadString(std::istream& stream, char out[kIdmapStringLength]) {
   char buf[kIdmapStringLength];
   memset(buf, 0, sizeof(buf));
   if (!stream.read(buf, sizeof(buf))) {
@@ -88,7 +90,7 @@ static bool WARN_UNUSED ReadString(std::istream& stream, char out[kIdmapStringLe
   return true;
 }
 
-static ResourceId NameToResid(const AssetManager2& am, const std::string& name) {
+ResourceId NameToResid(const AssetManager2& am, const std::string& name) {
   return am.GetResourceId(name);
 }
 
@@ -101,7 +103,7 @@ static ResourceId NameToResid(const AssetManager2& am, const std::string& name) 
 // relying on a hard-coded index. This however requires storing the package name in the idmap
 // header, which in turn requires incrementing the idmap version. Because the initial version of
 // idmap2 is compatible with idmap, this will have to wait for now.
-static const LoadedPackage* GetPackageAtIndex0(const LoadedArsc& loaded_arsc) {
+const LoadedPackage* GetPackageAtIndex0(const LoadedArsc& loaded_arsc) {
   const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc.GetPackages();
   if (packages.empty()) {
     return nullptr;
@@ -109,6 +111,8 @@ static const LoadedPackage* GetPackageAtIndex0(const LoadedArsc& loaded_arsc) {
   int id = packages[0]->GetPackageId();
   return loaded_arsc.GetPackageById(id);
 }
+
+}  // namespace
 
 std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& stream) {
   std::unique_ptr<IdmapHeader> idmap_header(new IdmapHeader());
