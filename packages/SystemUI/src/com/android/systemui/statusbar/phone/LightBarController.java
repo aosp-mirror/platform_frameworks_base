@@ -25,7 +25,6 @@ import android.graphics.Rect;
 import android.view.View;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -83,10 +82,11 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private final Context mContext;
 
     @Inject
-    public LightBarController(Context ctx) {
+    public LightBarController(Context ctx, DarkIconDispatcher darkIconDispatcher,
+            BatteryController batteryController) {
         mDarkModeColor = Color.valueOf(ctx.getColor(R.color.dark_mode_icon_color_single_tone));
-        mStatusBarIconController = Dependency.get(DarkIconDispatcher.class);
-        mBatteryController = Dependency.get(BatteryController.class);
+        mStatusBarIconController = darkIconDispatcher;
+        mBatteryController = batteryController;
         mBatteryController.addCallback(this);
         mContext = ctx;
     }
