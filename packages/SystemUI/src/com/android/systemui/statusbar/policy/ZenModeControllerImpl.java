@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
+
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -48,7 +50,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 /** Platform implementation of the zen mode controller. **/
+@Singleton
 public class ZenModeControllerImpl extends CurrentUserTracker
         implements ZenModeController, Dumpable {
     private static final String TAG = "ZenModeController";
@@ -71,7 +78,8 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     private long mZenUpdateTime;
     private NotificationManager.Policy mConsolidatedNotificationPolicy;
 
-    public ZenModeControllerImpl(Context context, Handler handler) {
+    @Inject
+    public ZenModeControllerImpl(Context context, @Named(MAIN_HANDLER_NAME) Handler handler) {
         super(context);
         mContext = context;
         mModeSetting = new GlobalSetting(mContext, handler, Global.ZEN_MODE) {

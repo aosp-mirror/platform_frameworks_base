@@ -43,7 +43,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
+
+/**
+ */
+@Singleton
 public class TunerServiceImpl extends TunerService {
 
     private static final String TUNER_VERSION = "sysui_tuner_version";
@@ -70,6 +76,9 @@ public class TunerServiceImpl extends TunerService {
     private int mCurrentUser;
     private CurrentUserTracker mUserTracker;
 
+    /**
+     */
+    @Inject
     public TunerServiceImpl(Context context) {
         mContext = context;
         mContentResolver = mContext.getContentResolver();

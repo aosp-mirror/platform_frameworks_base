@@ -20,11 +20,20 @@ import com.android.systemui.Dependency;
 import com.android.systemui.plugins.PluginDependency.DependencyProvider;
 import com.android.systemui.shared.plugins.PluginManager;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class PluginDependencyProvider extends DependencyProvider {
 
     private final ArrayMap<Class<?>, Object> mDependencies = new ArrayMap<>();
     private final PluginManager mManager;
 
+    /**
+     */
+    @Inject
     public PluginDependencyProvider(PluginManager manager) {
         mManager = manager;
         PluginDependency.sProvider = this;

@@ -16,6 +16,8 @@
 
 package com.android.systemui.appops;
 
+import static com.android.systemui.Dependency.BG_LOOPER_NAME;
+
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.os.Handler;
@@ -32,12 +34,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 /**
  * Controller to keep track of applications that have requested access to given App Ops
  *
  * It can be subscribed to with callbacks. Additionally, it passes on the information to
  * NotificationPresenter to be displayed to the user.
  */
+@Singleton
 public class AppOpsControllerImpl implements AppOpsController,
         AppOpsManager.OnOpActiveChangedListener,
         AppOpsManager.OnOpNotedListener {
@@ -65,7 +72,8 @@ public class AppOpsControllerImpl implements AppOpsController,
             AppOpsManager.OP_FINE_LOCATION
     };
 
-    public AppOpsControllerImpl(Context context, Looper bgLooper) {
+    @Inject
+    public AppOpsControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper) {
         mContext = context;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mBGHandler = new H(bgLooper);

@@ -45,11 +45,15 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Receives the callbacks from CommandQueue related to icons and tracks the state of
  * all the icons. Dispatches this state to any IconManagers that are currently
  * registered with it.
  */
+@Singleton
 public class StatusBarIconControllerImpl extends StatusBarIconList implements Tunable,
         ConfigurationListener, Dumpable, CommandQueue.Callbacks, StatusBarIconController {
 
@@ -66,6 +70,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     private boolean mIsDark = false;
 
+    @Inject
     public StatusBarIconControllerImpl(Context context) {
         super(context.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));

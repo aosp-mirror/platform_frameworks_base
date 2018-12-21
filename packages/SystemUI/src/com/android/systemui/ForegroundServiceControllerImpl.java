@@ -29,9 +29,13 @@ import com.android.internal.messages.nano.SystemMessageProto;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Foreground service controller, a/k/a Dianne's Dungeon.
  */
+@Singleton
 public class ForegroundServiceControllerImpl
         implements ForegroundServiceController {
 
@@ -45,6 +49,7 @@ public class ForegroundServiceControllerImpl
     private final SparseArray<UserServices> mUserServices = new SparseArray<>();
     private final Object mMutex = new Object();
 
+    @Inject
     public ForegroundServiceControllerImpl(Context context) {
         mContext = context;
     }

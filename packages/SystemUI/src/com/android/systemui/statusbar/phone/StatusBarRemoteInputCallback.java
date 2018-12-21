@@ -47,6 +47,12 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.PreviewInflater;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class StatusBarRemoteInputCallback implements Callback, Callbacks {
 
     private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
@@ -65,6 +71,9 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks {
     private int mDisabled2;
     protected BroadcastReceiver mChallengeReceiver = new ChallengeReceiver();
 
+    /**
+     */
+    @Inject
     public StatusBarRemoteInputCallback(Context context) {
         mContext = context;
         mContext.registerReceiverAsUser(mChallengeReceiver, UserHandle.ALL,

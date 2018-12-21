@@ -58,6 +58,12 @@ import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Objects;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String TAG = PowerUI.TAG + ".Notification";
     private static final boolean DEBUG = PowerUI.DEBUG;
@@ -136,6 +142,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private SystemUIDialog mHighTempDialog;
     private SystemUIDialog mThermalShutdownDialog;
 
+    /**
+     */
+    @Inject
     public PowerNotificationWarnings(Context context) {
         mContext = context;
         mNoMan = mContext.getSystemService(NotificationManager.class);

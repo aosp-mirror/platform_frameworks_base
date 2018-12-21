@@ -35,9 +35,13 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Manages the flashlight.
  */
+@Singleton
 public class FlashlightControllerImpl implements FlashlightController {
 
     private static final String TAG = "FlashlightController";
@@ -64,6 +68,7 @@ public class FlashlightControllerImpl implements FlashlightController {
     private String mCameraId;
     private boolean mTorchAvailable;
 
+    @Inject
     public FlashlightControllerImpl(Context context) {
         mContext = context;
         mCameraManager = (CameraManager) mContext.getSystemService(Context.CAMERA_SERVICE);

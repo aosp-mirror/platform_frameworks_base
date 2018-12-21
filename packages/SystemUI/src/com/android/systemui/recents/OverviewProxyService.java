@@ -63,9 +63,13 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Class to send information from overview to launcher with a binder.
  */
+@Singleton
 public class OverviewProxyService implements CallbackController<OverviewProxyListener>, Dumpable {
 
     private static final String ACTION_QUICKSTEP = "android.intent.action.QUICKSTEP_SERVICE";
@@ -338,6 +342,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
             = this::cleanupAfterDeath;
 
+    @Inject
     public OverviewProxyService(Context context) {
         mContext = context;
         mHandler = new Handler();

@@ -36,7 +36,8 @@ public interface SystemUIRootComponent {
 The root modules are what provides the global singleton dependencies across
 SystemUI. ContextHolder is just a wrapper that provides a context.
 SystemUIFactory @Provide dependencies that need to be overridden by SystemUI
-variants (like other form factors). DependencyProvider provides or binds any
+variants (like other form factors). DependencyBinder creates the mapping from
+interfaces to implementation classes. DependencyProvider provides or binds any
 remaining depedencies required.
 
 ### Adding injection to a new SystemUI object
@@ -195,10 +196,5 @@ public CustomView(@Named(VIEW_CONTEXT) Context themedViewContext, AttributeSet a
 
 ## TODO List
 
- - Eliminate usages of Depndency#get
- - Add support for Fragments to handle injection automatically
-   - (this could be through dagger2-android or something custom)
- - Reduce number of things with @Provide in DependencyProvider (many can be
-   @Inject instead)
- - Migrate as many remaining DependencyProvider instances to @Bind
+ - Eliminate usages of Dependency#get
  - Add links in above TODO

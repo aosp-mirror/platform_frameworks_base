@@ -34,6 +34,12 @@ import java.util.Comparator;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class ExtensionControllerImpl implements ExtensionController {
 
     public static final int SORT_ORDER_PLUGIN  = 0;
@@ -44,6 +50,9 @@ public class ExtensionControllerImpl implements ExtensionController {
 
     private final Context mDefaultContext;
 
+    /**
+     */
+    @Inject
     public ExtensionControllerImpl(Context context) {
         mDefaultContext = context;
     }

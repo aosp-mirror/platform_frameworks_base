@@ -19,14 +19,19 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * For mocking because AccessibilityManager is final for some reason...
  */
+@Singleton
 public class AccessibilityManagerWrapper implements
         CallbackController<AccessibilityServicesStateChangeListener> {
 
     private final AccessibilityManager mAccessibilityManager;
 
+    @Inject
     public AccessibilityManagerWrapper(Context context) {
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
     }

@@ -26,6 +26,12 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class VibratorHelper {
 
     private final Vibrator mVibrator;
@@ -44,6 +50,9 @@ public class VibratorHelper {
         }
     };
 
+    /**
+     */
+    @Inject
     public VibratorHelper(Context context) {
         mContext = context;
         mVibrator = context.getSystemService(Vibrator.class);
