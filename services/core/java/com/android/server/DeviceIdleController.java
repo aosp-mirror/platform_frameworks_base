@@ -1031,9 +1031,9 @@ public class DeviceIdleController extends SystemService
                 INACTIVE_TIMEOUT = mParser.getDurationMillis(KEY_INACTIVE_TIMEOUT,
                         !COMPRESS_TIME ? inactiveTimeoutDefault : (inactiveTimeoutDefault / 10));
                 SENSING_TIMEOUT = mParser.getDurationMillis(KEY_SENSING_TIMEOUT,
-                        !DEBUG ? 4 * 60 * 1000L : 60 * 1000L);
+                        !COMPRESS_TIME ? 4 * 60 * 1000L : 60 * 1000L);
                 LOCATING_TIMEOUT = mParser.getDurationMillis(KEY_LOCATING_TIMEOUT,
-                        !DEBUG ? 30 * 1000L : 15 * 1000L);
+                        !COMPRESS_TIME ? 30 * 1000L : 15 * 1000L);
                 LOCATION_ACCURACY = mParser.getFloat(KEY_LOCATION_ACCURACY, 20);
                 MOTION_INACTIVE_TIMEOUT = mParser.getDurationMillis(KEY_MOTION_INACTIVE_TIMEOUT,
                         !COMPRESS_TIME ? 10 * 60 * 1000L : 60 * 1000L);
@@ -1562,6 +1562,7 @@ public class DeviceIdleController extends SystemService
     static class Injector {
         private final Context mContext;
         private ConnectivityService mConnectivityService;
+        private Constants mConstants;
         private LocationManager mLocationManager;
 
         Injector(Context ctx) {
@@ -1591,7 +1592,10 @@ public class DeviceIdleController extends SystemService
 
         Constants getConstants(DeviceIdleController controller, Handler handler,
                 ContentResolver resolver) {
-            return controller.new Constants(handler, resolver);
+            if (mConstants == null) {
+                mConstants = controller.new Constants(handler, resolver);
+            }
+            return mConstants;
         }
 
         LocationManager getLocationManager() {
