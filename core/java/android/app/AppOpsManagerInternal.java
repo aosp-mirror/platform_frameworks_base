@@ -16,7 +16,6 @@
 
 package android.app;
 
-import android.annotation.NonNull;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.function.QuadFunction;
@@ -86,10 +85,7 @@ public abstract class AppOpsManagerInternal {
      *
      * @param code The op code to set.
      * @param uid The UID for which to set.
-     * @param packageName The package for which to set.
      * @param mode The new mode to set.
-     * @param isPrivileged If the package is privileged
      */
-    public abstract void setMode(int code, int uid, @NonNull String packageName, int mode,
-            boolean isPrivileged);
+    public abstract void setUidMode(int code, int uid, int mode);
 }

@@ -1193,9 +1193,9 @@ public final class DefaultPermissionGrantPolicy {
                             if (pm.checkPermission(fgPerm, pkg.packageName)
                                     == PackageManager.PERMISSION_GRANTED) {
                                 // Upgrade the app-op state of the fg permission to allow bg access
-                                mContext.getSystemService(AppOpsManager.class).setMode(
+                                mContext.getSystemService(AppOpsManager.class).setUidMode(
                                         AppOpsManager.permissionToOp(fgPerm), uid,
-                                        pkg.packageName, AppOpsManager.MODE_ALLOWED);
+                                        AppOpsManager.MODE_ALLOWED);
 
                                 break;
                             }
@@ -1205,8 +1205,8 @@ public final class DefaultPermissionGrantPolicy {
                     String bgPerm = getBackgroundPermission(permission);
                     if (bgPerm == null) {
                         if (op != null) {
-                            mContext.getSystemService(AppOpsManager.class).setMode(op, uid,
-                                    pkg.packageName, AppOpsManager.MODE_ALLOWED);
+                            mContext.getSystemService(AppOpsManager.class).setUidMode(op, uid,
+                                    AppOpsManager.MODE_ALLOWED);
                         }
                     } else {
                         int mode;
@@ -1217,8 +1217,7 @@ public final class DefaultPermissionGrantPolicy {
                             mode = AppOpsManager.MODE_FOREGROUND;
                         }
 
-                        mContext.getSystemService(AppOpsManager.class).setMode(op, uid,
-                                pkg.packageName, mode);
+                        mContext.getSystemService(AppOpsManager.class).setUidMode(op, uid, mode);
                     }
 
                     if (DEBUG) {
