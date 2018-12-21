@@ -158,7 +158,7 @@ private:
      * Don't copy, it's slower. If we really need this we can add it but let's try to
      * avoid it.
      */
-    explicit LogEvent(const LogEvent&);
+    LogEvent(const LogEvent&);
 
     /**
      * Parses a log_msg into a LogEvent object.
