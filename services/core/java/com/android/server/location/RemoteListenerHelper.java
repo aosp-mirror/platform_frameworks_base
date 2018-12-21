@@ -43,7 +43,7 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
     protected static final int RESULT_UNKNOWN = 5;
     protected static final int RESULT_NOT_ALLOWED = 6;
 
-    private final Handler mHandler;
+    protected final Handler mHandler;
     private final String mTag;
 
     private final Map<IBinder, LinkedListener> mListenerMap = new HashMap<>();

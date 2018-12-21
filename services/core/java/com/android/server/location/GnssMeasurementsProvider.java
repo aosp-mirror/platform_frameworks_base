@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import android.content.Context;
+import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementsEvent;
 import android.location.IGnssMeasurementsListener;
 import android.os.Handler;
@@ -27,14 +28,13 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
- * An base implementation for GPS measurements provider.
- * It abstracts out the responsibility of handling listeners, while still allowing technology
- * specific implementations to be built.
+ * An base implementation for GPS measurements provider. It abstracts out the responsibility of
+ * handling listeners, while still allowing technology specific implementations to be built.
  *
  * @hide
  */
-public abstract class GnssMeasurementsProvider extends
-        RemoteListenerHelper<IGnssMeasurementsListener> {
+public abstract class GnssMeasurementsProvider
+        extends RemoteListenerHelper<IGnssMeasurementsListener> {
     private static final String TAG = "GnssMeasurementsProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -42,19 +42,19 @@ public abstract class GnssMeasurementsProvider extends
 
     private boolean mIsCollectionStarted;
     private boolean mEnableFullTracking;
+    private int mGnssEngineCapabilities;
 
     protected GnssMeasurementsProvider(Context context, Handler handler) {
         this(context, handler, new GnssMeasurementProviderNative());
     }
 
     @VisibleForTesting
-    GnssMeasurementsProvider(Context context, Handler handler,
-            GnssMeasurementProviderNative aNative) {
+    GnssMeasurementsProvider(
+            Context context, Handler handler, GnssMeasurementProviderNative aNative) {
         super(context, handler, TAG);
         mNative = aNative;
     }
 
-    // TODO(b/37460011): Use this with death recovery logic.
     void resumeIfStarted() {
         if (DEBUG) {
             Log.d(TAG, "resumeIfStarted");
@@ -87,6 +87,25 @@ public abstract class GnssMeasurementsProvider extends
         }
     }
 
+    /**
+     * Injects GNSS measurement corrections into the GNSS chipset.
+     *
+     * @param measurementCorrections a {@link GnssMeasurementCorrections} object with the GNSS
+     *     measurement corrections to be injected into the GNSS chipset.
+     */
+    public void injectGnssMeasurementCorrections(
+            GnssMeasurementCorrections measurementCorrections) {
+        mHandler.post(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!mNative.injectGnssMeasurementCorrections(measurementCorrections)) {
+                            Log.e(TAG, "Failure in injecting GNSS corrections.");
+                        }
+                    }
+                });
+    }
+
     @Override
     protected void unregisterFromService() {
         boolean stopped = mNative.stopMeasurementCollection();
@@ -96,18 +115,29 @@ public abstract class GnssMeasurementsProvider extends
     }
 
     public void onMeasurementsAvailable(final GnssMeasurementsEvent event) {
-        foreach((IGnssMeasurementsListener listener, int uid, String packageName) -> {
-            if (!hasPermission(uid, packageName)) {
-                logPermissionDisabledEventNotReported(TAG, packageName, "GNSS measurements");
-                return;
-            }
-            listener.onGnssMeasurementsReceived(event);
-        });
+        foreach(
+                (IGnssMeasurementsListener listener, int uid, String packageName) -> {
+                    if (!hasPermission(uid, packageName)) {
+                        logPermissionDisabledEventNotReported(
+                                TAG, packageName, "GNSS measurements");
+                        return;
+                    }
+                    listener.onGnssMeasurementsReceived(event);
+                });
     }
 
-    public void onCapabilitiesUpdated(boolean isGnssMeasurementsSupported) {
+    /** Updates the framework about the capabilities of the GNSS chipset */
+    public void onCapabilitiesUpdated(int capabilities) {
+        mGnssEngineCapabilities = capabilities;
+        boolean isGnssMeasurementsSupported =
+                (capabilities & GnssLocationProvider.GPS_CAPABILITY_MEASUREMENTS) != 0;
         setSupported(isGnssMeasurementsSupported);
         updateResult();
+    }
+
+    /** Obtains the GNSS engine capabilities. */
+    public int getGnssCapabilities() {
+        return mGnssEngineCapabilities;
     }
 
     public void onGpsEnabledChanged() {
@@ -170,6 +200,11 @@ public abstract class GnssMeasurementsProvider extends
         public boolean stopMeasurementCollection() {
             return native_stop_measurement_collection();
         }
+
+        public boolean injectGnssMeasurementCorrections(
+                GnssMeasurementCorrections measurementCorrections) {
+            return native_inject_gnss_measurement_corrections(measurementCorrections);
+        }
     }
 
     private static native boolean native_is_measurement_supported();
@@ -177,4 +212,7 @@ public abstract class GnssMeasurementsProvider extends
     private static native boolean native_start_measurement_collection(boolean enableFullTracking);
 
     private static native boolean native_stop_measurement_collection();
+
+    private static native boolean native_inject_gnss_measurement_corrections(
+            GnssMeasurementCorrections measurementCorrections);
 }
