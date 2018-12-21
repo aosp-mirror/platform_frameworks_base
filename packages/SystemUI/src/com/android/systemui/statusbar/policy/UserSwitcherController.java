@@ -51,7 +51,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.Prefs;
@@ -597,7 +596,7 @@ public class UserSwitcherController implements Dumpable {
 
         protected BaseUserAdapter(UserSwitcherController controller) {
             mController = controller;
-            mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+            mKeyguardMonitor = controller.mKeyguardMonitor;
             controller.addAdapter(new WeakReference<>(this));
         }
 
