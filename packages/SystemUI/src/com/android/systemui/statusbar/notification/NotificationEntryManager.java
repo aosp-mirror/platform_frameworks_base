@@ -85,8 +85,6 @@ public class NotificationEntryManager implements
             Dependency.get(NotificationGutsManager.class);
     private final DeviceProvisionedController mDeviceProvisionedController =
             Dependency.get(DeviceProvisionedController.class);
-    private final VisualStabilityManager mVisualStabilityManager =
-            Dependency.get(VisualStabilityManager.class);
     private final ForegroundServiceController mForegroundServiceController =
             Dependency.get(ForegroundServiceController.class);
     private final AmbientPulseManager mAmbientPulseManager =
@@ -324,10 +322,6 @@ public class NotificationEntryManager implements
                 }
                 addEntry(entry);
             } else {
-                if (entry.getRow().hasLowPriorityStateUpdated()) {
-                    mVisualStabilityManager.onLowPriorityUpdated(entry);
-                    mPresenter.updateNotificationViews();
-                }
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryReinflated(entry);
                 }

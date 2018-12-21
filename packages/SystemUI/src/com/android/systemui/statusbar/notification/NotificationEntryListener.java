@@ -52,6 +52,8 @@ public interface NotificationEntryListener {
     /**
      * Called when an existing notification's views are reinflated (usually due to an update being
      * posted to that notification).
+     *
+     * @param entry notification data entry that was reinflated.
      */
     default void onEntryReinflated(NotificationData.Entry entry) {
     }

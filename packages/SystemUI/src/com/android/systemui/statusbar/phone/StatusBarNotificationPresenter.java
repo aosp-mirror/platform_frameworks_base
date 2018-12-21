@@ -62,6 +62,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationRowBinder;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -98,6 +99,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             Dependency.get(NotificationInterruptionStateProvider.class);
     private final NotificationMediaManager mMediaManager =
             Dependency.get(NotificationMediaManager.class);
+    private final VisualStabilityManager mVisualStabilityManager =
+            Dependency.get(VisualStabilityManager.class);
     protected AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
 
     private final NotificationPanelView mNotificationPanel;
@@ -212,6 +215,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                     this, mHeadsUpManager, this::canHeadsUp);
             mLockscreenUserManager.setUpWithPresenter(this);
             mMediaManager.setUpWithPresenter(this);
+            mVisualStabilityManager.setUpWithPresenter(this);
             Dependency.get(NotificationGutsManager.class).setUpWithPresenter(this,
                     notifListContainer, mCheckSaveListener, mOnSettingsClickListener);
 

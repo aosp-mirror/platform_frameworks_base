@@ -16,28 +16,31 @@
 
 package com.android.systemui.statusbar.notification;
 
+import static junit.framework.Assert.assertEquals;
+
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static junit.framework.Assert.assertEquals;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class VisualStabilityManagerTest extends SysuiTestCase {
 
-    private VisualStabilityManager mVisualStabilityManager = new VisualStabilityManager();
+    private VisualStabilityManager mVisualStabilityManager = new VisualStabilityManager(
+            mock(NotificationEntryManager.class));
     private VisualStabilityManager.Callback mCallback = mock(VisualStabilityManager.Callback.class);
     private VisibilityLocationProvider mLocationProvider = mock(VisibilityLocationProvider.class);
     private ExpandableNotificationRow mRow = mock(ExpandableNotificationRow.class);
@@ -45,6 +48,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        mVisualStabilityManager.setUpWithPresenter(mock(NotificationPresenter.class));
         mVisualStabilityManager.setVisibilityLocationProvider(mLocationProvider);
         mEntry = new NotificationData.Entry(mock(StatusBarNotification.class));
         mEntry.setRow(mRow);
