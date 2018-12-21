@@ -2330,4 +2330,7 @@
     </plurals>
     <!-- Text for the quick setting tile for sensor privacy [CHAR LIMIT=30] -->
     <string name="sensor_privacy_mode">Sensors off</string>
+
+    <!-- Name for device services grouping system uid apps in Ongoing Privacy Dialog [CHAR_LIMIT=NONE] -->
+    <string name="device_services">Device Services</string>
 </resources>

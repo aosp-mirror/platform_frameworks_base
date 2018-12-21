@@ -29,6 +29,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dependency
 import com.android.systemui.appops.AppOpItem
 import com.android.systemui.appops.AppOpsController
+import com.android.systemui.R
 
 class PrivacyItemController(val context: Context, val callback: Callback) {
 
@@ -41,15 +42,17 @@ class PrivacyItemController(val context: Context, val callback: Callback) {
                 Intent.ACTION_MANAGED_PROFILE_ADDED,
                 Intent.ACTION_MANAGED_PROFILE_REMOVED)
         const val TAG = "PrivacyItemController"
+        const val SYSTEM_UID = 1000
     }
-
     private var privacyList = emptyList<PrivacyItem>()
+
     private val appOpsController = Dependency.get(AppOpsController::class.java)
     private val userManager = context.getSystemService(UserManager::class.java)
     private var currentUserIds = emptyList<Int>()
     private val bgHandler = Handler(Dependency.get(Dependency.BG_LOOPER))
     private val uiHandler = Dependency.get(Dependency.MAIN_HANDLER)
     private var listening = false
+    val systemApp = PrivacyApplication(context.getString(R.string.device_services), context)
 
     private val notifyChanges = Runnable {
         callback.privacyChanged(privacyList)
@@ -126,6 +129,7 @@ class PrivacyItemController(val context: Context, val callback: Callback) {
             AppOpsManager.OP_RECORD_AUDIO -> PrivacyType.TYPE_MICROPHONE
             else -> return null
         }
+        if (appOpItem.uid == SYSTEM_UID) return PrivacyItem(type, systemApp)
         val app = PrivacyApplication(appOpItem.packageName, context)
         return PrivacyItem(type, app)
     }
