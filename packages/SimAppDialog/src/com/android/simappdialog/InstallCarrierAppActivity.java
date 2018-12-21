@@ -18,7 +18,7 @@ package com.android.simappdialog;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemProperties;
+import android.sysprop.SetupWizardProperties;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -51,7 +51,7 @@ public class InstallCarrierAppActivity extends Activity implements View.OnClickL
         // Setup theme for aosp/pixel
         setTheme(
                 WizardManagerHelper.getThemeRes(
-                        SystemProperties.get("setupwizard.theme"),
+                        SetupWizardProperties.theme().orElse(""),
                         R.style.SuwThemeGlif_Light
                 )
         );
