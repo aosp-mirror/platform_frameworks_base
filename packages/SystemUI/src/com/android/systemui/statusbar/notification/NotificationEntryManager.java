@@ -220,9 +220,7 @@ public class NotificationEntryManager implements
         final int count = mNotificationData.getActiveNotifications().size();
         final NotificationVisibility nv = NotificationVisibility.obtain(n.getKey(), rank, count,
                 true);
-        NotificationData.Entry entry = mNotificationData.get(n.getKey());
 
-        getRemoteInputManager().onPerformRemoveNotification(n, entry);
         final String pkg = n.getPackageName();
         final String tag = n.getTag();
         final int id = n.getId();
@@ -396,7 +394,7 @@ public class NotificationEntryManager implements
         }
 
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
-            listener.onEntryRemoved(key, old, lifetimeExtended, removedByUser);
+            listener.onEntryRemoved(entry, key, old, lifetimeExtended, removedByUser);
         }
     }
 

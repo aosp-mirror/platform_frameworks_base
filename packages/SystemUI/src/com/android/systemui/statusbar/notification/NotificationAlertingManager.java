@@ -81,7 +81,10 @@ public class NotificationAlertingManager {
 
             @Override
             public void onEntryRemoved(
-                    String key, StatusBarNotification old, boolean lifetimeExtended,
+                    NotificationData.Entry entry,
+                    String key,
+                    StatusBarNotification old,
+                    boolean lifetimeExtended,
                     boolean removedByUser) {
                 stopAlerting(key);
             }

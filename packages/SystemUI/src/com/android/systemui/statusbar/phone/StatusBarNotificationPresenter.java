@@ -188,8 +188,12 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 }
 
                 @Override
-                public void onEntryRemoved(String key, StatusBarNotification old,
-                        boolean lifetimeExtended, boolean removedByUser) {
+                public void onEntryRemoved(
+                        Entry entry,
+                        String key,
+                        StatusBarNotification old,
+                        boolean lifetimeExtended,
+                        boolean removedByUser) {
                     if (!lifetimeExtended) {
                         StatusBarNotificationPresenter.this.onNotificationRemoved(key, old);
                     }

@@ -155,8 +155,12 @@ public class NotificationMediaManager implements Dumpable {
         mEntryManager = notificationEntryManager;
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
-            public void onEntryRemoved(String key, StatusBarNotification old,
-                    boolean lifetimeExtended, boolean removedByUser) {
+            public void onEntryRemoved(
+                    Entry entry,
+                    String key,
+                    StatusBarNotification old,
+                    boolean lifetimeExtended,
+                    boolean removedByUser) {
                 if (!lifetimeExtended) {
                     onNotificationRemoved(key);
                 }

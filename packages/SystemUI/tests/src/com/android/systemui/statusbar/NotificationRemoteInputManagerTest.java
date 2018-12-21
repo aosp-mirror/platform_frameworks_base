@@ -20,7 +20,6 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputActiveExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputHistoryExtender;
@@ -28,6 +27,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager.SmartReplyH
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.phone.ShadeController;
 
 import com.google.android.collect.Sets;
 
@@ -36,6 +36,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -66,14 +68,11 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
-        mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
-                mLockscreenUserManager);
-        mDependency.injectTestDependency(SmartReplyController.class, mSmartReplyController);
-        mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
-                Handler.createAsync(Looper.myLooper()));
 
-        mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext);
+        mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext,
+                mLockscreenUserManager, mSmartReplyController, mEntryManager,
+                () -> mock(ShadeController.class),
+                Handler.createAsync(Looper.myLooper()));
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
         mEntry = new NotificationData.Entry(mSbn);
@@ -90,7 +89,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Test
     public void testPerformOnRemoveNotification() {
         when(mController.isRemoteInputActive(mEntry)).thenReturn(true);
-        mRemoteInputManager.onPerformRemoveNotification(mSbn, mEntry);
+        mRemoteInputManager.onPerformRemoveNotification(mEntry, mSbn.getKey());
 
         verify(mController).removeRemoteInput(mEntry, null);
     }
@@ -196,8 +195,15 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
     private class TestableNotificationRemoteInputManager extends NotificationRemoteInputManager {
 
-        public TestableNotificationRemoteInputManager(Context context) {
-            super(context);
+
+        TestableNotificationRemoteInputManager(Context context,
+                NotificationLockscreenUserManager lockscreenUserManager,
+                SmartReplyController smartReplyController,
+                NotificationEntryManager notificationEntryManager,
+                Lazy<ShadeController> shadeController,
+                Handler mainHandler) {
+            super(context, lockscreenUserManager, smartReplyController, notificationEntryManager,
+                    shadeController, mainHandler);
         }
 
         public void setUpWithPresenterForTest(Callback callback,
