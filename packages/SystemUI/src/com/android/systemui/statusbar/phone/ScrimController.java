@@ -282,8 +282,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
                 mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
                         AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
             }
-        // Do not re-schedule timeout when pulsing, let's save some extra battery.
-        } else if (mState != ScrimState.PULSING) {
+        } else {
             mTimeTicker.cancel();
             mWallpaperVisibilityTimedOut = false;
         }
@@ -365,7 +364,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             mExpansionFraction = fraction;
 
             final boolean keyguardOrUnlocked = mState == ScrimState.UNLOCKED
-                    || mState == ScrimState.KEYGUARD || mState == ScrimState.DARK_KEYGUARD;
+                    || mState == ScrimState.KEYGUARD;
             if (!keyguardOrUnlocked || !mExpansionAffectsAlpha) {
                 return;
             }

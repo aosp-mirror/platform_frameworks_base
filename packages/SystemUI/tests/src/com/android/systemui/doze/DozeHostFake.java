@@ -19,8 +19,6 @@ package com.android.systemui.doze;
 import android.annotation.NonNull;
 import android.app.PendingIntent;
 
-import com.android.systemui.util.wakelock.WakeLock;
-
 /**
  * A rudimentary fake for DozeHost.
  */
@@ -85,11 +83,6 @@ class DozeHostFake implements DozeHost {
     }
 
     @Override
-    public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
-        throw new RuntimeException("not implemented");
-    }
-
-    @Override
     public void onIgnoreTouchWhilePulsing(boolean ignore) {
     }
 
@@ -112,11 +105,6 @@ class DozeHostFake implements DozeHost {
     public void onDoubleTap(float x, float y) {
         doubleTapX = y;
         doubleTapY = y;
-    }
-
-    @Override
-    public void setPassiveInterrupt(boolean lightInterrupt) {
-
     }
 
     @Override

@@ -3312,12 +3312,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup())
                 || (mDozing && mDozeServiceHost.shouldAnimateScreenOff() && sleepingFromKeyguard);
 
-        mNotificationPanel.setDozing(mDozing, animate, mWakeUpTouchLocation,
-                mDozeServiceHost.wasPassivelyInterrupted());
-        if (mNotificationPanel.isSemiAwake()
-                && SystemProperties.getBoolean("persist.systemui.show_swipe_up", false)) {
-            mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
-        }
+        mNotificationPanel.setDozing(mDozing, animate, mWakeUpTouchLocation);
         updateQsExpansionEnabled();
         Trace.endSection();
     }
@@ -3883,9 +3878,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             // FLAG_DISMISS_KEYGUARD_ACTIVITY.
             ScrimState state = mStatusBarKeyguardViewManager.bouncerNeedsScrimming()
                     ? ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
-            if (mNotificationPanel.isSemiAwake()) {
-                state = ScrimState.DARK_KEYGUARD;
-            }
             mScrimController.transitionTo(state);
         } else if (isInLaunchTransition() || mLaunchCameraOnScreenTurningOn
                 || launchingAffordanceWithPreview) {
@@ -3898,8 +3890,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else if (mDozing && !wakeAndUnlocking) {
             mScrimController.transitionTo(ScrimState.AOD);
         } else if (mIsKeyguard && !wakeAndUnlocking) {
-            mScrimController.transitionTo(mNotificationPanel.isSemiAwake()
-                    ? ScrimState.DARK_KEYGUARD : ScrimState.KEYGUARD);
+            mScrimController.transitionTo(ScrimState.KEYGUARD);
         } else if (mBubbleController.isStackExpanded()) {
             mScrimController.transitionTo(ScrimState.BUBBLE_EXPANDED);
         } else {
@@ -3922,7 +3913,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         private boolean mAnimateWakeup;
         private boolean mAnimateScreenOff;
         private boolean mIgnoreTouchWhilePulsing;
-        private boolean mPassivelyInterrupted;
 
         @Override
         public String toString() {
@@ -4014,11 +4004,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         @Override
-        public void setPassiveInterrupt(boolean passiveInterrupt) {
-            mPassivelyInterrupted = passiveInterrupt;
-        }
-
-        @Override
         public void onIgnoreTouchWhilePulsing(boolean ignore) {
             if (ignore != mIgnoreTouchWhilePulsing) {
                 DozeLog.tracePulseTouchDisabledByProx(mContext, ignore);
@@ -4062,11 +4047,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 return true;
             }
             return false;
-        }
-
-        @Override
-        public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
-            StatusBar.this.startPendingIntentDismissingKeyguard(intent);
         }
 
         @Override
@@ -4130,10 +4110,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         public boolean shouldAnimateScreenOff() {
             return mAnimateScreenOff;
-        }
-
-        public boolean wasPassivelyInterrupted() {
-            return mPassivelyInterrupted;
         }
     }
 
