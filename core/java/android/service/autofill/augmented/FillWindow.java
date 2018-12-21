@@ -163,14 +163,15 @@ public final class FillWindow implements AutoCloseable {
             final int height = rect.bottom - rect.top;
             final int width = rect.right - rect.left;
             final WindowManager.LayoutParams windowParams = window.getAttributes();
-            windowParams.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-            windowParams.y = rect.top - height;
+            windowParams.gravity = Gravity.TOP | Gravity.LEFT;
+            windowParams.y = rect.top + height;
             windowParams.height = height;
             windowParams.x = rect.left;
             windowParams.width = width;
 
             window.setAttributes(windowParams);
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            window.setBackgroundDrawableResource(android.R.color.transparent);
 
             mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             final ViewGroup.LayoutParams diagParams = new ViewGroup.LayoutParams(width, height);
