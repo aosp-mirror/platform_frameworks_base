@@ -531,10 +531,18 @@ public class Dependency extends SystemUI {
         sDependency.destroyDependency(cls, destroy);
     }
 
+    /**
+     * @deprecated see docs/dagger.md
+     */
+    @Deprecated
     public static <T> T get(Class<T> cls) {
         return sDependency.getDependency(cls);
     }
 
+    /**
+     * @deprecated see docs/dagger.md
+     */
+    @Deprecated
     public static <T> T get(DependencyKey<T> cls) {
         return sDependency.getDependency(cls);
     }
