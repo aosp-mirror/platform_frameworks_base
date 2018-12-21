@@ -56,6 +56,7 @@ import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesManager;
 import com.android.internal.textservice.ITextServicesSessionListener;
 import com.android.internal.util.DumpUtils;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -278,6 +279,14 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         @Override
         public void onStart() {
+            LocalServices.addService(TextServicesManagerInternal.class,
+                    new TextServicesManagerInternal() {
+                        @Override
+                        public SpellCheckerInfo getCurrentSpellCheckerForUser(
+                                @UserIdInt int userId) {
+                            return mService.getCurrentSpellCheckerForUser(userId);
+                        }
+                    });
             publishBinderService(Context.TEXT_SERVICES_MANAGER_SERVICE, mService);
         }
 
@@ -491,6 +500,15 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             Slog.w(TAG, "more than one spell checker service found, picking first");
         }
         return spellCheckerList.get(0);
+    }
+
+    @Nullable
+    private SpellCheckerInfo getCurrentSpellCheckerForUser(@UserIdInt int userId) {
+        synchronized (mLock) {
+            final int spellCheckerOwnerUserId = mSpellCheckerOwnerUserIdMap.get(userId);
+            final TextServicesData data = mUserData.get(spellCheckerOwnerUserId);
+            return data != null ? data.getCurrentSpellChecker() : null;
+        }
     }
 
     // TODO: Save SpellCheckerService by supported languages. Currently only one spell
