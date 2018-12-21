@@ -42,7 +42,7 @@ DEFINE_string(package, "", "The package name for the generated class (required)"
 
 class ViewCompilerXmlVisitor : public XMLVisitor {
  public:
-  ViewCompilerXmlVisitor(JavaLangViewBuilder* builder) : builder_(builder) {}
+  explicit ViewCompilerXmlVisitor(JavaLangViewBuilder* builder) : builder_(builder) {}
 
   bool VisitEnter(const XMLDocument& /*doc*/) override {
     builder_->Start();
