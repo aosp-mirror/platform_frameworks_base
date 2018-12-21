@@ -325,7 +325,6 @@ import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
-import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -17856,21 +17855,14 @@ public class PackageManagerService extends IPackageManager.Stub
         public final PackageRemovedInfo outInfo;
         public final int flags;
         public final UserHandle user;
-        /**
-         * True if this package is an unupdated system app that may be deleted by the system.
-         * When true, disabledPs will be null.
-         */
-        public final boolean mayDeleteUnupdatedSystemApp;
 
         private DeletePackageAction(PackageSetting deletingPs, PackageSetting disabledPs,
-                PackageRemovedInfo outInfo, int flags, UserHandle user,
-                boolean mayDeleteUnupdatedSystemApp) {
+                PackageRemovedInfo outInfo, int flags, UserHandle user) {
             this.deletingPs = deletingPs;
             this.disabledPs = disabledPs;
             this.outInfo = outInfo;
             this.flags = flags;
             this.user = user;
-            this.mayDeleteUnupdatedSystemApp = mayDeleteUnupdatedSystemApp;
         }
     }
 
@@ -17886,24 +17878,22 @@ public class PackageManagerService extends IPackageManager.Stub
         if (ps == null) {
             return null;
         }
-        boolean mayDeleteUnupdatedSystemApp = false;
         if (isSystemApp(ps)) {
             if (ps.parentPackageName != null) {
                 Slog.w(TAG, "Attempt to delete child system package " + ps.pkg.packageName);
                 return null;
             }
 
-            if (((flags & PackageManager.DELETE_SYSTEM_APP) != 0) && user != null
-                    && user.getIdentifier() != UserHandle.USER_ALL) {
-                mayDeleteUnupdatedSystemApp = true;
-            } else if (disabledPs == null) {
-                // Confirmed if the system package has been updated
-                // An updated system app can be deleted. This will also have to restore
-                // the system pkg from system partition
-                // reader
+            final boolean deleteSystem = (flags & PackageManager.DELETE_SYSTEM_APP) != 0;
+            final boolean deleteAllUsers =
+                    user == null || user.getIdentifier() == UserHandle.USER_ALL;
+            if ((!deleteSystem || deleteAllUsers) && disabledPs == null) {
                 Slog.w(TAG, "Attempt to delete unknown system package " + ps.pkg.packageName);
                 return null;
             }
+            // Confirmed if the system package has been updated
+            // An updated system app can be deleted. This will also have to restore
+            // the system pkg from system partition reader
         }
         final int parentReferenceCount =
                 (ps.childPackageNames != null) ? ps.childPackageNames.size() : 0;
@@ -17918,8 +17908,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
         }
-        return new DeletePackageAction(ps, disabledPs, outInfo, flags, user,
-                mayDeleteUnupdatedSystemApp);
+        return new DeletePackageAction(ps, disabledPs, outInfo, flags, user);
     }
 
     /*
@@ -17993,8 +17982,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS, userId)) {
             unsuspendForSuspendingPackage(packageName, userId);
         }
-
-        if (!systemApp || action.mayDeleteUnupdatedSystemApp) {
+        if ((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)
+                && userId != UserHandle.USER_ALL) {
             // The caller is asking that the package only be deleted for a single
             // user.  To do this, we just mark its uninstalled state and delete
             // its data. If this is a system app, we only allow this to happen if
@@ -18017,13 +18006,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         // We need to set it back to 'installed' so the uninstall
                         // broadcasts will be sent correctly.
                         if (DEBUG_REMOVE) Slog.d(TAG, "Not installed by other users, full delete");
-                        if (userId != UserHandle.USER_ALL) {
-                            ps.setInstalled(true, userId);
-                        } else {
-                            for (int origUserId : outInfo.origUsers) {
-                                ps.setInstalled(true, origUserId);
-                            }
-                        }
+                        ps.setInstalled(true, userId);
                         mSettings.writeKernelMappingLPr(ps);
                     }
                 } else {
