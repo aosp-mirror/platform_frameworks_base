@@ -62,8 +62,8 @@ class VectorDrawableAtlas : public virtual RefBase {
 public:
     enum class StorageMode { allowSharedSurface, disallowSharedSurface };
 
-    VectorDrawableAtlas(size_t surfaceArea,
-                        StorageMode storageMode = StorageMode::allowSharedSurface);
+    explicit VectorDrawableAtlas(size_t surfaceArea,
+                                 StorageMode storageMode = StorageMode::allowSharedSurface);
 
     /**
      * "prepareForDraw" may allocate a new surface if needed. It may schedule to repack the
