@@ -51,7 +51,6 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
@@ -82,8 +81,6 @@ public class NotificationEntryManager implements
     protected final Context mContext;
     protected final HashMap<String, NotificationData.Entry> mPendingNotifications = new HashMap<>();
 
-    private final NotificationGroupManager mGroupManager =
-            Dependency.get(NotificationGroupManager.class);
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
     private final DeviceProvisionedController mDeviceProvisionedController =
@@ -556,11 +553,7 @@ public class NotificationEntryManager implements
             extender.setShouldManageLifetime(entry, false /* shouldManage */);
         }
 
-        mNotificationData.updateRanking(ranking);
-
-        final StatusBarNotification oldNotification = entry.notification;
-        entry.notification = notification;
-        mGroupManager.onEntryUpdated(entry, oldNotification);
+        mNotificationData.update(entry, ranking, notification);
 
         entry.updateIcons(mContext, notification);
         getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
