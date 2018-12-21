@@ -86,7 +86,7 @@ class FileDescriptorTable {
   bool ReopenOrDetach(std::string* error_msg);
 
  private:
-  FileDescriptorTable(const std::unordered_map<int, FileDescriptorInfo*>& map);
+  explicit FileDescriptorTable(const std::unordered_map<int, FileDescriptorInfo*>& map);
 
   bool RestatInternal(std::set<int>& open_fds, std::string* error_msg);
 

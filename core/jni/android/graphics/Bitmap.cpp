@@ -45,7 +45,7 @@ namespace android {
 
 class BitmapWrapper {
 public:
-    BitmapWrapper(Bitmap* bitmap)
+    explicit BitmapWrapper(Bitmap* bitmap)
         : mBitmap(bitmap) { }
 
     void freePixels() {
