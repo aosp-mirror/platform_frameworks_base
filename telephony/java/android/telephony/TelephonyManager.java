@@ -6447,7 +6447,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getCarrierPrivilegeStatus(mSubId) ==
+                return telephony.getCarrierPrivilegeStatus(subId) ==
                     CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
             }
         } catch (RemoteException ex) {
