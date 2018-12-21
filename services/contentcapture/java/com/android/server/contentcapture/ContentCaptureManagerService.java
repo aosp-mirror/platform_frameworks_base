@@ -76,7 +76,7 @@ public final class ContentCaptureManagerService extends
     @Override // from AbstractMasterSystemService
     protected ContentCapturePerUserService newServiceLocked(@UserIdInt int resolvedUserId,
             boolean disabled) {
-        return new ContentCapturePerUserService(this, mLock, resolvedUserId);
+        return new ContentCapturePerUserService(this, mLock, disabled, resolvedUserId);
     }
 
     @Override // from SystemService
@@ -181,7 +181,7 @@ public final class ContentCaptureManagerService extends
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, componentName, taskId, displayId,
-                        sessionId, Binder.getCallingUid(), flags, mAllowInstantService, result);
+                        sessionId, Binder.getCallingUid(), flags, result);
             }
         }
 

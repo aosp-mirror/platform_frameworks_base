@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -64,6 +65,8 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         I extends IInterface> implements DeathRecipient {
     private static final int MSG_UNBIND = 1;
 
+    protected static final long PERMANENT_BOUND_TIMEOUT_MS = 0;
+
     protected static final int LAST_PRIVATE_MSG = MSG_UNBIND;
 
     // TODO(b/117779333): convert all booleans into an integer / flags
@@ -85,6 +88,9 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     private boolean mDestroyed;
     private boolean mServiceDied;
     private boolean mCompleted;
+
+    // Used just for debugging purposes (on dump)
+    private long mNextUnbind;
 
     /**
      * Callback called when the service dies.
@@ -156,7 +162,9 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     protected abstract I getServiceInterface(@NonNull IBinder service);
 
     /**
-     * Defines How long after the last interaction with the service we would unbind.
+     * Defines how long after the last interaction with the service we would unbind.
+     *
+     * @return time to unbind (in millis), or {@link #PERMANENT_BOUND_TIMEOUT_MS} to not unbind.
      */
     protected abstract long getTimeoutIdleBindMillis();
 
@@ -220,11 +228,23 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                 .append(mComponentName.flattenToString()).println();
         pw.append(prefix).append(tab).append("destroyed=")
                 .append(String.valueOf(mDestroyed)).println();
+        final boolean bound = handleIsBound();
         pw.append(prefix).append(tab).append("bound=")
-                .append(String.valueOf(handleIsBound())).println();
+                .append(String.valueOf(bound));
+        final long idleTimeout = getTimeoutIdleBindMillis();
+        if (bound) {
+            if (idleTimeout > 0) {
+                pw.append(" (unbind in : ");
+                TimeUtils.formatDuration(mNextUnbind - SystemClock.elapsedRealtime(), pw);
+                pw.append(")");
+            } else {
+                pw.append(" (permanently bound)");
+            }
+        }
+        pw.println();
         pw.append(prefix).append("mBindInstantServiceAllowed=").println(mBindInstantServiceAllowed);
         pw.append(prefix).append("idleTimeout=")
-            .append(Long.toString(getTimeoutIdleBindMillis() / 1000)).append("s").println();
+            .append(Long.toString(idleTimeout / 1000)).append("s").println();
         pw.append(prefix).append("requestTimeout=")
             .append(Long.toString(getRemoteRequestMillis() / 1000)).append("s").println();
         pw.println();
@@ -236,6 +256,8 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
      * <p>This request must be responded by the service somehow (typically using a callback),
      * othewise it will trigger a {@link PendingRequest#onTimeout(AbstractRemoteService)} if the
      * service doesn't respond.
+     *
+     * <p><b>NOTE: </b>this request is responsible for calling {@link #scheduleUnbind()}.
      */
     protected void scheduleRequest(@NonNull PendingRequest<S, I> pendingRequest) {
         cancelScheduledUnbind();
@@ -250,7 +272,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
      * a simple {@link Runnable}.
      */
     protected void scheduleAsyncRequest(@NonNull AsyncRequest<I> request) {
-        cancelScheduledUnbind();
+        scheduleUnbind();
         // TODO(b/117779333): fix generics below
         @SuppressWarnings({"unchecked", "rawtypes"})
         final MyAsyncPendingRequest<S, I> asyncRequest = new MyAsyncPendingRequest(this, request);
@@ -263,12 +285,21 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     }
 
     protected void scheduleUnbind() {
+        final long unbindDelay = getTimeoutIdleBindMillis();
+
+        if (unbindDelay <= 0) {
+            if (mVerbose) Slog.v(mTag, "not scheduling unbind when value is " + unbindDelay);
+            return;
+        }
+
         cancelScheduledUnbind();
-        // TODO(b/111276913): implement "permanent binding"
         // TODO(b/117779333): make sure it's unbound if the service settings changing (right now
         // it's not)
+
+        mNextUnbind = SystemClock.elapsedRealtime() + unbindDelay;
+        if (mVerbose) Slog.v(mTag, "unbinding in " + unbindDelay + "ms: " + mNextUnbind);
         mHandler.sendMessageDelayed(obtainMessage(AbstractRemoteService::handleUnbind, this)
-                .setWhat(MSG_UNBIND), getTimeoutIdleBindMillis());
+                .setWhat(MSG_UNBIND), unbindDelay);
     }
 
     private void handleUnbind() {
@@ -342,6 +373,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                 mService = null;
             }
         }
+        mNextUnbind = 0;
         mContext.unbindService(mServiceConnection);
     }
 

@@ -35,6 +35,7 @@ import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -42,6 +43,7 @@ import android.view.contentcapture.ContentCaptureSession;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
+import com.android.server.contentcapture.RemoteContentCaptureService.ContentCaptureServiceCallbacks;
 import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.io.PrintWriter;
@@ -52,7 +54,8 @@ import java.util.ArrayList;
  */
 final class ContentCapturePerUserService
         extends
-        AbstractPerUserSystemService<ContentCapturePerUserService, ContentCaptureManagerService> {
+        AbstractPerUserSystemService<ContentCapturePerUserService, ContentCaptureManagerService>
+        implements ContentCaptureServiceCallbacks {
 
     private static final String TAG = ContentCaptureManagerService.class.getSimpleName();
 
@@ -60,15 +63,52 @@ final class ContentCapturePerUserService
     private final ArrayMap<String, ContentCaptureServerSession> mSessions =
             new ArrayMap<>();
 
+    /**
+     * Reference to the remote service.
+     *
+     * <p>It's set in the constructor, but it's also updated when the service's updated in the
+     * master's cache (for example, because a temporary service was set).
+     */
+    @GuardedBy("mLock")
+    private RemoteContentCaptureService mRemoteService;
+
     // TODO(b/111276913): add mechanism to prune stale sessions, similar to Autofill's
 
-    protected ContentCapturePerUserService(
-            ContentCaptureManagerService master, Object lock, @UserIdInt int userId) {
+    ContentCapturePerUserService(@NonNull ContentCaptureManagerService master,
+            @NonNull Object lock, boolean disabled, @UserIdInt int userId) {
         super(master, lock, userId);
+
+        updateRemoteServiceLocked(disabled);
+    }
+
+    /**
+     * Updates the reference to the remote service.
+     */
+    private void updateRemoteServiceLocked(boolean disabled) {
+        if (mRemoteService != null) {
+            if (mMaster.debug) Slog.d(TAG, "updateRemoteService(): destroying old remote service");
+            mRemoteService.destroy();
+            mRemoteService = null;
+        }
+
+        // Updates the component name
+        final ComponentName serviceComponentName = updateServiceInfoLocked();
+
+        if (serviceComponentName == null) {
+            Slog.w(TAG, "updateRemoteService(): no service componennt name");
+            return;
+        }
+
+        if (!disabled) {
+            mRemoteService = new RemoteContentCaptureService(
+                  mMaster.getContext(),
+                  ContentCaptureService.SERVICE_INTERFACE, serviceComponentName, mUserId, this,
+                  mMaster.isBindInstantServiceAllowed(), mMaster.verbose);
+        }
     }
 
     @Override // from PerUserSystemService
-    protected ServiceInfo newServiceInfo(@NonNull ComponentName serviceComponent)
+    protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws NameNotFoundException {
 
         int flags = PackageManager.GET_META_DATA;
@@ -103,14 +143,24 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     protected boolean updateLocked(boolean disabled) {
         destroyLocked();
-        return super.updateLocked(disabled);
+        final boolean disabledStateChanged = super.updateLocked(disabled);
+        updateRemoteServiceLocked(disabled);
+        return disabledStateChanged;
     }
 
-    // TODO(b/111276913): log metrics
+    @Override // from ContentCaptureServiceCallbacks
+    public void onServiceDied(@NonNull RemoteContentCaptureService service) {
+        if (mMaster.debug) Slog.d(TAG, "remote service died: " + service);
+        synchronized (mLock) {
+            removeSelfFromCacheLocked();
+        }
+    }
+
+    // TODO(b/119613670): log metrics
     @GuardedBy("mLock")
     public void startSessionLocked(@NonNull IBinder activityToken,
             @NonNull ComponentName componentName, int taskId, int displayId,
-            @NonNull String sessionId, int uid, int flags, boolean bindInstantServiceAllowed,
+            @NonNull String sessionId, int uid, int flags,
             @NonNull IResultReceiver clientReceiver) {
         if (!isEnabledLocked()) {
             setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED, /* binder=*/ null);
@@ -136,10 +186,23 @@ final class ContentCapturePerUserService
             return;
         }
 
-        final ContentCaptureServerSession newSession = new ContentCaptureServerSession(getContext(),
-                mUserId, mLock, activityToken, this, serviceComponentName, componentName, taskId,
-                displayId, sessionId, uid, flags, bindInstantServiceAllowed,
-                mMaster.verbose);
+        if (mRemoteService == null) {
+            updateRemoteServiceLocked(/* disabled= */ false); // already checked for isEnabled
+        }
+
+        if (mRemoteService == null) {
+            // TODO(b/119613670): log metrics
+            Slog.w(TAG, "startSession(id=" + existingSession + ", token=" + activityToken
+                    + ": ignoring because service is not set");
+            // TODO(b/111276913): use a new disabled state?
+            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED,
+                    /* binder=*/ null);
+            return;
+        }
+
+        final ContentCaptureServerSession newSession = new ContentCaptureServerSession(
+                activityToken, this, mRemoteService, componentName, taskId,
+                displayId, sessionId, uid, flags);
         if (mMaster.verbose) {
             Slog.v(TAG, "startSession(): new session for "
                     + ComponentName.flattenToShortString(componentName) + " and id " + sessionId);
@@ -148,7 +211,7 @@ final class ContentCapturePerUserService
         newSession.notifySessionStartedLocked(clientReceiver);
     }
 
-    // TODO(b/111276913): log metrics
+    // TODO(b/119613670): log metrics
     @GuardedBy("mLock")
     public void finishSessionLocked(@NonNull String sessionId) {
         if (!isEnabledLocked()) {
@@ -239,12 +302,18 @@ final class ContentCapturePerUserService
     @Override
     protected void dumpLocked(String prefix, PrintWriter pw) {
         super.dumpLocked(prefix, pw);
+
+        final String prefix2 = prefix + "  ";
+        if (mRemoteService != null) {
+            pw.print(prefix); pw.println("remote service:");
+            mRemoteService.dump(prefix2, pw);
+        }
+
         if (mSessions.isEmpty()) {
             pw.print(prefix); pw.println("no sessions");
         } else {
             final int size = mSessions.size();
             pw.print(prefix); pw.print("number sessions: "); pw.println(size);
-            final String prefix2 = prefix + "  ";
             for (int i = 0; i < size; i++) {
                 pw.print(prefix); pw.print("session@"); pw.println(i);
                 final ContentCaptureServerSession session = mSessions.valueAt(i);

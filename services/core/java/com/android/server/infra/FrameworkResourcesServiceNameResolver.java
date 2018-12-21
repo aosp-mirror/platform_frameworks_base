@@ -157,6 +157,11 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
         }
     }
 
+    @Override
+    public String toString() {
+        return "FrameworkResourcesServiceNamer: temps=" + mTemporaryServiceNames;
+    }
+
     // TODO(b/117779333): support proto
     @Override
     public void dumpShort(@NonNull PrintWriter pw) {

@@ -205,7 +205,7 @@ final class AutofillManagerServiceImpl
     }
 
     @Override // from PerUserSystemService
-    protected ServiceInfo newServiceInfo(@NonNull ComponentName serviceComponent)
+    protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws NameNotFoundException {
         mInfo = new AutofillServiceInfo(getContext(), serviceComponent, mUserId);
         return mInfo.getServiceInfo();

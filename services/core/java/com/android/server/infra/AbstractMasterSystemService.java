@@ -38,6 +38,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -219,6 +220,20 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     /**
+     * Checks whether the service is allowed to bind to an instant-app.
+     *
+     * <p>Typically called by subclasses when creating {@link AbstractRemoteService} instances.
+     *
+     * <p><b>NOTE: </b>must not be called by {@code ShellCommand} as it does not check for
+     * permission.
+     */
+    public final boolean isBindInstantServiceAllowed() {
+        synchronized (mLock) {
+            return mAllowInstantService;
+        }
+    }
+
+    /**
      * Sets whether the service is allowed to bind to an instant-app.
      *
      * <p>Typically called by {@code ShellCommand} during CTS tests.
@@ -314,6 +329,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      *
      * @return a new instance.
      */
+    @Nullable
     protected abstract S newServiceLocked(@UserIdInt int resolvedUserId, boolean disabled);
 
     /**
@@ -441,11 +457,11 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     /**
      * Removes a cached service for a given user.
      *
-     * @return the removed service;
+     * @return the removed service.
      */
     @GuardedBy("mLock")
     @NonNull
-    private S removeCachedServiceLocked(@UserIdInt int userId) {
+    protected final S removeCachedServiceLocked(@UserIdInt int userId) {
         final S service = peekServiceForUserLocked(userId);
         if (service != null) {
             mServicesCache.delete(userId);

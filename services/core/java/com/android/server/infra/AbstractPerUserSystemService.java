@@ -80,7 +80,8 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     /**
      * Creates a new {@link ServiceInfo} for the given service name.
      *
-     * <p><b>MUST</b> be overridden by subclasses that bind to an {@link AbstractRemoteService}.
+     * <p><b>MUST</b> be overridden by subclasses that bind to an
+     * {@link com.android.internal.infra.AbstractRemoteService}.
      *
      * @throws NameNotFoundException if the service does not exist.
      * @throws SecurityException if the service does not have the proper permissions to be bound to.
@@ -89,7 +90,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
      *
      * @return new {@link ServiceInfo},
      */
-    protected @NonNull ServiceInfo newServiceInfo(
+    protected @NonNull ServiceInfo newServiceInfoLocked(
             @SuppressWarnings("unused") @NonNull ComponentName serviceComponent)
             throws NameNotFoundException {
         throw new UnsupportedOperationException("not overridden");
@@ -137,8 +138,17 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
 
         mSetupComplete = isSetupCompletedLocked();
         mDisabled = disabled;
+
+        updateServiceInfoLocked();
+        return wasEnabled != isEnabledLocked();
+    }
+
+    /**
+     * Updates the internal reference to the service info, and returns the service's component.
+     */
+    protected final ComponentName updateServiceInfoLocked() {
+        ComponentName serviceComponent = null;
         if (mMaster.mServiceNameResolver != null) {
-            ComponentName serviceComponent = null;
             ServiceInfo serviceInfo = null;
             final String componentName = getComponentNameLocked();
             if (!TextUtils.isEmpty(componentName)) {
@@ -156,9 +166,10 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
             }
             try {
                 if (serviceInfo != null) {
-                    mServiceInfo = newServiceInfo(serviceComponent);
+                    mServiceInfo = newServiceInfoLocked(serviceComponent);
                     if (mMaster.debug) {
-                        Slog.d(mTag, "Set component for user " + mUserId + " as " + mServiceInfo);
+                        Slog.d(mTag, "Set component for user " + mUserId + " as "
+                                + serviceComponent + " and info as " + mServiceInfo);
                     }
                 } else {
                     mServiceInfo = null;
@@ -171,7 +182,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
                 mServiceInfo = null;
             }
         }
-        return wasEnabled != isEnabledLocked();
+        return serviceComponent;
     }
 
     /**
@@ -274,6 +285,13 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     public final Drawable getServiceIconLocked() {
         return mServiceInfo == null ? null
                 : mServiceInfo.loadIcon(getContext().getPackageManager());
+    }
+
+    /**
+     * Removes the service from the master's cache.
+     */
+    protected final void removeSelfFromCacheLocked() {
+        mMaster.removeCachedServiceLocked(mUserId);
     }
 
     /**

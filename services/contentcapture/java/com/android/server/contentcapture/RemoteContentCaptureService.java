@@ -32,8 +32,6 @@ final class RemoteContentCaptureService
         extends AbstractMultiplePendingRequestsRemoteService<RemoteContentCaptureService,
         IContentCaptureService> {
 
-    // TODO(b/117779333): changed it so it's permanentely bound
-    private static final long TIMEOUT_IDLE_BIND_MILLIS = 2 * DateUtils.MINUTE_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
 
     RemoteContentCaptureService(Context context, String serviceInterface,
@@ -44,19 +42,18 @@ final class RemoteContentCaptureService
                 bindInstantServiceAllowed, verbose, /* initialCapacity= */ 2);
     }
 
-    @Override // from RemoteService
+    @Override // from AbstractRemoteService
     protected IContentCaptureService getServiceInterface(@NonNull IBinder service) {
         return IContentCaptureService.Stub.asInterface(service);
     }
 
-    // TODO(b/111276913): modify super class to allow permanent binding when value is 0 or negative
-    @Override // from RemoteService
+    @Override // from AbstractRemoteService
     protected long getTimeoutIdleBindMillis() {
         // TODO(b/111276913): read from Settings so it can be changed in the field
-        return TIMEOUT_IDLE_BIND_MILLIS;
+        return PERMANENT_BOUND_TIMEOUT_MS;
     }
 
-    @Override // from RemoteService
+    @Override // from AbstractRemoteService
     protected long getRemoteRequestMillis() {
         // TODO(b/111276913): read from Settings so it can be changed in the field
         return TIMEOUT_REMOTE_REQUEST_MILLIS;
