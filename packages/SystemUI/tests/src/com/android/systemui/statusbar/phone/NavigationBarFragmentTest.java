@@ -40,7 +40,6 @@ import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -105,7 +104,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         DeviceProvisionedController deviceProvisionedController =
-                new DeviceProvisionedControllerImpl(context);
+                mock(DeviceProvisionedController.class);
         assertNotNull(mAccessibilityWrapper);
         return new NavigationBarFragment(mAccessibilityWrapper,
                 deviceProvisionedController,
