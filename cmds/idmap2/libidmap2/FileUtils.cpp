@@ -34,12 +34,12 @@ namespace utils {
 std::unique_ptr<std::vector<std::string>> FindFiles(const std::string& root, bool recurse,
                                                     const FindFilesPredicate& predicate) {
   DIR* dir = opendir(root.c_str());
-  if (!dir) {
+  if (dir == nullptr) {
     return nullptr;
   }
   std::unique_ptr<std::vector<std::string>> vector(new std::vector<std::string>());
   struct dirent* dirent;
-  while ((dirent = readdir(dir))) {
+  while ((dirent = readdir(dir)) != nullptr) {
     const std::string path = root + "/" + dirent->d_name;
     if (predicate(dirent->d_type, path)) {
       vector->push_back(path);
@@ -68,8 +68,10 @@ std::unique_ptr<std::string> ReadFile(const std::string& path) {
 }
 
 std::unique_ptr<std::string> ReadFile(int fd) {
+  static constexpr const size_t kBufSize = 1024;
+
   std::unique_ptr<std::string> str(new std::string());
-  char buf[1024];
+  char buf[kBufSize];
   ssize_t r;
   while ((r = read(fd, buf, sizeof(buf))) > 0) {
     str->append(buf, r);

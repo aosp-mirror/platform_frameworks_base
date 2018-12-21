@@ -117,7 +117,7 @@ const unsigned char idmap_raw_data[] = {
 
 const unsigned int idmap_raw_data_len = 565;
 
-const std::string GetTestDataPath();
+std::string GetTestDataPath();
 
 class Idmap2Tests : public testing::Test {
  protected:

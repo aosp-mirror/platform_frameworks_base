@@ -206,8 +206,9 @@ std::unique_ptr<const IdmapData::Header> IdmapData::Header::FromBinaryStream(std
 std::unique_ptr<const IdmapData::TypeEntry> IdmapData::TypeEntry::FromBinaryStream(
     std::istream& stream) {
   std::unique_ptr<IdmapData::TypeEntry> data(new IdmapData::TypeEntry());
-
-  uint16_t target_type16, overlay_type16, entry_count;
+  uint16_t target_type16;
+  uint16_t overlay_type16;
+  uint16_t entry_count;
   if (!Read16(stream, &target_type16) || !Read16(stream, &overlay_type16) ||
       !Read16(stream, &entry_count) || !Read16(stream, &data->entry_offset_)) {
     return nullptr;
@@ -292,25 +293,25 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(const std::string& target_apk_
   }
 
   const LoadedArsc* target_arsc = target_apk_assets.GetLoadedArsc();
-  if (!target_arsc) {
+  if (target_arsc == nullptr) {
     out_error << "error: failed to load target resources.arsc" << std::endl;
     return nullptr;
   }
 
   const LoadedArsc* overlay_arsc = overlay_apk_assets.GetLoadedArsc();
-  if (!overlay_arsc) {
+  if (overlay_arsc == nullptr) {
     out_error << "error: failed to load overlay resources.arsc" << std::endl;
     return nullptr;
   }
 
   const LoadedPackage* target_pkg = GetPackageAtIndex0(*target_arsc);
-  if (!target_pkg) {
+  if (target_pkg == nullptr) {
     out_error << "error: failed to load target package from resources.arsc" << std::endl;
     return nullptr;
   }
 
   const LoadedPackage* overlay_pkg = GetPackageAtIndex0(*overlay_arsc);
-  if (!overlay_pkg) {
+  if (overlay_pkg == nullptr) {
     out_error << "error: failed to load overlay package from resources.arsc" << std::endl;
     return nullptr;
   }

@@ -51,14 +51,14 @@ TEST(BinaryStreamVisitorTests, CreateBinaryStreamViaBinaryStreamVisitor) {
 
   ASSERT_EQ(idmap1->GetHeader()->GetTargetCrc(), idmap2->GetHeader()->GetTargetCrc());
   ASSERT_EQ(idmap1->GetHeader()->GetTargetPath(), idmap2->GetHeader()->GetTargetPath());
-  ASSERT_EQ(idmap1->GetData().size(), 1u);
+  ASSERT_EQ(idmap1->GetData().size(), 1U);
   ASSERT_EQ(idmap1->GetData().size(), idmap2->GetData().size());
 
   const auto& data1 = idmap1->GetData()[0];
   const auto& data2 = idmap2->GetData()[0];
 
   ASSERT_EQ(data1->GetHeader()->GetTargetPackageId(), data2->GetHeader()->GetTargetPackageId());
-  ASSERT_EQ(data1->GetTypeEntries().size(), 2u);
+  ASSERT_EQ(data1->GetTypeEntries().size(), 2U);
   ASSERT_EQ(data1->GetTypeEntries().size(), data2->GetTypeEntries().size());
   ASSERT_EQ(data1->GetTypeEntries()[0]->GetEntry(0), data2->GetTypeEntries()[0]->GetEntry(0));
   ASSERT_EQ(data1->GetTypeEntries()[0]->GetEntry(1), data2->GetTypeEntries()[0]->GetEntry(1));

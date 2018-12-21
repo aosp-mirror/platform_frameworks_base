@@ -49,17 +49,18 @@ void PrettyPrintVisitor::visit(const IdmapData::Header& header ATTRIBUTE_UNUSED)
   last_seen_package_id_ = header.GetTargetPackageId();
 }
 
-void PrettyPrintVisitor::visit(const IdmapData::TypeEntry& te) {
+void PrettyPrintVisitor::visit(const IdmapData::TypeEntry& type_entry) {
   const bool target_package_loaded = !target_am_.GetApkAssets().empty();
-  for (uint16_t i = 0; i < te.GetEntryCount(); i++) {
-    const EntryId entry = te.GetEntry(i);
+  for (uint16_t i = 0; i < type_entry.GetEntryCount(); i++) {
+    const EntryId entry = type_entry.GetEntry(i);
     if (entry == kNoEntry) {
       continue;
     }
 
     const ResourceId target_resid =
-        RESID(last_seen_package_id_, te.GetTargetTypeId(), te.GetEntryOffset() + i);
-    const ResourceId overlay_resid = RESID(last_seen_package_id_, te.GetOverlayTypeId(), entry);
+        RESID(last_seen_package_id_, type_entry.GetTargetTypeId(), type_entry.GetEntryOffset() + i);
+    const ResourceId overlay_resid =
+        RESID(last_seen_package_id_, type_entry.GetOverlayTypeId(), entry);
 
     stream_ << base::StringPrintf("0x%08x -> 0x%08x", target_resid, overlay_resid);
     if (target_package_loaded) {

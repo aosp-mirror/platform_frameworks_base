@@ -52,13 +52,13 @@ class ResourceUtilsTests : public Idmap2Tests {
 };
 
 TEST_F(ResourceUtilsTests, ResToTypeEntryName) {
-  Result<std::string> name = utils::ResToTypeEntryName(GetAssetManager(), 0x7f010000u);
+  Result<std::string> name = utils::ResToTypeEntryName(GetAssetManager(), 0x7f010000U);
   ASSERT_TRUE(name);
   ASSERT_EQ(*name, "integer/int1");
 }
 
 TEST_F(ResourceUtilsTests, ResToTypeEntryNameNoSuchResourceId) {
-  Result<std::string> name = utils::ResToTypeEntryName(GetAssetManager(), 0x7f123456u);
+  Result<std::string> name = utils::ResToTypeEntryName(GetAssetManager(), 0x7f123456U);
   ASSERT_FALSE(name);
 }
 
