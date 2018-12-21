@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.view.WindowInsets.Type.InsetType;
 
 /**
@@ -51,4 +52,15 @@ public interface WindowInsetsController {
      *              would like to make disappear.
      */
     void hide(@InsetType int types);
+
+    /**
+     * Lets the application control window inset animations in a frame-by-frame manner by modifying
+     * the position of the windows in the system causing insets directly.
+     *
+     * @param types The {@link InsetType}s the application has requested to control.
+     * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
+     *                 windows are ready to be controlled, among other callbacks.
+     */
+    void controlWindowInsetsAnimation(@InsetType int types,
+            @NonNull WindowInsetsAnimationControlListener listener);
 }

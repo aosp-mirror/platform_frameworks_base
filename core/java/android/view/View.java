@@ -10488,6 +10488,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return The {@link WindowInsetsController} or {@code null} if the view isn't attached to a
      *         a window.
+     * @see Window#getInsetsController()
      * @hide pending unhide
      */
     public @Nullable WindowInsetsController getWindowInsetsController() {
