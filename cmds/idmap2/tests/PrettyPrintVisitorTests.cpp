@@ -29,7 +29,6 @@
 
 #include "TestHelpers.h"
 
-using ::testing::IsNull;
 using ::testing::NotNull;
 
 using android::ApkAssets;

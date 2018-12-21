@@ -38,8 +38,6 @@
 
 #include "TestHelpers.h"
 
-using ::testing::NotNull;
-
 namespace android {
 namespace idmap2 {
 
