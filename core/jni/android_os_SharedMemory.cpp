@@ -20,8 +20,9 @@
 
 #include <cutils/ashmem.h>
 #include <utils/Log.h>
+
+#include <nativehelper/jni_macros.h>
 #include <nativehelper/JNIHelp.h>
-#include <nativehelper/JniConstants.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 #include <algorithm>
@@ -31,10 +32,10 @@
 
 namespace {
 
-static void throwErrnoException(JNIEnv* env, const char* functionName, int error) {
-    static jmethodID ctor = env->GetMethodID(JniConstants::errnoExceptionClass,
-            "<init>", "(Ljava/lang/String;I)V");
+jclass errnoExceptionClass;
+jmethodID errnoExceptionCtor;  // MethodID for ErrnoException.<init>(String,I)
 
+void throwErrnoException(JNIEnv* env, const char* functionName, int error) {
     ScopedLocalRef<jstring> detailMessage(env, env->NewStringUTF(functionName));
     if (detailMessage.get() == NULL) {
         // Not really much we can do here. We're probably dead in the water,
@@ -42,12 +43,14 @@ static void throwErrnoException(JNIEnv* env, const char* functionName, int error
         env->ExceptionClear();
     }
 
-    jobject exception = env->NewObject(JniConstants::errnoExceptionClass, ctor,
-            detailMessage.get(), error);
+    jobject exception = env->NewObject(errnoExceptionClass,
+                                       errnoExceptionCtor,
+                                       detailMessage.get(),
+                                       error);
     env->Throw(reinterpret_cast<jthrowable>(exception));
 }
 
-static jobject SharedMemory_create(JNIEnv* env, jobject, jstring jname, jint size) {
+jobject SharedMemory_nCreate(JNIEnv* env, jobject, jstring jname, jint size) {
 
     // Name is optional so we can't use ScopedUtfChars for this as it throws NPE on null
     const char* name = jname ? env->GetStringUTFChars(jname, nullptr) : nullptr;
@@ -69,7 +72,7 @@ static jobject SharedMemory_create(JNIEnv* env, jobject, jstring jname, jint siz
     return jniCreateFileDescriptor(env, fd);
 }
 
-static jint SharedMemory_getSize(JNIEnv* env, jobject, jobject fileDescriptor) {
+jint SharedMemory_nGetSize(JNIEnv* env, jobject, jobject fileDescriptor) {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     if (!ashmem_valid(fd)) {
         return -1;
@@ -78,7 +81,7 @@ static jint SharedMemory_getSize(JNIEnv* env, jobject, jobject fileDescriptor) {
     return static_cast<jint>(std::min(size, static_cast<size_t>(std::numeric_limits<jint>::max())));
 }
 
-static jint SharedMemory_setProt(JNIEnv* env, jobject, jobject fileDescriptor, jint prot) {
+jint SharedMemory_nSetProt(JNIEnv* env, jobject, jobject fileDescriptor, jint prot) {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     int err = 0;
     if (ashmem_set_prot_region(fd, prot)) {
@@ -87,18 +90,21 @@ static jint SharedMemory_setProt(JNIEnv* env, jobject, jobject fileDescriptor, j
     return err;
 }
 
-static const JNINativeMethod methods[] = {
-    {"nCreate", "(Ljava/lang/String;I)Ljava/io/FileDescriptor;", (void*)SharedMemory_create},
-    {"nGetSize", "(Ljava/io/FileDescriptor;)I", (void*)SharedMemory_getSize},
-    {"nSetProt", "(Ljava/io/FileDescriptor;I)I", (void*)SharedMemory_setProt},
+const JNINativeMethod methods[] = {
+  NATIVE_METHOD(SharedMemory, nCreate, "(Ljava/lang/String;I)Ljava/io/FileDescriptor;"),
+  NATIVE_METHOD(SharedMemory, nGetSize, "(Ljava/io/FileDescriptor;)I"),
+  NATIVE_METHOD(SharedMemory, nSetProt, "(Ljava/io/FileDescriptor;I)I")
 };
 
 } // anonymous namespace
 
 namespace android {
 
-int register_android_os_SharedMemory(JNIEnv* env)
-{
+int register_android_os_SharedMemory(JNIEnv* env) {
+    errnoExceptionClass =
+        MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/system/ErrnoException"));
+    errnoExceptionCtor =
+        GetMethodIDOrDie(env, errnoExceptionClass, "<init>", "(Ljava/lang/String;I)V");
     return RegisterMethodsOrDie(env, "android/os/SharedMemory", methods, NELEM(methods));
 }
 
