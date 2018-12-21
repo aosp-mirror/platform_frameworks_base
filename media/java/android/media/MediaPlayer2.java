@@ -436,13 +436,6 @@ public class MediaPlayer2 implements AutoCloseable
      */
     // This is a synchronous call.
     public void reset() {
-        synchronized (mEventCbLock) {
-            mEventCallbackRecords.clear();
-        }
-        synchronized (mDrmEventCbLock) {
-            mDrmEventCallbackRecords.clear();
-        }
-
         clearSourceInfos();
 
         stayAwake(false);
@@ -2758,6 +2751,12 @@ public class MediaPlayer2 implements AutoCloseable
                     "Illegal null Executor for the EventCallback");
         }
         synchronized (mEventCbLock) {
+            for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
+                if (cb.first == executor && cb.second == eventCallback) {
+                    Log.w(TAG, "The callback has been registered before.");
+                    return;
+                }
+            }
             mEventCallbackRecords.add(new Pair(executor, eventCallback));
         }
     }
