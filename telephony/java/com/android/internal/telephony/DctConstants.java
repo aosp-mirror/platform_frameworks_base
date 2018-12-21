@@ -79,10 +79,7 @@ public class DctConstants {
     public static final int EVENT_PS_RESTRICT_DISABLED = BASE + 23;
     public static final int EVENT_CLEAN_UP_CONNECTION = BASE + 24;
     public static final int EVENT_RESTART_RADIO = BASE + 26;
-    public static final int EVENT_SET_INTERNAL_DATA_ENABLE = BASE + 27;
     public static final int EVENT_CLEAN_UP_ALL_CONNECTIONS = BASE + 29;
-    public static final int CMD_SET_USER_DATA_ENABLE = BASE + 30;
-    public static final int CMD_SET_POLICY_DATA_ENABLE = BASE + 32;
     public static final int EVENT_ICC_CHANGED = BASE + 33;
     public static final int EVENT_DISCONNECT_DC_RETRYING = BASE + 34;
     public static final int EVENT_DATA_SETUP_COMPLETE_ERROR = BASE + 35;
@@ -93,14 +90,12 @@ public class DctConstants {
     public static final int CMD_NET_STAT_POLL = BASE + 40;
     public static final int EVENT_DATA_RAT_CHANGED = BASE + 41;
     public static final int CMD_CLEAR_PROVISIONING_SPINNER = BASE + 42;
-    public static final int EVENT_DEVICE_PROVISIONED_CHANGE = BASE + 43;
     public static final int EVENT_REDIRECTION_DETECTED = BASE + 44;
     public static final int EVENT_PCO_DATA_RECEIVED = BASE + 45;
-    public static final int EVENT_SET_CARRIER_DATA_ENABLED = BASE + 46;
+    public static final int EVENT_DATA_ENABLED_CHANGED = BASE + 46;
     public static final int EVENT_DATA_RECONNECT = BASE + 47;
     public static final int EVENT_ROAMING_SETTING_CHANGE = BASE + 48;
     public static final int EVENT_DATA_SERVICE_BINDING_CHANGED = BASE + 49;
-    public static final int EVENT_DEVICE_PROVISIONING_DATA_SETTING_CHANGE = BASE + 50;
 
     /***** Constants *****/
 
