@@ -43,9 +43,9 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.LongSparseArray;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -348,7 +348,7 @@ public class GarbageMonitor {
 
         public MemoryTile(QSHost host) {
             super(host);
-            gm = Dependency.get(GarbageMonitor.class);
+            gm = SystemUIFactory.getInstance().getRootComponent().createGarbageMonitor();
         }
 
         @Override
@@ -453,7 +453,8 @@ public class GarbageMonitor {
                     Settings.Secure.getInt(
                                     mContext.getContentResolver(), FORCE_ENABLE_LEAK_REPORTING, 0)
                             != 0;
-            mGarbageMonitor = Dependency.get(GarbageMonitor.class);
+            mGarbageMonitor = SystemUIFactory.getInstance().getRootComponent()
+                   .createGarbageMonitor();
             if (LEAK_REPORTING_ENABLED || forceEnable) {
                 mGarbageMonitor.startLeakMonitor();
             }

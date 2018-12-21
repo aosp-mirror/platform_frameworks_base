@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.InjectionInflationController;
+import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeDialogComponent;
 
 import java.util.function.Consumer;
@@ -237,5 +238,8 @@ public class SystemUIFactory {
          * ViewCreator generates all Views that need injection.
          */
         InjectionInflationController.ViewCreator createViewCreator();
+
+        @Singleton
+        GarbageMonitor createGarbageMonitor();
     }
 }
