@@ -66,6 +66,8 @@ import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.wm.ActivityStackSupervisor.dumpHistoryList;
+import static com.android.server.wm.ActivityStackSupervisor.printThisActivity;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_APP;
@@ -309,7 +311,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * The first entry in the list is the least recently used.
      * It contains HistoryRecord objects.
      */
-    final ArrayList<ActivityRecord> mLRUActivities = new ArrayList<>();
+    private final ArrayList<ActivityRecord> mLRUActivities = new ArrayList<>();
 
     /**
      * When we are in the process of pausing an activity, before starting the
@@ -5153,6 +5155,47 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
+    boolean dump(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,
+            String dumpPackage, boolean needSep) {
+        pw.println("  Stack #" + mStackId
+                + ": type=" + activityTypeToString(getActivityType())
+                + " mode=" + windowingModeToString(getWindowingMode()));
+        pw.println("  isSleeping=" + shouldSleepActivities());
+        pw.println("  mBounds=" + getRequestedOverrideBounds());
+
+        boolean printed = dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage,
+                needSep);
+
+        printed |= dumpHistoryList(fd, pw, mLRUActivities, "    ", "Run", false,
+                !dumpAll, false, dumpPackage, true,
+                "    Running activities (most recent first):", null);
+
+        needSep = printed;
+        boolean pr = printThisActivity(pw, mPausingActivity, dumpPackage, needSep,
+                "    mPausingActivity: ");
+        if (pr) {
+            printed = true;
+            needSep = false;
+        }
+        pr = printThisActivity(pw, getResumedActivity(), dumpPackage, needSep,
+                "    mResumedActivity: ");
+        if (pr) {
+            printed = true;
+            needSep = false;
+        }
+        if (dumpAll) {
+            pr = printThisActivity(pw, mLastPausedActivity, dumpPackage, needSep,
+                    "    mLastPausedActivity: ");
+            if (pr) {
+                printed = true;
+                needSep = true;
+            }
+            printed |= printThisActivity(pw, mLastNoHistoryActivity, dumpPackage,
+                    needSep, "    mLastNoHistoryActivity: ");
+        }
+        return printed;
+    }
+
     boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
             boolean dumpClient, String dumpPackage, boolean needSep) {
 
@@ -5172,7 +5215,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             pw.println(prefix + "mLastNonFullscreenBounds=" + task.mLastNonFullscreenBounds);
             pw.println(prefix + "* " + task);
             task.dump(pw, prefix + "  ");
-            ActivityStackSupervisor.dumpHistoryList(fd, pw, mTaskHistory.get(taskNdx).mActivities,
+            dumpHistoryList(fd, pw, mTaskHistory.get(taskNdx).mActivities,
                     prefix, "Hist", true, !dumpAll, dumpClient, dumpPackage, false, null, task);
         }
         return true;
@@ -5241,11 +5284,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      *             {@link #REMOVE_TASK_MODE_MOVING}, {@link #REMOVE_TASK_MODE_MOVING_TO_TOP}.
      */
     void removeTask(TaskRecord task, String reason, int mode) {
-        // TODO(b/119259346): Move some logic below to TaskRecord. See bug for more context.
-        for (ActivityRecord record : task.mActivities) {
-            onActivityRemovedFromStack(record);
-        }
-
         final boolean removed = mTaskHistory.remove(task);
 
         if (removed) {
@@ -5255,25 +5293,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         removeActivitiesFromLRUListLocked(task);
         updateTaskMovement(task, true);
 
-        if (mode == REMOVE_TASK_MODE_DESTROYING && task.mActivities.isEmpty()) {
-            // This task is going away, so save the last state if necessary.
-            task.saveLaunchingStateIfNeeded();
-
-            // TODO: VI what about activity?
-            final boolean isVoiceSession = task.voiceSession != null;
-            if (isVoiceSession) {
-                try {
-                    task.voiceSession.taskFinished(task.intent, task.taskId);
-                } catch (RemoteException e) {
-                }
-            }
-            if (task.autoRemoveFromRecents() || isVoiceSession) {
-                // Task creator asked to remove this when done, or this task was a voice
-                // interaction, so it should not remain on the recent tasks list.
-                mStackSupervisor.mRecentTasks.remove(task);
-            }
-
-            task.removeWindowContainer();
+        if (mode == REMOVE_TASK_MODE_DESTROYING) {
+            task.cleanUpResourcesForDestroy();
         }
 
         if (mTaskHistory.isEmpty()) {

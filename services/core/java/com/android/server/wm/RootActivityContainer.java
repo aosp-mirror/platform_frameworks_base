@@ -29,8 +29,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.app.WindowConfiguration.activityTypeToString;
-import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
@@ -2301,42 +2299,7 @@ class RootActivityContainer extends ConfigurationContainer
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
                 pw.println();
-                pw.println("  Stack #" + stack.mStackId
-                        + ": type=" + activityTypeToString(stack.getActivityType())
-                        + " mode=" + windowingModeToString(stack.getWindowingMode()));
-                pw.println("  isSleeping=" + stack.shouldSleepActivities());
-                pw.println("  mBounds=" + stack.getRequestedOverrideBounds());
-
-                printed |= stack.dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage,
-                        needSep);
-
-                printed |= dumpHistoryList(fd, pw, stack.mLRUActivities, "    ", "Run", false,
-                        !dumpAll, false, dumpPackage, true,
-                        "    Running activities (most recent first):", null);
-
-                needSep = printed;
-                boolean pr = printThisActivity(pw, stack.mPausingActivity, dumpPackage, needSep,
-                        "    mPausingActivity: ");
-                if (pr) {
-                    printed = true;
-                    needSep = false;
-                }
-                pr = printThisActivity(pw, stack.getResumedActivity(), dumpPackage, needSep,
-                        "    mResumedActivity: ");
-                if (pr) {
-                    printed = true;
-                    needSep = false;
-                }
-                if (dumpAll) {
-                    pr = printThisActivity(pw, stack.mLastPausedActivity, dumpPackage, needSep,
-                            "    mLastPausedActivity: ");
-                    if (pr) {
-                        printed = true;
-                        needSep = true;
-                    }
-                    printed |= printThisActivity(pw, stack.mLastNoHistoryActivity, dumpPackage,
-                            needSep, "    mLastNoHistoryActivity: ");
-                }
+                printed = stack.dump(fd, pw, dumpAll, dumpClient, dumpPackage, needSep);
                 needSep = printed;
             }
             printThisActivity(pw, activityDisplay.getResumedActivity(), dumpPackage, needSep,
