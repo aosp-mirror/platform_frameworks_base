@@ -2333,4 +2333,7 @@
 
     <!-- Name for device services grouping system uid apps in Ongoing Privacy Dialog [CHAR_LIMIT=NONE] -->
     <string name="device_services">Device Services</string>
+
+    <!-- What to show on the ambient display player when song doesn't have a title. [CHAR LIMIT=20] -->
+    <string name="music_controls_no_title">No title</string>
 </resources>

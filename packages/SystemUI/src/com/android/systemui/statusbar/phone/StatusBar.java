@@ -151,6 +151,7 @@ import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.doze.LockScreenWakeUpController;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -637,6 +638,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNavigationBarController = Dependency.get(DisplayNavigationBarController.class);
         mBubbleController = Dependency.get(BubbleController.class);
         mBubbleController.setExpandListener(mBubbleExpandListener);
+        KeyguardSliceProvider sliceProvider = KeyguardSliceProvider.getAttachedInstance();
+        if (sliceProvider != null) {
+            sliceProvider.initDependencies();
+        } else {
+            Log.w(TAG, "Cannot init KeyguardSliceProvider dependencies");
+        }
 
         mColorExtractor.addOnColorsChangedListener(this);
         mStatusBarStateController.addCallback(this, StatusBarStateController.RANK_STATUS_BAR);
