@@ -173,8 +173,6 @@ public:
     void onDrawPicture(const SkPicture*, const SkMatrix*, const SkPaint*) override;
     void onDrawAnnotation(const SkRect&, const char[], SkData*) override;
 
-    void onDrawTextRSXform(const void*, size_t, const SkRSXform[], const SkRect*,
-                           const SkPaint&) override;
     void onDrawTextBlob(const SkTextBlob*, SkScalar, SkScalar, const SkPaint&) override;
 
     void onDrawBitmap(const SkBitmap&, SkScalar, SkScalar, const SkPaint*) override;
