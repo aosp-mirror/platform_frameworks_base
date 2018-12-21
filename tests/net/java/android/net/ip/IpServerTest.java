@@ -16,6 +16,16 @@
 
 package android.net.ip;
 
+import static android.net.ConnectivityManager.TETHERING_BLUETOOTH;
+import static android.net.ConnectivityManager.TETHERING_USB;
+import static android.net.ConnectivityManager.TETHERING_WIFI;
+import static android.net.ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR;
+import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
+import static android.net.ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR;
+import static android.net.ip.IpServer.STATE_AVAILABLE;
+import static android.net.ip.IpServer.STATE_TETHERED;
+import static android.net.ip.IpServer.STATE_UNAVAILABLE;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -30,16 +40,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-
-import static android.net.ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR;
-import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
-import static android.net.ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR;
-import static android.net.ConnectivityManager.TETHERING_BLUETOOTH;
-import static android.net.ConnectivityManager.TETHERING_USB;
-import static android.net.ConnectivityManager.TETHERING_WIFI;
-import static android.net.ip.IpServer.STATE_AVAILABLE;
-import static android.net.ip.IpServer.STATE_TETHERED;
-import static android.net.ip.IpServer.STATE_UNAVAILABLE;
 
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
@@ -60,8 +60,6 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.TextUtils;
 
-import java.net.Inet4Address;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,6 +68,8 @@ import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.net.Inet4Address;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest

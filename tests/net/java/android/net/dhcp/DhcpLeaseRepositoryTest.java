@@ -35,8 +35,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.IpPrefix;
 import android.net.MacAddress;
-import android.net.util.SharedLog;
 import android.net.dhcp.DhcpServer.Clock;
+import android.net.util.SharedLog;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -126,7 +126,7 @@ public class DhcpLeaseRepositoryTest {
         mRepo.updateParams(new IpPrefix(TEST_SERVER_ADDR, 28), TEST_EXCL_SET, TEST_LEASE_TIME_MS);
 
         // /28 should have 16 addresses, 14 w/o the first/last, 11 w/o excluded addresses
-        requestAddresses((byte)11);
+        requestAddresses((byte) 11);
 
         try {
             mRepo.getOffer(null, TEST_MAC_2,

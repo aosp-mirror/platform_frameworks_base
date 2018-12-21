@@ -32,32 +32,32 @@ import java.net.InetSocketAddress;
  */
 abstract class DhcpPacketListener extends FdEventsReader<DhcpPacketListener.Payload> {
     static final class Payload {
-        final byte[] bytes = new byte[DhcpPacket.MAX_LENGTH];
-        Inet4Address srcAddr;
-        int srcPort;
+        protected final byte[] mBytes = new byte[DhcpPacket.MAX_LENGTH];
+        protected Inet4Address mSrcAddr;
+        protected int mSrcPort;
     }
 
-    public DhcpPacketListener(@NonNull Handler handler) {
+    DhcpPacketListener(@NonNull Handler handler) {
         super(handler, new Payload());
     }
 
     @Override
     protected int recvBufSize(@NonNull Payload buffer) {
-        return buffer.bytes.length;
+        return buffer.mBytes.length;
     }
 
     @Override
     protected final void handlePacket(@NonNull Payload recvbuf, int length) {
-        if (recvbuf.srcAddr == null) {
+        if (recvbuf.mSrcAddr == null) {
             return;
         }
 
         try {
-            final DhcpPacket packet = DhcpPacket.decodeFullPacket(recvbuf.bytes, length,
+            final DhcpPacket packet = DhcpPacket.decodeFullPacket(recvbuf.mBytes, length,
                     DhcpPacket.ENCAP_BOOTP);
-            onReceive(packet, recvbuf.srcAddr, recvbuf.srcPort);
+            onReceive(packet, recvbuf.mSrcAddr, recvbuf.mSrcPort);
         } catch (DhcpPacket.ParseException e) {
-            logParseError(recvbuf.bytes, length, e);
+            logParseError(recvbuf.mBytes, length, e);
         }
     }
 
@@ -66,11 +66,11 @@ abstract class DhcpPacketListener extends FdEventsReader<DhcpPacketListener.Payl
             throws Exception {
         final InetSocketAddress addr = new InetSocketAddress();
         final int read = Os.recvfrom(
-                fd, packetBuffer.bytes, 0, packetBuffer.bytes.length, 0 /* flags */, addr);
+                fd, packetBuffer.mBytes, 0, packetBuffer.mBytes.length, 0 /* flags */, addr);
 
         // Buffers with null srcAddr will be dropped in handlePacket()
-        packetBuffer.srcAddr = inet4AddrOrNull(addr);
-        packetBuffer.srcPort = addr.getPort();
+        packetBuffer.mSrcAddr = inet4AddrOrNull(addr);
+        packetBuffer.mSrcPort = addr.getPort();
         return read;
     }
 
