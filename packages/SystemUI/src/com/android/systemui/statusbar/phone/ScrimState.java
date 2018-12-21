@@ -141,7 +141,8 @@ public enum ScrimState {
 
         @Override
         public float getBehindAlpha(float busyness) {
-            return mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
+            return mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f
+                    : ScrimController.PULSING_WALLPAPER_SCRIM_ALPHA;
         }
     },
 
