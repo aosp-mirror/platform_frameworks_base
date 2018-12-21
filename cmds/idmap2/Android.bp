@@ -23,6 +23,7 @@ cc_defaults {
     ],
     tidy_flags: [
         "-system-headers",
+        "-warnings-as-errors=*",
     ],
 }
 
