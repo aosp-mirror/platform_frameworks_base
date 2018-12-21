@@ -41,6 +41,7 @@ public class BarChartPreferenceTest {
     private BarView mBarView2;
     private BarView mBarView3;
     private BarView mBarView4;
+    private TextView mDetailsView;
     private PreferenceViewHolder mHolder;
     private BarChartPreference mPreference;
 
@@ -51,14 +52,13 @@ public class BarChartPreferenceTest {
         mHolder = PreferenceViewHolder.createInstanceForTests(mBarChartView);
         mPreference = new BarChartPreference(mContext, null /* attrs */);
         mPreference.setBarChartTitle(R.string.debug_app);
-        mPreference.setBarChartDetails(R.string.debug_app);
-
 
         mIcon = mContext.getDrawable(R.drawable.ic_menu);
         mBarView1 = (BarView) mBarChartView.findViewById(R.id.bar_view1);
         mBarView2 = (BarView) mBarChartView.findViewById(R.id.bar_view2);
         mBarView3 = (BarView) mBarChartView.findViewById(R.id.bar_view3);
         mBarView4 = (BarView) mBarChartView.findViewById(R.id.bar_view4);
+        mDetailsView = (TextView) mBarChartView.findViewById(R.id.bar_chart_details);
     }
 
     @Test
@@ -73,26 +73,31 @@ public class BarChartPreferenceTest {
     }
 
     @Test
-    public void setBarChartDetailsRes_setDetailsRes_showInBarChartDetails() {
-        final TextView detailsView = (TextView) mBarChartView.findViewById(R.id.bar_chart_details);
+    public void onBindViewHolder_notSetDetailsRes_barChartDetailsViewIsGone() {
+        // We don't call BarChartPreference#setBarChartDetails
+        mPreference.onBindViewHolder(mHolder);
 
+        assertThat(mDetailsView.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void setBarChartDetailsRes_setDetailsRes_showInBarChartDetails() {
         mPreference.setBarChartDetails(R.string.debug_app);
         mPreference.onBindViewHolder(mHolder);
 
-        assertThat(detailsView.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(detailsView.getText()).isEqualTo(mContext.getText(R.string.debug_app));
+        assertThat(mDetailsView.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mDetailsView.getText()).isEqualTo(mContext.getText(R.string.debug_app));
     }
 
     @Test
     public void setBarChartDetailsClickListener_setClickListener_detailsViewAttachClickListener() {
-        final TextView detailsView = (TextView) mBarChartView.findViewById(R.id.bar_chart_details);
-
+        mPreference.setBarChartDetails(R.string.debug_app);
         mPreference.setBarChartDetailsClickListener(v -> {
         });
         mPreference.onBindViewHolder(mHolder);
 
-        assertThat(detailsView.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(detailsView.hasOnClickListeners()).isTrue();
+        assertThat(mDetailsView.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mDetailsView.hasOnClickListeners()).isTrue();
     }
 
     @Test
