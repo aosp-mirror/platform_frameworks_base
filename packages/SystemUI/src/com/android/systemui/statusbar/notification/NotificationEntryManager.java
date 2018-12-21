@@ -246,14 +246,10 @@ public class NotificationEntryManager implements
             int dismissalSentiment = NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
             mBarService.onNotificationClear(pkg, tag, id, userId, n.getKey(), dismissalSurface,
                     dismissalSentiment, nv);
-            removeNotification(n.getKey(), null);
-
+            removeNotificationInternal(
+                    n.getKey(), null, false /* forceRemove */, true /* removedByUser */);
         } catch (RemoteException ex) {
             // system process is dead if we're here.
-        }
-
-        for (NotificationEntryListener listener : mNotificationEntryListeners) {
-            listener.onPerformRemoveNotification(n);
         }
     }
 
@@ -294,7 +290,8 @@ public class NotificationEntryManager implements
      */
     @Override
     public void handleInflationException(StatusBarNotification n, Exception e) {
-        removeNotificationInternal(n.getKey(), null, true /* forceRemove */);
+        removeNotificationInternal(
+                n.getKey(), null, true /* forceRemove */, false /* removedByUser */);
         try {
             mBarService.onNotificationError(n.getPackageName(), n.getTag(), n.getId(), n.getUid(),
                     n.getInitialPid(), e.getMessage(), n.getUserId());
@@ -355,11 +352,15 @@ public class NotificationEntryManager implements
 
     @Override
     public void removeNotification(String key, NotificationListenerService.RankingMap ranking) {
-        removeNotificationInternal(key, ranking, false /* forceRemove */);
+        removeNotificationInternal(
+                key, ranking, false /* forceRemove */, false /* removedByUser */);
     }
 
-    private void removeNotificationInternal(String key,
-            @Nullable NotificationListenerService.RankingMap ranking, boolean forceRemove) {
+    private void removeNotificationInternal(
+            String key,
+            @Nullable NotificationListenerService.RankingMap ranking,
+            boolean forceRemove,
+            boolean removedByUser) {
         final NotificationData.Entry entry = mNotificationData.get(key);
 
         abortExistingInflation(key);
@@ -405,7 +406,7 @@ public class NotificationEntryManager implements
         }
 
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
-            listener.onEntryRemoved(key, old, lifetimeExtended);
+            listener.onEntryRemoved(key, old, lifetimeExtended, removedByUser);
         }
     }
 

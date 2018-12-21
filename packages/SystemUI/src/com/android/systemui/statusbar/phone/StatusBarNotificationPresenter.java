@@ -189,16 +189,13 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
                 @Override
                 public void onEntryRemoved(String key, StatusBarNotification old,
-                        boolean lifetimeExtended) {
+                        boolean lifetimeExtended, boolean removedByUser) {
                     if (!lifetimeExtended) {
                         StatusBarNotificationPresenter.this.onNotificationRemoved(key, old);
                     }
-                }
-
-                @Override
-                public void onPerformRemoveNotification(
-                        StatusBarNotification statusBarNotification) {
-                    StatusBarNotificationPresenter.this.onPerformRemoveNotification();
+                    if (removedByUser) {
+                        maybeEndAmbientPulse();
+                    }
                 }
             };
 
@@ -260,7 +257,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 || mActivityLaunchAnimator.isAnimationRunning();
     }
 
-    private void onPerformRemoveNotification() {
+    private void maybeEndAmbientPulse() {
         if (mNotificationPanel.hasPulsingNotifications() &&
                 !mAmbientPulseManager.hasNotifications()) {
             // We were showing a pulse for a notification, but no notifications are pulsing anymore.
