@@ -445,8 +445,7 @@ public class KeyguardViewMediator extends SystemUI {
             boolean simWasLocked;
             synchronized (KeyguardViewMediator.this) {
                 IccCardConstants.State lastState = mLastSimStates.get(slotId);
-                simWasLocked = (lastState == PIN_REQUIRED || lastState == PUK_REQUIRED)
-                    && simState == READY;
+                simWasLocked = (lastState == PIN_REQUIRED || lastState == PUK_REQUIRED);
                 mLastSimStates.append(slotId, simState);
             }
 
@@ -471,6 +470,8 @@ public class KeyguardViewMediator extends SystemUI {
                             // so we should only lock when they are ABSENT.
                             onSimAbsentLocked();
                             if (simWasLocked) {
+                                if (DEBUG_SIM_STATES) Log.d(TAG, "SIM moved to ABSENT when the "
+                                        + "previous state was locked. Reset the state.");
                                 resetStateLocked();
                             }
                         }
@@ -507,6 +508,8 @@ public class KeyguardViewMediator extends SystemUI {
                     synchronized (KeyguardViewMediator.this) {
                         if (DEBUG_SIM_STATES) Log.d(TAG, "READY, reset state? " + mShowing);
                         if (mShowing && simWasLocked) {
+                            if (DEBUG_SIM_STATES) Log.d(TAG, "SIM moved to READY when the "
+                                    + "previous state was locked. Reset the state.");
                             resetStateLocked();
                         }
                         mLockWhenSimRemoved = true;
