@@ -2732,8 +2732,24 @@ public final class Telephony {
 
         /**
          * The {@code content://} style URL for this table.
+         * For MSIM, this will return APNs for the default subscription
+         * {@link SubscriptionManager#getDefaultSubscriptionId()}. To specify subId for MSIM,
+         * use {@link Uri#withAppendedPath(Uri, String)} to append with subscription id.
          */
         public static final Uri CONTENT_URI = Uri.parse("content://telephony/carriers");
+
+        /**
+         * The {@code content://} style URL for this table. Used for APN query based on current
+         * subscription. Instead of specifying carrier matching information in the selection,
+         * this API will return all matching APNs from current subscription carrier and queries
+         * will be applied on top of that. If there is no match for MVNO (Mobile Virtual Network
+         * Operator) APNs, return APNs from its MNO (based on mccmnc) instead. For MSIM, this will
+         * return APNs for the default subscription
+         * {@link SubscriptionManager#getDefaultSubscriptionId()}. To specify subId for MSIM,
+         * use {@link Uri#withAppendedPath(Uri, String)} to append with subscription id.
+         */
+        public static final Uri SIM_APN_URI = Uri.parse(
+                "content://telephony/carriers/sim_apn_list");
 
         /**
          * The {@code content://} style URL to be called from DevicePolicyManagerService,
@@ -2745,7 +2761,9 @@ public final class Telephony {
         /**
          * The {@code content://} style URL to be called from Telephony to query APNs.
          * When DPC-owned APNs are enforced, only DPC-owned APNs are returned, otherwise only
-         * non-DPC-owned APNs are returned.
+         * non-DPC-owned APNs are returned. For MSIM, this will return APNs for the default
+         * subscription {@link SubscriptionManager#getDefaultSubscriptionId()}. To specify subId
+         * for MSIM, use {@link Uri#withAppendedPath(Uri, String)} to append with subscription id.
          * @hide
          */
         public static final Uri FILTERED_URI = Uri.parse("content://telephony/carriers/filtered");
@@ -2757,13 +2775,6 @@ public final class Telephony {
          */
         public static final Uri ENFORCE_MANAGED_URI = Uri.parse(
                 "content://telephony/carriers/enforce_managed");
-
-        /**
-         * The {@code content://} style URL to be called from Telephony to query current APNs.
-         * @hide
-         */
-        public static final Uri SIM_APN_LIST = Uri.parse(
-                "content://telephony/carriers/sim_apn_list");
 
         /**
          * The column name for ENFORCE_MANAGED_URI, indicates whether DPC-owned APNs are enforced.
@@ -2839,18 +2850,30 @@ public final class Telephony {
         /**
          * Mobile Country Code (MCC).
          * <P>Type: TEXT</P>
+         * @deprecated Use {@link #SIM_APN_URI} to query APN instead, this API will return
+         * matching APNs based on current subscription carrier, thus no need to specify MCC and
+         * other carrier matching information. In the future, Android will not support MCC for
+         * APN query.
          */
         public static final String MCC = "mcc";
 
         /**
          * Mobile Network Code (MNC).
          * <P>Type: TEXT</P>
+         * @deprecated Use {@link #SIM_APN_URI} to query APN instead, this API will return
+         * matching APNs based on current subscription carrier, thus no need to specify MNC and
+         * other carrier matching information. In the future, Android will not support MNC for
+         * APN query.
          */
         public static final String MNC = "mnc";
 
         /**
          * Numeric operator ID (as String). Usually {@code MCC + MNC}.
          * <P>Type: TEXT</P>
+         * @deprecated Use {@link #SIM_APN_URI} to query APN instead, this API will return
+         * matching APNs based on current subscription carrier, thus no need to specify Numeric
+         * and other carrier matching information. In the future, Android will not support Numeric
+         * for APN query.
          */
         public static final String NUMERIC = "numeric";
 
@@ -2931,6 +2954,10 @@ public final class Telephony {
          * MVNO type:
          * {@code SPN (Service Provider Name), IMSI, GID (Group Identifier Level 1)}.
          * <P>Type: TEXT</P>
+         * @deprecated Use {@link #SIM_APN_URI} to query APN instead, this API will return
+         * matching APNs based on current subscription carrier, thus no need to specify MVNO_TYPE
+         * and other carrier matching information. In the future, Android will not support MVNO_TYPE
+         * for APN query.
          */
         public static final String MVNO_TYPE = "mvno_type";
 
@@ -2943,6 +2970,10 @@ public final class Telephony {
          *     <li>GID: 4E, 33, ...</li>
          * </ul>
          * <P>Type: TEXT</P>
+         * @deprecated Use {@link #SIM_APN_URI} to query APN instead, this API will return
+         * matching APNs based on current subscription carrier, thus no need to specify
+         * MVNO_MATCH_DATA and other carrier matching information. In the future, Android will not
+         * support MVNO_MATCH_DATA for APN query.
          */
         public static final String MVNO_MATCH_DATA = "mvno_match_data";
 
@@ -3151,7 +3182,6 @@ public final class Telephony {
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface EditStatus {}
-
     }
 
     /**
