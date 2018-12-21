@@ -37,8 +37,7 @@
 using ::testing::IsNull;
 using ::testing::NotNull;
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 TEST(IdmapTests, TestCanonicalIdmapPathFor) {
   ASSERT_EQ(Idmap::CanonicalIdmapPathFor("/foo", "/vendor/overlay/bar.apk"),
@@ -346,23 +345,23 @@ class TestVisitor : public Visitor {
   explicit TestVisitor(std::ostream& stream) : stream_(stream) {
   }
 
-  void visit(const Idmap& idmap ATTRIBUTE_UNUSED) {
+  void visit(const Idmap& idmap ATTRIBUTE_UNUSED) override {
     stream_ << "TestVisitor::visit(Idmap)" << std::endl;
   }
 
-  void visit(const IdmapHeader& idmap ATTRIBUTE_UNUSED) {
+  void visit(const IdmapHeader& idmap ATTRIBUTE_UNUSED) override {
     stream_ << "TestVisitor::visit(IdmapHeader)" << std::endl;
   }
 
-  void visit(const IdmapData& idmap ATTRIBUTE_UNUSED) {
+  void visit(const IdmapData& idmap ATTRIBUTE_UNUSED) override {
     stream_ << "TestVisitor::visit(IdmapData)" << std::endl;
   }
 
-  void visit(const IdmapData::Header& idmap ATTRIBUTE_UNUSED) {
+  void visit(const IdmapData::Header& idmap ATTRIBUTE_UNUSED) override {
     stream_ << "TestVisitor::visit(IdmapData::Header)" << std::endl;
   }
 
-  void visit(const IdmapData::TypeEntry& idmap ATTRIBUTE_UNUSED) {
+  void visit(const IdmapData::TypeEntry& idmap ATTRIBUTE_UNUSED) override {
     stream_ << "TestVisitor::visit(IdmapData::TypeEntry)" << std::endl;
   }
 
@@ -391,5 +390,4 @@ TEST(IdmapTests, TestVisitor) {
             "TestVisitor::visit(IdmapData::TypeEntry)\n");
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

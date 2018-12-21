@@ -56,8 +56,7 @@ Status error(const std::string& msg) {
 
 }  // namespace
 
-namespace android {
-namespace os {
+namespace android::os {
 
 Status Idmap2Service::getIdmapPath(const std::string& overlay_apk_path,
                                    int32_t user_id ATTRIBUTE_UNUSED, std::string* _aidl_return) {
@@ -132,9 +131,8 @@ Status Idmap2Service::createIdmap(const std::string& target_apk_path,
     return error("failed to write to idmap path " + idmap_path);
   }
 
-  _aidl_return->reset(new std::string(idmap_path));
+  *_aidl_return = std::make_unique<std::string>(idmap_path);
   return ok();
 }
 
-}  // namespace os
-}  // namespace android
+}  // namespace android::os

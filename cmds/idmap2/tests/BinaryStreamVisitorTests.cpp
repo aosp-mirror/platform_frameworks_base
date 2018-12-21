@@ -31,8 +31,7 @@
 
 using ::testing::NotNull;
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 TEST(BinaryStreamVisitorTests, CreateBinaryStreamViaBinaryStreamVisitor) {
   std::string raw(reinterpret_cast<const char*>(idmap_raw_data), idmap_raw_data_len);
@@ -124,5 +123,4 @@ TEST(BinaryStreamVisitorTests, CreateIdmapFromApkAssetsInteropWithLoadedIdmap) {
   ASSERT_FALSE(success);
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

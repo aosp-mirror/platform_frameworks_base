@@ -29,9 +29,7 @@
 
 using ::testing::NotNull;
 
-namespace android {
-namespace idmap2 {
-namespace utils {
+namespace android::idmap2::utils {
 
 TEST(FileUtilsTests, FindFilesFindEverythingNonRecursive) {
   const auto& root = GetTestDataPath();
@@ -71,6 +69,4 @@ TEST(FileUtilsTests, ReadFile) {
   close(pipefd[0]);
 }
 
-}  // namespace utils
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2::utils

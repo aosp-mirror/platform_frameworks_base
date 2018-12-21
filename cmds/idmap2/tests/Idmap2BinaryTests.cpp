@@ -46,8 +46,7 @@
 using ::android::util::ExecuteBinary;
 using ::testing::NotNull;
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 class Idmap2BinaryTests : public Idmap2Tests {};
 
@@ -313,5 +312,4 @@ TEST_F(Idmap2BinaryTests, InvalidCommandLineOptions) {
   ASSERT_NE(result->status, EXIT_SUCCESS);
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

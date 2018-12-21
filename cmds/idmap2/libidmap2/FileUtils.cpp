@@ -15,10 +15,10 @@
  */
 
 #include <dirent.h>
-#include <errno.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <cerrno>
 #include <fstream>
 #include <memory>
 #include <string>
@@ -27,9 +27,7 @@
 
 #include "idmap2/FileUtils.h"
 
-namespace android {
-namespace idmap2 {
-namespace utils {
+namespace android::idmap2::utils {
 
 std::unique_ptr<std::vector<std::string>> FindFiles(const std::string& root, bool recurse,
                                                     const FindFilesPredicate& predicate) {
@@ -79,6 +77,4 @@ std::unique_ptr<std::string> ReadFile(int fd) {
   return r == 0 ? std::move(str) : nullptr;
 }
 
-}  // namespace utils
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2::utils

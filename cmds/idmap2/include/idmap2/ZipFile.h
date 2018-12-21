@@ -21,11 +21,10 @@
 #include <string>
 
 #include "android-base/macros.h"
-#include "ziparchive/zip_archive.h"
 #include "idmap2/Result.h"
+#include "ziparchive/zip_archive.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 struct MemoryChunk {
   size_t size;
@@ -56,7 +55,6 @@ class ZipFile {
   DISALLOW_COPY_AND_ASSIGN(ZipFile);
 };
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2
 
 #endif  // IDMAP2_INCLUDE_IDMAP2_ZIPFILE_H_

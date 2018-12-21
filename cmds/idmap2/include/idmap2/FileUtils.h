@@ -22,9 +22,7 @@
 #include <string>
 #include <vector>
 
-namespace android {
-namespace idmap2 {
-namespace utils {
+namespace android::idmap2::utils {
 
 constexpr const mode_t kIdmapFilePermissionMask = 0133;  // u=rw,g=r,o=r
 
@@ -37,8 +35,6 @@ std::unique_ptr<std::string> ReadFile(int fd);
 
 std::unique_ptr<std::string> ReadFile(const std::string& path);
 
-}  // namespace utils
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2::utils
 
 #endif  // IDMAP2_INCLUDE_IDMAP2_FILEUTILS_H_

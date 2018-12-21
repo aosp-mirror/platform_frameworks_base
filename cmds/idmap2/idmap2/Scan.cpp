@@ -56,8 +56,7 @@ std::unique_ptr<std::vector<std::string>> FindApkFiles(const std::vector<std::st
     }
     paths.insert(apk_paths->cbegin(), apk_paths->cend());
   }
-  return std::unique_ptr<std::vector<std::string>>(
-      new std::vector<std::string>(paths.cbegin(), paths.cend()));
+  return std::make_unique<std::vector<std::string>>(paths.cbegin(), paths.cend());
 }
 }  // namespace
 
@@ -138,15 +137,15 @@ bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
   }
 
   std::stringstream stream;
-  for (auto iter = interesting_apks.cbegin(); iter != interesting_apks.cend(); ++iter) {
-    const std::string idmap_path = Idmap::CanonicalIdmapPathFor(output_directory, *iter);
+  for (const auto& apk : interesting_apks) {
+    const std::string idmap_path = Idmap::CanonicalIdmapPathFor(output_directory, apk);
     std::stringstream dev_null;
     if (!Verify(std::vector<std::string>({"--idmap-path", idmap_path}), dev_null) &&
         !Create(std::vector<std::string>({
                     "--target-apk-path",
                     target_apk_path,
                     "--overlay-apk-path",
-                    *iter,
+                    apk,
                     "--idmap-path",
                     idmap_path,
                 }),

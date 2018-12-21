@@ -27,8 +27,7 @@
 using ::testing::IsNull;
 using ::testing::NotNull;
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 TEST(XmlTests, Create) {
   auto zip = ZipFile::Open(GetTestDataPath() + "/target/target.apk");
@@ -68,5 +67,4 @@ TEST(XmlTests, FindTag) {
   ASSERT_THAT(fail, IsNull());
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

@@ -23,8 +23,7 @@
 
 #include "idmap2/Idmap.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 class BinaryStreamVisitor : public Visitor {
  public:
@@ -43,7 +42,6 @@ class BinaryStreamVisitor : public Visitor {
   std::ostream& stream_;
 };
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2
 
 #endif  // IDMAP2_INCLUDE_IDMAP2_BINARYSTREAMVISITOR_H_

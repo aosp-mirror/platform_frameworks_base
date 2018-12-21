@@ -24,8 +24,7 @@
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 #define RESID(pkg, type, entry) (((pkg) << 24) | ((type) << 16) | (entry))
 
@@ -73,5 +72,4 @@ void PrettyPrintVisitor::visit(const IdmapData::TypeEntry& type_entry) {
   }
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

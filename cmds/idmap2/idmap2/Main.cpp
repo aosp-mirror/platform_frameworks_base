@@ -29,8 +29,8 @@
 
 using android::idmap2::CommandLineOptions;
 
-typedef std::map<std::string, std::function<bool(const std::vector<std::string>&, std::ostream&)>>
-    NameToFunctionMap;
+using NameToFunctionMap =
+    std::map<std::string, std::function<bool(const std::vector<std::string>&, std::ostream&)>>;
 
 namespace {
 
