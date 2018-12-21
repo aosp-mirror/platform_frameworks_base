@@ -22,6 +22,7 @@ import static android.net.NetworkPolicyManager.OVERRIDE_UNMETERED;
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.DurationMillisLong;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -62,6 +63,8 @@ import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -599,6 +602,73 @@ public class SubscriptionManager {
      * @hide
      */
     public static final String IS_METERED = "is_metered";
+
+    /**
+     * TelephonyProvider column name for the profile class of a subscription
+     * Only present if {@link #IS_EMBEDDED} is 1.
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String PROFILE_CLASS = "profile_class";
+
+    /**
+     * Profile class of the subscription
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "PROFILE_CLASS_" }, value = {
+            PROFILE_CLASS_TESTING,
+            PROFILE_CLASS_PROVISIONING,
+            PROFILE_CLASS_OPERATIONAL,
+            PROFILE_CLASS_UNSET,
+            PROFILE_CLASS_DEFAULT
+    })
+    public @interface ProfileClass {}
+
+    /**
+     * A testing profile can be pre-loaded or downloaded onto
+     * the eUICC and provides connectivity to test equipment
+     * for the purpose of testing the device and the eUICC. It
+     * is not intended to store any operator credentials.
+     * @hide
+     */
+    @SystemApi
+    public static final int PROFILE_CLASS_TESTING = 0;
+
+    /**
+     * A provisioning profile is pre-loaded onto the eUICC and
+     * provides connectivity to a mobile network solely for the
+     * purpose of provisioning profiles.
+     * @hide
+     */
+    @SystemApi
+    public static final int PROFILE_CLASS_PROVISIONING = 1;
+
+    /**
+     * An operational profile can be pre-loaded or downloaded
+     * onto the eUICC and provides services provided by the
+     * operator.
+     * @hide
+     */
+    @SystemApi
+    public static final int PROFILE_CLASS_OPERATIONAL = 2;
+
+    /**
+     * The profile class is unset. This occurs when profile class
+     * info is not available. The subscription either has no profile
+     * metadata or the profile metadata did not encode profile class.
+     * @hide
+     */
+    @SystemApi
+    public static final int PROFILE_CLASS_UNSET = -1;
+
+    /**
+     * Default profile class
+     * @hide
+     */
+    @SystemApi
+    public static final int PROFILE_CLASS_DEFAULT = PROFILE_CLASS_UNSET;
+
     /**
      * Broadcast Action: The user has changed one of the default subs related to
      * data, phone calls, or sms</p>
