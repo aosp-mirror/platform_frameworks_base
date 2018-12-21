@@ -19,10 +19,7 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.admin.DevicePolicyManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -35,7 +32,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.text.format.Formatter;
@@ -152,10 +148,7 @@ public class KeyguardIndicationController implements StateListener {
     private void registerCallbacks(KeyguardUpdateMonitor monitor) {
         monitor.registerCallback(getKeyguardCallback());
 
-        mContext.registerReceiverAsUser(mTickReceiver, UserHandle.SYSTEM,
-                new IntentFilter(Intent.ACTION_TIME_TICK), null,
-                Dependency.get(Dependency.TIME_TICK_HANDLER));
-
+        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mTickReceiver);
         Dependency.get(StatusBarStateController.class).addCallback(this);
     }
 
@@ -166,7 +159,7 @@ public class KeyguardIndicationController implements StateListener {
      * //TODO: This can probably be converted to a fragment and not have to be manually recreated
      */
     public void destroy() {
-        mContext.unregisterReceiver(mTickReceiver);
+        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mTickReceiver);
         Dependency.get(StatusBarStateController.class).removeCallback(this);
     }
 
@@ -477,16 +470,15 @@ public class KeyguardIndicationController implements StateListener {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
     }
 
-    private final BroadcastReceiver mTickReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mHandler.post(() -> {
-                if (mVisible) {
-                    updateIndication(false);
+    private final KeyguardUpdateMonitorCallback mTickReceiver =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onTimeChanged() {
+                    if (mVisible) {
+                        updateIndication(false /* animate */);
+                    }
                 }
-            });
-        }
-    };
+            };
 
     private final Handler mHandler = new Handler() {
         @Override
