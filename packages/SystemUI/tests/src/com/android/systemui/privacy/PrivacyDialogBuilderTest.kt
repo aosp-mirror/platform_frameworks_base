@@ -51,4 +51,19 @@ class PrivacyDialogBuilderTest : SysuiTestCase() {
         assertEquals(listOf(Privacy.TYPE_CAMERA), typesList[1])
         assertEquals(listOf(Privacy.TYPE_CAMERA), typesList[2])
     }
+
+    @Test
+    fun testOrder() {
+        // We want location to always go last, so it will go in the "+ other apps"
+        val appCamera = PrivacyItem(PrivacyType.TYPE_CAMERA, PrivacyApplication("Camera", context))
+        val appMicrophone =
+                PrivacyItem(PrivacyType.TYPE_MICROPHONE, PrivacyApplication("Microphone", context))
+        val appLocation =
+                PrivacyItem(PrivacyType.TYPE_LOCATION, PrivacyApplication("Location", context))
+
+        val items = listOf(appLocation, appMicrophone, appCamera)
+        val textBuilder = PrivacyDialogBuilder(context, items)
+        val appList = textBuilder.appsAndTypes.map { it.first }.map { it.packageName }
+        assertEquals(listOf("Camera", "Microphone", "Location"), appList)
+    }
 }
