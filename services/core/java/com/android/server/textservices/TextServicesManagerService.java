@@ -18,20 +18,6 @@ package com.android.server.textservices;
 
 import static android.view.textservice.TextServicesManager.DISABLE_PER_PROFILE_SPELL_CHECKER;
 
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.content.PackageMonitor;
-import com.android.internal.inputmethod.SubtypeLocaleUtils;
-import com.android.internal.textservice.ISpellCheckerService;
-import com.android.internal.textservice.ISpellCheckerServiceCallback;
-import com.android.internal.textservice.ISpellCheckerSession;
-import com.android.internal.textservice.ISpellCheckerSessionListener;
-import com.android.internal.textservice.ITextServicesManager;
-import com.android.internal.textservice.ITextServicesSessionListener;
-import com.android.internal.util.DumpUtils;
-import com.android.server.SystemService;
-
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -60,12 +46,26 @@ import android.util.SparseArray;
 import android.view.textservice.SpellCheckerInfo;
 import android.view.textservice.SpellCheckerSubtype;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageMonitor;
+import com.android.internal.inputmethod.SubtypeLocaleUtils;
+import com.android.internal.textservice.ISpellCheckerService;
+import com.android.internal.textservice.ISpellCheckerServiceCallback;
+import com.android.internal.textservice.ISpellCheckerSession;
+import com.android.internal.textservice.ISpellCheckerSessionListener;
+import com.android.internal.textservice.ITextServicesManager;
+import com.android.internal.textservice.ITextServicesSessionListener;
+import com.android.internal.util.DumpUtils;
+import com.android.server.SystemService;
+
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
