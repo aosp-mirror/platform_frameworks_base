@@ -49,12 +49,9 @@ import androidx.test.filters.SmallTest;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -72,7 +69,6 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
     @Mock Transaction mMockTransaction;
     @Mock AnimationSpec mMockAnimationSpec;
     @Mock PowerManagerInternal mMockPowerManager;
-    @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
 
     private SurfaceAnimationRunner mSurfaceAnimationRunner;
     private CountDownLatch mFinishCallbackLatch;
