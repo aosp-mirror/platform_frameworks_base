@@ -31,6 +31,7 @@ import android.view.SurfaceControl;
 public class NavBarTintController {
     public static final String NAV_COLOR_TRANSITION_TIME_SETTING = "navbar_color_adapt_transition";
     public static final int MIN_COLOR_ADAPT_TRANSITION_TIME = 400;
+    public static final int DEFAULT_COLOR_ADAPT_TRANSITION_TIME = 1500;
 
     private final HandlerThread mColorAdaptHandlerThread = new HandlerThread("ColorExtractThread");
     private Handler mColorAdaptionHandler;
