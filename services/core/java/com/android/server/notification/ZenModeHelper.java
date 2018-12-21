@@ -558,9 +558,7 @@ public class ZenModeHelper {
         rule.conditionId = automaticZenRule.getConditionId();
         rule.enabled = automaticZenRule.isEnabled();
         rule.modified = automaticZenRule.isModified();
-        if (automaticZenRule.getZenPolicy() != null) {
-            rule.zenPolicy = automaticZenRule.getZenPolicy();
-        }
+        rule.zenPolicy = automaticZenRule.getZenPolicy();
         rule.zenMode = NotificationManager.zenModeFromInterruptionFilter(
                 automaticZenRule.getInterruptionFilter(), Global.ZEN_MODE_OFF);
     }

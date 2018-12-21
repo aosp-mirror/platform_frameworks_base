@@ -327,6 +327,32 @@ public final class ZenPolicy implements Parcelable {
     }
 
     /**
+     * Whether this policy hides all visual effects
+     * @hide
+     */
+    public boolean shouldHideAllVisualEffects() {
+        for (int i = 0; i < mVisualEffects.size(); i++) {
+            if (mVisualEffects.get(i) != STATE_DISALLOW) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Whether this policy shows all visual effects
+     * @hide
+     */
+    public boolean shouldShowAllVisualEffects() {
+        for (int i = 0; i < mVisualEffects.size(); i++) {
+            if (mVisualEffects.get(i) != STATE_ALLOW) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Builder class for {@link ZenPolicy} objects.
      * Provides a convenient way to set the various fields of a {@link ZenPolicy}.  If a field
      * is not set, it is (@link STATE_UNSET} and will not change the current set policy.
@@ -336,6 +362,17 @@ public final class ZenPolicy implements Parcelable {
 
         public Builder() {
             mZenPolicy = new ZenPolicy();
+        }
+
+        /**
+         * @hide
+         */
+        public Builder(ZenPolicy policy) {
+            if (policy != null) {
+                mZenPolicy = policy.copy();
+            } else {
+                mZenPolicy = new ZenPolicy();
+            }
         }
 
         /**
@@ -533,6 +570,34 @@ public final class ZenPolicy implements Parcelable {
         }
 
         /**
+         * Whether to allow {@link PriorityCategory} sounds to play when DND is active.
+         * @hide
+         */
+        public Builder allowCategory(@PriorityCategory int category, boolean allow) {
+            switch (category) {
+                case PRIORITY_CATEGORY_ALARMS:
+                    allowAlarms(allow);
+                    break;
+                case PRIORITY_CATEGORY_MEDIA:
+                    allowMedia(allow);
+                    break;
+                case PRIORITY_CATEGORY_SYSTEM:
+                    allowSystem(allow);
+                    break;
+                case PRIORITY_CATEGORY_REMINDERS:
+                    allowReminders(allow);
+                    break;
+                case PRIORITY_CATEGORY_EVENTS:
+                    allowEvents(allow);
+                    break;
+                case PRIORITY_CATEGORY_REPEAT_CALLERS:
+                    allowRepeatCallers(allow);
+                    break;
+            }
+            return this;
+        }
+
+        /**
          * Whether {@link Notification#fullScreenIntent full screen intents} that are intercepted
          * by DND are shown.
          */
@@ -601,6 +666,38 @@ public final class ZenPolicy implements Parcelable {
                     show ? STATE_ALLOW : STATE_DISALLOW);
             return this;
         }
+
+        /**
+         * Whether notifications intercepted by DND are prevented from appearing for
+         * {@link VisualEffect}
+         * @hide
+         */
+        public Builder showVisualEffect(@VisualEffect int effect, boolean show) {
+            switch (effect) {
+                case VISUAL_EFFECT_FULL_SCREEN_INTENT:
+                    showFullScreenIntent(show);
+                    break;
+                case VISUAL_EFFECT_LIGHTS:
+                    showLights(show);
+                    break;
+                case VISUAL_EFFECT_PEEK:
+                    showPeeking(show);
+                    break;
+                case VISUAL_EFFECT_STATUS_BAR:
+                    showStatusBarIcons(show);
+                    break;
+                case VISUAL_EFFECT_BADGE:
+                    showBadges(show);
+                    break;
+                case VISUAL_EFFECT_AMBIENT:
+                    showInAmbientDisplay(show);
+                    break;
+                case VISUAL_EFFECT_NOTIFICATION_LIST:
+                    showInNotificationList(show);
+                    break;
+            }
+            return this;
+        }
     }
 
     @Override
@@ -640,8 +737,8 @@ public final class ZenPolicy implements Parcelable {
                 .append('{')
                 .append("priorityCategories=[").append(priorityCategoriesToString())
                 .append("], visualEffects=[").append(visualEffectsToString())
-                .append(", priorityCalls=").append(stateToString(mPriorityCalls))
-                .append("], priorityMessages=").append(stateToString(mPriorityMessages))
+                .append("], priorityCalls=").append(peopleTypeToString(mPriorityCalls))
+                .append(", priorityMessages=").append(peopleTypeToString(mPriorityMessages))
                 .append('}')
                 .toString();
     }
@@ -726,7 +823,23 @@ public final class ZenPolicy implements Parcelable {
             case STATE_ALLOW:
                 return "allow";
         }
-        return null;
+        return "invalidState{" + state + "}";
+    }
+
+    private String peopleTypeToString(@PeopleType int peopleType) {
+        switch (peopleType) {
+            case PEOPLE_TYPE_ANYONE:
+                return "anyone";
+            case PEOPLE_TYPE_CONTACTS:
+                return "contacts";
+            case PEOPLE_TYPE_NONE:
+                return "none";
+            case PEOPLE_TYPE_STARRED:
+                return "starred_contacts";
+            case STATE_UNSET:
+                return "unset";
+        }
+        return "invalidPeopleType{" + peopleType + "}";
     }
 
     @Override
@@ -854,27 +967,6 @@ public final class ZenPolicy implements Parcelable {
                 mVisualEffects.set(visualEffect, policyToApply.mVisualEffects.get(visualEffect));
             }
         }
-    }
-
-    /**
-     * @hide
-     */
-    public boolean areValuesSet() {
-        return getPriorityCategoryReminders() != STATE_UNSET
-                || getPriorityCategoryEvents() != STATE_UNSET
-                || getPriorityCategoryMessages() != STATE_UNSET
-                || getPriorityCategoryCalls() != STATE_UNSET
-                || getPriorityCategoryRepeatCallers() != STATE_UNSET
-                || getPriorityCategoryAlarms() != STATE_UNSET
-                || getPriorityCategoryMedia() != STATE_UNSET
-                || getPriorityCategorySystem() != STATE_UNSET
-                || getVisualEffectFullScreenIntent() != STATE_UNSET
-                || getVisualEffectLights() != STATE_UNSET
-                || getVisualEffectPeek() != STATE_UNSET
-                || getVisualEffectStatusBar() != STATE_UNSET
-                || getVisualEffectBadge() != STATE_UNSET
-                || getVisualEffectAmbient() != STATE_UNSET
-                || getVisualEffectNotificationList() != STATE_UNSET;
     }
 
     /**

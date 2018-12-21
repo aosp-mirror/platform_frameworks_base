@@ -550,7 +550,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private boolean updateZenConfig() {
-        final NotificationManager.Policy policy = mNotificationManager.getNotificationPolicy();
+        final NotificationManager.Policy policy =
+                mNotificationManager.getConsolidatedNotificationPolicy();
         boolean disallowAlarms = (policy.priorityCategories & NotificationManager.Policy
                 .PRIORITY_CATEGORY_ALARMS) == 0;
         boolean disallowMedia = (policy.priorityCategories & NotificationManager.Policy

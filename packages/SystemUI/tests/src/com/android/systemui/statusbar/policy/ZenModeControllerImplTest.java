@@ -89,20 +89,22 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
 
     @Test
     public void testAreNotificationsHiddenInShade_zenOnShadeNotSuppressed() {
-        mConfig.suppressedVisualEffects =
-                NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+        NotificationManager.Policy policy = new NotificationManager.Policy(0, 0, 0,
+                NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR);
+        when(mNm.getConsolidatedNotificationPolicy()).thenReturn(policy);
+        mController.updateConsolidatedNotificationPolicy();
         mController.updateZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
-        mController.updateZenModeConfig();
 
         assertFalse(mController.areNotificationsHiddenInShade());
     }
 
     @Test
     public void testAreNotificationsHiddenInShade_zenOnShadeSuppressed() {
-        mConfig.suppressedVisualEffects =
-                NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
+        NotificationManager.Policy policy = new NotificationManager.Policy(0, 0, 0,
+                NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST);
+        when(mNm.getConsolidatedNotificationPolicy()).thenReturn(policy);
+        mController.updateConsolidatedNotificationPolicy();
         mController.updateZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
-        mController.updateZenModeConfig();
 
         assertTrue(mController.areNotificationsHiddenInShade());
     }

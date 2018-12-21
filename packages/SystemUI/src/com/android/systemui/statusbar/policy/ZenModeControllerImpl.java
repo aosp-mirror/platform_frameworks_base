@@ -117,8 +117,8 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     @Override
     public boolean areNotificationsHiddenInShade() {
         if (mZenMode != Global.ZEN_MODE_OFF) {
-            return (mConfig.suppressedVisualEffects & NotificationManager.Policy
-                    .SUPPRESSED_EFFECT_NOTIFICATION_LIST) != 0;
+            return (mConsolidatedNotificationPolicy.suppressedVisualEffects
+                    & NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST) != 0;
         }
         return false;
     }
@@ -259,7 +259,6 @@ public class ZenModeControllerImpl extends CurrentUserTracker
             fireConsolidatedPolicyChanged(policy);
         }
     }
-
 
     @VisibleForTesting
     protected void updateZenModeConfig() {
