@@ -63,7 +63,8 @@ import java.lang.ref.WeakReference;
 //TODO(b/117779333): improve javadoc above instead of using Autofill as an example
 public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I>,
         I extends IInterface> implements DeathRecipient {
-    private static final int MSG_UNBIND = 1;
+    private static final int MSG_BIND = 1;
+    private static final int MSG_UNBIND = 2;
 
     protected static final long PERMANENT_BOUND_TIMEOUT_MS = 0;
 
@@ -106,7 +107,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         void onServiceDied(T service);
     }
 
-    // NOTE: must be package-protected so this class is not extend outside
+    // NOTE: must be package-protected so this class is not extended outside
     AbstractRemoteService(@NonNull Context context, @NonNull String serviceInterface,
             @NonNull ComponentName componentName, int userId, @NonNull VultureCallback<S> callback,
             boolean bindInstantServiceAllowed, boolean verbose) {
@@ -284,6 +285,25 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         mHandler.removeMessages(MSG_UNBIND);
     }
 
+    /**
+     * Schedules a request to bind to the remote service.
+     *
+     * <p>Typically used on constructor for implementations that need a permanent connection to
+     * the remote service.
+     */
+    protected void scheduleBind() {
+        if (mHandler.hasMessages(MSG_BIND)) {
+            if (mVerbose) Slog.v(mTag, "scheduleBind(): already scheduled");
+            return;
+        }
+        mHandler.sendMessage(obtainMessage(AbstractRemoteService::handleEnsureBound, this)
+                .setWhat(MSG_BIND));
+    }
+
+    /**
+     * Schedules a request to automatically unbind from the service after the
+     * {@link #getTimeoutIdleBindMillis() idle timeout} expires.
+     */
     protected void scheduleUnbind() {
         final long unbindDelay = getTimeoutIdleBindMillis();
 

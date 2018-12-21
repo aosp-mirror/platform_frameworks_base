@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.service.autofill.AutofillService;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -80,6 +81,12 @@ public abstract class ContentCaptureService extends Service {
      * Binder that receives calls from the system server.
      */
     private final IContentCaptureService mServerInterface = new IContentCaptureService.Stub() {
+
+        @Override
+        public void onConnectedStateChanged(boolean state) {
+            mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnConnectedStateChanged,
+                    ContentCaptureService.this, state));
+        }
 
         @Override
         public void onSessionStarted(ContentCaptureContext context, String sessionId, int uid,
@@ -204,6 +211,15 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
+     * Called when the Android system connects to service.
+     *
+     * <p>You should generally do initialization here rather than in {@link #onCreate}.
+     */
+    public void onConnected() {
+        Slog.i(TAG, "bound to " + getClass().getName());
+    }
+
+    /**
      * Creates a new content capture session.
      *
      * @param context content capture context
@@ -257,6 +273,15 @@ public abstract class ContentCaptureService extends Service {
         if (VERBOSE) Log.v(TAG, "onDestroyContentCaptureSession(id=" + sessionId + ")");
     }
 
+    /**
+     * Called when the Android system disconnects from the service.
+     *
+     * <p> At this point this service may no longer be an active {@link AutofillService}.
+     */
+    public void onDisconnected() {
+        Slog.i(TAG, "unbinding from " + getClass().getName());
+    }
+
     @Override
     @CallSuper
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -268,6 +293,14 @@ public abstract class ContentCaptureService extends Service {
                 pw.print(prefix); pw.print(mSessionsByUid.keyAt(i));
                 pw.print(": uid="); pw.println(mSessionsByUid.valueAt(i));
             }
+        }
+    }
+
+    private void handleOnConnectedStateChanged(boolean state) {
+        if (state) {
+            onConnected();
+        } else {
+            onDisconnected();
         }
     }
 
