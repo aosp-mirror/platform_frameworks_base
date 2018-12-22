@@ -17,8 +17,8 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageParser;
-import android.content.pm.Signature;
 import android.content.pm.PackageParser.SigningDetails;
+import android.content.pm.Signature;
 import android.os.Environment;
 import android.util.Slog;
 import android.util.Xml;
@@ -80,6 +80,13 @@ public final class SELinuxMMAC {
         // Platform mac permissions.
         sMacPermissions.add(new File(
             Environment.getRootDirectory(), "/etc/selinux/plat_mac_permissions.xml"));
+
+        // Product mac permissions (optional).
+        final File productMacPermission = new File(
+                Environment.getProductDirectory(), "/etc/selinux/product_mac_permissions.xml");
+        if (productMacPermission.exists()) {
+            sMacPermissions.add(productMacPermission);
+        }
 
         // Vendor mac permissions.
         // The filename has been renamed from nonplat_mac_permissions to
