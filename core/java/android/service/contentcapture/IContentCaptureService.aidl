@@ -29,6 +29,7 @@ import java.util.List;
  * @hide
  */
 oneway interface IContentCaptureService {
+    void onConnectedStateChanged(boolean state);
     void onSessionStarted(in ContentCaptureContext context, String sessionId, int uid,
                           in IResultReceiver clientReceiver);
     void onSessionFinished(String sessionId);

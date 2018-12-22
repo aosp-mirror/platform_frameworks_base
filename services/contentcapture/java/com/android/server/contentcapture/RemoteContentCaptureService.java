@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.service.contentcapture.IContentCaptureService;
 import android.service.contentcapture.SnapshotData;
 import android.text.format.DateUtils;
+import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
 
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
@@ -40,6 +41,9 @@ final class RemoteContentCaptureService
             boolean verbose) {
         super(context, serviceInterface, componentName, userId, callbacks,
                 bindInstantServiceAllowed, verbose, /* initialCapacity= */ 2);
+
+        // Bind right away, which will trigger a onConnected() on service's
+        scheduleBind();
     }
 
     @Override // from AbstractRemoteService
@@ -57,6 +61,18 @@ final class RemoteContentCaptureService
     protected long getRemoteRequestMillis() {
         // TODO(b/111276913): read from Settings so it can be changed in the field
         return TIMEOUT_REMOTE_REQUEST_MILLIS;
+    }
+
+    @Override // from RemoteService
+    protected void handleOnConnectedStateChanged(boolean state) {
+        if (state && getTimeoutIdleBindMillis() != PERMANENT_BOUND_TIMEOUT_MS) {
+            scheduleUnbind();
+        }
+        try {
+            mService.onConnectedStateChanged(state);
+        } catch (Exception e) {
+            Slog.w(mTag, "Exception calling onConnectedStateChanged(" + state + "): " + e);
+        }
     }
 
     /**

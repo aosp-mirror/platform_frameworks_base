@@ -77,7 +77,7 @@ final class RemoteFillService
         try {
             mService.onConnectedStateChanged(state);
         } catch (Exception e) {
-            Slog.w(mTag, "Exception calling onConnectedStateChanged(): " + e);
+            Slog.w(mTag, "Exception calling onConnectedStateChanged(" + state + "): " + e);
         }
     }
 
