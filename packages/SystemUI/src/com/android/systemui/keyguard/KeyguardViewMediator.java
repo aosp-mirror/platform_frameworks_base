@@ -468,6 +468,9 @@ public class KeyguardViewMediator extends SystemUI {
                             // MVNO SIMs can become transiently NOT_READY when switching networks,
                             // so we should only lock when they are ABSENT.
                             onSimAbsentLocked();
+                            if (simWasLocked) {
+                                resetStateLocked();
+                            }
                         }
                     }
                     break;
