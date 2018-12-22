@@ -2000,6 +2000,8 @@ public class CarrierConfigManager {
      * Determine whether to use only RSRP for the number of LTE signal bars.
      * @hide
      */
+    // FIXME: this key and related keys must not be exposed without a consistent philosophy for
+    // all RATs.
     public static final String KEY_USE_ONLY_RSRP_FOR_LTE_SIGNAL_BAR_BOOL =
             "use_only_rsrp_for_lte_signal_bar_bool";
 
@@ -2243,6 +2245,8 @@ public class CarrierConfigManager {
      * Currently this only supports the value "rscp"
      * @hide
      */
+    // FIXME: this key and related keys must not be exposed without a consistent philosophy for
+    // all RATs.
     public static final String KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING =
             "wcdma_default_signal_strength_measurement_string";
 

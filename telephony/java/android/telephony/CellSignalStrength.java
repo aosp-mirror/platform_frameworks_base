@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import android.os.PersistableBundle;
+
 /**
  * Abstract base class for cell phone signal strength related information.
  */
@@ -80,9 +82,74 @@ public abstract class CellSignalStrength {
      */
     public abstract CellSignalStrength copy();
 
+    /**
+     * Checks and returns whether there are any non-default values in this CellSignalStrength.
+     *
+     * Checks all the values in the subclass of CellSignalStrength and returns true if any of them
+     * have been set to a value other than their default.
+     *
+     * @hide
+     */
+    public abstract boolean isValid();
+
     @Override
     public abstract int hashCode();
 
     @Override
     public abstract boolean equals (Object o);
+
+    /**
+     * Calculate and set the carrier-influenced values such as the signal "Level".
+     *
+     * @hide
+     */
+    public abstract void updateLevel(PersistableBundle cc, ServiceState ss);
+
+    // Range for RSSI in ASU (0-31, 99) as defined in TS 27.007 8.69
+    /** @hide */
+    protected static final int getRssiDbmFromAsu(int asu) {
+        if (asu > 31 || asu < 0) return CellInfo.UNAVAILABLE;
+        return -113 + (2 * asu);
+    }
+
+    // Range for RSSI in ASU (0-31, 99) as defined in TS 27.007 8.69
+    /** @hide */
+    protected static final int getAsuFromRssiDbm(int dbm) {
+        if (dbm == CellInfo.UNAVAILABLE) return 99;
+        return (dbm / 2) + 113;
+    }
+
+    // Range for RSCP in ASU (0-96, 255) as defined in TS 27.007 8.69
+    /** @hide */
+    protected static final int getRscpDbmFromAsu(int asu) {
+        if (asu > 96 || asu < 0) return CellInfo.UNAVAILABLE;
+        return asu - 120;
+    }
+
+    // Range for RSCP in ASU (0-96, 255) as defined in TS 27.007 8.69
+    /** @hide */
+    protected static final int getAsuFromRscpDbm(int dbm) {
+        if (dbm == CellInfo.UNAVAILABLE) return 255;
+        return dbm + 120;
+    }
+
+    // Range for SNR in ASU (0-49, 255) as defined in TS 27.007 8.69
+    /** @hide */
+    protected static final int getEcNoDbFromAsu(int asu) {
+        if (asu > 49 || asu < 0) return CellInfo.UNAVAILABLE;
+        return -24 + (asu / 2);
+    }
+
+    /** @hide */
+    protected static final int inRangeOrUnavailable(int value, int rangeMin, int rangeMax) {
+        if (value < rangeMin || value > rangeMax) return CellInfo.UNAVAILABLE;
+        return value;
+    }
+
+    /** @hide */
+    protected static final int inRangeOrUnavailable(
+            int value, int rangeMin, int rangeMax, int special) {
+        if ((value < rangeMin || value > rangeMax) && value != special) return CellInfo.UNAVAILABLE;
+        return value;
+    }
 }
