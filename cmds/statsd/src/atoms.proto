@@ -3474,10 +3474,10 @@ message BuildInformation {
  * Pulls on-device BatteryStats power use calculations for the overall device.
  */
 message DeviceCalculatedPowerUse {
-    // Power used by the device in mAh, as computed by BatteryStats, since BatteryStats last reset
-    // (i.e. roughly since device was last significantly charged).
-    // Currently, this is BatteryStatsHelper.getComputedPower() (not getTotalPower()).
-    optional float computed_power_milli_amp_hours = 1;
+    // Power used by the device in nAs (i.e. nanocoulombs (nC)), as computed by BatteryStats, since
+    // BatteryStats last reset (i.e. roughly since device was last significantly charged).
+    // Currently, this is from BatteryStatsHelper.getComputedPower() (not getTotalPower()).
+    optional int64 computed_power_nano_amp_secs = 1;
 }
 
 /**
@@ -3489,9 +3489,9 @@ message DeviceCalculatedPowerBlameUid {
     // Uid being blamed. Note: isolated uids have already been mapped to host uid.
     optional int32 uid = 1 [(is_uid) = true];
 
-    // Power used by this uid in mAh, as computed by BatteryStats, since BatteryStats last reset
-    // (i.e. roughly since device was last significantly charged).
-    optional float power_milli_amp_hours = 2;
+    // Power used by this uid in nAs (i.e. nanocoulombs (nC)), as computed by BatteryStats, since
+    // BatteryStats last reset (i.e. roughly since device was last significantly charged).
+    optional int64 power_nano_amp_secs = 2;
 }
 
 /**
@@ -3525,9 +3525,9 @@ message DeviceCalculatedPowerBlameOther {
     }
     optional DrainType drain_type = 1;
 
-    // Power used by this item in mAh, as computed by BatteryStats, since BatteryStats last reset
-    // (i.e. roughly since device was last significantly charged).
-    optional float power_milli_amp_hours = 2;
+    // Power used by this item in nAs (i.e. nanocoulombs (nC)), as computed by BatteryStats, since
+    // BatteryStats last reset (i.e. roughly since device was last significantly charged).
+    optional int64 power_nano_amp_secs = 2;
 }
 
 /**
