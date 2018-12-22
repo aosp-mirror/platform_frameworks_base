@@ -71,7 +71,6 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowContextWrapper;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
-import org.robolectric.shadows.ShadowSettings;
 
 import java.io.File;
 import java.util.List;
@@ -433,7 +432,7 @@ public class UserBackupManagerServiceTest {
     }
 
     private String getSettingsTransport() {
-        return ShadowSettings.ShadowSecure.getString(
+        return Settings.Secure.getString(
                 mContext.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
     }
 
