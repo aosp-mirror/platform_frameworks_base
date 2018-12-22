@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.telephony.Rlog;
 
 import java.util.Objects;
@@ -35,6 +36,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
     private int mEvdoDbm;   // This value is the EVDO RSSI value
     private int mEvdoEcio;  // This value is the EVDO Ec/Io
     private int mEvdoSnr;   // Valid values are 0-8.  8 is the highest signal to noise ratio
+    private int mLevel;
 
     /** @hide */
     public CellSignalStrengthCdma() {
@@ -55,23 +57,29 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
      * rather than left as -1, which is a departure from SignalStrength, which is stuck with the
      * values it currently reports.
      *
-     * @param cdmaDbm negative of the CDMA signal strength value or -1 if invalid.
-     * @param cdmaEcio negative of the CDMA pilot/noise ratio or -1 if invalid.
-     * @param evdoDbm negative of the EvDO signal strength value or -1 if invalid.
-     * @param evdoEcio negative of the EvDO pilot/noise ratio or -1 if invalid.
-     * @param evdoSnr an SNR value 0..8 or -1 if invalid.
+     * @param cdmaDbm CDMA signal strength value or CellInfo.UNAVAILABLE if invalid.
+     * @param cdmaEcio CDMA pilot/noise ratio or CellInfo.UNAVAILABLE  if invalid.
+     * @param evdoDbm negative of the EvDO signal strength value or CellInfo.UNAVAILABLE if invalid.
+     * @param evdoEcio negative of the EvDO pilot/noise ratio or CellInfo.UNAVAILABLE if invalid.
+     * @param evdoSnr an SNR value 0..8 or CellInfo.UNVAILABLE if invalid.
      * @hide
      */
     public CellSignalStrengthCdma(int cdmaDbm, int cdmaEcio, int evdoDbm, int evdoEcio,
             int evdoSnr) {
-        // The values here were lifted from SignalStrength.validateInput()
-        // FIXME: Combine all checking and setting logic between this and SignalStrength.
-        mCdmaDbm = ((cdmaDbm > 0) && (cdmaDbm < 120))  ? -cdmaDbm : CellInfo.UNAVAILABLE;
-        mCdmaEcio = ((cdmaEcio > 0) && (cdmaEcio < 160)) ? -cdmaEcio : CellInfo.UNAVAILABLE;
+        mCdmaDbm = inRangeOrUnavailable(cdmaDbm, -120, 0);
+        mCdmaEcio = inRangeOrUnavailable(cdmaEcio, -160, 0);
+        mEvdoDbm = inRangeOrUnavailable(evdoDbm, -120, 0);
+        mEvdoEcio = inRangeOrUnavailable(evdoEcio, -160, 0);
+        mEvdoSnr = inRangeOrUnavailable(evdoSnr, 0, 8);
 
-        mEvdoDbm = ((evdoDbm > 0) && (evdoDbm < 120)) ? -evdoDbm : CellInfo.UNAVAILABLE;
-        mEvdoEcio = ((evdoEcio > 0) && (evdoEcio < 160)) ? -evdoEcio : CellInfo.UNAVAILABLE;
-        mEvdoSnr = ((evdoSnr > 0) && (evdoSnr <= 8)) ? evdoSnr : CellInfo.UNAVAILABLE;
+        updateLevel(null, null);
+    }
+
+    /** @hide */
+    public CellSignalStrengthCdma(android.hardware.radio.V1_0.CdmaSignalStrength cdma,
+            android.hardware.radio.V1_0.EvdoSignalStrength evdo) {
+        // Convert from HAL values as part of construction.
+        this(-cdma.dbm, -cdma.ecio, -evdo.dbm, -evdo.ecio, evdo.signalNoiseRatio);
     }
 
     /** @hide */
@@ -86,6 +94,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
         mEvdoDbm = s.mEvdoDbm;
         mEvdoEcio = s.mEvdoEcio;
         mEvdoSnr = s.mEvdoSnr;
+        mLevel = s.mLevel;
     }
 
     /** @hide */
@@ -102,6 +111,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
         mEvdoDbm = CellInfo.UNAVAILABLE;
         mEvdoEcio = CellInfo.UNAVAILABLE;
         mEvdoSnr = CellInfo.UNAVAILABLE;
+        mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
     /**
@@ -112,26 +122,54 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
      */
     @Override
     public int getLevel() {
-        int level;
+        return mLevel;
+    }
 
+    /** @hide */
+    @Override
+    public void updateLevel(PersistableBundle cc, ServiceState ss) {
         int cdmaLevel = getCdmaLevel();
         int evdoLevel = getEvdoLevel();
         if (evdoLevel == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
             /* We don't know evdo, use cdma */
-            level = getCdmaLevel();
+            mLevel = getCdmaLevel();
         } else if (cdmaLevel == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
             /* We don't know cdma, use evdo */
-            level = getEvdoLevel();
+            mLevel = getEvdoLevel();
         } else {
             /* We know both, use the lowest level */
-            level = cdmaLevel < evdoLevel ? cdmaLevel : evdoLevel;
+            mLevel = cdmaLevel < evdoLevel ? cdmaLevel : evdoLevel;
         }
-        if (DBG) log("getLevel=" + level);
-        return level;
     }
 
     /**
-     * Get the signal level as an asu value between 0..97, 99 is unknown
+     * Get the 1xRTT Level in (Android) ASU.
+     *
+     * There is no standard definition of ASU for CDMA; however, Android defines it as the
+     * the lesser of the following two results (for 1xRTT):
+     * <table>
+     *     <thead><tr><th>RSSI Range (dBm)</th><th>ASU Value</th></tr><thead>
+     *     <tbody>
+     *         <tr><td>-75..</td><td>16</td></tr>
+     *         <tr><td>-82..-76</td><td>8</td></tr>
+     *         <tr><td>-90..-83</td><td>4</td></tr>
+     *         <tr><td>-95..-91</td><td>2</td></tr>
+     *         <tr><td>-100..-96</td><td>1</td></tr>
+     *         <tr><td>..-101</td><td>99</td></tr>
+     *     </tbody>
+     * </table>
+     * <table>
+     *     <thead><tr><th>Ec/Io Range (dB)</th><th>ASU Value</th></tr><thead>
+     *     <tbody>
+     *         <tr><td>-90..</td><td>16</td></tr>
+     *         <tr><td>-100..-91</td><td>8</td></tr>
+     *         <tr><td>-115..-101</td><td>4</td></tr>
+     *         <tr><td>-130..-116</td><td>2</td></tr>
+     *         <tr><td>--150..-131</td><td>1</td></tr>
+     *         <tr><td>..-151</td><td>99</td></tr>
+     *     </tbody>
+     * </table>
+     * @return 1xRTT Level in Android ASU {1,2,4,8,16,99}
      */
     @Override
     public int getAsuLevel() {
@@ -220,6 +258,63 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
     }
 
     /**
+     * Get the EVDO Level in (Android) ASU.
+     *
+     * There is no standard definition of ASU for CDMA; however, Android defines it as the
+     * the lesser of the following two results (for EVDO):
+     * <table>
+     *     <thead><tr><th>RSSI Range (dBm)</th><th>ASU Value</th></tr><thead>
+     *     <tbody>
+     *         <tr><td>-65..</td><td>16</td></tr>
+     *         <tr><td>-75..-66</td><td>8</td></tr>
+     *         <tr><td>-85..-76</td><td>4</td></tr>
+     *         <tr><td>-95..-86</td><td>2</td></tr>
+     *         <tr><td>-105..-96</td><td>1</td></tr>
+     *         <tr><td>..-106</td><td>99</td></tr>
+     *     </tbody>
+     * </table>
+     * <table>
+     *     <thead><tr><th>SNR Range (unitless)</th><th>ASU Value</th></tr><thead>
+     *     <tbody>
+     *         <tr><td>7..</td><td>16</td></tr>
+     *         <tr><td>6</td><td>8</td></tr>
+     *         <tr><td>5</td><td>4</td></tr>
+     *         <tr><td>3..4</td><td>2</td></tr>
+     *         <tr><td>1..2</td><td>1</td></tr>
+     *         <tr><td>0</td><td>99</td></tr>
+     *     </tbody>
+     * </table>
+     *
+     * @return EVDO Level in Android ASU {1,2,4,8,16,99}
+     *
+     * @hide
+     */
+    public int getEvdoAsuLevel() {
+        int evdoDbm = getEvdoDbm();
+        int evdoSnr = getEvdoSnr();
+        int levelEvdoDbm;
+        int levelEvdoSnr;
+
+        if (evdoDbm >= -65) levelEvdoDbm = 16;
+        else if (evdoDbm >= -75) levelEvdoDbm = 8;
+        else if (evdoDbm >= -85) levelEvdoDbm = 4;
+        else if (evdoDbm >= -95) levelEvdoDbm = 2;
+        else if (evdoDbm >= -105) levelEvdoDbm = 1;
+        else levelEvdoDbm = 99;
+
+        if (evdoSnr >= 7) levelEvdoSnr = 16;
+        else if (evdoSnr >= 6) levelEvdoSnr = 8;
+        else if (evdoSnr >= 5) levelEvdoSnr = 4;
+        else if (evdoSnr >= 3) levelEvdoSnr = 2;
+        else if (evdoSnr >= 1) levelEvdoSnr = 1;
+        else levelEvdoSnr = 99;
+
+        int level = (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
+        if (DBG) log("getEvdoAsuLevel=" + level);
+        return level;
+    }
+
+    /**
      * Get the signal strength as dBm
      */
     @Override
@@ -237,6 +332,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
     public int getCdmaDbm() {
         return mCdmaDbm;
     }
+
     /** @hide */
     public void setCdmaDbm(int cdmaDbm) {
         mCdmaDbm = cdmaDbm;
@@ -248,6 +344,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
     public int getCdmaEcio() {
         return mCdmaEcio;
     }
+
     /** @hide */
     public void setCdmaEcio(int cdmaEcio) {
         mCdmaEcio = cdmaEcio;
@@ -259,6 +356,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
     public int getEvdoDbm() {
         return mEvdoDbm;
     }
+
     /** @hide */
     public void setEvdoDbm(int evdoDbm) {
         mEvdoDbm = evdoDbm;
@@ -270,6 +368,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
     public int getEvdoEcio() {
         return mEvdoEcio;
     }
+
     /** @hide */
     public void setEvdoEcio(int evdoEcio) {
         mEvdoEcio = evdoEcio;
@@ -281,6 +380,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
     public int getEvdoSnr() {
         return mEvdoSnr;
     }
+
     /** @hide */
     public void setEvdoSnr(int evdoSnr) {
         mEvdoSnr = evdoSnr;
@@ -288,28 +388,29 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
 
     @Override
     public int hashCode() {
-        return Objects.hash(mCdmaDbm, mCdmaEcio, mEvdoDbm, mEvdoEcio, mEvdoSnr);
+        return Objects.hash(mCdmaDbm, mCdmaEcio, mEvdoDbm, mEvdoEcio, mEvdoSnr, mLevel);
+    }
+
+    private static final CellSignalStrengthCdma sInvalid = new CellSignalStrengthCdma();
+
+    /** @hide */
+    @Override
+    public boolean isValid() {
+        return !this.equals(sInvalid);
     }
 
     @Override
     public boolean equals (Object o) {
         CellSignalStrengthCdma s;
-
-        try {
-            s = (CellSignalStrengthCdma) o;
-        } catch (ClassCastException ex) {
-            return false;
-        }
-
-        if (o == null) {
-            return false;
-        }
+        if (!(o instanceof CellSignalStrengthCdma)) return false;
+        s = (CellSignalStrengthCdma) o;
 
         return mCdmaDbm == s.mCdmaDbm
                 && mCdmaEcio == s.mCdmaEcio
                 && mEvdoDbm == s.mEvdoDbm
                 && mEvdoEcio == s.mEvdoEcio
-                && mEvdoSnr == s.mEvdoSnr;
+                && mEvdoSnr == s.mEvdoSnr
+                && mLevel == s.mLevel;
     }
 
     /**
@@ -322,7 +423,8 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
                 + " cdmaEcio=" + mCdmaEcio
                 + " evdoDbm=" + mEvdoDbm
                 + " evdoEcio=" + mEvdoEcio
-                + " evdoSnr=" + mEvdoSnr;
+                + " evdoSnr=" + mEvdoSnr
+                + " level=" + mLevel;
     }
 
     /** Implement the Parcelable interface */
@@ -334,6 +436,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
         dest.writeInt(mEvdoDbm);
         dest.writeInt(mEvdoEcio);
         dest.writeInt(mEvdoSnr);
+        dest.writeInt(mLevel);
     }
 
     /**
@@ -349,6 +452,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
         mEvdoDbm = in.readInt();
         mEvdoEcio = in.readInt();
         mEvdoSnr = in.readInt();
+        mLevel = in.readInt();
         if (DBG) log("CellSignalStrengthCdma(Parcel): " + toString());
     }
 
