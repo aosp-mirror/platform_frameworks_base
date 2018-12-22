@@ -68,6 +68,12 @@ class GnssNetworkConnectivityHandler {
     private static final int AGNSS_NET_CAPABILITY_NOT_METERED = 1 << 0;
     private static final int AGNSS_NET_CAPABILITY_NOT_ROAMING = 1 << 1;
 
+    // these need to match AGnssType enum in IAGnssCallback.hal
+    public static final int AGPS_TYPE_SUPL = 1;
+    public static final int AGPS_TYPE_C2K = 2;
+    private static final int AGPS_TYPE_EIMS = 3;
+    private static final int AGPS_TYPE_IMS = 4;
+
     // Default time limit in milliseconds for the ConnectivityManager to find a suitable
     // network with SUPL connectivity or report an error.
     private static final int SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS = 10 * 1000;
@@ -86,6 +92,7 @@ class GnssNetworkConnectivityHandler {
 
     private int mAGpsDataConnectionState;
     private InetAddress mAGpsDataConnectionIpAddr;
+    private int mAGpsType;
 
     private final Context mContext;
 
@@ -198,21 +205,11 @@ class GnssNetworkConnectivityHandler {
     /**
      * called from native code to update AGPS status
      */
-    public void onReportAGpsStatus(int type, int status, byte[] ipaddr) {
-        switch (status) {
+    public void onReportAGpsStatus(int agpsType, int agpsStatus, byte[] suplIpAddr) {
+        switch (agpsStatus) {
             case GPS_REQUEST_AGPS_DATA_CONN:
                 if (DEBUG) Log.d(TAG, "GPS_REQUEST_AGPS_DATA_CONN");
-                Log.v(TAG, "Received SUPL IP addr[]: " + Arrays.toString(ipaddr));
-                InetAddress connectionIpAddress = null;
-                if (ipaddr != null) {
-                    try {
-                        connectionIpAddress = InetAddress.getByAddress(ipaddr);
-                        if (DEBUG) Log.d(TAG, "IP address converted to: " + connectionIpAddress);
-                    } catch (UnknownHostException e) {
-                        Log.e(TAG, "Bad IP Address: " + ipaddr, e);
-                    }
-                }
-                requestSuplConnection(connectionIpAddress);
+                requestSuplConnection(agpsType, suplIpAddr);
                 break;
             case GPS_RELEASE_AGPS_DATA_CONN:
                 if (DEBUG) Log.d(TAG, "GPS_RELEASE_AGPS_DATA_CONN");
@@ -228,7 +225,7 @@ class GnssNetworkConnectivityHandler {
                 if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONN_FAILED");
                 break;
             default:
-                if (DEBUG) Log.d(TAG, "Received Unknown AGPS status: " + status);
+                if (DEBUG) Log.d(TAG, "Received Unknown AGPS status: " + agpsStatus);
         }
     }
 
@@ -308,8 +305,8 @@ class GnssNetworkConnectivityHandler {
         };
     }
 
-    private void requestSuplConnection(InetAddress inetAddress) {
-        postEvent(() -> handleRequestSuplConnection(inetAddress));
+    private void requestSuplConnection(int agpsType, byte[] suplIpAddr) {
+        postEvent(() -> handleRequestSuplConnection(agpsType, suplIpAddr));
     }
 
     private void suplConnectionAvailable(Network network) {
@@ -435,8 +432,15 @@ class GnssNetworkConnectivityHandler {
                 // exception in the following call to native_agps_data_conn_open
                 apn = "dummy-apn";
             }
+
+            // Setting route to host is needed for GNSS HAL implementations earlier than
+            // @2.0::IAgnssCallback. The HAL @2.0::IAgnssCallback.agnssStatusCb() method does
+            // not require setting route to SUPL host and hence does not provide an IP address.
+            if (mAGpsDataConnectionIpAddr != null) {
+                setRouting();
+            }
+
             int apnIpType = getApnIpType(apn);
-            setRouting();
             if (DEBUG) {
                 String message = String.format(
                         "native_agps_data_conn_open: mAgpsApn=%s, mApnIpType=%s",
@@ -444,34 +448,59 @@ class GnssNetworkConnectivityHandler {
                         apnIpType);
                 Log.d(TAG, message);
             }
-            native_agps_data_conn_open(apn, apnIpType);
+            native_agps_data_conn_open(network.getNetworkHandle(), apn, apnIpType);
             mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
         }
     }
 
-    private void handleRequestSuplConnection(InetAddress address) {
+    private void handleRequestSuplConnection(int agpsType, byte[] suplIpAddr) {
+        mAGpsDataConnectionIpAddr = null;
+        mAGpsType = agpsType;
+        if (suplIpAddr != null) {
+            if (VERBOSE) Log.v(TAG, "Received SUPL IP addr[]: " + Arrays.toString(suplIpAddr));
+            try {
+                mAGpsDataConnectionIpAddr = InetAddress.getByAddress(suplIpAddr);
+                if (DEBUG) Log.d(TAG, "IP address converted to: " + mAGpsDataConnectionIpAddr);
+            } catch (UnknownHostException e) {
+                Log.e(TAG, "Bad IP Address: " + suplIpAddr, e);
+            }
+        }
+
         if (DEBUG) {
             String message = String.format(
-                    "requestSuplConnection, state=%s, address=%s",
+                    "requestSuplConnection, state=%s, agpsType=%s, address=%s",
                     agpsDataConnStateAsString(),
-                    address);
+                    agpsTypeAsString(agpsType),
+                    mAGpsDataConnectionIpAddr);
             Log.d(TAG, message);
         }
 
         if (mAGpsDataConnectionState != AGPS_DATA_CONNECTION_CLOSED) {
             return;
         }
-        mAGpsDataConnectionIpAddr = address;
         mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPENING;
 
         NetworkRequest.Builder requestBuilder = new NetworkRequest.Builder();
-        requestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-        requestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_SUPL);
+        requestBuilder.addCapability(getNetworkCapability(mAGpsType));
         NetworkRequest request = requestBuilder.build();
         mConnMgr.requestNetwork(
                 request,
                 mSuplConnectivityCallback,
                 SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
+    }
+
+    private int getNetworkCapability(int agpsType) {
+        switch (agpsType) {
+            case AGPS_TYPE_C2K:
+            case AGPS_TYPE_SUPL:
+                return NetworkCapabilities.NET_CAPABILITY_SUPL;
+            case AGPS_TYPE_EIMS:
+                return NetworkCapabilities.NET_CAPABILITY_EIMS;
+            case AGPS_TYPE_IMS:
+                return NetworkCapabilities.NET_CAPABILITY_IMS;
+            default:
+                throw new IllegalArgumentException("agpsType: " + agpsType);
+        }
     }
 
     private void handleReleaseSuplConnection(int agpsDataConnStatus) {
@@ -486,8 +515,8 @@ class GnssNetworkConnectivityHandler {
         if (mAGpsDataConnectionState == AGPS_DATA_CONNECTION_CLOSED) {
             return;
         }
-        mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
 
+        mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
         mConnMgr.unregisterNetworkCallback(mSuplConnectivityCallback);
         switch (agpsDataConnStatus) {
             case GPS_AGPS_DATA_CONN_FAILED:
@@ -501,12 +530,9 @@ class GnssNetworkConnectivityHandler {
         }
     }
 
+    // TODO(25876485): Delete this method when all devices upgrade to HAL @2.0::IAGnssCallback
+    //                 interface which does not require setting route to host.
     private void setRouting() {
-        if (mAGpsDataConnectionIpAddr == null) {
-            return;
-        }
-
-        // TODO(25876485): replace the use of this deprecated API
         boolean result = mConnMgr.requestRouteToHostAddress(
                 ConnectivityManager.TYPE_MOBILE_SUPL,
                 mAGpsDataConnectionIpAddr);
@@ -564,6 +590,21 @@ class GnssNetworkConnectivityHandler {
         }
     }
 
+    private String agpsTypeAsString(int agpsType) {
+        switch (agpsType) {
+            case AGPS_TYPE_SUPL:
+                return "SUPL";
+            case AGPS_TYPE_C2K:
+                return "C2K";
+            case AGPS_TYPE_EIMS:
+                return "EIMS";
+            case AGPS_TYPE_IMS:
+                return "IMS";
+            default:
+                return "<Unknown>";
+        }
+    }
+
     private int getApnIpType(String apn) {
         ensureInHandlerThread();
         if (apn == null) {
@@ -614,7 +655,7 @@ class GnssNetworkConnectivityHandler {
     }
 
     // AGPS support
-    private native void native_agps_data_conn_open(String apn, int apnIpType);
+    private native void native_agps_data_conn_open(long networkHandle, String apn, int apnIpType);
 
     private native void native_agps_data_conn_closed();
 
