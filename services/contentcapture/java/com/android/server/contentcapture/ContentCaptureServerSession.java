@@ -17,7 +17,6 @@ package com.android.server.contentcapture;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
-import android.content.Context;
 import android.os.IBinder;
 import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.SnapshotData;
@@ -28,15 +27,13 @@ import android.view.contentcapture.ContentCaptureSessionId;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.Preconditions;
-import com.android.server.contentcapture.RemoteContentCaptureService.ContentCaptureServiceCallbacks;
 
 import java.io.PrintWriter;
 
-final class ContentCaptureServerSession implements ContentCaptureServiceCallbacks {
+final class ContentCaptureServerSession {
 
     private static final String TAG = ContentCaptureServerSession.class.getSimpleName();
 
-    private final Object mLock;
     final IBinder mActivityToken;
     private final ContentCapturePerUserService mService;
     private final RemoteContentCaptureService mRemoteService;
@@ -52,19 +49,16 @@ final class ContentCaptureServerSession implements ContentCaptureServiceCallback
      */
     private final int mUid;
 
-    ContentCaptureServerSession(@NonNull Context context, int userId, @NonNull Object lock,
-            @NonNull IBinder activityToken, @NonNull ContentCapturePerUserService service,
-            @NonNull ComponentName serviceComponentName, @NonNull ComponentName appComponentName,
-            int taskId, int displayId, @NonNull String sessionId, int uid, int flags,
-            boolean bindInstantServiceAllowed, boolean verbose) {
-        mLock = lock;
+    ContentCaptureServerSession(@NonNull IBinder activityToken,
+            @NonNull ContentCapturePerUserService service,
+            @NonNull RemoteContentCaptureService remoteService,
+            @NonNull ComponentName appComponentName,
+            int taskId, int displayId, @NonNull String sessionId, int uid, int flags) {
         mActivityToken = activityToken;
         mService = service;
         mId = Preconditions.checkNotNull(sessionId);
         mUid = uid;
-        mRemoteService = new RemoteContentCaptureService(context,
-                ContentCaptureService.SERVICE_INTERFACE, serviceComponentName, userId, this,
-                bindInstantServiceAllowed, verbose);
+        mRemoteService = remoteService;
         mContentCaptureContext = new ContentCaptureContext(/* clientContext= */ null,
                 appComponentName, taskId, displayId, flags);
     }
@@ -123,17 +117,6 @@ final class ContentCaptureServerSession implements ContentCaptureServiceCallback
         // TODO(b/111276913): must call client to set session as FINISHED_BY_SERVER
         if (notifyRemoteService) {
             mRemoteService.onSessionFinished(mId);
-        }
-    }
-
-    @Override // from RemoteContentCaptureServiceCallbacks
-    public void onServiceDied(@NonNull RemoteContentCaptureService service) {
-        // TODO(b/111276913): implement (remove session from PerUserSession?)
-        if (mService.isDebug()) {
-            Slog.d(TAG, "onServiceDied() for " + mId);
-        }
-        synchronized (mLock) {
-            removeSelfLocked(/* notifyRemoteService= */ true);
         }
     }
 

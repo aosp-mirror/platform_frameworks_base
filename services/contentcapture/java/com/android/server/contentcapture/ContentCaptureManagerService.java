@@ -41,6 +41,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractMasterSystemService;
+import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -66,14 +67,16 @@ public final class ContentCaptureManagerService extends
 
     private final LocalService mLocalService = new LocalService();
 
-    public ContentCaptureManagerService(Context context) {
-        super(context, UserManager.DISALLOW_CONTENT_CAPTURE);
+    public ContentCaptureManagerService(@NonNull Context context) {
+        super(context, new FrameworkResourcesServiceNameResolver(context,
+                com.android.internal.R.string.config_defaultContentCaptureService),
+                UserManager.DISALLOW_CONTENT_CAPTURE);
     }
 
     @Override // from AbstractMasterSystemService
     protected ContentCapturePerUserService newServiceLocked(@UserIdInt int resolvedUserId,
             boolean disabled) {
-        return new ContentCapturePerUserService(this, mLock, resolvedUserId);
+        return new ContentCapturePerUserService(this, mLock, disabled, resolvedUserId);
     }
 
     @Override // from SystemService
@@ -178,7 +181,7 @@ public final class ContentCaptureManagerService extends
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, componentName, taskId, displayId,
-                        sessionId, Binder.getCallingUid(), flags, mAllowInstantService, result);
+                        sessionId, Binder.getCallingUid(), flags, result);
             }
         }
 

@@ -77,7 +77,6 @@ import com.android.server.autofill.RemoteAugmentedAutofillService.RemoteAugmente
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractPerUserSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
-import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -170,8 +169,7 @@ final class AutofillManagerServiceImpl
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock, LocalLog requestsHistory,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
             AutofillCompatState autofillCompatState, boolean disabled) {
-        super(master, new SecureSettingsServiceNameResolver(master.getContext(), userId,
-                Settings.Secure.AUTOFILL_SERVICE), lock, userId);
+        super(master, lock, userId);
 
         mRequestsHistory = requestsHistory;
         mUiLatencyHistory = uiLatencyHistory;
@@ -181,9 +179,9 @@ final class AutofillManagerServiceImpl
         mAutofillCompatState = autofillCompatState;
 
         mAugmentedAutofillResolver = new FrameworkResourcesServiceNameResolver(master.getContext(),
-                userId, lock, com.android.internal.R.string.config_defaultAugmentedAutofillService);
+                com.android.internal.R.string.config_defaultAugmentedAutofillService);
         mAugmentedAutofillResolver.setOnTemporaryServiceNameChangedCallback(
-                () -> updateRemoteAugmentedAutofillService());
+                (u, s) -> updateRemoteAugmentedAutofillService());
 
         updateLocked(disabled);
     }
@@ -207,7 +205,7 @@ final class AutofillManagerServiceImpl
     }
 
     @Override // from PerUserSystemService
-    protected ServiceInfo newServiceInfo(@NonNull ComponentName serviceComponent)
+    protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws NameNotFoundException {
         mInfo = new AutofillServiceInfo(getContext(), serviceComponent, mUserId);
         return mInfo.getServiceInfo();
@@ -873,7 +871,7 @@ final class AutofillManagerServiceImpl
         pw.print(prefix); pw.print("Default component: "); pw.println(getContext()
                 .getString(R.string.config_defaultAutofillService));
         pw.print(prefix); pw.print("mAugmentedAutofillNamer: ");
-        mAugmentedAutofillResolver.dumpShortLocked(pw); pw.println();
+        mAugmentedAutofillResolver.dumpShort(pw); pw.println();
         if (mRemoteAugmentedAutofillService != null) {
             pw.print(prefix); pw.println("RemoteAugmentedAutofillService: ");
             mRemoteAugmentedAutofillService.dump(prefix2, pw);
@@ -1022,7 +1020,7 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     @Nullable RemoteAugmentedAutofillService getRemoteAugmentedAutofillServiceLocked() {
         if (mRemoteAugmentedAutofillService == null) {
-            final String serviceName = mAugmentedAutofillResolver.getServiceNameLocked();
+            final String serviceName = mAugmentedAutofillResolver.getServiceName(mUserId);
             if (serviceName == null) {
                 if (mMaster.verbose) {
                     Slog.v(TAG, "getRemoteAugmentedAutofillServiceLocked(): not set");
@@ -1030,7 +1028,7 @@ final class AutofillManagerServiceImpl
                 return null;
             }
             final ComponentName componentName = RemoteAugmentedAutofillService.getComponentName(
-                    serviceName, mUserId, mAugmentedAutofillResolver.isTemporaryLocked());
+                    serviceName, mUserId, mAugmentedAutofillResolver.isTemporary(mUserId));
             if (componentName == null) return null;
             if (sVerbose) {
                 Slog.v(TAG, "getRemoteAugmentedAutofillServiceLocked(): " + componentName);
@@ -1053,7 +1051,7 @@ final class AutofillManagerServiceImpl
      * Called when the {@link #mAugmentedAutofillResolver} changed (among other places).
      */
     private void updateRemoteAugmentedAutofillService() {
-        final String serviceName = mAugmentedAutofillResolver.getServiceNameLocked();
+        final String serviceName = mAugmentedAutofillResolver.getServiceName(mUserId);
         if (serviceName == null) {
             if (sVerbose) Slog.v(TAG, "updateRemoteAugmentedAutofillService(): time's up!");
             if (mRemoteAugmentedAutofillService != null) {

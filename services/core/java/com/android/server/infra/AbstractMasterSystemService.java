@@ -38,6 +38,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -86,13 +87,22 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     protected final Object mLock = new Object();
 
     /**
+     * Object used to define the name of the service component used to create
+     * {@link com.android.internal.infra.AbstractRemoteService} instances.
+     */
+    @Nullable
+    protected final ServiceNameResolver mServiceNameResolver;
+
+    /**
      * Whether the service should log debug statements.
      */
+    //TODO(b/117779333): consider using constants for these guards
     public boolean verbose = false;
 
     /**
      * Whether the service should log verbose statements.
      */
+    //TODO(b/117779333): consider using constants for these guards
     public boolean debug = false;
 
     /**
@@ -119,13 +129,24 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * Default constructor.
      *
      * @param context system context.
+     * @param serviceNameResolver resolver for
+     * {@link com.android.internal.infra.AbstractRemoteService} instances, or
+     * {@code null} when the service doesn't bind to remote services.
      * @param disallowProperty when not {@code null}, defines a {@link UserManager} restriction that
      *        disables the service.
      */
     protected AbstractMasterSystemService(@NonNull Context context,
+            @Nullable ServiceNameResolver serviceNameResolver,
             @Nullable String disallowProperty) {
         super(context);
 
+        mServiceNameResolver = serviceNameResolver;
+        if (mServiceNameResolver != null) {
+            mServiceNameResolver
+                    .setOnTemporaryServiceNameChangedCallback(
+                            (u, s) -> updateCachedServiceLocked(u));
+
+        }
         if (disallowProperty == null) {
             mDisabledUsers = null;
         } else {
@@ -193,6 +214,20 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      */
     public final boolean getAllowInstantService() {
         enforceCallingPermissionForManagement();
+        synchronized (mLock) {
+            return mAllowInstantService;
+        }
+    }
+
+    /**
+     * Checks whether the service is allowed to bind to an instant-app.
+     *
+     * <p>Typically called by subclasses when creating {@link AbstractRemoteService} instances.
+     *
+     * <p><b>NOTE: </b>must not be called by {@code ShellCommand} as it does not check for
+     * permission.
+     */
+    public final boolean isBindInstantServiceAllowed() {
         synchronized (mLock) {
             return mAllowInstantService;
         }
@@ -294,6 +329,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      *
      * @return a new instance.
      */
+    @Nullable
     protected abstract S newServiceLocked(@UserIdInt int resolvedUserId, boolean disabled);
 
     /**
@@ -421,11 +457,11 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     /**
      * Removes a cached service for a given user.
      *
-     * @return the removed service;
+     * @return the removed service.
      */
     @GuardedBy("mLock")
     @NonNull
-    private S removeCachedServiceLocked(@UserIdInt int userId) {
+    protected final S removeCachedServiceLocked(@UserIdInt int userId) {
         final S service = peekServiceForUserLocked(userId);
         if (service != null) {
             mServicesCache.delete(userId);
@@ -471,6 +507,10 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             final int size = mServicesCache.size();
             pw.print(prefix); pw.print("Debug: "); pw.print(realDebug);
             pw.print(" Verbose: "); pw.println(realVerbose);
+            if (mServiceNameResolver != null) {
+                pw.print(prefix); pw.print("Name resolver: ");
+                mServiceNameResolver.dumpShort(pw); pw.println();
+            }
             pw.print(prefix); pw.print("Disabled users: "); pw.println(mDisabledUsers);
             pw.print(prefix); pw.print("Allow instant service: "); pw.println(mAllowInstantService);
             final String settingsProperty = getServiceSettingsProperty();
