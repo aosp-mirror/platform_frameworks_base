@@ -1976,6 +1976,32 @@ public class ActivityManager {
     }
 
     /**
+     * Check if the context is allowed to start an activity on specified display. Some launch
+     * restrictions may apply to secondary displays that are private, virtual, or owned by the
+     * system, in which case an activity start may throw a {@link SecurityException}. Call this
+     * method prior to starting an activity on a secondary display to check if the current context
+     * has access to it.
+     *
+     * @see ActivityOptions#setLaunchDisplayId(int)
+     * @see android.view.Display.FLAG_PRIVATE
+     * @see android.view.Display.TYPE_VIRTUAL
+     *
+     * @param context Source context, from which an activity will be started.
+     * @param displayId Target display id.
+     * @param intent Intent used to launch an activity.
+     * @return {@code true} if a call to start an activity on the target display is allowed for the
+     * provided context and no {@link SecurityException} will be thrown, {@code false} otherwise.
+     */
+    public boolean isActivityStartAllowedOnDisplay(Context context, int displayId, Intent intent) {
+        try {
+            return getTaskService().isActivityStartAllowedOnDisplay(displayId, intent,
+                    intent.resolveTypeIfNeeded(context.getContentResolver()), context.getUserId());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
+        }
+    }
+
+    /**
      * Information you can retrieve about a particular Service that is
      * currently running in the system.
      */
