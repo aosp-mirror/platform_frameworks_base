@@ -266,6 +266,13 @@ public class SurfaceControl implements Parcelable {
     public static final int FX_SURFACE_DIM = 0x00020000;
 
     /**
+     * Surface creation flag: Creates a container surface.
+     * This surface will have no buffers and will only be used
+     * as a container for other surfaces, or for its InputInfo.
+     */
+    public static final int FX_SURFACE_CONTAINER = 0x00080000;
+
+    /**
      * Mask used for FX values above.
      *
      */
@@ -521,11 +528,36 @@ public class SurfaceControl implements Parcelable {
          */
         public Builder setColorLayer(boolean isColorLayer) {
             if (isColorLayer) {
-                mFlags |= FX_SURFACE_DIM;
+                setFlags(FX_SURFACE_DIM, FX_SURFACE_MASK);
             } else {
-                mFlags &= ~FX_SURFACE_DIM;
+                setBufferLayer();
             }
             return this;
+        }
+
+        /**
+         * Indicates whether a 'ContainerLayer' is to be constructed.
+         *
+         * Container layers will not be rendered in any fashion and instead are used
+         * as a parent of renderable layers.
+         *
+         * @param isContainerLayer Whether to create a container layer.
+         */
+        public Builder setContainerLayer(boolean isContainerLayer) {
+            if (isContainerLayer) {
+                setFlags(FX_SURFACE_CONTAINER, FX_SURFACE_MASK);
+            } else {
+                setBufferLayer();
+            }
+            return this;
+        }
+
+        /**
+         * Indicates whether a buffer layer is to be constructed.
+         *
+         */
+        public Builder setBufferLayer() {
+            return setFlags(FX_SURFACE_NORMAL, FX_SURFACE_MASK);
         }
 
         /**
@@ -536,6 +568,11 @@ public class SurfaceControl implements Parcelable {
          */
         public Builder setFlags(int flags) {
             mFlags = flags;
+            return this;
+        }
+
+        private Builder setFlags(int flags, int mask) {
+            mFlags = (mFlags & ~mask) | flags;
             return this;
         }
     }
