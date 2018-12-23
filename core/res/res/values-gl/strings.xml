@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite á aplicación acceder ás funcións de teléfono do dispositivo. Con este permiso a aplicación pode determinar o número de teléfono e os ID do dispositivo, se unha chamada está activa e o número remoto conectado mediante unha chamada."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"dirixir as chamadas a través do sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Permite á aplicación dirixir as súas chamadas a través do sistema para mellorar a túa experiencia durante as chamadas."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"consultar e controlar as chamadas a través do sistema."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Permite que a aplicación consulte e controle as chamadas en curso do dispositivo. Pode acceder a información como os números e os estados das chamadas."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"continuar unha chamada iniciada noutra aplicación"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Permite que a aplicación continúe unha chamada que se iniciou noutra aplicación."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ler números de teléfono"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite á aplicación comunicarse con etiquetas, tarxetas e lectores Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desactivar o bloqueo da pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite á aplicación desactivar o bloqueo do teclado e calquera seguranza dos contrasinais asociada. Por exemplo, o teléfono desactiva o bloqueo do teclado ao recibir unha chamada telefónica entrante e, a continuación, volve activar o bloqueo do teclado unha vez finalizada a chamada."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"consultar complexidade do bloqueo de pantalla e suxerir aumentala"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Permite que a aplicación consulte o nivel (alto, medio, baixo ou inexistente) de complexidade do bloqueo de pantalla para saber a lonxitude aproximada do contrasinal e o tipo de bloqueo de pantalla. A aplicación tamén pode suxerirlles aos usuarios que aumenten o nivel de complexidade do bloqueo de pantalla, aínda que poden ignorar a suxestión e seguir navegando. Ten en conta que o bloqueo de pantalla non se almacena como texto sen formato, polo que a aplicación non pode consultar o contrasinal exacto."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"utilizar hardware biométrico"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Permite que a aplicación utilice hardware biométrico para a autenticación"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"xestionar hardware de impresión dixital"</string>
@@ -1091,7 +1095,7 @@
     <string name="map_desc" msgid="1836995341943772348">"Localiza o enderezo seleccionado"</string>
     <string name="browse" msgid="1245903488306147205">"Abrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Abre o URL seleccionado"</string>
-    <string name="sms" msgid="4560537514610063430">"Mensaxe"</string>
+    <string name="sms" msgid="4560537514610063430">"Enviar SMS"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Envía unha mensaxe ao número de teléfono seleccionado"</string>
     <string name="add_contact" msgid="7867066569670597203">"Engadir"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Engade o elemento aos contactos"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"A tableta estase actualizando…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"O dispositivo estase actualizando…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"O teléfono estase iniciando…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Estase iniciando Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"A tableta estase iniciando…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"O dispositivo estase iniciando…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimizando almacenamento."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Toca para ver todas as redes"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Conectarse"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Todas as redes"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Conectácheste á rede wifi proposta pola aplicación <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Queres permitir que a aplicación <xliff:g id="NAME">%s</xliff:g> che propoña redes?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Si"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Non"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"A wifi activarase automaticamente"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Cando esteas preto dunha rede gardada de alta calidade"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Non volver activar"</string>

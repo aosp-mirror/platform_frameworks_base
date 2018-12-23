@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Annab rakendusele juurdepääsu seadme telefonifunktsioonidele. See luba võimaldab rakendusel määrata telefoninumbri ja seadme ID-d ning kontrollida, kas kõne on aktiivne ja kaugnumber on kõne kaudu telefoniga ühendatud."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"kõnede marsruutimine süsteemi kaudu"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Võimaldab rakendusel kõnesid süsteemi kaudu marsruutida, et helistamiskogemust täiustada."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"süsteemi kaudu kõnede vaatamine ja juhtimine."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Lubab rakendusel seadmes vaadata ja juhtida käimasolevaid kõnesid. See hõlmab sellist teavet nagu kõnede numbrid ja olek."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"jätka kõnet teises rakenduses"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Lubab rakendusel jätkata kõnet, mida alustati teises rakenduses."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lugeda telefoninumbreid"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Võimaldab rakendusel suhelda lähiväljaside (NFC) märgendite, kaartide ja lugeritega."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"keelake ekraanilukk"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Võimaldab rakendusel keelata klahviluku ja muu seotud parooli turvalisuse. Näiteks keelab telefon klahviluku sissetuleva kõne vastuvõtmisel ja lubab klahviluku uuesti, kui kõne on lõpetatud."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"Hankida ja taotleda ekraaniluku keerukuse teavet"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Lubab rakendusel vaadata ekraaniluku keerukuse taset (kõrge, keskmine, madal või puudub), mis näitab ekraaniluku võimalikku pikkust ja tüüpi. Rakendus võib kasutajatele soovitada ka ekraaniluku viimist teatud tasemele, kuid kasutajad võivad seda eirata ja kuvalt lahkuda. Pange tähele, et ekraanilukku ei salvestata lihttekstina, seega ei tea rakendus täpset parooli."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"kasutada biomeetrilist riistvara"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Võimaldab rakendusel autentimiseks kasutada biomeetrilist riistvara"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"sõrmejälje riistvara haldamine"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tahvelarvutit värskendatakse …"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Seadet värskendatakse …"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefon käivitub …"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android käivitub ..."</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tahvelarvuti käivitub …"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Seade käivitub …"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Salvestusruumi optimeerimine."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Puudutage kõikide võrkude nägemiseks"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Ühenda"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Kõik võrgud"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Ühendatud rakenduse <xliff:g id="NAME">%s</xliff:g> soovitatud WiFi-võrguga"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Kas soovite lubada rakendusel <xliff:g id="NAME">%s</xliff:g> teile võrke soovitada?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Jah"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ei"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WiFi lülitub sisse automaatselt"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kui olete kvaliteetse salvestatud võrgu läheduses"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ära lülita tagasi sisse"</string>

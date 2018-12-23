@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Овозможува апликацијата да пристапи кон карактеристиките на телефонот на уредот. Оваа дозвола овозможува апликацијата да ги утврди телефонскиот број и ID на уредот, дали повикот е активен и далечинскиот број поврзан со повикот."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"пренасочи повици преку системот"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дозволете ѝ на апликацијата да ги пренасочи повиците преку системот за да го подобри искуството при јавувањето."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"гледање и контролирање повици преку системот."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Дозволува апликацијата да гледа и контролира тековни повици на уредот. Ова вклучува информации како телефонски броеви за повици и состојбата на повиците."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"продолжување повик од друга апликација"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Овозможува апликацијата да продолжи повик започнат на друга апликација."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"да чита телефонски броеви"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дозволува апликацијата да комуницира со ознаки, картички и читачи за Комуникација при непосредна близина (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"оневозможи заклучување на екран"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Овозможува апликацијата да го оневозможи заклучувањето и каква било безбедност поврзана со лозинка. На пример, телефонот го оневозможува заклучувањето при прием на телефонски повик, а потоа повторно го овозможува заклучувањето кога повикот ќе заврши."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"добива и бара комплексност на заклучување екран"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Ѝ дозволува на апликацијата да го научи нивото на комплексност за заклучувањето на екранот (високо, средно, ниско или нема), коешто ги означува можниот опсег на должина и типот на заклувањето на екранот. Апликацијата може да им дава предлози на корисниците да го ажурираат заклучувањето на екранот на одредено ниво, но корисниците можат да го игнорираат и да продолжат понатаму. Имајте предвид дека заклучувањето на екранот не се складира како обичен текст па апликацијата не ја знае точната лозинка."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"користи биометриски хардвер"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Дозволува апликацијата да користи биометриски хардвер за проверка"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управувај хардвер за отпечатоци"</string>
@@ -1083,23 +1087,23 @@
     <string name="deleteText" msgid="6979668428458199034">"Избриши"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метод на внес"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дејства со текст"</string>
-    <string name="email" msgid="4560673117055050403">"E-пошта"</string>
+    <string name="email" msgid="4560673117055050403">"Испрати е-пошта"</string>
     <string name="email_desc" msgid="3638665569546416795">"Испраќа е-порака на избраната адреса"</string>
     <string name="dial" msgid="1253998302767701559">"Повикај"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Го повикува избраниот телефонски број"</string>
-    <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <string name="map" msgid="5441053548030107189">"Отвори карта"</string>
     <string name="map_desc" msgid="1836995341943772348">"Лоцирај ја избраната адреса"</string>
     <string name="browse" msgid="1245903488306147205">"Отвори"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ја отвора избраната URL"</string>
-    <string name="sms" msgid="4560537514610063430">"Порака"</string>
+    <string name="sms" msgid="4560537514610063430">"Испрати порака"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Испраќа порака на избраниот телефонски број"</string>
     <string name="add_contact" msgid="7867066569670597203">"Додај"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Додава во контакти"</string>
     <string name="view_calendar" msgid="979609872939597838">"Прикажи"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Го гледа избраното време во календарот"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Распоред"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Закажи"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Закажува настан за избраното време"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Песна"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Следи го"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Следи избран лет"</string>
     <string name="translate" msgid="9218619809342576858">"Преведи"</string>
     <string name="translate_desc" msgid="4502367770068777202">"Преведете го избраниот текст"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Таблетот се ажурира…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Уредот се ажурира…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Телефонот стартува…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android стартува…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Таблетот стартува…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Уредот стартува…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Оптимизирање на складирањето."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Допрете за да ги видите сите мрежи"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Поврзете се"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Сите мрежи"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Поврзано на Wi‑Fi мрежа обезбедена од <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Дали сакате да дозволите <xliff:g id="NAME">%s</xliff:g> да ви предлага мрежи?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Да"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Не"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ќе се вклучи автоматски"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Кога сте во близина на зачувана мрежа со висок квалитет"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не вклучувај повторно"</string>

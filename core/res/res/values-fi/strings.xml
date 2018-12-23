@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Antaa sovelluksen käyttää laitteen puhelinominaisuuksia. Sovellus voi määrittää puhelinnumeron ja laitteen tunnuksen, puhelun tilan sekä soitetun numeron."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ohjata puhelut järjestelmän kautta"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Tämä sallii sovelluksen ohjata puhelut järjestelmän kautta, mikä auttaa parantamaan puhelujen laatua."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"nähdä puhelut ja päättää niistä järjestelmässä"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Sovellus voi nähdä laitteella käynnissä olevat puhelut ja päättää niistä. Se näkee esimerkiksi puheluihin liittyvät numerot ja niiden tilat."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"jatkaa toisen sovelluksen puhelua"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Antaa sovelluksen jatkaa puhelua, joka aloitettiin toisessa sovelluksessa."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lukea puhelinnumeroita"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Antaa sovelluksen kommunikoida NFC (Near Field Communication) -tagien, -korttien ja -lukijoiden kanssa."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"poista näytön lukitus käytöstä"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Antaa sovelluksen ottaa näppäinlukon ja siihen liittyvän salasanasuojauksen pois käytöstä. Esimerkki: puhelin poistaa näppäinlukon käytöstä puhelun saapuessa ja asettaa lukon takaisin käyttöön puhelun päättyessä."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"pyytää näytön lukituksen monimutkaisuutta ja nähdä sen"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Sovellus saa luvan selvittää näytön lukituksen monimutkaisuuden (korkea, keskitaso tai matala) eli sen pituusluokan ja tyypin. Sovellus voi myös ehdottaa käyttäjille näytön lukituksen vaihtamista tietylle tasolle, mutta he voivat ohittaa tämän ja poistua. Itse näytön lukitusta ei säilytetä tekstimuodossa, joten sovellus ei tiedä sitä tarkalleen."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"käytä biometristä laitteistoa"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Sallii sovelluksen käyttää biometristä laitteistoa todennukseen"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"sormenjälkilaitteiston hallinnointi"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tablettia päivitetään…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Laitetta päivitetään…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Puhelin käynnistyy…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android käynnistyy…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tabletti käynnistyy…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Laite käynnistyy…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimoidaan tallennustilaa."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Napauta, niin näet kaikki verkot."</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Yhdistä"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Kaikki verkot"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Yhdistetty ehdotettuun (<xliff:g id="NAME">%s</xliff:g>) Wi-Fi-verkkoon"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Haluatko, että <xliff:g id="NAME">%s</xliff:g> voi ehdottaa sinulle verkkoja?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Kyllä"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ei"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi käynnistyy automaattisesti"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kun olet lähellä laadukasta tallennettua verkkoa"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Älä käynnistä uudelleen"</string>

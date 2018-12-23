@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"აპს შეეძლება ჰქონდეს წვდომა მოწყობილობის სატელეფონო ფუნქციებზე. აპმა მსგავსი უფლებით შეძლებს დაადგინოს ტელეფონის ნომერი, მისი სერიული გამოცემა, აქტიური ზარი, დაკავშირებული ნომერი და მსგავსი."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ზარების სისტემის მეშვეობით მარშრუტიზაცია"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"დარეკვის ხარისხის გაუმჯობესების მიზნით, აპს ზარების სისტემის მეშვეობით მარშრუტიზაციის საშუალებას აძლევს."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ზარების ნახვა და გაკონტროლება სისტემის მეშვეობით."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"საშუალებას აძლევს აპს, იხილოს და გააკონტროლოს მიმდინარე ზარები მოწყობილობაზე. აღნიშნული მოიცავს ისეთ ინფორმაციას, როგორიცაა ზარებთან დაკავშირებული აბონენტების ნომრები და ზარების მდგომარეობა."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ზარის სხვა აპიდან გაგრძელება"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"ნებას რთავს აპს, გააგრძელოს ზარი, რომელიც სხვა აპშია წამოწყებული."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ტელეფონის ნომრების წაკითხვა"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"აპს შეეძლება ახლო მოქმედების რადიოკავშირის (NFC) მეშვეობით ტეგების, ბარათებისა და წამკითხველების შემცველი მონაცემების მიმოცვლა."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"თქვენი ეკრანის ბლოკის გათიშვა"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"შეეძლება კლავიატურის დაბლოკვისა და პაროლით უზრუნველყოფილი ნებისმიერი უსაფრთხოების ფუნქციის დეაქტივაცია. მაგალითად, ტელეფონი შემომავალი ზარის დროს აუქმებს კლავიატურის დაბლოკვას და კვლავ ააქტიურებს მას, როგორც კი ზარი დასრულდება."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ეკრანის დაბლოკვის მეთოდის სირთულის მიღება და მოთხოვნა"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"საშუალებას აძლევს აპს, შეიტყოს ეკრანის დაბლოკვის მეთოდის სირთულე (მაღალი, საშუალო, დაბალი ან არანაირი), რისი მეშვეობითაც შესაძლებელია ეკრანის დაბლოკვის მეთოდის სიგრძის შესაძლო დიაპაზონისა და ტიპის განსაზღვრა. გარდა ამისა, აპს შეუძლია მომხმარებლებისთვის ეკრანის დაბლოკვის მეთოდის გარკვეულ დონემდე გაძლიერების შეთავაზება, თუმცა მომხმარებლებს შეეძლებათ აღნიშნული შეტყობინების უგულებელყოფა და სხვა ეკრანზე გადასვლა. გაითვალისწინეთ, რომ ეკრანის დაბლოკვის მეთოდი არ ინახება ჩვეულებრივი ტექსტის სახით, ამიტომ აპს არ ეცოდინება ზუსტი პაროლი."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ბიომეტრიული აპარატის გამოყენება"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"საშუალებას აძლევს აპს, ავტორიზაციისთვის გამოიყენოს ბიომეტრიული აპარატი"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"თითის ანაბეჭდის აპარატის მართვა"</string>
@@ -1083,11 +1087,11 @@
     <string name="deleteText" msgid="6979668428458199034">"წაშლა"</string>
     <string name="inputMethod" msgid="1653630062304567879">"შეყვანის მეთოდი"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ქმედებები ტექსტზე"</string>
-    <string name="email" msgid="4560673117055050403">"ელფოსტა"</string>
+    <string name="email" msgid="4560673117055050403">"ელფოსტის გაგზავნა"</string>
     <string name="email_desc" msgid="3638665569546416795">"არჩეულ მისამართზე ელფოსტის გაგზავნა"</string>
     <string name="dial" msgid="1253998302767701559">"ზარი"</string>
     <string name="dial_desc" msgid="6573723404985517250">"არჩეულ ტელეფონის ნომერზე დარეკვა"</string>
-    <string name="map" msgid="5441053548030107189">"რუკა"</string>
+    <string name="map" msgid="5441053548030107189">"რუკის გახსნა"</string>
     <string name="map_desc" msgid="1836995341943772348">"არჩეული მისამართის მდებარეობის დადგენა"</string>
     <string name="browse" msgid="1245903488306147205">"გახსნა"</string>
     <string name="browse_desc" msgid="8220976549618935044">"არჩეული URL-ის გახსნა"</string>
@@ -1097,9 +1101,9 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"დამატება"</string>
     <string name="view_calendar" msgid="979609872939597838">"ნახვა"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"არჩეული დროის კალენდარში ნახვა"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"განრიგი"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"დაგეგმვა"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"მოვლენის არჩეული დროისთვის დაგეგმვა"</string>
-    <string name="view_flight" msgid="7691640491425680214">"ჩანაწერი"</string>
+    <string name="view_flight" msgid="7691640491425680214">"მიდევნება"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"არჩეული ფრენისთვის თვალის მიდევნება"</string>
     <string name="translate" msgid="9218619809342576858">"თარგმნა"</string>
     <string name="translate_desc" msgid="4502367770068777202">"არჩეული ტექსტის თარგმნა"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"მიმდინარეობს ტაბლეტის განახლება…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"მიმდინარეობს მოწყობილობის განახლება…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"მიმდინარეობს ტელეფონის ჩართვა…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android იწყება…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"მიმდინარეობს ტაბლეტის ჩართვა…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"მიმდინარეობს მოწყობილობის ჩართვა…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"მეხსიერების ოპტიმიზირება."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"შეეხეთ ყველა ქსელის სანახავად"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"დაკავშირება"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ყველა ქსელი"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"დაკავშირებულია <xliff:g id="NAME">%s</xliff:g>-ის მიერ შემოთავაზებულ Wi‑Fi ქსელთან"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"გსურთ, საშუალება მისცეთ <xliff:g id="NAME">%s</xliff:g>-ს, შემოგთავაზოთ ქსელები?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"დიახ"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"არა"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi ავტომატურად ჩაირთვება"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"როცა შენახულ მაღალხარისხიან ქსელებთან ახლოს იმყოფებით"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ხელახლა ნუ ჩართავ"</string>

@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"به برنامه اجازه می‌دهد به ویژگی‌های تلفن دستگاه شما دسترسی پیدا کند. این مجوز به برنامه اجازه می‌دهد شماره تلفن و شناسه‌های دستگاه، فعال بودن یک تماس و شماره راه دوری که با یک تماس متصل شده است را مشخص کند."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"برقرار کردن تماس‌ها ازطریق سیستم"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"به برنامه امکان می‌دهد برای بهبود تجربه تماس، تماس‌هایش را ازطریق سیستم برقرار کند."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"دیدن و کنترل تماس‌ها ازطریق سیستم."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"به برنامه‌ها اجازه می‌دهد تماس‌های درحال انجام را در این دستگاه ببیند و کنترل کند. این مورد شامل اطلاعاتی مانند شماره تلفن برای تماس‌ها و وضعیت تماس‌ها است."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ادامه دادن تماس از برنامه‌ای دیگر"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"به برنامه اجازه می‌دهد تماسی را که در برنامه دیگری شروع شده ادامه دهد."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"خواندن شماره تلفن‌ها"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"‏به برنامه اجازه می‎دهد تا با تگهای ارتباط میدان نزدیک (NFC)، کارتها و فایل خوان ارتباط برقرار کند."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"غیرفعال کردن قفل صفحه شما"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"به برنامه امکان می‌دهد قفل کلید و هر گونه امنیت گذرواژه مرتبط را غیرفعال کند. به‌عنوان مثال تلفن هنگام دریافت یک تماس تلفنی ورودی قفل کلید را غیرفعال می‌کند و بعد از پایان تماس، قفل کلید را دوباره فعال می‌کند."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"دریافت و درخواست پیچیدگی قفل صفحه"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"به برنامه اجازه می‌دهد سطح پیچیدگی قفل صفحه (بالا، متوسط، پایین یا هیچ‌کدام) را بیاموزد که نشانگر اشکال مختلف طول و نوع قفل صفحه است. همچنین برنامه می‌تواند به کاربران پیشنهاد دهد قفل صفحه را به سطح خاصی به‌روزرسانی کنند، اما کاربران می‌توانند آزادانه این پیشنهاد را نادیده بگیرند و به سطح دیگری بروند. توجه داشته باشید که قفل صفحه در قالب نوشتار ساده ذخیره نمی‌شود، بنابراین برنامه گذرواژه دقیق را نمی‌داند."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"استفاده از سخت‌افزار بیومتریک"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"به برنامه امکان می‌دهد از سخت‌افزار بیومتریک برای احراز هویت استفاده کند"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"مدیریت سخت‌افزار اثر انگشت"</string>
@@ -1083,27 +1087,27 @@
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
     <string name="inputMethod" msgid="1653630062304567879">"روش ورودی"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"کنش‌های متنی"</string>
-    <string name="email" msgid="4560673117055050403">"ایمیل"</string>
+    <string name="email" msgid="4560673117055050403">"فرستادن ایمیل"</string>
     <string name="email_desc" msgid="3638665569546416795">"ارسال ایمیل به نشانی انتخابی"</string>
-    <string name="dial" msgid="1253998302767701559">"تماس"</string>
+    <string name="dial" msgid="1253998302767701559">"تماس گرفتن"</string>
     <string name="dial_desc" msgid="6573723404985517250">"تماس با شماره تلفن انتخابی"</string>
     <string name="map" msgid="5441053548030107189">"نقشه"</string>
     <string name="map_desc" msgid="1836995341943772348">"مکان‌یابی نشانی انتخاب‌شده"</string>
     <string name="browse" msgid="1245903488306147205">"باز کردن"</string>
     <string name="browse_desc" msgid="8220976549618935044">"باز کردن نشانی وب انتخابی"</string>
-    <string name="sms" msgid="4560537514610063430">"پیام"</string>
+    <string name="sms" msgid="4560537514610063430">"فرستادن پیام"</string>
     <string name="sms_desc" msgid="7526588350969638809">"ارسال پیام به شماره تلفن انتخابی"</string>
     <string name="add_contact" msgid="7867066569670597203">"افزودن"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"افزودن به مخاطبین"</string>
     <string name="view_calendar" msgid="979609872939597838">"مشاهده"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"مشاهده زمان انتخابی در تقویم"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"زمان‌بندی"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"زمان‌بندی کردن"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"زمان‌بندی رویداد برای زمان انتخابی"</string>
-    <string name="view_flight" msgid="7691640491425680214">"پیگیری"</string>
+    <string name="view_flight" msgid="7691640491425680214">"انجام پیگیری"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ردیابی پرواز انتخابی"</string>
     <string name="translate" msgid="9218619809342576858">"ترجمه کردن"</string>
     <string name="translate_desc" msgid="4502367770068777202">"ترجمه کردن نوشتار انتخاب‌شده"</string>
-    <string name="define" msgid="7394820043869954211">"تعریف"</string>
+    <string name="define" msgid="7394820043869954211">"تعریف کردن"</string>
     <string name="define_desc" msgid="7910883642444919726">"تعریف نوشتار انتخابی"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"حافظه درحال پر شدن است"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"برخی از عملکردهای سیستم ممکن است کار نکنند"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"رایانه لوحی درحال به‌روزرسانی است…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"دستگاه درحال به‌روزرسانی است…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"تلفن درحال راه‌اندازی است…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"‏Android در حال راه‌اندازی است..."</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"رایانه لوحی درحال راه‌اندازی است…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"دستگاه درحال راه‌اندازی است…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"بهینه‌سازی فضای ذخیره‌سازی."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"برای دیدن همه شبکه‌ها ضربه بزنید"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"اتصال"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"همه شبکه‌ها"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"‏متصل به شبکه Wi‑Fi پیشنهادی <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"می‌خواهید به <xliff:g id="NAME">%s</xliff:g> اجازه دهید شبکه‌هایی را که به شما پیشنهاد کند؟"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"بله"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"خیر"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏Wi‑Fi به‌طور خودکار روشن خواهد شد"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"وقتی نزدیک شبکه ذخیره‌شده با کیفیت بالا هستید"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"دوباره روشن نشود"</string>

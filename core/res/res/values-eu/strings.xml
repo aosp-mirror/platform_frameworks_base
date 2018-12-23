@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Gailuaren telefono-eginbideak atzitzeko baimena ematen die aplikazioei. Baimen horrek aplikazioari telefono-zenbakia eta gailu IDak zein diren, deirik aktibo dagoen eta deia zer zenbakirekin konektatuta dagoen zehazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"bideratu deiak sistemaren bidez"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Deiak sistemaren bidez bideratzea baimentzen die aplikazioei, deien zerbitzua ahal bezain ona izan dadin."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ikusi eta kontrolatu deiak sistemaren bidez."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Gailuan abian diren deiak eta deion informazioa ikusi eta kontrolatzeko baimena ematen dio aplikazioari; besteak beste, deien zenbakiak eta deien egoera."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"Jarraitu beste aplikazio batean hasitako deia"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Beste aplikazio batean hasitako dei bat jarraitzea baimentzen dio aplikazioari."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"irakurri telefono-zenbakiak"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Near Field Communication (NFC) etiketekin, txartelekin eta irakurgailuekin komunikatzea baimentzen die aplikazioei."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desgaitu pantailaren blokeoa"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Teklen blokeoa eta erlazionatutako pasahitz-segurtasuna desgaitzeko baimena ematen die aplikazioei. Adibidez, telefonoak teklen blokeoa desgaitzen du telefono-deiak jasotzen dituenean, eta berriro gaitzen du deiak amaitzean."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"lortu eta eskatu pantailaren blokeoaren konplexutasuna"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Pantailaren blokeoaren konplexutasun-maila (handia, ertaina, txikia edo bat ere ez) ezagutzea baimentzen dio aplikazioari; horren bidez, pantailaren blokeoaren luzeraren barruti edo mota posiblea adierazten da. Halaber, erabiltzaileei pantailaren blokeoa maila jakin batera igotzeko iradoki diezaieke aplikazioak, baina erabiltzaileek horri ez ikusi egiteko eta aplikazioa erabiltzen jarraitzeko aukera dute. Kontuan izan pantailaren blokeoa ez dela gordetzen testu arrunt gisa; beraz, aplikazioak ez du jakingo pasahitza zehazki zein den."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"Erabili hardware biometrikoa"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Autentifikatzeko hardware biometrikoa erabiltzea baimentzen die aplikazioei."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"kudeatu erreferentzia-gako digitalen hardwarea"</string>
@@ -1083,7 +1087,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Ezabatu"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Idazketa-metodoa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Testu-ekintzak"</string>
-    <string name="email" msgid="4560673117055050403">"Posta"</string>
+    <string name="email" msgid="4560673117055050403">"Bidali mezu bat"</string>
     <string name="email_desc" msgid="3638665569546416795">"Bidali mezu elektroniko bat hautatutako helbidera"</string>
     <string name="dial" msgid="1253998302767701559">"Deitu"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Deitu hautatutako telefono-zenbakira"</string>
@@ -1091,7 +1095,7 @@
     <string name="map_desc" msgid="1836995341943772348">"Bilatu hautatutako helbidea"</string>
     <string name="browse" msgid="1245903488306147205">"Ireki"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ireki hautatutako URLa"</string>
-    <string name="sms" msgid="4560537514610063430">"Bidali mezua"</string>
+    <string name="sms" msgid="4560537514610063430">"Bidali SMS bat"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Bidali testu-mezu bat hautatutako telefono-zenbakira"</string>
     <string name="add_contact" msgid="7867066569670597203">"Gehitu"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Gehitu kontaktuetan"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tableta eguneratzen ari da…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Gailua eguneratzen ari da…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefonoa abiarazten ari da…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android abiarazten ari da…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tableta abiarazten ari da…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Gailua abiarazten ari da…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Memoria optimizatzen."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Sakatu hau sare guztiak ikusteko"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Konektatu"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Sare guztiak"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> aplikazioak iradokitako Wi‑Fi sarera konektatuta"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"<xliff:g id="NAME">%s</xliff:g> aplikazioak sareak iradoki diezazkizun nahi duzu?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Bai"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ez"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi konexioa automatikoki aktibatuko da"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Gordeta daukazun kalitate handiko sare batetik gertu zaudenean"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ez aktibatu berriro"</string>

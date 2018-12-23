@@ -453,6 +453,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leidžiama programai pasiekti telefono funkcijas įrenginyje. Šis leidimas suteikia teisę programai nustatyti telefono numerį ir įrenginio ID, tai, ar skambutis aktyvus, ir skambučiu prijungtą nuotolinį numerį."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"nukreipti skambučius per sistemą"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Programai leidžiama nukreipti jos skambučius per sistemą siekiant pagerinti skambinimo paslaugas."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"matyti ir valdyti skambučius per sistemą."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Programai leidžiama matyti ir valdyti vykstančius skambučius įrenginyje. Tai apima tokią informaciją kaip skambučių telefono numeriai ir skambučių būsena."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"tęsti skambutį naudojant kitą programą"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Programai leidžiama tęsti skambutį, kuris buvo pradėtas naudojant kitą programą."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"skaityti telefonų numerius"</string>
@@ -513,6 +515,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Leidžiama programai perduoti artimojo lauko ryšių technologijos (ALR) žymas, korteles ir skaitymo programas."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"išjungti ekrano užraktą"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Leidžiama programai neleisti klavišo užrakto ir visos susijusios slaptažodžio apsaugos. Pvz., telefonas neleidžia klavišo užrakto priimant gaunamąjį skambutį ir pakartotinai jį įgalina, kai skambutis baigiamas."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"gauti ir pateikti ekrano užrakto sudėtingumo užklausą"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Leidžiama programai sužinoti ekrano užrakto sudėtingumo lygį (aukštas, vidutinis, žemas arba nėra), nurodantį galimą ekrano užrakto trukmės diapazoną ir tipą. Be to, programa gali pasiūlyti naudotojams atnaujinti ekrano užraktą į tam tikrą lygį, bet naudotojai gali laisvai nepaisyti ir išeiti. Atminkite, kad ekrano užraktas nesaugomas kaip grynasis tekstas, todėl programa nežino tikslaus slaptažodžio."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"naudoti biometrinę aparatinę įrangą"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Leidžiama programai naudoti biometrinę aparatinę įrangą tapatybei nustatyti"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"tvarkyti piršto antspaudo aparatinę įrangą"</string>
@@ -1131,7 +1135,7 @@
     <string name="map_desc" msgid="1836995341943772348">"Rasti vietą pasirinktu adresu"</string>
     <string name="browse" msgid="1245903488306147205">"Atidaryti"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Atidaryti pasirinktą URL"</string>
-    <string name="sms" msgid="4560537514610063430">"Pranešimas"</string>
+    <string name="sms" msgid="4560537514610063430">"Rašyti pranešimą"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Siųsti pranešimą pasirinktu telefono numeriu"</string>
     <string name="add_contact" msgid="7867066569670597203">"Pridėti"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Pridėti prie kontaktų"</string>
@@ -1221,6 +1225,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Planšetinis kompiuteris atnaujinamas…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Įrenginys atnaujinamas…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefonas paleidžiamas…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Paleidžiama „Android“…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Planšetinis kompiuteris paleidžiamas…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Įrenginys paleidžiamas…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimizuojama saugykla."</string>
@@ -1283,6 +1288,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Palieskite, jei norite matyti visus tinklus"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Prisijungti"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Visi tinklai"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Prisijungta prie „<xliff:g id="NAME">%s</xliff:g>“ pasiūlyto „Wi‑Fi“ tinklo"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Ar norite leisti „<xliff:g id="NAME">%s</xliff:g>“ siūlyti jums tinklus?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Taip"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ne"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"„Wi‑Fi“ bus įjungtas automatiškai"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kai būsite netoli išsaugoto aukštos kokybės tinklo"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Neįjunkite vėl"</string>

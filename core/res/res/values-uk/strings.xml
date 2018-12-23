@@ -453,6 +453,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дозволяє програмі отримувати доступ до телефонних функцій пристрою. Такий дозвіл дає програмі змогу визначати номер телефону й ідентифікатори пристрою, активність виклику, а також віддалений номер, на який здійснюється виклик."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"маршрутизувати виклики через систему"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дозволяє додатку маршрутизувати виклики через систему, щоб було зручніше телефонувати."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Переглядати виклики через систему й керувати ними."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Додаток може переглядати поточні виклики на пристрої та керувати ними. Це стосується такої інформації, як номери та стан викликів."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"продовжувати виклик з іншого додатка"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Додаток може продовжувати виклик, початий в іншому додатку."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"переглядати номери телефону"</string>
@@ -513,6 +515,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дозволяє програмі обмінюватися даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"вимикати блокування екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Наприклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"отримувати надсилати запити щодо рівня складності пароля для блокування екрана"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Дає змогу додатку визначати рівень складності пароля для блокування екрана (високий, середній, низький або нульовий), що вказує на можливий діапазон його довжини й тип. Додаток також може пропонувати користувачам підвищити рівень складності пароля для блокування екрана, але цю пропозицію можна ігнорувати. Примітка: оскільки пароль зашифрований, додаток його не знає."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"використовувати біометричне апаратне забезпечення"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Додаток може використовувати біометричне апаратне забезпечення для автентифікації"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"керувати апаратним забезпеченням для цифрових відбитків"</string>
@@ -1123,15 +1127,15 @@
     <string name="deleteText" msgid="6979668428458199034">"Видалити"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метод введення"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дії з текстом"</string>
-    <string name="email" msgid="4560673117055050403">"Електронна пошта"</string>
+    <string name="email" msgid="4560673117055050403">"Написати лист"</string>
     <string name="email_desc" msgid="3638665569546416795">"Надіслати електронний лист на вибрану адресу"</string>
-    <string name="dial" msgid="1253998302767701559">"Зателефонувати"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Набрати вибраний номер телефону"</string>
-    <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <string name="dial" msgid="1253998302767701559">"Телефонувати"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Телефонувати за вибраним номером"</string>
+    <string name="map" msgid="5441053548030107189">"Відкрити карту"</string>
     <string name="map_desc" msgid="1836995341943772348">"Знайти вибрану адресу"</string>
     <string name="browse" msgid="1245903488306147205">"Відкрити"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Відкрити вибрану URL-адресу"</string>
-    <string name="sms" msgid="4560537514610063430">"Повідомлення"</string>
+    <string name="sms" msgid="4560537514610063430">"Написати SMS"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Надіслати повідомлення за вибраним номером телефону"</string>
     <string name="add_contact" msgid="7867066569670597203">"Додати"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Додати в контакти"</string>
@@ -1221,6 +1225,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Планшет оновлюється…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Пристрій оновлюється…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Телефон запускається…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Запуск ОС Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Планшет запускається…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Пристрій запускається…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Оптимізація пам’яті."</string>
@@ -1283,6 +1288,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Торкніться, щоб побачити всі мережі"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Під’єднатися"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Усі мережі"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Під’єднано до мережі Wi-Fi, яку запропонував додаток <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Дозволити додатку <xliff:g id="NAME">%s</xliff:g> пропонувати вам мережі?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Так"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ні"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi вмикатиметься автоматично"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Коли ви поблизу збереженої мережі високої якості"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не вмикати знову"</string>

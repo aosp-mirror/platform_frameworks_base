@@ -453,6 +453,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Приложение получит доступ к функциям телефона на устройстве. Кроме того, оно сможет определять номера телефонов и серийные номера моделей, состояние активности вызова, а также удаленные номера, с которыми установлено соединение."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"перенаправлять звонки в системе"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Приложение сможет перенаправлять звонки в системе с целью улучшения качества связи."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Управление вызовами через систему"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Приложение сможет управлять текущими вызовами на устройстве, а также получит доступ к сведениям о них, в том числе к номерам телефонов и статусам звонков."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"Продолжить вызов, начатый в другом приложении"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Разрешает приложению продолжить вызов, начатый в другом приложении."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"чтение номеров телефонов"</string>
@@ -513,6 +515,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Приложение сможет обмениваться данными с NFC-метками, картами и устройствами считывания, используя NFC."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Отключение функции блокировки экрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Приложение сможет отключать блокировку экрана и другие функции защиты. Например, блокировка экрана будет отключаться при получении входящего вызова и включаться после завершения разговора."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"Доступ к информации об уровне сложности блокировки экрана и предоставление рекомендаций по его повышению"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Приложение получит доступ к сведениям об уровне сложности блокировки экрана (высокий, средний, низкий или не задан), в том числе о типе блокировки и длине пароля. Кроме того, оно сможет предлагать пользователям повысить уровень сложности блокировки. Эти рекомендации необязательны. Обратите внимание, что пароль не хранится в виде открытого текста и недоступен приложению."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"Использование биометрического оборудования"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Приложение сможет использовать биометрическое оборудование для аутентификации"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управление сканером отпечатков"</string>
@@ -1123,7 +1127,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Удалить"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Способ ввода"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Операции с текстом"</string>
-    <string name="email" msgid="4560673117055050403">"Письмо"</string>
+    <string name="email" msgid="4560673117055050403">"Написать письмо"</string>
     <string name="email_desc" msgid="3638665569546416795">"Отправить письмо выбранному адресату"</string>
     <string name="dial" msgid="1253998302767701559">"Позвонить"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Позвонить по выбранному номеру"</string>
@@ -1137,7 +1141,7 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"Добавить в контакты"</string>
     <string name="view_calendar" msgid="979609872939597838">"Открыть"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Посмотреть выбранный день в календаре"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Расписание"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Запланировать"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Запланировать событие на выбранный день"</string>
     <string name="view_flight" msgid="7691640491425680214">"Отследить"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Отслеживать выбранный рейс"</string>
@@ -1221,6 +1225,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Обновление планшета…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Обновление устройства…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Запуск телефона…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Запуск Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Запуск планшета…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Запуск устройства…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Оптимизация хранилища…"</string>
@@ -1283,6 +1288,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Нажмите, чтобы увидеть список сетей"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Подключиться"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Все сети"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Установлено подключение к сети Wi‑Fi, найденной приложением \'<xliff:g id="NAME">%s</xliff:g>\'"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Разрешить приложению \'<xliff:g id="NAME">%s</xliff:g>\' предлагать вам сети?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Да"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Нет"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi включится автоматически"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Когда вы будете в зоне действия сохраненной сети с хорошим сигналом."</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не включать снова"</string>

@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Laat die program toe om toegang tot die foonfunksies van die toestel te verkry. Hierdie toestemming laat die program toe om te bepaal wat die foonnommer en toestel-IDs is, of die oproep aan die gang is, en die afgeleë nommer wat deur \'n oproep verbind word."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"roeteer oproepe deur die stelsel"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Laat die program toe om sy oproepe deur die stelsel te stuur om die oproepervaring te verbeter."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"sien en beheer oproepe deur die stelsel."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Laat die program toe om deurlopende oproepe op die toestel te sien en te beheer. Dit sluit inligting in soos oproepnommers vir oproepe en die toedrag van die oproepe."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"gaan voort met \'n oproep uit \'n ander program"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Laat die program toe om \'n oproep voort te sit wat in \'n ander program begin is."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lees foonnommers"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Laat die program toe om met kortveldkommunikasie- (NFC) merkers, kaarte en lesers te kommunikeer."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktiveer jou skermslot"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Laat die program toe om die sleutelslot en enige verwante wagwoordsekuriteit te deaktiveer. Byvoorbeeld, die foon deaktiveer die sleutelslot wanneer ’n oproep inkom, en atkiveer dit dan weer wanneer die oproep eindig."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"kry en versoek skermslotkompleksiteit"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Laat die program toe om die skermslot-kompleksiteitvlak (hoog, medium, laag of geen) te leer, wat die moontlike omvang van die lengte en soort skermslot aandui. Hierdie program kan ook aan gebruikers voorstel dat hulle die skermslot na \'n sekere vlak toe opdateer, maar gebruikers kan dit vrylik ignoreer en weggaan. Let daarop dat die skermslot nie in skoonteks geberg word nie sodat die program nie die presiese wagwoord ken nie."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"gebruik biometriese hardeware"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Laat die program toe om biometriese hardeware vir stawing te gebruik"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"bestuur vingerafdrukhardeware"</string>
@@ -1086,7 +1090,7 @@
     <string name="email" msgid="4560673117055050403">"E-pos"</string>
     <string name="email_desc" msgid="3638665569546416795">"Stuur e-pos aan gekose adres"</string>
     <string name="dial" msgid="1253998302767701559">"Bel"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Bel gekose foonnommer"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Bel dié foonnommer"</string>
     <string name="map" msgid="5441053548030107189">"Kaart"</string>
     <string name="map_desc" msgid="1836995341943772348">"Soek geselekteerde adres"</string>
     <string name="browse" msgid="1245903488306147205">"Maak oop"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tablet dateer tans oop …"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Toestel dateer tans op …"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Foon begin tans …"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android begin tans …"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tablet begin tans …"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Toestel begin tans …"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimeer tans berging."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tik om alle netwerke te sien"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Koppel"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle netwerke"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Gekoppel aan Wi‑Fi-netwerk wat voorgestel is deur <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Wil jy <xliff:g id="NAME">%s</xliff:g> toelaat om netwerke vir jou voor te stel?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ja"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nee"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi sal outomaties aanskakel"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Wanneer jy naby \'n gestoorde hoëgehaltenetwerk is"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Moenie weer aanskakel nie"</string>

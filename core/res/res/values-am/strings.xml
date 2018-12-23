@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"መተግበሪያው የመሳሪያውን የስልክ ባህሪያት ላይ እንዲደርስ ይፈቅድለታል። ይህ ፈቃድ መተግበሪያው የስልክ ቁጥሩን እና የመሳሪያውን መታወቂያዎች፣ ጥሪ የነቃ እንደሆነ፣ እና በጥሪ የተገናኘውን የሩቅ ቁጥር እንዲወስን ይፈቅድለታል።"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ጥሪዎችን በስርዓቱ በኩል አዙር"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"መተግበሪያው የጥሪ ተሞክሮን እንዲያሻሽል ጥሪዎቹን በስርዓቱ በኩል እንዲያዞር ያስችለዋል።"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"በሥርዓቱ በኩል ጥሪዎችን ይመልከቱ እና ይቆጣጠሩ።"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"መተግበሪያው በመሣሪያው ላይ በመካሄድ ላይ ያሉ ጥሪዎችን እንዲመለከት እና እንዲቆጣጠር ይፈቅድለታል። ይህ ለጥሪዎች እንደ የጥሪ ቁጥሮች እና የጥሪዎች ሁኔታ የመሰለ መረጃን ያካትታል።"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"በሌላ መተግበሪያ የተጀመረ ጥሪን መቀጠል"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"መተግበሪያው በሌላ መተግበሪያ ውስጥ የተጀመረ ጥሪ እንዲቀጥል ያስችለዋል።"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ስልክ ቁጥሮች ያንብቡ"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ከቅርብ ግኑኙነት መስክ (NFC) መለያዎች፣ ካርዶች እና አንባቢ ጋር ለማገናኘት ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"የማያ ገጽዎን መቆለፊያ ያሰናክሉ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"መተግበሪያው መቆለፊያውና ማንኛውም የተጎዳኘ የይለፍ ቃል ደህንነት እንዲያሰናክል ይፈቅድለታል። ለምሳሌ ስልኩ ገቢ የስልክ ጥሪ በሚቀበልበት ጊዜ መቆለፊያውን ያሰናክልና ከዚያም ጥሪው ሲጠናቀቅ መቆለፊያውን በድጋሚ ያነቃዋል።"</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"የማያ ገጽ መቆለፊያ ውስብስብነት ያግኙ እና ይጠይቁ"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"መተግበሪያው የማያ ገጽ መቆለፊያው ውስብስብነት ደረጃ (ከፍተኛ፣ መካከለኛ፣ ዝቅተኛ ወይም ምንም) እንዲያውቅ ያስችለዋል፣ ይህም ሊሆኑ የሚችለው የማያ ገጽ መቆለፊያው ርዝመት እና አይነት ክልል ያመለክታል። መተግበሪያው እንዲሁም ለተጠቃሚዎች የማያ ገጽ መቆለፊያውን ወደተወሰነ ደረጃ እንዲያዘምኑት ሊጠቁማቸው ይችላል። የማያ ገጽ መቆለፊያው በስነጣ አልባ ጽሑፍ እንደማይከማች ልብ ይበሉ፣ በዚህም መተግበሪያው ትክክለኛውን የይለፍ ቃል አያውቅም።"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ባዮሜትራዊ ሃርድዌርን መጠቀም"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"መተግበሪያው የባዮሜትራዊ ሃርድዌር ለማረጋገጥ ስራ እንዲጠቀም ያስችለዋል"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"የጣት አሻራ ሃርድዌርን አስተዳድር"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"ጡባዊ በመዘመን ላይ ነው…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"መሣሪያ በመዘመን ላይ ነው…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"ስልክ በመጀመር ላይ ነው…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android በመጀመር ላይ ነው…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"ጡባዊ በመጀመር ላይ ነው…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"መሣሪያ በመጀመር ላይ ነው…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ማከማቻን በማመቻቸት ላይ።"</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ሁሉንም አውታረ መረቦችን ለማየት መታ ያድርጉ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"አገናኝ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ሁሉም አውታረ መረቦች"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"በ<xliff:g id="NAME">%s</xliff:g> ከተጠቆመው Wi-Fi ጋር ተገናኝቷል"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"<xliff:g id="NAME">%s</xliff:g> አውታረ መረቦችን ለእርስዎ እንዲጠቁሙ ይፈልጋሉ?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"አዎ"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"አይ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi በራስ-ሰር ይበራል"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ከፍተኛ ጥራት ያለው የተቀመጠ አውታረ መረብ አቅራቢያ ሲሆኑ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"መልሰህ አታብራ"</string>

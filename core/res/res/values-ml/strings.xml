@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ഉപകരണത്തിന്റെ ഫോൺ സവിശേഷതകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഈ അനുമതി ഫോൺ നമ്പർ, ഉപകരണ ഐഡികൾ, ഒരു കോൾ സജീവമാണോയെന്നത്, ഒരു കോൾ കണക്റ്റുചെയ്‌ത വിദൂര നമ്പർ എന്നിവ നിർണ്ണയിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"കോളുകൾ സിസ്റ്റത്തിലൂടെ വിടുക"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"കോളിംഗ് അനുഭവം ‌മെച്ചപ്പെടുത്തുന്നതിനായി തങ്ങളുടെ ‌കോളുകൾ സിസ്റ്റത്തിലേയ്ക്ക് വഴിതിരിച്ചുവിടാൻ ആപ്പുകളെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"സിസ്‌റ്റത്തിലൂടെ കോളുകൾ കാണുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"ഉപകരണത്തിൽ നിലവിലുള്ള കോളുകൾ കാണാനും നിയന്തിക്കാനും ആപ്പിനെ അനുവദിക്കുന്നു. കോളുകൾക്കുള്ള നമ്പറുകളും അവയുടെ നിലയും പോലെയുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"മറ്റൊരു ആപ്പിൽ നിന്നുള്ള കോൾ തുടരുക"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"മറ്റൊരു ആപ്പിൽ ആരംഭിച്ച കോൾ തുടരാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ഫോൺ നമ്പറുകൾ റീഡുചെയ്യൽ"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"നിയർ ഫീൽഡ് കമ്മ്യൂണിക്കേഷൻ (NFC) ടാഗുകളുമായും കാർഡുകളുമായും റീഡറുകളുമായുള്ള ആശയവിനിമയത്തിന് അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"കീലോക്കും ഏതെങ്കിലും അനുബന്ധ പാസ്‌വേഡ് സുരക്ഷയും പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ഒരു ഇൻകമിംഗ് കോൾ സ്വീകരിക്കുമ്പോൾ ഫോൺ കീലോക്ക് പ്രവർത്തനരഹിതമാക്കുന്നു, കോൾ അവസാനിക്കുമ്പോൾ കീലോക്ക് വീണ്ടും പ്രവർത്തനക്ഷമമാകുന്നു."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"സ്ക്രീൻ ലോക്ക് സങ്കീർണ്ണത അഭ്യർത്ഥിച്ച്, നേടുക"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"സ്ക്രീൻ ലോക്കിന്റെ സാധ്യമായ നീളവും തരവും സൂചിപ്പിക്കുന്ന, അതിന്റെ സങ്കീർണ്ണതാ നില (ഉയർന്നത്, ഇടത്തരം, കുറഞ്ഞത് അല്ലെങ്കിൽ ഒന്നുമില്ല) മനസിലാക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു. സ്‌ക്രീൻ ലോക്ക് ഒരു പ്രത്യേക തലത്തിലേക്ക് അപ്ഡേറ്റ് ചെയ്യുന്ന ഉപയോക്താക്കൾക്ക് നിർദ്ദേശിക്കാനും ആപ്പിനാവും, മാത്രമല്ല ഉപയോക്താക്കൾക്ക് എളുപ്പത്തിൽ അവഗണിക്കാനും മറ്റൊന്നിലേക്ക് നാവിഗേറ്റ് ചെയ്യാനുമാവും. പ്ലെയിൻടെക്‌സ്‌റ്റിൽ സ്ക്രീൻ ലോക്ക് സംഭരിക്കപ്പെട്ടിട്ടില്ലെന്ന കാര്യം ശ്രദ്ധിക്കുക, അതിനാൽ ആപ്പിന് കൃത്യമായ പാസ്‌വേഡ് അറിയില്ല."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ബയോമെട്രിക് ഹാർ‌ഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"പരിശോധിച്ചുറപ്പിക്കുന്നതിനായി, ബയോമെട്രിക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കാൻ ആപ്പിനെ അനുവദിക്കുക"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ നിയന്ത്രിക്കുക"</string>
@@ -1083,23 +1087,23 @@
     <string name="deleteText" msgid="6979668428458199034">"ഇല്ലാതാക്കുക"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ടൈപ്പുചെയ്യൽ രീതി"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ടെക്‌സ്‌റ്റ് പ്രവർത്തനങ്ങൾ"</string>
-    <string name="email" msgid="4560673117055050403">"ഇമെയിൽ"</string>
+    <string name="email" msgid="4560673117055050403">"ഇമെയിൽ അയയ്ക്കൂക"</string>
     <string name="email_desc" msgid="3638665569546416795">"തിരഞ്ഞെടുത്ത വിലാസത്തിലേക്ക് ഇമെയിൽ അയയ്ക്കുക"</string>
     <string name="dial" msgid="1253998302767701559">"വിളിക്കുക"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"തിരഞ്ഞെടുത്ത നമ്പറിലേക്ക് കോൾ ചെയ്യുക"</string>
-    <string name="map" msgid="5441053548030107189">"മാപ്പ്"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"തിരഞ്ഞെടുത്ത നമ്പറിലേക്ക് വിളിക്കുക"</string>
+    <string name="map" msgid="5441053548030107189">"മാപ്പ് തുറക്കുക"</string>
     <string name="map_desc" msgid="1836995341943772348">"തിരഞ്ഞെടുത്ത വിലാസം കണ്ടെത്തുക"</string>
     <string name="browse" msgid="1245903488306147205">"തുറക്കുക"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"തിരഞ്ഞെടുത്ത URL ഓപ്പൺ ചെയ്യുക"</string>
-    <string name="sms" msgid="4560537514610063430">"സന്ദേശം"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"തിരഞ്ഞെടുത്ത URL തുറക്കുക"</string>
+    <string name="sms" msgid="4560537514610063430">"സന്ദേശം അയയ്ക്കുക"</string>
     <string name="sms_desc" msgid="7526588350969638809">"തിരഞ്ഞെടുത്ത നമ്പറിലേക്ക് സന്ദേശം അയയ്ക്കുക"</string>
     <string name="add_contact" msgid="7867066569670597203">"ചേർക്കുക"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"കോൺടാക്‌റ്റുകളിലേക്ക് ചേർക്കുക"</string>
     <string name="view_calendar" msgid="979609872939597838">"കാണുക"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"കലണ്ടറിൽ തിരഞ്ഞെടുത്ത സമയം കാണുക"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"ഷെഡ്യൂള്‍‌"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"ഷെഡ്യൂള്‍‌ ചെയ്യുക"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"തിരഞ്ഞെടുത്ത സമയത്തേക്ക് ഇവന്റ് ഷെഡ്യൂൾ ചെയ്യുക"</string>
-    <string name="view_flight" msgid="7691640491425680214">"ട്രാക്ക്"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ട്രാക്ക് ചെയ്യുക"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"തിരഞ്ഞെടുത്ത ഫ്ലൈറ്റ് ട്രാക്ക് ചെയ്യുക"</string>
     <string name="translate" msgid="9218619809342576858">"വിവർത്തനം ചെയ്യുക"</string>
     <string name="translate_desc" msgid="4502367770068777202">"തിരഞ്ഞെടുത്ത ടെക്‌സ്‌റ്റ് വിവർത്തനം ചെയ്യുക"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"ടാബ്‌ലെറ്റ് അപ്‌ഡേറ്റ് ചെയ്യുന്നു…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"ഉപകരണം അപ്‌ഡേറ്റ് ചെയ്യുന്നു…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"ഫോൺ ആരംഭിക്കുന്നു…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android ആരംഭിക്കുന്നു…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"ടാബ്‌ലെറ്റ് ആരംഭിക്കുന്നു…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"ഉപകരണം ആരംഭിക്കുന്നു…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"സ്റ്റോറേജ്  ഒപ്‌റ്റിമൈസ് ചെയ്യുന്നു."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"എല്ലാ നെറ്റ്‌വർക്കുകളും കാണാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"കണക്റ്റുചെയ്യുക"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"എല്ലാ നെറ്റ്‌വർക്കുകളും"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> നിർദേശിച്ച വൈഫൈ നെറ്റ്‌വർക്കിൽ കണക്‌റ്റ് ചെയ്‌തു"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"നിങ്ങൾക്കായി <xliff:g id="NAME">%s</xliff:g>-നെ നെറ്റ്‌വർക്കുകൾ നിർദ്ദേശിക്കാൻ അനുവദിക്കണോ?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ഉവ്വ്"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ഇല്ല"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"വൈഫൈ സ്വമേധയാ ഓണാകും"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"നിങ്ങൾ ഉയർന്ന നിലവാരമുള്ള സംരക്ഷിക്കപ്പെട്ട നെറ്റ്‌വർക്കിനരികിലെത്തുമ്പോൾ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"തിരികെ ഓണാക്കരുത്"</string>

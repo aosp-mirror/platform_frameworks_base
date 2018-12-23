@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Cho phép ứng dụng truy cập vào các tính năng điện thoại của thiết bị. Quyền này cho phép ứng dụng xác định số điện thoại và ID thiết bị, cho dù cuộc gọi có hiện hoạt hay không và số từ xa có được kết nối bằng một cuộc gọi hay không."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"định tuyến cuộc gọi thông qua hệ thống"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Cho phép ứng dụng định tuyến cuộc gọi thông qua hệ thống nhằm cải thiện trải nghiệm gọi điện."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"xem và kiểm soát cuộc gọi thông qua hệ thống."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Cho phép ứng dụng xem và kiểm soát cuộc gọi đến trên thiết bị. Ứng dụng sẽ xem và kiểm soát các thông tin như số điện thoại của các cuộc gọi và trạng thái cuộc gọi."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"tiếp tục cuộc gọi từ một ứng dụng khác"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Cho phép ứng dụng tiếp tục cuộc gọi được bắt đầu trong một ứng dụng khác."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"đọc số điện thoại"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Cho phép ứng dụng giao tiếp với thẻ Giao tiếp trường gần (NFC), thẻ và trình đọc."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"vô hiệu hóa khóa màn hình của bạn"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Cho phép ứng dụng tắt khóa phím và bất kỳ bảo mật mật khẩu được liên kết nào. Ví dụ: điện thoại tắt khóa phím khi nhận được cuộc gọi đến, sau đó bật lại khóa phím khi cuộc gọi kết thúc."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"nhận và yêu cầu độ phức tạp của khóa màn hình"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Cho phép ứng dụng nắm được mức độ phức tạp của khóa màn hình (cao, trung bình, thấp hoặc không có), cho biết khoảng độ dài và loại khóa màn hình có thể có. Ứng dụng cũng có thể đề xuất cho người dùng rằng họ nên cập nhật khóa màn hình lên một mức độ nhất định nhưng người dùng có thể tùy ý bỏ qua và chuyển sang phần khác. Xin lưu ý rằng khóa màn hình không được lưu trữ dưới dạng văn bản thuần túy, do đó, ứng dụng sẽ không biết mật khẩu chính xác."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"sử dụng phần cứng sinh trắc học"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Cho phép ứng dụng dùng phần cứng sinh trắc học để xác thực"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"quản lý phần cứng vân tay"</string>
@@ -1083,22 +1087,22 @@
     <string name="deleteText" msgid="6979668428458199034">"Xóa"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Phương thức nhập"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tác vụ văn bản"</string>
-    <string name="email" msgid="4560673117055050403">"Email"</string>
+    <string name="email" msgid="4560673117055050403">"Gửi email"</string>
     <string name="email_desc" msgid="3638665569546416795">"Gửi email đến địa chỉ đã chọn"</string>
-    <string name="dial" msgid="1253998302767701559">"Gọi"</string>
+    <string name="dial" msgid="1253998302767701559">"Gọi điện"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Gọi đến số điện thoại đã chọn"</string>
-    <string name="map" msgid="5441053548030107189">"Bản đồ"</string>
+    <string name="map" msgid="5441053548030107189">"Xem bản đồ"</string>
     <string name="map_desc" msgid="1836995341943772348">"Tìm địa chỉ đã chọn"</string>
     <string name="browse" msgid="1245903488306147205">"Mở"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Mở URL đã chọn"</string>
-    <string name="sms" msgid="4560537514610063430">"Gửi tin nhắn"</string>
+    <string name="sms" msgid="4560537514610063430">"Nhắn tin"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Nhắn tin đến số điện thoại đã chọn"</string>
     <string name="add_contact" msgid="7867066569670597203">"Thêm"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Thêm vào danh bạ"</string>
     <string name="view_calendar" msgid="979609872939597838">"Xem"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Xem thời gian đã chọn trong lịch"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Lịch biểu"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Lên lịch biểu sự kiện cho thời gian đã chọn"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Lên lịch"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Lên lịch sự kiện cho thời gian đã chọn"</string>
     <string name="view_flight" msgid="7691640491425680214">"Theo dõi"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Theo dõi chuyến bay đã chọn"</string>
     <string name="translate" msgid="9218619809342576858">"Dịch"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Máy tính bảng đang cập nhật…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Thiết bị đang cập nhật…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Điện thoại đang khởi động…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android đang khởi động..."</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Máy tính bảng đang khởi động…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Thiết bị đang khởi động…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Tối ưu hóa lưu trữ."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Nhấn để xem tất cả các mạng"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Kết nối"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Tất cả các mạng"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Đã kết nối với mạng Wi‑Fi do <xliff:g id="NAME">%s</xliff:g> đề xuất"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Bạn có muốn cho phép <xliff:g id="NAME">%s</xliff:g> đề xuất mạng cho bạn không?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Có"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Không"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi sẽ tự động bật"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Khi bạn ở gần mạng đã lưu chất lượng cao"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Không bật lại"</string>

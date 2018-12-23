@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"端末の電話機能へのアクセスをアプリに許可します。これにより、電話番号、端末ID、通話中かどうか、通話相手の電話番号をアプリから特定できるようになります。"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"システム経由での通話転送"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"通話環境の改善のために、システム経由での通話転送をアプリに許可します。"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"システム経由の通話の表示と操作。"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"デバイスで進行中の通話の表示と操作をアプリに許可します。通話の電話番号や状態などの情報も含まれます。"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"別のアプリでの通話の続行"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"別のアプリで通話を続行することをこのアプリに許可します。"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"電話番号の読み取り"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"NFCタグ、カード、リーダーとの通信をアプリに許可します。"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"画面ロックの無効化"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"キーロックとキーロックに関連付けられたパスワードのセキュリティを無効にすることをアプリに許可します。たとえば、かかってきた電話を受ける際にキーロックを無効にし、通話が終了したらキーロックを再度有効にする場合などに使用します。"</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"画面ロックの複雑さの入手とリクエスト"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"このアプリに画面ロックの複雑さレベル（高、中、低、なし）を認識することを許可します。複雑さレベルは、画面ロックの文字数の範囲やタイプを示すものです。アプリはユーザーに一定レベルまで画面ロックを更新するようすすめることもできますが、ユーザーは無視したり別の操作を行ったりできます。画面ロックは平文で保存されないため、アプリが正確なパスワードを知ることはありません。"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"生体認証ハードウェアの使用"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"生体認証ハードウェアを認証に使用することをアプリに許可します"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"指紋ハードウェアの管理"</string>
@@ -1097,9 +1101,9 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"連絡先に追加します"</string>
     <string name="view_calendar" msgid="979609872939597838">"表示"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"カレンダーで選択した日時を表示します"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"スケジュール"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"予定を作成"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"選択した日時に予定を設定します"</string>
-    <string name="view_flight" msgid="7691640491425680214">"トラック"</string>
+    <string name="view_flight" msgid="7691640491425680214">"フライト"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"選択したフライトをチェックします"</string>
     <string name="translate" msgid="9218619809342576858">"翻訳"</string>
     <string name="translate_desc" msgid="4502367770068777202">"選択したテキストを翻訳します"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"タブレットの更新中…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"端末の更新中…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"スマートフォンの起動中…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Androidの起動中…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"タブレットの起動中…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"端末の起動中…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ストレージを最適化しています。"</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"すべてのネットワークを表示するにはタップします"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"接続"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"すべてのネットワーク"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> で推奨される Wi-Fi ネットワークに接続"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"ネットワークを推奨することを <xliff:g id="NAME">%s</xliff:g> に許可しますか？"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"はい"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"いいえ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi は自動的にオンになります"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"高品質の保存済みネットワークの検出時"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"再度オンにしない"</string>

@@ -453,6 +453,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дазваляе прыкладанням атрымлiваць доступ да функцый тэлефона на прыладзе. Дзякуючы гэтаму дазволу прыкладанне можа вызначаць iдэнтыфiкатары нумару тэлефона i прылады, незалежна ад таго, цi актыўны выклiк, i аддалены нумар, на якi робiцца выклiк."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"перанакіраванне выклікаў праз сістэму"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дазваляе праграме перанакіроўваць выклікі праз сістэму ў мэтах паляпшэння выклікаў."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"праглядаць выклікі і кіраваць імі праз сістэму."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Дазваляе праграме праглядаць на прыладзе ўваходныя выклікі і кіраваць імі. Гэта інфармацыя ўключае нумары выклікаў і звесткі пра іх краіну."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"працяг выкліку з іншай праграмы"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Дазваляе праграме працягваць выклік, які пачаўся ў іншай праграме."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"счытваць нумары тэлефонаў"</string>
@@ -513,6 +515,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дазваляе прыкладаннzv спалучацца з тэгамі, картамі і счытваючымі прыладамі Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"адключэнне блакiроўкi экрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Дазваляе прыкладанням адключаць блакiроўку клавіятуры і любыя сродкі абароны, звязаныя з паролем. Прыкладам гэтага з\'яўляецца адключэнне тэлефонам блакiроўкi клавіятуры пры атрыманні ўваходнага выкліку і паўторнае ўключэнне блакiроўкi клавіятуры, калі выклік завершаны."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"атрымліваць і адсылаць запыты наконт узроўню складанасці блакіроўкі экрана"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Дазваляе праграме вызначаць узровень складанасці блакіроўкі экрана (высокі, сярэдні, нізкі ці нулявы), які залежыць ад даўжыні пароля і ад тыпу блакіроўкі экрана. Праграма можа прапанаваць карыстальнікам ускладніць блакіроўку экрана, аднак гэту прапанову можна ігнараваць. Заўважце, што праграма не можа ведаць тып і пароль блакіроўкі экрана, таму што яны захоўваюцца ў зашыфраваным выглядзе."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"выкарыстоўваць біяметрычнае абсталяванне"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Дазваляе праграме выкарыстоўваць для аўтэнтыфікацыі біяметрычнае абсталяванне"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"кіраваць апаратнымі сродкамі для адбіткаў пальцаў"</string>
@@ -1123,21 +1127,21 @@
     <string name="deleteText" msgid="6979668428458199034">"Выдалiць"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метад уводу"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дзеянні з тэкстам"</string>
-    <string name="email" msgid="4560673117055050403">"Электронная пошта"</string>
+    <string name="email" msgid="4560673117055050403">"Напісаць ліст"</string>
     <string name="email_desc" msgid="3638665569546416795">"Напісаць электронны ліст на выбраны адрас"</string>
     <string name="dial" msgid="1253998302767701559">"Выклікаць"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Звязацца з абанентам"</string>
-    <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <string name="map" msgid="5441053548030107189">"Адкрыць карту"</string>
     <string name="map_desc" msgid="1836995341943772348">"Паказаць выбраны адрас на карце"</string>
     <string name="browse" msgid="1245903488306147205">"Адкрыць"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Адкрыць URL у браўзеры"</string>
-    <string name="sms" msgid="4560537514610063430">"Паведамленне"</string>
+    <string name="sms" msgid="4560537514610063430">"Напісаць SMS"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Адправіць паведамленне на выбраны нумар"</string>
     <string name="add_contact" msgid="7867066569670597203">"Дадаць"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Дадаць у кантакты"</string>
     <string name="view_calendar" msgid="979609872939597838">"Прагледзець"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Паказаць выбраны час у календары"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Графік"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Запланаваць"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Запланаваць падзею ў выбраны час"</string>
     <string name="view_flight" msgid="7691640491425680214">"Сачыць"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Адсочваць рэйс"</string>
@@ -1221,6 +1225,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Абнаўленне планшэта…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Абнаўленне прылады…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Запуск тэлефона…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android запускаецца..."</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Запуск планшэта…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Запуск прылады…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Аптымізацыя сховішча."</string>
@@ -1283,6 +1288,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Дакраніцеся, каб убачыць усе сеткі"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Падключыцца"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Усе сеткі"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Падключана да сеткі Wi‑Fi, прапанаванай праграмай \"<xliff:g id="NAME">%s</xliff:g>\""</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Хочаце дазволіць праграме \"<xliff:g id="NAME">%s</xliff:g>\" прапаноўваць вам сеткі?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Так"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Не"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi уключыцца аўтаматычна"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Побач з захаванай сеткай з высакаякасным сігналам"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не ўключаць зноў"</string>

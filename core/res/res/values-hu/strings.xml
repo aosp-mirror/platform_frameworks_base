@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen az eszköz telefonálási funkcióihoz. Az engedéllyel rendelkező alkalmazás meghatározhatja a telefonszámot és eszközazonosítókat, hogy egy hívás aktív-e, valamint híváskor a másik fél telefonszámát."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"rendszeren keresztüli hívásirányítás"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"A telefonálási élmény javítása érdekében lehetővé teszi az alkalmazás számára a rendszeren keresztüli hívásirányítást."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Hívások megtekintése és vezérlése a rendszeren keresztül"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Engedélyezi az alkalmazásnak az eszközön folyamatban lévő hívások megtekintését és vezérlését. Ebbe beletartoznak az olyan információk is, mint a hívásban részt vevő felek hívószáma és a hívások állapota."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"Másik alkalmazásból indított hívás folytatása"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Engedélyezi az alkalmazásnak, hogy folytassa a hívást, amelyet valamelyik másik alkalmazásban kezdtek meg."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefonszámok olvasása"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Lehetővé teszi az alkalmazás számára, hogy NFC (Near Field Communication - kis hatósugarú vezeték nélküli kommunikáció) technológiát használó címkékkel, kártyákkal és leolvasókkal kommunikáljon."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"képernyőzár kikapcsolása"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lehetővé teszi az alkalmazás számára a billentyűzár és bármely kapcsolódó jelszavas védelem kikapcsolását. Például a telefon feloldja a billentyűzárat bejövő hívás esetén, majd újra bekapcsolja azt a hívás végeztével."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"a képernyőzár összetettségének lekérdezése és lekérése"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Lehetővé teszi az alkalmazás számára, hogy megismerje a képernyőzár összetettségi szintjét (magas, közepes, alacsony vagy nincs), amely jelzi a képernyőzár lehetséges típusát és hosszát. Az alkalmazás ezenkívül javaslatot tehet a felhasználóknak a képernyőzár bizonyos szintre való frissítésére, de ezt a javaslatot a felhasználók figyelmen kívül hagyhatják. A képernyőzárat nem egyszerű szöveges formátumban tárolja a rendszer, ezért az alkalmazás nem fogja tudni a pontos jelszót."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"biometrikus hardver használata"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Lehetővé teszi az alkalmazás számára a biometrikus hardver hitelesítésre való használatát"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ujjlenyomat-olvasó hardver kezelése"</string>
@@ -1084,7 +1088,7 @@
     <string name="inputMethod" msgid="1653630062304567879">"Beviteli mód"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Műveletek szöveggel"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Kiválasztott cím elküldése e-mailben"</string>
+    <string name="email_desc" msgid="3638665569546416795">"E-mail küldése a kiválasztott címre"</string>
     <string name="dial" msgid="1253998302767701559">"Hívás"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Kiválasztott telefonszám hívása"</string>
     <string name="map" msgid="5441053548030107189">"Térkép"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"A táblagép frissítése…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Az eszköz frissítése…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"A telefon indítása…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Az Android indítása…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"A táblagép indítása…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Az eszköz indítása…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Tárhely-optimalizálás."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Koppintással megjelenítheti az összes hálózatot"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Kapcsolódás"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Összes hálózat"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Csatlakozva a(z) <xliff:g id="NAME">%s</xliff:g> által javasolt Wi-Fi-hálózathoz"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Szeretné, hogy a(z) <xliff:g id="NAME">%s</xliff:g> hálózatokat javasoljon Önnek?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Igen"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nem"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"A Wi-Fi automatikusan bekapcsol"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Amikor jó minőségű mentett hálózat közelében tartózkodik"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ne kapcsolódjon vissza"</string>

@@ -450,6 +450,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Aplikaciji omogućuje pristup telefonskim značajkama uređaja. Ta dozvola aplikaciji omogućuje utvrđivanje telefonskog broja i ID-ova uređaja, je li poziv aktivan te udaljeni broj koji je povezan pozivom."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"preusmjeravati pozive putem sustava"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Omogućuje aplikaciji da preusmjerava pozive putem sustava radi poboljšanja doživljaja."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"vidjeti i kontrolirati pozive putem sustava."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Omogućuje aplikaciji da vidi i kontrolira pozive koji su u tijeku na uređaju. To uključuje podatke kao što su brojevi i stanja poziva."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"nastaviti poziv iz neke druge aplikacije"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Omogućuje aplikaciji da nastavi poziv započet u nekoj drugoj aplikaciji."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"čitati telefonske brojeve"</string>
@@ -510,6 +512,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Aplikaciji omogućuje komunikaciju s oznakama, karticama i čitačima komunikacije kratkog dometa (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"onemogućavanje zaključavanja zaslona"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Aplikaciji omogućuje onemogućavanje zaključavanja tipkovnice i svih pripadajućih sigurnosnih zaporki. Na primjer, telefon onemogućuje zaključavanje tipkovnice kod primanja dolaznog telefonskog poziva, nakon kojeg se zaključavanje tipkovnice ponovo omogućuje."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"dohvatiti i zahtijevati složenost zaključavanja zaslona"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Omogućuje aplikaciji da sazna razinu složenosti zaključavanja zaslona (visoka, srednja, niska ili nijedna), što upućuje na mogući raspon duljine i vrstu zaključavanja zaslona. Aplikacija također korisnicima može predložiti da ažuriraju zaključavanje zaslona na određenu razinu, no korisnici to mogu slobodno zanemariti i nastaviti dalje. Napominjemo da se zaključavanje zaslona ne pohranjuje u običnom tekstu, pa aplikacija ne zna točnu zaporku."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"koristiti biometrijski hardver"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Aplikaciji omogućuje upotrebu biometrijskog hardvera radi autentifikacije"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"upravljanje hardverom za čitanje otisaka prstiju"</string>
@@ -1103,26 +1107,26 @@
     <string name="deleteText" msgid="6979668428458199034">"Izbriši"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Način unosa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Radnje s tekstom"</string>
-    <string name="email" msgid="4560673117055050403">"E-pošta"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Slanje e-poruke na odabranu adresu"</string>
-    <string name="dial" msgid="1253998302767701559">"Poziv"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Pozivanje odabranog telefonskog broja"</string>
-    <string name="map" msgid="5441053548030107189">"Karta"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Prikaz odabrane adrese na karti"</string>
+    <string name="email" msgid="4560673117055050403">"Pošalji e-poštu"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Pošalji e-poštu na odabranu adresu"</string>
+    <string name="dial" msgid="1253998302767701559">"Nazovi"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Nazovi odabrani telefonski broj"</string>
+    <string name="map" msgid="5441053548030107189">"Prikaži na karti"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Prikaži odabrane adrese na karti"</string>
     <string name="browse" msgid="1245903488306147205">"Otvori"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"Otvaranje odabranog URL-a"</string>
-    <string name="sms" msgid="4560537514610063430">"Poruka"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"Slanje poruke na odabrani telefonski broj"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Otvori odabrani URL"</string>
+    <string name="sms" msgid="4560537514610063430">"Pošalji poruku"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Pošalji poruku na odabrani telefonski broj"</string>
     <string name="add_contact" msgid="7867066569670597203">"Dodaj"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"Dodavanje u kontakte"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Dodaj u kontakte"</string>
     <string name="view_calendar" msgid="979609872939597838">"Prikaži"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Prikaz odabranog vremena u kalendaru"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Raspored"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Zakazivanje događaja za određeno vrijeme"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Prikaži odabrano vrijeme u kalendaru"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Zakaži"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Zakaži događaj za određeno vrijeme"</string>
     <string name="view_flight" msgid="7691640491425680214">"Prati"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"Praćenje odabranog leta"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Prati odabrani let"</string>
     <string name="translate" msgid="9218619809342576858">"Prevedi"</string>
-    <string name="translate_desc" msgid="4502367770068777202">"Prevedite odabrani tekst"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Prevedi odabrani tekst"</string>
     <string name="define" msgid="7394820043869954211">"Definiraj"</string>
     <string name="define_desc" msgid="7910883642444919726">"Definiraj odabrani tekst"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ponestaje prostora za pohranu"</string>
@@ -1201,6 +1205,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tablet se ažurira…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Uređaj se ažurira…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefon se pokreće…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Pokretanje Androida..."</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tablet se pokreće…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Uređaj se pokreće…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimiziranje pohrane."</string>
@@ -1261,6 +1266,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Dodirnite za prikaz svih mreža"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Poveži"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Sve mreže"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Povezani ste s Wi‑Fi mrežom koju je predložila aplikacija <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Želite li dopustiti da vam aplikacija <xliff:g id="NAME">%s</xliff:g> predlaže mreže?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Da"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ne"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi će se uključiti automatski"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kada ste u blizini spremljene mreže visoke kvalitete"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Više ne uključuj"</string>

@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lar appen bruke enhetens telefonfunksjoner. Med denne tillatelsen kan appen finne telefonnummer og enhets-ID-er, registrere om en samtale pågår, og se det eksterne nummeret det opprettes en forbindelse med via oppringing."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"send anrop gjennom systemet"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Lar appen sende anrop gjennom systemet for å forbedre anropsopplevelsen."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"se og kontrollere anrop i systemet."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Lar appen se og kontrollere anrop som pågår på enheten. Dette inkluderer informasjon som anropsnumre og tilstanden til anropene."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"fortsette et anrop fra en annen app"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Lar appen fortsette et anrop som ble startet i en annen app."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"les telefonnumre"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Lar appen kommunisere med etiketter, kort og lesere som benytter NFC-teknologi."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktivere skjermlåsen"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lar appen deaktivere tastelåsen og eventuell tilknyttet passordsikkerhet. Et eksempel er at telefonen deaktiverer tastelåsen når du mottar et innkommende anrop, og deretter aktiverer tastelåsen igjen når samtalen er ferdig."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"hente og be om kompleksitet for skjermlås"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Lar appen lære skjermlåsens kompleksitetsnivå (høy, middels, lav eller ingen), som indikerer det mulige området for lengde og type skjermlås. Appen kan foreslå at brukeren oppdaterer skjermlåsen til et bestemt nivå, men brukere kan velge å ignorere dette og navigere bort. Vær oppmerksom på at skjermlåsen ikke er lagret klartekst, så appen kan ikke se det nøyaktige passordet."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"bruke biometrisk maskinvare"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Lar appen bruke biometrisk maskinvare til godkjenning"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"administrere fingeravtrykkmaskinvare"</string>
@@ -1083,21 +1087,21 @@
     <string name="deleteText" msgid="6979668428458199034">"Slett"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Inndatametode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksthandlinger"</string>
-    <string name="email" msgid="4560673117055050403">"E-post"</string>
+    <string name="email" msgid="4560673117055050403">"Send e-post"</string>
     <string name="email_desc" msgid="3638665569546416795">"Send e-post til den valgte adressen"</string>
     <string name="dial" msgid="1253998302767701559">"Ring"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Ring det valgte telefonnummeret"</string>
-    <string name="map" msgid="5441053548030107189">"Kart"</string>
+    <string name="map" msgid="5441053548030107189">"Se Kart"</string>
     <string name="map_desc" msgid="1836995341943772348">"Finn den valgte adressen"</string>
     <string name="browse" msgid="1245903488306147205">"Åpne"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Åpne den valgte nettadressen"</string>
-    <string name="sms" msgid="4560537514610063430">"Melding"</string>
+    <string name="sms" msgid="4560537514610063430">"Send melding"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Send melding til det valgte telefonnummeret"</string>
     <string name="add_contact" msgid="7867066569670597203">"Legg til"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Legg til i kontakter"</string>
     <string name="view_calendar" msgid="979609872939597838">"Se"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Se det valgte klokkeslettet i kalenderen"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Oversikt"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Planlegg"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Planlegg aktivitet for valgt klokkeslett"</string>
     <string name="view_flight" msgid="7691640491425680214">"Spor"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Spor den valgte flyvningen"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Nettbrettet oppdateres …"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Enheten oppdateres …"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefonen starter …"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android starter …"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Nettbrettet starter …"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Enheten starter …"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimaliser lagring."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Trykk for å se alle nettverkene"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Koble til"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle nettverk"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Koblet til et Wi-Fi-nettverk som ble foreslått av <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Vil du la <xliff:g id="NAME">%s</xliff:g> foreslå nettverk for deg?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ja"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nei"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi slås på automatisk"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Når du er i nærheten av et lagret nettverk av høy kvalitet"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ikke slå på igjen"</string>

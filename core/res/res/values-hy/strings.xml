@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Թույլ է տալիս հավելվածին օգտագործել սարքի հեռախոսային գործիքները: Այս թույլտվությունը հավելվածին հնարավորություն է տալիս որոշել հեռախոսահամարը և սարքի ID-ները, արդյոք զանգը ակտիվ է և միացված զանգի հեռակա հեռախոսահամարը:"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"զանգերն ուղարկել համակարգի միջոցով"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Հավելվածին թույլ է տալիս իր զանգերն ուղարկել համակարգի միջոցով՝ կապի որակը բարձրացնելու նպատակով։"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Զանգերի դիտում և վերահսկում համակարգի միջոցով"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Թույլ է տալիս հավելվածին տեսնել և վերահսկել ընթացիկ զանգերը սարքում: Սա ներառում է այնպիսի տեղեկություններ, ինչպիսիք են, օրինակ, հեռախոսահամարները և զանգերի վիճակը:"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"շարունակել զանգը այլ հավելվածի միջոցով"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Թույլ է տալիս հավելվածին շարունակել մեկ այլ հավելվածի միջոցով սկսած զանգը:"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"օգտագործել հեռախոսահամարները"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Թույլ է տալիս հավելվածին հաղորդակցվել Մոտ տարածությամբ հաղորդակցման (NFC) պիտակների, քարտերի և ընթերցիչների հետ:"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"անջատել ձեր էկրանի կողպեքը"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Թույլ է տալիս հավելվածին անջատել ստեղնաշարի կողպումը և ցանկացած կապված գաղտնաբառի պաշտպանվածությունը: Սրա ճիշտ օրինակն է, երբ հեռախոսը անջատում է ստեղնաշարի կողպումը մուտքային զանգ ստանալիս, հետո այն կրկին միացնում է, երբ զանգը ավարտվում է:"</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"էկրանի կողպման բարդության մակարդակի մասին տեղեկությունների և այդ մակարդակի բարձրացման հետ կապված խորհուրդների ստացում"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Հավելվածին հասանելի կդառնան էկրանի կողպման բարդության մակարդակի մասին տեղեկությունները (բարձր, միջին, ցածր կամ ոչ մի), այդ թվում կողպման տեսակի և գաղտնաբառի երկարության մասին տվյալները: Բացի այդ, հավելվածը կկարողանա առաջարկել օգտատերերին բարձրացնել կողպման բարդության մակարդակը: Օգտատերերը կարող են անտեսել այդ առաջարկները: Նկատի ունեցեք, որ գաղտնաբառը չի պահվում բաց տեքստի տեսքով և հասանելի չէ հավելվածին:"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"կենսաչափական սարքի օգտագործում"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Հավելվածին թույլ է տալիս օգտագործել նույնականացման համար նախատեսված կենսաչափական սարքը"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"կառավարել մատնահետքերի գրանցման սարքը"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Պլանշետը թարմացվում է…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Սարքը թարմացվում է…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Հեռախոսը միանում է…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android-ը մեկնարկում է…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Պլանշետը միանում է…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Սարքը միանում է…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Պահեստի օպտիմալացում:"</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Հպեք՝ բոլոր ցանցերը տեսնելու համար"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Միանալ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Բոլոր ցանցերը"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Միացել է «<xliff:g id="NAME">%s</xliff:g>» հավելվածի գտած Wi‑Fi ցանցին:"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Թույլատրե՞լ <xliff:g id="NAME">%s</xliff:g> հավելվածին առաջարկել ձեզ ցանցեր:"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Այո"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ոչ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi-ն ավտոմատ կմիանա"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Լավ ազդանշանով պահված ցանցի տարածքում գտնվելիս"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Նորից չմիացնել"</string>

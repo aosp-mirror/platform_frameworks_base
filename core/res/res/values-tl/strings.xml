@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Pinapayagan ang app na i-access ang mga tampok ng telepono ng device. Pinapayagan ng pahintulot na ito ang app na tukuyin ang numero ng telepono at  mga ID ng device, kung aktibo man ang isang tawag, at ang malayuang numerong ikinonekta ng isang tawag."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"iruta ang mga tawag sa pamamagitan ng system"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Pinapayagan ang app na iruta ang mga tawag nito sa pamamagitan ng system upang mapahusay ang karanasan sa pagtawag."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"tingnan at kontrolin ang mga tawag sa pamamagitan ng system."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Binibigyang-daan ang app na makita at makontrol ang mga kasalukuyang tawag sa device. Kabilang dito ang impormasyon gaya ng mga numero ng tawag para sa mga tawag at ang status ng mga tawag."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ipagpatuloy ang isang tawag mula sa ibang app"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Pinapayagan ang app na ipagpatuloy ang isang tawag na sinimulan sa ibang app."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"basahin ang mga numero ng telepono"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Pinapayagan ang app na makipag-ugnay sa Near Field Communication (NFC) na mga tag, card, at reader."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"i-disable ang iyong screen lock"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Pinapayagan ang app na i-disable ang keylock at anumang nauugnay na seguridad sa password. Halimbawa, hindi pinapagana ng telepono ang keylock kapag nakakatanggap ng papasok na tawag sa telepono, pagkatapos ay muling pinapagana ang keylock kapag tapos na ang tawag."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"kunin at humiling ng pagiging kumplikado ng lock ng screen"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Pinapayagan ang app na malaman ang antas ng pagiging kumplikado ng lock ng screen (mataas, katamtaman, mababa, o wala), na nagsasaad ng posibleng hanay ng haba at uri ng lock ng screen. Maaari ding magmungkahi ang app sa mga user na i-update nila ang lock ng screen sa isang partikular na antas ngunit malaya ang mga user na balewalain ito at mag-navigate palayo. Tandaang hindi naka-store bilang plaintext ang lock ng screen kaya hindi alam ng app ang eksaktong password."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"gumamit ng biometric hardware"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Pinapayagan ang app na gumamit ng biometric hardware para sa pag-authenticate"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"pamahalaan ang hardware ng fingerprint"</string>
@@ -1085,13 +1089,13 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Pagkilos ng teksto"</string>
     <string name="email" msgid="4560673117055050403">"Mag-email"</string>
     <string name="email_desc" msgid="3638665569546416795">"Mag-email sa mga piniling address"</string>
-    <string name="dial" msgid="1253998302767701559">"Tawagan"</string>
+    <string name="dial" msgid="1253998302767701559">"Tumawag"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Tawagan ang piniling numero ng telepono"</string>
-    <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <string name="map" msgid="5441053548030107189">"Mag-mapa"</string>
     <string name="map_desc" msgid="1836995341943772348">"Hanapin ang piniling address"</string>
     <string name="browse" msgid="1245903488306147205">"Buksan"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Buksan ang piniling URL"</string>
-    <string name="sms" msgid="4560537514610063430">"Padalhan ng Mensahe"</string>
+    <string name="sms" msgid="4560537514610063430">"Magmensahe"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Padalhan ng mensahe ang piniling numero ng telepono"</string>
     <string name="add_contact" msgid="7867066569670597203">"Magdagdag"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Idagdag sa mga contact"</string>
@@ -1101,8 +1105,8 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Mag-iskedyul ng event para sa piniling oras"</string>
     <string name="view_flight" msgid="7691640491425680214">"Subaybayan"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"I-track ang piniling flight"</string>
-    <string name="translate" msgid="9218619809342576858">"Isalin"</string>
-    <string name="translate_desc" msgid="4502367770068777202">"Isalin ang napiling text"</string>
+    <string name="translate" msgid="9218619809342576858">"I-translate"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"I-translate ang piniling text"</string>
     <string name="define" msgid="7394820043869954211">"Ilarawan"</string>
     <string name="define_desc" msgid="7910883642444919726">"Ilarawan ang piniling text"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nauubusan na ang puwang ng storage"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Nag-a-update ang tablet…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Nag-a-update ang device…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Nagsisimula ang telepono…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Nagsisimula ang Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Nagsisimula ang tablet…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Nagsisimula ang device…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ino-optimize ang storage."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"I-tap upang makita ang lahat ng network"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Kumonekta"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Lahat ng network"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Nakakonekta sa Wi‑Fi network na iminungkahi ng <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Gusto mo bang hayaan ang <xliff:g id="NAME">%s</xliff:g> na magmungkahi ng mga network para sa iyo?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Oo"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Hindi"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Awtomatikong mag-o-on ang Wi‑Fi"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kapag malapit ka sa naka-save na network na mataas ang kalidad"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Huwag i-on muli"</string>

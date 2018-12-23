@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Uygulamaya cihazdaki telefon özelliklerine erişme izni verir. Bu izin, uygulamanın telefon numarasını ve cihaz kimliğini, etkin bir çağrı olup olmadığını ve çağrıda bağlanılan karşı tarafın numarasını öğrenmesine olanak sağlar."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"çağrıları sistem üzerinden yönlendir"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Uygulamanın, çağrı deneyimini iyileştirmek için çağrılarını sistem üzerinden yönlendirmesine olanak tanır."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"aramaları sistemde görüp denetleme."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Uygulamanın cihazda devam eden aramaları görmesini ve denetlemesini sağlar. Bu bilgiler arasında aramaların yapıldığı numaralar ve aramaların durumu gibi bilgiler yer alır."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"başka bir uygulamadaki çağrıya devam etme"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Uygulamanın, başka bir uygulamada başlatılan çağrıya devam etmesine izin verir."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefon numaralarını oku"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Uygulamaya, Near Field Communication (NFC) etiketleri, kartlar ve okuyucular ile iletişim kurma izni verir."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ekran kilidimi devre dışı bırak"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Uygulamaya, tuş kilidini ve ilişkili tüm şifreli güvenlik önlemlerini devre dışı bırakma izni verir. Örneğin, telefon, çağrı alındığında tuş kilidinin devre dışı bırakır ve sonra, görüşme bittiğinde kilidi yeniden etkinleştirir."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ekran kilidi karmaşıklığını edinme ve isteme"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Uygulamanın, ekran kilidi karmaşıklık seviyesini (yüksek, orta, düşük veya yok) öğrenmesini sağlar. Ekran kilidi karmaşıklık seviyesi, ekran kilidinin olası uzunluk aralığını ve türünü gösterir. Uygulama, kullanıcılara ekran kilidini belirli bir seviyeye güncellemelerini de önerebilir, ancak kullanıcılar bunu istedikleri gibi yoksayabilir ve geçebilirler. Ekran kilidi şifrelenmemiş metin olarak saklanmadığı için uygulamanın şifreyi tam olarak bilmediğini unutmayın."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"biyometrik donanım kullan"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Uygulamanın kimlik doğrulama için biyometrik donanım kullanmasına izin verir"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"parmak izi donanımını yönetme"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tablet güncelleniyor…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Cihaz güncelleniyor…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefon başlatılıyor…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android başlatılıyor…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tablet başlatılıyor…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Cihaz başlatılıyor…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Depolama optimize ediliyor."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tüm ağları görmek için dokunun"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Bağlan"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Tüm ağlar"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> tarafından önerilen kablosuz ağa bağlanıldı"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"<xliff:g id="NAME">%s</xliff:g> uygulamasının sizin için ağ önerisinde bulunmasına izin vermek istiyor musunuz?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Evet"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Hayır"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Kablosuz özelliği otomatik olarak açılacak"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Daha önce kaydedilmiş yüksek kaliteli bir ağın yakınında olduğunuzda"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Tekrar açılmasın"</string>

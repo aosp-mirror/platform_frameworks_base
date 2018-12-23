@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lejon aplikacionin të hyjë në funksionet telefonike të pajisjes. Kjo leje i mundëson aplikacionit të përcaktojë numrin e telefonit dhe ID-të e pajisjes, nëse një telefonatë është aktive apo nëse numri në distancë është i lidhur me një telefonatë."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"kalon telefonatat përmes sistemit"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Lejon që aplikacioni të kalojë telefonatat përmes sistemit për të përmirësuar përvojën e telefonatës."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Shiko dhe kontrollo telefonatat nëpërmjet sistemit."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Lejon që aplikacioni të shikojë dhe të kontrollojë telefonatat në vazhdim në pajisje. Kjo përfshin informacione si p.sh. numrat e telefonatave për telefonatat dhe gjendjen e telefonatave."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"vazhdo një telefonatë nga një aplikacion tjetër"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Lejon që aplikacioni të vazhdojë një telefonatë që është nisur në një aplikacion tjetër."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lexo numrat e telefonit"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Lejon aplikacionin të komunikojë me etiketimet e \"Komunikimit të fushës së afërt (NFC)\", kartat dhe lexuesit."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"çaktivizo kyçjen e ekranit"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lejon aplikacionin të çaktivizojë kyçjen e tasteve dhe çdo mbrojtje të lidhur me fjalëkalimin. Për shembull, telefoni çaktivizon kyçjen e tasteve kur merr një telefonatë hyrëse, pastaj riaktivizon kyçjen e tasteve kur mbaron telefonata."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"merr dhe kërko kompleksitetin e kyçjes së ekranit"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Lejo që aplikacioni të mësojë nivelin e kompleksitetit të kyçjes së ekranit (i lartë, i mesëm, i ulët ose asnjë), që tregon gamën e mundshme të gjatësisë dhe llojin e kyçjes së ekranit. Aplikacioni mund t\'u sugjerojë gjithashtu përdoruesve që të përditësojnë kyçjen e ekranit në një nivel të caktuar, por përdoruesit mund ta shpërfillin lirshëm dhe të navigojnë më tej. Ki parasysh se kyçja e ekranit nuk ruhet në tekst të thjeshtë, prandaj aplikacioni nuk e di fjalëkalimin e saktë."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"përdor harduerin biometrik"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"E lejon aplikacionin që të përdorë harduerin biometrik për vërtetimin"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"të menaxhojë harduerin e gjurmës së gishtit"</string>
@@ -1087,19 +1091,19 @@
     <string name="email_desc" msgid="3638665569546416795">"Dërgo email tek adresa e zgjedhur"</string>
     <string name="dial" msgid="1253998302767701559">"Telefono"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Telefono në numrin e zgjedhur të telefonit"</string>
-    <string name="map" msgid="5441053548030107189">"Harta"</string>
+    <string name="map" msgid="5441053548030107189">"Hap hartën"</string>
     <string name="map_desc" msgid="1836995341943772348">"Gjej adresën e zgjedhur"</string>
     <string name="browse" msgid="1245903488306147205">"Hap"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Hap URL-në e zgjedhur"</string>
-    <string name="sms" msgid="4560537514610063430">"Mesazh"</string>
+    <string name="sms" msgid="4560537514610063430">"Dërgo mesazh"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Dërgo mesazh te numri i zgjedhur i telefonit"</string>
     <string name="add_contact" msgid="7867066569670597203">"Shto"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Shto te kontaktet"</string>
     <string name="view_calendar" msgid="979609872939597838">"Shiko"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Shiko kohën e zgjedhur në kalendar"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Orari"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Planifiko"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Planifiko ngjarjen për kohën e zgjedhur"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Pjesë muzikore"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Monitoro"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Monitoro fluturimin e zgjedhur"</string>
     <string name="translate" msgid="9218619809342576858">"Përkthe"</string>
     <string name="translate_desc" msgid="4502367770068777202">"Përkthe tekstin e zgjedhur"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tableti po përditësohet…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Pajisja po përditësohet…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefoni po niset…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"\"Androidi\" po fillon…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tableti po niset…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Pajisja po niset…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Po përshtat ruajtjen."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Trokit për të parë të gjitha rrjetet"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Lidhu"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Të gjitha rrjetet"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Lidhur me rrjetin Wi‑Fi të propozuar nga <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Dëshiron të lejosh që <xliff:g id="NAME">%s</xliff:g> të propozojë rrjetet për ty?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Po"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Jo"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi do të aktivizohet automatikisht"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kur ndodhesh pranë një rrjeti të ruajtur me cilësi të lartë"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Mos e aktivizo përsëri"</string>
