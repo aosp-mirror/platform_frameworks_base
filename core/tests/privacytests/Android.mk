@@ -8,7 +8,7 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := \
     $(call all-java-files-under, src)
 
-LOCAL_STATIC_JAVA_LIBRARIES := junit rappor-tests android-support-test truth-prebuilt
+LOCAL_STATIC_JAVA_LIBRARIES := junit rappor-tests androidx.test.rules truth-prebuilt
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_PACKAGE_NAME := FrameworksPrivacyLibraryTests

@@ -38,7 +38,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.PowerManager;
-import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -53,6 +52,7 @@ import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
@@ -106,23 +106,6 @@ public class NotificationPanelView extends PanelView implements
     private static final boolean DEBUG = false;
 
     /**
-     * If passive interrupts expand the NSSL or not
-     */
-    private static final boolean EXPAND_ON_PASSIVE_INTERRUPT = SystemProperties.getBoolean(
-            "persist.sysui.expand_shade_on_wake_up", true);
-    /**
-     * If the notification panel should remain collapsed when the phone wakes up, even if the user
-     * presses power.
-     */
-    private static final boolean NEVER_EXPAND_WHEN_WAKING_UP = SystemProperties.getBoolean(
-            "persist.sysui.defer_notifications_on_lock_screen", false);
-    /**
-     * If waking up the phone should take you to SHADE_LOCKED instead of KEYGUARD
-     */
-    private static final boolean WAKE_UP_TO_SHADE = SystemProperties.getBoolean(
-            "persist.sysui.go_to_shade_on_wake_up", false);
-
-    /**
      * Fling expanding QS.
      */
     public static final int FLING_EXPAND = 0;
@@ -133,7 +116,7 @@ public class NotificationPanelView extends PanelView implements
     public static final int FLING_COLLAPSE = 1;
 
     /**
-     * Fing until QS is completely hidden.
+     * Fling until QS is completely hidden.
      */
     public static final int FLING_HIDE = 2;
 
@@ -282,12 +265,6 @@ public class NotificationPanelView extends PanelView implements
      */
     private float mLinearDarkAmount;
 
-    /**
-     * State where the device isn't dozing anymore, but the lock screen isn't fully awake.
-     * The screen will be dimmed down with the shade collapsed.
-     */
-    private boolean mSemiAwake;
-
     private boolean mPulsing;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mNoVisibleNotifications = true;
@@ -358,6 +335,10 @@ public class NotificationPanelView extends PanelView implements
         super.onFinishInflate();
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
+
+        KeyguardClockSwitch keyguardClockSwitch = findViewById(R.id.keyguard_clock_container);
+        ViewGroup bigClockContainer = findViewById(R.id.big_clock_container);
+        keyguardClockSwitch.setBigClockContainer(bigClockContainer);
 
         mNotificationContainerParent = findViewById(R.id.notification_container_parent);
         mNotificationStackScroller = findViewById(R.id.notification_stack_scroller);
@@ -1251,11 +1232,6 @@ public class NotificationPanelView extends PanelView implements
             updateDozingVisibilities(false /* animate */);
         }
 
-        // Expand notification shade if the device was is semi-awake state
-        if (mBarState == StatusBarState.SHADE && isSemiAwake()) {
-            mNotificationStackScroller.setDark(false /* dark */, false /* animated */,
-                    null /* touchLocation */);
-        }
         resetVerticalPanelPosition();
         updateQsState();
     }
@@ -2785,33 +2761,28 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setAnimationsEnabled(!disabled);
     }
 
-    public void setDozing(boolean dozing, boolean animate, PointF wakeUpTouchLocation,
-            boolean passivelyInterrupted) {
+    /**
+     * Sets the dozing state.
+     *
+     * @param dozing {@code true} when dozing.
+     * @param animate if transition should be animated.
+     * @param wakeUpTouchLocation touch event location - if woken up by SLPI sensor.
+     */
+    public void setDozing(boolean dozing, boolean animate, PointF wakeUpTouchLocation) {
         if (dozing == mDozing) return;
         mDozing = dozing;
-        boolean doNotExpand = (!EXPAND_ON_PASSIVE_INTERRUPT && passivelyInterrupted)
-                || NEVER_EXPAND_WHEN_WAKING_UP;
-        mSemiAwake = doNotExpand && !mDozing;
-        if (!mSemiAwake) {
-            mNotificationStackScroller.setDark(mDozing, animate, wakeUpTouchLocation);
-        }
+        mNotificationStackScroller.setDark(mDozing, animate, wakeUpTouchLocation);
 
         if (mBarState == StatusBarState.KEYGUARD
                 || mBarState == StatusBarState.SHADE_LOCKED) {
             updateDozingVisibilities(animate);
         }
 
-        final float darkAmount = dozing && !mSemiAwake ? 1 : 0;
-        if (!mSemiAwake) {
-            mStatusBarStateController.setDozeAmount(darkAmount, animate);
-        }
+        final float darkAmount = dozing ? 1 : 0;
+        mStatusBarStateController.setDozeAmount(darkAmount, animate);
         if (animate) {
             mNotificationStackScroller.notifyDarkAnimationStart(mDozing);
         }
-    }
-
-    public boolean isSemiAwake() {
-        return mSemiAwake;
     }
 
     @Override
@@ -3005,24 +2976,5 @@ public class NotificationPanelView extends PanelView implements
 
     public void showTransientIndication(int id) {
         mKeyguardBottomArea.showTransientIndication(id);
-    }
-
-    /**
-     * Whenever a user drags down on the empty area (pulling down the shade and clock) and lets go.
-     *
-     * @return {@code true} if dragging down should take the user to SHADE_LOCKED.
-     */
-    public boolean onDraggedDown() {
-        if (isSemiAwake()) {
-            mSemiAwake = false;
-            mNotificationStackScroller.setDark(false /* dark */, true /* animate */,
-                    null /* touchLocation */);
-            mStatusBarStateController.setDozeAmount(0f, true /* animated */);
-            mNotificationStackScroller.notifyDarkAnimationStart(mDozing);
-            mStatusBar.updateScrimController();
-
-            return WAKE_UP_TO_SHADE;
-        }
-        return true;
     }
 }

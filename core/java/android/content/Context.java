@@ -691,7 +691,8 @@ public abstract class Context {
      *
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(int[])
      */
-    public final TypedArray obtainStyledAttributes(@StyleableRes int[] attrs) {
+    @NonNull
+    public final TypedArray obtainStyledAttributes(@NonNull @StyleableRes int[] attrs) {
         return getTheme().obtainStyledAttributes(attrs);
     }
 
@@ -702,8 +703,9 @@ public abstract class Context {
      *
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(int, int[])
      */
-    public final TypedArray obtainStyledAttributes(
-            @StyleRes int resid, @StyleableRes int[] attrs) throws Resources.NotFoundException {
+    @NonNull
+    public final TypedArray obtainStyledAttributes(@StyleRes int resid,
+            @NonNull @StyleableRes int[] attrs) throws Resources.NotFoundException {
         return getTheme().obtainStyledAttributes(resid, attrs);
     }
 
@@ -714,8 +716,9 @@ public abstract class Context {
      *
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
      */
+    @NonNull
     public final TypedArray obtainStyledAttributes(
-            AttributeSet set, @StyleableRes int[] attrs) {
+            @Nullable AttributeSet set, @NonNull @StyleableRes int[] attrs) {
         return getTheme().obtainStyledAttributes(set, attrs, 0, 0);
     }
 
@@ -726,8 +729,9 @@ public abstract class Context {
      *
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
      */
-    public final TypedArray obtainStyledAttributes(
-            AttributeSet set, @StyleableRes int[] attrs, @AttrRes int defStyleAttr,
+    @NonNull
+    public final TypedArray obtainStyledAttributes(@Nullable AttributeSet set,
+            @NonNull @StyleableRes int[] attrs, @AttrRes int defStyleAttr,
             @StyleRes int defStyleRes) {
         return getTheme().obtainStyledAttributes(
             set, attrs, defStyleAttr, defStyleRes);

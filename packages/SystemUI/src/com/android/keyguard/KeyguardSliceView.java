@@ -24,6 +24,7 @@ import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.annotation.ColorInt;
+import android.annotation.StyleRes;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Color;
@@ -444,9 +445,11 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     static class KeyguardSliceButton extends Button implements
             ConfigurationController.ConfigurationListener {
 
+        @StyleRes
+        private static int sStyleId = R.style.TextAppearance_Keyguard_Secondary;
+
         public KeyguardSliceButton(Context context) {
-            super(context, null /* attrs */, 0 /* styleAttr */,
-                    com.android.keyguard.R.style.TextAppearance_Keyguard_Secondary);
+            super(context, null /* attrs */, 0 /* styleAttr */, sStyleId);
             onDensityOrFontScaleChanged();
             setEllipsize(TruncateAt.END);
         }
@@ -466,6 +469,11 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         @Override
         public void onDensityOrFontScaleChanged() {
             updatePadding();
+        }
+
+        @Override
+        public void onOverlayChanged() {
+            setTextAppearance(sStyleId);
         }
 
         @Override

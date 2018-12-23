@@ -18,7 +18,6 @@ package com.android.systemui.car;
 
 import android.content.Context;
 
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -38,17 +37,5 @@ public class CarNotificationEntryManager extends NotificationEntryManager {
         // a notification other than a regular click. As a result, just return null for the
         // long click listener.
         return null;
-    }
-
-    @Override
-    public boolean shouldHeadsUp(NotificationData.Entry entry) {
-        // Because space is usually constrained in the auto use-case, there should not be a
-        // pinned notification when the shade has been expanded. Ensure this by not pinning any
-        // notification if the shade is already opened.
-        if (!getPresenter().isPresenterFullyCollapsed()) {
-            return false;
-        }
-
-        return super.shouldHeadsUp(entry);
     }
 }

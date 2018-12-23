@@ -23,8 +23,7 @@
 #include <string>
 #include <vector>
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 /*
  * Utility class to convert a command line, including options (--path foo.txt),
@@ -65,7 +64,6 @@ class CommandLineOptions {
   std::string name_;
 };
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2
 
 #endif  // IDMAP2_INCLUDE_IDMAP2_COMMANDLINEOPTIONS_H_

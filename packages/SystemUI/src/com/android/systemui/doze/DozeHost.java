@@ -17,7 +17,6 @@
 package com.android.systemui.doze;
 
 import android.annotation.NonNull;
-import android.app.PendingIntent;
 
 /**
  * Interface the doze service uses to communicate with the rest of system UI.
@@ -34,7 +33,6 @@ public interface DozeHost {
     boolean isProvisioned();
     boolean isBlockingDoze();
 
-    void startPendingIntentDismissingKeyguard(PendingIntent intent);
     void extendPulse();
 
     void setAnimateWakeup(boolean animateWakeup);
@@ -46,12 +44,6 @@ public interface DozeHost {
     void setDozeScreenBrightness(int value);
 
     void onIgnoreTouchWhilePulsing(boolean ignore);
-
-    /**
-     * If the device was waken up by a passive interrupt that will show the lock screen without
-     * expanding the notification panel/shade.
-     */
-    void setPassiveInterrupt(boolean lightInterrupt);
 
     interface Callback {
         /**

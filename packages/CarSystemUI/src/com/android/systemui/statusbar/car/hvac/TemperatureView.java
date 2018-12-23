@@ -23,10 +23,26 @@ public interface TemperatureView {
     /**
      * Formats the float for display
      *
-     * @param temp - The current temp or NaN
+     * @param temp - The current temp in Celsius or NaN
      */
     void setTemp(float temp);
 
+    /**
+     * Render the displayed temperature in Fahrenheit
+     *
+     * @param displayFahrenheit - True if temperature should be displayed in Fahrenheit
+     */
+    void setDisplayInFahrenheit(boolean displayFahrenheit);
+
+    /**
+     * Convert the given temperature in Celsius into Fahrenheit
+     *
+     * @param realTemp - The temperature in Celsius
+     * @return Temperature in Fahrenheit.
+     */
+    default float convertToFahrenheit(float realTemp) {
+        return (realTemp * 9f / 5f) + 32;
+    }
 
     /**
      * @return propertiyId  Example: CarHvacManager.ID_ZONED_TEMP_SETPOINT (16385)

@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.service.autofill.AutofillService;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -40,6 +41,7 @@ import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
 import android.view.contentcapture.ContentCaptureSessionId;
 import android.view.contentcapture.IContentCaptureDirectManager;
+import android.view.contentcapture.MainContentCaptureSession;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -81,6 +83,12 @@ public abstract class ContentCaptureService extends Service {
     private final IContentCaptureService mServerInterface = new IContentCaptureService.Stub() {
 
         @Override
+        public void onConnectedStateChanged(boolean state) {
+            mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnConnectedStateChanged,
+                    ContentCaptureService.this, state));
+        }
+
+        @Override
         public void onSessionStarted(ContentCaptureContext context, String sessionId, int uid,
                 IResultReceiver clientReceiver) {
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnCreateSession,
@@ -108,10 +116,9 @@ public abstract class ContentCaptureService extends Service {
             new IContentCaptureDirectManager.Stub() {
 
         @Override
-        public void sendEvents(String sessionId,
-                @SuppressWarnings("rawtypes") ParceledListSlice events) {
+        public void sendEvents(@SuppressWarnings("rawtypes") ParceledListSlice events) {
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleSendEvents,
-                            ContentCaptureService.this, sessionId, Binder.getCallingUid(), events));
+                            ContentCaptureService.this, Binder.getCallingUid(), events));
         }
     };
 
@@ -204,6 +211,15 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
+     * Called when the Android system connects to service.
+     *
+     * <p>You should generally do initialization here rather than in {@link #onCreate}.
+     */
+    public void onConnected() {
+        Slog.i(TAG, "bound to " + getClass().getName());
+    }
+
+    /**
      * Creates a new content capture session.
      *
      * @param context content capture context
@@ -217,17 +233,28 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
-     * Notifies the service of {@link ContentCaptureEvent events} associated with a content capture
-     * session.
      *
-     * @param sessionId the session's Id
-     * @param request the events
+     * @deprecated use {@link #onContentCaptureEvent(ContentCaptureSessionId, ContentCaptureEvent)}
+     * instead.
      */
+    @Deprecated
     public void onContentCaptureEventsRequest(@NonNull ContentCaptureSessionId sessionId,
             @NonNull ContentCaptureEventsRequest request) {
         if (VERBOSE) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
     }
 
+    /**
+     * Notifies the service of {@link ContentCaptureEvent events} associated with a content capture
+     * session.
+     *
+     * @param sessionId the session's Id
+     * @param event the event
+     */
+    public void onContentCaptureEvent(@NonNull ContentCaptureSessionId sessionId,
+            @NonNull ContentCaptureEvent event) {
+        if (VERBOSE) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
+        onContentCaptureEventsRequest(sessionId, new ContentCaptureEventsRequest(event));
+    }
     /**
      * Notifies the service of {@link SnapshotData snapshot data} associated with a session.
      *
@@ -246,6 +273,15 @@ public abstract class ContentCaptureService extends Service {
         if (VERBOSE) Log.v(TAG, "onDestroyContentCaptureSession(id=" + sessionId + ")");
     }
 
+    /**
+     * Called when the Android system disconnects from the service.
+     *
+     * <p> At this point this service may no longer be an active {@link AutofillService}.
+     */
+    public void onDisconnected() {
+        Slog.i(TAG, "unbinding from " + getClass().getName());
+    }
+
     @Override
     @CallSuper
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -260,6 +296,14 @@ public abstract class ContentCaptureService extends Service {
         }
     }
 
+    private void handleOnConnectedStateChanged(boolean state) {
+        if (state) {
+            onConnected();
+        } else {
+            onDisconnected();
+        }
+    }
+
     //TODO(b/111276913): consider caching the InteractionSessionId for the lifetime of the session,
     // so we don't need to create a temporary InteractionSessionId for each event.
 
@@ -271,11 +315,37 @@ public abstract class ContentCaptureService extends Service {
                 mClientInterface.asBinder());
     }
 
-    private void handleSendEvents(@NonNull String sessionId, int uid,
-            @NonNull ParceledListSlice<ContentCaptureEvent> events) {
-        if (handleIsRightCallerFor(sessionId, uid)) {
-            onContentCaptureEventsRequest(new ContentCaptureSessionId(sessionId),
-                    new ContentCaptureEventsRequest(events));
+    private void handleSendEvents(int uid,
+            @NonNull ParceledListSlice<ContentCaptureEvent> parceledEvents) {
+
+        // Most events belong to the same session, so we can keep a reference to the last one
+        // to avoid creating too many ContentCaptureSessionId objects
+        String lastSessionId = null;
+        ContentCaptureSessionId sessionId = null;
+
+        final List<ContentCaptureEvent> events = parceledEvents.getList();
+        for (int i = 0; i < events.size(); i++) {
+            final ContentCaptureEvent event = events.get(i);
+            if (!handleIsRightCallerFor(event, uid)) continue;
+            String sessionIdString = event.getSessionId();
+            if (!sessionIdString.equals(lastSessionId)) {
+                sessionId = new ContentCaptureSessionId(sessionIdString);
+                lastSessionId = sessionIdString;
+            }
+            switch (event.getType()) {
+                case ContentCaptureEvent.TYPE_SESSION_STARTED:
+                    final ContentCaptureContext clientContext = event.getClientContext();
+                    clientContext.setParentSessionId(event.getParentSessionId());
+                    mSessionsByUid.put(sessionIdString, uid);
+                    onCreateContentCaptureSession(clientContext, sessionId);
+                    break;
+                case ContentCaptureEvent.TYPE_SESSION_FINISHED:
+                    mSessionsByUid.remove(sessionIdString);
+                    onDestroyContentCaptureSession(sessionId);
+                    break;
+                default:
+                    onContentCaptureEvent(sessionId, event);
+            }
         }
     }
 
@@ -290,9 +360,18 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
-     * Checks if the given {@code uid} owns the session.
+     * Checks if the given {@code uid} owns the session associated with the event.
      */
-    private boolean handleIsRightCallerFor(@NonNull String sessionId, int uid) {
+    private boolean handleIsRightCallerFor(@NonNull ContentCaptureEvent event, int uid) {
+        final String sessionId;
+        switch (event.getType()) {
+            case ContentCaptureEvent.TYPE_SESSION_STARTED:
+            case ContentCaptureEvent.TYPE_SESSION_FINISHED:
+                sessionId = event.getParentSessionId();
+                break;
+            default:
+                sessionId = event.getSessionId();
+        }
         final Integer rightUid = mSessionsByUid.get(sessionId);
         if (rightUid == null) {
             if (VERBOSE) Log.v(TAG, "No session for " + sessionId);
@@ -323,7 +402,7 @@ public abstract class ContentCaptureService extends Service {
             final Bundle extras;
             if (binder != null) {
                 extras = new Bundle();
-                extras.putBinder(ContentCaptureSession.EXTRA_BINDER, binder);
+                extras.putBinder(MainContentCaptureSession.EXTRA_BINDER, binder);
             } else {
                 extras = null;
             }

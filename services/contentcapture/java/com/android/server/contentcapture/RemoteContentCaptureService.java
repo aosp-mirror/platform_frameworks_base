@@ -23,17 +23,16 @@ import android.os.IBinder;
 import android.service.contentcapture.IContentCaptureService;
 import android.service.contentcapture.SnapshotData;
 import android.text.format.DateUtils;
+import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
 
+import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 import com.android.internal.os.IResultReceiver;
-import com.android.server.infra.AbstractMultiplePendingRequestsRemoteService;
 
 final class RemoteContentCaptureService
         extends AbstractMultiplePendingRequestsRemoteService<RemoteContentCaptureService,
         IContentCaptureService> {
 
-    // TODO(b/117779333): changed it so it's permanentely bound
-    private static final long TIMEOUT_IDLE_BIND_MILLIS = 2 * DateUtils.MINUTE_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
 
     RemoteContentCaptureService(Context context, String serviceInterface,
@@ -42,24 +41,38 @@ final class RemoteContentCaptureService
             boolean verbose) {
         super(context, serviceInterface, componentName, userId, callbacks,
                 bindInstantServiceAllowed, verbose, /* initialCapacity= */ 2);
+
+        // Bind right away, which will trigger a onConnected() on service's
+        scheduleBind();
     }
 
-    @Override // from RemoteService
+    @Override // from AbstractRemoteService
     protected IContentCaptureService getServiceInterface(@NonNull IBinder service) {
         return IContentCaptureService.Stub.asInterface(service);
     }
 
-    // TODO(b/111276913): modify super class to allow permanent binding when value is 0 or negative
-    @Override // from RemoteService
+    @Override // from AbstractRemoteService
     protected long getTimeoutIdleBindMillis() {
         // TODO(b/111276913): read from Settings so it can be changed in the field
-        return TIMEOUT_IDLE_BIND_MILLIS;
+        return PERMANENT_BOUND_TIMEOUT_MS;
     }
 
-    @Override // from RemoteService
+    @Override // from AbstractRemoteService
     protected long getRemoteRequestMillis() {
         // TODO(b/111276913): read from Settings so it can be changed in the field
         return TIMEOUT_REMOTE_REQUEST_MILLIS;
+    }
+
+    @Override // from RemoteService
+    protected void handleOnConnectedStateChanged(boolean state) {
+        if (state && getTimeoutIdleBindMillis() != PERMANENT_BOUND_TIMEOUT_MS) {
+            scheduleUnbind();
+        }
+        try {
+            mService.onConnectedStateChanged(state);
+        } catch (Exception e) {
+            Slog.w(mTag, "Exception calling onConnectedStateChanged(" + state + "): " + e);
+        }
     }
 
     /**

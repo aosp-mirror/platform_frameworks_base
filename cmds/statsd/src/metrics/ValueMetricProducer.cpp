@@ -103,7 +103,9 @@ ValueMetricProducer::ValueMetricProducer(
       mValueDirection(metric.value_direction()),
       mSkipZeroDiffOutput(metric.skip_zero_diff_output()),
       mUseZeroDefaultBase(metric.use_zero_default_base()),
-      mHasGlobalBase(false) {
+      mHasGlobalBase(false),
+      mMaxPullDelayNs(metric.max_pull_delay_sec() > 0 ? metric.max_pull_delay_sec() * NS_PER_SEC
+                                                      : StatsdStats::kPullMaxDelayNs) {
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
         bucketSizeMills = TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket());
@@ -340,19 +342,32 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
 
 void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
     vector<std::shared_ptr<LogEvent>> allData;
-    if (mPullerManager->Pull(mPullTagId, timestampNs, &allData)) {
-        for (const auto& data : allData) {
-            if (mEventMatcherWizard->matchLogEvent(
-                *data, mWhatMatcherIndex) == MatchingState::kMatched) {
-                onMatchedLogEventLocked(mWhatMatcherIndex, *data);
-            }
-        }
-        mHasGlobalBase = true;
-    } else {
-        // for pulled data, every pull is needed. So we reset the base if any
-        // pull fails.
+    if (!mPullerManager->Pull(mPullTagId, &allData)) {
+        ALOGE("Gauge Stats puller failed for tag: %d at %lld", mPullTagId, (long long)timestampNs);
         resetBase();
+        return;
     }
+    const int64_t pullDelayNs = getElapsedRealtimeNs() - timestampNs;
+    if (pullDelayNs > mMaxPullDelayNs) {
+        ALOGE("Pull finish too late for atom %d, longer than %lld", mPullTagId,
+              (long long)mMaxPullDelayNs);
+        StatsdStats::getInstance().notePullExceedMaxDelay(mPullTagId);
+        StatsdStats::getInstance().notePullDelay(mPullTagId, pullDelayNs);
+        resetBase();
+        return;
+    }
+    StatsdStats::getInstance().notePullDelay(mPullTagId, pullDelayNs);
+
+    for (const auto& data : allData) {
+        // make a copy before doing and changes
+        LogEvent localCopy = data->makeCopy();
+        localCopy.setElapsedTimestampNs(timestampNs);
+        if (mEventMatcherWizard->matchLogEvent(localCopy, mWhatMatcherIndex) ==
+            MatchingState::kMatched) {
+            onMatchedLogEventLocked(mWhatMatcherIndex, localCopy);
+        }
+    }
+    mHasGlobalBase = true;
 }
 
 int64_t ValueMetricProducer::calcPreviousBucketEndTime(const int64_t currentTimeNs) {
@@ -381,10 +396,11 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
             return;
         }
         for (const auto& data : allData) {
-            if (mEventMatcherWizard->matchLogEvent(*data, mWhatMatcherIndex) ==
+            LogEvent localCopy = data->makeCopy();
+            if (mEventMatcherWizard->matchLogEvent(localCopy, mWhatMatcherIndex) ==
                 MatchingState::kMatched) {
-                data->setElapsedTimestampNs(bucketEndTime);
-                onMatchedLogEventLocked(mWhatMatcherIndex, *data);
+                localCopy.setElapsedTimestampNs(bucketEndTime);
+                onMatchedLogEventLocked(mWhatMatcherIndex, localCopy);
             }
         }
         mHasGlobalBase = true;

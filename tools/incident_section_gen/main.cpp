@@ -453,7 +453,7 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
     map<string, bool> variableNames;
     set<string> parents;
     vector<const FieldDescriptor*> fieldsInOrder = sortFields(descriptor);
-    bool skip[fieldsInOrder.size()];
+    vector<bool> skip(fieldsInOrder.size());
     const Destination incidentDest = getPrivacyFlags(descriptor).dest();
 
     for (size_t i=0; i<fieldsInOrder.size(); i++) {

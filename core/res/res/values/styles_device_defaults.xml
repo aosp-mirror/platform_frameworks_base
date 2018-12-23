@@ -42,7 +42,7 @@ easier.
         <item name="textColor">@color/btn_colored_text_material</item>
     </style>
     <style name="Widget.DeviceDefault.TextView" parent="Widget.Material.TextView">
-        <item name="textAppearance">@string/config_bodyFontFamily</item>
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>
     <style name="Widget.DeviceDefault.CheckedTextView" parent="Widget.Material.CheckedTextView"/>
     <style name="Widget.DeviceDefault.AutoCompleteTextView" parent="Widget.Material.AutoCompleteTextView"/>

@@ -61,7 +61,6 @@ public class EuiccManager {
     public static final String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS =
             "android.telephony.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
 
-
     /**
      * Broadcast Action: The eUICC OTA status is changed.
      * <p class="note">
@@ -85,6 +84,20 @@ public class EuiccManager {
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NOTIFY_CARRIER_SETUP_INCOMPLETE =
             "android.telephony.euicc.action.NOTIFY_CARRIER_SETUP_INCOMPLETE";
+
+    /**
+     * Intent action to select a profile to enable before download a new eSIM profile.
+     *
+     * May be called during device provisioning when there are multiple slots having profiles on
+     * them. This Intent launches a screen for all the current existing profiles and let users to
+     * choose which one they want to enable. In this case, the slot contains the profile will be
+     * activated.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_PROFILE_SELECTION =
+            "android.telephony.euicc.action.PROFILE_SELECTION";
 
     /**
      * Intent action to provision an embedded subscription.
@@ -130,6 +143,16 @@ public class EuiccManager {
      * code for logging/debugging purposes only.
      */
     public static final int EMBEDDED_SUBSCRIPTION_RESULT_ERROR = 2;
+
+    /**
+     * Key for an extra set on the {@link #ACTION_PROVISION_EMBEDDED_SUBSCRIPTION} intent for which
+     * kind of activation flow will be evolved. (see {@code EUICC_ACTIVATION_})
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ACTIVATION_TYPE =
+            "android.telephony.euicc.extra.ACTIVATION_TYPE";
 
     /**
      * Key for an extra set on {@link PendingIntent} result callbacks providing a detailed result
@@ -195,6 +218,52 @@ public class EuiccManager {
      * carrier. If not provided, the app's launcher icon will be used as a fallback.
      */
     public static final String META_DATA_CARRIER_ICON = "android.telephony.euicc.carriericon";
+
+    /**
+     * Euicc activation type which will be included in {@link #EXTRA_ACTIVATION_TYPE} and used to
+     * decide which kind of activation flow should be lauched.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"EUICC_ACTIVATION_"}, value = {
+            EUICC_ACTIVATION_TYPE_DEFAULT,
+            EUICC_ACTIVATION_TYPE_BACKUP,
+            EUICC_ACTIVATION_TYPE_TRANSFER
+
+    })
+    public @interface EuiccActivationType{}
+
+
+    /**
+     * The default euicc activation type which includes checking server side and downloading the
+     * profile based on carrier's download configuration.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EUICC_ACTIVATION_TYPE_DEFAULT = 1;
+
+    /**
+     * The euicc activation type used when the default download process failed. LPA will start the
+     * backup flow and try to download the profile for the carrier.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EUICC_ACTIVATION_TYPE_BACKUP = 2;
+
+    /**
+     * The activation flow of eSIM seamless transfer will be used. LPA will start normal eSIM
+     * activation flow and if it's failed, the name of the carrier selected will be recorded. After
+     * the future device pairing, LPA will contact this carrier to transfer it from the other device
+     * to this device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EUICC_ACTIVATION_TYPE_TRANSFER = 3;
+
 
     /**
      * Euicc OTA update status which can be got by {@link #getOtaStatus}
@@ -336,7 +405,7 @@ public class EuiccManager {
         }
         try {
             getIEuiccController().downloadSubscription(subscription, switchAfterDownload,
-                    mContext.getOpPackageName(), callbackIntent);
+                    mContext.getOpPackageName(), null /* resolvedBundle */, callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

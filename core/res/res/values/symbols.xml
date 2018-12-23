@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
 /* Copyright 2012, The Android Open Source Project
 **
@@ -330,6 +329,7 @@
   <java-symbol type="bool" name="config_enableMultiUserUI"/>
   <java-symbol type="bool" name="config_enableNewAutoSelectNetworkUI"/>
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
+  <java-symbol type="bool" name="config_lowRamTaskSnapshotsAndRecents" />
   <java-symbol type="bool" name="config_hasRecents" />
   <java-symbol type="string" name="config_recentsComponentName" />
   <java-symbol type="integer" name="config_minNumVisibleRecentTasks_lowRam" />
@@ -1369,15 +1369,6 @@
   <java-symbol type="drawable" name="ic_wifi_signal_2" />
   <java-symbol type="drawable" name="ic_wifi_signal_3" />
   <java-symbol type="drawable" name="ic_wifi_signal_4" />
-  <java-symbol type="drawable" name="ic_signal_wifi_badged_0_bars" />
-  <java-symbol type="drawable" name="ic_signal_wifi_badged_1_bar" />
-  <java-symbol type="drawable" name="ic_signal_wifi_badged_2_bars" />
-  <java-symbol type="drawable" name="ic_signal_wifi_badged_3_bars" />
-  <java-symbol type="drawable" name="ic_signal_wifi_badged_4_bars" />
-  <java-symbol type="drawable" name="ic_signal_wifi_badged_4k" />
-  <java-symbol type="drawable" name="ic_signal_wifi_badged_hd" />
-  <java-symbol type="drawable" name="ic_signal_wifi_badged_sd" />
-  <java-symbol type="drawable" name="ic_signal_wifi_badged_ld" />
   <java-symbol type="drawable" name="stat_notify_rssi_in_range" />
   <java-symbol type="drawable" name="stat_sys_gps_on" />
   <java-symbol type="drawable" name="stat_sys_tether_wifi" />
@@ -3328,7 +3319,6 @@
   <java-symbol type="bool" name="config_displayBrightnessBucketsInDoze" />
   <java-symbol type="integer" name="config_storageManagerDaystoRetainDefault" />
   <java-symbol type="string" name="config_headlineFontFamily" />
-  <java-symbol type="string" name="config_headlineFontFamilyLight" />
   <java-symbol type="string" name="config_headlineFontFamilyMedium" />
 
   <java-symbol type="drawable" name="stat_sys_vitals" />
@@ -3522,4 +3512,7 @@
   <java-symbol type="dimen" name="rounded_corner_radius_bottom" />
 
   <java-symbol type="string" name="config_defaultModuleMetadataProvider" />
+
+  <!-- For Secondary Launcher -->
+  <java-symbol type="string" name="config_secondaryHomeComponent" />
 </resources>

@@ -34,48 +34,52 @@ void StatsPuller::SetUidMap(const sp<UidMap>& uidMap) { mUidMap = uidMap; }
 
 StatsPuller::StatsPuller(const int tagId)
     : mTagId(tagId) {
-    // Pullers can cause significant impact to system health and battery.
-    // So that we don't pull too frequently.
-    mCoolDownNs = StatsPullerManager::kAllPullAtomInfo.find(tagId)->second.coolDownNs;
-    VLOG("Puller for tag %d created. Cooldown set to %lld", mTagId, (long long)mCoolDownNs);
 }
 
-bool StatsPuller::Pull(const int64_t elapsedTimeNs, std::vector<std::shared_ptr<LogEvent>>* data) {
+bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     lock_guard<std::mutex> lock(mLock);
-    int64_t wallClockTimeNs = getWallClockNs();
+    int64_t elapsedTimeNs = getElapsedRealtimeNs();
     StatsdStats::getInstance().notePull(mTagId);
-    if (elapsedTimeNs - mLastPullTimeNs < mCoolDownNs) {
-        (*data) = mCachedData;
-        StatsdStats::getInstance().notePullFromCache(mTagId);
-        StatsdStats::getInstance().notePullDelay(mTagId, getElapsedRealtimeNs() - elapsedTimeNs);
-        return true;
+    const bool shouldUseCache = elapsedTimeNs - mLastPullTimeNs <
+                                StatsPullerManager::kAllPullAtomInfo.at(mTagId).coolDownNs;
+    if (shouldUseCache) {
+        if (mHasGoodData) {
+            (*data) = mCachedData;
+            StatsdStats::getInstance().notePullFromCache(mTagId);
+        }
+        return mHasGoodData;
     }
-    if (mMinPullIntervalNs > elapsedTimeNs - mLastPullTimeNs) {
-        mMinPullIntervalNs = elapsedTimeNs - mLastPullTimeNs;
-        StatsdStats::getInstance().updateMinPullIntervalSec(mTagId,
-                                                            mMinPullIntervalNs / NS_PER_SEC);
+
+    if (mLastPullTimeNs > 0) {
+        StatsdStats::getInstance().updateMinPullIntervalSec(
+                mTagId, (elapsedTimeNs - mLastPullTimeNs) / NS_PER_SEC);
     }
     mCachedData.clear();
     mLastPullTimeNs = elapsedTimeNs;
-    int64_t pullStartTimeNs = getElapsedRealtimeNs();
-    bool ret = PullInternal(&mCachedData);
-    if (!ret) {
-        mCachedData.clear();
-        return false;
+    mHasGoodData = PullInternal(&mCachedData);
+    if (!mHasGoodData) {
+        return mHasGoodData;
     }
-    StatsdStats::getInstance().notePullTime(mTagId, getElapsedRealtimeNs() - pullStartTimeNs);
-    for (const shared_ptr<LogEvent>& data : mCachedData) {
-        data->setElapsedTimestampNs(elapsedTimeNs);
-        data->setLogdWallClockTimestampNs(wallClockTimeNs);
+    const int64_t pullDurationNs = getElapsedRealtimeNs() - elapsedTimeNs;
+    StatsdStats::getInstance().notePullTime(mTagId, pullDurationNs);
+    const bool pullTimeOut =
+            pullDurationNs > StatsPullerManager::kAllPullAtomInfo.at(mTagId).pullTimeoutNs;
+    if (pullTimeOut) {
+        // Something went wrong. Discard the data.
+        clearCacheLocked();
+        mHasGoodData = false;
+        StatsdStats::getInstance().notePullTimeout(mTagId);
+        ALOGW("Pull for atom %d exceeds timeout %lld nano seconds.", mTagId,
+              (long long)pullDurationNs);
+        return mHasGoodData;
     }
 
     if (mCachedData.size() > 0) {
         mapAndMergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId);
-        (*data) = mCachedData;
     }
 
-    StatsdStats::getInstance().notePullDelay(mTagId, getElapsedRealtimeNs() - elapsedTimeNs);
-    return ret;
+    (*data) = mCachedData;
+    return mHasGoodData;
 }
 
 int StatsPuller::ForceClearCache() {
@@ -84,6 +88,10 @@ int StatsPuller::ForceClearCache() {
 
 int StatsPuller::clearCache() {
     lock_guard<std::mutex> lock(mLock);
+    return clearCacheLocked();
+}
+
+int StatsPuller::clearCacheLocked() {
     int ret = mCachedData.size();
     mCachedData.clear();
     mLastPullTimeNs = 0;
@@ -91,7 +99,8 @@ int StatsPuller::clearCache() {
 }
 
 int StatsPuller::ClearCacheIfNecessary(int64_t timestampNs) {
-    if (timestampNs - mLastPullTimeNs > mCoolDownNs) {
+    if (timestampNs - mLastPullTimeNs >
+        StatsPullerManager::kAllPullAtomInfo.at(mTagId).coolDownNs) {
         return clearCache();
     } else {
         return 0;

@@ -208,6 +208,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static class TestableNotificationManagerService extends NotificationManagerService {
         int countSystemChecks = 0;
         boolean isSystemUid = true;
+        int countLogSmartSuggestionsVisible = 0;
 
         public TestableNotificationManagerService(Context context) {
             super(context);
@@ -231,11 +232,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         @Override
-        protected void reportSeen(NotificationRecord r) {
-            return;
-        }
-
-        @Override
         protected void reportUserInteraction(NotificationRecord r) {
             return;
         }
@@ -244,6 +240,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         protected void handleSavePolicyFile() {
             return;
         }
+
+        @Override
+        void logSmartSuggestionsVisible(NotificationRecord r) {
+            super.logSmartSuggestionsVisible(r);
+            countLogSmartSuggestionsVisible++;
+        }
+
+
     }
 
     private class TestableToastCallback extends ITransientNotification.Stub {
@@ -3507,6 +3511,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testAppOverlay() throws Exception {
+        mBinderService.setAppOverlaysAllowed(PKG, mUid, false);
+        assertFalse(mBinderService.areAppOverlaysAllowedForPackage(PKG, mUid));
+    }
+
+    @Test
     public void testIsCallerInstantApp_primaryUser() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
@@ -3776,5 +3786,89 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 generatedByAssistant);
         verify(mAssistants).notifyAssistantActionClicked(
                 eq(r.sbn), eq(actionIndex), eq(action), eq(generatedByAssistant));
+    }
+
+    @Test
+    public void testLogSmartSuggestionsVisible_triggerOnExpandAndVisible() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true);
+        NotificationVisibility[] notificationVisibility = new NotificationVisibility[] {
+                NotificationVisibility.obtain(r.getKey(), 0, 0, true)
+        };
+        mService.mNotificationDelegate.onNotificationVisibilityChanged(notificationVisibility,
+                new NotificationVisibility[0]);
+
+        assertEquals(1, mService.countLogSmartSuggestionsVisible);
+    }
+
+    @Test
+    public void testLogSmartSuggestionsVisible_noTriggerOnExpand() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true);
+
+        assertEquals(0, mService.countLogSmartSuggestionsVisible);
+    }
+
+    @Test
+    public void testLogSmartSuggestionsVisible_noTriggerOnVisible() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        NotificationVisibility[] notificationVisibility = new NotificationVisibility[]{
+                NotificationVisibility.obtain(r.getKey(), 0, 0, true)
+        };
+        mService.mNotificationDelegate.onNotificationVisibilityChanged(notificationVisibility,
+                new NotificationVisibility[0]);
+
+        assertEquals(0, mService.countLogSmartSuggestionsVisible);
+    }
+
+    public void testReportSeen_delegated() {
+        Notification.Builder nb =
+                new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                        .setContentTitle("foo")
+                        .setSmallIcon(android.R.drawable.sym_def_app_icon);
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, "opPkg", 0, "tag", mUid, 0,
+                nb.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r =  new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.reportSeen(r);
+        verify(mAppUsageStats, never()).reportEvent(anyString(), anyInt(), anyInt());
+
+    }
+
+    @Test
+    public void testReportSeen_notDelegated() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+
+        mService.reportSeen(r);
+        verify(mAppUsageStats, times(1)).reportEvent(anyString(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testNotificationStats_notificationError() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", mUid, 0,
+                new Notification.Builder(mContext, mTestNotificationChannel.getId()).build(),
+                new UserHandle(mUid), null, 0);
+        NotificationRecord update = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+        mService.addEnqueuedNotification(update);
+        assertNull(update.sbn.getNotification().getSmallIcon());
+
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(update.getKey());
+        runnable.run();
+        waitForIdle();
+
+        ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
+        verify(mListeners).notifyRemovedLocked(any(), anyInt(), captor.capture());
+        assertNotNull(captor.getValue());
     }
 }

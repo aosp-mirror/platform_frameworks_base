@@ -106,12 +106,12 @@ class OngoingPrivacyDialog constructor(
         val appName = item.findViewById(R.id.app_name) as TextView
         val icons = item.findViewById(R.id.icons) as LinearLayout
 
-        var lp = LinearLayout.LayoutParams(iconSize, iconSize).apply {
+        val lp = LinearLayout.LayoutParams(iconSize, iconSize).apply {
             gravity = Gravity.CENTER_VERTICAL
             marginStart = iconMargin
         }
 
-        app.icon?.let {
+        app.icon.let {
             appIcon.setImageDrawable(it)
         }
 

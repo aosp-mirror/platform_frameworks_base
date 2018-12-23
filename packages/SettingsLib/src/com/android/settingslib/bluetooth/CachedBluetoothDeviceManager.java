@@ -127,6 +127,25 @@ public class CachedBluetoothDeviceManager {
     }
 
     /**
+     * Search for existing sub device {@link CachedBluetoothDevice}.
+     *
+     * @param device the address of the Bluetooth device
+     * @return true for found sub device or false.
+     */
+    public synchronized boolean isSubDevice(BluetoothDevice device) {
+        for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
+            if (!cachedDevice.getDevice().equals(device)) {
+                // Check sub devices if it exists
+                CachedBluetoothDevice subDevice = cachedDevice.getSubDevice();
+                if (subDevice != null && subDevice.getDevice().equals(device)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Updates the Hearing Aid devices; specifically the HiSyncId's. This routine is called when the
      * Hearing Aid Service is connected and the HiSyncId's are now available.
      * @param LocalBluetoothProfileManager profileManager

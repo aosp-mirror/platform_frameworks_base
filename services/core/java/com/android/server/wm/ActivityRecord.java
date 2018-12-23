@@ -42,6 +42,7 @@ import static android.app.WindowConfiguration.activityTypeToString;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.CATEGORY_LAUNCHER;
+import static android.content.Intent.CATEGORY_SECONDARY_HOME;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
@@ -1178,7 +1179,8 @@ final class ActivityRecord extends ConfigurationContainer {
 
     private boolean isHomeIntent(Intent intent) {
         return ACTION_MAIN.equals(intent.getAction())
-                && intent.hasCategory(CATEGORY_HOME)
+                && (intent.hasCategory(CATEGORY_HOME)
+                || intent.hasCategory(CATEGORY_SECONDARY_HOME))
                 && intent.getCategories().size() == 1
                 && intent.getData() == null
                 && intent.getType() == null;
@@ -2484,36 +2486,20 @@ final class ActivityRecord extends ConfigurationContainer {
     }
 
     void setRequestedOrientation(int requestedOrientation) {
-        final int displayId = getDisplayId();
-        final Configuration displayConfig =
-                mRootActivityContainer.getDisplayOverrideConfiguration(displayId);
-
-        final Configuration config = setOrientation(requestedOrientation,
-                displayId, displayConfig, mayFreezeScreenLocked(app));
-        if (config != null) {
-            frozenBeforeDestroy = true;
-            if (!mAtmService.updateDisplayOverrideConfigurationLocked(config, this,
-                    false /* deferResume */, displayId)) {
-                mRootActivityContainer.resumeFocusedStacksTopActivities();
-            }
-        }
+        setOrientation(requestedOrientation, mayFreezeScreenLocked(app));
         mAtmService.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
                 task.taskId, requestedOrientation);
     }
 
-    Configuration setOrientation(int requestedOrientation, int displayId,
-            Configuration displayConfig, boolean freezeScreenIfNeeded) {
+    private void setOrientation(int requestedOrientation, boolean freezeScreenIfNeeded) {
         if (mAppWindowToken == null) {
             Slog.w(TAG_WM,
                     "Attempted to set orientation of non-existing app token: " + appToken);
-            return null;
+            return;
         }
 
-        mAppWindowToken.setOrientation(requestedOrientation);
-
         final IBinder binder = freezeScreenIfNeeded ? appToken.asBinder() : null;
-        return mAtmService.mWindowManager.updateOrientationFromAppTokens(displayConfig, binder,
-                displayId);
+        mAppWindowToken.setOrientation(requestedOrientation, binder, this);
     }
 
     int getOrientation() {

@@ -1,25 +1,28 @@
 package com.android.settingslib.graph;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-import com.android.settingslib.R;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import static com.google.common.truth.Truth.assertThat;
-import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyFloat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.settingslib.R;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

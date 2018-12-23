@@ -57,8 +57,7 @@
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 class Idmap;
 class Visitor;
@@ -271,7 +270,6 @@ class Visitor {
   virtual void visit(const IdmapData::TypeEntry& type_entry) = 0;
 };
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2
 
 #endif  // IDMAP2_INCLUDE_IDMAP2_IDMAP_H_

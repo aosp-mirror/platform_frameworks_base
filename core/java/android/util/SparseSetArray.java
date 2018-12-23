@@ -55,6 +55,13 @@ public class SparseSetArray<T> {
     }
 
     /**
+     * @return the set of items at index n
+     */
+    public ArraySet<T> get(int n) {
+        return mData.get(n);
+    }
+
+    /**
      * Remove a value from index n.
      * @return TRUE when the value existed at the given index and removed, FALSE otherwise.
      */

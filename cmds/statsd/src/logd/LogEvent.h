@@ -207,12 +207,15 @@ public:
         return &mValues;
     }
 
+    inline LogEvent makeCopy() {
+        return LogEvent(*this);
+    }
+
 private:
     /**
-     * Don't copy, it's slower. If we really need this we can add it but let's try to
-     * avoid it.
+     * Only use this if copy is absolutely needed.
      */
-    explicit LogEvent(const LogEvent&);
+    LogEvent(const LogEvent&);
 
     /**
      * Parses a log_msg into a LogEvent object.

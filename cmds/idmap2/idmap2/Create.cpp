@@ -32,9 +32,12 @@ using android::ApkAssets;
 using android::idmap2::BinaryStreamVisitor;
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Idmap;
+using android::idmap2::utils::kIdmapFilePermissionMask;
 
 bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
-  std::string target_apk_path, overlay_apk_path, idmap_path;
+  std::string target_apk_path;
+  std::string overlay_apk_path;
+  std::string idmap_path;
 
   const CommandLineOptions opts =
       CommandLineOptions("idmap2 create")
@@ -68,7 +71,7 @@ bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
     return false;
   }
 
-  umask(0133);  // u=rw,g=r,o=r
+  umask(kIdmapFilePermissionMask);
   std::ofstream fout(idmap_path);
   if (fout.fail()) {
     out_error << "failed to open idmap path " << idmap_path << std::endl;

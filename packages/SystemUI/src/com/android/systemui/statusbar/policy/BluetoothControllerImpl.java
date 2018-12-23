@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.Dependency.BG_LOOPER_NAME;
+
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -42,6 +44,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.WeakHashMap;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class BluetoothControllerImpl implements BluetoothController, BluetoothCallback,
         CachedBluetoothDevice.Callback, LocalBluetoothProfileManager.ServiceListener {
     private static final String TAG = "BluetoothController";
@@ -61,7 +70,10 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private final H mHandler = new H(Looper.getMainLooper());
     private int mState;
 
-    public BluetoothControllerImpl(Context context, Looper bgLooper) {
+    /**
+     */
+    @Inject
+    public BluetoothControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper) {
         mLocalBluetoothManager = Dependency.get(LocalBluetoothManager.class);
         mBgHandler = new Handler(bgLooper);
         if (mLocalBluetoothManager != null) {

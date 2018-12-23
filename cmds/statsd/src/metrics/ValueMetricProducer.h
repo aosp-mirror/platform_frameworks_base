@@ -183,6 +183,8 @@ private:
     // diff against.
     bool mHasGlobalBase;
 
+    const int64_t mMaxPullDelayNs;
+
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsNoCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset);
@@ -207,6 +209,8 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBase);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures);
     FRIEND_TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFail);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullTooLate);
 };
 
 }  // namespace statsd

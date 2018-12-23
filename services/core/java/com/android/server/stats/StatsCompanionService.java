@@ -1563,11 +1563,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         return mBatteryStatsHelper;
     }
 
+    private long milliAmpHrsToNanoAmpSecs(double mAh) {
+        final long MILLI_AMP_HR_TO_NANO_AMP_SECS = 1_000_000L * 3600L;
+        return (long) (mAh * MILLI_AMP_HR_TO_NANO_AMP_SECS + 0.5);
+    }
+
     private void pullDeviceCalculatedPowerUse(int tagId,
             long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         BatteryStatsHelper bsHelper = getBatteryStatsHelper();
         StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeFloat((float) bsHelper.getComputedPower());
+        e.writeLong(milliAmpHrsToNanoAmpSecs(bsHelper.getComputedPower()));
         pulledData.add(e);
     }
 
@@ -1583,7 +1588,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(bs.uidObj.getUid());
-            e.writeFloat((float) bs.totalPowerMah);
+            e.writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah));
             pulledData.add(e);
         }
     }
@@ -1603,7 +1608,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(bs.drainType.ordinal());
-            e.writeFloat((float) bs.totalPowerMah);
+            e.writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah));
             pulledData.add(e);
         }
     }

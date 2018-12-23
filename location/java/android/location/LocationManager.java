@@ -22,6 +22,7 @@ import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
@@ -2079,17 +2080,54 @@ public class LocationManager {
     }
 
     /**
-     * No-op method to keep backward-compatibility.
-     * Don't use it. Use {@link #unregisterGnssMeasurementsCallback} instead.
+     * Injects GNSS measurement corrections into the GNSS chipset.
+     *
+     * @param measurementCorrections a {@link GnssMeasurementCorrections} object with the GNSS
+     *     measurement corrections to be injected into the GNSS chipset.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public void injectGnssMeasurementCorrections(
+            @NonNull GnssMeasurementCorrections measurementCorrections) {
+        try {
+            mGnssMeasurementCallbackTransport.injectGnssMeasurementCorrections(
+                    measurementCorrections);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns an integer with flags representing the capabilities of the GNSS chipset.
+     *
+     * @hide
+     */
+    @SystemApi
+    /**
+     * Returns the integer capability flags of the GNSS chipset as defined in {@code
+     * IGnssCallback.hal}
+     */
+    public int getGnssCapabilities() {
+        try {
+            return mGnssMeasurementCallbackTransport.getGnssCapabilities();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * No-op method to keep backward-compatibility. Don't use it. Use {@link
+     * #unregisterGnssMeasurementsCallback} instead.
+     *
      * @hide
      * @deprecated use {@link #unregisterGnssMeasurementsCallback(GnssMeasurementsEvent.Callback)}
-     * instead.
+     *     instead.
      */
     @Deprecated
     @SystemApi
     @SuppressLint("Doclava125")
-    public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
-    }
+    public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {}
 
     /**
      * Unregisters a GPS Measurement callback.

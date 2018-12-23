@@ -2612,6 +2612,29 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
+    public long performRemoveAnimation(long duration, long delay, float translationDirection,
+            boolean isHeadsUpAnimation, float endLocation, Runnable onFinishedRunnable,
+            AnimatorListenerAdapter animationListener) {
+        if (mMenuRow.isMenuVisible()) {
+            Animator anim = getTranslateViewAnimator(0f, null /* listener */);
+            if (anim != null) {
+                anim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        ExpandableNotificationRow.super.performRemoveAnimation(
+                                duration, delay, translationDirection, isHeadsUpAnimation,
+                                endLocation, onFinishedRunnable, animationListener);
+                    }
+                });
+                anim.start();
+                return anim.getDuration();
+            }
+        }
+        return super.performRemoveAnimation(duration, delay, translationDirection,
+                isHeadsUpAnimation, endLocation, onFinishedRunnable, animationListener);
+    }
+
+    @Override
     protected void onAppearAnimationFinished(boolean wasAppearing) {
         super.onAppearAnimationFinished(wasAppearing);
         if (wasAppearing) {

@@ -39,10 +39,11 @@ using android::binder::Status;
 using android::idmap2::BinaryStreamVisitor;
 using android::idmap2::Idmap;
 using android::idmap2::IdmapHeader;
+using android::idmap2::utils::kIdmapFilePermissionMask;
 
 namespace {
 
-static constexpr const char* kIdmapCacheDir = "/data/resource-cache";
+constexpr const char* kIdmapCacheDir = "/data/resource-cache";
 
 Status ok() {
   return Status::ok();
@@ -55,8 +56,7 @@ Status error(const std::string& msg) {
 
 }  // namespace
 
-namespace android {
-namespace os {
+namespace android::os {
 
 Status Idmap2Service::getIdmapPath(const std::string& overlay_apk_path,
                                    int32_t user_id ATTRIBUTE_UNUSED, std::string* _aidl_return) {
@@ -69,13 +69,12 @@ Status Idmap2Service::removeIdmap(const std::string& overlay_apk_path,
                                   int32_t user_id ATTRIBUTE_UNUSED, bool* _aidl_return) {
   assert(_aidl_return);
   const std::string idmap_path = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_apk_path);
-  if (unlink(idmap_path.c_str()) == 0) {
-    *_aidl_return = true;
-    return ok();
-  } else {
+  if (unlink(idmap_path.c_str()) != 0) {
     *_aidl_return = false;
     return error("failed to unlink " + idmap_path + ": " + strerror(errno));
   }
+  *_aidl_return = true;
+  return ok();
 }
 
 Status Idmap2Service::verifyIdmap(const std::string& overlay_apk_path,
@@ -119,7 +118,7 @@ Status Idmap2Service::createIdmap(const std::string& target_apk_path,
     return error(err.str());
   }
 
-  umask(0133);  // u=rw,g=r,o=r
+  umask(kIdmapFilePermissionMask);
   const std::string idmap_path = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_apk_path);
   std::ofstream fout(idmap_path);
   if (fout.fail()) {
@@ -132,9 +131,8 @@ Status Idmap2Service::createIdmap(const std::string& target_apk_path,
     return error("failed to write to idmap path " + idmap_path);
   }
 
-  _aidl_return->reset(new std::string(idmap_path));
+  *_aidl_return = std::make_unique<std::string>(idmap_path);
   return ok();
 }
 
-}  // namespace os
-}  // namespace android
+}  // namespace android::os

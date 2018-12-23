@@ -25,7 +25,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.notification.NotificationData;
@@ -41,6 +40,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Lazy;
+
 /**
  * NotificationViewHierarchyManager manages updating the view hierarchy of notification views based
  * on their group structure. For example, if a notification becomes bundled with another,
@@ -48,6 +52,7 @@ import java.util.Stack;
  * tell NotificationListContainer which notifications to display, and inform it of changes to those
  * notifications that might affect their display.
  */
+@Singleton
 public class NotificationViewHierarchyManager {
     private static final String TAG = "NotificationViewHierarchyManager";
 
@@ -56,20 +61,15 @@ public class NotificationViewHierarchyManager {
             mTmpChildOrderMap = new HashMap<>();
 
     // Dependencies:
-    protected final NotificationLockscreenUserManager mLockscreenUserManager =
-            Dependency.get(NotificationLockscreenUserManager.class);
-    protected final NotificationGroupManager mGroupManager =
-            Dependency.get(NotificationGroupManager.class);
-    protected final VisualStabilityManager mVisualStabilityManager =
-            Dependency.get(VisualStabilityManager.class);
-    private final StatusBarStateController mStatusBarStateController =
-            Dependency.get(StatusBarStateController.class);
-    private final NotificationEntryManager mEntryManager =
-            Dependency.get(NotificationEntryManager.class);
-    private final BubbleController mBubbleController = Dependency.get(BubbleController.class);
+    protected final NotificationLockscreenUserManager mLockscreenUserManager;
+    protected final NotificationGroupManager mGroupManager;
+    protected final VisualStabilityManager mVisualStabilityManager;
+    private final StatusBarStateController mStatusBarStateController;
+    private final NotificationEntryManager mEntryManager;
+    private final BubbleController mBubbleController;
 
     // Lazy
-    private ShadeController mShadeController;
+    private final Lazy<ShadeController> mShadeController;
 
     /**
      * {@code true} if notifications not part of a group should by default be rendered in their
@@ -116,20 +116,27 @@ public class NotificationViewHierarchyManager {
         }
     }
 
-    private ShadeController getShadeController() {
-        if (mShadeController == null) {
-            mShadeController = Dependency.get(ShadeController.class);
-        }
-        return mShadeController;
-    }
-
-    public NotificationViewHierarchyManager(Context context) {
+    @Inject
+    public NotificationViewHierarchyManager(Context context,
+            NotificationLockscreenUserManager notificationLockscreenUserManager,
+            NotificationGroupManager groupManager,
+            VisualStabilityManager visualStabilityManager,
+            StatusBarStateController statusBarStateController,
+            NotificationEntryManager notificationEntryManager,
+            BubbleController bubbleController,
+            Lazy<ShadeController> shadeController) {
+        mLockscreenUserManager = notificationLockscreenUserManager;
+        mGroupManager = groupManager;
+        mVisualStabilityManager = visualStabilityManager;
+        mStatusBarStateController = statusBarStateController;
+        mEntryManager = notificationEntryManager;
+        mBubbleController = bubbleController;
+        mShadeController = shadeController;
         Resources res = context.getResources();
         mAlwaysExpandNonGroupedNotification =
                 res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);
         mStatusBarStateListener = new StatusBarStateListener(mBubbleController);
-        mEntryManager.setStatusBarStateListener(mStatusBarStateListener);
-        Dependency.get(StatusBarStateController.class).addCallback(mStatusBarStateListener);
+        mStatusBarStateController.addCallback(mStatusBarStateListener);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -392,7 +399,7 @@ public class NotificationViewHierarchyManager {
                         && !row.isLowPriority()));
             }
 
-            entry.getRow().setOnAmbient(getShadeController().isDozing());
+            entry.getRow().setOnAmbient(mShadeController.get().isDozing());
             int userId = entry.notification.getUserId();
             boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
                     entry.notification) && !entry.isRowRemoved();

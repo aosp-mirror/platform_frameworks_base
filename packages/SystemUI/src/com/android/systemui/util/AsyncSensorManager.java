@@ -38,6 +38,9 @@ import com.android.systemui.shared.plugins.PluginManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Wrapper around sensor manager that hides potential sources of latency.
  *
@@ -45,6 +48,7 @@ import java.util.List;
  * without blocking. Note that this means registering listeners now always appears successful even
  * if it is not.
  */
+@Singleton
 public class AsyncSensorManager extends SensorManager
         implements PluginListener<SensorManagerPlugin> {
 
@@ -56,8 +60,14 @@ public class AsyncSensorManager extends SensorManager
     @VisibleForTesting final Handler mHandler;
     private final List<SensorManagerPlugin> mPlugins;
 
-    public AsyncSensorManager(SensorManager inner, PluginManager pluginManager) {
-        mInner = inner;
+    @Inject
+    public AsyncSensorManager(Context context, PluginManager pluginManager) {
+        this(context.getSystemService(SensorManager.class), pluginManager);
+    }
+
+    @VisibleForTesting
+    AsyncSensorManager(SensorManager sensorManager, PluginManager pluginManager) {
+        mInner = sensorManager;
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
         mSensorCache = mInner.getSensorList(Sensor.TYPE_ALL);

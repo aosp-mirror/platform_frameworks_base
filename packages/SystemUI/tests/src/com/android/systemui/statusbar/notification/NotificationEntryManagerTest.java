@@ -103,7 +103,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private KeyguardEnvironment mEnvironment;
     @Mock private ExpandableNotificationRow mRow;
     @Mock private NotificationListContainer mListContainer;
-    @Mock private NotificationEntryManager.Callback mCallback;
+    @Mock
+    private NotificationEntryListener mCallback;
+    @Mock
+    private NotificationRowBinder.BindRowCallback mBindCallback;
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private NotificationListenerService.RankingMap mRankingMap;
     @Mock private RemoteInputController mRemoteInputController;
@@ -135,7 +138,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
             super(context);
             mBarService = barService;
             mCountDownLatch = new CountDownLatch(1);
-            mUseHeadsUp = true;
         }
 
         @Override
@@ -231,7 +233,11 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager = new TestableNotificationEntryManager(mContext, mBarService);
         Dependency.get(InitController.class).executePostInitTasks();
         mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mCallback, mHeadsUpManager);
-        mEntryManager.setNotificationClicker(mock(NotificationClicker.class));
+
+        NotificationRowBinder notificationRowBinder = Dependency.get(NotificationRowBinder.class);
+        notificationRowBinder.setUpWithPresenter(
+                mPresenter, mListContainer, mHeadsUpManager, mEntryManager, mBindCallback);
+        notificationRowBinder.setNotificationClicker(mock(NotificationClicker.class));
 
         setUserSentiment(mEntry.key, NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL);
     }
@@ -244,7 +250,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         doAnswer(invocation -> {
             mCountDownLatch.countDown();
             return null;
-        }).when(mCallback).onBindRow(any(), any(), any(), any());
+        }).when(mBindCallback).onBindRow(any(), any(), any(), any());
 
         // Post on main thread, otherwise we will be stuck waiting here for the inflation finished
         // callback forever, since it won't execute until the tests ends.
@@ -261,7 +267,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         // Row inflation:
         ArgumentCaptor<NotificationData.Entry> entryCaptor = ArgumentCaptor.forClass(
                 NotificationData.Entry.class);
-        verify(mCallback).onBindRow(entryCaptor.capture(), any(), eq(mSbn), any());
+        verify(mBindCallback).onBindRow(entryCaptor.capture(), any(), eq(mSbn), any());
         NotificationData.Entry entry = entryCaptor.getValue();
         verify(mRemoteInputManager).bindRow(entry.getRow());
 

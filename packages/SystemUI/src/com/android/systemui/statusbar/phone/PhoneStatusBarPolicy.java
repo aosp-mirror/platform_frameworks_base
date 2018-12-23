@@ -85,7 +85,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
@@ -102,9 +101,8 @@ import java.util.Locale;
  * strictly doesn't need to.
  */
 public class PhoneStatusBarPolicy implements Callback, Callbacks,
-        RotationLockControllerCallback, Listener, LocationChangeCallback,
-        ZenModeController.Callback, DeviceProvisionedListener, KeyguardMonitor.Callback,
-        PrivacyItemController.Callback {
+        RotationLockControllerCallback, Listener, ZenModeController.Callback,
+        DeviceProvisionedListener, KeyguardMonitor.Callback, PrivacyItemController.Callback {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -255,6 +253,9 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mIconController.setIconVisibility(mSlotMicrophone, false);
         mIconController.setIcon(mSlotCamera, R.drawable.stat_sys_camera, null);
         mIconController.setIconVisibility(mSlotCamera, false);
+        mIconController.setIcon(mSlotLocation, LOCATION_STATUS_ICON_ID,
+                mContext.getString(R.string.accessibility_location_active));
+        mIconController.setIconVisibility(mSlotLocation, false);
 
         mRotationLockController.addCallback(this);
         mBluetooth.addCallback(this);
@@ -265,7 +266,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mNextAlarmController.addCallback(mNextAlarmCallback);
         mDataSaver.addCallback(this);
         mKeyguardMonitor.addCallback(this);
-        mLocationController.addCallback(this);
         mPrivacyItemController.setListening(true);
 
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
@@ -294,7 +294,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mNextAlarmController.removeCallback(mNextAlarmCallback);
         mDataSaver.removeCallback(this);
         mKeyguardMonitor.removeCallback(this);
-        mLocationController.removeCallback(this);
         mPrivacyItemController.setListening(false);
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallback(this);
         mContext.unregisterReceiver(mIntentReceiver);
@@ -312,21 +311,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     @Override
     public void onConfigChanged(ZenModeConfig config) {
         updateVolumeZen();
-    }
-
-    @Override
-    public void onLocationActiveChanged(boolean active) {
-        updateLocation();
-    }
-
-    // Updates the status view based on the current state of location requests.
-    private void updateLocation() {
-        if (mLocationController.isLocationActive()) {
-            mIconController.setIcon(mSlotLocation, LOCATION_STATUS_ICON_ID,
-                    mContext.getString(R.string.accessibility_location_active));
-        } else {
-            mIconController.removeAllIconsForSlot(mSlotLocation);
-        }
     }
 
     private void updateAlarm() {

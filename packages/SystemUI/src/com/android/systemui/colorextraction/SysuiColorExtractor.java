@@ -39,9 +39,13 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * ColorExtractor aware of wallpaper visibility
  */
+@Singleton
 public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
     private static final String TAG = "SysuiColorExtractor";
     private boolean mWallpaperVisible;
@@ -49,6 +53,7 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
     // Colors to return when the wallpaper isn't visible
     private final GradientColors mWpHiddenColors;
 
+    @Inject
     public SysuiColorExtractor(Context context) {
         this(context, new Tonal(context), true);
     }

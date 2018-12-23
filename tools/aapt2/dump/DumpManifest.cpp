@@ -43,8 +43,10 @@ enum {
   PERMISSION_ATTR = 0x01010006,
   EXPORTED_ATTR = 0x01010010,
   GRANT_URI_PERMISSIONS_ATTR = 0x0101001b,
+  PRIORITY_ATTR = 0x0101001c,
   RESOURCE_ATTR = 0x01010025,
   DEBUGGABLE_ATTR = 0x0101000f,
+  TARGET_PACKAGE_ATTR = 0x01010021,
   VALUE_ATTR = 0x01010024,
   VERSION_CODE_ATTR = 0x0101021b,
   VERSION_NAME_ATTR = 0x0101021c,
@@ -77,8 +79,11 @@ enum {
   ISGAME_ATTR = 0x10103f4,
   VERSION_ATTR = 0x01010519,
   CERT_DIGEST_ATTR = 0x01010548,
-  REQUIRED_FEATURE_ATTR = 0x1010557,
-  REQUIRED_NOT_FEATURE_ATTR = 0x1010558,
+  REQUIRED_FEATURE_ATTR = 0x01010557,
+  REQUIRED_NOT_FEATURE_ATTR = 0x01010558,
+  IS_STATIC_ATTR = 0x0101055a,
+  REQUIRED_SYSTEM_PROPERTY_NAME_ATTR = 0x01010565,
+  REQUIRED_SYSTEM_PROPERTY_VALUE_ATTR = 0x01010566,
   COMPILE_SDK_VERSION_ATTR = 0x01010572,
   COMPILE_SDK_VERSION_CODENAME_ATTR = 0x01010573,
   VERSION_MAJOR_ATTR = 0x01010577,
@@ -1586,6 +1591,44 @@ class OriginalPackage : public ManifestExtractor::Element {
   }
 };
 
+
+/** Represents <overlay> elements. **/
+class Overlay : public ManifestExtractor::Element {
+ public:
+  Overlay() = default;
+  const std::string* target_package = nullptr;
+  int priority;
+  bool is_static;
+  const std::string* required_property_name = nullptr;
+  const std::string* required_property_value = nullptr;
+
+  void Extract(xml::Element* element) override {
+    target_package = GetAttributeString(FindAttribute(element, TARGET_PACKAGE_ATTR));
+    priority = GetAttributeIntegerDefault(FindAttribute(element, PRIORITY_ATTR), 0);
+    is_static = GetAttributeIntegerDefault(FindAttribute(element, IS_STATIC_ATTR), false) != 0;
+    required_property_name = GetAttributeString(
+        FindAttribute(element, REQUIRED_SYSTEM_PROPERTY_NAME_ATTR));
+    required_property_value = GetAttributeString(
+        FindAttribute(element, REQUIRED_SYSTEM_PROPERTY_VALUE_ATTR));
+  }
+
+  void Print(text::Printer* printer) override {
+    printer->Print(StringPrintf("overlay:"));
+    if (target_package) {
+      printer->Print(StringPrintf(" targetPackage='%s'", target_package->c_str()));
+    }
+    printer->Print(StringPrintf(" priority='%d'", priority));
+    printer->Print(StringPrintf(" isStatic='%s'", is_static ? "true" : "false"));
+    if (required_property_name) {
+      printer->Print(StringPrintf(" requiredPropertyName='%s'", required_property_name->c_str()));
+    }
+    if (required_property_value) {
+      printer->Print(StringPrintf(" requiredPropertyValue='%s'", required_property_value->c_str()));
+    }
+    printer->Print("\n");
+  }
+};
+
 /** * Represents <package-verifier> elements. **/
 class PackageVerifier : public ManifestExtractor::Element {
  public:
@@ -2166,6 +2209,7 @@ T* ElementCast(ManifestExtractor::Element* element) {
     {"meta-data", std::is_base_of<MetaData, T>::value},
     {"manifest", std::is_base_of<Manifest, T>::value},
     {"original-package", std::is_base_of<OriginalPackage, T>::value},
+    {"overlay", std::is_base_of<Overlay, T>::value},
     {"package-verifier", std::is_base_of<PackageVerifier, T>::value},
     {"permission", std::is_base_of<Permission, T>::value},
     {"provider", std::is_base_of<Provider, T>::value},
@@ -2215,6 +2259,7 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
     {"manifest", &CreateType<Manifest>},
     {"meta-data", &CreateType<MetaData>},
     {"original-package", &CreateType<OriginalPackage>},
+    {"overlay", &CreateType<Overlay>},
     {"package-verifier", &CreateType<PackageVerifier>},
     {"permission", &CreateType<Permission>},
     {"provider", &CreateType<Provider>},

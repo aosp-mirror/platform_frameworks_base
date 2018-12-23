@@ -126,7 +126,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mPowerManager = new PowerManager(mContext, powerManagerService,
                 Handler.createAsync(Looper.myLooper()));
 
-        mEntryManager = new TestableNotificationEntryManager(mDreamManager, mPowerManager,
+        mEntryManager = new TestableNotificationEntryManager(mPowerManager,
                 mContext);
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         Dependency.get(InitController.class).executePostInitTasks();

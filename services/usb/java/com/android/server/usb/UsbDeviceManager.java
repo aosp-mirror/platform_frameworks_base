@@ -16,6 +16,12 @@
 
 package com.android.server.usb;
 
+import static android.hardware.usb.UsbPortStatus.DATA_ROLE_DEVICE;
+import static android.hardware.usb.UsbPortStatus.DATA_ROLE_HOST;
+import static android.hardware.usb.UsbPortStatus.MODE_AUDIO_ACCESSORY;
+import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SINK;
+import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SOURCE;
+
 import static com.android.internal.usb.DumpUtils.writeAccessory;
 import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
 
@@ -36,6 +42,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.debug.AdbManagerInternal;
 import android.debug.IAdbTransport;
+import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbConfiguration;
 import android.hardware.usb.UsbConstants;
@@ -294,9 +301,10 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         BroadcastReceiver portReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                UsbPort port = intent.getParcelableExtra(UsbManager.EXTRA_PORT);
+                ParcelableUsbPort port = intent.getParcelableExtra(UsbManager.EXTRA_PORT);
                 UsbPortStatus status = intent.getParcelableExtra(UsbManager.EXTRA_PORT_STATUS);
-                mHandler.updateHostState(port, status);
+                mHandler.updateHostState(
+                        port.getUsbPort(context.getSystemService(UsbManager.class)), status);
             }
         };
 
@@ -821,23 +829,20 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     boolean prevHostConnected = mHostConnected;
                     UsbPort port = (UsbPort) args.arg1;
                     UsbPortStatus status = (UsbPortStatus) args.arg2;
-                    mHostConnected = status.getCurrentDataRole() == UsbPort.DATA_ROLE_HOST;
-                    mSourcePower = status.getCurrentPowerRole() == UsbPort.POWER_ROLE_SOURCE;
-                    mSinkPower = status.getCurrentPowerRole() == UsbPort.POWER_ROLE_SINK;
-                    mAudioAccessoryConnected =
-                            (status.getCurrentMode() == UsbPort.MODE_AUDIO_ACCESSORY);
-                    mAudioAccessorySupported = port.isModeSupported(UsbPort.MODE_AUDIO_ACCESSORY);
+                    mHostConnected = status.getCurrentDataRole() == DATA_ROLE_HOST;
+                    mSourcePower = status.getCurrentPowerRole() == POWER_ROLE_SOURCE;
+                    mSinkPower = status.getCurrentPowerRole() == POWER_ROLE_SINK;
+                    mAudioAccessoryConnected = (status.getCurrentMode() == MODE_AUDIO_ACCESSORY);
+                    mAudioAccessorySupported = port.isModeSupported(MODE_AUDIO_ACCESSORY);
                     // Ideally we want to see if PR_SWAP and DR_SWAP is supported.
                     // But, this should be suffice, since, all four combinations are only supported
                     // when PR_SWAP and DR_SWAP are supported.
                     mSupportsAllCombinations = status.isRoleCombinationSupported(
-                            UsbPort.POWER_ROLE_SOURCE, UsbPort.DATA_ROLE_HOST)
-                            && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SINK,
-                            UsbPort.DATA_ROLE_HOST)
-                            && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SOURCE,
-                            UsbPort.DATA_ROLE_DEVICE)
-                            && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SINK,
-                            UsbPort.DATA_ROLE_HOST);
+                            POWER_ROLE_SOURCE, DATA_ROLE_HOST)
+                            && status.isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_HOST)
+                            && status.isRoleCombinationSupported(POWER_ROLE_SOURCE,
+                            DATA_ROLE_DEVICE)
+                            && status.isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_HOST);
 
                     args.recycle();
                     updateUsbNotification(false);

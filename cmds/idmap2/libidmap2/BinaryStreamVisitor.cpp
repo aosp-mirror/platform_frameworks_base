@@ -22,8 +22,7 @@
 
 #include "idmap2/BinaryStreamVisitor.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 void BinaryStreamVisitor::Write16(uint16_t value) {
   uint16_t x = htodl(value);
@@ -64,18 +63,17 @@ void BinaryStreamVisitor::visit(const IdmapData::Header& header) {
   Write16(header.GetTypeCount());
 }
 
-void BinaryStreamVisitor::visit(const IdmapData::TypeEntry& te) {
-  const uint16_t entryCount = te.GetEntryCount();
+void BinaryStreamVisitor::visit(const IdmapData::TypeEntry& type_entry) {
+  const uint16_t entryCount = type_entry.GetEntryCount();
 
-  Write16(te.GetTargetTypeId());
-  Write16(te.GetOverlayTypeId());
+  Write16(type_entry.GetTargetTypeId());
+  Write16(type_entry.GetOverlayTypeId());
   Write16(entryCount);
-  Write16(te.GetEntryOffset());
+  Write16(type_entry.GetEntryOffset());
   for (uint16_t i = 0; i < entryCount; i++) {
-    EntryId entry_id = te.GetEntry(i);
+    EntryId entry_id = type_entry.GetEntry(i);
     Write32(entry_id != kNoEntry ? static_cast<uint32_t>(entry_id) : kPadding);
   }
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

@@ -325,7 +325,6 @@ import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
-import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -888,7 +887,7 @@ public class PackageManagerService extends IPackageManager.Stub
     volatile boolean mSystemReady;
     volatile boolean mSafeMode;
     volatile boolean mHasSystemUidErrors;
-    private volatile boolean mWebInstantAppsDisabled;
+    private volatile SparseBooleanArray mWebInstantAppsDisabled = new SparseBooleanArray();
 
     ApplicationInfo mAndroidApplication;
     final ActivityInfo mResolveActivity = new ActivityInfo();
@@ -2225,9 +2224,7 @@ public class PackageManagerService extends IPackageManager.Stub
             for (int i = 0; i < builtInLibCount; i++) {
                 String name = libConfig.keyAt(i);
                 SystemConfig.SharedLibraryEntry entry = libConfig.valueAt(i);
-                addSharedLibraryLPw(entry.filename, null, null, name,
-                        SharedLibraryInfo.VERSION_UNDEFINED, SharedLibraryInfo.TYPE_BUILTIN,
-                        PLATFORM_PACKAGE_NAME, 0);
+                addBuiltInSharedLibraryLocked(entry.filename, name);
             }
 
             // Now that we have added all the libraries, iterate again to add dependency
@@ -5570,12 +5567,18 @@ public class PackageManagerService extends IPackageManager.Stub
      * were updated, return true.
      */
     private boolean isCompatSignatureUpdateNeeded(PackageParser.Package scannedPkg) {
-        final VersionInfo ver = getSettingsVersionForPackage(scannedPkg);
+        return isCompatSignatureUpdateNeeded(getSettingsVersionForPackage(scannedPkg));
+    }
+
+    private static boolean isCompatSignatureUpdateNeeded(VersionInfo ver) {
         return ver.databaseVersion < DatabaseVersion.SIGNATURE_END_ENTITY;
     }
 
     private boolean isRecoverSignatureUpdateNeeded(PackageParser.Package scannedPkg) {
-        final VersionInfo ver = getSettingsVersionForPackage(scannedPkg);
+        return isRecoverSignatureUpdateNeeded(getSettingsVersionForPackage(scannedPkg));
+    }
+
+    private static boolean isRecoverSignatureUpdateNeeded(VersionInfo ver) {
         return ver.databaseVersion < DatabaseVersion.SIGNATURE_MALFORMED_RECOVER;
     }
 
@@ -5904,8 +5907,8 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Returns whether or not instant apps have been disabled remotely.
      */
-    private boolean areWebInstantAppsDisabled() {
-        return mWebInstantAppsDisabled;
+    private boolean areWebInstantAppsDisabled(int userId) {
+        return mWebInstantAppsDisabled.get(userId);
     }
 
     private boolean isInstantAppResolutionAllowed(
@@ -5936,7 +5939,7 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             if (intent.getData() == null || TextUtils.isEmpty(intent.getData().getHost())) {
                 return false;
-            } else if (areWebInstantAppsDisabled()) {
+            } else if (areWebInstantAppsDisabled(userId)) {
                 return false;
             }
         }
@@ -6816,7 +6819,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private List<ResolveInfo> applyPostResolutionFilter(List<ResolveInfo> resolveInfos,
             String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid,
             boolean resolveForStart, int userId, Intent intent) {
-        final boolean blockInstant = intent.isWebIntent() && areWebInstantAppsDisabled();
+        final boolean blockInstant = intent.isWebIntent() && areWebInstantAppsDisabled(userId);
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
             // remove locally resolved instant app web results when disabled
@@ -8339,11 +8342,12 @@ public class PackageManagerService extends IPackageManager.Stub
         // directory and not the APK file.
         final long lastModifiedTime = mIsPreNMR1Upgrade
                 ? new File(pkg.codePath).lastModified() : getLastModifiedTime(pkg);
+        final VersionInfo settingsVersionForPackage = getSettingsVersionForPackage(pkg);
         if (ps != null && !forceCollect
                 && ps.codePathString.equals(pkg.codePath)
                 && ps.timeStamp == lastModifiedTime
-                && !isCompatSignatureUpdateNeeded(pkg)
-                && !isRecoverSignatureUpdateNeeded(pkg)) {
+                && !isCompatSignatureUpdateNeeded(settingsVersionForPackage)
+                && !isRecoverSignatureUpdateNeeded(settingsVersionForPackage)) {
             if (ps.signatures.mSigningDetails.signatures != null
                     && ps.signatures.mSigningDetails.signatures.length != 0
                     && ps.signatures.mSigningDetails.signatureSchemeVersion
@@ -8744,8 +8748,20 @@ public class PackageManagerService extends IPackageManager.Stub
         if (scanResult.success) {
             synchronized (mPackages) {
                 try {
+                    final String pkgName = scanResult.pkgSetting.name;
+                    final Map<String, ReconciledPackage> reconcileResult = reconcilePackagesLocked(
+                            new ReconcileRequest(
+                                    Collections.singletonMap(pkgName, scanResult),
+                                    mSharedLibraries,
+                                    mPackages,
+                                    Collections.singletonMap(
+                                            pkgName, getSettingsVersionForPackage(pkg)),
+                                    Collections.singletonMap(pkgName,
+                                            getSharedLibLatestVersionSetting(scanResult))),
+                            mSettings.mKeySetManagerService);
                     prepareScanResultLocked(scanResult);
-                    commitScanResultLocked(scanResult);
+                    commitReconciledScanResultLocked(
+                            reconcileResult.get(pkgName));
                 } catch (PackageManagerException e) {
                     unprepareScanResultLocked(scanResult);
                     throw e;
@@ -9352,8 +9368,26 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private @Nullable SharedLibraryInfo getSharedLibraryInfoLPr(String name, long version) {
-        LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
+    @Nullable
+    private SharedLibraryInfo getSharedLibraryInfoLPr(String name, long version) {
+        return getSharedLibraryInfo(name, version, mSharedLibraries, null);
+    }
+
+    @Nullable
+    private static SharedLibraryInfo getSharedLibraryInfo(String name, long version,
+            Map<String, LongSparseArray<SharedLibraryInfo>> existingLibraries,
+            @Nullable Map<String, LongSparseArray<SharedLibraryInfo>> newLibraries) {
+        if (newLibraries != null) {
+            final LongSparseArray<SharedLibraryInfo> versionedLib = newLibraries.get(name);
+            SharedLibraryInfo info = null;
+            if (versionedLib != null) {
+                info = versionedLib.get(version);
+            }
+            if (info != null) {
+                return info;
+            }
+        }
+        final LongSparseArray<SharedLibraryInfo> versionedLib = existingLibraries.get(name);
         if (versionedLib == null) {
             return null;
         }
@@ -9378,6 +9412,21 @@ public class PackageManagerService extends IPackageManager.Stub
             return versionedLib.get(previousLibVersion);
         }
         return null;
+    }
+
+
+    @Nullable
+    private PackageSetting getSharedLibLatestVersionSetting(@NonNull ScanResult scanResult) {
+        PackageSetting sharedLibPackage = null;
+        synchronized (mPackages) {
+            final SharedLibraryInfo latestSharedLibraVersionLPr =
+                    getLatestSharedLibraVersionLPr(scanResult.pkgSetting.pkg);
+            if (latestSharedLibraVersionLPr != null) {
+                sharedLibPackage = mSettings.getPackageLPr(
+                        latestSharedLibraVersionLPr.getPackageName());
+            }
+        }
+        return sharedLibPackage;
     }
 
     public void shutdown() {
@@ -9681,35 +9730,50 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mPackages")
     private void updateSharedLibrariesLPr(PackageParser.Package pkg,
             PackageParser.Package changingLib) throws PackageManagerException {
-        if (pkg == null) {
-            return;
-        }
+        final ArrayList<SharedLibraryInfo> sharedLibraryInfos =
+                collectSharedLibraryInfos(pkg, Collections.unmodifiableMap(mPackages),
+                        mSharedLibraries, null);
+        executeSharedLibrariesUpdateLPr(pkg, changingLib, sharedLibraryInfos);
+    }
 
-        // If the package provides libraries, clear their old dependencies.
-        // This method will set them up again.
-        applyDefiningSharedLibraryUpdateLocked(pkg, null, (definingLibrary, dependency) -> {
-            definingLibrary.clearDependencies();
-        });
+    private static ArrayList<SharedLibraryInfo> collectSharedLibraryInfos(PackageParser.Package pkg,
+            Map<String, PackageParser.Package> availablePackages,
+            @NonNull final Map<String, LongSparseArray<SharedLibraryInfo>> existingLibraries,
+            @Nullable final Map<String, LongSparseArray<SharedLibraryInfo>> newLibraries)
+            throws PackageManagerException {
+        if (pkg == null) {
+            return null;
+        }
         // The collection used here must maintain the order of addition (so
         // that libraries are searched in the correct order) and must have no
         // duplicates.
         ArrayList<SharedLibraryInfo> usesLibraryInfos = null;
         if (pkg.usesLibraries != null) {
-            usesLibraryInfos = addSharedLibrariesLPw(pkg.usesLibraries,
-                    null, null, pkg.packageName, true,
-                    pkg.applicationInfo.targetSdkVersion, null);
+            usesLibraryInfos = collectSharedLibraryInfos(pkg.usesLibraries, null, null,
+                    pkg.packageName, true, pkg.applicationInfo.targetSdkVersion, null,
+                    availablePackages, existingLibraries, newLibraries);
         }
         if (pkg.usesStaticLibraries != null) {
-            usesLibraryInfos = addSharedLibrariesLPw(pkg.usesStaticLibraries,
+            usesLibraryInfos = collectSharedLibraryInfos(pkg.usesStaticLibraries,
                     pkg.usesStaticLibrariesVersions, pkg.usesStaticLibrariesCertDigests,
-                    pkg.packageName, true,
-                    pkg.applicationInfo.targetSdkVersion, usesLibraryInfos);
+                    pkg.packageName, true, pkg.applicationInfo.targetSdkVersion, usesLibraryInfos,
+                    availablePackages, existingLibraries, newLibraries);
         }
         if (pkg.usesOptionalLibraries != null) {
-            usesLibraryInfos = addSharedLibrariesLPw(pkg.usesOptionalLibraries,
-                    null, null, pkg.packageName, false,
-                    pkg.applicationInfo.targetSdkVersion, usesLibraryInfos);
+            usesLibraryInfos = collectSharedLibraryInfos(pkg.usesOptionalLibraries,
+                    null, null, pkg.packageName, false, pkg.applicationInfo.targetSdkVersion,
+                    usesLibraryInfos, availablePackages, existingLibraries, newLibraries);
         }
+        return usesLibraryInfos;
+    }
+
+    private void executeSharedLibrariesUpdateLPr(PackageParser.Package pkg,
+            PackageParser.Package changingLib, ArrayList<SharedLibraryInfo> usesLibraryInfos) {
+        // If the package provides libraries, clear their old dependencies.
+        // This method will set them up again.
+        applyDefiningSharedLibraryUpdateLocked(pkg, null, (definingLibrary, dependency) -> {
+            definingLibrary.clearDependencies();
+        });
         if (usesLibraryInfos != null) {
             pkg.usesLibraryInfos = usesLibraryInfos;
             // Use LinkedHashSet to preserve the order of files added to
@@ -9726,18 +9790,22 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy("mPackages")
-    private ArrayList<SharedLibraryInfo> addSharedLibrariesLPw(
+    private static ArrayList<SharedLibraryInfo> collectSharedLibraryInfos(
             @NonNull List<String> requestedLibraries,
             @Nullable long[] requiredVersions, @Nullable String[][] requiredCertDigests,
             @NonNull String packageName, boolean required, int targetSdk,
-            @Nullable ArrayList<SharedLibraryInfo> outUsedLibraries)
+            @Nullable ArrayList<SharedLibraryInfo> outUsedLibraries,
+            @NonNull final Map<String, PackageParser.Package> availablePackages,
+            @NonNull final Map<String, LongSparseArray<SharedLibraryInfo>> existingLibraries,
+            @Nullable final Map<String, LongSparseArray<SharedLibraryInfo>> newLibraries)
             throws PackageManagerException {
         final int libCount = requestedLibraries.size();
         for (int i = 0; i < libCount; i++) {
             final String libName = requestedLibraries.get(i);
             final long libVersion = requiredVersions != null ? requiredVersions[i]
                     : SharedLibraryInfo.VERSION_UNDEFINED;
-            final SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(libName, libVersion);
+            final SharedLibraryInfo libraryInfo = getSharedLibraryInfo(libName, libVersion,
+                    existingLibraries, newLibraries);
             if (libraryInfo == null) {
                 if (required) {
                     throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
@@ -9757,7 +9825,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                     + libraryInfo.getLongVersion() + "; failing!");
                     }
 
-                    PackageParser.Package libPkg = mPackages.get(libraryInfo.getPackageName());
+                    PackageParser.Package libPkg =
+                            availablePackages.get(libraryInfo.getPackageName());
                     if (libPkg == null) {
                         throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
                                 "Package " + packageName + " requires unavailable static shared"
@@ -9930,15 +9999,24 @@ public class PackageManagerService extends IPackageManager.Stub
         @Nullable public final PackageSetting pkgSetting;
         /** ABI code paths that have changed in the package scan */
         @Nullable public final List<String> changedAbiCodePath;
+
+        public final SharedLibraryInfo staticSharedLibraryInfo;
+
+        public final List<SharedLibraryInfo> dynamicSharedLibraryInfos;
+
         public ScanResult(
                 ScanRequest request, boolean success,
                 @Nullable PackageSetting pkgSetting,
-                @Nullable List<String> changedAbiCodePath, boolean existingSettingCopied) {
+                @Nullable List<String> changedAbiCodePath, boolean existingSettingCopied,
+                SharedLibraryInfo staticSharedLibraryInfo,
+                List<SharedLibraryInfo> dynamicSharedLibraryInfos) {
             this.request = request;
             this.success = success;
             this.pkgSetting = pkgSetting;
             this.changedAbiCodePath = changedAbiCodePath;
             this.existingSettingCopied = existingSettingCopied;
+            this.staticSharedLibraryInfo = staticSharedLibraryInfo;
+            this.dynamicSharedLibraryInfos = dynamicSharedLibraryInfos;
         }
     }
 
@@ -10136,29 +10214,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
 
-    private void commitSuccessfulScanResults(@NonNull List<ScanResult> results)
-            throws PackageManagerException {
-        synchronized(mPackages) {
-            for (ScanResult result : results) {
-                // failures should have been caught earlier, but in case it wasn't,
-                // let's double check
-                if (!result.success) {
-                    throw new PackageManagerException(
-                            "Scan failed for " + result.request.pkg.packageName);
-                }
-            }
-            for (ScanResult result : results) {
-                try {
-                    prepareScanResultLocked(result);
-                    commitScanResultLocked(result);
-                } catch (PackageManagerException e) {
-                    unprepareScanResultLocked(result);
-                    throw e;
-                }
-            }
-        }
-    }
-
     /** Prepares the system to commit a {@link ScanResult} in a way that will not fail. */
     private void prepareScanResultLocked(@NonNull ScanResult result)
             throws PackageManagerException {
@@ -10191,7 +10246,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * possible and the system is not left in an inconsistent state.
      */
     @GuardedBy({"mPackages", "mInstallLock"})
-    private void commitScanResultLocked(@NonNull ScanResult result) throws PackageManagerException {
+    private void commitReconciledScanResultLocked(@NonNull ReconciledPackage reconciledPkg) {
+        final ScanResult result = reconciledPkg.scanResult;
         final ScanRequest request = result.request;
         final PackageParser.Package pkg = request.pkg;
         final PackageParser.Package oldPkg = request.oldPkg;
@@ -10199,7 +10255,6 @@ public class PackageManagerService extends IPackageManager.Stub
         final @ScanFlags int scanFlags = request.scanFlags;
         final PackageSetting oldPkgSetting = request.oldPkgSetting;
         final PackageSetting originalPkgSetting = request.originalPkgSetting;
-        final PackageSetting disabledPkgSetting = request.disabledPkgSetting;
         final UserHandle user = request.user;
         final String realPkgName = request.realPkgName;
         final List<String> changedAbiCodePath = result.changedAbiCodePath;
@@ -10235,130 +10290,19 @@ public class PackageManagerService extends IPackageManager.Stub
             mTransferedPackages.add(pkg.packageName);
         }
 
-        // THROWS: when requested libraries that can't be found. it only changes
-        // the state of the passed in pkg object, so, move to the top of the method
-        // and allow it to abort
-        if ((scanFlags & SCAN_BOOTING) == 0
-                && (parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-            // Check all shared libraries and map to their actual file path.
-            // We only do this here for apps not on a system dir, because those
-            // are the only ones that can fail an install due to this.  We
-            // will take care of the system apps by updating all of their
-            // library paths after the scan is done. Also during the initial
-            // scan don't update any libs as we do this wholesale after all
-            // apps are scanned to avoid dependency based scanning.
-            updateSharedLibrariesLPr(pkg, null);
-        }
-
-        // All versions of a static shared library are referenced with the same
-        // package name. Internally, we use a synthetic package name to allow
-        // multiple versions of the same shared library to be installed. So,
-        // we need to generate the synthetic package name of the latest shared
-        // library in order to compare signatures.
-        PackageSetting signatureCheckPs = pkgSetting;
-        if (pkg.applicationInfo.isStaticSharedLibrary()) {
-            SharedLibraryInfo libraryInfo = getLatestSharedLibraVersionLPr(pkg);
-            if (libraryInfo != null) {
-                signatureCheckPs = mSettings.getPackageLPr(libraryInfo.getPackageName());
-            }
+        if (reconciledPkg.collectedSharedLibraryInfos != null) {
+            executeSharedLibrariesUpdateLPr(pkg, null, reconciledPkg.collectedSharedLibraryInfos);
         }
 
         final KeySetManagerService ksms = mSettings.mKeySetManagerService;
-        if (ksms.shouldCheckUpgradeKeySetLocked(signatureCheckPs, scanFlags)) {
-            if (ksms.checkUpgradeKeySetLocked(signatureCheckPs, pkg)) {
-                // We just determined the app is signed correctly, so bring
-                // over the latest parsed certs.
-                pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
-            } else {
-                if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                    throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
-                            "Package " + pkg.packageName + " upgrade keys do not match the "
-                                    + "previously installed version");
-                } else {
-                    pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
-                    String msg = "System package " + pkg.packageName
-                            + " signature changed; retaining data.";
-                    reportSettingsProblem(Log.WARN, msg);
-                }
-            }
-        } else {
-            try {
-                final boolean compareCompat = isCompatSignatureUpdateNeeded(pkg);
-                final boolean compareRecover = isRecoverSignatureUpdateNeeded(pkg);
-                final boolean compatMatch = verifySignatures(signatureCheckPs, disabledPkgSetting,
-                        pkg.mSigningDetails, compareCompat, compareRecover);
-                // The new KeySets will be re-added later in the scanning process.
-                if (compatMatch) {
-                    synchronized (mPackages) {
-                        ksms.removeAppKeySetDataLPw(pkg.packageName);
-                    }
-                }
-                // We just determined the app is signed correctly, so bring
-                // over the latest parsed certs.
-                pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
-
-
-                // if this is is a sharedUser, check to see if the new package is signed by a newer
-                // signing certificate than the existing one, and if so, copy over the new details
-                if (signatureCheckPs.sharedUser != null) {
-                    if (pkg.mSigningDetails.hasAncestor(
-                                signatureCheckPs.sharedUser.signatures.mSigningDetails)) {
-                        signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
-                    }
-                    if (signatureCheckPs.sharedUser.signaturesChanged == null) {
-                        signatureCheckPs.sharedUser.signaturesChanged = Boolean.FALSE;
-                    }
-                }
-            } catch (PackageManagerException e) {
-                if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                    throw e;
-                }
-                // The signature has changed, but this package is in the system
-                // image...  let's recover!
-                pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
-
-                // If the system app is part of a shared user we allow that shared user to change
-                // signatures as well as part of an OTA. We still need to verify that the signatures
-                // are consistent within the shared user for a given boot, so only allow updating
-                // the signatures on the first package scanned for the shared user (i.e. if the
-                // signaturesChanged state hasn't been initialized yet in SharedUserSetting).
-                if (signatureCheckPs.sharedUser != null) {
-                    if (signatureCheckPs.sharedUser.signaturesChanged != null &&
-                        compareSignatures(
-                            signatureCheckPs.sharedUser.signatures.mSigningDetails.signatures,
-                            pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH) {
-                        if (SystemProperties.getInt("ro.product.first_api_level", 0) <= 28) {
-                            // Mismatched signatures is an error and silently skipping system
-                            // packages will likely break the device in unforeseen ways. However,
-                            // we allow the device to boot anyway because, prior to P, vendors were
-                            // not expecting the platform to crash in this situation.
-                            throw new PackageManagerException(
-                                    INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
-                                    "Signature mismatch for shared user: " + pkgSetting.sharedUser);
-                        } else {
-                            // Treat mismatched signatures on system packages using a shared UID as
-                            // fatal for the system overall, rather than just failing to install
-                            // whichever package happened to be scanned later.
-                            throw new IllegalStateException("Signature mismatch on system package "
-                                + pkg.packageName + " for shared user " + pkgSetting.sharedUser);
-                        }
-                    }
-
-                    signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
-                    signatureCheckPs.sharedUser.signaturesChanged = Boolean.TRUE;
-                }
-                // File a report about this.
-                String msg = "System package " + pkg.packageName
-                        + " signature changed; retaining data.";
-                reportSettingsProblem(Log.WARN, msg);
-            } catch (IllegalArgumentException e) {
-                // should never happen: certs matched when checking, but not when comparing
-                // old to new for sharedUser
-                throw new RuntimeException(
-                        "Signing certificates comparison made on incomparable signing details"
-                        + " but somehow passed verifySignatures!", e);
-            }
+        if (reconciledPkg.removeAppKeySetData) {
+            ksms.removeAppKeySetDataLPw(pkg.packageName);
         }
+        if (reconciledPkg.sharedUserSignaturesChanged) {
+            pkgSetting.sharedUser.signaturesChanged = Boolean.TRUE;
+            pkgSetting.sharedUser.signatures.mSigningDetails = reconciledPkg.signingDetails;
+        }
+        pkgSetting.signatures.mSigningDetails = reconciledPkg.signingDetails;
 
         if ((scanFlags & SCAN_CHECK_ONLY) == 0 && pkg.mAdoptPermissions != null) {
             // This package wants to adopt ownership of permissions from
@@ -10396,8 +10340,8 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             final int userId = user == null ? 0 : user.getIdentifier();
             // Modify state for the given package setting
-            commitPackageSettings(pkg, oldPkg, pkgSetting, user, scanFlags,
-                    (parseFlags & PackageParser.PARSE_CHATTY) != 0 /*chatty*/);
+            commitPackageSettings(pkg, oldPkg, pkgSetting, scanFlags,
+                    (parseFlags & PackageParser.PARSE_CHATTY) != 0 /*chatty*/, reconciledPkg);
             if (pkgSetting.getInstantApp(userId)) {
                 mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.appId);
             }
@@ -10568,11 +10512,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     UserManagerService.getInstance(), usesStaticLibraries,
                     pkg.usesStaticLibrariesVersions);
         } else {
-            if (!createNewPackage) {
-                // make a deep copy to avoid modifying any existing system state.
-                pkgSetting = new PackageSetting(pkgSetting);
-                pkgSetting.pkg = pkg;
-            }
+            // make a deep copy to avoid modifying any existing system state.
+            pkgSetting = new PackageSetting(pkgSetting);
+            pkgSetting.pkg = pkg;
+
             // REMOVE SharedUserSetting from method; update in a separate call.
             //
             // TODO(narayan): This update is bogus. nativeLibraryDir & primaryCpuAbi,
@@ -10791,8 +10734,21 @@ public class PackageManagerService extends IPackageManager.Stub
             pkgSetting.volumeUuid = volumeUuid;
         }
 
+        SharedLibraryInfo staticSharedLibraryInfo = null;
+        if (!TextUtils.isEmpty(pkg.staticSharedLibName)) {
+            staticSharedLibraryInfo = SharedLibraryInfo.createForStatic(pkg);
+        }
+        List<SharedLibraryInfo> dynamicSharedLibraryInfos = null;
+        if (!ArrayUtils.isEmpty(pkg.libraryNames)) {
+            dynamicSharedLibraryInfos = new ArrayList<>(pkg.libraryNames.size());
+            for (String name : pkg.libraryNames) {
+                dynamicSharedLibraryInfos.add(SharedLibraryInfo.createForDynamic(pkg, name));
+            }
+        }
+
         return new ScanResult(request, true, pkgSetting, changedAbiCodePath,
-                !createNewPackage /* existingSettingCopied */);
+                !createNewPackage /* existingSettingCopied */, staticSharedLibraryInfo,
+                dynamicSharedLibraryInfos);
     }
 
     /**
@@ -11302,24 +11258,48 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private boolean addSharedLibraryLPw(String path, String apk, List<String> codePaths,
-            String name, long version, int type, String declaringPackageName,
-            long declaringVersionCode) {
+    @GuardedBy("mPackages")
+    private boolean addBuiltInSharedLibraryLocked(String path, String name) {
+        if (nonStaticSharedLibExistsLocked(name)) {
+            return false;
+        }
+
+        SharedLibraryInfo libraryInfo = new SharedLibraryInfo(path, null, null, name,
+                (long) SharedLibraryInfo.VERSION_UNDEFINED, SharedLibraryInfo.TYPE_BUILTIN,
+                new VersionedPackage(PLATFORM_PACKAGE_NAME, (long) 0),
+                null, null);
+
+        commitSharedLibraryInfoLocked(libraryInfo);
+        return true;
+    }
+
+    @GuardedBy("mPackages")
+    private boolean nonStaticSharedLibExistsLocked(String name) {
+        return sharedLibExists(name, SharedLibraryInfo.VERSION_UNDEFINED, mSharedLibraries);
+    }
+
+    private static boolean sharedLibExists(final String name, final long version,
+            Map<String, LongSparseArray<SharedLibraryInfo>> librarySource) {
+        LongSparseArray<SharedLibraryInfo> versionedLib = librarySource.get(name);
+        if (versionedLib != null && versionedLib.indexOfKey(version) >= 0) {
+            return true;
+        }
+        return false;
+    }
+
+    @GuardedBy("mPackages")
+    private void commitSharedLibraryInfoLocked(SharedLibraryInfo libraryInfo) {
+        final String name = libraryInfo.getName();
         LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
         if (versionedLib == null) {
             versionedLib = new LongSparseArray<>();
             mSharedLibraries.put(name, versionedLib);
-            if (type == SharedLibraryInfo.TYPE_STATIC) {
-                mStaticLibsByDeclaringPackage.put(declaringPackageName, versionedLib);
-            }
-        } else if (versionedLib.indexOfKey(version) >= 0) {
-            return false;
         }
-        SharedLibraryInfo libraryInfo = new SharedLibraryInfo(path, apk, codePaths, name,
-                version, type, new VersionedPackage(declaringPackageName, declaringVersionCode),
-                null, null);
-        versionedLib.put(version, libraryInfo);
-        return true;
+        final String declaringPackageName = libraryInfo.getDeclaringPackage().getPackageName();
+        if (libraryInfo.getType() == SharedLibraryInfo.TYPE_STATIC) {
+            mStaticLibsByDeclaringPackage.put(declaringPackageName, versionedLib);
+        }
+        versionedLib.put(libraryInfo.getLongVersion(), libraryInfo);
     }
 
     private boolean removeSharedLibraryLPw(String name, long version) {
@@ -11348,8 +11328,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * be available for query, resolution, etc...
      */
     private void commitPackageSettings(PackageParser.Package pkg,
-            @Nullable PackageParser.Package oldPkg, PackageSetting pkgSetting, UserHandle user,
-            final @ScanFlags int scanFlags, boolean chatty) {
+            @Nullable PackageParser.Package oldPkg, PackageSetting pkgSetting,
+            final @ScanFlags int scanFlags, boolean chatty, ReconciledPackage reconciledPkg) {
         final String pkgName = pkg.packageName;
         if (mCustomResolverComponentName != null &&
                 mCustomResolverComponentName.getPackageName().equals(pkg.packageName)) {
@@ -11396,90 +11376,23 @@ public class PackageManagerService extends IPackageManager.Stub
         ArrayList<PackageParser.Package> clientLibPkgs = null;
         // writer
         synchronized (mPackages) {
-            boolean hasStaticSharedLibs = false;
-
-            // Any app can add new static shared libraries
-            if (pkg.staticSharedLibName != null) {
-                // Static shared libs don't allow renaming as they have synthetic package
-                // names to allow install of multiple versions, so use name from manifest.
-                if (addSharedLibraryLPw(null, pkg.packageName, pkg.getAllCodePaths(),
-                        pkg.staticSharedLibName,
-                        pkg.staticSharedLibVersion, SharedLibraryInfo.TYPE_STATIC,
-                        pkg.manifestPackageName, pkg.getLongVersionCode())) {
-                    hasStaticSharedLibs = true;
-                    // Shared libraries for the package need to be updated.
-                    try {
-                        updateSharedLibrariesLPr(pkg, null);
-                    } catch (PackageManagerException e) {
-                        Slog.e(TAG, "updateSharedLibrariesLPr failed: ", e);
-                    }
-                } else {
-                    Slog.w(TAG, "Package " + pkg.packageName + " library "
-                                + pkg.staticSharedLibName + " already exists; skipping");
+            if (!ArrayUtils.isEmpty(reconciledPkg.allowedSharedLibraryInfos)) {
+                for (SharedLibraryInfo info : reconciledPkg.allowedSharedLibraryInfos) {
+                    commitSharedLibraryInfoLocked(info);
                 }
-                // Static shared libs cannot be updated once installed since they
-                // use synthetic package name which includes the version code, so
-                // not need to update other packages's shared lib dependencies.
+                try {
+                    // Shared libraries for the package need to be updated.
+                    updateSharedLibrariesLPr(pkg, null);
+                } catch (PackageManagerException e) {
+                    Slog.e(TAG, "updateSharedLibrariesLPr failed: ", e);
+                }
             }
 
-            if (!hasStaticSharedLibs
-                    && (pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                // Only system apps can add new dynamic shared libraries.
-                if (pkg.libraryNames != null) {
-                    for (int i = 0; i < pkg.libraryNames.size(); i++) {
-                        String name = pkg.libraryNames.get(i);
-                        boolean allowed = false;
-                        if (pkg.isUpdatedSystemApp()) {
-                            // New library entries can only be added through the
-                            // system image.  This is important to get rid of a lot
-                            // of nasty edge cases: for example if we allowed a non-
-                            // system update of the app to add a library, then uninstalling
-                            // the update would make the library go away, and assumptions
-                            // we made such as through app install filtering would now
-                            // have allowed apps on the device which aren't compatible
-                            // with it.  Better to just have the restriction here, be
-                            // conservative, and create many fewer cases that can negatively
-                            // impact the user experience.
-                            final PackageSetting sysPs = mSettings
-                                    .getDisabledSystemPkgLPr(pkg.packageName);
-                            if (sysPs.pkg != null && sysPs.pkg.libraryNames != null) {
-                                for (int j = 0; j < sysPs.pkg.libraryNames.size(); j++) {
-                                    if (name.equals(sysPs.pkg.libraryNames.get(j))) {
-                                        allowed = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        } else {
-                            allowed = true;
-                        }
-                        if (allowed) {
-                            if (!addSharedLibraryLPw(null, pkg.packageName, pkg.getAllCodePaths(),
-                                    name, SharedLibraryInfo.VERSION_UNDEFINED,
-                                    SharedLibraryInfo.TYPE_DYNAMIC,
-                                    pkg.packageName, pkg.getLongVersionCode())) {
-                                Slog.w(TAG, "Package " + pkg.packageName + " library "
-                                        + name + " already exists; skipping");
-                            }
-                            // Shared libraries for the package need to be updated.
-                            try {
-                                updateSharedLibrariesLPr(pkg, null);
-                            } catch (PackageManagerException e) {
-                                Slog.e(TAG, "updateSharedLibrariesLPr failed: ", e);
-                            }
-                        } else {
-                            Slog.w(TAG, "Package " + pkg.packageName + " declares lib "
-                                    + name + " that is not declared on system image; skipping");
-                        }
-                    }
-
-                    if ((scanFlags & SCAN_BOOTING) == 0) {
-                        // If we are not booting, we need to update any applications
-                        // that are clients of our shared library.  If we are booting,
-                        // this will all be done once the scan is complete.
-                        clientLibPkgs = updateAllSharedLibrariesLPw(pkg);
-                    }
-                }
+            if (reconciledPkg.hasDynamicSharedLibraries() && (scanFlags & SCAN_BOOTING) == 0) {
+                // If we are not booting, we need to update any applications
+                // that are clients of our shared library.  If we are booting,
+                // this will all be done once the scan is complete.
+                clientLibPkgs = updateAllSharedLibrariesLPw(pkg);
             }
         }
 
@@ -15235,20 +15148,40 @@ public class PackageManagerService extends IPackageManager.Stub
     private static class ReconcileRequest {
         public final Map<String, ScanResult> scannedPackages;
 
-        // TODO: Remove install-specific details from reconcile request; make them generic types
-        //       that can be used for scanDir for example.
+        public final Map<String, PackageParser.Package> allPackages;
+        public final Map<String, LongSparseArray<SharedLibraryInfo>> sharedLibrarySource;
         public final Map<String, InstallArgs> installArgs;
         public final Map<String, PackageInstalledInfo> installResults;
         public final Map<String, PrepareResult> preparedPackages;
+        public final Map<String, VersionInfo> versionInfos;
+        public final Map<String, PackageSetting> lastStaticSharedLibSettings;
 
         private ReconcileRequest(Map<String, ScanResult> scannedPackages,
                 Map<String, InstallArgs> installArgs,
                 Map<String, PackageInstalledInfo> installResults,
-                Map<String, PrepareResult> preparedPackages) {
+                Map<String, PrepareResult> preparedPackages,
+                Map<String, LongSparseArray<SharedLibraryInfo>> sharedLibrarySource,
+                Map<String, PackageParser.Package> allPackages,
+                Map<String, VersionInfo> versionInfos,
+                Map<String, PackageSetting> lastStaticSharedLibSettings) {
             this.scannedPackages = scannedPackages;
             this.installArgs = installArgs;
             this.installResults = installResults;
             this.preparedPackages = preparedPackages;
+            this.sharedLibrarySource = sharedLibrarySource;
+            this.allPackages = allPackages;
+            this.versionInfos = versionInfos;
+            this.lastStaticSharedLibSettings = lastStaticSharedLibSettings;
+        }
+
+        private ReconcileRequest(Map<String, ScanResult> scannedPackages,
+                Map<String, LongSparseArray<SharedLibraryInfo>> sharedLibrarySource,
+                Map<String, PackageParser.Package> allPackages,
+                Map<String, VersionInfo> versionInfos,
+                Map<String, PackageSetting> lastStaticSharedLibSettings) {
+            this(scannedPackages, Collections.emptyMap(), Collections.emptyMap(),
+                    Collections.emptyMap(), sharedLibrarySource, allPackages, versionInfos,
+                    lastStaticSharedLibSettings);
         }
     }
     private static class ReconcileFailure extends PackageManagerException {
@@ -15257,6 +15190,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         ReconcileFailure(int reason, String message) {
             super(reason, "Reconcile failed: " + message);
+        }
+        ReconcileFailure(PackageManagerException e) {
+            this(e.error, e.getMessage());
         }
     }
 
@@ -15267,49 +15203,91 @@ public class PackageManagerService extends IPackageManager.Stub
     private static class ReconciledPackage {
         public final PackageSetting pkgSetting;
         public final ScanResult scanResult;
-        public final UserHandle installForUser;
-        public final String volumeUuid;
         // TODO: Remove install-specific details from the reconcile result
         public final PackageInstalledInfo installResult;
-        public final PrepareResult prepareResult;
-        @PackageManager.InstallFlags
-        public final int installFlags;
-        public final InstallArgs installArgs;
+        @Nullable public final PrepareResult prepareResult;
+        @Nullable public final InstallArgs installArgs;
         public final DeletePackageAction deletePackageAction;
+        public final List<SharedLibraryInfo> allowedSharedLibraryInfos;
+        public final SigningDetails signingDetails;
+        public final boolean sharedUserSignaturesChanged;
+        public ArrayList<SharedLibraryInfo> collectedSharedLibraryInfos;
+        public final boolean removeAppKeySetData;
 
         private ReconciledPackage(InstallArgs installArgs, PackageSetting pkgSetting,
-                UserHandle installForUser, PackageInstalledInfo installResult, int installFlags,
-                String volumeUuid, PrepareResult prepareResult, ScanResult scanResult,
-                DeletePackageAction deletePackageAction) {
+                PackageInstalledInfo installResult,
+                PrepareResult prepareResult, ScanResult scanResult,
+                DeletePackageAction deletePackageAction,
+                List<SharedLibraryInfo> allowedSharedLibraryInfos,
+                SigningDetails signingDetails,
+                boolean sharedUserSignaturesChanged,
+                boolean removeAppKeySetData) {
             this.installArgs = installArgs;
             this.pkgSetting = pkgSetting;
-            this.installForUser = installForUser;
             this.installResult = installResult;
-            this.installFlags = installFlags;
-            this.volumeUuid = volumeUuid;
             this.prepareResult = prepareResult;
             this.scanResult = scanResult;
             this.deletePackageAction = deletePackageAction;
+            this.allowedSharedLibraryInfos = allowedSharedLibraryInfos;
+            this.signingDetails = signingDetails;
+            this.sharedUserSignaturesChanged = sharedUserSignaturesChanged;
+            this.removeAppKeySetData = removeAppKeySetData;
+        }
+
+        public boolean hasDynamicSharedLibraries() {
+            return !ArrayUtils.isEmpty(allowedSharedLibraryInfos)
+                    && allowedSharedLibraryInfos.get(0).getType() != SharedLibraryInfo.TYPE_STATIC;
         }
     }
 
     @GuardedBy("mPackages")
     private static Map<String, ReconciledPackage> reconcilePackagesLocked(
-            final ReconcileRequest request)
+            final ReconcileRequest request, KeySetManagerService ksms)
             throws ReconcileFailure {
-        Map<String, ReconciledPackage> result = new ArrayMap<>(request.scannedPackages.size());
-        for (String installPackageName : request.installArgs.keySet()) {
-            final ScanResult scanResult = request.scannedPackages.get(installPackageName);
+        final Map<String, ScanResult> scannedPackages = request.scannedPackages;
+
+        final Map<String, ReconciledPackage> result = new ArrayMap<>(scannedPackages.size());
+
+        // make a copy of the existing set of packages so we can combine them with incoming packages
+        final ArrayMap<String, PackageParser.Package> combinedPackages =
+                new ArrayMap<>(request.allPackages.size() + scannedPackages.size());
+        combinedPackages.putAll(request.allPackages);
+
+        final Map<String, LongSparseArray<SharedLibraryInfo>> incomingSharedLibraries =
+                new ArrayMap<>();
+
+        for (String installPackageName : scannedPackages.keySet()) {
+            final ScanResult scanResult = scannedPackages.get(installPackageName);
+
+            // add / replace existing with incoming packages
+            combinedPackages.put(scanResult.pkgSetting.name, scanResult.request.pkg);
+
+            // in the first pass, we'll build up the set of incoming shared libraries
+            final List<SharedLibraryInfo> allowedSharedLibInfos =
+                    getAllowedSharedLibInfos(scanResult, request.sharedLibrarySource);
+            final SharedLibraryInfo staticLib = scanResult.staticSharedLibraryInfo;
+            if (allowedSharedLibInfos != null) {
+                for (SharedLibraryInfo info : allowedSharedLibInfos) {
+                    if (!addSharedLibraryToPackageVersionMap(incomingSharedLibraries, info)) {
+                        throw new ReconcileFailure("Static Shared Library " + staticLib.getName()
+                                + " is being installed twice in this set!");
+                    }
+                }
+            }
+
+            // the following may be null if we're just reconciling on boot (and not during install)
             final InstallArgs installArgs = request.installArgs.get(installPackageName);
             final PackageInstalledInfo res = request.installResults.get(installPackageName);
             final PrepareResult prepareResult = request.preparedPackages.get(installPackageName);
-            if (scanResult == null || installArgs == null || res == null) {
-                throw new ReconcileFailure(
-                        "inputs not balanced; missing argument for " + installPackageName);
+            final boolean isInstall = installArgs != null;
+            if (isInstall && (res == null || prepareResult == null)) {
+                throw new ReconcileFailure("Reconcile arguments are not balanced for "
+                        + installPackageName + "!");
             }
+
             final DeletePackageAction deletePackageAction;
             // we only want to try to delete for non system apps
-            if (prepareResult.replace && !prepareResult.system) {
+            if (isInstall && prepareResult.replace && !prepareResult.system) {
                 final boolean killApp = (scanResult.request.scanFlags & SCAN_DONT_KILL_APP) == 0;
                 final int deleteFlags = PackageManager.DELETE_KEEP_DATA
                         | (killApp ? 0 : PackageManager.DELETE_DONT_KILL_APP);
@@ -15324,17 +15302,252 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 deletePackageAction = null;
             }
+
+            final int scanFlags = scanResult.request.scanFlags;
+            final int parseFlags = scanResult.request.parseFlags;
+            final PackageParser.Package pkg = scanResult.request.pkg;
+
+            final PackageSetting disabledPkgSetting = scanResult.request.disabledPkgSetting;
+            final PackageSetting lastStaticSharedLibSetting =
+                    request.lastStaticSharedLibSettings.get(installPackageName);
+            final PackageSetting signatureCheckPs =
+                    (prepareResult != null && lastStaticSharedLibSetting != null)
+                            ? lastStaticSharedLibSetting
+                            : scanResult.pkgSetting;
+            boolean removeAppKeySetData = false;
+            boolean sharedUserSignaturesChanged = false;
+            SigningDetails signingDetails = null;
+            if (ksms.shouldCheckUpgradeKeySetLocked(signatureCheckPs, scanFlags)) {
+                if (ksms.checkUpgradeKeySetLocked(signatureCheckPs, pkg)) {
+                    // We just determined the app is signed correctly, so bring
+                    // over the latest parsed certs.
+                } else {
+                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                        throw new ReconcileFailure(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                                "Package " + pkg.packageName + " upgrade keys do not match the "
+                                        + "previously installed version");
+                    } else {
+                        String msg = "System package " + pkg.packageName
+                                + " signature changed; retaining data.";
+                        reportSettingsProblem(Log.WARN, msg);
+                    }
+                }
+                signingDetails = pkg.mSigningDetails;
+            } else {
+                try {
+                    final VersionInfo versionInfo = request.versionInfos.get(installPackageName);
+                    final boolean compareCompat = isCompatSignatureUpdateNeeded(versionInfo);
+                    final boolean compareRecover = isRecoverSignatureUpdateNeeded(versionInfo);
+                    final boolean compatMatch = verifySignatures(signatureCheckPs,
+                            disabledPkgSetting, pkg.mSigningDetails, compareCompat, compareRecover);
+                    // The new KeySets will be re-added later in the scanning process.
+                    if (compatMatch) {
+                        removeAppKeySetData = true;
+                    }
+                    // We just determined the app is signed correctly, so bring
+                    // over the latest parsed certs.
+                    signingDetails = pkg.mSigningDetails;
+
+
+                    // if this is is a sharedUser, check to see if the new package is signed by a
+                    // newer
+                    // signing certificate than the existing one, and if so, copy over the new
+                    // details
+                    if (signatureCheckPs.sharedUser != null) {
+                        if (pkg.mSigningDetails.hasAncestor(
+                                signatureCheckPs.sharedUser.signatures.mSigningDetails)) {
+                            signatureCheckPs.sharedUser.signatures.mSigningDetails =
+                                    pkg.mSigningDetails;
+                        }
+                        if (signatureCheckPs.sharedUser.signaturesChanged == null) {
+                            signatureCheckPs.sharedUser.signaturesChanged = Boolean.FALSE;
+                        }
+                    }
+                } catch (PackageManagerException e) {
+                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                        throw new ReconcileFailure(e);
+                    }
+                    signingDetails = pkg.mSigningDetails;
+
+                    // If the system app is part of a shared user we allow that shared user to
+                    // change
+                    // signatures as well as part of an OTA. We still need to verify that the
+                    // signatures
+                    // are consistent within the shared user for a given boot, so only allow
+                    // updating
+                    // the signatures on the first package scanned for the shared user (i.e. if the
+                    // signaturesChanged state hasn't been initialized yet in SharedUserSetting).
+                    if (signatureCheckPs.sharedUser != null) {
+                        final Signature[] sharedUserSignatures =
+                                signatureCheckPs.sharedUser.signatures.mSigningDetails.signatures;
+                        if (signatureCheckPs.sharedUser.signaturesChanged != null
+                                && compareSignatures(sharedUserSignatures,
+                                        pkg.mSigningDetails.signatures)
+                                        != PackageManager.SIGNATURE_MATCH) {
+                            if (SystemProperties.getInt("ro.product.first_api_level", 0) <= 28) {
+                                // Mismatched signatures is an error and silently skipping system
+                                // packages will likely break the device in unforeseen ways.
+                                // However,
+                                // we allow the device to boot anyway because, prior to P,
+                                // vendors were
+                                // not expecting the platform to crash in this situation.
+                                throw new ReconcileFailure(
+                                        INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                                        "Signature mismatch for shared user: "
+                                                + scanResult.pkgSetting.sharedUser);
+                            } else {
+                                // Treat mismatched signatures on system packages using a shared
+                                // UID as
+                                // fatal for the system overall, rather than just failing to install
+                                // whichever package happened to be scanned later.
+                                throw new IllegalStateException(
+                                        "Signature mismatch on system package "
+                                                + pkg.packageName + " for shared user "
+                                                + scanResult.pkgSetting.sharedUser);
+                            }
+                        }
+
+                        sharedUserSignaturesChanged = true;
+                        signatureCheckPs.sharedUser.signatures.mSigningDetails =
+                                pkg.mSigningDetails;
+                        signatureCheckPs.sharedUser.signaturesChanged = Boolean.TRUE;
+                    }
+                    // File a report about this.
+                    String msg = "System package " + pkg.packageName
+                            + " signature changed; retaining data.";
+                    reportSettingsProblem(Log.WARN, msg);
+                } catch (IllegalArgumentException e) {
+                    // should never happen: certs matched when checking, but not when comparing
+                    // old to new for sharedUser
+                    throw new RuntimeException(
+                            "Signing certificates comparison made on incomparable signing details"
+                                    + " but somehow passed verifySignatures!", e);
+                }
+            }
+
             result.put(installPackageName,
-                    new ReconciledPackage(installArgs, scanResult.pkgSetting, installArgs.getUser(),
-                            res, installArgs.installFlags, installArgs.volumeUuid,
-                            request.preparedPackages.get(installPackageName), scanResult,
-                            deletePackageAction));
+                    new ReconciledPackage(installArgs, scanResult.pkgSetting,
+                            res, request.preparedPackages.get(installPackageName), scanResult,
+                            deletePackageAction, allowedSharedLibInfos, signingDetails,
+                            sharedUserSignaturesChanged, removeAppKeySetData));
         }
+
+        for (String installPackageName : scannedPackages.keySet()) {
+            // Check all shared libraries and map to their actual file path.
+            // We only do this here for apps not on a system dir, because those
+            // are the only ones that can fail an install due to this.  We
+            // will take care of the system apps by updating all of their
+            // library paths after the scan is done. Also during the initial
+            // scan don't update any libs as we do this wholesale after all
+            // apps are scanned to avoid dependency based scanning.
+            final ScanResult scanResult = scannedPackages.get(installPackageName);
+            if ((scanResult.request.scanFlags & SCAN_BOOTING) != 0
+                    || (scanResult.request.parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0) {
+                continue;
+            }
+            try {
+                result.get(installPackageName).collectedSharedLibraryInfos =
+                        collectSharedLibraryInfos(scanResult.request.pkg, combinedPackages,
+                                request.sharedLibrarySource, incomingSharedLibraries);
+
+            } catch (PackageManagerException e) {
+                throw new ReconcileFailure(e.error, e.getMessage());
+            }
+        }
+
         return result;
     }
 
+    private static List<SharedLibraryInfo> getAllowedSharedLibInfos(
+            ScanResult scanResult,
+            Map<String, LongSparseArray<SharedLibraryInfo>> existingSharedLibraries) {
+        final PackageParser.Package pkg = scanResult.pkgSetting.pkg;
+        if (scanResult.staticSharedLibraryInfo == null
+                && scanResult.dynamicSharedLibraryInfos == null) {
+            return null;
+        }
+
+        // Any app can add new static shared libraries
+        if (scanResult.staticSharedLibraryInfo != null) {
+            return Collections.singletonList(scanResult.staticSharedLibraryInfo);
+        }
+        final boolean hasDynamicLibraries =
+                (pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+                        && scanResult.dynamicSharedLibraryInfos != null;
+        if (!hasDynamicLibraries) {
+            return null;
+        }
+        final ArrayList<SharedLibraryInfo> infos =
+                new ArrayList<>(scanResult.dynamicSharedLibraryInfos.size());
+        final boolean updatedSystemApp = pkg.isUpdatedSystemApp();
+        for (SharedLibraryInfo info : scanResult.dynamicSharedLibraryInfos) {
+            String name = info.getName();
+            boolean allowed = false;
+            if (updatedSystemApp) {
+                // New library entries can only be added through the
+                // system image.  This is important to get rid of a lot
+                // of nasty edge cases: for example if we allowed a non-
+                // system update of the app to add a library, then uninstalling
+                // the update would make the library go away, and assumptions
+                // we made such as through app install filtering would now
+                // have allowed apps on the device which aren't compatible
+                // with it.  Better to just have the restriction here, be
+                // conservative, and create many fewer cases that can negatively
+                // impact the user experience.
+                final PackageSetting sysPs = scanResult.request.disabledPkgSetting;
+                if (sysPs.pkg != null && sysPs.pkg.libraryNames != null) {
+                    for (int j = 0; j < sysPs.pkg.libraryNames.size(); j++) {
+                        if (name.equals(sysPs.pkg.libraryNames.get(j))) {
+                            allowed = true;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                allowed = true;
+            }
+            if (allowed) {
+                if (sharedLibExists(
+                        name, SharedLibraryInfo.VERSION_UNDEFINED, existingSharedLibraries)) {
+                    Slog.w(TAG, "Package " + pkg.packageName + " library "
+                            + name + " already exists; skipping");
+                    continue;
+                }
+                infos.add(info);
+            } else {
+                Slog.w(TAG, "Package " + pkg.packageName + " declares lib "
+                        + name + " that is not declared on system image; skipping");
+                continue;
+            }
+        }
+        return infos;
+    }
+
+    /**
+     * Returns false if the adding shared library already exists in the map and so could not be
+     * added.
+     */
+    private static boolean addSharedLibraryToPackageVersionMap(
+            Map<String, LongSparseArray<SharedLibraryInfo>> target,
+            SharedLibraryInfo library) {
+        final String name = library.getName();
+        if (target.containsKey(name)) {
+            if (library.getType() != SharedLibraryInfo.TYPE_STATIC) {
+                // We've already added this non-version-specific library to the map.
+                return false;
+            } else if (target.get(name).indexOfKey(library.getLongVersion()) >= 0) {
+                // We've already added this version of a version-specific library to the map.
+                return false;
+            }
+        } else {
+            target.put(name, new LongSparseArray<>());
+        }
+        target.get(name).put(library.getLongVersion(), library);
+        return true;
+    }
+
     @GuardedBy("mPackages")
-    private boolean commitPackagesLocked(final CommitRequest request) {
+    private void commitPackagesLocked(final CommitRequest request) {
         // TODO: remove any expected failures from this method; this should only be able to fail due
         //       to unavoidable errors (I/O, etc.)
         for (ReconciledPackage reconciledPkg : request.reconciledPackages.values()) {
@@ -15470,19 +15683,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-
-
-            try {
-                prepareScanResultLocked(scanResult);
-                commitScanResultLocked(scanResult);
-            } catch (PackageManagerException e) {
-                unprepareScanResultLocked(scanResult);
-                res.setReturnCode(INSTALL_FAILED_INTERNAL_ERROR);
-                res.setError("Package couldn't be installed in " + pkg.codePath, e);
-                return false;
-            }
+            commitReconciledScanResultLocked(reconciledPkg);
             updateSettingsLI(pkg, reconciledPkg.installArgs.installerPackageName, request.mAllUsers,
-                    res, reconciledPkg.installForUser, reconciledPkg.installArgs.installReason);
+                    res, reconciledPkg.installArgs.user, reconciledPkg.installArgs.installReason);
 
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps != null) {
@@ -15505,7 +15708,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 updateInstantAppInstallerLocked(packageName);
             }
         }
-        return true;
     }
 
     /**
@@ -15527,12 +15729,16 @@ public class PackageManagerService extends IPackageManager.Stub
      *
      * Failure at any phase will result in a full failure to install all packages.
      */
-    @GuardedBy({"mInstallLock", "mPackages"})
+    @GuardedBy("mInstallLock")
     private void installPackagesLI(List<InstallRequest> requests) {
-        final Map<String, ScanResult> scans = new ArrayMap<>(requests.size());
+        final Map<String, ScanResult> preparedScans = new ArrayMap<>(requests.size());
         final Map<String, InstallArgs> installArgs = new ArrayMap<>(requests.size());
         final Map<String, PackageInstalledInfo> installResults = new ArrayMap<>(requests.size());
         final Map<String, PrepareResult> prepareResults = new ArrayMap<>(requests.size());
+        final Map<String, VersionInfo> versionInfos = new ArrayMap<>(requests.size());
+        final Map<String, PackageSetting> lastStaticSharedLibSettings =
+                new ArrayMap<>(requests.size());
+        boolean success = false;
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackagesLI");
             for (InstallRequest request : requests) {
@@ -15564,33 +15770,47 @@ public class PackageManagerService extends IPackageManager.Stub
                             prepareResult.scanFlags, System.currentTimeMillis(),
                             request.args.user);
                     for (ScanResult result : scanResults) {
-                        if (null != scans.put(result.pkgSetting.pkg.packageName, result)) {
+                        if (null != preparedScans.put(result.pkgSetting.pkg.packageName, result)) {
                             request.installResult.setError(
                                     PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE,
                                     "Duplicate package " + result.pkgSetting.pkg.packageName
                                             + " in multi-package install request.");
                             return;
                         }
+                        prepareScanResultLocked(result);
+                        versionInfos.put(result.pkgSetting.pkg.packageName,
+                                getSettingsVersionForPackage(result.pkgSetting.pkg));
+                        if (result.staticSharedLibraryInfo != null) {
+                            final PackageSetting sharedLibLatestVersionSetting =
+                                    getSharedLibLatestVersionSetting(result);
+                            if (sharedLibLatestVersionSetting != null) {
+                                lastStaticSharedLibSettings.put(result.pkgSetting.pkg.packageName,
+                                        sharedLibLatestVersionSetting);
+                            }
+                        }
+                        prepareScanResultLocked(result);
                     }
                 } catch (PackageManagerException e) {
                     request.installResult.setError("Scanning Failed.", e);
                     return;
                 }
             }
-            ReconcileRequest reconcileRequest = new ReconcileRequest(scans, installArgs,
+            ReconcileRequest reconcileRequest = new ReconcileRequest(preparedScans, installArgs,
                     installResults,
-                    prepareResults);
+                    prepareResults,
+                    mSharedLibraries,
+                    Collections.unmodifiableMap(mPackages), versionInfos,
+                    lastStaticSharedLibSettings);
             CommitRequest commitRequest = null;
             synchronized (mPackages) {
                 Map<String, ReconciledPackage> reconciledPackages;
                 try {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "reconcilePackages");
-                    reconciledPackages = reconcilePackagesLocked(reconcileRequest);
+                    reconciledPackages = reconcilePackagesLocked(
+                            reconcileRequest, mSettings.mKeySetManagerService);
                 } catch (ReconcileFailure e) {
                     for (InstallRequest request : requests) {
-                        // TODO(b/109941548): add more concrete failure reasons
                         request.installResult.setError("Reconciliation failed...", e);
-                        // TODO: return any used system resources
                     }
                     return;
                 } finally {
@@ -15600,10 +15820,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "commitPackages");
                     commitRequest = new CommitRequest(reconciledPackages,
                             sUserManager.getUserIds());
-                    if (!commitPackagesLocked(commitRequest)) {
-                        cleanUpCommitFailuresLocked(commitRequest);
-                        return;
-                    }
+                    commitPackagesLocked(commitRequest);
+                    success = true;
                 } finally {
                     for (PrepareResult result : prepareResults.values()) {
                         if (result.freezer != null) {
@@ -15615,6 +15833,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             executePostCommitSteps(commitRequest);
         } finally {
+            if (!success) {
+                for (ScanResult result : preparedScans.values()) {
+                    unprepareScanResultLocked(result);
+                }
+            }
             for (PrepareResult result : prepareResults.values()) {
                 if (result.freezer != null) {
                     result.freezer.close();
@@ -15631,8 +15854,8 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private void executePostCommitSteps(CommitRequest commitRequest) {
         for (ReconciledPackage reconciledPkg : commitRequest.reconciledPackages.values()) {
-            final boolean instantApp =
-                    ((reconciledPkg.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0);
+            final boolean instantApp = ((reconciledPkg.scanResult.request.scanFlags
+                            & PackageManagerService.SCAN_AS_INSTANT_APP) != 0);
             final PackageParser.Package pkg = reconciledPkg.pkgSetting.pkg;
             final String packageName = pkg.packageName;
             prepareAppDataAfterInstallLIF(pkg);
@@ -15650,7 +15873,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // can be used for optimizations.
             mArtManagerService.prepareAppProfiles(
                     pkg,
-                    resolveUserIds(reconciledPkg.installForUser.getIdentifier()),
+                    resolveUserIds(reconciledPkg.installArgs.user.getIdentifier()),
                     /* updateReferenceProfileContent= */ true);
 
             // Check whether we need to dexopt the app.
@@ -15700,109 +15923,6 @@ public class PackageManagerService extends IPackageManager.Stub
             // BackgroundDexOptService will remove it from its blacklist.
             // TODO: Layering violation
             BackgroundDexOptService.notifyPackageChanged(packageName);
-        }
-
-    }
-
-    private void cleanUpCommitFailuresLocked(CommitRequest request) {
-        final Map<String, ReconciledPackage> reconciledPackages = request.reconciledPackages;
-        final int[] allUsers = request.mAllUsers;
-        for (ReconciledPackage reconciledPackage : reconciledPackages.values()) {
-            final String pkgName1 = reconciledPackage.pkgSetting.pkg.packageName;
-            if (reconciledPackage.installResult.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                reconciledPackage.installResult.setError(
-                        PackageManager.INSTALL_FAILED_INTERNAL_ERROR, "Commit failed...");
-            }
-            final PackageParser.Package oldPackage =
-                    reconciledPackage.prepareResult.existingPackage;
-            final PackageParser.Package newPackage = reconciledPackage.pkgSetting.pkg;
-            if (reconciledPackage.prepareResult.system) {
-                // Re installation failed. Restore old information
-                // Remove new pkg information
-                if (newPackage != null) {
-                    removeInstalledPackageLI(newPackage, true);
-                }
-                // Add back the old system package
-                PackageParser.Package restoredPkg = null;
-                try {
-                    final List<ScanResult> restoreResults = scanPackageTracedLI(oldPackage,
-                            reconciledPackage.prepareResult.parseFlags, SCAN_UPDATE_SIGNATURE, 0,
-                            reconciledPackage.installForUser);
-                    commitSuccessfulScanResults(restoreResults);
-                    restoredPkg = restoreResults.get(0).pkgSetting.pkg;
-                } catch (PackageManagerException e) {
-                    Slog.e(TAG, "Failed to restore original package: " + e.getMessage());
-                }
-                synchronized (mPackages) {
-                    final boolean disabledSystem;
-                    // Remove existing system package
-                    removePackageLI(reconciledPackage.scanResult.pkgSetting.pkg, true);
-                    disabledSystem = disableSystemPackageLPw(
-                            reconciledPackage.scanResult.pkgSetting.pkg, restoredPkg);
-                    if (disabledSystem) {
-                        enableSystemPackageLPw(restoredPkg);
-                    }
-                    // Ensure the installer package name up to date
-                    setInstallerPackageNameLPw(reconciledPackage.scanResult.pkgSetting.pkg,
-                            reconciledPackage.installArgs.installerPackageName);
-                    // Update permissions for restored package
-                    mPermissionManager.updatePermissions(
-                            restoredPkg.packageName, restoredPkg, false, mPackages.values(),
-                            mPermissionCallback);
-                    mSettings.writeLPr();
-                }
-                Slog.i(TAG, "Successfully restored package : " + restoredPkg.packageName
-                        + " after failed upgrade");
-            } else if (reconciledPackage.prepareResult.replace) {
-                if (DEBUG_INSTALL) Slog.d(TAG, "Install failed, rolling pack: " + pkgName1);
-
-                // Revert all internal state mutations and added folders for the failed install
-                boolean deletedPkg = deletePackageLIF(pkgName1, null, true,
-                        allUsers, /*TODO: deleteFlags*/ 0,
-                        reconciledPackage.installResult.removedInfo, true, null);
-
-                // Restore the old package
-                if (deletedPkg) {
-                    if (DEBUG_INSTALL) Slog.d(TAG, "Install failed, reinstalling: " + oldPackage);
-                    File restoreFile = new File(oldPackage.codePath);
-                    // Parse old package
-                    boolean oldExternal = isExternal(oldPackage);
-                    int oldParseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
-                            | (oldExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0);
-                    int oldScanFlags = SCAN_UPDATE_SIGNATURE | SCAN_UPDATE_TIME;
-                    try {
-                        scanPackageTracedLI(restoreFile, oldParseFlags, oldScanFlags,
-                                /* origUpdateTime */ System.currentTimeMillis(), null);
-                    } catch (PackageManagerException e) {
-                        Slog.e(TAG, "Failed to restore package : " + pkgName1
-                                + " after failed upgrade: "
-                                + e.getMessage());
-                        return;
-                    }
-
-                    synchronized (mPackages) {
-                        // Ensure the installer package name up to date
-                        setInstallerPackageNameLPw(oldPackage,
-                                reconciledPackage.installArgs.installerPackageName);
-
-                        // Update permissions for restored package
-                        mPermissionManager.updatePermissions(
-                                oldPackage.packageName, oldPackage, false, mPackages.values(),
-                                mPermissionCallback);
-
-                        mSettings.writeLPr();
-                    }
-
-                    Slog.i(TAG, "Successfully restored package : " + pkgName1
-                            + " after failed upgrade");
-                }
-            } else {
-                // Remove package from internal structures, but keep around any
-                // data that might have already existed
-                deletePackageLIF(pkgName1, UserHandle.ALL, false, null,
-                        PackageManager.DELETE_KEEP_DATA,
-                        reconciledPackage.installResult.removedInfo, true, null);
-            }
         }
     }
 
@@ -16283,15 +16403,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 Slog.e(TAG, "Error deriving application ABI", pme);
                 throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
                         "Error deriving application ABI");
-            }
-
-            // Shared libraries for the package need to be updated.
-            synchronized (mPackages) {
-                try {
-                    updateSharedLibrariesLPr(pkg, null);
-                } catch (PackageManagerException e) {
-                    Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
-                }
             }
         }
 
@@ -17856,21 +17967,14 @@ public class PackageManagerService extends IPackageManager.Stub
         public final PackageRemovedInfo outInfo;
         public final int flags;
         public final UserHandle user;
-        /**
-         * True if this package is an unupdated system app that may be deleted by the system.
-         * When true, disabledPs will be null.
-         */
-        public final boolean mayDeleteUnupdatedSystemApp;
 
         private DeletePackageAction(PackageSetting deletingPs, PackageSetting disabledPs,
-                PackageRemovedInfo outInfo, int flags, UserHandle user,
-                boolean mayDeleteUnupdatedSystemApp) {
+                PackageRemovedInfo outInfo, int flags, UserHandle user) {
             this.deletingPs = deletingPs;
             this.disabledPs = disabledPs;
             this.outInfo = outInfo;
             this.flags = flags;
             this.user = user;
-            this.mayDeleteUnupdatedSystemApp = mayDeleteUnupdatedSystemApp;
         }
     }
 
@@ -17886,24 +17990,22 @@ public class PackageManagerService extends IPackageManager.Stub
         if (ps == null) {
             return null;
         }
-        boolean mayDeleteUnupdatedSystemApp = false;
         if (isSystemApp(ps)) {
             if (ps.parentPackageName != null) {
                 Slog.w(TAG, "Attempt to delete child system package " + ps.pkg.packageName);
                 return null;
             }
 
-            if (((flags & PackageManager.DELETE_SYSTEM_APP) != 0) && user != null
-                    && user.getIdentifier() != UserHandle.USER_ALL) {
-                mayDeleteUnupdatedSystemApp = true;
-            } else if (disabledPs == null) {
-                // Confirmed if the system package has been updated
-                // An updated system app can be deleted. This will also have to restore
-                // the system pkg from system partition
-                // reader
+            final boolean deleteSystem = (flags & PackageManager.DELETE_SYSTEM_APP) != 0;
+            final boolean deleteAllUsers =
+                    user == null || user.getIdentifier() == UserHandle.USER_ALL;
+            if ((!deleteSystem || deleteAllUsers) && disabledPs == null) {
                 Slog.w(TAG, "Attempt to delete unknown system package " + ps.pkg.packageName);
                 return null;
             }
+            // Confirmed if the system package has been updated
+            // An updated system app can be deleted. This will also have to restore
+            // the system pkg from system partition reader
         }
         final int parentReferenceCount =
                 (ps.childPackageNames != null) ? ps.childPackageNames.size() : 0;
@@ -17918,8 +18020,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
         }
-        return new DeletePackageAction(ps, disabledPs, outInfo, flags, user,
-                mayDeleteUnupdatedSystemApp);
+        return new DeletePackageAction(ps, disabledPs, outInfo, flags, user);
     }
 
     /*
@@ -17993,8 +18094,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS, userId)) {
             unsuspendForSuspendingPackage(packageName, userId);
         }
-
-        if (!systemApp || action.mayDeleteUnupdatedSystemApp) {
+        if ((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)
+                && userId != UserHandle.USER_ALL) {
             // The caller is asking that the package only be deleted for a single
             // user.  To do this, we just mark its uninstalled state and delete
             // its data. If this is a system app, we only allow this to happen if
@@ -18017,13 +18118,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         // We need to set it back to 'installed' so the uninstall
                         // broadcasts will be sent correctly.
                         if (DEBUG_REMOVE) Slog.d(TAG, "Not installed by other users, full delete");
-                        if (userId != UserHandle.USER_ALL) {
-                            ps.setInstalled(true, userId);
-                        } else {
-                            for (int origUserId : outInfo.origUsers) {
-                                ps.setInstalled(true, origUserId);
-                            }
-                        }
+                        ps.setInstalled(true, userId);
                         mSettings.writeKernelMappingLPr(ps);
                     }
                 } else {
@@ -19484,6 +19579,17 @@ public class PackageManagerService extends IPackageManager.Stub
         return getHomeActivitiesAsUser(allHomeCandidates, UserHandle.getCallingUserId());
     }
 
+    /**
+     * Send a {@code PackageInstaller.ACTION_SESSION_UPDATED} broadcast intent, containing
+     * the {@code sessionInfo} in the extra field {@code PackageInstaller.EXTRA_SESSION}.
+     */
+    public void sendSessionUpdatedBroadcast(PackageInstaller.SessionInfo sessionInfo,
+            int userId) {
+        Intent sessionUpdatedIntent = new Intent(PackageInstaller.ACTION_SESSION_UPDATED)
+                .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo);
+        mContext.sendBroadcastAsUser(sessionUpdatedIntent, UserHandle.of(userId));
+    }
+
     public void sendSessionCommitBroadcast(PackageInstaller.SessionInfo sessionInfo, int userId) {
         UserManagerService ums = UserManagerService.getInstance();
         if (ums != null) {
@@ -20124,16 +20230,21 @@ public class PackageManagerService extends IPackageManager.Stub
         ContentObserver co = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
-                mWebInstantAppsDisabled =
-                        (Global.getInt(resolver, Global.ENABLE_EPHEMERAL_FEATURE, 1) == 0) ||
-                                (Secure.getInt(resolver, Secure.INSTANT_APPS_ENABLED, 1) == 0);
+                final boolean ephemeralFeatureDisabled =
+                        Global.getInt(resolver, Global.ENABLE_EPHEMERAL_FEATURE, 1) == 0;
+                for (int userId : UserManagerService.getInstance().getUserIds()) {
+                    final boolean instantAppsDisabledForUser =
+                            ephemeralFeatureDisabled || Secure.getIntForUser(resolver,
+                                    Secure.INSTANT_APPS_ENABLED, 1, userId) == 0;
+                    mWebInstantAppsDisabled.put(userId, instantAppsDisabledForUser);
+                }
             }
         };
         mContext.getContentResolver().registerContentObserver(android.provider.Settings.Global
                         .getUriFor(Global.ENABLE_EPHEMERAL_FEATURE),
-                false, co, UserHandle.USER_SYSTEM);
+                false, co, UserHandle.USER_ALL);
         mContext.getContentResolver().registerContentObserver(android.provider.Settings.Secure
-                        .getUriFor(Secure.INSTANT_APPS_ENABLED), false, co, UserHandle.USER_SYSTEM);
+                        .getUriFor(Secure.INSTANT_APPS_ENABLED), false, co, UserHandle.USER_ALL);
         co.onChange(true);
 
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being

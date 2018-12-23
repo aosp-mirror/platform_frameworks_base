@@ -17,8 +17,10 @@
 package com.android.systemui.appops;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,7 +34,6 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationPresenter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,9 +49,12 @@ public class AppOpsControllerTest extends SysuiTestCase {
     private static final int TEST_UID = 0;
     private static final int TEST_UID_OTHER = 500000;
 
-    @Mock private NotificationPresenter mPresenter;
-    @Mock private AppOpsManager mAppOpsManager;
-    @Mock private AppOpsController.Callback mCallback;
+    @Mock
+    private AppOpsManager mAppOpsManager;
+    @Mock
+    private AppOpsController.Callback mCallback;
+    @Mock
+    private AppOpsControllerImpl.H mMockHandler;
 
     private AppOpsControllerImpl mController;
 
@@ -77,9 +81,13 @@ public class AppOpsControllerTest extends SysuiTestCase {
 
     @Test
     public void addCallback_includedCode() {
-        mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO}, mCallback);
+        mController.addCallback(
+                new int[]{AppOpsManager.OP_RECORD_AUDIO, AppOpsManager.OP_FINE_LOCATION},
+                mCallback);
         mController.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
+                AppOpsManager.MODE_ALLOWED);
         verify(mCallback).onActiveStateChanged(AppOpsManager.OP_RECORD_AUDIO,
                 TEST_UID, TEST_PACKAGE_NAME, true);
     }
@@ -106,7 +114,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
     @Test
     public void addCallback_notSameCode() {
         mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO}, mCallback);
-        mController.removeCallback(new int[]{AppOpsManager.OP_FINE_LOCATION}, mCallback);
+        mController.removeCallback(new int[]{AppOpsManager.OP_CAMERA}, mCallback);
         mController.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
         verify(mCallback).onActiveStateChanged(AppOpsManager.OP_RECORD_AUDIO,
@@ -128,17 +136,30 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 TEST_UID, TEST_PACKAGE_NAME, true);
         mController.onOpActiveChanged(AppOpsManager.OP_CAMERA,
                 TEST_UID, TEST_PACKAGE_NAME, true);
-        assertEquals(2, mController.getActiveAppOps().size());
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION,
+                TEST_UID, TEST_PACKAGE_NAME, AppOpsManager.MODE_ALLOWED);
+        assertEquals(3, mController.getActiveAppOps().size());
     }
 
-    @Test public void getActiveItemsForUser() {
+    @Test
+    public void getActiveItemsForUser() {
         mController.onOpActiveChanged(AppOpsManager.OP_RECORD_AUDIO,
                 TEST_UID, TEST_PACKAGE_NAME, true);
         mController.onOpActiveChanged(AppOpsManager.OP_CAMERA,
                 TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
-        assertEquals(1,
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION,
+                TEST_UID, TEST_PACKAGE_NAME, AppOpsManager.MODE_ALLOWED);
+        assertEquals(2,
                 mController.getActiveAppOpsForUser(UserHandle.getUserId(TEST_UID)).size());
         assertEquals(1,
-                mController.getActiveAppOpsForUser(UserHandle.getUserId(TEST_UID)).size());
+                mController.getActiveAppOpsForUser(UserHandle.getUserId(TEST_UID_OTHER)).size());
+    }
+
+    @Test
+    public void opNotedScheduledForRemoval() {
+        mController.setBGHandler(mMockHandler);
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
+                AppOpsManager.MODE_ALLOWED);
+        verify(mMockHandler).scheduleRemoval(any(AppOpItem.class), anyLong());
     }
 }

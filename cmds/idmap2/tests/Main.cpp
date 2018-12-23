@@ -22,15 +22,13 @@
 
 #include "TestHelpers.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
-const std::string GetTestDataPath() {
+std::string GetTestDataPath() {
   return base::GetExecutableDirectory() + "/tests/data";
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);

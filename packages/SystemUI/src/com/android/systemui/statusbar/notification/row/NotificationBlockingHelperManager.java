@@ -34,10 +34,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Manager for the notification blocking helper - tracks and helps create the blocking helper
  * affordance.
  */
+@Singleton
 public class NotificationBlockingHelperManager {
     /** Enables debug logging and always makes the blocking helper show up after a dismiss. */
     private static final boolean DEBUG = false;
@@ -54,6 +58,7 @@ public class NotificationBlockingHelperManager {
      */
     private boolean mIsShadeExpanded;
 
+    @Inject
     public NotificationBlockingHelperManager(Context context) {
         mContext = context;
         mNonBlockablePkgs = new HashSet<>();

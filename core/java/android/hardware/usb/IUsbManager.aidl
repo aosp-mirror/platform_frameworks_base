@@ -20,7 +20,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbPort;
+import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbPortStatus;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -112,7 +112,7 @@ interface IUsbManager
     ParcelFileDescriptor getControlFd(long function);
 
     /* Gets the list of USB ports. */
-    UsbPort[] getPorts();
+    List<ParcelableUsbPort> getPorts();
 
     /* Gets the status of the specified USB port. */
     UsbPortStatus getPortStatus(in String portId);

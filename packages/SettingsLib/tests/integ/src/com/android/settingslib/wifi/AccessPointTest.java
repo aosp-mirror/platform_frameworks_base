@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,12 +43,12 @@ import android.net.wifi.hotspot2.pps.HomeSp;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.SpannableString;
 import android.text.format.DateUtils;
-import android.text.style.TtsSpan;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.settingslib.R;
 import com.android.settingslib.utils.ThreadUtils;

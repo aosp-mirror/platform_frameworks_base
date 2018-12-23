@@ -47,6 +47,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.GnssMeasurementCorrections;
 import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
@@ -2591,6 +2592,30 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             return true;
         }
+    }
+
+    @Override
+    public void injectGnssMeasurementCorrections(
+            GnssMeasurementCorrections measurementCorrections, String packageName) {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.LOCATION_HARDWARE,
+                "Location Hardware permission not granted to inject GNSS measurement corrections.");
+        if (!hasGnssPermissions(packageName) || mGnssMeasurementsProvider == null) {
+            mGnssMeasurementsProvider.injectGnssMeasurementCorrections(measurementCorrections);
+        } else {
+            Slog.e(TAG, "Can not inject GNSS corrections due to no permission.");
+        }
+    }
+
+    @Override
+    public int getGnssCapabilities(String packageName) {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.LOCATION_HARDWARE,
+                "Location Hardware permission not granted to obrain GNSS chipset capabilities.");
+        if (!hasGnssPermissions(packageName) || mGnssMeasurementsProvider == null) {
+            return -1;
+        }
+        return mGnssMeasurementsProvider.getGnssCapabilities();
     }
 
     @Override

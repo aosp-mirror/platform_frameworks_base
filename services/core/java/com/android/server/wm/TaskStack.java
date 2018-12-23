@@ -996,15 +996,20 @@ public class TaskStack extends WindowContainer<Task> implements
      * Adjusts the stack bounds if the IME is visible.
      *
      * @param imeWin The IME window.
+     * @param keepLastAmount Use {@code true} to keep the last adjusted amount from
+     *                       {@link DockedStackDividerController} for adjusting the stack bounds,
+     *                       Use {@code false} to reset adjusted amount as 0.
+     * @see #updateAdjustForIme(float, float, boolean)
      */
-    void setAdjustedForIme(WindowState imeWin, boolean forceUpdate) {
+    void setAdjustedForIme(WindowState imeWin, boolean keepLastAmount) {
         mImeWin = imeWin;
         mImeGoingAway = false;
-        if (!mAdjustedForIme || forceUpdate) {
+        if (!mAdjustedForIme || keepLastAmount) {
             mAdjustedForIme = true;
-            mAdjustImeAmount = 0f;
-            mAdjustDividerAmount = 0f;
-            updateAdjustForIme(0f, 0f, true /* force */);
+            DockedStackDividerController controller = getDisplayContent().mDividerControllerLocked;
+            final float adjustImeAmount = keepLastAmount ? controller.mLastAnimationProgress : 0f;
+            final float adjustDividerAmount = keepLastAmount ? controller.mLastDividerProgress : 0f;
+            updateAdjustForIme(adjustImeAmount, adjustDividerAmount, true /* force */);
         }
     }
 

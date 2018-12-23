@@ -106,7 +106,6 @@ public class LockScreenWakeUpController implements StatusBarStateController.Stat
 
             DozeLog.traceLockScreenWakeUp(wakeEvent);
             if (wakeEvent && mDozing) {
-                mDozeHost.setPassiveInterrupt(true);
                 if (DEBUG) Log.d(TAG, "Wake up.");
                 mPowerManager.wakeUp(SystemClock.uptimeMillis(), "com.android.systemui:NODOZE");
             } else if (!wakeEvent && !mDozing) {

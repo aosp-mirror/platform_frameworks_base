@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
 import android.os.Build;
 import android.util.Log;
@@ -334,7 +335,9 @@ public class AudioSystem
          * @param packName package name of the client app performing the recording. NOT SUPPORTED
          */
         void onRecordingConfigurationChanged(int event, int uid, int session, int source,
-                int[] recordingFormat, String packName);
+                        int portId, boolean silenced, int[] recordingFormat,
+                        AudioEffect.Descriptor[] clienteffects, AudioEffect.Descriptor[] effects,
+                        int activeSource, String packName);
     }
 
     private static AudioRecordingCallback sRecordingCallback;
@@ -352,19 +355,27 @@ public class AudioSystem
      * @param session
      * @param source
      * @param recordingFormat see
-     *     {@link AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int, int[])}
+     *     {@link AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int, int,\
+     boolean, int[], AudioEffect.Descriptor[], AudioEffect.Descriptor[], int, String)}
      *     for the description of the record format.
      */
     @UnsupportedAppUsage
     private static void recordingCallbackFromNative(int event, int uid, int session, int source,
-            int[] recordingFormat) {
+                          int portId, boolean silenced, int[] recordingFormat,
+                          AudioEffect.Descriptor[] clientEffects, AudioEffect.Descriptor[] effects,
+                          int activeSource) {
         AudioRecordingCallback cb = null;
         synchronized (AudioSystem.class) {
             cb = sRecordingCallback;
         }
+
+        String clientEffectName =  clientEffects.length == 0 ? "None" : clientEffects[0].name;
+        String effectName =  effects.length == 0 ? "None" : effects[0].name;
+
         if (cb != null) {
             // TODO receive package name from native
-            cb.onRecordingConfigurationChanged(event, uid, session, source, recordingFormat, "");
+            cb.onRecordingConfigurationChanged(event, uid, session, source, portId, silenced,
+                                        recordingFormat, clientEffects, effects, activeSource, "");
         }
     }
 

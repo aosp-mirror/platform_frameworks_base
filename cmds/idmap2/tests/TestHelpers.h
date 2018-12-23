@@ -19,8 +19,7 @@
 
 #include <string>
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 const unsigned char idmap_raw_data[] = {
     // IDMAP HEADER
@@ -117,7 +116,7 @@ const unsigned char idmap_raw_data[] = {
 
 const unsigned int idmap_raw_data_len = 565;
 
-const std::string GetTestDataPath();
+std::string GetTestDataPath();
 
 class Idmap2Tests : public testing::Test {
  protected:
@@ -162,7 +161,6 @@ class Idmap2Tests : public testing::Test {
   std::string idmap_path_;
 };
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2
 
 #endif  // IDMAP2_TESTS_TESTHELPERS_H_

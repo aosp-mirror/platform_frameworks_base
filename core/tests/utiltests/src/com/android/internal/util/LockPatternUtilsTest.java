@@ -29,11 +29,12 @@ import android.content.ContextWrapper;
 import android.content.pm.UserInfo;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
 import android.test.mock.MockContentResolver;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;

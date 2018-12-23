@@ -29,7 +29,7 @@ class FontFamily;
 namespace android {
 
 struct FontFamilyWrapper {
-  FontFamilyWrapper(std::shared_ptr<minikin::FontFamily>&& family) : family(family) {}
+  explicit FontFamilyWrapper(std::shared_ptr<minikin::FontFamily>&& family) : family(family) {}
   std::shared_ptr<minikin::FontFamily> family;
 };
 

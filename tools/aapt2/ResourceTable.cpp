@@ -40,6 +40,8 @@ using ::android::base::StringPrintf;
 
 namespace aapt {
 
+const char* Overlayable::kActorScheme = "overlay";
+
 static bool less_than_type_and_id(const std::unique_ptr<ResourceTableType>& lhs,
                                   const std::pair<ResourceType, Maybe<uint8_t>>& rhs) {
   return lhs->type < rhs.first || (lhs->type == rhs.first && rhs.second && lhs->id < rhs.second);
@@ -625,17 +627,18 @@ bool ResourceTable::SetAllowNewImpl(const ResourceNameRef& name, const AllowNew&
   return true;
 }
 
-bool ResourceTable::SetOverlayable(const ResourceNameRef& name, const Overlayable& overlayable,
+bool ResourceTable::SetOverlayable(const ResourceNameRef& name, const OverlayableItem& overlayable,
                                    IDiagnostics* diag) {
   return SetOverlayableImpl(name, overlayable, ResourceNameValidator, diag);
 }
 
 bool ResourceTable::SetOverlayableMangled(const ResourceNameRef& name,
-                                          const Overlayable& overlayable, IDiagnostics* diag) {
+                                          const OverlayableItem& overlayable, IDiagnostics* diag) {
   return SetOverlayableImpl(name, overlayable, SkipNameValidator, diag);
 }
 
-bool ResourceTable::SetOverlayableImpl(const ResourceNameRef& name, const Overlayable& overlayable,
+bool ResourceTable::SetOverlayableImpl(const ResourceNameRef& name,
+                                       const OverlayableItem& overlayable,
                                        NameValidator name_validator, IDiagnostics *diag) {
   CHECK(diag != nullptr);
 
@@ -647,14 +650,15 @@ bool ResourceTable::SetOverlayableImpl(const ResourceNameRef& name, const Overla
   ResourceTableType* type = package->FindOrCreateType(name.type);
   ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
 
-  if (entry->overlayable) {
+  if (entry->overlayable_item) {
     diag->Error(DiagMessage(overlayable.source)
-                    << "duplicate overlayable declaration for resource '" << name << "'");
-    diag->Error(DiagMessage(entry->overlayable.value().source) << "previous declaration here");
+                << "duplicate overlayable declaration for resource '" << name << "'");
+    diag->Error(DiagMessage(entry->overlayable_item.value().source)
+                << "previous declaration here");
     return false;
   }
 
-  entry->overlayable = overlayable;
+  entry->overlayable_item = overlayable;
   return true;
 }
 
@@ -690,7 +694,7 @@ std::unique_ptr<ResourceTable> ResourceTable::Clone() const {
         new_entry->id = entry->id;
         new_entry->visibility = entry->visibility;
         new_entry->allow_new = entry->allow_new;
-        new_entry->overlayable = entry->overlayable;
+        new_entry->overlayable_item = entry->overlayable_item;
 
         for (const auto& config_value : entry->values) {
           ResourceConfigValue* new_value =

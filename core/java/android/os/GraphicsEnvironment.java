@@ -17,8 +17,10 @@
 package android.os;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.opengl.EGL14;
@@ -57,9 +59,9 @@ public class GraphicsEnvironment {
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
     private static final String PROPERTY_GFX_DRIVER_WHITELIST = "ro.gfx.driver.whitelist.0";
-    private static final String ANGLE_PACKAGE_NAME = "com.google.android.angle";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
+    private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -255,8 +257,7 @@ public class GraphicsEnvironment {
             return sDriverMap.get(OpenGlDriverChoice.DEFAULT);
         }
         // Make sure we have good settings to use
-        if (globalSettingsDriverPkgs.isEmpty() || globalSettingsDriverValues.isEmpty()
-                || (globalSettingsDriverPkgs.size() != globalSettingsDriverValues.size())) {
+        if (globalSettingsDriverPkgs.size() != globalSettingsDriverValues.size()) {
             Log.w(TAG,
                     "Global.Settings values are invalid: "
                         + "globalSettingsDriverPkgs.size = "
@@ -276,9 +277,141 @@ public class GraphicsEnvironment {
     }
 
     /**
+     * Get the ANGLE package name.
+     */
+    private String getAnglePackageName(Context context) {
+        Intent intent = new Intent(ACTION_ANGLE_FOR_ANDROID);
+
+        List<ResolveInfo> resolveInfos = context.getPackageManager()
+                .queryIntentActivities(intent, PackageManager.MATCH_SYSTEM_ONLY);
+        if (resolveInfos.size() != 1) {
+            Log.e(TAG, "Invalid number of ANGLE packages. Required: 1, Found: "
+                    + resolveInfos.size());
+            for (ResolveInfo resolveInfo : resolveInfos) {
+                Log.e(TAG, "Found ANGLE package: " + resolveInfo.activityInfo.packageName);
+            }
+            return "";
+        }
+
+        // Must be exactly 1 ANGLE PKG found to get here.
+        return resolveInfos.get(0).activityInfo.packageName;
+    }
+
+    /**
+     * Attempt to setup ANGLE with a temporary rules file.
+     * True: Temporary rules file was loaded.
+     * False: Temporary rules file was *not* loaded.
+     */
+    private boolean setupAngleWithTempRulesFile(Context context,
+                                                String packageName,
+                                                String paths,
+                                                String devOptIn) {
+        // Check for temporary rules if debuggable or root
+        if (!isDebuggable(context) && !(getCanLoadSystemLibraries() == 1)) {
+            Log.v(TAG, "Skipping loading temporary rules file");
+            return false;
+        }
+
+        String angleTempRules = SystemProperties.get(ANGLE_TEMP_RULES);
+
+        if ((angleTempRules == null) || angleTempRules.isEmpty()) {
+            Log.v(TAG, "System property '" + ANGLE_TEMP_RULES + "' is not set or is empty");
+            return false;
+        }
+
+        Log.i(TAG, "Detected system property " + ANGLE_TEMP_RULES + ": " + angleTempRules);
+
+        File tempRulesFile = new File(angleTempRules);
+        if (tempRulesFile.exists()) {
+            Log.i(TAG, angleTempRules + " exists, loading file.");
+            try {
+                FileInputStream stream = new FileInputStream(angleTempRules);
+
+                try {
+                    FileDescriptor rulesFd = stream.getFD();
+                    long rulesOffset = 0;
+                    long rulesLength = stream.getChannel().size();
+                    Log.i(TAG, "Loaded temporary ANGLE rules from " + angleTempRules);
+
+                    setAngleInfo(paths, packageName, devOptIn, rulesFd, rulesOffset, rulesLength);
+
+                    stream.close();
+
+                    // We successfully setup ANGLE, so return with good status
+                    return true;
+                } catch (IOException e) {
+                    Log.w(TAG, "Hit IOException thrown by FileInputStream: " + e);
+                }
+            } catch (FileNotFoundException e) {
+                Log.w(TAG, "Temp ANGLE rules file not found: " + e);
+            } catch (SecurityException e) {
+                Log.w(TAG, "Temp ANGLE rules file not accessible: " + e);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Attempt to setup ANGLE with a (temporary) default rules file: b/121153494
+     * True: Rules file was loaded.
+     * False: Rules file was *not* loaded.
+     */
+    private boolean setupAngleRulesDebug(String packageName, String paths, String devOptIn) {
+        // b/121153494
+        // Skip APK rules file checking.
+        if (!DEBUG) {
+            Log.v(TAG, "Skipping loading the rules file.");
+            // Fill in some default values for now, so the loader can get an answer when it asks.
+            // Most importantly, we need to indicate which app we are init'ing and what the
+            // developer options for it are so we can turn on ANGLE if needed.
+            setAngleInfo(paths, packageName, devOptIn, null, 0, 0);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Attempt to setup ANGLE with a rules file loaded from the ANGLE APK.
+     * True: APK rules file was loaded.
+     * False: APK rules file was *not* loaded.
+     */
+    private boolean setupAngleRulesApk(String anglePkgName,
+            ApplicationInfo angleInfo,
+            Context context,
+            String packageName,
+            String paths,
+            String devOptIn) {
+        // Pass the rules file to loader for ANGLE decisions
+        try {
+            AssetManager angleAssets =
+                    context.getPackageManager().getResourcesForApplication(angleInfo).getAssets();
+
+            try {
+                AssetFileDescriptor assetsFd = angleAssets.openFd(ANGLE_RULES_FILE);
+
+                setAngleInfo(paths, packageName, devOptIn, assetsFd.getFileDescriptor(),
+                        assetsFd.getStartOffset(), assetsFd.getLength());
+
+                assetsFd.close();
+
+                return true;
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to get AssetFileDescriptor for " + ANGLE_RULES_FILE
+                        + " from '" + anglePkgName + "': " + e);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Failed to get AssetManager for '" + anglePkgName + "': " + e);
+        }
+
+        return false;
+    }
+
+    /**
      * Pass ANGLE details down to trigger enable logic
      */
-    private void setupAngle(Context context, Bundle bundle, String packageName) {
+    public void setupAngle(Context context, Bundle bundle, String packageName) {
         String devOptIn = getDriverForPkg(bundle, packageName);
 
         if (DEBUG) {
@@ -286,98 +419,47 @@ public class GraphicsEnvironment {
                     + "set to: '" + devOptIn + "'");
         }
 
+        String anglePkgName = getAnglePackageName(context);
+        if (anglePkgName.isEmpty()) {
+            Log.e(TAG, "Failed to find ANGLE package.");
+            return;
+        }
+
         ApplicationInfo angleInfo;
         try {
-            angleInfo = context.getPackageManager().getApplicationInfo(ANGLE_PACKAGE_NAME,
+            angleInfo = context.getPackageManager().getApplicationInfo(anglePkgName,
                 PackageManager.MATCH_SYSTEM_ONLY);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "ANGLE package '" + ANGLE_PACKAGE_NAME + "' not installed");
+            Log.w(TAG, "ANGLE package '" + anglePkgName + "' not installed");
             return;
         }
 
         String abi = chooseAbi(angleInfo);
 
         // Build a path that includes installed native libs and APK
-        StringBuilder sb = new StringBuilder();
-        sb.append(angleInfo.nativeLibraryDir)
-            .append(File.pathSeparator)
-            .append(angleInfo.sourceDir)
-            .append("!/lib/")
-            .append(abi);
-        String paths = sb.toString();
+        String paths = angleInfo.nativeLibraryDir
+                + File.pathSeparator
+                + angleInfo.sourceDir
+                + "!/lib/"
+                + abi;
 
         if (DEBUG) Log.v(TAG, "ANGLE package libs: " + paths);
 
-        // Look up rules file to pass to ANGLE
-        FileDescriptor rulesFd = null;
-        long rulesOffset = 0;
-        long rulesLength = 0;
-
-        // Check for temporary rules if debuggable or root
-        if (isDebuggable(context) || (getCanLoadSystemLibraries() == 1)) {
-            String angleTempRules = SystemProperties.get(ANGLE_TEMP_RULES);
-            if (angleTempRules != null && !angleTempRules.isEmpty()) {
-                Log.i(TAG, "Detected system property " + ANGLE_TEMP_RULES + ": " + angleTempRules);
-                File tempRulesFile = new File(angleTempRules);
-                if (tempRulesFile.exists()) {
-                    Log.i(TAG, angleTempRules + " exists, loading file.");
-                    FileInputStream stream = null;
-                    try {
-                        stream = new FileInputStream(angleTempRules);
-                    } catch (FileNotFoundException e) {
-                        Log.w(TAG, "Unable to create stream for temp ANGLE rules");
-                    }
-
-                    if (stream != null) {
-                        try {
-                            rulesFd = stream.getFD();
-                            rulesOffset = 0;
-                            rulesLength = stream.getChannel().size();
-                            Log.i(TAG, "Loaded temporary ANGLE rules from " + angleTempRules);
-                        } catch (IOException e) {
-                            Log.w(TAG, "Failed to get input stream for " + angleTempRules);
-                        }
-                    }
-                }
-            }
+        if (setupAngleWithTempRulesFile(context, packageName, paths, devOptIn)) {
+            // We setup ANGLE with a temp rules file, so we're done here.
+            return;
         }
 
-        // If no temp rules, load the real ones from the APK
-        if (DEBUG && (rulesFd == null)) {
-
-            // Pass the rules file to loader for ANGLE decisions
-            AssetManager angleAssets = null;
-            try {
-                angleAssets =
-                    context.getPackageManager().getResourcesForApplication(angleInfo).getAssets();
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, "Failed to get AssetManager for '" + ANGLE_PACKAGE_NAME + "'");
-                return;
-            }
-
-            AssetFileDescriptor assetsFd = null;
-            try {
-                assetsFd = angleAssets.openFd(ANGLE_RULES_FILE);
-            } catch (IOException e) {
-                Log.w(TAG, "Failed to get AssetFileDescriptor for " + ANGLE_RULES_FILE + " from "
-                           + "'" + ANGLE_PACKAGE_NAME + "'");
-                return;
-            }
-
-            if (assetsFd != null) {
-                rulesFd = assetsFd.getFileDescriptor();
-                rulesOffset = assetsFd.getStartOffset();
-                rulesLength = assetsFd.getLength();
-            } else {
-                Log.w(TAG, "Failed to get file descriptor for " + ANGLE_RULES_FILE);
-                return;
-            }
+        // b/121153494
+        if (setupAngleRulesDebug(packageName, paths, devOptIn)) {
+            // We setup ANGLE with defaults, so we're done here.
+            return;
         }
 
-        // Further opt-in logic is handled in native, so pass relevant info down
-        // TODO: Move the ANGLE selection logic earlier so we don't need to keep these
-        //       file descriptors open.
-        setAngleInfo(paths, packageName, devOptIn, rulesFd, rulesOffset, rulesLength);
+        if (setupAngleRulesApk(anglePkgName, angleInfo, context, packageName, paths, devOptIn)) {
+            // We setup ANGLE with rules from the APK, so we're done here.
+            return;
+        }
     }
 
     /**

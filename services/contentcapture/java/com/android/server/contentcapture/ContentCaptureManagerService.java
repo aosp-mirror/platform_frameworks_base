@@ -20,7 +20,6 @@ import static android.Manifest.permission.MANAGE_CONTENT_CAPTURE;
 import static android.content.Context.CONTENT_CAPTURE_MANAGER_SERVICE;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
@@ -34,7 +33,6 @@ import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
-import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.IContentCaptureManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -43,6 +41,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractMasterSystemService;
+import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -68,14 +67,16 @@ public final class ContentCaptureManagerService extends
 
     private final LocalService mLocalService = new LocalService();
 
-    public ContentCaptureManagerService(Context context) {
-        super(context, UserManager.DISALLOW_CONTENT_CAPTURE);
+    public ContentCaptureManagerService(@NonNull Context context) {
+        super(context, new FrameworkResourcesServiceNameResolver(context,
+                com.android.internal.R.string.config_defaultContentCaptureService),
+                UserManager.DISALLOW_CONTENT_CAPTURE);
     }
 
     @Override // from AbstractMasterSystemService
     protected ContentCapturePerUserService newServiceLocked(@UserIdInt int resolvedUserId,
             boolean disabled) {
-        return new ContentCapturePerUserService(this, mLock, resolvedUserId);
+        return new ContentCapturePerUserService(this, mLock, disabled, resolvedUserId);
     }
 
     @Override // from SystemService
@@ -164,8 +165,7 @@ public final class ContentCaptureManagerService extends
 
         @Override
         public void startSession(@UserIdInt int userId, @NonNull IBinder activityToken,
-                @NonNull ComponentName componentName, @NonNull String sessionId,
-                @Nullable ContentCaptureContext clientContext, int flags,
+                @NonNull ComponentName componentName, @NonNull String sessionId, int flags,
                 @NonNull IResultReceiver result) {
             Preconditions.checkNotNull(activityToken);
             Preconditions.checkNotNull(componentName);
@@ -175,14 +175,13 @@ public final class ContentCaptureManagerService extends
             // so we don't pass it on startSession (same for Autofill)
             final int taskId = getAmInternal().getTaskIdForActivity(activityToken, false);
 
-            // TODO(b/111276913): get from AM as well
+            // TODO(b/121260224): get from AM as well
             final int displayId = 0;
 
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, componentName, taskId, displayId,
-                        sessionId, Binder.getCallingUid(), clientContext, flags,
-                        mAllowInstantService, result);
+                        sessionId, Binder.getCallingUid(), flags, result);
             }
         }
 

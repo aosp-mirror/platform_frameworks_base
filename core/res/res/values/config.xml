@@ -2615,6 +2615,11 @@
     <!-- Package name for default network scorer app; overridden by product overlays. -->
     <string name="config_defaultNetworkScorerPackageName"></string>
 
+    <!-- Feature flag to enable memory efficient task snapshots that are used in recents optimized
+         for low memory devices and replace the app transition starting window with the splash
+         screen. -->
+    <bool name="config_lowRamTaskSnapshotsAndRecents">false</bool>
+
     <!-- Determines whether recent tasks are provided to the user. Default device has recents
          property. If this is false, then the following recents config flags are ignored. -->
     <bool name="config_hasRecents">true</bool>
@@ -3492,8 +3497,6 @@
 
     <!-- Name of a font family to use for headlines. If empty, falls back to platform default -->
     <string name="config_headlineFontFamily" translatable="false"></string>
-    <!-- Name of a font family to use for headlines. Defaults to sans-serif-light -->
-    <string name="config_headlineFontFamilyLight" translatable="false">sans-serif-light</string>
     <!-- Allows setting custom fontFeatureSettings on specific text. -->
     <string name="config_headlineFontFeatureSettings" translatable="false"></string>
 
@@ -3560,8 +3563,6 @@
     <string name="config_headlineFontFamilyMedium" translateable="false">@string/font_family_button_material</string>
     <!-- Name of a font family to use for body text. -->
     <string name="config_bodyFontFamily" translatable="false">sans-serif</string>
-    <!-- Name of a font family to use for light body text. -->
-    <string name="config_bodyFontFamilyLight" translatable="false">sans-serif-light</string>
     <!-- Name of a font family to use for medium body text. -->
     <string name="config_bodyFontFamilyMedium" translatable="false">sans-serif-medium</string>
 
@@ -3646,4 +3647,11 @@
 
     <!-- Component name for the default module metadata provider on this device -->
     <string name="config_defaultModuleMetadataProvider">com.android.modulemetadata</string>
+
+    <!-- This is the default launcher component to use on secondary displays that support system
+         decorations.
+         This launcher activity must support multiple instances and have corresponding launch mode
+         set in AndroidManifest.
+         {@see android.view.Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS} -->
+    <string name="config_secondaryHomeComponent" translatable="false">com.android.launcher3/com.android.launcher3.SecondaryDisplayLauncher</string>
 </resources>

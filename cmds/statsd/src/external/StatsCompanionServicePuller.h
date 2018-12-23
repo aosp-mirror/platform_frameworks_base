@@ -25,14 +25,14 @@ namespace statsd {
 
 class StatsCompanionServicePuller : public StatsPuller {
 public:
-    StatsCompanionServicePuller(int tagId);
-    bool PullInternal(vector<std::shared_ptr<LogEvent> >* data) override;
+    explicit StatsCompanionServicePuller(int tagId);
 
     void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService) override;
 
 private:
     Mutex mStatsCompanionServiceLock;
     sp<IStatsCompanionService> mStatsCompanionService = nullptr;
+    bool PullInternal(vector<std::shared_ptr<LogEvent> >* data) override;
 };
 
 }  // namespace statsd

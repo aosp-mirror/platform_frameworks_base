@@ -109,7 +109,7 @@ double toDouble(const std::string& s);
 class Reader
 {
 public:
-    Reader(const int fd);
+    explicit Reader(const int fd);
     ~Reader();
 
     bool readLine(std::string* line);
@@ -162,7 +162,7 @@ private:
 class Message
 {
 public:
-    Message(Table* table);
+    explicit Message(Table* table);
     ~Message();
 
     // Reconstructs the typical proto message by adding its message fields.

@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,6 +36,7 @@ import android.widget.LinearLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
@@ -90,7 +92,10 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
 
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
-        mViewHierarchyManager = new NotificationViewHierarchyManager(mContext);
+        mViewHierarchyManager = new NotificationViewHierarchyManager(mContext,
+                mLockscreenUserManager, mGroupManager, mVisualStabilityManager,
+                mock(StatusBarStateController.class), mEntryManager, mock(BubbleController.class),
+                () -> mShadeController);
         Dependency.get(InitController.class).executePostInitTasks();
         mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
     }

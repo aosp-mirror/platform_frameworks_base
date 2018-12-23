@@ -52,6 +52,8 @@ public class NotificationEntry {
     private NotificationChannel mChannel;
     private int mImportance;
     private boolean mSeen;
+    private boolean mExpanded;
+    private boolean mIsShowActionEventLogged;
 
     public NotificationEntry(IPackageManager packageManager, StatusBarNotification sbn,
             NotificationChannel channel) {
@@ -216,8 +218,24 @@ public class NotificationEntry {
         mSeen = true;
     }
 
+    public void setExpanded(boolean expanded) {
+        mExpanded = expanded;
+    }
+
+    public void setShowActionEventLogged() {
+        mIsShowActionEventLogged = true;
+    }
+
     public boolean hasSeen() {
         return mSeen;
+    }
+
+    public boolean isExpanded() {
+        return mExpanded;
+    }
+
+    public boolean isShowActionEventLogged() {
+        return mIsShowActionEventLogged;
     }
 
     public StatusBarNotification getSbn() {

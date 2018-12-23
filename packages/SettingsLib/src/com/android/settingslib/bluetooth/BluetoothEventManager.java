@@ -321,6 +321,11 @@ public class BluetoothEventManager {
                 // Dispatch device add callback to show bonded but
                 // not connected devices in discovery mode
                 dispatchDeviceAdded(cachedDevice);
+                Log.d(TAG, "DeviceFoundHandler found bonded and not connected device:"
+                        + cachedDevice);
+            } else {
+                Log.d(TAG, "DeviceFoundHandler found existing CachedBluetoothDevice:"
+                        + cachedDevice);
             }
             cachedDevice.setRssi(rssi);
             cachedDevice.setJustDiscovered(true);
@@ -463,6 +468,16 @@ public class BluetoothEventManager {
     private class AclStateChangedHandler implements Handler {
         @Override
         public void onReceive(Context context, Intent intent, BluetoothDevice device) {
+            if (device == null) {
+                Log.w(TAG, "AclStateChangedHandler: device is null");
+                return;
+            }
+
+            // Avoid to notify Settings UI for Hearing Aid sub device.
+            if (mDeviceManager.isSubDevice(device)) {
+                return;
+            }
+
             final String action = intent.getAction();
             if (action == null) {
                 Log.w(TAG, "AclStateChangedHandler: action is null");

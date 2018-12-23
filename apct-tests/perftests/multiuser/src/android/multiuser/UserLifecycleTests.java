@@ -27,9 +27,10 @@ import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -50,7 +51,7 @@ import java.util.concurrent.TimeUnit;
  * adb install -r \
  *     ${ANDROID_PRODUCT_OUT}/data/app/MultiUserPerfTests/MultiUserPerfTests.apk &&
  * adb shell am instrument -e class android.multiuser.UserLifecycleTests \
- *     -w com.android.perftests.multiuser/android.support.test.runner.AndroidJUnitRunner
+ *     -w com.android.perftests.multiuser/androidx.test.runner.AndroidJUnitRunner
  *
  * or
  *

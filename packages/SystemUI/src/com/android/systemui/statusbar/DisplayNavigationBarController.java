@@ -18,6 +18,8 @@ package com.android.systemui.statusbar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
+
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -32,9 +34,14 @@ import android.view.WindowManagerGlobal;
 
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 /**
  * A controller to handle external navigation bars
  */
+@Singleton
 public class DisplayNavigationBarController implements DisplayListener {
 
     private static final String TAG = DisplayNavigationBarController.class.getName();
@@ -46,7 +53,9 @@ public class DisplayNavigationBarController implements DisplayListener {
     /** A displayId - nav bar mapping */
     private SparseArray<NavigationBarFragment> mExternalNavigationBarMap = new SparseArray<>();
 
-    public DisplayNavigationBarController(Context context, Handler handler) {
+    @Inject
+    public DisplayNavigationBarController(Context context,
+            @Named(MAIN_HANDLER_NAME) Handler handler) {
         mContext = context;
         mHandler = handler;
         mDisplayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);

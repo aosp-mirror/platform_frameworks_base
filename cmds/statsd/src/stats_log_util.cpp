@@ -64,6 +64,8 @@ const int FIELD_ID_MAX_PULL_TIME_NANOS = 6;
 const int FIELD_ID_AVERAGE_PULL_DELAY_NANOS = 7;
 const int FIELD_ID_MAX_PULL_DELAY_NANOS = 8;
 const int FIELD_ID_DATA_ERROR = 9;
+const int FIELD_ID_PULL_TIMEOUT = 10;
+const int FIELD_ID_PULL_EXCEED_MAX_DELAY = 11;
 
 namespace {
 
@@ -450,6 +452,10 @@ void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_MAX_PULL_DELAY_NANOS,
                        (long long)pair.second.maxPullDelayNs);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_DATA_ERROR, (long long)pair.second.dataError);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_TIMEOUT,
+                       (long long)pair.second.pullTimeout);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_EXCEED_MAX_DELAY,
+                       (long long)pair.second.pullExceedMaxDelay);
     protoOutput->end(token);
 }
 

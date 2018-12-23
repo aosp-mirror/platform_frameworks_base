@@ -19,13 +19,14 @@ package com.android.systemui.keyguard;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.app.AlarmManager;
 import android.content.ContentResolver;
-import android.content.Intent;
+import android.media.MediaMetadata;
 import android.net.Uri;
 import android.provider.Settings;
 import android.support.test.filters.SmallTest;
@@ -40,7 +41,9 @@ import androidx.slice.SliceSpecs;
 import androidx.slice.builders.ListBuilder;
 import androidx.slice.core.SliceQuery;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationMediaManager;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -62,6 +65,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     private ContentResolver mContentResolver;
     @Mock
     private AlarmManager mAlarmManager;
+    @Mock
+    private NotificationMediaManager mNotificationMediaManager;
     private TestableKeyguardSliceProvider mProvider;
     private boolean mIsZenMode;
 
@@ -71,6 +76,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         mIsZenMode = false;
         mProvider = new TestableKeyguardSliceProvider();
         mProvider.attachInfo(getContext(), null);
+        mProvider.initDependencies();
         SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));
     }
 
@@ -90,8 +96,18 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBindSlice_readsMedia() {
+        MediaMetadata metadata = mock(MediaMetadata.class);
+        mProvider.onMetadataChanged(metadata);
+        mProvider.onBindSlice(mProvider.getUri());
+        verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_TITLE));
+        verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_ARTIST));
+        verify(mNotificationMediaManager).getMediaIcon();
+    }
+
+    @Test
     public void cleansDateFormat() {
-        mProvider.mIntentReceiver.onReceive(getContext(), new Intent(Intent.ACTION_TIMEZONE_CHANGED));
+        mProvider.mKeyguardUpdateMonitorCallback.onTimeZoneChanged(null);
         TestableLooper.get(this).processAllMessages();
         Assert.assertEquals("Date format should have been cleaned.", 1 /* expected */,
                 mProvider.mCleanDateFormatInvokations);
@@ -99,7 +115,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
 
     @Test
     public void updatesClock() {
-        mProvider.mIntentReceiver.onReceive(getContext(), new Intent(Intent.ACTION_TIME_TICK));
+        mProvider.mKeyguardUpdateMonitorCallback.onTimeChanged();
         TestableLooper.get(this).processAllMessages();
         verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
     }
@@ -135,12 +151,18 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     public void addZenMode_addedToSlice() {
         ListBuilder listBuilder = spy(new ListBuilder(getContext(), mProvider.getUri(),
             ListBuilder.INFINITY));
-        mProvider.addZenMode(listBuilder);
+        mProvider.addZenModeLocked(listBuilder);
         verify(listBuilder, never()).addRow(any(ListBuilder.RowBuilder.class));
 
         mIsZenMode = true;
-        mProvider.addZenMode(listBuilder);
+        mProvider.addZenModeLocked(listBuilder);
         verify(listBuilder).addRow(any(ListBuilder.RowBuilder.class));
+    }
+
+    @Test
+    public void onMetadataChanged_updatesSlice() {
+        mProvider.onMetadataChanged(mock(MediaMetadata.class));
+        verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
     }
 
     private class TestableKeyguardSliceProvider extends KeyguardSliceProvider {
@@ -165,14 +187,24 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         }
 
         @Override
-        void cleanDateFormat() {
-            super.cleanDateFormat();
+        void cleanDateFormatLocked() {
+            super.cleanDateFormatLocked();
             mCleanDateFormatInvokations++;
         }
 
         @Override
-        protected String getFormattedDate() {
-            return super.getFormattedDate() + mCounter++;
+        public KeyguardUpdateMonitor getKeyguardUpdateMonitor() {
+            return mock(KeyguardUpdateMonitor.class);
+        }
+
+        @Override
+        protected String getFormattedDateLocked() {
+            return super.getFormattedDateLocked() + mCounter++;
+        }
+
+        @Override
+        public void initDependencies() {
+            mMediaManager = mNotificationMediaManager;
         }
     }
 

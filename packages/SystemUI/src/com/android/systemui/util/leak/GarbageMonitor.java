@@ -17,6 +17,7 @@
 package com.android.systemui.util.leak;
 
 import static com.android.internal.logging.MetricsLogger.VIEW_UNKNOWN;
+import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -51,6 +52,13 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class GarbageMonitor {
     private static final boolean LEAK_REPORTING_ENABLED =
             Build.IS_DEBUGGABLE
@@ -85,9 +93,12 @@ public class GarbageMonitor {
 
     private long mHeapLimit;
 
+    /**
+     */
+    @Inject
     public GarbageMonitor(
             Context context,
-            Looper bgLooper,
+            @Named(BG_LOOPER_NAME) Looper bgLooper,
             LeakDetector leakDetector,
             LeakReporter leakReporter) {
         mContext = context.getApplicationContext();

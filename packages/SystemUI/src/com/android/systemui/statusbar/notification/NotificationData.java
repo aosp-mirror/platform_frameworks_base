@@ -27,20 +27,15 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICAT
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 
-import android.Manifest;
 import android.annotation.NonNull;
-import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Person;
 import android.content.Context;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -58,17 +53,13 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
-import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.statusbar.InflationTask;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.io.PrintWriter;
@@ -83,14 +74,13 @@ import java.util.Objects;
  */
 public class NotificationData {
 
+    private final NotificationFilter mNotificationFilter = Dependency.get(NotificationFilter.class);
+
     /**
      * These dependencies are late init-ed
      */
     private KeyguardEnvironment mEnvironment;
-    private ShadeController mShadeController;
     private NotificationMediaManager mMediaManager;
-    private ForegroundServiceController mFsc;
-    private NotificationLockscreenUserManager mUserManager;
 
     private HeadsUpManager mHeadsUpManager;
 
@@ -105,6 +95,7 @@ public class NotificationData {
         public NotificationChannel channel;
         public long lastAudiblyAlertedMs;
         public boolean noisy;
+        public boolean ambient;
         public int importance;
         public StatusBarIconView icon;
         public StatusBarIconView expandedIcon;
@@ -119,6 +110,9 @@ public class NotificationData {
         @NonNull
         public List<Notification.Action> systemGeneratedSmartActions = Collections.emptyList();
         public CharSequence[] smartReplies = new CharSequence[0];
+        @VisibleForTesting
+        public int suppressedVisualEffects;
+        public boolean suspended;
 
         private Entry parent; // our parent (if we're in a group)
         private ArrayList<Entry> children = new ArrayList<Entry>();
@@ -174,6 +168,7 @@ public class NotificationData {
             channel = ranking.getChannel();
             lastAudiblyAlertedMs = ranking.getLastAudiblyAlertedMillis();
             importance = ranking.getImportance();
+            ambient = ranking.isAmbient();
             snoozeCriteria = ranking.getSnoozeCriteria();
             userSentiment = ranking.getUserSentiment();
             systemGeneratedSmartActions = ranking.getSmartActions() == null
@@ -181,6 +176,8 @@ public class NotificationData {
             smartReplies = ranking.getSmartReplies() == null
                     ? new CharSequence[0]
                     : ranking.getSmartReplies().toArray(new CharSequence[0]);
+            suppressedVisualEffects = ranking.getSuppressedVisualEffects();
+            suspended = ranking.isSuspended();
         }
 
         public void setInterruption() {
@@ -623,6 +620,71 @@ public class NotificationData {
             if (row == null) return true;
             return row.canViewBeDismissed();
         }
+
+        boolean isExemptFromDndVisualSuppression() {
+            if (isNotificationBlockedByPolicy(notification.getNotification())) {
+                return false;
+            }
+
+            if ((notification.getNotification().flags
+                    & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+                return true;
+            }
+            if (notification.getNotification().isMediaNotification()) {
+                return true;
+            }
+            if (mIsSystemNotification != null && mIsSystemNotification) {
+                return true;
+            }
+            return false;
+        }
+
+        private boolean shouldSuppressVisualEffect(int effect) {
+            if (isExemptFromDndVisualSuppression()) {
+                return false;
+            }
+            return (suppressedVisualEffects & effect) != 0;
+        }
+
+        /**
+         * Returns whether {@link NotificationManager.Policy#SUPPRESSED_EFFECT_FULL_SCREEN_INTENT}
+         * is set for this entry.
+         */
+        public boolean shouldSuppressFullScreenIntent() {
+            return shouldSuppressVisualEffect(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT);
+        }
+
+        /**
+         * Returns whether {@link NotificationManager.Policy#SUPPRESSED_EFFECT_PEEK}
+         * is set for this entry.
+         */
+        public boolean shouldSuppressPeek() {
+            return shouldSuppressVisualEffect(SUPPRESSED_EFFECT_PEEK);
+        }
+
+        /**
+         * Returns whether {@link NotificationManager.Policy#SUPPRESSED_EFFECT_STATUS_BAR}
+         * is set for this entry.
+         */
+        public boolean shouldSuppressStatusBar() {
+            return shouldSuppressVisualEffect(SUPPRESSED_EFFECT_STATUS_BAR);
+        }
+
+        /**
+         * Returns whether {@link NotificationManager.Policy#SUPPRESSED_EFFECT_AMBIENT}
+         * is set for this entry.
+         */
+        public boolean shouldSuppressAmbient() {
+            return shouldSuppressVisualEffect(SUPPRESSED_EFFECT_AMBIENT);
+        }
+
+        /**
+         * Returns whether {@link NotificationManager.Policy#SUPPRESSED_EFFECT_NOTIFICATION_LIST}
+         * is set for this entry.
+         */
+        public boolean shouldSuppressNotificationList() {
+            return shouldSuppressVisualEffect(SUPPRESSED_EFFECT_NOTIFICATION_LIST);
+        }
     }
 
     private final ArrayMap<String, Entry> mEntries = new ArrayMap<>();
@@ -704,32 +766,11 @@ public class NotificationData {
         return mEnvironment;
     }
 
-    private ShadeController getShadeController() {
-        if (mShadeController == null) {
-            mShadeController = Dependency.get(ShadeController.class);
-        }
-        return mShadeController;
-    }
-
     private NotificationMediaManager getMediaManager() {
         if (mMediaManager == null) {
             mMediaManager = Dependency.get(NotificationMediaManager.class);
         }
         return mMediaManager;
-    }
-
-    private ForegroundServiceController getFsc() {
-        if (mFsc == null) {
-            mFsc = Dependency.get(ForegroundServiceController.class);
-        }
-        return mFsc;
-    }
-
-    private NotificationLockscreenUserManager getUserManager() {
-        if (mUserManager == null) {
-            mUserManager = Dependency.get(NotificationLockscreenUserManager.class);
-        }
-        return mUserManager;
     }
 
     /**
@@ -776,7 +817,7 @@ public class NotificationData {
     }
 
     public Entry remove(String key, RankingMap ranking) {
-        Entry removed = null;
+        Entry removed;
         synchronized (mEntries) {
             removed = mEntries.remove(key);
         }
@@ -847,62 +888,12 @@ public class NotificationData {
         return Ranking.VISIBILITY_NO_OVERRIDE;
     }
 
-    public boolean shouldSuppressFullScreenIntent(Entry entry) {
-        return shouldSuppressVisualEffect(entry, SUPPRESSED_EFFECT_FULL_SCREEN_INTENT);
-    }
-
-    public boolean shouldSuppressPeek(Entry entry) {
-        return shouldSuppressVisualEffect(entry, SUPPRESSED_EFFECT_PEEK);
-    }
-
-    public boolean shouldSuppressStatusBar(Entry entry) {
-        return shouldSuppressVisualEffect(entry, SUPPRESSED_EFFECT_STATUS_BAR);
-    }
-
-    public boolean shouldSuppressAmbient(Entry entry) {
-        return shouldSuppressVisualEffect(entry, SUPPRESSED_EFFECT_AMBIENT);
-    }
-
-    public boolean shouldSuppressNotificationList(Entry entry) {
-        return shouldSuppressVisualEffect(entry, SUPPRESSED_EFFECT_NOTIFICATION_LIST);
-    }
-
-    private boolean shouldSuppressVisualEffect(Entry entry, int effect) {
-        if (isExemptFromDndVisualSuppression(entry)) {
-            return false;
-        }
-        String key = entry.key;
-        if (mRankingMap != null) {
-            getRanking(key, mTmpRanking);
-            return (mTmpRanking.getSuppressedVisualEffects() & effect) != 0;
-        }
-        return false;
-    }
-
-    protected boolean isExemptFromDndVisualSuppression(Entry entry) {
-        if (isNotificationBlockedByPolicy(entry.notification.getNotification())) {
-            return false;
-        }
-
-        if ((entry.notification.getNotification().flags
-                & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
-            return true;
-        }
-        if (entry.notification.getNotification().isMediaNotification()) {
-            return true;
-        }
-        if (entry.mIsSystemNotification != null && entry.mIsSystemNotification) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Categories that are explicitly called out on DND settings screens are always blocked, if
      * DND has flagged them, even if they are foreground or system notifications that might
      * otherwise visually bypass DND.
      */
-    protected boolean isNotificationBlockedByPolicy(Notification n) {
+    private static boolean isNotificationBlockedByPolicy(Notification n) {
         if (isCategory(CATEGORY_CALL, n)
                 || isCategory(CATEGORY_MESSAGE, n)
                 || isCategory(CATEGORY_ALARM, n)
@@ -913,7 +904,7 @@ public class NotificationData {
         return false;
     }
 
-    private boolean isCategory(String category, Notification n) {
+    private static boolean isCategory(String category, Notification n) {
         return Objects.equals(n.category, category);
     }
 
@@ -1011,7 +1002,7 @@ public class NotificationData {
             for (int i = 0; i < N; i++) {
                 Entry entry = mEntries.valueAt(i);
 
-                if (shouldFilterOut(entry)) {
+                if (mNotificationFilter.shouldFilterOut(entry)) {
                     continue;
                 }
 
@@ -1020,87 +1011,6 @@ public class NotificationData {
         }
 
         Collections.sort(mSortedAndFiltered, mRankingComparator);
-    }
-
-    /**
-     * @return true if this notification should NOT be shown right now
-     */
-    public boolean shouldFilterOut(Entry entry) {
-        final StatusBarNotification sbn = entry.notification;
-        if (!(getEnvironment().isDeviceProvisioned() ||
-                showNotificationEvenIfUnprovisioned(sbn))) {
-            return true;
-        }
-
-        if (!getEnvironment().isNotificationForCurrentProfiles(sbn)) {
-            return true;
-        }
-
-        if (getUserManager().isLockscreenPublicMode(sbn.getUserId()) &&
-                (sbn.getNotification().visibility == Notification.VISIBILITY_SECRET
-                        || getUserManager().shouldHideNotifications(sbn.getUserId())
-                        || getUserManager().shouldHideNotifications(sbn.getKey()))) {
-            return true;
-        }
-
-        if (getShadeController().isDozing() && shouldSuppressAmbient(entry)) {
-            return true;
-        }
-
-        if (!getShadeController().isDozing() && shouldSuppressNotificationList(entry)) {
-            return true;
-        }
-
-        if (shouldHide(sbn.getKey())) {
-            return true;
-        }
-
-        if (!StatusBar.ENABLE_CHILD_NOTIFICATIONS
-                && mGroupManager.isChildInGroupWithSummary(sbn)) {
-            return true;
-        }
-
-        if (getFsc().isDungeonNotification(sbn)
-                && !getFsc().isDungeonNeededForUser(sbn.getUserId())) {
-            // this is a foreground-service disclosure for a user that does not need to show one
-            return true;
-        }
-        if (getFsc().isSystemAlertNotification(sbn)) {
-            final String[] apps = sbn.getNotification().extras.getStringArray(
-                    Notification.EXTRA_FOREGROUND_APPS);
-            if (apps != null && apps.length >= 1) {
-                if (!getFsc().isSystemAlertWarningNeeded(sbn.getUserId(), apps[0])) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    // Q: What kinds of notifications should show during setup?
-    // A: Almost none! Only things coming from packages with permission
-    // android.permission.NOTIFICATION_DURING_SETUP that also have special "kind" tags marking them
-    // as relevant for setup (see below).
-    public static boolean showNotificationEvenIfUnprovisioned(StatusBarNotification sbn) {
-        return showNotificationEvenIfUnprovisioned(AppGlobals.getPackageManager(), sbn);
-    }
-
-    @VisibleForTesting
-    static boolean showNotificationEvenIfUnprovisioned(IPackageManager packageManager,
-            StatusBarNotification sbn) {
-        return checkUidPermission(packageManager, Manifest.permission.NOTIFICATION_DURING_SETUP,
-                sbn.getUid()) == PackageManager.PERMISSION_GRANTED
-                && sbn.getNotification().extras.getBoolean(Notification.EXTRA_ALLOW_DURING_SETUP);
-    }
-
-    private static int checkUidPermission(IPackageManager packageManager, String permission,
-            int uid) {
-        try {
-            return packageManager.checkUidPermission(permission, uid);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
     public void dump(PrintWriter pw, String indent) {

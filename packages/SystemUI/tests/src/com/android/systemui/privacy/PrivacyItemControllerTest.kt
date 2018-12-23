@@ -19,6 +19,7 @@ package com.android.systemui.privacy
 import android.app.ActivityManager
 import android.app.AppOpsManager
 import android.content.Intent
+import android.content.pm.UserInfo
 import android.os.Handler
 import android.os.UserHandle
 import android.os.UserManager
@@ -27,16 +28,20 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import com.android.systemui.Dependency
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.appops.AppOpItem
 import com.android.systemui.appops.AppOpsController
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyList
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.doReturn
@@ -52,8 +57,12 @@ class PrivacyItemControllerTest : SysuiTestCase() {
 
     companion object {
         val CURRENT_USER_ID = ActivityManager.getCurrentUser()
-        val OTHER_USER = UserHandle(CURRENT_USER_ID + 1)
+        val TEST_UID = CURRENT_USER_ID * UserHandle.PER_USER_RANGE
+        const val SYSTEM_UID = 1000
+        const val TEST_PACKAGE_NAME = "test"
+        const val DEVICE_SERVICES_STRING = "Device services"
         const val TAG = "PrivacyItemControllerTest"
+        fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
     }
 
     @Mock
@@ -62,6 +71,8 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     private lateinit var callback: PrivacyItemController.Callback
     @Mock
     private lateinit var userManager: UserManager
+    @Captor
+    private lateinit var argCaptor: ArgumentCaptor<List<PrivacyItem>>
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var privacyItemController: PrivacyItemController
@@ -75,9 +86,14 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         mDependency.injectTestDependency(Dependency.BG_LOOPER, testableLooper.looper)
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER, Handler(testableLooper.looper))
         mContext.addMockSystemService(UserManager::class.java, userManager)
+        mContext.getOrCreateTestableResources().addOverride(R.string.device_services,
+                DEVICE_SERVICES_STRING)
 
-        doReturn(listOf(AppOpItem(AppOpsManager.OP_CAMERA, 0, "", 0)))
-                .`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+        doReturn(listOf(object : UserInfo() {
+            init {
+                id = CURRENT_USER_ID
+            }
+        })).`when`(userManager).getProfiles(anyInt())
 
         privacyItemController = PrivacyItemController(mContext, callback)
     }
@@ -97,6 +113,30 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         privacyItemController.setListening(false)
         verify(appOpsController).removeCallback(eq(PrivacyItemController.OPS),
                 any(AppOpsController.Callback::class.java))
+    }
+
+    @Test
+    fun testDistinctItems() {
+        doReturn(listOf(AppOpItem(AppOpsManager.OP_CAMERA, TEST_UID, "", 0),
+                AppOpItem(AppOpsManager.OP_CAMERA, TEST_UID, "", 1)))
+                .`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+
+        privacyItemController.setListening(true)
+        testableLooper.processAllMessages()
+        verify(callback).privacyChanged(capture(argCaptor))
+        assertEquals(1, argCaptor.value.size)
+    }
+
+    @Test
+    fun testSystemApps() {
+        doReturn(listOf(AppOpItem(AppOpsManager.OP_COARSE_LOCATION, SYSTEM_UID, TEST_PACKAGE_NAME,
+                0))).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+        privacyItemController.setListening(true)
+        testableLooper.processAllMessages()
+        verify(callback).privacyChanged(capture(argCaptor))
+        assertEquals(1, argCaptor.value.size)
+        assertEquals(context.getString(R.string.device_services),
+                argCaptor.value[0].application.applicationName)
     }
 
     @Test

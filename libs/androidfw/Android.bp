@@ -167,6 +167,7 @@ cc_test {
         },
     },
     data: ["tests/data/**/*.apk"],
+    test_suites: ["device-tests"],
 }
 
 cc_benchmark {

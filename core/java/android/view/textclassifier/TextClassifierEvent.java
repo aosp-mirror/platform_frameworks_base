@@ -27,6 +27,7 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 
 /**
  * A text classifier event.
@@ -497,5 +498,26 @@ public final class TextClassifierEvent implements Parcelable {
                     mLanguage);
         }
         // TODO: Add build(boolean validate).
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder out = new StringBuilder(128);
+        out.append("TextClassifierEvent{");
+        out.append("mEventCategory=").append(mEventCategory);
+        out.append(", mEventType=").append(mEventType);
+        out.append(", mEventContext=").append(mEventContext);
+        out.append(", mResultId=").append(mResultId);
+        out.append(", mEventIndex=").append(mEventIndex);
+        out.append(", mEventTime=").append(mEventTime);
+        out.append(", mExtras=").append(mExtras);
+        out.append(", mRelativeWordStartIndex=").append(mRelativeWordStartIndex);
+        out.append(", mRelativeWordEndIndex=").append(mRelativeWordEndIndex);
+        out.append(", mRelativeSuggestedWordStartIndex=").append(mRelativeSuggestedWordStartIndex);
+        out.append(", mRelativeSuggestedWordEndIndex=").append(mRelativeSuggestedWordEndIndex);
+        out.append(", mActionIndices=").append(Arrays.toString(mActionIndices));
+        out.append(", mLanguage=").append(mLanguage);
+        out.append("}");
+        return out.toString();
     }
 }

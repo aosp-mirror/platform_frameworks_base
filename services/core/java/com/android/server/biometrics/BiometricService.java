@@ -653,7 +653,7 @@ public class BiometricService extends SystemService {
             }
 
             mHandler.post(() -> {
-                final Pair<Integer, Integer> result = checkAndGetBiometricModality(callingUserId);
+                final Pair<Integer, Integer> result = checkAndGetBiometricModality(userId);
                 final int modality = result.first;
                 final int error = result.second;
 
@@ -950,7 +950,7 @@ public class BiometricService extends SystemService {
      * {@link BiometricAuthenticator#TYPE_FACE}
      * and the error containing one of the {@link BiometricConstants} errors.
      */
-    private Pair<Integer, Integer> checkAndGetBiometricModality(int callingUid) {
+    private Pair<Integer, Integer> checkAndGetBiometricModality(int userId) {
         int modality = TYPE_NONE;
 
         // No biometric features, send error
@@ -979,7 +979,7 @@ public class BiometricService extends SystemService {
                     // order.
                     firstHwAvailable = modality;
                 }
-                if (authenticator.hasEnrolledTemplates(callingUid)) {
+                if (authenticator.hasEnrolledTemplates(userId)) {
                     hasTemplatesEnrolled = true;
                     if (isEnabledForApp(modality)) {
                         // TODO(b/110907543): When face settings (and other settings) have both a

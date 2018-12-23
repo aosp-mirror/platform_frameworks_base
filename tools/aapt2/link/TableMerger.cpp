@@ -134,18 +134,18 @@ static bool MergeEntry(IAaptContext* context, const Source& src,
     dst_entry->allow_new = std::move(src_entry->allow_new);
   }
 
-  if (src_entry->overlayable) {
-    if (dst_entry->overlayable) {
+  if (src_entry->overlayable_item) {
+    if (dst_entry->overlayable_item) {
       // Do not allow a resource with an overlayable declaration to have that overlayable
       // declaration redefined
-      context->GetDiagnostics()->Error(DiagMessage(src_entry->overlayable.value().source)
+      context->GetDiagnostics()->Error(DiagMessage(src_entry->overlayable_item.value().source)
                                        << "duplicate overlayable declaration for resource '"
                                        << src_entry->name << "'");
-      context->GetDiagnostics()->Error(DiagMessage(dst_entry->overlayable.value().source)
+      context->GetDiagnostics()->Error(DiagMessage(dst_entry->overlayable_item.value().source)
                                        << "previous declaration here");
       return false;
     } else {
-      dst_entry->overlayable = std::move(src_entry->overlayable);
+      dst_entry->overlayable_item = std::move(src_entry->overlayable_item);
     }
   }
 

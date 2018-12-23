@@ -25,6 +25,12 @@ import com.android.systemui.settings.CurrentUserTracker;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         implements KeyguardMonitor {
 
@@ -47,6 +53,9 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     private boolean mKeyguardGoingAway;
     private boolean mLaunchTransitionFadingAway;
 
+    /**
+     */
+    @Inject
     public KeyguardMonitorImpl(Context context) {
         mContext = context;
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);

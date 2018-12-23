@@ -12820,6 +12820,17 @@ public final class Settings {
                 "privileged_device_identifier_3p_check_relaxed";
 
         /**
+         * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
+         * permission check for preloaded non-privileged apps.
+         *
+         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
+         *
+         * @hide
+         */
+        public static final String PRIVILEGED_DEVICE_IDENTIFIER_NON_PRIV_CHECK_RELAXED =
+                "privileged_device_identifier_non_priv_check_relaxed";
+
+        /**
          * If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will be ignored
          * and restoring to lower version of platform API will be skipped.
          *
@@ -12949,14 +12960,20 @@ public final class Settings {
 
         /**
          * Property used by {@code com.android.server.SystemServer} on start to decide whether
-         * the Content Capture service should be created or not
+         * the Content Capture service should be created or not.
          *
-         * <p>By default it should *NOT* be set (in which case the decision is based on whether
-         * the OEM provides an implementation for the service), but it can be overridden to:
+         * <p>Possible values are:
          *
          * <ul>
-         *   <li>Provide a "kill switch" so OEMs can disable it remotely in case of emergency.
-         *   <li>Enable the CTS tests to be run on AOSP builds
+         *   <li>If set to {@code default}, it will only be set if the OEM provides and defines the
+         *   service name by overlaying {@code config_defaultContentCaptureService} (this is the
+         *   "default" mode)
+         *   <li>If set to {@code always}, it will always be enabled, even when the resource is not
+         *   overlaid (this is useful during development and to run the CTS tests on AOSP builds).
+         *   <li>Otherwise, it's explicitly disabled (this could work as a "kill switch" so OEMs
+         *   can disable it remotely in case of emergency by setting to something else (like
+         *   {@code "false"}); notice that it's also disabled if the OEM doesn't explicitly set one
+         *   of the values above).
          * </ul>
          *
          * @hide
@@ -14258,6 +14275,44 @@ public final class Settings {
             ResolveInfo info = packageManager.resolveActivity(intent, 0);
             return info != null ? info.loadLabel(packageManager) : "";
         }
+    }
+
+    /**
+     * <p>
+     *     A Settings panel is floating UI that contains a fixed subset of settings to address a
+     *     particular user problem. For example, the
+     *     {@link #ACTION_INTERNET_CONNECTIVITY Internet Panel} surfaces settings related to
+     *     connecting to the internet.
+     * <p>
+     *     Settings panels appear above the calling app to address the problem without
+     *     the user needing to open Settings and thus leave their current screen.
+     */
+    public static final class Panel {
+        private Panel() {
+        }
+
+        /**
+         * Activity Action: Show a settings dialog containing settings to enable internet
+         * connection.
+         * <p>
+         * Input: Nothing.
+         * <p>
+         * Output: Nothing.
+         */
+        @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+        public static final String ACTION_INTERNET_CONNECTIVITY =
+                "android.settings.panel.action.INTERNET_CONNECTIVITY";
+
+        /**
+         * Activity Action: Show a settings dialog containing all volume streams.
+         * <p>
+         * Input: Nothing.
+         * <p>
+         * Output: Nothing.
+         */
+        @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+        public static final String ACTION_VOLUME =
+                "android.settings.panel.action.VOLUME";
     }
 
     private static final String[] PM_WRITE_SETTINGS = {

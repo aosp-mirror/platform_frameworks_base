@@ -22,15 +22,16 @@ import static org.junit.Assert.assertTrue;
 import android.net.wifi.FakeKeys;
 import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSp;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
+
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-
-import org.junit.Test;
 
 /**
  * Unit tests for {@link android.net.wifi.hotspot2.ConfigParser}.

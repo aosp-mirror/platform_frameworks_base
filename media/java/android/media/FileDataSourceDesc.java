@@ -44,6 +44,8 @@ public class FileDataSourceDesc extends DataSourceDesc {
     private ParcelFileDescriptor mPFD;
     private long mOffset = 0;
     private long mLength = FD_LENGTH_UNKNOWN;
+    private int mCount = 0;
+    private boolean mClosed = false;
 
     private FileDataSourceDesc() {
         super();
@@ -55,23 +57,48 @@ public class FileDataSourceDesc extends DataSourceDesc {
     @Override
     void close() {
         super.close();
-        closeFD();
+        decCount();
     }
 
     /**
-     * Releases the file descriptor held by this {@code FileDataSourceDesc} object.
+     * Decrements usage count by {@link MediaPlayer2}.
+     * If this is the last usage, also releases the file descriptor held by this
+     * {@code FileDataSourceDesc} object.
      */
-    void closeFD() {
+    void decCount() {
         synchronized (this) {
-            if (mPFD != null) {
-                try {
-                    mPFD.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "failed to close pfd: " + e);
-                }
-
-                mPFD = null;
+            --mCount;
+            if (mCount > 0) {
+                return;
             }
+
+            try {
+                mPFD.close();
+                mClosed = true;
+            } catch (IOException e) {
+                Log.e(TAG, "failed to close pfd: " + e);
+            }
+        }
+    }
+
+    /**
+     * Increments usage count by {@link MediaPlayer2} if PFD has not been closed.
+     */
+    void incCount() {
+        synchronized (this) {
+            if (!mClosed) {
+                ++mCount;
+            }
+        }
+    }
+
+    /**
+     * Return the status of underline ParcelFileDescriptor
+     * @return true if underline ParcelFileDescriptor is closed, false otherwise.
+     */
+    boolean isPFDClosed() {
+        synchronized (this) {
+            return mClosed;
         }
     }
 
@@ -150,6 +177,16 @@ public class FileDataSourceDesc extends DataSourceDesc {
          * @return a new {@link FileDataSourceDesc} object
          */
         public @NonNull FileDataSourceDesc build() {
+            if (mPFD == null) {
+                throw new IllegalStateException(
+                        "underline ParcelFileDescriptor should not be null");
+            }
+            try {
+                mPFD.getFd();
+            } catch (IllegalStateException e) {
+                throw new IllegalStateException("ParcelFileDescriptor has been closed");
+            }
+
             FileDataSourceDesc dsd = new FileDataSourceDesc();
             super.build(dsd);
             dsd.mPFD = mPFD;

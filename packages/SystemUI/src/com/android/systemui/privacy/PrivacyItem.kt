@@ -24,8 +24,8 @@ typealias Privacy = PrivacyType
 
 enum class PrivacyType(val nameId: Int, val iconId: Int) {
     TYPE_CAMERA(R.string.privacy_type_camera, R.drawable.stat_sys_camera),
-    TYPE_LOCATION(R.string.privacy_type_location, R.drawable.stat_sys_location),
-    TYPE_MICROPHONE(R.string.privacy_type_microphone, R.drawable.stat_sys_mic_none);
+    TYPE_MICROPHONE(R.string.privacy_type_microphone, R.drawable.stat_sys_mic_none),
+    TYPE_LOCATION(R.string.privacy_type_location, R.drawable.stat_sys_location);
 
     fun getName(context: Context) = context.resources.getString(nameId)
 
@@ -44,7 +44,7 @@ data class PrivacyApplication(val packageName: String, val context: Context)
         return applicationName.compareTo(other.applicationName)
     }
 
-    var icon: Drawable? = null
+    var icon: Drawable = context.getDrawable(android.R.drawable.sym_def_app_icon)
     var applicationName: String
 
     init {

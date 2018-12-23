@@ -72,7 +72,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.AssistManager;
@@ -97,6 +96,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+import javax.inject.Inject;
+
 /**
  * Fragment containing the NavigationBarFragment. Contains logic for what happens
  * on clicks and view states of the nav bar.
@@ -111,11 +112,12 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
 
-    private final DeviceProvisionedController mDeviceProvisionedController =
-            Dependency.get(DeviceProvisionedController.class);
+    private final AccessibilityManagerWrapper mAccessibilityManagerWrapper;
+    protected final AssistManager mAssistManager;
+    private final MetricsLogger mMetricsLogger;
+    private final DeviceProvisionedController mDeviceProvisionedController;
 
     protected NavigationBarView mNavigationBarView = null;
-    protected AssistManager mAssistManager;
 
     private int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
@@ -124,7 +126,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private AccessibilityManager mAccessibilityManager;
     private MagnificationContentObserver mMagnificationObserver;
     private ContentResolver mContentResolver;
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     private int mDisabledFlags1;
     private int mDisabledFlags2;
@@ -193,6 +194,17 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
     };
 
+    @Inject
+    public NavigationBarFragment(AccessibilityManagerWrapper accessibilityManagerWrapper,
+            DeviceProvisionedController deviceProvisionedController, MetricsLogger metricsLogger,
+            AssistManager assistManager, OverviewProxyService overviewProxyService) {
+        mAccessibilityManagerWrapper = accessibilityManagerWrapper;
+        mDeviceProvisionedController = deviceProvisionedController;
+        mMetricsLogger = metricsLogger;
+        mAssistManager = assistManager;
+        mOverviewProxyService = overviewProxyService;
+    }
+
     // ----- Fragment Lifecycle Callbacks -----
 
     @Override
@@ -205,8 +217,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mDivider = SysUiServiceProvider.getComponent(getContext(), Divider.class);
         mWindowManager = getContext().getSystemService(WindowManager.class);
         mAccessibilityManager = getContext().getSystemService(AccessibilityManager.class);
-        Dependency.get(AccessibilityManagerWrapper.class).addCallback(
-                mAccessibilityListener);
         mContentResolver = getContext().getContentResolver();
         mMagnificationObserver = new MagnificationContentObserver(
                 getContext().getMainThreadHandler());
@@ -218,15 +228,13 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             mDisabledFlags1 = savedInstanceState.getInt(EXTRA_DISABLE_STATE, 0);
             mDisabledFlags2 = savedInstanceState.getInt(EXTRA_DISABLE2_STATE, 0);
         }
-        mAssistManager = Dependency.get(AssistManager.class);
-        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+        mAccessibilityManagerWrapper.addCallback(mAccessibilityListener);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Dependency.get(AccessibilityManagerWrapper.class).removeCallback(
-                mAccessibilityListener);
+        mAccessibilityManagerWrapper.removeCallback(mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mMagnificationObserver);
     }
 
@@ -892,7 +900,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         if (DEBUG) Log.v(TAG, "addNavigationBar: about to add " + navigationBarView);
         if (navigationBarView == null) return null;
 
-        final NavigationBarFragment fragment = new NavigationBarFragment();
+        final NavigationBarFragment fragment = FragmentHostManager.get(navigationBarView)
+                .create(NavigationBarFragment.class);
         navigationBarView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {

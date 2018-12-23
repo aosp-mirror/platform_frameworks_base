@@ -182,7 +182,6 @@ package android.app {
     method public int getUserLockedFields();
     method public void lockFields(int);
     method public void setBlocked(boolean);
-    field public static final int USER_LOCKED_ALLOW_APP_OVERLAY = 2; // 0x2
   }
 
   public class NotificationManager {
@@ -637,6 +636,11 @@ package android.media {
     method public static int channelCountFromOutChannelMask(int);
     method public static int getBytesPerSample(int);
     method public static boolean isEncodingLinearPcm(int);
+  }
+
+  public final class AudioRecordingConfiguration implements android.os.Parcelable {
+    ctor public AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, java.lang.String, int, boolean, int, android.media.audiofx.AudioEffect.Descriptor[], android.media.audiofx.AudioEffect.Descriptor[]);
+    ctor public AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, java.lang.String);
   }
 
   public final class BufferingParams implements android.os.Parcelable {
@@ -1280,6 +1284,14 @@ package android.telecom {
 
   public final class PhoneAccountSuggestion implements android.os.Parcelable {
     ctor public PhoneAccountSuggestion(android.telecom.PhoneAccountHandle, int, boolean);
+  }
+
+  public class PhoneAccountSuggestionService extends android.app.Service {
+    ctor public PhoneAccountSuggestionService();
+    method public void onAccountSuggestionRequest(java.lang.String);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public final void suggestPhoneAccounts(java.lang.String, java.util.List<android.telecom.PhoneAccountSuggestion>);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.telecom.PhoneAccountSuggestionService";
   }
 
 }

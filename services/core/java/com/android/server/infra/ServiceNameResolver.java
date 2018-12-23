@@ -17,6 +17,9 @@ package com.android.server.infra;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
+
+import com.android.internal.infra.AbstractRemoteService;
 
 import java.io.PrintWriter;
 
@@ -29,78 +32,90 @@ import java.io.PrintWriter;
 public interface ServiceNameResolver {
 
     /**
+     * Listener for name changes.
+     */
+    public interface NameResolverListener {
+
+        /**
+         * The name change callback.
+         */
+        void onNameResolved(@UserIdInt int userId, @Nullable String serviceName);
+    }
+
+    /**
      * Sets a callback that is called after the service is
-     * {@link #setTemporaryServiceLocked(String, int) set} or
-     * {@link #resetTemporaryServiceLocked() reset}.
+     * {@link #setTemporaryService(int, String, int) set} or
+     * {@link #resetTemporaryService(int) reset}.
      *
      * <p>Typically called after the object is constructed.
      */
     default void setOnTemporaryServiceNameChangedCallback(
-            @SuppressWarnings("unused") @NonNull Runnable callback) {
+            @SuppressWarnings("unused") @NonNull NameResolverListener callback) {
         // ignored by default
     }
 
     /**
-     * Gets the default name of the service.
+     * Gets the default name of the service for the given user.
      *
      * <p>Typically implemented by reading a Settings property or framework resource.
      */
     @Nullable
-    String getDefaultServiceName();
+    String getDefaultServiceName(@UserIdInt int userId);
 
     /**
-     * Gets the current name of the service.
+     * Gets the current name of the service for the given user
      *
-     * <p>Must be called after acquiring this object's lock.
-     *
-     * @return either the temporary name (set by {@link #setTemporaryServiceLocked(String, int)}, or
-     * the {@link #getDefaultServiceName() default name}.
+     * @return either the temporary name (set by
+     * {@link #setTemporaryService(int, String, int)}, or the
+     * {@link #getDefaultServiceName(int) default name}.
      */
     @Nullable
-    default String getServiceNameLocked() {
-        return getDefaultServiceName();
+    default String getServiceName(@UserIdInt int userId) {
+        return getDefaultServiceName(userId);
     }
 
     /**
-     * Checks whether the current service is temporary.
-     *
-     * <p>Must be called after acquiring this object's lock.
+     * Checks whether the current service is temporary for the given user.
      */
-    default boolean isTemporaryLocked() {
+    default boolean isTemporary(@SuppressWarnings("unused") @UserIdInt int userId) {
         return false;
     }
 
     /**
-     * Temporarily sets the service implementation.
+     * Temporarily sets the service implementation for the given user.
      *
-     * <p>Must be called after acquiring this object's lock.
-     *
+     * @param userId user handle
      * @param componentName name of the new component
      * @param durationMs how long the change will be valid (the service will be automatically reset
      *            to the default component after this timeout expires).
      *
      * @throws UnsupportedOperationException if not implemented.
      */
-    default void setTemporaryServiceLocked(@NonNull String componentName, int durationMs) {
+    default void setTemporaryService(@UserIdInt int userId, @NonNull String componentName,
+            int durationMs) {
         throw new UnsupportedOperationException("temporary user not supported");
     }
 
     /**
-     * Resets the temporary service implementation to the default component.
+     * Resets the temporary service implementation to the default component for the given user.
      *
-     * <p>Must be called after acquiring this object's lock.
+     * @param userId user handle
      *
      * @throws UnsupportedOperationException if not implemented.
      */
-    default void resetTemporaryServiceLocked() {
+    default void resetTemporaryService(@UserIdInt int userId) {
         throw new UnsupportedOperationException("temporary user not supported");
     }
 
     /**
-     * Dump this object in just one line (without calling {@code println}.
-     *
-     * <p>Must be called after acquiring this object's lock.
+     * Dumps the generic info in just one line (without calling {@code println}.
      */
     // TODO(b/117779333): support proto
-    void dumpShortLocked(@NonNull PrintWriter pw);
+    void dumpShort(@NonNull PrintWriter pw);
+
+    /**
+     * Dumps the user-specific info in just one line (without calling {@code println}.
+     */
+    // TODO(b/117779333): support proto
+    void dumpShort(@NonNull PrintWriter pw, @UserIdInt int userId);
 }

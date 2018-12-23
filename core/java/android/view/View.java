@@ -9046,17 +9046,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@code onCreate()} and associate it with the root view of the activity:
      *
      * <pre>
-     *  ContentCaptureManager mgr = getSystemService(ContentCaptureManager.class);
-     *  if (mgr != null && mgr.isContentCaptureEnabled()) {
-     *    View rootView = findViewById(R.my_root_view);
-     *    ContentCaptureSession session = mgr.createContentCaptureSession(new
+     *   ContentCaptureSession oldSession = rootView.getContentCaptureSession();
+     *   if (oldSession != null) {
+     *     ContentCaptureSession newSession = oldSession.createContentCaptureSession(new
      *        ContentCaptureContext.Builder().setUri(myUrl).build());
-     *    rootView.setContentCaptureSession(session);
+     *     rootView.setContentCaptureSession(newSession);
      *  }
      * </pre>
      *
      * @param contentCaptureSession a session created by
-     * {@link ContentCaptureManager#createContentCaptureSession(
+     * {@link ContentCaptureSession#createContentCaptureSession(
      *        android.view.contentcapture.ContentCaptureContext)}.
      */
     public void setContentCaptureSession(@NonNull ContentCaptureSession contentCaptureSession) {
@@ -10489,6 +10488,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return The {@link WindowInsetsController} or {@code null} if the view isn't attached to a
      *         a window.
+     * @see Window#getInsetsController()
      * @hide pending unhide
      */
     public @Nullable WindowInsetsController getWindowInsetsController() {

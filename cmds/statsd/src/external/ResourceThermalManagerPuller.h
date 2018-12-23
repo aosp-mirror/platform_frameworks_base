@@ -29,6 +29,8 @@ namespace statsd {
 class ResourceThermalManagerPuller : public StatsPuller {
 public:
     ResourceThermalManagerPuller();
+
+private:
     bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override;
 };
 

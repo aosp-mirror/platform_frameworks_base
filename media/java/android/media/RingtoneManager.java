@@ -694,6 +694,27 @@ public class RingtoneManager {
         return getRingtone(context, ringtoneUri, -1);
     }
 
+    /**
+     * Returns a {@link Ringtone} with {@link VolumeShaper} if required for a given sound URI.
+     * <p>
+     * If the given URI cannot be opened for any reason, this method will
+     * attempt to fallback on another sound. If it cannot find any, it will
+     * return null.
+     *
+     * @param context A context used to query.
+     * @param ringtoneUri The {@link Uri} of a sound or ringtone.
+     * @param volumeShaperConfig config for volume shaper of the ringtone if applied.
+     * @return A {@link Ringtone} for the given URI, or null.
+     *
+     * @hide
+     */
+    public static Ringtone getRingtone(
+            final Context context, Uri ringtoneUri,
+            @Nullable VolumeShaper.Configuration volumeShaperConfig) {
+        // Don't set the stream type
+        return getRingtone(context, ringtoneUri, -1 /* streamType */, volumeShaperConfig);
+    }
+
     //FIXME bypass the notion of stream types within the class
     /**
      * Returns a {@link Ringtone} for a given sound URI on the given stream
@@ -707,13 +728,32 @@ public class RingtoneManager {
      */
     @UnsupportedAppUsage
     private static Ringtone getRingtone(final Context context, Uri ringtoneUri, int streamType) {
+        return getRingtone(context, ringtoneUri, streamType, null /* volumeShaperConfig */);
+    }
+
+    //FIXME bypass the notion of stream types within the class
+    /**
+     * Returns a {@link Ringtone} with {@link VolumeShaper} if required for a given sound URI on
+     * the given stream type. Normally, if you change the stream type on the returned
+     * {@link Ringtone}, it will re-create the {@link MediaPlayer}. This is just
+     * an optimized route to avoid that.
+     *
+     * @param streamType The stream type for the ringtone, or -1 if it should
+     *            not be set (and the default used instead).
+     * @param volumeShaperConfig config for volume shaper of the ringtone if applied.
+     * @see #getRingtone(Context, Uri)
+     */
+    @UnsupportedAppUsage
+    private static Ringtone getRingtone(
+            final Context context, Uri ringtoneUri, int streamType,
+            @Nullable VolumeShaper.Configuration volumeShaperConfig) {
         try {
             final Ringtone r = new Ringtone(context, true);
             if (streamType >= 0) {
                 //FIXME deprecated call
                 r.setStreamType(streamType);
             }
-            r.setUri(ringtoneUri);
+            r.setUri(ringtoneUri, volumeShaperConfig);
             return r;
         } catch (Exception ex) {
             Log.e(TAG, "Failed to open ringtone " + ringtoneUri + ": " + ex);

@@ -46,26 +46,29 @@
 using ::android::util::ExecuteBinary;
 using ::testing::NotNull;
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 class Idmap2BinaryTests : public Idmap2Tests {};
 
-static void AssertIdmap(const Idmap& idmap, const std::string& target_apk_path,
-                        const std::string& overlay_apk_path) {
+namespace {
+
+void AssertIdmap(const Idmap& idmap, const std::string& target_apk_path,
+                 const std::string& overlay_apk_path) {
   // check that the idmap file looks reasonable (IdmapTests is responsible for
   // more in-depth verification)
   ASSERT_EQ(idmap.GetHeader()->GetMagic(), kIdmapMagic);
   ASSERT_EQ(idmap.GetHeader()->GetVersion(), kIdmapCurrentVersion);
   ASSERT_EQ(idmap.GetHeader()->GetTargetPath(), target_apk_path);
   ASSERT_EQ(idmap.GetHeader()->GetOverlayPath(), overlay_apk_path);
-  ASSERT_EQ(idmap.GetData().size(), 1u);
+  ASSERT_EQ(idmap.GetData().size(), 1U);
 }
 
 #define ASSERT_IDMAP(idmap_ref, target_apk_path, overlay_apk_path)                      \
   do {                                                                                  \
     ASSERT_NO_FATAL_FAILURE(AssertIdmap(idmap_ref, target_apk_path, overlay_apk_path)); \
   } while (0)
+
+}  // namespace
 
 TEST_F(Idmap2BinaryTests, Create) {
   // clang-format off
@@ -309,5 +312,4 @@ TEST_F(Idmap2BinaryTests, InvalidCommandLineOptions) {
   ASSERT_NE(result->status, EXIT_SUCCESS);
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

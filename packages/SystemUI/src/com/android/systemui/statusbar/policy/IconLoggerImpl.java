@@ -18,6 +18,7 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_STATUS_ICONS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.STATUS_BAR_ICONS_CHANGED;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
+import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 
 import android.content.Context;
 import android.metrics.LogMaker;
@@ -31,6 +32,9 @@ import com.android.internal.logging.MetricsLogger;
 
 import java.util.Arrays;
 import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 public class IconLoggerImpl implements IconLogger {
 
@@ -46,7 +50,9 @@ public class IconLoggerImpl implements IconLogger {
     private final List<String> mIconIndex;
     private long mLastLog = System.currentTimeMillis();
 
-    public IconLoggerImpl(Context context, Looper bgLooper, MetricsLogger logger) {
+    @Inject
+    public IconLoggerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper,
+            MetricsLogger logger) {
         mContext = context;
         mHandler = new Handler(bgLooper);
         mLogger = logger;

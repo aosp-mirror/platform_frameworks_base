@@ -19,7 +19,8 @@ package android.net.wifi;
 import static org.junit.Assert.*;
 
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 

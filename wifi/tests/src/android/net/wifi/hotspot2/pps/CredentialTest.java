@@ -22,7 +22,8 @@ import static org.junit.Assert.assertTrue;
 import android.net.wifi.EAPConstants;
 import android.net.wifi.FakeKeys;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 

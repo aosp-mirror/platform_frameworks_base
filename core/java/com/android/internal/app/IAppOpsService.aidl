@@ -65,4 +65,6 @@ interface IAppOpsService {
 
     void startWatchingNoted(in int[] ops, IAppOpsNotedCallback callback);
     void stopWatchingNoted(IAppOpsNotedCallback callback);
+
+    int checkOperationRaw(int code, int uid, String packageName);
 }

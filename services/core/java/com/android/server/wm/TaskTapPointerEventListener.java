@@ -66,8 +66,11 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                     // method target window will lose the focus.
                     return;
                 }
-                mDisplayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP,
-                        mDisplayContent, true /* includingParents */);
+                WindowContainer parent = mDisplayContent.getParent();
+                if (parent != null) {
+                    parent.positionChildAt(WindowContainer.POSITION_TOP, mDisplayContent,
+                            true /* includingParents */);
+                }
             }
         };
     }

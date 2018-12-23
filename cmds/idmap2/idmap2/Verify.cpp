@@ -27,6 +27,7 @@ using android::idmap2::IdmapHeader;
 
 bool Verify(const std::vector<std::string>& args, std::ostream& out_error) {
   std::string idmap_path;
+
   const CommandLineOptions opts =
       CommandLineOptions("idmap2 verify")
           .MandatoryOption("--idmap-path", "input: path to idmap file to verify", &idmap_path);

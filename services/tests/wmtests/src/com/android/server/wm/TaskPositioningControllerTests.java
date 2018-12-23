@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertFalse;
@@ -66,6 +67,10 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         synchronized (mWm.mGlobalLock) {
             mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
         }
+
+        spyOn(mDisplayContent);
+        InputMonitor inputMonitor = mock(InputMonitor.class);
+        when(mDisplayContent.getInputMonitor()).thenReturn(inputMonitor);
     }
 
     @Test

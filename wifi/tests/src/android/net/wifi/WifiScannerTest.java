@@ -32,7 +32,8 @@ import android.net.wifi.WifiScanner.ScanSettings;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.test.TestLooper;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.test.BidirectionalAsyncChannelServer;
 
@@ -43,7 +44,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
-
 
 /**
  * Unit tests for {@link android.net.wifi.WifiScanner}.

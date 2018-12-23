@@ -16,27 +16,28 @@
 
 package android.permission;
 
+import static android.permission.RuntimePermissionPresenterService.SERVICE_INTERFACE;
+
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.pm.ResolveInfo;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
+import com.android.internal.infra.AbstractRemoteService;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -80,7 +81,7 @@ public final class RuntimePermissionPresenter {
      */
     public interface OnCountPermissionAppsResultCallback {
         /**
-         * The result for {@link #countPermissionApps(List, boolean,
+         * The result for {@link #countPermissionApps(List, boolean, boolean,
          * OnCountPermissionAppsResultCallback, Handler)}.
          *
          * @param numApps The number of apps that have one of the permissions
@@ -110,8 +111,13 @@ public final class RuntimePermissionPresenter {
         }
     }
 
-    private RuntimePermissionPresenter(Context context) {
-        mRemoteService = new RemoteService(context);
+    private RuntimePermissionPresenter(@NonNull Context context) {
+        Intent intent = new Intent(SERVICE_INTERFACE);
+        intent.setPackage(context.getPackageManager().getPermissionControllerPackageName());
+        ResolveInfo serviceInfo = context.getPackageManager().resolveService(intent, 0);
+
+        mRemoteService = new RemoteService(context,
+                serviceInfo.getComponentInfo().getComponentName());
     }
 
     /**
@@ -126,8 +132,8 @@ public final class RuntimePermissionPresenter {
         checkNotNull(packageName);
         checkNotNull(callback);
 
-        mRemoteService.processMessage(obtainMessage(RemoteService::getAppPermissions,
-                mRemoteService, packageName, callback, handler));
+        mRemoteService.scheduleRequest(new PendingGetAppPermissionRequest(mRemoteService,
+                packageName, callback, handler == null ? mRemoteService.getHandler() : handler));
     }
 
     /**
@@ -141,8 +147,8 @@ public final class RuntimePermissionPresenter {
         checkNotNull(packageName);
         checkNotNull(permissionName);
 
-        mRemoteService.processMessage(obtainMessage(RemoteService::revokeAppPermissions,
-                mRemoteService, packageName, permissionName));
+        mRemoteService.scheduleAsyncRequest(new PendingRevokeAppPermissionRequest(packageName,
+                permissionName));
     }
 
     /**
@@ -160,183 +166,192 @@ public final class RuntimePermissionPresenter {
         checkCollectionElementsNotNull(permissionNames, "permissionNames");
         checkNotNull(callback);
 
-        mRemoteService.processMessage(obtainMessage(RemoteService::countPermissionApps,
-                mRemoteService, permissionNames, countOnlyGranted, countSystem, callback, handler));
+        mRemoteService.scheduleRequest(new PendingCountPermissionAppsRequest(mRemoteService,
+                permissionNames, countOnlyGranted, countSystem, callback,
+                handler == null ? mRemoteService.getHandler() : handler));
     }
 
-    private static final class RemoteService
-            extends Handler implements ServiceConnection {
+    /**
+     * A connection to the remote service
+     */
+    static final class RemoteService extends
+            AbstractMultiplePendingRequestsRemoteService<RemoteService,
+                    IRuntimePermissionPresenter>  {
         private static final long UNBIND_TIMEOUT_MILLIS = 10000;
+        private static final long MESSAGE_TIMEOUT_MILLIS = 30000;
 
-        public static final int MSG_UNBIND = 0;
-
-        private final Object mLock = new Object();
-
-        private final Context mContext;
-
-        @GuardedBy("mLock")
-        private final List<Message> mPendingWork = new ArrayList<>();
-
-        @GuardedBy("mLock")
-        private IRuntimePermissionPresenter mRemoteInstance;
-
-        @GuardedBy("mLock")
-        private boolean mBound;
-
-        RemoteService(Context context) {
-            super(context.getMainLooper(), null, false);
-            mContext = context;
+        /**
+         * Create a connection to the remote service
+         *
+         * @param context A context to use
+         * @param componentName The component of the service to connect to
+         */
+        RemoteService(@NonNull Context context, @NonNull ComponentName componentName) {
+            super(context, SERVICE_INTERFACE, componentName, UserHandle.myUserId(),
+                    service -> Log.e(TAG, "RuntimePermPresenterService " + service + " died"),
+                    false, false, 1);
         }
 
-        public void processMessage(Message message) {
-            synchronized (mLock) {
-                if (!mBound) {
-                    Intent intent = new Intent(
-                            RuntimePermissionPresenterService.SERVICE_INTERFACE);
-                    intent.setPackage(mContext.getPackageManager()
-                            .getPermissionControllerPackageName());
-                    mBound = mContext.bindService(intent, this,
-                            Context.BIND_AUTO_CREATE);
+        /**
+         * @return The default handler used by this service.
+         */
+        Handler getHandler() {
+            return mHandler;
+        }
+
+        @Override
+        protected @NonNull IRuntimePermissionPresenter getServiceInterface(
+                @NonNull IBinder binder) {
+            return IRuntimePermissionPresenter.Stub.asInterface(binder);
+        }
+
+        @Override
+        protected long getTimeoutIdleBindMillis() {
+            return UNBIND_TIMEOUT_MILLIS;
+        }
+
+        @Override
+        protected long getRemoteRequestMillis() {
+            return MESSAGE_TIMEOUT_MILLIS;
+        }
+
+        @Override
+        public void scheduleRequest(@NonNull PendingRequest<RemoteService,
+                IRuntimePermissionPresenter> pendingRequest) {
+            super.scheduleRequest(pendingRequest);
+        }
+
+        @Override
+        public void scheduleAsyncRequest(
+                @NonNull AsyncRequest<IRuntimePermissionPresenter> request) {
+            super.scheduleAsyncRequest(request);
+        }
+    }
+
+    /**
+     * Request for {@link #getAppPermissions}
+     */
+    private static final class PendingGetAppPermissionRequest extends
+            AbstractRemoteService.PendingRequest<RemoteService, IRuntimePermissionPresenter> {
+        private final @NonNull String mPackageName;
+        private final @NonNull OnGetAppPermissionResultCallback mCallback;
+
+        private final @NonNull RemoteCallback mRemoteCallback;
+
+        private PendingGetAppPermissionRequest(@NonNull RemoteService service,
+                @NonNull String packageName, @NonNull OnGetAppPermissionResultCallback callback,
+                @NonNull Handler handler) {
+            super(service);
+
+            mPackageName = packageName;
+            mCallback = callback;
+
+            mRemoteCallback = new RemoteCallback(result -> {
+                final List<RuntimePermissionPresentationInfo> reportedPermissions;
+                List<RuntimePermissionPresentationInfo> permissions = null;
+                if (result != null) {
+                    permissions = result.getParcelableArrayList(KEY_RESULT);
                 }
-                mPendingWork.add(message);
-                scheduleNextMessageIfNeededLocked();
-            }
+                if (permissions == null) {
+                    permissions = Collections.emptyList();
+                }
+                reportedPermissions = permissions;
+
+                callback.onGetAppPermissions(reportedPermissions);
+
+                finish();
+            }, handler);
         }
 
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            synchronized (mLock) {
-                mRemoteInstance = IRuntimePermissionPresenter.Stub.asInterface(service);
-                scheduleNextMessageIfNeededLocked();
-            }
+        protected void onTimeout(RemoteService remoteService) {
+            mCallback.onGetAppPermissions(Collections.emptyList());
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
-            synchronized (mLock) {
-                mRemoteInstance = null;
-            }
-        }
-
-        private void getAppPermissions(@NonNull String packageName,
-                @NonNull OnGetAppPermissionResultCallback callback, @Nullable Handler handler) {
-            final IRuntimePermissionPresenter remoteInstance;
-            synchronized (mLock) {
-                remoteInstance = mRemoteInstance;
-            }
-            if (remoteInstance == null) {
-                return;
-            }
+        public void run() {
             try {
-                remoteInstance.getAppPermissions(packageName,
-                        new RemoteCallback(result -> {
-                            final List<RuntimePermissionPresentationInfo> reportedPermissions;
-                            List<RuntimePermissionPresentationInfo> permissions = null;
-                            if (result != null) {
-                                permissions = result.getParcelableArrayList(KEY_RESULT);
-                            }
-                            if (permissions == null) {
-                                permissions = Collections.emptyList();
-                            }
-                            reportedPermissions = permissions;
-                            if (handler != null) {
-                                handler.post(
-                                        () -> callback.onGetAppPermissions(reportedPermissions));
-                            } else {
-                                callback.onGetAppPermissions(reportedPermissions);
-                            }
-                        }, this));
-            } catch (RemoteException re) {
-                Log.e(TAG, "Error getting app permissions", re);
-            }
-            scheduleUnbind();
-
-            synchronized (mLock) {
-                scheduleNextMessageIfNeededLocked();
+                getService().getServiceInterface().getAppPermissions(mPackageName, mRemoteCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error getting app permission", e);
             }
         }
+    }
 
-        private void revokeAppPermissions(@NonNull String packageName,
+    /**
+     * Request for {@link #revokeRuntimePermission}
+     */
+    private static final class PendingRevokeAppPermissionRequest
+            implements AbstractRemoteService.AsyncRequest<IRuntimePermissionPresenter> {
+        private final @NonNull String mPackageName;
+        private final @NonNull String mPermissionName;
+
+        private PendingRevokeAppPermissionRequest(@NonNull String packageName,
                 @NonNull String permissionName) {
-            final IRuntimePermissionPresenter remoteInstance;
-            synchronized (mLock) {
-                remoteInstance = mRemoteInstance;
-            }
-            if (remoteInstance == null) {
-                return;
-            }
-            try {
-                remoteInstance.revokeRuntimePermission(packageName, permissionName);
-            } catch (RemoteException re) {
-                Log.e(TAG, "Error getting app permissions", re);
-            }
-
-            synchronized (mLock) {
-                scheduleNextMessageIfNeededLocked();
-            }
+            mPackageName = packageName;
+            mPermissionName = permissionName;
         }
 
-        private void countPermissionApps(@NonNull List<String> permissionNames,
-                boolean countOnlyGranted, boolean countSystem,
-                @NonNull OnCountPermissionAppsResultCallback callback, @Nullable Handler handler) {
-            final IRuntimePermissionPresenter remoteInstance;
-
-            synchronized (mLock) {
-                remoteInstance = mRemoteInstance;
-            }
-            if (remoteInstance == null) {
-                return;
-            }
-
+        @Override
+        public void run(IRuntimePermissionPresenter remoteInterface) {
             try {
-                remoteInstance.countPermissionApps(permissionNames, countOnlyGranted, countSystem,
-                        new RemoteCallback(result -> {
-                            final int numApps;
-                            if (result != null) {
-                                numApps = result.getInt(KEY_RESULT);
-                            } else {
-                                numApps = 0;
-                            }
-
-                            if (handler != null) {
-                                handler.post(() -> callback.onCountPermissionApps(numApps));
-                            } else {
-                                callback.onCountPermissionApps(numApps);
-                            }
-                        }, this));
-            } catch (RemoteException re) {
-                Log.e(TAG, "Error counting permission apps", re);
-            }
-
-            scheduleUnbind();
-
-            synchronized (mLock) {
-                scheduleNextMessageIfNeededLocked();
+                remoteInterface.revokeRuntimePermission(mPackageName, mPermissionName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error revoking app permission", e);
             }
         }
+    }
 
-        private void unbind() {
-            synchronized (mLock) {
-                if (mBound) {
-                    mContext.unbindService(this);
-                    mBound = false;
+    /**
+     * Request for {@link #countPermissionApps}
+     */
+    private static final class PendingCountPermissionAppsRequest extends
+            AbstractRemoteService.PendingRequest<RemoteService, IRuntimePermissionPresenter> {
+        private final @NonNull List<String> mPermissionNames;
+        private final @NonNull OnCountPermissionAppsResultCallback mCallback;
+        private final boolean mCountOnlyGranted;
+        private final boolean mCountSystem;
+
+        private final @NonNull RemoteCallback mRemoteCallback;
+
+        private PendingCountPermissionAppsRequest(@NonNull RemoteService service,
+                @NonNull List<String> permissionNames, boolean countOnlyGranted,
+                boolean countSystem, @NonNull OnCountPermissionAppsResultCallback callback,
+                @NonNull Handler handler) {
+            super(service);
+
+            mPermissionNames = permissionNames;
+            mCountOnlyGranted = countOnlyGranted;
+            mCountSystem = countSystem;
+            mCallback = callback;
+
+            mRemoteCallback = new RemoteCallback(result -> {
+                final int numApps;
+                if (result != null) {
+                    numApps = result.getInt(KEY_RESULT);
+                } else {
+                    numApps = 0;
                 }
-                mRemoteInstance = null;
-            }
+
+                callback.onCountPermissionApps(numApps);
+
+                finish();
+            }, handler);
         }
 
-        @GuardedBy("mLock")
-        private void scheduleNextMessageIfNeededLocked() {
-            if (mBound && mRemoteInstance != null && !mPendingWork.isEmpty()) {
-                Message nextMessage = mPendingWork.remove(0);
-                sendMessage(nextMessage);
-            }
+        @Override
+        protected void onTimeout(RemoteService remoteService) {
+            mCallback.onCountPermissionApps(0);
         }
 
-        private void scheduleUnbind() {
-            removeMessages(MSG_UNBIND);
-            sendMessageDelayed(PooledLambda.obtainMessage(RemoteService::unbind, this)
-                    .setWhat(MSG_UNBIND), UNBIND_TIMEOUT_MILLIS);
+        @Override
+        public void run() {
+            try {
+                getService().getServiceInterface().countPermissionApps(mPermissionNames,
+                        mCountOnlyGranted, mCountSystem, mRemoteCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error counting permission apps", e);
+            }
         }
     }
 }

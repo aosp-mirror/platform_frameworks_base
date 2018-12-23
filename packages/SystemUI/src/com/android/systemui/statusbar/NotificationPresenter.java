@@ -15,7 +15,7 @@
  */
 package com.android.systemui.statusbar;
 
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -28,7 +28,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  */
 public interface NotificationPresenter extends ExpandableNotificationRow.OnExpandClickListener,
         ActivatableNotificationView.OnActivatedListener,
-        NotificationEntryManager.Callback {
+        NotificationRowBinder.BindRowCallback {
     /**
      * Returns true if the presenter is not visible. For example, it may not be necessary to do
      * animations if this returns true.

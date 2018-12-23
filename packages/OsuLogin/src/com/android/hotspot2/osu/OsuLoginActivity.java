@@ -39,12 +39,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.android.hotspot2.R;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 
 /**
  * Online Sign Up Login Web View launched during Provision Process of Hotspot 2.0 rel2.
@@ -252,6 +254,10 @@ public class OsuLoginActivity extends Activity {
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request,
                 WebResourceError error) {
+            if (request.getUrl().toString().startsWith("http://127.0.0.1")) {
+                view.stopLoading();
+            }
+
             if (request.isForMainFrame()) {
                 // This happens right after getting HTTP redirect response from an OSU server
                 // since no more Http request is allowed to send to the OSU server.

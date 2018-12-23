@@ -188,7 +188,9 @@ bool StorageManager::hasConfigMetricsReport(const ConfigKey& key) {
     return false;
 }
 
-void StorageManager::appendConfigMetricsReport(const ConfigKey& key, ProtoOutputStream* proto) {
+void StorageManager::appendConfigMetricsReport(const ConfigKey& key,
+                                               ProtoOutputStream* proto,
+                                               bool erasa_data) {
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_DATA_DIR), closedir);
     if (dir == NULL) {
         VLOG("Path %s does not exist", STATS_DATA_DIR);
@@ -224,8 +226,9 @@ void StorageManager::appendConfigMetricsReport(const ConfigKey& key, ProtoOutput
                 close(fd);
             }
 
-            // Remove file from disk after reading.
-            remove(file_name.c_str());
+            if (erasa_data) {
+                remove(file_name.c_str());
+            }
         }
     }
 }

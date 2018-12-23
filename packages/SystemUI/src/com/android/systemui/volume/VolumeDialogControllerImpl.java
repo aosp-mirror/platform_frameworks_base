@@ -67,6 +67,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  *  Source of truth for all state / events related to the volume dialog.  No presentation.
  *
@@ -74,6 +77,7 @@ import java.util.Objects;
  *
  *  Methods ending in "W" must be called on the worker thread.
  */
+@Singleton
 public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpable {
     private static final String TAG = Util.logTag(VolumeDialogControllerImpl.class);
 
@@ -131,6 +135,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     protected final VC mVolumeController = new VC();
 
+    @Inject
     public VolumeDialogControllerImpl(Context context) {
         mContext = context.getApplicationContext();
         mNotificationManager = (NotificationManager) mContext.getSystemService(
@@ -545,7 +550,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private boolean updateZenConfig() {
-        final NotificationManager.Policy policy = mNotificationManager.getNotificationPolicy();
+        final NotificationManager.Policy policy =
+                mNotificationManager.getConsolidatedNotificationPolicy();
         boolean disallowAlarms = (policy.priorityCategories & NotificationManager.Policy
                 .PRIORITY_CATEGORY_ALARMS) == 0;
         boolean disallowMedia = (policy.priorityCategories & NotificationManager.Policy

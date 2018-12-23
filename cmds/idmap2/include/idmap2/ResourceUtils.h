@@ -25,14 +25,10 @@
 #include "idmap2/Idmap.h"
 #include "idmap2/Result.h"
 
-namespace android {
-namespace idmap2 {
-namespace utils {
+namespace android::idmap2::utils {
 
 Result<std::string> WARN_UNUSED ResToTypeEntryName(const AssetManager2& am, ResourceId resid);
 
-}  // namespace utils
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2::utils
 
 #endif  // IDMAP2_INCLUDE_IDMAP2_RESOURCEUTILS_H_

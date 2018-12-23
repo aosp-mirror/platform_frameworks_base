@@ -170,16 +170,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
     private static final int GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010;
     private static final int GPS_CAPABILITY_GEOFENCING = 0x0000020;
-    private static final int GPS_CAPABILITY_MEASUREMENTS = 0x0000040;
+    public static final int GPS_CAPABILITY_MEASUREMENTS = 0x0000040;
     private static final int GPS_CAPABILITY_NAV_MESSAGES = 0x0000080;
 
     // The AGPS SUPL mode
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
     private static final int AGPS_SUPL_MODE_MSB = 0x01;
-
-    // these need to match AGnssType enum in IAGnssCallback.hal
-    private static final int AGPS_TYPE_SUPL = 1;
-    private static final int AGPS_TYPE_C2K = 2;
 
     // Handler messages
     private static final int CHECK_LOCATION = 1;
@@ -642,6 +638,17 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 Log.e(TAG, "unable to parse SUPL_ES: " + suplESProperty);
             }
         }
+
+        String emergencyExtensionSecondsString
+                = properties.getProperty("ES_EXTENSION_SEC", "0");
+        try {
+            int emergencyExtensionSeconds =
+                    Integer.parseInt(emergencyExtensionSecondsString);
+            mNIHandler.setEmergencyExtensionSeconds(emergencyExtensionSeconds);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "unable to parse ES_EXTENSION_SEC: "
+                    + emergencyExtensionSecondsString);
+        }
     }
 
     private void loadPropertiesFromResource(Context context,
@@ -962,7 +969,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (mSuplServerHost != null
                 && mSuplServerPort > TCP_MIN_PORT
                 && mSuplServerPort <= TCP_MAX_PORT) {
-            native_set_agps_server(AGPS_TYPE_SUPL, mSuplServerHost, mSuplServerPort);
+            native_set_agps_server(GnssNetworkConnectivityHandler.AGPS_TYPE_SUPL,
+                    mSuplServerHost, mSuplServerPort);
         }
     }
 
@@ -1014,10 +1022,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
             // TODO: remove the following native calls if we can make sure they are redundant.
             if (mSuplServerHost != null) {
-                native_set_agps_server(AGPS_TYPE_SUPL, mSuplServerHost, mSuplServerPort);
+                native_set_agps_server(GnssNetworkConnectivityHandler.AGPS_TYPE_SUPL,
+                        mSuplServerHost, mSuplServerPort);
             }
             if (mC2KServerHost != null) {
-                native_set_agps_server(AGPS_TYPE_C2K, mC2KServerHost, mC2KServerPort);
+                native_set_agps_server(GnssNetworkConnectivityHandler.AGPS_TYPE_C2K,
+                        mC2KServerHost, mC2KServerPort);
             }
 
             mGnssMeasurementsProvider.onGpsEnabledChanged();
@@ -1564,8 +1574,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     @NativeEntryPoint
-    private void reportAGpsStatus(int type, int status, byte[] ipaddr) {
-        mNetworkConnectivityHandler.onReportAGpsStatus(type, status, ipaddr);
+    private void reportAGpsStatus(int agpsType, int agpsStatus, byte[] suplIpAddr) {
+        mNetworkConnectivityHandler.onReportAGpsStatus(agpsType, agpsStatus, suplIpAddr);
     }
 
     @NativeEntryPoint
@@ -1596,20 +1606,20 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     @NativeEntryPoint
     private void setEngineCapabilities(final int capabilities) {
         // send to handler thread for fast native return, and in-order handling
-        mHandler.post(() -> {
-            mEngineCapabilities = capabilities;
+        mHandler.post(
+                () -> {
+                    mEngineCapabilities = capabilities;
 
-            if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) {
-                mNtpTimeHelper.enablePeriodicTimeInjection();
-                requestUtcTime();
-            }
+                    if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) {
+                        mNtpTimeHelper.enablePeriodicTimeInjection();
+                        requestUtcTime();
+                    }
 
-            mGnssMeasurementsProvider.onCapabilitiesUpdated(hasCapability(
-                    GPS_CAPABILITY_MEASUREMENTS));
-            mGnssNavigationMessageProvider.onCapabilitiesUpdated(hasCapability(
-                    GPS_CAPABILITY_NAV_MESSAGES));
-            restartRequests();
-        });
+                    mGnssMeasurementsProvider.onCapabilitiesUpdated(capabilities);
+                    mGnssNavigationMessageProvider.onCapabilitiesUpdated(
+                            hasCapability(GPS_CAPABILITY_NAV_MESSAGES));
+                    restartRequests();
+                });
     }
 
     private void restartRequests() {

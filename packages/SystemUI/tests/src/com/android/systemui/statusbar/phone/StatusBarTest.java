@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -91,7 +92,10 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationFilter;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -129,6 +133,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ArrayList<Entry> mNotificationList;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private NotificationData mNotificationData;
+    @Mock
+    private NotificationInterruptionStateProvider.HeadsUpSuppressor mHeadsUpSuppressor;
 
     // Mock dependencies:
     @Mock private NotificationViewHierarchyManager mViewHierarchyManager;
@@ -141,13 +147,17 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private NotificationPresenter mNotificationPresenter;
-    @Mock private NotificationEntryManager.Callback mCallback;
+    @Mock
+    private NotificationEntryListener mCallback;
     @Mock private BubbleController mBubbleController;
+    @Mock
+    private NotificationFilter mNotificationFilter;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
     private PowerManager mPowerManager;
     private TestableNotificationEntryManager mEntryManager;
+    private TestableNotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
     private NotificationLogger mNotificationLogger;
     private CommandQueue mCommandQueue;
 
@@ -168,6 +178,17 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);
         mDependency.injectMockDependency(BubbleController.class);
+        mDependency.injectTestDependency(NotificationFilter.class, mNotificationFilter);
+
+        IPowerManager powerManagerService = mock(IPowerManager.class);
+        mPowerManager = new PowerManager(mContext, powerManagerService,
+                Handler.createAsync(Looper.myLooper()));
+
+        mNotificationInterruptionStateProvider =
+                new TestableNotificationInterruptionStateProvider(mContext, mPowerManager,
+                        mDreamManager);
+        mDependency.injectTestDependency(NotificationInterruptionStateProvider.class,
+                mNotificationInterruptionStateProvider);
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
@@ -177,10 +198,6 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationLogger.class, mNotificationLogger);
         mNotificationLogger = new NotificationLogger();
         DozeLog.traceDozing(mContext, false /* dozing */);
-
-        IPowerManager powerManagerService = mock(IPowerManager.class);
-        mPowerManager = new PowerManager(mContext, powerManagerService,
-                Handler.createAsync(Looper.myLooper()));
 
         mCommandQueue = mock(CommandQueue.class);
         when(mCommandQueue.asBinder()).thenReturn(new Binder());
@@ -205,7 +222,10 @@ public class StatusBarTest extends SysuiTestCase {
             return null;
         }).when(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any());
 
-        mEntryManager = new TestableNotificationEntryManager(mDreamManager, mPowerManager, mContext);
+        mNotificationInterruptionStateProvider.setUpWithPresenter(mNotificationPresenter,
+                mHeadsUpManager, mHeadsUpSuppressor);
+
+        mEntryManager = new TestableNotificationEntryManager(mPowerManager, mContext);
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
@@ -362,11 +382,9 @@ public class StatusBarTest extends SysuiTestCase {
     public void testShouldHeadsUp_nonSuppressedGroupSummary() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationData.shouldSuppressStatusBar(any())).thenReturn(false);
-        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
+        when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
-        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
-        when(mCallback.canHeadsUp(any(), any())).thenReturn(true);
+        when(mHeadsUpSuppressor.canHeadsUp(any(), any())).thenReturn(true);
 
         Notification n = new Notification.Builder(getContext(), "a")
                 .setGroup("a")
@@ -376,19 +394,18 @@ public class StatusBarTest extends SysuiTestCase {
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        entry.importance = IMPORTANCE_HIGH;
 
-        assertTrue(mEntryManager.shouldHeadsUp(entry));
+        assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
     }
 
     @Test
     public void testShouldHeadsUp_suppressedGroupSummary() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationData.shouldSuppressStatusBar(any())).thenReturn(false);
-        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
+        when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
-        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
-        when(mCallback.canHeadsUp(any(), any())).thenReturn(true);
+        when(mHeadsUpSuppressor.canHeadsUp(any(), any())).thenReturn(true);
 
         Notification n = new Notification.Builder(getContext(), "a")
                 .setGroup("a")
@@ -398,46 +415,44 @@ public class StatusBarTest extends SysuiTestCase {
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        entry.importance = IMPORTANCE_HIGH;
 
-        assertFalse(mEntryManager.shouldHeadsUp(entry));
+        assertFalse(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
     }
 
     @Test
     public void testShouldHeadsUp_suppressedHeadsUp() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
+        when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
-        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
-        when(mCallback.canHeadsUp(any(), any())).thenReturn(true);
-
-        when(mNotificationData.shouldSuppressPeek(any())).thenReturn(true);
+        when(mHeadsUpSuppressor.canHeadsUp(any(), any())).thenReturn(true);
 
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        entry.suppressedVisualEffects = SUPPRESSED_EFFECT_PEEK;
+        entry.importance = IMPORTANCE_HIGH;
 
-        assertFalse(mEntryManager.shouldHeadsUp(entry));
+        assertFalse(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
     }
 
     @Test
     public void testShouldHeadsUp_noSuppressedHeadsUp() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
+        when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
-        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
-        when(mCallback.canHeadsUp(any(), any())).thenReturn(true);
-
-        when(mNotificationData.shouldSuppressPeek(any())).thenReturn(false);
+        when(mHeadsUpSuppressor.canHeadsUp(any(), any())).thenReturn(true);
 
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        entry.importance = IMPORTANCE_HIGH;
 
-        assertTrue(mEntryManager.shouldHeadsUp(entry));
+        assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
     }
 
     @Test
@@ -725,20 +740,29 @@ public class StatusBarTest extends SysuiTestCase {
 
     public static class TestableNotificationEntryManager extends NotificationEntryManager {
 
-        public TestableNotificationEntryManager(IDreamManager dreamManager,
-                PowerManager powerManager, Context context) {
+        public TestableNotificationEntryManager(PowerManager powerManager, Context context) {
             super(context);
-            mDreamManager = dreamManager;
             mPowerManager = powerManager;
         }
 
         public void setUpForTest(NotificationPresenter presenter,
                 NotificationListContainer listContainer,
-                Callback callback,
+                NotificationEntryListener callback,
                 HeadsUpManagerPhone headsUpManager,
                 NotificationData notificationData) {
             super.setUpWithPresenter(presenter, listContainer, callback, headsUpManager);
             mNotificationData = notificationData;
+        }
+    }
+
+    public static class TestableNotificationInterruptionStateProvider extends
+            NotificationInterruptionStateProvider {
+
+        public TestableNotificationInterruptionStateProvider(
+                Context context,
+                PowerManager powerManager,
+                IDreamManager dreamManager) {
+            super(context, powerManager, dreamManager);
             mUseHeadsUp = true;
         }
     }

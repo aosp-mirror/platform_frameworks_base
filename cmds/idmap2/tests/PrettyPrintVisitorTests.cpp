@@ -29,13 +29,11 @@
 
 #include "TestHelpers.h"
 
-using ::testing::IsNull;
 using ::testing::NotNull;
 
 using android::ApkAssets;
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 TEST(PrettyPrintVisitorTests, CreatePrettyPrintVisitor) {
   const std::string target_apk_path(GetTestDataPath() + "/target/target.apk");
@@ -79,5 +77,4 @@ TEST(PrettyPrintVisitorTests, CreatePrettyPrintVisitorWithoutAccessToApks) {
   ASSERT_NE(stream.str().find("0x7f020000 -> 0x7f020000\n"), std::string::npos);
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

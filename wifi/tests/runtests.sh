@@ -22,4 +22,4 @@ adb wait-for-device
 adb install -r -g "$OUT/data/app/FrameworksWifiApiTests/FrameworksWifiApiTests.apk"
 
 adb shell am instrument --no-hidden-api-checks -w "$@" \
-  'android.net.wifi.test/android.support.test.runner.AndroidJUnitRunner'
+  'android.net.wifi.test/androidx.test.runner.AndroidJUnitRunner'

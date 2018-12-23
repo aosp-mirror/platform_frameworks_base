@@ -73,6 +73,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -1685,6 +1686,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return getInputMethodList(false /* isVrOnly */);
     }
 
+    @Override
     public List<InputMethodInfo> getVrInputMethodList() {
         return getInputMethodList(true /* isVrOnly */);
     }
@@ -3274,7 +3276,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final int packageNum = packageInfos.length;
                 for (int i = 0; i < packageNum; ++i) {
                     if (packageInfos[i].equals(imi.getPackageName())) {
-                        mFileManager.addInputMethodSubtypes(imi, subtypes);
+                        if (subtypes.length > 0) {
+                            mFileManager.addInputMethodSubtypes(imi, subtypes);
+                        } else {
+                            mFileManager.deleteAllInputMethodSubtypes(imi.getId());
+                        }
                         final long ident = Binder.clearCallingIdentity();
                         try {
                             buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
@@ -4295,19 +4301,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     ? new File(Environment.getDataDirectory(), SYSTEM_PATH)
                     : Environment.getUserSystemDirectory(userId);
             final File inputMethodDir = new File(systemDir, INPUT_METHOD_PATH);
-            if (!inputMethodDir.exists() && !inputMethodDir.mkdirs()) {
-                Slog.w(TAG, "Couldn't create dir.: " + inputMethodDir.getAbsolutePath());
-            }
             final File subtypeFile = new File(inputMethodDir, ADDITIONAL_SUBTYPES_FILE_NAME);
             mAdditionalInputMethodSubtypeFile = new AtomicFile(subtypeFile, "input-subtypes");
-            if (!subtypeFile.exists()) {
-                // If "subtypes.xml" doesn't exist, create a blank file.
-                writeAdditionalInputMethodSubtypes(
-                        mAdditionalSubtypesMap, mAdditionalInputMethodSubtypeFile, methodMap);
-            } else {
-                readAdditionalInputMethodSubtypes(
-                        mAdditionalSubtypesMap, mAdditionalInputMethodSubtypeFile);
-            }
+            readAdditionalInputMethodSubtypes(mAdditionalSubtypesMap,
+                    mAdditionalInputMethodSubtypeFile);
         }
 
         private void deleteAllInputMethodSubtypes(String imiId) {
@@ -4347,6 +4344,25 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private static void writeAdditionalInputMethodSubtypes(
                 ArrayMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile,
                 ArrayMap<String, InputMethodInfo> methodMap) {
+            if (allSubtypes.isEmpty()) {
+                if (subtypesFile.exists()) {
+                    subtypesFile.delete();
+                }
+                final File parentDir = subtypesFile.getBaseFile().getParentFile();
+                if (parentDir != null && FileUtils.listFilesOrEmpty(parentDir).length == 0) {
+                    if (!parentDir.delete()) {
+                        Slog.e(TAG, "Failed to delete the empty parent directory " + parentDir);
+                    }
+                }
+                return;
+            }
+
+            final File parentDir = subtypesFile.getBaseFile().getParentFile();
+            if (!parentDir.exists() && !parentDir.mkdirs()) {
+                Slog.e(TAG, "Failed to create a parent directory " + parentDir);
+                return;
+            }
+
             // Safety net for the case that this function is called before methodMap is set.
             final boolean isSetMethodMap = methodMap != null && methodMap.size() > 0;
             FileOutputStream fos = null;
@@ -4403,6 +4419,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 ArrayMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile) {
             if (allSubtypes == null || subtypesFile == null) return;
             allSubtypes.clear();
+            if (!subtypesFile.exists()) {
+                // Not having the file means there is no additional subtype.
+                return;
+            }
             try (final FileInputStream fis = subtypesFile.openRead()) {
                 final XmlPullParser parser = Xml.newPullParser();
                 parser.setInput(fis, StandardCharsets.UTF_8.name());

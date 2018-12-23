@@ -18,7 +18,7 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Fragment;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -35,7 +35,6 @@ import android.widget.FrameLayout.LayoutParams;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
@@ -46,8 +45,12 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
+import com.android.systemui.util.InjectionInflationController;
+import com.android.systemui.util.LifecycleFragment;
 
-public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
+import javax.inject.Inject;
+
+public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Callbacks {
     private static final String TAG = "QS";
     private static final boolean DEBUG = false;
     private static final String EXTRA_EXPANDED = "expanded";
@@ -74,13 +77,24 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     private float mLastQSExpansion = -1;
     private boolean mQsDisabled;
 
-    private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler =
-            Dependency.get(RemoteInputQuickSettingsDisabler.class);
+    private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
+    private final InjectionInflationController mInjectionInflater;
+
+    @Inject
+    public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
+            InjectionInflationController injectionInflater,
+            Context context) {
+        mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
+        mInjectionInflater = injectionInflater;
+        SysUiServiceProvider.getComponent(context, CommandQueue.class)
+                .observe(getLifecycle(), this);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
-        inflater = inflater.cloneInContext(new ContextThemeWrapper(getContext(), R.style.qs_theme));
+        inflater = mInjectionInflater.injectable(
+                inflater.cloneInContext(new ContextThemeWrapper(getContext(), R.style.qs_theme)));
         return inflater.inflate(R.layout.qs_panel, container, false);
     }
 
@@ -108,13 +122,6 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
                 mQSPanel.getTileLayout().restoreInstanceState(savedInstanceState);
             }
         }
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallback(this);
-    }
-
-    @Override
-    public void onDestroyView() {
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallback(this);
-        super.onDestroyView();
     }
 
     @Override

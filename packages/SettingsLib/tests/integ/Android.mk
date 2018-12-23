@@ -31,8 +31,8 @@ LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_USE_AAPT2 := true
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-test \
-    espresso-core \
+    androidx.test.rules \
+    androidx.test.espresso.core \
     mockito-target-minus-junit4 \
     truth-prebuilt
 

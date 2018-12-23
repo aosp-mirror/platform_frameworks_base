@@ -293,7 +293,7 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTim
 
     // Then, check stats-data directory to see there's any file containing
     // ConfigMetricsReport from previous shutdowns to concatenate to reports.
-    StorageManager::appendConfigMetricsReport(key, proto);
+    StorageManager::appendConfigMetricsReport(key, proto, erase_data);
 
     auto it = mMetricsManagers.find(key);
     if (it != mMetricsManagers.end()) {

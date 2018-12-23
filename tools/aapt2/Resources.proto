@@ -49,6 +49,9 @@ message ResourceTable {
 
   // Resource definitions corresponding to an Android package.
   repeated Package package = 2;
+
+  // The <overlayable> declarations within the resource table.
+  repeated Overlayable overlayable = 3;
 }
 
 // A package ID in the range [0x00, 0xff].
@@ -133,8 +136,20 @@ message AllowNew {
   string comment = 2;
 }
 
-// Represents a declaration that a resource is overayable at runtime.
+// Represents a set of overlayable resources.
 message Overlayable {
+  // The name of the <overlyabale>.
+  string name = 1;
+
+  // The location of the <overlyabale> declaration in the source.
+  Source source = 2;
+
+  // The component responsible for enabling and disabling overlays targeting this <overlayable>.
+  string actor = 3;
+}
+
+// Represents an overlayable <item> declaration within an <overlayable> tag.
+message OverlayableItem {
   enum Policy {
     PUBLIC = 0;
     SYSTEM = 1;
@@ -143,14 +158,18 @@ message Overlayable {
     PRODUCT_SERVICES = 4;
   }
 
-  // Where this declaration was defined in source.
+  // The location of the <item> declaration in source.
   Source source = 1;
 
   // Any comment associated with the declaration.
   string comment = 2;
 
-  // The policy defined in the overlayable declaration.
+  // The policy defined by the enclosing <policy> tag of this <item>.
   repeated Policy policy = 3;
+
+  // The index into overlayable list that points to the <overlayable> tag that contains
+  // this <item>.
+  uint32 overlayable_idx = 4;
 }
 
 // An entry ID in the range [0x0000, 0xffff].
@@ -180,7 +199,7 @@ message Entry {
   AllowNew allow_new = 4;
 
   // Whether this resource can be overlaid by a runtime resource overlay (RRO).
-  Overlayable overlayable = 5;
+  OverlayableItem overlayable_item = 5;
 
   // The set of values defined for this entry, each corresponding to a different
   // configuration/variant.

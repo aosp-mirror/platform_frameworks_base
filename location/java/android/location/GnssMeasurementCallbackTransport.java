@@ -19,6 +19,8 @@ package android.location;
 import android.content.Context;
 import android.os.RemoteException;
 
+import com.android.internal.util.Preconditions;
+
 /**
  * A handler class to manage transport callbacks for {@link GnssMeasurementsEvent.Callback}.
  *
@@ -26,12 +28,13 @@ import android.os.RemoteException;
  */
 class GnssMeasurementCallbackTransport
         extends LocalListenerHelper<GnssMeasurementsEvent.Callback> {
+    private static final String TAG = "GnssMeasCbTransport";
     private final ILocationManager mLocationManager;
 
     private final IGnssMeasurementsListener mListenerTransport = new ListenerTransport();
 
     public GnssMeasurementCallbackTransport(Context context, ILocationManager locationManager) {
-        super(context, "GnssMeasurementListenerTransport");
+        super(context, TAG);
         mLocationManager = locationManager;
     }
 
@@ -47,17 +50,34 @@ class GnssMeasurementCallbackTransport
         mLocationManager.removeGnssMeasurementsListener(mListenerTransport);
     }
 
+    /**
+     * Injects GNSS measurement corrections into the GNSS chipset.
+     *
+     * @param measurementCorrections a {@link GnssMeasurementCorrections} object with the GNSS
+     *     measurement corrections to be injected into the GNSS chipset.
+     */
+    protected void injectGnssMeasurementCorrections(
+            GnssMeasurementCorrections measurementCorrections) throws RemoteException {
+        Preconditions.checkNotNull(measurementCorrections);
+        mLocationManager.injectGnssMeasurementCorrections(
+                measurementCorrections, getContext().getPackageName());
+    }
+
+    protected int getGnssCapabilities() throws RemoteException {
+        return mLocationManager.getGnssCapabilities(getContext().getPackageName());
+    }
+
     private class ListenerTransport extends IGnssMeasurementsListener.Stub {
         @Override
         public void onGnssMeasurementsReceived(final GnssMeasurementsEvent event) {
             ListenerOperation<GnssMeasurementsEvent.Callback> operation =
                     new ListenerOperation<GnssMeasurementsEvent.Callback>() {
-                @Override
-                public void execute(GnssMeasurementsEvent.Callback callback)
-                        throws RemoteException {
-                    callback.onGnssMeasurementsReceived(event);
-                }
-            };
+                        @Override
+                        public void execute(GnssMeasurementsEvent.Callback callback)
+                                throws RemoteException {
+                            callback.onGnssMeasurementsReceived(event);
+                        }
+                    };
             foreach(operation);
         }
 

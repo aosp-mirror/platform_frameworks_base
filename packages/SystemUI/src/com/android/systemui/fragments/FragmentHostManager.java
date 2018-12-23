@@ -41,6 +41,8 @@ import com.android.systemui.util.leak.LeakDetector;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -186,6 +188,13 @@ public class FragmentHostManager {
         mFragments.dispatchDestroy();
     }
 
+    /**
+     * Creates a fragment that requires injection.
+     */
+    public <T> T create(Class<T> fragmentCls) {
+        return (T) mPlugins.instantiate(mContext, fragmentCls.getName(), null);
+    }
+
     public interface FragmentListener {
         void onFragmentViewCreated(String tag, Fragment fragment);
 
@@ -294,13 +303,36 @@ public class FragmentHostManager {
         Fragment instantiate(Context context, String className, Bundle arguments) {
             Context extensionContext = mExtensionLookup.get(className);
             if (extensionContext != null) {
-                Fragment f = Fragment.instantiate(extensionContext, className, arguments);
+                Fragment f = instantiateWithInjections(extensionContext, className, arguments);
                 if (f instanceof Plugin) {
                     ((Plugin) f).onCreate(mContext, extensionContext);
                 }
                 return f;
             }
-            return Fragment.instantiate(context, className, arguments);
+            return instantiateWithInjections(context, className, arguments);
+        }
+
+        private Fragment instantiateWithInjections(Context context, String className,
+                Bundle args) {
+            Method method = mManager.getInjectionMap().get(className);
+            if (method != null) {
+                try {
+                    Fragment f = (Fragment) method.invoke(mManager.getFragmentCreator());
+                    // Setup the args, taken from Fragment#instantiate.
+                    if (args != null) {
+                        args.setClassLoader(f.getClass().getClassLoader());
+                        f.setArguments(args);
+                    }
+                    return f;
+                } catch (IllegalAccessException e) {
+                    throw new Fragment.InstantiationException("Unable to instantiate " + className,
+                            e);
+                } catch (InvocationTargetException e) {
+                    throw new Fragment.InstantiationException("Unable to instantiate " + className,
+                            e);
+                }
+            }
+            return Fragment.instantiate(context, className, args);
         }
     }
 

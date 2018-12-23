@@ -18,8 +18,9 @@ package android.multiuser;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.os.Bundle;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;

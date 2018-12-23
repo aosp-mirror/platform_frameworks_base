@@ -83,7 +83,7 @@ public:
     static PrivacySpec new_spec(int dest);
 
 private:
-    PrivacySpec(uint8_t dest) : dest(dest) {}
+    explicit PrivacySpec(uint8_t dest) : dest(dest) {}
 };
 
 }  // namespace incidentd

@@ -16,12 +16,12 @@
 
 package com.android.internal.usb;
 
-import static android.hardware.usb.UsbPort.MODE_AUDIO_ACCESSORY;
-import static android.hardware.usb.UsbPort.MODE_DEBUG_ACCESSORY;
-import static android.hardware.usb.UsbPort.MODE_DFP;
-import static android.hardware.usb.UsbPort.MODE_DUAL;
-import static android.hardware.usb.UsbPort.MODE_NONE;
-import static android.hardware.usb.UsbPort.MODE_UFP;
+import static android.hardware.usb.UsbPortStatus.MODE_AUDIO_ACCESSORY;
+import static android.hardware.usb.UsbPortStatus.MODE_DEBUG_ACCESSORY;
+import static android.hardware.usb.UsbPortStatus.MODE_DFP;
+import static android.hardware.usb.UsbPortStatus.MODE_DUAL;
+import static android.hardware.usb.UsbPortStatus.MODE_NONE;
+import static android.hardware.usb.UsbPortStatus.MODE_UFP;
 
 import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
 

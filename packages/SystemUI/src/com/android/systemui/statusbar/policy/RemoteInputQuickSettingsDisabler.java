@@ -27,9 +27,13 @@ import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBar;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Let {@link RemoteInputView} to control the visibility of QuickSetting.
  */
+@Singleton
 public class RemoteInputQuickSettingsDisabler
         implements ConfigurationController.ConfigurationListener {
 
@@ -39,6 +43,7 @@ public class RemoteInputQuickSettingsDisabler
     private int mLastOrientation;
     @VisibleForTesting CommandQueue mCommandQueue;
 
+    @Inject
     public RemoteInputQuickSettingsDisabler(Context context) {
         mContext = context;
         mCommandQueue = SysUiServiceProvider.getComponent(context, CommandQueue.class);

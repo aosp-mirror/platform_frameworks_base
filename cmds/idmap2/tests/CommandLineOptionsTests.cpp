@@ -38,14 +38,11 @@
 
 #include "TestHelpers.h"
 
-using ::testing::NotNull;
-
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 TEST(CommandLineOptionsTests, Flag) {
-  bool foo = true, bar = false;
-
+  bool foo = true;
+  bool bar = false;
   CommandLineOptions opts =
       CommandLineOptions("test").OptionalFlag("--foo", "", &foo).OptionalFlag("--bar", "", &bar);
 
@@ -63,7 +60,8 @@ TEST(CommandLineOptionsTests, Flag) {
 }
 
 TEST(CommandLineOptionsTests, MandatoryOption) {
-  std::string foo, bar;
+  std::string foo;
+  std::string bar;
   CommandLineOptions opts = CommandLineOptions("test")
                                 .MandatoryOption("--foo", "", &foo)
                                 .MandatoryOption("--bar", "", &bar);
@@ -92,13 +90,14 @@ TEST(CommandLineOptionsTests, MandatoryOptionMultipleArgsAndExpectedOnceOrMore) 
   std::ostream fakeStdErr(nullptr);
   bool success = opts.Parse({"--foo", "FOO", "--foo", "BAR"}, fakeStdErr);
   ASSERT_TRUE(success);
-  ASSERT_EQ(args.size(), 2u);
+  ASSERT_EQ(args.size(), 2U);
   ASSERT_EQ(args[0], "FOO");
   ASSERT_EQ(args[1], "BAR");
 }
 
 TEST(CommandLineOptionsTests, OptionalOption) {
-  std::string foo, bar;
+  std::string foo;
+  std::string bar;
   CommandLineOptions opts = CommandLineOptions("test")
                                 .OptionalOption("--foo", "", &foo)
                                 .OptionalOption("--bar", "", &bar);
@@ -123,7 +122,8 @@ TEST(CommandLineOptionsTests, OptionalOption) {
 }
 
 TEST(CommandLineOptionsTests, CornerCases) {
-  std::string foo, bar;
+  std::string foo;
+  std::string bar;
   bool baz = false;
   CommandLineOptions opts = CommandLineOptions("test")
                                 .MandatoryOption("--foo", "", &foo)
@@ -150,7 +150,7 @@ TEST(CommandLineOptionsTests, ConvertArgvToVector) {
       nullptr,
   };
   std::unique_ptr<std::vector<std::string>> v = CommandLineOptions::ConvertArgvToVector(3, argv);
-  ASSERT_EQ(v->size(), 2ul);
+  ASSERT_EQ(v->size(), 2UL);
   ASSERT_EQ((*v)[0], "--foo");
   ASSERT_EQ((*v)[1], "FOO");
 }
@@ -161,12 +161,16 @@ TEST(CommandLineOptionsTests, ConvertArgvToVectorNoArgs) {
       nullptr,
   };
   std::unique_ptr<std::vector<std::string>> v = CommandLineOptions::ConvertArgvToVector(1, argv);
-  ASSERT_EQ(v->size(), 0ul);
+  ASSERT_EQ(v->size(), 0UL);
 }
 
 TEST(CommandLineOptionsTests, Usage) {
-  std::string arg1, arg2, arg3, arg4;
-  bool arg5 = false, arg6 = false;
+  std::string arg1;
+  std::string arg2;
+  std::string arg3;
+  std::string arg4;
+  bool arg5 = false;
+  bool arg6 = false;
   std::vector<std::string> arg7;
   CommandLineOptions opts = CommandLineOptions("test")
                                 .MandatoryOption("--aa", "description-aa", &arg1)
@@ -188,5 +192,4 @@ TEST(CommandLineOptionsTests, Usage) {
             std::string::npos);
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

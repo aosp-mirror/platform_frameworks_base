@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -152,6 +153,32 @@ public class BluetoothEventManagerTest {
         mContext.sendBroadcast(mIntent);
 
         verify(mBluetoothCallback).onAclConnectionStateChanged(mCachedBluetoothDevice,
+                BluetoothAdapter.STATE_CONNECTED);
+    }
+
+    @Test
+    public void dispatchAclConnectionStateChanged_aclDisconnected_shouldNotCallbackSubDevice() {
+        when(mCachedDeviceManager.isSubDevice(mBluetoothDevice)).thenReturn(true);
+        mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mIntent = new Intent(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mBluetoothCallback, never()).onAclConnectionStateChanged(mCachedBluetoothDevice,
+                BluetoothAdapter.STATE_DISCONNECTED);
+    }
+
+    @Test
+    public void dispatchAclConnectionStateChanged_aclConnected_shouldNotCallbackSubDevice() {
+        when(mCachedDeviceManager.isSubDevice(mBluetoothDevice)).thenReturn(true);
+        mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mIntent = new Intent(BluetoothDevice.ACTION_ACL_CONNECTED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mBluetoothCallback, never()).onAclConnectionStateChanged(mCachedBluetoothDevice,
                 BluetoothAdapter.STATE_CONNECTED);
     }
 }

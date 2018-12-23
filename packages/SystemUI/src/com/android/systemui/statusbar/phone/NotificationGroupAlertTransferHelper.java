@@ -29,8 +29,8 @@ import com.android.systemui.statusbar.AmbientPulseManager.OnAmbientChangedListen
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.statusbar.notification.AlertTransferListener;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.AsyncInflationTask;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
@@ -42,11 +42,15 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * A helper class dealing with the alert interactions between {@link NotificationGroupManager},
  * {@link HeadsUpManager}, {@link AmbientPulseManager}. In particular, this class deals with keeping
  * the correct notification in a group alerting based off the group suppression.
  */
+@Singleton
 public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedListener,
         OnAmbientChangedListener, StateListener {
 
@@ -73,6 +77,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
     private boolean mIsDozing;
 
+    @Inject
     public NotificationGroupAlertTransferHelper() {
         Dependency.get(StatusBarStateController.class).addCallback(this);
     }
@@ -90,7 +95,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         // not being up to date.
         mEntryManager = entryManager;
 
-        mEntryManager.setAlertTransferListener(mAlertTransferListener);
+        mEntryManager.addNotificationEntryListener(mNotificationEntryListener);
         groupManager.addOnGroupChangeListener(mOnGroupChangeListener);
     }
 
@@ -181,7 +186,8 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         }
     }
 
-    private final AlertTransferListener mAlertTransferListener = new AlertTransferListener() {
+    private final NotificationEntryListener mNotificationEntryListener =
+            new NotificationEntryListener() {
         // Called when a new notification has been posted but is not inflated yet. We use this to
         // see as early as we can if we need to abort a transfer.
         @Override

@@ -134,7 +134,6 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowQueuedWork;
@@ -169,6 +168,7 @@ public class KeyValueBackupTaskTest {
     private static final PackageData PACKAGE_2 = keyValuePackage(2);
     private static final String BACKUP_AGENT_SHARED_PREFS_SYNCHRONIZER_CLASS =
             "android.app.backup.BackupAgent$SharedPrefsSynchronizer";
+    private static final int USER_ID = 10;
 
     @Mock private TransportManager mTransportManager;
     @Mock private DataChangedJournal mOldJournal;
@@ -187,7 +187,6 @@ public class KeyValueBackupTaskTest {
     private File mBaseStateDir;
     private File mDataDir;
     private Application mApplication;
-    private ShadowApplication mShadowApplication;
     private Looper mMainLooper;
     private FrameworkShadowLooper mShadowMainLooper;
     private Context mContext;
@@ -199,7 +198,6 @@ public class KeyValueBackupTaskTest {
         mTransport = backupTransport();
 
         mApplication = RuntimeEnvironment.application;
-        mShadowApplication = shadowOf(mApplication);
         mContext = mApplication;
 
         mMainLooper = Looper.getMainLooper();
@@ -224,7 +222,7 @@ public class KeyValueBackupTaskTest {
         setUpBinderCallerAndApplicationAsSystem(mApplication);
         mBackupManagerService =
                 spy(createUserBackupManagerServiceAndRunTasks(
-                        mContext, mBaseStateDir, mDataDir, mTransportManager));
+                        USER_ID, mContext, mBaseStateDir, mDataDir, mTransportManager));
         setUpBackupManagerServiceBasics(
                 mBackupManagerService,
                 mApplication,
@@ -2438,7 +2436,7 @@ public class KeyValueBackupTaskTest {
                     packageData.packageName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
             PackageInfo packageInfo = getPackageInfo(packageData);
             mShadowPackageManager.addPackage(packageInfo);
-            mShadowApplication.sendBroadcast(getPackageAddedIntent(packageData));
+            mContext.sendBroadcast(getPackageAddedIntent(packageData));
             // Run the backup looper because on the receiver we post MSG_SCHEDULE_BACKUP_PACKAGE
             mShadowBackupLooper.runToEndOfTasks();
             BackupAgent backupAgent = spy(BackupAgent.class);

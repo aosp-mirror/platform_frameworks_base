@@ -1468,7 +1468,8 @@ public class Resources {
          * @see #obtainStyledAttributes(int, int[])
          * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
          */
-        public TypedArray obtainStyledAttributes(@StyleableRes int[] attrs) {
+        @NonNull
+        public TypedArray obtainStyledAttributes(@NonNull @StyleableRes int[] attrs) {
             return mThemeImpl.obtainStyledAttributes(this, null, attrs, 0, 0);
         }
 
@@ -1493,7 +1494,9 @@ public class Resources {
          * @see #obtainStyledAttributes(int[])
          * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
          */
-        public TypedArray obtainStyledAttributes(@StyleRes int resId, @StyleableRes int[] attrs)
+        @NonNull
+        public TypedArray obtainStyledAttributes(@StyleRes int resId,
+                @NonNull @StyleableRes int[] attrs)
                 throws NotFoundException {
             return mThemeImpl.obtainStyledAttributes(this, null, attrs, 0, resId);
         }
@@ -1547,8 +1550,10 @@ public class Resources {
          * @see #obtainStyledAttributes(int[])
          * @see #obtainStyledAttributes(int, int[])
          */
-        public TypedArray obtainStyledAttributes(AttributeSet set,
-                @StyleableRes int[] attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
+        @NonNull
+        public TypedArray obtainStyledAttributes(@Nullable AttributeSet set,
+                @NonNull @StyleableRes int[] attrs, @AttrRes int defStyleAttr,
+                @StyleRes int defStyleRes) {
             return mThemeImpl.obtainStyledAttributes(this, set, attrs, defStyleAttr, defStyleRes);
         }
 

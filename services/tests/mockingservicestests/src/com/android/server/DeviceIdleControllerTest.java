@@ -46,9 +46,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
@@ -56,6 +58,7 @@ import android.app.IActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.location.LocationProvider;
@@ -70,6 +73,7 @@ import android.os.SystemClock;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.deviceidle.ConstraintController;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -77,6 +81,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -89,6 +94,7 @@ public class DeviceIdleControllerTest {
     private DeviceIdleController mDeviceIdleController;
     private AnyMotionDetectorForTest mAnyMotionDetector;
     private AppStateTrackerForTest mAppStateTracker;
+    private DeviceIdleController.Constants mConstants;
     private InjectorForTest mInjector;
 
     private MockitoSession mMockingSession;
@@ -97,7 +103,7 @@ public class DeviceIdleControllerTest {
     @Mock
     private ConnectivityService mConnectivityService;
     @Mock
-    private DeviceIdleController.Constants mConstants;
+    private ContentResolver mContentResolver;
     @Mock
     private IActivityManager mIActivityManager;
     @Mock
@@ -108,10 +114,13 @@ public class DeviceIdleControllerTest {
     private PowerManager.WakeLock mWakeLock;
     @Mock
     private PowerManagerInternal mPowerManagerInternal;
+    @Mock
+    private SensorManager mSensorManager;
 
     class InjectorForTest extends DeviceIdleController.Injector {
         ConnectivityService connectivityService;
         LocationManager locationManager;
+        ConstraintController constraintController;
 
         InjectorForTest(Context ctx) {
             super(ctx);
@@ -139,25 +148,34 @@ public class DeviceIdleControllerTest {
         }
 
         @Override
-        DeviceIdleController.Constants getConstants(DeviceIdleController controller,
-                Handler handler,
-                ContentResolver resolver) {
-            return mConstants;
-        }
-
-        @Override
         LocationManager getLocationManager() {
             return locationManager;
         }
 
         @Override
         DeviceIdleController.MyHandler getHandler(DeviceIdleController controller) {
-            return mock(DeviceIdleController.MyHandler.class);
+            return mock(DeviceIdleController.MyHandler.class, Answers.RETURNS_DEEP_STUBS);
         }
 
         @Override
         PowerManager getPowerManager() {
             return mPowerManager;
+        }
+
+        @Override
+        SensorManager getSensorManager() {
+            return mSensorManager;
+        }
+
+        @Override
+        ConstraintController getConstraintController(
+                Handler handler, DeviceIdleController.LocalService localService) {
+            return constraintController;
+        }
+
+        @Override
+        boolean useMotionSensor() {
+            return true;
         }
     }
 
@@ -165,8 +183,13 @@ public class DeviceIdleControllerTest {
         boolean isMonitoring = false;
 
         AnyMotionDetectorForTest() {
-            super(mPowerManager, mock(Handler.class), mock(SensorManager.class),
+            super(mPowerManager, mock(Handler.class), mSensorManager,
                     mock(DeviceIdleCallback.class), 0.5f);
+        }
+
+        @Override
+        public boolean hasSensor() {
+            return true;
         }
 
         @Override
@@ -201,7 +224,7 @@ public class DeviceIdleControllerTest {
         mMockingSession = mockitoSession()
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)
-                .mockStatic(LocalServices.class)
+                .spyStatic(LocalServices.class)
                 .startMocking();
         spyOn(getContext());
         doReturn(null).when(getContext()).registerReceiver(any(), any());
@@ -218,9 +241,13 @@ public class DeviceIdleControllerTest {
         when(mPowerManager.newWakeLock(anyInt(), anyString())).thenReturn(mWakeLock);
         doNothing().when(mWakeLock).acquire();
         doNothing().when(mAlarmManager).set(anyInt(), anyLong(), anyString(), any(), any());
+        doReturn(mock(Sensor.class)).when(mSensorManager)
+                .getDefaultSensor(eq(Sensor.TYPE_SIGNIFICANT_MOTION), eq(true));
+        doReturn(true).when(mSensorManager).registerListener(any(), any(), anyInt());
         mAppStateTracker = new AppStateTrackerForTest(getContext(), Looper.getMainLooper());
         mAnyMotionDetector = new AnyMotionDetectorForTest();
         mInjector = new InjectorForTest(getContext());
+        doNothing().when(mContentResolver).registerContentObserver(any(), anyBoolean(), any());
         mDeviceIdleController = new DeviceIdleController(getContext(), mInjector);
         spyOn(mDeviceIdleController);
         doNothing().when(mDeviceIdleController).publishBinderService(any(), any());
@@ -228,6 +255,10 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         mDeviceIdleController.setDeepEnabledForTest(true);
         mDeviceIdleController.setLightEnabledForTest(true);
+
+        // Get the same Constants object that mDeviceIdleController got.
+        mConstants = mInjector.getConstants(mDeviceIdleController,
+                mInjector.getHandler(mDeviceIdleController), mContentResolver);
     }
 
     @After
@@ -235,9 +266,10 @@ public class DeviceIdleControllerTest {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
-        // DeviceIdleController adds this to LocalServices in the constructor, so we have to remove
-        // it after each test, otherwise, subsequent tests will fail.
+        // DeviceIdleController adds these to LocalServices in the constructor, so we have to remove
+        // them after each test, otherwise, subsequent tests will fail.
         LocalServices.removeServiceForTest(AppStateTracker.class);
+        LocalServices.removeServiceForTest(DeviceIdleController.LocalService.class);
     }
 
     @Test
@@ -1456,8 +1488,8 @@ public class DeviceIdleControllerTest {
 
     private void setAlarmSoon(boolean isSoon) {
         if (isSoon) {
-            doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
-                    mAlarmManager).getNextWakeFromIdleTime();
+            doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2)
+                    .when(mAlarmManager).getNextWakeFromIdleTime();
         } else {
             doReturn(Long.MAX_VALUE).when(mAlarmManager).getNextWakeFromIdleTime();
         }
@@ -1481,27 +1513,36 @@ public class DeviceIdleControllerTest {
                 assertFalse(mDeviceIdleController.isScreenOn());
                 break;
             case STATE_IDLE_PENDING:
-                assertTrue(mDeviceIdleController.mMotionListener.isActive());
+                assertEquals(
+                        mDeviceIdleController.hasMotionSensor(),
+                        mDeviceIdleController.mMotionListener.isActive());
                 assertFalse(mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn());
                 break;
             case STATE_SENSING:
-                assertTrue(mDeviceIdleController.mMotionListener.isActive());
-                assertTrue(mAnyMotionDetector.isMonitoring);
+                assertEquals(
+                        mDeviceIdleController.hasMotionSensor(),
+                        mDeviceIdleController.mMotionListener.isActive());
+                assertEquals(
+                        mDeviceIdleController.hasMotionSensor(),
+                        mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn());
                 break;
             case STATE_LOCATING:
-                assertTrue(mDeviceIdleController.mMotionListener.isActive());
-                assertTrue(mAnyMotionDetector.isMonitoring);
+                assertEquals(
+                        mDeviceIdleController.hasMotionSensor(),
+                        mDeviceIdleController.mMotionListener.isActive());
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn());
                 break;
             case STATE_IDLE:
-                assertTrue(mDeviceIdleController.mMotionListener.isActive()
+                if (mDeviceIdleController.hasMotionSensor()) {
+                    assertTrue(mDeviceIdleController.mMotionListener.isActive()
                         // If quick doze is enabled, the motion listener should NOT be active.
                         || mDeviceIdleController.isQuickDozeEnabled());
+                }
                 assertFalse(mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn());
@@ -1509,9 +1550,11 @@ public class DeviceIdleControllerTest {
                 verifyLightStateConditions(LIGHT_STATE_OVERRIDE);
                 break;
             case STATE_IDLE_MAINTENANCE:
-                assertTrue(mDeviceIdleController.mMotionListener.isActive()
+                if (mDeviceIdleController.hasMotionSensor()) {
+                    assertTrue(mDeviceIdleController.mMotionListener.isActive()
                         // If quick doze is enabled, the motion listener should NOT be active.
                         || mDeviceIdleController.isQuickDozeEnabled());
+                }
                 assertFalse(mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn());

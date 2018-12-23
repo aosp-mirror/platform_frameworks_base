@@ -6664,6 +6664,72 @@ message MetricsEvent {
     // OS: Q
     NOTIFICATION_ACTION_IS_SMART = 1601;
 
+    // FIELD: true if the associated ACTION_ZEN_ALLOW_* or ACTION_ZEN_BLOCK_* allows/blocks
+    // the effect/sound when DND is on.  false if set to disallow/show.
+    // OS: Q
+    FIELD_ZEN_TOGGLE_EXCEPTION = 1602;
+
+    // FIELD: rule id an ACTION_ZEN_ALLOW_* or ACTION_ZEN_BLOCK_* is associated with
+    // OS: Q
+    FIELD_ZEN_RULE_ID = 1603;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_SETTINGS = 1604;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Custom
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_SOUND_SETTINGS = 1605;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Use default Do Not Disturb behavior
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_DEFAULT_SETTINGS = 1606;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Custom
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_CUSTOM_SETTINGS = 1607;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Use default Do Not Disturb behavior
+    // > Notification restriction
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_NOTIFICATION_RESTRICTIONS = 1608;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Use default Do Not Disturb behavior
+    // > Notification restriction > Custom
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_VIS_EFFECTS = 1609;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Use default Do Not Disturb behavior
+    // > Notification restriction > Custom > Allow messages
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_MESSAGES = 1610;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Use default Do Not Disturb behavior
+    // > Notification restriction > Custom > Allow calls
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_CALLS = 1611;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Click footer link if custom settings applied
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_SETTINGS_DIALOG = 1612;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.

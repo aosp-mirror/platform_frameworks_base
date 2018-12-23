@@ -18,6 +18,7 @@
 
 #include "VectorDrawable.h"
 
+#include "SkAndroidFrameworkUtils.h"
 #include "SkCanvas.h"
 #include "SkData.h"
 #include "SkDrawShadowInfo.h"
@@ -114,6 +115,16 @@ struct SaveLayer final : Op {
     void draw(SkCanvas* c, const SkMatrix&) const {
         c->saveLayer({maybe_unset(bounds), &paint, backdrop.get(), clipMask.get(),
                       clipMatrix.isIdentity() ? nullptr : &clipMatrix, flags});
+    }
+};
+struct SaveBehind final : Op {
+    static const auto kType = Type::SaveBehind;
+    SaveBehind(const SkRect* subset) {
+        if (subset) { this->subset = *subset; }
+    }
+    SkRect  subset = kUnset;
+    void draw(SkCanvas* c, const SkMatrix&) const {
+        SkAndroidFrameworkUtils::SaveBehind(c, &subset);
     }
 };
 
@@ -579,6 +590,10 @@ void DisplayListData::saveLayer(const SkRect* bounds, const SkPaint* paint,
     this->push<SaveLayer>(0, bounds, paint, backdrop, clipMask, clipMatrix, flags);
 }
 
+void DisplayListData::saveBehind(const SkRect* subset) {
+    this->push<SaveBehind>(0, subset);
+}
+
 void DisplayListData::concat(const SkMatrix& matrix) {
     this->push<Concat>(0, matrix);
 }
@@ -848,6 +863,11 @@ void RecordingCanvas::willRestore() {
     fDL->restore();
 }
 
+bool RecordingCanvas::onDoSaveBehind(const SkRect* subset) {
+    fDL->saveBehind(subset);
+    return false;
+}
+
 void RecordingCanvas::didConcat(const SkMatrix& matrix) {
     fDL->concat(matrix);
 }
@@ -912,10 +932,6 @@ void RecordingCanvas::onDrawAnnotation(const SkRect& rect, const char key[], SkD
     fDL->drawAnnotation(rect, key, val);
 }
 
-void RecordingCanvas::onDrawTextRSXform(const void* text, size_t bytes, const SkRSXform xform[],
-                                        const SkRect* cull, const SkPaint& paint) {
-    fDL->drawTextRSXform(text, bytes, xform, cull, paint);
-}
 void RecordingCanvas::onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScalar y,
                                      const SkPaint& paint) {
     fDL->drawTextBlob(blob, x, y, paint);

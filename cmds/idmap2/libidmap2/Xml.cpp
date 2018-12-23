@@ -21,8 +21,7 @@
 
 #include "idmap2/Xml.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 std::unique_ptr<const Xml> Xml::Create(const uint8_t* data, size_t size, bool copyData) {
   std::unique_ptr<Xml> xml(new Xml());
@@ -78,5 +77,4 @@ Xml::~Xml() {
   xml_.uninit();
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

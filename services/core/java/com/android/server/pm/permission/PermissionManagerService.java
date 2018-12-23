@@ -27,7 +27,6 @@ import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.permissionToOp;
 import static android.app.AppOpsManager.permissionToOpCode;
-import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
@@ -1073,9 +1072,8 @@ public class PermissionManagerService {
         AppOpsManagerInternal appOpsInternal = LocalServices.getService(
                 AppOpsManagerInternal.class);
 
-        appOpsInternal.setMode(permissionToOpCode(permission),
-                getUid(userId, getAppId(pkg.applicationInfo.uid)), pkg.packageName, mode,
-                (pkg.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0);
+        appOpsInternal.setUidMode(permissionToOpCode(permission),
+                getUid(userId, getAppId(pkg.applicationInfo.uid)), mode);
     }
 
     /**
@@ -1345,8 +1343,12 @@ public class PermissionManagerService {
                                     sourcePermNum++) {
                                 String sourcePerm = sourcePerms.valueAt(sourcePermNum);
 
-                                if (appOpsManager.unsafeCheckOpNoThrow(permissionToOp(sourcePerm),
-                                        getUid(userId, getAppId(pkg.applicationInfo.uid)), pkgName)
+                                if (ps.hasRuntimePermission(sourcePerm, userId)
+                                        && ps.getRuntimePermissionState(sourcePerm, userId)
+                                        .isGranted()
+                                        && appOpsManager.unsafeCheckOpNoThrow(
+                                                permissionToOp(sourcePerm), getUid(userId,
+                                                getAppId(pkg.applicationInfo.uid)), pkgName)
                                         == MODE_ALLOWED) {
                                     setAppOpMode(sourcePerm, pkg, userId, MODE_FOREGROUND);
                                 }

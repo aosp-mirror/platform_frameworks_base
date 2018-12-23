@@ -31,27 +31,29 @@ import java.io.PrintWriter;
 public final class SecureSettingsServiceNameResolver implements ServiceNameResolver {
 
     private final @NonNull Context mContext;
-    private final @NonNull @UserIdInt int mUserId;
 
     @NonNull
     private final String mProperty;
 
-    public SecureSettingsServiceNameResolver(@NonNull Context context, @UserIdInt int userId,
-            @NonNull String property) {
+    public SecureSettingsServiceNameResolver(@NonNull Context context, @NonNull String property) {
         mContext = context;
-        mUserId = userId;
         mProperty = property;
     }
 
     @Override
-    public String getDefaultServiceName() {
-        return Settings.Secure.getStringForUser(mContext.getContentResolver(), mProperty, mUserId);
+    public String getDefaultServiceName(@UserIdInt int userId) {
+        return Settings.Secure.getStringForUser(mContext.getContentResolver(), mProperty, userId);
     }
 
     // TODO(b/117779333): support proto
     @Override
-    public void dumpShortLocked(@NonNull PrintWriter pw) {
+    public void dumpShort(@NonNull PrintWriter pw) {
         pw.print("SecureSettingsServiceNamer: prop="); pw.print(mProperty);
-        pw.print(", value="); pw.println(getDefaultServiceName());
+    }
+
+    // TODO(b/117779333): support proto
+    @Override
+    public void dumpShort(@NonNull PrintWriter pw, @UserIdInt int userId) {
+        pw.print("defaultService="); pw.print(getDefaultServiceName(userId));
     }
 }

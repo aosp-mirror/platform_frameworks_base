@@ -24,6 +24,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
@@ -33,15 +34,21 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.service.dreams.DreamService;
+import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.RemoteAnimationAdapter;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.EventLogTags;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.CommandQueue;
@@ -54,7 +61,9 @@ import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -66,6 +75,7 @@ import com.android.systemui.statusbar.policy.PreviewInflater;
 public class StatusBarNotificationActivityStarter implements NotificationActivityStarter {
 
     private static final String TAG = "NotificationClickHandler";
+    protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final AssistManager mAssistManager = Dependency.get(AssistManager.class);
     private final NotificationGroupManager mGroupManager =
@@ -84,6 +94,9 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             Dependency.get(NotificationEntryManager.class);
     private final StatusBarStateController mStatusBarStateController =
             Dependency.get(StatusBarStateController.class);
+    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider =
+            Dependency.get(NotificationInterruptionStateProvider.class);
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     private final Context mContext;
     private final NotificationPanelView mNotificationPanel;
@@ -94,6 +107,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private final IStatusBarService mBarService;
     private final CommandQueue mCommandQueue;
+    private final IDreamManager mDreamManager;
 
     private boolean mIsCollapsingToShowActivityOverLockscreen;
 
@@ -112,6 +126,15 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mCommandQueue = getComponent(context, CommandQueue.class);
+        mDreamManager = IDreamManager.Stub.asInterface(
+                ServiceManager.checkService(DreamService.DREAM_SERVICE));
+
+        mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
+            @Override
+            public void onPendingEntryAdded(NotificationData.Entry entry) {
+                handleFullScreenIntent(entry);
+            }
+        });
     }
 
     /**
@@ -322,6 +345,45 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }, null, false /* afterKeyguardGone */);
     }
 
+    private void handleFullScreenIntent(NotificationData.Entry entry) {
+        boolean isHeadsUped = mNotificationInterruptionStateProvider.shouldHeadsUp(entry);
+        if (!isHeadsUped && entry.notification.getNotification().fullScreenIntent != null) {
+            if (shouldSuppressFullScreenIntent(entry)) {
+                if (DEBUG) {
+                    Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + entry.key);
+                }
+            } else if (entry.importance < NotificationManager.IMPORTANCE_HIGH) {
+                if (DEBUG) {
+                    Log.d(TAG, "No Fullscreen intent: not important enough: " + entry.key);
+                }
+            } else {
+                // Stop screensaver if the notification has a fullscreen intent.
+                // (like an incoming phone call)
+                Dependency.get(UiOffloadThread.class).submit(() -> {
+                    try {
+                        mDreamManager.awaken();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+                // not immersive & a fullscreen alert should be shown
+                if (DEBUG) {
+                    Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
+                }
+                try {
+                    EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
+                            entry.key);
+                    entry.notification.getNotification().fullScreenIntent.send();
+                    entry.notifyFullScreenIntentLaunched();
+                    mMetricsLogger.count("note_fullscreen", 1);
+                } catch (PendingIntent.CanceledException e) {
+                    // ignore
+                }
+            }
+        }
+    }
+
     @Override
     public boolean isCollapsingToShowActivityOverLockscreen() {
         return mIsCollapsingToShowActivityOverLockscreen;
@@ -349,6 +411,14 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private boolean shouldCollapse() {
         return mStatusBarStateController.getState() != StatusBarState.SHADE
                 || !mActivityLaunchAnimator.isAnimationPending();
+    }
+
+    private boolean shouldSuppressFullScreenIntent(NotificationData.Entry entry) {
+        if (mPresenter.isDeviceInVrMode()) {
+            return true;
+        }
+
+        return entry.shouldSuppressFullScreenIntent();
     }
 
     private void removeNotification(StatusBarNotification notification) {

@@ -373,9 +373,44 @@ static Visibility::Level DeserializeVisibilityFromPb(const pb::Visibility::Level
   return Visibility::Level::kUndefined;
 }
 
+bool DeserializeOverlayableItemFromPb(const pb::OverlayableItem& pb_overlayable,
+                                      const android::ResStringPool& src_pool,
+                                      OverlayableItem* out_overlayable, std::string* out_error) {
+  for (const int policy : pb_overlayable.policy()) {
+    switch (policy) {
+      case pb::OverlayableItem::PUBLIC:
+        out_overlayable->policies |= OverlayableItem::Policy::kPublic;
+        break;
+      case pb::OverlayableItem::SYSTEM:
+        out_overlayable->policies |= OverlayableItem::Policy::kSystem;
+        break;
+      case pb::OverlayableItem::VENDOR:
+        out_overlayable->policies |= OverlayableItem::Policy::kVendor;
+        break;
+      case pb::OverlayableItem::PRODUCT:
+        out_overlayable->policies |= OverlayableItem::Policy::kProduct;
+        break;
+      case pb::OverlayableItem::PRODUCT_SERVICES:
+        out_overlayable->policies |= OverlayableItem::Policy::kProductServices;
+        break;
+      default:
+        *out_error = "unknown overlayable policy";
+        return false;
+    }
+  }
+
+  if (pb_overlayable.has_source()) {
+    DeserializeSourceFromPb(pb_overlayable.source(), src_pool, &out_overlayable->source);
+  }
+
+  out_overlayable->comment = pb_overlayable.comment();
+  return true;
+}
+
 static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStringPool& src_pool,
-                                     io::IFileCollection* files, ResourceTable* out_table,
-                                     std::string* out_error) {
+                                     io::IFileCollection* files,
+                                     const std::vector<std::shared_ptr<Overlayable>>& overlayables,
+                                     ResourceTable* out_table, std::string* out_error) {
   Maybe<uint8_t> id;
   if (pb_package.has_package_id()) {
     id = static_cast<uint8_t>(pb_package.package_id().id());
@@ -437,39 +472,22 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
         entry->allow_new = std::move(allow_new);
       }
 
-      if (pb_entry.has_overlayable()) {
-        Overlayable overlayable{};
-
-        const pb::Overlayable& pb_overlayable = pb_entry.overlayable();
-        for (const int policy : pb_overlayable.policy()) {
-          switch (policy) {
-            case pb::Overlayable::PUBLIC:
-              overlayable.policies |= Overlayable::Policy::kPublic;
-              break;
-            case pb::Overlayable::SYSTEM:
-              overlayable.policies |= Overlayable::Policy::kSystem;
-              break;
-            case pb::Overlayable::VENDOR:
-              overlayable.policies |= Overlayable::Policy::kVendor;
-              break;
-            case pb::Overlayable::PRODUCT:
-              overlayable.policies |= Overlayable::Policy::kProduct;
-              break;
-            case pb::Overlayable::PRODUCT_SERVICES:
-              overlayable.policies |= Overlayable::Policy::kProductServices;
-              break;
-            default:
-              *out_error = "unknown overlayable policy";
-              return false;
-          }
+      if (pb_entry.has_overlayable_item()) {
+        // Find the overlayable to which this item belongs
+        pb::OverlayableItem pb_overlayable_item = pb_entry.overlayable_item();
+        if (pb_overlayable_item.overlayable_idx() >= overlayables.size()) {
+          *out_error = android::base::StringPrintf("invalid overlayable_idx value %d",
+                                                   pb_overlayable_item.overlayable_idx());
+          return false;
         }
 
-        if (pb_overlayable.has_source()) {
-          DeserializeSourceFromPb(pb_overlayable.source(), src_pool, &overlayable.source);
+        OverlayableItem overlayable_item(overlayables[pb_overlayable_item.overlayable_idx()]);
+        if (!DeserializeOverlayableItemFromPb(pb_overlayable_item, src_pool, &overlayable_item,
+                                              out_error)) {
+          return false;
         }
 
-        overlayable.comment = pb_overlayable.comment();
-        entry->overlayable = overlayable;
+        entry->overlayable_item = std::move(overlayable_item);
       }
 
       ResourceId resid(pb_package.package_id().id(), pb_type.type_id().id(),
@@ -522,8 +540,19 @@ bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, io::IFileCollecti
     }
   }
 
+  // Deserialize the overlayable groups of the table
+  std::vector<std::shared_ptr<Overlayable>> overlayables;
+  for (const pb::Overlayable& pb_overlayable : pb_table.overlayable()) {
+    auto group = std::make_shared<Overlayable>(pb_overlayable.name(), pb_overlayable.actor());
+    if (pb_overlayable.has_source()) {
+      DeserializeSourceFromPb(pb_overlayable.source(), source_pool, &group->source);
+    }
+    overlayables.push_back(group);
+  }
+
   for (const pb::Package& pb_package : pb_table.package()) {
-    if (!DeserializePackageFromPb(pb_package, source_pool, files, out_table, out_error)) {
+    if (!DeserializePackageFromPb(pb_package, source_pool, files, overlayables, out_table,
+                                  out_error)) {
       return false;
     }
   }

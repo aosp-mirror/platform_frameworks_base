@@ -97,7 +97,7 @@ private:
 // ================================================================================
 class IncidentService : public BnIncidentManager {
 public:
-    IncidentService(const sp<Looper>& handlerLooper);
+    explicit IncidentService(const sp<Looper>& handlerLooper);
     virtual ~IncidentService();
 
     virtual Status reportIncident(const IncidentReportArgs& args);

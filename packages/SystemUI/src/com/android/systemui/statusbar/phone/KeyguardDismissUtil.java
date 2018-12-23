@@ -20,14 +20,22 @@ import android.util.Log;
 
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Executes actions that require the screen to be unlocked. Delegates the actual handling to an
  * implementation passed via {@link #setDismissHandler}.
  */
+@Singleton
 public class KeyguardDismissUtil implements KeyguardDismissHandler {
     private static final String TAG = "KeyguardDismissUtil";
 
     private volatile KeyguardDismissHandler mDismissHandler;
+
+    @Inject
+    public KeyguardDismissUtil() {
+    }
 
     /** Sets the actual {@link DismissHandler} implementation. */
     public void setDismissHandler(KeyguardDismissHandler dismissHandler) {

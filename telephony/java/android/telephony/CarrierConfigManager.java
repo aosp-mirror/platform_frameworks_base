@@ -2000,6 +2000,8 @@ public class CarrierConfigManager {
      * Determine whether to use only RSRP for the number of LTE signal bars.
      * @hide
      */
+    // FIXME: this key and related keys must not be exposed without a consistent philosophy for
+    // all RATs.
     public static final String KEY_USE_ONLY_RSRP_FOR_LTE_SIGNAL_BAR_BOOL =
             "use_only_rsrp_for_lte_signal_bar_bool";
 
@@ -2243,6 +2245,8 @@ public class CarrierConfigManager {
      * Currently this only supports the value "rscp"
      * @hide
      */
+    // FIXME: this key and related keys must not be exposed without a consistent philosophy for
+    // all RATs.
     public static final String KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING =
             "wcdma_default_signal_strength_measurement_string";
 
@@ -2399,6 +2403,34 @@ public class CarrierConfigManager {
      */
     public static final String KEY_5G_ICON_CONFIGURATION_STRING =
             "5g_icon_configuration_string";
+
+    /**
+     * Controls RSRP threshold at which AlternativeNetworkService will decide whether
+     * the opportunistic network is good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT =
+            "opportunistic_network_entry_threshold_rsrp_int";
+
+    /**
+     * Controls RSSNR threshold at which AlternativeNetworkService will decide whether
+     * the opportunistic network is good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT =
+            "opportunistic_network_entry_threshold_rssnr_int";
+
+    /**
+     * Controls RSRP threshold below which AlternativeNetworkService will decide whether
+     * the opportunistic network available is not good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT =
+            "opportunistic_network_exit_threshold_rsrp_int";
+
+    /**
+     * Controls RSSNR threshold below which AlternativeNetworkService will decide whether
+     * the opportunistic network available is not good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT =
+            "opportunistic_network_exit_threshold_rssnr_int";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -2761,6 +2793,14 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_CALL_WAITING_SERVICE_CLASS_INT, 1 /* SERVICE_CLASS_VOICE */);
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:None,connected:5G,not_restricted:None,restricted:None");
+        /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT, -108);
+        /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_MODERATE */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT, -118);
+        /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_GOOD */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 45);
+        /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_MODERATE */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 10);
     }
 
     /**

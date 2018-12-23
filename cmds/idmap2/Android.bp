@@ -12,14 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-cc_library {
-    name: "libidmap2",
-    host_supported: true,
+cc_defaults {
+    name: "idmap2_defaults",
     tidy: true,
+    tidy_checks: [
+        "android-*",
+        "misc-*",
+        "modernize-*",
+        "readability-*",
+    ],
     tidy_flags: [
         "-system-headers",
-// b/120024673       "-warnings-as-errors=*",
     ],
+}
+
+cc_library {
+    name: "libidmap2",
+    defaults: [
+        "idmap2_defaults",
+    ],
+    host_supported: true,
     srcs: [
         "libidmap2/BinaryStreamVisitor.cpp",
         "libidmap2/CommandLineOptions.cpp",
@@ -60,12 +72,13 @@ cc_library {
 
 cc_test {
     name: "idmap2_tests",
-    host_supported: true,
-    tidy: true,
-    tidy_flags: [
-        "-system-headers",
-// b/120024673        "-warnings-as-errors=*",
+    defaults: [
+        "idmap2_defaults",
     ],
+    tidy_checks: [
+        "-readability-magic-numbers",
+    ],
+    host_supported: true,
     srcs: [
         "tests/BinaryStreamVisitorTests.cpp",
         "tests/CommandLineOptionsTests.cpp",
@@ -114,12 +127,10 @@ cc_test {
 
 cc_binary {
     name: "idmap2",
-    host_supported: true,
-    tidy: true,
-    tidy_flags: [
-        "-system-headers",
-// b/120024673        "-warnings-as-errors=*",
+    defaults: [
+        "idmap2_defaults",
     ],
+    host_supported: true,
     srcs: [
         "idmap2/Create.cpp",
         "idmap2/Dump.cpp",
@@ -156,19 +167,11 @@ cc_binary {
 
 cc_binary {
     name: "idmap2d",
+    defaults: [
+        "idmap2_defaults",
+    ],
     host_supported: false,
-    tidy: true,
-    tidy_checks: [
-        // remove google-default-arguments or clang-tidy will complain about
-        // the auto-generated file IIdmap2.cpp
-        "-google-default-arguments",
-    ],
-    tidy_flags: [
-        "-system-headers",
-// b/120024673        "-warnings-as-errors=*",
-    ],
     srcs: [
-        ":idmap2_aidl",
         "idmap2d/Idmap2Service.cpp",
         "idmap2d/Main.cpp",
     ],
@@ -181,7 +184,28 @@ cc_binary {
         "libutils",
         "libziparchive",
     ],
+    static_libs: [
+        "libidmap2daidl",
+    ],
     init_rc: ["idmap2d/idmap2d.rc"],
+}
+
+cc_library_static {
+    name: "libidmap2daidl",
+    defaults: [
+        "idmap2_defaults",
+    ],
+    tidy: false,
+    host_supported: false,
+    srcs: [
+        ":idmap2_aidl",
+    ],
+    shared_libs: [
+        "libbase",
+    ],
+    aidl: {
+        export_aidl_headers: true,
+    },
 }
 
 filegroup {

@@ -29,10 +29,12 @@
 
 using android::idmap2::CommandLineOptions;
 
-typedef std::map<std::string, std::function<int(const std::vector<std::string>&, std::ostream&)>>
-    NameToFunctionMap;
+using NameToFunctionMap =
+    std::map<std::string, std::function<bool(const std::vector<std::string>&, std::ostream&)>>;
 
-static void PrintUsage(const NameToFunctionMap& commands, std::ostream& out) {
+namespace {
+
+void PrintUsage(const NameToFunctionMap& commands, std::ostream& out) {
   out << "usage: idmap2 [";
   for (auto iter = commands.cbegin(); iter != commands.cend(); iter++) {
     if (iter != commands.cbegin()) {
@@ -42,6 +44,8 @@ static void PrintUsage(const NameToFunctionMap& commands, std::ostream& out) {
   }
   out << "]" << std::endl;
 }
+
+}  // namespace
 
 int main(int argc, char** argv) {
   const NameToFunctionMap commands = {

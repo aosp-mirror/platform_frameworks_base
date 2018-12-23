@@ -151,7 +151,6 @@ public final class NotificationRecord {
 
     private int mSuppressedVisualEffects = 0;
     private String mUserExplanation;
-    private String mPeopleExplanation;
     private boolean mPreChannelsNotification = true;
     private Uri mSound;
     private long[] mVibration;
@@ -1166,6 +1165,13 @@ public final class NotificationRecord {
         mHasSeenSmartReplies = hasSeenSmartReplies;
     }
 
+    /**
+     * Returns whether this notification has been visible and expanded at the same time.
+     */
+    public boolean hasBeenVisiblyExpanded() {
+        return stats.hasBeenVisiblyExpanded();
+    }
+
     public void setSystemGeneratedSmartActions(
             ArrayList<Notification.Action> systemGeneratedSmartActions) {
         mSystemGeneratedSmartActions = systemGeneratedSmartActions;
@@ -1181,6 +1187,13 @@ public final class NotificationRecord {
 
     public ArrayList<CharSequence> getSmartReplies() {
         return mSmartReplies;
+    }
+
+    /**
+     * Returns whether this notification was posted by a secondary app
+     */
+    public boolean isProxied() {
+        return !Objects.equals(sbn.getPackageName(), sbn.getOpPkg());
     }
 
     /**

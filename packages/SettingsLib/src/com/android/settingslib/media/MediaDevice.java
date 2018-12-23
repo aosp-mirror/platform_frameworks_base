@@ -53,7 +53,7 @@ public abstract class MediaDevice {
      *
      * @return true if the MediaDevice is be connected to transfer, false otherwise.
      */
-    protected boolean isConnected() {
+    public boolean isConnected() {
         return mIsConnected;
     }
 

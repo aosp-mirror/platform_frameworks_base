@@ -27,6 +27,12 @@ import com.android.systemui.settings.CurrentUserTracker;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class DeviceProvisionedControllerImpl extends CurrentUserTracker implements
         DeviceProvisionedController {
 
@@ -36,6 +42,9 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
     private final Uri mDeviceProvisionedUri;
     private final Uri mUserSetupUri;
 
+    /**
+     */
+    @Inject
     public DeviceProvisionedControllerImpl(Context context) {
         super(context);
         mContext = context;

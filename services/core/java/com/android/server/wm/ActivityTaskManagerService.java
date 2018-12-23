@@ -5475,6 +5475,31 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return intent;
     }
 
+    /**
+     * Return the intent set with {@link Intent#CATEGORY_SECONDARY_HOME} to resolve secondary home
+     * activities.
+     *
+     * @param preferredPackage Specify a preferred package name, otherwise use secondary home
+     *                        component defined in config_secondaryHomeComponent.
+     * @return the intent set with {@link Intent#CATEGORY_SECONDARY_HOME}
+     */
+    Intent getSecondaryHomeIntent(String preferredPackage) {
+        final Intent intent = new Intent(mTopAction, mTopData != null ? Uri.parse(mTopData) : null);
+        if (preferredPackage == null) {
+            // Using the component stored in config if no package name.
+            final String secondaryHomeComponent = mContext.getResources().getString(
+                    com.android.internal.R.string.config_secondaryHomeComponent);
+            intent.setComponent(ComponentName.unflattenFromString(secondaryHomeComponent));
+        } else {
+            intent.setPackage(preferredPackage);
+        }
+        intent.addFlags(Intent.FLAG_DEBUG_TRIAGED_MISSING);
+        if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+            intent.addCategory(Intent.CATEGORY_SECONDARY_HOME);
+        }
+        return intent;
+    }
+
     ApplicationInfo getAppInfoForUser(ApplicationInfo info, int userId) {
         if (info == null) return null;
         ApplicationInfo newInfo = new ApplicationInfo(info);

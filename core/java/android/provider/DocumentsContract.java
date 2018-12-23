@@ -238,6 +238,9 @@ public final class DocumentsContract {
             "com.android.externalstorage.documents";
 
     /** {@hide} */
+    public static final String EXTERNAL_STORAGE_PRIMARY_EMULATED_ROOT_ID = "primary";
+
+    /** {@hide} */
     public static final String PACKAGE_DOCUMENTS_UI = "com.android.documentsui";
 
     /**
@@ -854,16 +857,6 @@ public final class DocumentsContract {
     public static Uri buildRootUri(String authority, String rootId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).appendPath(PATH_ROOT).appendPath(rootId).build();
-    }
-
-    /**
-     * Builds URI for user home directory on external (local) storage.
-     * {@hide}
-     */
-    public static Uri buildHomeUri() {
-        // TODO: Avoid this type of interpackage copying. Added here to avoid
-        // direct coupling, but not ideal.
-        return DocumentsContract.buildRootUri(EXTERNAL_STORAGE_PROVIDER_AUTHORITY, "home");
     }
 
     /**

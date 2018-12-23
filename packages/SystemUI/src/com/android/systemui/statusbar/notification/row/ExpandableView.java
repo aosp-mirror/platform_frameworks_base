@@ -312,16 +312,19 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
      * @param duration The duration of the remove animation.
      * @param delay The delay of the animation
      * @param translationDirection The direction value from [-1 ... 1] indicating in which the
- *                             animation should be performed. A value of -1 means that The
- *                             remove animation should be performed upwards,
- *                             such that the  child appears to be going away to the top. 1
- *                             Should mean the opposite.
+     *                             animation should be performed. A value of -1 means that The
+     *                             remove animation should be performed upwards,
+     *                             such that the  child appears to be going away to the top. 1
+     *                             Should mean the opposite.
      * @param isHeadsUpAnimation Is this a headsUp animation.
      * @param endLocation The location where the horizonal heads up disappear animation should end.
      * @param onFinishedRunnable A runnable which should be run when the animation is finished.
      * @param animationListener An animation listener to add to the animation.
+     *
+     * @return The additional delay, in milliseconds, that this view needs to add before the
+     * animation starts.
      */
-    public abstract void performRemoveAnimation(long duration,
+    public abstract long performRemoveAnimation(long duration,
             long delay, float translationDirection, boolean isHeadsUpAnimation, float endLocation,
             Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener);

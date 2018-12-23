@@ -27,6 +27,13 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ * Implementation of {@link NextAlarmController}
+ */
+@Singleton
 public class NextAlarmControllerImpl extends BroadcastReceiver
         implements NextAlarmController {
 
@@ -35,6 +42,9 @@ public class NextAlarmControllerImpl extends BroadcastReceiver
     private AlarmManager mAlarmManager;
     private AlarmManager.AlarmClockInfo mNextAlarm;
 
+    /**
+     */
+    @Inject
     public NextAlarmControllerImpl(Context context) {
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         IntentFilter filter = new IntentFilter();

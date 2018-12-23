@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -27,6 +29,11 @@ import android.util.Log;
 
 import com.android.systemui.R;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+@Singleton
 public final class SmartReplyConstants extends ContentObserver {
 
     private static final String TAG = "SmartReplyConstants";
@@ -47,7 +54,8 @@ public final class SmartReplyConstants extends ContentObserver {
     private final Context mContext;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
-    public SmartReplyConstants(Handler handler, Context context) {
+    @Inject
+    public SmartReplyConstants(@Named(MAIN_HANDLER_NAME) Handler handler, Context context) {
         super(handler);
 
         mContext = context;

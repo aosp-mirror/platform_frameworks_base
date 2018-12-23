@@ -1442,7 +1442,7 @@ easier.
     <style name="Theme.DeviceDefault.Settings" parent="Theme.Material.Settings">
         <!-- action bar -->
         <item name="actionBarStyle">@style/Widget.DeviceDefault.Light.ActionBar.Solid</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.DeviceDefault.ActionBar.Accent</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.DeviceDefault.ActionBar</item>
         <item name="popupTheme">@style/ThemeOverlay.DeviceDefault.Popup.Light</item>
 
         <!-- Color palette -->
@@ -1678,11 +1678,8 @@ easier.
 
     <style name="ThemeOverlay.DeviceDefault" />
 
-    <!-- @hide Theme overlay that inherits from material actionbar, and use accent color for
-             primary text -->
-    <style name="ThemeOverlay.DeviceDefault.ActionBar.Accent" parent="ThemeOverlay.Material.ActionBar">
-        <item name="textColorPrimary">@color/btn_colored_borderless_text_material</item>
-    </style>
+    <!-- @hide Theme overlay that inherits from material actionbar -->
+    <style name="ThemeOverlay.DeviceDefault.ActionBar" parent="ThemeOverlay.Material.ActionBar" />
 
     <!-- @hide Theme overlay for a light popup in action bar -->
     <style name="ThemeOverlay.DeviceDefault.Popup.Light" parent="@style/ThemeOverlay.Material.Light" />

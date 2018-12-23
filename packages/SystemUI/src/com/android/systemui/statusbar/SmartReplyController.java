@@ -27,10 +27,14 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Handles when smart replies are added to a notification
  * and clicked upon.
  */
+@Singleton
 public class SmartReplyController {
     private IStatusBarService mBarService;
     private Set<String> mSendingKeys = new ArraySet<>();
@@ -38,7 +42,7 @@ public class SmartReplyController {
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
 
-
+    @Inject
     public SmartReplyController() {
         mBarService = Dependency.get(IStatusBarService.class);
     }

@@ -189,23 +189,22 @@ TEST(ShellSubscriberTest, testPulledSubscription) {
     sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-    EXPECT_CALL(*pullerManager, Pull(10016, _, _))
-            .WillRepeatedly(
-                    Invoke([](int tagId, int64_t timeNs, vector<std::shared_ptr<LogEvent>>* data) {
-                        data->clear();
-                        shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, timeNs);
-                        event->write(kUid1);
-                        event->write(kCpuTime1);
-                        event->init();
-                        data->push_back(event);
-                        // another event
-                        event = make_shared<LogEvent>(tagId, timeNs);
-                        event->write(kUid2);
-                        event->write(kCpuTime2);
-                        event->init();
-                        data->push_back(event);
-                        return true;
-                    }));
+    EXPECT_CALL(*pullerManager, Pull(10016, _))
+            .WillRepeatedly(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, 1111L);
+                event->write(kUid1);
+                event->write(kCpuTime1);
+                event->init();
+                data->push_back(event);
+                // another event
+                event = make_shared<LogEvent>(tagId, 1111L);
+                event->write(kUid2);
+                event->write(kCpuTime2);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
 
     runShellTest(getPulledConfig(), uidMap, pullerManager, vector<std::shared_ptr<LogEvent>>(),
                  getExpectedShellData());

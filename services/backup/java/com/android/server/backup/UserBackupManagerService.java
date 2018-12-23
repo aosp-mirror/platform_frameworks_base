@@ -251,6 +251,7 @@ public class UserBackupManagerService {
     private static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60;  // one hour
     private static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
 
+    private final @UserIdInt int mUserId;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final TransportManager mTransportManager;
 
@@ -372,10 +373,11 @@ public class UserBackupManagerService {
      * Creates an instance of {@link UserBackupManagerService} and initializes state for it. This
      * includes setting up the directories where we keep our bookkeeping and transport management.
      *
-     * @see #createAndInitializeService(Context, Trampoline, HandlerThread, File, File,
+     * @see #createAndInitializeService(int, Context, Trampoline, HandlerThread, File, File,
      *     TransportManager)
      */
     static UserBackupManagerService createAndInitializeService(
+            @UserIdInt int userId,
             Context context,
             Trampoline trampoline,
             HandlerThread backupThread,
@@ -399,12 +401,13 @@ public class UserBackupManagerService {
         File dataDir = new File(Environment.getDownloadCacheDirectory(), BACKUP_STAGING_DIR);
 
         return createAndInitializeService(
-                context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
+                userId, context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
     }
 
     /**
      * Creates an instance of {@link UserBackupManagerService}.
      *
+     * @param userId The user which this service is for.
      * @param context The system server context.
      * @param trampoline A reference to the proxy to {@link BackupManagerService}.
      * @param backupThread The thread running backup/restore operations for the user.
@@ -415,6 +418,7 @@ public class UserBackupManagerService {
      */
     @VisibleForTesting
     public static UserBackupManagerService createAndInitializeService(
+            @UserIdInt int userId,
             Context context,
             Trampoline trampoline,
             HandlerThread backupThread,
@@ -422,16 +426,18 @@ public class UserBackupManagerService {
             File dataDir,
             TransportManager transportManager) {
         return new UserBackupManagerService(
-                context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
+                userId, context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
     }
 
     private UserBackupManagerService(
+            @UserIdInt int userId,
             Context context,
             Trampoline parent,
             HandlerThread backupThread,
             File baseStateDir,
             File dataDir,
             TransportManager transportManager) {
+        mUserId = userId;
         mContext = checkNotNull(context, "context cannot be null");
         mPackageManager = context.getPackageManager();
         mPackageManagerBinder = AppGlobals.getPackageManager();
@@ -2805,15 +2811,6 @@ public class UserBackupManagerService {
         }
     }
 
-    /** Mark the backup service as having been provisioned. */
-    public void setBackupProvisioned(boolean available) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "setBackupProvisioned");
-        /*
-         * This is now a no-op; provisioning is simply the device's own setup state.
-         */
-    }
-
     /** Report whether the backup mechanism is currently enabled. */
     public boolean isBackupEnabled() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
@@ -2861,19 +2858,6 @@ public class UserBackupManagerService {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "listAllTransportComponents");
         return mTransportManager.getRegisteredTransportComponents();
-    }
-
-    /** Report all system whitelisted transports. */
-    public String[] getTransportWhitelist() {
-        // No permission check, intentionally.
-        Set<ComponentName> whitelistedComponents = mTransportManager.getTransportWhitelist();
-        String[] whitelistedTransports = new String[whitelistedComponents.size()];
-        int i = 0;
-        for (ComponentName component : whitelistedComponents) {
-            whitelistedTransports[i] = component.flattenToShortString();
-            i++;
-        }
-        return whitelistedTransports;
     }
 
     /**

@@ -16,16 +16,16 @@
 
 package com.android.framework.permission.tests;
 
-import android.content.res.Configuration;
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.IWindowManager;
-import junit.framework.TestCase;
 
-import static android.view.Display.DEFAULT_DISPLAY;
+import junit.framework.TestCase;
 
 /**
  * TODO: Remove this. This is only a placeholder, need to implement this.
@@ -65,17 +65,6 @@ public class WindowManagerPermissionTests extends TestCase {
         try {
             mWm.removeWindowToken(null, DEFAULT_DISPLAY);
             fail("IWindowManager.removeWindowToken did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.updateOrientationFromAppTokens(new Configuration(),
-                    null /* freezeThisOneIfNeeded */, DEFAULT_DISPLAY);
-            fail("IWindowManager.updateOrientationFromAppTokens did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
             // expected

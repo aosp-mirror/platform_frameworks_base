@@ -15,10 +15,10 @@
  */
 
 #include <dirent.h>
-#include <errno.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <cerrno>
 #include <fstream>
 #include <memory>
 #include <string>
@@ -27,19 +27,17 @@
 
 #include "idmap2/FileUtils.h"
 
-namespace android {
-namespace idmap2 {
-namespace utils {
+namespace android::idmap2::utils {
 
 std::unique_ptr<std::vector<std::string>> FindFiles(const std::string& root, bool recurse,
                                                     const FindFilesPredicate& predicate) {
   DIR* dir = opendir(root.c_str());
-  if (!dir) {
+  if (dir == nullptr) {
     return nullptr;
   }
   std::unique_ptr<std::vector<std::string>> vector(new std::vector<std::string>());
   struct dirent* dirent;
-  while ((dirent = readdir(dir))) {
+  while ((dirent = readdir(dir)) != nullptr) {
     const std::string path = root + "/" + dirent->d_name;
     if (predicate(dirent->d_type, path)) {
       vector->push_back(path);
@@ -68,8 +66,10 @@ std::unique_ptr<std::string> ReadFile(const std::string& path) {
 }
 
 std::unique_ptr<std::string> ReadFile(int fd) {
+  static constexpr const size_t kBufSize = 1024;
+
   std::unique_ptr<std::string> str(new std::string());
-  char buf[1024];
+  char buf[kBufSize];
   ssize_t r;
   while ((r = read(fd, buf, sizeof(buf))) > 0) {
     str->append(buf, r);
@@ -77,6 +77,4 @@ std::unique_ptr<std::string> ReadFile(int fd) {
   return r == 0 ? std::move(str) : nullptr;
 }
 
-}  // namespace utils
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2::utils

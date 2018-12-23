@@ -875,15 +875,13 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
 
         public String getClassLoaderContext() { return mClassLoaderContext; }
 
-        @VisibleForTesting
-        /* package */ boolean isUnknownClassLoaderContext() {
+        public boolean isUnknownClassLoaderContext() {
             // The class loader context may be unknown if we loaded the data from a previous version
             // which didn't save the context.
             return UNKNOWN_CLASS_LOADER_CONTEXT.equals(mClassLoaderContext);
         }
 
-        @VisibleForTesting
-        /* package */ boolean isVariableClassLoaderContext() {
+        public boolean isVariableClassLoaderContext() {
             return VARIABLE_CLASS_LOADER_CONTEXT.equals(mClassLoaderContext);
         }
     }

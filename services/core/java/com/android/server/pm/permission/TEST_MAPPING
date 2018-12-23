@@ -1,0 +1,12 @@
+{
+    "presubmit": [
+        {
+            "name": "GtsPermissionTestCases",
+            "options": [
+                {
+                    "include-filter": "com.google.android.permission.gts.DefaultPermissionGrantPolicyTest"
+                }
+            ]
+        }
+    ]
+}

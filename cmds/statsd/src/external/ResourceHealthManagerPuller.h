@@ -28,7 +28,9 @@ namespace statsd {
  */
 class ResourceHealthManagerPuller : public StatsPuller {
 public:
-    ResourceHealthManagerPuller(int tagId);
+    explicit ResourceHealthManagerPuller(int tagId);
+
+private:
     bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override;
 };
 

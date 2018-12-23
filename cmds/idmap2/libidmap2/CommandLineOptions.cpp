@@ -26,13 +26,11 @@
 
 #include "idmap2/CommandLineOptions.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 std::unique_ptr<std::vector<std::string>> CommandLineOptions::ConvertArgvToVector(
     int argc, const char** argv) {
-  return std::unique_ptr<std::vector<std::string>>(
-      new std::vector<std::string>(argv + 1, argv + argc));
+  return std::make_unique<std::vector<std::string>>(argv + 1, argv + argc);
 }
 
 CommandLineOptions& CommandLineOptions::OptionalFlag(const std::string& name,
@@ -111,8 +109,8 @@ bool CommandLineOptions::Parse(const std::vector<std::string>& argv, std::ostrea
   }
 
   if (!mandatory_opts.empty()) {
-    for (auto iter = mandatory_opts.cbegin(); iter != mandatory_opts.cend(); ++iter) {
-      outError << "error: " << *iter << ": missing mandatory option" << std::endl;
+    for (const auto& opt : mandatory_opts) {
+      outError << "error: " << opt << ": missing mandatory option" << std::endl;
     }
     Usage(outError);
     return false;
@@ -159,5 +157,4 @@ void CommandLineOptions::Usage(std::ostream& out) const {
   }
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

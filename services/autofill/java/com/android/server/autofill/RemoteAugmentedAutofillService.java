@@ -38,8 +38,8 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 
+import com.android.internal.infra.AbstractSinglePendingRequestRemoteService;
 import com.android.internal.os.IResultReceiver;
-import com.android.server.infra.AbstractSinglePendingRequestRemoteService;
 
 final class RemoteAugmentedAutofillService
         extends AbstractSinglePendingRequestRemoteService<RemoteAugmentedAutofillService,
@@ -47,8 +47,6 @@ final class RemoteAugmentedAutofillService
 
     private static final String TAG = RemoteAugmentedAutofillService.class.getSimpleName();
 
-    // TODO(b/117779333): changed it so it's permanentely bound
-    private static final long TIMEOUT_IDLE_BIND_MILLIS = 2 * DateUtils.MINUTE_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
 
     RemoteAugmentedAutofillService(Context context, ComponentName serviceName,
@@ -90,7 +88,7 @@ final class RemoteAugmentedAutofillService
 
     @Override // from AbstractRemoteService
     protected long getTimeoutIdleBindMillis() {
-        return TIMEOUT_IDLE_BIND_MILLIS;
+        return PERMANENT_BOUND_TIMEOUT_MS;
     }
 
     @Override // from AbstractRemoteService

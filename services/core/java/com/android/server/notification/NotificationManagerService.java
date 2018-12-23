@@ -842,25 +842,13 @@ public class NotificationManagerService extends SystemService {
                         // Report to usage stats that notification was made visible
                         if (DBG) Slog.d(TAG, "Marking notification as visible " + nv.key);
                         reportSeen(r);
-
-                        // If the newly visible notification has smart suggestions
-                        // then log that the user has seen them.
-                        if ((r.getNumSmartRepliesAdded() > 0 || r.getNumSmartActionsAdded() > 0)
-                                && !r.hasSeenSmartReplies()) {
-                            r.setSeenSmartReplies(true);
-                            LogMaker logMaker = r.getLogMaker()
-                                    .setCategory(MetricsEvent.SMART_REPLY_VISIBLE)
-                                    .addTaggedData(MetricsEvent.NOTIFICATION_SMART_REPLY_COUNT,
-                                            r.getNumSmartRepliesAdded())
-                                    .addTaggedData(MetricsEvent.NOTIFICATION_SMART_ACTION_COUNT,
-                                            r.getNumSmartActionsAdded())
-                                    .addTaggedData(
-                                            MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
-                                            r.getSuggestionsGeneratedByAssistant());
-                            mMetricsLogger.write(logMaker);
-                        }
                     }
                     r.setVisibility(true, nv.rank, nv.count);
+                    // hasBeenVisiblyExpanded must be called after updating the expansion state of
+                    // the NotificationRecord to ensure the expansion state is up-to-date.
+                    if (r.hasBeenVisiblyExpanded()) {
+                        logSmartSuggestionsVisible(r);
+                    }
                     maybeRecordInterruptionLocked(r);
                     nv.recycle();
                 }
@@ -884,6 +872,11 @@ public class NotificationManagerService extends SystemService {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     r.stats.onExpansionChanged(userAction, expanded);
+                    // hasBeenVisiblyExpanded must be called after updating the expansion state of
+                    // the NotificationRecord to ensure the expansion state is up-to-date.
+                    if (r.hasBeenVisiblyExpanded()) {
+                        logSmartSuggestionsVisible(r);
+                    }
                     final long now = System.currentTimeMillis();
                     if (userAction) {
                         MetricsLogger.action(r.getItemLogMaker()
@@ -960,6 +953,26 @@ public class NotificationManagerService extends SystemService {
             }
         }
     };
+
+    @VisibleForTesting
+    void logSmartSuggestionsVisible(NotificationRecord r) {
+        // If the newly visible notification has smart suggestions
+        // then log that the user has seen them.
+        if ((r.getNumSmartRepliesAdded() > 0 || r.getNumSmartActionsAdded() > 0)
+                && !r.hasSeenSmartReplies()) {
+            r.setSeenSmartReplies(true);
+            LogMaker logMaker = r.getLogMaker()
+                    .setCategory(MetricsEvent.SMART_REPLY_VISIBLE)
+                    .addTaggedData(MetricsEvent.NOTIFICATION_SMART_REPLY_COUNT,
+                            r.getNumSmartRepliesAdded())
+                    .addTaggedData(MetricsEvent.NOTIFICATION_SMART_ACTION_COUNT,
+                            r.getNumSmartActionsAdded())
+                    .addTaggedData(
+                            MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
+                            r.getSuggestionsGeneratedByAssistant());
+            mMetricsLogger.write(logMaker);
+        }
+    }
 
     @GuardedBy("mNotificationLock")
     private void clearSoundLocked() {
@@ -1939,9 +1952,11 @@ public class NotificationManagerService extends SystemService {
      */
     @GuardedBy("mNotificationLock")
     protected void reportSeen(NotificationRecord r) {
-        mAppUsageStats.reportEvent(r.sbn.getPackageName(),
-                getRealUserId(r.sbn.getUserId()),
-                UsageEvents.Event.NOTIFICATION_SEEN);
+        if (!r.isProxied()) {
+            mAppUsageStats.reportEvent(r.sbn.getPackageName(),
+                    getRealUserId(r.sbn.getUserId()),
+                    UsageEvents.Event.NOTIFICATION_SEEN);
+        }
     }
 
     protected int calculateSuppressedVisualEffects(Policy incomingPolicy, Policy currPolicy,
@@ -2276,6 +2291,26 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrSameApp(pkg);
 
             return mPreferencesHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
+        }
+
+        @Override
+        public boolean areAppOverlaysAllowed(String pkg) {
+            return areAppOverlaysAllowedForPackage(pkg, Binder.getCallingUid());
+        }
+
+        @Override
+        public boolean areAppOverlaysAllowedForPackage(String pkg, int uid) {
+            checkCallerIsSystemOrSameApp(pkg);
+
+            return mPreferencesHelper.areAppOverlaysAllowed(pkg, uid);
+        }
+
+        @Override
+        public void setAppOverlaysAllowed(String pkg, int uid, boolean allowed) {
+            checkCallerIsSystem();
+
+            mPreferencesHelper.setAppOverlaysAllowed(pkg, uid, allowed);
+            handleSavePolicyFile();
         }
 
         @Override
@@ -2647,6 +2682,10 @@ public class NotificationManagerService extends SystemService {
          * Note that since notification posting is done asynchronously, this will not return
          * notifications that are in the process of being posted.
          *
+         * From {@link Build.VERSION_CODES#Q}, will also return notifications you've posted as
+         * an app's notification delegate via
+         * {@link NotificationManager#notifyAsPackage(String, String, int, Notification)}.
+         *
          * @returns A list of all the package's notifications, in natural order.
          */
         @Override
@@ -2689,16 +2728,18 @@ public class NotificationManagerService extends SystemService {
 
         private StatusBarNotification sanitizeSbn(String pkg, int userId,
                 StatusBarNotification sbn) {
-            if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId) {
-                // We could pass back a cloneLight() but clients might get confused and
-                // try to send this thing back to notify() again, which would not work
-                // very well.
-                return new StatusBarNotification(
-                        sbn.getPackageName(),
-                        sbn.getOpPkg(),
-                        sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
-                        sbn.getNotification().clone(),
-                        sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
+            if (sbn.getUserId() == userId) {
+                if (sbn.getPackageName().equals(pkg) || sbn.getOpPkg().equals(pkg)) {
+                    // We could pass back a cloneLight() but clients might get confused and
+                    // try to send this thing back to notify() again, which would not work
+                    // very well.
+                    return new StatusBarNotification(
+                            sbn.getPackageName(),
+                            sbn.getOpPkg(),
+                            sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
+                            sbn.getNotification().clone(),
+                            sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
+                }
             }
             return null;
         }
@@ -4017,7 +4058,7 @@ public class NotificationManagerService extends SystemService {
                 final ArraySet<ComponentName> listeners =
                     mListenersDisablingEffects.valueAt(i);
                 for (int j = 0; j < listeners.size(); j++) {
-                    final ComponentName componentName = listeners.valueAt(i);
+                    final ComponentName componentName = listeners.valueAt(j);
                     componentName.writeToProto(proto,
                             ListenersDisablingEffectsProto.LISTENER_COMPONENTS);
                 }
@@ -4162,8 +4203,8 @@ public class NotificationManagerService extends SystemService {
                     final int listenerSize = listeners.size();
 
                     for (int j = 0; j < listenerSize; j++) {
-                        if (i > 0) pw.print(',');
-                        final ComponentName listener = listeners.valueAt(i);
+                        if (j > 0) pw.print(',');
+                        final ComponentName listener = listeners.valueAt(j);
                         if (listener != null) {
                             pw.print(listener);
                         }
@@ -4403,7 +4444,7 @@ public class NotificationManagerService extends SystemService {
             notification.flags &= ~Notification.FLAG_CAN_COLORIZE;
         }
 
-        if (ai.targetSdkVersion >= Build.VERSION_CODES.Q) {
+        if (notification.fullScreenIntent != null && ai.targetSdkVersion >= Build.VERSION_CODES.Q) {
             int fullscreenIntentPermission = mPackageManagerClient.checkPermission(
                     android.Manifest.permission.USE_FULL_SCREEN_INTENT, pkg);
             if (fullscreenIntentPermission != PERMISSION_GRANTED) {
@@ -4898,7 +4939,7 @@ public class NotificationManagerService extends SystemService {
                         Slog.e(TAG, "Not posting notification without small icon: " + notification);
                         if (old != null && !old.isCanceled) {
                             mListeners.notifyRemovedLocked(r,
-                                    NotificationListenerService.REASON_ERROR, null);
+                                    NotificationListenerService.REASON_ERROR, r.getStats());
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {

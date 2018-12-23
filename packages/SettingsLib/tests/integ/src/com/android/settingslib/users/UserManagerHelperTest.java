@@ -18,7 +18,6 @@ package com.android.settingslib.users;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,8 +32,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -116,8 +116,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     void onProfileStateChanged(LocalBluetoothProfile profile, int newProfileState) {
         if (BluetoothUtils.D) {
-            Log.d(TAG, "onProfileStateChanged: profile " + profile +
-                    " newProfileState " + newProfileState);
+            Log.d(TAG, "onProfileStateChanged: profile " + profile + ", device=" + mDevice
+                    + ", newProfileState " + newProfileState);
         }
         if (mLocalAdapter.getState() == BluetoothAdapter.STATE_TURNING_OFF)
         {
@@ -570,7 +570,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         if (BluetoothUtils.D) {
-            Log.e(TAG, "updating profiles for " + mDevice.getAliasName());
+            Log.e(TAG, "updating profiles for " + mDevice.getAliasName() + ", " + mDevice);
             BluetoothClass bluetoothClass = mDevice.getBluetoothClass();
 
             if (bluetoothClass != null) Log.v(TAG, "Class: " + bluetoothClass.toString());

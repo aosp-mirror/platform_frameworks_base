@@ -59,7 +59,7 @@ public:
 private:
     friend class RenderThread;
 
-    CacheManager(const DisplayInfo& display);
+    explicit CacheManager(const DisplayInfo& display);
 
     void reset(sk_sp<GrContext> grContext);
     void destroy();

@@ -17,14 +17,9 @@
 package com.android.server.display;
 
 import android.content.Intent;
-import android.os.RemoteException;
-import android.os.ResultReceiver;
-import android.os.ShellCallback;
 import android.os.ShellCommand;
-import android.util.Slog;
 
 import java.io.PrintWriter;
-import java.lang.NumberFormatException;
 
 class DisplayManagerShellCommand extends ShellCommand {
     private static final String TAG = "DisplayManagerShellCommand";
@@ -46,6 +41,10 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setBrightness();
             case "reset-brightness-configuration":
                 return resetBrightnessConfiguration();
+            case "ab-logging-enable":
+                return setAutoBrightnessLoggingEnabled(true);
+            case "ab-logging-disable":
+                return setAutoBrightnessLoggingEnabled(false);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -62,6 +61,10 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Sets the current brightness to BRIGHTNESS (a number between 0 and 1).");
         pw.println("  reset-brightness-configuration");
         pw.println("    Reset the brightness to its default configuration.");
+        pw.println("  ab-logging-enable");
+        pw.println("    Enable auto-brightness logging.");
+        pw.println("  ab-logging-disable");
+        pw.println("    Disable auto-brightness logging.");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
@@ -87,6 +90,11 @@ class DisplayManagerShellCommand extends ShellCommand {
 
     private int resetBrightnessConfiguration() {
         mService.resetBrightnessConfiguration();
+        return 0;
+    }
+
+    private int setAutoBrightnessLoggingEnabled(boolean enabled) {
+        mService.setAutoBrightnessLoggingEnabled(enabled);
         return 0;
     }
 }

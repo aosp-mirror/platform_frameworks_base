@@ -763,6 +763,20 @@ android_media_MediaRecord_getActiveMicrophones(JNIEnv *env,
     }
     return jStatus;
 }
+
+static jint android_media_MediaRecord_getPortId(JNIEnv *env,  jobject thiz) {
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return (jint)AUDIO_PORT_HANDLE_NONE;
+    }
+
+    audio_port_handle_t portId;
+    process_media_recorder_call(env, mr->getPortId(&portId),
+                                "java/lang/RuntimeException", "getPortId failed.");
+    return (jint)portId;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -801,6 +815,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_enableDeviceCallback", "(Z)V",                     (void *)android_media_MediaRecorder_enableDeviceCallback},
 
     {"native_getActiveMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_MediaRecord_getActiveMicrophones},
+    {"native_getPortId", "()I", (void *)android_media_MediaRecord_getPortId},
 };
 
 // This function only registers the native methods, and is called from

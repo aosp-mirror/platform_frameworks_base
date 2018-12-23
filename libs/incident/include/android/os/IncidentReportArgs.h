@@ -40,7 +40,7 @@ const uint8_t DEST_AUTOMATIC = 200;
 class IncidentReportArgs : public Parcelable {
 public:
     IncidentReportArgs();
-    explicit IncidentReportArgs(const IncidentReportArgs& that);
+    IncidentReportArgs(const IncidentReportArgs& that);
     virtual ~IncidentReportArgs();
 
     virtual status_t writeToParcel(Parcel* out) const;

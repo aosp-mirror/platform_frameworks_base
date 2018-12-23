@@ -240,7 +240,10 @@ message GaugeMetric {
   optional SamplingType sampling_type = 9 [default = RANDOM_ONE_SAMPLE] ;
 
   optional int64 min_bucket_size_nanos = 10;
+
   optional int64 max_num_gauge_atoms_per_bucket = 11 [default = 10];
+
+  optional int32 max_pull_delay_sec = 13 [default = 10];
 }
 
 message ValueMetric {
@@ -285,6 +288,8 @@ message ValueMetric {
   optional ValueDirection value_direction = 13 [default = INCREASING];
 
   optional bool skip_zero_diff_output = 14 [default = true];
+
+  optional int32 max_pull_delay_sec = 16 [default = 10];
 }
 
 message Alert {

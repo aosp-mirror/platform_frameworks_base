@@ -29,9 +29,11 @@ import android.view.WindowManager;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.BatteryMeterView;
+import com.android.systemui.CarSystemUIFactory;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -102,7 +104,9 @@ public class CarStatusBar extends StatusBar implements
 
         mHvacController.connectToCarService();
 
-        mCarFacetButtonController = Dependency.get(CarFacetButtonController.class);
+        CarSystemUIFactory factory = SystemUIFactory.getInstance();
+        mCarFacetButtonController = factory.getCarDependencyComponent()
+                .getCarFacetButtonController();
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mDeviceIsProvisioned = mDeviceProvisionedController.isDeviceProvisioned();
         if (!mDeviceIsProvisioned) {
@@ -239,7 +243,7 @@ public class CarStatusBar extends StatusBar implements
     @Override
     protected void makeStatusBarView() {
         super.makeStatusBarView();
-        mHvacController = Dependency.get(HvacController.class);
+        mHvacController = new HvacController(mContext);
 
         mNotificationPanelBackground = getDefaultWallpaper();
         mScrimController.setScrimBehindDrawable(mNotificationPanelBackground);

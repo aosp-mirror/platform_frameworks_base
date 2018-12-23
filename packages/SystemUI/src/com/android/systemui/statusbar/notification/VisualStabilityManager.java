@@ -25,10 +25,14 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * A manager that ensures that notifications are visually stable. It will suppress reorderings
  * and reorder at the right time when they are out of view.
  */
+@Singleton
 public class VisualStabilityManager implements OnHeadsUpChangedListener {
 
     private final ArrayList<Callback> mCallbacks =  new ArrayList<>();
@@ -41,6 +45,10 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
     private ArraySet<View> mLowPriorityReorderingViews = new ArraySet<>();
     private ArraySet<View> mAddedChildren = new ArraySet<>();
     private boolean mPulsing;
+
+    @Inject
+    public VisualStabilityManager() {
+    }
 
     /**
      * Add a callback to invoke when reordering is allowed again.

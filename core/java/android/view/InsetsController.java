@@ -28,6 +28,7 @@ import android.view.InsetsState.InternalInsetType;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * Implements {@link WindowInsetsController} on the client.
@@ -41,6 +42,7 @@ public class InsetsController implements WindowInsetsController {
     private final ViewRootImpl mViewRoot;
 
     private final SparseArray<InsetsSourceControl> mTmpControlArray = new SparseArray<>();
+    private final ArrayList<InsetsAnimationControlImpl> mAnimationControls = new ArrayList<>();
 
     public InsetsController(ViewRootImpl viewRoot) {
         mViewRoot = viewRoot;
@@ -67,9 +69,11 @@ public class InsetsController implements WindowInsetsController {
     /**
      * @see InsetsState#calculateInsets
      */
-    WindowInsets calculateInsets(boolean isScreenRound,
+    @VisibleForTesting
+    public WindowInsets calculateInsets(boolean isScreenRound,
             boolean alwaysConsumeNavBar, DisplayCutout cutout) {
-        return mState.calculateInsets(mFrame, isScreenRound, alwaysConsumeNavBar, cutout);
+        return mState.calculateInsets(mFrame, isScreenRound, alwaysConsumeNavBar, cutout,
+                null /* typeSideMap */);
     }
 
     /**
@@ -116,6 +120,28 @@ public class InsetsController implements WindowInsetsController {
         }
     }
 
+    @Override
+    public void controlWindowInsetsAnimation(@InsetType int types,
+            WindowInsetsAnimationControlListener listener) {
+
+        // TODO: Check whether we already have a controller.
+        final ArraySet<Integer> internalTypes = mState.toInternalType(types);
+        final SparseArray<InsetsSourceConsumer> consumers = new SparseArray<>();
+        for (int i = internalTypes.size() - 1; i >= 0; i--) {
+            InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
+            if (consumer.getControl() != null) {
+                consumers.put(consumer.getType(), consumer);
+            } else {
+                // TODO: Let calling app know it's not possible, or wait
+                // TODO: Remove it from types
+            }
+        }
+        final InsetsAnimationControlImpl controller = new InsetsAnimationControlImpl(consumers,
+                mFrame, mState, listener, types,
+                () -> new SyncRtSurfaceTransactionApplier(mViewRoot.mView));
+        mAnimationControls.add(controller);
+    }
+
     private void applyLocalVisibilityOverride() {
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer controller = mSourceConsumers.valueAt(i);
@@ -134,7 +160,8 @@ public class InsetsController implements WindowInsetsController {
         return controller;
     }
 
-    void notifyVisibilityChanged() {
+    @VisibleForTesting
+    public void notifyVisibilityChanged() {
         mViewRoot.notifyInsetsChanged();
     }
 

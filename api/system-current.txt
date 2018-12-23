@@ -27,6 +27,7 @@ package android {
     field public static final java.lang.String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
     field public static final java.lang.String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE";
+    field public static final java.lang.String BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE = "android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE";
     field public static final java.lang.String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
     field public static final java.lang.String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
@@ -1471,6 +1472,8 @@ package android.hardware.display {
 
   public final class BrightnessConfiguration implements android.os.Parcelable {
     method public int describeContents();
+    method public android.hardware.display.BrightnessCorrection getCorrectionByCategory(int);
+    method public android.hardware.display.BrightnessCorrection getCorrectionByPackageName(java.lang.String);
     method public android.util.Pair<float[], float[]> getCurve();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessConfiguration> CREATOR;
@@ -1478,8 +1481,20 @@ package android.hardware.display {
 
   public static class BrightnessConfiguration.Builder {
     ctor public BrightnessConfiguration.Builder(float[], float[]);
+    method public android.hardware.display.BrightnessConfiguration.Builder addCorrectionByCategory(int, android.hardware.display.BrightnessCorrection);
+    method public android.hardware.display.BrightnessConfiguration.Builder addCorrectionByPackageName(java.lang.String, android.hardware.display.BrightnessCorrection);
     method public android.hardware.display.BrightnessConfiguration build();
+    method public int getMaxCorrectionsByCategory();
+    method public int getMaxCorrectionsByPackageName();
     method public android.hardware.display.BrightnessConfiguration.Builder setDescription(java.lang.String);
+  }
+
+  public final class BrightnessCorrection implements android.os.Parcelable {
+    method public float apply(float);
+    method public static android.hardware.display.BrightnessCorrection createScaleAndTranslateLog(float, float);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessCorrection> CREATOR;
   }
 
   public final class DisplayManager {
@@ -2520,7 +2535,37 @@ package android.hardware.usb {
   }
 
   public class UsbManager {
+    method public java.util.List<android.hardware.usb.UsbPort> getPorts();
     method public void grantPermission(android.hardware.usb.UsbDevice, java.lang.String);
+    field public static final java.lang.String ACTION_USB_PORT_CHANGED = "android.hardware.usb.action.USB_PORT_CHANGED";
+  }
+
+  public final class UsbPort {
+    method public android.hardware.usb.UsbPortStatus getStatus();
+    method public void setRoles(int, int);
+  }
+
+  public final class UsbPortStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCurrentDataRole();
+    method public int getCurrentMode();
+    method public int getCurrentPowerRole();
+    method public int getSupportedRoleCombinations();
+    method public boolean isConnected();
+    method public boolean isRoleCombinationSupported(int, int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.usb.UsbPortStatus> CREATOR;
+    field public static final int DATA_ROLE_DEVICE = 2; // 0x2
+    field public static final int DATA_ROLE_HOST = 1; // 0x1
+    field public static final int DATA_ROLE_NONE = 0; // 0x0
+    field public static final int MODE_AUDIO_ACCESSORY = 4; // 0x4
+    field public static final int MODE_DEBUG_ACCESSORY = 8; // 0x8
+    field public static final int MODE_DFP = 2; // 0x2
+    field public static final int MODE_NONE = 0; // 0x0
+    field public static final int MODE_UFP = 1; // 0x1
+    field public static final int POWER_ROLE_NONE = 0; // 0x0
+    field public static final int POWER_ROLE_SINK = 2; // 0x2
+    field public static final int POWER_ROLE_SOURCE = 1; // 0x1
   }
 
 }
@@ -2530,6 +2575,81 @@ package android.location {
   public abstract class BatchedLocationCallback {
     ctor public BatchedLocationCallback();
     method public void onLocationBatch(java.util.List<android.location.Location>);
+  }
+
+  public final class GnssMeasurementCorrections implements android.os.Parcelable {
+    method public int describeContents();
+    method public double getAltitudeMeters();
+    method public double getLatitudeDegrees();
+    method public double getLongitudeDegrees();
+    method public java.util.List<android.location.GnssSingleSatCorrection> getSingleSatCorrectionList();
+    method public long getToaGpsNanosecondsOfWeek();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.location.GnssMeasurementCorrections> CREATOR;
+  }
+
+  public static class GnssMeasurementCorrections.Builder {
+    ctor public GnssMeasurementCorrections.Builder();
+    method public android.location.GnssMeasurementCorrections build();
+    method public android.location.GnssMeasurementCorrections.Builder setAltitudeMeters(double);
+    method public android.location.GnssMeasurementCorrections.Builder setLatitudeDegrees(double);
+    method public android.location.GnssMeasurementCorrections.Builder setLongitudeDegrees(double);
+    method public android.location.GnssMeasurementCorrections.Builder setSingleSatCorrectionList(java.util.List<android.location.GnssSingleSatCorrection>);
+    method public android.location.GnssMeasurementCorrections.Builder setToaGpsNanosecondsOfWeek(long);
+  }
+
+  public final class GnssReflectingPlane implements android.os.Parcelable {
+    method public int describeContents();
+    method public double getAltitudeMeters();
+    method public double getAzimuthDegrees();
+    method public double getLatitudeDegrees();
+    method public double getLongitudeDegrees();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.location.GnssReflectingPlane> CREATOR;
+  }
+
+  public static class GnssReflectingPlane.Builder {
+    ctor public GnssReflectingPlane.Builder();
+    method public android.location.GnssReflectingPlane build();
+    method public android.location.GnssReflectingPlane.Builder setAltitudeMeters(double);
+    method public android.location.GnssReflectingPlane.Builder setAzimuthDegrees(double);
+    method public android.location.GnssReflectingPlane.Builder setLatitudeDegrees(double);
+    method public android.location.GnssReflectingPlane.Builder setLongitudeDegrees(double);
+  }
+
+  public final class GnssSingleSatCorrection implements android.os.Parcelable {
+    method public int describeContents();
+    method public float getCarrierFrequencyHz();
+    method public int getConstellationType();
+    method public float getExcessPathLengthMeters();
+    method public float getExcessPathLengthUncertaintyMeters();
+    method public android.location.GnssReflectingPlane getReflectingPlane();
+    method public int getSatId();
+    method public int getSingleSatCorrectionFlags();
+    method public boolean hasExcessPathLength();
+    method public boolean hasExcessPathLengthUncertainty();
+    method public boolean hasReflectingPlane();
+    method public boolean hasSatelliteLineOfSight();
+    method public boolean isSatelliteLineOfSight();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.location.GnssSingleSatCorrection> CREATOR;
+    field public static final int HAS_EXCESS_PATH_LENGTH_MASK = 2; // 0x2
+    field public static final int HAS_EXCESS_PATH_LENGTH_UNC_MASK = 4; // 0x4
+    field public static final int HAS_REFLECTING_PLANE_MASK = 8; // 0x8
+    field public static final int HAS_SAT_IS_LOS_MASK = 1; // 0x1
+  }
+
+  public static class GnssSingleSatCorrection.Builder {
+    ctor public GnssSingleSatCorrection.Builder();
+    method public android.location.GnssSingleSatCorrection build();
+    method public android.location.GnssSingleSatCorrection.Builder setCarrierFrequencyHz(float);
+    method public android.location.GnssSingleSatCorrection.Builder setConstellationType(int);
+    method public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthMeters(float);
+    method public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthUncertaintyMeters(float);
+    method public android.location.GnssSingleSatCorrection.Builder setReflectingPlane(android.location.GnssReflectingPlane);
+    method public android.location.GnssSingleSatCorrection.Builder setSatId(int);
+    method public android.location.GnssSingleSatCorrection.Builder setSatIsLos(boolean);
+    method public android.location.GnssSingleSatCorrection.Builder setSingleSatCorrectionFlags(int);
   }
 
   public class GpsClock implements android.os.Parcelable {
@@ -2768,8 +2888,10 @@ package android.location {
     method public deprecated boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method public void flushGnssBatch();
     method public int getGnssBatchSize();
+    method public int getGnssCapabilities();
     method public java.lang.String getLocationControllerExtraPackage();
     method public java.lang.String getNetworkProviderPackage();
+    method public void injectGnssMeasurementCorrections(android.location.GnssMeasurementCorrections);
     method public boolean isLocationControllerExtraPackageEnabled();
     method public boolean isLocationEnabledForUser(android.os.UserHandle);
     method public boolean isProviderEnabledForUser(java.lang.String, android.os.UserHandle);
@@ -2908,7 +3030,7 @@ package android.media {
     field public static final int PLAYER_TYPE_UNKNOWN = -1; // 0xffffffff
   }
 
-  public class AudioRecord implements android.media.AudioRouting {
+  public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting {
     ctor public AudioRecord(android.media.AudioAttributes, android.media.AudioFormat, int, int) throws java.lang.IllegalArgumentException;
   }
 
@@ -3396,7 +3518,20 @@ package android.net {
     ctor public LinkAddress(java.lang.String);
   }
 
+  public final class LinkProperties implements android.os.Parcelable {
+    ctor public LinkProperties();
+    method public boolean addRoute(android.net.RouteInfo);
+    method public void clear();
+    method public void setDnsServers(java.util.Collection<java.net.InetAddress>);
+    method public void setDomains(java.lang.String);
+    method public void setHttpProxy(android.net.ProxyInfo);
+    method public void setInterfaceName(java.lang.String);
+    method public void setLinkAddresses(java.util.Collection<android.net.LinkAddress>);
+    method public void setMtu(int);
+  }
+
   public final class NetworkCapabilities implements android.os.Parcelable {
+    method public int getSignalStrength();
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
   }
 
@@ -3414,6 +3549,10 @@ package android.net {
     ctor public NetworkRecommendationProvider(android.content.Context, java.util.concurrent.Executor);
     method public final android.os.IBinder getBinder();
     method public abstract void onRequestScores(android.net.NetworkKey[]);
+  }
+
+  public static class NetworkRequest.Builder {
+    method public android.net.NetworkRequest.Builder setSignalStrength(int);
   }
 
   public class NetworkScoreManager {
@@ -5005,7 +5144,7 @@ package android.service.carrier {
 
 package android.service.contentcapture {
 
-  public final class ContentCaptureEventsRequest implements android.os.Parcelable {
+  public final deprecated class ContentCaptureEventsRequest implements android.os.Parcelable {
     method public int describeContents();
     method public java.util.List<android.view.contentcapture.ContentCaptureEvent> getEvents();
     method public void writeToParcel(android.os.Parcel, int);
@@ -5017,9 +5156,12 @@ package android.service.contentcapture {
     method public final java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
     method public final java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
     method public void onActivitySnapshot(android.view.contentcapture.ContentCaptureSessionId, android.service.contentcapture.SnapshotData);
-    method public void onContentCaptureEventsRequest(android.view.contentcapture.ContentCaptureSessionId, android.service.contentcapture.ContentCaptureEventsRequest);
+    method public void onConnected();
+    method public void onContentCaptureEvent(android.view.contentcapture.ContentCaptureSessionId, android.view.contentcapture.ContentCaptureEvent);
+    method public deprecated void onContentCaptureEventsRequest(android.view.contentcapture.ContentCaptureSessionId, android.service.contentcapture.ContentCaptureEventsRequest);
     method public void onCreateContentCaptureSession(android.view.contentcapture.ContentCaptureContext, android.view.contentcapture.ContentCaptureSessionId);
     method public void onDestroyContentCaptureSession(android.view.contentcapture.ContentCaptureSessionId);
+    method public void onDisconnected();
     method public final void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);
     method public final void setContentCaptureWhitelist(java.util.List<java.lang.String>, java.util.List<android.content.ComponentName>);
     method public final void setPackageContentCaptureEnabled(java.lang.String, boolean);
@@ -5038,6 +5180,16 @@ package android.service.contentcapture {
 }
 
 package android.service.euicc {
+
+  public final class DownloadSubscriptionResult implements android.os.Parcelable {
+    ctor public DownloadSubscriptionResult(int, int, int);
+    method public int describeContents();
+    method public int getCardId();
+    method public int getResolvableErrors();
+    method public int getResult();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.euicc.DownloadSubscriptionResult> CREATOR;
+  }
 
   public final class EuiccProfileInfo implements android.os.Parcelable {
     method public int describeContents();
@@ -5092,7 +5244,8 @@ package android.service.euicc {
     ctor public EuiccService();
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract int onDeleteSubscription(int, java.lang.String);
-    method public abstract int onDownloadSubscription(int, android.telephony.euicc.DownloadableSubscription, boolean, boolean);
+    method public abstract android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, android.telephony.euicc.DownloadableSubscription, boolean, boolean, android.os.Bundle);
+    method public deprecated int onDownloadSubscription(int, android.telephony.euicc.DownloadableSubscription, boolean, boolean);
     method public abstract int onEraseSubscriptions(int);
     method public abstract android.service.euicc.GetDefaultDownloadableSubscriptionListResult onGetDefaultDownloadableSubscriptionList(int, boolean);
     method public abstract android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, android.telephony.euicc.DownloadableSubscription, boolean);
@@ -5107,19 +5260,25 @@ package android.service.euicc {
     field public static final java.lang.String ACTION_BIND_CARRIER_PROVISIONING_SERVICE = "android.service.euicc.action.BIND_CARRIER_PROVISIONING_SERVICE";
     field public static final java.lang.String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS = "android.service.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
     field public static final java.lang.String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION = "android.service.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
-    field public static final java.lang.String ACTION_RESOLVE_CONFIRMATION_CODE = "android.service.euicc.action.RESOLVE_CONFIRMATION_CODE";
+    field public static final deprecated java.lang.String ACTION_RESOLVE_CONFIRMATION_CODE = "android.service.euicc.action.RESOLVE_CONFIRMATION_CODE";
     field public static final java.lang.String ACTION_RESOLVE_DEACTIVATE_SIM = "android.service.euicc.action.RESOLVE_DEACTIVATE_SIM";
     field public static final java.lang.String ACTION_RESOLVE_NO_PRIVILEGES = "android.service.euicc.action.RESOLVE_NO_PRIVILEGES";
+    field public static final java.lang.String ACTION_RESOLVE_RESOLVABLE_ERRORS = "android.service.euicc.action.RESOLVE_RESOLVABLE_ERRORS";
     field public static final java.lang.String CATEGORY_EUICC_UI = "android.service.euicc.category.EUICC_UI";
     field public static final java.lang.String EUICC_SERVICE_INTERFACE = "android.service.euicc.EuiccService";
+    field public static final java.lang.String EXTRA_RESOLUTION_ALLOW_POLICY_RULES = "android.service.euicc.extra.RESOLUTION_ALLOW_POLICY_RULES";
     field public static final java.lang.String EXTRA_RESOLUTION_CALLING_PACKAGE = "android.service.euicc.extra.RESOLUTION_CALLING_PACKAGE";
     field public static final java.lang.String EXTRA_RESOLUTION_CONFIRMATION_CODE = "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE";
     field public static final java.lang.String EXTRA_RESOLUTION_CONFIRMATION_CODE_RETRIED = "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE_RETRIED";
     field public static final java.lang.String EXTRA_RESOLUTION_CONSENT = "android.service.euicc.extra.RESOLUTION_CONSENT";
+    field public static final java.lang.String EXTRA_RESOLVABLE_ERRORS = "android.service.euicc.extra.RESOLVABLE_ERRORS";
+    field public static final int RESOLVABLE_ERROR_CONFIRMATION_CODE = 1; // 0x1
+    field public static final int RESOLVABLE_ERROR_POLICY_RULES = 2; // 0x2
     field public static final int RESULT_FIRST_USER = 1; // 0x1
     field public static final int RESULT_MUST_DEACTIVATE_SIM = -1; // 0xffffffff
-    field public static final int RESULT_NEED_CONFIRMATION_CODE = -2; // 0xfffffffe
+    field public static final deprecated int RESULT_NEED_CONFIRMATION_CODE = -2; // 0xfffffffe
     field public static final int RESULT_OK = 0; // 0x0
+    field public static final int RESULT_RESOLVABLE_ERRORS = -2; // 0xfffffffe
   }
 
   public static abstract class EuiccService.OtaStatusChangedCallback {
@@ -5603,6 +5762,14 @@ package android.telecom {
 
   public final class PhoneAccountSuggestion implements android.os.Parcelable {
     ctor public PhoneAccountSuggestion(android.telecom.PhoneAccountHandle, int, boolean);
+  }
+
+  public class PhoneAccountSuggestionService extends android.app.Service {
+    ctor public PhoneAccountSuggestionService();
+    method public void onAccountSuggestionRequest(java.lang.String);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public final void suggestPhoneAccounts(java.lang.String, java.util.List<android.telecom.PhoneAccountSuggestion>);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.telecom.PhoneAccountSuggestionService";
   }
 
   public final class RemoteConference {
@@ -6096,7 +6263,7 @@ package android.telephony {
     method public deprecated boolean getDataEnabled(int);
     method public boolean getEmergencyCallbackMode();
     method public java.lang.String getIsimDomain();
-    method public int getPreferredNetworkType(int);
+    method public int getPreferredNetworkTypeBitmap();
     method public int getRadioPowerState();
     method public int getSimApplicationState();
     method public int getSimCardState();
@@ -6125,6 +6292,7 @@ package android.telephony {
     method public void setDataActivationState(int);
     method public deprecated void setDataEnabled(int, boolean);
     method public void setDataRoamingEnabled(boolean);
+    method public boolean setPreferredNetworkTypeBitmap(int);
     method public boolean setRadio(boolean);
     method public boolean setRadioPower(boolean);
     method public void setSimPowerState(int);
@@ -6150,29 +6318,6 @@ package android.telephony {
     field public static final java.lang.String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
     field public static final int INVALID_CARD_ID = -1; // 0xffffffff
     field public static final long MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS = 60000L; // 0xea60L
-    field public static final int NETWORK_MODE_CDMA_EVDO = 4; // 0x4
-    field public static final int NETWORK_MODE_CDMA_NO_EVDO = 5; // 0x5
-    field public static final int NETWORK_MODE_EVDO_NO_CDMA = 6; // 0x6
-    field public static final int NETWORK_MODE_GLOBAL = 7; // 0x7
-    field public static final int NETWORK_MODE_GSM_ONLY = 1; // 0x1
-    field public static final int NETWORK_MODE_GSM_UMTS = 3; // 0x3
-    field public static final int NETWORK_MODE_LTE_CDMA_EVDO = 8; // 0x8
-    field public static final int NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA = 10; // 0xa
-    field public static final int NETWORK_MODE_LTE_GSM_WCDMA = 9; // 0x9
-    field public static final int NETWORK_MODE_LTE_ONLY = 11; // 0xb
-    field public static final int NETWORK_MODE_LTE_TDSCDMA = 15; // 0xf
-    field public static final int NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA = 22; // 0x16
-    field public static final int NETWORK_MODE_LTE_TDSCDMA_GSM = 17; // 0x11
-    field public static final int NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA = 20; // 0x14
-    field public static final int NETWORK_MODE_LTE_TDSCDMA_WCDMA = 19; // 0x13
-    field public static final int NETWORK_MODE_LTE_WCDMA = 12; // 0xc
-    field public static final int NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA = 21; // 0x15
-    field public static final int NETWORK_MODE_TDSCDMA_GSM = 16; // 0x10
-    field public static final int NETWORK_MODE_TDSCDMA_GSM_WCDMA = 18; // 0x12
-    field public static final int NETWORK_MODE_TDSCDMA_ONLY = 13; // 0xd
-    field public static final int NETWORK_MODE_TDSCDMA_WCDMA = 14; // 0xe
-    field public static final int NETWORK_MODE_WCDMA_ONLY = 2; // 0x2
-    field public static final int NETWORK_MODE_WCDMA_PREF = 0; // 0x0
     field public static final int NETWORK_TYPE_BITMASK_1xRTT = 128; // 0x80
     field public static final int NETWORK_TYPE_BITMASK_CDMA = 16; // 0x10
     field public static final int NETWORK_TYPE_BITMASK_EDGE = 4; // 0x4
@@ -6408,12 +6553,17 @@ package android.telephony.euicc {
     method public void getDownloadableSubscriptionMetadata(android.telephony.euicc.DownloadableSubscription, android.app.PendingIntent);
     method public int getOtaStatus();
     field public static final java.lang.String ACTION_OTA_STATUS_CHANGED = "android.telephony.euicc.action.OTA_STATUS_CHANGED";
+    field public static final java.lang.String ACTION_PROFILE_SELECTION = "android.telephony.euicc.action.PROFILE_SELECTION";
     field public static final java.lang.String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION = "android.telephony.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
+    field public static final int EUICC_ACTIVATION_TYPE_BACKUP = 2; // 0x2
+    field public static final int EUICC_ACTIVATION_TYPE_DEFAULT = 1; // 0x1
+    field public static final int EUICC_ACTIVATION_TYPE_TRANSFER = 3; // 0x3
     field public static final int EUICC_OTA_FAILED = 2; // 0x2
     field public static final int EUICC_OTA_IN_PROGRESS = 1; // 0x1
     field public static final int EUICC_OTA_NOT_NEEDED = 4; // 0x4
     field public static final int EUICC_OTA_STATUS_UNAVAILABLE = 5; // 0x5
     field public static final int EUICC_OTA_SUCCEEDED = 3; // 0x3
+    field public static final java.lang.String EXTRA_ACTIVATION_TYPE = "android.telephony.euicc.extra.ACTIVATION_TYPE";
     field public static final java.lang.String EXTRA_EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS = "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS";
     field public static final java.lang.String EXTRA_FORCE_PROVISION = "android.telephony.euicc.extra.FORCE_PROVISION";
   }
@@ -7497,6 +7647,7 @@ package android.view.contentcapture {
     method public int getDisplayId();
     method public android.os.Bundle getExtras();
     method public int getFlags();
+    method public android.view.contentcapture.ContentCaptureSessionId getParentSessionId();
     method public int getTaskId();
     method public android.net.Uri getUri();
     field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1

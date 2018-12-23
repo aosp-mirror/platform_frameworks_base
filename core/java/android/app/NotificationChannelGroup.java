@@ -50,20 +50,12 @@ public final class NotificationChannelGroup implements Parcelable {
     private static final String ATT_DESC = "desc";
     private static final String ATT_ID = "id";
     private static final String ATT_BLOCKED = "blocked";
-    private static final String ATT_ALLOW_APP_OVERLAY = "app_overlay";
     private static final String ATT_USER_LOCKED = "locked";
-
-    private static final boolean DEFAULT_ALLOW_APP_OVERLAY = true;
 
     /**
      * @hide
      */
     public static final int USER_LOCKED_BLOCKED_STATE = 0x00000001;
-    /**
-     * @hide
-     */
-    @TestApi
-    public static final int USER_LOCKED_ALLOW_APP_OVERLAY = 0x00000002;
 
     /**
      * @see #getId()
@@ -74,7 +66,6 @@ public final class NotificationChannelGroup implements Parcelable {
     private String mDescription;
     private boolean mBlocked;
     private List<NotificationChannel> mChannels = new ArrayList<>();
-    private boolean mAllowAppOverlay = DEFAULT_ALLOW_APP_OVERLAY;
     // Bitwise representation of fields that have been changed by the user
     private int mUserLockedFields;
 
@@ -110,7 +101,6 @@ public final class NotificationChannelGroup implements Parcelable {
         }
         in.readParcelableList(mChannels, NotificationChannel.class.getClassLoader());
         mBlocked = in.readBoolean();
-        mAllowAppOverlay = in.readBoolean();
         mUserLockedFields = in.readInt();
     }
 
@@ -138,7 +128,6 @@ public final class NotificationChannelGroup implements Parcelable {
         }
         dest.writeParcelableList(mChannels, flags);
         dest.writeBoolean(mBlocked);
-        dest.writeBoolean(mAllowAppOverlay);
         dest.writeInt(mUserLockedFields);
     }
 
@@ -181,15 +170,6 @@ public final class NotificationChannelGroup implements Parcelable {
     }
 
     /**
-     * Returns whether notifications posted to this channel group can display outside of the
-     * notification shade, in a floating window on top of other apps. These may additionally be
-     * blocked at the notification channel level, see {@link NotificationChannel#canOverlayApps()}.
-     */
-    public boolean canOverlayApps() {
-        return mAllowAppOverlay;
-    }
-
-    /**
      * Sets the user visible description of this group.
      *
      * <p>The recommended maximum length is 300 characters; the value may be truncated if it is too
@@ -197,21 +177,6 @@ public final class NotificationChannelGroup implements Parcelable {
      */
     public void setDescription(String description) {
         mDescription = getTrimmedString(description);
-    }
-
-    /**
-     * Sets whether notifications posted to this channel group can appear outside of the
-     * notification shade, floating over other apps' content.
-     *
-     * <p>This value will be ignored for notifications that are posted to channels that do not
-     * allow app overlays ({@link NotificationChannel#canOverlayApps()}.
-     *
-     * <p>Only modifiable before the channel is submitted to
-     * {@link NotificationManager#createNotificationChannelGroup(NotificationChannelGroup)}.</p>
-     * @see Notification#getAppOverlayIntent()
-     */
-    public void setAllowAppOverlay(boolean allowAppOverlay) {
-        mAllowAppOverlay = allowAppOverlay;
     }
 
     /**
@@ -266,7 +231,6 @@ public final class NotificationChannelGroup implements Parcelable {
         // Name, id, and importance are set in the constructor.
         setDescription(parser.getAttributeValue(null, ATT_DESC));
         setBlocked(safeBool(parser, ATT_BLOCKED, false));
-        setAllowAppOverlay(safeBool(parser, ATT_ALLOW_APP_OVERLAY, DEFAULT_ALLOW_APP_OVERLAY));
     }
 
     private static boolean safeBool(XmlPullParser parser, String att, boolean defValue) {
@@ -289,9 +253,6 @@ public final class NotificationChannelGroup implements Parcelable {
             out.attribute(null, ATT_DESC, getDescription().toString());
         }
         out.attribute(null, ATT_BLOCKED, Boolean.toString(isBlocked()));
-        if (canOverlayApps() != DEFAULT_ALLOW_APP_OVERLAY) {
-            out.attribute(null, ATT_ALLOW_APP_OVERLAY, Boolean.toString(canOverlayApps()));
-        }
         out.attribute(null, ATT_USER_LOCKED, Integer.toString(mUserLockedFields));
 
         out.endTag(null, TAG_GROUP);
@@ -307,7 +268,6 @@ public final class NotificationChannelGroup implements Parcelable {
         record.put(ATT_NAME, getName());
         record.put(ATT_DESC, getDescription());
         record.put(ATT_BLOCKED, isBlocked());
-        record.put(ATT_ALLOW_APP_OVERLAY, canOverlayApps());
         record.put(ATT_USER_LOCKED, mUserLockedFields);
         return record;
     }
@@ -336,7 +296,6 @@ public final class NotificationChannelGroup implements Parcelable {
         if (o == null || getClass() != o.getClass()) return false;
         NotificationChannelGroup that = (NotificationChannelGroup) o;
         return isBlocked() == that.isBlocked() &&
-                mAllowAppOverlay == that.mAllowAppOverlay &&
                 mUserLockedFields == that.mUserLockedFields &&
                 Objects.equals(getId(), that.getId()) &&
                 Objects.equals(getName(), that.getName()) &&
@@ -347,7 +306,7 @@ public final class NotificationChannelGroup implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getName(), getDescription(), isBlocked(), getChannels(),
-                mAllowAppOverlay, mUserLockedFields);
+                mUserLockedFields);
     }
 
     @Override
@@ -356,7 +315,6 @@ public final class NotificationChannelGroup implements Parcelable {
         cloned.setDescription(getDescription());
         cloned.setBlocked(isBlocked());
         cloned.setChannels(getChannels());
-        cloned.setAllowAppOverlay(canOverlayApps());
         cloned.lockFields(mUserLockedFields);
         return cloned;
     }
@@ -369,7 +327,6 @@ public final class NotificationChannelGroup implements Parcelable {
                 + ", mDescription=" + (!TextUtils.isEmpty(mDescription) ? "hasDescription " : "")
                 + ", mBlocked=" + mBlocked
                 + ", mChannels=" + mChannels
-                + ", mAllowAppOverlay=" + mAllowAppOverlay
                 + ", mUserLockedFields=" + mUserLockedFields
                 + '}';
     }
@@ -385,7 +342,6 @@ public final class NotificationChannelGroup implements Parcelable {
         for (NotificationChannel channel : mChannels) {
             channel.writeToProto(proto, NotificationChannelGroupProto.CHANNELS);
         }
-        proto.write(NotificationChannelGroupProto.ALLOW_APP_OVERLAY, mAllowAppOverlay);
         proto.end(token);
     }
 }

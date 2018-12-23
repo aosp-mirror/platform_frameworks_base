@@ -30,7 +30,7 @@ namespace skiapipeline {
 
 class SkiaPipeline : public renderthread::IRenderPipeline {
 public:
-    SkiaPipeline(renderthread::RenderThread& thread);
+    explicit SkiaPipeline(renderthread::RenderThread& thread);
     virtual ~SkiaPipeline();
 
     TaskManager* getTaskManager() override;

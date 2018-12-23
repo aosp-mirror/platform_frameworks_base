@@ -26,6 +26,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -42,23 +43,22 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
 
     private static final String TAG = FrameworkResourcesServiceNameResolver.class.getSimpleName();
 
-    /** Handler message to {@link #resetTemporaryServiceLocked()} */
+    /** Handler message to {@link #resetTemporaryService(int)} */
     private static final int MSG_RESET_TEMPORARY_SERVICE = 0;
 
     private final @NonNull Context mContext;
-    private final @NonNull @UserIdInt int mUserId;
-    private final @NonNull Object mLock;
+    private final @NonNull Object mLock = new Object();
     private final @StringRes int mResourceId;
-    private @Nullable Runnable mOnSetCallback;
+    private @Nullable NameResolverListener mOnSetCallback;
 
     /**
-     * Temporary service name set by {@link #setTemporaryServiceLocked(String, int)}.
+     * Map of temporary service name set by {@link #setTemporaryService(int, String, int)},
+     * keyed by {@code userId}.
      *
      * <p>Typically used by Shell command and/or CTS tests.
      */
     @GuardedBy("mLock")
-    @Nullable
-    private String mTemporaryServiceName;
+    private final SparseArray<String> mTemporaryServiceNames = new SparseArray<>();
 
     /**
      * When the temporary service will expire (and reset back to the default).
@@ -72,99 +72,123 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     @GuardedBy("mLock")
     private Handler mTemporaryHandler;
 
-    public FrameworkResourcesServiceNameResolver(@NonNull Context context, @UserIdInt int userId,
-            @NonNull Object lock, @StringRes int resourceId) {
-        mLock = lock;
+    public FrameworkResourcesServiceNameResolver(@NonNull Context context,
+            @StringRes int resourceId) {
         mContext = context;
-        mUserId = userId;
         mResourceId = resourceId;
     }
 
     @Override
-    public void setOnTemporaryServiceNameChangedCallback(@NonNull Runnable callback) {
-        this.mOnSetCallback = callback;
-    }
-
-    @Override
-    public String getDefaultServiceName() {
-        final String name = mContext.getString(mResourceId);
-        return TextUtils.isEmpty(name) ? null : name;
-    }
-
-    @Override
-    public String getServiceNameLocked() {
-        if (mTemporaryServiceName != null) {
-            // Always log it, as it should only be used on CTS or during development
-            Slog.w(TAG, "getComponentName(): using temporary name " + mTemporaryServiceName);
-            return mTemporaryServiceName;
-        } else {
-            return getDefaultServiceName();
+    public void setOnTemporaryServiceNameChangedCallback(@NonNull NameResolverListener callback) {
+        synchronized (mLock) {
+            this.mOnSetCallback = callback;
         }
     }
 
     @Override
-    public boolean isTemporaryLocked() {
-        return mTemporaryServiceName != null;
+    public String getDefaultServiceName(@UserIdInt int userId) {
+        synchronized (mLock) {
+            final String name = mContext.getString(mResourceId);
+            return TextUtils.isEmpty(name) ? null : name;
+        }
     }
 
     @Override
-    public void setTemporaryServiceLocked(@NonNull String componentName, int durationMs) {
-        mTemporaryServiceName = componentName;
+    public String getServiceName(@UserIdInt int userId) {
+        synchronized (mLock) {
+            final String temporaryName = mTemporaryServiceNames.get(userId);
+            if (temporaryName != null) {
+                // Always log it, as it should only be used on CTS or during development
+                Slog.w(TAG, "getComponentName(): using temporary name " + temporaryName
+                        + " for user " + userId);
+                return temporaryName;
+            } else {
+                return getDefaultServiceName(userId);
+            }
+        }
+    }
 
-        if (mTemporaryHandler == null) {
-            mTemporaryHandler = new Handler(Looper.getMainLooper(), null, true) {
-                @Override
-                public void handleMessage(Message msg) {
-                    if (msg.what == MSG_RESET_TEMPORARY_SERVICE) {
-                        synchronized (mLock) {
-                            resetTemporaryServiceLocked();
+    @Override
+    public boolean isTemporary(@UserIdInt int userId) {
+        synchronized (mLock) {
+            return mTemporaryServiceNames.get(userId) != null;
+        }
+    }
+
+    @Override
+    public void setTemporaryService(@UserIdInt int userId, @NonNull String componentName,
+            int durationMs) {
+        synchronized (mLock) {
+            mTemporaryServiceNames.put(userId, componentName);
+
+            if (mTemporaryHandler == null) {
+                mTemporaryHandler = new Handler(Looper.getMainLooper(), null, true) {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        if (msg.what == MSG_RESET_TEMPORARY_SERVICE) {
+                            synchronized (mLock) {
+                                resetTemporaryService(userId);
+                            }
+                        } else {
+                            Slog.wtf(TAG, "invalid handler msg: " + msg);
                         }
-                    } else {
-                        Slog.wtf(TAG, "invalid handler msg: " + msg);
                     }
-                }
-            };
-        } else {
-            removeResetTemporaryServiceMessageLocked();
+                };
+            } else {
+                mTemporaryHandler.removeMessages(MSG_RESET_TEMPORARY_SERVICE);
+            }
+            mTemporaryServiceExpiration = SystemClock.elapsedRealtime() + durationMs;
+            mTemporaryHandler.sendEmptyMessageDelayed(MSG_RESET_TEMPORARY_SERVICE, durationMs);
+            notifyTemporaryServiceNameChangedLocked(userId, componentName);
         }
-        mTemporaryServiceExpiration = SystemClock.elapsedRealtime() + durationMs;
-        mTemporaryHandler.sendEmptyMessageDelayed(MSG_RESET_TEMPORARY_SERVICE, durationMs);
-        onServiceNameChanged();
     }
 
     @Override
-    public void resetTemporaryServiceLocked() {
-        Slog.i(TAG, "resetting temporary service from " + mTemporaryServiceName);
-        mTemporaryServiceName = null;
-        if (mTemporaryHandler != null) {
-            removeResetTemporaryServiceMessageLocked();
-            mTemporaryHandler = null;
+    public void resetTemporaryService(@UserIdInt int userId) {
+        synchronized (mLock) {
+            Slog.i(TAG, "resetting temporary service for user " + userId + " from "
+                    + mTemporaryServiceNames.get(userId));
+            mTemporaryServiceNames.remove(userId);
+            if (mTemporaryHandler != null) {
+                mTemporaryHandler.removeMessages(MSG_RESET_TEMPORARY_SERVICE);
+                mTemporaryHandler = null;
+            }
+            notifyTemporaryServiceNameChangedLocked(userId, /* newTemporaryName= */ null);
         }
-        onServiceNameChanged();
+    }
+
+    @Override
+    public String toString() {
+        return "FrameworkResourcesServiceNamer: temps=" + mTemporaryServiceNames;
     }
 
     // TODO(b/117779333): support proto
     @Override
-    public void dumpShortLocked(@NonNull PrintWriter pw) {
-        pw.print("FrameworkResourcesServiceNamer: resId="); pw.print(mResourceId);
-        if (mTemporaryServiceName != null) {
-            pw.print(", tmpName="); pw.print(mTemporaryServiceName);
-            final long ttl = mTemporaryServiceExpiration - SystemClock.elapsedRealtime();
-            pw.print(" (expires in "); TimeUtils.formatDuration(ttl, pw); pw.print(")");
-            pw.print(", defaultName="); pw.println(getDefaultServiceName());
-        } else {
-            pw.print(", serviceName="); pw.println(getDefaultServiceName());
+    public void dumpShort(@NonNull PrintWriter pw) {
+        synchronized (mLock) {
+            pw.print("FrameworkResourcesServiceNamer: resId="); pw.print(mResourceId);
+            pw.print(", numberTemps="); pw.print(mTemporaryServiceNames.size());
         }
     }
 
-    private void onServiceNameChanged() {
+    // TODO(b/117779333): support proto
+    @Override
+    public void dumpShort(@NonNull PrintWriter pw, @UserIdInt int userId) {
+        synchronized (mLock) {
+            final String temporaryName = mTemporaryServiceNames.get(userId);
+            if (temporaryName != null) {
+                pw.print("tmpName="); pw.print(temporaryName);
+                final long ttl = mTemporaryServiceExpiration - SystemClock.elapsedRealtime();
+                pw.print(" (expires in "); TimeUtils.formatDuration(ttl, pw); pw.print("), ");
+            }
+            pw.print("defaultName="); pw.println(getDefaultServiceName(userId));
+        }
+    }
+
+    private void notifyTemporaryServiceNameChangedLocked(@UserIdInt int userId,
+            @Nullable String newTemporaryName) {
         if (mOnSetCallback != null) {
-            mOnSetCallback.run();
+            mOnSetCallback.onNameResolved(userId, newTemporaryName);
         }
-    }
-
-    private void removeResetTemporaryServiceMessageLocked() {
-        // NOTE: caller should already have checked it
-        mTemporaryHandler.removeMessages(MSG_RESET_TEMPORARY_SERVICE);
     }
 }

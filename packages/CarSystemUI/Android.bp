@@ -69,6 +69,7 @@ android_app {
         ],
     },
     resource_dirs: [
+        "res-keyguard",
         "res",
     ],
 
@@ -80,4 +81,5 @@ android_app {
         "com.android.keyguard",
     ],
 
+    annotation_processors: ["dagger2-compiler-2.19"],
 }

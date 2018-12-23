@@ -172,6 +172,7 @@ message Atom {
         WifiEnabledStateChanged wifi_enabled_state_changed = 113;
         WifiRunningStateChanged wifi_running_state_changed = 114;
         AppCompacted app_compacted = 115;
+        NetworkDnsEventReported network_dns_event_Reported = 116;
     }
 
     // Pulled events will start at field 10000.
@@ -3473,10 +3474,10 @@ message BuildInformation {
  * Pulls on-device BatteryStats power use calculations for the overall device.
  */
 message DeviceCalculatedPowerUse {
-    // Power used by the device in mAh, as computed by BatteryStats, since BatteryStats last reset
-    // (i.e. roughly since device was last significantly charged).
-    // Currently, this is BatteryStatsHelper.getComputedPower() (not getTotalPower()).
-    optional float computed_power_milli_amp_hours = 1;
+    // Power used by the device in nAs (i.e. nanocoulombs (nC)), as computed by BatteryStats, since
+    // BatteryStats last reset (i.e. roughly since device was last significantly charged).
+    // Currently, this is from BatteryStatsHelper.getComputedPower() (not getTotalPower()).
+    optional int64 computed_power_nano_amp_secs = 1;
 }
 
 /**
@@ -3488,9 +3489,9 @@ message DeviceCalculatedPowerBlameUid {
     // Uid being blamed. Note: isolated uids have already been mapped to host uid.
     optional int32 uid = 1 [(is_uid) = true];
 
-    // Power used by this uid in mAh, as computed by BatteryStats, since BatteryStats last reset
-    // (i.e. roughly since device was last significantly charged).
-    optional float power_milli_amp_hours = 2;
+    // Power used by this uid in nAs (i.e. nanocoulombs (nC)), as computed by BatteryStats, since
+    // BatteryStats last reset (i.e. roughly since device was last significantly charged).
+    optional int64 power_nano_amp_secs = 2;
 }
 
 /**
@@ -3524,9 +3525,9 @@ message DeviceCalculatedPowerBlameOther {
     }
     optional DrainType drain_type = 1;
 
-    // Power used by this item in mAh, as computed by BatteryStats, since BatteryStats last reset
-    // (i.e. roughly since device was last significantly charged).
-    optional float power_milli_amp_hours = 2;
+    // Power used by this item in nAs (i.e. nanocoulombs (nC)), as computed by BatteryStats, since
+    // BatteryStats last reset (i.e. roughly since device was last significantly charged).
+    optional int64 power_nano_amp_secs = 2;
 }
 
 /**
@@ -3670,7 +3671,7 @@ message AppCompacted {
     SOME = 1;
     FULL = 2;
   }
-  optional Action action = 3 [default = UNKNOWN];
+  optional Action action = 3;
 
   // Total RSS in kilobytes consumed by the process prior to compaction.
   optional int64 before_rss_total_kilobytes = 4;
@@ -3702,13 +3703,61 @@ message AppCompacted {
   // The last compaction action performed for this app.
   optional Action last_action = 13;
 
-  // The last time that compaction was attempted on this process in seconds
-  // since boot.
-  optional int64 last_compact_timestamp = 14;
+  // The last time that compaction was attempted on this process in milliseconds
+  // since boot, not including sleep (see SystemClock.uptimeMillis()).
+  optional int64 last_compact_timestamp_ms_since_boot = 14;
 
-  // The oom_adj at the time of compaction.
-  optional int32 oom_adj = 15;
+  // The oom_score_adj at the time of compaction.
+  optional int32 oom_score_adj = 15;
 
   // The process state at the time of compaction.
   optional android.app.ProcessStateEnum process_state = 16 [default = PROCESS_STATE_UNKNOWN];
+}
+
+/**
+ * Logs the latency period(in microseconds) and the return code of
+ * the DNS(Domain Name System) lookups.
+ * These 4 methods(GETADDRINFO,GETHOSTBYNAME,GETHOSTBYADDR,RES_NSEND)
+ * to get info(address or hostname) from DNS server(or DNS cache).
+ * Logged from:
+ *   /system/netd/server/DnsProxyListener.cpp
+ */
+message NetworkDnsEventReported {
+    // The types of the DNS lookups, as defined in
+    //system/netd/server/binder/android/net/metrics/INetdEventListener.aidl
+    enum EventType {
+        EVENT_UNKNOWN = 0;
+        EVENT_GETADDRINFO = 1;
+        EVENT_GETHOSTBYNAME = 2;
+        EVENT_GETHOSTBYADDR = 3;
+        EVENT_RES_NSEND = 4;
+    }
+    optional EventType event_type = 1;
+
+    // The return value of the DNS resolver for each DNS lookups.
+    //bionic/libc/include/netdb.h
+    //system/netd/resolv/include/netd_resolv/resolv.h
+    enum ReturnCode {
+        EAI_NOERR = 0;
+        EAI_ADDRFAMILY = 1;
+        EAI_AGAIN = 2;
+        EAI_BADFLAGS = 3;
+        EAI_FAIL = 4;
+        EAI_FAMILY = 5;
+        EAI_MEMORY = 6;
+        EAI_NODATA = 7;
+        EAI_NONAME = 8;
+        EAI_SERVICE = 9;
+        EAI_SOCKTYPE = 10;
+        EAI_SYSTEM = 11;
+        EAI_BADHINTS = 12;
+        EAI_PROTOCOL = 13;
+        EAI_OVERFLOW = 14;
+        RESOLV_TIMEOUT = 255;
+        EAI_MAX = 256;
+    }
+    optional ReturnCode return_code = 2;
+
+    // The latency period(in microseconds) it took for this DNS lookup to complete.
+    optional int32 latency_micros = 3;
 }

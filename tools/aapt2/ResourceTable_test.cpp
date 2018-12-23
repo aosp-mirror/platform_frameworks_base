@@ -244,48 +244,90 @@ TEST(ResourceTableTest, SetAllowNew) {
 
 TEST(ResourceTableTest, SetOverlayable) {
   ResourceTable table;
-  Overlayable overlayable{};
-  overlayable.policies |= Overlayable::Policy::kProduct;
-  overlayable.policies |= Overlayable::Policy::kProductServices;
-  overlayable.comment = "comment";
+  auto overlayable = std::make_shared<Overlayable>("Name", "overlay://theme",
+                                                   Source("res/values/overlayable.xml", 40));
+  OverlayableItem overlayable_item(overlayable);
+  overlayable_item.policies |= OverlayableItem::Policy::kProduct;
+  overlayable_item.policies |= OverlayableItem::Policy::kProductServices;
+  overlayable_item.comment = "comment";
+  overlayable_item.source = Source("res/values/overlayable.xml", 42);
 
   const ResourceName name = test::ParseNameOrDie("android:string/foo");
-  ASSERT_TRUE(table.SetOverlayable(name, overlayable, test::GetDiagnostics()));
+  ASSERT_TRUE(table.SetOverlayable(name, overlayable_item, test::GetDiagnostics()));
   Maybe<ResourceTable::SearchResult> search_result = table.FindResource(name);
 
   ASSERT_TRUE(search_result);
-  ASSERT_TRUE(search_result.value().entry->overlayable);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
 
-  Overlayable& result_overlayable = search_result.value().entry->overlayable.value();
-  ASSERT_THAT(result_overlayable.comment, StrEq("comment"));
-  EXPECT_THAT(result_overlayable.policies, Eq(Overlayable::Policy::kProduct
-                                              | Overlayable::Policy::kProductServices));
+  OverlayableItem& result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(result_overlayable_item.overlayable->source.path, Eq("res/values/overlayable.xml"));
+  EXPECT_THAT(result_overlayable_item.overlayable->source.line, 40);
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kProduct
+                                                   | OverlayableItem::Policy::kProductServices));
+  ASSERT_THAT(result_overlayable_item.comment, StrEq("comment"));
+  EXPECT_THAT(result_overlayable_item.source.path, Eq("res/values/overlayable.xml"));
+  EXPECT_THAT(result_overlayable_item.source.line, 42);
 }
 
-TEST(ResourceTableTest, AddDuplicateOverlayableSamePolicyFail) {
+TEST(ResourceTableTest, SetMultipleOverlayableResources) {
+  ResourceTable table;
+
+  const ResourceName foo = test::ParseNameOrDie("android:string/foo");
+  auto group = std::make_shared<Overlayable>("Name", "overlay://theme");
+  OverlayableItem overlayable(group);
+  overlayable.policies = OverlayableItem::Policy::kProduct;
+  ASSERT_TRUE(table.SetOverlayable(foo, overlayable, test::GetDiagnostics()));
+
+  const ResourceName bar = test::ParseNameOrDie("android:string/bar");
+  OverlayableItem overlayable2(group);
+  overlayable2.policies = OverlayableItem::Policy::kProduct;
+  ASSERT_TRUE(table.SetOverlayable(bar, overlayable2, test::GetDiagnostics()));
+
+  const ResourceName baz = test::ParseNameOrDie("android:string/baz");
+  OverlayableItem overlayable3(group);
+  overlayable3.policies = OverlayableItem::Policy::kVendor;
+  ASSERT_TRUE(table.SetOverlayable(baz, overlayable3, test::GetDiagnostics()));
+}
+
+TEST(ResourceTableTest, SetOverlayableDifferentResourcesDifferentName) {
+  ResourceTable table;
+
+  const ResourceName foo = test::ParseNameOrDie("android:string/foo");
+  OverlayableItem overlayable_item(std::make_shared<Overlayable>("Name", "overlay://theme"));
+  overlayable_item.policies = OverlayableItem::Policy::kProduct;
+  ASSERT_TRUE(table.SetOverlayable(foo, overlayable_item, test::GetDiagnostics()));
+
+  const ResourceName bar = test::ParseNameOrDie("android:string/bar");
+  OverlayableItem overlayable_item2(std::make_shared<Overlayable>("Name2",  "overlay://theme"));
+  overlayable_item2.policies = OverlayableItem::Policy::kProduct;
+  ASSERT_TRUE(table.SetOverlayable(bar, overlayable_item2, test::GetDiagnostics()));
+}
+
+TEST(ResourceTableTest, SetOverlayableSameResourcesFail) {
   ResourceTable table;
   const ResourceName name = test::ParseNameOrDie("android:string/foo");
 
-  Overlayable overlayable{};
-  overlayable.policies = Overlayable::Policy::kProduct;
-  ASSERT_TRUE(table.SetOverlayable(name, overlayable, test::GetDiagnostics()));
+  auto overlayable = std::make_shared<Overlayable>("Name", "overlay://theme");
+  OverlayableItem overlayable_item(overlayable);
+  ASSERT_TRUE(table.SetOverlayable(name, overlayable_item, test::GetDiagnostics()));
 
-  Overlayable overlayable2{};
-  overlayable2.policies = Overlayable::Policy::kProduct;
-  ASSERT_FALSE(table.SetOverlayable(name, overlayable2, test::GetDiagnostics()));
+  OverlayableItem overlayable_item2(overlayable);
+  ASSERT_FALSE(table.SetOverlayable(name, overlayable_item2, test::GetDiagnostics()));
 }
 
-TEST(ResourceTableTest, AddDuplicateOverlayableDifferentPolicyFail) {
+TEST(ResourceTableTest,  SetOverlayableSameResourcesDifferentNameFail) {
   ResourceTable table;
   const ResourceName name = test::ParseNameOrDie("android:string/foo");
 
-  Overlayable overlayable{};
-  overlayable.policies = Overlayable::Policy::kProduct;
-  ASSERT_TRUE(table.SetOverlayable(name, overlayable, test::GetDiagnostics()));
+  auto overlayable = std::make_shared<Overlayable>("Name", "overlay://theme");
+  OverlayableItem overlayable_item(overlayable);
+  ASSERT_TRUE(table.SetOverlayable(name, overlayable_item, test::GetDiagnostics()));
 
-  Overlayable overlayable2{};
-  overlayable2.policies = Overlayable::Policy::kVendor;
-  ASSERT_FALSE(table.SetOverlayable(name, overlayable2, test::GetDiagnostics()));
+  auto overlayable2 = std::make_shared<Overlayable>("Other", "overlay://theme");
+  OverlayableItem overlayable_item2(overlayable2);
+  ASSERT_FALSE(table.SetOverlayable(name, overlayable_item2, test::GetDiagnostics()));
 }
 
 TEST(ResourceTableTest, AllowDuplictaeResourcesNames) {

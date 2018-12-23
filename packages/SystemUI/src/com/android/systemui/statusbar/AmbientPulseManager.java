@@ -28,17 +28,22 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Manager which handles high priority notifications that should "pulse" in when the device is
  * dozing and/or in AOD.  The pulse uses the notification's ambient view and pops in briefly
  * before automatically dismissing the alert.
  */
+@Singleton
 public class AmbientPulseManager extends AlertingNotificationManager {
 
     protected final ArraySet<OnAmbientChangedListener> mListeners = new ArraySet<>();
     @VisibleForTesting
     protected long mExtensionTime;
 
+    @Inject
     public AmbientPulseManager(@NonNull final Context context) {
         Resources resources = context.getResources();
         mAutoDismissNotificationDecay = resources.getInteger(R.integer.ambient_notification_decay);

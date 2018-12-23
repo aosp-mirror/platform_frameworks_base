@@ -26,6 +26,7 @@ import android.content.Context;
 abstract class WebSyncManager implements Runnable {
     protected static final java.lang.String LOGTAG = "websync";
     protected android.webkit.WebViewDatabase mDataBase;
+    @UnsupportedAppUsage
     protected android.os.Handler mHandler;
 
     protected WebSyncManager(Context context, String name) {

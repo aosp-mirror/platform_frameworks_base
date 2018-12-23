@@ -28,12 +28,12 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
+import android.view.SyncRtSurfaceTransactionApplier;
+import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.shared.system.SurfaceControlCompat;
-import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier;
-import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
@@ -267,8 +267,8 @@ public class ActivityLaunchAnimator {
             Matrix m = new Matrix();
             m.postTranslate(0, (float) (mParams.top - app.position.y));
             mWindowCrop.set(mParams.left, 0, mParams.right, mParams.getHeight());
-            SurfaceParams params = new SurfaceParams(new SurfaceControlCompat(app.leash),
-                    1f /* alpha */, m, mWindowCrop, app.prefixOrderIndex, mCornerRadius);
+            SurfaceParams params = new SurfaceParams(app.leash, 1f /* alpha */, m, mWindowCrop,
+                    app.prefixOrderIndex, mCornerRadius);
             mSyncRtTransactionApplier.scheduleApply(params);
         }
 

@@ -611,6 +611,7 @@
     <protected-broadcast android:name="android.intent.action.DOCK_ACTIVE" />
 
     <!-- Added in Q -->
+    <protected-broadcast android:name="android.content.pm.action.SESSION_UPDATED" />
 
     <!-- For CarIdlenessTracker -->
     <protected-broadcast android:name="com.android.server.jobscheduler.GARAGE_MODE_ON" />
@@ -2001,6 +2002,15 @@
          <p>Protection level: signature|privileged
     -->
     <permission android:name="android.permission.BIND_SCREENING_SERVICE"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- Must be required by a {@link android.telecom.PhoneAccountSuggestionService},
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature|privileged
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE"
         android:protectionLevel="signature|privileged" />
 
     <!-- Must be required by a {@link android.telecom.CallRedirectionService},
@@ -4327,7 +4337,7 @@
     <permission android:name="android.permission.SMS_FINANCIAL_TRANSACTIONS"
         android:protectionLevel="signature|appop" />
 
-    <!-- Required for apps targeting {@link android.os.Build.VERSION_CODES#P} that want to use
+    <!-- Required for apps targeting {@link android.os.Build.VERSION_CODES#Q} that want to use
          {@link android.app.Notification.Builder#setFullScreenIntent notification full screen
          intents}.  -->
     <permission android:name="android.permission.USE_FULL_SCREEN_INTENT"

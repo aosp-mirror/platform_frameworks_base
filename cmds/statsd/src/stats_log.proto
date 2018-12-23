@@ -401,6 +401,8 @@ message StatsdStatsReport {
         optional int64 average_pull_delay_nanos = 7;
         optional int64 max_pull_delay_nanos = 8;
         optional int64 data_error = 9;
+        optional int64 pull_timeout = 10;
+        optional int64 pull_exceed_max_delay = 11;
     }
     repeated PulledAtomStats pulled_atom_stats = 10;
 
