@@ -553,10 +553,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     private InputMethodSubtype mCurrentSubtype;
 
-    // This list contains the pairs of InputMethodInfo and InputMethodSubtype.
-    private final ArrayMap<InputMethodInfo, ArrayList<InputMethodSubtype>>
-            mShortcutInputMethodsAndSubtypes = new ArrayMap<>();
-
     // Was the keyguard locked when this client became current?
     private boolean mCurClientInKeyguard;
 
@@ -2535,7 +2531,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Slog.w(TAG, "Unknown input method from prefs: " + id, e);
                 resetCurrentMethodAndClient(UnbindReason.SWITCH_IME_FAILED);
             }
-            mShortcutInputMethodsAndSubtypes.clear();
         } else {
             // There is no longer an input method set, so stop any current one.
             resetCurrentMethodAndClient(UnbindReason.NO_IME);
@@ -4228,24 +4223,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public List getShortcutInputMethodsAndSubtypes() {
         synchronized (mMethodMap) {
             ArrayList<Object> ret = new ArrayList<>();
-            if (mShortcutInputMethodsAndSubtypes.size() == 0) {
-                // If there are no selected shortcut subtypes, the framework will try to find
-                // the most applicable subtype from all subtypes whose mode is
-                // SUBTYPE_MODE_VOICE. This is an exceptional case, so we will hardcode the mode.
-                Pair<InputMethodInfo, InputMethodSubtype> info =
+            // If there are no selected shortcut subtypes, the framework will try to find
+            // the most applicable subtype from all subtypes whose mode is
+            // SUBTYPE_MODE_VOICE. This is an exceptional case, so we will hardcode the mode.
+            Pair<InputMethodInfo, InputMethodSubtype> info =
                     findLastResortApplicableShortcutInputMethodAndSubtypeLocked(
                             InputMethodUtils.SUBTYPE_MODE_VOICE);
-                if (info != null) {
-                    ret.add(info.first);
-                    ret.add(info.second);
-                }
-                return ret;
-            }
-            for (InputMethodInfo imi: mShortcutInputMethodsAndSubtypes.keySet()) {
-                ret.add(imi);
-                for (InputMethodSubtype subtype: mShortcutInputMethodsAndSubtypes.get(imi)) {
-                    ret.add(subtype);
-                }
+            if (info != null) {
+                ret.add(info.first);
+                ret.add(info.second);
             }
             return ret;
         }
