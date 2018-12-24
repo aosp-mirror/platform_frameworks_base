@@ -580,7 +580,7 @@
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Subaybayan ang bilang ng mga hindi tamang password na na-type kapag ina-unlock ang screen, at i-lock ang tablet o burahin ang lahat ng data ng tablet kung masyadong maraming hindi tamang password ang na-type."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Subaybayan ang bilang ng mga maling password kapag ina-unlock ang screen at i-lock ang TV o burahin ang lahat ng data ng TV kung masyadong maraming maling password ang nata-type."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Subaybayan ang bilang ng mga hindi tamang password na na-type. kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng telepono kung masyadong maraming hindi tamang password ang na-type."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng telepono kung masyadong maraming maling password ang na-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang tablet o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang TV o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
@@ -602,7 +602,7 @@
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Baguhin kung gaano kadalas dapat palitan ang password, PIN o pattern sa screen lock."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Itakda pag-encrypt ng storage"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Hilinging naka-encrypt ang nakaimbak na data ng app."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Huwag paganahin mga camera"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"I-disable ang mga camera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Pigilan ang paggamit sa lahat ng camera ng device."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"I-disable ilang screen lock feature"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Pigilan ang paggamit ng ilang feature ng screen lock."</string>
@@ -1014,13 +1014,13 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Pagkilos ng teksto"</string>
     <string name="email" msgid="4560673117055050403">"Mag-email"</string>
     <string name="email_desc" msgid="3638665569546416795">"Mag-email sa mga piniling address"</string>
-    <string name="dial" msgid="1253998302767701559">"Tawagan"</string>
+    <string name="dial" msgid="1253998302767701559">"Tumawag"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Tawagan ang piniling numero ng telepono"</string>
-    <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <string name="map" msgid="5441053548030107189">"Mag-mapa"</string>
     <string name="map_desc" msgid="1836995341943772348">"Hanapin ang piniling address"</string>
     <string name="browse" msgid="1245903488306147205">"Buksan"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Buksan ang piniling URL"</string>
-    <string name="sms" msgid="4560537514610063430">"Padalhan ng Mensahe"</string>
+    <string name="sms" msgid="4560537514610063430">"Magmensahe"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Padalhan ng mensahe ang piniling numero ng telepono"</string>
     <string name="add_contact" msgid="7867066569670597203">"Magdagdag"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Idagdag sa mga contact"</string>
@@ -1256,7 +1256,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"China-charge ang nakakonektang device. Mag-tap para sa higit pang opsyon."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"May na-detect na analog na audio accessory"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Hindi tugma sa teleponong ito ang naka-attach na device. I-tap upang matuto pa."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Konektado ang debugging ng USB"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Nakakonekta ang pag-debug ng USB"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"I-tap para i-off ang pag-debug ng USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Piliin upang i-disable ang debugging ng USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Kinukuha ang ulat ng bug…"</string>

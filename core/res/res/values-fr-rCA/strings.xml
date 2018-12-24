@@ -1012,24 +1012,24 @@
     <string name="deleteText" msgid="6979668428458199034">"Supprimer"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Mode de saisie"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Actions sur le texte"</string>
-    <string name="email" msgid="4560673117055050403">"Courriel"</string>
+    <string name="email" msgid="4560673117055050403">"Envoyer un courriel"</string>
     <string name="email_desc" msgid="3638665569546416795">"Envoyer un courriel à l\'adresse sélectionnée"</string>
-    <string name="dial" msgid="1253998302767701559">"Appel"</string>
+    <string name="dial" msgid="1253998302767701559">"Appeler"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Téléphoner au numéro sélectionné"</string>
-    <string name="map" msgid="5441053548030107189">"Carte"</string>
+    <string name="map" msgid="5441053548030107189">"Ouvrir une carte"</string>
     <string name="map_desc" msgid="1836995341943772348">"Localiser l\'adresse sélectionnée"</string>
     <string name="browse" msgid="1245903488306147205">"Ouvrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ouvrir l\'adresse URL sélectionnée"</string>
-    <string name="sms" msgid="4560537514610063430">"Message"</string>
+    <string name="sms" msgid="4560537514610063430">"Envoyer un texto"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Envoyer un message texte au numéro de téléphone sélectionné"</string>
     <string name="add_contact" msgid="7867066569670597203">"Ajouter"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Ajouter aux contacts"</string>
     <string name="view_calendar" msgid="979609872939597838">"Afficher"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Voir la date sélectionnée dans l\'agenda"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Calendrier"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Planifier un événement pour l\'heure sélectionnée"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Planifier"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Planifier un événement à l\'heure sélectionnée"</string>
     <string name="view_flight" msgid="7691640491425680214">"Effectuer le suivi"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"Faire le suivi du vol sélectionné"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Obtenir des informations sur le vol sélectionné"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Espace de stockage bientôt saturé"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Il est possible que certaines fonctionnalités du système ne soient pas opérationnelles."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Espace de stockage insuffisant pour le système. Assurez-vous de disposer de 250 Mo d\'espace libre, puis redémarrez."</string>

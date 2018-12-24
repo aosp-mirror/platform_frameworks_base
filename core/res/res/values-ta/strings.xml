@@ -1012,7 +1012,7 @@
     <string name="deleteText" msgid="6979668428458199034">"நீக்கு"</string>
     <string name="inputMethod" msgid="1653630062304567879">"உள்ளீட்டு முறை"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"உரை நடவடிக்கைகள்"</string>
-    <string name="email" msgid="4560673117055050403">"மின்னஞ்சல்"</string>
+    <string name="email" msgid="4560673117055050403">"மின்னஞ்சல் அனுப்பு"</string>
     <string name="email_desc" msgid="3638665569546416795">"தேர்ந்தெடுத்த முகவரிக்கு மின்னஞ்சல் அனுப்பும்"</string>
     <string name="dial" msgid="1253998302767701559">"அழை"</string>
     <string name="dial_desc" msgid="6573723404985517250">"தேர்ந்தெடுத்த ஃபோன் எண்ணை அழைக்கும்"</string>
@@ -1020,13 +1020,13 @@
     <string name="map_desc" msgid="1836995341943772348">"தேர்ந்தெடுத்த முகவரிக்கான வரைபடத்தைத் திறக்கும்"</string>
     <string name="browse" msgid="1245903488306147205">"திற"</string>
     <string name="browse_desc" msgid="8220976549618935044">"தேர்ந்தெடுத்த URLஐத் திறக்கும்"</string>
-    <string name="sms" msgid="4560537514610063430">"செய்தி"</string>
+    <string name="sms" msgid="4560537514610063430">"செய்தி அனுப்பு"</string>
     <string name="sms_desc" msgid="7526588350969638809">"தேர்ந்தெடுத்த ஃபோன் எண்ணிற்குச் செய்தி அனுப்பும்"</string>
     <string name="add_contact" msgid="7867066569670597203">"சேர்"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"தொடர்புகளில் சேர்க்கும்"</string>
     <string name="view_calendar" msgid="979609872939597838">"காண்பி"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"கேலெண்டரில் தேர்ந்தெடுத்த நேரத்தைக் காட்டும்"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"திட்டமிடுதல்"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"திட்டமிடு"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"தேர்ந்தெடுத்த நேரத்திற்கு நிகழ்வைத் திட்டமிடும்"</string>
     <string name="view_flight" msgid="7691640491425680214">"கண்கானி"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"தேர்ந்தெடுத்த விமானத்தைக் கண்காணிக்கும்"</string>

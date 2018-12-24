@@ -305,7 +305,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"સ્પર્શ કરીને શોધખોળ કરવું ચાલુ કરો"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ટૅપ કરેલ આઇટમ મોટેથી બોલવામાં આવશે અને હાવભાવની મદદથી સ્ક્રીનને શોધી શકાય છે."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"તમે લખો તે ટેક્સ્ટનું અવલોકન કરો"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ક્રેડિટ કાર્ડ નંબર્સ અને પાસવર્ડ્સ જેવો વ્યક્તિગત ડેટા શામેલ છે."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ક્રેડિટ કાર્ડ નંબર અને પાસવર્ડ જેવો વ્યક્તિગત ડેટા શામેલ છે."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"પ્રદર્શન વિસ્તૃતિકરણ નિયંત્રિત કરો"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"પ્રદર્શનનું ઝૂમ સ્તર અને સ્થિતિનિર્ધારણ નિયંત્રિત કરો."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"હાવભાવ કરો"</string>
@@ -1012,11 +1012,11 @@
     <string name="deleteText" msgid="6979668428458199034">"ડિલીટ કરો"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ઇનપુટ પદ્ધતિ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ટેક્સ્ટ ક્રિયાઓ"</string>
-    <string name="email" msgid="4560673117055050403">"ઇમેઇલ"</string>
+    <string name="email" msgid="4560673117055050403">"ઇમેઇલ કરો"</string>
     <string name="email_desc" msgid="3638665569546416795">"પસંદ કરેલ ઍડ્રેસ પર ઇમેઇલ મોકલો"</string>
     <string name="dial" msgid="1253998302767701559">"કૉલ કરો"</string>
     <string name="dial_desc" msgid="6573723404985517250">"પસંદ કરેલ ફોન નંબર પર કૉલ કરો"</string>
-    <string name="map" msgid="5441053548030107189">"નકશો"</string>
+    <string name="map" msgid="5441053548030107189">"નકશો ખોલો"</string>
     <string name="map_desc" msgid="1836995341943772348">"પસંદ કરેલ સરનામું શોધો"</string>
     <string name="browse" msgid="1245903488306147205">"ખોલો"</string>
     <string name="browse_desc" msgid="8220976549618935044">"પસંદ કરેલ URL ખોલો"</string>
@@ -1025,7 +1025,7 @@
     <string name="add_contact" msgid="7867066569670597203">"ઉમેરો"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"સંપર્કોમાં ઉમેરો"</string>
     <string name="view_calendar" msgid="979609872939597838">"જુઓ"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"કૅલેન્ડરમાં પસંદ કરેલ સમય જુઓ"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"કૅલેન્ડરમાં પસંદ કરેલો સમય જુઓ"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"શેડ્યૂલ કરો"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"પસંદ કરેલ સમય માટે ઇવેન્ટ શેડ્યૂલ કરો"</string>
     <string name="view_flight" msgid="7691640491425680214">"ટ્રૅક કરો"</string>

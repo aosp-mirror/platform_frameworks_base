@@ -1033,21 +1033,21 @@
     <string name="inputMethod" msgid="1653630062304567879">"Metodă de intrare"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acțiuni pentru text"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Trimiteți e-mail la adresa selectată"</string>
-    <string name="dial" msgid="1253998302767701559">"Apelați"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Apelați numărul de telefon selectat"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Trimiteți un e-mail la adresa selectată"</string>
+    <string name="dial" msgid="1253998302767701559">"Sunați"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Sunați la numărul de telefon selectat"</string>
     <string name="map" msgid="5441053548030107189">"Hartă"</string>
     <string name="map_desc" msgid="1836995341943772348">"Localizați adresa selectată"</string>
     <string name="browse" msgid="1245903488306147205">"Deschideți"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Deschideți adresa URL selectată"</string>
-    <string name="sms" msgid="4560537514610063430">"Mesaj"</string>
+    <string name="sms" msgid="4560537514610063430">"Trimiteți mesaj"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Trimiteți un mesaj la numărul de telefon selectat"</string>
     <string name="add_contact" msgid="7867066569670597203">"Adăugați"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"Adăugați la persoanele din Agendă"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Adăugați în agendă"</string>
     <string name="view_calendar" msgid="979609872939597838">"Afișați"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Afișați ora selectată în calendar"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Program"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programați evenimentul pentru momentul selectat"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Afișați data selectată în calendar"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Programați"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programați evenimentul pentru data selectată"</string>
     <string name="view_flight" msgid="7691640491425680214">"Urmăriți"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Urmăriți zborul selectat"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Spațiul de stocare aproape ocupat"</string>

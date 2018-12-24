@@ -1012,22 +1012,22 @@
     <string name="deleteText" msgid="6979668428458199034">"Xóa"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Phương thức nhập"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tác vụ văn bản"</string>
-    <string name="email" msgid="4560673117055050403">"Email"</string>
+    <string name="email" msgid="4560673117055050403">"Gửi email"</string>
     <string name="email_desc" msgid="3638665569546416795">"Gửi email đến địa chỉ đã chọn"</string>
-    <string name="dial" msgid="1253998302767701559">"Gọi"</string>
+    <string name="dial" msgid="1253998302767701559">"Gọi điện"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Gọi đến số điện thoại đã chọn"</string>
-    <string name="map" msgid="5441053548030107189">"Bản đồ"</string>
+    <string name="map" msgid="5441053548030107189">"Xem bản đồ"</string>
     <string name="map_desc" msgid="1836995341943772348">"Tìm địa chỉ đã chọn"</string>
     <string name="browse" msgid="1245903488306147205">"Mở"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Mở URL đã chọn"</string>
-    <string name="sms" msgid="4560537514610063430">"Gửi tin nhắn"</string>
+    <string name="sms" msgid="4560537514610063430">"Nhắn tin"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Nhắn tin đến số điện thoại đã chọn"</string>
     <string name="add_contact" msgid="7867066569670597203">"Thêm"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Thêm vào danh bạ"</string>
     <string name="view_calendar" msgid="979609872939597838">"Xem"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Xem thời gian đã chọn trong lịch"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Lịch biểu"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Lên lịch biểu sự kiện cho thời gian đã chọn"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Lên lịch"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Lên lịch sự kiện cho thời gian đã chọn"</string>
     <string name="view_flight" msgid="7691640491425680214">"Theo dõi"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Theo dõi chuyến bay đã chọn"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Sắp hết dung lượng lưu trữ"</string>

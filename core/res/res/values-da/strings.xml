@@ -1012,15 +1012,15 @@
     <string name="deleteText" msgid="6979668428458199034">"Slet"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Inputmetode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksthandlinger"</string>
-    <string name="email" msgid="4560673117055050403">"E-mail"</string>
+    <string name="email" msgid="4560673117055050403">"Send mail"</string>
     <string name="email_desc" msgid="3638665569546416795">"Send en mail til den valgte adresse"</string>
     <string name="dial" msgid="1253998302767701559">"Ring op"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Ring til det valgte telefonnummer"</string>
-    <string name="map" msgid="5441053548030107189">"Kort"</string>
+    <string name="map" msgid="5441053548030107189">"Åbn kort"</string>
     <string name="map_desc" msgid="1836995341943772348">"Find den valgte adresse"</string>
     <string name="browse" msgid="1245903488306147205">"Åbn"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Åbn den valgte webadresse"</string>
-    <string name="sms" msgid="4560537514610063430">"Besked"</string>
+    <string name="sms" msgid="4560537514610063430">"Send besked"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Send en besked til det valgte telefonnummer"</string>
     <string name="add_contact" msgid="7867066569670597203">"Tilføj"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Føj til kontaktpersoner"</string>

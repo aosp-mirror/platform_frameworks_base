@@ -1012,24 +1012,24 @@
     <string name="deleteText" msgid="6979668428458199034">"ဖျက်ရန်"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ထည့်သွင်းရန်နည်းလမ်း"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"စာတို လုပ်ဆောင်ချက်"</string>
-    <string name="email" msgid="4560673117055050403">"အီးမေးလ်"</string>
+    <string name="email" msgid="4560673117055050403">"အီးမေးလ်ပို့ရန်"</string>
     <string name="email_desc" msgid="3638665569546416795">"ရွေးထားသည့် လိပ်စာသို့ အီးမေးလ်ပို့ရန်"</string>
     <string name="dial" msgid="1253998302767701559">"ခေါ်ဆိုရန်"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ရွေးထားသည့် ဖုန်းနံပါတ်ကို ခေါ်ရန်"</string>
-    <string name="map" msgid="5441053548030107189">"မြေပုံ"</string>
+    <string name="map" msgid="5441053548030107189">"မြေပုံဖွင့်ရန်"</string>
     <string name="map_desc" msgid="1836995341943772348">"ရွေးထားသည့် လိပ်စာကို ရှာဖွေရန်"</string>
     <string name="browse" msgid="1245903488306147205">"ဖွင့်ရန်"</string>
     <string name="browse_desc" msgid="8220976549618935044">"ရွေးထားသည့် URL ကို ဖွင့်ရန်"</string>
-    <string name="sms" msgid="4560537514610063430">"SMS"</string>
+    <string name="sms" msgid="4560537514610063430">"SMS ပို့ရန်"</string>
     <string name="sms_desc" msgid="7526588350969638809">"ရွေးထားသည့် ဖုန်းနံပါတ်ကို မက်ဆေ့ဂျ်ပို့ရန်"</string>
     <string name="add_contact" msgid="7867066569670597203">"ထည့်ရန်"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"အဆက်အသွယ်များသို့ ထည့်ရန်"</string>
     <string name="view_calendar" msgid="979609872939597838">"ကြည့်ရန်"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"ရွေးထားသည့် အချိန်ကို ပြက္ခဒိန်တွင် ကြည့်ရန်"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"အချိန်ဇယား"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"အစီအစဉ်ထည့်ရန်"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"ရွေးထားသည့်အချိန်အတွက် အစီအစဉ်ပြုလုပ်ရန်"</string>
     <string name="view_flight" msgid="7691640491425680214">"ရှာရန်"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"ရွေးထားသည့် လေယာဉ်ခရီးစဉ်ကို ရှာဖွေရန်"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"ရွေးထားသည့် လေယာဉ်ခရီးစဉ်ကို ရှာရန်"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"သိမ်းဆည်သော နေရာ နည်းနေပါသည်"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"တချို့ စနစ်လုပ်ငန်းများ အလုပ် မလုပ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"စနစ်အတွက် သိုလှောင်ခန်း မလုံလောက်ပါ။ သင့်ဆီမှာ နေရာလွတ် ၂၅၀ MB ရှိတာ စစ်ကြည့်ပြီး စတင်ပါ။"</string>
