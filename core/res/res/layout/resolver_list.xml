@@ -129,6 +129,18 @@
             android:enabled="false"
             android:text="@string/activity_resolver_use_always"
             android:onClick="onButtonClick" />
+
+        <Button
+            android:id="@+id/button_app_settings"
+            android:layout_width="wrap_content"
+            android:layout_gravity="end"
+            android:maxLines="2"
+            android:minHeight="@dimen/alert_dialog_button_bar_height"
+            style="?attr/buttonBarPositiveButtonStyle"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="@string/activity_resolver_app_settings"
+            android:onClick="onButtonClick" />
     </LinearLayout>
 
 </com.android.internal.widget.ResolverDrawerLayout>
