@@ -305,6 +305,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             displayId = optionLaunchId;
         }
 
+        // If the source activity is a no-display activity, pass on the launch display id from
+        // source activity as currently preferred.
+        if (displayId == INVALID_DISPLAY && source != null && source.noDisplay) {
+            displayId = source.mHandoverLaunchDisplayId;
+            if (DEBUG) appendLog("display-from-no-display-source=" + displayId);
+        }
+
         ActivityStack stack =
                 (displayId == INVALID_DISPLAY && task != null) ? task.getStack() : null;
         if (stack != null) {
