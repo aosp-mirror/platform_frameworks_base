@@ -1032,24 +1032,24 @@
     <string name="deleteText" msgid="6979668428458199034">"Izbriši"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Način unosa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Radnje s tekstom"</string>
-    <string name="email" msgid="4560673117055050403">"E-pošta"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Slanje e-poruke na odabranu adresu"</string>
-    <string name="dial" msgid="1253998302767701559">"Poziv"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Pozivanje odabranog telefonskog broja"</string>
-    <string name="map" msgid="5441053548030107189">"Karta"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Prikaz odabrane adrese na karti"</string>
+    <string name="email" msgid="4560673117055050403">"Pošalji e-poštu"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Pošalji e-poštu na odabranu adresu"</string>
+    <string name="dial" msgid="1253998302767701559">"Nazovi"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Nazovi odabrani telefonski broj"</string>
+    <string name="map" msgid="5441053548030107189">"Prikaži na karti"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Prikaži odabrane adrese na karti"</string>
     <string name="browse" msgid="1245903488306147205">"Otvori"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"Otvaranje odabranog URL-a"</string>
-    <string name="sms" msgid="4560537514610063430">"Poruka"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"Slanje poruke na odabrani telefonski broj"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Otvori odabrani URL"</string>
+    <string name="sms" msgid="4560537514610063430">"Pošalji poruku"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Pošalji poruku na odabrani telefonski broj"</string>
     <string name="add_contact" msgid="7867066569670597203">"Dodaj"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"Dodavanje u kontakte"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Dodaj u kontakte"</string>
     <string name="view_calendar" msgid="979609872939597838">"Prikaži"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Prikaz odabranog vremena u kalendaru"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Raspored"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Zakazivanje događaja za određeno vrijeme"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Prikaži odabrano vrijeme u kalendaru"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Zakaži"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Zakaži događaj za određeno vrijeme"</string>
     <string name="view_flight" msgid="7691640491425680214">"Prati"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"Praćenje odabranog leta"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Prati odabrani let"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ponestaje prostora za pohranu"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Neke sistemske funkcije možda neće raditi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nema dovoljno pohrane za sustav. Oslobodite 250 MB prostora i pokrenite uređaj ponovo."</string>

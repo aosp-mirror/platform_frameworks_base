@@ -1026,7 +1026,7 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"បញ្ចូល​ទៅ​ក្នុង​ទំនាក់ទំនង"</string>
     <string name="view_calendar" msgid="979609872939597838">"មើល"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"មើល​ពេលវេលា​ដែល​បាន​ជ្រើសរើស​នៅក្នុង​ប្រតិទិន"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"កាលវិភាគ"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"កំណត់​កាលវិភាគ"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"កំណត់​កាលវិភាគ​ព្រឹត្តិការណ៍​សម្រាប់ពេល​វេលាដែល​បាន​ជ្រើសរើស"</string>
     <string name="view_flight" msgid="7691640491425680214">"តាម​ដាន"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"តាមដាន​ជើង​ហោះហើរ​ដែល​បាន​ជ្រើសរើស"</string>

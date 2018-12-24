@@ -301,7 +301,7 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"আপনার অত্যাবশ্যক লক্ষণগুলির সম্পর্কে সেন্সর ডেটা অ্যাক্সেস করে"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে সেন্সর থেকে আপনার ভাইটাল সাইনের ডেটা অ্যাক্সেস করতে দেবেন?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"উইন্ডোর কন্টেন্ট পুনরুদ্ধার করে"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"আপনি ইন্টারঅ্যাক্ট করছেন এমন একটি উইন্ডোর সামগ্রীকে সযত্নে নিরীক্ষণ করে৷"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ব্যবহার করছেন এমন একটি উইন্ডোর কন্টেন্ট নিরীক্ষণ করে৷"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"স্পর্শের মাধ্যমে অন্বেষণ করা চালু করুন"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"যে আইটেমগুলিতে আলতো চেপেছেন সেগুলি সশব্দে বলবে এবং ইঙ্গিতগুলি ব্যবহার করে স্ক্রিন অন্বেষণ করা যাবে৷"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"আপনার লেখা পাঠ্যকে নিরীক্ষণ করে"</string>
@@ -1012,23 +1012,23 @@
     <string name="deleteText" msgid="6979668428458199034">"মুছুন"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ইনপুট পদ্ধতি"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"পাঠ্য ক্রিয়াগুলি"</string>
-    <string name="email" msgid="4560673117055050403">"ইমেল"</string>
+    <string name="email" msgid="4560673117055050403">"ইমেল করুন"</string>
     <string name="email_desc" msgid="3638665569546416795">"বেছে নেওয়া আইডিতে ইমেল পাঠান"</string>
-    <string name="dial" msgid="1253998302767701559">"কল"</string>
+    <string name="dial" msgid="1253998302767701559">"কল খুলুন"</string>
     <string name="dial_desc" msgid="6573723404985517250">"বেছে নেওয়া ফোন নম্বরে কল করুন"</string>
-    <string name="map" msgid="5441053548030107189">"ম্যাপ"</string>
+    <string name="map" msgid="5441053548030107189">"ম্যাপ খুলুন"</string>
     <string name="map_desc" msgid="1836995341943772348">"বেছে নেওয়া ঠিকানাটি ম্যাপে দেখুন"</string>
     <string name="browse" msgid="1245903488306147205">"খুলুন"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"বেছে নেওয়া ইউআরএলে যান"</string>
-    <string name="sms" msgid="4560537514610063430">"মেসেজ"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"বেছে নেওয়া ইউআরএল-এ যান"</string>
+    <string name="sms" msgid="4560537514610063430">"মেসেজ করুন"</string>
     <string name="sms_desc" msgid="7526588350969638809">"বেছে নেওয়া ফোন নম্বরে মেসেজ পাঠান"</string>
     <string name="add_contact" msgid="7867066569670597203">"যোগ করুন"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"পরিচিতিতে যোগ করুন"</string>
     <string name="view_calendar" msgid="979609872939597838">"দেখুন"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"বেছে নেওয়া দিনটি ক্যালেন্ডারে দেখুন"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"সময়সূচি"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"সময়সূচি সেট করুন"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"বেছে নেওয়া সময়ে ইভেন্ট সেট করুন"</string>
-    <string name="view_flight" msgid="7691640491425680214">"ট্র্যাক"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ট্র্যাক করুন"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"বেছে নেওয়া ফ্লাইট ট্র্যাক করুন"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"স্টোরেজ পূর্ণ হতে চলেছে"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"কিছু কিছু সিস্টেম ক্রিয়াকলাপ কাজ নাও করতে পারে"</string>

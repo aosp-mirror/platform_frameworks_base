@@ -1012,7 +1012,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Eliminar"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Método de introducción de texto"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acciones de texto"</string>
-    <string name="email" msgid="4560673117055050403">"Correo electrónico"</string>
+    <string name="email" msgid="4560673117055050403">"Enviar correo"</string>
     <string name="email_desc" msgid="3638665569546416795">"Enviar un correo electrónico a la dirección seleccionada"</string>
     <string name="dial" msgid="1253998302767701559">"Llamar"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Llamar al número de teléfono seleccionado"</string>
@@ -1020,15 +1020,15 @@
     <string name="map_desc" msgid="1836995341943772348">"Buscar la dirección seleccionada"</string>
     <string name="browse" msgid="1245903488306147205">"Abrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Abrir la URL seleccionada"</string>
-    <string name="sms" msgid="4560537514610063430">"Mensaje"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"Enviar un mensaje al número de teléfono seleccionado"</string>
+    <string name="sms" msgid="4560537514610063430">"Enviar SMS"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Enviar SMS al teléfono seleccionado"</string>
     <string name="add_contact" msgid="7867066569670597203">"Añadir"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Añadir a contactos"</string>
     <string name="view_calendar" msgid="979609872939597838">"Ver"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Ver la hora seleccionada en el calendario"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Programar"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programar un evento para la hora seleccionada"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Buscar"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Hacer seguimiento"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Seguir el vuelo seleccionado"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Queda poco espacio"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Es posible que algunas funciones del sistema no funcionen."</string>

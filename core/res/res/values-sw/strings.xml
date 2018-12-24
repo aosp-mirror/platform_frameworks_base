@@ -1023,10 +1023,10 @@
     <string name="add_contact" msgid="7867066569670597203">"Ongeza"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Ongeza kwenye anwani"</string>
     <string name="view_calendar" msgid="979609872939597838">"Angalia"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Angalia wakati uliyochagua katika kalenda"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Ratiba"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Angalia wakati uliochagua katika kalenda"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Ratibu"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Ratibu tukio la wakati uliochagua"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Toleo"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Fuatilia"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Fuatilia ndege uliyochagua"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nafasi ya kuhifadhi inakaribia kujaa"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Baadhi ya vipengee vya mfumo huenda visifanye kazi"</string>

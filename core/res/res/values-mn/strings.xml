@@ -1012,23 +1012,23 @@
     <string name="deleteText" msgid="6979668428458199034">"Устгах"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Оруулах арга"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Текст үйлдэл"</string>
-    <string name="email" msgid="4560673117055050403">"Имэйл"</string>
+    <string name="email" msgid="4560673117055050403">"Имэйл бичих"</string>
     <string name="email_desc" msgid="3638665569546416795">"Сонгосон хаяг руу имэйл илгээх"</string>
     <string name="dial" msgid="1253998302767701559">"Залгах"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Сонгосон утасны дугаар руу залгах"</string>
-    <string name="map" msgid="5441053548030107189">"Газрын зураг"</string>
+    <string name="map" msgid="5441053548030107189">"Газрын зураг хийх"</string>
     <string name="map_desc" msgid="1836995341943772348">"Сонгосон хаягийг байршуулах"</string>
     <string name="browse" msgid="1245903488306147205">"Нээх"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Сонгосон URL-г нээх"</string>
-    <string name="sms" msgid="4560537514610063430">"Зурвас"</string>
+    <string name="sms" msgid="4560537514610063430">"Зурвас бичих"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Сонгосон утасны дугаар руу мессеж илгээх"</string>
     <string name="add_contact" msgid="7867066569670597203">"Нэмэх"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Харилцагчид нэмэх"</string>
     <string name="view_calendar" msgid="979609872939597838">"Үзэх"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Календариас сонгосон огноог харах"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Хуваарь"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Хуваарь гаргах"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Aрга хэмжээг сонгосон цагт хуваарилах"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Бичлэг"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Хянах"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Сонгосон нислэгийг хянах"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Сангийн хэмжээ дутагдаж байна"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Зарим систем функц ажиллахгүй байна"</string>
