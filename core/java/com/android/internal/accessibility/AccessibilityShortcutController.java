@@ -357,15 +357,16 @@ public class AccessibilityShortcutController {
     }
 
     private boolean performTtsPrompt(AlertDialog alertDialog) {
+        final String serviceName = getShortcutFeatureDescription(false /* no summary */);
         final AccessibilityServiceInfo serviceInfo = getInfoForTargetService();
-        if (serviceInfo == null) {
+        if (TextUtils.isEmpty(serviceName) || serviceInfo == null) {
             return false;
         }
         if ((serviceInfo.flags & AccessibilityServiceInfo
                 .FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK) == 0) {
             return false;
         }
-        final TtsPrompt tts = new TtsPrompt();
+        final TtsPrompt tts = new TtsPrompt(serviceName);
         alertDialog.setOnDismissListener(dialog -> tts.dismiss());
         return true;
     }
@@ -378,8 +379,9 @@ public class AccessibilityShortcutController {
         private boolean mDismiss;
         private TextToSpeech mTts;
 
-        TtsPrompt() {
-            mText = mContext.getString(R.string.accessibility_shortcut_spoken_feedback);
+        TtsPrompt(String serviceName) {
+            mText = mContext.getString(R.string.accessibility_shortcut_spoken_feedback,
+                    serviceName);
             mTts = mFrameworkObjectProvider.getTextToSpeech(mContext, this);
         }
 
