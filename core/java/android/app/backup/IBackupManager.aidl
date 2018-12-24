@@ -180,13 +180,6 @@ interface IBackupManager {
     void setAutoRestore(boolean doAutoRestore);
 
     /**
-     * Indicate that any necessary one-time provisioning has occurred.
-     *
-     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
-     */
-    void setBackupProvisioned(boolean isProvisioned);
-
-    /**
      * Report whether the backup mechanism is currently enabled.
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
