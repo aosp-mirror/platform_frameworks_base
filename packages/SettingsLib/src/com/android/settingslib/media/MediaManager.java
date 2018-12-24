@@ -17,7 +17,6 @@ package com.android.settingslib.media;
 
 import android.app.Notification;
 import android.content.Context;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,13 +67,7 @@ public abstract class MediaManager {
     public abstract void stopScan();
 
     protected MediaDevice findMediaDevice(String id) {
-        for (MediaDevice mediaDevice : mMediaDevices) {
-            if (mediaDevice.getId().equals(id)) {
-                return mediaDevice;
-            }
-        }
-        Log.e(TAG, "findMediaDevice() can't found device");
-        return null;
+        return MediaDeviceUtils.findMediaDevice(mMediaDevices, id);
     }
 
     protected void dispatchDeviceAdded(MediaDevice mediaDevice) {
@@ -96,7 +89,7 @@ public abstract class MediaManager {
     protected void dispatchDeviceListAdded() {
         synchronized (mCallbacks) {
             for (MediaDeviceCallback callback : mCallbacks) {
-                callback.onDeviceListAdded(mMediaDevices);
+                callback.onDeviceListAdded(new ArrayList<>(mMediaDevices));
             }
         }
     }
@@ -113,6 +106,14 @@ public abstract class MediaManager {
         synchronized (mCallbacks) {
             for (MediaDeviceCallback callback : mCallbacks) {
                 callback.onDeviceAttributesChanged();
+            }
+        }
+    }
+
+    protected void dispatchActiveDeviceChanged(String id) {
+        synchronized (mCallbacks) {
+            for (MediaDeviceCallback callback : mCallbacks) {
+                callback.onActiveDeviceChanged(id);
             }
         }
     }
@@ -153,5 +154,12 @@ public abstract class MediaManager {
          * Callback for notifying MediaDevice attributes is changed.
          */
         void onDeviceAttributesChanged();
+
+        /**
+         * Callback for notifying active MediaDevice is changed.
+         *
+         * @param id the id of MediaDevice
+         */
+        void onActiveDeviceChanged(String id);
     }
 }
