@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tətbiqə cihazın telefon funksiyalarına giriş icazəsi verir. Belə icazəli tətbiq bu telefonun nömrəsini və cihaz İD\'ni, zəngin aktiv olub-olmadığını və zəng edilən nömrəni müəyyən edə bilər."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"zəngləri sistem üzərindən yönləndirin"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Tətbiqə, zəng təcrübəsini yaxşılaşdırmaq üçün, zəngləri sistem üzərindən yönləndirməyə icazə verilir."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"zənglərə sistemdə baxın və nəzarət edin."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Tətbiqin cihazda davam edən zəngləri görməsinə və nəzarət etməsinə icazə verin. Bura zəng edən nömrələr və zənglərin statusu haqqında məlumat daxildir."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"zəngə digər tətbiqdən davam edin"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Tətbiqə digər tətbiqdə başlayan zəngə davam etmək icazəsi verilir."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefon nömrələrini oxuyun"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Tətbiqə Yaxın Məsafə Kommunikasiyası (NFC) teqləri, kartları və oxuyucuları ilə əlaqə qurmağa icazə verir."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Ekran kilidini deaktiv edir"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Tətbiqə kilid açarını və təhlükəsizlik parolunu deaktiv etməyə imkan verir. Qanuni misal budur ki, telefon zəng qəbul edən zaman kilidi açır və zəng qurtarandan sonra kilidi bağlayır."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ekran kilidi mürəkkəbliliyini əldə edin və tələb edin"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Tətbiqə ekran kilidinin uzunluq intervalı və növünü göstərən ekran kilidi mürəkkəbliliyini (yüksək, orta, aşağı və ya heçbiri) öyrənməyə icazə verir. Tətbiq, istifadəçilərə ekran kilidini müəyyən səviyyəyə yeniləməyi təklif edə bilər, lakin istifadəçilər istənilən vaxt bunu iqnor edə bilər. Nəzərə alın ki, ekran kilidi şifrələndiyinə görə tətbiq parolu dəqiq bilmir."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"biometrik proqramdan istifadə edin"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Doğrulama üçün biometrik proqramdan istifadə etməyə imkan verir"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"barmaq izi avadanlığını idarə edin"</string>
@@ -1083,23 +1087,23 @@
     <string name="deleteText" msgid="6979668428458199034">"Sil"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Daxiletmə metodu"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Mətn əməliyyatları"</string>
-    <string name="email" msgid="4560673117055050403">"E-poçt"</string>
+    <string name="email" msgid="4560673117055050403">"E-poçtu aç"</string>
     <string name="email_desc" msgid="3638665569546416795">"Seçilmiş ünvana e-məktub yazın"</string>
-    <string name="dial" msgid="1253998302767701559">"Zəng"</string>
+    <string name="dial" msgid="1253998302767701559">"Zəng edin"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Seçilmiş telefon nömrəsinə zəng edin"</string>
-    <string name="map" msgid="5441053548030107189">"Xəritə"</string>
+    <string name="map" msgid="5441053548030107189">"Xəritəni aç"</string>
     <string name="map_desc" msgid="1836995341943772348">"Seçilmiş ünvanları tapın"</string>
     <string name="browse" msgid="1245903488306147205">"Açın"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Seçilmiş linki açın"</string>
-    <string name="sms" msgid="4560537514610063430">"Mesaj"</string>
+    <string name="sms" msgid="4560537514610063430">"Mesaj yazın"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Seçilmiş telefon nömrəsini mesajla göndərin"</string>
     <string name="add_contact" msgid="7867066569670597203">"Əlavə edin"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Kontakta əlavə edin"</string>
     <string name="view_calendar" msgid="979609872939597838">"Baxın"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Təqvimdə seçilmiş vaxta baxın"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Cədvəl"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Təqvimdə planlayın"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Tədbiri seçilmiş vaxta planlaşdırın"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Trek"</string>
+    <string name="view_flight" msgid="7691640491425680214">"İzləyin"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Seçilmiş uçuşu izləyin"</string>
     <string name="translate" msgid="9218619809342576858">"Tərcümə edin"</string>
     <string name="translate_desc" msgid="4502367770068777202">"Seçilmiş mətni tərcümə edin"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Planşet yenilənir…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Cihaz yenilənir…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefon başlayır…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android işə başlayır..."</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Planşet başlayır…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Cihaz başlayır…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Yaddaş optimallaşdırılır."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Bütün şəbəkələri görmək üçün klikləyin"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Qoşulun"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Bütün şəbəkələr"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> tərəfindən təklif edilən Wi‑Fi  şəbəkəsinə qoşuldu"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"<xliff:g id="NAME">%s</xliff:g> tərəfindən şəbəkələrin təklif edilməsinə icazə vermək itəyirsiniz?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Bəli"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Xeyr"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi avtomatik olaraq aktiv ediləcək"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Yadda saxlanmış yüksək keyfiyyətli şəbəkələr yaxınlıqda olduqda"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Yenidən aktiv etməyin"</string>

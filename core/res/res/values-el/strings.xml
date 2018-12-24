@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Επιτρέπει στην εφαρμογή την πρόσβαση στις λειτουργίες τηλεφώνου της συσκευής. Αυτή η άδεια δίνει τη δυνατότητα στην εφαρμογή να καθορίζει τον αριθμό τηλεφώνου και τα αναγνωριστικά συσκευών, εάν μια κλήση είναι ενεργή, καθώς και τον απομακρυσμένο αριθμό που συνδέεται από μια κλήση."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"δρομολόγηση κλήσεων μέσω του συστήματος"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Επιτρέπει στην εφαρμογή να δρομολογεί τις κλήσεις της μέσω του συστήματος για να βελτιώσει την εμπειρία κλήσης."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"προβολή και έλεγχος κλήσεων μέσω του συστήματος."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Επιτρέπει στην εφαρμογή να βλέπει και να ελέγχει τις εισερχόμενες κλήσεις στη συσκευή. Αυτό περιλαμβάνει πληροφορίες όπως τους αριθμούς κλήσεων για τις κλήσεις και την κατάσταση των κλήσεων."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"συνέχιση κλήσης από άλλη συσκευή"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Επιτρέπει στην εφαρμογή να συνεχίσει μια κλήση η οποία ξεκίνησε σε άλλη εφαρμογή."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ανάγνωση αριθμών τηλεφώνου"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Επιτρέπει στην εφαρμογή την επικοινωνία με ετικέτες, κάρτες και αναγνώστες της Επικοινωνίας κοντινού πεδίου (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"απενεργοποιεί το κλείδωμα οθόνης"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Επιτρέπει στην εφαρμογή την απενεργοποίηση του κλειδώματος πληκτρολογίου και άλλης σχετικής ασφάλειας με κωδικό πρόσβασης. Για παράδειγμα, το κλείδωμα πληκτρολογίου στο τηλέφωνο απενεργοποιείται όταν λαμβάνεται εισερχόμενη τηλεφωνική κλήση και ενεργοποιείται ξανά όταν η κλήση τερματιστεί."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"λήψη και υποβολή αιτήματος για πολυπλοκότητα οθόνης κλειδώματος"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Επιτρέπει στην εφαρμογή να μάθει το επίπεδο πολυπλοκότητας του κλειδώματος οθόνης (υψηλό, μέσο, χαμηλό ή κανένα), το οποίο υποδεικνύει το πιθανό εύρος του μήκους και του τύπου κλειδώματος οθόνης. Η εφαρμογή μπορεί επίσης να προτείνει στους χρήστες να ενημερώσουν το κλείδωμα οθόνης σε ένα συγκεκριμένο επίπεδο, όμως οι χρήστες μπορούν να την αγνοήσουν και να συνεχίσουν. Λάβετε υπόψη ότι το κλείδωμα οθόνης δεν αποθηκεύεται σε απλό κείμενο. Συνεπώς, η εφαρμογή δεν γνωρίζει τον κωδικό."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"χρήση βιομετρικού εξοπλισμού"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί βιομετρικό εξοπλισμό για έλεγχο ταυτότητας"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"διαχειρίζεται τον εξοπλισμό δακτυλικού αποτυπώματος"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Ενημέρωση tablet…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Ενημέρωση συστήματος…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Εκκίνηση τηλεφώνου…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Εκκίνηση Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Εκκίνηση tablet…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Εκκίνηση συσκευής…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Βελτιστοποίηση αποθηκευτικού χώρου."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Πατήστε για να δείτε όλα τα δίκτυα"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Σύνδεση"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Όλα τα δίκτυα"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Σύνδεση στο δίκτυο Wi‑Fi που προτάθηκε από την εφαρμογή <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Θέλετε να επιτρέψετε στην εφαρμογή <xliff:g id="NAME">%s</xliff:g> να σας προτείνει δίκτυα;"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ναι"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Όχι"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Το Wi‑Fi θα ενεργοποιηθεί αυτόματα"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Όταν βρίσκεστε κοντά σε αποθηκευμένο δίκτυο υψηλής ποιότητας"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Να μην ενεργοποιηθεί ξανά"</string>

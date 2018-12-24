@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Consente all\'applicazione di accedere alle funzioni telefoniche del dispositivo. Questa autorizzazione consente all\'applicazione di determinare il numero di telefono e gli ID dei dispositivi, se una chiamata è attiva e il numero remoto connesso da una chiamata."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"indirizzamento delle chiamate tramite il sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Consente all\'app di indirizzare le proprie chiamate tramite il sistema al fine di migliorare l\'esperienza di chiamata."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"visualizzazione e controllo delle chiamate tramite il sistema."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Consente all\'app di visualizzare e controllare le chiamate in corso sul dispositivo. Sono incluse informazioni quali i numeri e lo stato relativi alle chiamate."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"Continuazione di una chiamata da un\'altra app"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Consente all\'app di continuare una chiamata che è stata iniziata in un\'altra app."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lettura dei numeri di telefono"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Consente all\'applicazione di comunicare con tag, schede e lettori NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"disattivazione blocco schermo"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Consente all\'applicazione di disattivare il blocco tastiera ed eventuali protezioni tramite password associate. Ad esempio, il telefono disattiva il blocco tastiera quando riceve una telefonata in arrivo e lo riattiva al termine della chiamata."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ricezione e richiesta della complessità del blocco schermo"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Consente all\'app di conoscere il livello di complessità del blocco schermo (alto, medio, basso o nessuno), che indica l\'intervallo di caratteri possibile e il tipo di blocco schermo. L\'app può inoltre suggerire agli utenti di aggiornare il blocco schermo a un livello specifico di complessità, ma gli utenti possono ignorare liberamente il suggerimento e uscire. Tieni presente che il blocco schermo non viene memorizzato come testo non crittografato, quindi l\'app non conosce la password esatta."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"Utilizzo di hardware biometrico"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Consente all\'app di utilizzare hardware biometrico per eseguire l\'autenticazione"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gestisci hardware per il riconoscimento delle impronte digitali"</string>
@@ -1083,7 +1087,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Elimina"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metodo inserimento"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Azioni testo"</string>
-    <string name="email" msgid="4560673117055050403">"Invia una email"</string>
+    <string name="email" msgid="4560673117055050403">"Invia email"</string>
     <string name="email_desc" msgid="3638665569546416795">"Invia un\'email all\'indirizzo selezionato"</string>
     <string name="dial" msgid="1253998302767701559">"Chiama"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Chiama il numero di telefono selezionato"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Aggiornamento del tablet…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Aggiornamento del dispositivo…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Avvio del telefono…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Avvio di Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Avvio del tablet…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Avvio del dispositivo…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ottimizzazione archiviazione."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tocca per vedere tutte le reti"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connetti"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Tutte le reti"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"È stata stabilita la connessione alla rete Wi‑Fi proposta da <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Vuoi consentire all\'app <xliff:g id="NAME">%s</xliff:g> di proporti reti?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Sì"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Il Wi‑Fi verrà attivato automaticamente"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Quando ti trovi nell\'area di una rete salvata di alta qualità"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Non riattivare"</string>

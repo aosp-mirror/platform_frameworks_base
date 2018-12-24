@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Апп нь төхөөрөмжийн утасны функцд хандах боломжтой. Энэ зөвшөөрөл нь апп-д утасны дугаар болон төхөөрөмжийн ID-г, дуудлага идэвхтэй эсэх, холын дугаар дуудлагаар холбогдсон байгаа эсэхийг тогтоох боломжийг олгоно,"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"системээр дамжуулах дуудлага"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дуудлагыг сайжруулахын тулд дуудлагаа системээр дамжуулах зөвшөөрлийг апп-д олгодог."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"систем дэх дуудлагыг харах болон хянах."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Аппад төхөөрөмж дээр хийж буй дуудлагыг харах болон хянахыг зөвшөөрдөг. Үүнд дуудлагын дугаар болон дуудлагын төлөв зэрэг мэдээллийг агуулдаг."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"дуудлагыг өөр аппаас үргэлжлүүлэх"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Аппад өөр аппад эхлүүлсэн дуудлагыг үргэлжлүүлэхийг зөвшөөрдөг."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"утасны дугаарыг унших"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Апп нь Ойролцоо Талбарын Холболт(NFC) таг, карт, болон уншигчтай холбогдох боломжтой."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"дэлгэцний түгжээг идэвхгүй болгох"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Апп нь түгжээ болон бусад холбоотой нууц үгийн аюулгүй байдлыг идэвхгүй болгох боломжтой. Жишээ нь бол утас нь дуудлага ирэх үед түгжээг идэвхгүй болгох ба дуудлага дуусахад буцаан идэвхтэй болгодог."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"дэлгэцийн түгжээний төвөгтэй байдлыг авах болон хүсэх"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Аппад дэлгэцийн түгжээний боломжит уртын хэмжээ болон төрлийг заадаг дэлгэцийн түгжээний төвөгтэй байдлын түвшнийг (өндөр, дундаж, бага эсвэл байхгүй) мэдэж авахыг зөвшөөрдөг. Түүнчлэн, апп хэрэглэгчдэд дэлгэцийн түгжээг тодорхой түвшинд шинэчлэхийг санал болгодог хэдий ч хэрэглэгч үүнийг чөлөөтэй үл хэрэгсэж, орхих боломжтой. Дэлгэцийн түгжээг ил бичвэрээр хадгалдаггүй тул апп тодорхой нууц үгийг мэддэггүй болохыг анхаарна уу."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"биометрийн техник хангамжийг ашиглах"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Aппад биометрийн техник хангамжийг баталгаажуулалтад ашиглахыг зөвшөөрдөг"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"хурууны хээний програм хангамжийг удирдах"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Таблетыг шинэчилж байна…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Төхөөрөмжийг шинэчилж байна…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Утсыг эхлүүлж байна…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Андройд эхэлж байна..."</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Таблетыг эхлүүлж байна…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Төхөөрөмжийг эхлүүлж байна…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Хадгалалтыг сайжруулж байна."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Бүх сүлжээг харахын тулд товшино уу"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Холбогдох"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Бүх сүлжээ"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g>-с санал болгосон Wi-Fi сүлжээнд холбогдсон"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Та <xliff:g id="NAME">%s</xliff:g>-г танд сүлжээ санал болгохыг хүсэж байна уу?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Тийм"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Үгүй"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi автоматаар асна"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Таныг хадгалсан, өндөр чанартай сүлжээний ойролцоо байх үед"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Буцааж асаахгүй"</string>

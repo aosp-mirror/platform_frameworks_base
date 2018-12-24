@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Колдонмого түзмөктүн чалуу мүмкүнчүлүктөрүнө жетки алуу уруксатын берет. Бул уруксат колдонмого, телефондун номурун, түзмөктүн ID-син, чалуунун абалын жана байланышта чыккан номурду аныктоого жол берет."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"чалууларды тутум аркылуу өткөрүү"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Чалуунун сапатын жакшыртуу максатында колдонмого чалууларын тутум аркылуу өткөрүүгө уруксат берет."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"тутум аркылуу чалууларды көрүп, көзөмөлдөө."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Колдонмого түзмөктөгү аткарылып жаткан чалууларды көрүп, көзөмөлдөөгө уруксат берет. Буга чалуулардын саны жана абалы сыяктуу маалымат кирет."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"чалууну башка колдонмодон улантуу"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Башка колдонмодон аткарылган чалууну бул колдонмодо улантууга уруксат берүү."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"телефон номерлерин окуу"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Колдонмого Жакынкы аралыкта байланышуу (NFC) белгилери, карталары жана окугучтары менен байланышуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"экранды бөгөттөөнү өчүрүү"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Колдонмого экрандын бөгөттөөчү жана ага байланыштуу сырсөз коргоосун өчүрүү уруксатын берет. Мисалы, чалуу келгенде экрандын бөгөтүн алып салат, чалуу бүткөндө кайрадан орнотот."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"экранды бөгөттөө канчалык татаал экенин сурап, маалымат алуу"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Колдонмого экранды бөгөттөөнүн татаалдыгын (татаал, орточо, оңой же такыр жок) үйрөнүүгө мүмкүнчүлүк берет. Татаалдык деңгээли сырсөздүн узундугу жана экранды бөгөттөөнүн түрү боюнча айырмаланат. Колдонмо экранды бөгөттөөнү белгилүү деңгээлге тууралоону колдонуучуларга сунуштай да алат, бирок колдонуучулар ага көңүл бурбай койсо болот. Сырсөздү колдонмо билбеши үчүн, экранды бөгөттөө сырсөзүн кадимки текстте сактоого болбойт."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"биометрикалык аппаратты колдонуу"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Колдонмого аныктыгын текшерүү үчүн биометрикалык аппаратты пайдалануу мүмкүндүгүн берет"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"манжа изинин аппараттык камсыздоосун башкаруу"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Планшет жаңыртылууда…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Түзмөк жаңыртылууда…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Телефон күйгүзүлүүдө…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android жүргүзүлүүдө…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Планшет күйгүзүлүүдө…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Түзмөк күйүгүзүлүүдө…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Сактагыч ыңгайлаштырылууда."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Бардык тармактарды көрүү үчүн басыңыз"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Туташуу"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Бардык тармактар"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> сунуштаган Wi‑Fi тармагына туташтырылды"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"<xliff:g id="NAME">%s</xliff:g> сизге тармактарды сунуштай берсинби?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ооба"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Жок"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi автоматтык түрдө күйөт"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Байланыш сигналы күчтүү тармактарга жакындаганда"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Өзү кайра күйбөйт"</string>

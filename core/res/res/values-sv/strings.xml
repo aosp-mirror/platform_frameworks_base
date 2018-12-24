@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tillåter att appen kommer åt enhetens telefonfunktioner. Med den här behörigheten tillåts appen att identifiera mobilens telefonnummer och enhets-ID, om ett samtal pågår och vilket nummer samtalet är kopplat till."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"dirigera samtal via systemet"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Appen tillåts att dirigera samtal via systemet för att förbättra samtalsupplevelsen."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"visa och styra samtal via systemet."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Tillåter att appen kan visa och styra pågående samtal på enheten. Detta omfattar information som telefonnummer för samtal och samtalens status."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"fortsätta ett samtal från en annan app"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Tillåter att appen fortsätter ett samtal som har startats i en annan app."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"läsa telefonnummer"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Tillåter att appen kommunicerar med etiketter, kort och läsare för närfältskommunikation (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"inaktivera skärmlåset"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Tillåter att appen inaktiverar tangentlåset och tillhörande lösenordsskydd. Ett exempel kan vara att tangentlåset inaktiveras vid inkommande samtal och aktiveras igen när samtalet är avslutat."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"hämta och begär komplexitet för låsskärmen"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Tillåter att appen får reda på komplexitetsnivån för skärmlåset (hög, mellan, låg eller ingen). Detta ger en indikation på skärmlåsets möjliga längd och typ. Appen kan även föreslå att skärmlåset uppdateras till en viss nivå, men användare kan ignorera förslaget och fortsätta navigera. Observera att skärmlåset inte lagras i vanlig text så appen får inte reda på det exakta lösenordet."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"använd biometrisk maskinvara"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Tillåter att appen använder biometrisk maskinvara vid autentisering"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"hantera maskinvara för fingeravtryck"</string>
@@ -1087,7 +1091,7 @@
     <string name="email_desc" msgid="3638665569546416795">"Skicka e-post till vald adress"</string>
     <string name="dial" msgid="1253998302767701559">"Ring"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Ring valt telefonnummer"</string>
-    <string name="map" msgid="5441053548030107189">"Karta"</string>
+    <string name="map" msgid="5441053548030107189">"Öppna karta"</string>
     <string name="map_desc" msgid="1836995341943772348">"Hitta den valda adressen"</string>
     <string name="browse" msgid="1245903488306147205">"Öppna"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Öppna vald webbadress"</string>
@@ -1097,9 +1101,9 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"Lägg till i Kontakter"</string>
     <string name="view_calendar" msgid="979609872939597838">"Visa"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Visa vald tid i kalendern"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Schema"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Schemalägg"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Schemalägg händelse på den valda tiden"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Spår"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Spåra"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Spåra valt flyg"</string>
     <string name="translate" msgid="9218619809342576858">"Översätt"</string>
     <string name="translate_desc" msgid="4502367770068777202">"Översätt markerad text"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Surfplattan uppdateras …"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Enheten uppdateras …"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Mobilen startar …"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android startar …"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Surfplattan startar …"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Enheten startar …"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Lagringsutrymmet optimeras."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tryck för att visa alla nätverk"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Anslut"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alla nätverk"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Ansluten till Wi-Fi-nätverket som föreslogs i <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Vill du tillåta att <xliff:g id="NAME">%s</xliff:g> föreslår nätverk till dig?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ja"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nej"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi aktiveras automatiskt"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"När du är i närheten av ett sparat nätverk av hög kvalitet"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Återaktivera inte"</string>

@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"උපාංගයේ දුරකථන විශේෂාංග වෙත ප්‍රවේශයට යෙදුමට ඉඩ දෙයි.  ඇමතුම සක්‍රිය වුවත්, සහ ඇමතුමකින් දුරස්ථ අංකය සම්බන්ධ වුවත් දුරකථන අංකය සහ උපාංග ID හඳුනා ගැනීමට මෙම අවසරය යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"පද්ධතිය හරහා ඇමතුම් මාර්ගගත කරන්න"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"ඇමතුම් අත්දැකීම වැඩිදියුණු කිරීම සඳහා යෙදුමට පද්ධතිය හරහා එහි ඇමතුම් මාර්ගගත කිරීමට ඉඩ දෙයි."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"පද්ධතිය හරහා ඇමතුම් බලන්න සහ පාලනය කරන්න."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"යෙදුමට උපාංගයෙහි පවතින ඇමතුම් බැලීමට සහ පාලනය කිරීමට ඉඩ දෙයි මෙහි ඇමතුම් සඳහා ඇමතුම් අංක සහ ඇමතුම්වල තත්ත්වය වැනි තොරතුරු ඇතුළත් වේ."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"වෙනත් යෙදුමක් වෙතින් වන ඇමතුමක් දිගටම කරගෙන යන්න"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"වෙනත් යෙදුමක ආරම්භ කරන ලද ඇමතුමක් දිගටම කරගෙන යාමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"දුරකථන අංක කියවන්න"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ආසන්න ක්ෂේත්‍ර සන්නිවේදන (NFC) ටැග්, පත්, සහ කියවන්නන් සමඟ සන්නිවේදනය කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ඔබගේ තිරයේ අගුල අබල කරන්න"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"යතුරු අගුල සහ ඕනෑම සම්බන්ධිත මුරපද ආරක්ෂාවක් අබල කිරීමට යෙදුමට අවසර දෙන්න. මෙහි උදාහරණයක් වන්නේ පැමිණෙන ඇමතුමක් ලැබෙද්දී, දුරකථනය අක්‍රිය වන අතර ඇමතුම අවසාන වන විට යතුරු අගුල නැවත සක්‍රිය වෙයි."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"තිර අගුලු සංකිර්ණය ලබා ගන්න සහ ඉල්ලන්න"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"තිර අගුලෙහි තිබිය හැකි දිගෙහි පරාසය හා වර්ගයේ පිළිබිඹු කරන, තිර අගුලු සංකීර්ණතා මට්ටම (ඉහළ, මධ්‍යම, අඩු හෝ රහිත) දැන ගැනීමට යෙදුමට ඉඩ දෙයි. තිරයේ අගුල නිශ්චිත මට්ටමක් වෙත යාවත්කාලීන කරන බවද මෙම යෙදුම පරිශීලකයින්ට යෝජනා කළ හැකිය. නමුත් පරිශීලකයන්ට නිදහසේ නොසලකා හැර සංචාලනය කළ හැකිය. තිර අලුල සරල පෙළ තුළ ගබඩා කර නැති බව සලකන්න එම නිසා යෙදුම නිවැරදි මුරපදය නොදනී."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ජීවමිතික දෘඪාංග භාවිත කරන්න"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"සත්‍යාපනය සඳහා ජීවමිතික දෘඪාංග භාවිත කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ඇඟිලි සලකුණු දෘඩාංග කළමනාකරණය කිරීම."</string>
@@ -1183,6 +1187,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"ටැබ්ලට් පරිගණකය යාවත්කාලීන කරමින්..."</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"උපාංගය යාවත්කාලීන කරමින්..."</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"දුරකථනය ආරම්භ කරමින්…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android ආරම්භ කරමින්…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"ටැබ්ලට් පරිගණකය ආරම්භ කරමින්…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"උපාංගය ආරම්භ කරමින්…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ආචයනය ප්‍රශස්තිකරණය කිරීම."</string>
@@ -1241,6 +1246,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"සියලු ජාල බැලීමට තට්ටු කරන්න"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"සම්බන්ධ කරන්න"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"සියලු ජාල"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> විසින් යෝජිත Wi-Fi ජාලයට සම්බන්ධ වුණි"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"<xliff:g id="NAME">%s</xliff:g>ඔබට ඔබ සඳහා ජාල යෝජනා කිරීමට අවශ්‍යද?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ඔව්"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"නැත"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ස්වයංක්‍රියව ක්‍රියාත්මක වනු ඇත"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ඔබ උසස් තත්ත්වයේ සුරැකි ජාලයක් අවට සිටින විට"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"නැවත ක්‍රියාත්මක නොකරන්න"</string>

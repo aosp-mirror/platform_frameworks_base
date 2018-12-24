@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permet que l\'aplicació accedeixi a les funcions de telèfon del dispositiu. Aquest permís permet que l\'aplicació determini el número de telèfon i els identificadors del dispositiu, si hi ha una trucada activa i el número remot connectat amb una trucada."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"encaminar trucades a través del sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Permet que l\'aplicació encamini les trucades a través del sistema per millorar-ne l\'experiència."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"consulta i controla les trucades a través del sistema."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Permet que l\'aplicació consulti i controli les trucades en curs al dispositiu. Inclou informació com ara l\'estat i els números de les trucades."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"Continua una trucada d\'una altra aplicació"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Permet que l\'aplicació continuï una trucada que s\'havia iniciat en una altra aplicació."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"llegir els números de telèfon"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permet que l\'aplicació es comuniqui amb les etiquetes, les targetes i els lectors de Comunicació de camp proper (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desactivació del bloqueig de pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permet que l\'aplicació desactivi el bloqueig del teclat i qualsevol element de seguretat de contrasenyes associat. Per exemple, el telèfon desactiva el bloqueig del teclat en rebre una trucada entrant i, a continuació, reactiva el bloqueig del teclat quan finalitza la trucada."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"obtenir i sol·licitar el nivell de complexitat del bloqueig de pantalla"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Permet que l\'aplicació conegui el nivell de complexitat del bloqueig de pantalla (alt, mitjà, baix o cap), que indica la llargària i el tipus de bloqueig de pantalla possibles. L\'aplicació també pot suggerir que els usuaris actualitzin el bloqueig de pantalla a un nivell determinat, però els usuaris poden ignorar aquestes recomanacions. Tingues en compte que el bloqueig de pantalla no s\'emmagatzema com a text sense format, de manera que l\'aplicació no coneix la contrasenya exacta."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"utilitza maquinari biomètric"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Permet que l\'aplicació faci servir maquinari biomètric per a l\'autenticació"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Gestionar el maquinari d\'empremtes digitals"</string>
@@ -1083,7 +1087,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Suprimeix"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Mètode d\'introducció de text"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accions de text"</string>
-    <string name="email" msgid="4560673117055050403">"Correu electrònic"</string>
+    <string name="email" msgid="4560673117055050403">"Envia un correu"</string>
     <string name="email_desc" msgid="3638665569546416795">"Envia un correu electrònic a l\'adreça seleccionada"</string>
     <string name="dial" msgid="1253998302767701559">"Truca"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Truca al número de telèfon seleccionat"</string>
@@ -1091,12 +1095,12 @@
     <string name="map_desc" msgid="1836995341943772348">"Localitza l\'adreça seleccionada"</string>
     <string name="browse" msgid="1245903488306147205">"Obre"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Obre l\'URL seleccionat"</string>
-    <string name="sms" msgid="4560537514610063430">"Missatge"</string>
+    <string name="sms" msgid="4560537514610063430">"Envia un SMS"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Envia un SMS al número de telèfon seleccionat"</string>
     <string name="add_contact" msgid="7867066569670597203">"Afegeix"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Afegeix als contactes"</string>
     <string name="view_calendar" msgid="979609872939597838">"Mostra"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Consulta l\'hora seleccionada al calendari"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Consulta la data seleccionada al calendari"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Programa"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programa un esdeveniment per a la data seleccionada"</string>
     <string name="view_flight" msgid="7691640491425680214">"Fes un seguiment"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"La tauleta s\'està actualitzant…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"El dispositiu s\'està actualitzant…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"S\'està iniciant el telèfon…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"S\'està iniciant Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"S\'està iniciant la tauleta…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"S\'està iniciant el dispositiu…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"S\'està optimitzant l\'emmagatzematge."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Toca per veure totes les xarxes"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connecta"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Totes les xarxes"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"T\'has connectat a la xarxa Wi‑Fi proposada per l\'aplicació <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Vols permetre que <xliff:g id="NAME">%s</xliff:g> et proposi xarxes?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Sí"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"La Wi-Fi s\'activarà automàticament"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Quan siguis a prop d\'una xarxa de qualitat desada"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"No tornis a activar"</string>

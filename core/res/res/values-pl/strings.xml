@@ -453,6 +453,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Pozwala aplikacji na dostęp do funkcji telefonicznych urządzenia. Aplikacja z tym uprawnieniem może odczytać numer telefonu i identyfikator urządzenia, sprawdzić, czy połączenie jest aktywne, oraz poznać numer, z którym jest nawiązane połączenie."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"przekazywanie połączeń przez system"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Zezwala aplikacji na przekazywanie połączeń przez system, by poprawić ich jakość."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"przeglądanie i kontrolowanie połączeń w systemie."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Zezwala aplikacji na przeglądanie i kontrolowanie trwających połączeń na urządzeniu. Dotyczy to informacji takich jak numery, z którymi nawiązane jest połączenie, oraz stan połączeń."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"kontynuuj połączenie w innej aplikacji"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Zezwala na kontynuowanie przez aplikację połączenia rozpoczętego w innej aplikacji."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"odczytywanie numerów telefonów"</string>
@@ -513,6 +515,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Pozwala aplikacji na komunikowanie się z tagami, kartami i czytnikami NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"wyłączanie blokady ekranu"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Pozwala aplikacji na wyłączenie blokady klawiatury i wszystkich związanych z tym haseł zabezpieczających. Na przykład telefon wyłącza blokadę klawiatury, gdy odbiera połączenie przychodzące, a następnie włącza ją ponownie po zakończeniu połączenia."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"uzyskiwanie informacji o stopniu trudności blokady ekranu i proszenie te informacje"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Zezwala aplikacji na poznanie stopnia złożoności blokady ekranu (wysoki, średni, niski lub brak), który wskazuje na możliwy zakres długości oraz typ blokady ekranu. Aplikacja może też zasugerować zaktualizowanie blokady ekranu pod kątem określonego stopnia trudności, ale użytkownik może to zignorować i zamknąć komunikat. Pamiętaj, że blokada ekranu nie jest zapisywana przy użyciu zwykłego tekstu, więc aplikacja nie pozna dokładnego hasła."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"używanie sprzętu biometrycznego"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Zezwala aplikacji na używanie sprzętu biometrycznego na potrzeby autoryzacji"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"zarządzanie czytnikiem linii papilarnych"</string>
@@ -1123,11 +1127,11 @@
     <string name="deleteText" msgid="6979668428458199034">"Usuń"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Sposób wprowadzania tekstu"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Działania na tekście"</string>
-    <string name="email" msgid="4560673117055050403">"E-mail"</string>
+    <string name="email" msgid="4560673117055050403">"Wyślij e-maila"</string>
     <string name="email_desc" msgid="3638665569546416795">"Wyślij e-maila na wybrany adres"</string>
     <string name="dial" msgid="1253998302767701559">"Zadzwoń"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Zadzwoń pod wybrany numer telefonu"</string>
-    <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <string name="map" msgid="5441053548030107189">"Otwórz mapę"</string>
     <string name="map_desc" msgid="1836995341943772348">"Pokaż wybrany adres na mapie"</string>
     <string name="browse" msgid="1245903488306147205">"Otwórz"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Otwórz wybrany adres URL"</string>
@@ -1139,7 +1143,7 @@
     <string name="view_calendar_desc" msgid="5828320291870344584">"Wyświetl wybraną datę w kalendarzu"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Zaplanuj"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Zaplanuj wydarzenie na wybraną godzinę"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Utwór"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Śledź"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Śledź wybrany lot"</string>
     <string name="translate" msgid="9218619809342576858">"Tłumacz"</string>
     <string name="translate_desc" msgid="4502367770068777202">"Przetłumacz zaznaczony tekst"</string>
@@ -1221,6 +1225,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tablet się aktualizuje…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Urządzenie się aktualizuje…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefon się uruchamia…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android się uruchamia…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tablet się uruchamia…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Urządzenie się uruchamia…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optymalizacja pamięci."</string>
@@ -1283,6 +1288,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Kliknij, by zobaczyć wszystkie sieci"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Połącz"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Wszystkie sieci"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Połączono z siecią Wi‑Fi zaproponowaną przez aplikację <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Czy chcesz zezwolić aplikacji <xliff:g id="NAME">%s</xliff:g> na proponowanie sieci?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Tak"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nie"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi włączy się automatycznie"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Gdy znajdziesz się w pobliżu zapisanej sieci o mocnym sygnale"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nie włączaj ponownie"</string>

@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"အပလီကေးရှင်းအား ဖုန်းရဲ့ စွမ်းဆောင်ချက်များအား သုံးခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် ဖုန်းနံပါတ်၊ စက်နံပါတ်၊ ဖုန်းခေါ်နေမှု ရှိမရှိနှင့် တဖက်မှ ဖုန်းနံပါတ် များအား သိရှိနိုင်ပါသည်"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ခေါ်ဆိုမှုများကို စနစ်မှတစ်ဆင့် ဖြတ်သန်းခွင့်ပြုပါ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"ခေါ်ဆိုမှု အတွေ့အကြုံ ပိုမိုကောင်းမွန်လာစေရန်အတွက် အက်ပ်၏ ခေါ်ဆိုမှုအား စနစ်မှတစ်ဆင့် ဖြတ်သန်းရန် ခွင့်ပြုပါသည်။"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"စနစ်မှတစ်ဆင့် ခေါ်ဆိုမှုများကို ကြည့်ရှုထိန်းချုပ်ပါ။"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"စက်ပစ္စည်းပေါ်ရှိ လက်ရှိခေါ်ဆိုမှုများကို အက်ပ်အား ကြည့်ရှုထိန်းချုပ်ခွင့်ပြုသည်။ ၎င်းတွင် ခေါ်ဆိုမှုနံပါတ်များနှင့် ခေါ်ဆိုမှုအခြေအနေများကဲ့သို့သော အခြေအနေများ ပါဝင်သည်။"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"အခြားအက်ပ်မှ ဖုန်းခေါ်ဆိုမှုကို ဆက်လက်ပြုလုပ်ပါ"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"အခြားအက်ပ်တွင် စတင်ထားသည့် ဖုန်းခေါ်ဆိုမှုကို ဆက်လက်ပြုလုပ်ရန် ဤအက်ပ်ကို ခွင့်ပြုသည်။"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ဖုန်းနံပါတ်များကို ဖတ်ရန်"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"အက်ပ်အား တာတို စက်ကွင်း ဆက်သွယ်ရေး (NFC) တဲဂ်များ၊ ကဒ်များ နှင့် ဖတ်ကြသူတို့နှင့် ဆက်သွယ်ပြောဆိုခွင့် ပြုသည်။"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ဖန်သားပြင် သော့ချခြင်းအား မလုပ်နိုင်အောင် ပိတ်ရန်"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"အပလီကေးရှင်းအား သော့ချခြင်းနှင့် သက်ဆိုင်ရာ စကားဝှက်သတ်မှတ်ခြင်းများအား မသုံးနိုင်အောင် ပိတ်ခြင်းကို ခွင့်ပြုရန်။ ဥပမာ ဖုန်းလာလျှင် သော့ပိတ်ခြင်း ပယ်ဖျက်ခြင်း၊ ဖုန်းပြောပြီးလျှင် သော့ကို အလိုအလျောက် ပြန်ပိတ်ခြင်း"</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ဖုန်းမျက်နှာပြင်လော့ခ် ရှုပ်ထွေးမှုကို ရယူခြင်းနှင့် တောင်းခံခြင်း"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"ဖုန်းမျက်နှာပြင်လော့ခ်၏ ရှုပ်ထွေးမှုအဆင့် (မြင့်၊ အလယ်အလတ်၊ နိမ့် သို့မဟုတ် မရှိ) အား လေ့လာရန် အက်ပ်ကို ခွင့်ပြုသည်။ ၎င်းက သတ်မှတ်ထားနိုင်သော ဖုန်းမျက်နှာပြင်လော့ခ်၏ စာလုံးရေနှင့် အမျိုးအစားကို ညွှန်ပြပေးသည်။ အသုံးပြုသူများအနေနှင့် ဖုန်းမျက်နှာပြင်လော့ခ်ကို အတိုင်းအတာတစ်ခုအထိ အဆင့်မြှင့်ရန် အက်ပ်က အကြံပြုနိုင်သည်။ သို့သော်လည်း အသုံးပြုသူများက ၎င်းကို ဂရုပြုမနေဘဲ လွတ်လပ်စွာ ကြည့်ရှုနိုင်ပါသည်။ ဖုန်းမျက်နှာပြင်လော့ခ်ကို စာသားအတိုင်း သိမ်းမထားသဖြင့် အက်ပ်သည် စကားဝှက်အစစ်ကို မသိနိုင်ကြောင်း သတိပြုပါ။"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ဇီဝဗေဒဆိုင်ရာ အချက်အလက်သုံး ကွန်ပျူတာဆိုင်ရာ စက်ပစ္စည်းကို အသုံးပြုရန်"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"အထောက်အထားစိစစ်ခြင်းအတွက် ဇီဝဗေဒဆိုင်ရာ သတင်းအချက်အလက်များသုံးသည့် ကွန်ပျူတာဆိုင်ရာ စက်ပစ္စည်းကို အသုံးပြုရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"လက်ဗွေရာပစ္စည်းကို စီမံမည်"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"တက်ဘလက်ကို အပ်ဒိတ်လုပ်နေသည်…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"စက်ပစ္စည်းကို အပ်ဒိတ်လုပ်နေသည်…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"ဖုန်း စတင်နေသည်…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android စတင်နေ…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"တက်ဘလက် စတင်နေသည်…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"စက်ပစ္စည်း စတင်နေသည်…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"သိုလှောင်မှုအား ပြုပြင်ခြင်း။"</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ကွန်ရက်အားလုံးကို ကြည့်ရန် တို့ပါ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ချိတ်ဆက်ရန်"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ကွန်ရက်အားလုံး"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> အကြံပြုထားသော Wi‑Fi ကွန် ရက်သို့ ချိတ်ဆက်ထားသည်"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"သင့်အတွက် ကွန်ရက်များ အကြံပြုရန် <xliff:g id="NAME">%s</xliff:g> ကို ခွင့်ပြုလိုပါသလား။"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Yes"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ကို အလိုအလျောက်​ ပြန်ဖွင့်ပေးလိမ့်ပါမည်"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"သိမ်းဆည်းထားသည့် အရည်အသွေးမြင့်ကွန်ရက်များအနီးသို့ ရောက်ရှိသည့်အခါ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ပြန်မဖွင့်ပါနှင့်"</string>

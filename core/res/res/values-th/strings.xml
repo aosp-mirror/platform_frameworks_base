@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"อนุญาตให้แอปพลิเคชันเข้าถึงฟีเจอร์โทรศัพท์ของอุปกรณ์ การอนุญาตนี้ทำให้แอปพลิเคชันสามารถตรวจสอบหมายเลขโทรศัพท์และรหัสอุปกรณ์ ตรวจสอบว่ามีการโทรที่ทำงานอยู่หรือไม่ และตรวจสอบหมายเลขระยะไกลที่เชื่อมต่อด้วยการโทร"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"กำหนดเส้นทางการโทรผ่านระบบ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"อนุญาตให้แอปกำหนดเส้นทางการโทรของแอปผ่านระบบเพื่อปรับปรุงประสบการณ์ในการโทร"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ดูและจัดการการติดต่อผ่านระบบ"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"อนุญาตให้แอปดูและจัดการการติดต่อในอุปกรณ์ ซึ่งรวมถึงข้อมูลอย่างเช่น หมายเลขที่ใช้ในการติดต่อและสถานะการติดต่อ"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ต่อสายจากแอปอื่น"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"อนุญาตให้แอปต่อสายที่เริ่มจากแอปอื่น"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"อ่านหมายเลขโทรศัพท์"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"อนุญาตให้แอปพลิเคชันสื่อสารกับแท็ก Near Field Communication (NFC) การ์ด และโปรแกรมอ่าน"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ปิดใช้งานการล็อกหน้าจอของคุณ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"อนุญาตให้แอปพลิเคชันปิดใช้งานการล็อกปุ่มกดและการรักษาความปลอดภัยด้วยรหัสผ่านใดๆ ที่เกี่ยวข้อง ตัวอย่างเช่น โทรศัพท์ปิดใช้งานการล็อกปุ่มกดเมื่อรับสายเรียกเข้า จากนั้นจึงเปิดใช้งานการล็อกปุ่มกดใหม่หลังจากวางสาย"</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ใช้และขอดูความซับซ้อนของ \"ล็อกหน้าจอ\""</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"อนุญาตให้แอปเรียนรู้ระดับความซับซ้อนของการล็อกหน้าจอ (สูง ปานกลาง ต่ำ หรือไม่มี) ซึ่งแสดงให้เห็นช่วงความยาวและประเภทของการล็อกหน้าจอที่เป็นไปได้ นอกจากนี้แอปยังแนะนำให้ผู้ใช้อัปเดตการล็อกหน้าจอเป็นระดับหนึ่งๆ ได้ด้วย แต่ผู้ใช้จะปฏิเสธและไปยังส่วนต่างๆ ต่อได้ โปรดทราบว่าระบบไม่ได้จัดเก็บการล็อกหน้าจอไว้เป็นข้อความธรรมดา เพื่อให้แอปไม่รู้รหัสผ่าน"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ใช้ฮาร์ดแวร์ชีวมิติ"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"อนุญาตให้แอปใช้ฮาร์ดแวร์ชีวมิติเพื่อตรวจสอบสิทธิ์"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"จัดการฮาร์ดแวร์ลายนิ้วมือ"</string>
@@ -1097,14 +1101,14 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"เพิ่มในรายชื่อติดต่อ"</string>
     <string name="view_calendar" msgid="979609872939597838">"ดู"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"ดูเวลาที่เลือกในปฏิทิน"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"กำหนดการ"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"ตั้งเวลา"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"ตั้งเวลากิจกรรมสำหรับเวลาที่เลือก"</string>
-    <string name="view_flight" msgid="7691640491425680214">"แทร็ก"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ติดตาม"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ติดตามเที่ยวบินที่เลือก"</string>
     <string name="translate" msgid="9218619809342576858">"แปล"</string>
     <string name="translate_desc" msgid="4502367770068777202">"แปลข้อความที่เลือก"</string>
     <string name="define" msgid="7394820043869954211">"หาความหมาย"</string>
-    <string name="define_desc" msgid="7910883642444919726">"ให้คำจำกัดความข้อความที่เลือก"</string>
+    <string name="define_desc" msgid="7910883642444919726">"หาความหมายข้อความที่เลือก"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"พื้นที่จัดเก็บเหลือน้อย"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"บางฟังก์ชันระบบอาจไม่ทำงาน"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"พื้นที่เก็บข้อมูลไม่เพียงพอสำหรับระบบ โปรดตรวจสอบว่าคุณมีพื้นที่ว่าง 250 MB แล้วรีสตาร์ท"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"แท็บเล็ตกำลังอัปเดต…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"อุปกรณ์กำลังอัปเดต…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"โทรศัพท์กำลังเริ่มต้น…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android กำลังเริ่มต้น…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"แท็บเล็ตกำลังเริ่มต้น…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"อุปกรณ์กำลังเริ่มต้น…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"กำลังเพิ่มประสิทธิภาพพื้นที่จัดเก็บข้อมูล"</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"แตะเพื่อดูเครือข่ายทั้งหมด"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"เชื่อมต่อ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"เครือข่ายทั้งหมด"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"เชื่อมต่ออยู่กับเครือข่าย Wi‑Fi ที่ <xliff:g id="NAME">%s</xliff:g> แนะนำ"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"ต้องการให้ <xliff:g id="NAME">%s</xliff:g> แนะนำเครือข่ายให้ไหม"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ใช่"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ไม่"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi จะเปิดโดยอัตโนมัติ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"เมื่อคุณอยู่ใกล้เครือข่ายคุณภาพสูงที่บันทึกไว้"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ไม่ต้องเปิดอีกครั้ง"</string>

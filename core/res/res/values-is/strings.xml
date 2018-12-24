@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leyfir forriti að fá aðgang að símaeiginleikum tækisins. Þessi heimild gerir forritinu kleift að komast að símanúmeri og auðkennum tækisins, hvort símtal er í gangi og símanúmeri viðmælanda í símtali."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"senda símtöl gegnum kerfið"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Heimilar forritinu að senda símtöl sín gegnum kerfið til að bæta gæði símtalsins."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"sjá og stjórna símtölum í gegnum kerfið."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Leyfir forritinu að sjá og stjórna hringdum símtölum í tækinu. Þar á meðal eru upplýsingar á borð við símanúmer í símtölum og stöður símtala."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"halda áfram með símtal úr öðru forriti"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Leyfir forritinu að halda áfram með símtal sem hófst í öðru forriti."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lesa símanúmer"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Leyfir forriti að eiga samskipti við NFC-merki, -spjöld og -lesara (nándarsamskipti)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"slökkva á skjálásnum"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Leyfir forriti að slökkva á símalásnum og öðrum öryggisaðgerðum tengdum aðgangsorði. Til dæmis gerir síminn lásinn óvirkan þegar símtal berst og læsist svo aftur að símtali loknu."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"fá og biðja um flókinn skjálás"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Leyfir forritinu að læra hversu flókinn skjálásinn er (erfiður, miðlungs, léttur eða enginn), sem gefur til kynna lengd og tegund skjálássins. Forritið getur einnig lagt til að notendur geri skjálásinn flóknari upp að tilteknu marki, en notendur geta valið að hunsa það og halda áfram að vafra. Hafðu í huga að skjálásinn er ekki geymdur í ódulkóðuðum texta svo forritið veit ekki nákvæmt aðgangsorð."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"nota búnað fyrir líffræðileg gögn"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Leyfir forritinu að nota búnað fyrir líffræðileg gögn til auðkenningar"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"stjórna fingrafarabúnaði"</string>
@@ -1083,7 +1087,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Eyða"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Innsláttaraðferð"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaaðgerðir"</string>
-    <string name="email" msgid="4560673117055050403">"Tölvupóstur"</string>
+    <string name="email" msgid="4560673117055050403">"Senda tölvupóst"</string>
     <string name="email_desc" msgid="3638665569546416795">"Senda á valið netfang"</string>
     <string name="dial" msgid="1253998302767701559">"Símtal"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Hringja í valið símanúmer"</string>
@@ -1091,7 +1095,7 @@
     <string name="map_desc" msgid="1836995341943772348">"Finna valið heimilisfang"</string>
     <string name="browse" msgid="1245903488306147205">"Opna"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Opna valda vefslóð"</string>
-    <string name="sms" msgid="4560537514610063430">"Skilaboð"</string>
+    <string name="sms" msgid="4560537514610063430">"Senda skilaboð"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Senda skilaboð í valið símanúmer"</string>
     <string name="add_contact" msgid="7867066569670597203">"Bæta við"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Bæta við tengiliði"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Uppfærir spjaldtölvu…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Uppfærir tæki…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Síminn kveikir á sér…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android er að ræsast…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Spjaldtölvan kveikir á sér…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Tækið kveikir á sér…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Fínstillir geymslu."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Ýttu til að sjá öll netkerfi"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Tengjast"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Öll netkerfi"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Tengt við Wi-Fi net sem <xliff:g id="NAME">%s</xliff:g> stakk upp á"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Viltu leyfa <xliff:g id="NAME">%s</xliff:g> að stinga upp á neti fyrir þig?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Já"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nei"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Kveikt verður sjálfkrafa á Wi‑Fi"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Þegar þú ert nálægt vistuðu hágæðaneti"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ekki kveikja aftur"</string>

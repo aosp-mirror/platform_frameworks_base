@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Қолданбаға құрылғыдағы телефон функцияларына кіру мүмкіндігін береді. Бұл рұқсат қолданбаға телефон нөмірі, құрылғы жеке анықтағышы, қоңырау белсенділігі және сол қоңырауға байланысты қашықтағы нөмірді анықтау мүмкіндігін береді."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"қоңырауларды жүйе арқылы бағыттау"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Қоңырау шалу тәжірибесін жақсарту үшін қолданба қоңырауларды жүйе арқылы бағыттай алады."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"жүйе арқылы қоңырауларды көру және басқару."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Қолданбаға құрылғыдағы қазіргі қоңырауларды көруге және басқаруға мүмкіндік береді. Бұл – қоңырау шалу нөмірлері және қоңыраулардың күйі сияқты ақпаратқа қатысты."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"басқа қолданбадағы қоңырауды жалғастыру"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Қолданбаға басқа қолданбадағы қоңырауды жалғастыруға рұқсат береді."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"телефон нөмірлерін оқу"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Қолданбаға NFC белгілерімен, карталармен және оқу құралдарымен байланысуға рұқсат береді."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"экран бекітпесін істен шығару"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Қолданбаларға кілтперне және басқа кілтсөзге қатысты қауіпсіздік шараларын өшіру мүмкіндігін береді. Мысалы, телефон кіріс қоңырауларын алғанда кілтпернені өшіреді және қоңырау аяқталғанда қайта қосады."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"экранды құлыптау күрделілігі туралы дерек алу және оны сұрау"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Қолданбаға экранды құлыптау күрделілігінің деңгейін (жоғары, орташа, төмен немесе жоқ), соның ішінде ұзақтығы мен түрін көрсетеді. Сонымен қатар қолданба пайдаланушыларға экранды құлыптауды белгілі бір деңгейге жаңартуды ұсынады. Бірақ бұл ұсыныстарды елемеуге болады. Экранды құлпы қарапайым мәтін түрінде сақталмайтынын және қолданбаға белгісіз болатынын ескеріңіз."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"биометрикалық жабдықты пайдалану"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Аутентификациялау үшін қолданбаға биометрикалық жабдықты пайдалануға рұқсат береді"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"саусақ ізі жабдығын басқару"</string>
@@ -1083,23 +1087,23 @@
     <string name="deleteText" msgid="6979668428458199034">"Жою"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Енгізу әдісі"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Мәтін әрекеттері"</string>
-    <string name="email" msgid="4560673117055050403">"Электрондық пошта"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Таңдалған электрондық пошта мекенжайына хабар жіберу"</string>
+    <string name="email" msgid="4560673117055050403">"Эл. поштаны ашу"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Таңдалған мекенжайға хабар жіберу"</string>
     <string name="dial" msgid="1253998302767701559">"Қоңырау шалу"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Таңдалған телефон нөміріне қоңырау шалу"</string>
-    <string name="map" msgid="5441053548030107189">"Map"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Таңдалған мекенжайдың орналасқан жерін анықтау"</string>
+    <string name="map" msgid="5441053548030107189">"Картаны ашу"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Таңдалған мекенжайды табу"</string>
     <string name="browse" msgid="1245903488306147205">"Ашу"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Таңдалған URL мекенжайын ашу"</string>
-    <string name="sms" msgid="4560537514610063430">"Хабар"</string>
+    <string name="sms" msgid="4560537514610063430">"Хабар жазу"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Таңдалған телефон нөміріне хабар жіберу"</string>
     <string name="add_contact" msgid="7867066569670597203">"Енгізу"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Контактілер тізіміне енгізу"</string>
     <string name="view_calendar" msgid="979609872939597838">"Көру"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Күнтізбеде таңдалған уақытты көру"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Кесте"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Таңдалған уақытқа іс-шараны жоспарлау"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Бақылау"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Таңдалған уақытты күнтізбеден көру"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Жоспарлау"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Таңдалған уақытқа іс-шара жоспарлау"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Қадағалау"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Таңдалған ұшу рейсін қадағалау"</string>
     <string name="translate" msgid="9218619809342576858">"Аудару"</string>
     <string name="translate_desc" msgid="4502367770068777202">"Таңдалған мәтінді аудару"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Планшет жаңартылуда…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Құрылғы жаңартылуда…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Телефон іске қосылуда…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android іске қосылуда…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Планшет іске қосылуда…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Құрылғы іске қосылуда…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Қойманы оңтайландыру."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Барлық желілерді көру үшін түртіңіз"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Қосылу"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Барлық желілер"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> ұсынған Wi‑Fi желісіне жалғанды"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"<xliff:g id="NAME">%s</xliff:g> сізге желі ұсынғанын қалайсыз ба?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Иә"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Жоқ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi автоматты түрде қосылады"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Сақталған жоғары сапалы желіге жақын болғанда"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Қайта қоспау"</string>
