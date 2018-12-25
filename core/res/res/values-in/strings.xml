@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Memungkinkan aplikasi mengakses fitur telepon perangkat. Izin ini memungkinkan aplikasi menentukan nomor telepon dan ID perangkat, apakah suatu panggilan aktif atau tidak, dan nomor jarak jauh yang tersambung oleh sebuah panggilan."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"sambungkan panggilan telepon melalui sistem"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Mengizinkan aplikasi menyambungkan panggilan telepon melalui sistem untuk menyempurnakan pengalaman menelepon."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"melihat dan mengontrol panggilan melalui sistem."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Memungkinkan aplikasi melihat dan mengontrol panggilan telepon yang sedang berlangsung di perangkat. Ini mencakup informasi seperti nomor yang menelepon dan status panggilan telepon."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"lanjutkan panggilan dari aplikasi lain"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Mengizinkan aplikasi melanjutkan panggilan yang dimulai di aplikasi lain."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"membaca nomor telepon"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Mengizinkan apl berkomunikasi dengan tag, kartu, dan alat pembaca Komunikasi Nirkabel Jarak Dekat (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"nonaktifkan kunci layar Anda"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Memungkinkan aplikasi menonaktifkan kunci tombol dan keamanan sandi apa pun yang terkait. Misalnya, ponsel menonaktifkan kunci tombol saat menerima panggilan telepon masuk, kemudian mengaktifkan kembali kunci tombol ketika panggilan selesai."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"dapatkan dan minta kompleksitas kunci layar"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Mengizinkan aplikasi mempelajari tingkat kompleksitas kunci layar (tinggi, sedang, rendah, atau tidak ada), yang menunjukkan kemungkinan rentang durasi dan jenis kunci layar. Aplikasi juga dapat menyarankan agar pengguna memperbarui kunci layar ke tingkat tertentu, tetapi pengguna dapat mengabaikan dan keluar dengan bebas. Perhatikan bahwa kunci layar tidak disimpan dalam teks biasa, sehingga aplikasi tidak mengetahui sandi yang sebenarnya."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"gunakan hardware biometrik"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Mengizinkan aplikasi menggunakan hardware biometrik untuk autentikasi"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"kelola hardware sidik jari"</string>
@@ -1088,23 +1092,23 @@
     <string name="dial" msgid="1253998302767701559">"Panggil"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Panggil nomor telepon yang dipilih"</string>
     <string name="map" msgid="5441053548030107189">"Peta"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Mencari alamat yang dipilih"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Cari alamat yang dipilih"</string>
     <string name="browse" msgid="1245903488306147205">"Buka"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Buka URL yang dipilih"</string>
-    <string name="sms" msgid="4560537514610063430">"Pesan"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"Mengirimkan SMS ke nomor telepon yang dipilih"</string>
+    <string name="sms" msgid="4560537514610063430">"SMS"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Kirim SMS ke nomor telepon yang dipilih"</string>
     <string name="add_contact" msgid="7867066569670597203">"Tambahkan"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"Menambahkan ke kontak"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Tambahkan ke kontak"</string>
     <string name="view_calendar" msgid="979609872939597838">"Lihat"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Melihat waktu yang dipilih di kalender"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Jadwal"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Jadwalkan"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Menjadwalkan acara untuk waktu yang dipilih"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Lacak"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"Memantau penerbangan yang dipilih"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Pantau"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Pantau penerbangan yang dipilih"</string>
     <string name="translate" msgid="9218619809342576858">"Terjemahkan"</string>
     <string name="translate_desc" msgid="4502367770068777202">"Terjemahkan teks yang dipilih"</string>
-    <string name="define" msgid="7394820043869954211">"Tentukan"</string>
-    <string name="define_desc" msgid="7910883642444919726">"Tentukan teks yang dipilih"</string>
+    <string name="define" msgid="7394820043869954211">"Definisikan"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Definisikan teks yang dipilih"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ruang penyimpanan hampir habis"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Beberapa fungsi sistem mungkin tidak dapat bekerja"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Penyimpanan tidak cukup untuk sistem. Pastikan Anda memiliki 250 MB ruang kosong, lalu mulai ulang."</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Mengupdate tablet…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Mengupdate perangkat…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Menyalakan ponsel…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Memulai Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Menyalakan tablet…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Menyalakan perangkat…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Mengoptimalkan penyimpanan."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tap untuk melihat semua jaringan"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Hubungkan"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Semua jaringan"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Terhubung ke jaringan Wi‑Fi yang diusulkan oleh <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Perbolehkan <xliff:g id="NAME">%s</xliff:g> mengusulkan jaringan kepada Anda?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ya"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Tidak"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi akan aktif otomatis"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Saat berada di dekat jaringan berkualitas tinggi yang tersimpan"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Jangan aktifkan kembali"</string>

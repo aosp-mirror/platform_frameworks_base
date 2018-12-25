@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que la aplicación acceda a las funciones de teléfono del dispositivo. La aplicación puede utilizar este permiso para descubrir identificadores de dispositivos y números de teléfono, para saber si una llamada está activa y para conocer el número remoto con el que se ha establecido conexión mediante una llamada."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"Transmite llamadas a través del sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Permite que la app transmita las llamadas a través del sistema para mejorar la experiencia de llamadas."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Mirar y controlar las llamadas con el sistema"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Permite que la app vea y controle las llamadas entrantes del dispositivo. Incluye información como los números emisores y el estado de las llamadas."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"continuar llamada de otra app"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Permite que la app continúe con una llamada que se inició en otra app."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"leer números de teléfono"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que la aplicación se comunique con lectores, tarjetas y etiquetas de Comunicación de campo cercano (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desactivar el bloqueo de pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite que la aplicación desactive el bloqueo del teclado y cualquier protección con contraseña asociada. Por ejemplo, el dispositivo puede desactivar el bloqueo del teclado cuando recibe una llamada telefónica y volver a activarlo cuando finaliza la llamada."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"obtener y solicitar complejidad del bloqueo de pantalla"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Permite que la app conozca el nivel de complejidad del bloqueo de pantalla (alta, media, baja o ninguna), lo que indica el rango de duración posible y el tipo de bloqueo de pantalla. La app también puede sugerirles a los usuarios que actualicen el bloqueo de pantalla a un determinado nivel, aunque ellos pueden ignorar esta sugerencia y seguir navegando. Ten en cuenta que el bloqueo de pantalla no se almacena como texto sin formato, por lo que la app no conoce la contraseña exacta."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"usar hardware biométrico"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Permite que la app use hardware biométrico para realizar la autenticación"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Administrar el hardware de huellas digitales"</string>
@@ -1088,7 +1092,7 @@
     <string name="dial" msgid="1253998302767701559">"Llamar"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Llamar al número de teléfono seleccionado"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Abrir la dirección seleccionada en el mapa"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Buscar la dirección seleccionada"</string>
     <string name="browse" msgid="1245903488306147205">"Abrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Abrir URL seleccionada"</string>
     <string name="sms" msgid="4560537514610063430">"Mensaje"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Actualizando tablet…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Actualizando dispositivo…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Iniciando teléfono…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Iniciando Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Iniciando tablet…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Iniciando dispositivo…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimizando almacenamiento"</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Presiona para ver todas las redes"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Conectar"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Todas las redes"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Se estableció conexión con la red Wi-Fi sugerida por <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"¿Quieres permitir que <xliff:g id="NAME">%s</xliff:g> te sugiera redes?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Sí"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Se activará la conexión Wi-Fi automáticamente"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Cuando estés cerca de una red guardada de alta calidad"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"No volver a activar"</string>

@@ -317,18 +317,18 @@
     <string name="permgrouplab_visual" msgid="8030190588123857921">"फोटो आणि व्हिडिओ"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"तुमचे फोटो आणि व्हिडिओ अॅक्सेस करा"</string>
     <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे फोटो आणि व्हिडिओ अॅक्सेस करू द्यायचे का?"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो सामग्री पुनर्प्राप्त करा"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"तुम्ही परस्‍परसंवाद करीत असलेल्‍या विंडोची सामग्री तपासा."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडोमधील आशय पुन्हा मिळवा"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"तुम्ही वापरत असलेल्‍या विंडोमधील आशय तपासा."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"स्पर्श करून अन्वेषण चालू करा"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"टॅप केलेले आयटम मोठ्‍याने बोलले जातील आणि जेश्चरचा वापर करून स्क्रीन एक्सप्लोर केली जाऊ शकते."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"तुम्ही टाइप करता त्या मजकुराचे निरीक्षण करा"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"क्रेडिट कार्ड नंबर आणि संकेतशब्‍द यासारखा वैयक्तिक डेटा समाविष्‍ट करते."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"डिस्प्ले मॅग्निफिकेशन नियंत्रित करा"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"प्रदर्शनाचा झूम स्तर आणि स्थिती निर्धारण नियंत्रित करा."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"यामध्ये क्रेडिट कार्ड नंबर आणि पासवर्ड यासारखा वैयक्तिक डेटा समाविष्‍ट आहे."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"डिस्प्ले मोठा करण्यावर नियंत्रण ठेवा"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"डिस्प्लेची झूम पातळी आणि पोझिशनिंग नियंत्रित करा."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"जेश्चर करा"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"टॅप, स्वाइप, पिंच आणि इतर जेश्चर करू शकते."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"फिंगरप्रिंट जेश्चर"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"डिव्‍हाइसच्‍या फिंगरप्रिंट सेंसरवर केलेले जेश्चर कॅप्‍चर करू शकते."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"डिव्‍हाइसच्‍या फिंगरप्रिंट सेंन्सरवरील जेश्चर कॅप्‍चर करू शकते."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"स्टेटस बार अक्षम करा किंवा सुधारित करा"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"स्टेटस बार अक्षम करण्यासाठी किंवा सिस्टम चिन्हे जोडण्यासाठी आणि काढण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"स्टेटस बार होऊ द्या"</string>
@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइस च्या फोन वैशिष्ट्यांवर अॅक्सेस करण्यास अॅपला अनुमती देते. ही परवानगी कॉल अॅक्टिव्हेट असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रिमोट नंबर निर्धारित करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"प्रणालीच्या माध्यमातून कॉल रूट करा"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कॉल करण्याचा अनुभव सुधारण्यासाठी अॅपला त्याचे कॉल प्रणालीच्या माध्यमातून रूट करू देते."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"सिस्टम वापरून कॉल पाहा आणि नियंत्रण ठेवा."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"डिव्हाइसवर येणार कॉल पाहण्यासाठी आणि नियंत्रित करण्यासाठी अॅपला अनुमती देते. यामध्ये कॉल करण्यासाठी कॉलचा नंबर आणि कॉलची स्थिती यासारख्या माहितीचा समावेश असतो."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"दुसऱ्या अॅपवरून कॉल करणे सुरू ठेवा"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"दुसऱ्या अॅपमध्ये सुरू झालेल्या कॉलला पुढे सुरू ठेवण्याची अॅपला अनुमती देते."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"फोन नंबर वाचा"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"फील्ड जवळील कम्युनिकेशन (NFC) टॅग, कार्डे आणि वाचक यांच्यासह संवाद करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"तुमचे स्क्रीन लॉक अक्षम करा"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"कीलॉक आणि कोणतीही संबद्ध पासवर्ड सुरक्षितता अक्षम करण्यासाठी अ‍ॅप ला अनुमती देते. उदाहरणार्थ, येणारा फोन कॉल प्राप्त करताना फोन कीलॉक अक्षम करतो, नंतर जेव्हा कॉल समाप्त होतो तेव्हा तो कीलॉक पुन्हा-सक्षम करतो."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"स्क्रीन लॉक जटिलता मिळवा आणि त्यासाठी विनंती करा"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"अ‍ॅपला स्क्रीन लॉक जटिलता पातळी (उच्च, मध्यम, खालची किंवा काहीही नाही) जाणून घेऊ देते, जी लांबीची संभाव्य श्रेणी आणि स्क्रीन लॉकचा प्रकार सूचित करते. अ‍ॅप वापरकर्त्यांना हेदेखील सुचवू शकते की त्यांनी स्क्रीन लॉक ठराविक पातळीपर्यंत अपडेट करावे परंतु वापरकर्ते मुक्तपणे ते दुर्लक्षित करू शकतात आणि तेथून नेव्हिगेट करू शकतात. स्क्रीन लॉक प्लेनटेक्स्टमध्ये स्टोअर केले जात नसल्यामुळे अ‍ॅपला नेमका पासवर्ड माहीत नसतो याची नोंद घ्या."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"बायोमेट्रिक हार्डवेअर वापरा"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ऑथेंटिकेशनसाठी बायोमेट्रिक हार्डवेअरचा वापर करण्याची अॅपला अनुमती देते"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"फिंगरप्रिंट हार्डवेअर व्यवस्थापित करा"</string>
@@ -1110,7 +1114,7 @@
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टीमसाठी पुरेसे संचयन नाही. आपल्याकडे 250MB मोकळे स्थान असल्याचे सुनिश्चित करा आणि रीस्टार्ट करा."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> चालत आहे"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"अधिक माहितीसाठी किंवा अ‍ॅप थांबविण्यासाठी टॅप करा."</string>
-    <string name="ok" msgid="5970060430562524910">"ठीक"</string>
+    <string name="ok" msgid="5970060430562524910">"ठीक आहे"</string>
     <string name="cancel" msgid="6442560571259935130">"रद्द करा"</string>
     <string name="yes" msgid="5362982303337969312">"ठीक"</string>
     <string name="no" msgid="5141531044935541497">"रद्द करा"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"टॅबलेट अपडेट होत आहे…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"डिव्‍हाइस अपडेट होत आहे…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"फोन सुरू होत आहे…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android प्रारंभ करत आहे…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"टॅबलेट सुरू होत आहे…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"डिव्‍हाइस सुरू होत आहे…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"संचयन ऑप्टिमाइझ करत आहे."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"सर्व नेटवर्क पाहण्यासाठी टॅप करा"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"कनेक्ट करा"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"सर्व नेटवर्क"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> ने सुचवलेल्या वाय-फाय नेटवर्कशी कनेक्ट केले"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"तुम्हाला <xliff:g id="NAME">%s</xliff:g> ने तुमच्यासाठी नेटवर्क सुचवायला हवे आहे का?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"होय"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"नाही"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"वाय-फाय आपोआप चालू होईल"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"तुम्ही जेव्हा सेव्ह केलेल्या उच्च दर्जाच्या नेटवर्कजवळ असाल तेव्हा"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"पुन्हा चालू करू नका"</string>
@@ -1857,7 +1866,7 @@
     <string name="language_selection_title" msgid="2680677278159281088">"एक भाषा जोडा"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"प्रदेश प्राधान्य"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"भाषा नाव टाइप करा"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"सूचित केलेले"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"सुचवलेल्या भाषा"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"सर्व भाषा"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"सर्व प्रदेश"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"शोध"</string>

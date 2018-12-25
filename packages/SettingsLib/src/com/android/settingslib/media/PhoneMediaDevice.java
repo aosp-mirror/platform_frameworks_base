@@ -15,6 +15,7 @@
  */
 package com.android.settingslib.media;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.util.Log;
 
@@ -23,6 +24,8 @@ import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.HearingAidProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
+
+import java.util.List;
 
 /**
  * PhoneMediaDevice extends MediaDevice to represents Phone device.
@@ -41,6 +44,30 @@ public class PhoneMediaDevice extends MediaDevice {
 
         mLocalBluetoothManager = localBluetoothManager;
         mProfileManager = mLocalBluetoothManager.getProfileManager();
+        initDeviceRecord();
+
+        mIsConnected = isPhoneActive();
+    }
+
+    private boolean isPhoneActive() {
+        boolean isActive = true;
+
+        final HearingAidProfile hapProfile = mProfileManager.getHearingAidProfile();
+        final A2dpProfile a2dpProfile = mProfileManager.getA2dpProfile();
+
+        if (a2dpProfile.getActiveDevice() == null) {
+            final List<BluetoothDevice> activeDevices = hapProfile.getActiveDevices();
+            for (BluetoothDevice btDevice : activeDevices) {
+                if (btDevice != null) {
+                    isActive = false;
+                    break;
+                }
+            }
+        } else {
+            isActive = false;
+        }
+
+        return isActive;
     }
 
     @Override
@@ -61,13 +88,18 @@ public class PhoneMediaDevice extends MediaDevice {
     }
 
     @Override
+    public void notifyConnectedChanged() {
+        mIsConnected = isPhoneActive();
+    }
+
+    @Override
     public void connect() {
         final HearingAidProfile hapProfile = mProfileManager.getHearingAidProfile();
         final A2dpProfile a2dpProfile = mProfileManager.getA2dpProfile();
 
         if (hapProfile != null && a2dpProfile != null) {
-            mIsConnected =
-                    hapProfile.setActiveDevice(null) && a2dpProfile.setActiveDevice(null);
+            mIsConnected = hapProfile.setActiveDevice(null) && a2dpProfile.setActiveDevice(null);
+            super.connect();
         }
         Log.d(TAG, "connect() device : " + getName() + ", is selected : " + mIsConnected);
     }

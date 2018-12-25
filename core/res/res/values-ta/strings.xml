@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"சாதனத்தின் மொபைல் அம்சங்களை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. மொபைல் மற்றும் சாதன ஐடிகள், அழைப்பு செயலில் உள்ளதா மற்றும் அழைப்பு மூலம் இணைக்கப்பட்ட தொலைக் கட்டுப்பாட்டு எண் ஆகியவற்றைத் தீர்மானிக்க இந்த அனுமதி பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"சிஸ்டம் மூலம் அழைப்புகளை ரூட் செய்தல்"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"அழைக்கும் அனுபவத்தை மேம்படுத்தும் பொருட்டு, சிஸ்டம் மூலம் தனது அழைப்புகளை ரூட் செய்ய பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"சிஸ்டம் மூலமாக அழைப்புகளைப் பார்த்தலும் கட்டுப்படுத்துதலும்."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"செயலில் உள்ள அழைப்புகளைச் சாதனத்தில் பார்க்கவும் கட்டுப்படுத்தவும் ஆப்ஸை அனுமதிக்கிறது. அழைப்பு எண்கள் மற்றும் அழைப்புகளின் நிலை போன்ற தகவல்களும் இதில் அடங்கும்."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"மற்றொரு பயன்பாட்டிலிருந்து அழைப்பைத் தொடருதல்"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"மற்றொரு பயன்பாட்டில் தொடங்கப்பட்ட அழைப்பைத் தொடருவதற்கு, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ஃபோன் எண்களைப் படித்தல்"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"குறுகிய இடைவெளி தகவல்பரிமாற்றம் (NFC), குறிகள், கார்டுகள் மற்றும் ரீடர்கள் ஆகியவற்றுடன் தொடர்புகொள்ள, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"உங்கள் திரைப் பூட்டை முடக்குதல்"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"விசைப்பூட்டையும், தொடர்புடைய கடவுச்சொல் பாதுகாப்பையும் முடக்கப் பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, உள்வரும் மொபைல் அழைப்பைப் பெறும்போது மொபைல் விசைப்பூட்டை முடக்குகிறது, பிறகு அழைப்பு முடிந்தவுடன் விசைப்பூட்டை மீண்டும் இயக்குகிறது."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"திரைப் பூட்டு தொடர்பான சிக்கலைத் தீர்க்க அனுமதி பெறுதல்"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"திரைப் பூட்டு தொடர்பான சிக்கலின் தன்மையைப் பற்றி (அதிகம், நடுத்தரம், குறைவு அல்லது ஏதுமில்லை) அறிந்துகொள்ள ஆப்ஸை அனுமதிக்கிறது. இதன் மூலம் திரைப் பூட்டின் திறனையும் வகையையும் பற்றி அறிந்துகொள்ள முடிகிறது. மேலும் திரைப் பூட்டு தொடர்பான சிக்கலின் தன்மையை குறிப்பிட்ட நிலைக்குப் புதுப்பித்துக்கொள்ளலாம் என்பதையும் ஆப்ஸ் பயனர்களுக்குப் பரிந்துரைக்கலாம். ஆனால் தங்கள் விருப்பப்படி அவற்றைப் பயனர்கள் ஏற்கவோ நிராகரிக்கவோ செய்யலாம். கவனத்திற்கு: திரைப் பூட்டு எளிய உரையிலான கடவுச்சொல்லால் சேமிக்கப்படுவதில்லை என்பதால் சரியான கடவுச்சொல்லை ஆப்ஸால் அறிய இயலாது."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"பயோமெட்ரிக் வன்பொருளைப் பயன்படுத்து"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"பயோமெட்ரிக் வன்பொருளைப் பயன்படுத்தி அங்கீகரிப்பதற்கு, பயன்பாட்டை அனுமதிக்கும்"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"கைரேகை வன்பொருளை நிர்வகி"</string>
@@ -1083,7 +1087,7 @@
     <string name="deleteText" msgid="6979668428458199034">"நீக்கு"</string>
     <string name="inputMethod" msgid="1653630062304567879">"உள்ளீட்டு முறை"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"உரை நடவடிக்கைகள்"</string>
-    <string name="email" msgid="4560673117055050403">"மின்னஞ்சல்"</string>
+    <string name="email" msgid="4560673117055050403">"மின்னஞ்சல் அனுப்பு"</string>
     <string name="email_desc" msgid="3638665569546416795">"தேர்ந்தெடுத்த முகவரிக்கு மின்னஞ்சல் அனுப்பும்"</string>
     <string name="dial" msgid="1253998302767701559">"அழை"</string>
     <string name="dial_desc" msgid="6573723404985517250">"தேர்ந்தெடுத்த ஃபோன் எண்ணை அழைக்கும்"</string>
@@ -1091,13 +1095,13 @@
     <string name="map_desc" msgid="1836995341943772348">"தேர்ந்தெடுத்த முகவரிக்கான வரைபடத்தைத் திறக்கும்"</string>
     <string name="browse" msgid="1245903488306147205">"திற"</string>
     <string name="browse_desc" msgid="8220976549618935044">"தேர்ந்தெடுத்த URLஐத் திறக்கும்"</string>
-    <string name="sms" msgid="4560537514610063430">"செய்தி"</string>
+    <string name="sms" msgid="4560537514610063430">"செய்தி அனுப்பு"</string>
     <string name="sms_desc" msgid="7526588350969638809">"தேர்ந்தெடுத்த ஃபோன் எண்ணிற்குச் செய்தி அனுப்பும்"</string>
     <string name="add_contact" msgid="7867066569670597203">"சேர்"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"தொடர்புகளில் சேர்க்கும்"</string>
     <string name="view_calendar" msgid="979609872939597838">"காண்பி"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"கேலெண்டரில் தேர்ந்தெடுத்த நேரத்தைக் காட்டும்"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"திட்டமிடுதல்"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"திட்டமிடு"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"தேர்ந்தெடுத்த நேரத்திற்கு நிகழ்வைத் திட்டமிடும்"</string>
     <string name="view_flight" msgid="7691640491425680214">"கண்கானி"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"தேர்ந்தெடுத்த விமானத்தைக் கண்காணிக்கும்"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"டேப்லெட் புதுப்பிக்கப்படுகிறது…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"சாதனம் புதுப்பிக்கப்படுகிறது…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"மொபைல் தொடங்குகிறது…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android துவங்குகிறது..."</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"டேப்லெட் தொடங்குகிறது…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"சாதனம் தொடங்குகிறது…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"சேமிப்பகத்தை உகந்ததாக்குகிறது."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"எல்லா நெட்வொர்க்குகளையும் பார்க்க, தட்டவும்"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"இணை"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"எல்லா நெட்வொர்க்குகளும்"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> இன் வைஃபை நெட்வொர்க்குடன் இணைக்கப்பட்டது"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"உங்களுக்கு நெட்வொர்க்குகளைக் காட்ட <xliff:g id="NAME">%s</xliff:g>ஐ அனுமதிக்கவா?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"சரி"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"வேண்டாம்"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"வைஃபை தானாக ஆன் ஆகும்"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"சேமித்த, உயர்தர நெட்வொர்க்கிற்கு அருகில் இருக்கும்போது"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"மீண்டும் ஆன் செய்யாதே"</string>

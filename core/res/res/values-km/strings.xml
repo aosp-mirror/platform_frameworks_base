@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​លក្ខណៈ​ទូរស័ព្ទ​នៃ​ឧបករណ៍។ សិទ្ធិ​នេះ​​ឲ្យ​កម្មវិធី​កំណត់​លេខ​ទូរស័ព្ទ និង​លេខ​សម្គាល់​ឧបករណ៍ ថា​តើ​ការ​ហៅ​សកម្ម និង​លេខ​ពី​ចម្ងាយ​បាន​ភ្ជាប់​ដោយ​ការ​ហៅ។"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"បញ្ជូន​ការ​ហៅ​ទូរសព្ទ​តាមរយៈ​ប្រព័ន្ធ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​នេះ​បញ្ជូន​ការ​ហៅ​ទូរសព្ទ​របស់វា​តាមរយៈ​ប្រព័ន្ធ ​ដើម្បី​ធ្វើ​ឲ្យ​ការ​ហៅ​ទូរសព្ទ​ប្រសើរ​ជាង​មុន។"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"មើល និង​គ្រប់គ្រង​ការហៅទូរសព្ទ​តាមរយៈប្រព័ន្ធ។"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"អនុញ្ញាត​ឱ្យកម្មវិធី​មើល និងគ្រប់គ្រង​ការហៅទូរសព្ទ​ដែល​កំពុង​ដំណើរការ​នៅលើ​ឧបករណ៍។ សកម្មភាព​នេះរួមមាន​ព័ត៌មាន​ដូចជា លេខទូរសព្ទ​សម្រាប់ការ​ហៅទូរសព្ទ និង​ស្ថានភាព​នៃការហៅទូរសព្ទជាដើម។"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"បន្ត​ការ​ហៅ​ទូរសព្ទ​ពី​កម្មវិធី​ផ្សេង​"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​បន្ត​ការ​ហៅ​ទូរសព្ទ​ ដែល​បាន​ចាប់ផ្តើម​នៅក្នុង​កម្មវិធី​ផ្សេង​។"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"អាន​លេខ​ទូរសព្ទ"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ឲ្យ​កម្មវិធី​ទាក់ទង​ជា​មួយ​ស្លាក (NFC) កាត និង​កម្មវិធី​អាន។"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"បិទ​ការ​ចាក់​សោ​អេក្រង់​របស់​អ្នក"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ឲ្យ​កម្មវិធី​បិទ​ការ​ចាក់សោ​សុវត្ថិភាព​ពាក្យ​សម្ងាត់​ដែល​បាន​ភ្ជាប់​ណា​មួយ។ ​ឧទាហរណ៍​ត្រឹមត្រូវ​​​នៃ​ការ​បិទ​ទូរស័ព្ទ​ពេល​ទទួលការ​ហៅ​ចូល បន្ទាប់​ម​បើក​សោ​ពេល​ការ​ហៅ​បាន​បញ្ចប់។"</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ទទួល និងស្នើ​សុំភាព​ស្មុគស្មាញ​នៃការចាក់សោអេក្រង់"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"អនុញ្ញាតឱ្យ​កម្មវិធី​រៀនអំពី​កម្រិតស្មុគស្មាញ​ការនៃការចាក់សោអេក្រង់ (ខ្ពស់ មធ្យម​ ទាប ឬគ្មាន) ដែល​បញ្ជាក់អំពី​​ប្រវែង និងប្រភេទ​នៃការចាក់សោអេក្រង់។ កម្មវិធី​នេះ​ក៏​អាច​ណែនាំឱ្យ​អ្នកប្រើប្រាស់​ធ្វើបច្ចុប្បន្នភាព​ការចាក់សោ​អេក្រង់​ទៅកម្រិតជាក់លាក់​ផងដែរ ប៉ុន្តែ​អ្នកប្រើប្រាស់​អាច​មិនអើពើនឹង​ការណែនាំនេះ​ដោយសេរី។ សូម​ចំណាំថា ការចាក់សោអេក្រង់​មិន​ត្រូវបាន​រក្សាទុក​ជាអត្ថបទ​ធម្មតាទេ ដូច្នេះ​កម្មវិធីនេះ​មិន​ស្គាល់​ពាក្យសម្ងាត់​ពិតប្រាកដ​ឡើយ។"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"គ្រប់គ្រងផ្នែករឹងស្នាមម្រាមដៃ"</string>
@@ -1183,6 +1187,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"ថេប្លេត​កំពុង​ដំឡើងជំនាន់…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"ឧបករណ៍​កំពុង​ដំឡើងជំនាន់…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"ទូរសព្ទ​កំពុង​ចាប់ផ្ដើម…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android កំពុង​ចាប់ផ្ដើម…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"ថេប្លេត​កំពុង​ចាប់ផ្ដើម…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"ឧបករណ៍​កំពុង​ចាប់ផ្ដើម…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"កំពុងធ្វើឲ្យឧបករណ៍ផ្ទុកមានប្រសិទ្ធភាព។"</string>
@@ -1241,6 +1246,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ចុចដើម្បីមើលបណ្តាញទាំងអស់"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ភ្ជាប់"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"បណ្ដាញ​ទាំងអស់"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"បានភ្ជាប់​បណ្ដាញ Wi‑Fi ដែលបាន​ណែនាំដោយ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"តើអ្នក​ចង់អនុញ្ញាតឱ្យ <xliff:g id="NAME">%s</xliff:g> ណែនាំ​បណ្ដាញ​សម្រាប់អ្នកដែរទេ?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"បាទ/ចាស"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ទេ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi នឹង​បើក​ដោយ​ស្វ័យប្រវត្តិ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"នៅពេល​ដែល​អ្នក​នៅ​ជិត​បណ្តាញ​គុណភាព​ខ្ពស់​ដែល​បាន​រក្សាទុក"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"កុំ​បើក​ឡើង​វិញ"</string>

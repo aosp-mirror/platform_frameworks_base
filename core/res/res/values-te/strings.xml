@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"పరికరం యొక్క ఫోన్ ఫీచర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయి"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"కాలింగ్ అనుభవాన్ని మెరుగుపరచడం కోసం తన కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"సిస్టమ్ ద్వారా కాల్‌లను చూసి, నియంత్రించండి."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"పరికరంలో కొనసాగుతున్న కాల్‌లను చూడడానికి మరియు నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది. ఇందులో కాల్ కోసం కాల్‌ల నంబర్‌లు మరియు రాష్ట్ర కాల్ వంటి సమాచారం ఉంటుంది."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"మరో యాప్ నుండి కాల్‌ని కొనసాగించండి"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"మరో యాప్‌లో ప్రారంభించిన కాల్‌ని కొనసాగించడానికి యాప్‌ని అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ఫోన్ నంబర్‌లను చదువు"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"సమీప ఫీల్డ్ కమ్యూనికేషన్ (NFC) ట్యాగ్‌లు, కార్డులు మరియు రీడర్‌లతో కమ్యూనికేట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"మీ స్క్రీన్ లాక్‌ను నిలిపివేయడం"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"కీలాక్ మరియు ఏదైనా అనుబంధించబడిన పాస్‌వర్డ్ భద్రతను నిలిపివేయడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇన్‌కమింగ్ ఫోన్ కాల్ వస్తున్నప్పుడు ఫోన్ కీలాక్‌ను నిలిపివేస్తుంది, ఆపై కాల్ ముగిసిన తర్వాత కీలాక్‌ను మళ్లీ ప్రారంభిస్తుంది."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"స్క్రీన్ లాక్ పాస్‌వర్డ్ బల స్థాయిని పొందడం మరియు అభ్యర్ధించడం"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"ఇది మీ స్క్రీన్ లాక్ పాస్‌వర్డ్‌ బల స్థాయి (తీవ్రంగా ఉండాలా లేదా ఓ మోస్తరుగా ఉండాలా లేదా తక్కువ తీవ్రంగా గానీ అసలు ఏదీ కాకుండా ఉండాలా) అనే విషయాన్ని గుర్తుంచుకోవడానికి యాప్‌కి అనుమతిస్తుంది, అలాగే పాస్‌‌వర్డ్ పొడుగు ఎంత ఉండాలీ, ఏ రకమైన స్క్రీన్ లాక్ పధ్ధతి అనుసరించాలో సూచిస్తుంది. యాప్ ఇంకా స్క్రీన్ లాక్‌ పాస్‌వర్డ్‌ బల స్థాయిని ఏ స్థాయిలో సెట్ చేసుకుంటే బాగుంటుందో వినియోగదారులకు తెలపగలదు కానీ వినియోగదారులు దాని సూచనలను పట్టించుకోకుండా వారి ఇష్టం మేరకు చక్కగా సెట్ చేసుకోవచ్చు. మీకో ముఖ్యమైన మాట స్క్రీన్ లాక్‌ పాస్‌వర్డ్‌ అనేది సాదా వచన రూపంలో నిల్వ చేయబడదు, కనుక అసలు మీరు పాస్‌వర్డ్‌ ఏం పెట్టారనే విషయం యాప్‌కి తెలియదు."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"బయోమెట్రిక్ హార్డ్‌వేర్‌ని ఉపయోగించు"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ప్రమాణీకరణ కోసం బయోమెట్రిక్ హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ని అనుమతిస్తుంది"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"వేలిముద్ర హార్డ్‌వేర్‌ని నిర్వహించడానికి అనుమతి"</string>
@@ -1083,27 +1087,27 @@
     <string name="deleteText" msgid="6979668428458199034">"తొలగించు"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"వచనానికి సంబంధించిన చర్యలు"</string>
-    <string name="email" msgid="4560673117055050403">"ఇమెయిల్"</string>
+    <string name="email" msgid="4560673117055050403">"ఇమెయిల్ చేయి"</string>
     <string name="email_desc" msgid="3638665569546416795">"ఎంచుకున్న చిరునామాకు ఇమెయిల్‌ను పంపుతుంది"</string>
-    <string name="dial" msgid="1253998302767701559">"కాల్ చేయండి"</string>
+    <string name="dial" msgid="1253998302767701559">"కాల్ చేయి"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ఎంచుకున్న ఫోన్ నంబర్‌కు కాల్ చేస్తుంది"</string>
-    <string name="map" msgid="5441053548030107189">"మ్యాప్"</string>
+    <string name="map" msgid="5441053548030107189">"మ్యాప్ తెరువు"</string>
     <string name="map_desc" msgid="1836995341943772348">"ఎంచుకున్న చిరునామాను గుర్తించు"</string>
-    <string name="browse" msgid="1245903488306147205">"తెరవండి"</string>
+    <string name="browse" msgid="1245903488306147205">"తెరువు"</string>
     <string name="browse_desc" msgid="8220976549618935044">"ఎంచుకున్న URLని తెరుస్తుంది"</string>
-    <string name="sms" msgid="4560537514610063430">"సందేశం"</string>
+    <string name="sms" msgid="4560537514610063430">"సందేశం పంపు"</string>
     <string name="sms_desc" msgid="7526588350969638809">"ఎంచుకున్న ఫోన్ నంబర్‌కి సందేశం పంపుతుంది"</string>
-    <string name="add_contact" msgid="7867066569670597203">"జోడించండి"</string>
+    <string name="add_contact" msgid="7867066569670597203">"జోడించు"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"పరిచయాలకు జోడిస్తుంది"</string>
-    <string name="view_calendar" msgid="979609872939597838">"చూడండి"</string>
+    <string name="view_calendar" msgid="979609872939597838">"చూడు"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"ఎంచుకున్న సమయాన్ని క్యాలెండర్‌లో వీక్షించండి"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"షెడ్యూల్"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"షెడ్యూల్ చేయి"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"ఎంచుకున్న సమయానికి ఈవెంట్‌ను షెడ్యూల్ చేస్తుంది"</string>
-    <string name="view_flight" msgid="7691640491425680214">"ట్రాక్ చేయండి"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ట్రాక్ చేయి"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ఎంచుకున్న విమానాన్ని ట్రాక్ చేస్తుంది"</string>
-    <string name="translate" msgid="9218619809342576858">"అనువదించండి"</string>
+    <string name="translate" msgid="9218619809342576858">"అనువదించు"</string>
     <string name="translate_desc" msgid="4502367770068777202">"ఎంచుకున్న వచనాన్ని అనువదించండి"</string>
-    <string name="define" msgid="7394820043869954211">"నిర్వచించండి"</string>
+    <string name="define" msgid="7394820043869954211">"నిర్వహించు"</string>
     <string name="define_desc" msgid="7910883642444919726">"ఎంచుకున్న వచనాన్ని నిర్వచించండి"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"నిల్వ ఖాళీ అయిపోతోంది"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"టాబ్లెట్ అప్‌డేట్‌ అవుతోంది…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"పరికరం అప్‌డేట్‌ అవుతోంది…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"ఫోన్ ప్రారంభమవుతోంది…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android ప్రారంభమవుతోంది…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"టాబ్లెట్ ప్రారంభమవుతోంది…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"పరికరం ప్రారంభమవుతోంది…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"నిల్వను అనుకూలపరుస్తోంది."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"అన్ని నెట్‌వర్క్‌లు చూడటానికి నొక్కండి"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"కనెక్ట్ చేయి"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"అన్ని నెట్‌వర్క్‌లు"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> సూచన మేరకు Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేయబడింది"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"మీరు <xliff:g id="NAME">%s</xliff:g> మీకోసం సూచించే నెట్‌వర్క్‌లకు అనుమతిస్తారా?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"అవును"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"లేదు"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi స్వయంచాలకంగా ఆన్ అవుతుంది"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"మీరు అధిక నాణ్యత గల సేవ్ చేసిన నెట్‌వర్క్‌కు సమీపంగా ఉన్నప్పుడు"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"తిరిగి ఆన్ చేయవద్దు"</string>

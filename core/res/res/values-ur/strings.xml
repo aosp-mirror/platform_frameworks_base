@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"‏ایپ کو آلے کی فون والی خصوصیات تک رسائی حاصل کرنے کی اجازت دیتا ہے۔ یہ اجازت ایپ کو فون نمبر اور آلے کے IDs کا تعین کرنے، آیا کوئی کال فعال ہے، اور کال کے ذریعہ مربوط ریموٹ نمبر کا تعین کرنے دیتی ہے۔"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"سسٹم کے ذریعہ کالز روٹ کریں"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"کالںگ کا تجربہ بہتر بنانے کے لیے سسٹم کے ذریعہ ایپ کو کالز روٹ کرنے کی اجازت دیتا ہے۔"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"سسٹم کے ذریعے کالز دیکھیں اور کنٹرول کریں۔"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"ایپ کو آلہ پر جاری کالز دیکھنے اور کنٹرول کرنے کی اجازت دیں۔ اس میں کالز کیلئے کال نمبرز اور کالز کی حالت جیسی معلومات شامل ہیں۔"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"دوسری ایپ کی کال جاری رکھیں"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"ایپ کو دوسری ایپ میں شروع کردہ کال کو جاری رکھنے کی اجازت ملتی ہے۔"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"فون نمبرز پڑھیں"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"‏ایپ کو Near Field Communication (NFC)‎ ٹیگز، کارڈز اور ریڈرز کے ساتھ مواصلت کرنے کی اجازت دیٹا ہے۔"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"اپنے اسکرین لاک کو غیر فعال کریں"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ایپ کو کلیدی لاک اور کسی بھی متعلقہ پاس ورڈ سیکیورٹی کو غیر فعال کرنے کی اجازت دیتا ہے۔ مثلاً، کوئی آنے والی فون کال موصول ہونے کے وقت فون کلیدی لاک کو غیر فعال کرتا ہے، پھر کال پوری ہوجانے پر کلیدی لاک کو دوبارہ فعال کردیتا ہے۔"</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"موصول کریں اور اسکرین لاک کی پیچیدگی کے لیے درخواست کریں"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"اپپ کو اسکرین لاک کی پیچیدگی (مُشکل، درمیانی، آسان یا کوئی نہیں) کو جاننے کی اجازت دیتا ہے، جو لمبائی کی ممکنہ حد اور اسکرین لاک کے قسم کو بتاتا ہے۔ اپپ صارفین کو مشوره بھی دے سکتی ہے کہ وہ اسکرین لاک کو مخصوس لیول تک اپ ڈیٹ کرتے ہیں لیکن صارفین آزادانہ طور پر نظر انداز اور نیویگیٹ کر سکتے ہیں۔ یاد رکھیں کہ اسکرین لاک پلین ٹیکسٹ میں اسٹور کیا ہوا نہیں ہے اس لیے اپپ صحیح پاس ورڈ نہیں جانتی ہے۔"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"بایومیٹرک ہارڈ ویئر استعمال کریں"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ایپ کو توثیق کے لیے بایومیٹرک ہارڈ ویئر استعمال کرنے کی اجازت دیتا ہے"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"فنگر پرنٹ ہارڈ ویئر کا نظم کریں"</string>
@@ -1083,15 +1087,15 @@
     <string name="deleteText" msgid="6979668428458199034">"حذف کریں"</string>
     <string name="inputMethod" msgid="1653630062304567879">"اندراج کا طریقہ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"متن کی کارروائیاں"</string>
-    <string name="email" msgid="4560673117055050403">"ای میل"</string>
+    <string name="email" msgid="4560673117055050403">"ای میل بھیجیں"</string>
     <string name="email_desc" msgid="3638665569546416795">"منتخب کردہ پتہ پر ای میل کریں"</string>
     <string name="dial" msgid="1253998302767701559">"کال کریں"</string>
     <string name="dial_desc" msgid="6573723404985517250">"منتخب کردہ فون نمبر پر کال کریں"</string>
-    <string name="map" msgid="5441053548030107189">"نقشہ"</string>
+    <string name="map" msgid="5441053548030107189">"نقشہ کی ایپ کھولیں"</string>
     <string name="map_desc" msgid="1836995341943772348">"منتخب کردہ پتہ تلاش کریں"</string>
     <string name="browse" msgid="1245903488306147205">"کھولیں"</string>
     <string name="browse_desc" msgid="8220976549618935044">"‏منتخب کردہ URL کھولیں"</string>
-    <string name="sms" msgid="4560537514610063430">"پیغام"</string>
+    <string name="sms" msgid="4560537514610063430">"پیغام بھیجیں"</string>
     <string name="sms_desc" msgid="7526588350969638809">"منتخب کردہ فون نمبر پر پیغام بھیجیں"</string>
     <string name="add_contact" msgid="7867066569670597203">"شامل کریں"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"رابطوں میں شامل کریں"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"ٹیبلٹ اپ ڈیٹ ہو رہا ہے…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"آلہ اپ ڈیٹ ہو رہا ہے…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"فون شروع ہو رہا ہے…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"‏Android شروع ہو رہا ہے…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"ٹیبلیٹ شروع ہو رہا ہے…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"آلہ شروع ہو رہا ہے…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"اسٹوریج کو بہترین بنایا جا رہا ہے۔"</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"تمام نیٹ ورکس دیکھنے کیلئے تھپتھپائيں"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"منسلک کریں"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"سبھی نیٹ ورکس"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"‏<xliff:g id="NAME">%s</xliff:g> کے ذریعے تجویز کردہ Wi-Fi نیٹ ورک سے منسلک کر دیا گیا"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"کیا آپ <xliff:g id="NAME">%s</xliff:g> کو آپ کے لیے نیٹ ورکس تجویز کرنے کی اجازت دینا چاہتے ہیں؟"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ہاں"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"نہیں"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏Wi‑Fi از خود آن ہو جائے گا"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"جب آپ اعلی معیار کے محفوظ کردہ نیٹ ورک کے قریب ہوں"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"دوبارہ آن نہ کریں"</string>

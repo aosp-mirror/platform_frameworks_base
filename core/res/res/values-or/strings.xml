@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ଆପ୍‌କୁ ଡିଭାଇସ୍‌ର ଫୋନ୍‌ ବୈଶିଷ୍ଟ୍ୟ ଆକ୍ସେସ୍‍ କରିବାକୁ ଅନୁମତି ଦେଇଥାଏ। ଏହି ଅନୁମତି ଆପ୍‌କୁ ଫୋନ୍‌ ନମ୍ବର୍ ଓ ଡିଭାଇସ୍‌ IDଗୁଡ଼ିକୁ ନିର୍ଦ୍ଧାରଣ କରିବାକୁ ଅନୁମତି ଦେଇଥାଏ, କଲ୍ ସକ୍ରିୟ ଥିଲେ ବି ଏବଂ କଲ୍ ଦ୍ୱାରା ସଂଯୋଗ ଥିବା ରିମୋଟ୍‌ ନମ୍ବର୍‌କୁ ମଧ୍ୟ।"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ସିଷ୍ଟମ୍‍ ଜରିଆରେ କଲ୍‌ର ମାର୍ଗ ବଦଳାଇପାରେ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"କଲ୍‍ କରିବାର ଅନୁଭୂତି ବଢ଼ାଇବାକୁ ସିଷ୍ଟମ୍‍ ଜରିଆରେ ଆପର କଲ୍‍ଗୁଡ଼ିକୁ ରୁଟ୍‍ କରିବାକୁ ଏହାକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ସିଷ୍ଟମ୍‍ ମାଧ୍ୟମରେ କଲ୍‍ଗୁଡ଼ିକୁ ଦେଖିଥାଏ ଏବଂ ନିୟନ୍ତ୍ରଣ କରିଥାଏ।"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"ଆପ୍‍କୁ ଡିଭାଇସ୍‍‍ରେ ଚାଲୁଥିବା କଲ୍‍ଗୁଡ଼ିକୁ ଦେଖିବାକୁ ଏବଂ ନିୟନ୍ତ୍ରଣ କରିବାକୁ ଅନୁମତି ଦେଇଥାଏ। ଏଥିରେ କଲ୍‍ଗୁଡ଼ିକ ପାଇଁ କଲ୍‍ ନମ୍ବର୍‍ ଏବଂ କଲ୍‍ଗୁଡ଼ିକର ସ୍ଥିତି ପରି ସୂଚନା ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି।"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ଅନ୍ୟ ଏକ ଆପ୍‌ରୁ କଲ୍‌କୁ ଜାରି ରଖନ୍ତୁ"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"ଅନ୍ୟ ଆପ୍‌ରେ ଆରମ୍ଭ ହୋଇଥିବା ଗୋଟିଏ କଲ୍‌କୁ ଜାରି ରଖିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ଫୋନ୍‍ ନମ୍ବର ପଢ଼େ"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ନିଅର୍‍ ଫିଲ୍ଡ କମ୍ୟୁନିକେସନ୍‍ନ (NFC) ଟାଗ୍‍, କାର୍ଡ ଓ ରିଡରଗୁଡ଼ିକ ସହ ଯୋଗାଯୋଗ କରିବା ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ଆପଣଙ୍କ ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ଆପ୍‌କୁ କୀ\'ଲକ୍ କିମ୍ବା ସେଥିରେ ଥିବା କୌଣସି ପାସ୍‌ୱର୍ଡ ସୁରକ୍ଷାକୁ ଅକ୍ଷମ କରିବା ପାଇଁ ଅନୁମତି ଦିଏ, ଉଦାହରଣସ୍ୱରୂପ, ଇନ୍‌କମିଙ୍ଗ ଫୋନ୍‌ କଲ୍ ପ୍ରାପ୍ତ କରିବା ସମୟରେ ଫୋନ୍‌ଟି କୀ\'ଲକ୍‌କୁ ଅକ୍ଷମ କରିଦିଏ, ତା’ପରେ କଲ୍ ସମାପ୍ତ ହେବାପରେ ପୁଣି କୀ\'ଲକ୍‌କୁ ସକ୍ଷମ କରିଥାଏ।"</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ସ୍କ୍ରିନ୍‌ ଲକ୍‌ର ଜଟିଳତା ପ୍ରାପ୍ତ କରନ୍ତୁ କିମ୍ବା ଅନୁରୋଧ କରନ୍ତୁ"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"ସ୍କ୍ରିନ୍‌ ଲକ୍‌ର ଜଟିଳତା ସ୍ତର (ଉଚ୍ଚ, ମଧ୍ୟମ, ନିମ୍ନ କିମ୍ବା କିଛିନୁହେଁ), ଜାଣିବାକୁ ଆପ୍‌କୁ ଅନୁମତି ଦିଅନ୍ତୁ, ଯାହା ସ୍କ୍ରିନ୍‌ ଲକ୍‌ର ସମ୍ଭାବ୍ୟ ପରିସୀମାର ଲମ୍ବ ଏବଂ ପ୍ରକାର ସୂଚୀତ କରେ। ଆପ୍‌ ଏହା ମଧ୍ୟ ଉପଯୋଗକର୍ତ୍ତାମାନଙ୍କୁ ପରାମର୍ଶ ଦେଇପାରେ ଯେ ସେମାନେ ସ୍କ୍ରିନ୍‌ ଲକ୍‌କୁ ଏକ ନିର୍ଦ୍ଧିଷ୍ଟ ସ୍ତର ପର୍ଯ୍ୟନ୍ତ ଅପ୍‌ଡେଟ୍‌ କରିପାରନ୍ତି, କିନ୍ତୁ ଉପଯୋଗକର୍ତ୍ତାମାନେ ନିଜ ଇଚ୍ଛାରେ ଏହାକୁ ଉପେକ୍ଷା ଏବଂ ନାଭିଗେଟ୍ କରିପାରିବେ। ଏହା ଧ୍ୟାନ ଦିଅନ୍ତୁ ଯେ ସ୍କ୍ରିନ୍‌ ଲକ୍‌ ସରଳ ଟେକ୍ସଟ୍‌ରେ ଷ୍ଟୋର୍‌ କରାଯାଇନଥାଏ ଯେପରି ଆପ୍‌ ସଠିକ୍‌ ପାସ୍‌‍ୱର୍ଡ ଜାଣିପାରିନଥାଏ।"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ବାୟୋମେଟ୍ରିକ୍‌ ହାର୍ଡୱେର୍‌ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ସ୍ୱୀକୃତି ପାଇଁ ବାୟୋମେଟ୍ରିକ୍‌ ହାର୍ଡୱେର୍‌ ବ୍ୟବହାର କରିବାକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ହାର୍ଡୱେର୍‍ ପରିଚାଳନା କରନ୍ତୁ"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"ଟାବଲେଟ୍ ଅପଡେଟ୍ ହେଉଛି…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"ଡିଭାଇସ୍ ଅପଡେଟ୍ ହେଉଛି…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"ଫୋନ୍ ଆରମ୍ଭ ହେଉଛି…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"ଆଣ୍ଡ୍ରଏଡ୍ ଆରମ୍ଭ ହେଉଛି…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"ଟାବଲେଟ୍ ଆରମ୍ଭ ହେଉଛି…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"ଡିଭାଇସ୍ ଆରମ୍ଭ ହେଉଛି…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ଷ୍ଟୋରେଜ୍‍ ବଢ଼ାଯାଉଛି"</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ସମସ୍ତ ନେଟ୍‌ୱର୍କ ଦେଖିବାକୁ ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"କନେକ୍ଟ କରନ୍ତୁ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ସମସ୍ତ ନେଟ୍‌ୱର୍କ"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g>ଙ୍କ ଦ୍ୱାରା ପ୍ରସ୍ତାବିତ ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କ ସହ ସଂଯୁକ୍ତ ହୋଇଛି"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"ଆପଣ କ’ଣ ଚାହୁଁଛନ୍ତି <xliff:g id="NAME">%s</xliff:g>, ଆପଣଙ୍କ ପାଇଁ ନେଟ୍‌ୱର୍କର ପ୍ରସ୍ତାବ ଦିଅନ୍ତୁ?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ହଁ"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ନାହିଁ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ୱାଇ-ଫାଇ ସ୍ୱଚାଳିତ ଭାବେ ଅନ୍ ହେବ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ଆପଣ ଏକ ଉଚ୍ଚ-କ୍ୱାଲିଟୀ ବିଶିଷ୍ଟ ସେଭ୍‌ କରାଯାଇଥିବା ନେଟ୍‌ୱର୍କ ପାଖରେ ଥିବା ସମୟରେ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ପୁଣି ଅନ୍‍ କରନ୍ତୁ ନାହିଁ"</string>

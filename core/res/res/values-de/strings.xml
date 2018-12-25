@@ -324,7 +324,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Text bei der Eingabe beobachten"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Einschließlich personenbezogener Daten wie Kreditkartennummern und Passwörter."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Displayvergrößerung festlegen"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Legt die Zoom-Stufe des Displays und die Zoom-Position auf dem Display fest."</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Legt die Zoom-Stufe und -Position auf dem Display fest."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Bewegungen möglich"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Tippen, Wischen, Zusammenziehen und andere Bewegungen möglich."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Bewegungen auf dem Fingerabdrucksensor"</string>
@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ermöglicht der App, auf die Telefonfunktionen des Geräts zuzugreifen. Die Berechtigung erlaubt der App, die Telefonnummer und Geräte-IDs zu erfassen, festzustellen, ob gerade ein Gespräch geführt wird, und die Rufnummer verbundener Anrufer zu lesen."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"Anrufe über das System durchführen"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Ermöglicht der App, Anrufe über das System durchzuführen, um die Anrufqualität zu verbessern."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Anrufe durch das System einsehen und verwalten."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Ermöglicht der App, aktuelle Anrufe einzusehen und zu verwalten. Dies beinhaltet Informationen wie Nummern für Anrufe und den Status der Anrufe."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"Anruf aus einer anderen App weiterführen"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Ermöglicht der App, einen Anruf weiterzuführen, der in einer anderen App begonnen wurde."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"Telefonnummern vorlesen"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ermöglicht der App die Kommunikation mit Tags für die Nahfeldkommunikation, Karten und Readern"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Displaysperre deaktivieren"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ermöglicht der App, die Tastensperre sowie den damit verbundenen Passwortschutz zu deaktivieren. Das Telefon deaktiviert die Tastensperre beispielsweise, wenn ein Anruf eingeht, und aktiviert sie wieder, nachdem das Gespräch beendet wurde."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"Komplexität der Displaysperre erfahren und anfragen"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Ermöglicht es der App, die Komplexitätsstufe der Displaysperre (hoch, mittel, niedrig oder keine) zu erfahren, was auf die mögliche Dauer und Art der Displaysperre hinweist. Die App kann Nutzern auch vorschlagen, die Displaysperre auf eine bestimmte Stufe zu aktualisieren, Nutzer können diesen Vorschlag jedoch auch einfach ignorieren und fortfahren. Beachten Sie, dass die Displaysperre nicht im Klartext gespeichert ist, sodass die App nicht das genaue Passwort kennt."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"Biometrische Hardware verwenden"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Erlaubt der App, biometrische Hardware zur Authentifizierung zu verwenden"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Fingerabdruckhardware verwalten"</string>
@@ -1083,21 +1087,21 @@
     <string name="deleteText" msgid="6979668428458199034">"Löschen"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Eingabemethode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaktionen"</string>
-    <string name="email" msgid="4560673117055050403">"E-Mail"</string>
+    <string name="email" msgid="4560673117055050403">"E-Mail senden"</string>
     <string name="email_desc" msgid="3638665569546416795">"E-Mail an ausgewählte Adresse senden"</string>
     <string name="dial" msgid="1253998302767701559">"Anrufen"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Ausgewählte Telefonnummer anrufen"</string>
-    <string name="map" msgid="5441053548030107189">"Karte"</string>
+    <string name="map" msgid="5441053548030107189">"Karte öffnen"</string>
     <string name="map_desc" msgid="1836995341943772348">"Ausgewählte Adresse finden"</string>
     <string name="browse" msgid="1245903488306147205">"Öffnen"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ausgewählte URL öffnen"</string>
-    <string name="sms" msgid="4560537514610063430">"SMS"</string>
+    <string name="sms" msgid="4560537514610063430">"SMS senden"</string>
     <string name="sms_desc" msgid="7526588350969638809">"SMS an ausgewählte Telefonnummer senden"</string>
     <string name="add_contact" msgid="7867066569670597203">"Hinzufügen"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Zu Kontakten hinzufügen"</string>
-    <string name="view_calendar" msgid="979609872939597838">"Anzeigen"</string>
+    <string name="view_calendar" msgid="979609872939597838">"Aufrufen"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Ausgewählte Zeit im Kalender anzeigen"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Terminübersicht"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Termin planen"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Termin für die ausgewählte Zeit planen"</string>
     <string name="view_flight" msgid="7691640491425680214">"Verfolgen"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Ausgewählten Flug verfolgen"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tablet wird aktualisiert…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Gerät wird aktualisiert…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Smartphone wird gestartet…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android wird gestartet…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tablet wird gestartet…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Gerät wird gestartet…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Speicher wird optimiert"</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tippen, um alle Netzwerke zu sehen"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinden"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle Netzwerke"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Mit einem von <xliff:g id="NAME">%s</xliff:g> vorgeschlagenen WLAN-Netzwerk verbunden"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Möchten Sie, dass <xliff:g id="NAME">%s</xliff:g> Ihnen Netzwerke vorschlägt?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ja"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nein"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WLAN wird automatisch aktiviert"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Wenn du in der Nähe eines sicheren gespeicherten Netzwerks bist"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nicht wieder aktivieren"</string>

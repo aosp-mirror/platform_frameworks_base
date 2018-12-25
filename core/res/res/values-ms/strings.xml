@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Membenarkan apl mengakses ciri telefon pada peranti. Kebenaran ini membolehkan apl menentukan nombor telefon dan ID peranti, sama ada panggilan aktif dan nombor jauh yang dihubungkan dengan panggilan."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"halakan panggilan menerusi sistem"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Membenarkan apl menghalakan panggilan menerusi sistem untuk meningkatkan pengalaman panggilan."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"lihat dan kawal panggilan melalui sistem."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Membenarkan apl melihat dan mengawal panggilan yang sedang berlangsung pada peranti. Ini termasuklah maklumat seperti nombor panggilan untuk panggilan dan keadaan panggilan tersebut."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"teruskan panggilan daripada apl lain"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Membenarkan apl meneruskan panggilan yang dimulakan dalam apl lain."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"baca nombor telefon"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Membenarkan apl berkomunikasi dengan teg, kad dan pembaca Komunikasi Medan Dekat (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"lumpuhkan kunci skrin anda"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Membenarkan apl melumpuhkan kunci kekunci dan sebarang keselamatan kata laluan yang berkaitan. Sebagai contoh, telefon melumpuhkan kunci kekunci apabila menerima panggilan telefon masuk kemudian mendayakan semula kunci kekunci apabila panggilan selesai."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"dapatkan dan minta kekompleksan kunci skrin"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Benarkan apl mengetahui tahap kekompleksan kunci skrin (tinggi, sederhana, rendah atau tiada) yang menunjukkan kemungkinan julat panjang dan jenis kunci skrin. Apl juga boleh mencadangkan kepada pengguna supaya mengemas kini kunci skrin pada tahap tertentu namun pengguna boleh mengabaikan dan menavigasi keluar dengan bebas. Sila ambil perhatian bahawa kunci skrin tidak disimpan dalam teks biasa, maka apl tidak mengetahui kata laluan yang tepat."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"gunakan perkakasan biometrik"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Membenarkan apl menggunakan perkakasan biometrik untuk pengesahan"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"urus perkakasan cap jari"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tablet sedang mengemas kini…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Peranti sedang mengemas kini…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefon sedang dimulakan…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android sedang dimulakan…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tablet sedang dimulakan…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Peranti sedang dimulakan…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Mengoptimumkan storan."</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Ketik untuk melihat semua rangkaian"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Sambung"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Semua rangkaian"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Dihubungkan ke rangkaian Wi‑Fi yang dicadangkan oleh <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Adakah anda ingin <xliff:g id="NAME">%s</xliff:g> mencadangkan rangkaian kepada anda?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ya"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Tidak"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi akan dihidupkan secara automatik"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Apabila anda berada berdekatan dengan rangkaian disimpan yang berkualiti tinggi"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Jangan hidupkan kembali"</string>

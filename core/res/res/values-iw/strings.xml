@@ -453,6 +453,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"מאפשר לאפליקציה לגשת לתכונות הטלפון של המכשיר. אישור זה מתיר לאפליקציה לגלות את מספר הטלפון ואת זיהויי המכשיר, האם שיחה פעילה ואת המספר המרוחק המחובר באמצעות שיחה."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ניתוב שיחות דרך המערכת"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"מאפשרת לאפליקציה לנתב את השיחות דרך המערכת כדי לשפר את חוויית השיחה."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ניתן להציג שיחות ולשלוט בהן באמצעות המערכת."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"מאפשר לאפליקציה להציג שיחות נוכחיות ולשלוט בהן במכשיר. זה כולל פרטים כמו מספרי שיחה של שיחות ומצב השיחה."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"המשך שיחה מאפליקציה אחרת"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"הרשאה זו מתירה לאפליקציה להמשיך שיחה שהחלה באפליקציה אחרת."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"גישה למספרי הטלפון"</string>
@@ -513,6 +515,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"מאפשר לאפליקציה נהל תקשורת עם תגים, כרטיסים וקוראים מסוג \'תקשורת מטווח קצר\'."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ביטול נעילת המסך שלך"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"מאפשר לאפליקציה להשבית את נעילת המקשים וכל אמצעי אבטחה משויך המבוסס על סיסמה. לדוגמה, הטלפון משבית את נעילת המקשים בעת קבלה של שיחת טלפון נכנסת, ולאחר מכן מפעיל מחדש את נעילת המקשים עם סיום השיחה."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"קבלה ובקשה של מורכבות לנעילת מסך"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"‏מאפשרת לאפליקציה ללמוד את רמת המורכבות של נעילת המסך (גבוהה, בינונית, נמוכה או ללא). רמה זו מציינת את הטווח האפשרי של אורך וסוג של נעילת המסך. האפליקציה יכולה גם להציע למשתמשים שיעדכנו את נעילת המסך ברמה מסוימת, אבל המשתמשים יכולים להתעלם מההצעה ולנווט לפריט אחר כרצונם. יש לשים לב שנעילת המסך לא מאוחסנת ב-plaintext, ולכן האפליקציה לא יודעת מה הסיסמה המדויקת."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"שימוש בחומרה ביומטרית"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"מאפשרת לאפליקציה להשתמש בחומרה ביומטרית לצורך אימות"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ניהול חומרה של טביעות אצבעות"</string>
@@ -1123,28 +1127,28 @@
     <string name="deleteText" msgid="6979668428458199034">"מחיקה"</string>
     <string name="inputMethod" msgid="1653630062304567879">"שיטת קלט"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"פעולות טקסט"</string>
-    <string name="email" msgid="4560673117055050403">"אימייל"</string>
+    <string name="email" msgid="4560673117055050403">"התכתבות באימייל"</string>
     <string name="email_desc" msgid="3638665569546416795">"שליחת אימייל לכתובת שנבחרה"</string>
-    <string name="dial" msgid="1253998302767701559">"שיחה"</string>
+    <string name="dial" msgid="1253998302767701559">"ביצוע שיחה"</string>
     <string name="dial_desc" msgid="6573723404985517250">"התקשרות למספר הטלפון שנבחר"</string>
-    <string name="map" msgid="5441053548030107189">"מפה"</string>
-    <string name="map_desc" msgid="1836995341943772348">"מיקום הכתובת שנבחרה"</string>
+    <string name="map" msgid="5441053548030107189">"צפייה במפה"</string>
+    <string name="map_desc" msgid="1836995341943772348">"איתור הכתובת שנבחרה"</string>
     <string name="browse" msgid="1245903488306147205">"פתיחה"</string>
     <string name="browse_desc" msgid="8220976549618935044">"פתיחה של כתובת האתר שנבחרה"</string>
-    <string name="sms" msgid="4560537514610063430">"הודעה"</string>
+    <string name="sms" msgid="4560537514610063430">"התכתבות בהודעות"</string>
     <string name="sms_desc" msgid="7526588350969638809">"שליחת הודעה למספר הטלפון שנבחר"</string>
     <string name="add_contact" msgid="7867066569670597203">"הוספה"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"הוספה לאנשי הקשר"</string>
-    <string name="view_calendar" msgid="979609872939597838">"תצוגה"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"הצגת הזמן שנבחר ביומן"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"לוח זמנים"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"תזמון אירוע לזמן שנבחר"</string>
+    <string name="view_calendar" msgid="979609872939597838">"צפייה"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"הצגת התאריך שנבחר ביומן"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"קביעת מועד"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"קביעת מועד לאירוע בתאריך שנבחר"</string>
     <string name="view_flight" msgid="7691640491425680214">"מעקב"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"ניהול מעקב אחר הטיסה שנבחרה"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"מעקב אחרי הטיסה שנבחרה"</string>
     <string name="translate" msgid="9218619809342576858">"תרגום"</string>
     <string name="translate_desc" msgid="4502367770068777202">"תרגום הטקסט שנבחר"</string>
-    <string name="define" msgid="7394820043869954211">"הגדרה"</string>
-    <string name="define_desc" msgid="7910883642444919726">"הגדרת הטקסט שנבחר"</string>
+    <string name="define" msgid="7394820043869954211">"מציאת הפירוש"</string>
+    <string name="define_desc" msgid="7910883642444919726">"פירוש הטקסט שנבחר"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"שטח האחסון אוזל"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ייתכן שפונקציות מערכת מסוימות לא יפעלו"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"‏אין מספיק שטח אחסון עבור המערכת. ודא שיש לך שטח פנוי בגודל 250MB התחל שוב."</string>
@@ -1221,6 +1225,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"הטאבלט מתעדכן…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"הפעלת המכשיר מתחילה…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"הפעלת הטלפון מתחילה…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"‏הפעלת Android מתחילה…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"הפעלת הטאבלט מתחילה…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"הפעלת המכשיר מתחילה…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"מתבצעת אופטימיזציה של האחסון."</string>
@@ -1283,6 +1288,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"יש להקיש כדי לראות את כל הרשתות"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"התחבר"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"כל הרשתות"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"‏יש חיבור לרשת Wi‑Fi שהוצעה על ידי <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"האם ברצונך לקבל הצעות לרשתות מ-<xliff:g id="NAME">%s</xliff:g>?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"כן"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"לא"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏ה-Wi-Fi יופעל אוטומטית"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"כשתימצאו בקרבת רשת באיכות גבוהה ששמרתם"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"אל תפעיל שוב"</string>

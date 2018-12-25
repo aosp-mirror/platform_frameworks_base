@@ -318,7 +318,7 @@
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"ਤੁਹਾਡੀਆਂ ਫ਼ੋਟੋਆਂ ਅਤੇ ਵੀਡੀਓ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="permgrouprequest_visual" msgid="6907523945030290376">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਤੁਹਾਡੀਆਂ ਫ਼ੋਟੋਆਂ ਅਤੇ ਵੀਡੀਓ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ਵਿੰਡੋ ਸਮੱਗਰੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨਾ"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ਇੱਕ ਵਿੰਡੋ ਦੀ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਅੰਤਰਕਿਰਿਆ ਕਰ ਰਹੇ ਹੋ"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ਉਸ ਵਿੰਡੋ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਅੰਤਰਕਿਰਿਆ ਕਰ ਰਹੇ ਹੋ"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'ਸਪੱਰਸ਼ ਰਾਹੀਂ ਪੜਚੋਲ ਕਰੋ\' ਚਾਲੂ ਕਰਨਾ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ਟੈਪ ਕੀਤੀਆਂ ਆਈਟਮਾਂ ਨੂੰ ਉੱਚੀ ਆਵਾਜ਼ ਵਿੱਚ ਬੋਲਿਆ ਜਾਵੇਗਾ ਅਤੇ ਸਕ੍ਰੀਨ ਦੀ ਸੰਕੇਤਾਂ ਦੀ ਵਰਤੋਂ ਨਾਲ ਪੜਚੋਲ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਟਾਈਪ ਕੀਤੀ ਲਿਖਤ ਦਾ ਨਿਰੀਖਣ ਕਰਨਾ"</string>
@@ -447,6 +447,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ਐਪ ਨੂੰ ਡੀਵਾਈਸ ਦੀਆਂ ਫ਼ੋਨ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪ ਨੂੰ ਫ਼ੋਨ ਨੰਬਰ ਅਤੇ ਡੀਵਾਈਸ ਆਈ.ਡੀ. ਨਿਰਧਾਰਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ, ਇੱਕ ਕਾਲ ਕਿਰਿਆਸ਼ੀਲ ਹੈ ਜਾਂ ਨਹੀਂ ਅਤੇ ਰਿਮੋਟ ਨੰਬਰ ਇੱਕ ਕਾਲ ਨਾਲ ਕਨੈਕਟ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ਸਿਸਟਮ ਰਾਹੀਂ ਕਾਲਾਂ ਰੂਟ ਕਰੋ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"ਕਾਲ ਕਰਨ ਦੇ ਅਨੁਭਵ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ ਐਪ ਨੂੰ ਇਸਦੀਆਂ ਕਾਲਾਂ ਨੂੰ ਸਿਸਟਮ ਰਾਹੀਂ ਰੂਟ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦੀ ਹੈ।"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ਸਿਸਟਮ ਰਾਹੀਂ ਕਾਲਾਂ ਦੇਖੋ ਅਤੇ ਕੰਟਰੋਲ ਕਰੋ।"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"ਐਪ ਨੂੰ ਡੀਵਾਈਸ \'ਤੇ ਜਾਰੀ ਕਾਲਾਂ ਦੇਖਣ ਅਤੇ ਕੰਟਰੋਲ ਕਰਨ ਦਿਓ। ਇਸ ਵਿੱਚ ਕਾਲਾਂ ਦੇ ਨੰਬਰਾਂ ਅਤੇ ਉਹਨਾਂ ਦੀ ਸਥਿਤੀ ਬਾਰੇ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਹੈ।"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ਕਿਸੇ ਹੋਰ ਐਪ ਤੋਂ ਕਾਲ ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"ਐਪ ਨੂੰ ਉਹ ਕਾਲ ਜਾਰੀ ਰੱਖਣ ਦਿਓ ਜਿਸਨੂੰ ਹੋਰ ਐਪ ਤੋਂ ਚਾਲੂ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ਫ਼ੋਨ ਨੰਬਰ ਪੜ੍ਹੋ"</string>
@@ -507,6 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ (NFC) ਟੈਗਾਂ, ਕਾਰਡਾਂ ਅਤੇ ਰੀਡਰਾਂ ਨਾਲ ਸੰਚਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ਆਪਣਾ ਸਕ੍ਰੀਨ  ਲਾਕ  ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ਐਪ ਨੂੰ ਕੀਲਾਕ ਅਤੇ ਕਿਸੇ ਵੀ ਸੰਬੰਧਿਤ ਪਾਸਵਰਡ ਸੁਰੱਖਿਆ ਨੂੰ ਬੰਦ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਫ਼ੋਨ ਇੱਕ ਇਨਕਮਿੰਗ ਫ਼ੋਨ ਕਾਲ ਪ੍ਰਾਪਤ ਕਰਨ ਵੇਲੇ ਬੰਦ ਕਰਦਾ ਹੈ, ਫਿਰ ਜਦੋਂ ਕਾਲ ਖਤਮ ਹੁੰਦੀ ਹੈ ਤਾਂ ਕੀਲਾਕ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਕਰਦਾ ਹੈ।"</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਪ੍ਰਾਪਤ ਕਰੋ ਅਤੇ ਬੇਨਤੀ ਕਰੋ"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"ਐਪ ਨੂੰ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਦੇ ਪੱਧਰ ਬਾਰੇ ਜਾਣਨ ਦਿਓ (ਉੱਚ, ਮੱਧਮ, ਘੱਟ ਜਾਂ ਕੋਈ ਨਹੀਂ), ਜੋ ਲੰਬਾਈ ਦੀ ਸੰਭਵ ਰੇਂਜ ਅਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਕਿਸਮ ਦਾ ਸੰਕੇਤ ਦਿੰਦਾ ਹੈ। ਐਪ ਵਰਤੋਂਕਾਰਾਂ ਨੂੰ ਇੱਕ ਖਾਸ ਪੱਧਰ ਤੱਕ ਸਕ੍ਰੀਨ ਲਾਕ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੁਝਾਅ ਵੀ ਦੇ ਸਕਦੀ ਹੈ ਪਰ ਵਰਤੋਂਕਾਰ ਇਸਨੂੰ ਅਣਡਿੱਠ ਕਰ ਸਕਦੇ ਹਨ। ਨੋਟ ਕਰੋ ਕਿ ਸਕ੍ਰੀਨ ਲਾਕ ਸਧਾਰਨ ਲਿਖਤ ਵਿੱਚ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਇਸ ਲਈ ਐਪ ਸਹੀ ਪਾਸਵਰਡ ਬਾਰੇ ਨਹੀਂ ਜਾਣਦੀ ਹੈ।"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦਿੰਦਾ ਹੈ"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਵਿਵਸਥਿਤ ਕਰੋ"</string>
@@ -1181,6 +1185,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"ਟੈਬਲੈੱਟ ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"ਡੀਵਾਈਸ ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"ਫ਼ੋਨ ਚਾਲੂ ਹੋ ਰਿਹਾ ਹੈ…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android ਚਾਲੂ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"ਟੈਬਲੈੱਟ ਚਾਲੂ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"ਡੀਵਾਈਸ ਚਾਲੂ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ਸਟੋਰੇਜ ਅਨੁਕੂਲ ਹੋ ਰਹੀ ਹੈ।"</string>
@@ -1239,6 +1244,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ਸਾਰੇ ਨੈੱਟਵਰਕਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ਕਨੈਕਟ ਕਰੋ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ਸਾਰੇ ਨੈੱਟਵਰਕ"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> ਵੱਲੋਂ ਸੁਝਾਏ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਹੈ"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"ਕੀ ਤੁਸੀਂ ਚਾਹੁੰਦੇ ਹੋ ਕਿ <xliff:g id="NAME">%s</xliff:g> ਤੁਹਾਨੂੰ ਨੈੱਟਵਰਕ ਸੁਝਾਏ?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ਹਾਂ"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ਨਹੀਂ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ਵਾਈ‑ਫਾਈ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਚੱਲ ਪਵੇਗਾ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ਜਦੋਂ ਤੁਸੀਂ ਕਿਸੇ ਰੱਖਿਅਤ ਕੀਤੇ ਉੱਚ-ਗੁਣਵੱਤਾ ਵਾਲੇ ਨੈੱਟਵਰਕ ਦੇ ਨੇੜੇ ਹੋਵੋ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ਵਾਪਸ ਚਾਲੂ ਨਾ ਕਰੋ"</string>
@@ -1513,7 +1522,7 @@
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"ਅਣਲਾਕ ਕਰਨ ਲਈ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"ਹੋਮ \'ਤੇ ਜਾਓ"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"ਉੱਪਰ ਜਾਓ"</string>
-    <string name="action_menu_overflow_description" msgid="2295659037509008453">"ਹੋਰ ਚੋਣਾਂ"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"ਹੋਰ ਵਿਕਲਪ"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="3570990907910199483">"ਅੰਦਰੂਨੀ ਸਾਂਝੀ ਕੀਤੀ ਸਟੋਰੇਜ"</string>

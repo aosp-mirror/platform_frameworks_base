@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.media;
 
+import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.util.Log;
 
@@ -33,6 +35,13 @@ public class BluetoothMediaDevice extends MediaDevice {
     BluetoothMediaDevice(Context context, CachedBluetoothDevice device) {
         super(context, MediaDeviceType.TYPE_BLUETOOTH_DEVICE);
         mCachedDevice = device;
+        initDeviceRecord();
+        buildConnectedState(device);
+    }
+
+    private void buildConnectedState(CachedBluetoothDevice device) {
+        mIsConnected = device.isActiveDevice(BluetoothProfile.A2DP)
+                || device.isActiveDevice(BluetoothProfile.HEARING_AID);
     }
 
     @Override
@@ -52,9 +61,15 @@ public class BluetoothMediaDevice extends MediaDevice {
     }
 
     @Override
+    public void notifyConnectedChanged() {
+        buildConnectedState(mCachedDevice);
+    }
+
+    @Override
     public void connect() {
         //TODO(b/117129183): add callback to notify LocalMediaManager connection state.
         mIsConnected = mCachedDevice.setActive();
+        super.connect();
         Log.d(TAG, "connect() device : " + getName() + ", is selected : " + mIsConnected);
     }
 
@@ -69,5 +84,19 @@ public class BluetoothMediaDevice extends MediaDevice {
      */
     public CachedBluetoothDevice getCachedDevice() {
         return mCachedDevice;
+    }
+
+    @Override
+    protected boolean isCarKitDevice() {
+        final BluetoothClass bluetoothClass = mCachedDevice.getDevice().getBluetoothClass();
+        if (bluetoothClass != null) {
+            switch (bluetoothClass.getDeviceClass()) {
+                // Both are common CarKit class
+                case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
+                case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
+                    return true;
+            }
+        }
+        return false;
     }
 }

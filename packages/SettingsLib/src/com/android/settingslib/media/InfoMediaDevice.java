@@ -16,6 +16,7 @@
 package com.android.settingslib.media;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import androidx.mediarouter.media.MediaRouter;
 
@@ -33,6 +34,7 @@ public class InfoMediaDevice extends MediaDevice {
     InfoMediaDevice(Context context, MediaRouter.RouteInfo info) {
         super(context, MediaDeviceType.TYPE_CAST_DEVICE);
         mRouteInfo = info;
+        initDeviceRecord();
     }
 
     @Override
@@ -52,14 +54,22 @@ public class InfoMediaDevice extends MediaDevice {
     }
 
     @Override
+    public void notifyConnectedChanged() {
+        //TODO(b/117129183): check mIsConnected state
+    }
+
+    @Override
     public void connect() {
         //TODO(b/117129183): use MediaController2 to transfer media
         mIsConnected = true;
+        super.connect();
+        //mIsConnected = true;
+        Toast.makeText(mContext, "This is cast device !", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void disconnect() {
         //TODO(b/117129183): disconnected last select device
-        mIsConnected = false;
+        //mIsConnected = false;
     }
 }

@@ -453,6 +453,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Aplikaciji omogoča dostop do funkcij telefona v napravi. S tem dovoljenjem lahko aplikacija določi telefonsko številko in ID-je naprave, določi lahko tudi, ali je klic aktiven, in oddaljeno številko, s katero je klic povezan."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"Usmeri klice prek sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Dovoli, da aplikacija usmeri klice prek sistema, da se tako izboljša izkušnja klicanja."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ogled in nadzor klicev prek sistema."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Aplikaciji dovoljuje, da si ogleda in nadzoruje aktivne klice v napravi. To vključuje informacije, kot so telefonske številke klicev in stanje klicev."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"Nadaljevanje klica iz druge aplikacije"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Aplikaciji dovoljuje nadaljevanje klica, ki se je začel v drugi aplikaciji."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"branje telefonskih številk"</string>
@@ -513,6 +515,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Podpira komunikacijo med računalnikom in oznakami, karticami in bralniki komunikacije s tehnologijo bližnjega polja."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"onemogočanje zaklepanja zaslona"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Aplikaciji dovoljuje, da onemogoči zaklep tipkovnice in morebitno povezano varnostno geslo. Telefon na primer onemogoči zaklep tipkovnice pri dohodnem klicu ter vnovič omogoči zaklep, ko je klic končan."</string>
+    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"pridobi in zahtevaj zapletenost zaklepanja zaslona"</string>
+    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Aplikaciji dovoljuje, da pridobi raven zapletenosti zaklepanja zaslona (visoka, srednja, nizka ali brez), ki označuje možen obseg dolžine in vrsto zaklepanja zaslona. Aplikacija lahko tudi predlaga uporabnikom, da posodobijo zaklepanje zaslona na določeno raven, vendar lahko uporabniki to opozorilo prezrejo in ga zaprejo tako, da se pomaknejo stran. Upoštevajte, da zaklepanje zaslona ni shranjeno v navadnem besedilu, tako da aplikacija ne pozna točnega gesla."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"uporaba strojne opreme za biometrične podatke"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Aplikaciji omogoča uporabo strojne opreme za biometrične podatke za preverjanje pristnosti"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"upravljanje strojne opreme za prstne odtise"</string>
@@ -1221,6 +1225,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tablični računalnik se posodablja …"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Naprava se posodablja …"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefon se zaganja …"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android se zaganja …"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tablični računalnik se zaganja …"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Naprava se zaganja …"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimiziranje shrambe."</string>
@@ -1283,6 +1288,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Dotaknite se, če si želite ogledati vsa omrežja"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Vzpostavi povezavo"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Vsa omrežja"</string>
+    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Vzpostavljena povezava z omrežjem Wi‑Fi na predlog aplikacije <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Ali želite aplikaciji <xliff:g id="NAME">%s</xliff:g> dovoliti predlaganje omrežij?"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Da"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ne"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Povezava Wi‑Fi se bo samodejno vklopila"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Ko ste v bližini zanesljivega shranjenega omrežja"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ne vklopi znova"</string>
