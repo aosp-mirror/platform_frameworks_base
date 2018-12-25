@@ -4754,16 +4754,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + " with INTERACT_ACROSS_USERS_FULL");
                 return ShellCommandResult.FAILURE;
             }
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                shellCommand.getErrPrintWriter().print(
-                        "Caller must have WRITE_SECURE_SETTINGS permission");
-                throw new SecurityException(
-                        "Requires permission "
-                                + android.Manifest.permission.WRITE_SECURE_SETTINGS);
-            }
-
+            mContext.enforceCallingPermission(Manifest.permission.WRITE_SECURE_SETTINGS, null);
             final long ident = Binder.clearCallingIdentity();
             try {
                 previouslyEnabled = setInputMethodEnabledLocked(id, enabled);
@@ -4812,15 +4803,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + " with INTERACT_ACROSS_USERS_FULL");
                 return ShellCommandResult.FAILURE;
             }
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                shellCommand.getErrPrintWriter().print(
-                        "Caller must have WRITE_SECURE_SETTINGS permission");
-                throw new SecurityException(
-                        "Requires permission "
-                                + android.Manifest.permission.WRITE_SECURE_SETTINGS);
-            }
+            mContext.enforceCallingPermission(Manifest.permission.WRITE_SECURE_SETTINGS, null);
             final String nextIme;
             final List<InputMethodInfo> nextEnabledImes;
             final long ident = Binder.clearCallingIdentity();
