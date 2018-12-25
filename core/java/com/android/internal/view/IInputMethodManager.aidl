@@ -70,8 +70,6 @@ interface IInputMethodManager {
     boolean isInputMethodPickerShownForTest();
     // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
     void setInputMethod(in IBinder token, String id);
-    // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
-    void setInputMethodAndSubtype(in IBinder token, String id, in InputMethodSubtype subtype);
     void registerSuggestionSpansForNotification(in SuggestionSpan[] spans);
     boolean notifySuggestionPicked(in SuggestionSpan span, String originalString, int index);
     InputMethodSubtype getCurrentInputMethodSubtype();
