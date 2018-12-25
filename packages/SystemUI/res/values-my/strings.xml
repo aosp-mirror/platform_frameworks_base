@@ -798,12 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ဖုန်း ပူနွေးလာပါပြီ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ဖုန်းကို အေးအောင်ပြုလုပ်နေစဉ်တွင် အချို့ဝန်ဆောင်မှုများကို ကန့်သတ်ထားပါသည်"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"သင့်ဖုန်းသည် အလိုအလျောက် ပြန်အေးသွားပါလိမ့်မည်။ ဖုန်းကို အသုံးပြုနိုင်ပါသေးသည် သို့သော် ပိုနှေးနိုင်ပါသည်။\n\nသင့်ဖုန်း အေးသွားသည်နှင့် ပုံမှန်အတိုင်း ပြန်အလုပ်လုပ်ပါလိမ့်မည်။"</string>
-    <!-- no translation found for high_temp_alarm_title (442812040762745210) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (519359725058131592) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_help_care_steps (3631075329318070726) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"အားသွင်းကိရိယာ ပလပ်ဖြုတ်ပါ"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"ဤစက်ပစ္စည်းကို အားသွင်းရာတွင် ပြဿနာရှိနေသည်။ ပါဝါ ကြားခံကိရိယာကို ပလပ်ဖြုတ်ပြီး ကေဘယ်ကြိုး ပူနွေးနေခြင်းရှိမရှိ စစ်ဆေးပါ။"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"လက်ဝဲ ဖြတ်လမ်းလင့်ခ်"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"လက်ယာ ဖြတ်လမ်းလင့်ခ်"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"လက်ဝဲ ဖြတ်လမ်းလင့်ခ်ဖြင့်လည်း လော့ခ်ဖွင့်ရန်"</string>

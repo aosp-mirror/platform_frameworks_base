@@ -798,12 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"மொபைல் சூடாகிறது"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"மொபைலின் வெப்ப அளவு குறையும் போது, சில அம்சங்களைப் பயன்படுத்த முடியாது"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"உங்கள் மொபைலின் வெப்ப அளவு தானாகவே குறையும். தொடர்ந்து நீங்கள் மொபைலைப் பயன்படுத்தலாம், ஆனால் அதன் வேகம் குறைவாக இருக்கக்கூடும்.\n\nமொபைலின் வெப்ப அளவு குறைந்தவுடன், அது இயல்பு நிலையில் இயங்கும்."</string>
-    <!-- no translation found for high_temp_alarm_title (442812040762745210) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (519359725058131592) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_help_care_steps (3631075329318070726) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"சார்ஜரைத் துண்டிக்கவும்"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"இந்தச் சாதனத்தைச் சார்ஜ் செய்வதில் சிக்கல் உள்ளது. கேபிள் சூடாகியிருக்கக்கூடும் என்பதால் பவர் அடாப்டரைத் துண்டிக்கவும்."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"மேலும் விவரங்களுக்கு இதைப் பார்க்கவும்"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"இடப்புறக் குறுக்குவழி"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"வலப்புறக் குறுக்குவழி"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"இடப்புறக் குறுக்குவழி மூலமாகவும் திறக்கும்"</string>
