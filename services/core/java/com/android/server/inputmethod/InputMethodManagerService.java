@@ -4863,6 +4863,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         final boolean previouslyEnabled;
         synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                shellCommand.getErrPrintWriter().print("Must be called from the foreground user or"
+                        + " with INTERACT_ACROSS_USERS_FULL");
+                return ShellCommandResult.FAILURE;
+            }
             if (mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.WRITE_SECURE_SETTINGS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -4916,6 +4921,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     private int handleShellCommandResetInputMethod(@NonNull ShellCommand shellCommand) {
         synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                shellCommand.getErrPrintWriter().print("Must be called from the foreground user or"
+                        + " with INTERACT_ACROSS_USERS_FULL");
+                return ShellCommandResult.FAILURE;
+            }
             if (mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.WRITE_SECURE_SETTINGS)
                     != PackageManager.PERMISSION_GRANTED) {
