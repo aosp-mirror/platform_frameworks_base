@@ -1568,12 +1568,6 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
-            reportNotSupported();
-        }
-
-        @BinderThread
-        @Override
         public void registerSuggestionSpansForNotification(SuggestionSpan[] suggestionSpans) {
             reportNotSupported();
         }
