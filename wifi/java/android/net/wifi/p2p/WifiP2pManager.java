@@ -311,11 +311,18 @@ public class WifiP2pManager {
             "android.net.wifi.p2p.EXTRA_HANDOVER_MESSAGE";
 
     /**
-     * The lookup key for a calling package returned by the WifiP2pService.
+     * The lookup key for a calling package name from WifiP2pManager
      * @hide
      */
     public static final String CALLING_PACKAGE =
             "android.net.wifi.p2p.CALLING_PACKAGE";
+
+    /**
+     * The lookup key for a calling package binder from WifiP2pManager
+     * @hide
+     */
+    public static final String CALLING_BINDER =
+            "android.net.wifi.p2p.CALLING_BINDER";
 
     IWifiP2pManager mService;
 
@@ -535,6 +542,9 @@ public class WifiP2pManager {
     public static final int REQUEST_NETWORK_INFO                    = BASE + 94;
     /** @hide */
     public static final int RESPONSE_NETWORK_INFO                   = BASE + 95;
+
+    /** @hide */
+    public static final int UPDATE_CHANNEL_INFO                     = BASE + 96;
 
     /**
      * Create a new WifiP2pManager instance. Applications use
@@ -1098,6 +1108,11 @@ public class WifiP2pManager {
         Channel c = new Channel(srcContext, srcLooper, listener, binder, this);
         if (c.mAsyncChannel.connectSync(srcContext, c.mHandler, messenger)
                 == AsyncChannel.STATUS_SUCCESSFUL) {
+            Bundle bundle = new Bundle();
+            bundle.putString(CALLING_PACKAGE, c.mContext.getOpPackageName());
+            bundle.putBinder(CALLING_BINDER, binder);
+            c.mAsyncChannel.sendMessage(UPDATE_CHANNEL_INFO, 0,
+                    c.putListener(null), bundle);
             return c;
         } else {
             c.close();
@@ -1124,6 +1139,7 @@ public class WifiP2pManager {
      * @param c is the channel created at {@link #initialize}
      * @param listener for callbacks on success or failure. Can be null.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
     public void discoverPeers(Channel c, ActionListener listener) {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(DISCOVER_PEERS, 0, c.putListener(listener));
@@ -1167,6 +1183,7 @@ public class WifiP2pManager {
      * @param config options as described in {@link WifiP2pConfig} class
      * @param listener for callbacks on success or failure. Can be null.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
     public void connect(Channel c, WifiP2pConfig config, ActionListener listener) {
         checkChannel(c);
         checkP2pConfig(config);
@@ -1208,6 +1225,7 @@ public class WifiP2pManager {
      * @param c is the channel created at {@link #initialize}
      * @param listener for callbacks on success or failure. Can be null.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
     public void createGroup(Channel c, ActionListener listener) {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(CREATE_GROUP, WifiP2pGroup.PERSISTENT_NET_ID,
@@ -1238,6 +1256,7 @@ public class WifiP2pManager {
      * @param config the configuration of a p2p group.
      * @param listener for callbacks on success or failure. Can be null.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
     public void createGroup(@NonNull Channel c,
             @Nullable WifiP2pConfig config,
             @Nullable ActionListener listener) {
@@ -1316,6 +1335,7 @@ public class WifiP2pManager {
      * @param servInfo is a local service information.
      * @param listener for callbacks on success or failure. Can be null.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
     public void addLocalService(Channel c, WifiP2pServiceInfo servInfo, ActionListener listener) {
         checkChannel(c);
         checkServiceInfo(servInfo);
@@ -1425,6 +1445,7 @@ public class WifiP2pManager {
      * @param c is the channel created at {@link #initialize}
      * @param listener for callbacks on success or failure. Can be null.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
     public void discoverServices(Channel c, ActionListener listener) {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(DISCOVER_SERVICES, 0, c.putListener(listener));
@@ -1500,12 +1521,10 @@ public class WifiP2pManager {
      * @param c is the channel created at {@link #initialize}
      * @param listener for callback when peer list is available. Can be null.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
     public void requestPeers(Channel c, PeerListListener listener) {
         checkChannel(c);
-        Bundle callingPackage = new Bundle();
-        callingPackage.putString(CALLING_PACKAGE, c.mContext.getOpPackageName());
-        c.mAsyncChannel.sendMessage(REQUEST_PEERS, 0, c.putListener(listener),
-                callingPackage);
+        c.mAsyncChannel.sendMessage(REQUEST_PEERS, 0, c.putListener(listener));
     }
 
     /**
@@ -1525,6 +1544,7 @@ public class WifiP2pManager {
      * @param c is the channel created at {@link #initialize}
      * @param listener for callback when group info is available. Can be null.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
     public void requestGroupInfo(Channel c, GroupInfoListener listener) {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(REQUEST_GROUP_INFO, 0, c.putListener(listener));
@@ -1697,10 +1717,7 @@ public class WifiP2pManager {
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void factoryReset(@NonNull Channel c, @Nullable ActionListener listener) {
         checkChannel(c);
-        Bundle callingPackage = new Bundle();
-        callingPackage.putString(CALLING_PACKAGE, c.mContext.getOpPackageName());
-        c.mAsyncChannel.sendMessage(FACTORY_RESET, 0, c.putListener(listener),
-                callingPackage);
+        c.mAsyncChannel.sendMessage(FACTORY_RESET, 0, c.putListener(listener));
     }
 
     /**
