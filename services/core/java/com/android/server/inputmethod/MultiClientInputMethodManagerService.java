@@ -1303,13 +1303,6 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public List getShortcutInputMethodsAndSubtypes() {
-            reportNotSupported();
-            return null;
-        }
-
-        @BinderThread
-        @Override
         public boolean showSoftInput(
                 IInputMethodClient client, int flags, ResultReceiver resultReceiver) {
             final int callingUid = Binder.getCallingUid();

@@ -4084,86 +4084,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         setSelectedInputMethodAndSubtypeLocked(imi, lastSubtypeId, false);
     }
 
-    // If there are no selected shortcuts, tries finding the most applicable ones.
-    private Pair<InputMethodInfo, InputMethodSubtype>
-            findLastResortApplicableShortcutInputMethodAndSubtypeLocked(String mode) {
-        List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
-        InputMethodInfo mostApplicableIMI = null;
-        InputMethodSubtype mostApplicableSubtype = null;
-        boolean foundInSystemIME = false;
-
-        // Search applicable subtype for each InputMethodInfo
-        for (InputMethodInfo imi: imis) {
-            final String imiId = imi.getId();
-            if (foundInSystemIME && !imiId.equals(mCurMethodId)) {
-                continue;
-            }
-            InputMethodSubtype subtype = null;
-            final List<InputMethodSubtype> enabledSubtypes =
-                    mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true);
-            // 1. Search by the current subtype's locale from enabledSubtypes.
-            if (mCurrentSubtype != null) {
-                subtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
-                        mRes, enabledSubtypes, mode, mCurrentSubtype.getLocale(), false);
-            }
-            // 2. Search by the system locale from enabledSubtypes.
-            // 3. Search the first enabled subtype matched with mode from enabledSubtypes.
-            if (subtype == null) {
-                subtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
-                        mRes, enabledSubtypes, mode, null, true);
-            }
-            final ArrayList<InputMethodSubtype> overridingImplicitlyEnabledSubtypes =
-                    InputMethodUtils.getOverridingImplicitlyEnabledSubtypes(imi, mode);
-            final ArrayList<InputMethodSubtype> subtypesForSearch =
-                    overridingImplicitlyEnabledSubtypes.isEmpty()
-                            ? InputMethodUtils.getSubtypes(imi)
-                            : overridingImplicitlyEnabledSubtypes;
-            // 4. Search by the current subtype's locale from all subtypes.
-            if (subtype == null && mCurrentSubtype != null) {
-                subtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
-                        mRes, subtypesForSearch, mode, mCurrentSubtype.getLocale(), false);
-            }
-            // 5. Search by the system locale from all subtypes.
-            // 6. Search the first enabled subtype matched with mode from all subtypes.
-            if (subtype == null) {
-                subtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
-                        mRes, subtypesForSearch, mode, null, true);
-            }
-            if (subtype != null) {
-                if (imiId.equals(mCurMethodId)) {
-                    // The current input method is the most applicable IME.
-                    mostApplicableIMI = imi;
-                    mostApplicableSubtype = subtype;
-                    break;
-                } else if (!foundInSystemIME) {
-                    // The system input method is 2nd applicable IME.
-                    mostApplicableIMI = imi;
-                    mostApplicableSubtype = subtype;
-                    if ((imi.getServiceInfo().applicationInfo.flags
-                            & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        foundInSystemIME = true;
-                    }
-                }
-            }
-        }
-        if (DEBUG) {
-            if (mostApplicableIMI != null) {
-                Slog.w(TAG, "Most applicable shortcut input method was:"
-                        + mostApplicableIMI.getId());
-                if (mostApplicableSubtype != null) {
-                    Slog.w(TAG, "Most applicable shortcut input method subtype was:"
-                            + "," + mostApplicableSubtype.getMode() + ","
-                            + mostApplicableSubtype.getLocale());
-                }
-            }
-        }
-        if (mostApplicableIMI != null) {
-            return new Pair<> (mostApplicableIMI, mostApplicableSubtype);
-        } else {
-            return null;
-        }
-    }
-
     /**
      * @return Return the current subtype of this input method.
      */
@@ -4215,26 +4135,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         return mCurrentSubtype;
-    }
-
-    // TODO: We should change the return type from List to List<Parcelable>
-    @SuppressWarnings("rawtypes")
-    @Override
-    public List getShortcutInputMethodsAndSubtypes() {
-        synchronized (mMethodMap) {
-            ArrayList<Object> ret = new ArrayList<>();
-            // If there are no selected shortcut subtypes, the framework will try to find
-            // the most applicable subtype from all subtypes whose mode is
-            // SUBTYPE_MODE_VOICE. This is an exceptional case, so we will hardcode the mode.
-            Pair<InputMethodInfo, InputMethodSubtype> info =
-                    findLastResortApplicableShortcutInputMethodAndSubtypeLocked(
-                            InputMethodUtils.SUBTYPE_MODE_VOICE);
-            if (info != null) {
-                ret.add(info.first);
-                ret.add(info.second);
-            }
-            return ret;
-        }
     }
 
     @Override

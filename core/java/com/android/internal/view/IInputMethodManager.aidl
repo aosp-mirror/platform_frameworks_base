@@ -42,9 +42,6 @@ interface IInputMethodManager {
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
             boolean allowsImplicitlySelectedSubtypes);
     InputMethodSubtype getLastInputMethodSubtype();
-    // TODO: We should change the return type from List to List<Parcelable>
-    // Currently there is a bug that aidl doesn't accept List<Parcelable>
-    List getShortcutInputMethodsAndSubtypes();
 
     boolean showSoftInput(in IInputMethodClient client, int flags,
             in ResultReceiver resultReceiver);

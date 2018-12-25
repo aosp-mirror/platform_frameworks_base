@@ -76,9 +76,9 @@ import com.android.internal.view.InputBindResult;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -231,6 +231,13 @@ public final class InputMethodManager {
     static final String TAG = "InputMethodManager";
 
     static final String PENDING_EVENT_COUNTER = "aq:imm";
+
+    /**
+     * A constant that represents Voice IME.
+     *
+     * @see InputMethodSubtype#getMode()
+     */
+    private static final String SUBTYPE_MODE_VOICE = "voice";
 
     /**
      * Ensures that {@link #sInstance} becomes non-{@code null} for application that have directly
@@ -2459,34 +2466,25 @@ public final class InputMethodManager {
      * Returns a map of all shortcut input method info and their subtypes.
      */
     public Map<InputMethodInfo, List<InputMethodSubtype>> getShortcutInputMethodsAndSubtypes() {
-        synchronized (mH) {
-            HashMap<InputMethodInfo, List<InputMethodSubtype>> ret = new HashMap<>();
-            try {
-                // TODO: We should change the return type from List<Object> to List<Parcelable>
-                List<Object> info = mService.getShortcutInputMethodsAndSubtypes();
-                // "info" has imi1, subtype1, subtype2, imi2, subtype2, imi3, subtype3..in the list
-                ArrayList<InputMethodSubtype> subtypes = null;
-                if (info != null && !info.isEmpty()) {
-                    final int N = info.size();
-                    for (int i = 0; i < N; ++i) {
-                        Object o = info.get(i);
-                        if (o instanceof InputMethodInfo) {
-                            if (ret.containsKey(o)) {
-                                Log.e(TAG, "IMI list already contains the same InputMethod.");
-                                break;
-                            }
-                            subtypes = new ArrayList<>();
-                            ret.put((InputMethodInfo)o, subtypes);
-                        } else if (subtypes != null && o instanceof InputMethodSubtype) {
-                            subtypes.add((InputMethodSubtype)o);
-                        }
-                    }
+        final List<InputMethodInfo> enabledImes = getEnabledInputMethodList();
+
+        // Ensure we check system IMEs first.
+        enabledImes.sort(Comparator.comparingInt(imi -> imi.isSystem() ? 0 : 1));
+
+        final int numEnabledImes = enabledImes.size();
+        for (int imiIndex = 0; imiIndex < numEnabledImes; ++imiIndex) {
+            final InputMethodInfo imi = enabledImes.get(imiIndex);
+            final List<InputMethodSubtype> subtypes = getEnabledInputMethodSubtypeList(
+                    imi, true);
+            final int subtypeCount = subtypes.size();
+            for (int subtypeIndex = 0; subtypeIndex < subtypeCount; ++subtypeIndex) {
+                final InputMethodSubtype subtype = imi.getSubtypeAt(subtypeIndex);
+                if (SUBTYPE_MODE_VOICE.equals(subtype.getMode())) {
+                    return Collections.singletonMap(imi, Collections.singletonList(subtype));
                 }
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
             }
-            return ret;
         }
+        return Collections.emptyMap();
     }
 
     /**
