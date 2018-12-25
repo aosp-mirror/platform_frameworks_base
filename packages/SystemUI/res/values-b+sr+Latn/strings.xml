@@ -167,6 +167,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -250,6 +252,8 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Režim rada je uključen."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Ušteda podataka je isključena."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Ušteda podataka je uključena."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"Isključena je privatnost senzora."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"Uključena je privatnost senzora."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Osvetljenost ekrana"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Puni se"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G–3G podaci su pauzirani"</string>
@@ -890,4 +894,7 @@
       <item quantity="few">I još <xliff:g id="NUM_APPS_1">%d</xliff:g> aplikacije</item>
       <item quantity="other">I još <xliff:g id="NUM_APPS_1">%d</xliff:g> aplikacija</item>
     </plurals>
+    <string name="sensor_privacy_mode" msgid="8982771253020769598">"Senzori su isključeni"</string>
+    <string name="device_services" msgid="1191212554435440592">"Usluge za uređaje"</string>
+    <string name="music_controls_no_title" msgid="5236895307087002011">"Bez naslova"</string>
 </resources>

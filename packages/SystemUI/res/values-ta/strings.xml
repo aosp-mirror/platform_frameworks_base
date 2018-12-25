@@ -167,6 +167,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"ரோமிங்"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -250,6 +252,8 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"பணிப் பயன்முறை இயக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"டேட்டா சேமிப்பான் முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"டேட்டா சேமிப்பான் இயக்கப்பட்டது."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"\'சென்சார் தனியுரிமை\' ஆஃப் செய்யப்பட்டது."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"’சென்சார் தனியுரிமை’ ஆன் செய்யப்பட்டது."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"திரை பிரகாசம்"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"சார்ஜ் ஆகிறது"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G டேட்டா இடைநிறுத்தப்பட்டது"</string>
@@ -884,4 +888,9 @@
       <item quantity="other">வேறு <xliff:g id="NUM_APPS_1">%d</xliff:g> ஆப்ஸ்</item>
       <item quantity="one">வேறு <xliff:g id="NUM_APPS_0">%d</xliff:g> ஆப்ஸ்</item>
     </plurals>
+    <string name="sensor_privacy_mode" msgid="8982771253020769598">"சென்சார்களை ஆஃப் செய்தல்"</string>
+    <!-- no translation found for device_services (1191212554435440592) -->
+    <skip />
+    <!-- no translation found for music_controls_no_title (5236895307087002011) -->
+    <skip />
 </resources>
