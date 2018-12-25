@@ -944,6 +944,10 @@ public class NetworkMonitor extends StateMachine {
     private class WaitingForNextProbeState extends State {
         @Override
         public void enter() {
+            scheduleNextProbe();
+        }
+
+        private void scheduleNextProbe() {
             final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
             sendMessageDelayed(msg, mReevaluateDelayMs);
             mReevaluateDelayMs *= 2;
