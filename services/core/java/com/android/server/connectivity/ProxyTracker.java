@@ -208,7 +208,10 @@ public class ProxyTracker {
     public void sendProxyBroadcast() {
         final ProxyInfo defaultProxy = getDefaultProxy();
         final ProxyInfo proxyInfo = null != defaultProxy ? defaultProxy : new ProxyInfo("", 0, "");
-        if (mPacManager.setCurrentProxyScriptUrl(proxyInfo)) return;
+        if (mPacManager.setCurrentProxyScriptUrl(proxyInfo)
+                == PacManager.ToSendOrNotToSendBroadcast.DONT_SEND_BROADCAST) {
+            return;
+        }
         if (DBG) Slog.d(TAG, "sending Proxy Broadcast for " + proxyInfo);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
