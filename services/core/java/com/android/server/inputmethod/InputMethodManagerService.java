@@ -3621,34 +3621,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
-    @GuardedBy("mMethodMap")
-    void buildInputMethodListLocked(boolean resetDefaultEnabledIme) {
-        if (DEBUG) {
-            Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
-                    + " \n ------ caller=" + Debug.getCallers(10));
-        }
-        if (!mSystemReady) {
-            Slog.e(TAG, "buildInputMethodListLocked is not allowed until system is ready");
-            return;
-        }
-        mMethodList.clear();
-        mMethodMap.clear();
-        mMethodMapUpdateCount++;
-        mMyPackageMonitor.clearKnownImePackageNamesLocked();
-
-        // Use for queryIntentServicesAsUser
-        final PackageManager pm = mContext.getPackageManager();
+    static void queryInputMethodServicesInternal(Context context,
+            @UserIdInt int userId, ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
+            ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList) {
+        methodList.clear();
+        methodMap.clear();
 
         // Note: We do not specify PackageManager.MATCH_ENCRYPTION_* flags here because the default
         // behavior of PackageManager is exactly what we want.  It by default picks up appropriate
         // services depending on the unlock state for the specified user.
-        final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
+        final List<ResolveInfo> services = context.getPackageManager().queryIntentServicesAsUser(
                 new Intent(InputMethod.SERVICE_INTERFACE),
                 PackageManager.GET_META_DATA | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS,
-                mSettings.getCurrentUserId());
+                userId);
 
-        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                mFileManager.getAllAdditionalInputMethodSubtypes();
+        methodList.ensureCapacity(services.size());
+        methodMap.ensureCapacity(services.size());
+
         for (int i = 0; i < services.size(); ++i) {
             ResolveInfo ri = services.get(i);
             ServiceInfo si = ri.serviceInfo;
@@ -3662,20 +3651,35 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             if (DEBUG) Slog.d(TAG, "Checking " + imeId);
 
-            final List<InputMethodSubtype> additionalSubtypes = additionalSubtypeMap.get(imeId);
             try {
-                InputMethodInfo p = new InputMethodInfo(mContext, ri, additionalSubtypes);
-                mMethodList.add(p);
-                final String id = p.getId();
-                mMethodMap.put(id, p);
-
+                final InputMethodInfo imi = new InputMethodInfo(context, ri,
+                        additionalSubtypeMap.get(imeId));
+                methodList.add(imi);
+                methodMap.put(imi.getId(), imi);
                 if (DEBUG) {
-                    Slog.d(TAG, "Found an input method " + p);
+                    Slog.d(TAG, "Found an input method " + imi);
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG, "Unable to load input method " + imeId, e);
             }
         }
+    }
+
+    @GuardedBy("mMethodMap")
+    void buildInputMethodListLocked(boolean resetDefaultEnabledIme) {
+        if (DEBUG) {
+            Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
+                    + " \n ------ caller=" + Debug.getCallers(10));
+        }
+        if (!mSystemReady) {
+            Slog.e(TAG, "buildInputMethodListLocked is not allowed until system is ready");
+            return;
+        }
+        mMethodMapUpdateCount++;
+        mMyPackageMonitor.clearKnownImePackageNamesLocked();
+
+        queryInputMethodServicesInternal(mContext, mSettings.getCurrentUserId(),
+                mFileManager.getAllAdditionalInputMethodSubtypes(), mMethodMap, mMethodList);
 
         // Construct the set of possible IME packages for onPackageChanged() to avoid false
         // negatives when the package state remains to be the same but only the component state is
@@ -3684,9 +3688,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // Here we intentionally use PackageManager.MATCH_DISABLED_COMPONENTS since the purpose
             // of this query is to avoid false negatives.  PackageManager.MATCH_ALL could be more
             // conservative, but it seems we cannot use it for now (Issue 35176630).
-            final List<ResolveInfo> allInputMethodServices = pm.queryIntentServicesAsUser(
-                    new Intent(InputMethod.SERVICE_INTERFACE),
-                    PackageManager.MATCH_DISABLED_COMPONENTS, mSettings.getCurrentUserId());
+            final List<ResolveInfo> allInputMethodServices =
+                    mContext.getPackageManager().queryIntentServicesAsUser(
+                            new Intent(InputMethod.SERVICE_INTERFACE),
+                            PackageManager.MATCH_DISABLED_COMPONENTS, mSettings.getCurrentUserId());
             final int N = allInputMethodServices.size();
             for (int i = 0; i < N; ++i) {
                 final ServiceInfo si = allInputMethodServices.get(i).serviceInfo;
