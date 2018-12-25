@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Adakah anda ingin menyahpasang apl ini untuk pengguna <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Gantikan apl ini dengan versi kilang? Semua data akan dialih keluar."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Gantikan apl ini dengan versi kilang? Semua data akan dialih keluar. Tindakan ini melibatkan semua pengguna peranti ini, termasuk mereka yang mempunyai profil kerja."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Alih keluar juga <xliff:g id="SIZE">%1$s</xliff:g> fail media yang berkaitan."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Simpan <xliff:g id="SIZE">%1$s</xliff:g> data apl."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Penyahpasangan yang sedang berjalan"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Penyahpasangan yang gagal"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Menyahpasang…"</string>

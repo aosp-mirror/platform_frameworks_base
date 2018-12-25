@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"သင်သည် အသုံးပြုသူ <xliff:g id="USERNAME">%1$s</xliff:g> အတွက် ဤအကောင့်ကို ဖယ်ရှားလိုပါသလား။"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"ဤအက်ပ်ကို စက်ရုံထုတ်ဗားရှင်းဖြင့် အစားထိုးလိုပါသလား။ ဒေတာများအားလုံးကို ဖယ်ရှားလိုက်ပါမည်။"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ဤအက်ပ်ကို စက်ရုံထုတ်ဗားရှင်းဖြင့် အစားထိုးလိုသလား။ ဒေတာများအားလုံးကို ဖယ်ရှားလိုက်ပါမည်။ ၎င်းသည် အလုပ်ပရိုဖိုင်ဖြင့်သုံးသူများအပါအဝင် အသုံးပြုသူများအားလုံးကို အကျိုးသက်ရောက်စေပါမည်။"</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"သက်ဆိုင်ရာ မီဒီယာဖိုင် <xliff:g id="SIZE">%1$s</xliff:g> ကိုလည်း ဖယ်ရှားပါ။"</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"အက်ပ်ဒေတာများ၏ <xliff:g id="SIZE">%1$s</xliff:g> ကို ထားရှိရန်။"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ပရိုဂရမ်ကို ဖယ်ရှားနေပါသည်"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ပရိုဂရမ်ကို ဖယ်ရှား၍မရပါ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"ပရိုဂရမ်ကို ဖယ်ရှားနေသည်..."</string>

@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Eltávolítja ezt az alkalmazást <xliff:g id="USERNAME">%1$s</xliff:g> felhasználó esetében?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Lecseréli az alkalmazást a gyári verzióra? Minden adat törlődik."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Lecseréli az alkalmazást a gyári verzióra? Minden adat törlődik. Ez az eszköz összes felhasználóját érinti, így a munkaprofilokkal rendelkezőket is."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Távolítsa el a társított médiafájlokat is (összesen: <xliff:g id="SIZE">%1$s</xliff:g>)."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> alkalmazásadat megtartása."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Futó eltávolítások"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Sikertelen telepítések"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Eltávolítás…"</string>
