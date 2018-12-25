@@ -1253,6 +1253,7 @@ package android.content.pm {
     method public abstract void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public void sendDeviceCustomizationReadyBroadcast();
     method public abstract boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
+    method public java.lang.String[] setDistractingPackageRestrictions(java.lang.String[], int);
     method public void setHarmfulAppWarning(java.lang.String, java.lang.CharSequence);
     method public deprecated java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, java.lang.String);
     method public java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, android.content.pm.SuspendDialogInfo);
@@ -1320,11 +1321,17 @@ package android.content.pm {
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_INSTANT = 8388608; // 0x800000
+    field public static final int RESTRICTION_HIDE_FROM_SUGGESTIONS = 1; // 0x1
+    field public static final int RESTRICTION_HIDE_NOTIFICATIONS = 2; // 0x2
+    field public static final int RESTRICTION_NONE = 0; // 0x0
   }
 
   public static abstract class PackageManager.DexModuleRegisterCallback {
     ctor public PackageManager.DexModuleRegisterCallback();
     method public abstract void onDexModuleRegistered(java.lang.String, boolean, java.lang.String);
+  }
+
+  public static abstract class PackageManager.DistractionRestriction implements java.lang.annotation.Annotation {
   }
 
   public static abstract interface PackageManager.OnPermissionsChangedListener {

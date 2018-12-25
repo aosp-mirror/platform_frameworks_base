@@ -111,6 +111,7 @@ message PackageProto {
         optional EnabledState enabled_state = 7;
         optional string last_disabled_app_caller = 8;
         optional string suspending_package = 9;
+        optional int32 distraction_flags = 10;
     }
 
     // Name of package. e.g. "com.android.providers.telephony".

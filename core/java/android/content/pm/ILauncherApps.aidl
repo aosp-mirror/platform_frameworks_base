@@ -69,6 +69,7 @@ interface ILauncherApps {
             int userId);
 
     boolean hasShortcutHostPermission(String callingPackage);
+    boolean shouldHideFromSuggestions(String packageName, in UserHandle user);
 
     ParceledListSlice getShortcutConfigActivities(
             String callingPackage, String packageName, in UserHandle user);

@@ -5889,6 +5889,74 @@ public abstract class PackageManager {
     public abstract boolean isSignedByExactly(String packageName, KeySet ks);
 
     /**
+     * Flag to denote no restrictions. This should be used to clear any restrictions that may have
+     * been previously set for the package.
+     * @see PackageManager.DistractionRestriction
+     * @hide
+     */
+    @SystemApi
+    public static final int RESTRICTION_NONE = 0x0;
+
+    /**
+     * Flag to denote that a package should be hidden from any suggestions to the user.
+     * @see PackageManager.DistractionRestriction
+     * @hide
+     */
+    @SystemApi
+    public static final int RESTRICTION_HIDE_FROM_SUGGESTIONS = 0x00000001;
+
+    /**
+     * Flag to denote that a package's notifications should be hidden.
+     * @see PackageManager.DistractionRestriction
+     * @hide
+     */
+    @SystemApi
+    public static final int RESTRICTION_HIDE_NOTIFICATIONS = 0x00000002;
+
+    /**
+     * Restriction flags to set on a package that is considered as distracting to the user.
+     * These should help the user to restrict their usage of these apps.
+     *
+     * @see #setDistractingPackageRestrictions(String[], int)
+     * @hide
+     */
+    @SystemApi
+    @IntDef(flag = true, prefix = {"RESTRICTION_"}, value = {
+            RESTRICTION_NONE,
+            RESTRICTION_HIDE_FROM_SUGGESTIONS,
+            RESTRICTION_HIDE_NOTIFICATIONS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DistractionRestriction {}
+
+    /**
+     * Mark or unmark the given packages as distracting to the user.
+     * These packages can have certain restrictions set that should discourage the user to launch
+     * them often. For example, notifications from such an app can be hidden, or the app can be
+     * removed from launcher suggestions, so the user is able to restrict their use of these apps.
+     *
+     * <p>The caller must hold {@link android.Manifest.permission#SUSPEND_APPS} to use this API.
+     *
+     * @param packages Packages to mark as distracting.
+     * @param restrictionFlags Any combination of {@link DistractionRestriction restrictions} to
+     *                         impose on the given packages. {@link #RESTRICTION_NONE} can be used
+     *                         to clear any existing restrictions.
+     * @return A list of packages that could not have the {@code restrictionFlags} set. The system
+     * may prevent restricting critical packages to preserve normal device function.
+     *
+     * @see DistractionRestriction
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SUSPEND_APPS)
+    @NonNull
+    public String[] setDistractingPackageRestrictions(@NonNull String[] packages,
+            @DistractionRestriction int restrictionFlags) {
+        throw new UnsupportedOperationException(
+                "setDistractingPackageRestrictions not implemented");
+    }
+
+    /**
      * Puts the package in a suspended state, where attempts at starting activities are denied.
      *
      * <p>It doesn't remove the data or the actual package file. The application's notifications
@@ -5911,8 +5979,7 @@ public abstract class PackageManager {
      * {@link PersistableBundle} objects to be shared with the apps being suspended and the
      * launcher to support customization that they might need to handle the suspended state.
      *
-     * <p>The caller must hold {@link Manifest.permission#SUSPEND_APPS} or
-     * {@link Manifest.permission#MANAGE_USERS} to use this api.</p>
+     * <p>The caller must hold {@link Manifest.permission#SUSPEND_APPS} to use this API.
      *
      * @param packageNames The names of the packages to set the suspended status.
      * @param suspended If set to {@code true}, the packages will be suspended, if set to
@@ -5955,7 +6022,7 @@ public abstract class PackageManager {
      * <p>When the user tries to launch a suspended app, a system dialog alerting them that the app
      * is suspended will be shown instead.
      * The caller can optionally customize the dialog by passing a {@link SuspendDialogInfo} object
-     * to this api. This dialog will have a button that starts the
+     * to this API. This dialog will have a button that starts the
      * {@link Intent#ACTION_SHOW_SUSPENDED_APP_DETAILS} intent if the suspending app declares an
      * activity which handles this action.
      *
@@ -5966,7 +6033,7 @@ public abstract class PackageManager {
      * {@link PersistableBundle} objects to be shared with the apps being suspended and the
      * launcher to support customization that they might need to handle the suspended state.
      *
-     * <p>The caller must hold {@link Manifest.permission#SUSPEND_APPS} to use this api.
+     * <p>The caller must hold {@link Manifest.permission#SUSPEND_APPS} to use this API.
      *
      * @param packageNames The names of the packages to set the suspended status.
      * @param suspended If set to {@code true}, the packages will be suspended, if set to
@@ -6005,7 +6072,7 @@ public abstract class PackageManager {
      * #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
      * SuspendDialogInfo) setPackagesSuspended}. The platform prevents suspending certain critical
      * packages to keep the device in a functioning state, e.g. the default dialer.
-     * Apps need to hold {@link Manifest.permission#SUSPEND_APPS SUSPEND_APPS} to call this api.
+     * Apps need to hold {@link Manifest.permission#SUSPEND_APPS SUSPEND_APPS} to call this API.
      *
      * <p>
      * Note that this set of critical packages can change with time, so even though a package name

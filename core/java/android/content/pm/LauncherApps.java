@@ -697,6 +697,26 @@ public class LauncherApps {
     }
 
     /**
+     * Returns whether a package should be hidden from suggestions to the user. Currently, this
+     * could be done because the package was marked as distracting to the user via
+     * {@code PackageManager.setDistractingPackageRestrictions(String[], int)}.
+     *
+     * @param packageName The package for which to check.
+     * @param user the {@link UserHandle} of the profile.
+     * @return
+     */
+    public boolean shouldHideFromSuggestions(@NonNull String packageName,
+            @NonNull UserHandle user) {
+        Preconditions.checkNotNull(packageName, "packageName");
+        Preconditions.checkNotNull(user, "user");
+        try {
+            return mService.shouldHideFromSuggestions(packageName, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns {@link ApplicationInfo} about an application installed for a specific user profile.
      *
      * @param packageName The package name of the application

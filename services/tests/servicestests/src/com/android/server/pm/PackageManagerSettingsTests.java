@@ -35,6 +35,7 @@ import static org.junit.Assert.fail;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.SuspendDialogInfo;
@@ -226,8 +227,8 @@ public class PackageManagerSettingsTests {
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
         // now read and verify
         settingsUnderTest.readPackageRestrictionsLPr(0);
-        final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1).
-                readUserState(0);
+        final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
+                .readUserState(0);
         assertThat(readPus1.suspended, is(true));
         assertThat(readPus1.suspendingPackage, equalTo("suspendingPackage1"));
         assertThat(readPus1.dialogInfo, equalTo(dialogInfo1));
@@ -235,16 +236,16 @@ public class PackageManagerSettingsTests {
         assertThat(BaseBundle.kindofEquals(readPus1.suspendedLauncherExtras, launcherExtras1),
                 is(true));
 
-        final PackageUserState readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2).
-                readUserState(0);
+        final PackageUserState readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2)
+                .readUserState(0);
         assertThat(readPus2.suspended, is(true));
         assertThat(readPus2.suspendingPackage, equalTo("suspendingPackage2"));
         assertThat(readPus2.dialogInfo, is(nullValue()));
         assertThat(readPus2.suspendedAppExtras, is(nullValue()));
         assertThat(readPus2.suspendedLauncherExtras, is(nullValue()));
 
-        final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3).
-                readUserState(0);
+        final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
+                .readUserState(0);
         assertThat(readPus3.suspended, is(false));
         assertThat(readPus3.suspendingPackage, is(nullValue()));
         assertThat(readPus3.dialogInfo, is(nullValue()));
@@ -254,8 +255,56 @@ public class PackageManagerSettingsTests {
 
     @Test
     public void testPackageRestrictionsSuspendedDefault() {
-        final PackageSetting defaultSetting =  createPackageSetting(PACKAGE_NAME_1);
+        final PackageSetting defaultSetting = createPackageSetting(PACKAGE_NAME_1);
         assertThat(defaultSetting.getSuspended(0), is(false));
+    }
+
+    @Test
+    public void testReadWritePackageRestrictions_distractionFlags() {
+        final Context context = InstrumentationRegistry.getTargetContext();
+        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, new Object());
+        final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
+        final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
+        final PackageSetting ps3 = createPackageSetting(PACKAGE_NAME_3);
+
+        final int distractionFlags1 = PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
+        ps1.setDistractionFlags(distractionFlags1, 0);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
+
+        final int distractionFlags2 = PackageManager.RESTRICTION_HIDE_NOTIFICATIONS
+                | PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
+        ps2.setDistractionFlags(distractionFlags2, 0);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
+
+        final int distractionFlags3 = PackageManager.RESTRICTION_NONE;
+        ps3.setDistractionFlags(distractionFlags3, 0);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
+
+        settingsUnderTest.writePackageRestrictionsLPr(0);
+
+        settingsUnderTest.mPackages.clear();
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
+        // now read and verify
+        settingsUnderTest.readPackageRestrictionsLPr(0);
+        final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
+                .readUserState(0);
+        assertThat(readPus1.distractionFlags, is(distractionFlags1));
+
+        final PackageUserState readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2)
+                .readUserState(0);
+        assertThat(readPus2.distractionFlags, is(distractionFlags2));
+
+        final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
+                .readUserState(0);
+        assertThat(readPus3.distractionFlags, is(distractionFlags3));
+    }
+
+    @Test
+    public void testPackageRestrictionsDistractionFlagsDefault() {
+        final PackageSetting defaultSetting = createPackageSetting(PACKAGE_NAME_1);
+        assertThat(defaultSetting.getDistractionFlags(0), is(PackageManager.RESTRICTION_NONE));
     }
 
     @Test
@@ -692,6 +741,7 @@ public class PackageManagerSettingsTests {
         assertThat(userState.notLaunched, is(notLaunched));
         assertThat(userState.stopped, is(stopped));
         assertThat(userState.suspended, is(false));
+        assertThat(userState.distractionFlags, is(0));
         if (oldUserState != null) {
             assertThat(userState.equals(oldUserState), is(not(userStateChanged)));
         }

@@ -2353,6 +2353,25 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGES_UNSUSPENDED = "android.intent.action.PACKAGES_UNSUSPENDED";
 
     /**
+     * Broadcast Action: Distracting packages have been changed.
+     * <p>Includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_CHANGED_PACKAGE_LIST} is the set of packages which have been changed.
+     * <li> {@link #EXTRA_CHANGED_UID_LIST} is the set of uids which have been changed.
+     * <li> {@link #EXTRA_DISTRACTION_RESTRICTIONS} the new restrictions set on these packages.
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system. It is only sent to registered receivers.
+     *
+     * @see PackageManager#setDistractingPackageRestrictions(String[], int)
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DISTRACTING_PACKAGES_CHANGED =
+            "android.intent.action.DISTRACTING_PACKAGES_CHANGED";
+
+    /**
      * Broadcast Action: Sent to a package that has been suspended by the system. This is sent
      * whenever a package is put into a suspended state or any of its app extras change while in the
      * suspended state.
@@ -5060,6 +5079,17 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_CHANGED_UID_LIST =
             "android.intent.extra.changed_uid_list";
+
+    /**
+     * An integer denoting a bitwise combination of restrictions set on distracting packages via
+     * {@link PackageManager#setDistractingPackageRestrictions(String[], int)}
+     *
+     * @hide
+     * @see PackageManager.DistractionRestriction
+     * @see PackageManager#setDistractingPackageRestrictions(String[], int)
+     */
+    public static final String EXTRA_DISTRACTION_RESTRICTIONS =
+            "android.intent.extra.distraction_restrictions";
 
     /**
      * @hide
