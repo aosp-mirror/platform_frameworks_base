@@ -92,6 +92,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
         mDetailAdapter = new DndDetailAdapter();
         mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_SET_VISIBLE));
         mReceiverRegistered = true;
+        mController.observe(getLifecycle(), mZenCallback);
     }
 
     @Override
@@ -286,10 +287,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
         if (mListening == listening) return;
         mListening = listening;
         if (mListening) {
-            mController.addCallback(mZenCallback);
             Prefs.registerListener(mContext, mPrefListener);
         } else {
-            mController.removeCallback(mZenCallback);
             Prefs.unregisterListener(mContext, mPrefListener);
         }
     }

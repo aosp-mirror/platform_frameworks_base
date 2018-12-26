@@ -73,6 +73,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
         mWifiController = mController.getAccessPointController();
         mDetailAdapter = (WifiDetailAdapter) createDetailAdapter();
         mActivityStarter = activityStarter;
+        mController.observe(getLifecycle(), mSignalCallback);
     }
 
     @Override
@@ -82,11 +83,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mController.addCallback(mSignalCallback);
-        } else {
-            mController.removeCallback(mSignalCallback);
-        }
     }
 
     @Override

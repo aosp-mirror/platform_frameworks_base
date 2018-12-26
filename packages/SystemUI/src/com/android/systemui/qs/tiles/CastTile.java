@@ -75,6 +75,9 @@ public class CastTile extends QSTileImpl<BooleanState> {
         mKeyguard = keyguardMonitor;
         mNetworkController = networkController;
         mActivityStarter = activityStarter;
+        mController.observe(this, mCallback);
+        mKeyguard.observe(this, mCallback);
+        mNetworkController.observe(this, mSignalCallback);
     }
 
     @Override
@@ -90,15 +93,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
     @Override
     public void handleSetListening(boolean listening) {
         if (DEBUG) Log.d(TAG, "handleSetListening " + listening);
-        if (listening) {
-            mController.addCallback(mCallback);
-            mKeyguard.addCallback(mCallback);
-            mNetworkController.addCallback(mSignalCallback);
-        } else {
+        if (!listening) {
             mController.setDiscovering(false);
-            mController.removeCallback(mCallback);
-            mKeyguard.removeCallback(mCallback);
-            mNetworkController.removeCallback(mSignalCallback);
         }
     }
 

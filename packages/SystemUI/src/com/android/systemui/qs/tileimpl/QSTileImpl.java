@@ -14,6 +14,9 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import static androidx.lifecycle.Lifecycle.State.DESTROYED;
+import static androidx.lifecycle.Lifecycle.State.RESUMED;
+
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_CLICK;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_LONG_PRESS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_SECONDARY_CLICK;
@@ -37,6 +40,11 @@ import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -66,7 +74,7 @@ import java.util.ArrayList;
  *
  * @param <TState> see above
  */
-public abstract class QSTileImpl<TState extends State> implements QSTile {
+public abstract class QSTileImpl<TState extends State> implements QSTile, LifecycleOwner {
     protected final String TAG = "Tile." + getClass().getSimpleName();
     protected static final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
 
@@ -94,6 +102,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     private boolean mShowingDetail;
     private int mIsFullQs;
 
+    private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
+
     public abstract TState newTileState();
 
     abstract protected void handleClick();
@@ -111,6 +121,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected QSTileImpl(QSHost host) {
         mHost = host;
         mContext = host.getContext();
+    }
+
+    @NonNull
+    @Override
+    public Lifecycle getLifecycle() {
+        return mLifecycle;
     }
 
     /**
@@ -341,12 +357,14 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         if (listening) {
             if (mListeners.add(listener) && mListeners.size() == 1) {
                 if (DEBUG) Log.d(TAG, "handleSetListening true");
+                mLifecycle.markState(RESUMED);
                 handleSetListening(listening);
                 refreshState(); // Ensure we get at least one refresh after listening.
             }
         } else {
             if (mListeners.remove(listener) && mListeners.size() == 0) {
                 if (DEBUG) Log.d(TAG, "handleSetListening false");
+                mLifecycle.markState(DESTROYED);
                 handleSetListening(listening);
             }
         }

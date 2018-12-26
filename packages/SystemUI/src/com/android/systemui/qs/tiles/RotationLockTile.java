@@ -43,6 +43,7 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
     public RotationLockTile(QSHost host, RotationLockController rotationLockController) {
         super(host);
         mController = rotationLockController;
+        mController.observe(this, mCallback);
     }
 
     @Override
@@ -51,11 +52,6 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
     }
 
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mController.addCallback(mCallback);
-        } else {
-            mController.removeCallback(mCallback);
-        }
     }
 
     @Override

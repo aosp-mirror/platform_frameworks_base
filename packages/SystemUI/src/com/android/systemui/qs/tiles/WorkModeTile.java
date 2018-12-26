@@ -41,6 +41,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     public WorkModeTile(QSHost host, ManagedProfileController managedProfileController) {
         super(host);
         mProfileController = managedProfileController;
+        mProfileController.observe(getLifecycle(), this);
     }
 
     @Override
@@ -50,11 +51,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mProfileController.addCallback(this);
-        } else {
-            mProfileController.removeCallback(this);
-        }
     }
 
     @Override

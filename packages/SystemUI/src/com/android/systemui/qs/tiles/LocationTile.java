@@ -52,6 +52,8 @@ public class LocationTile extends QSTileImpl<BooleanState> {
         mController = locationController;
         mKeyguard = keyguardMonitor;
         mActivityStarter = activityStarter;
+        mController.observe(this, mCallback);
+        mKeyguard.observe(this, mCallback);
     }
 
     @Override
@@ -61,13 +63,6 @@ public class LocationTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mController.addCallback(mCallback);
-            mKeyguard.addCallback(mCallback);
-        } else {
-            mController.removeCallback(mCallback);
-            mKeyguard.removeCallback(mCallback);
-        }
     }
 
     @Override

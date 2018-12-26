@@ -73,6 +73,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
         mKeyguardMonitor = keyguardMonitor;
         mDataController = mController.getMobileDataController();
         mDetailAdapter = new CellularDetailAdapter();
+        mController.observe(getLifecycle(), mSignalCallback);
     }
 
     @Override
@@ -87,11 +88,6 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mController.addCallback(mSignalCallback);
-        } else {
-            mController.removeCallback(mSignalCallback);
-        }
     }
 
     @Override

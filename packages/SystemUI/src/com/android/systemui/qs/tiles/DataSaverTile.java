@@ -40,6 +40,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
     public DataSaverTile(QSHost host, NetworkController networkController) {
         super(host);
         mDataSaverController = networkController.getDataSaverController();
+        mDataSaverController.observe(getLifecycle(), this);
     }
 
     @Override
@@ -49,11 +50,6 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mDataSaverController.addCallback(this);
-        } else {
-            mDataSaverController.removeCallback(this);
-        }
     }
 
     @Override

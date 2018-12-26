@@ -61,6 +61,8 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
                 refreshState();
             }
         };
+        mHotspotController.observe(this, mCallbacks);
+        mDataSaverController.observe(this, mCallbacks);
     }
 
     @Override
@@ -83,12 +85,7 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
         if (mListening == listening) return;
         mListening = listening;
         if (listening) {
-            mHotspotController.addCallback(mCallbacks);
-            mDataSaverController.addCallback(mCallbacks);
             refreshState();
-        } else {
-            mHotspotController.removeCallback(mCallbacks);
-            mDataSaverController.removeCallback(mCallbacks);
         }
         mAirplaneMode.setListening(listening);
     }

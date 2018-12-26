@@ -68,6 +68,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         mController = bluetoothController;
         mActivityStarter = activityStarter;
         mDetailAdapter = (BluetoothDetailAdapter) createDetailAdapter();
+        mController.observe(getLifecycle(), mCallback);
     }
 
     @Override
@@ -82,11 +83,6 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mController.addCallback(mCallback);
-        } else {
-            mController.removeCallback(mCallback);
-        }
     }
 
     @Override

@@ -44,6 +44,7 @@ public class UserTile extends QSTileImpl<State> implements UserInfoController.On
         super(host);
         mUserSwitcherController = userSwitcherController;
         mUserInfoController = userInfoController;
+        mUserInfoController.observe(getLifecycle(), this);
     }
 
     @Override
@@ -73,11 +74,6 @@ public class UserTile extends QSTileImpl<State> implements UserInfoController.On
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mUserInfoController.addCallback(this);
-        } else {
-            mUserInfoController.removeCallback(this);
-        }
     }
 
     @Override

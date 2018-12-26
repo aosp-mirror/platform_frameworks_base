@@ -45,6 +45,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     public BatterySaverTile(QSHost host, BatteryController batteryController) {
         super(host);
         mBatteryController = batteryController;
+        mBatteryController.observe(getLifecycle(), this);
     }
 
     @Override
@@ -59,11 +60,6 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mBatteryController.addCallback(this);
-        } else {
-            mBatteryController.removeCallback(this);
-        }
     }
 
     @Override
