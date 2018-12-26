@@ -51,22 +51,6 @@ public final class CellIdentityTdscdma extends CellIdentity {
     }
 
     /**
-     * @param mcc 3-digit Mobile Country Code, 0..999
-     * @param mnc 2 or 3-digit Mobile Network Code, 0..999
-     * @param lac 16-bit Location Area Code, 0..65535, CellInfo.UNAVAILABLE if unknown
-     * @param cid 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, CellInfo.
-     *        UNAVAILABLE if unknown
-     * @param cpid 8-bit Cell Parameters ID described in TS 25.331, 0..127, CellInfo.UNAVAILABLE
-     *        if unknown
-     * @param uarfcn 16-bit UMTS Absolute RF Channel Number described in TS 25.101 sec. 5.4.3
-     *
-     * @hide
-     */
-    public CellIdentityTdscdma(int mcc, int mnc, int lac, int cid, int cpid, int uarfcn) {
-        this(String.valueOf(mcc), String.valueOf(mnc), lac, cid, cpid, uarfcn, null, null);
-    }
-
-    /**
      * @param mcc 3-digit Mobile Country Code in string format
      * @param mnc 2 or 3-digit Mobile Network Code in string format
      * @param lac 16-bit Location Area Code, 0..65535, CellInfo.UNAVAILABLE if unknown
@@ -92,6 +76,17 @@ public final class CellIdentityTdscdma extends CellIdentity {
     private CellIdentityTdscdma(CellIdentityTdscdma cid) {
         this(cid.mMccStr, cid.mMncStr, cid.mLac, cid.mCid,
                 cid.mCpid, cid.mUarfcn, cid.mAlphaLong, cid.mAlphaShort);
+    }
+
+    /** @hide */
+    public CellIdentityTdscdma(android.hardware.radio.V1_0.CellIdentityTdscdma cid) {
+        this(cid.mcc, cid.mnc, cid.lac, cid.cid, cid.cpid, CellInfo.UNAVAILABLE, "", "");
+    }
+
+    /** @hide */
+    public CellIdentityTdscdma(android.hardware.radio.V1_2.CellIdentityTdscdma cid) {
+        this(cid.base.mcc, cid.base.mnc, cid.base.lac, cid.base.cid, cid.base.cpid,
+                cid.uarfcn, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort);
     }
 
     CellIdentityTdscdma copy() {
