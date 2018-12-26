@@ -35,7 +35,6 @@ import android.widget.Switch;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.net.DataUsageController;
-import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
@@ -66,11 +65,12 @@ public class CellularTile extends QSTileImpl<SignalState> {
     private final KeyguardMonitor mKeyguardMonitor;
 
     @Inject
-    public CellularTile(QSHost host) {
+    public CellularTile(QSHost host, NetworkController networkController,
+            ActivityStarter activityStarter, KeyguardMonitor keyguardMonitor) {
         super(host);
-        mController = Dependency.get(NetworkController.class);
-        mActivityStarter = Dependency.get(ActivityStarter.class);
-        mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+        mController = networkController;
+        mActivityStarter = activityStarter;
+        mKeyguardMonitor = keyguardMonitor;
         mDataController = mController.getMobileDataController();
         mDetailAdapter = new CellularDetailAdapter();
     }

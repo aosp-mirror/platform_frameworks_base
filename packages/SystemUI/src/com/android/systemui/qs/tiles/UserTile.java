@@ -22,7 +22,6 @@ import android.provider.Settings;
 import android.util.Pair;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
@@ -40,10 +39,11 @@ public class UserTile extends QSTileImpl<State> implements UserInfoController.On
     private Pair<String, Drawable> mLastUpdate;
 
     @Inject
-    public UserTile(QSHost host) {
+    public UserTile(QSHost host, UserSwitcherController userSwitcherController,
+            UserInfoController userInfoController) {
         super(host);
-        mUserSwitcherController = Dependency.get(UserSwitcherController.class);
-        mUserInfoController = Dependency.get(UserInfoController.class);
+        mUserSwitcherController = userSwitcherController;
+        mUserInfoController = userInfoController;
     }
 
     @Override

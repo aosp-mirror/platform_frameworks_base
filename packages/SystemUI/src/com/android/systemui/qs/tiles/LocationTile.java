@@ -23,7 +23,6 @@ import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.R.drawable;
 import com.android.systemui.plugins.ActivityStarter;
@@ -43,13 +42,16 @@ public class LocationTile extends QSTileImpl<BooleanState> {
 
     private final LocationController mController;
     private final KeyguardMonitor mKeyguard;
+    private final ActivityStarter mActivityStarter;
     private final Callback mCallback = new Callback();
 
     @Inject
-    public LocationTile(QSHost host) {
+    public LocationTile(QSHost host, LocationController locationController,
+            KeyguardMonitor keyguardMonitor, ActivityStarter activityStarter) {
         super(host);
-        mController = Dependency.get(LocationController.class);
-        mKeyguard = Dependency.get(KeyguardMonitor.class);
+        mController = locationController;
+        mKeyguard = keyguardMonitor;
+        mActivityStarter = activityStarter;
     }
 
     @Override
@@ -76,7 +78,7 @@ public class LocationTile extends QSTileImpl<BooleanState> {
     @Override
     protected void handleClick() {
         if (mKeyguard.isSecure() && mKeyguard.isShowing()) {
-            Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
+            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 final boolean wasEnabled = mState.value;
                 mHost.openPanels();
                 mController.setLocationEnabled(!wasEnabled);

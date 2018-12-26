@@ -23,7 +23,6 @@ import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
@@ -40,9 +39,9 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
     private final FlashlightController mFlashlightController;
 
     @Inject
-    public FlashlightTile(QSHost host) {
+    public FlashlightTile(QSHost host, FlashlightController flashlightController) {
         super(host);
-        mFlashlightController = Dependency.get(FlashlightController.class);
+        mFlashlightController = flashlightController;
     }
 
     @Override

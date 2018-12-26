@@ -30,7 +30,6 @@ import android.widget.Switch;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.wifi.AccessPoint;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -67,12 +66,13 @@ public class WifiTile extends QSTileImpl<SignalState> {
     private boolean mExpectDisabled;
 
     @Inject
-    public WifiTile(QSHost host) {
+    public WifiTile(QSHost host, NetworkController networkController,
+            ActivityStarter activityStarter) {
         super(host);
-        mController = Dependency.get(NetworkController.class);
+        mController = networkController;
         mWifiController = mController.getAccessPointController();
         mDetailAdapter = (WifiDetailAdapter) createDetailAdapter();
-        mActivityStarter = Dependency.get(ActivityStarter.class);
+        mActivityStarter = activityStarter;
     }
 
     @Override

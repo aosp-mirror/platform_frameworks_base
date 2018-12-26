@@ -22,7 +22,6 @@ import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
@@ -39,9 +38,9 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     private final ManagedProfileController mProfileController;
 
     @Inject
-    public WorkModeTile(QSHost host) {
+    public WorkModeTile(QSHost host, ManagedProfileController managedProfileController) {
         super(host);
-        mProfileController = Dependency.get(ManagedProfileController.class);
+        mProfileController = managedProfileController;
     }
 
     @Override

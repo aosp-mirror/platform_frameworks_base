@@ -36,7 +36,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -62,10 +61,12 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     private final ActivityStarter mActivityStarter;
 
     @Inject
-    public BluetoothTile(QSHost host) {
+    public BluetoothTile(QSHost host,
+            BluetoothController bluetoothController,
+            ActivityStarter activityStarter) {
         super(host);
-        mController = Dependency.get(BluetoothController.class);
-        mActivityStarter = Dependency.get(ActivityStarter.class);
+        mController = bluetoothController;
+        mActivityStarter = activityStarter;
         mDetailAdapter = (BluetoothDetailAdapter) createDetailAdapter();
     }
 

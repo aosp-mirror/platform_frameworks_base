@@ -15,7 +15,6 @@
 package com.android.systemui.qs.tiles;
 
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -79,7 +78,8 @@ public class CastTileTest extends SysuiTestCase {
 
         when(mHost.getContext()).thenReturn(mContext);
 
-        mCastTile = new CastTile(mHost);
+        mCastTile = new CastTile(mHost, mController, mKeyguard, mNetworkController,
+                mActivityStarter);
 
         // We are not setting the mocks to listening, so we trigger a first refresh state to
         // set the initial state

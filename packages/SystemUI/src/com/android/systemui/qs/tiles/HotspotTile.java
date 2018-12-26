@@ -25,7 +25,6 @@ import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.AirplaneBooleanState;
 import com.android.systemui.qs.GlobalSetting;
@@ -51,10 +50,11 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     private boolean mListening;
 
     @Inject
-    public HotspotTile(QSHost host) {
+    public HotspotTile(QSHost host, HotspotController hotspotController,
+            DataSaverController dataSaverController) {
         super(host);
-        mHotspotController = Dependency.get(HotspotController.class);
-        mDataSaverController = Dependency.get(DataSaverController.class);
+        mHotspotController = hotspotController;
+        mDataSaverController = dataSaverController;
         mAirplaneMode = new GlobalSetting(mContext, mHandler, Global.AIRPLANE_MODE_ON) {
             @Override
             protected void handleValueChanged(int value) {

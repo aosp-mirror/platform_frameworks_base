@@ -24,7 +24,6 @@ import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
@@ -41,9 +40,9 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
     private final RotationLockController mController;
 
     @Inject
-    public RotationLockTile(QSHost host) {
+    public RotationLockTile(QSHost host, RotationLockController rotationLockController) {
         super(host);
-        mController = Dependency.get(RotationLockController.class);
+        mController = rotationLockController;
     }
 
     @Override

@@ -23,7 +23,6 @@ import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.graph.BatteryMeterDrawableBase;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
@@ -43,9 +42,9 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     private boolean mPluggedIn;
 
     @Inject
-    public BatterySaverTile(QSHost host) {
+    public BatterySaverTile(QSHost host, BatteryController batteryController) {
         super(host);
-        mBatteryController = Dependency.get(BatteryController.class);
+        mBatteryController = batteryController;
     }
 
     @Override
