@@ -479,7 +479,7 @@ public class MediaRecorder implements AudioRouting,
         public static final int HE_AAC = 4;
         /** Enhanced Low Delay AAC (AAC-ELD) audio codec */
         public static final int AAC_ELD = 5;
-        /** Ogg Vorbis audio codec */
+        /** Ogg Vorbis audio codec (Support is optional) */
         public static final int VORBIS = 6;
         /** Opus audio codec */
         public static final int OPUS = 7;
