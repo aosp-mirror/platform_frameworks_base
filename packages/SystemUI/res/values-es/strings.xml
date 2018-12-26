@@ -798,12 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"El teléfono se está calentando"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Se limitan algunas funciones mientras el teléfono se enfría"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"El teléfono intentará enfriarse. Puedes seguir utilizándolo, pero es posible que funcione con mayor lentitud.\n\nUna vez que se haya enfriado, funcionará con normalidad."</string>
-    <!-- no translation found for high_temp_alarm_title (442812040762745210) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (519359725058131592) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_help_care_steps (3631075329318070726) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Desconecta el cargador"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"No se puede cargar el dispositivo. Desconecta el adaptador de corriente con cuidado, ya que el cable puede estar caliente."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Ver pasos de mantenimiento"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Acceso directo a la izquierda"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Acceso directo a la derecha"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Desbloquear también con el acceso directo a la izquierda"</string>
