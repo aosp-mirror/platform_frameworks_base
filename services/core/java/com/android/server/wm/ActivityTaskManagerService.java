@@ -639,7 +639,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    ActivityTaskManagerService(Context context) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public ActivityTaskManagerService(Context context) {
         mContext = context;
         mFactoryTest = FactoryTest.getMode();
         mSystemThread = ActivityThread.currentActivityThread();
