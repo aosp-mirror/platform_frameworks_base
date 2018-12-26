@@ -56,6 +56,7 @@ import com.android.internal.telephony.OperatorInfo;
 import java.util.List;
 import java.util.Map;
 
+import android.telephony.UiccCardInfo;
 import android.telephony.UiccSlotInfo;
 
 /**
@@ -1492,6 +1493,17 @@ interface ITelephony {
      * @hide
      */
     int getCardIdForDefaultEuicc(int subId, String callingPackage); 
+
+    /**
+     * Gets information about currently inserted UICCs and eUICCs. See {@link UiccCardInfo} for more
+     * details on the kind of information available.
+     *
+     * @return UiccCardInfo an array of UiccCardInfo objects, representing information on the
+     * currently inserted UICCs and eUICCs.
+     *
+     * @hide
+     */
+    UiccCardInfo[] getUiccCardsInfo();
 
     /**
      * Get slot info for all the UICC slots.
