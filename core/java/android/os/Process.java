@@ -174,6 +174,12 @@ public class Process {
      */
     public static final int SE_UID = 1068;
 
+    /**
+     * Defines the UID/GID for the NetworkStack app.
+     * @hide
+     */
+    public static final int NETWORK_STACK_UID = 1073;
+
     /** {@hide} */
     public static final int NOBODY_UID = 9999;
 
