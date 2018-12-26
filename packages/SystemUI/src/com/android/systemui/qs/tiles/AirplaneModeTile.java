@@ -40,6 +40,8 @@ import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Airplane mode **/
 public class AirplaneModeTile extends QSTileImpl<BooleanState> {
     private final Icon mIcon =
@@ -48,6 +50,7 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
 
     private boolean mListening;
 
+    @Inject
     public AirplaneModeTile(QSHost host) {
         super(host);
 

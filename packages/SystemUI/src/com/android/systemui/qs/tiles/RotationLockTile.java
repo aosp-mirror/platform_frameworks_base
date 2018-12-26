@@ -32,12 +32,15 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Rotation **/
 public class RotationLockTile extends QSTileImpl<BooleanState> {
 
     private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_auto_rotate);
     private final RotationLockController mController;
 
+    @Inject
     public RotationLockTile(QSHost host) {
         super(host);
         mController = Dependency.get(RotationLockController.class);

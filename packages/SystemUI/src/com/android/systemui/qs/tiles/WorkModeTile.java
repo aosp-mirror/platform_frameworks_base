@@ -29,6 +29,8 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Work profile on/off */
 public class WorkModeTile extends QSTileImpl<BooleanState> implements
         ManagedProfileController.Callback {
@@ -36,6 +38,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     private final ManagedProfileController mProfileController;
 
+    @Inject
     public WorkModeTile(QSHost host) {
         super(host);
         mProfileController = Dependency.get(ManagedProfileController.class);

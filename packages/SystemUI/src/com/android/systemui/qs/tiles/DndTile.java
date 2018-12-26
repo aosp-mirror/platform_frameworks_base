@@ -62,6 +62,8 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.volume.ZenModePanel;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Do not disturb **/
 public class DndTile extends QSTileImpl<BooleanState> {
 
@@ -81,6 +83,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private boolean mShowingDetail;
     private boolean mReceiverRegistered;
 
+    @Inject
     public DndTile(QSHost host) {
         super(host);
         mController = Dependency.get(ZenModeController.class);

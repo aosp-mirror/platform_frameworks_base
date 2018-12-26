@@ -160,7 +160,6 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -940,8 +939,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                             .withPlugin(QS.class)
                             .withDefault(this::createDefaultQSFragment)
                             .build());
-            final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
-                    mIconController);
             mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow,
                     (visible) -> {
                         mBrightnessMirrorVisible = visible;
@@ -950,7 +947,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             fragmentHostManager.addTagListener(QS.TAG, (tag, f) -> {
                 QS qs = (QS) f;
                 if (qs instanceof QSFragment) {
-                    ((QSFragment) qs).setHost(qsh);
                     mQSPanel = ((QSFragment) qs).getQsPanel();
                     mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
                 }

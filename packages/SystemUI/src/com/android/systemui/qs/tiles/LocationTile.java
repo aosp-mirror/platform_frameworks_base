@@ -34,6 +34,8 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Location **/
 public class LocationTile extends QSTileImpl<BooleanState> {
 
@@ -43,6 +45,7 @@ public class LocationTile extends QSTileImpl<BooleanState> {
     private final KeyguardMonitor mKeyguard;
     private final Callback mCallback = new Callback();
 
+    @Inject
     public LocationTile(QSHost host) {
         super(host);
         mController = Dependency.get(LocationController.class);

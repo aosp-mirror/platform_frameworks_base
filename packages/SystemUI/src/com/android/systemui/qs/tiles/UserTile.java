@@ -31,12 +31,15 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
+import javax.inject.Inject;
+
 public class UserTile extends QSTileImpl<State> implements UserInfoController.OnUserInfoChangedListener {
 
     private final UserSwitcherController mUserSwitcherController;
     private final UserInfoController mUserInfoController;
     private Pair<String, Drawable> mLastUpdate;
 
+    @Inject
     public UserTile(QSHost host) {
         super(host);
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);

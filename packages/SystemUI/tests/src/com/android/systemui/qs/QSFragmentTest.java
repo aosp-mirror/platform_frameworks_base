@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -36,6 +37,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiBaseFragmentTest;
+import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -86,7 +88,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         QSFragment qs = (QSFragment) mFragment;
         mFragments.dispatchResume();
         processAllMessages();
-        QSTileHost host = new QSTileHost(mContext, null, mock(StatusBarIconController.class));
+        QSTileHost host = new QSTileHost(mContext, mock(StatusBarIconController.class),
+                mock(QSFactoryImpl.class), new Handler());
         qs.setHost(host);
 
         qs.setListening(true);
@@ -128,6 +131,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         return new QSFragment(
                 new RemoteInputQuickSettingsDisabler(context, mock(ConfigurationController.class)),
                 new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()),
-                context);
+                context,
+                mock(QSTileHost.class));
     }
 }

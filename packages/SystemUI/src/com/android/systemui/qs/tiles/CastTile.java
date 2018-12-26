@@ -51,6 +51,8 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Cast **/
 public class CastTile extends QSTileImpl<BooleanState> {
     private static final Intent CAST_SETTINGS =
@@ -65,6 +67,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private Dialog mDialog;
     private boolean mWifiConnected;
 
+    @Inject
     public CastTile(QSHost host) {
         super(host);
         mController = Dependency.get(CastController.class);

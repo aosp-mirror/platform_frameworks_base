@@ -51,6 +51,8 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Cellular **/
 public class CellularTile extends QSTileImpl<SignalState> {
     private static final String ENABLE_SETTINGS_DATA_PLAN = "enable.settings.data.plan";
@@ -63,6 +65,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
     private final ActivityStarter mActivityStarter;
     private final KeyguardMonitor mKeyguardMonitor;
 
+    @Inject
     public CellularTile(QSHost host) {
         super(host);
         mController = Dependency.get(NetworkController.class);

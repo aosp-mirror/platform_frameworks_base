@@ -30,11 +30,14 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.NetworkController;
 
+import javax.inject.Inject;
+
 public class DataSaverTile extends QSTileImpl<BooleanState> implements
         DataSaverController.Listener{
 
     private final DataSaverController mDataSaverController;
 
+    @Inject
     public DataSaverTile(QSHost host) {
         super(host);
         mDataSaverController = Dependency.get(NetworkController.class).getDataSaverController();

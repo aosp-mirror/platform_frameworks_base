@@ -30,6 +30,8 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
 
+import javax.inject.Inject;
+
 public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         BatteryController.BatteryStateChangeCallback {
 
@@ -40,6 +42,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     private boolean mCharging;
     private boolean mPluggedIn;
 
+    @Inject
     public BatterySaverTile(QSHost host) {
         super(host);
         mBatteryController = Dependency.get(BatteryController.class);

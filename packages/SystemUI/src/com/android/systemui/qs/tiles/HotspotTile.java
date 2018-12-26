@@ -34,6 +34,8 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     private static final Intent TETHER_SETTINGS = new Intent().setComponent(new ComponentName(
@@ -48,6 +50,7 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     private final GlobalSetting mAirplaneMode;
     private boolean mListening;
 
+    @Inject
     public HotspotTile(QSHost host) {
         super(host);
         mHotspotController = Dependency.get(HotspotController.class);

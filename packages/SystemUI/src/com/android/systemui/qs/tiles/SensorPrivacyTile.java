@@ -31,6 +31,8 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: SensorPrivacy mode **/
 public class SensorPrivacyTile extends QSTileImpl<BooleanState> implements
         SensorPrivacyManager.OnSensorPrivacyChangedListener {
@@ -40,6 +42,7 @@ public class SensorPrivacyTile extends QSTileImpl<BooleanState> implements
     private final KeyguardMonitor mKeyguard;
     private final SensorPrivacyManager mSensorPrivacyManager;
 
+    @Inject
     public SensorPrivacyTile(QSHost host) {
         super(host);
 

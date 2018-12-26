@@ -30,6 +30,8 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Control flashlight **/
 public class FlashlightTile extends QSTileImpl<BooleanState> implements
         FlashlightController.FlashlightListener {
@@ -37,6 +39,7 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
     private final Icon mIcon = ResourceIcon.get(R.drawable.ic_signal_flashlight);
     private final FlashlightController mFlashlightController;
 
+    @Inject
     public FlashlightTile(QSHost host) {
         super(host);
         mFlashlightController = Dependency.get(FlashlightController.class);
