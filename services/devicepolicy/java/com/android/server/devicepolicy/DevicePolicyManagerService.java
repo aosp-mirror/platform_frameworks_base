@@ -9293,19 +9293,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 InputMethodManager inputMethodManager =
                         mContext.getSystemService(InputMethodManager.class);
                 List<InputMethodInfo> imes = inputMethodManager.getInputMethodList();
-                long id = mInjector.binderClearCallingIdentity();
-                try {
-                    if (imes != null) {
-                        for (InputMethodInfo ime : imes) {
-                            ServiceInfo serviceInfo = ime.getServiceInfo();
-                            ApplicationInfo applicationInfo = serviceInfo.applicationInfo;
-                            if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                                result.add(serviceInfo.packageName);
-                            }
+                if (imes != null) {
+                    for (InputMethodInfo ime : imes) {
+                        ServiceInfo serviceInfo = ime.getServiceInfo();
+                        ApplicationInfo applicationInfo = serviceInfo.applicationInfo;
+                        if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                            result.add(serviceInfo.packageName);
                         }
                     }
-                } finally {
-                    mInjector.binderRestoreCallingIdentity(id);
                 }
             }
             return result;

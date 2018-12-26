@@ -553,10 +553,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     private InputMethodSubtype mCurrentSubtype;
 
-    // This list contains the pairs of InputMethodInfo and InputMethodSubtype.
-    private final ArrayMap<InputMethodInfo, ArrayList<InputMethodSubtype>>
-            mShortcutInputMethodsAndSubtypes = new ArrayMap<>();
-
     // Was the keyguard locked when this client became current?
     private boolean mCurClientInKeyguard;
 
@@ -2535,7 +2531,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Slog.w(TAG, "Unknown input method from prefs: " + id, e);
                 resetCurrentMethodAndClient(UnbindReason.SWITCH_IME_FAILED);
             }
-            mShortcutInputMethodsAndSubtypes.clear();
         } else {
             // There is no longer an input method set, so stop any current one.
             resetCurrentMethodAndClient(UnbindReason.NO_IME);
@@ -3092,10 +3087,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
+    @BinderThread
+    private void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
+            if (!calledWithValidTokenLocked(token)) {
                 return;
             }
             if (subtype != null) {
@@ -3626,34 +3621,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
-    @GuardedBy("mMethodMap")
-    void buildInputMethodListLocked(boolean resetDefaultEnabledIme) {
-        if (DEBUG) {
-            Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
-                    + " \n ------ caller=" + Debug.getCallers(10));
-        }
-        if (!mSystemReady) {
-            Slog.e(TAG, "buildInputMethodListLocked is not allowed until system is ready");
-            return;
-        }
-        mMethodList.clear();
-        mMethodMap.clear();
-        mMethodMapUpdateCount++;
-        mMyPackageMonitor.clearKnownImePackageNamesLocked();
-
-        // Use for queryIntentServicesAsUser
-        final PackageManager pm = mContext.getPackageManager();
+    static void queryInputMethodServicesInternal(Context context,
+            @UserIdInt int userId, ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
+            ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList) {
+        methodList.clear();
+        methodMap.clear();
 
         // Note: We do not specify PackageManager.MATCH_ENCRYPTION_* flags here because the default
         // behavior of PackageManager is exactly what we want.  It by default picks up appropriate
         // services depending on the unlock state for the specified user.
-        final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
+        final List<ResolveInfo> services = context.getPackageManager().queryIntentServicesAsUser(
                 new Intent(InputMethod.SERVICE_INTERFACE),
                 PackageManager.GET_META_DATA | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS,
-                mSettings.getCurrentUserId());
+                userId);
 
-        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                mFileManager.getAllAdditionalInputMethodSubtypes();
+        methodList.ensureCapacity(services.size());
+        methodMap.ensureCapacity(services.size());
+
         for (int i = 0; i < services.size(); ++i) {
             ResolveInfo ri = services.get(i);
             ServiceInfo si = ri.serviceInfo;
@@ -3667,20 +3651,35 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             if (DEBUG) Slog.d(TAG, "Checking " + imeId);
 
-            final List<InputMethodSubtype> additionalSubtypes = additionalSubtypeMap.get(imeId);
             try {
-                InputMethodInfo p = new InputMethodInfo(mContext, ri, additionalSubtypes);
-                mMethodList.add(p);
-                final String id = p.getId();
-                mMethodMap.put(id, p);
-
+                final InputMethodInfo imi = new InputMethodInfo(context, ri,
+                        additionalSubtypeMap.get(imeId));
+                methodList.add(imi);
+                methodMap.put(imi.getId(), imi);
                 if (DEBUG) {
-                    Slog.d(TAG, "Found an input method " + p);
+                    Slog.d(TAG, "Found an input method " + imi);
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG, "Unable to load input method " + imeId, e);
             }
         }
+    }
+
+    @GuardedBy("mMethodMap")
+    void buildInputMethodListLocked(boolean resetDefaultEnabledIme) {
+        if (DEBUG) {
+            Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
+                    + " \n ------ caller=" + Debug.getCallers(10));
+        }
+        if (!mSystemReady) {
+            Slog.e(TAG, "buildInputMethodListLocked is not allowed until system is ready");
+            return;
+        }
+        mMethodMapUpdateCount++;
+        mMyPackageMonitor.clearKnownImePackageNamesLocked();
+
+        queryInputMethodServicesInternal(mContext, mSettings.getCurrentUserId(),
+                mFileManager.getAllAdditionalInputMethodSubtypes(), mMethodMap, mMethodList);
 
         // Construct the set of possible IME packages for onPackageChanged() to avoid false
         // negatives when the package state remains to be the same but only the component state is
@@ -3689,9 +3688,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // Here we intentionally use PackageManager.MATCH_DISABLED_COMPONENTS since the purpose
             // of this query is to avoid false negatives.  PackageManager.MATCH_ALL could be more
             // conservative, but it seems we cannot use it for now (Issue 35176630).
-            final List<ResolveInfo> allInputMethodServices = pm.queryIntentServicesAsUser(
-                    new Intent(InputMethod.SERVICE_INTERFACE),
-                    PackageManager.MATCH_DISABLED_COMPONENTS, mSettings.getCurrentUserId());
+            final List<ResolveInfo> allInputMethodServices =
+                    mContext.getPackageManager().queryIntentServicesAsUser(
+                            new Intent(InputMethod.SERVICE_INTERFACE),
+                            PackageManager.MATCH_DISABLED_COMPONENTS, mSettings.getCurrentUserId());
             final int N = allInputMethodServices.size();
             for (int i = 0; i < N; ++i) {
                 final ServiceInfo si = allInputMethodServices.get(i).serviceInfo;
@@ -4089,86 +4089,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         setSelectedInputMethodAndSubtypeLocked(imi, lastSubtypeId, false);
     }
 
-    // If there are no selected shortcuts, tries finding the most applicable ones.
-    private Pair<InputMethodInfo, InputMethodSubtype>
-            findLastResortApplicableShortcutInputMethodAndSubtypeLocked(String mode) {
-        List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
-        InputMethodInfo mostApplicableIMI = null;
-        InputMethodSubtype mostApplicableSubtype = null;
-        boolean foundInSystemIME = false;
-
-        // Search applicable subtype for each InputMethodInfo
-        for (InputMethodInfo imi: imis) {
-            final String imiId = imi.getId();
-            if (foundInSystemIME && !imiId.equals(mCurMethodId)) {
-                continue;
-            }
-            InputMethodSubtype subtype = null;
-            final List<InputMethodSubtype> enabledSubtypes =
-                    mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true);
-            // 1. Search by the current subtype's locale from enabledSubtypes.
-            if (mCurrentSubtype != null) {
-                subtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
-                        mRes, enabledSubtypes, mode, mCurrentSubtype.getLocale(), false);
-            }
-            // 2. Search by the system locale from enabledSubtypes.
-            // 3. Search the first enabled subtype matched with mode from enabledSubtypes.
-            if (subtype == null) {
-                subtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
-                        mRes, enabledSubtypes, mode, null, true);
-            }
-            final ArrayList<InputMethodSubtype> overridingImplicitlyEnabledSubtypes =
-                    InputMethodUtils.getOverridingImplicitlyEnabledSubtypes(imi, mode);
-            final ArrayList<InputMethodSubtype> subtypesForSearch =
-                    overridingImplicitlyEnabledSubtypes.isEmpty()
-                            ? InputMethodUtils.getSubtypes(imi)
-                            : overridingImplicitlyEnabledSubtypes;
-            // 4. Search by the current subtype's locale from all subtypes.
-            if (subtype == null && mCurrentSubtype != null) {
-                subtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
-                        mRes, subtypesForSearch, mode, mCurrentSubtype.getLocale(), false);
-            }
-            // 5. Search by the system locale from all subtypes.
-            // 6. Search the first enabled subtype matched with mode from all subtypes.
-            if (subtype == null) {
-                subtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
-                        mRes, subtypesForSearch, mode, null, true);
-            }
-            if (subtype != null) {
-                if (imiId.equals(mCurMethodId)) {
-                    // The current input method is the most applicable IME.
-                    mostApplicableIMI = imi;
-                    mostApplicableSubtype = subtype;
-                    break;
-                } else if (!foundInSystemIME) {
-                    // The system input method is 2nd applicable IME.
-                    mostApplicableIMI = imi;
-                    mostApplicableSubtype = subtype;
-                    if ((imi.getServiceInfo().applicationInfo.flags
-                            & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        foundInSystemIME = true;
-                    }
-                }
-            }
-        }
-        if (DEBUG) {
-            if (mostApplicableIMI != null) {
-                Slog.w(TAG, "Most applicable shortcut input method was:"
-                        + mostApplicableIMI.getId());
-                if (mostApplicableSubtype != null) {
-                    Slog.w(TAG, "Most applicable shortcut input method subtype was:"
-                            + "," + mostApplicableSubtype.getMode() + ","
-                            + mostApplicableSubtype.getLocale());
-                }
-            }
-        }
-        if (mostApplicableIMI != null) {
-            return new Pair<> (mostApplicableIMI, mostApplicableSubtype);
-        } else {
-            return null;
-        }
-    }
-
     /**
      * @return Return the current subtype of this input method.
      */
@@ -4220,35 +4140,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         return mCurrentSubtype;
-    }
-
-    // TODO: We should change the return type from List to List<Parcelable>
-    @SuppressWarnings("rawtypes")
-    @Override
-    public List getShortcutInputMethodsAndSubtypes() {
-        synchronized (mMethodMap) {
-            ArrayList<Object> ret = new ArrayList<>();
-            if (mShortcutInputMethodsAndSubtypes.size() == 0) {
-                // If there are no selected shortcut subtypes, the framework will try to find
-                // the most applicable subtype from all subtypes whose mode is
-                // SUBTYPE_MODE_VOICE. This is an exceptional case, so we will hardcode the mode.
-                Pair<InputMethodInfo, InputMethodSubtype> info =
-                    findLastResortApplicableShortcutInputMethodAndSubtypeLocked(
-                            InputMethodUtils.SUBTYPE_MODE_VOICE);
-                if (info != null) {
-                    ret.add(info.first);
-                    ret.add(info.second);
-                }
-                return ret;
-            }
-            for (InputMethodInfo imi: mShortcutInputMethodsAndSubtypes.keySet()) {
-                ret.add(imi);
-                for (InputMethodSubtype subtype: mShortcutInputMethodsAndSubtypes.get(imi)) {
-                    ret.add(subtype);
-                }
-            }
-            return ret;
-        }
     }
 
     @Override
@@ -4863,16 +4754,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         final boolean previouslyEnabled;
         synchronized (mMethodMap) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                shellCommand.getErrPrintWriter().print(
-                        "Caller must have WRITE_SECURE_SETTINGS permission");
-                throw new SecurityException(
-                        "Requires permission "
-                                + android.Manifest.permission.WRITE_SECURE_SETTINGS);
+            if (!calledFromValidUserLocked()) {
+                shellCommand.getErrPrintWriter().print("Must be called from the foreground user or"
+                        + " with INTERACT_ACROSS_USERS_FULL");
+                return ShellCommandResult.FAILURE;
             }
-
+            mContext.enforceCallingPermission(Manifest.permission.WRITE_SECURE_SETTINGS, null);
             final long ident = Binder.clearCallingIdentity();
             try {
                 previouslyEnabled = setInputMethodEnabledLocked(id, enabled);
@@ -4916,15 +4803,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     private int handleShellCommandResetInputMethod(@NonNull ShellCommand shellCommand) {
         synchronized (mMethodMap) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                shellCommand.getErrPrintWriter().print(
-                        "Caller must have WRITE_SECURE_SETTINGS permission");
-                throw new SecurityException(
-                        "Requires permission "
-                                + android.Manifest.permission.WRITE_SECURE_SETTINGS);
+            if (!calledFromValidUserLocked()) {
+                shellCommand.getErrPrintWriter().print("Must be called from the foreground user or"
+                        + " with INTERACT_ACROSS_USERS_FULL");
+                return ShellCommandResult.FAILURE;
             }
+            mContext.enforceCallingPermission(Manifest.permission.WRITE_SECURE_SETTINGS, null);
             final String nextIme;
             final List<InputMethodInfo> nextEnabledImes;
             final long ident = Binder.clearCallingIdentity();

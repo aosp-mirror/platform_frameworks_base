@@ -43,8 +43,6 @@ import com.android.net.IProxyCallback;
 import com.android.net.IProxyPortListener;
 import com.android.net.IProxyService;
 
-import libcore.io.Streams;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -70,6 +68,11 @@ public class PacManager {
     private static final int DELAY_4 = 3;
     private static final int DELAY_LONG = 4;
     private static final long MAX_PAC_SIZE = 20 * 1000 * 1000;
+
+    // Return values for #setCurrentProxyScriptUrl
+    enum ToSendOrNotToSendBroadcast {
+        DONT_SEND_BROADCAST, DO_SEND_BROADCAST
+    }
 
     private String mCurrentPac;
     @GuardedBy("mProxyLock")
@@ -171,13 +174,13 @@ public class PacManager {
      * PacManager will trigger a new broadcast when it is ready.
      *
      * @param proxy Proxy information that is about to be broadcast.
-     * @return Returns true when the broadcast should not be sent
+     * @return Returns whether the broadcast should be sent : either DO_ or DONT_SEND_BROADCAST
      */
-    synchronized boolean setCurrentProxyScriptUrl(ProxyInfo proxy) {
+    synchronized ToSendOrNotToSendBroadcast setCurrentProxyScriptUrl(ProxyInfo proxy) {
         if (!Uri.EMPTY.equals(proxy.getPacFileUrl())) {
             if (proxy.getPacFileUrl().equals(mPacUrl) && (proxy.getPort() > 0)) {
                 // Allow to send broadcast, nothing to do.
-                return false;
+                return ToSendOrNotToSendBroadcast.DO_SEND_BROADCAST;
             }
             mPacUrl = proxy.getPacFileUrl();
             mCurrentDelay = DELAY_1;
@@ -185,7 +188,7 @@ public class PacManager {
             mHasDownloaded = false;
             getAlarmManager().cancel(mPacRefreshIntent);
             bind();
-            return true;
+            return ToSendOrNotToSendBroadcast.DONT_SEND_BROADCAST;
         } else {
             getAlarmManager().cancel(mPacRefreshIntent);
             synchronized (mProxyLock) {
@@ -201,7 +204,7 @@ public class PacManager {
                     }
                 }
             }
-            return false;
+            return ToSendOrNotToSendBroadcast.DO_SEND_BROADCAST;
         }
     }
 
@@ -296,7 +299,7 @@ public class PacManager {
         Intent intent = new Intent();
         intent.setClassName(PAC_PACKAGE, PAC_SERVICE);
         if ((mProxyConnection != null) && (mConnection != null)) {
-            // Already bound no need to bind again, just download the new file.
+            // Already bound: no need to bind again, just download the new file.
             mNetThreadHandler.post(mPacDownloader);
             return;
         }

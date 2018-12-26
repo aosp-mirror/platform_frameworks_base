@@ -16,63 +16,42 @@
 
 package android.net.wifi;
 
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * A class representing Wi-Fi Protected Setup
- * @deprecated This class is no longer supported.
+ *
  * {@see WifiP2pConfig}
  */
-@Deprecated
 public class WpsInfo implements Parcelable {
 
-    /** Push button configuration
-     * @deprecated This is no longer supported.*/
-    @Deprecated
+    /** Push button configuration */
     public static final int PBC     = 0;
-    /** Display pin method configuration - pin is generated and displayed on device
-     * @deprecated This is no longer supported.*/
-    @Deprecated
+    /** Display pin method configuration - pin is generated and displayed on device */
     public static final int DISPLAY = 1;
-    /** Keypad pin method configuration - pin is entered on device
-     * @deprecated This is no longer supported.*/
-    @Deprecated
+    /** Keypad pin method configuration - pin is entered on device */
     public static final int KEYPAD  = 2;
-    /** Label pin method configuration - pin is labelled on device
-     * @deprecated This is no longer supported.*/
-    @Deprecated
+    /** Label pin method configuration - pin is labelled on device */
     public static final int LABEL   = 3;
-    /** Invalid configuration
-     * @deprecated This is no longer supported.*/
-    @Deprecated
+    /** Invalid configuration */
     public static final int INVALID = 4;
 
-    /** Wi-Fi Protected Setup. www.wi-fi.org/wifi-protected-setup has details
-     * @deprecated This is no longer supported.*/
-    @Deprecated
+    /** Wi-Fi Protected Setup. www.wi-fi.org/wifi-protected-setup has details */
     public int setup;
 
-    /** Passed with pin method KEYPAD
-     * @deprecated This is no longer supported.*/
-    @Deprecated
+    /** Passed with pin method KEYPAD */
     public String BSSID;
 
-    /** Passed with pin method configuration
-     * @deprecated This is no longer supported.*/
-    @Deprecated
+    /** Passed with pin method configuration */
     public String pin;
 
-    /** @deprecated This API is no longer supported.*/
-    @Deprecated
     public WpsInfo() {
         setup = INVALID;
         BSSID = null;
         pin = null;
     }
 
-    /** @deprecated This API is no longer supported.*/
-    @Deprecated
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append(" setup: ").append(setup);
@@ -84,16 +63,12 @@ public class WpsInfo implements Parcelable {
         return sbuf.toString();
     }
 
-    /** Implement the Parcelable interface
-     * @deprecated This API is no longer supported.*/
-    @Deprecated
+    /** Implement the Parcelable interface */
     public int describeContents() {
         return 0;
     }
 
-    /* Copy constructor
-    * @deprecated This API is no longer supported.*/
-    @Deprecated
+    /* Copy constructor */
     public WpsInfo(WpsInfo source) {
         if (source != null) {
             setup = source.setup;
@@ -102,22 +77,16 @@ public class WpsInfo implements Parcelable {
         }
     }
 
-    /** Implement the Parcelable interface
-     * @deprecated This API is no longer supported. */
-    @Deprecated
+    /** Implement the Parcelable interface */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(setup);
         dest.writeString(BSSID);
         dest.writeString(pin);
     }
 
-    /** Implement the Parcelable interface
-     * @deprecated This API is no longer supported.*/
-    @Deprecated
+    /** Implement the Parcelable interface */
     public static final Creator<WpsInfo> CREATOR =
         new Creator<WpsInfo>() {
-            /** @deprecated This API is nolonger supported.*/
-            @Deprecated
             public WpsInfo createFromParcel(Parcel in) {
                 WpsInfo config = new WpsInfo();
                 config.setup = in.readInt();
@@ -126,8 +95,6 @@ public class WpsInfo implements Parcelable {
                 return config;
             }
 
-            /** @deprecated This API is nolonger supported.*/
-            @Deprecated
             public WpsInfo[] newArray(int size) {
                 return new WpsInfo[size];
             }

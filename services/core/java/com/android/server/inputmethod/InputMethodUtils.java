@@ -63,7 +63,6 @@ final class InputMethodUtils {
     public static final int NOT_A_SUBTYPE_ID = -1;
     public static final String SUBTYPE_MODE_ANY = null;
     public static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
-    public static final String SUBTYPE_MODE_VOICE = "voice";
     private static final String TAG = "InputMethodUtils";
     private static final Locale ENGLISH_LOCALE = new Locale("en");
     private static final String NOT_A_SUBTYPE_ID_STR = String.valueOf(NOT_A_SUBTYPE_ID);
@@ -371,19 +370,6 @@ final class InputMethodUtils {
         final int subtypeCount = imi.getSubtypeCount();
         for (int i = 0; i < subtypeCount; ++i) {
             subtypes.add(imi.getSubtypeAt(i));
-        }
-        return subtypes;
-    }
-
-    public static ArrayList<InputMethodSubtype> getOverridingImplicitlyEnabledSubtypes(
-            InputMethodInfo imi, String mode) {
-        ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-        final int subtypeCount = imi.getSubtypeCount();
-        for (int i = 0; i < subtypeCount; ++i) {
-            final InputMethodSubtype subtype = imi.getSubtypeAt(i);
-            if (subtype.overridesImplicitlyEnabledSubtype() && subtype.getMode().equals(mode)) {
-                subtypes.add(subtype);
-            }
         }
         return subtypes;
     }

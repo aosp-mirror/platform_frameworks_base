@@ -42,9 +42,6 @@ interface IInputMethodManager {
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
             boolean allowsImplicitlySelectedSubtypes);
     InputMethodSubtype getLastInputMethodSubtype();
-    // TODO: We should change the return type from List to List<Parcelable>
-    // Currently there is a bug that aidl doesn't accept List<Parcelable>
-    List getShortcutInputMethodsAndSubtypes();
 
     boolean showSoftInput(in IInputMethodClient client, int flags,
             in ResultReceiver resultReceiver);
@@ -70,8 +67,6 @@ interface IInputMethodManager {
     boolean isInputMethodPickerShownForTest();
     // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
     void setInputMethod(in IBinder token, String id);
-    // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
-    void setInputMethodAndSubtype(in IBinder token, String id, in InputMethodSubtype subtype);
     void registerSuggestionSpansForNotification(in SuggestionSpan[] spans);
     boolean notifySuggestionPicked(in SuggestionSpan span, String originalString, int index);
     InputMethodSubtype getCurrentInputMethodSubtype();

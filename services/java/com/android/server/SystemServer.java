@@ -63,6 +63,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.TimingsTraceLog;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
@@ -1019,7 +1020,7 @@ public final class SystemServer {
         // Bring up services needed for UI.
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             traceBeginAndSlog("StartInputMethodManagerLifecycle");
-            if (MultiClientInputMethodManagerService.isConfiguredToUse()) {
+            if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) {
                 mSystemServiceManager.startService(
                         MultiClientInputMethodManagerService.Lifecycle.class);
             } else {
