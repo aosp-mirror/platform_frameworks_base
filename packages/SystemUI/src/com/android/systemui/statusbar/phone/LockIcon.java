@@ -60,6 +60,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private boolean mHasFingerPrintIcon;
     private boolean mHasFaceUnlockIcon;
     private int mDensity;
+    private boolean mPulsing;
+    private boolean mDozing;
 
     private final Runnable mDrawOffTimeout = () -> update(true /* forceUpdate */);
     private float mDarkAmount;
@@ -159,6 +161,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             mLastScreenOn = mScreenOn;
         }
 
+        setVisibility(mDozing && !mPulsing ? GONE : VISIBLE);
         updateClickability();
     }
 
@@ -279,6 +282,24 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     public void setDarkAmount(float darkAmount) {
         mDarkAmount = darkAmount;
         updateDarkTint();
+    }
+
+    /**
+     * When keyguard is in pulsing (AOD2) state.
+     * @param pulsing {@code true} when pulsing.
+     * @param animated if transition should be animated.
+     */
+    public void setPulsing(boolean pulsing, boolean animated) {
+        mPulsing = pulsing;
+        update();
+    }
+
+    /**
+     * Sets the dozing state of the keyguard.
+     */
+    public void setDozing(boolean dozing) {
+        mDozing = dozing;
+        update();
     }
 
     private void updateDarkTint() {

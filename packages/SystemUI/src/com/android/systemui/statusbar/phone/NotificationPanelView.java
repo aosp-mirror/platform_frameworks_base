@@ -579,7 +579,6 @@ public class NotificationPanelView extends PanelView implements
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
         mNotificationStackScroller.setAntiBurnInOffsetX(mClockPositionResult.clockX);
-        mKeyguardBottomArea.setBurnInXOffset(mClockPositionResult.clockX);
 
         mStackScrollerMeasuringPass++;
         requestScrollerTopPaddingUpdate(animate);
@@ -2806,6 +2805,7 @@ public class NotificationPanelView extends PanelView implements
         }
         mNotificationStackScroller.setPulsing(pulsing, animatePulse);
         mKeyguardStatusView.setPulsing(pulsing, animatePulse);
+        mKeyguardBottomArea.setPulsing(pulsing, animatePulse);
     }
 
     public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
@@ -2818,7 +2818,6 @@ public class NotificationPanelView extends PanelView implements
     public void dozeTimeTick() {
         mKeyguardStatusBar.dozeTimeTick();
         mKeyguardStatusView.dozeTimeTick();
-        mKeyguardBottomArea.dozeTimeTick();
         if (mInterpolatedDarkAmount > 0) {
             positionClockAndNotifications();
         }
