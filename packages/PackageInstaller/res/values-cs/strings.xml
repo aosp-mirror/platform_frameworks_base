@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Chcete tuto aplikaci pro uživatele <xliff:g id="USERNAME">%1$s</xliff:g> odinstalovat?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Chcete tuto aplikaci nahradit tovární verzí? Všechna data budou odstraněna."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Chcete tuto aplikaci nahradit tovární verzí? Všechna data budou odstraněna. Tato akce ovlivní všechny uživatele zařízení, včetně uživatelů s pracovním profilem."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Odstranit také <xliff:g id="SIZE">%1$s</xliff:g> přidružených mediálních souborů."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Ponechat data aplikace o velikosti <xliff:g id="SIZE">%1$s</xliff:g>."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Probíhající odinstalace"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Neúspěšné odinstalace"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Odinstalace…"</string>

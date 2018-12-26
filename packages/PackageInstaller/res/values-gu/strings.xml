@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"શું તમે <xliff:g id="USERNAME">%1$s</xliff:g> વપરાશકર્તા માટે આ ઍપ્લિકેશનને અનઇન્સ્ટૉલ કરવા માગો છો?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"આ ઍપ્લિકેશનને ફેક્ટરી વર્ઝનથી બદલીએ? બધો ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"આ ઍપ્લિકેશનને ફેક્ટરી વર્ઝનથી બદલીએ? બધો ડેટા કાઢી નાખવામાં આવશે. આનાથી કાર્યાલયની પ્રોફાઇલ ધરાવનારા વપરાશકર્તાઓ સહિત આ ડિવાઇસના બધા વપરાશકર્તાઓ પ્રભાવિત થશે."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"<xliff:g id="SIZE">%1$s</xliff:g>ની સંકળાયેલી મીડિયા ફાઇલોને પણ કાઢી નાખો."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g>નો ઍપ ડેટા રાખો."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ચાલી રહેલા અનઇન્સ્ટૉલ"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"નિષ્ફળ થયેલા અનઇન્સ્ટૉલ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"અનઇન્સ્ટૉલ કરી રહ્યાં છીએ…"</string>

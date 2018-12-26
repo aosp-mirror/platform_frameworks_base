@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g>님의 기기에 설치된 앱을 제거하시겠습니까?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"이 앱을 초기 버전으로 바꾸시겠습니까? 모든 데이터가 삭제됩니다."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"이 앱을 초기 버전으로 바꾸시겠습니까? 모든 데이터가 삭제되며 직장 프로필 사용자를 포함해 이 기기의 모든 사용자에게 영향을 미칩니다."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"<xliff:g id="SIZE">%1$s</xliff:g>의 관련 미디어 파일도 삭제합니다."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"앱 데이터 크기를 <xliff:g id="SIZE">%1$s</xliff:g>로 유지합니다."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"실행 중인 제거 작업"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"실패한 제거 작업"</string>
     <string name="uninstalling" msgid="8709566347688966845">"제거 중..."</string>

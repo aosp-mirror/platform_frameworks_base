@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Disinstallare l\'app per l\'utente <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Sostituire questa app con la versione di fabbrica? Tutti i dati verranno rimossi."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Sostituire questa app con la versione di fabbrica? Tutti i dati verranno rimossi. Saranno interessati tutti gli utenti del dispositivo, inclusi quelli che hanno profili di lavoro."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Rimuovi anche <xliff:g id="SIZE">%1$s</xliff:g> di file multimediali associati."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Mantieni <xliff:g id="SIZE">%1$s</xliff:g> di dati delle app."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Disinstallazioni in esecuzione"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Disinstallazioni non riuscite"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Disinstallazione…"</string>

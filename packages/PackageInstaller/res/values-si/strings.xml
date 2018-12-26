@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> පරිශීලකයා සඳහා මෙම යෙදුම අස්ථාපනය කිරීමට ඔබට අවශ්‍යයද?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"මෙම යෙදුම කර්මාන්ත ශාලා අනුවාදයක් සමගින් ප්‍රතිස්ථාපනය කරන්නද? සියලු දත්ත ඉවත් කරනු ඇත."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"මෙම යෙදුම කර්මාන්ත ශාලා අනුවාදයක් සමගින් ප්‍රතිස්ථාපනය කරන්නද? සියලු දත්ත ඉවත් කරනු ඇත. මෙය කාර්යාල පැතිකඩවල් සහිත අය ඇතුළුව, මෙම උපාංගයෙහි සියලු පරිශීලකයන් වෙත බලපානු ඇත."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"ආශ්‍රිත මාධ්‍ය ගොනු <xliff:g id="SIZE">%1$s</xliff:g> ද ඉවත් කරන්න."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"යෙදුම් දත්තවලින් <xliff:g id="SIZE">%1$s</xliff:g> තබා ගන්න."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"අස්ථාපන ධාවනය කරමින්"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"අසාර්ථක වූ අස්ථාපන"</string>
     <string name="uninstalling" msgid="8709566347688966845">"අස්ථාපනය කරමින්…"</string>

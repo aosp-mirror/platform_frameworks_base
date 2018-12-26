@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Vols desinstal·lar aquesta aplicació per a l\'usuari <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Vols substituir aquesta aplicació per la versió de fàbrica? Se suprimiran totes les dades."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Vols substituir aquesta aplicació per la versió de fàbrica? Se suprimiran totes les dades. Això afectarà tots els usuaris d\'aquest dispositiu, inclosos els que tinguin un perfil professional."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Suprimeix també <xliff:g id="SIZE">%1$s</xliff:g> de fitxers multimèdia associats."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Conserva <xliff:g id="SIZE">%1$s</xliff:g> de dades de l\'aplicació."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Desinstal·lacions en curs"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Desinstal·lacions fallides"</string>
     <string name="uninstalling" msgid="8709566347688966845">"S\'està desinstal·lant…"</string>

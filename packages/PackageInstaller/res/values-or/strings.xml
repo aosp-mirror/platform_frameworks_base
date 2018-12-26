@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"ୟୁଜର୍‌ <xliff:g id="USERNAME">%1$s</xliff:g>ଙ୍କ ପାଇଁ ଆପଣ ଏହି ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ କରିବେ କି?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"ଏହି ଆପ୍‍ ଫ୍ୟାକ୍ଟୋରୀ ଭର୍ସନ୍‍‍ ସହ ବଦଳାଇବେ? ସମସ୍ତ ଡାଟା କାଢ଼ିଦିଆଯିବ।"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ଏହି ଆପ୍‍ ଫ୍ୟାକ୍ଟୋରୀ ଭର୍ସନ୍‍‍ ସହ ବଦଳାଇବେ? ସମସ୍ତ ଡାଟା ବାହାର କରିଦିଆଯିବ। ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ ଥିବା ସମେତ, ଏହାଦ୍ୱାରା ଡିଭାଇସରେ ଥିବା ସମସ୍ତ ୟୁଜର୍‌ ପ୍ରଭାବିତ ହେବେ।"</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"<xliff:g id="SIZE">%1$s</xliff:g> ର ସମ୍ବନ୍ଧିତ ମିଡିଆ ଫାଇଲ୍‌ଗୁଡ଼ିକ ମଧ୍ୟ କାଢନ୍ତୁ।"</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ଆକାରର ଆପ୍‍ ଡାଟା ରଖନ୍ତୁୁ।"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ଅନଇନଷ୍ଟଲ୍‌ ଚାଲୁଛି"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ବିଫଳ ହୋଇଥିବା ଅନଇନଷ୍ଟଲ୍‌"</string>
     <string name="uninstalling" msgid="8709566347688966845">"ଅନ୍‌ଇନଷ୍ଟଲ୍‌ କରାଯାଉଛି…"</string>

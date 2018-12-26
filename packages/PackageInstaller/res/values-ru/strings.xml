@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Удалить это приложение из профиля <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Установить исходную версию приложения? Все его данные будут удалены."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Установить исходную версию приложения? Его данные будут удалены из всех профилей устройства, в том числе рабочих."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Также удалить связанные медиафайлы (<xliff:g id="SIZE">%1$s</xliff:g>)"</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Сохранить данные приложения (<xliff:g id="SIZE">%1$s</xliff:g>)"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Активные процессы удаления"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Ошибки удаления"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Удаление…"</string>

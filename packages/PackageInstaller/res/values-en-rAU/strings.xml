@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Do you want to uninstall this app for the user <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Replace this app with the factory version? All data will be removed."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Replace this app with the factory version? All data will be removed. This affects all users of this device, including those with work profiles."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Also remove <xliff:g id="SIZE">%1$s</xliff:g> of associated media files."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Keep <xliff:g id="SIZE">%1$s</xliff:g> of app data."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Running uninstallations"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Failed uninstallations"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Uninstalling…"</string>
