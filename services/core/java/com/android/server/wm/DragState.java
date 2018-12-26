@@ -127,6 +127,7 @@ class DragState {
      * {@code true} when {@link #closeLocked()} is called.
      */
     private boolean mIsClosing;
+    IBinder mTransferTouchFromToken;
 
     DragState(WindowManagerService service, DragDropController controller, IBinder token,
             SurfaceControl surface, int flags, IBinder localWin) {
@@ -177,6 +178,8 @@ class DragState {
 
         mTmpClipRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
         t.setWindowCrop(mInputSurface, mTmpClipRect);
+        t.transferTouchFocus(mTransferTouchFromToken, h.token);
+        mTransferTouchFromToken = null;
     }
 
     /**
