@@ -808,12 +808,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"הטלפון מתחמם"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"חלק מהתכונות מוגבלות כל עוד הטלפון מתקרר"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"קירור הטלפון ייעשה באופן אוטומטי. תוכל עדיין להשתמש בטלפון, אבל ייתכן שהוא יפעל לאט יותר.\n\nהטלפון יחזור לפעול כרגיל לאחר שיתקרר."</string>
-    <!-- no translation found for high_temp_alarm_title (442812040762745210) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (519359725058131592) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_help_care_steps (3631075329318070726) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"יש לנתק את המטען"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"יש בעיה עם טעינת מכשיר זה. יש לנתק את מתאם המתח בזהירות כיוון שייתכן שהכבל חם."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"לצפייה בשלבי הטיפול"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"קיצור דרך שמאלי"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"קיצור דרך ימני"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"קיצור דרך שמאלי גם מבטל נעילה"</string>

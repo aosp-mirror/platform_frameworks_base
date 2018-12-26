@@ -798,12 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Umiinit ang telepono"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Limitado ang ilang feature habang nagku-cool down ang telepono"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Awtomatikong susubukan ng iyong telepono na mag-cool down. Magagamit mo pa rin ang iyong telepono, ngunit maaaring mas mabagal ang paggana nito.\n\nKapag nakapag-cool down na ang iyong telepono, gagana na ito nang normal."</string>
-    <!-- no translation found for high_temp_alarm_title (442812040762745210) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (519359725058131592) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_help_care_steps (3631075329318070726) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Hugutin ang charger"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"May isyu sa pag-charge ng device na ito. Hugutin ang power adapter at mag-ingat dahil maaaring mainit ang cable."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Tingnan ang mga hakbang sa pangangalaga"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Kaliwang shortcut"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Kanang shortcut"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ina-unlock din ng kaliwang shortcut ang"</string>
