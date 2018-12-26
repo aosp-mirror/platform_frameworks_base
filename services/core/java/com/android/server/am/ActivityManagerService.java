@@ -976,6 +976,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         protected boolean allowFilterResult(
                 BroadcastFilter filter, List<BroadcastFilter> dest) {
+            if (filter.receiverList.receiver == null) {
+                Slog.w(TAG, "  Receiver of filter's receiverList is null; packageName = "
+                        + filter.packageName);
+                return false;
+            }
             IBinder target = filter.receiverList.receiver.asBinder();
             for (int i = dest.size() - 1; i >= 0; i--) {
                 if (dest.get(i).receiverList.receiver.asBinder() == target) {
