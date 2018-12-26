@@ -1207,6 +1207,16 @@ public final class SystemServer {
             }
             traceEnd();
 
+            traceBeginAndSlog("StartNetworkStack");
+            try {
+                final android.net.NetworkStack networkStack =
+                        context.getSystemService(android.net.NetworkStack.class);
+                networkStack.start(context);
+            } catch (Throwable e) {
+                reportWtf("starting Network Stack", e);
+            }
+            traceEnd();
+
             traceBeginAndSlog("StartNsdService");
             try {
                 serviceDiscovery = NsdService.create(context);
