@@ -15389,10 +15389,15 @@ public class PackageManagerService extends IPackageManager.Stub
         return result;
     }
 
+    /**
+     * Compare the newly scanned package with current system state to see which of its declared
+     * shared libraries should be allowed to be added to the system.
+     */
     private static List<SharedLibraryInfo> getAllowedSharedLibInfos(
             ScanResult scanResult,
             Map<String, LongSparseArray<SharedLibraryInfo>> existingSharedLibraries) {
-        final PackageParser.Package pkg = scanResult.pkgSetting.pkg;
+        // Let's used the parsed package as scanResult.pkgSetting may be null
+        final PackageParser.Package pkg = scanResult.request.pkg;
         if (scanResult.staticSharedLibraryInfo == null
                 && scanResult.dynamicSharedLibraryInfos == null) {
             return null;
@@ -15424,8 +15429,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 // have allowed apps on the device which aren't compatible
                 // with it.  Better to just have the restriction here, be
                 // conservative, and create many fewer cases that can negatively
-                // impact the user experience.
-                final PackageSetting sysPs = scanResult.request.disabledPkgSetting;
+                // impact the user experience. We may not yet have disabled the
+                // updated package yet, so be sure to grab the current setting if
+                // that's the case.
+                final PackageSetting sysPs = scanResult.request.disabledPkgSetting == null
+                        ? scanResult.request.oldPkgSetting
+                        : scanResult.request.disabledPkgSetting;
                 if (sysPs.pkg != null && sysPs.pkg.libraryNames != null) {
                     for (int j = 0; j < sysPs.pkg.libraryNames.size(); j++) {
                         if (name.equals(sysPs.pkg.libraryNames.get(j))) {
