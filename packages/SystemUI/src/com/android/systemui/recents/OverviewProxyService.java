@@ -44,7 +44,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysUiServiceProvider;
@@ -90,8 +89,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Handler mHandler;
     private final Runnable mConnectionRunnable = this::internalConnectToCurrentUser;
     private final ComponentName mRecentsComponentName;
-    private final DeviceProvisionedController mDeviceProvisionedController
-            = Dependency.get(DeviceProvisionedController.class);
+    private final DeviceProvisionedController mDeviceProvisionedController;
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
     private final Intent mQuickStepIntent;
 
@@ -343,9 +341,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             = this::cleanupAfterDeath;
 
     @Inject
-    public OverviewProxyService(Context context) {
+    public OverviewProxyService(Context context, DeviceProvisionedController provisionController) {
         mContext = context;
         mHandler = new Handler();
+        mDeviceProvisionedController = provisionController;
         mConnectionBackoffAttempts = 0;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(
                 com.android.internal.R.string.config_recentsComponentName));

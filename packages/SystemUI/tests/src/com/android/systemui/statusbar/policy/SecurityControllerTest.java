@@ -39,6 +39,8 @@ import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserManager;
 import android.security.IKeyChainService;
 import android.support.test.runner.AndroidJUnit4;
@@ -98,7 +100,10 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         // Wait for callbacks from 1) the CACertLoader and 2) the onUserSwitched() function in the
         // constructor of mSecurityController
         mStateChangedLatch = new CountDownLatch(2);
-        mSecurityController = new SecurityControllerImpl(mContext, this);
+        // TODO: Migrate this test to TestableLooper and use a handler attached
+        // to that.
+        mSecurityController = new SecurityControllerImpl(mContext,
+                new Handler(Looper.getMainLooper()), this);
     }
 
     @After

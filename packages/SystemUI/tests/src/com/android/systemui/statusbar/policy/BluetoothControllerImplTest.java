@@ -74,7 +74,8 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 .thenReturn(mock(LocalBluetoothProfileManager.class));
 
         mBluetoothControllerImpl = new BluetoothControllerImpl(mContext,
-                mTestableLooper.getLooper());
+                mTestableLooper.getLooper(),
+                mMockBluetoothManager);
     }
 
     @Test

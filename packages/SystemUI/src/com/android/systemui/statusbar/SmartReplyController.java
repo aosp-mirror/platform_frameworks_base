@@ -21,7 +21,6 @@ import android.util.ArraySet;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
@@ -36,15 +35,16 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class SmartReplyController {
-    private IStatusBarService mBarService;
+    private final IStatusBarService mBarService;
+    private final NotificationEntryManager mEntryManager;
     private Set<String> mSendingKeys = new ArraySet<>();
     private Callback mCallback;
-    private final NotificationEntryManager mEntryManager =
-            Dependency.get(NotificationEntryManager.class);
 
     @Inject
-    public SmartReplyController() {
-        mBarService = Dependency.get(IStatusBarService.class);
+    public SmartReplyController(NotificationEntryManager entryManager,
+            IStatusBarService statusBarService) {
+        mBarService = statusBarService;
+        mEntryManager = entryManager;
     }
 
     public void setCallback(Callback callback) {
