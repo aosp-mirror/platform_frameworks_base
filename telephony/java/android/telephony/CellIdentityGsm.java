@@ -36,10 +36,8 @@ public final class CellIdentityGsm extends CellIdentity {
     // 16-bit GSM Cell Identity described in TS 27.007, 0..65535
     private final int mCid;
     // 16-bit GSM Absolute RF Channel Number
-    @UnsupportedAppUsage
     private final int mArfcn;
     // 6-bit Base Station Identity Code
-    @UnsupportedAppUsage
     private final int mBsic;
 
     /**
@@ -52,34 +50,6 @@ public final class CellIdentityGsm extends CellIdentity {
         mCid = CellInfo.UNAVAILABLE;
         mArfcn = CellInfo.UNAVAILABLE;
         mBsic = CellInfo.UNAVAILABLE;
-    }
-    /**
-     * public constructor
-     * @param mcc 3-digit Mobile Country Code, 0..999
-     * @param mnc 2 or 3-digit Mobile Network Code, 0..999
-     * @param lac 16-bit Location Area Code, 0..65535
-     * @param cid 16-bit GSM Cell Identity or 28-bit UMTS Cell Identity
-     *
-     * @hide
-     */
-    public CellIdentityGsm(int mcc, int mnc, int lac, int cid) {
-        this(lac, cid, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
-                String.valueOf(mcc), String.valueOf(mnc), null, null);
-    }
-
-    /**
-     * public constructor
-     * @param mcc 3-digit Mobile Country Code, 0..999
-     * @param mnc 2 or 3-digit Mobile Network Code, 0..999
-     * @param lac 16-bit Location Area Code, 0..65535
-     * @param cid 16-bit GSM Cell Identity or 28-bit UMTS Cell Identity
-     * @param arfcn 16-bit GSM Absolute RF Channel Number
-     * @param bsic 6-bit Base Station Identity Code
-     *
-     * @hide
-     */
-    public CellIdentityGsm(int mcc, int mnc, int lac, int cid, int arfcn, int bsic) {
-        this(lac, cid, arfcn, bsic, String.valueOf(mcc), String.valueOf(mnc), null, null);
     }
 
     /**
@@ -101,9 +71,20 @@ public final class CellIdentityGsm extends CellIdentity {
         mLac = lac;
         mCid = cid;
         mArfcn = arfcn;
-        // In RIL BSIC is a UINT8, so 0xFF is the 'INVALID' designator
-        // for inbound parcels
-        mBsic = (bsic == 0xFF) ? CellInfo.UNAVAILABLE : bsic;
+        mBsic = bsic;
+    }
+
+    /** @hide */
+    public CellIdentityGsm(android.hardware.radio.V1_0.CellIdentityGsm cid) {
+        this(cid.lac, cid.cid, cid.arfcn,
+                cid.bsic == 0xFF ? CellInfo.UNAVAILABLE : cid.bsic, cid.mcc, cid.mnc, "", "");
+    }
+
+    /** @hide */
+    public CellIdentityGsm(android.hardware.radio.V1_2.CellIdentityGsm cid) {
+        this(cid.base.lac, cid.base.cid, cid.base.arfcn,
+                cid.base.bsic == 0xFF ? CellInfo.UNAVAILABLE : cid.base.bsic, cid.base.mcc,
+                cid.base.mnc, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort);
     }
 
     private CellIdentityGsm(CellIdentityGsm cid) {

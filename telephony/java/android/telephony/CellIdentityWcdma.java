@@ -51,35 +51,6 @@ public final class CellIdentityWcdma extends CellIdentity {
         mPsc = CellInfo.UNAVAILABLE;
         mUarfcn = CellInfo.UNAVAILABLE;
     }
-    /**
-     * public constructor
-     * @param mcc 3-digit Mobile Country Code, 0..999
-     * @param mnc 2 or 3-digit Mobile Network Code, 0..999
-     * @param lac 16-bit Location Area Code, 0..65535
-     * @param cid 28-bit UMTS Cell Identity
-     * @param psc 9-bit UMTS Primary Scrambling Code
-     *
-     * @hide
-     */
-    public CellIdentityWcdma (int mcc, int mnc, int lac, int cid, int psc) {
-        this(lac, cid, psc, CellInfo.UNAVAILABLE, String.valueOf(mcc), String.valueOf(mnc),
-                null, null);
-    }
-
-    /**
-     * public constructor
-     * @param mcc 3-digit Mobile Country Code, 0..999
-     * @param mnc 2 or 3-digit Mobile Network Code, 0..999
-     * @param lac 16-bit Location Area Code, 0..65535
-     * @param cid 28-bit UMTS Cell Identity
-     * @param psc 9-bit UMTS Primary Scrambling Code
-     * @param uarfcn 16-bit UMTS Absolute RF Channel Number described in TS 25.101 sec. 5.4.3
-     *
-     * @hide
-     */
-    public CellIdentityWcdma (int mcc, int mnc, int lac, int cid, int psc, int uarfcn) {
-        this(lac, cid, psc, uarfcn, String.valueOf(mcc), String.valueOf(mnc), null, null);
-    }
 
     /**
      * public constructor
@@ -101,6 +72,18 @@ public final class CellIdentityWcdma extends CellIdentity {
         mCid = cid;
         mPsc = psc;
         mUarfcn = uarfcn;
+    }
+
+    /** @hide */
+    public CellIdentityWcdma(android.hardware.radio.V1_0.CellIdentityWcdma cid) {
+        this(cid.lac, cid.cid, cid.psc, cid.uarfcn, cid.mcc, cid.mnc, "", "");
+    }
+
+    /** @hide */
+    public CellIdentityWcdma(android.hardware.radio.V1_2.CellIdentityWcdma cid) {
+        this(cid.base.lac, cid.base.cid, cid.base.psc, cid.base.uarfcn,
+                cid.base.mcc, cid.base.mnc, cid.operatorNames.alphaLong,
+                cid.operatorNames.alphaShort);
     }
 
     private CellIdentityWcdma(CellIdentityWcdma cid) {
