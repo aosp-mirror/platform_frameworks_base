@@ -87,6 +87,7 @@ import android.net.INetworkPolicyManager;
 import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
+import android.net.NetworkStack;
 import android.net.NetworkWatchlistManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
@@ -282,6 +283,13 @@ final class SystemServiceRegistry {
                 IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
                 return new ConnectivityManager(context, service);
             }});
+
+        registerService(Context.NETWORK_STACK_SERVICE, NetworkStack.class,
+                new StaticServiceFetcher<NetworkStack>() {
+                @Override
+                public NetworkStack createService() {
+                    return new NetworkStack();
+                }});
 
         registerService(Context.IPSEC_SERVICE, IpSecManager.class,
                 new CachedServiceFetcher<IpSecManager>() {
