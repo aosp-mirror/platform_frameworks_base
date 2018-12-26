@@ -4066,6 +4066,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         @Override
+        public void stopPulsing() {
+            if (mDozeScrimController.isPulsing()) {
+                mDozeScrimController.pulseOutNow();
+            }
+        }
+
+        @Override
         public void setAnimateWakeup(boolean animateWakeup) {
             if (mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_AWAKE
                     || mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_WAKING) {
