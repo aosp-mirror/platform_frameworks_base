@@ -68,10 +68,10 @@ public class AmbientDisplayConfiguration {
 
     public boolean wakeLockScreenGestureEnabled(int user) {
         return boolSettingDefaultOn(Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE, user)
-                && wakeLockScreenGestureAvailable();
+                && wakeScreenGestureAvailable();
     }
 
-    public boolean wakeLockScreenGestureAvailable() {
+    public boolean wakeScreenGestureAvailable() {
         return mContext.getResources()
                 .getBoolean(R.bool.config_dozeWakeLockScreenSensorAvailable);
     }
@@ -81,20 +81,12 @@ public class AmbientDisplayConfiguration {
                 && wakeScreenGestureAvailable();
     }
 
-    public boolean wakeScreenGestureAvailable() {
-        return !TextUtils.isEmpty(wakeScreenSensorType());
-    }
-
     public String doubleTapSensorType() {
         return mContext.getResources().getString(R.string.config_dozeDoubleTapSensorType);
     }
 
     public String longPressSensorType() {
         return mContext.getResources().getString(R.string.config_dozeLongPressSensorType);
-    }
-
-    public String wakeScreenSensorType() {
-        return mContext.getResources().getString(R.string.config_dozeWakeScreenSensorType);
     }
 
     public boolean pulseOnLongPressEnabled(int user) {

@@ -93,12 +93,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * A scrim varies its opacity based on a busyness factor, for example
      * how many notifications are currently visible.
      */
-    public static final float GRADIENT_SCRIM_ALPHA_BUSY = 0.70f;
+    public static final float GRADIENT_SCRIM_ALPHA_BUSY = 0.7f;
     /**
-     * A scrim varies its opacity based on a busyness factor, for example
-     * how many notifications are currently visible.
+     * Scrim opacity when a wallpaper doesn't support ambient mode.
      */
-    public static final float GRADIENT_SCRIM_DARK_KEYGUARD = 0.80f;
+    public static final float PULSING_WALLPAPER_SCRIM_ALPHA = 0.6f;
+
     /**
      * The most common scrim, the one under the keyguard.
      */
