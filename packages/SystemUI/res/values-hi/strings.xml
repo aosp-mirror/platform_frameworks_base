@@ -167,6 +167,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"एलटीई"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"रोमिंग"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -250,6 +252,8 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"कार्य मोड चालू किया गया."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"डेटा बचाने की सेटिंग बंद कर दी गई है."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"डेटा बचाने की सेटिंग चालू कर दी गई है."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"सेंसर निजता को बंद कर दिया गया है."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"सेंसर निजता को चालू कर दिया गया है."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"स्क्रीन की स्क्रीन की रोशनी"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"चार्ज हो रही है"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G डेटा रोक दिया गया है"</string>
@@ -599,7 +603,7 @@
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"चालू"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"पावर सूचना नियंत्रण के ज़रिये, आप किसी ऐप की सूचना को उसकी अहमियत के हिसाब से 0 से 5 के लेवल पर सेट कर सकते हैं.\n\n"<b>"लेवल 5"</b>" \n- सूचना सूची में सबसे ऊपर दिखाएं \n- पूरे स्क्रीन को ढंकने की अनुमति दें \n- लगातार देखते रहें \n\n"<b>" लेवल 4"</b>" \n- पूरे स्क्रीन को ढंकें \n- लगातार देखते रहें \n\n"<b>"लेवल 3"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n-कभी भी न देखें \n\n"<b>"लेवल 2"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n\n"<b>"लेवल 1"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी न देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n- लॉक स्क्रीन और स्टेटस बार से छिपाएं \n- सूचना सूची के नीचे दिखाएं \n\n"<b>"लेवल 0"</b>" \n- ऐप्लिकेशन की सभी सूचनाएं रोक दें"</string>
-    <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचनाएं"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"अब आपको ये सूचनाएं दिखाई नहीं देंगी"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"इन सूचनाओं को छोटा कर दिया जाएगा"</string>
     <string name="notification_channel_silenced" msgid="2877199534497961942">"ये सूचनाएं बिना आवाज़ के दिखाई जाएंगी"</string>
@@ -834,7 +838,7 @@
     <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> चल रहा है"</string>
     <string name="instant_apps_message" msgid="1183313016396018086">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है. ज़्यादा जानने के लिए टैप करें."</string>
-    <string name="app_info" msgid="6856026610594615344">"ऐप की जानकारी"</string>
+    <string name="app_info" msgid="6856026610594615344">"ऐप्लिकेशन की जानकारी"</string>
     <string name="go_to_web" msgid="2650669128861626071">"ब्राउज़र पर जाएं"</string>
     <string name="mobile_data" msgid="7094582042819250762">"मोबाइल डेटा"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -884,4 +888,7 @@
       <item quantity="one"><xliff:g id="NUM_APPS_1">%d</xliff:g> दूसरे ऐप्लिकेशन</item>
       <item quantity="other"><xliff:g id="NUM_APPS_1">%d</xliff:g> दूसरे ऐप्लिकेशन</item>
     </plurals>
+    <string name="sensor_privacy_mode" msgid="8982771253020769598">"सेंसर बंद हैं"</string>
+    <string name="device_services" msgid="1191212554435440592">"डिवाइस सेवाएं"</string>
+    <string name="music_controls_no_title" msgid="5236895307087002011">"कोई शीर्षक नहीं"</string>
 </resources>
