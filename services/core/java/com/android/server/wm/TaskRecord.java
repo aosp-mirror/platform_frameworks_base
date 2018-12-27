@@ -885,7 +885,6 @@ class TaskRecord extends ConfigurationContainer {
                     info.packageName, info.targetActivity);
             if (_intent != null) {
                 Intent targetIntent = new Intent(_intent);
-                targetIntent.setComponent(targetComponent);
                 targetIntent.setSelector(null);
                 targetIntent.setSourceBounds(null);
                 if (DEBUG_TASKS) Slog.v(TAG_TASKS,
