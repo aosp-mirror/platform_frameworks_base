@@ -38,11 +38,13 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
@@ -89,7 +91,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         mFragments.dispatchResume();
         processAllMessages();
         QSTileHost host = new QSTileHost(mContext, mock(StatusBarIconController.class),
-                mock(QSFactoryImpl.class), new Handler());
+                mock(QSFactoryImpl.class), new Handler(), Looper.myLooper(),
+                mock(PluginManager.class), mock(TunerService.class));
         qs.setHost(host);
 
         qs.setListening(true);
