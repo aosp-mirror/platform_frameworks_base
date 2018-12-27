@@ -15,21 +15,14 @@
  */
 package com.android.settingslib.media;
 
-import android.util.Log;
-
 import androidx.mediarouter.media.MediaRouter;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
-
-import java.util.List;
 
 /**
  * MediaDeviceUtils provides utility function for MediaDevice
  */
 public class MediaDeviceUtils {
-
-    private static final String TAG = "MediaDeviceUtils";
-
     /**
      * Use CachedBluetoothDevice address to represent unique id
      *
@@ -48,22 +41,5 @@ public class MediaDeviceUtils {
      */
     public static String getId(MediaRouter.RouteInfo route) {
         return route.getId();
-    }
-
-    /**
-     * Find the MediaDevice through id.
-     *
-     * @param devices the list of MediaDevice
-     * @param id the unique id of MediaDevice
-     * @return MediaDevice
-     */
-    public static MediaDevice findMediaDevice(List<MediaDevice> devices, String id) {
-        for (MediaDevice mediaDevice : devices) {
-            if (mediaDevice.getId().equals(id)) {
-                return mediaDevice;
-            }
-        }
-        Log.e(TAG, "findMediaDevice() can't found device");
-        return null;
     }
 }

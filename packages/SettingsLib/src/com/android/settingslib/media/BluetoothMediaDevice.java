@@ -16,7 +16,6 @@
 package com.android.settingslib.media;
 
 import android.bluetooth.BluetoothClass;
-import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.util.Log;
 
@@ -36,12 +35,6 @@ public class BluetoothMediaDevice extends MediaDevice {
         super(context, MediaDeviceType.TYPE_BLUETOOTH_DEVICE);
         mCachedDevice = device;
         initDeviceRecord();
-        buildConnectedState(device);
-    }
-
-    private void buildConnectedState(CachedBluetoothDevice device) {
-        mIsConnected = device.isActiveDevice(BluetoothProfile.A2DP)
-                || device.isActiveDevice(BluetoothProfile.HEARING_AID);
     }
 
     @Override
@@ -58,11 +51,6 @@ public class BluetoothMediaDevice extends MediaDevice {
     @Override
     public String getId() {
         return MediaDeviceUtils.getId(mCachedDevice);
-    }
-
-    @Override
-    public void notifyConnectedChanged() {
-        buildConnectedState(mCachedDevice);
     }
 
     @Override

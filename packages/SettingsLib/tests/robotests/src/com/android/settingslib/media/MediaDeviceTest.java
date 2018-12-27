@@ -25,10 +25,8 @@ import android.content.Context;
 
 import androidx.mediarouter.media.MediaRouter;
 
-import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
-import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -61,8 +59,6 @@ public class MediaDeviceTest {
             new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO);
 
     @Mock
-    private A2dpProfile mA2dpProfile;
-    @Mock
     private BluetoothDevice mDevice1;
     @Mock
     private BluetoothDevice mDevice2;
@@ -76,8 +72,6 @@ public class MediaDeviceTest {
     private CachedBluetoothDevice mCachedDevice3;
     @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
-    @Mock
-    private LocalBluetoothProfileManager mProfileManager;
     @Mock
     private MediaRouter.RouteInfo mRouteInfo1;
     @Mock
@@ -115,9 +109,6 @@ public class MediaDeviceTest {
         when(mRouteInfo1.getName()).thenReturn(DEVICE_NAME_1);
         when(mRouteInfo2.getName()).thenReturn(DEVICE_NAME_2);
         when(mRouteInfo3.getName()).thenReturn(DEVICE_NAME_3);
-        when(mLocalBluetoothManager.getProfileManager()).thenReturn(mProfileManager);
-        when(mProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
-        when(mA2dpProfile.getActiveDevice()).thenReturn(mDevice1);
 
         mBluetoothMediaDevice1 = new BluetoothMediaDevice(mContext, mCachedDevice1);
         mBluetoothMediaDevice2 = new BluetoothMediaDevice(mContext, mCachedDevice2);

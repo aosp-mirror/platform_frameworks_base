@@ -17,7 +17,6 @@ package com.android.settingslib.media;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.IntDef;
 
@@ -55,7 +54,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         ConnectionRecordManager.getInstance().fetchLastSelectedDevice(mContext);
         mConnectedRecord = ConnectionRecordManager.getInstance().fetchConnectionRecord(mContext,
                 getId());
-        Log.d("ttttt", getName() + " used: " + mConnectedRecord);
     }
 
     /**
@@ -86,11 +84,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return unique id of MediaDevice
      */
     public abstract String getId();
-
-    /**
-     * Notify MediaDevice to change their connected state.
-     */
-    public abstract void notifyConnectedChanged();
 
     /**
      * Transfer MediaDevice for media
