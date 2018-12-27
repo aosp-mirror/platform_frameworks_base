@@ -11572,6 +11572,7 @@ public final class Settings {
          * battery_level_collection_delay_ms (long)
          * max_history_files (int)
          * max_history_buffer_kb (int)
+         * battery_charged_delay_ms (int)
          * </pre>
          *
          * <p>
