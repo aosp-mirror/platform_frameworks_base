@@ -32,6 +32,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITION
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
@@ -45,7 +46,9 @@ import android.view.InputChannel;
 import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
+import android.view.animation.Animation;
 
+import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
@@ -60,6 +63,7 @@ final class InputMonitor {
 
     // When true, need to call updateInputWindowsLw().
     private boolean mUpdateInputWindowsNeeded = true;
+    private boolean mUpdateInputWindowsPending;
 
     // Currently focused input window handle.
     private InputWindowHandle mFocusedInputWindowHandle;
@@ -70,8 +74,11 @@ final class InputMonitor {
             new UpdateInputForAllWindowsConsumer();
 
     private final int mDisplayId;
+    private final DisplayContent mDisplayContent;
+    private boolean mDisplayRemoved;
 
     private final SurfaceControl.Transaction mInputTransaction;
+    private final Handler mHandler;
 
     /**
      * The set of input consumer added to the window manager by name, which consumes input events
@@ -105,10 +112,64 @@ final class InputMonitor {
         }
     }
 
+    private final Runnable mUpdateInputWindows = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mService.mGlobalLock) {
+                mUpdateInputWindowsPending = false;
+                mUpdateInputWindowsNeeded = false;
+
+                if (mDisplayRemoved) {
+                    return;
+                }
+
+                // Populate the input window list with information about all of the windows that
+                // could potentially receive input.
+                // As an optimization, we could try to prune the list of windows but this turns
+                // out to be difficult because only the native code knows for sure which window
+                // currently has touch focus.
+
+                // If there's a drag in flight, provide a pseudo-window to catch drag input
+                final boolean inDrag = mService.mDragDropController.dragDropActiveLocked();
+                if (inDrag) {
+                    if (DEBUG_DRAG) {
+                        Log.d(TAG_WM, "Inserting drag window");
+                    }
+                    mService.mDragDropController.showInputSurface(mInputTransaction, mDisplayId);
+                } else {
+                    mService.mDragDropController.hideInputSurface(mInputTransaction, mDisplayId);
+                }
+
+                final boolean inPositioning =
+                        mService.mTaskPositioningController.isPositioningLocked();
+                if (inPositioning) {
+                    if (DEBUG_TASK_POSITIONING) {
+                        Log.d(TAG_WM, "Inserting window handle for repositioning");
+                    }
+                    mService.mTaskPositioningController.showInputSurface(mInputTransaction,
+                            mDisplayId);
+                } else {
+                    mService.mTaskPositioningController.hideInputSurface(mInputTransaction,
+                            mDisplayId);
+                }
+
+                // Add all windows on the default display.
+                mUpdateInputForAllWindowsConsumer.updateInputWindows(inDrag);
+            }
+        }
+    };
+
     public InputMonitor(WindowManagerService service, int displayId) {
         mService = service;
+        mDisplayContent = mService.mRoot.getDisplayContent(displayId);
         mDisplayId = displayId;
-        mInputTransaction = mService.mRoot.getDisplayContent(mDisplayId).getPendingTransaction();
+        mInputTransaction = mDisplayContent.getPendingTransaction();
+        mHandler = AnimationThread.getHandler();
+    }
+
+    void onDisplayRemoved() {
+        mHandler.removeCallbacks(mUpdateInputWindows);
+        mDisplayRemoved = true;
     }
 
     private void addInputConsumer(String name, InputConsumerImpl consumer) {
@@ -248,41 +309,18 @@ final class InputMonitor {
         if (!force && !mUpdateInputWindowsNeeded) {
             return;
         }
-        mUpdateInputWindowsNeeded = false;
+        scheduleUpdateInputWindows();
+    }
 
-        if (false) Slog.d(TAG_WM, ">>>>>> ENTERED updateInputWindowsLw");
-
-        // Populate the input window list with information about all of the windows that
-        // could potentially receive input.
-        // As an optimization, we could try to prune the list of windows but this turns
-        // out to be difficult because only the native code knows for sure which window
-        // currently has touch focus.
-
-        // If there's a drag in flight, provide a pseudo-window to catch drag input
-        final boolean inDrag = mService.mDragDropController.dragDropActiveLocked();
-        if (inDrag) {
-            if (DEBUG_DRAG) {
-                Log.d(TAG_WM, "Inserting drag window");
-            }
-            mService.mDragDropController.showInputSurface(mInputTransaction, mDisplayId);
-        } else {
-            mService.mDragDropController.hideInputSurface(mInputTransaction, mDisplayId);
+    private void scheduleUpdateInputWindows() {
+        if (mDisplayRemoved) {
+            return;
         }
 
-        final boolean inPositioning = mService.mTaskPositioningController.isPositioningLocked();
-        if (inPositioning) {
-            if (DEBUG_TASK_POSITIONING) {
-                Log.d(TAG_WM, "Inserting window handle for repositioning");
-            }
-            mService.mTaskPositioningController.showInputSurface(mInputTransaction, mDisplayId);
-        } else {
-            mService.mTaskPositioningController.hideInputSurface(mInputTransaction, mDisplayId);
+        if (!mUpdateInputWindowsPending) {
+            mUpdateInputWindowsPending = true;
+            mHandler.post(mUpdateInputWindows);
         }
-
-        // Add all windows on the default display.
-        mUpdateInputForAllWindowsConsumer.updateInputWindows(inDrag);
-
-        if (false) Slog.d(TAG_WM, "<<<<<<< EXITED updateInputWindowsLw");
     }
 
     /* Called when the current input focus changes.
@@ -385,19 +423,18 @@ final class InputMonitor {
             mTmpRect.setEmpty();
             mDisableWallpaperTouchEvents = false;
             this.inDrag = inDrag;
-            final DisplayContent dc = mService.mRoot.getDisplayContent(mDisplayId);
-            wallpaperController = dc.mWallpaperController;
+            wallpaperController = mDisplayContent.mWallpaperController;
 
             resetInputConsumers(mInputTransaction);
 
-            dc.forAllWindows(this,
+            mDisplayContent.forAllWindows(this,
                     true /* traverseTopToBottom */);
 
             if (mAddWallpaperInputConsumerHandle) {
                 wallpaperInputConsumer.show(mInputTransaction, 0);
             }
 
-            dc.scheduleAnimation();
+            mDisplayContent.scheduleAnimation();
 
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
