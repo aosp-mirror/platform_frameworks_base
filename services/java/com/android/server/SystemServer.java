@@ -783,7 +783,7 @@ public final class SystemServer {
 
         // Manages apk rollbacks.
         traceBeginAndSlog("StartRollbackManagerService");
-        mSystemServiceManager.startService(RollbackManagerService.Lifecycle.class);
+        mSystemServiceManager.startService(RollbackManagerService.class);
         traceEnd();
     }
 
