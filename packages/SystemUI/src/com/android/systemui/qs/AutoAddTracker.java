@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import javax.inject.Inject;
+
 public class AutoAddTracker {
 
     private static final String[][] CONVERT_PREFS = {
@@ -48,6 +50,7 @@ public class AutoAddTracker {
     private final ArraySet<String> mAutoAdded;
     private final Context mContext;
 
+    @Inject
     public AutoAddTracker(Context context) {
         mContext = context;
         mAutoAdded = new ArraySet<>(getAdded());

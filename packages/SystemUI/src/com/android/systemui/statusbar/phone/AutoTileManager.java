@@ -30,6 +30,9 @@ import com.android.systemui.statusbar.policy.DataSaverController.Listener;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotController.Callback;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 /**
  * Manages which tiles should be automatically added to QS.
  */
@@ -44,24 +47,31 @@ public class AutoTileManager {
     private final QSTileHost mHost;
     private final Handler mHandler;
     private final AutoAddTracker mAutoTracker;
+    private final HotspotController mHotspotController;
+    private final DataSaverController mDataSaverController;
+    private final ManagedProfileController mManagedProfileController;
+    private final ColorDisplayController mColorDisplayController;
 
-    public AutoTileManager(Context context, QSTileHost host) {
-        this(context, new AutoAddTracker(context), host,
-            new Handler(Dependency.get(Dependency.BG_LOOPER)));
-    }
-
-    @VisibleForTesting
-    AutoTileManager(Context context, AutoAddTracker autoAddTracker, QSTileHost host,
-            Handler handler) {
+    @Inject
+    public AutoTileManager(Context context, AutoAddTracker autoAddTracker, QSTileHost host,
+            @Named(Dependency.BG_HANDLER_NAME) Handler handler,
+            HotspotController hotspotController,
+            DataSaverController dataSaverController,
+            ManagedProfileController managedProfileController,
+            ColorDisplayController colorDisplayController) {
         mAutoTracker = autoAddTracker;
         mContext = context;
         mHost = host;
         mHandler = handler;
+        mHotspotController = hotspotController;
+        mDataSaverController = dataSaverController;
+        mManagedProfileController = managedProfileController;
+        mColorDisplayController = colorDisplayController;
         if (!mAutoTracker.isAdded(HOTSPOT)) {
-            Dependency.get(HotspotController.class).addCallback(mHotspotCallback);
+            hotspotController.addCallback(mHotspotCallback);
         }
         if (!mAutoTracker.isAdded(SAVER)) {
-            Dependency.get(DataSaverController.class).addCallback(mDataSaverListener);
+            dataSaverController.addCallback(mDataSaverListener);
         }
         if (!mAutoTracker.isAdded(INVERSION)) {
             mColorsSetting = new SecureSetting(mContext, mHandler,
@@ -79,11 +89,11 @@ public class AutoTileManager {
             mColorsSetting.setListening(true);
         }
         if (!mAutoTracker.isAdded(WORK)) {
-            Dependency.get(ManagedProfileController.class).addCallback(mProfileCallback);
+            managedProfileController.addCallback(mProfileCallback);
         }
         if (!mAutoTracker.isAdded(NIGHT)
                 && ColorDisplayManager.isNightDisplayAvailable(mContext)) {
-            Dependency.get(ColorDisplayController.class).setListener(mColorDisplayCallback);
+            colorDisplayController.setListener(mColorDisplayCallback);
         }
     }
 
@@ -92,11 +102,11 @@ public class AutoTileManager {
             mColorsSetting.setListening(false);
         }
         mAutoTracker.destroy();
-        Dependency.get(HotspotController.class).removeCallback(mHotspotCallback);
-        Dependency.get(DataSaverController.class).removeCallback(mDataSaverListener);
-        Dependency.get(ManagedProfileController.class).removeCallback(mProfileCallback);
+        mHotspotController.removeCallback(mHotspotCallback);
+        mDataSaverController.removeCallback(mDataSaverListener);
+        mManagedProfileController.removeCallback(mProfileCallback);
         if (ColorDisplayManager.isNightDisplayAvailable(mContext)) {
-            Dependency.get(ColorDisplayController.class).setListener(null);
+            mColorDisplayController.setListener(null);
         }
     }
 
@@ -109,7 +119,7 @@ public class AutoTileManager {
                 @Override
                 public void onManagedProfileChanged() {
                     if (mAutoTracker.isAdded(WORK)) return;
-                    if (Dependency.get(ManagedProfileController.class).hasActiveProfile()) {
+                    if (mManagedProfileController.hasActiveProfile()) {
                         mHost.addTile(WORK);
                         mAutoTracker.setTileAdded(WORK);
                     }
@@ -129,8 +139,7 @@ public class AutoTileManager {
             if (isDataSaving) {
                 mHost.addTile(SAVER);
                 mAutoTracker.setTileAdded(SAVER);
-                mHandler.post(() -> Dependency.get(DataSaverController.class).removeCallback(
-                        mDataSaverListener));
+                mHandler.post(() -> mDataSaverController.removeCallback(mDataSaverListener));
             }
         }
     };
@@ -142,8 +151,7 @@ public class AutoTileManager {
             if (enabled) {
                 mHost.addTile(HOTSPOT);
                 mAutoTracker.setTileAdded(HOTSPOT);
-                mHandler.post(() -> Dependency.get(HotspotController.class)
-                        .removeCallback(mHotspotCallback));
+                mHandler.post(() -> mHotspotController.removeCallback(mHotspotCallback));
             }
         }
     };
@@ -170,8 +178,7 @@ public class AutoTileManager {
             if (mAutoTracker.isAdded(NIGHT)) return;
             mHost.addTile(NIGHT);
             mAutoTracker.setTileAdded(NIGHT);
-            mHandler.post(() -> Dependency.get(ColorDisplayController.class)
-                    .setListener(null));
+            mHandler.post(() -> mColorDisplayController.setListener(null));
         }
     };
 }

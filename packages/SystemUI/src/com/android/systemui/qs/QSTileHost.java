@@ -56,6 +56,7 @@ import java.util.function.Predicate;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /** Platform implementation of the quick settings tile host **/
@@ -74,7 +75,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
     private final PluginManager mPluginManager;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
-    private final AutoTileManager mAutoTiles;
+    private AutoTileManager mAutoTiles;
     private final StatusBarIconController mIconController;
     private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
     private int mCurrentUser;
@@ -87,7 +88,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
             @Named(Dependency.MAIN_HANDLER_NAME) Handler mainHandler,
             @Named(Dependency.BG_LOOPER_NAME) Looper bgLooper,
             PluginManager pluginManager,
-            TunerService tunerService) {
+            TunerService tunerService,
+            Provider<AutoTileManager> autoTiles) {
         mIconController = iconController;
         mContext = context;
         mTunerService = tunerService;
@@ -104,9 +106,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
             // QSTileHost -> XXXTile -> QSTileHost. Posting ensures creation
             // finishes before creating any tiles.
             tunerService.addTunable(this, TILES_SETTING);
+            // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
+            mAutoTiles = autoTiles.get();
         });
-        // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
-        mAutoTiles = new AutoTileManager(context, this);
     }
 
     public StatusBarIconController getIconController() {
@@ -264,7 +266,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
 
     @Override
     public void unmarkTileAsAutoAdded(String spec) {
-        mAutoTiles.unmarkTileAsAutoAdded(spec);
+        if (mAutoTiles != null) mAutoTiles.unmarkTileAsAutoAdded(spec);
     }
 
     public void addTile(String spec) {
