@@ -8295,6 +8295,22 @@ package android.telephony.mbms.vendor {
 
 package android.util {
 
+  public class DocumentsStatsLog {
+    method public static void logActivityLaunch(int, boolean, int, int);
+    method public static void logFileOperation(int, int);
+    method public static void logFileOperationCanceled(int);
+    method public static void logFileOperationCopyMoveMode(int, int);
+    method public static void logFileOperationFailure(int, int);
+    method public static void logFilePick(int, long, int, boolean, int, int, int);
+    method public static void logInvalidScopedAccessRequest(int);
+    method public static void logPickerLaunchedFrom(String);
+    method public static void logRootVisited(int, int);
+    method public static void logSearchMode(int);
+    method public static void logSearchType(int);
+    method public static void logStartupMs(int);
+    method public static void logUserAction(int);
+  }
+
   public class EventLog {
     method public static void readEventsOnWrapping(int[], long, java.util.Collection<android.util.EventLog.Event>) throws java.io.IOException;
   }
