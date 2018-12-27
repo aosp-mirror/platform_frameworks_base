@@ -303,7 +303,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             if (mKeySizeBits == -1) {
                 mKeySizeBits = getDefaultKeySize(keymasterAlgorithm);
             }
-            checkValidKeySize(keymasterAlgorithm, mKeySizeBits);
+            checkValidKeySize(keymasterAlgorithm, mKeySizeBits, mSpec.isStrongBoxBacked());
 
             if (spec.getKeystoreAlias() == null) {
                 throw new InvalidAlgorithmParameterException("KeyStore entry alias not provided");
@@ -724,10 +724,18 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         }
     }
 
-    private static void checkValidKeySize(int keymasterAlgorithm, int keySize)
+    private static void checkValidKeySize(
+            int keymasterAlgorithm,
+            int keySize,
+            boolean isStrongBoxBacked)
             throws InvalidAlgorithmParameterException {
         switch (keymasterAlgorithm) {
             case KeymasterDefs.KM_ALGORITHM_EC:
+                if (isStrongBoxBacked && keySize != 256) {
+                    throw new InvalidAlgorithmParameterException(
+                            "Unsupported StrongBox EC key size: "
+                            + keySize + " bits. Supported: 256");
+                }
                 if (!SUPPORTED_EC_NIST_CURVE_SIZES.contains(keySize)) {
                     throw new InvalidAlgorithmParameterException("Unsupported EC key size: "
                             + keySize + " bits. Supported: " + SUPPORTED_EC_NIST_CURVE_SIZES);
