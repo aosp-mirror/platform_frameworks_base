@@ -96,7 +96,7 @@ public class KeepalivePacketData implements Parcelable {
         out.writeByteArray(mPacket);
     }
 
-    private KeepalivePacketData(Parcel in) {
+    protected KeepalivePacketData(Parcel in) {
         srcAddress = NetworkUtils.numericToInetAddress(in.readString());
         dstAddress = NetworkUtils.numericToInetAddress(in.readString());
         srcPort = in.readInt();

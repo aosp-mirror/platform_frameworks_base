@@ -22,17 +22,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.net.IpPrefix;
-import android.net.LinkAddress;
-import android.net.LinkProperties;
 import android.net.LinkProperties.CompareResult;
 import android.net.LinkProperties.ProvisioningChange;
-import android.net.RouteInfo;
-import android.os.Parcel;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.system.OsConstants;
 import android.util.ArraySet;
+
+import com.android.internal.util.TestUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -849,18 +846,6 @@ public class LinkPropertiesTest {
         assertEquals(new ArraySet<>(expectRemoved), (new ArraySet<>(result.removed)));
     }
 
-    private void assertParcelingIsLossless(LinkProperties source) {
-        Parcel p = Parcel.obtain();
-        source.writeToParcel(p, /* flags */ 0);
-        p.setDataPosition(0);
-        final byte[] marshalled = p.marshall();
-        p = Parcel.obtain();
-        p.unmarshall(marshalled, 0, marshalled.length);
-        p.setDataPosition(0);
-        LinkProperties dest = LinkProperties.CREATOR.createFromParcel(p);
-        assertEquals(source, dest);
-    }
-
     @Test
     public void testLinkPropertiesParcelable() throws Exception {
         LinkProperties source = new LinkProperties();
@@ -882,12 +867,12 @@ public class LinkPropertiesTest {
 
         source.setNat64Prefix(new IpPrefix("2001:db8:1:2:64:64::/96"));
 
-        assertParcelingIsLossless(source);
+        TestUtils.assertParcelingIsLossless(source, LinkProperties.CREATOR);
     }
 
     @Test
     public void testParcelUninitialized() throws Exception {
         LinkProperties empty = new LinkProperties();
-        assertParcelingIsLossless(empty);
+        TestUtils.assertParcelingIsLossless(empty, LinkProperties.CREATOR);
     }
 }
