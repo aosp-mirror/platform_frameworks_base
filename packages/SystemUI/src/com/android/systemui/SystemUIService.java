@@ -43,7 +43,7 @@ public class SystemUIService extends Service {
             throw new RuntimeException();
         }
 
-        if (Build.IS_DEBUGGABLE) {
+        if (Build.IS_ENG) {
             // b/71353150 - looking for leaked binder proxies
             BinderInternal.nSetBinderProxyCountEnabled(true);
             BinderInternal.nSetBinderProxyCountWatermarks(1000,900);
