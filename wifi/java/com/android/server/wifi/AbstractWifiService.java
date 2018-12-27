@@ -81,7 +81,7 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
     }
 
     @Override
-    public ParceledListSlice getPrivilegedConfiguredNetworks() {
+    public ParceledListSlice getPrivilegedConfiguredNetworks(String packageName) {
         throw new UnsupportedOperationException();
     }
 
