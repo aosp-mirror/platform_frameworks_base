@@ -1,7 +1,8 @@
+// Signature format: 2.0
 package android {
 
   public static final class Manifest.permission {
-    field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
+    field public static final String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
   }
 
 }
@@ -9,11 +10,11 @@ package android {
 package android.app {
 
   public class Notification implements android.os.Parcelable {
-    method public static java.lang.Class<? extends android.app.Notification.Style> getNotificationStyleClass(java.lang.String);
+    method public static Class<? extends android.app.Notification.Style> getNotificationStyleClass(String);
   }
 
   public static final class Notification.TvExtender implements android.app.Notification.Extender {
-    method public deprecated java.lang.String getChannel();
+    method @Deprecated public String getChannel();
   }
 
 }
@@ -21,8 +22,8 @@ package android.app {
 package android.app.admin {
 
   public class DevicePolicyManager {
-    method public deprecated java.lang.String getDeviceInitializerApp();
-    method public deprecated android.content.ComponentName getDeviceInitializerComponent();
+    method @Deprecated @Nullable public String getDeviceInitializerApp();
+    method @Deprecated @Nullable public android.content.ComponentName getDeviceInitializerComponent();
   }
 
 }
@@ -30,31 +31,31 @@ package android.app.admin {
 package android.content {
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
-    field public static final deprecated java.lang.String ACTION_DEVICE_INITIALIZATION_WIZARD = "android.intent.action.DEVICE_INITIALIZATION_WIZARD";
-    field public static final deprecated java.lang.String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
-    field public static final deprecated java.lang.String ACTION_SERVICE_STATE = "android.intent.action.SERVICE_STATE";
-    field public static final deprecated java.lang.String EXTRA_CDMA_DEFAULT_ROAMING_INDICATOR = "cdmaDefaultRoamingIndicator";
-    field public static final deprecated java.lang.String EXTRA_CDMA_ROAMING_INDICATOR = "cdmaRoamingIndicator";
-    field public static final deprecated java.lang.String EXTRA_CSS_INDICATOR = "cssIndicator";
-    field public static final deprecated java.lang.String EXTRA_DATA_OPERATOR_ALPHA_LONG = "data-operator-alpha-long";
-    field public static final deprecated java.lang.String EXTRA_DATA_OPERATOR_ALPHA_SHORT = "data-operator-alpha-short";
-    field public static final deprecated java.lang.String EXTRA_DATA_OPERATOR_NUMERIC = "data-operator-numeric";
-    field public static final deprecated java.lang.String EXTRA_DATA_RADIO_TECH = "dataRadioTechnology";
-    field public static final deprecated java.lang.String EXTRA_DATA_REG_STATE = "dataRegState";
-    field public static final deprecated java.lang.String EXTRA_DATA_ROAMING_TYPE = "dataRoamingType";
-    field public static final deprecated java.lang.String EXTRA_EMERGENCY_ONLY = "emergencyOnly";
-    field public static final deprecated java.lang.String EXTRA_IS_DATA_ROAMING_FROM_REGISTRATION = "isDataRoamingFromRegistration";
-    field public static final deprecated java.lang.String EXTRA_IS_USING_CARRIER_AGGREGATION = "isUsingCarrierAggregation";
-    field public static final deprecated java.lang.String EXTRA_LTE_EARFCN_RSRP_BOOST = "LteEarfcnRsrpBoost";
-    field public static final deprecated java.lang.String EXTRA_MANUAL = "manual";
-    field public static final deprecated java.lang.String EXTRA_NETWORK_ID = "networkId";
-    field public static final deprecated java.lang.String EXTRA_OPERATOR_ALPHA_LONG = "operator-alpha-long";
-    field public static final deprecated java.lang.String EXTRA_OPERATOR_ALPHA_SHORT = "operator-alpha-short";
-    field public static final deprecated java.lang.String EXTRA_OPERATOR_NUMERIC = "operator-numeric";
-    field public static final deprecated java.lang.String EXTRA_SYSTEM_ID = "systemId";
-    field public static final deprecated java.lang.String EXTRA_VOICE_RADIO_TECH = "radioTechnology";
-    field public static final deprecated java.lang.String EXTRA_VOICE_REG_STATE = "voiceRegState";
-    field public static final deprecated java.lang.String EXTRA_VOICE_ROAMING_TYPE = "voiceRoamingType";
+    field @Deprecated public static final String ACTION_DEVICE_INITIALIZATION_WIZARD = "android.intent.action.DEVICE_INITIALIZATION_WIZARD";
+    field @Deprecated public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
+    field @Deprecated public static final String ACTION_SERVICE_STATE = "android.intent.action.SERVICE_STATE";
+    field @Deprecated public static final String EXTRA_CDMA_DEFAULT_ROAMING_INDICATOR = "cdmaDefaultRoamingIndicator";
+    field @Deprecated public static final String EXTRA_CDMA_ROAMING_INDICATOR = "cdmaRoamingIndicator";
+    field @Deprecated public static final String EXTRA_CSS_INDICATOR = "cssIndicator";
+    field @Deprecated public static final String EXTRA_DATA_OPERATOR_ALPHA_LONG = "data-operator-alpha-long";
+    field @Deprecated public static final String EXTRA_DATA_OPERATOR_ALPHA_SHORT = "data-operator-alpha-short";
+    field @Deprecated public static final String EXTRA_DATA_OPERATOR_NUMERIC = "data-operator-numeric";
+    field @Deprecated public static final String EXTRA_DATA_RADIO_TECH = "dataRadioTechnology";
+    field @Deprecated public static final String EXTRA_DATA_REG_STATE = "dataRegState";
+    field @Deprecated public static final String EXTRA_DATA_ROAMING_TYPE = "dataRoamingType";
+    field @Deprecated public static final String EXTRA_EMERGENCY_ONLY = "emergencyOnly";
+    field @Deprecated public static final String EXTRA_IS_DATA_ROAMING_FROM_REGISTRATION = "isDataRoamingFromRegistration";
+    field @Deprecated public static final String EXTRA_IS_USING_CARRIER_AGGREGATION = "isUsingCarrierAggregation";
+    field @Deprecated public static final String EXTRA_LTE_EARFCN_RSRP_BOOST = "LteEarfcnRsrpBoost";
+    field @Deprecated public static final String EXTRA_MANUAL = "manual";
+    field @Deprecated public static final String EXTRA_NETWORK_ID = "networkId";
+    field @Deprecated public static final String EXTRA_OPERATOR_ALPHA_LONG = "operator-alpha-long";
+    field @Deprecated public static final String EXTRA_OPERATOR_ALPHA_SHORT = "operator-alpha-short";
+    field @Deprecated public static final String EXTRA_OPERATOR_NUMERIC = "operator-numeric";
+    field @Deprecated public static final String EXTRA_SYSTEM_ID = "systemId";
+    field @Deprecated public static final String EXTRA_VOICE_RADIO_TECH = "radioTechnology";
+    field @Deprecated public static final String EXTRA_VOICE_REG_STATE = "voiceRegState";
+    field @Deprecated public static final String EXTRA_VOICE_ROAMING_TYPE = "voiceRoamingType";
   }
 
 }
@@ -62,7 +63,7 @@ package android.content {
 package android.media.tv {
 
   public final class TvInputManager {
-    method public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, android.media.tv.TvInputManager.HardwareCallback, android.media.tv.TvInputInfo);
+    method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, android.media.tv.TvInputManager.HardwareCallback, android.media.tv.TvInputInfo);
   }
 
   public static final class TvInputManager.Hardware {
@@ -73,7 +74,7 @@ package android.media.tv {
 
 package android.net.wifi {
 
-  public deprecated class BatchedScanResult implements android.os.Parcelable {
+  @Deprecated public class BatchedScanResult implements android.os.Parcelable {
     ctor public BatchedScanResult();
     ctor public BatchedScanResult(android.net.wifi.BatchedScanResult);
     field public final java.util.List<android.net.wifi.ScanResult> scanResults;
@@ -93,8 +94,8 @@ package android.os {
   }
 
   public final class PowerManager {
-    method public deprecated boolean isScreenBrightnessBoosted();
-    field public static final deprecated java.lang.String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
+    method @Deprecated public boolean isScreenBrightnessBoosted();
+    field @Deprecated public static final String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
   }
 
 }
@@ -103,10 +104,10 @@ package android.service.notification {
 
   public abstract class NotificationListenerService extends android.app.Service {
     method public android.service.notification.StatusBarNotification[] getActiveNotifications(int);
-    method public android.service.notification.StatusBarNotification[] getActiveNotifications(java.lang.String[], int);
+    method public android.service.notification.StatusBarNotification[] getActiveNotifications(String[], int);
     method public void registerAsSystemService(android.content.Context, android.content.ComponentName, int) throws android.os.RemoteException;
     method public final void setOnNotificationPostedTrim(int);
-    method public final void snoozeNotification(java.lang.String, java.lang.String);
+    method public final void snoozeNotification(String, String);
     method public void unregisterAsSystemService() throws android.os.RemoteException;
     field public static final int TRIM_FULL = 0; // 0x0
     field public static final int TRIM_LIGHT = 1; // 0x1
@@ -122,9 +123,9 @@ package android.service.notification {
 package android.telephony {
 
   public class TelephonyManager {
-    method public deprecated void answerRingingCall();
-    method public deprecated boolean endCall();
-    method public deprecated void silenceRinger();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void answerRingingCall();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public boolean endCall();
+    method @Deprecated public void silenceRinger();
   }
 
 }
