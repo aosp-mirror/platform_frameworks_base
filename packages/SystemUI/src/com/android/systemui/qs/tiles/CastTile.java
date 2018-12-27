@@ -33,7 +33,6 @@ import android.widget.Button;
 import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -51,6 +50,8 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Cast **/
 public class CastTile extends QSTileImpl<BooleanState> {
     private static final Intent CAST_SETTINGS =
@@ -65,13 +66,18 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private Dialog mDialog;
     private boolean mWifiConnected;
 
-    public CastTile(QSHost host) {
+    @Inject
+    public CastTile(QSHost host, CastController castController, KeyguardMonitor keyguardMonitor,
+            NetworkController networkController, ActivityStarter activityStarter) {
         super(host);
-        mController = Dependency.get(CastController.class);
+        mController = castController;
         mDetailAdapter = new CastDetailAdapter();
-        mKeyguard = Dependency.get(KeyguardMonitor.class);
-        mNetworkController = Dependency.get(NetworkController.class);
-        mActivityStarter = Dependency.get(ActivityStarter.class);
+        mKeyguard = keyguardMonitor;
+        mNetworkController = networkController;
+        mActivityStarter = activityStarter;
+        mController.observe(this, mCallback);
+        mKeyguard.observe(this, mCallback);
+        mNetworkController.observe(this, mSignalCallback);
     }
 
     @Override
@@ -87,15 +93,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
     @Override
     public void handleSetListening(boolean listening) {
         if (DEBUG) Log.d(TAG, "handleSetListening " + listening);
-        if (listening) {
-            mController.addCallback(mCallback);
-            mKeyguard.addCallback(mCallback);
-            mNetworkController.addCallback(mSignalCallback);
-        } else {
+        if (!listening) {
             mController.setDiscovering(false);
-            mController.removeCallback(mCallback);
-            mKeyguard.removeCallback(mCallback);
-            mNetworkController.removeCallback(mSignalCallback);
         }
     }
 
@@ -135,7 +134,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
             mDialog = MediaRouteDialogPresenter.createDialog(mContext, ROUTE_TYPE_REMOTE_DISPLAY,
                     v -> {
                         mDialog.dismiss();
-                        Dependency.get(ActivityStarter.class)
+                        mActivityStarter
                                 .postStartActivityDismissingKeyguard(getLongClickIntent(), 0);
                     });
             mDialog.getWindow().setType(LayoutParams.TYPE_KEYGUARD_DIALOG);

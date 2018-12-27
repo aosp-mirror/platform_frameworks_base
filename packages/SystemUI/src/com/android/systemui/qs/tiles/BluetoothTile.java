@@ -36,7 +36,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -51,6 +50,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Bluetooth **/
 public class BluetoothTile extends QSTileImpl<BooleanState> {
     private static final Intent BLUETOOTH_SETTINGS = new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
@@ -59,11 +60,15 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     private final BluetoothDetailAdapter mDetailAdapter;
     private final ActivityStarter mActivityStarter;
 
-    public BluetoothTile(QSHost host) {
+    @Inject
+    public BluetoothTile(QSHost host,
+            BluetoothController bluetoothController,
+            ActivityStarter activityStarter) {
         super(host);
-        mController = Dependency.get(BluetoothController.class);
-        mActivityStarter = Dependency.get(ActivityStarter.class);
+        mController = bluetoothController;
+        mActivityStarter = activityStarter;
         mDetailAdapter = (BluetoothDetailAdapter) createDetailAdapter();
+        mController.observe(getLifecycle(), mCallback);
     }
 
     @Override
@@ -78,11 +83,6 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mController.addCallback(mCallback);
-        } else {
-            mController.removeCallback(mCallback);
-        }
     }
 
     @Override

@@ -23,7 +23,6 @@ import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.R.drawable;
 import com.android.systemui.plugins.ActivityStarter;
@@ -34,6 +33,8 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Location **/
 public class LocationTile extends QSTileImpl<BooleanState> {
 
@@ -41,12 +42,18 @@ public class LocationTile extends QSTileImpl<BooleanState> {
 
     private final LocationController mController;
     private final KeyguardMonitor mKeyguard;
+    private final ActivityStarter mActivityStarter;
     private final Callback mCallback = new Callback();
 
-    public LocationTile(QSHost host) {
+    @Inject
+    public LocationTile(QSHost host, LocationController locationController,
+            KeyguardMonitor keyguardMonitor, ActivityStarter activityStarter) {
         super(host);
-        mController = Dependency.get(LocationController.class);
-        mKeyguard = Dependency.get(KeyguardMonitor.class);
+        mController = locationController;
+        mKeyguard = keyguardMonitor;
+        mActivityStarter = activityStarter;
+        mController.observe(this, mCallback);
+        mKeyguard.observe(this, mCallback);
     }
 
     @Override
@@ -56,13 +63,6 @@ public class LocationTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mController.addCallback(mCallback);
-            mKeyguard.addCallback(mCallback);
-        } else {
-            mController.removeCallback(mCallback);
-            mKeyguard.removeCallback(mCallback);
-        }
     }
 
     @Override
@@ -73,7 +73,7 @@ public class LocationTile extends QSTileImpl<BooleanState> {
     @Override
     protected void handleClick() {
         if (mKeyguard.isSecure() && mKeyguard.isShowing()) {
-            Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
+            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 final boolean wasEnabled = mState.value;
                 mHost.openPanels();
                 mController.setLocationEnabled(!wasEnabled);

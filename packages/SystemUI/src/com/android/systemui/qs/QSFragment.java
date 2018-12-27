@@ -79,15 +79,18 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final InjectionInflationController mInjectionInflater;
+    private final QSTileHost mHost;
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
             InjectionInflationController injectionInflater,
-            Context context) {
+            Context context,
+            QSTileHost qsTileHost) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mInjectionInflater = injectionInflater;
         SysUiServiceProvider.getComponent(context, CommandQueue.class)
                 .observe(getLifecycle(), this);
+        mHost = qsTileHost;
     }
 
     @Override
@@ -122,6 +125,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 mQSPanel.getTileLayout().restoreInstanceState(savedInstanceState);
             }
         }
+        setHost(mHost);
     }
 
     @Override

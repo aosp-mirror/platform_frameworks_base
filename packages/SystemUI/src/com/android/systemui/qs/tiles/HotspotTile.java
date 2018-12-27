@@ -25,7 +25,6 @@ import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.AirplaneBooleanState;
 import com.android.systemui.qs.GlobalSetting;
@@ -33,6 +32,8 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
+
+import javax.inject.Inject;
 
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
@@ -48,16 +49,20 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     private final GlobalSetting mAirplaneMode;
     private boolean mListening;
 
-    public HotspotTile(QSHost host) {
+    @Inject
+    public HotspotTile(QSHost host, HotspotController hotspotController,
+            DataSaverController dataSaverController) {
         super(host);
-        mHotspotController = Dependency.get(HotspotController.class);
-        mDataSaverController = Dependency.get(DataSaverController.class);
+        mHotspotController = hotspotController;
+        mDataSaverController = dataSaverController;
         mAirplaneMode = new GlobalSetting(mContext, mHandler, Global.AIRPLANE_MODE_ON) {
             @Override
             protected void handleValueChanged(int value) {
                 refreshState();
             }
         };
+        mHotspotController.observe(this, mCallbacks);
+        mDataSaverController.observe(this, mCallbacks);
     }
 
     @Override
@@ -80,12 +85,7 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
         if (mListening == listening) return;
         mListening = listening;
         if (listening) {
-            mHotspotController.addCallback(mCallbacks);
-            mDataSaverController.addCallback(mCallbacks);
             refreshState();
-        } else {
-            mHotspotController.removeCallback(mCallbacks);
-            mDataSaverController.removeCallback(mCallbacks);
         }
         mAirplaneMode.setListening(listening);
     }

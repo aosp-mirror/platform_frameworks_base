@@ -6,6 +6,8 @@ to create dependencies without reflection*
 
 Go read about Dagger 2.
 
+ - [User's guide](https://google.github.io/dagger/users-guide)
+
 TODO: Add some links.
 
 ## State of the world

@@ -15,8 +15,8 @@
 package com.android.systemui.qs.tiles;
 
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +25,8 @@ import android.service.quicksettings.Tile;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+
+import androidx.lifecycle.LifecycleOwner;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
@@ -79,7 +81,8 @@ public class CastTileTest extends SysuiTestCase {
 
         when(mHost.getContext()).thenReturn(mContext);
 
-        mCastTile = new CastTile(mHost);
+        mCastTile = new CastTile(mHost, mController, mKeyguard, mNetworkController,
+                mActivityStarter);
 
         // We are not setting the mocks to listening, so we trigger a first refresh state to
         // set the initial state
@@ -88,7 +91,8 @@ public class CastTileTest extends SysuiTestCase {
         mCastTile.handleSetListening(true);
         ArgumentCaptor<NetworkController.SignalCallback> signalCallbackArgumentCaptor =
                 ArgumentCaptor.forClass(NetworkController.SignalCallback.class);
-        verify(mNetworkController).addCallback(signalCallbackArgumentCaptor.capture());
+        verify(mNetworkController).observe(any(LifecycleOwner.class),
+                signalCallbackArgumentCaptor.capture());
         mCallback = signalCallbackArgumentCaptor.getValue();
 
     }

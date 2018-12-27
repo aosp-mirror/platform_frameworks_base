@@ -35,7 +35,6 @@ import android.widget.Switch;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.net.DataUsageController;
-import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
@@ -51,6 +50,8 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Cellular **/
 public class CellularTile extends QSTileImpl<SignalState> {
     private static final String ENABLE_SETTINGS_DATA_PLAN = "enable.settings.data.plan";
@@ -63,13 +64,16 @@ public class CellularTile extends QSTileImpl<SignalState> {
     private final ActivityStarter mActivityStarter;
     private final KeyguardMonitor mKeyguardMonitor;
 
-    public CellularTile(QSHost host) {
+    @Inject
+    public CellularTile(QSHost host, NetworkController networkController,
+            ActivityStarter activityStarter, KeyguardMonitor keyguardMonitor) {
         super(host);
-        mController = Dependency.get(NetworkController.class);
-        mActivityStarter = Dependency.get(ActivityStarter.class);
-        mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+        mController = networkController;
+        mActivityStarter = activityStarter;
+        mKeyguardMonitor = keyguardMonitor;
         mDataController = mController.getMobileDataController();
         mDetailAdapter = new CellularDetailAdapter();
+        mController.observe(getLifecycle(), mSignalCallback);
     }
 
     @Override
@@ -84,11 +88,6 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mController.addCallback(mSignalCallback);
-        } else {
-            mController.removeCallback(mSignalCallback);
-        }
     }
 
     @Override
