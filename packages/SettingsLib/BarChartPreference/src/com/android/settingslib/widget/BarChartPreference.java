@@ -168,6 +168,7 @@ public class BarChartPreference extends Preference {
         if (mDetailsId == 0) {
             detailsView.setVisibility(View.GONE);
         } else {
+            detailsView.setVisibility(View.VISIBLE);
             detailsView.setText(mDetailsId);
             detailsView.setOnClickListener(mDetailsOnClickListener);
         }

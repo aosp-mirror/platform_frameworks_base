@@ -81,6 +81,20 @@ public class BarChartPreferenceTest {
     }
 
     @Test
+    public void onBindViewHolder_notSetDetailsRes_barChartDetailsViewIsGoneThenReappears() {
+        // We don't call BarChartPreference#setBarChartDetails yet.
+        mPreference.onBindViewHolder(mHolder);
+
+        assertThat(mDetailsView.getVisibility()).isEqualTo(View.GONE);
+
+        mPreference.setBarChartDetails(R.string.debug_app);
+        mPreference.onBindViewHolder(mHolder);
+
+        assertThat(mDetailsView.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mDetailsView.getText()).isEqualTo(mContext.getText(R.string.debug_app));
+    }
+
+    @Test
     public void setBarChartDetailsRes_setDetailsRes_showInBarChartDetails() {
         mPreference.setBarChartDetails(R.string.debug_app);
         mPreference.onBindViewHolder(mHolder);
