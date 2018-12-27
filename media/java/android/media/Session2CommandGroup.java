@@ -1,0 +1,321 @@
+/*
+ * Copyright 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.media;
+
+import static android.media.Session2Command.COMMAND_CODE_CUSTOM;
+import static android.media.Session2Command.COMMAND_VERSION_1;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.media.Session2Command.Range;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.ArrayMap;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * A set of {@link Session2Command} which represents a command group.
+ * <p>
+ * This API is not generally intended for third party application developers.
+ * Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ * {@link androidx.media2.SessionCommandGroup} for consistent behavior across all devices.
+ * </p>
+ * @hide
+ */
+public final class Session2CommandGroup implements Parcelable {
+    private static final String TAG = "Session2CommandGroup";
+
+    public static final Parcelable.Creator<Session2CommandGroup> CREATOR =
+            new Parcelable.Creator<Session2CommandGroup>() {
+                @Override
+                public Session2CommandGroup createFromParcel(Parcel in) {
+                    return new Session2CommandGroup(in);
+                }
+
+                @Override
+                public Session2CommandGroup[] newArray(int size) {
+                    return new Session2CommandGroup[size];
+                }
+            };
+
+    Set<Session2Command> mCommands = new HashSet<>();
+
+    /**
+     * Default Constructor.
+     */
+    public Session2CommandGroup() { }
+
+    /**
+     * Creates a new Session2CommandGroup with commands copied from another object.
+     *
+     * @param commands The collection of commands to copy.
+     */
+    public Session2CommandGroup(@Nullable Collection<Session2Command> commands) {
+        if (commands != null) {
+            mCommands.addAll(commands);
+        }
+    }
+
+    /**
+     * Used by parcelable creator.
+     */
+    @SuppressWarnings("WeakerAccess") /* synthetic access */
+    Session2CommandGroup(Parcel in) {
+        Session2Command[] commands = in.readParcelableArray(
+                Session2Command.class.getClassLoader(), Session2Command.class);
+        if (commands != null) {
+            for (Session2Command command : commands) {
+                mCommands.add(command);
+            }
+        }
+    }
+
+    /**
+     * Adds a command to this command group.
+     *
+     * @param command A command to add. Shouldn't be {@code null}.
+     * @hide TODO remove this method
+     */
+    public void addCommand(@NonNull Session2Command command) {
+        if (command == null) {
+            throw new IllegalArgumentException("command shouldn't be null");
+        }
+        if (!hasCommand(command)) {
+            mCommands.add(command);
+        }
+    }
+
+    /**
+     * Adds a predefined command with given {@code commandCode} to this command group.
+     *
+     * @param commandCode A command code to add.
+     *                    Shouldn't be {@link Session2Command#COMMAND_CODE_CUSTOM}.
+     * @hide TODO remove this method
+     */
+    public void addCommand(@Session2Command.CommandCode int commandCode) {
+        if (commandCode == COMMAND_CODE_CUSTOM) {
+            throw new IllegalArgumentException(
+                    "Use addCommand(Session2Command) for COMMAND_CODE_CUSTOM.");
+        }
+        if (!hasCommand(commandCode)) {
+            mCommands.add(new Session2Command(commandCode));
+        }
+    }
+
+    /**
+     * Checks whether this command group has a command that matches given {@code command}.
+     *
+     * @param command A command to find. Shouldn't be {@code null}.
+     */
+    public boolean hasCommand(@NonNull Session2Command command) {
+        if (command == null) {
+            throw new IllegalArgumentException("command shouldn't be null");
+        }
+        return mCommands.contains(command);
+    }
+
+    /**
+     * Checks whether this command group has a command that matches given {@code commandCode}.
+     *
+     * @param commandCode A command code to find.
+     *                    Shouldn't be {@link Session2Command#COMMAND_CODE_CUSTOM}.
+     */
+    public boolean hasCommand(@Session2Command.CommandCode int commandCode) {
+        if (commandCode == COMMAND_CODE_CUSTOM) {
+            throw new IllegalArgumentException("Use hasCommand(Command) for custom command");
+        }
+        for (Session2Command command : mCommands) {
+            if (command.getCommandCode() == commandCode) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets all commands of this command group.
+     */
+    public @NonNull Set<Session2Command> getCommands() {
+        return new HashSet<>(mCommands);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelableArray((Session2Command[]) mCommands.toArray(), 0);
+    }
+
+    /**
+     * Builds a {@link Session2CommandGroup} object.
+     */
+    public static final class Builder {
+        private Set<Session2Command> mCommands;
+
+        public Builder() {
+            mCommands = new HashSet<>();
+        }
+
+        /**
+         * Creates a new builder for {@link Session2CommandGroup} with commands copied from another
+         * {@link Session2CommandGroup} object.
+         * @param commandGroup
+         */
+        public Builder(@NonNull Session2CommandGroup commandGroup) {
+            mCommands = commandGroup.getCommands();
+        }
+
+        /**
+         * Adds a command to this command group.
+         *
+         * @param command A command to add. Shouldn't be {@code null}.
+         */
+        public @NonNull Builder addCommand(@NonNull Session2Command command) {
+            if (command == null) {
+                throw new IllegalArgumentException("command shouldn't be null");
+            }
+            mCommands.add(command);
+            return this;
+        }
+
+        /**
+         * Adds a predefined command with given {@code commandCode} to this command group.
+         *
+         * @param commandCode A command code to add.
+         *                    Shouldn't be {@link Session2Command#COMMAND_CODE_CUSTOM}.
+         */
+        public @NonNull Builder addCommand(@Session2Command.CommandCode int commandCode) {
+            if (commandCode == COMMAND_CODE_CUSTOM) {
+                throw new IllegalArgumentException(
+                        "Use addCommand(Session2Command) for COMMAND_CODE_CUSTOM.");
+            }
+            mCommands.add(new Session2Command(commandCode));
+            return this;
+        }
+
+        /**
+         * Adds all predefined session commands except for the commands added after the specified
+         * version without default implementation. This provides convenient way to add commands
+         * with implementation.
+         *
+         * @param version command version
+         * @see Session2Command#COMMAND_VERSION_1
+         * @see
+         * MediaSession2.Session2Callback#onConnect
+         */
+        public @NonNull Builder addAllPredefinedCommands(
+                @Session2Command.CommandVersion int version) {
+            if (version != COMMAND_VERSION_1) {
+                throw new IllegalArgumentException("Unknown command version " + version);
+            }
+            addAllPlayerCommands(version);
+            addAllVolumeCommands(version);
+            addAllSessionCommands(version);
+            addAllLibraryCommands(version);
+            return this;
+        }
+
+        /**
+         * Removes a command from this group which matches given {@code command}.
+         *
+         * @param command A command to find. Shouldn't be {@code null}.
+         */
+        public @NonNull Builder removeCommand(@NonNull Session2Command command) {
+            if (command == null) {
+                throw new IllegalArgumentException("command shouldn't be null");
+            }
+            mCommands.remove(command);
+            return this;
+        }
+
+        /**
+         * Removes a command from this group which matches given {@code commandCode}.
+         *
+         * @param commandCode A command code to find.
+         *                    Shouldn't be {@link Session2Command#COMMAND_CODE_CUSTOM}.
+         */
+        public @NonNull Builder removeCommand(@Session2Command.CommandCode int commandCode) {
+            if (commandCode == COMMAND_CODE_CUSTOM) {
+                throw new IllegalArgumentException("commandCode shouldn't be COMMAND_CODE_CUSTOM");
+            }
+            mCommands.remove(new Session2Command(commandCode));
+            return this;
+        }
+
+        @NonNull Builder addAllPlayerCommands(@Session2Command.CommandVersion int version) {
+            addCommands(version, Session2Command.VERSION_PLAYER_COMMANDS_MAP);
+            return this;
+        }
+
+        @NonNull Builder addAllPlayerCommands(@Session2Command.CommandVersion int version,
+                boolean includePlaylistCommands) {
+            if (includePlaylistCommands) {
+                return addAllPlayerCommands(version);
+            }
+            for (int i = COMMAND_VERSION_1; i <= version; i++) {
+                Range include = Session2Command.VERSION_PLAYER_COMMANDS_MAP.get(i);
+                Range exclude = Session2Command.VERSION_PLAYER_PLAYLIST_COMMANDS_MAP.get(i);
+                for (int code = include.lower; code <= include.upper; code++) {
+                    if (code < exclude.lower && code > exclude.upper) {
+                        addCommand(code);
+                    }
+                }
+            }
+            return this;
+        }
+
+        @NonNull Builder addAllVolumeCommands(@Session2Command.CommandVersion int version) {
+            addCommands(version, Session2Command.VERSION_VOLUME_COMMANDS_MAP);
+            return this;
+        }
+
+        @NonNull Builder addAllSessionCommands(@Session2Command.CommandVersion int version) {
+            addCommands(version, Session2Command.VERSION_SESSION_COMMANDS_MAP);
+            return this;
+        }
+
+        @NonNull Builder addAllLibraryCommands(@Session2Command.CommandVersion int version) {
+            addCommands(version, Session2Command.VERSION_LIBRARY_COMMANDS_MAP);
+            return this;
+        }
+
+        private void addCommands(
+                @Session2Command.CommandVersion int version, ArrayMap<Integer, Range> map) {
+            for (int i = COMMAND_VERSION_1; i <= version; i++) {
+                Range range = map.get(i);
+                for (int code = range.lower; code <= range.upper; code++) {
+                    addCommand(code);
+                }
+            }
+        }
+
+        /**
+         * Builds {@link Session2CommandGroup}.
+         *
+         * @return a new {@link Session2CommandGroup}.
+         */
+        public @NonNull Session2CommandGroup build() {
+            return new Session2CommandGroup(mCommands);
+        }
+    }
+}
