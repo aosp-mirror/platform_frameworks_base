@@ -77,13 +77,14 @@ public final class CellIdentityGsm extends CellIdentity {
     /** @hide */
     public CellIdentityGsm(android.hardware.radio.V1_0.CellIdentityGsm cid) {
         this(cid.lac, cid.cid, cid.arfcn,
-                cid.bsic == 0xFF ? CellInfo.UNAVAILABLE : cid.bsic, cid.mcc, cid.mnc, "", "");
+                cid.bsic == (byte) 0xFF ? CellInfo.UNAVAILABLE : cid.bsic,
+                cid.mcc, cid.mnc, "", "");
     }
 
     /** @hide */
     public CellIdentityGsm(android.hardware.radio.V1_2.CellIdentityGsm cid) {
         this(cid.base.lac, cid.base.cid, cid.base.arfcn,
-                cid.base.bsic == 0xFF ? CellInfo.UNAVAILABLE : cid.base.bsic, cid.base.mcc,
+                cid.base.bsic == (byte) 0xFF ? CellInfo.UNAVAILABLE : cid.base.bsic, cid.base.mcc,
                 cid.base.mnc, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort);
     }
 
