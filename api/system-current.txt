@@ -5397,6 +5397,8 @@ package android.telephony {
   public class SubscriptionManager {
     method public java.util.List<android.telephony.SubscriptionInfo> getAvailableSubscriptionInfoList();
     method public void requestEmbeddedSubscriptionInfoListRefresh();
+    method public void setDefaultDataSubId(int);
+    method public void setDefaultSmsSubId(int);
     field public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
     field public static final android.net.Uri VT_ENABLED_CONTENT_URI;
     field public static final android.net.Uri WFC_ENABLED_CONTENT_URI;
