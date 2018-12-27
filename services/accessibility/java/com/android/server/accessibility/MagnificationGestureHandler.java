@@ -115,8 +115,11 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
     private static final boolean DEBUG_PANNING_SCALING = false || DEBUG_ALL;
     private static final boolean DEBUG_EVENT_STREAM = false || DEBUG_ALL;
 
+    // The MIN_SCALE is different from MagnificationController.MIN_SCALE due
+    // to AccessibilityService.MagnificationController#setScale() has
+    // different scale range
     private static final float MIN_SCALE = 2.0f;
-    private static final float MAX_SCALE = 5.0f;
+    private static final float MAX_SCALE = MagnificationController.MAX_SCALE;
 
     @VisibleForTesting final MagnificationController mMagnificationController;
 

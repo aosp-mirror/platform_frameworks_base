@@ -1090,7 +1090,7 @@ public abstract class AccessibilityService extends Service {
          * called) or the service has been disconnected, this method will have
          * no effect and return {@code false}.
          *
-         * @param scale the magnification scale to set, must be >= 1 and <= 5
+         * @param scale the magnification scale to set, must be >= 1 and <= 8
          * @param animate {@code true} to animate from the current scale or
          *                {@code false} to set the scale immediately
          * @return {@code true} on success, {@code false} on failure
