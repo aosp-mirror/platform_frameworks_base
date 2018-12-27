@@ -4841,23 +4841,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // Also reset the settings of the current IME
                     mSettings.putSelectedInputMethod(null);
                     // Disable all enabled IMEs.
-                    {
-                        final ArrayList<InputMethodInfo> enabledImes =
-                                mSettings.getEnabledInputMethodListLocked();
-                        final int N = enabledImes.size();
-                        for (int i = 0; i < N; ++i) {
-                            setInputMethodEnabledLocked(enabledImes.get(i).getId(), false);
-                        }
-                    }
+                    mSettings.getEnabledInputMethodListLocked().forEach(
+                            imi -> setInputMethodEnabledLocked(imi.getId(), false));
                     // Re-enable with default enabled IMEs.
-                    {
-                        final ArrayList<InputMethodInfo> defaultEnabledIme =
-                                InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList);
-                        final int N = defaultEnabledIme.size();
-                        for (int i = 0; i < N; ++i) {
-                            setInputMethodEnabledLocked(defaultEnabledIme.get(i).getId(), true);
-                        }
-                    }
+                    InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList).forEach(
+                            imi -> setInputMethodEnabledLocked(imi.getId(), true));
                     updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
                     InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
                             mSettings.getEnabledInputMethodListLocked(),
