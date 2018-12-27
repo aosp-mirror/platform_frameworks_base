@@ -16,13 +16,13 @@
 
 package com.android.internal.hardware;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
+
+import com.android.internal.R;
 
 public class AmbientDisplayConfiguration {
 
@@ -37,7 +37,8 @@ public class AmbientDisplayConfiguration {
     public boolean enabled(int user) {
         return pulseOnNotificationEnabled(user)
                 || pulseOnLongPressEnabled(user)
-                || alwaysOnEnabled(user);
+                || alwaysOnEnabled(user)
+                || wakeLockScreenGestureEnabled(user);
     }
 
     public boolean pulseOnNotificationEnabled(int user) {
