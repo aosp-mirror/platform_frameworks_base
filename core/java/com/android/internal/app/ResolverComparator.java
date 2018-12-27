@@ -22,44 +22,36 @@ import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
-import android.content.SharedPreferences;
-import android.content.ServiceConnection;
 import android.metrics.LogMaker;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.storage.StorageManager;
 import android.os.UserHandle;
-import android.service.resolver.IResolverRankerService;
 import android.service.resolver.IResolverRankerResult;
+import android.service.resolver.IResolverRankerService;
 import android.service.resolver.ResolverRankerService;
 import android.service.resolver.ResolverTarget;
-import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.Log;
+
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
-import java.io.File;
-import java.lang.InterruptedException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Ranks and compares packages based on usage stats.
@@ -90,6 +82,8 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
 
     private final Collator mCollator;
     private final boolean mHttp;
+    // can be null if mHttp == false or current user has no default browser package
+    private final String mDefaultBrowserPackageName;
     private final PackageManager mPm;
     private final UsageStatsManager mUsm;
     private final Map<String, UsageStats> mStats;
@@ -184,6 +178,10 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         getContentAnnotations(intent);
         mAction = intent.getAction();
         mRankerServiceName = new ComponentName(mContext, this.getClass());
+
+        mDefaultBrowserPackageName = mHttp
+                ? mPm.getDefaultBrowserPackageNameAsUser(UserHandle.myUserId())
+                : null;
     }
 
     // get annotations of content from intent.
@@ -312,7 +310,14 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         if (mHttp) {
             // Special case: we want filters that match URI paths/schemes to be
             // ordered before others.  This is for the case when opening URIs,
-            // to make native apps go above browsers.
+            // to make native apps go above browsers - except for 1 even more special case
+            // which is the default browser, as we want that to go above them all.
+            if (isDefaultBrowser(lhs)) {
+                return -1;
+            }
+            if (isDefaultBrowser(rhs)) {
+                return 1;
+            }
             final boolean lhsSpecific = ResolverActivity.isSpecificUriMatch(lhs.match);
             final boolean rhsSpecific = ResolverActivity.isSpecificUriMatch(rhs.match);
             if (lhsSpecific != rhsSpecific) {
@@ -417,6 +422,20 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         if (DEBUG) {
             Log.d(TAG, "Unbinded Resolver Ranker.");
         }
+    }
+
+    private boolean isDefaultBrowser(ResolveInfo ri) {
+        // It makes sense to prefer the default browser
+        // only if the targeted user is the current user
+        if (ri.targetUserId != UserHandle.USER_CURRENT) {
+            return false;
+        }
+
+        if (ri.activityInfo.packageName != null
+                && ri.activityInfo.packageName.equals(mDefaultBrowserPackageName)) {
+            return true;
+        }
+        return false;
     }
 
     // records metrics for evaluation.
