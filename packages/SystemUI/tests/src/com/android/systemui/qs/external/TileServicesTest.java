@@ -32,8 +32,10 @@ import android.testing.TestableLooper.RunWithLooper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.tuner.TunerService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -60,7 +62,10 @@ public class TileServicesTest extends SysuiTestCase {
         QSTileHost host = new QSTileHost(mContext,
                 mock(StatusBarIconController.class),
                 mock(QSFactoryImpl.class),
-                new Handler());
+                new Handler(),
+                Looper.myLooper(),
+                mock(PluginManager.class),
+                mock(TunerService.class));
         mTileService = new TestTileServices(host, Looper.getMainLooper());
     }
 
