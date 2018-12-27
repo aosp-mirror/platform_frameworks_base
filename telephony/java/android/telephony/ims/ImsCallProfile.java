@@ -23,6 +23,8 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telecom.VideoProfile;
+import android.telephony.emergency.EmergencyNumber;
+import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.util.Log;
 
 import com.android.internal.telephony.PhoneConstants;
@@ -295,6 +297,28 @@ public final class ImsCallProfile implements Parcelable {
     public @CallRestrictCause int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
 
     /**
+     * The emergency service categories, only valid if {@link #getServiceType} returns
+     * {@link #SERVICE_TYPE_EMERGENCY}
+     *
+     * If valid, the value is the bitwise-OR combination of the following constants:
+     * <ol>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_POLICE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AMBULANCE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MIEC} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AIEC} </li>
+     * </ol>
+     *
+     * Reference: 3gpp 23.167, Section 6 - Functional description;
+     *            3gpp 22.101, Section 10 - Emergency Calls.
+     */
+    private @EmergencyServiceCategories int mEmergencyServiceCategories =
+            EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED;
+
+    /**
      * Extras associated with this {@link ImsCallProfile}.
      * <p>
      * Valid data types include:
@@ -495,6 +519,7 @@ public final class ImsCallProfile implements Parcelable {
         out.writeInt(mCallType);
         out.writeBundle(filteredExtras);
         out.writeParcelable(mMediaProfile, 0);
+        out.writeInt(mEmergencyServiceCategories);
     }
 
     private void readFromParcel(Parcel in) {
@@ -502,6 +527,7 @@ public final class ImsCallProfile implements Parcelable {
         mCallType = in.readInt();
         mCallExtras = in.readBundle();
         mMediaProfile = in.readParcelable(ImsStreamMediaProfile.class.getClassLoader());
+        mEmergencyServiceCategories = in.readInt();
     }
 
     public static final Creator<ImsCallProfile> CREATOR = new Creator<ImsCallProfile>() {
@@ -709,5 +735,54 @@ public final class ImsCallProfile implements Parcelable {
      */
     private static boolean isVideoStateSet(int videoState, int videoStateToCheck) {
         return (videoState & videoStateToCheck) == videoStateToCheck;
+    }
+
+    /**
+     * Set the emergency service categories. The set value is valid only if
+     * {@link #getServiceType} returns {@link #SERVICE_TYPE_EMERGENCY}
+     *
+     * If valid, the value is the bitwise-OR combination of the following constants:
+     * <ol>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_POLICE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AMBULANCE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MIEC} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AIEC} </li>
+     * </ol>
+     *
+     * Reference: 3gpp 23.167, Section 6 - Functional description;
+     *            3gpp 22.101, Section 10 - Emergency Calls.
+     */
+    public void setEmergencyServiceCategories(
+            @EmergencyServiceCategories int emergencyServiceCategories) {
+        mEmergencyServiceCategories = emergencyServiceCategories;
+    }
+
+    /**
+     * Get the emergency service categories, only valid if {@link #getServiceType} returns
+     * {@link #SERVICE_TYPE_EMERGENCY}
+     *
+     * @return the emergency service categories,
+     *
+     * If valid, the value is the bitwise-OR combination of the following constants:
+     * <ol>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_POLICE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AMBULANCE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MIEC} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AIEC} </li>
+     * </ol>
+     *
+     * Reference: 3gpp 23.167, Section 6 - Functional description;
+     *            3gpp 22.101, Section 10 - Emergency Calls.
+     */
+    public @EmergencyServiceCategories int getEmergencyServiceCategories() {
+        return mEmergencyServiceCategories;
     }
 }
