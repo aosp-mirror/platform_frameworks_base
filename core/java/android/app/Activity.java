@@ -924,6 +924,9 @@ public class Activity extends ContextThemeWrapper
 
     private AutofillPopupWindow mAutofillPopupWindow;
 
+    /** @hide */
+    boolean mEnterAnimationComplete;
+
     private static native String getDlWarning();
 
     /** Return the intent that started this activity. */
@@ -2328,6 +2331,7 @@ public class Activity extends ContextThemeWrapper
             }
             notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_STOP);
         }
+        mEnterAnimationComplete = false;
     }
 
     /**
@@ -7085,6 +7089,8 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     public void dispatchEnterAnimationComplete() {
+        mEnterAnimationComplete = true;
+        mInstrumentation.onEnterAnimationComplete();
         onEnterAnimationComplete();
         if (getWindow() != null && getWindow().getDecorView() != null) {
             getWindow().getDecorView().getViewTreeObserver().dispatchOnEnterAnimationComplete();
