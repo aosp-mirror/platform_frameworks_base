@@ -3078,10 +3078,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public void setInputMethod(IBinder token, String id) {
+    @BinderThread
+    private void setInputMethod(IBinder token, String id) {
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
+            if (!calledWithValidTokenLocked(token)) {
                 return;
             }
             setInputMethodWithSubtypeIdLocked(token, id, NOT_A_SUBTYPE_ID);
