@@ -22,7 +22,7 @@ package com.android.systemui.dock;
 public interface DockManager {
 
     /**
-     * Uninitialized / unknow dock states
+     * Uninitialized / unknown dock states
      */
     int STATE_NONE = 0;
     /**
@@ -37,14 +37,14 @@ public interface DockManager {
     /**
      * Add a dock event listener into manager
      *
-     * @param callback A  {@link #DockEventListener} which want to add
+     * @param callback A  {@link DockEventListener} which want to add
      */
     void addListener(DockEventListener callback);
 
     /**
      * Remove the added listener from dock manager
      *
-     * @param callback A {@link #DockEventListener} which want to remove
+     * @param callback A {@link DockEventListener} which want to remove
      */
     void removeListener(DockEventListener callback);
 
@@ -52,8 +52,6 @@ public interface DockManager {
     interface DockEventListener {
         /**
          * Override to handle dock events
-         *
-         * Events reference: {@link #DockState}
          */
         void onEvent(int event);
     }
