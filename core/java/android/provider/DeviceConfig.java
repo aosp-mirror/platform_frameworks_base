@@ -86,6 +86,14 @@ public final class DeviceConfig {
     @SystemApi
     public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
 
+    /**
+     * Namespace for all netd related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_NETD_NATIVE = "netd_native";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static Map<OnPropertyChangedListener, Pair<String, Executor>> sListeners =
