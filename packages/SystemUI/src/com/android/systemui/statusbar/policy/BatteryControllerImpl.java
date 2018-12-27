@@ -30,7 +30,6 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
-import com.android.systemui.Dependency;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.Estimate;
 
@@ -55,7 +54,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final int UPDATE_GRANULARITY_MSEC = 1000 * 60;
 
-    private final EnhancedEstimates mEstimates = Dependency.get(EnhancedEstimates.class);
+    private final EnhancedEstimates mEstimates;
     private final ArrayList<BatteryController.BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<>();
     private final PowerManager mPowerManager;
     private final Handler mHandler;
@@ -73,15 +72,17 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private long mLastEstimateTimestamp = -1;
 
     @Inject
-    public BatteryControllerImpl(Context context) {
-        this(context, context.getSystemService(PowerManager.class));
+    public BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates) {
+        this(context, enhancedEstimates, context.getSystemService(PowerManager.class));
     }
 
     @VisibleForTesting
-    BatteryControllerImpl(Context context, PowerManager powerManager) {
+    BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates,
+            PowerManager powerManager) {
         mContext = context;
         mHandler = new Handler();
         mPowerManager = powerManager;
+        mEstimates = enhancedEstimates;
 
         registerReceiver();
         updatePowerSave();

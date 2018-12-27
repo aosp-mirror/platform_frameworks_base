@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Та энэ аппыг <xliff:g id="USERNAME">%1$s</xliff:g> хэрэглэгчийн өмнөөс устгахыг хүсэж байна уу?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Энэ аппыг үйлдвэрээс ирсэн хувилбараар солих уу? Бүх өгөгдөл устах болно."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Энэ аппыг үйлдвэрээс ирсэн хувилбараар солих уу? Бүх өгөгдөл устах болно. Энэ нь эдгээр ажлын профайлтай бүхий энэ төхөөрөмжийн бүх хэрэглэгчид нөлөөлнө."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Холбоотой медиа файлуудын <xliff:g id="SIZE">%1$s</xliff:g>-г мөн адил устгана уу."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Аппын өгөгдлийн <xliff:g id="SIZE">%1$s</xliff:g>-г үлдээнэ үү."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Устгаж байна"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Устгаж чадсангүй"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Устгаж байна…"</string>

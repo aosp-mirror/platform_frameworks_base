@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.CommandQueue;
@@ -44,11 +43,12 @@ public class RemoteInputQuickSettingsDisabler
     @VisibleForTesting CommandQueue mCommandQueue;
 
     @Inject
-    public RemoteInputQuickSettingsDisabler(Context context) {
+    public RemoteInputQuickSettingsDisabler(Context context,
+            ConfigurationController configController) {
         mContext = context;
         mCommandQueue = SysUiServiceProvider.getComponent(context, CommandQueue.class);
         mLastOrientation = mContext.getResources().getConfiguration().orientation;
-        Dependency.get(ConfigurationController.class).addCallback(this);
+        configController.addCallback(this);
     }
 
     public int adjustDisableFlags(int state) {

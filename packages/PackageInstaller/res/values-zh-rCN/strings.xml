@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"要为用户<xliff:g id="USERNAME">%1$s</xliff:g>卸载此应用吗？"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"要将此应用替换为出厂版本吗？这样会移除所有数据。"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"要将此应用替换为出厂版本吗？这样会移除所有数据，并会影响此设备的所有用户（包括已设置工作资料的用户）。"</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"同时移除 <xliff:g id="SIZE">%1$s</xliff:g> 的关联媒体文件。"</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"保留 <xliff:g id="SIZE">%1$s</xliff:g> 的应用数据。"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"正在进行卸载操作"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"卸载操作失败"</string>
     <string name="uninstalling" msgid="8709566347688966845">"正在卸载…"</string>

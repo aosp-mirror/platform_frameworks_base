@@ -167,6 +167,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"漫游"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -250,6 +252,8 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"工作模式已开启。"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"流量节省程序已关闭。"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"流量节省程序已开启。"</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"已关闭传感器隐私设置。"</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"已开启传感器隐私设置。"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"屏幕亮度"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"正在充电"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G 数据网络已暂停使用"</string>
@@ -296,7 +300,7 @@
     <skip />
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"正在开启…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"亮度"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自动旋转"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自动旋转屏幕"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"自动旋转屏幕"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g>模式"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"屏幕方向：锁定"</string>
@@ -884,4 +888,8 @@
       <item quantity="other">另外 <xliff:g id="NUM_APPS_1">%d</xliff:g> 个应用</item>
       <item quantity="one">另外 <xliff:g id="NUM_APPS_0">%d</xliff:g> 个应用</item>
     </plurals>
+    <string name="sensor_privacy_mode" msgid="8982771253020769598">"已关闭传感器"</string>
+    <string name="device_services" msgid="1191212554435440592">"设备服务"</string>
+    <!-- no translation found for music_controls_no_title (5236895307087002011) -->
+    <skip />
 </resources>

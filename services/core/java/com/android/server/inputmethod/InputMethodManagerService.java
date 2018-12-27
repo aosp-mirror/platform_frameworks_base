@@ -179,6 +179,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -4587,6 +4588,25 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             @Nullable FileDescriptor err,
             @NonNull String[] args, @Nullable ShellCallback callback,
             @NonNull ResultReceiver resultReceiver) throws RemoteException {
+        final int callingUid = Binder.getCallingUid();
+        // Reject any incoming calls from non-shell users, including ones from the system user.
+        if (callingUid != Process.ROOT_UID && callingUid != Process.SHELL_UID) {
+            // Note that Binder#onTransact() will automatically close "in", "out", and "err" when
+            // returned from this method, hence there is no need to close those FDs.
+            // "resultReceiver" is the only thing that needs to be taken care of here.
+            if (resultReceiver != null) {
+                resultReceiver.send(ShellCommandResult.FAILURE, null);
+            }
+            final String errorMsg = "InputMethodManagerService does not support shell commands from"
+                    + " non-shell users. callingUid=" + callingUid
+                    + " args=" + Arrays.toString(args);
+            if (Process.isCoreUid(callingUid)) {
+                // Let's not crash the calling process if the caller is one of core components.
+                Slog.e(TAG, errorMsg);
+                return;
+            }
+            throw new SecurityException(errorMsg);
+        }
         new ShellCommandImpl(this).exec(
                 this, in, out, err, args, callback, resultReceiver);
     }

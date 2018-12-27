@@ -144,8 +144,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         TestableBubbleController(Context context,
                 StatusBarWindowController statusBarWindowController) {
-            super(context);
-            mStatusBarWindowController = statusBarWindowController;
+            super(context, statusBarWindowController);
         }
     }
 }

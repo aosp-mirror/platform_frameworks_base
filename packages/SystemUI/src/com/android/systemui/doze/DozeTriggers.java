@@ -135,11 +135,12 @@ public class DozeTriggers implements DozeMachine.Part {
         boolean isPickup = pulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
         boolean isLongPress = pulseReason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS;
         boolean isWakeDisplay = pulseReason == DozeLog.REASON_SENSOR_WAKE_UP;
+        boolean isWakeLockScreen = pulseReason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN;
         boolean wakeEvent = rawValues != null && rawValues.length > 0 && rawValues[0] != 0;
 
         if (isWakeDisplay) {
             onWakeScreen(wakeEvent);
-        } else if (isLongPress) {
+        } else if (isLongPress || isWakeLockScreen) {
             requestPulse(pulseReason, sensorPerformedProxCheck);
         } else {
             proximityCheckThenCall((result) -> {
@@ -156,7 +157,6 @@ public class DozeTriggers implements DozeMachine.Part {
                     mDozeHost.extendPulse();
                 }
             }, sensorPerformedProxCheck, pulseReason);
-            return;
         }
 
         if (isPickup) {

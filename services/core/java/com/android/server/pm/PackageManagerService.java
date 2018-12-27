@@ -447,6 +447,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final int BLUETOOTH_UID = Process.BLUETOOTH_UID;
     private static final int SHELL_UID = Process.SHELL_UID;
     private static final int SE_UID = Process.SE_UID;
+    private static final int NETWORKSTACK_UID = Process.NETWORK_STACK_UID;
 
     static final int SCAN_NO_DEX = 1 << 0;
     static final int SCAN_UPDATE_SIGNATURE = 1 << 1;
@@ -2170,6 +2171,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mSettings.addSharedUserLPw("android.uid.shell", SHELL_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.se", SE_UID,
+                ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        mSettings.addSharedUserLPw("android.uid.networkstack", NETWORKSTACK_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
@@ -15458,10 +15461,15 @@ public class PackageManagerService extends IPackageManager.Stub
         return result;
     }
 
+    /**
+     * Compare the newly scanned package with current system state to see which of its declared
+     * shared libraries should be allowed to be added to the system.
+     */
     private static List<SharedLibraryInfo> getAllowedSharedLibInfos(
             ScanResult scanResult,
             Map<String, LongSparseArray<SharedLibraryInfo>> existingSharedLibraries) {
-        final PackageParser.Package pkg = scanResult.pkgSetting.pkg;
+        // Let's used the parsed package as scanResult.pkgSetting may be null
+        final PackageParser.Package pkg = scanResult.request.pkg;
         if (scanResult.staticSharedLibraryInfo == null
                 && scanResult.dynamicSharedLibraryInfos == null) {
             return null;
@@ -15493,8 +15501,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 // have allowed apps on the device which aren't compatible
                 // with it.  Better to just have the restriction here, be
                 // conservative, and create many fewer cases that can negatively
-                // impact the user experience.
-                final PackageSetting sysPs = scanResult.request.disabledPkgSetting;
+                // impact the user experience. We may not yet have disabled the
+                // updated package yet, so be sure to grab the current setting if
+                // that's the case.
+                final PackageSetting sysPs = scanResult.request.disabledPkgSetting == null
+                        ? scanResult.request.oldPkgSetting
+                        : scanResult.request.disabledPkgSetting;
                 if (sysPs.pkg != null && sysPs.pkg.libraryNames != null) {
                     for (int j = 0; j < sysPs.pkg.libraryNames.size(); j++) {
                         if (name.equals(sysPs.pkg.libraryNames.get(j))) {

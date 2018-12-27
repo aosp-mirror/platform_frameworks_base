@@ -33,7 +33,6 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
@@ -122,12 +121,12 @@ public class BubbleController {
     }
 
     @Inject
-    public BubbleController(Context context) {
+    public BubbleController(Context context, StatusBarWindowController statusBarWindowController) {
         mContext = context;
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mDisplaySize = new Point();
         wm.getDefaultDisplay().getSize(mDisplaySize);
-        mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
+        mStatusBarWindowController = statusBarWindowController;
     }
 
     /**

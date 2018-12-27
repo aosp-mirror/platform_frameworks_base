@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Бул колдонмону <xliff:g id="USERNAME">%1$s</xliff:g> үчүн чыгарып саласызбы?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Бул колдонмонун баштапкы версиясы орнотулсунбу? Бардык дайындар өчүп калат."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Бул колдонмонун баштапкы версиясы орнотулсунбу? Түзмөктөгү бардык профилдердин, ошондой эле жумушчу профилдердин дайындары өчүп калат."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Ошондой эле, тиешелүү медиа файлдардын <xliff:g id="SIZE">%1$s</xliff:g> өчүрүү."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Колдонмонун <xliff:g id="SIZE">%1$s</xliff:g> дайындарын сактоо."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Чыгарылып салынууда"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Чыгарылып салынбай калгандар"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Чыгарылып салынууда…"</string>

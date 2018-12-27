@@ -167,6 +167,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"रोमिङ"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -250,6 +252,8 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"कार्य मोड सक्रिय भयो।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"डेटा सेभरलाई निष्क्रिय पारियो।"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"डेटा सेभरलाई सक्रिय गरियो।"</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"सेन्सरको गोपनियता निष्क्रिय पारिएको छ।"</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"सेन्सरको गोपनियता सक्रिय गरिएको छ।"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"प्रदर्शन चमक"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"चार्ज गर्दै"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G डेटा रोकिएको छ"</string>
@@ -431,7 +435,7 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"ब्याट्री सेभर सक्रिय छ"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"प्रदर्शन र पृष्ठभूमि डेटा घटाउँनुहोस्"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ब्याट्री सेभर निष्क्रिय पार्नुहोस्"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले आफ्नो स्क्रीनमा प्रदर्शित हुने सबै खिच्न शुरू गर्नेछ।"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले आफ्नो स्क्रीनमा प्रदर्शित हुने सबै खिच्न शुरू गर्ने छ।"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फेरि नदेखाउनुहोस्"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सबै हटाउनुहोस्"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"व्यवस्थित गर्नुहोस्"</string>
@@ -700,7 +704,7 @@
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"भोल्युम नियन्त्रणसहित देखाउनुहोस्"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"बाधा नपुर्याउनुहोस्"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"भोल्युम बटनका सर्टकट"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"भोल्युम बढाउनेमा बाधा नपुर्याउनुहोस् प्रविष्ट गर्नुहोस्"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"भोल्युम बढाउनेमा बाधा नपुर्याउनुहोस् प्रविष्टि गर्नुहोस्"</string>
     <string name="battery" msgid="7498329822413202973">"ब्याट्री"</string>
     <string name="clock" msgid="7416090374234785905">"घडी"</string>
     <string name="headset" msgid="4534219457597457353">"हेडसेट"</string>
@@ -809,7 +813,7 @@
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"तपाईंको फोन अति नै तातिएकाले चिसिन बन्द भयो। तपाईंको फोन अब सामान्य ढंगले चल्दै छ।\n\nतपाईंले निम्न कुराहरू गर्नुभयो भने तपाईंको फोन अत्यन्त तातो हुनसक्छ:\n	• धेरै संसाधन खपत गर्ने अनुप्रयोगहरूको प्रयोग (जस्तै गेमिङ, भिडियो वा नेभिगेसन अनुप्रयोगहरू)\n	• ठूला फाइलहरूको डाउनलोड वा अपलोड\n	• उच्च तापक्रममा फोनको प्रयोग"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"फोन तातो भइरहेको छ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"फोन चिसो हुँदै गर्दा केही विशेषताहरूलाई सीमित गरिन्छ"</string>
-    <string name="high_temp_dialog_message" msgid="6840700639374113553">"तपाईंको फोन स्वतः चिसो हुने प्रयास गर्नेछ। तपाईं अझै पनि आफ्नो फोनको प्रयोग गर्न सक्नुहुन्छ तर त्यो अझ ढिलो चल्न सक्छ।\n\nचिसो भएपछि तपाईंको फोन सामान्य गतिमा चल्नेछ।"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"तपाईंको फोन स्वतः चिसो हुने प्रयास गर्ने छ। तपाईं अझै पनि आफ्नो फोनको प्रयोग गर्न सक्नुहुन्छ तर त्यो अझ ढिलो चल्न सक्छ।\n\nचिसो भएपछि तपाईंको फोन सामान्य गतिमा चल्नेछ।"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"बायाँतिरको सर्टकट"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"दायाँतिरको सर्टकट"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"बायाँतिरको सर्टकटले पनि अनलक गर्छ"</string>
@@ -884,4 +888,9 @@
       <item quantity="other"><xliff:g id="NUM_APPS_1">%d</xliff:g>अन्य अनुप्रयोगहरू</item>
       <item quantity="one"><xliff:g id="NUM_APPS_0">%d</xliff:g> अन्य अनुप्रयोग</item>
     </plurals>
+    <string name="sensor_privacy_mode" msgid="8982771253020769598">"सेन्सरहरू निष्क्रिय छन्"</string>
+    <!-- no translation found for device_services (1191212554435440592) -->
+    <skip />
+    <!-- no translation found for music_controls_no_title (5236895307087002011) -->
+    <skip />
 </resources>

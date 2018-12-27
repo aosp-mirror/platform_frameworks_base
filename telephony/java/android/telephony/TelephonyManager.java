@@ -3196,6 +3196,29 @@ public class TelephonyManager {
     }
 
     /**
+     * Gets information about currently inserted UICCs and eUICCs. See {@link UiccCardInfo} for more
+     * details on the kind of information available.
+     *
+     * @return UiccCardInfo an array of UiccCardInfo objects, representing information on the
+     * currently inserted UICCs and eUICCs.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public UiccCardInfo[] getUiccCardsInfo() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                return null;
+            }
+            return telephony.getUiccCardsInfo();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Gets all the UICC slots. The objects in the array can be null if the slot info is not
      * available, which is possible between phone process starting and getting slot info from modem.
      *

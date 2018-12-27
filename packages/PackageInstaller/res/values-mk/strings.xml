@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Дали сакате да ја деинсталирате апликацијава за корисникот <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Сакате да ја замените оваа апликација со фабричката верзија? Сите податоци ќе се отстранат."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Сакате да ја замените оваа апликација со фабричката верзија? Сите податоци ќе се отстранат. Тоа важи за сите корисници на овој уред, вклучувајќи ги и тие со работни профили."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Отстрани и <xliff:g id="SIZE">%1$s</xliff:g> поврзани аудиовизуелни датотеки."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Задржи <xliff:g id="SIZE">%1$s</xliff:g> податоци на апликацијата."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Деинсталации во тек"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Неуспешни деинсталации"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Се деинсталира…"</string>

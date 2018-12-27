@@ -6269,6 +6269,7 @@ package android.telephony {
     method public int getSimCardState();
     method public int getSupportedRadioAccessFamily();
     method public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
+    method public android.telephony.UiccCardInfo[] getUiccCardsInfo();
     method public android.telephony.UiccSlotInfo[] getUiccSlotsInfo();
     method public android.os.Bundle getVisualVoicemailSettings();
     method public int getVoiceActivationState();
@@ -6363,6 +6364,18 @@ package android.telephony {
     method public java.lang.String getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.UiccAccessRule> CREATOR;
+  }
+
+  public class UiccCardInfo implements android.os.Parcelable {
+    ctor public UiccCardInfo(boolean, int, java.lang.String, java.lang.String, int);
+    method public int describeContents();
+    method public int getCardId();
+    method public java.lang.String getEid();
+    method public java.lang.String getIccId();
+    method public int getSlotIndex();
+    method public boolean isEuicc();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.UiccCardInfo> CREATOR;
   }
 
   public class UiccSlotInfo implements android.os.Parcelable {

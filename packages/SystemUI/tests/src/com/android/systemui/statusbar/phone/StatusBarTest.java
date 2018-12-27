@@ -68,6 +68,7 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.appops.AppOpsControllerImpl;
 import com.android.systemui.assist.AssistManager;
@@ -195,8 +196,10 @@ public class StatusBarTest extends SysuiTestCase {
 
         mMetricsLogger = new FakeMetricsLogger();
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
+        mEntryManager = new TestableNotificationEntryManager(mPowerManager, mContext);
+        mNotificationLogger = new NotificationLogger(mNotificationListener,
+                Dependency.get(UiOffloadThread.class), mEntryManager, mStatusBarStateController);
         mDependency.injectTestDependency(NotificationLogger.class, mNotificationLogger);
-        mNotificationLogger = new NotificationLogger();
         DozeLog.traceDozing(mContext, false /* dozing */);
 
         mCommandQueue = mock(CommandQueue.class);
@@ -225,7 +228,6 @@ public class StatusBarTest extends SysuiTestCase {
         mNotificationInterruptionStateProvider.setUpWithPresenter(mNotificationPresenter,
                 mHeadsUpManager, mHeadsUpSuppressor);
 
-        mEntryManager = new TestableNotificationEntryManager(mPowerManager, mContext);
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,

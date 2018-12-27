@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.logging;
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,9 +37,12 @@ import android.testing.TestableLooper;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -91,7 +95,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
         mEntry = new NotificationData.Entry(mSbn);
         mEntry.setRow(mRow);
 
-        mLogger = new TestableNotificationLogger(mBarService);
+        mLogger = new TestableNotificationLogger(mListener, Dependency.get(UiOffloadThread.class),
+                mEntryManager, mock(StatusBarStateController.class), mBarService);
         mLogger.setUpWithContainer(mListContainer);
     }
 
@@ -153,7 +158,12 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     private class TestableNotificationLogger extends NotificationLogger {
 
-        public TestableNotificationLogger(IStatusBarService barService) {
+        public TestableNotificationLogger(NotificationListener notificationListener,
+                UiOffloadThread uiOffloadThread,
+                NotificationEntryManager entryManager,
+                StatusBarStateController statusBarStateController,
+                IStatusBarService barService) {
+            super(notificationListener, uiOffloadThread, entryManager, statusBarStateController);
             mBarService = barService;
             // Make this on the current thread so we can wait for it during tests.
             mHandler = Handler.createAsync(Looper.myLooper());

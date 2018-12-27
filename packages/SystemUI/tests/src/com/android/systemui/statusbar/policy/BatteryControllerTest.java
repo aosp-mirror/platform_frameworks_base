@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.power.EnhancedEstimates;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,7 +49,8 @@ public class BatteryControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mBatteryController = new BatteryControllerImpl(getContext(), mPowerManager);
+        mBatteryController = new BatteryControllerImpl(getContext(), mock(EnhancedEstimates.class),
+                mPowerManager);
     }
 
     @Test

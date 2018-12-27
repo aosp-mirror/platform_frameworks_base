@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Ar norite pašalinti šią naudotojo <xliff:g id="USERNAME">%1$s</xliff:g> programą?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Pakeisti šios programos versiją į gamyklinę? Visi duomenys bus pašalinti."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Pakeisti šios programos versiją į gamyklinę? Visi duomenys bus pašalinti. Tai paveiks visus šio įrenginio naudotojus, įskaitant turinčius darbo profilius."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Taip pat pašalinti <xliff:g id="SIZE">%1$s</xliff:g> susijusių medijos failų."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Palikti <xliff:g id="SIZE">%1$s</xliff:g> programų duomenų."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Vykdomi pašalinimai"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Nepavykę pašalinimai"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Pašalinama…"</string>

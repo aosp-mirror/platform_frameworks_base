@@ -208,9 +208,11 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
                     android.app.slice.SliceItem.FORMAT_IMAGE);
             if (icon != null) {
                 iconDrawable = icon.getIcon().loadDrawable(mContext);
-                final int width = (int) (iconDrawable.getIntrinsicWidth()
-                        / (float) iconDrawable.getIntrinsicHeight() * mIconSize);
-                iconDrawable.setBounds(0, 0, Math.max(width, 1), mIconSize);
+                if (iconDrawable != null) {
+                    final int width = (int) (iconDrawable.getIntrinsicWidth()
+                            / (float) iconDrawable.getIntrinsicHeight() * mIconSize);
+                    iconDrawable.setBounds(0, 0, Math.max(width, 1), mIconSize);
+                }
             }
             button.setCompoundDrawables(iconDrawable, null, null, null);
             button.setOnClickListener(this);

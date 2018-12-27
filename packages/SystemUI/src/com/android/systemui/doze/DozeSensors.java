@@ -17,6 +17,7 @@
 package com.android.systemui.doze;
 
 import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_DISPLAY;
+import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_LOCK_SCREEN;
 
 import android.annotation.AnyThread;
 import android.app.ActivityManager;
@@ -115,8 +116,15 @@ public class DozeSensors {
                 new PluginSensor(
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_DISPLAY),
                         Settings.Secure.DOZE_WAKE_SCREEN_GESTURE,
-                        true /* configured */,
+                        mConfig.wakeScreenGestureAvailable(),
                         DozeLog.REASON_SENSOR_WAKE_UP,
+                        false /* reports touch coordinates */,
+                        false /* touchscreen */),
+                new PluginSensor(
+                        new SensorManagerPlugin.Sensor(TYPE_WAKE_LOCK_SCREEN),
+                        Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
+                        mConfig.wakeScreenGestureAvailable(),
+                        DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN,
                         false /* reports touch coordinates */,
                         false /* touchscreen */),
         };

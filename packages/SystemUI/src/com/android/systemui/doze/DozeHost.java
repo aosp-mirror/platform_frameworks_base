@@ -45,6 +45,11 @@ public interface DozeHost {
 
     void onIgnoreTouchWhilePulsing(boolean ignore);
 
+    /**
+     * Leaves pulsing state, going back to ambient UI.
+     */
+    void stopPulsing();
+
     interface Callback {
         /**
          * Called when a high priority notification is added.

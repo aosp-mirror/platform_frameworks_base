@@ -58,6 +58,8 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Vill du avinstallera appen för användaren <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Vill du ersätta den här appen med den version som var installerad när enheten var ny? All information tas bort."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Vill du ersätta den här appen med den version som var installerad när enheten var ny? All information tas bort. Detta påverkar alla som använder enheten, även dem med jobbprofiler."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Ta även bort <xliff:g id="SIZE">%1$s</xliff:g> tillhörande mediefiler."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Behåll <xliff:g id="SIZE">%1$s</xliff:g> appdata."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Avinstallationer som pågår"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Avinstallationer som misslyckats"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Avinstallerar …"</string>
