@@ -16,6 +16,9 @@
 
 package com.android.server.net.ipmemorystore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -23,8 +26,11 @@ import static org.mockito.Mockito.doReturn;
 
 import android.content.Context;
 import android.net.ipmemorystore.Blob;
+import android.net.ipmemorystore.IOnBlobRetrievedListener;
+import android.net.ipmemorystore.IOnNetworkAttributesRetrieved;
 import android.net.ipmemorystore.IOnStatusListener;
 import android.net.ipmemorystore.NetworkAttributes;
+import android.net.ipmemorystore.NetworkAttributesParcelable;
 import android.net.ipmemorystore.Status;
 import android.net.ipmemorystore.StatusParcelable;
 import android.os.IBinder;
@@ -41,8 +47,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.lang.reflect.Modifier;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -92,6 +102,59 @@ public class IpMemoryStoreServiceTest {
         };
     }
 
+    /** Helper method to make an IOnBlobRetrievedListener */
+    private interface OnBlobRetrievedListener {
+        void onBlobRetrieved(Status status, String l2Key, String name, byte[] data);
+    }
+    private IOnBlobRetrievedListener onBlobRetrieved(final OnBlobRetrievedListener functor) {
+        return new IOnBlobRetrievedListener() {
+            @Override
+            public void onBlobRetrieved(final StatusParcelable statusParcelable,
+                    final String l2Key, final String name, final Blob blob) throws RemoteException {
+                functor.onBlobRetrieved(new Status(statusParcelable), l2Key, name,
+                        null == blob ? null : blob.data);
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return null;
+            }
+        };
+    }
+
+    /** Helper method to make an IOnNetworkAttributesRetrievedListener */
+    private interface OnNetworkAttributesRetrievedListener  {
+        void onNetworkAttributesRetrieved(Status status, String l2Key, NetworkAttributes attr);
+    }
+    private IOnNetworkAttributesRetrieved onNetworkAttributesRetrieved(
+            final OnNetworkAttributesRetrievedListener functor) {
+        return new IOnNetworkAttributesRetrieved() {
+            @Override
+            public void onL2KeyResponse(final StatusParcelable status, final String l2Key,
+                    final NetworkAttributesParcelable attributes)
+                    throws RemoteException {
+                functor.onNetworkAttributesRetrieved(new Status(status), l2Key,
+                        null == attributes ? null : new NetworkAttributes(attributes));
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return null;
+            }
+        };
+    }
+
+    // Helper method to factorize some boilerplate
+    private void doLatched(final String timeoutMessage, final Consumer<CountDownLatch> functor) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        functor.accept(latch);
+        try {
+            latch.await(5000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            fail(timeoutMessage);
+        }
+    }
+
     @Test
     public void testNetworkAttributes() {
         final NetworkAttributes.Builder na = new NetworkAttributes.Builder();
@@ -102,18 +165,103 @@ public class IpMemoryStoreServiceTest {
         na.setGroupHint("hint1");
         na.setMtu(219);
         final String l2Key = UUID.randomUUID().toString();
-        final CountDownLatch latch = new CountDownLatch(1);
-        mService.storeNetworkAttributes(l2Key, na.build().toParcelable(),
-                onStatus(status -> {
-                    assertTrue("Store status not successful : " + status.resultCode,
-                            status.isSuccess());
-                    latch.countDown();
-                }));
+        NetworkAttributes attributes = na.build();
+        doLatched("Did not complete storing attributes", latch ->
+                mService.storeNetworkAttributes(l2Key, attributes.toParcelable(),
+                        onStatus(status -> {
+                            assertTrue("Store status not successful : " + status.resultCode,
+                                    status.isSuccess());
+                            latch.countDown();
+                        })));
+
+        doLatched("Did not complete retrieving attributes", latch ->
+                mService.retrieveNetworkAttributes(l2Key, onNetworkAttributesRetrieved(
+                        (status, key, attr) -> {
+                            assertTrue("Retrieve network attributes not successful : "
+                                    + status.resultCode, status.isSuccess());
+                            assertEquals(l2Key, key);
+                            assertEquals(attributes, attr);
+                            latch.countDown();
+                        })));
+
+        final NetworkAttributes.Builder na2 = new NetworkAttributes.Builder();
         try {
-            latch.await(5000, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            fail("Did not complete storing attributes");
-        }
+            na.setDnsAddresses(Arrays.asList(
+                    new InetAddress[] {Inet6Address.getByName("0A1C:2E40:480A::1CA6")}));
+        } catch (UnknownHostException e) { /* Still can't happen */ }
+        final NetworkAttributes attributes2 = na2.build();
+        doLatched("Did not complete storing attributes 2", latch ->
+                mService.storeNetworkAttributes(l2Key, attributes2.toParcelable(),
+                        onStatus(status -> latch.countDown())));
+
+        doLatched("Did not complete retrieving attributes 2", latch ->
+                mService.retrieveNetworkAttributes(l2Key, onNetworkAttributesRetrieved(
+                        (status, key, attr) -> {
+                            assertTrue("Retrieve network attributes not successful : "
+                                    + status.resultCode, status.isSuccess());
+                            assertEquals(l2Key, key);
+                            assertEquals(attributes.assignedV4Address, attr.assignedV4Address);
+                            assertEquals(attributes.groupHint, attr.groupHint);
+                            assertEquals(attributes.mtu, attr.mtu);
+                            assertEquals(attributes2.dnsAddresses, attr.dnsAddresses);
+                            latch.countDown();
+                        })));
+
+        doLatched("Did not complete retrieving attributes 3", latch ->
+                mService.retrieveNetworkAttributes(l2Key + "nonexistent",
+                        onNetworkAttributesRetrieved(
+                                (status, key, attr) -> {
+                                    assertTrue("Retrieve network attributes not successful : "
+                                            + status.resultCode, status.isSuccess());
+                                    assertEquals(l2Key + "nonexistent", key);
+                                    assertNull("Retrieved data not stored", attr);
+                                    latch.countDown();
+                                }
+                        )));
+
+        // Verify that this test does not miss any new field added later.
+        // If any field is added to NetworkAttributes it must be tested here for storing
+        // and retrieving.
+        assertEquals(4, Arrays.stream(NetworkAttributes.class.getDeclaredFields())
+                .filter(f -> !Modifier.isStatic(f.getModifiers())).count());
+    }
+
+    @Test
+    public void testInvalidAttributes() {
+        doLatched("Did not complete storing bad attributes", latch ->
+                mService.storeNetworkAttributes("key", null, onStatus(status -> {
+                    assertFalse("Success storing on a null key",
+                            status.isSuccess());
+                    assertEquals(Status.ERROR_ILLEGAL_ARGUMENT, status.resultCode);
+                    latch.countDown();
+                })));
+
+        final NetworkAttributes na = new NetworkAttributes.Builder().setMtu(2).build();
+        doLatched("Did not complete storing bad attributes", latch ->
+                mService.storeNetworkAttributes(null, na.toParcelable(), onStatus(status -> {
+                    assertFalse("Success storing null attributes on a null key",
+                            status.isSuccess());
+                    assertEquals(Status.ERROR_ILLEGAL_ARGUMENT, status.resultCode);
+                    latch.countDown();
+                })));
+
+        doLatched("Did not complete storing bad attributes", latch ->
+                mService.storeNetworkAttributes(null, null, onStatus(status -> {
+                    assertFalse("Success storing null attributes on a null key",
+                            status.isSuccess());
+                    assertEquals(Status.ERROR_ILLEGAL_ARGUMENT, status.resultCode);
+                    latch.countDown();
+                })));
+
+        doLatched("Did not complete retrieving bad attributes", latch ->
+                mService.retrieveNetworkAttributes(null, onNetworkAttributesRetrieved(
+                        (status, key, attr) -> {
+                            assertFalse("Success retrieving attributes for a null key",
+                                    status.isSuccess());
+                            assertEquals(Status.ERROR_ILLEGAL_ARGUMENT, status.resultCode);
+                            assertNull(key);
+                            assertNull(attr);
+                        })));
     }
 
     @Test
@@ -121,18 +269,36 @@ public class IpMemoryStoreServiceTest {
         final Blob b = new Blob();
         b.data = new byte[] { -3, 6, 8, -9, 12, -128, 0, 89, 112, 91, -34 };
         final String l2Key = UUID.randomUUID().toString();
-        final CountDownLatch latch = new CountDownLatch(1);
-        mService.storeBlob(l2Key, TEST_CLIENT_ID, TEST_DATA_NAME, b,
-                onStatus(status -> {
-                    assertTrue("Store status not successful : " + status.resultCode,
-                            status.isSuccess());
-                    latch.countDown();
-                }));
-        try {
-            latch.await(5000, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            fail("Did not complete storing private data");
-        }
+        doLatched("Did not complete storing private data", latch ->
+                mService.storeBlob(l2Key, TEST_CLIENT_ID, TEST_DATA_NAME, b,
+                        onStatus(status -> {
+                            assertTrue("Store status not successful : " + status.resultCode,
+                                    status.isSuccess());
+                            latch.countDown();
+                        })));
+
+        doLatched("Did not complete retrieving private data", latch ->
+                mService.retrieveBlob(l2Key, TEST_CLIENT_ID, TEST_DATA_NAME, onBlobRetrieved(
+                        (status, key, name, data) -> {
+                            assertTrue("Retrieve blob status not successful : " + status.resultCode,
+                                    status.isSuccess());
+                            assertEquals(l2Key, key);
+                            assertEquals(name, TEST_DATA_NAME);
+                            Arrays.equals(b.data, data);
+                            latch.countDown();
+                        })));
+
+        // Most puzzling error message ever
+        doLatched("Did not complete retrieving nothing", latch ->
+                mService.retrieveBlob(l2Key, TEST_CLIENT_ID, TEST_DATA_NAME + "2", onBlobRetrieved(
+                        (status, key, name, data) -> {
+                            assertTrue("Retrieve blob status not successful : " + status.resultCode,
+                                    status.isSuccess());
+                            assertEquals(l2Key, key);
+                            assertEquals(name, TEST_DATA_NAME + "2");
+                            assertNull(data);
+                            latch.countDown();
+                        })));
     }
 
     @Test

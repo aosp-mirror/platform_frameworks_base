@@ -19,6 +19,7 @@ package com.android.server.net.ipmemorystore;
 import static android.net.ipmemorystore.Status.ERROR_DATABASE_CANNOT_BE_OPENED;
 import static android.net.ipmemorystore.Status.ERROR_GENERIC;
 import static android.net.ipmemorystore.Status.ERROR_ILLEGAL_ARGUMENT;
+import static android.net.ipmemorystore.Status.SUCCESS;
 
 import static com.android.server.net.ipmemorystore.IpMemoryStoreDatabase.EXPIRY_ERROR;
 
@@ -278,9 +279,32 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
      *         the query.
      */
     @Override
-    public void retrieveNetworkAttributes(@NonNull final String l2Key,
-            @NonNull final IOnNetworkAttributesRetrieved listener) {
-        // TODO : implement this.
+    public void retrieveNetworkAttributes(@Nullable final String l2Key,
+            @Nullable final IOnNetworkAttributesRetrieved listener) {
+        if (null == listener) return;
+        mExecutor.execute(() -> {
+            try {
+                if (null == l2Key) {
+                    listener.onL2KeyResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), l2Key, null);
+                    return;
+                }
+                if (null == mDb) {
+                    listener.onL2KeyResponse(makeStatus(ERROR_DATABASE_CANNOT_BE_OPENED), l2Key,
+                            null);
+                    return;
+                }
+                try {
+                    final NetworkAttributes attributes =
+                            IpMemoryStoreDatabase.retrieveNetworkAttributes(mDb, l2Key);
+                    listener.onL2KeyResponse(makeStatus(SUCCESS), l2Key,
+                            null == attributes ? null : attributes.toParcelable());
+                } catch (final Exception e) {
+                    listener.onL2KeyResponse(makeStatus(ERROR_GENERIC), l2Key, null);
+                }
+            } catch (final RemoteException e) {
+                // Client at the other end died
+            }
+        });
     }
 
     /**
@@ -297,6 +321,28 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
     @Override
     public void retrieveBlob(@NonNull final String l2Key, @NonNull final String clientId,
             @NonNull final String name, @NonNull final IOnBlobRetrievedListener listener) {
-        // TODO : implement this.
+        if (null == listener) return;
+        mExecutor.execute(() -> {
+            try {
+                if (null == l2Key) {
+                    listener.onBlobRetrieved(makeStatus(ERROR_ILLEGAL_ARGUMENT), l2Key, name, null);
+                    return;
+                }
+                if (null == mDb) {
+                    listener.onBlobRetrieved(makeStatus(ERROR_DATABASE_CANNOT_BE_OPENED), l2Key,
+                            name, null);
+                    return;
+                }
+                try {
+                    final Blob b = new Blob();
+                    b.data = IpMemoryStoreDatabase.retrieveBlob(mDb, l2Key, clientId, name);
+                    listener.onBlobRetrieved(makeStatus(SUCCESS), l2Key, name, b);
+                } catch (final Exception e) {
+                    listener.onBlobRetrieved(makeStatus(ERROR_GENERIC), l2Key, name, null);
+                }
+            } catch (final RemoteException e) {
+                // Client at the other end died
+            }
+        });
     }
 }

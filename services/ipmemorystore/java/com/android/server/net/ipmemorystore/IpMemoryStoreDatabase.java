@@ -29,8 +29,11 @@ import android.net.ipmemorystore.NetworkAttributes;
 import android.net.ipmemorystore.Status;
 import android.util.Log;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -71,7 +74,7 @@ public class IpMemoryStoreDatabase {
         public static final String COLTYPE_DNSADDRESSES = "BLOB";
 
         public static final String COLNAME_MTU = "mtu";
-        public static final String COLTYPE_MTU = "INTEGER";
+        public static final String COLTYPE_MTU = "INTEGER DEFAULT -1";
 
         public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS "
                 + TABLENAME                 + " ("
@@ -122,7 +125,7 @@ public class IpMemoryStoreDatabase {
     /** The SQLite DB helper */
     public static class DbHelper extends SQLiteOpenHelper {
         // Update this whenever changing the schema.
-        private static final int SCHEMA_VERSION = 1;
+        private static final int SCHEMA_VERSION = 2;
         private static final String DATABASE_FILENAME = "IpMemoryStore.db";
 
         public DbHelper(@NonNull final Context context) {
@@ -164,6 +167,21 @@ public class IpMemoryStoreDatabase {
             os.write(b, 0, b.length);
         }
         return os.toByteArray();
+    }
+
+    @NonNull
+    private static ArrayList<InetAddress> decodeAddressList(@NonNull final byte[] encoded) {
+        final ByteArrayInputStream is = new ByteArrayInputStream(encoded);
+        final ArrayList<InetAddress> addresses = new ArrayList<>();
+        int d = -1;
+        while ((d = is.read()) != -1) {
+            final byte[] bytes = new byte[d];
+            is.read(bytes, 0, d);
+            try {
+                addresses.add(InetAddress.getByAddress(bytes));
+            } catch (UnknownHostException e) { /* Hopefully impossible */ }
+        }
+        return addresses;
     }
 
     // Convert a NetworkAttributes object to content values to store them in a table compliant
@@ -274,5 +292,81 @@ public class IpMemoryStoreDatabase {
         final long res = db.insertWithOnConflict(PrivateDataContract.TABLENAME, null,
                 toContentValues(key, clientId, name, data), SQLiteDatabase.CONFLICT_REPLACE);
         return (res == -1) ? Status.ERROR_STORAGE : Status.SUCCESS;
+    }
+
+    @Nullable
+    static NetworkAttributes retrieveNetworkAttributes(@NonNull final SQLiteDatabase db,
+            @NonNull final String key) {
+        final Cursor cursor = db.query(NetworkAttributesContract.TABLENAME,
+                null, // columns, null means everything
+                NetworkAttributesContract.COLNAME_L2KEY + " = ?", // selection
+                new String[] { key }, // selectionArgs
+                null, // groupBy
+                null, // having
+                null); // orderBy
+        // L2KEY is the primary key ; it should not be possible to get more than one
+        // result here. 0 results means the key was not found.
+        if (cursor.getCount() != 1) return null;
+        cursor.moveToFirst();
+
+        // Make sure the data hasn't expired
+        final long expiry = cursor.getLong(
+                cursor.getColumnIndexOrThrow(NetworkAttributesContract.COLNAME_EXPIRYDATE));
+        if (expiry < System.currentTimeMillis()) return null;
+
+        final NetworkAttributes.Builder builder = new NetworkAttributes.Builder();
+        final int assignedV4AddressInt = getInt(cursor,
+                NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESS, 0);
+        final String groupHint = getString(cursor, NetworkAttributesContract.COLNAME_GROUPHINT);
+        final byte[] dnsAddressesBlob =
+                getBlob(cursor, NetworkAttributesContract.COLNAME_DNSADDRESSES);
+        final int mtu = getInt(cursor, NetworkAttributesContract.COLNAME_MTU, -1);
+        if (0 != assignedV4AddressInt) {
+            builder.setAssignedV4Address(NetworkUtils.intToInet4AddressHTH(assignedV4AddressInt));
+        }
+        builder.setGroupHint(groupHint);
+        if (null != dnsAddressesBlob) {
+            builder.setDnsAddresses(decodeAddressList(dnsAddressesBlob));
+        }
+        if (mtu >= 0) {
+            builder.setMtu(mtu);
+        }
+        return builder.build();
+    }
+
+    private static final String[] DATA_COLUMN = new String[] {
+            PrivateDataContract.COLNAME_DATA
+    };
+    @Nullable
+    static byte[] retrieveBlob(@NonNull final SQLiteDatabase db, @NonNull final String key,
+            @NonNull final String clientId, @NonNull final String name) {
+        final Cursor cursor = db.query(PrivateDataContract.TABLENAME,
+                DATA_COLUMN, // columns
+                PrivateDataContract.COLNAME_L2KEY + " = ? AND " // selection
+                + PrivateDataContract.COLNAME_CLIENT + " = ? AND "
+                + PrivateDataContract.COLNAME_DATANAME + " = ?",
+                new String[] { key, clientId, name }, // selectionArgs
+                null, // groupBy
+                null, // having
+                null); // orderBy
+        // The query above is querying by (composite) primary key, so it should not be possible to
+        // get more than one result here. 0 results means the key was not found.
+        if (cursor.getCount() != 1) return null;
+        cursor.moveToFirst();
+        return cursor.getBlob(0); // index in the DATA_COLUMN array
+    }
+
+    // Helper methods
+    static String getString(final Cursor cursor, final String columnName) {
+        final int columnIndex = cursor.getColumnIndex(columnName);
+        return (columnIndex >= 0) ? cursor.getString(columnIndex) : null;
+    }
+    static byte[] getBlob(final Cursor cursor, final String columnName) {
+        final int columnIndex = cursor.getColumnIndex(columnName);
+        return (columnIndex >= 0) ? cursor.getBlob(columnIndex) : null;
+    }
+    static int getInt(final Cursor cursor, final String columnName, final int defaultValue) {
+        final int columnIndex = cursor.getColumnIndex(columnName);
+        return (columnIndex >= 0) ? cursor.getInt(columnIndex) : defaultValue;
     }
 }
