@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.service.adb.AdbServiceDumpProto;
+import android.sysprop.AdbProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -185,7 +186,7 @@ public class AdbService extends IAdbManager.Stub {
         mContext = context;
         mContentResolver = context.getContentResolver();
 
-        boolean secureAdbEnabled = SystemProperties.getBoolean("ro.adb.secure", false);
+        boolean secureAdbEnabled = AdbProperties.secure().orElse(false);
         boolean dataEncrypted = "1".equals(SystemProperties.get("vold.decrypt"));
         if (secureAdbEnabled && !dataEncrypted) {
             mDebuggingManager = new AdbDebuggingManager(context);
