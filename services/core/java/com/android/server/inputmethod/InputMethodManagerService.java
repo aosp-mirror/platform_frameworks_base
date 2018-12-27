@@ -4619,10 +4619,30 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mService = service;
         }
 
+        @RequiresPermission(allOf = {
+                Manifest.permission.WRITE_SECURE_SETTINGS,
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL})
         @BinderThread
         @ShellCommandResult
         @Override
         public int onCommand(@Nullable String cmd) {
+            // For shell command, require all the permissions here in favor of code simplicity.
+            mService.mContext.enforceCallingPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+            mService.mContext.enforceCallingPermission(
+                    Manifest.permission.WRITE_SECURE_SETTINGS, null);
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return onCommandWithSystemIdentity(cmd);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @BinderThread
+        @ShellCommandResult
+        private int onCommandWithSystemIdentity(@Nullable String cmd) {
             if ("refresh_debug_properties".equals(cmd)) {
                 return refreshDebugProperties();
             }
@@ -4767,25 +4787,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @BinderThread
     @ShellCommandResult
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     private int handleShellCommandEnableDisableInputMethod(
             @NonNull ShellCommand shellCommand, boolean enabled) {
         final String id = shellCommand.getNextArgRequired();
 
         final boolean previouslyEnabled;
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
-                shellCommand.getErrPrintWriter().print("Must be called from the foreground user or"
-                        + " with INTERACT_ACROSS_USERS_FULL");
-                return ShellCommandResult.FAILURE;
-            }
-            mContext.enforceCallingPermission(Manifest.permission.WRITE_SECURE_SETTINGS, null);
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                previouslyEnabled = setInputMethodEnabledLocked(id, enabled);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            previouslyEnabled = setInputMethodEnabledLocked(id, enabled);
         }
         final PrintWriter pr = shellCommand.getOutPrintWriter();
         pr.print("Input method ");
@@ -4805,7 +4813,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @ShellCommandResult
     private int handleShellCommandSetInputMethod(@NonNull ShellCommand shellCommand) {
         final String id = shellCommand.getNextArgRequired();
-        setInputMethod(null, id);
+        synchronized (mMethodMap) {
+            setInputMethodLocked(id, NOT_A_SUBTYPE_ID);
+        }
         final PrintWriter pr = shellCommand.getOutPrintWriter();
         pr.print("Input method ");
         pr.print(id);
@@ -4820,43 +4830,29 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @BinderThread
     @ShellCommandResult
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     private int handleShellCommandResetInputMethod(@NonNull ShellCommand shellCommand) {
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
-                shellCommand.getErrPrintWriter().print("Must be called from the foreground user or"
-                        + " with INTERACT_ACROSS_USERS_FULL");
-                return ShellCommandResult.FAILURE;
-            }
-            mContext.enforceCallingPermission(Manifest.permission.WRITE_SECURE_SETTINGS, null);
             final String nextIme;
             final List<InputMethodInfo> nextEnabledImes;
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                synchronized (mMethodMap) {
-                    hideCurrentInputLocked(0, null);
-                    unbindCurrentMethodLocked();
-                    // Reset the current IME
-                    resetSelectedInputMethodAndSubtypeLocked(null);
-                    // Also reset the settings of the current IME
-                    mSettings.putSelectedInputMethod(null);
-                    // Disable all enabled IMEs.
-                    mSettings.getEnabledInputMethodListLocked().forEach(
-                            imi -> setInputMethodEnabledLocked(imi.getId(), false));
-                    // Re-enable with default enabled IMEs.
-                    InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList).forEach(
-                            imi -> setInputMethodEnabledLocked(imi.getId(), true));
-                    updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
-                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
-                            mSettings.getEnabledInputMethodListLocked(),
-                            mSettings.getCurrentUserId(),
-                            mContext.getBasePackageName());
-                    nextIme = mSettings.getSelectedInputMethod();
-                    nextEnabledImes = getEnabledInputMethodList();
-                }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            hideCurrentInputLocked(0, null);
+            unbindCurrentMethodLocked();
+            // Reset the current IME
+            resetSelectedInputMethodAndSubtypeLocked(null);
+            // Also reset the settings of the current IME
+            mSettings.putSelectedInputMethod(null);
+            // Disable all enabled IMEs.
+            mSettings.getEnabledInputMethodListLocked().forEach(
+                    imi -> setInputMethodEnabledLocked(imi.getId(), false));
+            // Re-enable with default enabled IMEs.
+            InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList).forEach(
+                    imi -> setInputMethodEnabledLocked(imi.getId(), true));
+            updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
+            InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
+                    mSettings.getEnabledInputMethodListLocked(),
+                    mSettings.getCurrentUserId(),
+                    mContext.getBasePackageName());
+            nextIme = mSettings.getSelectedInputMethod();
+            nextEnabledImes = getEnabledInputMethodList();
             final PrintWriter pr = shellCommand.getOutPrintWriter();
             pr.println("Reset current and enabled IMEs");
             pr.println("Newly selected IME:");
