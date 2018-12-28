@@ -22,18 +22,14 @@ import android.app.Notification;
 import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
-import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
@@ -98,7 +94,6 @@ public class NotificationEntryManager implements
     private final Handler mDeferredNotificationViewUpdateHandler;
     private Runnable mUpdateNotificationViewsCallback;
 
-    protected IStatusBarService mBarService;
     private NotificationPresenter mPresenter;
     protected PowerManager mPowerManager;
     private NotificationListenerService.RankingMap mLatestRankingMap;
@@ -139,8 +134,6 @@ public class NotificationEntryManager implements
     public NotificationEntryManager(Context context) {
         mContext = context;
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mBubbleController.setDismissListener(this /* bubbleEventListener */);
         mNotificationData = new NotificationData();
         mDeferredNotificationViewUpdateHandler = new Handler();
@@ -215,26 +208,8 @@ public class NotificationEntryManager implements
         final int count = mNotificationData.getActiveNotifications().size();
         final NotificationVisibility nv = NotificationVisibility.obtain(n.getKey(), rank, count,
                 true);
-
-        final String pkg = n.getPackageName();
-        final String tag = n.getTag();
-        final int id = n.getId();
-        final int userId = n.getUserId();
-        try {
-            int dismissalSurface = NotificationStats.DISMISSAL_SHADE;
-            if (mHeadsUpManager.isAlerting(n.getKey())) {
-                dismissalSurface = NotificationStats.DISMISSAL_PEEK;
-            } else if (mListContainer.hasPulsingNotifications()) {
-                dismissalSurface = NotificationStats.DISMISSAL_AOD;
-            }
-            int dismissalSentiment = NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
-            mBarService.onNotificationClear(pkg, tag, id, userId, n.getKey(), dismissalSurface,
-                    dismissalSentiment, nv);
-            removeNotificationInternal(
-                    n.getKey(), null, false /* forceRemove */, true /* removedByUser */);
-        } catch (RemoteException ex) {
-            // system process is dead if we're here.
-        }
+        removeNotificationInternal(
+                n.getKey(), null, nv, false /* forceRemove */, true /* removedByUser */);
     }
 
     @Override
@@ -275,12 +250,9 @@ public class NotificationEntryManager implements
     @Override
     public void handleInflationException(StatusBarNotification n, Exception e) {
         removeNotificationInternal(
-                n.getKey(), null, true /* forceRemove */, false /* removedByUser */);
-        try {
-            mBarService.onNotificationError(n.getPackageName(), n.getTag(), n.getId(), n.getUid(),
-                    n.getInitialPid(), e.getMessage(), n.getUserId());
-        } catch (RemoteException ex) {
-            // The end is nigh.
+                n.getKey(), null, null, true /* forceRemove */, false /* removedByUser */);
+        for (NotificationEntryListener listener : mNotificationEntryListeners) {
+            listener.onInflationError(n, e);
         }
     }
 
@@ -333,12 +305,13 @@ public class NotificationEntryManager implements
     @Override
     public void removeNotification(String key, NotificationListenerService.RankingMap ranking) {
         removeNotificationInternal(
-                key, ranking, false /* forceRemove */, false /* removedByUser */);
+                key, ranking, null, false /* forceRemove */, false /* removedByUser */);
     }
 
     private void removeNotificationInternal(
             String key,
             @Nullable NotificationListenerService.RankingMap ranking,
+            @Nullable NotificationVisibility visibility,
             boolean forceRemove,
             boolean removedByUser) {
         final NotificationData.Entry entry = mNotificationData.get(key);
@@ -385,7 +358,7 @@ public class NotificationEntryManager implements
         }
 
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
-            listener.onEntryRemoved(entry, key, old, lifetimeExtended, removedByUser);
+            listener.onEntryRemoved(entry, key, old, visibility, lifetimeExtended, removedByUser);
         }
     }
 

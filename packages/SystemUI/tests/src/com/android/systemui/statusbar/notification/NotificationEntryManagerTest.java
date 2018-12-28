@@ -52,7 +52,6 @@ import android.util.ArraySet;
 import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
@@ -109,7 +108,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private NotificationListenerService.RankingMap mRankingMap;
     @Mock private RemoteInputController mRemoteInputController;
-    @Mock private IStatusBarService mBarService;
 
     // Dependency mocks:
     @Mock private ForegroundServiceController mForegroundServiceController;
@@ -132,9 +130,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     private class TestableNotificationEntryManager extends NotificationEntryManager {
         private final CountDownLatch mCountDownLatch;
 
-        public TestableNotificationEntryManager(Context context, IStatusBarService barService) {
+        TestableNotificationEntryManager(Context context) {
             super(context);
-            mBarService = barService;
             mCountDownLatch = new CountDownLatch(1);
         }
 
@@ -227,7 +224,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntry = new NotificationData.Entry(mSbn);
         mEntry.expandedIcon = mock(StatusBarIconView.class);
 
-        mEntryManager = new TestableNotificationEntryManager(mContext, mBarService);
+        mEntryManager = new TestableNotificationEntryManager(mContext);
         Dependency.get(InitController.class).executePostInitTasks();
         mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
         mEntryManager.addNotificationEntryListener(mEntryListener);
@@ -258,8 +255,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         assertTrue(mEntryManager.getCountDownLatch().await(10, TimeUnit.SECONDS));
 
         // Check that no inflation error occurred.
-        verify(mBarService, never()).onNotificationError(any(), any(), anyInt(), anyInt(), anyInt(),
-                any(), anyInt());
+        verify(mEntryListener, never()).onInflationError(any(), any());
         verify(mForegroundServiceController).addNotification(eq(mSbn), anyInt());
 
         // Row inflation:
@@ -293,8 +289,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         // Wait for content update.
         assertTrue(mEntryManager.getCountDownLatch().await(10, TimeUnit.SECONDS));
 
-        verify(mBarService, never()).onNotificationError(any(), any(), anyInt(), anyInt(), anyInt(),
-                any(), anyInt());
+        verify(mEntryListener, never()).onInflationError(any(), any());
 
         verify(mPresenter).updateNotificationViews();
         verify(mForegroundServiceController).updateNotification(eq(mSbn), anyInt());
@@ -313,14 +308,13 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
 
-        verify(mBarService, never()).onNotificationError(any(), any(), anyInt(), anyInt(), anyInt(),
-                any(), anyInt());
+        verify(mEntryListener, never()).onInflationError(any(), any());
 
         verify(mForegroundServiceController).removeNotification(mSbn);
         verify(mListContainer).cleanUpViewStateForEntry(mEntry);
         verify(mPresenter).updateNotificationViews();
         verify(mEntryListener).onEntryRemoved(mEntry, mSbn.getKey(), mSbn,
-                false /* lifetimeExtended */, false /* removedByUser */);
+                null, false /* lifetimeExtended */, false /* removedByUser */);
         verify(mRow).setRemoved();
 
         assertNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
@@ -345,7 +339,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         assertNotNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
         verify(extender).setShouldManageLifetime(mEntry, true /* shouldManage */);
         verify(mEntryListener).onEntryRemoved(mEntry, mSbn.getKey(), null,
-                true /* lifetimeExtended */, false /* removedByUser */);
+                null, true /* lifetimeExtended */, false /* removedByUser */);
     }
 
     @Test

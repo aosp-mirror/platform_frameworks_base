@@ -255,6 +255,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                     NotificationData.Entry entry,
                     String key,
                     StatusBarNotification old,
+                    NotificationVisibility visibility,
                     boolean lifetimeExtended,
                     boolean removedByUser) {
                 if (removedByUser) {

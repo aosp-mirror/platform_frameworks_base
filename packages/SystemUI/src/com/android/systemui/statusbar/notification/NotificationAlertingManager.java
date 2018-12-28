@@ -24,6 +24,7 @@ import android.app.Notification;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationListener;
@@ -84,6 +85,7 @@ public class NotificationAlertingManager {
                     NotificationData.Entry entry,
                     String key,
                     StatusBarNotification old,
+                    NotificationVisibility visibility,
                     boolean lifetimeExtended,
                     boolean removedByUser) {
                 stopAlerting(key);
