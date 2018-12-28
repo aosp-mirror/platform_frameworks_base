@@ -171,7 +171,7 @@ public final class Session2Token implements Parcelable {
         dest.writeString(mPackageName);
         dest.writeString(mServiceName);
         // TODO: Uncomment below
-        //dest.writeStrongBinder(mSessionLink.asBinder());
+        //dest.writeStrongBinder(mSessionLink.getBinder());
         dest.writeString(mComponentName == null ? "" : mComponentName.flattenToString());
     }
 
