@@ -1052,7 +1052,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         // TODO(b/117663715): Ensure the caller can access the setting.
-        // enforceSettingReadable(name, SETTINGS_TYPE_CONFIG, UserHandle.getCallingUserId());
+        // enforceReadPermission(READ_DEVICE_CONFIG);
 
         // Get the value.
         synchronized (mLock) {
@@ -1088,8 +1088,9 @@ public class SettingsProvider extends ContentProvider {
 
     private boolean mutateConfigSetting(String name, String value, String prefix,
             boolean makeDefault, int operation, int mode) {
-        // TODO(b/117663715): check the new permission when it's added.
-        // enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
+
+        // TODO(b/117663715): Ensure the caller can access the setting.
+        // enforceReadPermission(WRITE_DEVICE_CONFIG);
 
         // Perform the mutation.
         synchronized (mLock) {

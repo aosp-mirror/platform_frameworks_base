@@ -16,9 +16,13 @@
 
 package android.provider;
 
+import static android.Manifest.permission.READ_DEVICE_CONFIG;
+import static android.Manifest.permission.WRITE_DEVICE_CONFIG;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
@@ -69,6 +73,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
     public static String getProperty(String namespace, String name) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         String compositeName = createCompositeName(namespace, name);
@@ -96,6 +101,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static boolean setProperty(
             String namespace, String name, String value, boolean makeDefault) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
@@ -116,6 +122,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static void resetToDefaults(@ResetMode int resetMode, @Nullable String namespace) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         Settings.Config.resetToDefaults(contentResolver, resetMode, namespace);
@@ -137,10 +144,12 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
     public static void addOnPropertyChangedListener(
             @NonNull String namespace,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnPropertyChangedListener onPropertyChangedListener) {
+        // TODO enforce READ_DEVICE_CONFIG permission
         synchronized (sLock) {
             Pair<String, Executor> oldNamespace = sListeners.get(onPropertyChangedListener);
             if (oldNamespace == null) {

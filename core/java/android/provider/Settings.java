@@ -14041,7 +14041,7 @@ public final class Settings {
          *
          * @hide
          */
-        // TODO(b/117663715): require a new read permission
+        @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
         static String getString(ContentResolver resolver, String name) {
             return sNameValueCache.getStringForUser(resolver, name, resolver.getUserId());
         }
@@ -14064,8 +14064,7 @@ public final class Settings {
          *
          * @hide
          */
-        // TODO(b/117663715): require a new write permission restricted to a single source
-        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         static boolean putString(@NonNull ContentResolver resolver, @NonNull String name,
                 @Nullable String value, boolean makeDefault) {
             return sNameValueCache.putStringForUser(resolver, name, value, null, makeDefault,
@@ -14087,7 +14086,7 @@ public final class Settings {
          * @hide
          */
         // TODO(b/117663715): require a new write permission restricted to a single source
-        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         static void resetToDefaults(@NonNull ContentResolver resolver, @ResetMode int resetMode,
                 @Nullable String prefix) {
             try {

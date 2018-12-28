@@ -2526,6 +2526,16 @@
     <permission android:name="android.permission.WRITE_GSERVICES"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows an application to modify config settings.
+    <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.WRITE_DEVICE_CONFIG"
+        android:protectionLevel="signature|configurator"/>
+
+    <!-- @SystemApi @hide Allows an application to read config settings.
+    <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.READ_DEVICE_CONFIG"
+        android:protectionLevel="signature|preinstalled" />
+
     <!-- @SystemApi @TestApi Allows an application to call
         {@link android.app.ActivityManager#forceStopPackage}.
         @hide -->
