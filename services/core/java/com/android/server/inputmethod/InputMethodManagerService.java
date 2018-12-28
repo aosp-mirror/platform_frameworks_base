@@ -4237,11 +4237,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 ArrayMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile,
                 ArrayMap<String, InputMethodInfo> methodMap) {
             if (allSubtypes.isEmpty()) {
+                final File parentDir = subtypesFile.getBaseFile().getParentFile();
+                if (parentDir == null || !parentDir.exists()) {
+                    // Even the parent directory doesn't exist.  There is nothing to clean up.
+                    return;
+                }
                 if (subtypesFile.exists()) {
                     subtypesFile.delete();
                 }
-                final File parentDir = subtypesFile.getBaseFile().getParentFile();
-                if (parentDir != null && FileUtils.listFilesOrEmpty(parentDir).length == 0) {
+                if (FileUtils.listFilesOrEmpty(parentDir).length == 0) {
                     if (!parentDir.delete()) {
                         Slog.e(TAG, "Failed to delete the empty parent directory " + parentDir);
                     }
