@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
+import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.ViewRootImpl;
@@ -113,6 +114,21 @@ class InsetsStateController {
         }
         if (!mLastState.equals(mState)) {
             mLastState.set(mState, true /* copySources */);
+            notifyInsetsChanged();
+        }
+    }
+
+    void onInsetsModified(WindowState windowState, InsetsState state) {
+        boolean changed = false;
+        for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
+            final InsetsSource source = state.sourceAt(i);
+            final InsetsSourceProvider provider = mControllers.get(source.getType());
+            if (provider == null) {
+                continue;
+            }
+            changed |= provider.onInsetsModified(windowState, source);
+        }
+        if (changed) {
             notifyInsetsChanged();
         }
     }
