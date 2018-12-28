@@ -76,6 +76,8 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
     static final String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
     static final String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
+    static final String KEY_USE_MEM_AWARE_SERVICE_RESTARTS = "use_mem_aware_service_restarts";
+    static final String KEY_SERVICE_RESTART_DELAY_DURATION = "service_restart_delay_duration";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -113,6 +115,8 @@ final class ActivityManagerConstants extends ContentObserver {
     public static final long DEFAULT_COMPACT_THROTTLE_2 = 10000;
     public static final long DEFAULT_COMPACT_THROTTLE_3 = 500;
     public static final long DEFAULT_COMPACT_THROTTLE_4 = 10000;
+    private static final boolean DEFAULT_USE_MEM_AWARE_SERVICE_RESTARTS = true;
+    private static final long DEFAULT_SERVICE_RESTART_DELAY_DURATION = 5 * 1000;
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -248,6 +252,12 @@ final class ActivityManagerConstants extends ContentObserver {
     public long COMPACT_THROTTLE_3 = DEFAULT_COMPACT_THROTTLE_3;
     // How long we'll skip second compactAppFull after first compactAppFull
     public long COMPACT_THROTTLE_4 = DEFAULT_COMPACT_THROTTLE_4;
+
+    // Use memory aware optimized logic to restart services
+    public boolean FLAG_USE_MEM_AWARE_SERVICE_RESTARTS = DEFAULT_USE_MEM_AWARE_SERVICE_RESTARTS;
+
+    // How long a service restart will be delayed by if there is memory pressure
+    public long SERVICE_RESTART_DELAY_DURATION = DEFAULT_SERVICE_RESTART_DELAY_DURATION;
 
     // Indicates whether the activity starts logging is enabled.
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
@@ -413,6 +423,10 @@ final class ActivityManagerConstants extends ContentObserver {
             COMPACT_THROTTLE_2 = mParser.getLong(KEY_COMPACT_THROTTLE_2, DEFAULT_COMPACT_THROTTLE_2);
             COMPACT_THROTTLE_3 = mParser.getLong(KEY_COMPACT_THROTTLE_3, DEFAULT_COMPACT_THROTTLE_3);
             COMPACT_THROTTLE_4 = mParser.getLong(KEY_COMPACT_THROTTLE_4, DEFAULT_COMPACT_THROTTLE_4);
+            FLAG_USE_MEM_AWARE_SERVICE_RESTARTS = mParser.getBoolean(
+                    KEY_USE_MEM_AWARE_SERVICE_RESTARTS, DEFAULT_USE_MEM_AWARE_SERVICE_RESTARTS);
+            SERVICE_RESTART_DELAY_DURATION = mParser.getLong(
+                    KEY_SERVICE_RESTART_DELAY_DURATION, DEFAULT_SERVICE_RESTART_DELAY_DURATION);
 
             updateMaxCachedProcesses();
         }
@@ -505,6 +519,10 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(TOP_TO_FGS_GRACE_DURATION);
         pw.print("  "); pw.print(KEY_USE_COMPACTION); pw.print("=");
         pw.println(USE_COMPACTION);
+        pw.print("  "); pw.print(KEY_USE_MEM_AWARE_SERVICE_RESTARTS); pw.print("=");
+        pw.println(FLAG_USE_MEM_AWARE_SERVICE_RESTARTS);
+        pw.print("  "); pw.print(KEY_SERVICE_RESTART_DELAY_DURATION); pw.print("=");
+        pw.println(SERVICE_RESTART_DELAY_DURATION);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
