@@ -206,9 +206,16 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 }
             };
 
+            NotificationGutsManager gutsManager = Dependency.get(NotificationGutsManager.class);
+
             mViewHierarchyManager.setUpWithPresenter(this, notifListContainer);
             mEntryManager.setUpWithPresenter(this, notifListContainer, mHeadsUpManager);
             mEntryManager.addNotificationEntryListener(notificationEntryListener);
+            mEntryManager.addNotificationLifetimeExtender(mHeadsUpManager);
+            mEntryManager.addNotificationLifetimeExtender(mAmbientPulseManager);
+            mEntryManager.addNotificationLifetimeExtender(gutsManager);
+            mEntryManager.addNotificationLifetimeExtenders(
+                    remoteInputManager.getLifetimeExtenders());
             mNotificationRowBinder.setUpWithPresenter(this, notifListContainer, mHeadsUpManager,
                     mEntryManager, this);
             mNotificationInterruptionStateProvider.setUpWithPresenter(
@@ -216,7 +223,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             mLockscreenUserManager.setUpWithPresenter(this);
             mMediaManager.setUpWithPresenter(this);
             mVisualStabilityManager.setUpWithPresenter(this);
-            Dependency.get(NotificationGutsManager.class).setUpWithPresenter(this,
+            gutsManager.setUpWithPresenter(this,
                     notifListContainer, mCheckSaveListener, mOnSettingsClickListener);
 
             onUserSwitched(mLockscreenUserManager.getCurrentUserId());
