@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.media.session.MediaSessionManager;
 import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.os.Binder;
@@ -33,7 +34,9 @@ import android.os.Bundle;
 import android.os.Process;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -43,13 +46,19 @@ import java.util.concurrent.Executor;
  * other processes including the Android framework and other apps.
  * <p>
  * This API is not generally intended for third party application developers.
- * Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
- * {@link androidx.media2.MediaSession} for consistent behavior across all devices.
+ * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
+ * for consistent behavior across all devices.
  * @hide
  */
 public class MediaSession2 implements AutoCloseable {
     static final String TAG = "MediaSession";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    // Note: This checks the uniqueness of a session ID only in a single process.
+    // When the framework becomes able to check the uniqueness, this logic should be removed.
+    //@GuardedBy("MediaSession.class")
+    private static final List<String> SESSION_ID_LIST = new ArrayList<>();
 
     @SuppressWarnings("WeakerAccess") /* synthetic access */
     final Object mLock = new Object();
@@ -71,8 +80,15 @@ public class MediaSession2 implements AutoCloseable {
     private final Session2Token mSessionToken;
     private final MediaSessionManager mSessionManager;
 
-    MediaSession2(Context context, String id, PendingIntent sessionActivity,
-            Executor callbackExecutor, SessionCallback callback) {
+    MediaSession2(@NonNull Context context, @NonNull String id, PendingIntent sessionActivity,
+            @NonNull Executor callbackExecutor, @NonNull SessionCallback callback) {
+        synchronized (MediaSession2.class) {
+            if (SESSION_ID_LIST.contains(id)) {
+                throw new IllegalStateException("Session ID must be unique. ID=" + id);
+            }
+            SESSION_ID_LIST.add(id);
+        }
+
         mContext = context;
         mSessionId = id;
         mSessionActivity = sessionActivity;
@@ -87,16 +103,21 @@ public class MediaSession2 implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        // TODO: Implement this
+        try {
+            synchronized (MediaSession2.class) {
+                SESSION_ID_LIST.remove(mSessionId);
+            }
+            // TODO: Implement this
+        } catch (Exception e) {
+            // Should not be here.
+        }
     }
 
-    // AML method
     boolean isClosed() {
         // TODO: Implement this
         return true;
     }
 
-    // AML method
     void onConnect(final Controller2Link controller, int seq, Bundle connectionRequest) {
         if (controller == null || connectionRequest == null) {
             return;
@@ -174,7 +195,6 @@ public class MediaSession2 implements AutoCloseable {
         }
     }
 
-    // AML method
     void onDisconnect(final Controller2Link controller, int seq) {
         if (controller == null) {
             return;
@@ -197,10 +217,105 @@ public class MediaSession2 implements AutoCloseable {
         }
     }
 
-    // AML method
     void onSessionCommand(final Controller2Link controller, final int seq,
             final Session2Command command, final Bundle args) {
         // TODO: Implement this
+    }
+
+    /**
+     * Builder for {@link MediaSession2}.
+     * <p>
+     * Any incoming event from the {@link MediaController2} will be handled on the callback
+     * executor. If it's not set, {@link Context#getMainExecutor()} will be used by default.
+     */
+    public static final class Builder {
+        private Context mContext;
+        private String mId;
+        private PendingIntent mSessionActivity;
+        private Executor mCallbackExecutor;
+        private SessionCallback mCallback;
+
+        /**
+         * Creates a builder for {@link MediaSession2}.
+         *
+         * @param context Context
+         * @throws IllegalArgumentException if context is {@code null}.
+         */
+        public Builder(@NonNull Context context) {
+            if (context == null) {
+                throw new IllegalArgumentException("context shouldn't be null");
+            }
+            mContext = context;
+        }
+
+        /**
+         * Set an intent for launching UI for this Session. This can be used as a
+         * quick link to an ongoing media screen. The intent should be for an
+         * activity that may be started using {@link Context#startActivity(Intent)}.
+         *
+         * @param pi The intent to launch to show UI for this session.
+         * @return The Builder to allow chaining
+         */
+        @NonNull
+        public Builder setSessionActivity(@Nullable PendingIntent pi) {
+            mSessionActivity = pi;
+            return this;
+        }
+
+        /**
+         * Set ID of the session. If it's not set, an empty string will be used to create a session.
+         * <p>
+         * Use this if and only if your app supports multiple playback at the same time and also
+         * wants to provide external apps to have finer controls of them.
+         *
+         * @param id id of the session. Must be unique per package.
+         * @throws IllegalArgumentException if id is {@code null}.
+         * @return The Builder to allow chaining
+         */
+        @NonNull
+        public Builder setId(@NonNull String id) {
+            if (id == null) {
+                throw new IllegalArgumentException("id shouldn't be null");
+            }
+            mId = id;
+            return this;
+        }
+
+        /**
+         * Set callback for the session and its executor.
+         *
+         * @param executor callback executor
+         * @param callback session callback.
+         * @return The Builder to allow chaining
+         */
+        @NonNull
+        public Builder setSessionCallback(@NonNull Executor executor,
+                @NonNull SessionCallback callback) {
+            mCallbackExecutor = executor;
+            mCallback = callback;
+            return this;
+        }
+
+        /**
+         * Build {@link MediaSession2}.
+         *
+         * @return a new session
+         * @throws IllegalStateException if the session with the same id is already exists for the
+         *      package.
+         */
+        @NonNull
+        public MediaSession2 build() {
+            if (mCallbackExecutor == null) {
+                mCallbackExecutor = mContext.getMainExecutor();
+            }
+            if (mCallback == null) {
+                mCallback = new SessionCallback() {};
+            }
+            if (mId == null) {
+                mId = "";
+            }
+            return new MediaSession2(mContext, mId, mSessionActivity, mCallbackExecutor, mCallback);
+        }
     }
 
     /**
@@ -235,16 +350,16 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * @hide
          */
-        public @NonNull RemoteUserInfo getRemoteUserInfo() {
+        @NonNull
+        public RemoteUserInfo getRemoteUserInfo() {
             return mRemoteUserInfo;
         }
 
         /**
-         * @return package name of the controller. Can be
-         *         {@link androidx.media.MediaSessionManager.RemoteUserInfo#LEGACY_CONTROLLER} if
-         *         the package name cannot be obtained.
+         * @return package name of the controller.
          */
-        public @NonNull String getPackageName() {
+        @NonNull
+        public String getPackageName() {
             return mRemoteUserInfo.getPackageName();
         }
 
@@ -292,10 +407,6 @@ public class MediaSession2 implements AutoCloseable {
             return "ControllerInfo {pkg=" + mRemoteUserInfo.getPackageName() + ", uid="
                     + mRemoteUserInfo.getUid() + ", allowedCommands=" + mAllowedCommands + "})";
         }
-
-        @Nullable Controller2Link getControllerBinder() {
-            return mControllerBinder;
-        }
     }
 
     /**
@@ -316,7 +427,8 @@ public class MediaSession2 implements AutoCloseable {
          * @param controller controller information.
          * @return allowed commands. Can be {@code null} to reject connection.
          */
-        @Nullable public Session2CommandGroup onConnect(@NonNull MediaSession2 session,
+        @Nullable
+        public Session2CommandGroup onConnect(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller) {
             Session2CommandGroup commands = new Session2CommandGroup.Builder()
                     .addAllPredefinedCommands(Session2Command.COMMAND_VERSION_1)

@@ -38,8 +38,9 @@ import java.util.Objects;
  * If it's representing a session service, it may not be ongoing.
  * <p>
  * This API is not generally intended for third party application developers.
- * Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a> instead.
- * {@link androidx.media2.SessionToken} for consistent behavior across all devices.
+ * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
+ * for consistent behavior across all devices.
  * <p>
  * This may be passed to apps by the session owner to allow them to create a
  * {@link MediaController2} to communicate with the session.

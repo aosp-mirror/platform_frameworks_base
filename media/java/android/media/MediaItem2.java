@@ -36,8 +36,9 @@ import java.util.concurrent.Executor;
  * A class with information on a single media item with the metadata information.
  * <p>
  * This API is not generally intended for third party application developers.
- * Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
- * {@link androidx.media2.MediaItem} for consistent behavior across all devices.
+ * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
+ * for consistent behavior across all devices.
  * <p>
  * @hide
  */

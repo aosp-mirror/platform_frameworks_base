@@ -39,8 +39,9 @@ import java.util.concurrent.Executor;
  * commands can be sent to the session.
  * <p>
  * This API is not generally intended for third party application developers.
- * Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
- * {@link androidx.media2.MediaController} for consistent behavior across all devices.
+ * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
+ * for consistent behavior across all devices.
  * @hide
  */
 public class MediaController2 implements AutoCloseable {
