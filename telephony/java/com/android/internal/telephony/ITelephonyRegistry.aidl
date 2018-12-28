@@ -81,5 +81,5 @@ interface ITelephonyRegistry {
     void notifyPhoneCapabilityChanged(in PhoneCapability capability);
     void notifyPreferredDataSubIdChanged(int preferredSubId);
     void notifyRadioPowerStateChanged(in int state);
-    void notifyEmergencyNumberList(in List<EmergencyNumber> emergencyNumberList);
+    void notifyEmergencyNumberList();
 }

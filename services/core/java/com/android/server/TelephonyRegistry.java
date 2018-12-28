@@ -67,7 +67,9 @@ import com.android.server.am.BatteryStatsService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -196,6 +198,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private ArrayList<List<PhysicalChannelConfig>> mPhysicalChannelConfigs;
 
+    private Map<Integer, List<EmergencyNumber>> mEmergencyNumberList;
+
     private int[] mSrvccState;
 
     private int mDefaultSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -233,8 +237,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     | PhoneStateListener.LISTEN_CELL_INFO;
 
     static final int ENFORCE_PHONE_STATE_PERMISSION_MASK =
-                PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR |
-                PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR;
+                PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR
+                        | PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR
+                        | PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST;
 
     static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_PRECISE_CALL_STATE |
@@ -361,6 +366,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCellInfo = new ArrayList<List<CellInfo>>();
         mSrvccState = new int[numPhones];
         mPhysicalChannelConfigs = new ArrayList<List<PhysicalChannelConfig>>();
+        mEmergencyNumberList = new HashMap<>();
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
@@ -760,6 +766,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         try {
                             r.callback.onPhysicalChannelConfigurationChanged(
                                     mPhysicalChannelConfigs.get(phoneId));
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
+                    if ((events & PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST) != 0) {
+                        try {
+                            r.callback.onEmergencyNumberListChanged(mEmergencyNumberList);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1677,10 +1690,30 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
 
     @Override
-    public void notifyEmergencyNumberList(List<EmergencyNumber> emergencyNumberList) {
-        // TODO checkPermission, modify Listener constent documentation
-        // TODO implement multisim emergency number list update in listener
-        // TODO implement PhoneStateListenerTest
+    public void notifyEmergencyNumberList() {
+        if (!checkNotifyPermission("notifyEmergencyNumberList()")) {
+            return;
+        }
+
+        synchronized (mRecords) {
+            mEmergencyNumberList = TelephonyManager.getDefault().getCurrentEmergencyNumberList();
+
+            for (Record r : mRecords) {
+                if (r.matchPhoneStateListenerEvent(
+                        PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST)) {
+                    try {
+                        r.callback.onEmergencyNumberListChanged(mEmergencyNumberList);
+                        if (VDBG) {
+                            log("notifyEmergencyNumberList: emergencyNumberList= "
+                                    + mEmergencyNumberList);
+                        }
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
     }
 
 
@@ -1724,6 +1757,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mPhoneCapability=" + mPhoneCapability);
             pw.println("mPreferredDataSubId=" + mPreferredDataSubId);
             pw.println("mRadioPowerState=" + mRadioPowerState);
+            pw.println("mEmergencyNumberList=" + mEmergencyNumberList);
 
             pw.decreaseIndent();
 
