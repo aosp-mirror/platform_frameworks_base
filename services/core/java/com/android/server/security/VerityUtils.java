@@ -16,13 +16,11 @@
 
 package com.android.server.security;
 
-import static android.system.OsConstants.PROT_READ;
-import static android.system.OsConstants.PROT_WRITE;
-
 import android.annotation.NonNull;
 import android.os.SharedMemory;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.system.OsConstants;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
@@ -55,6 +53,21 @@ abstract public class VerityUtils {
     private static final int MAX_SIGNATURE_FILE_SIZE_BYTES = 8192;
 
     private static final boolean DEBUG = false;
+
+    /** Returns whether the file has fs-verity enabled. */
+    public static boolean hasFsverity(@NonNull String filePath) {
+        // NB: only measure but not check the actual measurement here. As long as this succeeds,
+        // the file is on readable if the measurement can be verified against a trusted key, and
+        // this is good enough for installed apps.
+        int errno = measureFsverityNative(filePath);
+        if (errno != 0) {
+            if (errno != OsConstants.ENODATA) {
+                Slog.e(TAG, "Failed to measure fs-verity, errno " + errno + ": " + filePath);
+            }
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Generates Merkle tree and fs-verity metadata.
@@ -213,6 +226,7 @@ abstract public class VerityUtils {
         return md.digest();
     }
 
+    private static native int measureFsverityNative(@NonNull String filePath);
     private static native byte[] constructFsveritySignedDataNative(@NonNull byte[] measurement);
     private static native byte[] constructFsverityDescriptorNative(long fileSize);
     private static native byte[] constructFsverityExtensionNative(short extensionId,
@@ -249,7 +263,7 @@ abstract public class VerityUtils {
         if (shm == null) {
             throw new IllegalStateException("Failed to generate verity tree into shared memory");
         }
-        if (!shm.setProtect(PROT_READ)) {
+        if (!shm.setProtect(OsConstants.PROT_READ)) {
             throw new SecurityException("Failed to set up shared memory correctly");
         }
         return Pair.create(shm, contentSize);
@@ -323,7 +337,7 @@ abstract public class VerityUtils {
                     throw new IllegalStateException("Multiple instantiation from this factory");
                 }
                 mShm = SharedMemory.create("apkverity", capacity);
-                if (!mShm.setProtect(PROT_READ | PROT_WRITE)) {
+                if (!mShm.setProtect(OsConstants.PROT_READ | OsConstants.PROT_WRITE)) {
                     throw new SecurityException("Failed to set protection");
                 }
                 mBuffer = mShm.mapReadWrite();
