@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
@@ -51,6 +52,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 /** Handles inflating and updating views for notifications. */
@@ -72,6 +74,7 @@ public class NotificationRowBinder {
     private final NotificationMessagingUtil mMessagingUtil;
     private final ExpandableNotificationRow.ExpansionLogger mExpansionLogger =
             this::logNotificationExpansion;
+    private final boolean mAllowLongPress;
 
     private NotificationRemoteInputManager mRemoteInputManager;
     private NotificationPresenter mPresenter;
@@ -83,9 +86,11 @@ public class NotificationRowBinder {
     private NotificationClicker mNotificationClicker;
 
     @Inject
-    public NotificationRowBinder(Context context) {
+    public NotificationRowBinder(Context context,
+            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress) {
         mContext = context;
         mMessagingUtil = new NotificationMessagingUtil(context);
+        mAllowLongPress = allowLongPress;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
@@ -147,7 +152,9 @@ public class NotificationRowBinder {
         row.setHeadsUpManager(mHeadsUpManager);
         row.setOnExpandClickListener(mPresenter);
         row.setInflationCallback(mInflationCallback);
-        row.setLongPressListener(getNotificationLongClicker());
+        if (mAllowLongPress) {
+            row.setLongPressListener(mGutsManager::openGuts);
+        }
         mListContainer.bindRow(row);
         getRemoteInputManager().bindRow(row);
 
@@ -258,10 +265,6 @@ public class NotificationRowBinder {
         row.setNeedsRedaction(
                 Dependency.get(NotificationLockscreenUserManager.class).needsRedaction(entry));
         row.inflateViews();
-    }
-
-    ExpandableNotificationRow.LongPressListener getNotificationLongClicker() {
-        return mGutsManager::openGuts;
     }
 
     private void logNotificationExpansion(String key, boolean userAction, boolean expanded) {

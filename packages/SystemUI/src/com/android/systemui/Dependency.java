@@ -157,6 +157,12 @@ public class Dependency extends SystemUI {
     public static final String LEAK_REPORT_EMAIL_NAME = "leak_report_email";
 
     /**
+     * Whether this platform supports long-pressing notifications to show notification channel
+     * settings.
+     */
+    public static final String ALLOW_NOTIFICATION_LONG_PRESS_NAME = "allow_notif_longpress";
+
+    /**
      * Key for getting a background Looper for background work.
      */
     public static final DependencyKey<Looper> BG_LOOPER = new DependencyKey<>(BG_LOOPER_NAME);
