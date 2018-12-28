@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
@@ -41,7 +40,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -56,7 +54,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.stubbing.Answer;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -67,7 +64,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
-    @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationListContainer mListContainer;
     @Mock private IStatusBarService mBarService;
     @Mock private NotificationData mNotificationData;
@@ -78,21 +74,21 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Mock private NotificationListener mListener;
 
     private NotificationData.Entry mEntry;
-    private StatusBarNotification mSbn;
     private TestableNotificationLogger mLogger;
     private ConcurrentLinkedQueue<AssertionError> mErrorQueue = new ConcurrentLinkedQueue<>();
 
     @Before
-    public void setUp() throws RemoteException {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(NotificationListener.class, mListener);
 
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
-        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
+        StatusBarNotification sbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME,
+                0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
-        mEntry = new NotificationData.Entry(mSbn);
+        mEntry = new NotificationData.Entry(sbn);
         mEntry.setRow(mRow);
 
         mLogger = new TestableNotificationLogger(mListener, Dependency.get(UiOffloadThread.class),
@@ -106,7 +102,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 NotificationVisibility.obtain(mEntry.key, 0, 1, true)
         };
         NotificationVisibility[] noLongerVisibleKeys = {};
-        doAnswer((Answer) invocation -> {
+        doAnswer(invocation -> {
                     try {
                         assertArrayEquals(newlyVisibleKeys,
                                 (NotificationVisibility[]) invocation.getArguments()[0]);
@@ -158,7 +154,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     private class TestableNotificationLogger extends NotificationLogger {
 
-        public TestableNotificationLogger(NotificationListener notificationListener,
+        TestableNotificationLogger(NotificationListener notificationListener,
                 UiOffloadThread uiOffloadThread,
                 NotificationEntryManager entryManager,
                 StatusBarStateController statusBarStateController,
@@ -169,13 +165,9 @@ public class NotificationLoggerTest extends SysuiTestCase {
             mHandler = Handler.createAsync(Looper.myLooper());
         }
 
-        public OnChildLocationsChangedListener
+        OnChildLocationsChangedListener
                 getChildLocationsChangedListenerForTest() {
             return mNotificationLocationsChangedListener;
-        }
-
-        public Handler getHandlerForTest() {
-            return mHandler;
         }
     }
 }

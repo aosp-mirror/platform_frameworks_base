@@ -868,6 +868,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.setHeadsUpManager(mHeadsUpManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
         mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
+        mNotificationLogger.setHeadsUpManager(mHeadsUpManager);
         putComponent(HeadsUpManager.class, mHeadsUpManager);
 
         createNavigationBar();

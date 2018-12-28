@@ -37,6 +37,7 @@ import android.widget.TextView;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.MessagingGroup;
 import com.android.internal.widget.MessagingMessage;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -195,6 +196,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                         Entry entry,
                         String key,
                         StatusBarNotification old,
+                        NotificationVisibility visibility,
                         boolean lifetimeExtended,
                         boolean removedByUser) {
                     if (!lifetimeExtended) {

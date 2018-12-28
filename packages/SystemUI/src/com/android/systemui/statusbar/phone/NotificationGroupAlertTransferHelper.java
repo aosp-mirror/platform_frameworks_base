@@ -22,6 +22,7 @@ import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
@@ -220,6 +221,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
                 Entry entry,
                 String key,
                 StatusBarNotification old,
+                NotificationVisibility visibility,
                 boolean lifetimeExtended,
                 boolean removedByUser) {
             // Removes any alerts pending on this entry. Note that this will not stop any inflation

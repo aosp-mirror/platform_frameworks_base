@@ -15,8 +15,10 @@
  */
 package com.android.systemui.statusbar.notification;
 
+import android.annotation.Nullable;
 import android.service.notification.StatusBarNotification;
 
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 
 /**
@@ -59,12 +61,21 @@ public interface NotificationEntryListener {
     }
 
     /**
+     * Called when an error occurred inflating the views for a notification.
+     */
+    default void onInflationError(StatusBarNotification notification, Exception exception) {
+    }
+
+    /**
      * Called when a notification has been removed (either because the user swiped it away or
      * because the developer retracted it).
      * @param entry notification data entry that was removed.  Null if no entry existed for the
      *              removed key at the time of removal.
      * @param key key of notification that was removed
      * @param old StatusBarNotification of the notification before it was removed
+     * @param visibility logging data related to the visibility of the notification at the time of
+     *                   removal, if it was removed by a user action.  Null if it was not removed by
+     *                   a user action.
      * @param lifetimeExtended true if something is artificially extending how long the notification
      * @param removedByUser true if the notification was removed by a user action
      */
@@ -72,6 +83,7 @@ public interface NotificationEntryListener {
             NotificationData.Entry entry,
             String key,
             StatusBarNotification old,
+            @Nullable NotificationVisibility visibility,
             boolean lifetimeExtended,
             boolean removedByUser) {
     }

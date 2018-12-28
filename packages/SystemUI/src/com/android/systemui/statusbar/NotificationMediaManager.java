@@ -42,6 +42,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
@@ -159,6 +160,7 @@ public class NotificationMediaManager implements Dumpable {
                     Entry entry,
                     String key,
                     StatusBarNotification old,
+                    NotificationVisibility visibility,
                     boolean lifetimeExtended,
                     boolean removedByUser) {
                 if (!lifetimeExtended) {
