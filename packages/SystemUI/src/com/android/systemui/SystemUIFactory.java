@@ -221,6 +221,9 @@ public class SystemUIFactory {
         @Singleton
         Dependency.DependencyInjector createDependency();
 
+        @Singleton
+        StatusBar.StatusBarInjector getStatusBarInjector();
+
         /**
          * FragmentCreator generates all Fragments that need injection.
          */

@@ -220,6 +220,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.volume.VolumeComponent;
 
 import java.io.FileDescriptor;
@@ -227,6 +228,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.Subcomponent;
 
 public class StatusBar extends SystemUI implements DemoMode,
         ActivityStarter, OnUnlockMethodChangedListener,
@@ -353,6 +358,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Object mQueueLock = new Object();
 
     protected StatusBarIconController mIconController;
+    @Inject
+    InjectionInflationController mInjectionInflater;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -1196,8 +1203,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     protected void inflateStatusBarWindow(Context context) {
-        mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
-                R.layout.super_status_bar, null);
+        mStatusBarWindow = (StatusBarWindowView) mInjectionInflater.injectable(
+                LayoutInflater.from(context)).inflate(R.layout.super_status_bar, null);
     }
 
     protected void startKeyguard() {
@@ -4503,5 +4510,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public NotificationGutsManager getGutsManager() {
         return mGutsManager;
+    }
+
+    @Subcomponent
+    public interface StatusBarInjector {
+        void createStatusBar(StatusBar statusbar);
     }
 }
