@@ -22,6 +22,7 @@ import android.hardware.radio.V1_4.EmergencyNumberSource;
 import android.hardware.radio.V1_4.EmergencyServiceCategory;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -150,6 +151,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     @IntDef(flag = true, prefix = { "EMERGENCY_NUMBER_SOURCE_" }, value = {
             EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING,
             EMERGENCY_NUMBER_SOURCE_SIM,
+            EMERGENCY_NUMBER_SOURCE_DATABASE,
             EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG,
             EMERGENCY_NUMBER_SOURCE_DEFAULT
     })
@@ -169,6 +171,10 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      * Reference: 3gpp 22.101, Section 10 - Emergency Calls
      */
     public static final int EMERGENCY_NUMBER_SOURCE_SIM = EmergencyNumberSource.SIM;
+    /**
+     * Bit-field which indicates the number is from the platform-maintained database.
+     */
+    public static final int EMERGENCY_NUMBER_SOURCE_DATABASE =  1 << 4;
     /** Bit-field which indicates the number is from the modem config. */
     public static final int EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG =
             EmergencyNumberSource.MODEM_CONFIG;
@@ -187,21 +193,24 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         EMERGENCY_NUMBER_SOURCE_SET = new HashSet<Integer>();
         EMERGENCY_NUMBER_SOURCE_SET.add(EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING);
         EMERGENCY_NUMBER_SOURCE_SET.add(EMERGENCY_NUMBER_SOURCE_SIM);
+        EMERGENCY_NUMBER_SOURCE_SET.add(EMERGENCY_NUMBER_SOURCE_DATABASE);
         EMERGENCY_NUMBER_SOURCE_SET.add(EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG);
         EMERGENCY_NUMBER_SOURCE_SET.add(EMERGENCY_NUMBER_SOURCE_DEFAULT);
     }
 
     private final String mNumber;
     private final String mCountryIso;
+    private final String mMnc;
     private final int mEmergencyServiceCategoryBitmask;
     private final int mEmergencyNumberSourceBitmask;
 
     /** @hide */
     public EmergencyNumber(@NonNull String number, @NonNull String countryIso,
-                           int emergencyServiceCategories,
+                           @NonNull String mnc, int emergencyServiceCategories,
                            int emergencyNumberSources) {
         this.mNumber = number;
         this.mCountryIso = countryIso;
+        this.mMnc = mnc;
         this.mEmergencyServiceCategoryBitmask = emergencyServiceCategories;
         this.mEmergencyNumberSourceBitmask = emergencyNumberSources;
     }
@@ -210,6 +219,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     public EmergencyNumber(Parcel source) {
         mNumber = source.readString();
         mCountryIso = source.readString();
+        mMnc = source.readString();
         mEmergencyServiceCategoryBitmask = source.readInt();
         mEmergencyNumberSourceBitmask = source.readInt();
     }
@@ -233,6 +243,15 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      */
     public String getCountryIso() {
         return mCountryIso;
+    }
+
+    /**
+     * Get the Mobile Network Code of the emergency number.
+     *
+     * @return the Mobile Network Code of the emergency number.
+     */
+    public String getMnc() {
+        return mMnc;
     }
 
     /**
@@ -338,6 +357,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mNumber);
         dest.writeString(mCountryIso);
+        dest.writeString(mMnc);
         dest.writeInt(mEmergencyServiceCategoryBitmask);
         dest.writeInt(mEmergencyNumberSourceBitmask);
     }
@@ -350,10 +370,10 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
 
     @Override
     public String toString() {
-        return "EmergencyNumber = " + "[Number]" + mNumber + " / [CountryIso]" + mCountryIso
-                + " / [ServiceCategories]"
-                + Integer.toBinaryString(mEmergencyServiceCategoryBitmask)
-                + " / [Sources]" + Integer.toBinaryString(mEmergencyNumberSourceBitmask);
+        return "EmergencyNumber:" + "Number-" + mNumber + "|CountryIso-" + mCountryIso
+                + "|Mnc-" + mMnc
+                + "|ServiceCategories-" + Integer.toBinaryString(mEmergencyServiceCategoryBitmask)
+                + "|Sources-" + Integer.toBinaryString(mEmergencyNumberSourceBitmask);
     }
 
     @Override
@@ -373,6 +393,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      * The priority of sources are defined as follows:
      *     EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING >
      *     EMERGENCY_NUMBER_SOURCE_SIM >
+     *     EMERGENCY_NUMBER_SOURCE_DATABASE >
      *     EMERGENCY_NUMBER_SOURCE_DEFAULT >
      *     EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG
      *
@@ -385,7 +406,9 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         if (this.isFromSources(EMERGENCY_NUMBER_SOURCE_SIM)) {
             score += 1 << 3;
         }
-        // TODO add a score if the number comes from Google's emergency number database
+        if (this.isFromSources(EMERGENCY_NUMBER_SOURCE_DATABASE)) {
+            score += 1 << 2;
+        }
         if (this.isFromSources(EMERGENCY_NUMBER_SOURCE_DEFAULT)) {
             score += 1 << 1;
         }
@@ -412,12 +435,102 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
                 < emergencyNumber.getDisplayPriorityScore()) {
             return 1;
         } else {
-            /**
-             * TODO if both numbers have the same display priority score, the number matches the
-             * Google's emergency number database has a higher display priority.
-             */
             return 0;
         }
+    }
+
+    /**
+     * In-place merge same emergency numbers in the emergency number list.
+     *
+     * A unique EmergencyNumber has a unique combination of ‘number’, ‘mcc’, 'mnc' and
+     * 'categories' fields. Multiple Emergency Number Sources should be merged into one bitfield
+     * for the same EmergencyNumber.
+     *
+     * @param emergencyNumberList the emergency number list to process
+     *
+     * @hide
+     */
+    public static void mergeSameNumbersInEmergencyNumberList(
+            List<EmergencyNumber> emergencyNumberList) {
+        if (emergencyNumberList == null) {
+            return;
+        }
+        Set<EmergencyNumber> mergedEmergencyNumber = new HashSet<>();
+        for (int i = 0; i < emergencyNumberList.size(); i++) {
+            // Skip the check because it was merged.
+            if (mergedEmergencyNumber.contains(emergencyNumberList.get(i))) {
+                continue;
+            }
+            for (int j = i + 1; j < emergencyNumberList.size(); j++) {
+                if (isSameEmergencyNumber(
+                        emergencyNumberList.get(i), emergencyNumberList.get(j))) {
+                    Rlog.e(LOG_TAG, "Found unexpected duplicate numbers: "
+                            + emergencyNumberList.get(i) + " vs " + emergencyNumberList.get(j));
+                    // Set the merged emergency number in the current position
+                    emergencyNumberList.set(i, mergeNumbers(
+                            emergencyNumberList.get(i), emergencyNumberList.get(j)));
+                    // Mark the emergency number has been merged
+                    mergedEmergencyNumber.add(emergencyNumberList.get(j));
+                }
+            }
+        }
+        // Remove the marked emergency number in the orignal list
+        for (int i = 0; i < emergencyNumberList.size(); i++) {
+            if (mergedEmergencyNumber.contains(emergencyNumberList.get(i))) {
+                emergencyNumberList.remove(i--);
+            }
+        }
+    }
+
+    /**
+     * Check if two emergency numbers are the same.
+     *
+     * A unique EmergencyNumber has a unique combination of ‘number’, ‘mcc’, 'mnc' and
+     * 'categories' fields. Multiple Emergency Number Sources should be merged into one bitfield
+     * for the same EmergencyNumber.
+     *
+     * @param first first EmergencyNumber to compare
+     * @param second second EmergencyNumber to compare
+     * @return true if they are the same EmergencyNumbers; false otherwise.
+     *
+     * @hide
+     */
+    public static boolean isSameEmergencyNumber(@NonNull EmergencyNumber first,
+                                                @NonNull EmergencyNumber second) {
+        if (!first.getNumber().equals(second.getNumber())) {
+            return false;
+        }
+        if (!first.getCountryIso().equals(second.getCountryIso())) {
+            return false;
+        }
+        if (!first.getMnc().equals(second.getMnc())) {
+            return false;
+        }
+        if (first.getEmergencyServiceCategoryBitmask()
+                != second.getEmergencyServiceCategoryBitmask()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Get a merged EmergencyNumber for two numbers if they are the same.
+     *
+     * @param first first EmergencyNumber to compare
+     * @param second second EmergencyNumber to compare
+     * @return a merged EmergencyNumber or null if they are not the same EmergencyNumber
+     *
+     * @hide
+     */
+    public static EmergencyNumber mergeNumbers(@NonNull EmergencyNumber first,
+                                         @NonNull EmergencyNumber second) {
+        if (isSameEmergencyNumber(first, second)) {
+            return new EmergencyNumber(first.getNumber(), first.getCountryIso(), first.getMnc(),
+                    first.getEmergencyServiceCategoryBitmask(),
+                    first.getEmergencyNumberSourceBitmask()
+                            | second.getEmergencyNumberSourceBitmask());
+        }
+        return null;
     }
 
     public static final Parcelable.Creator<EmergencyNumber> CREATOR =
