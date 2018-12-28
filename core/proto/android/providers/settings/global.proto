@@ -384,11 +384,12 @@ message GlobalSettingsProto {
         // App allowed to load GPU debug layers.
         optional SettingProto debug_app = 1;
         optional SettingProto debug_layers = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        // Apps opt in to load graphics driver from Game Update Package
-        // instead of native graphcis driver through developer options.
+        // GUP - List of Apps selected to use Game Update Packages
         optional SettingProto gup_dev_opt_in_apps = 8;
-        // Apps on the black list that are forbidden to useGame Update Package.
-        optional SettingProto gup_black_list = 9;
+        // GUP - List of Apps selected not to use Game Update Packages
+        optional SettingProto gup_dev_opt_out_apps = 9;
+        // GUP - List of Apps that are forbidden to use Game Update Packages
+        optional SettingProto gup_black_list = 10;
     }
     optional Gpu gpu = 59;
 

@@ -56,6 +56,7 @@ final class CoreSettingsObserver extends ContentObserver {
 
         sGlobalSettingToTypeMap.put(Settings.Global.DEBUG_VIEW_ATTRIBUTES, int.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GUP_DEV_OPT_IN_APPS, String.class);
+        sGlobalSettingToTypeMap.put(Settings.Global.GUP_DEV_OPT_OUT_APPS, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GUP_BLACK_LIST, String.class);
         // add other global settings here...
     }

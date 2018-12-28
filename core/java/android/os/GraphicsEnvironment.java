@@ -33,6 +33,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /** @hide */
 public class GraphicsEnvironment {
@@ -136,6 +139,19 @@ public class GraphicsEnvironment {
         setLayerPaths(mClassLoader, layerPaths);
     }
 
+    private static List<String> getGlobalSettingsString(Bundle bundle, String globalSetting) {
+        List<String> valueList = null;
+        String settingsValue = bundle.getString(globalSetting);
+
+        if (settingsValue != null) {
+            valueList = new ArrayList<>(Arrays.asList(settingsValue.split(",")));
+        } else {
+            valueList = new ArrayList<>();
+        }
+
+        return valueList;
+    }
+
     /**
      * Choose whether the current process should use the builtin or an updated driver.
      */
@@ -154,14 +170,19 @@ public class GraphicsEnvironment {
             return;
         }
 
-        String applicationPackageName = context.getPackageName();
-        String devOptInApplicationName = coreSettings.getString(
-                Settings.Global.GUP_DEV_OPT_IN_APPS);
-        boolean devOptIn = applicationPackageName.equals(devOptInApplicationName);
-        boolean whitelisted = onWhitelist(context, driverPackageName, ai.packageName);
-        if (!devOptIn && !whitelisted) {
+        if (getGlobalSettingsString(coreSettings, Settings.Global.GUP_DEV_OPT_OUT_APPS)
+                        .contains(ai.packageName)) {
             if (DEBUG) {
-                Log.w(TAG, applicationPackageName + " is not on the whitelist.");
+                Log.w(TAG, ai.packageName + " opts out from GUP.");
+            }
+            return;
+        }
+
+        if (!getGlobalSettingsString(coreSettings, Settings.Global.GUP_DEV_OPT_IN_APPS)
+                        .contains(ai.packageName)
+                && !onWhitelist(context, driverPackageName, ai.packageName)) {
+            if (DEBUG) {
+                Log.w(TAG, ai.packageName + " is not on the whitelist.");
             }
             return;
         }
