@@ -186,6 +186,7 @@ import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
@@ -384,6 +385,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected AppOpsController mAppOpsController;
     protected KeyguardViewMediator mKeyguardViewMediator;
     private ZenModeController mZenController;
+    private final NotificationAlertingManager mNotificationAlertingManager =
+            Dependency.get(NotificationAlertingManager.class);
 
     // for disabling the status bar
     private int mDisabled1 = 0;
@@ -1032,7 +1035,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
-                mScrimController, mActivityLaunchAnimator, mStatusBarKeyguardViewManager);
+                mScrimController, mActivityLaunchAnimator, mStatusBarKeyguardViewManager,
+                mNotificationAlertingManager);
 
         mAppOpsController.addCallback(APP_OPS, this);
         mNotificationListener.setUpWithPresenter(mPresenter);

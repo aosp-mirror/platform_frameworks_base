@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
@@ -266,6 +267,8 @@ public class Dependency extends SystemUI {
     @Inject Lazy<RemoteInputQuickSettingsDisabler> mRemoteInputQuickSettingsDisabler;
     @Inject Lazy<BubbleController> mBubbleController;
     @Inject Lazy<NotificationEntryManager> mNotificationEntryManager;
+    @Inject
+    Lazy<NotificationAlertingManager> mNotificationAlertingManager;
     @Inject Lazy<SensorPrivacyManager> mSensorPrivacyManager;
     @Inject @Named(BG_LOOPER_NAME) Lazy<Looper> mBgLooper;
     @Inject @Named(BG_HANDLER_NAME) Lazy<Handler> mBgHandler;
@@ -439,6 +442,7 @@ public class Dependency extends SystemUI {
                 mRemoteInputQuickSettingsDisabler::get);
         mProviders.put(BubbleController.class, mBubbleController::get);
         mProviders.put(NotificationEntryManager.class, mNotificationEntryManager::get);
+        mProviders.put(NotificationAlertingManager.class, mNotificationAlertingManager::get);
 
         sDependency = this;
     }

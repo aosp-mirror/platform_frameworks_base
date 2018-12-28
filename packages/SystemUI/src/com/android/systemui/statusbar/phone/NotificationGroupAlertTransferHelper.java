@@ -216,11 +216,16 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         }
 
         @Override
-        public void onEntryRemoved(Entry entry) {
+        public void onEntryRemoved(
+                Entry entry,
+                String key,
+                StatusBarNotification old,
+                boolean lifetimeExtended,
+                boolean removedByUser) {
             // Removes any alerts pending on this entry. Note that this will not stop any inflation
             // tasks started by a transfer, so this should only be used as clean-up for when
             // inflation is stopped and the pending alert no longer needs to happen.
-            mPendingAlerts.remove(entry.key);
+            mPendingAlerts.remove(key);
         }
     };
 

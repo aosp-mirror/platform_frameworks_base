@@ -20,6 +20,7 @@ import android.view.View;
 
 import androidx.collection.ArraySet;
 
+import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -37,6 +38,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
 
     private final ArrayList<Callback> mCallbacks =  new ArrayList<>();
 
+    private NotificationPresenter mPresenter;
     private boolean mPanelExpanded;
     private boolean mScreenOn;
     private boolean mReorderingAllowed;
@@ -47,7 +49,22 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
     private boolean mPulsing;
 
     @Inject
-    public VisualStabilityManager() {
+    public VisualStabilityManager(NotificationEntryManager notificationEntryManager) {
+        notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
+            @Override
+            public void onEntryReinflated(NotificationData.Entry entry) {
+                if (entry.hasLowPriorityStateUpdated()) {
+                    onLowPriorityUpdated(entry);
+                    if (mPresenter != null) {
+                        mPresenter.updateNotificationViews();
+                    }
+                }
+            }
+        });
+    }
+
+    public void setUpWithPresenter(NotificationPresenter presenter) {
+        mPresenter = presenter;
     }
 
     /**
@@ -154,7 +171,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
         }
     }
 
-    public void onLowPriorityUpdated(NotificationData.Entry entry) {
+    private void onLowPriorityUpdated(NotificationData.Entry entry) {
         mLowPriorityReorderingViews.add(entry.getRow());
     }
 

@@ -19,10 +19,13 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.app.Notification;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -35,6 +38,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,7 +80,10 @@ public class SmartReplyControllerTest extends SysuiTestCase {
         mDependency.injectTestDependency(SmartReplyController.class,
                 mSmartReplyController);
 
-        mRemoteInputManager = new NotificationRemoteInputManager(mContext);
+        mRemoteInputManager = new NotificationRemoteInputManager(mContext,
+                mock(NotificationLockscreenUserManager.class), mSmartReplyController,
+                mNotificationEntryManager, () -> mock(ShadeController.class),
+                Handler.createAsync(Looper.myLooper()));
         mRemoteInputManager.setUpWithCallback(mCallback, mDelegate);
         mNotification = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)

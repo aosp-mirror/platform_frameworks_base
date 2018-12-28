@@ -827,6 +827,14 @@ public class NotificationData {
         return removed;
     }
 
+    /** Updates the given notification entry with the provided ranking. */
+    public void update(Entry entry, RankingMap ranking, StatusBarNotification notification) {
+        updateRanking(ranking);
+        final StatusBarNotification oldNotification = entry.notification;
+        entry.notification = notification;
+        mGroupManager.onEntryUpdated(entry, oldNotification);
+    }
+
     public void updateRanking(RankingMap ranking) {
         updateRankingAndSort(ranking);
     }
