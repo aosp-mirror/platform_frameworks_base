@@ -33,25 +33,12 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
- * A class with information on a single media item with the metadata information. Here are use
- * cases.
- * <ul>
- * <li>Specify media items to {@link SessionPlayer2} for playback.
- * <li>Share media items across the processes.
- * </ul>
- * <p>
- * Subclasses of the session player may only accept certain subclasses of the media items. Check
- * the player documentation that you're interested in.
- * <p>
- * When it's shared across the processes, we cannot guarantee that they contain the right values
- * because media items are application dependent especially for the metadata.
- * <p>
- * This object is thread safe.
+ * A class with information on a single media item with the metadata information.
  * <p>
  * This API is not generally intended for third party application developers.
  * Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
  * {@link androidx.media2.MediaItem} for consistent behavior across all devices.
- * </p>
+ * <p>
  * @hide
  */
 public class MediaItem2 implements Parcelable {

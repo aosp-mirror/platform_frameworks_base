@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -39,7 +38,7 @@ import java.util.Objects;
  * If it's representing a session service, it may not be ongoing.
  * <p>
  * This API is not generally intended for third party application developers.
- * Use the <a href="{@docRoot}jetpack/androidx/">Support Library</a> instead.
+ * Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a> instead.
  * {@link androidx.media2.SessionToken} for consistent behavior across all devices.
  * <p>
  * This may be passed to apps by the session owner to allow them to create a
@@ -85,12 +84,12 @@ public final class Session2Token implements Parcelable {
     public static final int TYPE_SESSION = 0;
 
     /**
-     * Type for {@link MediaSessionService2}.
+     * Type for {@link MediaSession2Service}.
      */
     public static final int TYPE_SESSION_SERVICE = 1;
 
     /**
-     * Type for {@link MediaLibraryService2}.
+     * Type for {@link MediaLibrary2Service}.
      */
     public static final int TYPE_LIBRARY_SERVICE = 2;
 
@@ -98,12 +97,11 @@ public final class Session2Token implements Parcelable {
     private final @TokenType int mType;
     private final String mPackageName;
     private final String mServiceName;
-    private final IBinder mISession;
+    private final Session2Link mSessionLink;
     private final ComponentName mComponentName;
 
     /**
-     * Constructor for the token. You can create token of {@link MediaSessionService2},
-     * {@link MediaLibraryService2} for {@link MediaController2} or {@link MediaBrowser2}.
+     * Constructor for the token.
      *
      * @param context The context.
      * @param serviceComponent The component name of the service.
@@ -120,7 +118,7 @@ public final class Session2Token implements Parcelable {
         final int uid = getUid(manager, serviceComponent.getPackageName());
 
         // TODO: Uncomment below to stop hardcode type.
-        final int type = TYPE_SESSION_SERVICE;
+        final int type = TYPE_SESSION;
 //        final int type;
 //        if (isInterfaceDeclared(manager, MediaLibraryService2.SERVICE_INTERFACE,
 //                serviceComponent)) {
@@ -141,27 +139,26 @@ public final class Session2Token implements Parcelable {
         mServiceName = serviceComponent.getClassName();
         mUid = uid;
         mType = type;
-        mISession = null;
+        mSessionLink = null;
     }
 
-    // TODO: Uncomment below
-//    Session2Token(int uid, int type, String packageName, IMediaSession2 iSession) {
-//        mUid = uid;
-//        mType = type;
-//        mPackageName = packageName;
-//        mServiceName = null;
-//        mComponentName = null;
-//        mISession = iSession.asBinder();
-//    }
+    Session2Token(int uid, int type, String packageName, Session2Link sessionLink) {
+        mUid = uid;
+        mType = type;
+        mPackageName = packageName;
+        mServiceName = null;
+        mComponentName = null;
+        mSessionLink = sessionLink;
+    }
 
     Session2Token(Parcel in) {
         mUid = in.readInt();
         mType = in.readInt();
         mPackageName = in.readString();
         mServiceName = in.readString();
-        // TODO: Uncomment below and stop hardcode mISession
-        mISession = null;
-        //mISession = ISession.Stub.asInterface(in.readStrongBinder());
+        // TODO: Uncomment below and stop hardcode mSessionLink
+        mSessionLink = null;
+        //mSessionLink = ISession.Stub.asInterface(in.readStrongBinder());
         mComponentName = ComponentName.unflattenFromString(in.readString());
     }
 
@@ -172,7 +169,7 @@ public final class Session2Token implements Parcelable {
         dest.writeString(mPackageName);
         dest.writeString(mServiceName);
         // TODO: Uncomment below
-        //dest.writeStrongBinder(mISession.asBinder());
+        //dest.writeStrongBinder(mSessionLink.asBinder());
         dest.writeString(mComponentName == null ? "" : mComponentName.flattenToString());
     }
 
@@ -183,7 +180,7 @@ public final class Session2Token implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mType, mUid, mPackageName, mServiceName, mISession);
+        return Objects.hash(mType, mUid, mPackageName, mServiceName, mSessionLink);
     }
 
     @Override
@@ -196,13 +193,13 @@ public final class Session2Token implements Parcelable {
                 && TextUtils.equals(mPackageName, other.mPackageName)
                 && TextUtils.equals(mServiceName, other.mServiceName)
                 && mType == other.mType
-                && Objects.equals(mISession, other.mISession);
+                && Objects.equals(mSessionLink, other.mSessionLink);
     }
 
     @Override
     public String toString() {
         return "Session2Token {pkg=" + mPackageName + " type=" + mType
-                + " service=" + mServiceName + " IMediaSession2=" + mISession + "}";
+                + " service=" + mServiceName + " Session2Link=" + mSessionLink + "}";
     }
 
     /**
@@ -249,8 +246,8 @@ public final class Session2Token implements Parcelable {
     /**
      * @hide
      */
-    public Object getBinder() {
-        return mISession;
+    public Session2Link getSessionLink() {
+        return mSessionLink;
     }
 
     private static boolean isInterfaceDeclared(PackageManager manager, String serviceInterface,
