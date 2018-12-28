@@ -821,6 +821,7 @@ public class ImageReader implements AutoCloseable {
                 case ImageFormat.DEPTH_POINT_CLOUD:
                 case ImageFormat.RAW_PRIVATE:
                 case ImageFormat.DEPTH_JPEG:
+                case ImageFormat.HEIC:
                     width = ImageReader.this.getWidth();
                     break;
                 default:
@@ -838,6 +839,7 @@ public class ImageReader implements AutoCloseable {
                 case ImageFormat.DEPTH_POINT_CLOUD:
                 case ImageFormat.RAW_PRIVATE:
                 case ImageFormat.DEPTH_JPEG:
+                case ImageFormat.HEIC:
                     height = ImageReader.this.getHeight();
                     break;
                 default:

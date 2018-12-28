@@ -716,6 +716,14 @@ public class ImageFormat {
     public static final int PRIVATE = 0x22;
 
     /**
+     * Compressed HEIC format.
+     *
+     * <p>This format defines the HEIC brand of High Efficiency Image File
+     * Format as described in ISO/IEC 23008-12.</p>
+     */
+    public static final int HEIC = 0x48454946;
+
+    /**
      * Use this function to retrieve the number of bits per pixel of an
      * ImageFormat.
      *
@@ -796,6 +804,7 @@ public class ImageFormat {
             case RAW_DEPTH:
             case Y8:
             case DEPTH_JPEG:
+            case HEIC:
                 return true;
         }
 
