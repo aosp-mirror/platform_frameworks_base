@@ -20,7 +20,6 @@ import com.android.i18n.phonenumbers.NumberParseException;
 import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
-import com.android.i18n.phonenumbers.ShortNumberInfo;
 
 import android.annotation.IntDef;
 import android.annotation.UnsupportedAppUsage;
@@ -2182,101 +2181,6 @@ public class PhoneNumberUtils {
                     + countryIso);
         }
         return isEmergencyNumberInternal(subId, number, countryIso, useExactMatch);
-    }
-
-    /**
-     * Back-up old logics for {@link #isEmergencyNumberInternal} for legacy and deprecate purpose.
-     *
-     * @hide
-     */
-    public static boolean isEmergencyNumberInternal(String number, boolean useExactMatch,
-                                                    String defaultCountryIso) {
-        // If the number passed in is null, just return false:
-        if (number == null) return false;
-
-        // If the number passed in is a SIP address, return false, since the
-        // concept of "emergency numbers" is only meaningful for calls placed
-        // over the cell network.
-        // (Be sure to do this check *before* calling extractNetworkPortionAlt(),
-        // since the whole point of extractNetworkPortionAlt() is to filter out
-        // any non-dialable characters (which would turn 'abc911def@example.com'
-        // into '911', for example.))
-        if (PhoneNumberUtils.isUriNumber(number)) {
-            return false;
-        }
-
-        // Strip the separators from the number before comparing it
-        // to the list.
-        number = PhoneNumberUtils.extractNetworkPortionAlt(number);
-
-        String emergencyNumbers = "";
-        int slotId = SubscriptionManager.getSlotIndex(getDefaultVoiceSubId());
-
-        // retrieve the list of emergency numbers
-        // check read-write ecclist property first
-        String ecclist = (slotId <= 0) ? "ril.ecclist" : ("ril.ecclist" + slotId);
-
-        emergencyNumbers = SystemProperties.get(ecclist, "");
-
-        Rlog.d(LOG_TAG, "slotId:" + slotId + " country:"
-                + defaultCountryIso + " emergencyNumbers: " +  emergencyNumbers);
-
-        if (TextUtils.isEmpty(emergencyNumbers)) {
-            // then read-only ecclist property since old RIL only uses this
-            emergencyNumbers = SystemProperties.get("ro.ril.ecclist");
-        }
-
-        if (!TextUtils.isEmpty(emergencyNumbers)) {
-            // searches through the comma-separated list for a match,
-            // return true if one is found.
-            for (String emergencyNum : emergencyNumbers.split(",")) {
-                // It is not possible to append additional digits to an emergency number to dial
-                // the number in Brazil - it won't connect.
-                if (useExactMatch || "BR".equalsIgnoreCase(defaultCountryIso)) {
-                    if (number.equals(emergencyNum)) {
-                        return true;
-                    }
-                } else {
-                    if (number.startsWith(emergencyNum)) {
-                        return true;
-                    }
-                }
-            }
-            // no matches found against the list!
-            return false;
-        }
-
-        Rlog.d(LOG_TAG, "System property doesn't provide any emergency numbers."
-                + " Use embedded logic for determining ones.");
-
-        // If slot id is invalid, means that there is no sim card.
-        // According spec 3GPP TS22.101, the following numbers should be
-        // ECC numbers when SIM/USIM is not present.
-        emergencyNumbers = ((slotId < 0) ? "112,911,000,08,110,118,119,999" : "112,911");
-
-        for (String emergencyNum : emergencyNumbers.split(",")) {
-            if (useExactMatch) {
-                if (number.equals(emergencyNum)) {
-                    return true;
-                }
-            } else {
-                if (number.startsWith(emergencyNum)) {
-                    return true;
-                }
-            }
-        }
-
-        // No ecclist system property, so use our own list.
-        if (defaultCountryIso != null) {
-            ShortNumberInfo info = ShortNumberInfo.getInstance();
-            if (useExactMatch) {
-                return info.isEmergencyNumber(number, defaultCountryIso);
-            } else {
-                return info.connectsToEmergencyNumber(number, defaultCountryIso);
-            }
-        }
-
-        return false;
     }
 
     /**
