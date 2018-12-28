@@ -972,7 +972,7 @@ public final class MediaCodecInfo {
          * {@code null}.  The array is sorted in ascending order.
          */
         public int[] getSupportedSampleRates() {
-            return Arrays.copyOf(mSampleRates, mSampleRates.length);
+            return mSampleRates != null ? Arrays.copyOf(mSampleRates, mSampleRates.length) : null;
         }
 
         /**
