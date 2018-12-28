@@ -81,8 +81,8 @@ public class NotificationInlineImageResolver implements ImageResolver {
         Drawable result = null;
         try {
             result = hasCache() ? mImageCache.get(uri) : resolveImage(uri);
-        } catch (IOException ex) {
-            Log.d(TAG, "loadImage: Can't load image from " + uri);
+        } catch (IOException | SecurityException ex) {
+            Log.d(TAG, "loadImage: Can't load image from " + uri, ex);
         }
         return result;
     }
