@@ -21,6 +21,7 @@ import android.text.TextUtils;
 import android.util.SparseIntArray;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.telephony.Rlog;
 
 import java.nio.ByteBuffer;
@@ -587,7 +588,7 @@ public class GsmAlphabet {
      * Additionally, in some country(ex. Korea), there are non-ASCII or MBCS characters.
      * If a character set is given, characters in data are treat as MBCS.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static String
     gsm8BitUnpackedToString(byte[] data, int offset, int length, String characterset) {
         boolean isMbcs = false;

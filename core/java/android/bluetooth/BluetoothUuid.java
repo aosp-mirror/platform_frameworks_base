@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.ParcelUuid;
 
 import java.nio.ByteBuffer;
@@ -38,20 +39,20 @@ public final class BluetoothUuid {
      * The following 128 bit values are calculated as:
      *  uuid * 2^96 + BASE_UUID
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final ParcelUuid AudioSink =
             ParcelUuid.fromString("0000110B-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid AudioSource =
             ParcelUuid.fromString("0000110A-0000-1000-8000-00805F9B34FB");
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final ParcelUuid AdvAudioDist =
             ParcelUuid.fromString("0000110D-0000-1000-8000-00805F9B34FB");
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final ParcelUuid HSP =
             ParcelUuid.fromString("00001108-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid HSP_AG =
             ParcelUuid.fromString("00001112-0000-1000-8000-00805F9B34FB");
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final ParcelUuid Handsfree =
             ParcelUuid.fromString("0000111E-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid Handsfree_AG =

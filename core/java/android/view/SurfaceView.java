@@ -110,7 +110,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     final ReentrantLock mSurfaceLock = new ReentrantLock();
     @UnsupportedAppUsage
     final Surface mSurface = new Surface();       // Current surface in use
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     boolean mDrawingStopped = true;
     // We use this to track if the application has produced a frame
     // in to the Surface. Up until that point, we should be careful not to punch
@@ -129,7 +129,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
     int mSubLayer = APPLICATION_MEDIA_SUBLAYER;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     boolean mIsCreating = false;
     private volatile boolean mRtHandlingPositionUpdates = false;
 
@@ -159,9 +159,9 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     boolean mViewVisibility = false;
     boolean mWindowStopped = false;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int mRequestedWidth = -1;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int mRequestedHeight = -1;
     /* Set SurfaceView's format to 565 by default to maintain backward
      * compatibility with applications assuming this format.
@@ -172,7 +172,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     @UnsupportedAppUsage
     boolean mHaveFrame = false;
     boolean mSurfaceCreated = false;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     long mLastLockTime = 0;
 
     boolean mVisible = false;
@@ -182,7 +182,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     int mSurfaceHeight = -1;
     @UnsupportedAppUsage
     int mFormat = -1;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final Rect mSurfaceFrame = new Rect();
     int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
     private Translator mTranslator;

@@ -23,6 +23,7 @@ import java.text.BreakIterator;
 import java.util.Arrays;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.text.Emoji;
@@ -118,7 +119,7 @@ public abstract class SmsMessageBase {
      * Returns the address of the SMS service center that relayed this message
      * or null if there is none.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public String getServiceCenterAddress() {
         return mScAddress;
     }
@@ -223,14 +224,14 @@ public abstract class SmsMessageBase {
     /**
      * Get protocol identifier.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public abstract int getProtocolIdentifier();
 
     /**
      * See TS 23.040 9.2.3.9 returns true if this is a "replace short message"
      * SMS
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public abstract boolean isReplace();
 
     /**
@@ -302,7 +303,7 @@ public abstract class SmsMessageBase {
      *         See TS 23.040, 9.9.2.3.15 for a description of other possible
      *         values.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public abstract int getStatus();
 
     /**
@@ -315,7 +316,7 @@ public abstract class SmsMessageBase {
      * Returns true iff the <code>TP-Reply-Path</code> bit is set in
      * this message.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public abstract boolean isReplyPathPresent();
 
     /**

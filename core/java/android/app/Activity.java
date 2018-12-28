@@ -848,7 +848,7 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage
     /*package*/ boolean mWindowAdded = false;
     /*package*/ boolean mVisibleFromServer = false;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     /*package*/ boolean mVisibleFromClient = true;
     /*package*/ ActionBar mActionBar = null;
     private boolean mEnableDefaultActionBarUp;

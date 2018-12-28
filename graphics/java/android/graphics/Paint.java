@@ -25,6 +25,7 @@ import android.annotation.Px;
 import android.annotation.Size;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.FontVariationAxis;
+import android.os.Build;
 import android.os.LocaleList;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
@@ -69,7 +70,7 @@ public class Paint {
     private MaskFilter  mMaskFilter;
     private PathEffect  mPathEffect;
     private Shader      mShader;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Typeface    mTypeface;
     private Xfermode    mXfermode;
 

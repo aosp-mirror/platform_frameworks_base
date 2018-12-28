@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.UnsupportedAppUsage;
 import android.app.usage.StorageStatsManager;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -38,7 +39,7 @@ public class PackageStats implements Parcelable {
     public String packageName;
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public int userHandle;
 
     /** Size of the code (e.g., APK) */

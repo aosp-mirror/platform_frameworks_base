@@ -19,6 +19,7 @@ package android.net.wifi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -69,7 +70,7 @@ public class WifiInfo implements Parcelable {
     }
 
     private SupplicantState mSupplicantState;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mBSSID;
     @UnsupportedAppUsage
     private WifiSsid mWifiSsid;

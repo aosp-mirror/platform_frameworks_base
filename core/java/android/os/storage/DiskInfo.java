@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -66,7 +67,7 @@ public class DiskInfo implements Parcelable {
         this.flags = flags;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public DiskInfo(Parcel parcel) {
         id = parcel.readString();
         flags = parcel.readInt();
@@ -196,7 +197,7 @@ public class DiskInfo implements Parcelable {
         return id.hashCode();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final Creator<DiskInfo> CREATOR = new Creator<DiskInfo>() {
         @Override
         public DiskInfo createFromParcel(Parcel in) {

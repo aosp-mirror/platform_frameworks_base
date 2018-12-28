@@ -17,6 +17,7 @@
 package android.net.wifi.p2p;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcelable;
 import android.os.Parcel;
 
@@ -54,7 +55,7 @@ public class WifiP2pWfdInfo implements Parcelable {
 
     private int mMaxThroughput;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public WifiP2pWfdInfo() {
     }
 

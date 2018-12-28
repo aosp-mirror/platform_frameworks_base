@@ -20,6 +20,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.view.View;
 
 /**
@@ -52,7 +53,7 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     protected int[] mFrom;
     /**
      * A list of View ids representing the views to which the data must be bound.
