@@ -35,5 +35,8 @@ public class ActivityViewMainActivity extends Activity {
 
         findViewById(R.id.resize_activity_view_button).setOnClickListener(
                 v -> startActivity(new Intent(this, ActivityViewResizeActivity.class)));
+
+        findViewById(R.id.visibility_activity_view_button).setOnClickListener(
+                v -> startActivity(new Intent(this, ActivityViewVisibilityActivity.class)));
     }
 }
