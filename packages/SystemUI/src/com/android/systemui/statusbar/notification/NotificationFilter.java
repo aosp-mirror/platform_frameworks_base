@@ -117,8 +117,8 @@ public class NotificationFilter {
             return true;
         }
 
-        if (getFsc().isDungeonNotification(sbn)
-                && !getFsc().isDungeonNeededForUser(sbn.getUserId())) {
+        if (getFsc().isDisclosureNotification(sbn)
+                && !getFsc().isDisclosureNeededForUser(sbn.getUserId())) {
             // this is a foreground-service disclosure for a user that does not need to show one
             return true;
         }

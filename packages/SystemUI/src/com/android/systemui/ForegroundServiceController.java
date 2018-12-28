@@ -15,54 +15,38 @@
 package com.android.systemui;
 
 import android.annotation.Nullable;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.content.Context;
-import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.messages.nano.SystemMessageProto;
-
-import java.util.Arrays;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Foreground service controller, a/k/a Dianne's Dungeon.
+ * Tracks state of foreground services and notifications related to foreground services per user.
  */
 @Singleton
 public class ForegroundServiceController {
 
-    // shelf life of foreground services before they go bad
-    private static final long FG_SERVICE_GRACE_MILLIS = 5000;
-
-    private static final String TAG = "FgServiceController";
-    private static final boolean DBG = false;
-
-    private final Context mContext;
-    private final SparseArray<UserServices> mUserServices = new SparseArray<>();
+    private final SparseArray<ForegroundServicesUserState> mUserServices = new SparseArray<>();
     private final Object mMutex = new Object();
 
     @Inject
-    public ForegroundServiceController(Context context) {
-        mContext = context;
+    public ForegroundServiceController() {
     }
 
     /**
      * @return true if this user has services missing notifications and therefore needs a
      * disclosure notification.
      */
-    public boolean isDungeonNeededForUser(int userId) {
+    public boolean isDisclosureNeededForUser(int userId) {
         synchronized (mMutex) {
-            final UserServices services = mUserServices.get(userId);
+            final ForegroundServicesUserState services = mUserServices.get(userId);
             if (services == null) return false;
-            return services.isDungeonNeeded();
+            return services.isDisclosureNeeded();
         }
     }
 
@@ -72,7 +56,7 @@ public class ForegroundServiceController {
      */
     public boolean isSystemAlertWarningNeeded(int userId, String pkg) {
         synchronized (mMutex) {
-            final UserServices services = mUserServices.get(userId);
+            final ForegroundServicesUserState services = mUserServices.get(userId);
             if (services == null) return false;
             return services.getStandardLayoutKey(pkg) == null;
         }
@@ -85,7 +69,7 @@ public class ForegroundServiceController {
     @Nullable
     public String getStandardLayoutKey(int userId, String pkg) {
         synchronized (mMutex) {
-            final UserServices services = mUserServices.get(userId);
+            final ForegroundServicesUserState services = mUserServices.get(userId);
             if (services == null) return null;
             return services.getStandardLayoutKey(pkg);
         }
@@ -97,7 +81,7 @@ public class ForegroundServiceController {
     @Nullable
     public ArraySet<Integer> getAppOps(int userId, String pkg) {
         synchronized (mMutex) {
-            final UserServices services = mUserServices.get(userId);
+            final ForegroundServicesUserState services = mUserServices.get(userId);
             if (services == null) {
                 return null;
             }
@@ -112,9 +96,9 @@ public class ForegroundServiceController {
     public void onAppOpChanged(int code, int uid, String packageName, boolean active) {
         int userId = UserHandle.getUserId(uid);
         synchronized (mMutex) {
-            UserServices userServices = mUserServices.get(userId);
+            ForegroundServicesUserState userServices = mUserServices.get(userId);
             if (userServices == null) {
-                userServices = new UserServices();
+                userServices = new ForegroundServicesUserState();
                 mUserServices.put(userId, userServices);
             }
             if (active) {
@@ -126,77 +110,35 @@ public class ForegroundServiceController {
     }
 
     /**
-     * @param sbn notification that was just posted
-     * @param importance
+     * Looks up the {@link ForegroundServicesUserState} for the given {@code userId}, then performs
+     * the given {@link UserStateUpdateCallback} on it.  If no state exists for the user ID, creates
+     * a new one if {@code createIfNotFound} is true, then performs the update on the new state.
+     * If {@code createIfNotFound} is false, no update is performed.
+     *
+     * @return false if no user state was found and none was created; true otherwise.
      */
-    public void addNotification(StatusBarNotification sbn, int importance) {
-        updateNotification(sbn, importance);
-    }
-
-    /**
-     * @param sbn notification that was just removed
-     */
-    public boolean removeNotification(StatusBarNotification sbn) {
+    boolean updateUserState(int userId,
+            UserStateUpdateCallback updateCallback,
+            boolean createIfNotFound) {
         synchronized (mMutex) {
-            final UserServices userServices = mUserServices.get(sbn.getUserId());
-            if (userServices == null) {
-                if (DBG) {
-                    Log.w(TAG, String.format(
-                            "user %d with no known notifications got removeNotification for %s",
-                            sbn.getUserId(), sbn));
+            ForegroundServicesUserState userState = mUserServices.get(userId);
+            if (userState == null) {
+                if (createIfNotFound) {
+                    userState = new ForegroundServicesUserState();
+                    mUserServices.put(userId, userState);
+                } else {
+                    return false;
                 }
-                return false;
             }
-            if (isDungeonNotification(sbn)) {
-                // if you remove the dungeon entirely, we take that to mean there are
-                // no running services
-                userServices.setRunningServices(null, 0);
-                return true;
-            } else {
-                // this is safe to call on any notification, not just FLAG_FOREGROUND_SERVICE
-                return userServices.removeNotification(sbn.getPackageName(), sbn.getKey());
-            }
+            return updateCallback.updateUserState(userState);
         }
     }
 
     /**
-     * @param sbn notification that was just changed in some way
+     * @return true if {@code sbn} is the system-provided disclosure notification containing the
+     * list of running foreground services.
      */
-    public void updateNotification(StatusBarNotification sbn, int newImportance) {
-        synchronized (mMutex) {
-            UserServices userServices = mUserServices.get(sbn.getUserId());
-            if (userServices == null) {
-                userServices = new UserServices();
-                mUserServices.put(sbn.getUserId(), userServices);
-            }
-
-            if (isDungeonNotification(sbn)) {
-                final Bundle extras = sbn.getNotification().extras;
-                if (extras != null) {
-                    final String[] svcs = extras.getStringArray(Notification.EXTRA_FOREGROUND_APPS);
-                    userServices.setRunningServices(svcs, sbn.getNotification().when);
-                }
-            } else {
-                userServices.removeNotification(sbn.getPackageName(), sbn.getKey());
-                if (0 != (sbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE)) {
-                    if (newImportance > NotificationManager.IMPORTANCE_MIN) {
-                        userServices.addImportantNotification(sbn.getPackageName(), sbn.getKey());
-                    }
-                    final Notification.Builder builder = Notification.Builder.recoverBuilder(
-                            mContext, sbn.getNotification());
-                    if (builder.usesStandardHeader()) {
-                        userServices.addStandardLayoutNotification(
-                                sbn.getPackageName(), sbn.getKey());
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @return true if sbn is the system-provided "dungeon" (list of running foreground services).
-     */
-    public boolean isDungeonNotification(StatusBarNotification sbn) {
+    public boolean isDisclosureNotification(StatusBarNotification sbn) {
         return sbn.getId() == SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICES
                 && sbn.getTag() == null
                 && sbn.getPackageName().equals("android");
@@ -212,125 +154,19 @@ public class ForegroundServiceController {
     }
 
     /**
-     * Struct to track relevant packages and notifications for a userid's foreground services.
+     * Callback provided to {@link #updateUserState(int, UserStateUpdateCallback, boolean)}
+     * to perform the update.
      */
-    private static class UserServices {
-        private String[] mRunning = null;
-        private long mServiceStartTime = 0;
-        // package -> sufficiently important posted notification keys
-        private ArrayMap<String, ArraySet<String>> mImportantNotifications = new ArrayMap<>(1);
-        // package -> standard layout posted notification keys
-        private ArrayMap<String, ArraySet<String>> mStandardLayoutNotifications = new ArrayMap<>(1);
+    interface UserStateUpdateCallback {
+        /**
+         * Perform update operations on the provided {@code userState}.
+         *
+         * @return true if the update succeeded.
+         */
+        boolean updateUserState(ForegroundServicesUserState userState);
 
-        // package -> app ops
-        private ArrayMap<String, ArraySet<Integer>> mAppOps = new ArrayMap<>(1);
-
-        public void setRunningServices(String[] pkgs, long serviceStartTime) {
-            mRunning = pkgs != null ? Arrays.copyOf(pkgs, pkgs.length) : null;
-            mServiceStartTime = serviceStartTime;
-        }
-
-        public void addOp(String pkg, int op) {
-            if (mAppOps.get(pkg) == null) {
-                mAppOps.put(pkg, new ArraySet<>(3));
-            }
-            mAppOps.get(pkg).add(op);
-        }
-
-        public boolean removeOp(String pkg, int op) {
-            final boolean found;
-            final ArraySet<Integer> keys = mAppOps.get(pkg);
-            if (keys == null) {
-                found = false;
-            } else {
-                found = keys.remove(op);
-                if (keys.size() == 0) {
-                    mAppOps.remove(pkg);
-                }
-            }
-            return found;
-        }
-
-        public void addImportantNotification(String pkg, String key) {
-            addNotification(mImportantNotifications, pkg, key);
-        }
-
-        public boolean removeImportantNotification(String pkg, String key) {
-            return removeNotification(mImportantNotifications, pkg, key);
-        }
-
-        public void addStandardLayoutNotification(String pkg, String key) {
-            addNotification(mStandardLayoutNotifications, pkg, key);
-        }
-
-        public boolean removeStandardLayoutNotification(String pkg, String key) {
-            return removeNotification(mStandardLayoutNotifications, pkg, key);
-        }
-
-        public boolean removeNotification(String pkg, String key) {
-            boolean removed = false;
-            removed |= removeImportantNotification(pkg, key);
-            removed |= removeStandardLayoutNotification(pkg, key);
-            return removed;
-        }
-
-        public void addNotification(ArrayMap<String, ArraySet<String>> map, String pkg,
-                String key) {
-            if (map.get(pkg) == null) {
-                map.put(pkg, new ArraySet<>());
-            }
-            map.get(pkg).add(key);
-        }
-
-        public boolean removeNotification(ArrayMap<String, ArraySet<String>> map,
-                String pkg, String key) {
-            final boolean found;
-            final ArraySet<String> keys = map.get(pkg);
-            if (keys == null) {
-                found = false;
-            } else {
-                found = keys.remove(key);
-                if (keys.size() == 0) {
-                    map.remove(pkg);
-                }
-            }
-            return found;
-        }
-
-        public boolean isDungeonNeeded() {
-            if (mRunning != null
-                    && System.currentTimeMillis() - mServiceStartTime >= FG_SERVICE_GRACE_MILLIS) {
-
-                for (String pkg : mRunning) {
-                    final ArraySet<String> set = mImportantNotifications.get(pkg);
-                    if (set == null || set.size() == 0) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public ArraySet<Integer> getFeatures(String pkg) {
-            return mAppOps.get(pkg);
-        }
-
-        public String getStandardLayoutKey(String pkg) {
-            final ArraySet<String> set = mStandardLayoutNotifications.get(pkg);
-            if (set == null || set.size() == 0) {
-                return null;
-            }
-            return set.valueAt(0);
-        }
-
-        @Override
-        public String toString() {
-            return "UserServices{"
-                    + "mRunning=" + Arrays.toString(mRunning)
-                    + ", mServiceStartTime=" + mServiceStartTime
-                    + ", mImportantNotifications=" + mImportantNotifications
-                    + ", mStandardLayoutNotifications=" + mStandardLayoutNotifications
-                    + '}';
+        /** Called if the state was not found and was not created. */
+        default void userStateNotFound(int userId) {
         }
     }
 }
