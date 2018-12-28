@@ -219,12 +219,6 @@ public abstract class DependencyBinder {
     /**
      */
     @Binds
-    public abstract ForegroundServiceController provideForegroundService(
-            ForegroundServiceControllerImpl controllerImpl);
-
-    /**
-     */
-    @Binds
     public abstract PowerUI.WarningsUI provideWarningsUi(PowerNotificationWarnings controllerImpl);
 
     /**

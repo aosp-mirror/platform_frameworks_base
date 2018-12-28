@@ -50,7 +50,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        fsc = new ForegroundServiceControllerImpl(mContext);
+        fsc = new ForegroundServiceController(mContext);
     }
 
     @Test
