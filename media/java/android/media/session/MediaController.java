@@ -21,12 +21,12 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
+import android.media.session.MediaSession.QueueItem;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -70,7 +70,8 @@ public final class MediaController {
 
     private final MediaSession.Token mToken;
     private final Context mContext;
-    private final CallbackStub mCbStub = new CallbackStub(this);
+    private final ControllerCallbackLink mCbStub =
+            new ControllerCallbackLink(new CallbackStub(this));
     private final ArrayList<MessageHandler> mCallbacks = new ArrayList<MessageHandler>();
     private final Object mLock = new Object();
 
@@ -242,10 +243,7 @@ public final class MediaController {
      */
     public @Nullable List<MediaSession.QueueItem> getQueue() {
         try {
-            ParceledListSlice queue = mSessionBinder.getQueue();
-            if (queue != null) {
-                return queue.getList();
-            }
+            return mSessionBinder.getQueue();
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error calling getQueue.", e);
         }
@@ -1058,10 +1056,10 @@ public final class MediaController {
         }
     }
 
-    private final static class CallbackStub extends ISessionControllerCallback.Stub {
+    private static final class CallbackStub extends ControllerCallbackLink.CallbackStub {
         private final WeakReference<MediaController> mController;
 
-        public CallbackStub(MediaController controller) {
+        CallbackStub(MediaController controller) {
             mController = new WeakReference<MediaController>(controller);
         }
 
@@ -1098,9 +1096,7 @@ public final class MediaController {
         }
 
         @Override
-        public void onQueueChanged(ParceledListSlice parceledQueue) {
-            List<MediaSession.QueueItem> queue = parceledQueue == null ? null : parceledQueue
-                    .getList();
+        public void onQueueChanged(List<QueueItem> queue) {
             MediaController controller = mController.get();
             if (controller != null) {
                 controller.postMessage(MSG_UPDATE_QUEUE, queue, null);
@@ -1124,15 +1120,15 @@ public final class MediaController {
         }
 
         @Override
-        public void onVolumeInfoChanged(ParcelableVolumeInfo pvi) {
+        public void onVolumeInfoChanged(int volumeType, AudioAttributes attrs, int controlType,
+                int maxVolume, int currentVolume) {
             MediaController controller = mController.get();
             if (controller != null) {
-                PlaybackInfo info = new PlaybackInfo(pvi.volumeType, pvi.audioAttrs,
-                        pvi.controlType, pvi.maxVolume, pvi.currentVolume);
+                PlaybackInfo info = new PlaybackInfo(volumeType, attrs, controlType, maxVolume,
+                        currentVolume);
                 controller.postMessage(MSG_UPDATE_VOLUME, info, null);
             }
         }
-
     }
 
     private final static class MessageHandler extends Handler {
