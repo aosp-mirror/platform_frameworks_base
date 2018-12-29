@@ -11869,6 +11869,28 @@ public final class Settings {
         public static final String KEEP_PROFILE_IN_BACKGROUND = "keep_profile_in_background";
 
         /**
+         * The default time in ms within which a subsequent connection from an always allowed system
+         * is allowed to reconnect without user interaction.
+         *
+         * @hide
+         */
+        public static final long DEFAULT_ADB_ALLOWED_CONNECTION_TIME = 604800000;
+
+        /**
+         * When the user first connects their device to a system a prompt is displayed to allow
+         * the adb connection with an option to 'Always allow' connections from this system. If the
+         * user selects this always allow option then the connection time is stored for the system.
+         * This setting is the time in ms within which a subsequent connection from an always
+         * allowed system is allowed to reconnect without user interaction.
+         *
+         * Type: long
+         *
+         * @hide
+         */
+        public static final String ADB_ALLOWED_CONNECTION_TIME =
+                "adb_allowed_connection_time";
+
+        /**
          * Get the key that retrieves a bluetooth headset's priority.
          * @hide
          */

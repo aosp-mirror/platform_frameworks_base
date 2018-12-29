@@ -27,6 +27,7 @@ import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hci/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hfp/enums.proto";
+import "frameworks/base/core/proto/android/debug/enums.proto";
 import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
@@ -204,6 +205,7 @@ message Atom {
         SeOmapiReported se_omapi_reported = 141;
         BroadcastDispatchLatencyReported broadcast_dispatch_latency_reported = 142;
         AttentionManagerServiceResultReported attention_manager_service_result_reported = 143;
+        AdbConnectionChanged adb_connection_changed = 144;
     }
 
     // Pulled events will start at field 10000.
@@ -4496,4 +4498,26 @@ message AttentionManagerServiceResultReported {
         ATTENTION_FAILURE_UNKNOWN = 4;
     }
     optional AttentionCheckResult attention_check_result = 1 [default = UNKNOWN];
+}
+
+/**
+ * Logs when an adb connection changes state.
+ *
+ * Logged from:
+ *     frameworks/base/services/core/java/com/android/server/adb/AdbDebuggingManager.java
+ */
+message AdbConnectionChanged {
+    // The last time this system connected via adb, or 0 if the 'always allow' option was not
+    // previously selected for this system.
+    optional int64 last_connection_time_millis = 1;
+
+    // The time in ms within which a subsequent connection from an 'always allow' system is allowed
+    // to reconnect via adb without user interaction.
+    optional int64 auth_window_millis = 2;
+
+    // The state of the adb connection from frameworks/base/core/proto/android/debug/enums.proto.
+    optional android.debug.AdbConnectionStateEnum state = 3;
+
+    // True if the 'always allow' option was selected for this system.
+    optional bool always_allow = 4;
 }

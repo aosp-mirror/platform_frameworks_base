@@ -156,6 +156,7 @@
         </activity>
 
         <activity android:name="com.android.server.accounts.AccountAuthenticatorDummyActivity" />
+        <activity android:name="com.android.server.adb.AdbDebuggingManagerTestActivity" />
 
         <activity-alias android:name="a.ShortcutEnabled"
             android:targetActivity="com.android.server.pm.ShortcutTestActivity"
