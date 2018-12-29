@@ -262,6 +262,8 @@ public final class ImsCallProfile implements Parcelable {
     public static final String EXTRA_DISPLAY_TEXT = "DisplayText";
     public static final String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
     public static final String EXTRA_IS_CALL_PULL = "CallPull";
+    public static final String EXTRA_ADDITIONAL_SIP_INVITE_FIELDS =
+                                  "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
 
     /**
      * Extra key which the RIL can use to indicate the radio technology used for a call.

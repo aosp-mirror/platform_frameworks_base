@@ -614,6 +614,11 @@ public abstract class Connection extends Conferenceable {
     public static final String EVENT_HANDOVER_FAILED =
             "android.telecom.event.HANDOVER_FAILED";
 
+    /**
+     * Connection extra key used to store SIP invite fields for an incoming call for IMS calls
+     */
+    public static final String EXTRA_SIP_INVITE = "android.telecom.extra.SIP_INVITE";
+
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
