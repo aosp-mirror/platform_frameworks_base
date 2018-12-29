@@ -20,5 +20,8 @@
           android:alpha="?attr/disabledAlpha" />
     <item android:state_checked="true"
           android:color="?attr/colorControlActivated" />
+    <item android:state_checked="false"
+          android:color="?attr/colorForeground"
+          android:alpha="?attr/disabledAlpha" />
     <item android:color="?attr/colorForeground" />
 </selector>
