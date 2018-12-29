@@ -35,7 +35,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -83,8 +82,6 @@ public class NotificationEntryManager implements
             Dependency.get(DeviceProvisionedController.class);
     private final ForegroundServiceController mForegroundServiceController =
             Dependency.get(ForegroundServiceController.class);
-    private final AmbientPulseManager mAmbientPulseManager =
-            Dependency.get(AmbientPulseManager.class);
     private final BubbleController mBubbleController = Dependency.get(BubbleController.class);
 
     // Lazily retrieved dependencies
@@ -170,16 +167,20 @@ public class NotificationEntryManager implements
         mNotificationData.setHeadsUpManager(mHeadsUpManager);
         mListContainer = listContainer;
 
-        mNotificationLifetimeExtenders.add(mHeadsUpManager);
-        mNotificationLifetimeExtenders.add(mAmbientPulseManager);
-        mNotificationLifetimeExtenders.add(mGutsManager);
-        mNotificationLifetimeExtenders.addAll(getRemoteInputManager().getLifetimeExtenders());
-
-        for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
-            extender.setCallback(key -> removeNotification(key, mLatestRankingMap));
-        }
-
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
+    }
+
+    /** Adds multiple {@link NotificationLifetimeExtender}s. */
+    public void addNotificationLifetimeExtenders(List<NotificationLifetimeExtender> extenders) {
+        for (NotificationLifetimeExtender extender : extenders) {
+            addNotificationLifetimeExtender(extender);
+        }
+    }
+
+    /** Adds a {@link NotificationLifetimeExtender}. */
+    public void addNotificationLifetimeExtender(NotificationLifetimeExtender extender) {
+        mNotificationLifetimeExtenders.add(extender);
+        extender.setCallback(key -> removeNotification(key, mLatestRankingMap));
     }
 
     public NotificationData getNotificationData() {
