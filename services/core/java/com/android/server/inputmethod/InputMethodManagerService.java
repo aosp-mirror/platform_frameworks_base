@@ -4624,17 +4624,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @RequiresPermission(allOf = {
+                Manifest.permission.DUMP,
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                 Manifest.permission.WRITE_SECURE_SETTINGS,
-                Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+        })
         @BinderThread
         @ShellCommandResult
         @Override
         public int onCommand(@Nullable String cmd) {
             // For shell command, require all the permissions here in favor of code simplicity.
-            mService.mContext.enforceCallingPermission(
-                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
-            mService.mContext.enforceCallingPermission(
-                    Manifest.permission.WRITE_SECURE_SETTINGS, null);
+            Arrays.asList(
+                    Manifest.permission.DUMP,
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    Manifest.permission.WRITE_SECURE_SETTINGS
+            ).forEach(permission -> mService.mContext.enforceCallingPermission(permission, null));
 
             final long identity = Binder.clearCallingIdentity();
             try {
