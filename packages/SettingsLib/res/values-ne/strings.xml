@@ -231,7 +231,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"निष्क्रिय छ"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"स्वचालित"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"निजी DNS प्रदायकको होस्टनाम"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS प्रदायकको होस्टनाम प्रविष्ट गर्नुहोस्"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS प्रदायकको होस्टनाम प्रविष्टि गर्नुहोस्"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"जडान गर्न सकिएन"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ताररहित प्रदर्शन प्रमाणीकरणका लागि विकल्पहरू देखाउनुहोस्"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fi लग स्तर बढाउनुहोस्, Wi-Fi चयनकर्तामा प्रति SSID RSSI देखाइन्छ"</string>
@@ -419,7 +419,7 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"आफू अनुकूल (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"मद्दत र प्रतिक्रिया"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"मेनु"</string>
-    <string name="retail_demo_reset_message" msgid="118771671364131297">"डेमो मोडमा फ्याक्ट्री रिसेट गर्न पासवर्ड प्रविष्ट गर्नुहोस्"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"डेमो मोडमा फ्याक्ट्री रिसेट गर्न पासवर्ड प्रविष्टि गर्नुहोस्"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"अर्को"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"पासवर्ड आवश्यक छ"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"आगत विधिहरू सक्रिय गर्नुहोस्"</string>
