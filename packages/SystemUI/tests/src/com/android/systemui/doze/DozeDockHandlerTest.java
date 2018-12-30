@@ -119,7 +119,7 @@ public class DozeDockHandlerTest extends SysuiTestCase {
     @Test
     public void testOnEvent_undockedWhenDoze_neverRequestPulseOut() throws Exception {
         mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_PULSING);
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
 
         mDockManagerFake.setDockEvent(DockManager.STATE_UNDOCKING);
 

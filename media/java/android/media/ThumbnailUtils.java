@@ -36,6 +36,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
@@ -362,27 +363,27 @@ public class ThumbnailUtils {
     }
 
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static int computeSampleSize(BitmapFactory.Options options,
             int minSideLength, int maxNumOfPixels) {
         return 1;
     }
 
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static int computeInitialSampleSize(BitmapFactory.Options options,
             int minSideLength, int maxNumOfPixels) {
         return 1;
     }
 
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static void closeSilently(ParcelFileDescriptor c) {
         IoUtils.closeQuietly(c);
     }
 
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static ParcelFileDescriptor makeInputStream(
             Uri uri, ContentResolver cr) {
         try {
@@ -396,7 +397,7 @@ public class ThumbnailUtils {
      * Transform source Bitmap to targeted width and height.
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static Bitmap transform(Matrix scaler,
             Bitmap source,
             int targetWidth,
@@ -502,7 +503,7 @@ public class ThumbnailUtils {
     }
 
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static void createThumbnailFromEXIF(String filePath, int targetSize,
             int maxPixels, SizedThumbnailBitmap sizedThumbBitmap) {
     }

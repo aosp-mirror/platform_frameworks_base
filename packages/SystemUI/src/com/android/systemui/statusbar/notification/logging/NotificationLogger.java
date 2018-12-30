@@ -21,6 +21,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationStats;
+import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -32,8 +34,10 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +64,8 @@ public class NotificationLogger implements StateListener {
     // Dependencies:
     private final NotificationListenerService mNotificationListener;
     private final UiOffloadThread mUiOffloadThread;
-    protected NotificationEntryManager mEntryManager;
+    private final NotificationEntryManager mEntryManager;
+    private HeadsUpManager mHeadsUpManager;
 
     protected Handler mHandler = new Handler();
     protected IStatusBarService mBarService;
@@ -158,10 +163,36 @@ public class NotificationLogger implements StateListener {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         // Not expected to be destroyed, don't need to unsubscribe
         statusBarStateController.addCallback(this);
+
+        entryManager.addNotificationEntryListener(new NotificationEntryListener() {
+            @Override
+            public void onEntryRemoved(
+                    NotificationData.Entry entry,
+                    String key,
+                    StatusBarNotification old,
+                    NotificationVisibility visibility,
+                    boolean lifetimeExtended,
+                    boolean removedByUser) {
+                if (removedByUser && visibility != null) {
+                    logNotificationClear(key, entry.notification, visibility);
+                }
+            }
+
+            @Override
+            public void onInflationError(
+                    StatusBarNotification notification,
+                    Exception exception) {
+                logNotificationError(notification, exception);
+            }
+        });
     }
 
     public void setUpWithContainer(NotificationListContainer listContainer) {
         mListContainer = listContainer;
+    }
+
+    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
+        mHeadsUpManager = headsUpManager;
     }
 
     public void stopNotificationLogging() {
@@ -190,6 +221,45 @@ public class NotificationLogger implements StateListener {
     private void setDozing(boolean dozing) {
         synchronized (mDozingLock) {
             mDozing = dozing;
+        }
+    }
+
+    private void logNotificationClear(String key, StatusBarNotification notification,
+            NotificationVisibility nv) {
+        final String pkg = notification.getPackageName();
+        final String tag = notification.getTag();
+        final int id = notification.getId();
+        final int userId = notification.getUserId();
+        try {
+            int dismissalSurface = NotificationStats.DISMISSAL_SHADE;
+            if (mHeadsUpManager.isAlerting(key)) {
+                dismissalSurface = NotificationStats.DISMISSAL_PEEK;
+            } else if (mListContainer.hasPulsingNotifications()) {
+                dismissalSurface = NotificationStats.DISMISSAL_AOD;
+            }
+            int dismissalSentiment = NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
+            mBarService.onNotificationClear(pkg, tag, id, userId, notification.getKey(),
+                    dismissalSurface,
+                    dismissalSentiment, nv);
+        } catch (RemoteException ex) {
+            // system process is dead if we're here.
+        }
+    }
+
+    private void logNotificationError(
+            StatusBarNotification notification,
+            Exception exception) {
+        try {
+            mBarService.onNotificationError(
+                    notification.getPackageName(),
+                    notification.getTag(),
+                    notification.getId(),
+                    notification.getUid(),
+                    notification.getInitialPid(),
+                    exception.getMessage(),
+                    notification.getUserId());
+        } catch (RemoteException ex) {
+            // The end is nigh.
         }
     }
 

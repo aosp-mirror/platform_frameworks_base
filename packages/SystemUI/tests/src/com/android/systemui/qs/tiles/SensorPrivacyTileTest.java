@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,7 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
@@ -64,7 +66,8 @@ public class SensorPrivacyTileTest extends SysuiTestCase {
 
         when(mHost.getContext()).thenReturn(mContext);
 
-        mSensorPrivacyTile = new SensorPrivacyTile(mHost);
+        mSensorPrivacyTile = new SensorPrivacyTile(mHost, mSensorPrivacyManager, mKeyguard,
+                mock(ActivityStarter.class));
     }
 
     @Test

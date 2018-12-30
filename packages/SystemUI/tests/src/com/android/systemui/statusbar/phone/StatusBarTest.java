@@ -67,6 +67,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.appops.AppOpsController;
@@ -91,6 +92,7 @@ import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -149,10 +151,12 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private NotificationPresenter mNotificationPresenter;
     @Mock
-    private NotificationEntryListener mCallback;
+    private NotificationEntryListener mEntryListener;
     @Mock private BubbleController mBubbleController;
     @Mock
     private NotificationFilter mNotificationFilter;
+    @Mock
+    private NotificationAlertingManager mNotificationAlertingManager;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -180,6 +184,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mDeviceProvisionedController);
         mDependency.injectMockDependency(BubbleController.class);
         mDependency.injectTestDependency(NotificationFilter.class, mNotificationFilter);
+        mDependency.injectTestDependency(NotificationAlertingManager.class,
+                mNotificationAlertingManager);
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
         mPowerManager = new PowerManager(mContext, powerManagerService,
@@ -242,10 +248,14 @@ public class StatusBarTest extends SysuiTestCase {
                 mock(BubbleController.class));
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
+        SystemUIFactory.getInstance().getRootComponent()
+                .getStatusBarInjector()
+                .createStatusBar(mStatusBar);
         mStatusBar.putComponent(StatusBar.class, mStatusBar);
         Dependency.get(InitController.class).executePostInitTasks();
         mEntryManager.setUpForTest(mock(NotificationPresenter.class), mStackScroller,
-                mCallback, mHeadsUpManager, mNotificationData);
+                mHeadsUpManager, mNotificationData);
+        mEntryManager.addNotificationEntryListener(mEntryListener);
         mNotificationLogger.setUpWithContainer(mStackScroller);
 
         TestableLooper.get(this).setMessageHandler(m -> {
@@ -749,10 +759,9 @@ public class StatusBarTest extends SysuiTestCase {
 
         public void setUpForTest(NotificationPresenter presenter,
                 NotificationListContainer listContainer,
-                NotificationEntryListener callback,
                 HeadsUpManagerPhone headsUpManager,
                 NotificationData notificationData) {
-            super.setUpWithPresenter(presenter, listContainer, callback, headsUpManager);
+            super.setUpWithPresenter(presenter, listContainer, headsUpManager);
             mNotificationData = notificationData;
         }
     }

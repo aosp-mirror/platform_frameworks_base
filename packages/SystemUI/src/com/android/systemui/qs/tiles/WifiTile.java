@@ -30,7 +30,6 @@ import android.widget.Switch;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.wifi.AccessPoint;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -51,6 +50,8 @@ import com.android.systemui.statusbar.policy.WifiIcons;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Wifi **/
 public class WifiTile extends QSTileImpl<SignalState> {
     private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
@@ -64,12 +65,15 @@ public class WifiTile extends QSTileImpl<SignalState> {
     private final ActivityStarter mActivityStarter;
     private boolean mExpectDisabled;
 
-    public WifiTile(QSHost host) {
+    @Inject
+    public WifiTile(QSHost host, NetworkController networkController,
+            ActivityStarter activityStarter) {
         super(host);
-        mController = Dependency.get(NetworkController.class);
+        mController = networkController;
         mWifiController = mController.getAccessPointController();
         mDetailAdapter = (WifiDetailAdapter) createDetailAdapter();
-        mActivityStarter = Dependency.get(ActivityStarter.class);
+        mActivityStarter = activityStarter;
+        mController.observe(getLifecycle(), mSignalCallback);
     }
 
     @Override
@@ -79,11 +83,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mController.addCallback(mSignalCallback);
-        } else {
-            mController.removeCallback(mSignalCallback);
-        }
     }
 
     @Override

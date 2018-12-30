@@ -17,6 +17,7 @@ package android.app.usage;
 
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,37 +30,37 @@ public final class ConfigurationStats implements Parcelable {
     /**
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public Configuration mConfiguration;
 
     /**
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public long mBeginTimeStamp;
 
     /**
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public long mEndTimeStamp;
 
     /**
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public long mLastTimeActive;
 
     /**
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public long mTotalTimeActive;
 
     /**
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public int mActivationCount;
 
     /**

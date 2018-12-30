@@ -20,13 +20,22 @@
 #include "jni.h"
 #include <utils/Log.h>
 
+#include <errno.h>
+#include <fcntl.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <android-base/unique_fd.h>
 
 // TODO(112037636): Always include once fsverity.h is upstreamed and backported.
 #define HAS_FSVERITY 0
 
 #if HAS_FSVERITY
 #include <linux/fsverity.h>
+
+const int kSha256Bytes = 32;
 #endif
 
 namespace android {
@@ -66,9 +75,26 @@ class JavaByteArrayHolder {
     jbyte* mElements;
 };
 
+int measureFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
+#if HAS_FSVERITY
+    auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_digest) + kSha256Bytes);
+    fsverity_digest* data = reinterpret_cast<fsverity_digest*>(raii->getRaw());
+    data->digest_size = kSha256Bytes;  // the only input/output parameter
+
+    const char* path = env->GetStringUTFChars(filePath, nullptr);
+    ::android::base::unique_fd rfd(open(path, O_RDONLY));
+    if (ioctl(rfd.get(), FS_IOC_MEASURE_VERITY, data) < 0) {
+      return errno;
+    }
+    return 0;
+#else
+    LOG_ALWAYS_FATAL("fs-verity is used while not enabled");
+    return -1;
+#endif  // HAS_FSVERITY
+}
+
 jbyteArray constructFsveritySignedData(JNIEnv* env, jobject /* clazz */, jbyteArray digest) {
 #if HAS_FSVERITY
-    const int kSha256Bytes = 32;
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_digest_disk) + kSha256Bytes);
     fsverity_digest_disk* data = reinterpret_cast<fsverity_digest_disk*>(raii->getRaw());
 
@@ -146,6 +172,7 @@ jbyteArray constructFsverityFooter(JNIEnv* env, jobject /* clazz */,
 }
 
 const JNINativeMethod sMethods[] = {
+    { "measureFsverityNative", "(Ljava/lang/String;)I", (void *)measureFsverity },
     { "constructFsveritySignedDataNative", "([B)[B", (void *)constructFsveritySignedData },
     { "constructFsverityDescriptorNative", "(J)[B", (void *)constructFsverityDescriptor },
     { "constructFsverityExtensionNative", "(SI)[B", (void *)constructFsverityExtension },

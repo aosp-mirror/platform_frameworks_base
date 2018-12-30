@@ -98,7 +98,7 @@ import java.util.List;
  */
 public abstract class NotificationListenerService extends Service {
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String TAG = getClass().getSimpleName();
 
     /**
@@ -294,7 +294,7 @@ public abstract class NotificationListenerService extends Service {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     protected INotificationManager mNoMan;
 
     /**
@@ -516,7 +516,7 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     protected final INotificationManager getNotificationInterface() {
         if (mNoMan == null) {
             mNoMan = INotificationManager.Stub.asInterface(

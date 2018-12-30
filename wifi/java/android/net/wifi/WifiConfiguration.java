@@ -28,6 +28,7 @@ import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -632,7 +633,7 @@ public class WifiConfiguration implements Parcelable {
      *  the network we need to be before autojoin kicks in
      */
     /** @hide **/
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static int INVALID_RSSI = -127;
 
     // States for the userApproved field

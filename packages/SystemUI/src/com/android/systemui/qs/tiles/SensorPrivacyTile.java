@@ -23,13 +23,14 @@ import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
+
+import javax.inject.Inject;
 
 /** Quick settings tile: SensorPrivacy mode **/
 public class SensorPrivacyTile extends QSTileImpl<BooleanState> implements
@@ -39,12 +40,16 @@ public class SensorPrivacyTile extends QSTileImpl<BooleanState> implements
             ResourceIcon.get(R.drawable.ic_signal_sensors);
     private final KeyguardMonitor mKeyguard;
     private final SensorPrivacyManager mSensorPrivacyManager;
+    private final ActivityStarter mActivityStarter;
 
-    public SensorPrivacyTile(QSHost host) {
+    @Inject
+    public SensorPrivacyTile(QSHost host, SensorPrivacyManager sensorPrivacyManager,
+            KeyguardMonitor keyguardMonitor, ActivityStarter activityStarter) {
         super(host);
 
-        mSensorPrivacyManager = Dependency.get(SensorPrivacyManager.class);
-        mKeyguard = Dependency.get(KeyguardMonitor.class);
+        mSensorPrivacyManager = sensorPrivacyManager;
+        mKeyguard = keyguardMonitor;
+        mActivityStarter = activityStarter;
     }
 
     @Override
@@ -57,7 +62,7 @@ public class SensorPrivacyTile extends QSTileImpl<BooleanState> implements
         final boolean wasEnabled = mState.value;
         // Don't allow disabling from the lockscreen.
         if (wasEnabled && mKeyguard.isSecure() && mKeyguard.isShowing()) {
-            Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
+            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 MetricsLogger.action(mContext, getMetricsCategory(), !wasEnabled);
                 setEnabled(!wasEnabled);
             });

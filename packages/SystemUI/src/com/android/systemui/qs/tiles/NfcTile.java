@@ -33,6 +33,8 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Enable/Disable NFC **/
 public class NfcTile extends QSTileImpl<BooleanState> {
 
@@ -40,6 +42,7 @@ public class NfcTile extends QSTileImpl<BooleanState> {
 
     private boolean mListening;
 
+    @Inject
     public NfcTile(QSHost host) {
         super(host);
     }

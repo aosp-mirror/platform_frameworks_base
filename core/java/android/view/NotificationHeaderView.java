@@ -195,12 +195,10 @@ public class NotificationHeaderView extends ViewGroup {
             }
             int childHeight = child.getMeasuredHeight();
             MarginLayoutParams params = (MarginLayoutParams) child.getLayoutParams();
-            left += params.getMarginStart();
-            int right = left + child.getMeasuredWidth();
+            int layoutLeft;
+            int layoutRight;
             int top = (int) (getPaddingTop() + (ownHeight - childHeight) / 2.0f);
             int bottom = top + childHeight;
-            int layoutLeft = left;
-            int layoutRight = right;
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
                     || child == mAppOps) {
@@ -211,6 +209,12 @@ public class NotificationHeaderView extends ViewGroup {
                 }
                 layoutLeft = layoutRight - child.getMeasuredWidth();
                 end = layoutLeft - params.getMarginStart();
+            } else {
+                left += params.getMarginStart();
+                int right = left + child.getMeasuredWidth();
+                layoutLeft = left;
+                layoutRight = right;
+                left = right + params.getMarginEnd();
             }
             if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
                 int ltrLeft = layoutLeft;
@@ -218,7 +222,6 @@ public class NotificationHeaderView extends ViewGroup {
                 layoutRight = getWidth() - ltrLeft;
             }
             child.layout(layoutLeft, top, layoutRight, bottom);
-            left = right + params.getMarginEnd();
         }
         updateTouchListener();
     }

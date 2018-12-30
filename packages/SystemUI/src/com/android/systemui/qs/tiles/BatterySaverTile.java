@@ -23,12 +23,13 @@ import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.graph.BatteryMeterDrawableBase;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
+
+import javax.inject.Inject;
 
 public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         BatteryController.BatteryStateChangeCallback {
@@ -40,9 +41,11 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     private boolean mCharging;
     private boolean mPluggedIn;
 
-    public BatterySaverTile(QSHost host) {
+    @Inject
+    public BatterySaverTile(QSHost host, BatteryController batteryController) {
         super(host);
-        mBatteryController = Dependency.get(BatteryController.class);
+        mBatteryController = batteryController;
+        mBatteryController.observe(getLifecycle(), this);
     }
 
     @Override
@@ -57,11 +60,6 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mBatteryController.addCallback(this);
-        } else {
-            mBatteryController.removeCallback(this);
-        }
     }
 
     @Override

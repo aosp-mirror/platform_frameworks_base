@@ -37,6 +37,7 @@ import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
+import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -70,7 +71,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationPanelView.class), mock(HeadsUpManagerPhone.class),
                 statusBarWindowView, mock(NotificationListContainerViewGroup.class),
                 mock(DozeScrimController.class), mock(ScrimController.class),
-                mock(ActivityLaunchAnimator.class), mock(StatusBarKeyguardViewManager.class));
+                mock(ActivityLaunchAnimator.class), mock(StatusBarKeyguardViewManager.class),
+                mock(NotificationAlertingManager.class));
     }
 
     @Test

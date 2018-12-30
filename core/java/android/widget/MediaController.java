@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.media.AudioManager;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -87,9 +88,9 @@ public class MediaController extends FrameLayout {
     private WindowManager.LayoutParams mDecorLayoutParams;
     @UnsupportedAppUsage
     private ProgressBar mProgress;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private TextView mEndTime;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private TextView mCurrentTime;
     @UnsupportedAppUsage
     private boolean mShowing;
@@ -107,9 +108,9 @@ public class MediaController extends FrameLayout {
     private ImageButton mFfwdButton;
     @UnsupportedAppUsage
     private ImageButton mRewButton;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private ImageButton mNextButton;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private ImageButton mPrevButton;
     private CharSequence mPlayDescription;
     private CharSequence mPauseDescription;

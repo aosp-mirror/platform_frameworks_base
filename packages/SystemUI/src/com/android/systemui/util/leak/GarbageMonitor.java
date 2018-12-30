@@ -346,6 +346,7 @@ public class GarbageMonitor {
         private final GarbageMonitor gm;
         private ProcessMemInfo pmi;
 
+        @Inject
         public MemoryTile(QSHost host) {
             super(host);
             gm = SystemUIFactory.getInstance().getRootComponent().createGarbageMonitor();

@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.net.ConnectivityManager.PacketKeepalive;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -352,7 +353,7 @@ public abstract class NetworkAgent extends Handler {
     /**
      * Called by the bearer code when it has new NetworkInfo data.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void sendNetworkInfo(NetworkInfo networkInfo) {
         queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, new NetworkInfo(networkInfo));
     }

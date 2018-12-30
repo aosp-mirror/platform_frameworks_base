@@ -22,6 +22,8 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.power.PowerNotificationWarnings;
 import com.android.systemui.power.PowerUI;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
@@ -224,4 +226,9 @@ public abstract class DependencyBinder {
      */
     @Binds
     public abstract PowerUI.WarningsUI provideWarningsUi(PowerNotificationWarnings controllerImpl);
+
+    /**
+     */
+    @Binds
+    public abstract QSHost provideQsHost(QSTileHost controllerImpl);
 }

@@ -18,7 +18,6 @@ package com.android.settingslib.media;
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.util.Log;
 
@@ -31,7 +30,6 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -41,18 +39,14 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
 
     private static final String TAG = "BluetoothMediaManager";
 
-    private final DeviceProfileNotReadyObserverCallback mObserverCallback =
-            new DeviceProfileNotReadyObserverCallback();
+    private final DeviceAttributeChangeCallback mCachedDeviceCallback =
+            new DeviceAttributeChangeCallback();
 
     private LocalBluetoothManager mLocalBluetoothManager;
     private LocalBluetoothProfileManager mProfileManager;
 
     private MediaDevice mLastAddedDevice;
     private MediaDevice mLastRemovedDevice;
-
-    private boolean mIsA2dpProfileReady = false;
-    private boolean mIsHearingAidProfileReady = false;
-    private Collection<CachedBluetoothDevice> mCachedDevices;
 
     BluetoothMediaManager(Context context, LocalBluetoothManager localBluetoothManager,
             Notification notification) {
@@ -68,18 +62,6 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
         mLocalBluetoothManager.getEventManager().registerCallback(this);
         buildBluetoothDeviceList();
         dispatchDeviceListAdded();
-
-        // The profile may not ready when calling startScan().
-        // Device status are all disconnected since profiles are not ready to connected.
-        // In this case, we observe all devices in CachedDeviceManager.
-        // When one of these device is connected to profile, will call buildBluetoothDeviceList()
-        // again to find the connected devices.
-        if (!mIsA2dpProfileReady && !mIsHearingAidProfileReady) {
-            mCachedDevices = mLocalBluetoothManager.getCachedDeviceManager().getCachedDevicesCopy();
-            for (CachedBluetoothDevice device : mCachedDevices) {
-                device.registerCallback(mObserverCallback);
-            }
-        }
     }
 
     private void buildBluetoothDeviceList() {
@@ -114,8 +96,6 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
                 addMediaDevice(cachedDevice);
             }
         }
-
-        mIsA2dpProfileReady = a2dpProfile.isProfileReady();
     }
 
     private void addConnectedHearingAidDevices() {
@@ -150,14 +130,13 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
                 addMediaDevice(cachedDevice);
             }
         }
-
-        mIsHearingAidProfileReady = hapProfile.isProfileReady();
     }
 
     private void addMediaDevice(CachedBluetoothDevice cachedDevice) {
         MediaDevice mediaDevice = findMediaDevice(MediaDeviceUtils.getId(cachedDevice));
         if (mediaDevice == null) {
             mediaDevice = new BluetoothMediaDevice(mContext, cachedDevice);
+            cachedDevice.registerCallback(mCachedDeviceCallback);
             mLastAddedDevice = mediaDevice;
             mMediaDevices.add(mediaDevice);
         }
@@ -166,6 +145,16 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
     @Override
     public void stopScan() {
         mLocalBluetoothManager.getEventManager().unregisterCallback(this);
+        unregisterCachedDeviceCallback();
+    }
+
+    private void unregisterCachedDeviceCallback() {
+        for (MediaDevice device : mMediaDevices) {
+            if (device instanceof BluetoothMediaDevice) {
+                ((BluetoothMediaDevice) device).getCachedDevice()
+                        .unregisterCallback(mCachedDeviceCallback);
+            }
+        }
     }
 
     @Override
@@ -177,6 +166,8 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
             final List<MediaDevice> removeDevicesList = new ArrayList<>();
             for (MediaDevice device : mMediaDevices) {
                 if (device instanceof BluetoothMediaDevice) {
+                    ((BluetoothMediaDevice) device).getCachedDevice()
+                            .unregisterCallback(mCachedDeviceCallback);
                     removeDevicesList.add(device);
                 }
             }
@@ -221,6 +212,7 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
     private void removeMediaDevice(CachedBluetoothDevice cachedDevice) {
         final MediaDevice mediaDevice = findMediaDevice(MediaDeviceUtils.getId(cachedDevice));
         if (mediaDevice != null) {
+            cachedDevice.unregisterCallback(mCachedDeviceCallback);
             mLastRemovedDevice = mediaDevice;
             mMediaDevices.remove(mediaDevice);
         }
@@ -260,30 +252,10 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
             dispatchDeviceRemoved(cachedDevice);
         }
     }
-
-    @Override
-    public void onActiveDeviceChanged(CachedBluetoothDevice activeDevice, int bluetoothProfile) {
-        Log.d(TAG, "onActiveDeviceChanged : device : "
-                + activeDevice + ", profile : " + bluetoothProfile);
-        if (BluetoothProfile.HEARING_AID == bluetoothProfile
-                || BluetoothProfile.A2DP == bluetoothProfile) {
-            final String id = activeDevice == null
-                    ? PhoneMediaDevice.ID : MediaDeviceUtils.getId(activeDevice);
-            dispatchActiveDeviceChanged(id);
-        }
-    }
-
-    class DeviceProfileNotReadyObserverCallback implements CachedBluetoothDevice.Callback {
-
+    class DeviceAttributeChangeCallback implements CachedBluetoothDevice.Callback {
         @Override
         public void onDeviceAttributesChanged() {
-            if (!mIsA2dpProfileReady && !mIsHearingAidProfileReady) {
-                for (CachedBluetoothDevice device : mCachedDevices) {
-                    device.unregisterCallback(mObserverCallback);
-                }
-                buildBluetoothDeviceList();
-                dispatchDeviceListAdded();
-            }
+            dispatchDeviceAttributesChanged();
         }
     }
 }

@@ -174,6 +174,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final PackageManagerService mPm;
     private final Handler mHandler;
     private final PackageSessionProvider mSessionProvider;
+    private final StagingManager mStagingManager;
 
     final int sessionId;
     final int userId;
@@ -396,7 +397,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
             Context context, PackageManagerService pm,
-            PackageSessionProvider sessionProvider, Looper looper,
+            PackageSessionProvider sessionProvider, Looper looper, StagingManager stagingManager,
             int sessionId, int userId,
             String installerPackageName, int installerUid, SessionParams params, long createdMillis,
             File stageDir, String stageCid, boolean prepared, boolean sealed,
@@ -406,6 +407,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mPm = pm;
         mSessionProvider = sessionProvider;
         mHandler = new Handler(looper, mHandlerCallback);
+        mStagingManager = stagingManager;
 
         this.sessionId = sessionId;
         this.userId = userId;
@@ -1063,9 +1065,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
         if (isStaged()) {
-            // STOPSHIP: implement staged sessions
-            mStagedSessionReady = true;
-            mPm.sendSessionUpdatedBroadcast(generateInfo(), userId);
+            mStagingManager.commitSession(this);
             dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
             return;
         }
@@ -1083,7 +1083,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     if (activeSession != null) {
                         if ((activeSession.getSessionParams().installFlags
                                 & PackageManager.INSTALL_APEX) != 0) {
-                            // TODO(b/118865310): Add exception to this case for staged installs
                             throw new PackageManagerException(
                                     PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                                     "Atomic install is not supported for APEX packages.");
@@ -1950,6 +1949,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mCallback.onSessionFinished(this, success);
     }
 
+    void setStagedSessionReady() {
+        synchronized (mLock) {
+            mStagedSessionReady = true;
+            mStagedSessionApplied = false;
+            mStagedSessionFailed = false;
+            mStagedSessionErrorCode = SessionInfo.NO_ERROR;
+        }
+    }
+
     private void destroyInternal() {
         synchronized (mLock) {
             mSealed = true;
@@ -2151,7 +2159,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     //                       can have a complete session for the constructor
     public static PackageInstallerSession readFromXml(@NonNull XmlPullParser in,
             @NonNull PackageInstallerService.InternalCallback callback, @NonNull Context context,
-            @NonNull PackageManagerService pm, Looper installerThread, @NonNull File sessionsDir,
+            @NonNull PackageManagerService pm, Looper installerThread,
+            @NonNull StagingManager stagingManager, @NonNull File sessionsDir,
             @NonNull PackageSessionProvider sessionProvider)
             throws IOException, XmlPullParserException {
         final int sessionId = readIntAttribute(in, ATTR_SESSION_ID);
@@ -2195,8 +2204,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             params.appIconLastModified = appIconFile.lastModified();
         }
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
-                installerThread, sessionId, userId, installerPackageName, installerUid,
-                params, createdMillis, stageDir, stageCid, prepared, sealed,
+                installerThread, stagingManager, sessionId, userId, installerPackageName,
+                installerUid, params, createdMillis, stageDir, stageCid, prepared, sealed,
                 EMPTY_CHILD_SESSION_ARRAY, parentSessionId);
     }
 

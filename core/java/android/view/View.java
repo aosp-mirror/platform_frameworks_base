@@ -4683,7 +4683,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * a long press could be performed before the tap is checked, in which case the tap's action
      * should not be invoked.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean mHasPerformedLongPress;
 
     /**
@@ -14840,7 +14840,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param flags Constant indicating the value which should be set
      * @param mask Constant indicating the bit range that should be changed
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     void setFlags(int flags, int mask) {
         final boolean accessibilityEnabled =
                 AccessibilityManager.getInstance(mContext).isEnabled();

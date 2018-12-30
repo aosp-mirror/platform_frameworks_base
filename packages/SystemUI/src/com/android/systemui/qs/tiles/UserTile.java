@@ -22,7 +22,6 @@ import android.provider.Settings;
 import android.util.Pair;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
@@ -31,16 +30,21 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
+import javax.inject.Inject;
+
 public class UserTile extends QSTileImpl<State> implements UserInfoController.OnUserInfoChangedListener {
 
     private final UserSwitcherController mUserSwitcherController;
     private final UserInfoController mUserInfoController;
     private Pair<String, Drawable> mLastUpdate;
 
-    public UserTile(QSHost host) {
+    @Inject
+    public UserTile(QSHost host, UserSwitcherController userSwitcherController,
+            UserInfoController userInfoController) {
         super(host);
-        mUserSwitcherController = Dependency.get(UserSwitcherController.class);
-        mUserInfoController = Dependency.get(UserInfoController.class);
+        mUserSwitcherController = userSwitcherController;
+        mUserInfoController = userInfoController;
+        mUserInfoController.observe(getLifecycle(), this);
     }
 
     @Override
@@ -70,11 +74,6 @@ public class UserTile extends QSTileImpl<State> implements UserInfoController.On
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mUserInfoController.addCallback(this);
-        } else {
-            mUserInfoController.removeCallback(this);
-        }
     }
 
     @Override

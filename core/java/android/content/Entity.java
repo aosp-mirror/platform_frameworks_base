@@ -18,6 +18,7 @@ package android.content;
 
 import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
+import android.os.Build;
 
 import java.util.ArrayList;
 
@@ -29,9 +30,9 @@ import java.util.ArrayList;
  * corresponds to that RawContact. The uri refers to the Data table uri for each row.
  */
 public final class Entity {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final private ContentValues mValues;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final private ArrayList<NamedContentValues> mSubValues;
 
     public Entity(ContentValues values) {

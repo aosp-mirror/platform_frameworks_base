@@ -20,8 +20,13 @@ import static android.view.InsetsState.INSET_SIDE_BOTTOM;
 import static android.view.InsetsState.INSET_SIDE_TOP;
 import static android.view.InsetsState.TYPE_IME;
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.TYPE_SIDE_BAR_1;
+import static android.view.InsetsState.TYPE_SIDE_BAR_2;
+import static android.view.InsetsState.TYPE_SIDE_BAR_3;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertNotEquals;
 
 import android.graphics.Rect;
@@ -132,5 +137,14 @@ public class InsetsStateTest {
         mState2.readFromParcel(p);
         p.recycle();
         assertEquals(mState, mState2);
+    }
+
+    @Test
+    public void testGetDefaultVisibility() {
+        assertTrue(InsetsState.getDefaultVisibly(TYPE_TOP_BAR));
+        assertTrue(InsetsState.getDefaultVisibly(TYPE_SIDE_BAR_1));
+        assertTrue(InsetsState.getDefaultVisibly(TYPE_SIDE_BAR_2));
+        assertTrue(InsetsState.getDefaultVisibly(TYPE_SIDE_BAR_3));
+        assertFalse(InsetsState.getDefaultVisibly(TYPE_IME));
     }
 }

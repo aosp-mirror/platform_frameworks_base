@@ -49,7 +49,6 @@ import android.widget.Toast;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.notification.EnableZenModeDialog;
-import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysUIToast;
@@ -61,6 +60,8 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.volume.ZenModePanel;
+
+import javax.inject.Inject;
 
 /** Quick settings tile: Do not disturb **/
 public class DndTile extends QSTileImpl<BooleanState> {
@@ -76,17 +77,22 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
+    private final ActivityStarter mActivityStarter;
 
     private boolean mListening;
     private boolean mShowingDetail;
     private boolean mReceiverRegistered;
 
-    public DndTile(QSHost host) {
+    @Inject
+    public DndTile(QSHost host, ZenModeController zenModeController,
+            ActivityStarter activityStarter) {
         super(host);
-        mController = Dependency.get(ZenModeController.class);
+        mController = zenModeController;
+        mActivityStarter = activityStarter;
         mDetailAdapter = new DndDetailAdapter();
         mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_SET_VISIBLE));
         mReceiverRegistered = true;
+        mController.observe(getLifecycle(), mZenCallback);
     }
 
     @Override
@@ -157,7 +163,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
             // show on-boarding screen
             Intent intent = new Intent(Settings.ZEN_MODE_ONBOARDING);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(intent, 0);
+            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
         } else {
             switch (zenDuration) {
                 case Settings.Secure.ZEN_DURATION_PROMPT:
@@ -281,10 +287,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
         if (mListening == listening) return;
         mListening = listening;
         if (mListening) {
-            mController.addCallback(mZenCallback);
             Prefs.registerListener(mContext, mPrefListener);
         } else {
-            mController.removeCallback(mZenCallback);
             Prefs.unregisterListener(mContext, mPrefListener);
         }
     }
@@ -445,7 +449,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private final ZenModePanel.Callback mZenModePanelCallback = new ZenModePanel.Callback() {
         @Override
         public void onPrioritySettings() {
-            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
+            mActivityStarter.postStartActivityDismissingKeyguard(
                     ZEN_PRIORITY_SETTINGS, 0);
         }
 

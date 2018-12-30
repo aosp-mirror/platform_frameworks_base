@@ -16,6 +16,8 @@ package com.android.systemui;
 
 import android.util.Log;
 
+import com.android.systemui.statusbar.phone.StatusBar;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -63,6 +65,11 @@ public class SystemBars extends SystemUI {
         }
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mComponents;
+        if (mStatusBar instanceof StatusBar) {
+            SystemUIFactory.getInstance().getRootComponent()
+                    .getStatusBarInjector()
+                    .createStatusBar((StatusBar) mStatusBar);
+        }
         mStatusBar.start();
         if (DEBUG) Log.d(TAG, "started " + mStatusBar.getClass().getSimpleName());
     }

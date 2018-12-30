@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -91,7 +92,7 @@ public class OperatorInfo implements Parcelable {
                 operatorNumeric, rilStateToState(stateString));
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public OperatorInfo(String operatorAlphaLong,
             String operatorAlphaShort,
             String operatorNumeric) {

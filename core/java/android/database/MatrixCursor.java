@@ -17,6 +17,7 @@
 package android.database;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import java.util.ArrayList;
 
 /**
@@ -27,9 +28,9 @@ import java.util.ArrayList;
 public class MatrixCursor extends AbstractCursor {
 
     private final String[] columnNames;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Object[] data;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int rowCount = 0;
     private final int columnCount;
 

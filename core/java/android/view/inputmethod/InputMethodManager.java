@@ -26,6 +26,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.app.ActivityThread;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
@@ -37,11 +39,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.Trace;
+import android.provider.Settings;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
 import android.util.Pools.Pool;
@@ -231,6 +235,8 @@ public final class InputMethodManager {
     static final String TAG = "InputMethodManager";
 
     static final String PENDING_EVENT_COUNTER = "aq:imm";
+
+    private static final int NOT_A_SUBTYPE_ID = -1;
 
     /**
      * A constant that represents Voice IME.
@@ -2071,6 +2077,13 @@ public final class InputMethodManager {
     /**
      * Force switch to a new input method component. This can only be called
      * from an application or a service which has a token of the currently active input method.
+     *
+     * <p>On Android {@link Build.VERSION_CODES#Q} and later devices, the undocumented behavior that
+     * token can be {@code null} when the caller has
+     * {@link android.Manifest.permission#WRITE_SECURE_SETTINGS} is deprecated. Instead, update
+     * {@link android.provider.Settings.Secure#DEFAULT_INPUT_METHOD} and
+     * {@link android.provider.Settings.Secure#SELECTED_INPUT_METHOD_SUBTYPE} directly.</p>
+     *
      * @param token Supplies the identifying token given to an input method
      * when it was started, which allows it to perform this operation on
      * itself.
@@ -2082,14 +2095,50 @@ public final class InputMethodManager {
     @Deprecated
     public void setInputMethod(IBinder token, String id) {
         if (token == null) {
-            // Note: null token is allowed for callers that have WRITE_SECURE_SETTINGS permission.
-            // Thus we cannot always rely on InputMethodPrivilegedOperationsRegistry unfortunately.
-            // TODO(Bug 114488811): Consider deprecating null token rule.
-            try {
-                mService.setInputMethod(token, id);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+            // There are still some system components that rely on this undocumented behavior
+            // regarding null IME token with WRITE_SECURE_SETTINGS.  Provide a fallback logic as a
+            // temporary remedy.
+            if (id == null) {
+                return;
             }
+            if (Process.myUid() == Process.SYSTEM_UID) {
+                Log.w(TAG, "System process should not be calling setInputMethod() because almost "
+                        + "always it is a bug under multi-user / multi-profile environment. "
+                        + "Consider interacting with InputMethodManagerService directly via "
+                        + "LocalServices.");
+                return;
+            }
+            final Context fallbackContext = ActivityThread.currentApplication();
+            if (fallbackContext == null) {
+                return;
+            }
+            if (fallbackContext.checkSelfPermission(WRITE_SECURE_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            final List<InputMethodInfo> imis = getEnabledInputMethodList();
+            final int numImis = imis.size();
+            boolean found = false;
+            for (int i = 0; i < numImis; ++i) {
+                final InputMethodInfo imi = imis.get(i);
+                if (id.equals(imi.getId())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                Log.e(TAG, "Ignoring setInputMethod(null, " + id + ") because the specified "
+                        + "id not found in enabled IMEs.");
+                return;
+            }
+            Log.w(TAG, "The undocumented behavior that setInputMethod() accepts null token "
+                    + "when the caller has WRITE_SECURE_SETTINGS is deprecated. This behavior may "
+                    + "be completely removed in a future version.  Update secure settings directly "
+                    + "instead.");
+            final ContentResolver resolver = fallbackContext.getContentResolver();
+            Settings.Secure.putInt(resolver, Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
+                    NOT_A_SUBTYPE_ID);
+            Settings.Secure.putString(resolver, Settings.Secure.DEFAULT_INPUT_METHOD, id);
             return;
         }
         InputMethodPrivilegedOperationsRegistry.get(token).setInputMethod(id);

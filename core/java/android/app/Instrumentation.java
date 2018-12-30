@@ -29,6 +29,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -110,6 +111,7 @@ public class Instrumentation {
     private PerformanceCollector mPerformanceCollector;
     private Bundle mPerfMetrics = new Bundle();
     private UiAutomation mUiAutomation;
+    private final Object mAnimationCompleteLock = new Object();
 
     public Instrumentation() {
     }
@@ -397,6 +399,31 @@ public class Instrumentation {
         idler.waitForIdle();
     }
 
+    private void waitForEnterAnimationComplete(Activity activity) {
+        synchronized (mAnimationCompleteLock) {
+            long timeout = 5000;
+            try {
+                // We need to check that this specified Activity completed the animation, not just
+                // any Activity. If it was another Activity, then decrease the timeout by how long
+                // it's already waited and wait for the thread to wakeup again.
+                while (timeout > 0 && !activity.mEnterAnimationComplete) {
+                    long startTime = System.currentTimeMillis();
+                    mAnimationCompleteLock.wait(timeout);
+                    long totalTime = System.currentTimeMillis() - startTime;
+                    timeout -= totalTime;
+                }
+            } catch (InterruptedException e) {
+            }
+        }
+    }
+
+    /** @hide */
+    public void onEnterAnimationComplete() {
+        synchronized (mAnimationCompleteLock) {
+            mAnimationCompleteLock.notifyAll();
+        }
+    }
+
     /**
      * Execute a call on the application's main thread, blocking until it is
      * complete.  Useful for doing things that are not thread-safe, such as
@@ -499,6 +526,7 @@ public class Instrumentation {
                 }
             } while (mWaitingActivities.contains(aw));
 
+            waitForEnterAnimationComplete(aw.activity);
             return aw.activity;
         }
     }
@@ -2002,7 +2030,7 @@ public class Instrumentation {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static void checkStartActivityResult(int res, Object intent) {
         if (!ActivityManager.isStartResultFatalError(res)) {
             return;

@@ -35,7 +35,7 @@ public class InsetsSourceConsumer {
     private final InsetsState mState;
     private final InsetsController mController;
     private @Nullable InsetsSourceControl mSourceControl;
-    private boolean mHidden;
+    private boolean mVisible;
 
     public InsetsSourceConsumer(@InternalInsetType int type, InsetsState state,
             Supplier<Transaction> transactionSupplier, InsetsController controller) {
@@ -43,6 +43,7 @@ public class InsetsSourceConsumer {
         mState = state;
         mTransactionSupplier = transactionSupplier;
         mController = controller;
+        mVisible = InsetsState.getDefaultVisibly(type);
     }
 
     public void setControl(@Nullable InsetsSourceControl control) {
@@ -51,8 +52,9 @@ public class InsetsSourceConsumer {
         }
         mSourceControl = control;
         applyHiddenToControl();
-        applyLocalVisibilityOverride();
-        mController.notifyVisibilityChanged();
+        if (applyLocalVisibilityOverride()) {
+            mController.notifyVisibilityChanged();
+        }
     }
 
     @VisibleForTesting
@@ -66,28 +68,32 @@ public class InsetsSourceConsumer {
 
     @VisibleForTesting
     public void show() {
-        setHidden(false);
+        setVisible(true);
     }
 
     @VisibleForTesting
     public void hide() {
-        setHidden(true);
+        setVisible(false);
     }
 
-    void applyLocalVisibilityOverride() {
+    boolean applyLocalVisibilityOverride() {
 
         // If we don't have control, we are not able to change the visibility.
         if (mSourceControl == null) {
-            return;
+            return false;
         }
-        mState.getSource(mType).setVisible(!mHidden);
+        if (mState.getSource(mType).isVisible() == mVisible) {
+            return false;
+        }
+        mState.getSource(mType).setVisible(mVisible);
+        return true;
     }
 
-    private void setHidden(boolean hidden) {
-        if (mHidden == hidden) {
+    private void setVisible(boolean visible) {
+        if (mVisible == visible) {
             return;
         }
-        mHidden = hidden;
+        mVisible = visible;
         applyHiddenToControl();
         applyLocalVisibilityOverride();
         mController.notifyVisibilityChanged();
@@ -100,10 +106,10 @@ public class InsetsSourceConsumer {
 
         // TODO: Animation
         final Transaction t = mTransactionSupplier.get();
-        if (mHidden) {
-            t.hide(mSourceControl.getLeash());
-        } else {
+        if (mVisible) {
             t.show(mSourceControl.getLeash());
+        } else {
+            t.hide(mSourceControl.getLeash());
         }
         t.apply();
     }

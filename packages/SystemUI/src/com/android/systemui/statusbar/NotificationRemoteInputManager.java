@@ -17,6 +17,8 @@ package com.android.systemui.statusbar;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 
+import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -26,6 +28,7 @@ import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -46,9 +49,9 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -60,7 +63,10 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * Class for handling remote input state over a set of notifications. This class handles things
@@ -100,15 +106,12 @@ public class NotificationRemoteInputManager implements Dumpable {
             new ArraySet<>();
 
     // Dependencies:
-    protected final NotificationLockscreenUserManager mLockscreenUserManager =
-            Dependency.get(NotificationLockscreenUserManager.class);
-    protected final SmartReplyController mSmartReplyController =
-            Dependency.get(SmartReplyController.class);
-    private final NotificationEntryManager mEntryManager
-            = Dependency.get(NotificationEntryManager.class);
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
+    private final SmartReplyController mSmartReplyController;
+    private final NotificationEntryManager mEntryManager;
+    private final Handler mMainHandler;
 
-    // Lazy
-    private ShadeController mShadeController;
+    private final Lazy<ShadeController> mShadeController;
 
     protected final Context mContext;
     private final UserManager mUserManager;
@@ -126,7 +129,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         @Override
         public boolean onClickHandler(
                 View view, PendingIntent pendingIntent, RemoteViews.RemoteResponse response) {
-            getShadeController().wakeUpIfDozing(SystemClock.uptimeMillis(), view);
+            mShadeController.get().wakeUpIfDozing(SystemClock.uptimeMillis(), view);
 
             if (handleRemoteInput(view, pendingIntent)) {
                 return true;
@@ -226,21 +229,40 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
     };
 
-    private ShadeController getShadeController() {
-        if (mShadeController == null) {
-            mShadeController = Dependency.get(ShadeController.class);
-        }
-        return mShadeController;
-    }
-
     @Inject
-    public NotificationRemoteInputManager(Context context) {
+    public NotificationRemoteInputManager(
+            Context context,
+            NotificationLockscreenUserManager lockscreenUserManager,
+            SmartReplyController smartReplyController,
+            NotificationEntryManager notificationEntryManager,
+            Lazy<ShadeController> shadeController,
+            @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
         mContext = context;
+        mLockscreenUserManager = lockscreenUserManager;
+        mSmartReplyController = smartReplyController;
+        mEntryManager = notificationEntryManager;
+        mShadeController = shadeController;
+        mMainHandler = mainHandler;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         addLifetimeExtenders();
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
+
+        notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
+            @Override
+            public void onEntryRemoved(
+                    NotificationData.Entry entry,
+                    String key,
+                    StatusBarNotification old,
+                    NotificationVisibility visibility,
+                    boolean lifetimeExtended,
+                    boolean removedByUser) {
+                if (removedByUser) {
+                    onPerformRemoveNotification(entry, key);
+                }
+            }
+        });
     }
 
     /** Initializes this component with the provided dependencies. */
@@ -258,7 +280,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                     // view it is already canceled, so we'll need to cancel it on the apps behalf
                     // after sending - unless the app posts an update in the mean time, so wait a
                     // bit.
-                    Dependency.get(Dependency.MAIN_HANDLER).postDelayed(() -> {
+                    mMainHandler.postDelayed(() -> {
                         if (mEntriesKeptForRemoteInputActive.remove(entry)) {
                             mNotificationLifetimeFinishedCallback.onSafeToRemove(entry.key);
                         }
@@ -392,10 +414,10 @@ public class NotificationRemoteInputManager implements Dumpable {
         return mRemoteInputController;
     }
 
-    public void onPerformRemoveNotification(StatusBarNotification n,
-            NotificationData.Entry entry) {
-        if (mKeysKeptForRemoteInputHistory.contains(n.getKey())) {
-            mKeysKeptForRemoteInputHistory.remove(n.getKey());
+    @VisibleForTesting
+    void onPerformRemoveNotification(NotificationData.Entry entry, final String key) {
+        if (mKeysKeptForRemoteInputHistory.contains(key)) {
+            mKeysKeptForRemoteInputHistory.remove(key);
         }
         if (mRemoteInputController.isRemoteInputActive(entry)) {
             mRemoteInputController.removeRemoteInput(entry, null);

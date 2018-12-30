@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.content.ComponentName;
+import android.os.Handler;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -30,8 +31,11 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.tileimpl.QSFactoryImpl;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.tuner.TunerService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -55,8 +59,13 @@ public class TileServicesTest extends SysuiTestCase {
     public void setUp() throws Exception {
         mDependency.injectMockDependency(BluetoothController.class);
         mManagers = new ArrayList<>();
-        QSTileHost host = new QSTileHost(mContext, null,
-                mock(StatusBarIconController.class));
+        QSTileHost host = new QSTileHost(mContext,
+                mock(StatusBarIconController.class),
+                mock(QSFactoryImpl.class),
+                new Handler(),
+                Looper.myLooper(),
+                mock(PluginManager.class),
+                mock(TunerService.class));
         mTileService = new TestTileServices(host, Looper.getMainLooper());
     }
 

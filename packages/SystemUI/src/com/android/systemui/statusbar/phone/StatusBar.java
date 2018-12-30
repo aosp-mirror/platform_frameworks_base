@@ -159,7 +159,6 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -187,6 +186,7 @@ import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
@@ -220,6 +220,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.volume.VolumeComponent;
 
 import java.io.FileDescriptor;
@@ -227,6 +228,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.Subcomponent;
 
 public class StatusBar extends SystemUI implements DemoMode,
         ActivityStarter, OnUnlockMethodChangedListener,
@@ -353,6 +358,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Object mQueueLock = new Object();
 
     protected StatusBarIconController mIconController;
+    @Inject
+    InjectionInflationController mInjectionInflater;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -385,6 +392,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected AppOpsController mAppOpsController;
     protected KeyguardViewMediator mKeyguardViewMediator;
     private ZenModeController mZenController;
+    private final NotificationAlertingManager mNotificationAlertingManager =
+            Dependency.get(NotificationAlertingManager.class);
 
     // for disabling the status bar
     private int mDisabled1 = 0;
@@ -859,6 +868,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.setHeadsUpManager(mHeadsUpManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
         mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
+        mNotificationLogger.setHeadsUpManager(mHeadsUpManager);
         putComponent(HeadsUpManager.class, mHeadsUpManager);
 
         createNavigationBar();
@@ -938,8 +948,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                             .withPlugin(QS.class)
                             .withDefault(this::createDefaultQSFragment)
                             .build());
-            final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
-                    mIconController);
             mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow,
                     (visible) -> {
                         mBrightnessMirrorVisible = visible;
@@ -948,7 +956,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             fragmentHostManager.addTagListener(QS.TAG, (tag, f) -> {
                 QS qs = (QS) f;
                 if (qs instanceof QSFragment) {
-                    ((QSFragment) qs).setHost(qsh);
                     mQSPanel = ((QSFragment) qs).getQsPanel();
                     mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
                 }
@@ -1036,7 +1043,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
-                mScrimController, mActivityLaunchAnimator, mStatusBarKeyguardViewManager);
+                mScrimController, mActivityLaunchAnimator, mStatusBarKeyguardViewManager,
+                mNotificationAlertingManager);
 
         mAppOpsController.addCallback(APP_OPS, this);
         mNotificationListener.setUpWithPresenter(mPresenter);
@@ -1196,8 +1204,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     protected void inflateStatusBarWindow(Context context) {
-        mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
-                R.layout.super_status_bar, null);
+        mStatusBarWindow = (StatusBarWindowView) mInjectionInflater.injectable(
+                LayoutInflater.from(context)).inflate(R.layout.super_status_bar, null);
     }
 
     protected void startKeyguard() {
@@ -4503,5 +4511,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public NotificationGutsManager getGutsManager() {
         return mGutsManager;
+    }
+
+    @Subcomponent
+    public interface StatusBarInjector {
+        void createStatusBar(StatusBar statusbar);
     }
 }

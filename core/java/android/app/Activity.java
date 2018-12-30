@@ -848,7 +848,7 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage
     /*package*/ boolean mWindowAdded = false;
     /*package*/ boolean mVisibleFromServer = false;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     /*package*/ boolean mVisibleFromClient = true;
     /*package*/ ActionBar mActionBar = null;
     private boolean mEnableDefaultActionBarUp;
@@ -923,6 +923,9 @@ public class Activity extends ContextThemeWrapper
     private int mLastAutofillId = View.LAST_APP_AUTOFILL_ID;
 
     private AutofillPopupWindow mAutofillPopupWindow;
+
+    /** @hide */
+    boolean mEnterAnimationComplete;
 
     private static native String getDlWarning();
 
@@ -2328,6 +2331,7 @@ public class Activity extends ContextThemeWrapper
             }
             notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_STOP);
         }
+        mEnterAnimationComplete = false;
     }
 
     /**
@@ -7085,6 +7089,8 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     public void dispatchEnterAnimationComplete() {
+        mEnterAnimationComplete = true;
+        mInstrumentation.onEnterAnimationComplete();
         onEnterAnimationComplete();
         if (getWindow() != null && getWindow().getDecorView() != null) {
             getWindow().getDecorView().getViewTreeObserver().dispatchOnEnterAnimationComplete();

@@ -4,6 +4,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -14,18 +15,18 @@ import android.os.Parcelable;
  * {@link android.app.Activity#onProvideAssistContent Activity.onProvideAssistContent}.
  */
 public class AssistContent implements Parcelable {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean mIsAppProvidedIntent = false;
     private boolean mIsAppProvidedWebUri = false;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Intent mIntent;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mStructuredData;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private ClipData mClipData;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Uri mUri;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final Bundle mExtras;
 
     public AssistContent() {
@@ -174,7 +175,7 @@ public class AssistContent implements Parcelable {
         mIsAppProvidedWebUri = in.readInt() == 1;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     void writeToParcelInternal(Parcel dest, int flags) {
         if (mIntent != null) {
             dest.writeInt(1);

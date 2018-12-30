@@ -44,6 +44,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import javax.inject.Inject;
+
 public class NightDisplayTile extends QSTileImpl<BooleanState>
         implements ColorDisplayController.Callback {
 
@@ -58,6 +60,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
     private ColorDisplayController mController;
     private boolean mIsListening;
 
+    @Inject
     public NightDisplayTile(QSHost host) {
         super(host);
         mController = new ColorDisplayController(mContext, ActivityManager.getCurrentUser());

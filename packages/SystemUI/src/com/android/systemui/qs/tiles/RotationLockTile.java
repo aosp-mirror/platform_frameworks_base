@@ -24,7 +24,6 @@ import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
@@ -32,15 +31,19 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Rotation **/
 public class RotationLockTile extends QSTileImpl<BooleanState> {
 
     private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_auto_rotate);
     private final RotationLockController mController;
 
-    public RotationLockTile(QSHost host) {
+    @Inject
+    public RotationLockTile(QSHost host, RotationLockController rotationLockController) {
         super(host);
-        mController = Dependency.get(RotationLockController.class);
+        mController = rotationLockController;
+        mController.observe(this, mCallback);
     }
 
     @Override
@@ -49,11 +52,6 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
     }
 
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mController.addCallback(mCallback);
-        } else {
-            mController.removeCallback(mCallback);
-        }
     }
 
     @Override

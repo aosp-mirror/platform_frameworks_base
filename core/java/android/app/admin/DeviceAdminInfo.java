@@ -29,6 +29,7 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -174,7 +175,7 @@ public final class DeviceAdminInfo implements Parcelable {
     /** @hide */
     public static class PolicyInfo {
         public final int ident;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public final String tag;
         public final int label;
         public final int description;

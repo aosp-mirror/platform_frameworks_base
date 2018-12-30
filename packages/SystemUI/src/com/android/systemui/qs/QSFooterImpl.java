@@ -18,6 +18,8 @@ package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
+import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
@@ -48,7 +50,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.graph.SignalDrawable;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.R.dimen;
 import com.android.systemui.plugins.ActivityStarter;
@@ -63,11 +64,16 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 import com.android.systemui.tuner.TunerService;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 public class QSFooterImpl extends FrameLayout implements QSFooter,
         OnClickListener, OnUserInfoChangedListener, EmergencyListener, SignalCallback {
 
-    private ActivityStarter mActivityStarter;
-    private UserInfoController mUserInfoController;
+    private final ActivityStarter mActivityStarter;
+    private final UserInfoController mUserInfoController;
+    private final NetworkController mNetworkController;
+    private final DeviceProvisionedController mDeviceProvisionedController;
     private SettingsButton mSettingsButton;
     protected View mSettingsContainer;
     private PageIndicator mPageIndicator;
@@ -100,9 +106,17 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private final CellSignalState mInfo = new CellSignalState();
     private OnClickListener mExpandClickListener;
 
-    public QSFooterImpl(Context context, AttributeSet attrs) {
+    @Inject
+    public QSFooterImpl(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
+            ActivityStarter activityStarter, UserInfoController userInfoController,
+            NetworkController networkController,
+            DeviceProvisionedController deviceProvisionedController) {
         super(context, attrs);
         mColorForeground = Utils.getColorAttrDefaultColor(context, android.R.attr.colorForeground);
+        mActivityStarter = activityStarter;
+        mUserInfoController = userInfoController;
+        mNetworkController = networkController;
+        mDeviceProvisionedController = deviceProvisionedController;
     }
 
     @Override
@@ -111,7 +125,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mDivider = findViewById(R.id.qs_footer_divider);
         mEdit = findViewById(android.R.id.edit);
         mEdit.setOnClickListener(view ->
-                Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() ->
+                mActivityStarter.postQSRunnableDismissingKeyguard(() ->
                         mQsPanel.showEdit(view)));
 
         mPageIndicator = findViewById(R.id.footer_page_indicator);
@@ -137,8 +151,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
         updateResources();
 
-        mUserInfoController = Dependency.get(UserInfoController.class);
-        mActivityStarter = Dependency.get(ActivityStarter.class);
         addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight,
                 oldBottom) -> updateAnimator(right - left));
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
@@ -316,14 +328,14 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private void updateListeners() {
         if (mListening) {
             mUserInfoController.addCallback(this);
-            if (Dependency.get(NetworkController.class).hasVoiceCallingFeature()) {
-                Dependency.get(NetworkController.class).addEmergencyListener(this);
-                Dependency.get(NetworkController.class).addCallback(this);
+            if (mNetworkController.hasVoiceCallingFeature()) {
+                mNetworkController.addEmergencyListener(this);
+                mNetworkController.addCallback(this);
             }
         } else {
             mUserInfoController.removeCallback(this);
-            Dependency.get(NetworkController.class).removeEmergencyListener(this);
-            Dependency.get(NetworkController.class).removeCallback(this);
+            mNetworkController.removeEmergencyListener(this);
+            mNetworkController.removeCallback(this);
         }
     }
 
@@ -344,7 +356,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         }
 
         if (v == mSettingsButton) {
-            if (!Dependency.get(DeviceProvisionedController.class).isCurrentUserSetup()) {
+            if (!mDeviceProvisionedController.isCurrentUserSetup()) {
                 // If user isn't setup just unlock the device and dump them back at SUW.
                 mActivityStarter.postQSRunnableDismissingKeyguard(() -> { });
                 return;
@@ -353,7 +365,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                     mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
                             : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
             if (mSettingsButton.isTunerClick()) {
-                Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
+                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                     if (TunerService.isTunerEnabled(mContext)) {
                         TunerService.showResetRequest(mContext, () -> {
                             // Relaunch settings so that the tuner disappears.

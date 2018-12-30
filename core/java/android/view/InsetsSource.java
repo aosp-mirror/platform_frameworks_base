@@ -65,6 +65,10 @@ public class InsetsSource implements Parcelable {
         return mFrame;
     }
 
+    public boolean isVisible() {
+        return mVisible;
+    }
+
     /**
      * Calculates the insets this source will cause to a client window.
      *

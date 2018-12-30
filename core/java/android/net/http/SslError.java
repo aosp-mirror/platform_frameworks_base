@@ -17,6 +17,7 @@
 package android.net.http;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import java.security.cert.X509Certificate;
 
 /**
@@ -68,7 +69,7 @@ public class SslError {
      * The SSL error set bitfield (each individual error is a bit index;
      * multiple individual errors can be OR-ed)
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int mErrors;
 
     /**
@@ -80,7 +81,7 @@ public class SslError {
     /**
      * The URL associated with the error set.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final String mUrl;
 
     /**

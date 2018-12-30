@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -30,6 +31,7 @@ import android.util.Log;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
@@ -52,7 +54,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Predicate;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 /** Platform implementation of the quick settings tile host **/
+@Singleton
 public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -60,29 +67,44 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
     public static final String TILES_SETTING = Secure.QS_TILES;
 
     private final Context mContext;
-    private final StatusBar mStatusBar;
     private final LinkedHashMap<String, QSTile> mTiles = new LinkedHashMap<>();
     protected final ArrayList<String> mTileSpecs = new ArrayList<>();
     private final TileServices mServices;
+    private final TunerService mTunerService;
+    private final PluginManager mPluginManager;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
     private final AutoTileManager mAutoTiles;
     private final StatusBarIconController mIconController;
     private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
     private int mCurrentUser;
+    private StatusBar mStatusBar;
 
-    public QSTileHost(Context context, StatusBar statusBar,
-            StatusBarIconController iconController) {
+    @Inject
+    public QSTileHost(Context context,
+            StatusBarIconController iconController,
+            QSFactoryImpl defaultFactory,
+            @Named(Dependency.MAIN_HANDLER_NAME) Handler mainHandler,
+            @Named(Dependency.BG_LOOPER_NAME) Looper bgLooper,
+            PluginManager pluginManager,
+            TunerService tunerService) {
         mIconController = iconController;
         mContext = context;
-        mStatusBar = statusBar;
+        mTunerService = tunerService;
+        mPluginManager = pluginManager;
 
-        mServices = new TileServices(this, Dependency.get(Dependency.BG_LOOPER));
+        mServices = new TileServices(this, bgLooper);
 
-        mQsFactories.add(new QSFactoryImpl(this));
-        Dependency.get(PluginManager.class).addPluginListener(this, QSFactory.class, true);
+        defaultFactory.setHost(this);
+        mQsFactories.add(defaultFactory);
+        pluginManager.addPluginListener(this, QSFactory.class, true);
 
-        Dependency.get(TunerService.class).addTunable(this, TILES_SETTING);
+        mainHandler.post(() -> {
+            // This is technically a hack to avoid circular dependency of
+            // QSTileHost -> XXXTile -> QSTileHost. Posting ensures creation
+            // finishes before creating any tiles.
+            tunerService.addTunable(this, TILES_SETTING);
+        });
         // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
         mAutoTiles = new AutoTileManager(context, this);
     }
@@ -94,16 +116,16 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
     public void destroy() {
         mTiles.values().forEach(tile -> tile.destroy());
         mAutoTiles.destroy();
-        Dependency.get(TunerService.class).removeTunable(this);
+        mTunerService.removeTunable(this);
         mServices.destroy();
-        Dependency.get(PluginManager.class).removePluginListener(this);
+        mPluginManager.removePluginListener(this);
     }
 
     @Override
     public void onPluginConnected(QSFactory plugin, Context pluginContext) {
         // Give plugins priority over creation so they can override if they wish.
         mQsFactories.add(0, plugin);
-        String value = Dependency.get(TunerService.class).getValue(TILES_SETTING);
+        String value = mTunerService.getValue(TILES_SETTING);
         // Force remove and recreate of all tiles.
         onTuningChanged(TILES_SETTING, "");
         onTuningChanged(TILES_SETTING, value);
@@ -113,7 +135,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
     public void onPluginDisconnected(QSFactory plugin) {
         mQsFactories.remove(plugin);
         // Force remove and recreate of all tiles.
-        String value = Dependency.get(TunerService.class).getValue(TILES_SETTING);
+        String value = mTunerService.getValue(TILES_SETTING);
         onTuningChanged(TILES_SETTING, "");
         onTuningChanged(TILES_SETTING, value);
     }
@@ -140,16 +162,25 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
 
     @Override
     public void collapsePanels() {
+        if (mStatusBar == null) {
+            mStatusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
+        }
         mStatusBar.postAnimateCollapsePanels();
     }
 
     @Override
     public void forceCollapsePanels() {
+        if (mStatusBar == null) {
+            mStatusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
+        }
         mStatusBar.postAnimateForceCollapsePanels();
     }
 
     @Override
     public void openPanels() {
+        if (mStatusBar == null) {
+            mStatusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
+        }
         mStatusBar.postAnimateOpenPanels();
     }
 

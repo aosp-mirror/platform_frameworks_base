@@ -15,7 +15,11 @@
  */
 package com.android.systemui.statusbar.notification;
 
+import android.annotation.Nullable;
 import android.service.notification.StatusBarNotification;
+
+import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.statusbar.notification.row.NotificationInflater;
 
 /**
  * Listener interface for changes sent by NotificationEntryManager.
@@ -37,39 +41,50 @@ public interface NotificationEntryListener {
     /**
      * Called when a notification was updated.
      */
-    default void onNotificationUpdated(StatusBarNotification notification) {
+    default void onEntryUpdated(NotificationData.Entry entry) {
+    }
+
+    /**
+     * Called when a notification's views are inflated for the first time.
+     */
+    default void onEntryInflated(NotificationData.Entry entry,
+            @NotificationInflater.InflationFlag int inflatedFlags) {
     }
 
     /**
      * Called when an existing notification's views are reinflated (usually due to an update being
      * posted to that notification).
+     *
+     * @param entry notification data entry that was reinflated.
      */
     default void onEntryReinflated(NotificationData.Entry entry) {
     }
 
     /**
+     * Called when an error occurred inflating the views for a notification.
+     */
+    default void onInflationError(StatusBarNotification notification, Exception exception) {
+    }
+
+    /**
      * Called when a notification has been removed (either because the user swiped it away or
      * because the developer retracted it).
-     *
-     * TODO: combine this with onNotificationRemoved().
-     */
-    default void onEntryRemoved(NotificationData.Entry entry) {
-    }
-
-    /**
-     * Called when a notification was removed.
-     *
+     * @param entry notification data entry that was removed.  Null if no entry existed for the
+     *              removed key at the time of removal.
      * @param key key of notification that was removed
      * @param old StatusBarNotification of the notification before it was removed
+     * @param visibility logging data related to the visibility of the notification at the time of
+     *                   removal, if it was removed by a user action.  Null if it was not removed by
+     *                   a user action.
+     * @param lifetimeExtended true if something is artificially extending how long the notification
+     * @param removedByUser true if the notification was removed by a user action
      */
-    default void onNotificationRemoved(String key, StatusBarNotification old) {
-    }
-
-    /**
-     * Removes a notification immediately.
-     *
-     * TODO: combine this with onNotificationRemoved().
-     */
-    default void onPerformRemoveNotification(StatusBarNotification statusBarNotification) {
+    default void onEntryRemoved(
+            NotificationData.Entry entry,
+            String key,
+            StatusBarNotification old,
+            @Nullable NotificationVisibility visibility,
+            boolean lifetimeExtended,
+            boolean removedByUser) {
     }
 }

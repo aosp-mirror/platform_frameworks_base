@@ -19,7 +19,9 @@ package android.view;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.os.RemoteException;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetType;
@@ -36,7 +38,11 @@ import java.util.ArrayList;
  */
 public class InsetsController implements WindowInsetsController {
 
+    private final String TAG = "InsetsControllerImpl";
+
     private final InsetsState mState = new InsetsState();
+    private final InsetsState mTmpState = new InsetsState();
+
     private final Rect mFrame = new Rect();
     private final SparseArray<InsetsSourceConsumer> mSourceConsumers = new SparseArray<>();
     private final ViewRootImpl mViewRoot;
@@ -61,8 +67,12 @@ public class InsetsController implements WindowInsetsController {
             return false;
         }
         mState.set(state);
+        mTmpState.set(state, true /* copySources */);
         applyLocalVisibilityOverride();
         mViewRoot.notifyInsetsChanged();
+        if (!mState.equals(mTmpState)) {
+            sendStateToWindowManager();
+        }
         return true;
     }
 
@@ -163,6 +173,27 @@ public class InsetsController implements WindowInsetsController {
     @VisibleForTesting
     public void notifyVisibilityChanged() {
         mViewRoot.notifyInsetsChanged();
+        sendStateToWindowManager();
+    }
+
+    /**
+     * Sends the local visibility state back to window manager.
+     */
+    private void sendStateToWindowManager() {
+        InsetsState tmpState = new InsetsState();
+        for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
+            final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
+            if (consumer.getControl() != null) {
+                tmpState.addSource(mState.getSource(consumer.getType()));
+            }
+        }
+
+        // TODO: Put this on a dispatcher thread.
+        try {
+            mViewRoot.mWindowSession.insetsModified(mViewRoot.mWindow, tmpState);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to call insetsModified", e);
+        }
     }
 
     void dump(String prefix, PrintWriter pw) {

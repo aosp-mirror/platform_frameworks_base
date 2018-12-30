@@ -34,7 +34,6 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
-import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -52,7 +51,6 @@ import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.InjectionInflationController;
@@ -145,11 +143,6 @@ public class SystemUIFactory {
         return new KeyguardIndicationController(context, indicationArea, lockIcon);
     }
 
-    public QSTileHost createQSTileHost(Context context, StatusBar statusBar,
-            StatusBarIconController iconController) {
-        return new QSTileHost(context, statusBar, iconController);
-    }
-
     public VolumeDialogComponent createVolumeDialogComponent(SystemUI systemUi, Context context) {
         return new VolumeDialogComponent(systemUi, context);
     }
@@ -227,6 +220,9 @@ public class SystemUIFactory {
     public interface SystemUIRootComponent {
         @Singleton
         Dependency.DependencyInjector createDependency();
+
+        @Singleton
+        StatusBar.StatusBarInjector getStatusBarInjector();
 
         /**
          * FragmentCreator generates all Fragments that need injection.

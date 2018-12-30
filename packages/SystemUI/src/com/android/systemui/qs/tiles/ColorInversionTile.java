@@ -30,6 +30,8 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Invert colors **/
 public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
@@ -38,6 +40,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
     private boolean mListening;
 
+    @Inject
     public ColorInversionTile(QSHost host) {
         super(host);
 

@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.qs.QSFooterImpl;
 import com.android.systemui.qs.QuickStatusBarHeader;
 
 import java.lang.reflect.InvocationTargetException;
@@ -107,6 +108,10 @@ public class InjectionInflationController {
          * Creates the QuickStatusBarHeader.
          */
         QuickStatusBarHeader createQsHeader();
+        /**
+         * Creates the QSFooterImpl.
+         */
+        QSFooterImpl createQsFooter();
     }
 
     /**

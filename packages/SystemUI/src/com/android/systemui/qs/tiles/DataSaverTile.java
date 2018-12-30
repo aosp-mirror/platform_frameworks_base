@@ -20,7 +20,6 @@ import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -30,14 +29,18 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.NetworkController;
 
+import javax.inject.Inject;
+
 public class DataSaverTile extends QSTileImpl<BooleanState> implements
         DataSaverController.Listener{
 
     private final DataSaverController mDataSaverController;
 
-    public DataSaverTile(QSHost host) {
+    @Inject
+    public DataSaverTile(QSHost host, NetworkController networkController) {
         super(host);
-        mDataSaverController = Dependency.get(NetworkController.class).getDataSaverController();
+        mDataSaverController = networkController.getDataSaverController();
+        mDataSaverController.observe(getLifecycle(), this);
     }
 
     @Override
@@ -47,11 +50,6 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mDataSaverController.addCallback(this);
-        } else {
-            mDataSaverController.removeCallback(this);
-        }
     }
 
     @Override
