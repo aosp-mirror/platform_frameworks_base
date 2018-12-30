@@ -977,18 +977,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Read transfers from the original owner stay open, but as the session's data
         // cannot be modified anymore, there is no leak of information.
-        if (!params.isMultiPackage) {
+        // For staged sessions, the validation is performed by StagingManager.
+        if (!params.isMultiPackage && !params.isStaged) {
             final PackageInfo pkgInfo = mPm.getPackageInfo(
                     params.appPackageName, PackageManager.GET_SIGNATURES
                             | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
 
             resolveStageDirLocked();
 
-            // Verify that stage looks sane with respect to existing application.
-            // This currently only ensures packageName, versionCode, and certificate
-            // consistency.
             try {
                 if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+                    // TODO(b/118865310): Remove this when APEX validation is done via
+                    //                    StagingManager.
                     validateApexInstallLocked(pkgInfo);
                 } else {
                     // Verify that stage looks sane with respect to existing application.
@@ -1061,14 +1061,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void commitLocked()
             throws PackageManagerException {
+        if (params.isStaged) {
+            mStagingManager.commitSession(this);
+            destroyInternal();
+            dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
+            return;
+        }
         final PackageManagerService.ActiveInstallSession committingSession =
                 makeSessionActiveLocked();
         if (committingSession == null) {
-            return;
-        }
-        if (isStaged()) {
-            mStagingManager.commitSession(this);
-            dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
             return;
         }
         if (isMultiPackage()) {
@@ -1973,7 +1974,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 bridge.forceClose();
             }
         }
-        if (stageDir != null) {
+        // For staged sessions, we don't delete the directory where the packages have been copied,
+        // since these packages are supposed to be read on reboot. StagingManager is in charge of
+        // deleting these dirs when the staged session has reached a final state.
+        // TODO(b/118865310): Implement packageDir deletion in StagingManager.
+        if (stageDir != null && !params.isStaged) {
             try {
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
             } catch (InstallerException ignored) {
