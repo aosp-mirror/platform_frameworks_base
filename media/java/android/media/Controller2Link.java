@@ -21,6 +21,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 
+import java.util.Objects;
+
 /**
  * Handles incoming commands from {@link MediaSession2} and {@link MediaLibrarySession}
  * to both {@link MediaController2} and {@link MediaBrowser2}.
@@ -66,6 +68,20 @@ public final class Controller2Link implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStrongBinder(mIController.asBinder());
+    }
+
+    @Override
+    public int hashCode() {
+        return mIController.asBinder().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Controller2Link)) {
+            return false;
+        }
+        Controller2Link other = (Controller2Link) obj;
+        return Objects.equals(mIController.asBinder(), other.mIController.asBinder());
     }
 
     /** Interface method for IMediaController2.notifyConnected */

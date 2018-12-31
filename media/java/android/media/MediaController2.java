@@ -98,7 +98,6 @@ public class MediaController2 implements AutoCloseable {
 
         mNextSeqNumber = 0;
 
-        Session2Link sessionBinder = token.getSessionLink();
         if (token.getType() == TYPE_SESSION) {
             connectToSession();
         } else {
@@ -120,9 +119,11 @@ public class MediaController2 implements AutoCloseable {
             mCallbackExecutor.execute(() -> {
                 mCallback.onDisconnected(MediaController2.this);
             });
+            mSessionBinder = null;
         }
     }
 
+    // Called by Controller2Link.onConnected
     void onConnected(int seq, Bundle connectionResult) {
         final long token = Binder.clearCallingIdentity();
         try {
@@ -155,10 +156,18 @@ public class MediaController2 implements AutoCloseable {
         }
     }
 
+    // Called by Controller2Link.onDisconnected
     void onDisconnected(int seq) {
-        // TODO: Implement this
+        final long token = Binder.clearCallingIdentity();
+        try {
+            // close() will call mCallback.onDisconnected
+            close();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
+    // Called by Controller2Link.onSessionCommand
     void onSessionCommand(int seq, Session2Command command, Bundle args) {
         // TODO: Implement this
     }

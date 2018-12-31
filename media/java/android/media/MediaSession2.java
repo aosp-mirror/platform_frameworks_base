@@ -35,6 +35,7 @@ import android.os.Process;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +108,13 @@ public class MediaSession2 implements AutoCloseable {
             synchronized (MediaSession2.class) {
                 SESSION_ID_LIST.remove(mSessionId);
             }
-            // TODO: Implement this
+            Collection<ControllerInfo> controllerInfos;
+            synchronized (mLock) {
+                controllerInfos = mConnectedControllers.values();
+            }
+            for (ControllerInfo info : controllerInfos) {
+                info.notifyDisconnected();
+            }
         } catch (Exception e) {
             // Should not be here.
         }
@@ -118,6 +125,7 @@ public class MediaSession2 implements AutoCloseable {
         return true;
     }
 
+    // Called by Session2Link.onConnect
     void onConnect(final Controller2Link controller, int seq, Bundle connectionRequest) {
         if (controller == null || connectionRequest == null) {
             return;
@@ -173,21 +181,12 @@ public class MediaSession2 implements AutoCloseable {
                     if (isClosed()) {
                         return;
                     }
-                    try {
-                        controller.notifyConnected(
-                                controllerInfo.mNextSeqNumber++, connectionResult);
-                    } catch (RuntimeException e) {
-                        // Controller may be died prematurely.
-                    }
+                    controllerInfo.notifyConnected(connectionResult);
                 } else {
                     if (DEBUG) {
                         Log.d(TAG, "Rejecting connection, controllerInfo=" + controllerInfo);
                     }
-                    try {
-                        controller.notifyDisconnected(controllerInfo.mNextSeqNumber++);
-                    } catch (RuntimeException e) {
-                        // Controller may be died prematurely.
-                    }
+                    controllerInfo.notifyDisconnected();
                 }
             });
         } finally {
@@ -195,20 +194,24 @@ public class MediaSession2 implements AutoCloseable {
         }
     }
 
+    // Called by Session2Link.onDisconnect
     void onDisconnect(final Controller2Link controller, int seq) {
         if (controller == null) {
             return;
         }
+        final ControllerInfo controllerInfo;
+        synchronized (mLock) {
+            controllerInfo = mConnectedControllers.get(controller);
+        }
+        if (controllerInfo == null) {
+            return;
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                final ControllerInfo controllerInfo = mConnectedControllers.get(controller);
                 mCallbackExecutor.execute(() -> {
-                    try {
-                        controller.notifyDisconnected(controllerInfo.mNextSeqNumber++);
-                    } catch (RuntimeException e) {
-                        // Controller may be died prematurely.
-                    }
+                    mCallback.onDisconnected(MediaSession2.this, controllerInfo);
                 });
                 mConnectedControllers.remove(controller);
             }
@@ -217,6 +220,7 @@ public class MediaSession2 implements AutoCloseable {
         }
     }
 
+    // Called by Session2Link.onSessionCommand
     void onSessionCommand(final Controller2Link controller, final int seq,
             final Session2Command command, final Bundle args) {
         // TODO: Implement this
@@ -323,13 +327,12 @@ public class MediaSession2 implements AutoCloseable {
      * <p>
      * This API is not generally intended for third party application developers.
      */
-    public static final class ControllerInfo {
+    static final class ControllerInfo {
         private final RemoteUserInfo mRemoteUserInfo;
         private final boolean mIsTrusted;
         private final Controller2Link mControllerBinder;
+        private int mNextSeqNumber;
 
-        @SuppressWarnings("WeakerAccess") /* synthetic access */
-        int mNextSeqNumber;
         @SuppressWarnings("WeakerAccess") /* synthetic access */
         Session2CommandGroup mAllowedCommands;
 
@@ -348,7 +351,7 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         /**
-         * @hide
+         * @return remote user info of the controller.
          */
         @NonNull
         public RemoteUserInfo getRemoteUserInfo() {
@@ -368,6 +371,36 @@ public class MediaSession2 implements AutoCloseable {
          */
         public int getUid() {
             return mRemoteUserInfo.getUid();
+        }
+
+        public void notifyConnected(Bundle connectionResult) {
+            if (mControllerBinder != null) {
+                try {
+                    mControllerBinder.notifyConnected(getNextSeqNumber(), connectionResult);
+                } catch (RuntimeException e) {
+                    // Controller may be died prematurely.
+                }
+            }
+        }
+
+        public void notifyDisconnected() {
+            if (mControllerBinder != null) {
+                try {
+                    mControllerBinder.notifyDisconnected(getNextSeqNumber());
+                } catch (RuntimeException e) {
+                    // Controller may be died prematurely.
+                }
+            }
+        }
+
+        public void sendSessionCommand(Session2Command command, Bundle args) {
+            if (mControllerBinder != null) {
+                try {
+                    mControllerBinder.sendSessionCommand(getNextSeqNumber(), command, args);
+                } catch (RuntimeException e) {
+                    // Controller may be died prematurely.
+                }
+            }
         }
 
         /**
@@ -406,6 +439,10 @@ public class MediaSession2 implements AutoCloseable {
         public String toString() {
             return "ControllerInfo {pkg=" + mRemoteUserInfo.getPackageName() + ", uid="
                     + mRemoteUserInfo.getUid() + ", allowedCommands=" + mAllowedCommands + "})";
+        }
+
+        private synchronized int getNextSeqNumber() {
+            return mNextSeqNumber++;
         }
     }
 
