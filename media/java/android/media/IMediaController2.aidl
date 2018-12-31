@@ -17,6 +17,7 @@
 package android.media;
 
 import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.media.Session2Command;
 
 /**
@@ -30,5 +31,6 @@ import android.media.Session2Command;
 oneway interface IMediaController2 {
     void notifyConnected(int seq, in Bundle connectionResult) = 0;
     void notifyDisconnected(int seq) = 1;
-    void sendSessionCommand(int seq, in Session2Command command, in Bundle args) = 2;
+    void sendSessionCommand(int seq, in Session2Command command, in Bundle args,
+            in ResultReceiver resultReceiver) = 2;
 }

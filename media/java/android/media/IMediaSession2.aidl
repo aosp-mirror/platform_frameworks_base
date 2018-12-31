@@ -17,6 +17,7 @@
 package android.media;
 
 import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.media.Controller2Link;
 import android.media.Session2Command;
 
@@ -32,6 +33,6 @@ oneway interface IMediaSession2 {
     void connect(in Controller2Link caller, int seq, in Bundle connectionRequest) = 0;
     void disconnect(in Controller2Link caller, int seq) = 1;
     void sendSessionCommand(in Controller2Link caller, int seq, in Session2Command sessionCommand,
-            in Bundle args) = 2;
+            in Bundle args, in ResultReceiver resultReceiver) = 2;
     // Next Id : 3
 }

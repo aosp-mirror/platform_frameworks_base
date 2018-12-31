@@ -27,8 +27,10 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.ResultReceiver;
 import android.util.Log;
 
 import java.util.concurrent.Executor;
@@ -56,6 +58,7 @@ public class MediaController2 implements AutoCloseable {
     private final Session2Token mSessionToken;
     private final Executor mCallbackExecutor;
     private final Controller2Link mControllerStub;
+    private final Handler mResultHandler;
 
     private final Object mLock = new Object();
     //@GuardedBy("mLock")
@@ -95,6 +98,8 @@ public class MediaController2 implements AutoCloseable {
         mCallbackExecutor = executor;
         mCallback = callback;
         mControllerStub = new Controller2Link(this);
+        // NOTE: mResultHandler uses main looper, so this MUST NOT be blocked.
+        mResultHandler = new Handler(context.getMainLooper());
 
         mNextSeqNumber = 0;
 
@@ -127,23 +132,36 @@ public class MediaController2 implements AutoCloseable {
      * Sends a session command to the session
      * <p>
      * @param command the session command
-     * @param args optional argument
+     * @param args optional arguments
+     * @return a token which will be sent together in {@link ControllerCallback#onCommandResult}
+     *     when its result is received.
      */
-    // TODO: make cancelable and provide a way to get the result.
-    public void sendSessionCommand(@NonNull Session2Command command, @Nullable Bundle args) {
+    // TODO: make cancelable.
+    public Object sendSessionCommand(@NonNull Session2Command command, @Nullable Bundle args) {
         if (command == null) {
             throw new IllegalArgumentException("command shouldn't be null");
         }
+
+        ResultReceiver resultReceiver = new ResultReceiver(mResultHandler) {
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                mCallbackExecutor.execute(() -> {
+                    mCallback.onCommandResult(MediaController2.this, this,
+                            command, resultData);
+                });
+            }
+        };
+
         synchronized (mLock) {
             if (mSessionBinder != null) {
                 try {
                     mSessionBinder.sendSessionCommand(mControllerStub, mNextSeqNumber++,
-                            command, args);
+                            command, args, resultReceiver);
                 } catch (RuntimeException e)  {
                     // No-op
                 }
             }
         }
+        return resultReceiver;
     }
 
     // Called by Controller2Link.onConnected
@@ -191,11 +209,15 @@ public class MediaController2 implements AutoCloseable {
     }
 
     // Called by Controller2Link.onSessionCommand
-    void onSessionCommand(int seq, Session2Command command, Bundle args) {
+    void onSessionCommand(int seq, Session2Command command, Bundle args,
+            @Nullable ResultReceiver resultReceiver) {
         final long token = Binder.clearCallingIdentity();
         try {
             mCallbackExecutor.execute(() -> {
-                mCallback.onSessionCommand(MediaController2.this, command, args);
+                Bundle result = mCallback.onSessionCommand(MediaController2.this, command, args);
+                if (resultReceiver != null) {
+                    resultReceiver.send(0, result);
+                }
             });
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -251,10 +273,28 @@ public class MediaController2 implements AutoCloseable {
         public void onDisconnected(@NonNull MediaController2 controller) { }
 
         /**
-         * Called when a controller sent a session command.
+         * Called when the connected session sent a session command.
+         *
+         * @param controller the controller for this event
+         * @param command the session command
+         * @param args optional arguments
+         * @return the result for the session command
          */
-        public void onSessionCommand(@NonNull MediaController2 controller,
+        public Bundle onSessionCommand(@NonNull MediaController2 controller,
                 @NonNull Session2Command command, @Nullable Bundle args) {
+            return null;
+        }
+
+        /**
+         * Called when the command sent to the connected session is finished.
+         *
+         * @param controller the controller for this event
+         * @param token the token got from {@link MediaController2#sendSessionCommand}
+         * @param command the session command
+         * @param result the result of the session command
+         */
+        public void onCommandResult(@NonNull MediaController2 controller, @NonNull Object token,
+                @NonNull Session2Command command, @Nullable Bundle result) {
         }
     }
 }

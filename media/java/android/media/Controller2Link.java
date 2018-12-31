@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 
 import java.util.Objects;
 
@@ -103,9 +104,10 @@ public final class Controller2Link implements Parcelable {
     }
 
     /** Interface method for IMediaController2.sendSessionCommand */
-    public void sendSessionCommand(int seq, Session2Command command, Bundle args) {
+    public void sendSessionCommand(int seq, Session2Command command, Bundle args,
+            ResultReceiver resultReceiver) {
         try {
-            mIController.sendSessionCommand(seq, command, args);
+            mIController.sendSessionCommand(seq, command, args, resultReceiver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -126,8 +128,9 @@ public final class Controller2Link implements Parcelable {
     }
 
     /** Stub implementation for IMediaController2.sendSessionCommand */
-    public void onSessionCommand(int seq, Session2Command command, Bundle args) {
-        mController.onSessionCommand(seq, command, args);
+    public void onSessionCommand(int seq, Session2Command command, Bundle args,
+            ResultReceiver resultReceiver) {
+        mController.onSessionCommand(seq, command, args, resultReceiver);
     }
 
     private class Controller2Stub extends IMediaController2.Stub {
@@ -142,8 +145,9 @@ public final class Controller2Link implements Parcelable {
         }
 
         @Override
-        public void sendSessionCommand(int seq, Session2Command command, Bundle args) {
-            Controller2Link.this.onSessionCommand(seq, command, args);
+        public void sendSessionCommand(int seq, Session2Command command, Bundle args,
+                ResultReceiver resultReceiver) {
+            Controller2Link.this.onSessionCommand(seq, command, args, resultReceiver);
         }
     }
 }
