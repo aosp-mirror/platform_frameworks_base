@@ -675,12 +675,7 @@ public class RollbackManagerService extends IRollbackManager.Stub {
         getHandler().postDelayed(() -> runExpiration(), duration);
     }
 
-    /**
-     * Gets the RollbackManagerService's handler.
-     * To allow PackageManagerService to call into RollbackManagerService
-     * without fear of blocking the PackageManagerService thread.
-     */
-    public Handler getHandler() {
+    private Handler getHandler() {
         return mHandlerThread.getThreadHandler();
     }
 
