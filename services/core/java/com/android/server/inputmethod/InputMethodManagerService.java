@@ -72,8 +72,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
-import android.os.Environment;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -97,14 +95,12 @@ import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.LruCache;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
-import android.util.Xml;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -125,7 +121,6 @@ import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
-import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -147,7 +142,6 @@ import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
@@ -164,18 +158,10 @@ import com.android.server.inputmethod.InputMethodUtils.InputMethodSettings;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.wm.WindowManagerInternal;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -315,7 +301,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final WindowManagerInternal mWindowManagerInternal;
     final HandlerCaller mCaller;
     final boolean mHasFeature;
-    private InputMethodFileManager mFileManager;
+    private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
+            new ArrayMap<>();
     private final HardKeyboardListener mHardKeyboardListener;
     private final AppOpsManager mAppOpsManager;
     private final UserManager mUserManager;
@@ -1221,7 +1208,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                         int change = isPackageDisappearing(imi.getPackageName());
                         if (isPackageModified(imi.getPackageName())) {
-                            mFileManager.deleteAllInputMethodSubtypes(imiId);
+                            mAdditionalSubtypeMap.remove(imi.getId());
+                            AdditionalSubtypeUtils.save(mAdditionalSubtypeMap, mMethodMap,
+                                    mSettings.getCurrentUserId());
                         }
                         if (change == PACKAGE_TEMPORARY_CHANGE
                                 || change == PACKAGE_PERMANENT_CHANGE) {
@@ -1453,7 +1442,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mRes, context.getContentResolver(), mMethodMap, mMethodList, userId, !mSystemReady);
 
         updateCurrentProfileIds();
-        mFileManager = new InputMethodFileManager(mMethodMap, userId);
+        AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, userId);
         mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
                 mSettings, context);
         // Register VR-state listener.
@@ -1499,8 +1488,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 !mSystemReady || !mUserManager.isUserUnlockingOrUnlocked(newUserId);
         mSettings.switchCurrentUser(newUserId, useCopyOnWriteSettings);
         updateCurrentProfileIds();
-        // InputMethodFileManager should be reset when the user is changed
-        mFileManager = new InputMethodFileManager(mMethodMap, newUserId);
+        // Additional subtypes should be reset when the user is changed
+        AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, newUserId);
         final String defaultImiId = mSettings.getSelectedInputMethod();
 
         if (DEBUG) Slog.d(TAG, "Switching user stage 2/3. newUserId=" + newUserId
@@ -3252,6 +3241,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // By this IPC call, only a process which shares the same uid with the IME can add
         // additional input method subtypes to the IME.
         if (TextUtils.isEmpty(imiId) || subtypes == null) return;
+        final ArrayList<InputMethodSubtype> toBeAdded = new ArrayList<>();
+        for (InputMethodSubtype subtype : subtypes) {
+            if (!toBeAdded.contains(subtype)) {
+                toBeAdded.add(subtype);
+            } else {
+                Slog.w(TAG, "Duplicated subtype definition found: "
+                        + subtype.getLocale() + ", " + subtype.getMode());
+            }
+        }
         synchronized (mMethodMap) {
             if (!calledFromValidUserLocked()) {
                 return;
@@ -3273,10 +3271,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 for (int i = 0; i < packageNum; ++i) {
                     if (packageInfos[i].equals(imi.getPackageName())) {
                         if (subtypes.length > 0) {
-                            mFileManager.addInputMethodSubtypes(imi, subtypes);
+                            mAdditionalSubtypeMap.put(imi.getId(), toBeAdded);
                         } else {
-                            mFileManager.deleteAllInputMethodSubtypes(imi.getId());
+                            mAdditionalSubtypeMap.remove(imi.getId());
                         }
+                        AdditionalSubtypeUtils.save(mAdditionalSubtypeMap, mMethodMap,
+                                mSettings.getCurrentUserId());
                         final long ident = Binder.clearCallingIdentity();
                         try {
                             buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
@@ -3680,7 +3680,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mMyPackageMonitor.clearKnownImePackageNamesLocked();
 
         queryInputMethodServicesInternal(mContext, mSettings.getCurrentUserId(),
-                mFileManager.getAllAdditionalInputMethodSubtypes(), mMethodMap, mMethodList);
+                mAdditionalSubtypeMap, mMethodMap, mMethodList);
 
         // Construct the set of possible IME packages for onPackageChanged() to avoid false
         // negatives when the package state remains to be the same but only the component state is
@@ -4159,235 +4159,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
             return false;
-        }
-    }
-
-    // TODO: Cache the state for each user and reset when the cached user is removed.
-    private static class InputMethodFileManager {
-        private static final String SYSTEM_PATH = "system";
-        private static final String INPUT_METHOD_PATH = "inputmethod";
-        private static final String ADDITIONAL_SUBTYPES_FILE_NAME = "subtypes.xml";
-        private static final String NODE_SUBTYPES = "subtypes";
-        private static final String NODE_SUBTYPE = "subtype";
-        private static final String NODE_IMI = "imi";
-        private static final String ATTR_ID = "id";
-        private static final String ATTR_LABEL = "label";
-        private static final String ATTR_ICON = "icon";
-        private static final String ATTR_IME_SUBTYPE_ID = "subtypeId";
-        private static final String ATTR_IME_SUBTYPE_LOCALE = "imeSubtypeLocale";
-        private static final String ATTR_IME_SUBTYPE_LANGUAGE_TAG = "languageTag";
-        private static final String ATTR_IME_SUBTYPE_MODE = "imeSubtypeMode";
-        private static final String ATTR_IME_SUBTYPE_EXTRA_VALUE = "imeSubtypeExtraValue";
-        private static final String ATTR_IS_AUXILIARY = "isAuxiliary";
-        private static final String ATTR_IS_ASCII_CAPABLE = "isAsciiCapable";
-        private final AtomicFile mAdditionalInputMethodSubtypeFile;
-        private final ArrayMap<String, InputMethodInfo> mMethodMap;
-        private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypesMap =
-                new ArrayMap<>();
-        InputMethodFileManager(ArrayMap<String, InputMethodInfo> methodMap, int userId) {
-            if (methodMap == null) {
-                throw new NullPointerException("methodMap is null");
-            }
-            mMethodMap = methodMap;
-            final File systemDir = userId == UserHandle.USER_SYSTEM
-                    ? new File(Environment.getDataDirectory(), SYSTEM_PATH)
-                    : Environment.getUserSystemDirectory(userId);
-            final File inputMethodDir = new File(systemDir, INPUT_METHOD_PATH);
-            final File subtypeFile = new File(inputMethodDir, ADDITIONAL_SUBTYPES_FILE_NAME);
-            mAdditionalInputMethodSubtypeFile = new AtomicFile(subtypeFile, "input-subtypes");
-            readAdditionalInputMethodSubtypes(mAdditionalSubtypesMap,
-                    mAdditionalInputMethodSubtypeFile);
-        }
-
-        private void deleteAllInputMethodSubtypes(String imiId) {
-            synchronized (mMethodMap) {
-                mAdditionalSubtypesMap.remove(imiId);
-                writeAdditionalInputMethodSubtypes(
-                        mAdditionalSubtypesMap, mAdditionalInputMethodSubtypeFile, mMethodMap);
-            }
-        }
-
-        public void addInputMethodSubtypes(
-                InputMethodInfo imi, InputMethodSubtype[] additionalSubtypes) {
-            synchronized (mMethodMap) {
-                final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-                final int N = additionalSubtypes.length;
-                for (int i = 0; i < N; ++i) {
-                    final InputMethodSubtype subtype = additionalSubtypes[i];
-                    if (!subtypes.contains(subtype)) {
-                        subtypes.add(subtype);
-                    } else {
-                        Slog.w(TAG, "Duplicated subtype definition found: "
-                                + subtype.getLocale() + ", " + subtype.getMode());
-                    }
-                }
-                mAdditionalSubtypesMap.put(imi.getId(), subtypes);
-                writeAdditionalInputMethodSubtypes(
-                        mAdditionalSubtypesMap, mAdditionalInputMethodSubtypeFile, mMethodMap);
-            }
-        }
-
-        public ArrayMap<String, List<InputMethodSubtype>> getAllAdditionalInputMethodSubtypes() {
-            synchronized (mMethodMap) {
-                return mAdditionalSubtypesMap;
-            }
-        }
-
-        private static void writeAdditionalInputMethodSubtypes(
-                ArrayMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile,
-                ArrayMap<String, InputMethodInfo> methodMap) {
-            if (allSubtypes.isEmpty()) {
-                final File parentDir = subtypesFile.getBaseFile().getParentFile();
-                if (parentDir == null || !parentDir.exists()) {
-                    // Even the parent directory doesn't exist.  There is nothing to clean up.
-                    return;
-                }
-                if (subtypesFile.exists()) {
-                    subtypesFile.delete();
-                }
-                if (FileUtils.listFilesOrEmpty(parentDir).length == 0) {
-                    if (!parentDir.delete()) {
-                        Slog.e(TAG, "Failed to delete the empty parent directory " + parentDir);
-                    }
-                }
-                return;
-            }
-
-            final File parentDir = subtypesFile.getBaseFile().getParentFile();
-            if (!parentDir.exists() && !parentDir.mkdirs()) {
-                Slog.e(TAG, "Failed to create a parent directory " + parentDir);
-                return;
-            }
-
-            // Safety net for the case that this function is called before methodMap is set.
-            final boolean isSetMethodMap = methodMap != null && methodMap.size() > 0;
-            FileOutputStream fos = null;
-            try {
-                fos = subtypesFile.startWrite();
-                final XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(fos, StandardCharsets.UTF_8.name());
-                out.startDocument(null, true);
-                out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-                out.startTag(null, NODE_SUBTYPES);
-                for (String imiId : allSubtypes.keySet()) {
-                    if (isSetMethodMap && !methodMap.containsKey(imiId)) {
-                        Slog.w(TAG, "IME uninstalled or not valid.: " + imiId);
-                        continue;
-                    }
-                    out.startTag(null, NODE_IMI);
-                    out.attribute(null, ATTR_ID, imiId);
-                    final List<InputMethodSubtype> subtypesList = allSubtypes.get(imiId);
-                    final int N = subtypesList.size();
-                    for (int i = 0; i < N; ++i) {
-                        final InputMethodSubtype subtype = subtypesList.get(i);
-                        out.startTag(null, NODE_SUBTYPE);
-                        if (subtype.hasSubtypeId()) {
-                            out.attribute(null, ATTR_IME_SUBTYPE_ID,
-                                    String.valueOf(subtype.getSubtypeId()));
-                        }
-                        out.attribute(null, ATTR_ICON, String.valueOf(subtype.getIconResId()));
-                        out.attribute(null, ATTR_LABEL, String.valueOf(subtype.getNameResId()));
-                        out.attribute(null, ATTR_IME_SUBTYPE_LOCALE, subtype.getLocale());
-                        out.attribute(null, ATTR_IME_SUBTYPE_LANGUAGE_TAG,
-                                subtype.getLanguageTag());
-                        out.attribute(null, ATTR_IME_SUBTYPE_MODE, subtype.getMode());
-                        out.attribute(null, ATTR_IME_SUBTYPE_EXTRA_VALUE, subtype.getExtraValue());
-                        out.attribute(null, ATTR_IS_AUXILIARY,
-                                String.valueOf(subtype.isAuxiliary() ? 1 : 0));
-                        out.attribute(null, ATTR_IS_ASCII_CAPABLE,
-                                String.valueOf(subtype.isAsciiCapable() ? 1 : 0));
-                        out.endTag(null, NODE_SUBTYPE);
-                    }
-                    out.endTag(null, NODE_IMI);
-                }
-                out.endTag(null, NODE_SUBTYPES);
-                out.endDocument();
-                subtypesFile.finishWrite(fos);
-            } catch (java.io.IOException e) {
-                Slog.w(TAG, "Error writing subtypes", e);
-                if (fos != null) {
-                    subtypesFile.failWrite(fos);
-                }
-            }
-        }
-
-        private static void readAdditionalInputMethodSubtypes(
-                ArrayMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile) {
-            if (allSubtypes == null || subtypesFile == null) return;
-            allSubtypes.clear();
-            if (!subtypesFile.exists()) {
-                // Not having the file means there is no additional subtype.
-                return;
-            }
-            try (final FileInputStream fis = subtypesFile.openRead()) {
-                final XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(fis, StandardCharsets.UTF_8.name());
-                int type = parser.getEventType();
-                // Skip parsing until START_TAG
-                while ((type = parser.next()) != XmlPullParser.START_TAG
-                        && type != XmlPullParser.END_DOCUMENT) {}
-                String firstNodeName = parser.getName();
-                if (!NODE_SUBTYPES.equals(firstNodeName)) {
-                    throw new XmlPullParserException("Xml doesn't start with subtypes");
-                }
-                final int depth =parser.getDepth();
-                String currentImiId = null;
-                ArrayList<InputMethodSubtype> tempSubtypesArray = null;
-                while (((type = parser.next()) != XmlPullParser.END_TAG
-                        || parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
-                    if (type != XmlPullParser.START_TAG)
-                        continue;
-                    final String nodeName = parser.getName();
-                    if (NODE_IMI.equals(nodeName)) {
-                        currentImiId = parser.getAttributeValue(null, ATTR_ID);
-                        if (TextUtils.isEmpty(currentImiId)) {
-                            Slog.w(TAG, "Invalid imi id found in subtypes.xml");
-                            continue;
-                        }
-                        tempSubtypesArray = new ArrayList<>();
-                        allSubtypes.put(currentImiId, tempSubtypesArray);
-                    } else if (NODE_SUBTYPE.equals(nodeName)) {
-                        if (TextUtils.isEmpty(currentImiId) || tempSubtypesArray == null) {
-                            Slog.w(TAG, "IME uninstalled or not valid.: " + currentImiId);
-                            continue;
-                        }
-                        final int icon = Integer.parseInt(
-                                parser.getAttributeValue(null, ATTR_ICON));
-                        final int label = Integer.parseInt(
-                                parser.getAttributeValue(null, ATTR_LABEL));
-                        final String imeSubtypeLocale =
-                                parser.getAttributeValue(null, ATTR_IME_SUBTYPE_LOCALE);
-                        final String languageTag =
-                                parser.getAttributeValue(null, ATTR_IME_SUBTYPE_LANGUAGE_TAG);
-                        final String imeSubtypeMode =
-                                parser.getAttributeValue(null, ATTR_IME_SUBTYPE_MODE);
-                        final String imeSubtypeExtraValue =
-                                parser.getAttributeValue(null, ATTR_IME_SUBTYPE_EXTRA_VALUE);
-                        final boolean isAuxiliary = "1".equals(String.valueOf(
-                                parser.getAttributeValue(null, ATTR_IS_AUXILIARY)));
-                        final boolean isAsciiCapable = "1".equals(String.valueOf(
-                                parser.getAttributeValue(null, ATTR_IS_ASCII_CAPABLE)));
-                        final InputMethodSubtypeBuilder builder = new InputMethodSubtypeBuilder()
-                                .setSubtypeNameResId(label)
-                                .setSubtypeIconResId(icon)
-                                .setSubtypeLocale(imeSubtypeLocale)
-                                .setLanguageTag(languageTag)
-                                .setSubtypeMode(imeSubtypeMode)
-                                .setSubtypeExtraValue(imeSubtypeExtraValue)
-                                .setIsAuxiliary(isAuxiliary)
-                                .setIsAsciiCapable(isAsciiCapable);
-                        final String subtypeIdString =
-                                parser.getAttributeValue(null, ATTR_IME_SUBTYPE_ID);
-                        if (subtypeIdString != null) {
-                            builder.setSubtypeId(Integer.parseInt(subtypeIdString));
-                        }
-                        tempSubtypesArray.add(builder.build());
-                    }
-                }
-            } catch (XmlPullParserException | IOException | NumberFormatException e) {
-                Slog.w(TAG, "Error reading subtypes", e);
-                return;
-            }
         }
     }
 
