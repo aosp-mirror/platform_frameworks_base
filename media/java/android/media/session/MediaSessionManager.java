@@ -98,7 +98,7 @@ public final class MediaSessionManager {
      * @return The binder object from the system
      * @hide
      */
-    public @NonNull ISession createSession(@NonNull MediaSession.CallbackStub cbStub,
+    public @NonNull ISession createSession(@NonNull SessionCallbackLink cbStub,
             @NonNull String tag, int userId) throws RemoteException {
         return mService.createSession(mContext.getPackageName(), cbStub, tag, userId);
     }

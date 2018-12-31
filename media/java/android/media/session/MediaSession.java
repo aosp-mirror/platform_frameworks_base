@@ -129,7 +129,7 @@ public final class MediaSession {
     private final MediaSession.Token mSessionToken;
     private final MediaController mController;
     private final ISession mBinder;
-    private final CallbackStub mCbStub;
+    private final SessionCallbackLink mCbStub;
 
     // Do not change the name of mCallback. Support lib accesses this by using reflection.
     @UnsupportedAppUsage
@@ -172,7 +172,7 @@ public final class MediaSession {
         }
         mMaxBitmapSize = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize);
-        mCbStub = new CallbackStub(this);
+        mCbStub = new SessionCallbackLink(new CallbackStub(this));
         MediaSessionManager manager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         try {
@@ -1062,7 +1062,7 @@ public final class MediaSession {
     /**
      * @hide
      */
-    public static class CallbackStub extends ISessionCallback.Stub {
+    public static final class CallbackStub extends SessionCallbackLink.CallbackStub {
         private WeakReference<MediaSession> mMediaSession;
 
         public CallbackStub(MediaSession session) {
