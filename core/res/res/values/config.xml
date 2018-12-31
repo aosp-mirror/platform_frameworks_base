@@ -2842,19 +2842,6 @@
 
     <bool name="config_auto_attach_data_on_creation">true</bool>
 
-    <!-- Values for GPS configuration -->
-    <string-array translatable="false" name="config_gpsParameters">
-        <item>SUPL_HOST=supl.google.com</item>
-        <item>SUPL_PORT=7275</item>
-        <item>SUPL_VER=0x20000</item>
-        <item>SUPL_MODE=1</item>
-        <item>SUPL_ES=1</item>
-        <item>LPP_PROFILE=0</item>
-        <item>USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL=1</item>
-        <item>A_GLONASS_POS_PROTOCOL_SELECT=0</item>
-        <item>GPS_LOCK=3</item>
-    </string-array>
-
     <!-- Sprint need a 70 ms delay for 3way call -->
     <integer name="config_cdma_3waycall_flash_delay">0</integer>
 

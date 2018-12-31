@@ -1793,17 +1793,6 @@ public class CarrierConfigManager {
             "editable_wfc_roaming_mode_bool";
 
     /**
-     * Determine whether current lpp_mode used for E-911 needs to be kept persistently.
-     * {@code false} - not keeping the lpp_mode means using default configuration of gps.conf
-     *                 when sim is not presented.
-     * {@code true}  - current lpp_profile of carrier will be kepted persistently
-     *                 even after sim is removed.
-     *
-     * @hide
-     */
-    public static final String KEY_PERSIST_LPP_MODE_BOOL = "persist_lpp_mode_bool";
-
-    /**
      * Carrier specified WiFi networks.
      * @hide
      */
@@ -2432,6 +2421,114 @@ public class CarrierConfigManager {
     public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT =
             "opportunistic_network_exit_threshold_rssnr_int";
 
+    /**
+     * GPS configs. See android.hardware.gnss@1.0 IGnssConfiguration.
+     * @hide
+     */
+    public static final class Gps {
+        /** Prefix of all Gps.KEY_* constants. */
+        public static final String KEY_PREFIX = "gps.";
+
+        /**
+         * Determine whether current lpp_mode used for E-911 needs to be kept persistently.
+         * {@code false} - not keeping the lpp_mode means using default configuration of gps.conf
+         *                 when sim is not presented.
+         * {@code true}  - current lpp_profile of carrier will be kepted persistently
+         *                 even after sim is removed. This is default.
+         */
+        public static final String KEY_PERSIST_LPP_MODE_BOOL = KEY_PREFIX + "persist_lpp_mode_bool";
+
+        /**
+         * SUPL server host for SET Initiated & non-ES Network-Initiated SUPL requests.
+         * Default to supl.google.com
+         */
+        public static final String KEY_SUPL_HOST_STRING = KEY_PREFIX + "supl_host";
+
+        /** SUPL server port. Default to 7275. */
+        public static final String KEY_SUPL_PORT_STRING = KEY_PREFIX + "supl_port";
+
+        /**
+         * The SUPL version requested by Carrier. This is a bit mask
+         * with bits 0:7 representing a service indicator field, bits 8:15
+         * representing the minor version and bits 16:23 representing the
+         * major version. Default to 0x20000.
+         */
+        public static final String KEY_SUPL_VER_STRING = KEY_PREFIX + "supl_ver";
+
+        /**
+         * SUPL_MODE configuration bit mask
+         * 1 - Mobile Station Based. This is default.
+         * 2 - Mobile Station Assisted.
+         */
+        public static final String KEY_SUPL_MODE_STRING = KEY_PREFIX + "supl_mode";
+
+        /**
+         * Whether to limit responses to SUPL ES mode requests only during user emergency sessions
+         * (e.g. E911), and SUPL non-ES requests to only outside of non user emergency sessions.
+         * 0 - no.
+         * 1 - yes. This is default.
+         */
+        // TODO(b/119567985): name this key properly
+        public static final String KEY_SUPL_ES_STRING = KEY_PREFIX + "supl_es";
+
+        /**
+         * LTE Positioning Profile settings bit mask.
+         * 0 - Radio Resource Location Protocol in user plane and control plane. This is default.
+         * 1 - Enable LTE Positioning Protocol in user plane.
+         * 2 - Enable LTE Positioning Protocol in control plane.
+         */
+        public static final String KEY_LPP_PROFILE_STRING = KEY_PREFIX + "lpp_profile";
+
+        /**
+         * Determine whether to use emergency PDN for emergency SUPL.
+         * 0 - no.
+         * 1 - yes. This is default.
+         */
+        public static final String KEY_USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL_STRING =
+                KEY_PREFIX + "use_emergency_pdn_for_emergency_supl";
+
+        /**
+         * A_GLONASS_POS_PROTOCOL_SELECT bit mask.
+         * 0 - Don't use A-GLONASS. This is default.
+         * 1 - Use A-GLONASS in Radio Resource Control(RRC) control-plane.
+         * 2 - Use A-GLONASS in Radio Resource Location user-plane.
+         * 4 - Use A-GLONASS in LTE Positioning Protocol User plane.
+         */
+        public static final String KEY_A_GLONASS_POS_PROTOCOL_SELECT_STRING =
+                KEY_PREFIX + "a_glonass_pos_protocol_select";
+
+        /**
+         * GPS_LOCK configuration bit mask to specify GPS device behavior toward other services,
+         * when Location Settings are off.
+         * "0" - No lock.
+         * "1" - Lock Mobile Originated GPS functionalities.
+         * "2" - Lock Network initiated GPS functionalities.
+         * "3" - Lock both. This is default.
+         */
+        public static final String KEY_GPS_LOCK_STRING = KEY_PREFIX + "gps_lock";
+
+        /**
+         * SUPL NI emergency extension time in seconds. Default to "0".
+         */
+        public static final String KEY_ES_EXTENSION_SEC = KEY_PREFIX + "es_extension_sec";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, true);
+            defaults.putString(KEY_SUPL_HOST_STRING, "supl.google.com");
+            defaults.putString(KEY_SUPL_PORT_STRING, "7275");
+            defaults.putString(KEY_SUPL_VER_STRING, "0x20000");
+            defaults.putString(KEY_SUPL_MODE_STRING, "1");
+            defaults.putString(KEY_SUPL_ES_STRING, "1");
+            defaults.putString(KEY_LPP_PROFILE_STRING, "0");
+            defaults.putString(KEY_USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL_STRING, "1");
+            defaults.putString(KEY_A_GLONASS_POS_PROTOCOL_SELECT_STRING, "0");
+            defaults.putString(KEY_GPS_LOCK_STRING, "3");
+            defaults.putString(KEY_ES_EXTENSION_SEC, "0");
+            return defaults;
+        }
+    }
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2724,7 +2821,6 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_FILTERED_CNAP_NAMES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
-        sDefaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, true);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putInt(KEY_EMERGENCY_NOTIFICATION_DELAY_INT, -1);
@@ -2801,6 +2897,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 45);
         /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_MODERATE */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 10);
+        sDefaults.putAll(Gps.getDefaults());
     }
 
     /**
