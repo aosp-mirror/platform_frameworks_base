@@ -81,6 +81,10 @@ public class MediaSession2 implements AutoCloseable {
     private final Session2Token mSessionToken;
     private final MediaSessionManager mSessionManager;
 
+    //@GuardedBy("mLock")
+    @SuppressWarnings("WeakerAccess") /* synthetic access */
+    private boolean mClosed;
+
     MediaSession2(@NonNull Context context, @NonNull String id, PendingIntent sessionActivity,
             @NonNull Executor callbackExecutor, @NonNull SessionCallback callback) {
         synchronized (MediaSession2.class) {
@@ -111,6 +115,7 @@ public class MediaSession2 implements AutoCloseable {
             Collection<ControllerInfo> controllerInfos;
             synchronized (mLock) {
                 controllerInfos = mConnectedControllers.values();
+                mClosed = true;
             }
             for (ControllerInfo info : controllerInfos) {
                 info.notifyDisconnected();
@@ -120,9 +125,48 @@ public class MediaSession2 implements AutoCloseable {
         }
     }
 
+    /**
+     * Broadcasts a session command to all the connected controllers
+     * <p>
+     * @param command the session command
+     * @param args optional argument
+     */
+    public void broadcastSessionCommand(@NonNull Session2Command command, @Nullable Bundle args) {
+        if (command == null) {
+            throw new IllegalArgumentException("command shouldn't be null");
+        }
+        Collection<ControllerInfo> controllerInfos;
+        synchronized (mLock) {
+            controllerInfos = mConnectedControllers.values();
+        }
+        for (ControllerInfo controller : controllerInfos) {
+            controller.sendSessionCommand(command, args);
+        }
+    }
+
+    /**
+     * Sends a session command to a specific controller
+     * <p>
+     * @param controller the controller to get the session command
+     * @param command the session command
+     * @param args optional argument
+     */
+    // TODO: make cancelable and provide a way to get the result.
+    public void sendSessionCommand(@NonNull ControllerInfo controller,
+            @NonNull Session2Command command, @Nullable Bundle args) {
+        if (controller == null) {
+            throw new IllegalArgumentException("controller shouldn't be null");
+        }
+        if (command == null) {
+            throw new IllegalArgumentException("command shouldn't be null");
+        }
+        controller.sendSessionCommand(command, args);
+    }
+
     boolean isClosed() {
-        // TODO: Implement this
-        return true;
+        synchronized (mLock) {
+            return mClosed;
+        }
     }
 
     // Called by Session2Link.onConnect
@@ -209,12 +253,10 @@ public class MediaSession2 implements AutoCloseable {
 
         final long token = Binder.clearCallingIdentity();
         try {
-            synchronized (mLock) {
-                mCallbackExecutor.execute(() -> {
-                    mCallback.onDisconnected(MediaSession2.this, controllerInfo);
-                });
-                mConnectedControllers.remove(controller);
-            }
+            mCallbackExecutor.execute(() -> {
+                mCallback.onDisconnected(MediaSession2.this, controllerInfo);
+            });
+            mConnectedControllers.remove(controller);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -223,7 +265,31 @@ public class MediaSession2 implements AutoCloseable {
     // Called by Session2Link.onSessionCommand
     void onSessionCommand(final Controller2Link controller, final int seq,
             final Session2Command command, final Bundle args) {
-        // TODO: Implement this
+        if (controller == null) {
+            return;
+        }
+        final ControllerInfo controllerInfo;
+        synchronized (mLock) {
+            controllerInfo = mConnectedControllers.get(controller);
+        }
+        if (controllerInfo == null) {
+            return;
+        }
+
+        // TODO: check allowed commands.
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mCallbackExecutor.execute(() -> {
+                try {
+                    mCallback.onSessionCommand(
+                            MediaSession2.this, controllerInfo, command, args);
+                } catch (RuntimeException e) {
+                    // Controller may be died prematurely.
+                }
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
@@ -327,7 +393,7 @@ public class MediaSession2 implements AutoCloseable {
      * <p>
      * This API is not generally intended for third party application developers.
      */
-    static final class ControllerInfo {
+    public static final class ControllerInfo {
         private final RemoteUserInfo mRemoteUserInfo;
         private final boolean mIsTrusted;
         private final Controller2Link mControllerBinder;
@@ -373,36 +439,6 @@ public class MediaSession2 implements AutoCloseable {
             return mRemoteUserInfo.getUid();
         }
 
-        public void notifyConnected(Bundle connectionResult) {
-            if (mControllerBinder != null) {
-                try {
-                    mControllerBinder.notifyConnected(getNextSeqNumber(), connectionResult);
-                } catch (RuntimeException e) {
-                    // Controller may be died prematurely.
-                }
-            }
-        }
-
-        public void notifyDisconnected() {
-            if (mControllerBinder != null) {
-                try {
-                    mControllerBinder.notifyDisconnected(getNextSeqNumber());
-                } catch (RuntimeException e) {
-                    // Controller may be died prematurely.
-                }
-            }
-        }
-
-        public void sendSessionCommand(Session2Command command, Bundle args) {
-            if (mControllerBinder != null) {
-                try {
-                    mControllerBinder.sendSessionCommand(getNextSeqNumber(), command, args);
-                } catch (RuntimeException e) {
-                    // Controller may be died prematurely.
-                }
-            }
-        }
-
         /**
          * Return if the controller has granted {@code android.permission.MEDIA_CONTENT_CONTROL} or
          * has a enabled notification listener so can be trusted to accept connection and incoming
@@ -439,6 +475,36 @@ public class MediaSession2 implements AutoCloseable {
         public String toString() {
             return "ControllerInfo {pkg=" + mRemoteUserInfo.getPackageName() + ", uid="
                     + mRemoteUserInfo.getUid() + ", allowedCommands=" + mAllowedCommands + "})";
+        }
+
+        void notifyConnected(Bundle connectionResult) {
+            if (mControllerBinder != null) {
+                try {
+                    mControllerBinder.notifyConnected(getNextSeqNumber(), connectionResult);
+                } catch (RuntimeException e) {
+                    // Controller may be died prematurely.
+                }
+            }
+        }
+
+        void notifyDisconnected() {
+            if (mControllerBinder != null) {
+                try {
+                    mControllerBinder.notifyDisconnected(getNextSeqNumber());
+                } catch (RuntimeException e) {
+                    // Controller may be died prematurely.
+                }
+            }
+        }
+
+        void sendSessionCommand(Session2Command command, Bundle args) {
+            if (mControllerBinder != null) {
+                try {
+                    mControllerBinder.sendSessionCommand(getNextSeqNumber(), command, args);
+                } catch (RuntimeException e) {
+                    // Controller may be died prematurely.
+                }
+            }
         }
 
         private synchronized int getNextSeqNumber() {

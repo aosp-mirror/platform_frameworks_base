@@ -123,6 +123,29 @@ public class MediaController2 implements AutoCloseable {
         }
     }
 
+    /**
+     * Sends a session command to the session
+     * <p>
+     * @param command the session command
+     * @param args optional argument
+     */
+    // TODO: make cancelable and provide a way to get the result.
+    public void sendSessionCommand(@NonNull Session2Command command, @Nullable Bundle args) {
+        if (command == null) {
+            throw new IllegalArgumentException("command shouldn't be null");
+        }
+        synchronized (mLock) {
+            if (mSessionBinder != null) {
+                try {
+                    mSessionBinder.sendSessionCommand(mControllerStub, mNextSeqNumber++,
+                            command, args);
+                } catch (RuntimeException e)  {
+                    // No-op
+                }
+            }
+        }
+    }
+
     // Called by Controller2Link.onConnected
     void onConnected(int seq, Bundle connectionResult) {
         final long token = Binder.clearCallingIdentity();
@@ -169,7 +192,14 @@ public class MediaController2 implements AutoCloseable {
 
     // Called by Controller2Link.onSessionCommand
     void onSessionCommand(int seq, Session2Command command, Bundle args) {
-        // TODO: Implement this
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mCallbackExecutor.execute(() -> {
+                mCallback.onSessionCommand(MediaController2.this, command, args);
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private int getNextSeqNumber() {
