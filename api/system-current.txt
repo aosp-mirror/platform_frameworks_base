@@ -3000,7 +3000,7 @@ package android.media {
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
-    field public static final int FLAG_FROM_KEY = 4096; // 0x1000
+    field public static final int FLAG_FROM_KEY = 65536; // 0x10000
   }
 
   public static abstract class AudioManager.AudioServerStateCallback {
