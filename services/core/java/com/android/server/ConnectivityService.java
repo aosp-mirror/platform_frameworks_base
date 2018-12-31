@@ -1433,6 +1433,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             newNc.setUids(null);
             newNc.setSSID(null);
         }
+        if (newNc.getNetworkSpecifier() != null) {
+            newNc.setNetworkSpecifier(newNc.getNetworkSpecifier().redact());
+        }
         return newNc;
     }
 
@@ -5145,7 +5148,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         switch (notificationType) {
             case ConnectivityManager.CALLBACK_AVAILABLE: {
-                putParcelable(bundle, new NetworkCapabilities(networkAgent.networkCapabilities));
+                putParcelable(bundle, networkCapabilitiesRestrictedForCallerPermissions(
+                        networkAgent.networkCapabilities, nri.mPid, nri.mUid));
                 putParcelable(bundle, new LinkProperties(networkAgent.linkProperties));
                 break;
             }
