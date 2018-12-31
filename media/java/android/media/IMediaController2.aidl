@@ -33,4 +33,6 @@ oneway interface IMediaController2 {
     void notifyDisconnected(int seq) = 1;
     void sendSessionCommand(int seq, in Session2Command command, in Bundle args,
             in ResultReceiver resultReceiver) = 2;
+    void cancelSessionCommand(int seq) = 3;
+    // Next Id : 4
 }

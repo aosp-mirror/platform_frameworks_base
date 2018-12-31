@@ -409,6 +409,112 @@ public final class Session2Command implements Parcelable {
      */
     public static final int COMMAND_CODE_SESSION_SET_RATING = 40010;
 
+    /**
+     * @hide
+     */
+    @IntDef(flag = false, /*prefix = "RESULT_CODE",*/ value = {
+            RESULT_SUCCESS,
+            RESULT_ERROR_UNKNOWN_ERROR,
+            RESULT_ERROR_INVALID_STATE,
+            RESULT_ERROR_BAD_VALUE,
+            RESULT_ERROR_PERMISSION_DENIED,
+            RESULT_ERROR_IO_ERROR,
+            RESULT_INFO_SKIPPED,
+            RESULT_ERROR_SESSION_DISCONNECTED,
+            RESULT_ERROR_NOT_SUPPORTED,
+            RESULT_ERROR_SESSION_AUTHENTICATION_EXPIRED,
+            RESULT_ERROR_SESSION_PREMIUM_ACCOUNT_REQUIRED,
+            RESULT_ERROR_SESSION_CONCURRENT_STREAM_LIMIT,
+            RESULT_ERROR_SESSION_PARENTAL_CONTROL_RESTRICTED,
+            RESULT_ERROR_SESSION_NOT_AVAILABLE_IN_REGION,
+            RESULT_ERROR_SESSION_SKIP_LIMIT_REACHED,
+            RESULT_ERROR_SESSION_SETUP_REQUIRED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ResultCode {}
+
+    /**
+     * Result code representing that the command is skipped or canceled. For an example, a seek
+     * command can be skipped if it is followed by another seek command.
+     */
+    public static final int RESULT_INFO_SKIPPED = 1;
+
+    /**
+     * Result code representing that the command is successfully completed.
+     */
+    public static final int RESULT_SUCCESS = 0;
+
+    /**
+     * Result code represents that call is ended with an unknown error.
+     */
+    public static final int RESULT_ERROR_UNKNOWN_ERROR = -1;
+
+    /**
+     * Result code representing that the command cannot be completed because the current state is
+     * not valid for the command.
+     */
+    public static final int RESULT_ERROR_INVALID_STATE = -2;
+
+    /**
+     * Result code representing that an argument is illegal.
+     */
+    public static final int RESULT_ERROR_BAD_VALUE = -3;
+
+    /**
+     * Result code representing that the command is not allowed.
+     */
+    public static final int RESULT_ERROR_PERMISSION_DENIED = -4;
+
+    /**
+     * Result code representing a file or network related command error.
+     */
+    public static final int RESULT_ERROR_IO_ERROR = -5;
+
+    /**
+     * Result code representing that the command is not supported nor implemented.
+     */
+    public static final int RESULT_ERROR_NOT_SUPPORTED = -6;
+
+    /**
+     * Result code representing that the session and controller were disconnected.
+     */
+    public static final int RESULT_ERROR_SESSION_DISCONNECTED = -100;
+
+    /**
+     * Result code representing that the authentication has expired.
+     */
+    public static final int RESULT_ERROR_SESSION_AUTHENTICATION_EXPIRED = -102;
+
+    /**
+     * Result code representing that a premium account is required.
+     */
+    public static final int RESULT_ERROR_SESSION_PREMIUM_ACCOUNT_REQUIRED = -103;
+
+    /**
+     * Result code representing that too many concurrent streams are detected.
+     */
+    public static final int RESULT_ERROR_SESSION_CONCURRENT_STREAM_LIMIT = -104;
+
+    /**
+     * Result code representing that the content is blocked due to parental controls.
+     */
+    public static final int RESULT_ERROR_SESSION_PARENTAL_CONTROL_RESTRICTED = -105;
+
+    /**
+     * Result code representing that the content is blocked due to being regionally unavailable.
+     */
+    public static final int RESULT_ERROR_SESSION_NOT_AVAILABLE_IN_REGION = -106;
+
+    /**
+     * Result code representing that the application cannot skip any more because the skip limit is
+     * reached.
+     */
+    public static final int RESULT_ERROR_SESSION_SKIP_LIMIT_REACHED = -107;
+
+    /**
+     * Result code representing that the session needs user's manual intervention.
+     */
+    public static final int RESULT_ERROR_SESSION_SETUP_REQUIRED = -108;
+
     public static final Parcelable.Creator<Session2Command> CREATOR =
             new Parcelable.Creator<Session2Command>() {
                 @Override
@@ -580,6 +686,39 @@ public final class Session2Command implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mCustomCommand, mCommandCode);
+    }
+
+    /**
+     * Contains the result of {@link Session2Command}.
+     */
+    public static final class Result {
+        private final int mResultCode;
+        private final Bundle mResultData;
+
+        /**
+         * Constructor of {@link Result}.
+         *
+         * @param resultCode result code
+         * @param resultData result data
+         */
+        public Result(int resultCode, Bundle resultData) {
+            mResultCode = resultCode;
+            mResultData = resultData;
+        }
+
+        /**
+         * Returns the result code.
+         */
+        public int getResultCode() {
+            return mResultCode;
+        }
+
+        /**
+         * Returns the result data.
+         */
+        public Bundle getResultData() {
+            return mResultData;
+        }
     }
 
     @SuppressWarnings("WeakerAccess") /* synthetic access */

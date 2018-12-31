@@ -34,5 +34,6 @@ oneway interface IMediaSession2 {
     void disconnect(in Controller2Link caller, int seq) = 1;
     void sendSessionCommand(in Controller2Link caller, int seq, in Session2Command sessionCommand,
             in Bundle args, in ResultReceiver resultReceiver) = 2;
-    // Next Id : 3
+    void cancelSessionCommand(in Controller2Link caller, int seq) = 3;
+    // Next Id : 4
 }
