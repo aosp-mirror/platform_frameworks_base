@@ -123,6 +123,7 @@ import com.android.server.power.ShutdownThread;
 import com.android.server.power.ThermalManagerService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.role.RoleManagerService;
+import com.android.server.rollback.RollbackManagerService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.signedconfig.SignedConfigService;
@@ -778,6 +779,11 @@ public final class SystemServer {
         // Tracks time spent in handling messages in handlers.
         traceBeginAndSlog("StartLooperStatsService");
         mSystemServiceManager.startService(LooperStatsService.Lifecycle.class);
+        traceEnd();
+
+        // Manages apk rollbacks.
+        traceBeginAndSlog("StartRollbackManagerService");
+        mSystemServiceManager.startService(RollbackManagerService.Lifecycle.class);
         traceEnd();
     }
 

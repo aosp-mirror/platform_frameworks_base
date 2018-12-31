@@ -49,6 +49,8 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
+import android.content.rollback.IRollbackManager;
+import android.content.rollback.RollbackManager;
 import android.debug.AdbManager;
 import android.debug.IAdbManager;
 import android.hardware.ConsumerIrManager;
@@ -1168,6 +1170,16 @@ final class SystemServiceRegistry {
                     public RoleManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
                         return new RoleManager(ctx.getOuterContext());
+                    }});
+
+        registerService(Context.ROLLBACK_SERVICE, RollbackManager.class,
+                new CachedServiceFetcher<RollbackManager>() {
+                    @Override
+                    public RollbackManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(Context.ROLLBACK_SERVICE);
+                        return new RollbackManager(ctx.getOuterContext(),
+                                IRollbackManager.Stub.asInterface(b));
                     }});
         //CHECKSTYLE:ON IndentationCheck
     }

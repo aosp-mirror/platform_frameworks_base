@@ -27,6 +27,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -2247,6 +2248,32 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_CHANGED = "android.intent.action.PACKAGE_CHANGED";
+    /**
+     * Broadcast Action: Sent to the system rollback manager when a package
+     * needs to have rollback enabled.
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     * </p>
+     *
+     * @hide This broadcast is used internally by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGE_ENABLE_ROLLBACK =
+            "android.intent.action.PACKAGE_ENABLE_ROLLBACK";
+    /**
+     * Broadcast Action: An existing version of an application package has been
+     * rolled back to a previous version.
+     * The data contains the name of the package.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @hide TODO: hidden, @TestApi until we decide on public vs. @SystemApi.
+     */
+    @TestApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGE_ROLLBACK_EXECUTED =
+            "android.intent.action.PACKAGE_ROLLBACK_EXECUTED";
     /**
      * @hide
      * Broadcast Action: Ask system services if there is any reason to
@@ -10343,6 +10370,7 @@ public class Intent implements Parcelable, Cloneable {
                 case ACTION_MEDIA_SCANNER_SCAN_FILE:
                 case ACTION_PACKAGE_NEEDS_VERIFICATION:
                 case ACTION_PACKAGE_VERIFIED:
+                case ACTION_PACKAGE_ENABLE_ROLLBACK:
                     // Ignore legacy actions
                     break;
                 default:

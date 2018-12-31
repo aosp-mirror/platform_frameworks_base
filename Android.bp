@@ -151,6 +151,7 @@ java_defaults {
         "core/java/android/content/pm/dex/IArtManager.aidl",
         "core/java/android/content/pm/dex/ISnapshotRuntimeProfileCallback.aidl",
         "core/java/android/content/pm/permission/IRuntimePermissionPresenter.aidl",
+        "core/java/android/content/rollback/IRollbackManager.aidl",
         "core/java/android/database/IContentObserver.aidl",
         "core/java/android/debug/IAdbManager.aidl",
         "core/java/android/debug/IAdbTransport.aidl",
