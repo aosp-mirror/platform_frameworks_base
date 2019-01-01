@@ -1724,6 +1724,25 @@ public final class PowerManager {
             = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
 
     /**
+     * Constant for PreIdleTimeout normal mode (default mode, not short nor extend timeout) .
+     * @hide
+     */
+    public static final int PRE_IDLE_TIMEOUT_MODE_NORMAL = 0;
+
+    /**
+     * Constant for PreIdleTimeout long mode (extend timeout to keep in inactive mode
+     * longer).
+     * @hide
+     */
+    public static final int PRE_IDLE_TIMEOUT_MODE_LONG = 1;
+
+    /**
+     * Constant for PreIdleTimeout short mode (short timeout to go to doze mode quickly)
+     * @hide
+     */
+    public static final int PRE_IDLE_TIMEOUT_MODE_SHORT = 2;
+
+    /**
      * A wake lock is a mechanism to indicate that your application needs
      * to have the device stay on.
      * <p>

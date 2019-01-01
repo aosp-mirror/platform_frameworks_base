@@ -1376,6 +1376,45 @@ public class DeviceIdleControllerTest {
         verifyLightStateConditions(LIGHT_STATE_ACTIVE);
     }
 
+    @Test
+    public void testStepToIdleMode() {
+        float delta = mDeviceIdleController.MIN_PRE_IDLE_FACTOR_CHANGE;
+        for (int mode = PowerManager.PRE_IDLE_TIMEOUT_MODE_NORMAL;
+                mode <= PowerManager.PRE_IDLE_TIMEOUT_MODE_LONG;
+                mode++) {
+            int ret = mDeviceIdleController.setPreIdleTimeoutMode(mode);
+            if (mode == PowerManager.PRE_IDLE_TIMEOUT_MODE_NORMAL) {
+                assertEquals("setPreIdleTimeoutMode: " + mode + " failed.",
+                        mDeviceIdleController.SET_IDLE_FACTOR_RESULT_IGNORED, ret);
+            } else {
+                assertEquals("setPreIdleTimeoutMode: " + mode + " failed.",
+                        mDeviceIdleController.SET_IDLE_FACTOR_RESULT_OK, ret);
+            }
+            //TODO(b/123045185): Mocked Handler of DeviceIdleController to make message loop
+            //workable in this test class
+            mDeviceIdleController.updatePreIdleFactor();
+            float expectedfactor = mDeviceIdleController.getPreIdleTimeoutByMode(mode);
+            float curfactor = mDeviceIdleController.getPreIdleTimeoutFactor();
+            assertEquals("Pre idle time factor of mode [" + mode + "].",
+                    expectedfactor, curfactor, delta);
+            mDeviceIdleController.resetPreIdleTimeoutMode();
+            mDeviceIdleController.updatePreIdleFactor();
+
+            checkNextAlarmTimeWithNewPreIdleFactor(expectedfactor, STATE_INACTIVE);
+            checkNextAlarmTimeWithNewPreIdleFactor(expectedfactor, STATE_IDLE_PENDING);
+
+            checkNextAlarmTimeWithNewPreIdleFactor(expectedfactor, STATE_SENSING);
+            checkNextAlarmTimeWithNewPreIdleFactor(expectedfactor, STATE_LOCATING);
+            checkNextAlarmTimeWithNewPreIdleFactor(expectedfactor, STATE_QUICK_DOZE_DELAY);
+            checkNextAlarmTimeWithNewPreIdleFactor(expectedfactor, STATE_IDLE_MAINTENANCE);
+            checkNextAlarmTimeWithNewPreIdleFactor(expectedfactor, STATE_IDLE);
+            checkMaybeDoAnImmediateMaintenance(expectedfactor);
+        }
+        float curfactor = mDeviceIdleController.getPreIdleTimeoutFactor();
+        assertEquals("Pre idle time factor of mode default.",
+                1.0f, curfactor, delta);
+    }
+
     private void enterDeepState(int state) {
         switch (state) {
             case STATE_ACTIVE:
@@ -1597,6 +1636,86 @@ public class DeviceIdleControllerTest {
                 break;
             default:
                 fail("Conditions for " + lightStateToString(expectedLightState) + " unknown.");
+        }
+    }
+
+    private void checkNextAlarmTimeWithNewPreIdleFactor(float factor, int state) {
+        final long errorTolerance = 1000;
+        enterDeepState(state);
+        long now = SystemClock.elapsedRealtime();
+        long alarm = mDeviceIdleController.getNextAlarmTime();
+        if (state == STATE_INACTIVE || state == STATE_IDLE_PENDING) {
+            int ret = mDeviceIdleController.setPreIdleTimeoutFactor(factor);
+            if (Float.compare(factor, 1.0f) == 0) {
+                assertEquals("setPreIdleTimeoutMode: " + factor + " failed.",
+                        mDeviceIdleController.SET_IDLE_FACTOR_RESULT_IGNORED, ret);
+            } else {
+                assertEquals("setPreIdleTimeoutMode: " + factor + " failed.",
+                        mDeviceIdleController.SET_IDLE_FACTOR_RESULT_OK, ret);
+            }
+            if (ret == mDeviceIdleController.SET_IDLE_FACTOR_RESULT_OK) {
+                mDeviceIdleController.updatePreIdleFactor();
+                long newAlarm = mDeviceIdleController.getNextAlarmTime();
+                long newDelay = (long) ((alarm - now) * factor);
+                assertTrue("setPreIdleTimeoutFactor: " + factor,
+                        Math.abs(newDelay - (newAlarm - now)) <  errorTolerance);
+                mDeviceIdleController.resetPreIdleTimeoutMode();
+                mDeviceIdleController.updatePreIdleFactor();
+                mDeviceIdleController.maybeDoImmediateMaintenance();
+                newAlarm = mDeviceIdleController.getNextAlarmTime();
+                assertTrue("resetPreIdleTimeoutMode from: " + factor,
+                        Math.abs(newAlarm - alarm) < errorTolerance);
+                mDeviceIdleController.setPreIdleTimeoutFactor(factor);
+                now = SystemClock.elapsedRealtime();
+                enterDeepState(state);
+                newAlarm = mDeviceIdleController.getNextAlarmTime();
+                assertTrue("setPreIdleTimeoutFactor: " + factor + " before step to idle",
+                        Math.abs(newDelay - (newAlarm - now)) <  errorTolerance);
+                mDeviceIdleController.resetPreIdleTimeoutMode();
+                mDeviceIdleController.updatePreIdleFactor();
+                mDeviceIdleController.maybeDoImmediateMaintenance();
+            }
+        } else {
+            mDeviceIdleController.setPreIdleTimeoutFactor(factor);
+            mDeviceIdleController.updatePreIdleFactor();
+            long newAlarm = mDeviceIdleController.getNextAlarmTime();
+            assertTrue("setPreIdleTimeoutFactor: " + factor
+                    + " shounld not change next alarm" ,
+                    (newAlarm == alarm));
+            mDeviceIdleController.resetPreIdleTimeoutMode();
+            mDeviceIdleController.updatePreIdleFactor();
+            mDeviceIdleController.maybeDoImmediateMaintenance();
+        }
+    }
+
+    private void checkMaybeDoAnImmediateMaintenance(float factor) {
+        int ret = mDeviceIdleController.setPreIdleTimeoutFactor(factor);
+        final long minuteInMillis = 60 * 1000;
+        if (Float.compare(factor, 1.0f) == 0) {
+            assertEquals("setPreIdleTimeoutMode: " + factor + " failed.",
+                    mDeviceIdleController.SET_IDLE_FACTOR_RESULT_IGNORED, ret);
+        } else {
+            assertEquals("setPreIdleTimeoutMode: " + factor + " failed.",
+                    mDeviceIdleController.SET_IDLE_FACTOR_RESULT_OK, ret);
+        }
+        if (ret == mDeviceIdleController.SET_IDLE_FACTOR_RESULT_OK) {
+            enterDeepState(STATE_IDLE);
+            long now = SystemClock.elapsedRealtime();
+            long alarm = mDeviceIdleController.getNextAlarmTime();
+            mDeviceIdleController.setIdleStartTimeForTest(
+                    now - (long) (mConstants.IDLE_TIMEOUT * 0.6));
+            mDeviceIdleController.maybeDoImmediateMaintenance();
+            long newAlarm = mDeviceIdleController.getNextAlarmTime();
+            assertTrue("maintenance not reschedule IDLE_TIMEOUT * 0.6",
+                    newAlarm == alarm);
+            mDeviceIdleController.setIdleStartTimeForTest(
+                    now - (long) (mConstants.IDLE_TIMEOUT * 1.2));
+            mDeviceIdleController.maybeDoImmediateMaintenance();
+            newAlarm = mDeviceIdleController.getNextAlarmTime();
+            assertTrue("maintenance not reschedule IDLE_TIMEOUT * 1.2",
+                    (newAlarm - now) < minuteInMillis);
+            mDeviceIdleController.resetPreIdleTimeoutMode();
+            mDeviceIdleController.updatePreIdleFactor();
         }
     }
 }
