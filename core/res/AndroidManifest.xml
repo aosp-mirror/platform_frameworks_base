@@ -42,6 +42,8 @@
     <protected-broadcast android:name="android.intent.action.PACKAGE_REMOVED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_ENABLE_ROLLBACK" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_ROLLBACK_EXECUTED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_RESTARTED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_FIRST_LAUNCH" />
@@ -3844,6 +3846,12 @@
          @hide
     -->
     <permission android:name="android.permission.BIND_PACKAGE_VERIFIER"
+        android:protectionLevel="signature" />
+
+    <!-- @hide Rollback manager needs to have this permission before the PackageManager will
+         trust it to enable rollback.
+    -->
+    <permission android:name="android.permission.PACKAGE_ROLLBACK_AGENT"
         android:protectionLevel="signature" />
 
     <!-- @SystemApi @hide Allows an application to mark other applications as harmful -->

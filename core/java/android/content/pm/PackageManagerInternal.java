@@ -759,4 +759,48 @@ public abstract class PackageManagerInternal {
     /** Returns whether the given package is enabled for the given user */
     public abstract @PackageManager.EnabledState int getApplicationEnabledState(
             String packageName, int userId);
+
+    /**
+     * Extra field name for the token of a request to enable rollback for a
+     * package.
+     */
+    public static final String EXTRA_ENABLE_ROLLBACK_TOKEN =
+            "android.content.pm.extra.ENABLE_ROLLBACK_TOKEN";
+
+    /**
+     * Extra field name for the installFlags of a request to enable rollback
+     * for a package.
+     */
+    public static final String EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS =
+            "android.content.pm.extra.ENABLE_ROLLBACK_INSTALL_FLAGS";
+
+    /**
+     * Used as the {@code enableRollbackCode} argument for
+     * {@link PackageManagerInternal#setEnableRollbackCode} to indicate that
+     * enabling rollback succeeded.
+     */
+    public static final int ENABLE_ROLLBACK_SUCCEEDED = 1;
+
+    /**
+     * Used as the {@code enableRollbackCode} argument for
+     * {@link PackageManagerInternal#setEnableRollbackCode} to indicate that
+     * enabling rollback failed.
+     */
+    public static final int ENABLE_ROLLBACK_FAILED = -1;
+
+    /**
+     * Allows the rollback manager listening to the
+     * {@link Intent#ACTION_PACKAGE_ENABLE_ROLLBACK enable rollback broadcast}
+     * to respond to the package manager. The response must include the
+     * {@code enableRollbackCode} which is one of
+     * {@link PackageManager#ENABLE_ROLLBACK_SUCCEEDED} or
+     * {@link PackageManager#ENABLE_ROLLBACK_FAILED}.
+     *
+     * @param token pending package identifier as passed via the
+     *            {@link PackageManager#EXTRA_ENABLE_ROLLBACK_TOKEN} Intent extra.
+     * @param enableRollbackCode the status code result of enabling rollback
+     * @throws SecurityException if the caller does not have the
+     *            PACKAGE_ROLLBACK_AGENT permission.
+     */
+    public abstract void setEnableRollbackCode(int token, int enableRollbackCode);
 }

@@ -67,6 +67,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -539,37 +540,42 @@ public class AudioManager {
 
     /**
      * Adjusting the volume due to a hardware key press.
+     * This flag can be used in the places in order to denote (or check) that a volume adjustment
+     * request is from a hardware key press. (e.g. {@link MediaController}).
      * @hide
      */
     @SystemApi
-    public static final int FLAG_FROM_KEY = 1 << 12;
+    public static final int FLAG_FROM_KEY = 1 << 16;
 
-    private static final String[] FLAG_NAMES = {
-        "FLAG_SHOW_UI",
-        "FLAG_ALLOW_RINGER_MODES",
-        "FLAG_PLAY_SOUND",
-        "FLAG_REMOVE_SOUND_AND_VIBRATE",
-        "FLAG_VIBRATE",
-        "FLAG_FIXED_VOLUME",
-        "FLAG_BLUETOOTH_ABS_VOLUME",
-        "FLAG_SHOW_SILENT_HINT",
-        "FLAG_HDMI_SYSTEM_AUDIO_VOLUME",
-        "FLAG_ACTIVE_MEDIA_ONLY",
-        "FLAG_SHOW_UI_WARNINGS",
-        "FLAG_SHOW_VIBRATE_HINT",
-        "FLAG_FROM_KEY",
-    };
+    // The iterator of TreeMap#entrySet() returns the entries in ascending key order.
+    private static final TreeMap<Integer, String> FLAG_NAMES = new TreeMap<>();
+
+    static {
+        FLAG_NAMES.put(FLAG_SHOW_UI, "FLAG_SHOW_UI");
+        FLAG_NAMES.put(FLAG_ALLOW_RINGER_MODES, "FLAG_ALLOW_RINGER_MODES");
+        FLAG_NAMES.put(FLAG_PLAY_SOUND, "FLAG_PLAY_SOUND");
+        FLAG_NAMES.put(FLAG_REMOVE_SOUND_AND_VIBRATE, "FLAG_REMOVE_SOUND_AND_VIBRATE");
+        FLAG_NAMES.put(FLAG_VIBRATE, "FLAG_VIBRATE");
+        FLAG_NAMES.put(FLAG_FIXED_VOLUME, "FLAG_FIXED_VOLUME");
+        FLAG_NAMES.put(FLAG_BLUETOOTH_ABS_VOLUME, "FLAG_BLUETOOTH_ABS_VOLUME");
+        FLAG_NAMES.put(FLAG_SHOW_SILENT_HINT, "FLAG_SHOW_SILENT_HINT");
+        FLAG_NAMES.put(FLAG_HDMI_SYSTEM_AUDIO_VOLUME, "FLAG_HDMI_SYSTEM_AUDIO_VOLUME");
+        FLAG_NAMES.put(FLAG_ACTIVE_MEDIA_ONLY, "FLAG_ACTIVE_MEDIA_ONLY");
+        FLAG_NAMES.put(FLAG_SHOW_UI_WARNINGS, "FLAG_SHOW_UI_WARNINGS");
+        FLAG_NAMES.put(FLAG_SHOW_VIBRATE_HINT, "FLAG_SHOW_VIBRATE_HINT");
+        FLAG_NAMES.put(FLAG_FROM_KEY, "FLAG_FROM_KEY");
+    }
 
     /** @hide */
     public static String flagsToString(int flags) {
         final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < FLAG_NAMES.length; i++) {
-            final int flag = 1 << i;
+        for (Map.Entry<Integer, String> entry : FLAG_NAMES.entrySet()) {
+            final int flag = entry.getKey();
             if ((flags & flag) != 0) {
                 if (sb.length() > 0) {
                     sb.append(',');
                 }
-                sb.append(FLAG_NAMES[i]);
+                sb.append(entry.getValue());
                 flags &= ~flag;
             }
         }

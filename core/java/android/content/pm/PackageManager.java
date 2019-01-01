@@ -720,6 +720,9 @@ public abstract class PackageManager {
             INSTALL_FORCE_SDK,
             INSTALL_FULL_APP,
             INSTALL_ALLOCATE_AGGRESSIVE,
+            INSTALL_VIRTUAL_PRELOAD,
+            INSTALL_APEX,
+            INSTALL_ENABLE_ROLLBACK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -856,6 +859,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_APEX = 0x00020000;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that rollback
+     * should be enabled for this install.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ENABLE_ROLLBACK = 0x00040000;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "DONT_KILL_APP" }, value = {
