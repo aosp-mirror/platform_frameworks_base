@@ -70,7 +70,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -164,16 +163,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** System service that performs backup/restore operations. */
 public class UserBackupManagerService {
-    // File containing backup-enabled state.  Contains a single byte;
-    // nonzero == enabled.  File missing or contains a zero byte == disabled.
-    private static final String BACKUP_ENABLE_FILE = "backup_enabled";
-
     // Persistently track the need to do a full init.
     private static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
-
-    // Name of the directories the service stores bookkeeping data under.
-    private static final String BACKUP_PERSISTENT_DIR = "backup";
-    private static final String BACKUP_STAGING_DIR = "backup_stage";
 
     // System-private key used for backing up an app's widget state.  Must
     // begin with U+FFxx by convention (we reserve all keys starting
@@ -354,9 +345,9 @@ public class UserBackupManagerService {
     final AtomicInteger mNextToken = new AtomicInteger();
 
     // Where we keep our journal files and other bookkeeping.
-    private File mBaseStateDir;
-    private File mDataDir;
-    private File mJournalDir;
+    private final File mBaseStateDir;
+    private final File mDataDir;
+    private final File mJournalDir;
     @Nullable
     private DataChangedJournal mJournal;
     private File mFullBackupScheduleFile;
@@ -395,10 +386,8 @@ public class UserBackupManagerService {
         TransportManager transportManager =
                 new TransportManager(context, transportWhitelist, currentTransport);
 
-        File baseStateDir = new File(Environment.getDataDirectory(), BACKUP_PERSISTENT_DIR);
-
-        // This dir on /cache is managed directly in init.rc
-        File dataDir = new File(Environment.getDownloadCacheDirectory(), BACKUP_STAGING_DIR);
+        File baseStateDir = UserBackupManagerFiles.getBaseStateDir(userId);
+        File dataDir = UserBackupManagerFiles.getDataDir(userId);
 
         return createAndInitializeService(
                 userId, context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
@@ -726,16 +715,8 @@ public class UserBackupManagerService {
         return mBaseStateDir;
     }
 
-    public void setBaseStateDir(File baseStateDir) {
-        mBaseStateDir = baseStateDir;
-    }
-
     public File getDataDir() {
         return mDataDir;
-    }
-
-    public void setDataDir(File dataDir) {
-        mDataDir = dataDir;
     }
 
     @Nullable
@@ -2735,8 +2716,7 @@ public class UserBackupManagerService {
         try {
             boolean wasEnabled = mEnabled;
             synchronized (this) {
-                // TODO(b/118520567): Clean up writing backup enabled logic.
-                BackupManagerService.writeBackupEnableState(enable, UserHandle.USER_SYSTEM);
+                UserBackupManagerFilePersistedSettings.writeBackupEnableState(mUserId, enable);
                 mEnabled = enable;
             }
 
