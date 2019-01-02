@@ -45,9 +45,7 @@ public class AssitantButton extends CarFacetButton {
                     Log.d(TAG, "IVoiceInteractionSessionShowCallback onShown()");
                 }
             };
-
-    private static final String EXTRA_CAR_PUSH_TO_TALK =
-            "com.android.car.input.EXTRA_CAR_PUSH_TO_TALK";
+    
     private final AssistUtils mAssistUtils;
 
     public AssitantButton(Context context, AttributeSet attrs) {
@@ -60,7 +58,6 @@ public class AssitantButton extends CarFacetButton {
 
     private void showAssistant() {
         final Bundle args = new Bundle();
-        args.putBoolean(EXTRA_CAR_PUSH_TO_TALK, true);
         mAssistUtils.showSessionForActiveService(args,
                 SHOW_SOURCE_ASSIST_GESTURE, mShowCallback, /*activityToken=*/ null);
     }
