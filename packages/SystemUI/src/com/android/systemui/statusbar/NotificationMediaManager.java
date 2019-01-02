@@ -157,7 +157,7 @@ public class NotificationMediaManager implements Dumpable {
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onEntryRemoved(
-                    Entry entry,
+                    @Nullable Entry entry,
                     String key,
                     StatusBarNotification old,
                     NotificationVisibility visibility,
