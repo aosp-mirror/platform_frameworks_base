@@ -73,7 +73,8 @@ class HalDeathRecipient : public hidl_death_recipient {
     wp<V1_1::ITunerCallback> mTunerCallback;
 
 public:
-    HalDeathRecipient(wp<V1_1::ITunerCallback> tunerCallback):mTunerCallback(tunerCallback) {}
+    explicit HalDeathRecipient(wp<V1_1::ITunerCallback> tunerCallback)
+        : mTunerCallback(tunerCallback) {}
 
     virtual void serviceDied(uint64_t cookie, const wp<hidl::base::V1_0::IBase>& who);
 };
