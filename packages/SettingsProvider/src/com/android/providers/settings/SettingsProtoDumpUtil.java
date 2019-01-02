@@ -1557,6 +1557,10 @@ class SettingsProtoDumpUtil {
                 Settings.Global.ZRAM_ENABLED,
                 GlobalSettingsProto.ZRAM_ENABLED);
 
+        dumpSetting(s, p,
+                Global.APP_OPS_CONSTANTS,
+                GlobalSettingsProto.APP_OPS_CONSTANTS);
+
         p.end(token);
         // Please insert new settings using the same order as in GlobalSettingsProto.
 

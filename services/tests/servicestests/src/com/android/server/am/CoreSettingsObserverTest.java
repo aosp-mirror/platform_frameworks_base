@@ -34,7 +34,7 @@ import android.test.mock.MockContentResolver;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.test.FakeSettingsProvider;
-import com.android.server.AppOpsService;
+import com.android.server.appop.AppOpsService;
 
 import org.junit.AfterClass;
 import org.junit.Before;

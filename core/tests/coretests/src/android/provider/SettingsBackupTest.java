@@ -27,6 +27,7 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
 import android.platform.test.annotations.Presubmit;
+import android.provider.Settings.Global;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -550,7 +551,12 @@ public class SettingsBackupTest {
                     Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
                     Settings.Global.BACKUP_MULTI_USER_ENABLED,
                     Settings.Global.ISOLATED_STORAGE_LOCAL,
-                    Settings.Global.ISOLATED_STORAGE_REMOTE);
+                    Settings.Global.ISOLATED_STORAGE_REMOTE,
+                    Settings.Global.APPOP_HISTORY_PARAMETERS,
+                    Settings.Global.APPOP_HISTORY_MODE,
+                    Settings.Global.APPOP_HISTORY_INTERVAL_MULTIPLIER,
+                    Settings.Global.APPOP_HISTORY_BASE_INTERVAL_MILLIS);
+
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,

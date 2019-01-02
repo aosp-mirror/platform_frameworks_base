@@ -245,7 +245,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.AppOpsService;
+import com.android.server.appop.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;

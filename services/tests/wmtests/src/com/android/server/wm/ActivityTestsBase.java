@@ -66,7 +66,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 
 import com.android.internal.app.IVoiceInteractor;
-import com.android.server.AppOpsService;
+import com.android.server.appop.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.ServiceThread;
 import com.android.server.am.ActivityManagerService;
