@@ -5239,6 +5239,45 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(PASSWORD_COMPLEXITY_HIGH, dpm.getPasswordComplexity());
     }
 
+    public void testCrossProfileCalendarPackages_initiallyEmpty() {
+        setAsProfileOwner(admin1);
+        final Set<String> packages = dpm.getCrossProfileCalendarPackages(admin1);
+        assertCrossProfileCalendarPackagesEqual(packages, Collections.emptySet());
+    }
+
+    public void testCrossProfileCalendarPackages_reopenDpms() {
+        setAsProfileOwner(admin1);
+        dpm.setCrossProfileCalendarPackages(admin1, null);
+        Set<String> packages = dpm.getCrossProfileCalendarPackages(admin1);
+        assertTrue(packages == null);
+        initializeDpms();
+        packages = dpm.getCrossProfileCalendarPackages(admin1);
+        assertTrue(packages == null);
+
+        dpm.setCrossProfileCalendarPackages(admin1, Collections.emptySet());
+        packages = dpm.getCrossProfileCalendarPackages(admin1);
+        assertCrossProfileCalendarPackagesEqual(packages, Collections.emptySet());
+        initializeDpms();
+        packages = dpm.getCrossProfileCalendarPackages(admin1);
+        assertCrossProfileCalendarPackagesEqual(packages, Collections.emptySet());
+
+        final String dummyPackageName = "test";
+        final Set<String> testPackages = new ArraySet<String>(Arrays.asList(dummyPackageName));
+        dpm.setCrossProfileCalendarPackages(admin1, testPackages);
+        packages = dpm.getCrossProfileCalendarPackages(admin1);
+        assertCrossProfileCalendarPackagesEqual(packages, testPackages);
+        initializeDpms();
+        packages = dpm.getCrossProfileCalendarPackages(admin1);
+        assertCrossProfileCalendarPackagesEqual(packages, testPackages);
+    }
+
+    private void assertCrossProfileCalendarPackagesEqual(Set<String> expected, Set<String> actual) {
+        assertTrue(expected != null);
+        assertTrue(actual != null);
+        assertTrue(expected.containsAll(actual));
+        assertTrue(actual.containsAll(expected));
+    }
+
     private void configureProfileOwnerForDeviceIdAccess(ComponentName who, int userId) {
         final long ident = mServiceContext.binder.clearCallingIdentity();
         mServiceContext.binder.callingUid =

@@ -10428,23 +10428,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Whitelists a package that is allowed to access cross profile calendar APIs.
+     * Whitelists a set of packages that are allowed to access cross-profile calendar APIs.
      *
      * <p>Called by a profile owner of a managed profile.
      *
+     * <p>Calling with a null value for the set disables the restriction so that all packages
+     * are allowed to access cross-profile calendar APIs. Calling with an empty set disallows
+     * all packages from accessing cross-profile calendar APIs. If this method isn't called,
+     * no package will be allowed to access cross-profile calendar APIs by default.
+     *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
-     * @param packageName name of the package to be whitelisted.
+     * @param packageNames set of packages to be whitelisted.
      * @throws SecurityException if {@code admin} is not a profile owner.
      *
-     * @see #removeCrossProfileCalendarPackage(ComponentName, String)
      * @see #getCrossProfileCalendarPackages(ComponentName)
      */
-    public void addCrossProfileCalendarPackage(@NonNull ComponentName admin,
-            @NonNull String packageName) {
-        throwIfParentInstance("addCrossProfileCalendarPackage");
+    public void setCrossProfileCalendarPackages(@NonNull ComponentName admin,
+            @Nullable Set<String> packageNames) {
+        throwIfParentInstance("setCrossProfileCalendarPackages");
         if (mService != null) {
             try {
-                mService.addCrossProfileCalendarPackage(admin, packageName);
+                mService.setCrossProfileCalendarPackages(admin, packageNames == null ? null
+                        : new ArrayList<>(packageNames));
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -10452,52 +10457,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Removes a package that was allowed to access cross profile calendar APIs
-     * from the whitelist.
-     *
-     * <p>Called by a profile owner of a managed profile.
-     *
-     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
-     * @param packageName name of the package to be removed from the whitelist.
-     * @return {@code true} if the package is successfully removed from the whitelist,
-     * {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a profile owner.
-     *
-     * @see #addCrossProfileCalendarPackage(ComponentName, String)
-     * @see #getCrossProfileCalendarPackages(ComponentName)
-     */
-    public boolean removeCrossProfileCalendarPackage(@NonNull ComponentName admin,
-            @NonNull String packageName) {
-        throwIfParentInstance("removeCrossProfileCalendarPackage");
-        if (mService != null) {
-            try {
-                return mService.removeCrossProfileCalendarPackage(admin, packageName);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets a set of package names that are whitelisted to access cross profile calendar APIs.
+     * Gets a set of package names that are whitelisted to access cross-profile calendar APIs.
      *
      * <p>Called by a profile owner of a managed profile.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      * @return the set of names of packages that were previously whitelisted via
-     * {@link #addCrossProfileCalendarPackage(ComponentName, String)}, or an
+     * {@link #setCrossProfileCalendarPackages(ComponentName, Set)}, or an
      * empty set if none have been whitelisted.
      * @throws SecurityException if {@code admin} is not a profile owner.
      *
-     * @see #addCrossProfileCalendarPackage(ComponentName, String)
-     * @see #removeCrossProfileCalendarPackage(ComponentName, String)
+     * @see #setCrossProfileCalendarPackages(ComponentName, Set)
      */
-    public @NonNull Set<String> getCrossProfileCalendarPackages(@NonNull ComponentName admin) {
+    public @Nullable Set<String> getCrossProfileCalendarPackages(@NonNull ComponentName admin) {
         throwIfParentInstance("getCrossProfileCalendarPackages");
         if (mService != null) {
             try {
-                return new ArraySet<>(mService.getCrossProfileCalendarPackages(admin));
+                final List<String> packageNames = mService.getCrossProfileCalendarPackages(admin);
+                return packageNames == null ? null : new ArraySet<>(packageNames);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -10506,22 +10483,21 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns if a package is whitelisted to access cross profile calendar APIs.
+     * Returns if a package is whitelisted to access cross-profile calendar APIs.
      *
      * <p>To query for a specific user, use
      * {@link Context#createPackageContextAsUser(String, int, UserHandle)} to create a context for
      * that user, and get a {@link DevicePolicyManager} from this context.
      *
      * @param packageName the name of the package
-     * @return {@code true} if the package is whitelisted to access cross profile calendar APIs.
+     * @return {@code true} if the package is whitelisted to access cross-profile calendar APIs.
      * {@code false} otherwise.
      *
-     * @see #addCrossProfileCalendarPackage(ComponentName, String)
-     * @see #removeCrossProfileCalendarPackage(ComponentName, String)
+     * @see #setCrossProfileCalendarPackages(ComponentName, Set)
      * @see #getCrossProfileCalendarPackages(ComponentName)
      * @hide
      */
-    public @NonNull boolean isPackageAllowedToAccessCalendar(@NonNull  String packageName) {
+    public boolean isPackageAllowedToAccessCalendar(@NonNull  String packageName) {
         throwIfParentInstance("isPackageAllowedToAccessCalendar");
         if (mService != null) {
             try {
@@ -10535,27 +10511,27 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Gets a set of package names that are whitelisted to access cross profile calendar APIs.
+     * Gets a set of package names that are whitelisted to access cross-profile calendar APIs.
      *
      * <p>To query for a specific user, use
      * {@link Context#createPackageContextAsUser(String, int, UserHandle)} to create a context for
      * that user, and get a {@link DevicePolicyManager} from this context.
      *
      * @return the set of names of packages that were previously whitelisted via
-     * {@link #addCrossProfileCalendarPackage(ComponentName, String)}, or an
+     * {@link #setCrossProfileCalendarPackages(ComponentName, Set)}, or an
      * empty set if none have been whitelisted.
      *
-     * @see #addCrossProfileCalendarPackage(ComponentName, String)
-     * @see #removeCrossProfileCalendarPackage(ComponentName, String)
+     * @see #setCrossProfileCalendarPackages(ComponentName, Set)
      * @see #getCrossProfileCalendarPackages(ComponentName)
      * @hide
      */
-    public @NonNull Set<String>  getCrossProfileCalendarPackages() {
+    public @Nullable Set<String> getCrossProfileCalendarPackages() {
         throwIfParentInstance("getCrossProfileCalendarPackages");
         if (mService != null) {
             try {
-                return new ArraySet<>(mService.getCrossProfileCalendarPackagesForUser(
-                        myUserId()));
+                final List<String> packageNames = mService.getCrossProfileCalendarPackagesForUser(
+                        myUserId());
+                return packageNames == null ? null : new ArraySet<>(packageNames);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
