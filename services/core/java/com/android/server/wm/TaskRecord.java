@@ -481,6 +481,32 @@ class TaskRecord extends ConfigurationContainer {
         mTask = task;
     }
 
+    void cleanUpResourcesForDestroy() {
+        if (!mActivities.isEmpty()) {
+            return;
+        }
+
+        // This task is going away, so save the last state if necessary.
+        saveLaunchingStateIfNeeded();
+
+        // TODO: VI what about activity?
+        final boolean isVoiceSession = voiceSession != null;
+        if (isVoiceSession) {
+            try {
+                voiceSession.taskFinished(intent, taskId);
+            } catch (RemoteException e) {
+            }
+        }
+        if (autoRemoveFromRecents() || isVoiceSession) {
+            // Task creator asked to remove this when done, or this task was a voice
+            // interaction, so it should not remain on the recent tasks list.
+            mService.mStackSupervisor.mRecentTasks.remove(this);
+        }
+
+        removeWindowContainer();
+    }
+
+    @VisibleForTesting
     void removeWindowContainer() {
         mService.getLockTaskController().clearLockedTask(this);
         if (mTask == null) {
