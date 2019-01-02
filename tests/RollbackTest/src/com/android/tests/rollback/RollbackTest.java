@@ -56,7 +56,8 @@ public class RollbackTest {
 
     private static final String TAG = "RollbackTest";
 
-    private static final String TEST_APP_PACKAGE_NAME = "com.android.tests.rollback.testapp";
+    private static final String TEST_APP_A = "com.android.tests.rollback.testapp.A";
+    private static final String TEST_APP_B = "com.android.tests.rollback.testapp.B";
 
     /**
      * Test basic rollbacks.
@@ -89,16 +90,16 @@ public class RollbackTest {
             RollbackBroadcastReceiver broadcastReceiver = new RollbackBroadcastReceiver();
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
-            // Uninstall com.android.tests.rollback.testapp
-            RollbackTestUtils.uninstall("com.android.tests.rollback.testapp");
-            assertEquals(-1, RollbackTestUtils.getInstalledVersion(TEST_APP_PACKAGE_NAME));
+            // Uninstall TEST_APP_A
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            assertEquals(-1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // TODO: There is currently a race condition between when the app is
             // uninstalled and when rollback manager deletes the rollback. Fix it
             // so that's not the case!
             for (int i = 0; i < 5; ++i) {
                 for (RollbackInfo info : rm.getRecentlyExecutedRollbacks()) {
-                    if (TEST_APP_PACKAGE_NAME.equals(info.targetPackage.packageName)) {
+                    if (TEST_APP_A.equals(info.targetPackage.packageName)) {
                         Log.i(TAG, "Sleeping 1 second to wait for uninstall to take effect.");
                         Thread.sleep(1000);
                         break;
@@ -107,27 +108,27 @@ public class RollbackTest {
             }
 
             // The app should not be available for rollback.
-            assertNull(rm.getAvailableRollback(TEST_APP_PACKAGE_NAME));
-            assertFalse(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_PACKAGE_NAME));
+            assertNull(rm.getAvailableRollback(TEST_APP_A));
+            assertFalse(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
 
             // There should be no recently executed rollbacks for this package.
             for (RollbackInfo info : rm.getRecentlyExecutedRollbacks()) {
-                assertNotEquals(TEST_APP_PACKAGE_NAME, info.targetPackage.packageName);
+                assertNotEquals(TEST_APP_A, info.targetPackage.packageName);
             }
 
             // Install v1 of the app (without rollbacks enabled).
-            RollbackTestUtils.install("RollbackTestAppV1.apk", false);
-            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_PACKAGE_NAME));
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // Upgrade from v1 to v2, with rollbacks enabled.
-            RollbackTestUtils.install("RollbackTestAppV2.apk", true);
-            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_PACKAGE_NAME));
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // The app should now be available for rollback.
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_PACKAGE_NAME));
-            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_PACKAGE_NAME);
+            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
+            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
             assertNotNull(rollback);
-            assertEquals(TEST_APP_PACKAGE_NAME, rollback.targetPackage.packageName);
+            assertEquals(TEST_APP_A, rollback.targetPackage.packageName);
             assertEquals(2, rollback.targetPackage.higherVersion.versionCode);
             assertEquals(1, rollback.targetPackage.lowerVersion.versionCode);
 
@@ -138,26 +139,26 @@ public class RollbackTest {
 
             // Roll back the app.
             RollbackTestUtils.rollback(rollback);
-            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_PACKAGE_NAME));
+            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // Verify we received a broadcast for the rollback.
             // TODO: Race condition between the timeout and when the broadcast is
             // received could lead to test flakiness.
             Intent broadcast = broadcastReceiver.poll(5, TimeUnit.SECONDS);
             assertNotNull(broadcast);
-            assertEquals(TEST_APP_PACKAGE_NAME, broadcast.getData().getSchemeSpecificPart());
+            assertEquals(TEST_APP_A, broadcast.getData().getSchemeSpecificPart());
             assertNull(broadcastReceiver.poll(0, TimeUnit.SECONDS));
 
             // Verify the recent rollback has been recorded.
             rollback = null;
             for (RollbackInfo r : rm.getRecentlyExecutedRollbacks()) {
-                if (TEST_APP_PACKAGE_NAME.equals(r.targetPackage.packageName)) {
+                if (TEST_APP_A.equals(r.targetPackage.packageName)) {
                     assertNull(rollback);
                     rollback = r;
                 }
             }
             assertNotNull(rollback);
-            assertEquals(TEST_APP_PACKAGE_NAME, rollback.targetPackage.packageName);
+            assertEquals(TEST_APP_A, rollback.targetPackage.packageName);
             assertEquals(2, rollback.targetPackage.higherVersion.versionCode);
             assertEquals(1, rollback.targetPackage.lowerVersion.versionCode);
 
@@ -181,17 +182,17 @@ public class RollbackTest {
 
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
-            // Prep installation of com.android.tests.rollback.testapp
-            RollbackTestUtils.uninstall("com.android.tests.rollback.testapp");
-            RollbackTestUtils.install("RollbackTestAppV1.apk", false);
-            RollbackTestUtils.install("RollbackTestAppV2.apk", true);
-            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_PACKAGE_NAME));
+            // Prep installation of TEST_APP_A
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // The app should now be available for rollback.
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_PACKAGE_NAME));
-            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_PACKAGE_NAME);
+            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
+            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
             assertNotNull(rollback);
-            assertEquals(TEST_APP_PACKAGE_NAME, rollback.targetPackage.packageName);
+            assertEquals(TEST_APP_A, rollback.targetPackage.packageName);
             assertEquals(2, rollback.targetPackage.higherVersion.versionCode);
             assertEquals(1, rollback.targetPackage.lowerVersion.versionCode);
 
@@ -199,27 +200,27 @@ public class RollbackTest {
             rm.reloadPersistedData();
 
             // The app should still be available for rollback.
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_PACKAGE_NAME));
-            rollback = rm.getAvailableRollback(TEST_APP_PACKAGE_NAME);
+            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
+            rollback = rm.getAvailableRollback(TEST_APP_A);
             assertNotNull(rollback);
-            assertEquals(TEST_APP_PACKAGE_NAME, rollback.targetPackage.packageName);
+            assertEquals(TEST_APP_A, rollback.targetPackage.packageName);
             assertEquals(2, rollback.targetPackage.higherVersion.versionCode);
             assertEquals(1, rollback.targetPackage.lowerVersion.versionCode);
 
             // Roll back the app.
             RollbackTestUtils.rollback(rollback);
-            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_PACKAGE_NAME));
+            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // Verify the recent rollback has been recorded.
             rollback = null;
             for (RollbackInfo r : rm.getRecentlyExecutedRollbacks()) {
-                if (TEST_APP_PACKAGE_NAME.equals(r.targetPackage.packageName)) {
+                if (TEST_APP_A.equals(r.targetPackage.packageName)) {
                     assertNull(rollback);
                     rollback = r;
                 }
             }
             assertNotNull(rollback);
-            assertEquals(TEST_APP_PACKAGE_NAME, rollback.targetPackage.packageName);
+            assertEquals(TEST_APP_A, rollback.targetPackage.packageName);
             assertEquals(2, rollback.targetPackage.higherVersion.versionCode);
             assertEquals(1, rollback.targetPackage.lowerVersion.versionCode);
 
@@ -229,13 +230,13 @@ public class RollbackTest {
             // Verify the recent rollback is still recorded.
             rollback = null;
             for (RollbackInfo r : rm.getRecentlyExecutedRollbacks()) {
-                if (TEST_APP_PACKAGE_NAME.equals(r.targetPackage.packageName)) {
+                if (TEST_APP_A.equals(r.targetPackage.packageName)) {
                     assertNull(rollback);
                     rollback = r;
                 }
             }
             assertNotNull(rollback);
-            assertEquals(TEST_APP_PACKAGE_NAME, rollback.targetPackage.packageName);
+            assertEquals(TEST_APP_A, rollback.targetPackage.packageName);
             assertEquals(2, rollback.targetPackage.higherVersion.versionCode);
             assertEquals(1, rollback.targetPackage.lowerVersion.versionCode);
         } finally {
@@ -256,25 +257,25 @@ public class RollbackTest {
                     Manifest.permission.MANAGE_ROLLBACKS);
 
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
-            RollbackTestUtils.uninstall("com.android.tests.rollback.testapp");
-            RollbackTestUtils.install("RollbackTestAppV1.apk", false);
-            RollbackTestUtils.install("RollbackTestAppV2.apk", true);
-            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_PACKAGE_NAME));
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // The app should now be available for rollback.
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_PACKAGE_NAME));
-            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_PACKAGE_NAME);
+            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
+            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
             assertNotNull(rollback);
-            assertEquals(TEST_APP_PACKAGE_NAME, rollback.targetPackage.packageName);
+            assertEquals(TEST_APP_A, rollback.targetPackage.packageName);
             assertEquals(2, rollback.targetPackage.higherVersion.versionCode);
             assertEquals(1, rollback.targetPackage.lowerVersion.versionCode);
 
             // Expire the rollback.
-            rm.expireRollbackForPackage(TEST_APP_PACKAGE_NAME);
+            rm.expireRollbackForPackage(TEST_APP_A);
 
             // The rollback should no longer be available.
-            assertNull(rm.getAvailableRollback(TEST_APP_PACKAGE_NAME));
-            assertFalse(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_PACKAGE_NAME));
+            assertNull(rm.getAvailableRollback(TEST_APP_A));
+            assertFalse(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
         } finally {
             RollbackTestUtils.dropShellPermissionIdentity();
         }
@@ -285,10 +286,9 @@ public class RollbackTest {
     // Calls into the test app to process user data.
     // Asserts if the user data could not be processed or was version
     // incompatible with the previously processed user data.
-    private void processUserData() throws Exception {
+    private void processUserData(String packageName) throws Exception {
         Intent intent = new Intent();
-        intent.setComponent(new ComponentName(
-                    "com.android.tests.rollback.testapp",
+        intent.setComponent(new ComponentName(packageName,
                     "com.android.tests.rollback.testapp.ProcessUserData"));
         Context context = InstrumentationRegistry.getContext();
 
@@ -339,16 +339,16 @@ public class RollbackTest {
                     Manifest.permission.DELETE_PACKAGES,
                     Manifest.permission.MANAGE_ROLLBACKS);
 
-            RollbackTestUtils.uninstall("com.android.tests.rollback.testapp");
+            RollbackTestUtils.uninstall(TEST_APP_A);
             RollbackTestUtils.install("RollbackTestAppV1.apk", false);
-            processUserData();
+            processUserData(TEST_APP_A);
             RollbackTestUtils.install("RollbackTestAppV2.apk", true);
-            processUserData();
+            processUserData(TEST_APP_A);
 
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
-            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_PACKAGE_NAME);
+            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
             RollbackTestUtils.rollback(rollback);
-            processUserData();
+            processUserData(TEST_APP_A);
         } finally {
             RollbackTestUtils.dropShellPermissionIdentity();
         }
@@ -380,6 +380,58 @@ public class RollbackTest {
     }
 
     /**
+     * Regression test for rollback in the case when multiple apps are
+     * available for rollback at the same time.
+     */
+    @Test
+    public void testMultipleRollbackAvailable() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.MANAGE_ROLLBACKS);
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+
+            // Prep installation of the test apps.
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            RollbackTestUtils.uninstall(TEST_APP_B);
+            RollbackTestUtils.install("RollbackTestAppBv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppBv2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
+
+            // Both test apps should now be available for rollback, and the
+            // targetPackage returned for rollback should be correct.
+            RollbackInfo rollbackA = rm.getAvailableRollback(TEST_APP_A);
+            assertNotNull(rollbackA);
+            assertEquals(TEST_APP_A, rollbackA.targetPackage.packageName);
+
+            RollbackInfo rollbackB = rm.getAvailableRollback(TEST_APP_B);
+            assertNotNull(rollbackB);
+            assertEquals(TEST_APP_B, rollbackB.targetPackage.packageName);
+
+            // Executing rollback should roll back the correct package.
+            RollbackTestUtils.rollback(rollbackA);
+            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
+
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            RollbackTestUtils.rollback(rollbackB);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
+        } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
+    }
+
+    /**
      * Test that the MANAGE_ROLLBACKS permission is required to call
      * RollbackManager APIs.
      */
@@ -390,7 +442,7 @@ public class RollbackTest {
         RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
         try {
-            rm.getAvailableRollback(TEST_APP_PACKAGE_NAME);
+            rm.getAvailableRollback(TEST_APP_A);
             fail("expected SecurityException");
         } catch (SecurityException e) {
             // Expected.
@@ -427,7 +479,7 @@ public class RollbackTest {
         }
 
         try {
-            rm.expireRollbackForPackage(TEST_APP_PACKAGE_NAME);
+            rm.expireRollbackForPackage(TEST_APP_A);
             fail("expected SecurityException");
         } catch (SecurityException e) {
             // Expected.

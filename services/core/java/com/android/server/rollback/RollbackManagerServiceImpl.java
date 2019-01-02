@@ -211,7 +211,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 PackageRollbackData data = mAvailableRollbacks.get(i);
-                if (data.info.higherVersion.equals(installedVersion)) {
+                if (data.info.packageName.equals(packageName)
+                        && data.info.higherVersion.equals(installedVersion)) {
                     // TODO: For atomic installs, check all dependent packages
                     // for available rollbacks and include that info here.
                     return new RollbackInfo(data.info);
@@ -308,7 +309,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 PackageRollbackData available = mAvailableRollbacks.get(i);
                 // TODO: Check if available.info.lowerVersion matches
                 // rollback.targetPackage.lowerVersion?
-                if (available.info.higherVersion.equals(installedVersion)) {
+                if (available.info.packageName.equals(packageName)
+                        && available.info.higherVersion.equals(installedVersion)) {
                     data = available;
                     break;
                 }
