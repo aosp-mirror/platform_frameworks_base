@@ -390,12 +390,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     };
 
     private void restoreNonVrImeFromSettingsNoCheck() {
-        mIsVrImeStarted = false;
         // switch back to non-VR InputMethod from settings.
         synchronized (mMethodMap) {
-            final String lastInputId = mSettings.getSelectedInputMethod();
-            setInputMethodLocked(lastInputId,
-                    mSettings.getSelectedInputMethodSubtypeId(lastInputId));
+            if (!mIsVrImeStarted) return;
+            mIsVrImeStarted = false;
+            updateFromSettingsLocked(false);
         }
     }
 
