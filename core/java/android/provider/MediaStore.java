@@ -1338,7 +1338,7 @@ public final class MediaStore {
             public static final String insertImage(ContentResolver cr, Bitmap source,
                                                    String title, String description) {
                 ContentValues values = new ContentValues();
-                values.put(Images.Media.TITLE, title);
+                values.put(Images.Media.DISPLAY_NAME, title);
                 values.put(Images.Media.DESCRIPTION, description);
                 values.put(Images.Media.MIME_TYPE, "image/jpeg");
 
