@@ -17,6 +17,7 @@
 package android.accounts;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcelable;
 import android.os.Parcel;
 
@@ -77,7 +78,7 @@ public class AuthenticatorDescription implements Parcelable {
         return new AuthenticatorDescription(type);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private AuthenticatorDescription(String type) {
         this.type = type;
         this.packageName = null;
@@ -88,7 +89,7 @@ public class AuthenticatorDescription implements Parcelable {
         this.customTokens = false;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private AuthenticatorDescription(Parcel source) {
         this.type = source.readString();
         this.packageName = source.readString();

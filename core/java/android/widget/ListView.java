@@ -28,6 +28,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Trace;
 import android.util.AttributeSet;
@@ -189,7 +190,7 @@ public class ListView extends AbsListView {
 
     @UnsupportedAppUsage
     Drawable mDivider;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int mDividerHeight;
 
     Drawable mOverScrollHeader;
@@ -1390,7 +1391,7 @@ public class ListView extends AbsListView {
      *            startPosition is 0).
      * @return The height of this ListView with the given children.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final int measureHeightOfChildren(int widthMeasureSpec, int startPosition, int endPosition,
             int maxHeight, int disallowPartialChildPosition) {
         final ListAdapter adapter = mAdapter;
@@ -1533,7 +1534,7 @@ public class ListView extends AbsListView {
      *
      * @param childCount Number of children
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private void correctTooHigh(int childCount) {
         // First see if the last item is visible. If it is not, it is OK for the
         // top of the list to be pushed up.
@@ -1583,7 +1584,7 @@ public class ListView extends AbsListView {
      *
      * @param childCount Number of children
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private void correctTooLow(int childCount) {
         // First see if the first item is visible. If it is not, it is OK for the
         // bottom of the list to be pushed down.

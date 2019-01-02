@@ -18,6 +18,7 @@ package android.content;
 
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.text.TextUtils;
 import android.os.Parcelable;
 import android.os.Parcel;
@@ -30,9 +31,9 @@ public class SyncAdapterType implements Parcelable {
     public final String authority;
     public final String accountType;
     public final boolean isKey;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final boolean userVisible;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final boolean supportsUploading;
     @UnsupportedAppUsage
     private final boolean isAlwaysSyncable;
@@ -85,7 +86,7 @@ public class SyncAdapterType implements Parcelable {
         this.packageName = packageName;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private SyncAdapterType(String authority, String accountType) {
         if (TextUtils.isEmpty(authority)) {
             throw new IllegalArgumentException("the authority must not be empty: " + authority);

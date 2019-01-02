@@ -206,9 +206,9 @@ public class PopupWindow {
     private float mElevation;
 
     private Drawable mBackground;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Drawable mAboveAnchorBackgroundDrawable;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Drawable mBelowAnchorBackgroundDrawable;
 
     private Transition mEnterTransition;

@@ -19,6 +19,7 @@ package android.util;
 import libcore.util.EmptyArray;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
@@ -77,13 +78,13 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     /**
      * Special hash array value that indicates the container is immutable.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     static final int[] EMPTY_IMMUTABLE_INTS = new int[0];
 
     /**
      * @hide Special immutable empty ArrayMap.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final ArrayMap EMPTY = new ArrayMap<>(-1);
 
     /**
@@ -102,11 +103,11 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     static int mTwiceBaseCacheSize;
 
     final boolean mIdentityHashCode;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int[] mHashes;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     Object[] mArray;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int mSize;
     MapCollections<K, V> mCollections;
 
@@ -122,7 +123,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int indexOf(Object key, int hash) {
         final int N = mSize;
 
@@ -161,7 +162,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         return ~end;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int indexOfNull() {
         final int N = mSize;
 
@@ -200,7 +201,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         return ~end;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private void allocArrays(final int size) {
         if (mHashes == EMPTY_IMMUTABLE_INTS) {
             throw new UnsupportedOperationException("ArrayMap is immutable");
@@ -239,7 +240,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         mArray = new Object[size<<1];
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static void freeArrays(final int[] hashes, final Object[] array, final int size) {
         if (hashes.length == (BASE_SIZE*2)) {
             synchronized (ArrayMap.class) {
@@ -393,7 +394,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                 : indexOf(key, mIdentityHashCode ? System.identityHashCode(key) : key.hashCode());
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int indexOfValue(Object value) {
         final int N = mSize*2;
         final Object[] array = mArray;

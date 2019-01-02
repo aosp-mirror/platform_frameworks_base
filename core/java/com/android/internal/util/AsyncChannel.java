@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -162,7 +163,7 @@ public class AsyncChannel {
         sCmdToString[CMD_CHANNEL_DISCONNECT - BASE] = "CMD_CHANNEL_DISCONNECT";
         sCmdToString[CMD_CHANNEL_DISCONNECTED - BASE] = "CMD_CHANNEL_DISCONNECTED";
     }
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     protected static String cmdToString(int cmd) {
         cmd -= BASE;
         if ((cmd >= 0) && (cmd < sCmdToString.length)) {
@@ -591,7 +592,7 @@ public class AsyncChannel {
      * @param srcMsg
      * @param what
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void replyToMessage(Message srcMsg, int what) {
         Message msg = Message.obtain();
         msg.what = what;

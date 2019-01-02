@@ -19,6 +19,7 @@ package android.util;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.SystemClock;
 
 import libcore.timezone.CountryTimeZones;
@@ -289,7 +290,7 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static void formatDuration(long duration, PrintWriter pw, int fieldLen) {
         synchronized (sFormatSync) {
             int len = formatDurationLocked(duration, fieldLen);
@@ -306,7 +307,7 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static void formatDuration(long duration, PrintWriter pw) {
         formatDuration(duration, pw, 0);
     }
