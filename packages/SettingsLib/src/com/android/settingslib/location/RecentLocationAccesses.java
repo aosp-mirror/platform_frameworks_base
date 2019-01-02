@@ -31,6 +31,7 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -56,11 +57,18 @@ public class RecentLocationAccesses {
     private final PackageManager mPackageManager;
     private final Context mContext;
     private final IconDrawableFactory mDrawableFactory;
+    private final Clock mClock;
 
     public RecentLocationAccesses(Context context) {
+        this(context, Clock.systemDefaultZone());
+    }
+
+    @VisibleForTesting
+    RecentLocationAccesses(Context context, Clock clock) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mDrawableFactory = IconDrawableFactory.newInstance(context);
+        mClock = clock;
     }
 
     /**
@@ -77,7 +85,7 @@ public class RecentLocationAccesses {
 
         // Process the AppOps list and generate a preference list.
         ArrayList<Access> accesses = new ArrayList<>(appOpsCount);
-        final long now = System.currentTimeMillis();
+        final long now = mClock.millis();
         final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         final List<UserHandle> profiles = um.getUserProfiles();
 
