@@ -22,7 +22,7 @@ import android.media.session.ICallback;
 import android.media.session.IOnMediaKeyListener;
 import android.media.session.IOnVolumeKeyLongPressListener;
 import android.media.session.ISession;
-import android.media.session.ISessionCallback;
+import android.media.session.SessionCallbackLink;
 import android.os.Bundle;
 import android.view.KeyEvent;
 
@@ -31,7 +31,7 @@ import android.view.KeyEvent;
  * @hide
  */
 interface ISessionManager {
-    ISession createSession(String packageName, in ISessionCallback cb, String tag, int userId);
+    ISession createSession(String packageName, in SessionCallbackLink cb, String tag, int userId);
     List<IBinder> getSessions(in ComponentName compName, int userId);
     void dispatchMediaKeyEvent(String packageName, boolean asSystemService, in KeyEvent keyEvent,
             boolean needWakeLock);
