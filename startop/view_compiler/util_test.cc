@@ -20,9 +20,15 @@
 
 using std::string;
 
+namespace startop {
+namespace util {
+
 TEST(UtilTest, FindLayoutNameFromFilename) {
-  EXPECT_EQ("bar", ::FindLayoutNameFromFilename("foo/bar.xml"));
-  EXPECT_EQ("bar", ::FindLayoutNameFromFilename("bar.xml"));
-  EXPECT_EQ("bar", ::FindLayoutNameFromFilename("./foo/bar.xml"));
-  EXPECT_EQ("bar", ::FindLayoutNameFromFilename("/foo/bar.xml"));
+  EXPECT_EQ("bar", startop::util::FindLayoutNameFromFilename("foo/bar.xml"));
+  EXPECT_EQ("bar", startop::util::FindLayoutNameFromFilename("bar.xml"));
+  EXPECT_EQ("bar", startop::util::FindLayoutNameFromFilename("./foo/bar.xml"));
+  EXPECT_EQ("bar", startop::util::FindLayoutNameFromFilename("/foo/bar.xml"));
 }
+
+}  // namespace util
+}  // namespace startop
