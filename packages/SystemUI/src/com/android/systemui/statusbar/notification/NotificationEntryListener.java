@@ -80,7 +80,7 @@ public interface NotificationEntryListener {
      * @param removedByUser true if the notification was removed by a user action
      */
     default void onEntryRemoved(
-            NotificationData.Entry entry,
+            @Nullable NotificationData.Entry entry,
             String key,
             StatusBarNotification old,
             @Nullable NotificationVisibility visibility,

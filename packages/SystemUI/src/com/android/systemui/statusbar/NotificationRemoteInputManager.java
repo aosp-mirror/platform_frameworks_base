@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT
 import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
@@ -252,13 +253,13 @@ public class NotificationRemoteInputManager implements Dumpable {
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onEntryRemoved(
-                    NotificationData.Entry entry,
+                    @Nullable NotificationData.Entry entry,
                     String key,
                     StatusBarNotification old,
                     NotificationVisibility visibility,
                     boolean lifetimeExtended,
                     boolean removedByUser) {
-                if (removedByUser) {
+                if (removedByUser && entry != null) {
                     onPerformRemoveNotification(entry, key);
                 }
             }
