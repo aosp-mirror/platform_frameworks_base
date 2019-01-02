@@ -27,23 +27,7 @@
 
 namespace android {
 
-class ProxyErrorLogger : public net::ProxyErrorListener {
-public:
-    ~ProxyErrorLogger() {
-
-    }
-    void AlertMessage(String16 message) {
-        String8 str(message);
-        ALOGD("Alert: %s", str.string());
-    }
-    void ErrorMessage(String16 message) {
-        String8 str(message);
-        ALOGE("Error: %s", str.string());
-    }
-};
-
 net::ProxyResolverV8* proxyResolver = NULL;
-ProxyErrorLogger* logger = NULL;
 bool pacSet = false;
 
 String16 jstringToString16(JNIEnv* env, jstring jstr) {
@@ -64,9 +48,7 @@ jstring string16ToJstring(JNIEnv* env, String16 string) {
 static jboolean com_android_pacprocessor_PacNative_createV8ParserNativeLocked(JNIEnv* /* env */,
         jobject) {
     if (proxyResolver == NULL) {
-        logger = new ProxyErrorLogger();
-        proxyResolver = new net::ProxyResolverV8(net::ProxyResolverJSBindings::CreateDefault(),
-                logger);
+        proxyResolver = new net::ProxyResolverV8(net::ProxyResolverJSBindings::CreateDefault());
         pacSet = false;
         return JNI_FALSE;
     }
@@ -76,9 +58,7 @@ static jboolean com_android_pacprocessor_PacNative_createV8ParserNativeLocked(JN
 static jboolean com_android_pacprocessor_PacNative_destroyV8ParserNativeLocked(JNIEnv* /* env */,
         jobject) {
     if (proxyResolver != NULL) {
-        delete logger;
         delete proxyResolver;
-        logger = NULL;
         proxyResolver = NULL;
         return JNI_FALSE;
     }
