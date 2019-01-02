@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
@@ -218,7 +219,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
         @Override
         public void onEntryRemoved(
-                Entry entry,
+                @Nullable Entry entry,
                 String key,
                 StatusBarNotification old,
                 NotificationVisibility visibility,
