@@ -109,7 +109,7 @@ public class MediaController2 implements AutoCloseable {
         mContext = context;
         mSessionToken = token;
         mCallbackExecutor = (executor == null) ? context.getMainExecutor() : executor;
-        mCallback = (callback == null) ? new ControllerCallback() { } : callback;
+        mCallback = (callback == null) ? new ControllerCallback() {} : callback;
         mControllerStub = new Controller2Link(this);
         // NOTE: mResultHandler uses main looper, so this MUST NOT be blocked.
         mResultHandler = new Handler(context.getMainLooper());
@@ -132,7 +132,7 @@ public class MediaController2 implements AutoCloseable {
                 try {
                     mSessionBinder.unlinkToDeath(mDeathRecipient, 0);
                     mSessionBinder.disconnect(mControllerStub, getNextSeqNumber());
-                } catch (RuntimeException e)  {
+                } catch (RuntimeException e) {
                     // No-op
                 }
             }
@@ -326,7 +326,7 @@ public class MediaController2 implements AutoCloseable {
          * @param allowedCommands commands that's allowed by the session.
          */
         public void onConnected(@NonNull MediaController2 controller,
-                @NonNull Session2CommandGroup allowedCommands) { }
+                @NonNull Session2CommandGroup allowedCommands) {}
 
         /**
          * Called when the session refuses the controller or the controller is disconnected from
@@ -338,7 +338,7 @@ public class MediaController2 implements AutoCloseable {
          *
          * @param controller the controller for this event
          */
-        public void onDisconnected(@NonNull MediaController2 controller) { }
+        public void onDisconnected(@NonNull MediaController2 controller) {}
 
         /**
          * Called when the connected session sent a session command.
@@ -364,6 +364,6 @@ public class MediaController2 implements AutoCloseable {
          * @param result the result of the session command
          */
         public void onCommandResult(@NonNull MediaController2 controller, @NonNull Object token,
-                @NonNull Session2Command command, @NonNull Session2Command.Result result) { }
+                @NonNull Session2Command command, @NonNull Session2Command.Result result) {}
     }
 }

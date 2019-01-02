@@ -643,7 +643,7 @@ public class MediaSession2 implements AutoCloseable {
     public abstract static class SessionCallback {
         /**
          * Called when a controller is created for this session. Return allowed commands for
-         * controller. By default it allows all connection requests and commands.
+         * controller. By default it returns {@code null}.
          * <p>
          * You can reject the connection by returning {@code null}. In that case, controller
          * receives {@link MediaController2.ControllerCallback#onDisconnected(MediaController2)}
@@ -656,10 +656,7 @@ public class MediaSession2 implements AutoCloseable {
         @Nullable
         public Session2CommandGroup onConnect(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller) {
-            Session2CommandGroup commands = new Session2CommandGroup.Builder()
-                    .addAllPredefinedCommands(Session2Command.COMMAND_VERSION_1)
-                    .build();
-            return commands;
+            return null;
         }
 
         /**
@@ -669,7 +666,7 @@ public class MediaSession2 implements AutoCloseable {
          * @param controller controller information
          */
         public void onDisconnected(@NonNull MediaSession2 session,
-                @NonNull ControllerInfo controller) { }
+                @NonNull ControllerInfo controller) {}
 
         /**
          * Called when a controller sent a session command.
@@ -699,6 +696,6 @@ public class MediaSession2 implements AutoCloseable {
          */
         public void onCommandResult(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller, @NonNull Object token,
-                @NonNull Session2Command command, @NonNull Session2Command.Result result) { }
+                @NonNull Session2Command command, @NonNull Session2Command.Result result) {}
     }
 }
