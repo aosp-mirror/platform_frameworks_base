@@ -292,7 +292,7 @@ private:
 
     class TvInputCallback : public ITvInputCallback {
     public:
-        TvInputCallback(JTvInputHal* hal);
+        explicit TvInputCallback(JTvInputHal* hal);
         Return<void> notify(const TvInputEvent& event) override;
     private:
         JTvInputHal* mHal;
