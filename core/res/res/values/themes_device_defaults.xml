@@ -1711,4 +1711,6 @@ easier.
         <item name="notificationHeaderTextAppearance">@style/TextAppearance.DeviceDefault.Notification.Info</item>
     </style>
 
+    <!-- @hide DeviceDefault theme for the DocumentsUI app.  -->
+    <style name="Theme.DeviceDefault.DocumentsUI" parent="Theme.DeviceDefault.DayNight" />
 </resources>
