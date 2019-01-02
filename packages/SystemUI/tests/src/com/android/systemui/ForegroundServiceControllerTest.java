@@ -392,7 +392,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
 
     private void entryRemoved(StatusBarNotification notification) {
         mEntryListener.onEntryRemoved(new NotificationData.Entry(notification),
-                null, null, null, false, false);
+                null, false);
     }
 
     private void entryAdded(StatusBarNotification notification, int importance) {

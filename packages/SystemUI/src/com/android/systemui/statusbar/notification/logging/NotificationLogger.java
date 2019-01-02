@@ -15,7 +15,6 @@
  */
 package com.android.systemui.statusbar.notification.logging;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -168,14 +167,11 @@ public class NotificationLogger implements StateListener {
         entryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onEntryRemoved(
-                    @Nullable NotificationData.Entry entry,
-                    String key,
-                    StatusBarNotification old,
+                    NotificationData.Entry entry,
                     NotificationVisibility visibility,
-                    boolean lifetimeExtended,
                     boolean removedByUser) {
-                if (removedByUser && visibility != null && entry != null) {
-                    logNotificationClear(key, entry.notification, visibility);
+                if (removedByUser && visibility != null) {
+                    logNotificationClear(entry.key, entry.notification, visibility);
                 }
             }
 

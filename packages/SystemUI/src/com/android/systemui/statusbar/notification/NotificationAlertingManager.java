@@ -20,7 +20,6 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORC
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 
-import android.annotation.Nullable;
 import android.app.Notification;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -83,13 +82,10 @@ public class NotificationAlertingManager {
 
             @Override
             public void onEntryRemoved(
-                    @Nullable NotificationData.Entry entry,
-                    String key,
-                    StatusBarNotification old,
+                    NotificationData.Entry entry,
                     NotificationVisibility visibility,
-                    boolean lifetimeExtended,
                     boolean removedByUser) {
-                stopAlerting(key);
+                stopAlerting(entry.key);
             }
         });
     }

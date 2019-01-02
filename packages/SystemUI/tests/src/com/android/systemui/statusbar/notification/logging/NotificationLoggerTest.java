@@ -159,11 +159,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
         verify(mBarService, times(1)).onNotificationVisibilityChanged(any(), any());
     }
 
-    @Test
-    public void testHandleNullEntryOnEntryRemoved() {
-        mNotificationEntryListener.onEntryRemoved(null, "foobar", null, null, false, false);
-    }
-
     private class TestableNotificationLogger extends NotificationLogger {
 
         TestableNotificationLogger(NotificationListener notificationListener,

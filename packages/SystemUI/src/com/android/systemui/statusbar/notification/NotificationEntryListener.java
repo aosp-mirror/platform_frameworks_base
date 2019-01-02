@@ -71,20 +71,14 @@ public interface NotificationEntryListener {
      * because the developer retracted it).
      * @param entry notification data entry that was removed.  Null if no entry existed for the
      *              removed key at the time of removal.
-     * @param key key of notification that was removed
-     * @param old StatusBarNotification of the notification before it was removed
      * @param visibility logging data related to the visibility of the notification at the time of
      *                   removal, if it was removed by a user action.  Null if it was not removed by
      *                   a user action.
-     * @param lifetimeExtended true if something is artificially extending how long the notification
      * @param removedByUser true if the notification was removed by a user action
      */
     default void onEntryRemoved(
-            @Nullable NotificationData.Entry entry,
-            String key,
-            StatusBarNotification old,
+            NotificationData.Entry entry,
             @Nullable NotificationVisibility visibility,
-            boolean lifetimeExtended,
             boolean removedByUser) {
     }
 }

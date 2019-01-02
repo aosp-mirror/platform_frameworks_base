@@ -196,14 +196,10 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 @Override
                 public void onEntryRemoved(
                         @Nullable Entry entry,
-                        String key,
-                        StatusBarNotification old,
                         NotificationVisibility visibility,
-                        boolean lifetimeExtended,
                         boolean removedByUser) {
-                    if (!lifetimeExtended) {
-                        StatusBarNotificationPresenter.this.onNotificationRemoved(key, old);
-                    }
+                    StatusBarNotificationPresenter.this.onNotificationRemoved(
+                            entry.key, entry.notification);
                     if (removedByUser) {
                         maybeEndAmbientPulse();
                     }

@@ -61,14 +61,9 @@ public class ForegroundServiceNotificationListener {
             @Override
             public void onEntryRemoved(
                     NotificationData.Entry entry,
-                    String key,
-                    StatusBarNotification old,
                     NotificationVisibility visibility,
-                    boolean lifetimeExtended,
                     boolean removedByUser) {
-                if (entry != null && !lifetimeExtended) {
-                    removeNotification(entry.notification);
-                }
+                removeNotification(entry.notification);
             }
         });
     }

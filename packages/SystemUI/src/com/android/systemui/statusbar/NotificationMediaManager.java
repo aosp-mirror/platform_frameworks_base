@@ -37,7 +37,6 @@ import android.media.session.PlaybackState;
 import android.os.Handler;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -157,15 +156,10 @@ public class NotificationMediaManager implements Dumpable {
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onEntryRemoved(
-                    @Nullable Entry entry,
-                    String key,
-                    StatusBarNotification old,
+                    Entry entry,
                     NotificationVisibility visibility,
-                    boolean lifetimeExtended,
                     boolean removedByUser) {
-                if (!lifetimeExtended) {
-                    onNotificationRemoved(key);
-                }
+                onNotificationRemoved(entry.key);
             }
         });
     }

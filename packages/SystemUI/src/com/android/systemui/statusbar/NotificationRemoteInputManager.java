@@ -254,13 +254,10 @@ public class NotificationRemoteInputManager implements Dumpable {
             @Override
             public void onEntryRemoved(
                     @Nullable NotificationData.Entry entry,
-                    String key,
-                    StatusBarNotification old,
                     NotificationVisibility visibility,
-                    boolean lifetimeExtended,
                     boolean removedByUser) {
                 if (removedByUser && entry != null) {
-                    onPerformRemoveNotification(entry, key);
+                    onPerformRemoveNotification(entry, entry.key);
                 }
             }
         });

@@ -153,6 +153,12 @@ public class NotificationEntryManager implements
         return mNotificationRowBinder;
     }
 
+    // TODO: Remove this once we can always use a mocked row binder in our tests
+    @VisibleForTesting
+    void setRowBinder(NotificationRowBinder notificationRowBinder) {
+        mNotificationRowBinder = notificationRowBinder;
+    }
+
     public void setUpWithPresenter(NotificationPresenter presenter,
             NotificationListContainer listContainer,
             HeadsUpManager headsUpManager) {
@@ -309,7 +315,6 @@ public class NotificationEntryManager implements
 
         abortExistingInflation(key);
 
-        StatusBarNotification old = null;
         boolean lifetimeExtended = false;
 
         if (entry != null) {
@@ -342,12 +347,12 @@ public class NotificationEntryManager implements
                 // Let's remove the children if this was a summary
                 handleGroupSummaryRemoved(key);
 
-                old = removeNotificationViews(key, ranking);
-            }
-        }
+                removeNotificationViews(key, ranking);
 
-        for (NotificationEntryListener listener : mNotificationEntryListeners) {
-            listener.onEntryRemoved(entry, key, old, visibility, lifetimeExtended, removedByUser);
+                for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                    listener.onEntryRemoved(entry, visibility, removedByUser);
+                }
+            }
         }
     }
 
