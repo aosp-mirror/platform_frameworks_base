@@ -16,8 +16,6 @@
 
 #define LOG_TAG "LineBreaker"
 
-#include "unicode/locid.h"
-#include "unicode/brkiter.h"
 #include "utils/misc.h"
 #include "utils/Log.h"
 #include <nativehelper/ScopedStringChars.h>
