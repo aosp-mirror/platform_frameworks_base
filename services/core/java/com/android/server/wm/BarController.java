@@ -27,6 +27,7 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 
 import com.android.server.LocalServices;
@@ -89,6 +90,10 @@ public class BarController {
     }
 
     void setWindow(WindowState win) {
+        if (ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL) {
+            // BarController gets replaced with InsetsPolicy in the full insets mode.
+            return;
+        }
         mWin = win;
     }
 
