@@ -32,6 +32,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
@@ -44,6 +45,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
@@ -54,6 +56,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.metrics.LogMaker;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -69,6 +72,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -79,6 +83,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -175,6 +180,29 @@ public class NotificationInfoTest extends SysuiTestCase {
     private void waitForStopButton() {
         PollingCheck.waitFor(1000,
                 () -> VISIBLE == mNotificationInfo.findViewById(R.id.prompt).getVisibility());
+    }
+
+    class ImportanceChangeLogMaker implements ArgumentMatcher<LogMaker> {
+        private static final int CATEGORY = MetricsProto.MetricsEvent.ACTION_SAVE_IMPORTANCE;
+        private int mType, mSubtype;
+
+        ImportanceChangeLogMaker(int type, int subtype) {
+            mType = type;
+            mSubtype = subtype;
+        }
+        public boolean matches(LogMaker l) {
+            return (l.getCategory() == CATEGORY)
+                    && (l.getType() == mType)
+                    && (l.getSubtype() == mSubtype);
+        }
+
+        public String toString() {
+            return String.format("LogMaker(%d, %d, %d)", CATEGORY, mType, mSubtype);
+        }
+    }
+
+    private LogMaker importanceChangeLog(int type, int subtype) {
+        return argThat(new ImportanceChangeLogMaker(type, subtype));
     }
 
     @Test
@@ -475,7 +503,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, false,
                 IMPORTANCE_DEFAULT);
         mNotificationInfo.logBlockingHelperCounter("HowCanNotifsBeRealIfAppsArent");
-        verify(mMetricsLogger, times(0)).count(anyString(), anyInt());
+        verifyZeroInteractions(mMetricsLogger);
     }
 
     @Test
@@ -484,7 +512,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, false, true,
                 true, true, IMPORTANCE_DEFAULT);
         mNotificationInfo.logBlockingHelperCounter("HowCanNotifsBeRealIfAppsArent");
-        verify(mMetricsLogger, times(1)).count(anyString(), anyInt());
+        verify(mMetricsLogger).count(eq("HowCanNotifsBeRealIfAppsArent"), eq(1));
     }
 
     @Test
@@ -827,6 +855,9 @@ public class NotificationInfoTest extends SysuiTestCase {
         waitForUndoButton();
         mNotificationInfo.handleCloseControls(true, false);
 
+        verify(mMetricsLogger).write(importanceChangeLog(
+                MetricsProto.MetricsEvent.TYPE_ACTION, IMPORTANCE_NONE - IMPORTANCE_LOW));
+
         mTestableLooper.processAllMessages();
         ArgumentCaptor<NotificationChannel> updated =
                 ArgumentCaptor.forClass(NotificationChannel.class);
@@ -859,6 +890,9 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.findViewById(R.id.block).performClick();
         waitForUndoButton();
         mNotificationInfo.handleCloseControls(true, false);
+
+        verify(mMetricsLogger).write(importanceChangeLog(
+                MetricsProto.MetricsEvent.TYPE_ACTION, IMPORTANCE_NONE - IMPORTANCE_LOW));
 
         mTestableLooper.processAllMessages();
         ArgumentCaptor<NotificationChannel> updated =
@@ -936,15 +970,14 @@ public class NotificationInfoTest extends SysuiTestCase {
         waitForUndoButton();
         mNotificationInfo.findViewById(R.id.undo).performClick();
         waitForStopButton();
-        mNotificationInfo.handleCloseControls(true, false);
+        // mNotificationInfo.handleCloseControls doesn't get called by this interaction.
+
+        verify(mMetricsLogger).write(importanceChangeLog(
+                MetricsProto.MetricsEvent.TYPE_DISMISS, IMPORTANCE_NONE - IMPORTANCE_LOW));
 
         mTestableLooper.processAllMessages();
-        ArgumentCaptor<NotificationChannel> updated =
-                ArgumentCaptor.forClass(NotificationChannel.class);
-        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
-                anyString(), eq(TEST_UID), updated.capture());
-        assertTrue(0 != (mNotificationChannel.getUserLockedFields() & USER_LOCKED_IMPORTANCE));
-        assertEquals(IMPORTANCE_LOW, mNotificationChannel.getImportance());
+        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
+                anyString(), eq(TEST_UID), any());
     }
 
     @Test
@@ -958,15 +991,11 @@ public class NotificationInfoTest extends SysuiTestCase {
         waitForUndoButton();
         mNotificationInfo.findViewById(R.id.undo).performClick();
         waitForStopButton();
-        mNotificationInfo.handleCloseControls(true, false);
+        // mNotificationInfo.handleCloseControls doesn't get called by this code path
 
         mTestableLooper.processAllMessages();
-        ArgumentCaptor<NotificationChannel> updated =
-                ArgumentCaptor.forClass(NotificationChannel.class);
-        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
-                anyString(), eq(TEST_UID), updated.capture());
-        assertTrue(0 != (mNotificationChannel.getUserLockedFields() & USER_LOCKED_IMPORTANCE));
-        assertEquals(IMPORTANCE_LOW, mNotificationChannel.getImportance());
+        verify(mMockINotificationManager, times(0)).updateNotificationChannelForPackage(
+                anyString(), eq(TEST_UID), any());
     }
 
     @Test

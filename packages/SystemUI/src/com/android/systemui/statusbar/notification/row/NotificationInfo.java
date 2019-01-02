@@ -40,6 +40,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
+import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
@@ -150,6 +151,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         // Reset exit counter that we'll log and record an undo event separately (not an exit event)
         mExitReason = NotificationCounters.BLOCKING_HELPER_DISMISSED;
         logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_UNDO);
+        mMetricsLogger.write(importanceChangeLogMaker().setType(MetricsEvent.TYPE_DISMISS));
         swapContent(ACTION_UNDO, true /* animate */);
     };
 
@@ -381,6 +383,17 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         }
     }
 
+    /**
+     * Returns an initialized LogMaker for logging importance changes.
+     * The caller may override the type (to DISMISS) before passing it to mMetricsLogger.
+     * @return new LogMaker
+     */
+    private LogMaker importanceChangeLogMaker() {
+        return new LogMaker(MetricsEvent.ACTION_SAVE_IMPORTANCE)
+                .setType(MetricsEvent.TYPE_ACTION)
+                .setSubtype(mChosenImportance - mStartingChannelImportance);
+    }
+
     private boolean hasImportanceChanged() {
         return mSingleNotificationChannel != null
                 && mStartingChannelImportance != mChosenImportance;
@@ -397,8 +410,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
      * Commits the updated importance values on the background thread.
      */
     private void updateImportance() {
-        MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
-                mChosenImportance - mStartingChannelImportance);
+        mMetricsLogger.write(importanceChangeLogMaker());
 
         Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
         bgHandler.post(new UpdateImportanceRunnable(mINotificationManager, mPackageName, mAppUid,
