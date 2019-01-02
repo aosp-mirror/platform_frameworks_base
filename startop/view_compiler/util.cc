@@ -18,6 +18,9 @@
 
 using std::string;
 
+namespace startop {
+namespace util {
+
 // TODO: see if we can borrow this from somewhere else, like aapt2.
 string FindLayoutNameFromFilename(const string& filename) {
   size_t start = filename.rfind("/");
@@ -30,3 +33,6 @@ string FindLayoutNameFromFilename(const string& filename) {
 
   return filename.substr(start, end - start);
 }
+
+}  // namespace util
+}  // namespace startop
