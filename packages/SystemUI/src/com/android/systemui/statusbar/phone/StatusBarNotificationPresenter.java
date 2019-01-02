@@ -20,6 +20,7 @@ import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
 import static com.android.systemui.statusbar.phone.StatusBar.MULTIUSER_DEBUG;
 import static com.android.systemui.statusbar.phone.StatusBar.SPEW;
 
+import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -193,7 +194,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
                 @Override
                 public void onEntryRemoved(
-                        Entry entry,
+                        @Nullable Entry entry,
                         String key,
                         StatusBarNotification old,
                         NotificationVisibility visibility,
