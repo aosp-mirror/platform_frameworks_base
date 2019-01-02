@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.hardware.Camera;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -101,12 +102,12 @@ public class MediaRecorder implements AudioRouting
     @UnsupportedAppUsage
     private Surface mSurface;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mPath;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private FileDescriptor mFd;
     private File mFile;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private EventHandler mEventHandler;
     @UnsupportedAppUsage
     private OnErrorListener mOnErrorListener;
@@ -949,7 +950,7 @@ public class MediaRecorder implements AudioRouting
     // native implementation
     private native void _setOutputFile(FileDescriptor fd) throws IllegalStateException, IOException;
     private native void _setNextOutputFile(FileDescriptor fd) throws IllegalStateException, IOException;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private native void _prepare() throws IllegalStateException, IOException;
 
     /**
@@ -1051,7 +1052,7 @@ public class MediaRecorder implements AudioRouting
         mEventHandler.removeCallbacksAndMessages(null);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private native void native_reset();
 
     /**
@@ -1509,14 +1510,14 @@ public class MediaRecorder implements AudioRouting
      */
     public native void release();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static native final void native_init();
 
     @UnsupportedAppUsage
     private native final void native_setup(Object mediarecorder_this,
             String clientName, String opPackageName) throws IllegalStateException;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private native final void native_finalize();
 
     @UnsupportedAppUsage

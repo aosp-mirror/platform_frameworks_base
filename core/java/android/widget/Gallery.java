@@ -22,6 +22,7 @@ import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -105,7 +106,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     /**
      * Helper for detecting touch gestures.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private GestureDetector mGestureDetector;
 
     /**
@@ -149,7 +150,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     /**
      * The currently selected item's child.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private View mSelectedChild;
     
     /**
@@ -480,7 +481,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     /**
      * @return The center of this Gallery.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int getCenterOfGallery() {
         return (getWidth() - mPaddingLeft - mPaddingRight) / 2 + mPaddingLeft;
     }
@@ -488,7 +489,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     /**
      * @return The center of the given view.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static int getCenterOfView(View view) {
         return view.getLeft() + view.getWidth() / 2;
     }

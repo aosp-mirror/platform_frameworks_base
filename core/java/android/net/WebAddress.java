@@ -20,6 +20,7 @@ import static android.util.Patterns.GOOD_IRI_CHAR;
 
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -50,7 +51,7 @@ public class WebAddress {
     private String mScheme;
     @UnsupportedAppUsage
     private String mHost;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mPort;
     @UnsupportedAppUsage
     private String mPath;

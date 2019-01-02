@@ -17,6 +17,7 @@
 package com.android.internal.util;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import java.io.File;
 import java.io.IOException;
 
@@ -46,7 +47,7 @@ public class JournaledFile {
      * it to the real one.  If there is both a real file and a temp one, assumes that the
      * temp one isn't fully written and deletes it.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public File chooseForRead() {
         File result;
         if (mReal.exists()) {
@@ -71,7 +72,7 @@ public class JournaledFile {
      * <p>
      * Call {@link #commit} to commit the changes, or {@link #rollback} to forget the changes.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public File chooseForWrite() {
         if (mWriting) {
             throw new IllegalStateException("uncommitted write already in progress");
@@ -99,7 +100,7 @@ public class JournaledFile {
     /**
      * Commit changes.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void commit() {
         if (!mWriting) {
             throw new IllegalStateException("no file to commit");
@@ -111,7 +112,7 @@ public class JournaledFile {
     /**
      * Roll back changes.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void rollback() {
         if (!mWriting) {
             throw new IllegalStateException("no file to roll back");

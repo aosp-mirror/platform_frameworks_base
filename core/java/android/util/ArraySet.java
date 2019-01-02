@@ -19,6 +19,7 @@ package android.util;
 import libcore.util.EmptyArray;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
@@ -157,7 +158,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return ~end;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private void allocArrays(final int size) {
         if (size == (BASE_SIZE * 2)) {
             synchronized (ArraySet.class) {
@@ -215,7 +216,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         mArray = new Object[size];
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static void freeArrays(final int[] hashes, final Object[] array, final int size) {
         if (hashes.length == (BASE_SIZE * 2)) {
             synchronized (ArraySet.class) {
