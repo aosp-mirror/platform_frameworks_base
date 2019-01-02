@@ -485,4 +485,57 @@ public class RollbackTest {
             // Expected.
         }
     }
+
+    /**
+     * Test rollback of multi-package installs.
+     * TODO: Stop ignoring this test once support for multi-package rollback
+     * is implemented.
+     */
+    @Ignore @Test
+    public void testMultiPackage() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.MANAGE_ROLLBACKS);
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+
+            // Prep installation of the test apps.
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.uninstall(TEST_APP_B);
+            RollbackTestUtils.installMultiPackage(false,
+                    "RollbackTestAppAv1.apk",
+                    "RollbackTestAppBv1.apk");
+            RollbackTestUtils.installMultiPackage(true,
+                    "RollbackTestAppAv2.apk",
+                    "RollbackTestAppBv2.apk");
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
+
+            // TEST_APP_A should now be available for rollback.
+            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
+            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
+            assertNotNull(rollback);
+
+            // TODO: Test the dependent apps for rollback are correct once we
+            // support that in the RollbackInfo API.
+
+            // Rollback the app. It should cause both test apps to be rolled
+            // back.
+            RollbackTestUtils.rollback(rollback);
+            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
+
+            // We should not see a recent rollback listed for TEST_APP_B
+            for (RollbackInfo r : rm.getRecentlyExecutedRollbacks()) {
+                assertNotEquals(TEST_APP_B, r.targetPackage.packageName);
+            }
+
+            // TODO: Test the listed dependent apps for the recently executed
+            // rollback are correct once we support that in the RollbackInfo
+            // API.
+        } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
+    }
 }

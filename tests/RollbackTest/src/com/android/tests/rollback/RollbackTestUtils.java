@@ -135,6 +135,57 @@ class RollbackTestUtils {
         assertStatusSuccess(LocalIntentSender.getIntentSenderResult());
     }
 
+    /**
+     * Installs the apks with the given resource names as an atomic set.
+     *
+     * @param enableRollback if rollback should be enabled.
+     * @param resourceNames names of the class loader resource for the apks to
+     *        install.
+     * @throws AssertionError if the installation fails.
+     */
+    static void installMultiPackage(boolean enableRollback, String... resourceNames)
+            throws InterruptedException, IOException {
+        Context context = InstrumentationRegistry.getContext();
+        PackageInstaller packageInstaller = context.getPackageManager().getPackageInstaller();
+
+        PackageInstaller.SessionParams multiPackageParams = new PackageInstaller.SessionParams(
+                PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+        multiPackageParams.setMultiPackage();
+        if (enableRollback) {
+            // TODO: Do we set this on the parent params, the child params, or
+            // both?
+            multiPackageParams.setEnableRollback();
+        }
+        int multiPackageId = packageInstaller.createSession(multiPackageParams);
+        PackageInstaller.Session multiPackage = packageInstaller.openSession(multiPackageId);
+
+        for (String resourceName : resourceNames) {
+            PackageInstaller.Session session = null;
+            PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+                    PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+            if (enableRollback) {
+                params.setEnableRollback();
+            }
+            int sessionId = packageInstaller.createSession(params);
+            session = packageInstaller.openSession(sessionId);
+
+            ClassLoader loader = RollbackTest.class.getClassLoader();
+            try (OutputStream packageInSession = session.openWrite("package", 0, -1);
+                 InputStream is = loader.getResourceAsStream(resourceName);) {
+                byte[] buffer = new byte[4096];
+                int n;
+                while ((n = is.read(buffer)) >= 0) {
+                    packageInSession.write(buffer, 0, n);
+                }
+            }
+            multiPackage.addChildSessionId(sessionId);
+        }
+
+        // Commit the session (this will start the installation workflow).
+        multiPackage.commit(LocalIntentSender.getIntentSender());
+        assertStatusSuccess(LocalIntentSender.getIntentSenderResult());
+    }
+
     static void adoptShellPermissionIdentity(String... permissions) {
         InstrumentationRegistry
             .getInstrumentation()
