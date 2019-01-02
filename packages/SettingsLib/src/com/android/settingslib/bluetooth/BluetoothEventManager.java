@@ -484,6 +484,10 @@ public class BluetoothEventManager {
                 return;
             }
             final CachedBluetoothDevice activeDevice = mDeviceManager.findDevice(device);
+            if (activeDevice == null) {
+                Log.w(TAG, "AclStateChangedHandler: activeDevice is null");
+                return;
+            }
             final int state;
             switch (action) {
                 case BluetoothDevice.ACTION_ACL_CONNECTED:
