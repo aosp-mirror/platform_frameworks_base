@@ -27,8 +27,8 @@ import android.view.View;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -44,7 +44,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private static final float NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD = 0.1f;
 
-    private final DarkIconDispatcher mStatusBarIconController;
+    private final SysuiDarkIconDispatcher mStatusBarIconController;
     private final BatteryController mBatteryController;
     private BiometricUnlockController mBiometricUnlockController;
 
@@ -79,16 +79,13 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private final Rect mLastDockedBounds = new Rect();
     private boolean mQsCustomizing;
 
-    private final Context mContext;
-
     @Inject
     public LightBarController(Context ctx, DarkIconDispatcher darkIconDispatcher,
             BatteryController batteryController) {
         mDarkModeColor = Color.valueOf(ctx.getColor(R.color.dark_mode_icon_color_single_tone));
-        mStatusBarIconController = darkIconDispatcher;
+        mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
         mBatteryController = batteryController;
         mBatteryController.addCallback(this);
-        mContext = ctx;
     }
 
     public void setNavigationBar(LightBarTransitionsController navigationBar) {
@@ -225,9 +222,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private void updateNavigation() {
         if (mNavigationBarController != null) {
-            if (!NavBarTintController.isEnabled(mContext)) {
-                mNavigationBarController.setIconsDark(mNavigationLight, animateChange());
-            }
+            mNavigationBarController.setIconsDark(
+                    mNavigationLight, animateChange());
         }
     }
 
@@ -267,10 +263,6 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         pw.print(" mQsCustomizing="); pw.println(mQsCustomizing);
 
         pw.println();
-
-        if (mStatusBarIconController != null) {
-            mStatusBarIconController.dump(fd, pw, args);
-        }
 
         LightBarTransitionsController transitionsController =
                 mStatusBarIconController.getTransitionsController();
