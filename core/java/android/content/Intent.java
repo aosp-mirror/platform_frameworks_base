@@ -9062,7 +9062,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param extras The new set of extras in the Intent, or null to erase
      * all extras.
      */
-    public @NonNull Intent replaceExtras(@NonNull Bundle extras) {
+    public @NonNull Intent replaceExtras(@Nullable Bundle extras) {
         mExtras = extras != null ? new Bundle(extras) : null;
         return this;
     }
