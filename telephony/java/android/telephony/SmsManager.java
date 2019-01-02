@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.BaseBundle;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -89,7 +90,7 @@ public final class SmsManager {
             new ArrayMap<Integer, SmsManager>();
 
     /** A concrete subscription id, or the pseudo DEFAULT_SUBSCRIPTION_ID */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mSubId;
 
     /*

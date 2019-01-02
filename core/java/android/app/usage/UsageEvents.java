@@ -19,6 +19,7 @@ import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -178,32 +179,32 @@ public final class UsageEvents implements Parcelable {
         /**
          * {@hide}
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String mPackage;
 
         /**
          * {@hide}
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String mClass;
 
         /**
          * {@hide}
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public long mTimeStamp;
 
         /**
          * {@hide}
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int mEventType;
 
         /**
          * Only present for {@link #CONFIGURATION_CHANGE} event types.
          * {@hide}
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public Configuration mConfiguration;
 
         /**
@@ -386,30 +387,30 @@ public final class UsageEvents implements Parcelable {
     }
 
     // Only used when creating the resulting events. Not used for reading/unparceling.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private List<Event> mEventsToWrite = null;
 
     // Only used for reading/unparceling events.
     @UnsupportedAppUsage
     private Parcel mParcel = null;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mEventCount;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mIndex = 0;
 
     /*
      * In order to save space, since ComponentNames will be duplicated everywhere,
      * we use a map and index into it.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String[] mStringPool;
 
     /**
      * Construct the iterator from a parcel.
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public UsageEvents(Parcel in) {
         byte[] bytes = in.readBlob();
         Parcel data = Parcel.obtain();
@@ -494,7 +495,7 @@ public final class UsageEvents implements Parcelable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int findStringIndex(String str) {
         final int index = Arrays.binarySearch(mStringPool, str);
         if (index < 0) {
@@ -506,7 +507,7 @@ public final class UsageEvents implements Parcelable {
     /**
      * Writes a single event to the parcel. Modify this when updating {@link Event}.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private void writeEventToParcel(Event event, Parcel p, int flags) {
         final int packageIndex;
         if (event.mPackage != null) {
@@ -550,7 +551,7 @@ public final class UsageEvents implements Parcelable {
     /**
      * Reads a single event from the parcel. Modify this when updating {@link Event}.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private void readEventFromParcel(Parcel p, Event eventOut) {
         final int packageIndex = p.readInt();
         if (packageIndex >= 0) {

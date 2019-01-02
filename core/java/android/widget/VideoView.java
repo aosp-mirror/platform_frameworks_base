@@ -113,7 +113,7 @@ public class VideoView extends SurfaceView
     private int mTargetState = STATE_IDLE;
 
     // All the stuff we need for playing and showing a video
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private SurfaceHolder mSurfaceHolder = null;
     @UnsupportedAppUsage
     private MediaPlayer mMediaPlayer = null;
@@ -565,7 +565,7 @@ public class VideoView extends SurfaceView
         }
     };
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private MediaPlayer.OnErrorListener mErrorListener =
         new MediaPlayer.OnErrorListener() {
         public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {

@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
@@ -41,7 +42,7 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public CellInfoCdma(CellInfoCdma ci) {
         super(ci);
         this.mCellIdentityCdma = ci.mCellIdentityCdma.copy();

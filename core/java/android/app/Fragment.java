@@ -390,7 +390,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     ViewGroup mContainer;
 
     // The View generated for this fragment.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     View mView;
 
     // Whether this fragment should defer starting until after other fragments

@@ -39,6 +39,7 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -343,7 +344,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     InputMethodManager mImm;
     
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int mTheme = 0;
     
     LayoutInflater mInflater;
@@ -418,7 +419,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     boolean mShouldClearInsetOfPreviousIme;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
 

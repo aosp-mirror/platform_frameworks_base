@@ -878,7 +878,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static String stateToString(int state) {
         switch (state) {
             case STATE_DISCONNECTED:

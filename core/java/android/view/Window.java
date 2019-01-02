@@ -37,6 +37,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.session.MediaController;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -284,7 +285,7 @@ public abstract class Window {
     private WindowControllerCallback mWindowControllerCallback;
     private OnRestrictedCaptionAreaChangedListener mOnRestrictedCaptionAreaChangedListener;
     private Rect mRestrictedCaptionAreaRect;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private WindowManager mWindowManager;
     @UnsupportedAppUsage
     private IBinder mAppToken;
@@ -1276,7 +1277,7 @@ public abstract class Window {
     public abstract void alwaysReadCloseOnTouchAttr();
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public boolean shouldCloseOnTouch(Context context, MotionEvent event) {
         final boolean isOutside =
                 event.getAction() == MotionEvent.ACTION_DOWN && isOutOfBounds(context, event)
