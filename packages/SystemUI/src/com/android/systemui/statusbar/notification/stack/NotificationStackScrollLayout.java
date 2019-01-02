@@ -5219,9 +5219,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         // another "changeViewPosition" call is ever added.
         changeViewPosition(mShelf,
                 getChildCount() - offsetFromEnd);
-
-        // Scrim opacity varies based on notification count
-        mScrimController.setNotificationCount(getNotGoneChildCount());
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)

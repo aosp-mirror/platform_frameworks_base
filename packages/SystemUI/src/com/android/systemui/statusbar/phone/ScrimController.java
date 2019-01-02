@@ -88,16 +88,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     /**
      * Default alpha value for most scrims.
      */
-    public static final float GRADIENT_SCRIM_ALPHA = 0.45f;
+    public static final float GRADIENT_SCRIM_ALPHA = 0.2f;
     /**
      * A scrim varies its opacity based on a busyness factor, for example
      * how many notifications are currently visible.
      */
     public static final float GRADIENT_SCRIM_ALPHA_BUSY = 0.7f;
-    /**
-     * Scrim opacity when a wallpaper doesn't support ambient mode.
-     */
-    public static final float PULSING_WALLPAPER_SCRIM_ALPHA = 0.6f;
 
     /**
      * The most common scrim, the one under the keyguard.
@@ -154,7 +150,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private Callback mCallback;
     private boolean mWallpaperSupportsAmbientMode;
     private boolean mScreenOn;
-    private float mNotificationDensity;
 
     // Scrim blanking callbacks
     private Runnable mPendingFrameCallback;
@@ -245,7 +240,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         mCurrentInFrontTint = state.getFrontTint();
         mCurrentBehindTint = state.getBehindTint();
         mCurrentInFrontAlpha = state.getFrontAlpha();
-        mCurrentBehindAlpha = state.getBehindAlpha(mNotificationDensity);
+        mCurrentBehindAlpha = state.getBehindAlpha();
         applyExpansionToAlpha();
 
         // Scrim might acquire focus when user is navigating with a D-pad or a keyboard.
@@ -416,7 +411,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             // Either darken of make the scrim transparent when you
             // pull down the shade
             float interpolatedFract = getInterpolatedFraction();
-            float alphaBehind = mState.getBehindAlpha(mNotificationDensity);
+            float alphaBehind = mState.getBehindAlpha();
             if (mDarkenWhileDragging) {
                 mCurrentBehindAlpha = MathUtils.lerp(GRADIENT_SCRIM_ALPHA_BUSY, alphaBehind,
                         interpolatedFract);
@@ -426,24 +421,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
                         interpolatedFract);
                 mCurrentInFrontAlpha = 0;
             }
-        }
-    }
-
-    /**
-     * Keyguard and shade scrim opacity varies according to how many notifications are visible.
-     * @param notificationCount Number of visible notifications.
-     */
-    public void setNotificationCount(int notificationCount) {
-        final float maxNotificationDensity = 3;
-        float notificationDensity = Math.min(notificationCount / maxNotificationDensity, 1f);
-        if (mNotificationDensity == notificationDensity) {
-            return;
-        }
-        mNotificationDensity = notificationDensity;
-
-        if (mState == ScrimState.KEYGUARD) {
-            applyExpansionToAlpha();
-            scheduleUpdate();
         }
     }
 
@@ -909,7 +886,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         // Backdrop event may arrive after state was already applied,
         // in this case, back-scrim needs to be re-evaluated
         if (mState == ScrimState.AOD || mState == ScrimState.PULSING) {
-            float newBehindAlpha = mState.getBehindAlpha(mNotificationDensity);
+            float newBehindAlpha = mState.getBehindAlpha();
             if (mCurrentBehindAlpha != newBehindAlpha) {
                 mCurrentBehindAlpha = newBehindAlpha;
                 updateScrims();

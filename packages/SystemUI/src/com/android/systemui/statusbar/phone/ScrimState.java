@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import android.graphics.Color;
 import android.os.Trace;
-import android.util.MathUtils;
 
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -56,13 +55,6 @@ public enum ScrimState {
             }
             mCurrentBehindAlpha = mScrimBehindAlphaKeyguard;
             mCurrentInFrontAlpha = 0;
-        }
-
-        @Override
-        public float getBehindAlpha(float busynessFactor) {
-            return MathUtils.map(0 /* start */, 1 /* stop */,
-                    mScrimBehindAlphaKeyguard, ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
-                    busynessFactor);
         }
     },
 
@@ -117,7 +109,7 @@ public enum ScrimState {
         }
 
         @Override
-        public float getBehindAlpha(float busyness) {
+        public float getBehindAlpha() {
             return mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
         }
 
@@ -134,15 +126,8 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             mCurrentInFrontAlpha = 0;
-            mCurrentInFrontTint = Color.BLACK;
-            mCurrentBehindTint = Color.BLACK;
+            mCurrentBehindAlpha = mScrimBehindAlphaKeyguard;
             mBlankScreen = mDisplayRequiresBlanking;
-        }
-
-        @Override
-        public float getBehindAlpha(float busyness) {
-            return mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f
-                    : ScrimController.PULSING_WALLPAPER_SCRIM_ALPHA;
         }
     },
 
@@ -235,7 +220,7 @@ public enum ScrimState {
         return mCurrentInFrontAlpha;
     }
 
-    public float getBehindAlpha(float busyness) {
+    public float getBehindAlpha() {
         return mCurrentBehindAlpha;
     }
 
