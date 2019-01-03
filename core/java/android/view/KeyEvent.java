@@ -818,7 +818,10 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_THUMBS_UP = 286;
     /** Key code constant: Thumbs down key. Apps can use this to let user downvote content. */
     public static final int KEYCODE_THUMBS_DOWN = 287;
-    /** Key code constant: Consumed by system to switch current viewer profile. */
+    /**
+     * Key code constant: Used to switch current {@link android.accounts.Account} that is
+     * consuming content. May be consumed by system to set account globally.
+     */
     public static final int KEYCODE_PROFILE_SWITCH = 288;
 
     /**
