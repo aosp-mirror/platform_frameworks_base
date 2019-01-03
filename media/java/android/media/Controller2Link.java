@@ -25,8 +25,7 @@ import android.os.ResultReceiver;
 import java.util.Objects;
 
 /**
- * Handles incoming commands from {@link MediaSession2} and {@link MediaLibrarySession}
- * to both {@link MediaController2} and {@link MediaBrowser2}.
+ * Handles incoming commands from {@link MediaSession2} to both {@link MediaController2}.
  * @hide
  */
 // @SystemApi
@@ -90,7 +89,7 @@ public final class Controller2Link implements Parcelable {
         try {
             mIController.notifyConnected(seq, connectionResult);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            throw new RuntimeException(e);
         }
     }
 
@@ -99,7 +98,7 @@ public final class Controller2Link implements Parcelable {
         try {
             mIController.notifyDisconnected(seq);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            throw new RuntimeException(e);
         }
     }
 
@@ -109,7 +108,16 @@ public final class Controller2Link implements Parcelable {
         try {
             mIController.sendSessionCommand(seq, command, args, resultReceiver);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** Interface method for IMediaController2.cancelSessionCommand */
+    public void cancelSessionCommand(int seq) {
+        try {
+            mIController.cancelSessionCommand(seq);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -133,6 +141,11 @@ public final class Controller2Link implements Parcelable {
         mController.onSessionCommand(seq, command, args, resultReceiver);
     }
 
+    /** Stub implementation for IMediaController2.cancelSessionCommand */
+    public void onCancelCommand(int seq) {
+        mController.onCancelCommand(seq);
+    }
+
     private class Controller2Stub extends IMediaController2.Stub {
         @Override
         public void notifyConnected(int seq, Bundle connectionResult) {
@@ -148,6 +161,11 @@ public final class Controller2Link implements Parcelable {
         public void sendSessionCommand(int seq, Session2Command command, Bundle args,
                 ResultReceiver resultReceiver) {
             Controller2Link.this.onSessionCommand(seq, command, args, resultReceiver);
+        }
+
+        @Override
+        public void cancelSessionCommand(int seq) {
+            Controller2Link.this.onCancelCommand(seq);
         }
     }
 }
