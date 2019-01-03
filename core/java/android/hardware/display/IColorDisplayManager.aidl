@@ -21,4 +21,5 @@ interface IColorDisplayManager {
     boolean isDeviceColorManaged();
 
     boolean setSaturationLevel(int saturationLevel);
+    boolean setAppSaturationLevel(String packageName, int saturationLevel);
 }
