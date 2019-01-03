@@ -57,13 +57,15 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     @Before
     public void setup() {
         mSysuiContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
-        mSysuiContext.putComponent(StatusBar.class, mock(StatusBar.class));
+        StatusBar statusBar = mock(StatusBar.class);
+        mSysuiContext.putComponent(StatusBar.class, statusBar);
         mSysuiContext.putComponent(TunerService.class, mock(TunerService.class));
         mStatusBarStateController = mDependency
                 .injectMockDependency(StatusBarStateController.class);
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mMockNotificiationAreaController = mock(NotificationIconAreaController.class);
         mNotificationAreaInner = mock(View.class);
+        when(statusBar.getPanel()).thenReturn(mock(NotificationPanelView.class));
         when(mNotificationAreaInner.animate()).thenReturn(mock(ViewPropertyAnimator.class));
         when(mMockNotificiationAreaController.getNotificationInnerAreaView()).thenReturn(
                 mNotificationAreaInner);

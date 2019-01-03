@@ -141,6 +141,13 @@ public class KeyguardStatusView extends GridLayout implements
         onDensityOrFontScaleChanged();
     }
 
+    /**
+     * If we're presenting a custom clock of just the default one.
+     */
+    public boolean hasCustomClock() {
+        return mClockView.hasCustomClock();
+    }
+
     private void setEnableMarquee(boolean enabled) {
         if (DEBUG) Log.v(TAG, "Schedule setEnableMarquee: " + (enabled ? "Enable" : "Disable"));
         if (enabled) {

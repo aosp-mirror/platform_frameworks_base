@@ -800,7 +800,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
         mNotificationIconAreaController = SystemUIFactory.getInstance()
-                .createNotificationIconAreaController(context, this);
+                .createNotificationIconAreaController(context, this, mStatusBarStateController);
         inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelf);
 

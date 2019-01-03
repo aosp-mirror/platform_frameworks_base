@@ -87,6 +87,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
         super(context, attrs);
     }
 
+    /**
+     * Returns if this view is presenting a custom clock, or the default implementation.
+     */
+    public boolean hasCustomClock() {
+        return mClockPlugin != null;
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();

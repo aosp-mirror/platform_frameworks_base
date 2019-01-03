@@ -50,6 +50,7 @@ import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardClockSwitch;
@@ -142,7 +143,8 @@ public class NotificationPanelView extends PanelView implements
     private KeyguardStatusBarView mKeyguardStatusBar;
     private QS mQs;
     private FrameLayout mQsFrame;
-    private KeyguardStatusView mKeyguardStatusView;
+    @VisibleForTesting
+    protected KeyguardStatusView mKeyguardStatusView;
     private View mQsNavbarScrim;
     protected NotificationsQuickSettingsContainer mNotificationContainerParent;
     protected NotificationStackScrollLayout mNotificationStackScroller;
@@ -325,6 +327,13 @@ public class NotificationPanelView extends PanelView implements
         setPanelAlpha(255, false /* animate */);
         mCommandQueue = getComponent(context, CommandQueue.class);
         mDisplayId = context.getDisplayId();
+    }
+
+    /**
+     * Returns if there's a custom clock being presented.
+     */
+    public boolean hasCustomClock() {
+        return mKeyguardStatusView.hasCustomClock();
     }
 
     private void setStatusBar(StatusBar bar) {
@@ -2774,6 +2783,9 @@ public class NotificationPanelView extends PanelView implements
         if (dozing == mDozing) return;
         mDozing = dozing;
         mNotificationStackScroller.setDark(mDozing, animate, wakeUpTouchLocation);
+        if (mDozing) {
+            mNotificationStackScroller.setShowDarkShelf(!hasCustomClock());
+        }
 
         if (mBarState == StatusBarState.KEYGUARD
                 || mBarState == StatusBarState.SHADE_LOCKED) {

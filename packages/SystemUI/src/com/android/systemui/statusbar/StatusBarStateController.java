@@ -331,7 +331,8 @@ public class StatusBarStateController implements CallbackController<StateListene
          *
          * @param newState the new {@link StatusBarState}
          */
-        public void onStateChanged(int newState);
+        default void onStateChanged(int newState) {
+        }
 
         /**
          * Callback to be notified when Dozing changes. Dozing is stored separately from state.

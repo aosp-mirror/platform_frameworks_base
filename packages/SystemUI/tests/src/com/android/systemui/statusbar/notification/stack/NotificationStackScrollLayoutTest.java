@@ -142,6 +142,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         doNothing().when(mGroupManager).collapseAllGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(notificationShelf).setAnimationsEnabled(anyBoolean());
+        doNothing().when(notificationShelf).fadeInTranslating();
 
         mOriginalInterruptionModelSetting = Settings.Secure.getInt(mContext.getContentResolver(),
                 NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);

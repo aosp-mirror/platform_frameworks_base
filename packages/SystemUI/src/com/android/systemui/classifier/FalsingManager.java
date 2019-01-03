@@ -48,7 +48,7 @@ import java.io.PrintWriter;
  *
  * It does not collect touch events when the bouncer shows up.
  */
-public class FalsingManager implements SensorEventListener {
+public class FalsingManager implements SensorEventListener, StateListener {
     private static final String ENFORCE_BOUNCER = "falsing_manager_enforce_bouncer";
 
     private static final int[] CLASSIFIER_SENSORS = new int[] {
@@ -84,8 +84,6 @@ public class FalsingManager implements SensorEventListener {
     private boolean mShowingAod;
     private Runnable mPendingWtf;
 
-    private final StateListener mStateListener = this::setStatusBarState;
-
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange) {
@@ -108,7 +106,7 @@ public class FalsingManager implements SensorEventListener {
                 UserHandle.USER_ALL);
 
         updateConfiguration();
-        Dependency.get(StatusBarStateController.class).addCallback(mStateListener);
+        Dependency.get(StatusBarStateController.class).addCallback(this);
     }
 
     public static FalsingManager getInstance(Context context) {
@@ -282,14 +280,15 @@ public class FalsingManager implements SensorEventListener {
         updateSessionActive();
     }
 
-    private void setStatusBarState(int state) {
+    @Override
+    public void onStateChanged(int newState) {
         if (FalsingLog.ENABLED) {
             FalsingLog.i("setStatusBarState", new StringBuilder()
                     .append("from=").append(StatusBarState.toShortString(mState))
-                    .append(" to=").append(StatusBarState.toShortString(state))
+                    .append(" to=").append(StatusBarState.toShortString(newState))
                     .toString());
         }
-        mState = state;
+        mState = newState;
         updateSessionActive();
     }
 

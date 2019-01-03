@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.ScrimView;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
@@ -136,8 +137,8 @@ public class SystemUIFactory {
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,
-            StatusBar statusBar) {
-        return new NotificationIconAreaController(context, statusBar);
+            StatusBar statusBar, StatusBarStateController statusBarStateController) {
+        return new NotificationIconAreaController(context, statusBar, statusBarStateController);
     }
 
     public KeyguardIndicationController createKeyguardIndicationController(Context context,
