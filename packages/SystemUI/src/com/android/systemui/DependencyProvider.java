@@ -41,6 +41,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
+import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -166,6 +167,13 @@ public class DependencyProvider {
     @Provides
     public PluginManager providePluginManager(Context context) {
         return new PluginManagerImpl(context, new PluginInitializerImpl());
+    }
+
+    @Singleton
+    @Provides
+    public NavigationBarController provideNavigationBarController(Context context,
+            @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
+        return new NavigationBarController(context, mainHandler);
     }
 
     @Singleton

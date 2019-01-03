@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -36,6 +37,9 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 public class BarTransitions {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_COLORS = false;
@@ -47,6 +51,18 @@ public class BarTransitions {
     public static final int MODE_TRANSPARENT = 4;
     public static final int MODE_WARNING = 5;
     public static final int MODE_LIGHTS_OUT_TRANSPARENT = 6;
+
+    @IntDef(flag = true, prefix = { "MODE_" }, value = {
+            MODE_OPAQUE,
+            MODE_SEMI_TRANSPARENT,
+            MODE_TRANSLUCENT,
+            MODE_LIGHTS_OUT,
+            MODE_TRANSPARENT,
+            MODE_WARNING,
+            MODE_LIGHTS_OUT_TRANSPARENT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TransitionMode {}
 
     public static final int LIGHTS_IN_DURATION = 250;
     public static final int LIGHTS_OUT_DURATION = 1500;

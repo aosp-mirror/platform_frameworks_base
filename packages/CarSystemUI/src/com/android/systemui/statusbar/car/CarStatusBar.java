@@ -280,7 +280,9 @@ public class CarStatusBar extends StatusBar implements
         buildNavBarContent();
         attachNavBarWindows();
 
-        mNavigationBarController.createNavigationBars();
+        // There has been a car customized nav bar on the default display, so just create nav bars
+        // on external displays.
+        mNavigationBarController.createNavigationBars(false /* includeDefaultDisplay */);
     }
 
     private void buildNavBarContent() {
@@ -445,12 +447,6 @@ public class CarStatusBar extends StatusBar implements
             pw.print("=");
             pw.println(entry.getValue());
         }
-    }
-
-
-    @Override
-    public View getNavigationBarWindow() {
-        return mNavigationBarWindow;
     }
 
     @Override
