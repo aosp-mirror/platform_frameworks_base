@@ -258,14 +258,27 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             }
             mEvents = new ArrayList<>(MAX_BUFFER_SIZE);
         }
-        mEvents.add(event);
+
+        if (!mEvents.isEmpty() && event.getType() == TYPE_VIEW_TEXT_CHANGED) {
+            final ContentCaptureEvent lastEvent = mEvents.get(mEvents.size() - 1);
+
+            // TODO(b/121045053): check if flags match
+            if (lastEvent.getType() == TYPE_VIEW_TEXT_CHANGED
+                    && lastEvent.getId().equals(event.getId())) {
+                if (VERBOSE) {
+                    Log.v(mTag, "Buffering VIEW_TEXT_CHANGED event, updated text = "
+                            + event.getText());
+                }
+                lastEvent.setText(event.getText());
+            } else {
+                mEvents.add(event);
+            }
+        } else {
+            mEvents.add(event);
+        }
 
         final int numberEvents = mEvents.size();
 
-        // TODO(b/120784831): need to optimize it so we buffer changes until a number of X are
-        // buffered (either total or per autofillid). For
-        // example, if the user typed "a", "b", "c" and the threshold is 3, we should buffer
-        // "a" and "b" then send "abc".
         final boolean bufferEvent = numberEvents < MAX_BUFFER_SIZE;
 
         if (bufferEvent && !forceFlush) {
