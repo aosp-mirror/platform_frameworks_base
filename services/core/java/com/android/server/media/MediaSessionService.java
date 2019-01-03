@@ -40,6 +40,7 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
+import android.media.Session2Token;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.ICallback;
 import android.media.session.IOnMediaKeyListener;
@@ -889,6 +890,21 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 return createSessionInternal(pid, uid, resolvedUserId, packageName, cb, tag)
                         .getSessionBinder();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void notifySession2Created(Session2Token sessionToken) throws RemoteException {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (DEBUG) {
+                    Log.d(TAG, "Session2 is created " + sessionToken);
+                }
+                // TODO: Keep the session.
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

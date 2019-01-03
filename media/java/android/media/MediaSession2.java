@@ -464,7 +464,21 @@ public class MediaSession2 implements AutoCloseable {
             if (mId == null) {
                 mId = "";
             }
-            return new MediaSession2(mContext, mId, mSessionActivity, mCallbackExecutor, mCallback);
+            MediaSession2 session2 = new MediaSession2(mContext, mId, mSessionActivity,
+                    mCallbackExecutor, mCallback);
+
+            // Notify framework about the newly create session after the constructor is finished.
+            // Otherwise, framework may access the session before the initialization is finished.
+            try {
+                MediaSessionManager manager = (MediaSessionManager) mContext.getSystemService(
+                        Context.MEDIA_SESSION_SERVICE);
+                manager.notifySession2Created(session2.getSessionToken());
+            } catch (Exception e) {
+                session2.close();
+                throw e;
+            }
+
+            return session2;
         }
     }
 

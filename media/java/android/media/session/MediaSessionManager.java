@@ -26,6 +26,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
+import android.media.MediaSession2;
+import android.media.Session2Token;
 import android.media.browse.MediaBrowser;
 import android.os.Handler;
 import android.os.IBinder;
@@ -99,6 +101,30 @@ public final class MediaSessionManager {
     public @NonNull ISession createSession(@NonNull MediaSession.CallbackStub cbStub,
             @NonNull String tag, int userId) throws RemoteException {
         return mService.createSession(mContext.getPackageName(), cbStub, tag, userId);
+    }
+
+    /**
+     * Notifies that a new {@link MediaSession2} with type {@link Session2Token#TYPE_SESSION} is
+     * created.
+     * <p>
+     * Do not use this API directly, but create a new instance through the
+     * {@link MediaSession2.Builder} instead.
+     *
+     * @param token newly created session2 token
+     * @hide
+     */
+    public void notifySession2Created(@NonNull Session2Token token) {
+        if (token == null) {
+            throw new IllegalArgumentException("token shouldn't be null");
+        }
+        if (token.getType() != Session2Token.TYPE_SESSION) {
+            throw new IllegalArgumentException("token's type should be TYPE_SESSION");
+        }
+        try {
+            mService.notifySession2Created(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
