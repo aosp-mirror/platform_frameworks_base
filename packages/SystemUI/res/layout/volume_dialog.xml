@@ -87,7 +87,7 @@
                 android:background="@drawable/rounded_bg_bottom_background">
                 <com.android.keyguard.AlphaOptimizedImageButton
                     android:id="@+id/settings"
-                    android:src="@drawable/ic_settings_16dp"
+                    android:src="@drawable/ic_tune_black_16dp"
                     android:layout_width="@dimen/volume_dialog_tap_target_size"
                     android:layout_height="@dimen/volume_dialog_tap_target_size"
                     android:layout_gravity="center"
