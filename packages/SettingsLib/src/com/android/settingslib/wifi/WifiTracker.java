@@ -68,6 +68,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -628,9 +629,9 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                             providersAndScans.keySet()).keySet();
             for (OsuProvider provider : providersAndScans.keySet()) {
                 if (!alreadyProvisioned.contains(provider)) {
-                    AccessPoint accessPointOsu = new AccessPoint(mContext, provider);
-                    // TODO(b/118705403): accessPointOsu.setScanResults(Matching ScanResult with
-                    // best RSSI)
+                    // TODO(b/118705403): use real scan results for this provider
+                    AccessPoint accessPointOsu =
+                            getCachedOrCreateOsu(null, cachedAccessPoints, provider);
                     // TODO(b/118705403): Figure out if we would need to update an OSU AP (this will
                     // be used if we need to display it at the top of the picker as the "active" AP)
                     // Otherwise OSU APs should ignore attempts to update the active connection info
@@ -699,6 +700,23 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         }
         final AccessPoint accessPoint = new AccessPoint(mContext, scanResults);
         return accessPoint;
+    }
+
+    private AccessPoint getCachedOrCreateOsu(
+            List<ScanResult> scanResults,
+            List<AccessPoint> cache,
+            OsuProvider provider) {
+        ListIterator<AccessPoint> lit = cache.listIterator();
+        while (lit.hasNext()) {
+            final AccessPoint ret = lit.next();
+            if (ret.getKey().equals(AccessPoint.getKey(provider))) {
+                lit.remove();
+                // TODO(b/118705403): Use real scan results for this.
+                // ret.setScanResults(scanResults);
+                return ret;
+            }
+        }
+        return new AccessPoint(mContext, provider);
     }
 
     private void updateNetworkInfo(NetworkInfo networkInfo) {

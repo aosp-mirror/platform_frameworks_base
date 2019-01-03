@@ -364,24 +364,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
     /** Updates {@link #mKey} and should only called upon object creation/initialization. */
     private void updateKey() {
         // TODO(sghuman): Consolidate Key logic on ScanResultMatchInfo
-
-        StringBuilder builder = new StringBuilder();
-
         if (isPasspoint()) {
-            builder.append(KEY_PREFIX_FQDN).append(mConfig.FQDN);
+            mKey = getKey(mConfig);
         } else if (isOsuProvider()) {
-            builder.append(KEY_PREFIX_OSU).append(mOsuProvider.getOsuSsid());
-            builder.append(',').append(mOsuProvider.getServerUri());
+            mKey = getKey(mOsuProvider);
         } else { // Non-Passpoint AP
-            builder.append(KEY_PREFIX_AP);
-            if (TextUtils.isEmpty(getSsidStr())) {
-                builder.append(getBssid());
-            } else {
-                builder.append(getSsidStr());
-            }
-            builder.append(',').append(getSecurity());
+            mKey = getKey(getSsidStr(), getBssid(), getSecurity());
         }
-        mKey = builder.toString();
     }
 
     /**
@@ -622,34 +611,46 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public static String getKey(ScanResult result) {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append(KEY_PREFIX_AP);
-        if (TextUtils.isEmpty(result.SSID)) {
-            builder.append(result.BSSID);
-        } else {
-            builder.append(result.SSID);
-        }
-
-        builder.append(',').append(getSecurity(result));
-        return builder.toString();
+        return getKey(result.SSID, result.BSSID, getSecurity(result));
     }
 
+    /**
+     * Returns the AccessPoint key for a WifiConfiguration.
+     * This will return a special Passpoint key if the config is for Passpoint.
+     */
     public static String getKey(WifiConfiguration config) {
-        StringBuilder builder = new StringBuilder();
-
         if (config.isPasspoint()) {
-            builder.append(KEY_PREFIX_FQDN).append(config.FQDN);
+            return new StringBuilder()
+                    .append(KEY_PREFIX_FQDN)
+                    .append(config.FQDN).toString();
         } else {
-            builder.append(KEY_PREFIX_AP);
-            if (TextUtils.isEmpty(config.SSID)) {
-                builder.append(config.BSSID);
-            } else {
-                builder.append(removeDoubleQuotes(config.SSID));
-            }
-            builder.append(',').append(getSecurity(config));
+            return getKey(config.SSID, config.BSSID, getSecurity(config));
         }
+    }
 
+    /**
+     * Returns the AccessPoint key corresponding to the OsuProvider.
+     */
+    public static String getKey(OsuProvider provider) {
+        return new StringBuilder()
+                .append(KEY_PREFIX_OSU)
+                .append(provider.getOsuSsid())
+                .append(',')
+                .append(provider.getServerUri()).toString();
+    }
+
+    /**
+     * Returns the AccessPoint key for a normal non-Passpoint network by ssid/bssid and security.
+     */
+    private static String getKey(String ssid, String bssid, int security) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(KEY_PREFIX_AP);
+        if (TextUtils.isEmpty(ssid)) {
+            builder.append(bssid);
+        } else {
+            builder.append(ssid);
+        }
+        builder.append(',').append(security);
         return builder.toString();
     }
 
