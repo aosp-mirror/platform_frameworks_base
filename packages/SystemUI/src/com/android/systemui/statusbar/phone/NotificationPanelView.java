@@ -2803,6 +2803,11 @@ public class NotificationPanelView extends PanelView implements
         if (animatePulse) {
             mAnimateNextPositionUpdate = true;
         }
+        // Do not animate the clock when waking up from a pulse.
+        // The height callback will take care of pushing the clock to the right position.
+        if (!mPulsing && !mDozing) {
+            mAnimateNextPositionUpdate = false;
+        }
         mNotificationStackScroller.setPulsing(pulsing, animatePulse);
         mKeyguardStatusView.setPulsing(pulsing, animatePulse);
         mKeyguardBottomArea.setPulsing(pulsing, animatePulse);
