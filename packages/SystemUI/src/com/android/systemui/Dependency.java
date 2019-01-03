@@ -512,6 +512,9 @@ public class Dependency extends SystemUI {
     public static void initDependencies(Context context) {
         if (sDependency != null) return;
         Dependency d = new Dependency();
+        SystemUIFactory.getInstance().getRootComponent()
+                .createDependency()
+                .createSystemUI(d);
         d.mContext = context;
         d.mComponents = new HashMap<>();
         d.start();
