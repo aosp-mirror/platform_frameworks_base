@@ -174,7 +174,7 @@ public class NotificationLogger implements StateListener {
                     NotificationVisibility visibility,
                     boolean lifetimeExtended,
                     boolean removedByUser) {
-                if (removedByUser && visibility != null && entry.notification != null) {
+                if (removedByUser && visibility != null && entry != null) {
                     logNotificationClear(key, entry.notification, visibility);
                 }
             }
