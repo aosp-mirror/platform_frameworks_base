@@ -4125,10 +4125,12 @@ public class SettingsProvider extends ContentProvider {
                             Secure.CHARGING_SOUNDS_ENABLED);
 
                     if (!globalChargingSoundEnabled.isNull()) {
-                        secureSettings.insertSettingLocked(
-                                Secure.CHARGING_SOUNDS_ENABLED,
-                                globalChargingSoundEnabled.getValue(), null, false,
-                                SettingsState.SYSTEM_PACKAGE_NAME);
+                        if (secureChargingSoundsEnabled.isNull()) {
+                            secureSettings.insertSettingLocked(
+                                    Secure.CHARGING_SOUNDS_ENABLED,
+                                    globalChargingSoundEnabled.getValue(), null, false,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
 
                         // set global charging_sounds_enabled setting to null since it's deprecated
                         globalSettings.insertSettingLocked(
