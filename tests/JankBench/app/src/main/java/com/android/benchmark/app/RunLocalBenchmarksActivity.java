@@ -323,7 +323,7 @@ public class RunLocalBenchmarksActivity extends AppCompatActivity {
                 intent = new Intent(getApplicationContext(), EditTextInputActivity.class);
                 break;
             case R.id.benchmark_overdraw:
-                intent = new Intent(getApplicationContext(), BitmapUploadActivity.class);
+                intent = new Intent(getApplicationContext(), FullScreenOverdrawActivity.class);
                 break;
             case R.id.benchmark_memory_bandwidth:
                 syntheticTestId = 0;
