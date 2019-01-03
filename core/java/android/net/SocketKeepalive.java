@@ -109,6 +109,18 @@ public abstract class SocketKeepalive implements AutoCloseable {
      **/
     public static final int MAX_INTERVAL_SEC = 3600;
 
+    /**
+     * This packet is invalid.
+     * See the error code for details.
+     * @hide
+     */
+    public static class InvalidPacketException extends Exception {
+        public final int error;
+        public InvalidPacketException(int error) {
+            this.error = error;
+        }
+    }
+
     @NonNull final IConnectivityManager mService;
     @NonNull final Network mNetwork;
     @NonNull private final Executor mExecutor;
@@ -135,7 +147,7 @@ public abstract class SocketKeepalive implements AutoCloseable {
             @Override
             public void handleMessage(Message message) {
                 switch (message.what) {
-                    case NetworkAgent.EVENT_PACKET_KEEPALIVE:
+                    case NetworkAgent.EVENT_SOCKET_KEEPALIVE:
                         final int status = message.arg2;
                         try {
                             if (status == SUCCESS) {
