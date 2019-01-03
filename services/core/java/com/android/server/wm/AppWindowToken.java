@@ -1949,6 +1949,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         } else if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
+            if (mWmService.mLowRamTaskSnapshots) {
+                // For low RAM devices, we use the splash screen starting window instead of the
+                // task snapshot starting window.
+                return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+            }
             return snapshot == null ? STARTING_WINDOW_TYPE_NONE
                     : snapshotOrientationSameAsTask(snapshot) || fromRecents
                             ? STARTING_WINDOW_TYPE_SNAPSHOT : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
