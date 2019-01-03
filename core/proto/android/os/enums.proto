@@ -57,6 +57,7 @@ enum BatteryStatusEnum {
 }
 
 // These constants are defined in hardware/interfaces/thermal/1.0/types.hal
+// and in hardware/interfaces/thermal/2.0/types.hal
 // They are primarily used by android/os/HardwarePropertiesManager.java.
 // Any change to the types in the thermal hal should be made here as well.
 enum TemperatureTypeEnum {
@@ -65,6 +66,16 @@ enum TemperatureTypeEnum {
     TEMPERATURE_TYPE_GPU = 1;
     TEMPERATURE_TYPE_BATTERY = 2;
     TEMPERATURE_TYPE_SKIN = 3;
+    TEMPERATURE_TYPE_USB_PORT = 4;
+    TEMPERATURE_TYPE_POWER_AMPLIFIER = 5;
+
+    // Battery Charge Limit - virtual thermal sensors.
+    TEMPERATURE_TYPE_BCL_VOLTAGE = 6;
+    TEMPERATURE_TYPE_BCL_CURRENT = 7;
+    TEMPERATURE_TYPE_BCL_PERCENTAGE = 8;
+
+    // Neural Processing Unit.
+    TEMPERATURE_TYPE_NPU = 9;
 }
 
 // Wakelock types, primarily used by android/os/PowerManager.java.
