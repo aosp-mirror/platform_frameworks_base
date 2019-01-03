@@ -180,6 +180,17 @@ void AppendPath(std::string* base, StringPiece part) {
   base->append(part.data(), part.size());
 }
 
+std::string BuildPath(std::vector<const StringPiece>&& args) {
+  if (args.empty()) {
+    return "";
+  }
+  std::string out = args[0].to_string();
+  for (int i = 1; i < args.size(); i++) {
+    file::AppendPath(&out, args[i]);
+  }
+  return out;
+}
+
 std::string PackageToPath(const StringPiece& package) {
   std::string out_path;
   for (const StringPiece& part : util::Tokenize(package, '.')) {

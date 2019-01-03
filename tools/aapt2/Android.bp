@@ -170,6 +170,7 @@ cc_test_host {
     srcs: [
         "test/Builders.cpp",
         "test/Common.cpp",
+        "test/Fixture.cpp",
         "**/*_test.cpp",
     ] + toolSources,
     static_libs: [
@@ -177,7 +178,10 @@ cc_test_host {
         "libgmock",
     ],
     defaults: ["aapt2_defaults"],
-    data: ["integration-tests/CompileTest/**/*"],
+    data: [
+         "integration-tests/CompileTest/**/*",
+         "integration-tests/CommandTests/**/*"
+    ],
 }
 
 // ==========================================================
