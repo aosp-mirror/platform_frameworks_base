@@ -127,7 +127,7 @@ public class BackupManagerService {
     protected void startServiceForUser(int userId) {
         UserBackupManagerService userBackupManagerService =
                 UserBackupManagerService.createAndInitializeService(
-                        userId, mContext, mTrampoline, mBackupThread, mTransportWhitelist);
+                        userId, mContext, mTrampoline, mTransportWhitelist);
         startServiceForUser(userId, userBackupManagerService);
     }
 
@@ -152,7 +152,11 @@ public class BackupManagerService {
     /** Stops the backup service for user {@code userId} when the user is stopped. */
     @VisibleForTesting
     protected void stopServiceForUser(int userId) {
-        mServiceUsers.remove(userId);
+        UserBackupManagerService userBackupManagerService = mServiceUsers.removeReturnOld(userId);
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.tearDownService();
+        }
     }
 
     SparseArray<UserBackupManagerService> getServiceUsers() {
