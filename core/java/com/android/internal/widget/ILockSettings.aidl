@@ -62,7 +62,9 @@ interface ILockSettings {
             in byte[] recoveryServiceCertFile, in byte[] recoveryServiceSigFile);
     KeyChainSnapshot getKeyChainSnapshot();
     String generateKey(String alias);
+    String generateKeyWithMetadata(String alias, in byte[] metadata);
     String importKey(String alias, in byte[] keyBytes);
+    String importKeyWithMetadata(String alias, in byte[] keyBytes, in byte[] metadata);
     String getKey(String alias);
     void removeKey(String alias);
     void setSnapshotCreatedPendingIntent(in PendingIntent intent);

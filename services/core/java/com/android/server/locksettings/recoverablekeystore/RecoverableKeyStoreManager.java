@@ -20,8 +20,8 @@ import static android.security.keystore.recovery.RecoveryController.ERROR_BAD_CE
 import static android.security.keystore.recovery.RecoveryController.ERROR_DECRYPTION_FAILED;
 import static android.security.keystore.recovery.RecoveryController.ERROR_DOWNGRADE_CERTIFICATE;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INSECURE_USER;
-import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_KEY_FORMAT;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_CERTIFICATE;
+import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_KEY_FORMAT;
 import static android.security.keystore.recovery.RecoveryController.ERROR_NO_SNAPSHOT_PENDING;
 import static android.security.keystore.recovery.RecoveryController.ERROR_SERVICE_INTERNAL_ERROR;
 import static android.security.keystore.recovery.RecoveryController.ERROR_SESSION_EXPIRED;
@@ -35,12 +35,12 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.security.KeyStore;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.RecoveryCertPath;
 import android.security.keystore.recovery.RecoveryController;
 import android.security.keystore.recovery.WrappedApplicationKey;
-import android.security.KeyStore;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -59,7 +59,6 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnaps
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
-import java.security.KeyFactory;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -70,7 +69,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -674,13 +672,35 @@ public class RecoverableKeyStoreManager {
      * Generates a key named {@code alias} in caller's namespace.
      * The key is stored in system service keystore namespace.
      *
+     * @param alias the alias provided by caller as a reference to the key.
      * @return grant alias, which caller can use to access the key.
+     * @throws RemoteException if certain internal errors occur.
+     *
+     * @deprecated Use {@link #generateKeyWithMetadata(String, byte[])} instead.
      */
+    @Deprecated
     public String generateKey(@NonNull String alias) throws RemoteException {
+        return generateKeyWithMetadata(alias, /*metadata=*/ null);
+    }
+
+    /**
+     * Generates a key named {@code alias} with the {@code metadata} in caller's namespace.
+     * The key is stored in system service keystore namespace.
+     *
+     * @param alias the alias provided by caller as a reference to the key.
+     * @param metadata the optional metadata blob that will authenticated (but unencrypted) together
+     *         with the key material when the key is uploaded to cloud.
+     * @return grant alias, which caller can use to access the key.
+     * @throws RemoteException if certain internal errors occur.
+     */
+    public String generateKeyWithMetadata(@NonNull String alias, @Nullable byte[] metadata)
+            throws RemoteException {
         checkRecoverKeyStorePermission();
         Preconditions.checkNotNull(alias, "alias is null");
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
+
+        // TODO: Include metadata in the processes of authentication and storage
 
         PlatformEncryptionKey encryptionKey;
         try {
@@ -713,10 +733,30 @@ public class RecoverableKeyStoreManager {
      * @return grant alias, which caller can use to access the key.
      * @throws RemoteException if the given key is invalid or some internal errors occur.
      *
+     * @deprecated Use {{@link #importKeyWithMetadata(String, byte[], byte[])}} instead.
+     *
      * @hide
      */
+    @Deprecated
     public @Nullable String importKey(@NonNull String alias, @NonNull byte[] keyBytes)
             throws RemoteException {
+        return importKeyWithMetadata(alias, keyBytes, /*metadata=*/ null);
+    }
+
+    /**
+     * Imports a 256-bit AES-GCM key named {@code alias} with the given {@code metadata}. The key is
+     * stored in system service keystore namespace.
+     *
+     * @param alias the alias provided by caller as a reference to the key.
+     * @param keyBytes the raw bytes of the 256-bit AES key.
+     * @param metadata the metadata to be authenticated (but unencrypted) together with the key.
+     * @return grant alias, which caller can use to access the key.
+     * @throws RemoteException if the given key is invalid or some internal errors occur.
+     *
+     * @hide
+     */
+    public @Nullable String importKeyWithMetadata(@NonNull String alias, @NonNull byte[] keyBytes,
+            @Nullable byte[] metadata) throws RemoteException {
         checkRecoverKeyStorePermission();
         Preconditions.checkNotNull(alias, "alias is null");
         Preconditions.checkNotNull(keyBytes, "keyBytes is null");
@@ -727,6 +767,8 @@ public class RecoverableKeyStoreManager {
                     "The given key does not contain " + RecoverableKeyGenerator.KEY_SIZE_BITS
                             + " bits.");
         }
+
+        // TODO: Include metadata in the processes of authentication and storage
 
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
