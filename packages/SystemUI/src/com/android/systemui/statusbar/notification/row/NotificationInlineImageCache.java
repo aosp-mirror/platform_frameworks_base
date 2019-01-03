@@ -87,8 +87,8 @@ public class NotificationInlineImageCache implements NotificationInlineImageReso
 
             try {
                 drawable = mResolver.resolveImage(target);
-            } catch (IOException ex) {
-                Log.d(TAG, "PreloadImageTask: Resolve failed from " + target);
+            } catch (IOException | SecurityException ex) {
+                Log.d(TAG, "PreloadImageTask: Resolve failed from " + target, ex);
             }
 
             return drawable;
