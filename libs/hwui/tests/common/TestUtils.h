@@ -315,24 +315,24 @@ public:
     static WebViewFunctorCallbacks createMockFunctor(RenderMode mode) {
         auto callbacks = WebViewFunctorCallbacks{
                 .onSync =
-                        [](int functor, const WebViewSyncData& data) {
+                        [](int functor, void* client_data, const WebViewSyncData& data) {
                             expectOnRenderThread();
                             sMockFunctorCounts[functor].sync++;
                         },
                 .onContextDestroyed =
-                        [](int functor) {
+                        [](int functor, void* client_data) {
                             expectOnRenderThread();
                             sMockFunctorCounts[functor].contextDestroyed++;
                         },
                 .onDestroyed =
-                        [](int functor) {
+                        [](int functor, void* client_data) {
                             expectOnRenderThread();
                             sMockFunctorCounts[functor].destroyed++;
                         },
         };
         switch (mode) {
             case RenderMode::OpenGL_ES:
-                callbacks.gles.draw = [](int functor, const DrawGlInfo& params) {
+                callbacks.gles.draw = [](int functor, void* client_data, const DrawGlInfo& params) {
                     expectOnRenderThread();
                     sMockFunctorCounts[functor].glesDraw++;
                 };

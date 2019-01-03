@@ -129,31 +129,31 @@ struct AwDrawFn_PostDrawVkParams {
 
 // Called on render thread while UI thread is blocked. Called for both GL and
 // VK.
-typedef void AwDrawFn_OnSync(int functor, AwDrawFn_OnSyncParams* params);
+typedef void AwDrawFn_OnSync(int functor, void* data, AwDrawFn_OnSyncParams* params);
 
 // Called on render thread when either the context is destroyed _or_ when the
 // functor's last reference goes away. Will always be called with an active
 // context. Called for both GL and VK.
-typedef void AwDrawFn_OnContextDestroyed(int functor);
+typedef void AwDrawFn_OnContextDestroyed(int functor, void* data);
 
 // Called on render thread when the last reference to the handle goes away and
-// the handle is considered irrevocably destroyed. Will always be proceeded by
+// the handle is considered irrevocably destroyed. Will always be preceded by
 // a call to OnContextDestroyed if this functor had ever been drawn. Called for
 // both GL and VK.
-typedef void AwDrawFn_OnDestroyed(int functor);
+typedef void AwDrawFn_OnDestroyed(int functor, void* data);
 
 // Only called for GL.
-typedef void AwDrawFn_DrawGL(int functor, AwDrawFn_DrawGLParams* params);
+typedef void AwDrawFn_DrawGL(int functor, void* data, AwDrawFn_DrawGLParams* params);
 
 // Initialize vulkan state. Needs to be called again after any
 // OnContextDestroyed. Only called for Vulkan.
-typedef void AwDrawFn_InitVk(int functor, AwDrawFn_InitVkParams* params);
+typedef void AwDrawFn_InitVk(int functor, void* data, AwDrawFn_InitVkParams* params);
 
 // Only called for Vulkan.
-typedef void AwDrawFn_DrawVk(int functor, AwDrawFn_DrawVkParams* params);
+typedef void AwDrawFn_DrawVk(int functor, void* data, AwDrawFn_DrawVkParams* params);
 
 // Only called for Vulkan.
-typedef void AwDrawFn_PostDrawVk(int functor,
+typedef void AwDrawFn_PostDrawVk(int functor, void* data,
                                  AwDrawFn_PostDrawVkParams* params);
 
 struct AwDrawFnFunctorCallbacks {
@@ -176,7 +176,7 @@ enum AwDrawFnRenderMode {
 typedef AwDrawFnRenderMode AwDrawFn_QueryRenderMode(void);
 
 // Create a functor. |functor_callbacks| should be valid until OnDestroyed.
-typedef int AwDrawFn_CreateFunctor(AwDrawFnFunctorCallbacks* functor_callbacks);
+typedef int AwDrawFn_CreateFunctor(void* data, AwDrawFnFunctorCallbacks* functor_callbacks);
 
 // May be called on any thread to signal that the functor should be destroyed.
 // The functor will receive an onDestroyed when the last usage of it is
