@@ -47,6 +47,7 @@ public class WifiInfoTest {
         writeWifiInfo.txBad = TEST_TX_BAD;
         writeWifiInfo.rxSuccess = TEST_RX_SUCCESS;
         writeWifiInfo.setTrusted(true);
+        writeWifiInfo.setOsuAp(true);
 
         Parcel parcel = Parcel.obtain();
         writeWifiInfo.writeToParcel(parcel, 0);
@@ -60,5 +61,6 @@ public class WifiInfoTest {
         assertEquals(TEST_TX_BAD, readWifiInfo.txBad);
         assertEquals(TEST_RX_SUCCESS, readWifiInfo.rxSuccess);
         assertTrue(readWifiInfo.isTrusted());
+        assertTrue(readWifiInfo.isOsuAp());
     }
 }
