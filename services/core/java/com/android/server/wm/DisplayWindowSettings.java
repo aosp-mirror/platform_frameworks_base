@@ -326,14 +326,10 @@ class DisplayWindowSettings {
 
     void applySettingsToDisplayLocked(DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getEntry(displayInfo);
+        final Entry entry = getOrCreateEntry(displayInfo);
 
         // Setting windowing mode first, because it may override overscan values later.
         dc.setWindowingMode(getWindowingModeLocked(entry, dc.getDisplayId()));
-
-        if (entry == null) {
-            return;
-        }
 
         displayInfo.overscanLeft = entry.mOverscanLeft;
         displayInfo.overscanTop = entry.mOverscanTop;

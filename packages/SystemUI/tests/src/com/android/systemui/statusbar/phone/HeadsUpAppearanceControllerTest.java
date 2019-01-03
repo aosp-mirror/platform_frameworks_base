@@ -30,11 +30,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 
 import org.junit.Assert;
 import org.junit.Before;

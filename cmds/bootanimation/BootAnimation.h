@@ -114,7 +114,7 @@ public:
         virtual void shutdown() {}
     };
 
-    BootAnimation(sp<Callbacks> callbacks);
+    explicit BootAnimation(sp<Callbacks> callbacks);
 
     sp<SurfaceComposerClient> session() const;
 
@@ -128,7 +128,7 @@ private:
 
     class TimeCheckThread : public Thread {
     public:
-        TimeCheckThread(BootAnimation* bootAnimation);
+        explicit TimeCheckThread(BootAnimation* bootAnimation);
         virtual ~TimeCheckThread();
     private:
         virtual status_t    readyToRun();

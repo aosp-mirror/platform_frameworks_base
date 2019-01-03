@@ -27,9 +27,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <unordered_map>
 
 #include <android/hardware/power/1.0/IPower.h>
 #include <android/hardware/power/1.1/IPower.h>
+#include <android/hardware/power/stats/1.0/IPowerStats.h>
 #include <android/system/suspend/1.0/ISystemSuspend.h>
 #include <android/system/suspend/1.0/ISystemSuspendCallback.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -73,6 +75,33 @@ static jmethodID jgetAndUpdatePlatformState = NULL;
 static jmethodID jgetSubsystem = NULL;
 static jmethodID jputVoter = NULL;
 static jmethodID jputState = NULL;
+
+std::mutex gPowerHalMutex;
+std::unordered_map<uint32_t, std::string> gPowerStatsHalEntityNames = {};
+std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::string>>
+    gPowerStatsHalStateNames = {};
+std::vector<uint32_t> gPowerStatsHalPlatformIds = {};
+std::vector<uint32_t> gPowerStatsHalSubsystemIds = {};
+sp<android::hardware::power::stats::V1_0::IPowerStats> gPowerStatsHalV1_0 = nullptr;
+std::function<void(JNIEnv*, jobject)> gGetLowPowerStatsImpl = {};
+std::function<jint(JNIEnv*, jobject)> gGetPlatformLowPowerStatsImpl = {};
+std::function<jint(JNIEnv*, jobject)> gGetSubsystemLowPowerStatsImpl = {};
+
+// The caller must be holding gPowerHalMutex.
+static void deinitPowerStatsLocked() {
+    gPowerStatsHalV1_0 = nullptr;
+}
+
+struct PowerHalDeathRecipient : virtual public hardware::hidl_death_recipient {
+    virtual void serviceDied(uint64_t cookie,
+            const wp<android::hidl::base::V1_0::IBase>& who) override {
+        // The HAL just died. Reset all handles to HAL services.
+        std::lock_guard<std::mutex> lock(gPowerHalMutex);
+        deinitPowerStatsLocked();
+    }
+};
+
+sp<PowerHalDeathRecipient> gDeathRecipient = new PowerHalDeathRecipient();
 
 class WakeupCallback : public ISystemSuspendCallback {
 public:
@@ -202,18 +231,291 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
     return mergedreasonpos - mergedreason;
 }
 
-static void getLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject jrpmStats) {
-    if (jrpmStats == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException",
-                "The rpmstats jni input jobject jrpmStats is null.");
-        return;
+// The caller must be holding gPowerHalMutex.
+static bool checkResultLocked(const Return<void> &ret, const char* function) {
+    if (!ret.isOk()) {
+        ALOGE("%s failed: requested HAL service not available. Description: %s",
+            function, ret.description().c_str());
+        if (ret.isDeadObject()) {
+            deinitPowerStatsLocked();
+        }
+        return false;
     }
-    if (jgetAndUpdatePlatformState == NULL || jgetSubsystem == NULL
-            || jputVoter == NULL || jputState == NULL) {
-        ALOGE("A rpmstats jni jmethodID is null.");
+    return true;
+}
+
+// The caller must be holding gPowerHalMutex.
+// gPowerStatsHalV1_0 must not be null
+static bool initializePowerStats() {
+    using android::hardware::power::stats::V1_0::Status;
+    using android::hardware::power::stats::V1_0::PowerEntityType;
+
+    // Clear out previous content if we are re-initializing
+    gPowerStatsHalEntityNames.clear();
+    gPowerStatsHalStateNames.clear();
+    gPowerStatsHalPlatformIds.clear();
+    gPowerStatsHalSubsystemIds.clear();
+
+    Return<void> ret;
+    ret = gPowerStatsHalV1_0->getPowerEntityInfo([](auto infos, auto status) {
+        if (status != Status::SUCCESS) {
+            ALOGE("Error getting power entity info");
+            return;
+        }
+
+        // construct lookup table of powerEntityId to power entity name
+        // also construct vector of platform and subsystem IDs
+        for (auto info : infos) {
+            gPowerStatsHalEntityNames.emplace(info.powerEntityId, info.powerEntityName);
+            if (info.type == PowerEntityType::POWER_DOMAIN) {
+                gPowerStatsHalPlatformIds.emplace_back(info.powerEntityId);
+            } else {
+                gPowerStatsHalSubsystemIds.emplace_back(info.powerEntityId);
+            }
+        }
+    });
+    if (!checkResultLocked(ret, __func__)) {
+        return false;
+    }
+
+    ret = gPowerStatsHalV1_0->getPowerEntityStateInfo({}, [](auto stateSpaces, auto status) {
+        if (status != Status::SUCCESS) {
+            ALOGE("Error getting state info");
+            return;
+        }
+
+        // construct lookup table of powerEntityId, powerEntityStateId to power entity state name
+        for (auto stateSpace : stateSpaces) {
+            std::unordered_map<uint32_t, std::string> stateNames = {};
+            for (auto state : stateSpace.states) {
+                stateNames.emplace(state.powerEntityStateId,
+                    state.powerEntityStateName);
+            }
+            gPowerStatsHalStateNames.emplace(stateSpace.powerEntityId, stateNames);
+        }
+    });
+    if (!checkResultLocked(ret, __func__)) {
+        return false;
+    }
+
+    return (!gPowerStatsHalEntityNames.empty()) && (!gPowerStatsHalStateNames.empty());
+}
+
+// The caller must be holding gPowerHalMutex.
+static bool getPowerStatsHalLocked() {
+    if (gPowerStatsHalV1_0 == nullptr) {
+        gPowerStatsHalV1_0 = android::hardware::power::stats::V1_0::IPowerStats::getService();
+        if (gPowerStatsHalV1_0 == nullptr) {
+            ALOGE("Unable to get power.stats HAL service.");
+            return false;
+        }
+
+        // Link death recipient to power.stats service handle
+        hardware::Return<bool> linked = gPowerStatsHalV1_0->linkToDeath(gDeathRecipient, 0);
+        if (!linked.isOk()) {
+            ALOGE("Transaction error in linking to power.stats HAL death: %s",
+                    linked.description().c_str());
+            deinitPowerStatsLocked();
+            return false;
+        } else if (!linked) {
+            ALOGW("Unable to link to power.stats HAL death notifications");
+            // We should still continue even though linking failed
+        }
+        return initializePowerStats();
+    }
+    return true;
+}
+
+// The caller must be holding powerHalMutex.
+static void getPowerStatsHalLowPowerData(JNIEnv* env, jobject jrpmStats) {
+    using android::hardware::power::stats::V1_0::Status;
+
+    if (!getPowerStatsHalLocked()) {
+        ALOGE("failed to get low power stats");
         return;
     }
 
+    // Get power entity state residency data
+    bool success = false;
+    Return<void> ret = gPowerStatsHalV1_0->getPowerEntityStateResidencyData({},
+        [&env, &jrpmStats, &success](auto results, auto status) {
+            if (status == Status::NOT_SUPPORTED) {
+                ALOGW("getPowerEntityStateResidencyData is not supported");
+                success = false;
+                return;
+            }
+
+            for (auto result : results) {
+                jobject jsubsystem = env->CallObjectMethod(jrpmStats, jgetSubsystem,
+                    env->NewStringUTF(gPowerStatsHalEntityNames.at(result.powerEntityId).c_str()));
+                if (jsubsystem == NULL) {
+                    ALOGE("The rpmstats jni jobject jsubsystem is null.");
+                    return;
+                }
+                for (auto stateResidency : result.stateResidencyData) {
+
+                    env->CallVoidMethod(jsubsystem, jputState,
+                        env->NewStringUTF(gPowerStatsHalStateNames.at(result.powerEntityId)
+                        .at(stateResidency.powerEntityStateId).c_str()),
+                        stateResidency.totalTimeInStateMs,
+                        stateResidency.totalStateEntryCount);
+                }
+            }
+            success = true;
+        });
+    checkResultLocked(ret, __func__);
+    if (!success) {
+        ALOGE("getPowerEntityStateResidencyData failed");
+    }
+}
+
+static jint getPowerStatsHalPlatformData(JNIEnv* env, jobject outBuf) {
+    using android::hardware::power::stats::V1_0::Status;
+    using hardware::power::stats::V1_0::PowerEntityStateResidencyResult;
+    using hardware::power::stats::V1_0::PowerEntityStateResidencyData;
+
+    if (!getPowerStatsHalLocked()) {
+        ALOGE("failed to get low power stats");
+        return -1;
+    }
+
+    char *output = (char*)env->GetDirectBufferAddress(outBuf);
+    char *offset = output;
+    int remaining = (int)env->GetDirectBufferCapacity(outBuf);
+    int total_added = -1;
+
+    // Get power entity state residency data
+    Return<void> ret = gPowerStatsHalV1_0->getPowerEntityStateResidencyData(
+        gPowerStatsHalPlatformIds,
+        [&offset, &remaining, &total_added](auto results, auto status) {
+            if (status == Status::NOT_SUPPORTED) {
+                ALOGW("getPowerEntityStateResidencyData is not supported");
+                return;
+            }
+
+            for (size_t i = 0; i < results.size(); i++) {
+                const PowerEntityStateResidencyResult& result = results[i];
+
+                for (size_t j = 0; j < result.stateResidencyData.size(); j++) {
+                    const PowerEntityStateResidencyData& stateResidency =
+                        result.stateResidencyData[j];
+                    int added = snprintf(offset, remaining,
+                        "state_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " ",
+                        j + 1, gPowerStatsHalStateNames.at(result.powerEntityId)
+                           .at(stateResidency.powerEntityStateId).c_str(),
+                        stateResidency.totalTimeInStateMs,
+                        stateResidency.totalStateEntryCount);
+                    if (added < 0) {
+                        break;
+                    }
+                    if (added > remaining) {
+                        added = remaining;
+                    }
+                    offset += added;
+                    remaining -= added;
+                    total_added += added;
+                }
+                if (remaining <= 0) {
+                    /* rewrite NULL character*/
+                    offset--;
+                    total_added--;
+                    ALOGE("power.stats Hal: buffer not enough");
+                    break;
+                }
+            }
+        });
+    if (!checkResultLocked(ret, __func__)) {
+        return -1;
+    }
+
+    total_added += 1;
+    return total_added;
+}
+
+static jint getPowerStatsHalSubsystemData(JNIEnv* env, jobject outBuf) {
+    using android::hardware::power::stats::V1_0::Status;
+    using hardware::power::stats::V1_0::PowerEntityStateResidencyResult;
+    using hardware::power::stats::V1_0::PowerEntityStateResidencyData;
+
+    if (!getPowerStatsHalLocked()) {
+        ALOGE("failed to get low power stats");
+        return -1;
+    }
+
+    char *output = (char*)env->GetDirectBufferAddress(outBuf);
+    char *offset = output;
+    int remaining = (int)env->GetDirectBufferCapacity(outBuf);
+    int total_added = -1;
+
+    // Get power entity state residency data
+    Return<void> ret = gPowerStatsHalV1_0->getPowerEntityStateResidencyData(
+        gPowerStatsHalSubsystemIds,
+        [&offset, &remaining, &total_added](auto results, auto status) {
+            if (status == Status::NOT_SUPPORTED) {
+                ALOGW("getPowerEntityStateResidencyData is not supported");
+                return;
+            }
+
+            int added = snprintf(offset, remaining, "SubsystemPowerState ");
+            offset += added;
+            remaining -= added;
+            total_added += added;
+
+            for (size_t i = 0; i < results.size(); i++) {
+                const PowerEntityStateResidencyResult& result = results[i];
+                added = snprintf(offset, remaining, "subsystem_%zu name=%s ",
+                        i + 1, gPowerStatsHalEntityNames.at(result.powerEntityId).c_str());
+                if (added < 0) {
+                    break;
+                }
+
+                if (added > remaining) {
+                    added = remaining;
+                }
+
+                offset += added;
+                remaining -= added;
+                total_added += added;
+
+                for (size_t j = 0; j < result.stateResidencyData.size(); j++) {
+                    const PowerEntityStateResidencyData& stateResidency =
+                        result.stateResidencyData[j];
+                    added = snprintf(offset, remaining,
+                        "state_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " last entry=%"
+                        PRIu64 " ", j + 1, gPowerStatsHalStateNames.at(result.powerEntityId)
+                           .at(stateResidency.powerEntityStateId).c_str(),
+                        stateResidency.totalTimeInStateMs,
+                        stateResidency.totalStateEntryCount,
+                        stateResidency.lastEntryTimestampMs);
+                    if (added < 0) {
+                        break;
+                    }
+                    if (added > remaining) {
+                        added = remaining;
+                    }
+                    offset += added;
+                    remaining -= added;
+                    total_added += added;
+                }
+                if (remaining <= 0) {
+                    /* rewrite NULL character*/
+                    offset--;
+                    total_added--;
+                    ALOGE("power.stats Hal: buffer not enough");
+                    break;
+                }
+            }
+        });
+    if (!checkResultLocked(ret, __func__)) {
+        return -1;
+    }
+
+    total_added += 1;
+    return total_added;
+}
+
+// The caller must be holding powerHalMutex.
+static void getPowerHalLowPowerData(JNIEnv* env, jobject jrpmStats) {
     sp<IPowerV1_0> powerHalV1_0 = getPowerHalV1_0();
     if (powerHalV1_0 == nullptr) {
         ALOGE("Power Hal not loaded");
@@ -286,16 +588,11 @@ static void getLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject jrpmStats
     processPowerHalReturn(ret, "getSubsystemLowPowerStats");
 }
 
-static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject outBuf) {
+static jint getPowerHalPlatformData(JNIEnv* env, jobject outBuf) {
     char *output = (char*)env->GetDirectBufferAddress(outBuf);
     char *offset = output;
     int remaining = (int)env->GetDirectBufferCapacity(outBuf);
     int total_added = -1;
-
-    if (outBuf == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", "null argument");
-        return -1;
-    }
 
     {
         sp<IPowerV1_0> powerHalV1_0 = getPowerHalV1_0();
@@ -365,7 +662,7 @@ static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject o
     return total_added;
 }
 
-static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject outBuf) {
+static jint getPowerHalSubsystemData(JNIEnv* env, jobject outBuf) {
     char *output = (char*)env->GetDirectBufferAddress(outBuf);
     char *offset = output;
     int remaining = (int)env->GetDirectBufferCapacity(outBuf);
@@ -373,11 +670,6 @@ static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject 
 
     // This is a IPower 1.1 API
     sp<IPowerV1_1> powerHal_1_1 = nullptr;
-
-    if (outBuf == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", "null argument");
-        return -1;
-    }
 
     {
         // Trying to get 1.1, this will succeed only for devices supporting 1.1
@@ -456,6 +748,88 @@ static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject 
     *offset = 0;
     total_added += 1;
     return total_added;
+}
+
+static void setUpPowerStatsLocked() {
+    // First see if power.stats HAL is available. Fall back to power HAL if
+    // power.stats HAL is unavailable.
+    if (android::hardware::power::stats::V1_0::IPowerStats::getService() != nullptr) {
+        ALOGI("Using power.stats HAL");
+        gGetLowPowerStatsImpl = getPowerStatsHalLowPowerData;
+        gGetPlatformLowPowerStatsImpl = getPowerStatsHalPlatformData;
+        gGetSubsystemLowPowerStatsImpl = getPowerStatsHalSubsystemData;
+    } else if (android::hardware::power::V1_0::IPower::getService() != nullptr) {
+        ALOGI("Using power HAL");
+        gGetLowPowerStatsImpl = getPowerHalLowPowerData;
+        gGetPlatformLowPowerStatsImpl = getPowerHalPlatformData;
+        gGetSubsystemLowPowerStatsImpl = getPowerHalSubsystemData;
+    }
+}
+
+static void getLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject jrpmStats) {
+    if (jrpmStats == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException",
+                "The rpmstats jni input jobject jrpmStats is null.");
+        return;
+    }
+    if (jgetAndUpdatePlatformState == NULL || jgetSubsystem == NULL
+            || jputVoter == NULL || jputState == NULL) {
+        ALOGE("A rpmstats jni jmethodID is null.");
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(gPowerHalMutex);
+
+    if (!gGetLowPowerStatsImpl) {
+        setUpPowerStatsLocked();
+    }
+
+    if (gGetLowPowerStatsImpl) {
+        return gGetLowPowerStatsImpl(env, jrpmStats);
+    }
+
+    ALOGE("Unable to load Power Hal or power.stats HAL");
+    return;
+}
+
+static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject outBuf) {
+    if (outBuf == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", "null argument");
+        return -1;
+    }
+
+    std::lock_guard<std::mutex> lock(gPowerHalMutex);
+
+    if (!gGetPlatformLowPowerStatsImpl) {
+        setUpPowerStatsLocked();
+    }
+
+    if (gGetPlatformLowPowerStatsImpl) {
+        return gGetPlatformLowPowerStatsImpl(env, outBuf);
+    }
+
+    ALOGE("Unable to load Power Hal or power.stats HAL");
+    return -1;
+}
+
+static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject outBuf) {
+    if (outBuf == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", "null argument");
+        return -1;
+    }
+
+    std::lock_guard<std::mutex> lock(gPowerHalMutex);
+
+    if (!gGetSubsystemLowPowerStatsImpl) {
+        setUpPowerStatsLocked();
+    }
+
+    if (gGetSubsystemLowPowerStatsImpl) {
+        return gGetSubsystemLowPowerStatsImpl(env, outBuf);
+    }
+
+    ALOGE("Unable to load Power Hal or power.stats HAL");
+    return -1;
 }
 
 static const JNINativeMethod method_table[] = {

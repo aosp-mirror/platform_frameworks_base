@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.ActivityView;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.widget.Button;
 
 public class ActivityViewActivity extends Activity {
@@ -41,6 +42,10 @@ public class ActivityViewActivity extends Activity {
             final Intent intent = Intent.makeMainActivity(null);
             final Intent chooser = Intent.createChooser(intent,
                     "Pick an app to launch in ActivityView");
+            chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Parcelable[] {
+                    new Intent(Intent.ACTION_MAIN)
+                            .addCategory("com.android.internal.category.PLATLOGO")
+            });
             if (intent.resolveActivity(getPackageManager()) != null) {
                 chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);

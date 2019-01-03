@@ -129,7 +129,7 @@ public final class ControllerCallbackLink implements Parcelable {
     }
 
     /** Gets the binder */
-    public IBinder asBinder() {
+    public IBinder getBinder() {
         return mIControllerCallback.asBinder();
     }
 

@@ -74,7 +74,7 @@ public:
         }
     }
 
-    operator bool() {
+    explicit operator bool() {
         return mLocked;
     }
 
