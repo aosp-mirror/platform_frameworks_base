@@ -18,10 +18,14 @@ package com.android.server.wm;
 
 import static android.os.Build.IS_USER;
 
+import android.util.Log;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * A buffer structure backed by a {@link java.util.concurrent.BlockingQueue} to store the first
@@ -29,14 +33,17 @@ import java.io.IOException;
  * Once the buffer is full it will no longer accepts new elements.
  */
 class WindowTraceQueueBuffer extends WindowTraceBuffer {
-    private Thread mWriterThread;
+    private static final String TAG = "WindowTracing";
+
+    private Thread mConsumerThread;
     private boolean mCancel;
 
     @VisibleForTesting
-    WindowTraceQueueBuffer(int size, File traceFile, boolean startWriterThread) throws IOException {
+    WindowTraceQueueBuffer(int size, File traceFile, boolean startConsumerThread)
+            throws IOException {
         super(size, traceFile);
-        if (startWriterThread) {
-            initializeWriterThread();
+        if (startConsumerThread) {
+            initializeConsumerThread();
         }
     }
 
@@ -44,45 +51,56 @@ class WindowTraceQueueBuffer extends WindowTraceBuffer {
         this(size, traceFile, !IS_USER);
     }
 
-    private void initializeWriterThread() {
+    private void initializeConsumerThread() {
         mCancel = false;
-        mWriterThread = new Thread(() -> {
+        mConsumerThread = new Thread(() -> {
             try {
                 loop();
+            } catch (InterruptedException e) {
+                Log.i(TAG, "Interrupting trace consumer thread");
             } catch (IOException e) {
-                throw new IllegalStateException("Failed to execute trace write loop thread", e);
+                Log.e(TAG, "Failed to execute trace consumer thread", e);
             }
         }, "window_tracing");
-        mWriterThread.start();
+        mConsumerThread.start();
     }
 
-    private void loop() throws IOException {
+    private void loop() throws IOException, InterruptedException {
         while (!mCancel) {
-            writeNextBufferElementToFile();
-        }
-    }
+            byte[] proto;
+            synchronized (mBufferLock) {
+                mBufferLock.wait();
 
-    private void restartWriterThread() throws InterruptedException {
-        if (mWriterThread != null) {
-            mCancel = true;
-            mWriterThread.interrupt();
-            mWriterThread.join();
-            initializeWriterThread();
+                proto = mBuffer.poll();
+                if (proto != null) {
+                    mBufferSize -= proto.length;
+                }
+            }
+
+            if (proto != null) {
+                try (OutputStream os = new FileOutputStream(mTraceFile, true)) {
+                    os.write(proto);
+                }
+            }
         }
     }
 
     @Override
-    boolean canAdd(byte[] protoBytes) {
+    boolean canAdd(int protoLength) {
         long availableSpace = getAvailableSpace();
-        return availableSpace >= protoBytes.length;
+        return availableSpace >= protoLength;
     }
 
     @Override
-    void writeToDisk() throws InterruptedException {
-        while (!mBuffer.isEmpty()) {
-            mBufferSizeLock.wait();
-            mBufferSizeLock.notify();
+    void writeTraceToFile() throws InterruptedException {
+        synchronized (mBufferLock) {
+            mCancel = true;
+            mBufferLock.notify();
         }
-        restartWriterThread();
+
+        if (mConsumerThread != null) {
+            mConsumerThread.join();
+            mConsumerThread = null;
+        }
     }
 }

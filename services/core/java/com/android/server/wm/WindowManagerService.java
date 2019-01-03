@@ -6045,6 +6045,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("    d[isplays]: active display contents");
                 pw.println("    t[okens]: token list");
                 pw.println("    w[indows]: window list");
+                pw.println("    trace: write Winscope trace to file");
                 pw.println("  cmd may also be a NAME to dump windows.  NAME may");
                 pw.println("    be a partial substring in a window name, a");
                 pw.println("    Window hex object identifier, or");
@@ -6116,6 +6117,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     mRoot.dumpChildrenNames(pw, " ");
                     pw.println(" ");
                     mRoot.forAllWindows(w -> {pw.println(w);}, true /* traverseTopToBottom */);
+                }
+                return;
+            } else if ("trace".equals(cmd)) {
+                synchronized (mGlobalLock) {
+                    mWindowTracing.writeTraceToFile();
                 }
                 return;
             } else {

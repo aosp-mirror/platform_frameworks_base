@@ -72,8 +72,7 @@ public class WindowManagerShellCommand extends ShellCommand {
                     // XXX this should probably be changed to use openFileForSystem() to create
                     // the output trace file, so the shell gets the correct semantics for where
                     // trace files can be written.
-                    return mInternal.mWindowTracing.onShellCommand(this,
-                            getNextArgRequired());
+                    return mInternal.mWindowTracing.onShellCommand(this);
                 case "set-user-rotation":
                     return runSetDisplayUserRotation(pw);
                 case "set-fix-to-user-rotation":
