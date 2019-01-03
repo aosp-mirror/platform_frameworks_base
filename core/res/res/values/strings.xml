@@ -3072,7 +3072,7 @@
     <!-- Title of intent resolver dialog when selecting a viewer application that opens URI
          and a previously used application is known [CHAR LIMIT=128]. -->
     <string name="whichGiveAccessToApplicationNamed">Give access to open <xliff:g id="host" example="mail.google.com">%1$s</xliff:g> links with <xliff:g id="application" example="Gmail">%2$s</xliff:g></string>
-    <!-- Label for a link to an intent resolver dialog to open URI [CHAR LIMIT=16] -->
+    <!-- Label for a link to an intent resolver dialog to open URI [CHAR LIMIT=18] -->
     <string name="whichGiveAccessToApplicationLabel">Give access</string>
     <!-- Title of intent resolver dialog when selecting an editor application to run. -->
     <string name="whichEditApplication">Edit with</string>
