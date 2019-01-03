@@ -768,6 +768,21 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testReturnBoundsForFullscreenWindowingMode() {
+        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FREEFORM);
+
+        mCurrent.mPreferredDisplayId = freeformDisplay.mDisplayId;
+        mCurrent.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
+        mCurrent.mBounds.set(0, 0, 200, 100);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+
+        assertEquals(new Rect(0, 0, 200, 100), mResult.mBounds);
+    }
+
+    @Test
     public void testUsesDisplayOrientationForNoSensorOrientation() {
         final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
                 WINDOWING_MODE_FREEFORM);
