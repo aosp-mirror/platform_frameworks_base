@@ -755,9 +755,10 @@ public class Notifier {
     };
 
     /**
-     * Plays the wireless charging sound for both wireless and non-wireless charging
+     * If enabled, plays a sound and/or vibration when wireless or non-wireless charging has started
      */
-    private void playChargingStartedSound(@UserIdInt int userId) {
+    private void playChargingStartedFeedback(@UserIdInt int userId) {
+        playChargingStartedVibration(userId);
         final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.CHARGING_STARTED_SOUND);
         if (isChargingFeedbackEnabled(userId) && soundPath != null) {
@@ -773,8 +774,7 @@ public class Notifier {
     }
 
     private void showWirelessChargingStarted(int batteryLevel, @UserIdInt int userId) {
-        playWirelessChargingVibration(userId);
-        playChargingStartedSound(userId);
+        playChargingStartedFeedback(userId);
         if (mStatusBarManagerInternal != null) {
             mStatusBarManagerInternal.showChargingAnimation(batteryLevel);
         }
@@ -782,7 +782,7 @@ public class Notifier {
     }
 
     private void showWiredChargingStarted(@UserIdInt int userId) {
-        playChargingStartedSound(userId);
+        playChargingStartedFeedback(userId);
         mSuspendBlocker.release();
     }
 
@@ -790,7 +790,7 @@ public class Notifier {
         mTrustManager.setDeviceLockedForUser(userId, true /*locked*/);
     }
 
-    private void playWirelessChargingVibration(@UserIdInt int userId) {
+    private void playChargingStartedVibration(@UserIdInt int userId) {
         final boolean vibrateEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.CHARGING_VIBRATION_ENABLED, 1, userId) != 0;
         if (vibrateEnabled && isChargingFeedbackEnabled(userId)) {
