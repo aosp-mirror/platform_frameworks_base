@@ -253,21 +253,6 @@ public class NotificationEntryManager implements
         }
     }
 
-    private void addEntry(NotificationData.Entry shadeEntry) {
-        if (shadeEntry == null) {
-            return;
-        }
-        // Add the expanded view and icon.
-        mNotificationData.add(shadeEntry);
-        tagForeground(shadeEntry.notification);
-        updateNotifications();
-        for (NotificationEntryListener listener : mNotificationEntryListeners) {
-            listener.onNotificationAdded(shadeEntry);
-        }
-
-        maybeScheduleUpdateNotificationViews(shadeEntry);
-    }
-
     private void maybeScheduleUpdateNotificationViews(NotificationData.Entry entry) {
         long audibleAlertTimeout = RECENTLY_ALERTED_THRESHOLD_MS
                 - (System.currentTimeMillis() - entry.lastAudiblyAlertedMs);
@@ -289,7 +274,13 @@ public class NotificationEntryManager implements
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryInflated(entry, inflatedFlags);
                 }
-                addEntry(entry);
+                mNotificationData.add(entry);
+                tagForeground(entry.notification);
+                updateNotifications();
+                for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                    listener.onNotificationAdded(entry);
+                }
+                maybeScheduleUpdateNotificationViews(entry);
             } else {
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryReinflated(entry);
@@ -347,25 +338,15 @@ public class NotificationEntryManager implements
                 // Let's remove the children if this was a summary
                 handleGroupSummaryRemoved(key);
 
-                removeNotificationViews(key, ranking);
+                mNotificationData.remove(key, ranking);
+                updateNotifications();
+                Dependency.get(LeakDetector.class).trackGarbage(entry);
 
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryRemoved(entry, visibility, removedByUser);
                 }
             }
         }
-    }
-
-    private StatusBarNotification removeNotificationViews(String key,
-            NotificationListenerService.RankingMap ranking) {
-        NotificationData.Entry entry = mNotificationData.remove(key, ranking);
-        if (entry == null) {
-            Log.w(TAG, "removeNotification for unknown key: " + key);
-            return null;
-        }
-        updateNotifications();
-        Dependency.get(LeakDetector.class).trackGarbage(entry);
-        return entry.notification;
     }
 
     /**
@@ -423,25 +404,6 @@ public class NotificationEntryManager implements
         }
     }
 
-    private NotificationData.Entry createNotificationEntry(
-            StatusBarNotification sbn, NotificationListenerService.Ranking ranking)
-            throws InflationException {
-        if (DEBUG) {
-            Log.d(TAG, "createNotificationEntry(notification=" + sbn + " " + ranking);
-        }
-
-        NotificationData.Entry entry = new NotificationData.Entry(sbn, ranking);
-        if (BubbleController.shouldAutoBubble(getContext(), entry)) {
-            entry.setIsBubble(true);
-        }
-
-        Dependency.get(LeakDetector.class).trackInstance(entry);
-        // Construct the expanded view.
-        getRowBinder().inflateViews(entry, () -> performRemoveNotification(sbn),
-                mNotificationData.get(entry.key) != null);
-        return entry;
-    }
-
     private void addNotificationInternal(StatusBarNotification notification,
             NotificationListenerService.RankingMap rankingMap) throws InflationException {
         String key = notification.getKey();
@@ -452,7 +414,17 @@ public class NotificationEntryManager implements
         mNotificationData.updateRanking(rankingMap);
         NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
         rankingMap.getRanking(key, ranking);
-        NotificationData.Entry entry = createNotificationEntry(notification, ranking);
+
+        NotificationData.Entry entry = new NotificationData.Entry(notification, ranking);
+        if (BubbleController.shouldAutoBubble(getContext(), entry)) {
+            entry.setIsBubble(true);
+        }
+
+        Dependency.get(LeakDetector.class).trackInstance(entry);
+        // Construct the expanded view.
+        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
+                mNotificationData.get(entry.key) != null);
+
         abortExistingInflation(key);
 
         mPendingNotifications.put(key, entry);
