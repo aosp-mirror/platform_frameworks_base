@@ -282,6 +282,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
 
         @Override
+        public void onHomeButtonVisibilityChanged(boolean visible) {
+            getHomeButton().setVisibility(visible ? VISIBLE : GONE);
+        }
+
+        @Override
         public void onColorAdaptChanged(boolean enabled) {
             if (enabled) {
                 mColorAdaptionController.start();
@@ -672,6 +677,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         // TODO(b/113914868): investigation log for disappearing home button
         Log.i(TAG, "updateNavButtonIcons (b/113914868): home disabled=" + disableHome
                 + " mDisabledFlags=" + mDisabledFlags);
+        disableHome |= mPrototypeController.hideHomeButton();
 
         // Always disable recents when alternate car mode UI is active and for secondary displays.
         boolean disableRecent = isRecentsButtonDisabled();
@@ -945,6 +951,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
             // TODO(b/112934365): remove after prototype finished, only needed to escape from pin
             getBackButton().setVisibility(VISIBLE);
+            getHomeButton().setVisibility(VISIBLE);
         } else {
             mScreenPinningNotify.showPinningExitToast();
         }
