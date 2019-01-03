@@ -4280,9 +4280,8 @@ public class AudioManager {
      * Return codes for listAudioPorts(), createAudioPatch() ...
      */
 
-    /** @hide
-     * CANDIDATE FOR PUBLIC API
-     */
+    /** @hide */
+    @SystemApi
     public static final int SUCCESS = AudioSystem.SUCCESS;
     /**
      * A default error code.

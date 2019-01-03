@@ -7822,6 +7822,36 @@ public class AudioService extends IAudioService.Stub
         return AudioManager.SUCCESS;
     }
 
+    /** see AudioPolicy.setUidDeviceAffinity() */
+    public int setUidDeviceAffinity(IAudioPolicyCallback pcb, int uid,
+            @NonNull int[] deviceTypes,
+            @NonNull String[] deviceAddresses) {
+        synchronized (mAudioPolicies) {
+            final AudioPolicyProxy app =
+                    checkUpdateForPolicy(pcb, "Cannot change device affinity in audio policy");
+            if (app == null) {
+                return AudioManager.ERROR;
+            }
+            if (!app.hasMixRoutedToDevices(deviceTypes, deviceAddresses)) {
+                return AudioManager.ERROR;
+            }
+        }
+        return AudioManager.SUCCESS;
+    }
+
+    /** see AudioPolicy.removeUidDeviceAffinity() */
+    public int removeUidDeviceAffinity(IAudioPolicyCallback pcb, int uid) {
+        synchronized (mAudioPolicies) {
+            final AudioPolicyProxy app =
+                    checkUpdateForPolicy(pcb, "Cannot remove device affinity in audio policy");
+            if (app == null) {
+                return AudioManager.ERROR;
+            }
+
+        }
+        return AudioManager.SUCCESS;
+    }
+
     public int setFocusPropertiesForPolicy(int duckingBehavior, IAudioPolicyCallback pcb) {
         if (DEBUG_AP) Log.d(TAG, "setFocusPropertiesForPolicy() duck behavior=" + duckingBehavior
                 + " policy " +  pcb.asBinder());
@@ -7994,6 +8024,15 @@ public class AudioService extends IAudioService.Stub
     //======================
     // Audio policy proxy
     //======================
+    private static final class AudioDeviceArray {
+        final @NonNull int[] mDeviceTypes;
+        final @NonNull String[] mDeviceAddresses;
+        AudioDeviceArray(@NonNull int[] types,  @NonNull String[] addresses) {
+            mDeviceTypes = types;
+            mDeviceAddresses = addresses;
+        }
+    }
+
     /**
      * This internal class inherits from AudioPolicyConfig, each instance contains all the
      * mixes of an AudioPolicy and their configurations.
@@ -8003,6 +8042,8 @@ public class AudioService extends IAudioService.Stub
         final IAudioPolicyCallback mPolicyCallback;
         final boolean mHasFocusListener;
         final boolean mIsVolumeController;
+        final HashMap<Integer, AudioDeviceArray> mUidDeviceAffinities =
+                new HashMap<Integer, AudioDeviceArray>();
         /**
          * Audio focus ducking behavior for an audio policy.
          * This variable reflects the value that was successfully set in
@@ -8075,6 +8116,26 @@ public class AudioService extends IAudioService.Stub
             return false;
         }
 
+        // Verify all the devices in the array are served by mixes defined in this policy
+        boolean hasMixRoutedToDevices(@NonNull int[] deviceTypes,
+                @NonNull String[] deviceAddresses) {
+            for (int i = 0; i < deviceTypes.length; i++) {
+                boolean hasDevice = false;
+                for (AudioMix mix : mMixes) {
+                    // this will check both that the mix has ROUTE_FLAG_RENDER and the device
+                    // is reached by this mix
+                    if (mix.isRoutedToDevice(deviceTypes[i], deviceAddresses[i])) {
+                        hasDevice = true;
+                        break;
+                    }
+                }
+                if (!hasDevice) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         void addMixes(@NonNull ArrayList<AudioMix> mixes) {
             // TODO optimize to not have to unregister the mixes already in place
             synchronized (mMixes) {
@@ -8097,6 +8158,29 @@ public class AudioService extends IAudioService.Stub
             final long identity = Binder.clearCallingIdentity();
             AudioSystem.registerPolicyMixes(mMixes, true);
             Binder.restoreCallingIdentity(identity);
+        }
+
+        void setUidDeviceAffinities(int uid, @NonNull int[] types, @NonNull String[] addresses) {
+            final Integer Uid = new Integer(uid);
+            if (mUidDeviceAffinities.remove(Uid) != null) {
+                final long identity = Binder.clearCallingIdentity();
+                AudioSystem.removeUidDeviceAffinities(uid);
+                Binder.restoreCallingIdentity(identity);
+            }
+            final long identity = Binder.clearCallingIdentity();
+            final int res = AudioSystem.setUidDeviceAffinities(uid, types, addresses);
+            Binder.restoreCallingIdentity(identity);
+            if (res == AudioSystem.SUCCESS) {
+                mUidDeviceAffinities.put(Uid, new AudioDeviceArray(types, addresses));
+            }
+        }
+
+        void removeUidDeviceAffinities(int uid, @NonNull int[] types, @NonNull String[] addresses) {
+            if (mUidDeviceAffinities.remove(new Integer(uid)) != null) {
+                final long identity = Binder.clearCallingIdentity();
+                AudioSystem.removeUidDeviceAffinities(uid);
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     };
 
