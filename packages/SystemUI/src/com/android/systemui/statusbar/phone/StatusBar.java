@@ -3573,10 +3573,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mVisualStabilityManager.setScreenOn(false);
             updateVisibleToUser();
 
-            // We need to disable touch events because these might
-            // collapse the panel after we expanded it, and thus we would end up with a blank
-            // Keyguard.
-            mNotificationPanel.setTouchAndAnimationDisabled(true);
+            updateNotificationPanelTouchState();
             mStatusBarWindow.cancelCurrentTouch();
             if (mLaunchCameraOnFinishedGoingToSleep) {
                 mLaunchCameraOnFinishedGoingToSleep = false;
@@ -3599,12 +3596,21 @@ public class StatusBar extends SystemUI implements DemoMode,
             mDeviceInteractive = true;
             mAmbientPulseManager.releaseAllImmediately();
             mVisualStabilityManager.setScreenOn(true);
-            mNotificationPanel.setTouchAndAnimationDisabled(false);
+            updateNotificationPanelTouchState();
             updateVisibleToUser();
             updateIsKeyguard();
             mDozeServiceHost.stopDozing();
         }
     };
+
+    /**
+     * We need to disable touch events because these might
+     * collapse the panel after we expanded it, and thus we would end up with a blank
+     * Keyguard.
+     */
+    private void updateNotificationPanelTouchState() {
+        mNotificationPanel.setTouchAndAnimationDisabled(!mDeviceInteractive && !mPulsing);
+    }
 
     final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
         @Override
@@ -3871,17 +3877,15 @@ public class StatusBar extends SystemUI implements DemoMode,
                 @Override
                 public void onPulseStarted() {
                     callback.onPulseStarted();
-                    if (mAmbientPulseManager.hasNotifications()) {
-                        // Only pulse the stack scroller if there's actually something to show.
-                        // Otherwise just show the always-on screen.
-                        setPulsing(true);
-                    }
+                    updateNotificationPanelTouchState();
+                    setPulsing(true);
                 }
 
                 @Override
                 public void onPulseFinished() {
                     mPulsing = false;
                     callback.onPulseFinished();
+                    updateNotificationPanelTouchState();
                     setPulsing(false);
                 }
 

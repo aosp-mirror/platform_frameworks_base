@@ -364,7 +364,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             mExpansionFraction = fraction;
 
             final boolean keyguardOrUnlocked = mState == ScrimState.UNLOCKED
-                    || mState == ScrimState.KEYGUARD;
+                    || mState == ScrimState.KEYGUARD || mState == ScrimState.PULSING;
             if (!keyguardOrUnlocked || !mExpansionAffectsAlpha) {
                 return;
             }
@@ -409,7 +409,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             behindFraction = (float) Math.pow(behindFraction, 0.8f);
             mCurrentBehindAlpha = behindFraction * GRADIENT_SCRIM_ALPHA_BUSY;
             mCurrentInFrontAlpha = 0;
-        } else if (mState == ScrimState.KEYGUARD) {
+        } else if (mState == ScrimState.KEYGUARD || mState == ScrimState.PULSING) {
             // Either darken of make the scrim transparent when you
             // pull down the shade
             float interpolatedFract = getInterpolatedFraction();
@@ -562,8 +562,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         if (alpha == 0f) {
             scrim.setClickable(false);
         } else {
-            // Eat touch events (unless dozing or pulsing).
-            scrim.setClickable(mState != ScrimState.AOD && mState != ScrimState.PULSING);
+            // Eat touch events (unless dozing).
+            scrim.setClickable(mState != ScrimState.AOD);
         }
         updateScrim(scrim, alpha);
     }

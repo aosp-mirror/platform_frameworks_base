@@ -956,7 +956,7 @@ public class NotificationPanelView extends PanelView implements
             handled = true;
         }
         handled |= super.onTouchEvent(event);
-        return mDozing ? handled : true;
+        return !mDozing || mPulsing || handled;
     }
 
     private boolean handleQsTouch(MotionEvent event) {

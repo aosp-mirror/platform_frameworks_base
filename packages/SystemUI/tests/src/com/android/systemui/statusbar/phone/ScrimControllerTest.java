@@ -54,7 +54,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.function.Consumer;
 
@@ -578,7 +578,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testEatsTouchEvent() {
         HashSet<ScrimState> eatsTouches =
-                new HashSet<>(Arrays.asList(ScrimState.AOD, ScrimState.PULSING));
+                new HashSet<>(Collections.singletonList(ScrimState.AOD));
         for (ScrimState state : ScrimState.values()) {
             if (state == ScrimState.UNINITIALIZED) {
                 continue;
