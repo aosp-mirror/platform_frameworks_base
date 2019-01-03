@@ -77,7 +77,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private ShadeController mShadeController;
 
     private NotificationViewHierarchyManager mViewHierarchyManager;
-    private NotificationTestHelper mHelper = new NotificationTestHelper(mContext);
+    private NotificationTestHelper mHelper;
 
     @Before
     public void setUp() {
@@ -89,6 +89,8 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
+
+        mHelper = new NotificationTestHelper(mContext);
 
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 

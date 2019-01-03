@@ -15,8 +15,6 @@
  */
 package com.android.systemui.statusbar.notification;
 
-import static com.android.systemui.bubbles.BubbleController.DEBUG_DEMOTE_TO_NOTIF;
-
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
@@ -33,7 +31,6 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ForegroundServiceController;
-import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -64,8 +61,7 @@ public class NotificationEntryManager implements
         Dumpable,
         NotificationInflater.InflationCallback,
         NotificationUpdateHandler,
-        VisualStabilityManager.Callback,
-        BubbleController.BubbleDismissListener {
+        VisualStabilityManager.Callback {
     private static final String TAG = "NotificationEntryMgr";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -80,7 +76,6 @@ public class NotificationEntryManager implements
             Dependency.get(DeviceProvisionedController.class);
     private final ForegroundServiceController mForegroundServiceController =
             Dependency.get(ForegroundServiceController.class);
-    private final BubbleController mBubbleController = Dependency.get(BubbleController.class);
 
     // Lazily retrieved dependencies
     private NotificationRemoteInputManager mRemoteInputManager;
@@ -126,7 +121,6 @@ public class NotificationEntryManager implements
 
     public NotificationEntryManager(Context context) {
         mContext = context;
-        mBubbleController.setDismissListener(this /* bubbleEventListener */);
         mNotificationData = new NotificationData();
         mDeferredNotificationViewUpdateHandler = new Handler();
     }
@@ -207,23 +201,6 @@ public class NotificationEntryManager implements
                 true);
         removeNotificationInternal(
                 n.getKey(), null, nv, false /* forceRemove */, true /* removedByUser */);
-    }
-
-    @Override
-    public void onStackDismissed() {
-        updateNotifications();
-    }
-
-    @Override
-    public void onBubbleDismissed(String key) {
-        NotificationData.Entry entry = mNotificationData.get(key);
-        if (entry != null) {
-            entry.setBubbleDismissed(true);
-            if (!DEBUG_DEMOTE_TO_NOTIF) {
-                performRemoveNotification(entry.notification);
-            }
-        }
-        updateNotifications();
     }
 
     private void abortExistingInflation(String key) {
@@ -416,9 +393,6 @@ public class NotificationEntryManager implements
         rankingMap.getRanking(key, ranking);
 
         NotificationData.Entry entry = new NotificationData.Entry(notification, ranking);
-        if (BubbleController.shouldAutoBubble(getContext(), entry)) {
-            entry.setIsBubble(true);
-        }
 
         Dependency.get(LeakDetector.class).trackInstance(entry);
         // Construct the expanded view.
