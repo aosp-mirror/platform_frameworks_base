@@ -9,7 +9,7 @@ LOCAL_SRC_FILES := \
     $(call all-java-files-under, src)
 
 LOCAL_DX_FLAGS := --core-library
-LOCAL_STATIC_JAVA_LIBRARIES := android-common frameworks-core-util-lib android-support-test
+LOCAL_STATIC_JAVA_LIBRARIES := android-common frameworks-core-util-lib androidx.test.rules
 LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base
 LOCAL_PACKAGE_NAME := FrameworksCoreFeatureFlagTests
 LOCAL_PRIVATE_PLATFORM_APIS := true
