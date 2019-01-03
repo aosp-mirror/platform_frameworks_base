@@ -634,6 +634,7 @@ java_defaults {
         "wifi/java/android/net/wifi/rtt/IRttCallback.aidl",
         "wifi/java/android/net/wifi/rtt/IWifiRttManager.aidl",
         "wifi/java/android/net/wifi/hotspot2/IProvisioningCallback.aidl",
+        "wifi/java/android/net/wifi/IDppCallback.aidl",
         "wifi/java/android/net/wifi/IWifiScanner.aidl",
         "packages/services/PacProcessor/com/android/net/IProxyService.aidl",
         "packages/services/Proxy/com/android/net/IProxyCallback.aidl",
