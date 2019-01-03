@@ -1362,8 +1362,9 @@ public final class ProcessList {
                 mService.mNativeDebuggingApp = null;
             }
 
-            if (app.info.isPrivilegedApp() &&
-                    DexManager.isPackageSelectedToRunOob(app.pkgList.mPkgList.keySet())) {
+            if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PREFER_CODE_INTEGRITY) != 0
+                    || (app.info.isPrivilegedApp()
+                        && DexManager.isPackageSelectedToRunOob(app.pkgList.mPkgList.keySet()))) {
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 

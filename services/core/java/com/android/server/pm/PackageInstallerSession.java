@@ -105,6 +105,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapter;
+import com.android.server.pm.dex.DexManager;
 
 import libcore.io.IoUtils;
 
@@ -1591,6 +1592,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         libDirsToInherit.addAll(Arrays.asList(archSubDir.listFiles()));
                     }
                     mResolvedInheritedFiles.addAll(libDirsToInherit);
+                }
+            }
+        }
+        if (baseApk.preferCodeIntegrity) {
+            for (File file : mResolvedStagedFiles) {
+                if (file.getName().endsWith(".apk")
+                        && !DexManager.auditUncompressedCodeInApk(file.getPath())) {
+                    throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                            "Some code are not uncompressed and aligned correctly for "
+                            + mPackageName);
                 }
             }
         }

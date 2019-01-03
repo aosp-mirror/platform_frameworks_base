@@ -785,10 +785,10 @@ public class DexManager {
      * files that can be direclty mapped.
      */
     private static void logIfPackageHasUncompressedCode(PackageParser.Package pkg) {
-        logIfApkHasUncompressedCode(pkg.baseCodePath);
+        auditUncompressedCodeInApk(pkg.baseCodePath);
         if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
             for (int i = 0; i < pkg.splitCodePaths.length; i++) {
-                logIfApkHasUncompressedCode(pkg.splitCodePaths[i]);
+                auditUncompressedCodeInApk(pkg.splitCodePaths[i]);
             }
         }
     }
@@ -797,34 +797,41 @@ public class DexManager {
      * Generates log if the archive located at {@code fileName} has uncompressed dex file and so
      * files that can be direclty mapped.
      */
-    private static void logIfApkHasUncompressedCode(String fileName) {
+    public static boolean auditUncompressedCodeInApk(String fileName) {
         StrictJarFile jarFile = null;
         try {
             jarFile = new StrictJarFile(fileName,
                     false /*verify*/, false /*signatureSchemeRollbackProtectionsEnforced*/);
             Iterator<ZipEntry> it = jarFile.iterator();
+            boolean allCorrect = true;
             while (it.hasNext()) {
                 ZipEntry entry = it.next();
                 if (entry.getName().endsWith(".dex")) {
                     if (entry.getMethod() != ZipEntry.STORED) {
+                        allCorrect = false;
                         Slog.w(TAG, "APK " + fileName + " has compressed dex code " +
                                 entry.getName());
                     } else if ((entry.getDataOffset() & 0x3) != 0) {
+                        allCorrect = false;
                         Slog.w(TAG, "APK " + fileName + " has unaligned dex code " +
                                 entry.getName());
                     }
                 } else if (entry.getName().endsWith(".so")) {
                     if (entry.getMethod() != ZipEntry.STORED) {
+                        allCorrect = false;
                         Slog.w(TAG, "APK " + fileName + " has compressed native code " +
                                 entry.getName());
                     } else if ((entry.getDataOffset() & (0x1000 - 1)) != 0) {
+                        allCorrect = false;
                         Slog.w(TAG, "APK " + fileName + " has unaligned native code " +
                                 entry.getName());
                     }
                 }
             }
+            return allCorrect;
         } catch (IOException ignore) {
             Slog.wtf(TAG, "Error when parsing APK " + fileName);
+            return false;
         } finally {
             try {
                 if (jarFile != null) {
