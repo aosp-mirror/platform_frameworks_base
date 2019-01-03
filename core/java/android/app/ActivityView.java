@@ -37,6 +37,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceSession;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -343,6 +344,12 @@ public class ActivityView extends ViewGroup {
             }
             cleanTapExcludeRegion();
         }
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        mSurfaceView.setVisibility(visibility);
     }
 
     private void initVirtualDisplay(SurfaceSession surfaceSession) {
