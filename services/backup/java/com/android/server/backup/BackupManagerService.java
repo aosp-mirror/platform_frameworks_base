@@ -39,7 +39,6 @@ import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -139,13 +138,7 @@ public class BackupManagerService {
         mServiceUsers.put(userId, userBackupManagerService);
 
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
-        try {
-            // TODO(b/121198604): Make enable file per-user and clean up indirection.
-            mTrampoline.setBackupEnabledForUser(
-                    userId, UserBackupManagerFilePersistedSettings.readBackupEnableState(userId));
-        } catch (RemoteException e) {
-            // Can't happen, it's a local object.
-        }
+        userBackupManagerService.initializeBackupEnableState();
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
