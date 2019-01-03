@@ -918,6 +918,22 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testCanceledNoisyNeverVibrate() throws Exception {
+        NotificationRecord r = getBuzzyBeepyNotification();
+
+        final int waitMs = mAudioManager.getFocusRampTimeMs(
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+                r.getAudioAttributes());
+
+        mService.buzzBeepBlinkLocked(r);
+        mService.clearNotifications();
+
+        verifyNeverVibrate();
+        Thread.sleep(waitMs);
+        verifyNeverVibrate();
+    }
+    
+    @Test
     public void testEmptyUriSoundTreatedAsNoSound() throws Exception {
         NotificationChannel channel = new NotificationChannel("test", "test", IMPORTANCE_HIGH);
         channel.setSound(Uri.EMPTY, null);
