@@ -862,6 +862,32 @@ package android.content {
     method public void sendOrderedBroadcast(android.content.Intent, String, android.os.Bundle, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle);
   }
 
+  public class DynamicAndroidClient {
+    ctor public DynamicAndroidClient(@NonNull android.content.Context);
+    method public void bind();
+    method public void setOnStatusChangedListener(@NonNull android.content.DynamicAndroidClient.OnStatusChangedListener, @NonNull java.util.concurrent.Executor);
+    method public void setOnStatusChangedListener(@NonNull android.content.DynamicAndroidClient.OnStatusChangedListener);
+    method public void start(String, long);
+    method public void start(String, long, long);
+    method public void unbind();
+    field public static final int CAUSE_ERROR_EXCEPTION = 6; // 0x6
+    field public static final int CAUSE_ERROR_INVALID_URL = 4; // 0x4
+    field public static final int CAUSE_ERROR_IO = 3; // 0x3
+    field public static final int CAUSE_ERROR_IPC = 5; // 0x5
+    field public static final int CAUSE_INSTALL_CANCELLED = 2; // 0x2
+    field public static final int CAUSE_INSTALL_COMPLETED = 1; // 0x1
+    field public static final int CAUSE_NOT_SPECIFIED = 0; // 0x0
+    field public static final int STATUS_IN_PROGRESS = 2; // 0x2
+    field public static final int STATUS_IN_USE = 4; // 0x4
+    field public static final int STATUS_NOT_STARTED = 1; // 0x1
+    field public static final int STATUS_READY = 3; // 0x3
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+  }
+
+  public static interface DynamicAndroidClient.OnStatusChangedListener {
+    method public void onStatusChanged(int, int, long);
+  }
+
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
     field public static final String ACTION_BATTERY_LEVEL_CHANGED = "android.intent.action.BATTERY_LEVEL_CHANGED";
     field public static final String ACTION_CALL_EMERGENCY = "android.intent.action.CALL_EMERGENCY";
