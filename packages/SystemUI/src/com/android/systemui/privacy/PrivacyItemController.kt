@@ -46,10 +46,13 @@ class PrivacyItemController(val context: Context, val callback: Callback) {
     }
     private var privacyList = emptyList<PrivacyItem>()
 
+    @Suppress("DEPRECATION")
     private val appOpsController = Dependency.get(AppOpsController::class.java)
     private val userManager = context.getSystemService(UserManager::class.java)
     private var currentUserIds = emptyList<Int>()
+    @Suppress("DEPRECATION")
     private val bgHandler = Handler(Dependency.get(Dependency.BG_LOOPER))
+    @Suppress("DEPRECATION")
     private val uiHandler = Dependency.get(Dependency.MAIN_HANDLER)
     private var listening = false
     val systemApp = PrivacyApplication(context.getString(R.string.device_services), context)
