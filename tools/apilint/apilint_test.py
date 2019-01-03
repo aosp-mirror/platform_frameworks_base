@@ -143,5 +143,133 @@ class BaseFileTests(unittest.TestCase):
                                       out_classes_with_base=classes_with_base)
         self.assertEquals(map(lambda x: x.fullname, classes_with_base), ["android.app.WallpaperColors"])
 
+class V2TokenizerTests(unittest.TestCase):
+    def _test(self, raw, expected):
+        self.assertEquals(apilint.V2Tokenizer(raw).tokenize(), expected)
+
+    def test_simple(self):
+        self._test("  method public some.Type someName(some.Argument arg, int arg);",
+                   ['method', 'public', 'some.Type', 'someName', '(', 'some.Argument',
+                    'arg', ',', 'int', 'arg', ')', ';'])
+        self._test("class Some.Class extends SomeOther {",
+                   ['class', 'Some.Class', 'extends', 'SomeOther', '{'])
+
+    def test_annotation(self):
+        self._test("method @Nullable public void name();",
+                   ['method', '@', 'Nullable', 'public', 'void', 'name', '(', ')', ';'])
+
+    def test_annotation_args(self):
+        self._test("@Some(val=1, other=2) class Class {",
+                   ['@', 'Some', '(', 'val', '=', '1', ',', 'other', '=', '2', ')',
+                    'class', 'Class', '{'])
+    def test_comment(self):
+        self._test("some //comment", ['some'])
+
+    def test_strings(self):
+        self._test(r'"" "foo" "\"" "\\"', ['""', '"foo"', r'"\""', r'"\\"'])
+
+    def test_at_interface(self):
+        self._test("public @interface Annotation {",
+                   ['public', '@interface', 'Annotation', '{'])
+
+    def test_array_type(self):
+        self._test("int[][]", ['int', '[]', '[]'])
+
+    def test_generics(self):
+        self._test("<>foobar<A extends Object>",
+                   ['<', '>', 'foobar', '<', 'A', 'extends', 'Object', '>'])
+
+class V2ParserTests(unittest.TestCase):
+    def _cls(self, raw):
+        pkg = apilint.Package(999, "package pkg {", None)
+        return apilint.Class(pkg, 1, raw, '', sig_format=2)
+
+    def _method(self, raw, cls=None):
+        if not cls:
+            cls = self._cls("class Class {")
+        return apilint.Method(cls, 1, raw, '', sig_format=2)
+
+    def _field(self, raw):
+        cls = self._cls("class Class {")
+        return apilint.Field(cls, 1, raw, '', sig_format=2)
+
+    def test_class(self):
+        cls = self._cls("@Deprecated @IntRange(from=1, to=2) public static abstract class Some.Name extends Super<Class> implements Interface<Class> {")
+        self.assertTrue('deprecated' in cls.split)
+        self.assertTrue('static' in cls.split)
+        self.assertTrue('abstract' in cls.split)
+        self.assertTrue('class' in cls.split)
+        self.assertEquals('Super', cls.extends)
+        self.assertEquals('Interface', cls.implements)
+        self.assertEquals('pkg.Some.Name', cls.fullname)
+
+    def test_interface(self):
+        cls = self._cls("@Deprecated @IntRange(from=1, to=2) public interface Some.Name extends Interface<Class> {")
+        self.assertTrue('deprecated' in cls.split)
+        self.assertTrue('interface' in cls.split)
+        self.assertEquals('Interface', cls.extends)
+        self.assertEquals('Interface', cls.implements)
+        self.assertEquals('pkg.Some.Name', cls.fullname)
+
+    def test_at_interface(self):
+        cls = self._cls("@java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE, java.lang.annotation.ElementType.FIELD, java.lang.annotation.ElementType.METHOD, java.lang.annotation.ElementType.PARAMETER, java.lang.annotation.ElementType.CONSTRUCTOR, java.lang.annotation.ElementType.LOCAL_VARIABLE}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS) public @interface SuppressLint {")
+        self.assertTrue('@interface' in cls.split)
+        self.assertEquals('pkg.SuppressLint', cls.fullname)
+
+    def test_parse_method(self):
+        m = self._method("method @Deprecated public static <T> Class<T>[][] name("
+                         + "Class<T[]>[][], Class<T[][][]>[][]...) throws Exception, T;")
+        self.assertTrue('static' in m.split)
+        self.assertTrue('public' in m.split)
+        self.assertTrue('method' in m.split)
+        self.assertTrue('deprecated' in m.split)
+        self.assertEquals('java.lang.Class[][]', m.typ)
+        self.assertEquals('name', m.name)
+        self.assertEquals(['java.lang.Class[][]', 'java.lang.Class[][]...'], m.args)
+        self.assertEquals(['java.lang.Exception', 'T'], m.throws)
+
+    def test_ctor(self):
+        m = self._method("ctor @Deprecated <T> ClassName();")
+        self.assertTrue('ctor' in m.split)
+        self.assertTrue('deprecated' in m.split)
+        self.assertEquals('ctor', m.typ)
+        self.assertEquals('ClassName', m.name)
+
+    def test_parse_annotation_method(self):
+        cls = self._cls("@interface Annotation {")
+        self._method('method abstract String category() default "";', cls=cls)
+        self._method('method abstract boolean deepExport() default false;', cls=cls)
+        self._method('method abstract ViewDebug.FlagToString[] flagMapping() default {};', cls=cls)
+
+    def test_parse_string_field(self):
+        f = self._field('field @Deprecated public final String SOME_NAME = "value";')
+        self.assertTrue('field' in f.split)
+        self.assertTrue('deprecated' in f.split)
+        self.assertTrue('final' in f.split)
+        self.assertEquals('java.lang.String', f.typ)
+        self.assertEquals('SOME_NAME', f.name)
+        self.assertEquals('value', f.value)
+
+    def test_parse_field(self):
+        f = self._field('field public Object SOME_NAME;')
+        self.assertTrue('field' in f.split)
+        self.assertEquals('java.lang.Object', f.typ)
+        self.assertEquals('SOME_NAME', f.name)
+        self.assertEquals(None, f.value)
+
+    def test_parse_int_field(self):
+        f = self._field('field public int NAME = 123;')
+        self.assertTrue('field' in f.split)
+        self.assertEquals('int', f.typ)
+        self.assertEquals('NAME', f.name)
+        self.assertEquals('123', f.value)
+
+    def test_parse_quotient_field(self):
+        f = self._field('field public int NAME = (0.0/0.0);')
+        self.assertTrue('field' in f.split)
+        self.assertEquals('int', f.typ)
+        self.assertEquals('NAME', f.name)
+        self.assertEquals('( 0.0 / 0.0 )', f.value)
+
 if __name__ == "__main__":
     unittest.main()

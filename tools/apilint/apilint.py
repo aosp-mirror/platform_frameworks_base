@@ -50,45 +50,37 @@ def format(fg=None, bg=None, bright=False, bold=False, dim=False, reset=False):
     return "\033[%sm" % (";".join(codes))
 
 
-def ident(raw):
-    """Strips superficial signature changes, giving us a strong key that
-    can be used to identify members across API levels."""
-    raw = raw.replace(" deprecated ", " ")
-    raw = raw.replace(" synchronized ", " ")
-    raw = raw.replace(" final ", " ")
-    raw = re.sub("<.+?>", "", raw)
-    if " throws " in raw:
-        raw = raw[:raw.index(" throws ")]
-    return raw
-
-
 class Field():
-    def __init__(self, clazz, line, raw, blame):
+    def __init__(self, clazz, line, raw, blame, sig_format = 1):
         self.clazz = clazz
         self.line = line
         self.raw = raw.strip(" {;")
         self.blame = blame
 
-        # drop generics for now; may need multiple passes
-        raw = re.sub("<[^<]+?>", "", raw)
-        raw = re.sub("<[^<]+?>", "", raw)
+        if sig_format == 2:
+            V2LineParser(raw).parse_into_field(self)
+        elif sig_format == 1:
+            # drop generics for now; may need multiple passes
+            raw = re.sub("<[^<]+?>", "", raw)
+            raw = re.sub("<[^<]+?>", "", raw)
 
-        raw = raw.split()
-        self.split = list(raw)
+            raw = raw.split()
+            self.split = list(raw)
 
-        for r in ["field", "volatile", "transient", "public", "protected", "static", "final", "deprecated"]:
-            while r in raw: raw.remove(r)
+            for r in ["field", "volatile", "transient", "public", "protected", "static", "final", "deprecated"]:
+                while r in raw: raw.remove(r)
 
-        # ignore annotations for now
-        raw = [ r for r in raw if not r.startswith("@") ]
+            # ignore annotations for now
+            raw = [ r for r in raw if not r.startswith("@") ]
 
-        self.typ = raw[0]
-        self.name = raw[1].strip(";")
-        if len(raw) >= 4 and raw[2] == "=":
-            self.value = raw[3].strip(';"')
-        else:
-            self.value = None
-        self.ident = ident(self.raw)
+            self.typ = raw[0]
+            self.name = raw[1].strip(";")
+            if len(raw) >= 4 and raw[2] == "=":
+                self.value = raw[3].strip(';"')
+            else:
+                self.value = None
+
+        self.ident = "-".join((self.typ, self.name, self.value or ""))
 
     def __hash__(self):
         return hash(self.raw)
@@ -96,48 +88,55 @@ class Field():
     def __repr__(self):
         return self.raw
 
-
 class Method():
-    def __init__(self, clazz, line, raw, blame):
+    def __init__(self, clazz, line, raw, blame, sig_format = 1):
         self.clazz = clazz
         self.line = line
         self.raw = raw.strip(" {;")
         self.blame = blame
 
-        # drop generics for now; may need multiple passes
-        raw = re.sub("<[^<]+?>", "", raw)
-        raw = re.sub("<[^<]+?>", "", raw)
+        if sig_format == 2:
+            V2LineParser(raw).parse_into_method(self)
+        elif sig_format == 1:
+            # drop generics for now; may need multiple passes
+            raw = re.sub("<[^<]+?>", "", raw)
+            raw = re.sub("<[^<]+?>", "", raw)
 
-        # handle each clause differently
-        raw_prefix, raw_args, _, raw_throws = re.match(r"(.*?)\((.*?)\)( throws )?(.*?);$", raw).groups()
+            # handle each clause differently
+            raw_prefix, raw_args, _, raw_throws = re.match(r"(.*?)\((.*?)\)( throws )?(.*?);$", raw).groups()
 
-        # parse prefixes
-        raw = re.split("[\s]+", raw_prefix)
-        for r in ["", ";"]:
-            while r in raw: raw.remove(r)
-        self.split = list(raw)
+            # parse prefixes
+            raw = re.split("[\s]+", raw_prefix)
+            for r in ["", ";"]:
+                while r in raw: raw.remove(r)
+            self.split = list(raw)
 
-        for r in ["method", "public", "protected", "static", "final", "deprecated", "abstract", "default", "operator"]:
-            while r in raw: raw.remove(r)
+            for r in ["method", "public", "protected", "static", "final", "deprecated", "abstract", "default", "operator", "synchronized"]:
+                while r in raw: raw.remove(r)
 
-        self.typ = raw[0]
-        self.name = raw[1]
+            self.typ = raw[0]
+            self.name = raw[1]
 
-        # parse args
-        self.args = []
-        for arg in re.split(",\s*", raw_args):
-            arg = re.split("\s", arg)
-            # ignore annotations for now
-            arg = [ a for a in arg if not a.startswith("@") ]
-            if len(arg[0]) > 0:
-                self.args.append(arg[0])
+            # parse args
+            self.args = []
+            for arg in re.split(",\s*", raw_args):
+                arg = re.split("\s", arg)
+                # ignore annotations for now
+                arg = [ a for a in arg if not a.startswith("@") ]
+                if len(arg[0]) > 0:
+                    self.args.append(arg[0])
 
-        # parse throws
-        self.throws = []
-        for throw in re.split(",\s*", raw_throws):
-            self.throws.append(throw)
+            # parse throws
+            self.throws = []
+            for throw in re.split(",\s*", raw_throws):
+                self.throws.append(throw)
+        else:
+            raise ValueError("Unknown signature format: " + sig_format)
 
-        self.ident = ident(self.raw)
+        self.ident = "-".join((self.typ, self.name, "-".join(self.args)))
+
+    def sig_matches(self, typ, name, args):
+        return typ == self.typ and name == self.name and args == self.args
 
     def __hash__(self):
         return hash(self.raw)
@@ -147,7 +146,7 @@ class Method():
 
 
 class Class():
-    def __init__(self, pkg, line, raw, blame):
+    def __init__(self, pkg, line, raw, blame, sig_format = 1):
         self.pkg = pkg
         self.line = line
         self.raw = raw.strip(" {;")
@@ -156,30 +155,43 @@ class Class():
         self.fields = []
         self.methods = []
 
-        # drop generics for now; may need multiple passes
-        raw = re.sub("<[^<]+?>", "", raw)
-        raw = re.sub("<[^<]+?>", "", raw)
+        if sig_format == 2:
+            V2LineParser(raw).parse_into_class(self)
+        elif sig_format == 1:
+            # drop generics for now; may need multiple passes
+            raw = re.sub("<[^<]+?>", "", raw)
+            raw = re.sub("<[^<]+?>", "", raw)
 
-        raw = raw.split()
-        self.split = list(raw)
-        if "class" in raw:
-            self.fullname = raw[raw.index("class")+1]
-        elif "interface" in raw:
-            self.fullname = raw[raw.index("interface")+1]
-        elif "@interface" in raw:
-            self.fullname = raw[raw.index("@interface")+1]
-        else:
-            raise ValueError("Funky class type %s" % (self.raw))
+            raw = raw.split()
+            self.split = list(raw)
+            if "class" in raw:
+                self.fullname = raw[raw.index("class")+1]
+            elif "interface" in raw:
+                self.fullname = raw[raw.index("interface")+1]
+            elif "@interface" in raw:
+                self.fullname = raw[raw.index("@interface")+1]
+            else:
+                raise ValueError("Funky class type %s" % (self.raw))
 
-        if "extends" in raw:
-            self.extends = raw[raw.index("extends")+1]
-            self.extends_path = self.extends.split(".")
+            if "extends" in raw:
+                self.extends = raw[raw.index("extends")+1]
+            else:
+                self.extends = None
+
+            if "implements" in raw:
+                self.implements = raw[raw.index("implements")+1]
+            else:
+                self.implements = None
         else:
-            self.extends = None
-            self.extends_path = []
+            raise ValueError("Unknown signature format: " + sig_format)
 
         self.fullname = self.pkg.name + "." + self.fullname
         self.fullname_path = self.fullname.split(".")
+
+        if self.extends is not None:
+            self.extends_path = self.extends.split(".")
+        else:
+            self.extends_path = []
 
         self.name = self.fullname[self.fullname.rindex(".")+1:]
 
@@ -207,6 +219,285 @@ class Package():
 
     def __repr__(self):
         return self.raw
+
+class V2Tokenizer():
+    DELIMITER = re.compile(r'\s+|[()@<>;,={}/"]|\[\]')
+    STRING_SPECIAL = re.compile(r'["\\]')
+
+    def __init__(self, raw):
+        self.raw = raw
+        self.current = 0
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if self.current >= len(self.raw):
+            raise StopIteration
+
+        start = self.current
+        match = V2Tokenizer.DELIMITER.search(self.raw, start)
+        if match:
+            match_start = match.start()
+            if match_start == self.current:
+                end = match.end()
+            else:
+                end = match_start
+        else:
+            end = len(self.raw)
+
+        token = self.raw[start:end]
+        self.current = end
+
+        if token.strip() == "":
+            return self.next()
+
+        if token == "@" and self.raw[start:start+10] == "@interface":
+            return token + self.next()
+
+        if token == '/' and self.raw[start:start+2] == "//":
+            self.current = len(self.raw)
+            raise StopIteration
+
+        if token == '"':
+            return token + self.tokenize_string()
+
+        return token
+
+    def tokenize_string(self):
+        start = self.current
+        end = len(self.raw)
+        while start < end:
+            match = V2Tokenizer.STRING_SPECIAL.search(self.raw, start)
+            if match:
+                if match.group() == '"':
+                    end = match.end()
+                    break
+                elif match.group() == '\\':
+                    # ignore whatever is after the slash
+                    start += 2
+                else:
+                    raise ValueError("Unexpected match: `%s`" % (match.group()))
+            else:
+                raise ValueError("Unexpected EOF tokenizing string: `%s`" % (self.raw[self.current - 1:],))
+
+        token = self.raw[self.current:end]
+        self.current = end
+        return token
+
+class V2LineParser():
+    MODIFIERS = set("public protected internal private abstract default static final transient volatile synchronized".split())
+    JAVA_LANG_TYPES = set("AbstractMethodError AbstractStringBuilder Appendable ArithmeticException ArrayIndexOutOfBoundsException ArrayStoreException AssertionError AutoCloseable Boolean BootstrapMethodError Byte Character CharSequence Class ClassCastException ClassCircularityError ClassFormatError ClassLoader ClassNotFoundException Cloneable CloneNotSupportedException Comparable Compiler Deprecated Double Enum EnumConstantNotPresentException Error Exception ExceptionInInitializerError Float FunctionalInterface IllegalAccessError IllegalAccessException IllegalArgumentException IllegalMonitorStateException IllegalStateException IllegalThreadStateException IncompatibleClassChangeError IndexOutOfBoundsException InheritableThreadLocal InstantiationError InstantiationException Integer InternalError InterruptedException Iterable LinkageError Long Math NegativeArraySizeException NoClassDefFoundError NoSuchFieldError NoSuchFieldException NoSuchMethodError NoSuchMethodException NullPointerException Number NumberFormatException Object OutOfMemoryError Override Package package-info.java Process ProcessBuilder ProcessEnvironment ProcessImpl Readable ReflectiveOperationException Runnable Runtime RuntimeException RuntimePermission SafeVarargs SecurityException SecurityManager Short StackOverflowError StackTraceElement StrictMath String StringBuffer StringBuilder StringIndexOutOfBoundsException SuppressWarnings System Thread ThreadDeath ThreadGroup ThreadLocal Throwable TypeNotPresentException UNIXProcess UnknownError UnsatisfiedLinkError UnsupportedClassVersionError UnsupportedOperationException VerifyError VirtualMachineError Void".split())
+
+    def __init__(self, raw):
+        self.tokenized = list(V2Tokenizer(raw))
+        self.current = 0
+
+    def parse_into_method(self, method):
+        method.split = []
+        kind = self.parse_one_of("ctor", "method")
+        method.split.append(kind)
+        annotations = self.parse_annotations()
+        method.split.extend(self.parse_modifiers())
+        self.parse_matching_paren("<", ">")
+        if "@Deprecated" in annotations:
+            method.split.append("deprecated")
+        if kind == "ctor":
+            method.typ = "ctor"
+        else:
+            method.typ = self.parse_type()
+            method.split.append(method.typ)
+        method.name = self.parse_name()
+        method.split.append(method.name)
+        self.parse_token("(")
+        method.args = self.parse_args()
+        self.parse_token(")")
+        method.throws = self.parse_throws()
+        if "@interface" in method.clazz.split:
+            self.parse_annotation_default()
+        self.parse_token(";")
+        self.parse_eof()
+
+    def parse_into_class(self, clazz):
+        clazz.split = []
+        annotations = self.parse_annotations()
+        if "@Deprecated" in annotations:
+            clazz.split.append("deprecated")
+        clazz.split.extend(self.parse_modifiers())
+        kind = self.parse_one_of("class", "interface", "@interface", "enum")
+        if kind == "enum":
+            # enums are implicitly final
+            clazz.split.append("final")
+        clazz.split.append(kind)
+        clazz.fullname = self.parse_name()
+        self.parse_matching_paren("<", ">")
+        extends = self.parse_extends()
+        clazz.extends = extends[0] if extends else None
+        implements = self.parse_implements()
+        clazz.implements = implements[0] if implements else None
+        # The checks assume that interfaces are always found in implements, which isn't true for
+        # subinterfaces.
+        if not implements and "interface" in clazz.split:
+            clazz.implements = clazz.extends
+        self.parse_token("{")
+        self.parse_eof()
+
+    def parse_into_field(self, field):
+        kind = self.parse_token("field")
+        field.split = [kind]
+        annotations = self.parse_annotations()
+        if "@Deprecated" in annotations:
+            field.split.append("deprecated")
+        field.split.extend(self.parse_modifiers())
+        field.typ = self.parse_type()
+        field.split.append(field.typ)
+        field.name = self.parse_name()
+        field.split.append(field.name)
+        if self.parse_if("="):
+            field.value = self.parse_value_stripped()
+        else:
+            field.value = None
+
+        self.parse_token(";")
+        self.parse_eof()
+
+    def lookahead(self):
+        return self.tokenized[self.current]
+
+    def parse_one_of(self, *options):
+        found = self.lookahead()
+        if found not in options:
+            raise ValueError("Parsing failed, expected one of `%s` but found `%s` in %s" % (options, found, repr(self.tokenized)))
+        return self.parse_token()
+
+    def parse_token(self, tok = None):
+        found = self.lookahead()
+        if tok is not None and found != tok:
+            raise ValueError("Parsing failed, expected `%s` but found `%s` in %s" % (tok, found, repr(self.tokenized)))
+        self.current += 1
+        return found
+
+    def eof(self):
+        return self.current == len(self.tokenized)
+
+    def parse_eof(self):
+        if not self.eof():
+            raise ValueError("Parsing failed, expected EOF, but %s has not been parsed in %s" % (self.tokenized[self.current:], self.tokenized))
+
+    def parse_if(self, tok):
+        if not self.eof() and self.lookahead() == tok:
+            self.parse_token()
+            return True
+        return False
+
+    def parse_annotations(self):
+        ret = []
+        while self.lookahead() == "@":
+            ret.append(self.parse_annotation())
+        return ret
+
+    def parse_annotation(self):
+        ret = self.parse_token("@") + self.parse_token()
+        self.parse_matching_paren("(", ")")
+        return ret
+
+    def parse_matching_paren(self, open, close):
+        start = self.current
+        if not self.parse_if(open):
+            return
+        length = len(self.tokenized)
+        count = 1
+        while count > 0:
+            if self.current == length:
+                raise ValueError("Unexpected EOF looking for closing paren: `%s`" % (self.tokenized[start:],))
+            t = self.parse_token()
+            if t == open:
+                count += 1
+            elif t == close:
+                count -= 1
+        return self.tokenized[start:self.current]
+
+    def parse_modifiers(self):
+        ret = []
+        while self.lookahead() in V2LineParser.MODIFIERS:
+            ret.append(self.parse_token())
+        return ret
+
+    def parse_type(self):
+        type = self.parse_token()
+        if type in V2LineParser.JAVA_LANG_TYPES:
+            type = "java.lang." + type
+        self.parse_matching_paren("<", ">")
+        while self.parse_if("[]"):
+            type += "[]"
+        return type
+
+    def parse_arg_type(self):
+        type = self.parse_type()
+        if self.parse_if("..."):
+            type += "..."
+        return type
+
+    def parse_name(self):
+        return self.parse_token()
+
+    def parse_args(self):
+        args = []
+        if self.lookahead() == ")":
+            return args
+
+        while True:
+            args.append(self.parse_arg())
+            if self.lookahead() == ")":
+                return args
+            self.parse_token(",")
+
+    def parse_arg(self):
+        self.parse_annotations()
+        return self.parse_arg_type()
+
+    def parse_throws(self):
+        ret = []
+        if self.parse_if("throws"):
+            ret.append(self.parse_type())
+            while self.parse_if(","):
+                ret.append(self.parse_type())
+        return ret
+
+    def parse_extends(self):
+        if self.parse_if("extends"):
+            return self.parse_space_delimited_type_list()
+        return []
+
+    def parse_implements(self):
+        if self.parse_if("implements"):
+            return self.parse_space_delimited_type_list()
+        return []
+
+    def parse_space_delimited_type_list(self, terminals = ["implements", "{"]):
+        types = []
+        while True:
+            types.append(self.parse_type())
+            if self.lookahead() in terminals:
+                return types
+
+    def parse_annotation_default(self):
+        if self.parse_if("default"):
+            self.parse_value()
+
+    def parse_value(self):
+        if self.lookahead() == "{":
+            return " ".join(self.parse_matching_paren("{", "}"))
+        elif self.lookahead() == "(":
+            return " ".join(self.parse_matching_paren("(", ")"))
+        else:
+            return self.parse_token()
+
+    def parse_value_stripped(self):
+        value = self.parse_value()
+        if value[0] == '"':
+            return value[1:-1]
+        return value
 
 
 def _parse_stream(f, clazz_cb=None, base_f=None, out_classes_with_base=None,
@@ -252,6 +543,7 @@ def _parse_stream_to_generator(f):
     pkg = None
     clazz = None
     blame = None
+    sig_format = 1
 
     re_blame = re.compile("^([a-z0-9]{7,}) \(<([^>]+)>.+?\) (.+?)$")
     for raw in f:
@@ -264,16 +556,18 @@ def _parse_stream_to_generator(f):
         else:
             blame = None
 
-        if raw.startswith("package"):
+        if line == 1 and raw == "// Signature format: 2.0":
+            sig_format = 2
+        elif raw.startswith("package"):
             pkg = Package(line, raw, blame)
         elif raw.startswith("  ") and raw.endswith("{"):
-            clazz = Class(pkg, line, raw, blame)
+            clazz = Class(pkg, line, raw, blame, sig_format=sig_format)
         elif raw.startswith("    ctor"):
-            clazz.ctors.append(Method(clazz, line, raw, blame))
+            clazz.ctors.append(Method(clazz, line, raw, blame, sig_format=sig_format))
         elif raw.startswith("    method"):
-            clazz.methods.append(Method(clazz, line, raw, blame))
+            clazz.methods.append(Method(clazz, line, raw, blame, sig_format=sig_format))
         elif raw.startswith("    field"):
-            clazz.fields.append(Field(clazz, line, raw, blame))
+            clazz.fields.append(Field(clazz, line, raw, blame, sig_format=sig_format))
         elif raw.startswith("  }") and clazz:
             yield clazz
 
@@ -367,7 +661,7 @@ def _fail(clazz, detail, error, rule, msg):
     """Records an API failure to be processed later."""
     global failures
 
-    sig = "%s-%s-%s" % (clazz.fullname, repr(detail), msg)
+    sig = "%s-%s-%s" % (clazz.fullname, detail.ident if detail else None, msg)
     sig = sig.replace(" deprecated ", " ")
 
     failures[sig] = Failure(sig, clazz, detail, error, rule, msg)
@@ -408,7 +702,7 @@ def verify_constants(clazz):
 
 def verify_enums(clazz):
     """Enums are bad, mmkay?"""
-    if "extends java.lang.Enum" in clazz.raw:
+    if clazz.extends == "java.lang.Enum" or "enum" in clazz.split:
         error(clazz, None, "F5", "Enums are not allowed")
 
 
@@ -467,7 +761,7 @@ def verify_listeners(clazz):
         interface OnFooListener { void onFoo() }"""
 
     if clazz.name.endswith("Listener"):
-        if " abstract class " in clazz.raw:
+        if "abstract" in clazz.split and "class" in clazz.split:
             error(clazz, None, "L1", "Listeners should be an interface, or otherwise renamed Callback")
 
         for m in clazz.methods:
@@ -546,16 +840,16 @@ def verify_equals(clazz):
     eq = False
     hc = False
     for m in clazz.methods:
-        if " static " in m.raw: continue
-        if "boolean equals(java.lang.Object)" in m.raw: eq = True
-        if "int hashCode()" in m.raw: hc = True
+        if "static" in m.split: continue
+        if m.sig_matches("boolean", "equals", ["java.lang.Object"]): eq = True
+        if m.sig_matches("int", "hashCode", []): hc = True
     if eq != hc:
         error(clazz, None, "M8", "Must override both equals and hashCode; missing one")
 
 
 def verify_parcelable(clazz):
     """Verify that Parcelable objects aren't hiding required bits."""
-    if "implements android.os.Parcelable" in clazz.raw:
+    if clazz.implements == "android.os.Parcelable":
         creator = [ i for i in clazz.fields if i.name == "CREATOR" ]
         write = [ i for i in clazz.methods if i.name == "writeToParcel" ]
         describe = [ i for i in clazz.methods if i.name == "describeContents" ]
@@ -563,8 +857,7 @@ def verify_parcelable(clazz):
         if len(creator) == 0 or len(write) == 0 or len(describe) == 0:
             error(clazz, None, "FW3", "Parcelable requires CREATOR, writeToParcel, and describeContents; missing one")
 
-        if ((" final class " not in clazz.raw) and
-            (" final deprecated class " not in clazz.raw)):
+        if "final" not in clazz.split:
             error(clazz, None, "FW8", "Parcelable classes must be final")
 
         for c in clazz.ctors:
@@ -684,7 +977,7 @@ def verify_helper_classes(clazz):
     """Verify that helper classes are named consistently with what they extend.
     All developer extendable methods should be named onFoo()."""
     test_methods = False
-    if "extends android.app.Service" in clazz.raw:
+    if clazz.extends == "android.app.Service":
         test_methods = True
         if not clazz.name.endswith("Service"):
             error(clazz, None, "CL4", "Inconsistent class name; should be FooService")
@@ -696,7 +989,7 @@ def verify_helper_classes(clazz):
                 if f.value != clazz.fullname:
                     error(clazz, f, "C4", "Inconsistent interface constant; expected '%s'" % (clazz.fullname))
 
-    if "extends android.content.ContentProvider" in clazz.raw:
+    if clazz.extends == "android.content.ContentProvider":
         test_methods = True
         if not clazz.name.endswith("Provider"):
             error(clazz, None, "CL4", "Inconsistent class name; should be FooProvider")
@@ -708,12 +1001,12 @@ def verify_helper_classes(clazz):
                 if f.value != clazz.fullname:
                     error(clazz, f, "C4", "Inconsistent interface constant; expected '%s'" % (clazz.fullname))
 
-    if "extends android.content.BroadcastReceiver" in clazz.raw:
+    if clazz.extends == "android.content.BroadcastReceiver":
         test_methods = True
         if not clazz.name.endswith("Receiver"):
             error(clazz, None, "CL4", "Inconsistent class name; should be FooReceiver")
 
-    if "extends android.app.Activity" in clazz.raw:
+    if clazz.extends == "android.app.Activity":
         test_methods = True
         if not clazz.name.endswith("Activity"):
             error(clazz, None, "CL4", "Inconsistent class name; should be FooActivity")
@@ -731,7 +1024,7 @@ def verify_helper_classes(clazz):
 def verify_builder(clazz):
     """Verify builder classes.
     Methods should return the builder to enable chaining."""
-    if " extends " in clazz.raw: return
+    if clazz.extends: return
     if not clazz.name.endswith("Builder"): return
 
     if clazz.name != "Builder":
@@ -759,7 +1052,7 @@ def verify_builder(clazz):
 
 def verify_aidl(clazz):
     """Catch people exposing raw AIDL."""
-    if "extends android.os.Binder" in clazz.raw or "implements android.os.IInterface" in clazz.raw:
+    if clazz.extends == "android.os.Binder" or clazz.implements == "android.os.IInterface":
         error(clazz, None, None, "Raw AIDL interfaces must not be exposed")
 
 
@@ -1168,7 +1461,7 @@ def verify_abstract_inner(clazz):
     """Verifies that abstract inner classes are static."""
 
     if re.match(".+?\.[A-Z][^\.]+\.[A-Z]", clazz.fullname):
-        if " abstract " in clazz.raw and " static " not in clazz.raw:
+        if "abstract" in clazz.split and "static" not in clazz.split:
             warn(clazz, None, None, "Abstract inner classes should be static to improve testability")
 
 
@@ -1263,8 +1556,8 @@ def verify_units(clazz):
 
 def verify_closable(clazz):
     """Verifies that classes are AutoClosable."""
-    if "implements java.lang.AutoCloseable" in clazz.raw: return
-    if "implements java.io.Closeable" in clazz.raw: return
+    if clazz.implements == "java.lang.AutoCloseable": return
+    if clazz.implements == "java.io.Closeable": return
 
     for m in clazz.methods:
         if len(m.args) > 0: continue
@@ -1349,6 +1642,9 @@ def verify_method_name_not_kotlin_operator(clazz):
 
 def verify_collections_over_arrays(clazz):
     """Warn that [] should be Collections."""
+
+    if "@interface" in clazz.split:
+        return
 
     safe = ["java.lang.String[]","byte[]","short[]","int[]","long[]","float[]","double[]","boolean[]","char[]"]
     for m in clazz.methods:
@@ -1683,11 +1979,11 @@ def show_deprecations_at_birth(cur, prev):
             del cur[prev_clazz.fullname]
 
     for clazz in cur.values():
-        if " deprecated " in clazz.raw and not clazz.fullname in prev:
+        if "deprecated" in clazz.split and not clazz.fullname in prev:
             error(clazz, None, None, "Found API deprecation at birth")
 
         for i in clazz.ctors + clazz.methods + clazz.fields:
-            if " deprecated " in i.raw:
+            if "deprecated" in i.split:
                 error(clazz, i, None, "Found API deprecation at birth")
 
     print "%s Deprecated at birth %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True),
