@@ -41,7 +41,7 @@ class NativeCallbackThread {
     DISALLOW_COPY_AND_ASSIGN(NativeCallbackThread);
 
 public:
-    NativeCallbackThread(JavaVM *vm);
+    explicit NativeCallbackThread(JavaVM *vm);
     virtual ~NativeCallbackThread();
 
     void enqueue(const Task &task);

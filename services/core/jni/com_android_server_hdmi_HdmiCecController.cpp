@@ -89,7 +89,7 @@ public:
 private:
     class HdmiCecCallback : public IHdmiCecCallback {
     public:
-        HdmiCecCallback(HdmiCecController* controller) : mController(controller) {};
+        explicit HdmiCecCallback(HdmiCecController* controller) : mController(controller) {};
         Return<void> onCecMessage(const CecMessage& event)  override;
         Return<void> onHotplugEvent(const HotplugEvent& event)  override;
     private:
