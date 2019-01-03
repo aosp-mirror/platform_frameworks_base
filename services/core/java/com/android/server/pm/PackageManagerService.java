@@ -13021,20 +13021,26 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public boolean canSuspendPackageForUser(String packageName, int userId) {
+    public String[] getUnsuspendablePackagesForUser(String[] packageNames, int userId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
-                "canSuspendPackageForUser");
+                "getUnsuspendablePackagesForUser");
         final int callingUid = Binder.getCallingUid();
         if (UserHandle.getUserId(callingUid) != userId) {
             throw new SecurityException("Calling uid " + callingUid
-                    + " cannot query canSuspendPackageForUser for user " + userId);
+                    + " cannot query getUnsuspendablePackagesForUser for user " + userId);
         }
+        final ArraySet<String> unactionablePackages = new ArraySet<>();
         final long identity = Binder.clearCallingIdentity();
         try {
-            return canSuspendPackageForUserInternal(packageName, userId);
+            for (String packageName : packageNames) {
+                if (!canSuspendPackageForUserInternal(packageName, userId)) {
+                    unactionablePackages.add(packageName);
+                }
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+        return unactionablePackages.toArray(new String[unactionablePackages.size()]);
     }
 
     private boolean canSuspendPackageForUserInternal(String packageName, int userId) {

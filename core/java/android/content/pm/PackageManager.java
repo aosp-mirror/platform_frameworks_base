@@ -5969,27 +5969,28 @@ public abstract class PackageManager {
     }
 
     /**
-     * Returns whether or not a given package can be suspended via a call to {@link
+     * Returns any packages in a given set of packages that cannot be suspended via a call to {@link
      * #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
      * SuspendDialogInfo) setPackagesSuspended}. The platform prevents suspending certain critical
      * packages to keep the device in a functioning state, e.g. the default dialer.
      * Apps need to hold {@link Manifest.permission#SUSPEND_APPS SUSPEND_APPS} to call this api.
      *
      * <p>
-     * Note that this set of critical packages can change with time, so <em>a value of {@code true}
-     * returned by this api does not guarantee that a following call to {@link
-     * #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
-     * SuspendDialogInfo) setPackagesSuspended} for the same package will succeed</em>, especially
-     * if considerable time elapsed between the two calls.
+     * Note that this set of critical packages can change with time, so even though a package name
+     * was not returned by this call, it does not guarantee that a subsequent call to
+     * {@link #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
+     * SuspendDialogInfo) setPackagesSuspended} for that package will succeed, especially if
+     * significant time elapsed between the two calls.
      *
-     * @param packageName The package to check.
-     * @return {@code true} if the given package can be suspended, {@code false} otherwise.
+     * @param packageNames The packages to check.
+     * @return A list of packages that can not be currently suspended by the system.
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.SUSPEND_APPS)
-    public boolean canSuspendPackage(@NonNull String packageName) {
-        throw new UnsupportedOperationException("canSuspendPackage not implemented");
+    @NonNull
+    public String[] getUnsuspendablePackages(@NonNull String[] packageNames) {
+        throw new UnsupportedOperationException("canSuspendPackages not implemented");
     }
 
     /**

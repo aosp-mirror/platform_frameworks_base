@@ -2299,9 +2299,9 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public boolean canSuspendPackage(String packageName) {
+    public String[] getUnsuspendablePackages(String[] packageNames) {
         try {
-            return mPM.canSuspendPackageForUser(packageName, mContext.getUserId());
+            return mPM.getUnsuspendablePackagesForUser(packageNames, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
