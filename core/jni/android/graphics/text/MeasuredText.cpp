@@ -17,8 +17,6 @@
 #define LOG_TAG "MeasuredText"
 
 #include "GraphicsJNI.h"
-#include "unicode/locid.h"
-#include "unicode/brkiter.h"
 #include "utils/misc.h"
 #include "utils/Log.h"
 #include <nativehelper/ScopedStringChars.h>
