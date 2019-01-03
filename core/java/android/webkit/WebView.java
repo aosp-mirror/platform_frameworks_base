@@ -847,7 +847,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Asynchronously evaluates JavaScript in the context of the currently displayed page.
-     * If non-null, |resultCallback| will be invoked with any result returned from that
+     * If non-null, {@code resultCallback} will be invoked with any result returned from that
      * execution. This method must be called on the UI thread and the callback will
      * be made on the UI thread.
      * <p>
