@@ -43,4 +43,13 @@ public class BinderTest extends TestCase {
         Binder.restoreCallingWorkSource(token);
         assertEquals(UID, Binder.getCallingWorkSourceUid());
     }
+
+    @SmallTest
+    public void testGetCallingUidOrThrow() throws Exception {
+        try {
+            Binder.getCallingUidOrThrow();
+            throw new AssertionError("IllegalStateException expected");
+        } catch (IllegalStateException expected) {
+        }
+    }
 }
