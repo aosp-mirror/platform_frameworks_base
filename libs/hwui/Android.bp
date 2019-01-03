@@ -61,6 +61,7 @@ cc_defaults {
         "libstatslog",
         "libutils",
         "libEGL",
+        "libGLESv1_CM",
         "libGLESv2",
         "libGLESv3",
         "libvulkan",
