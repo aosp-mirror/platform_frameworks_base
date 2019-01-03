@@ -157,7 +157,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      *
      * @hide
      */
-    void start(@NonNull IBinder applicationToken, @NonNull ComponentName activityComponent) {
+    void start(@NonNull IBinder applicationToken, @NonNull ComponentName activityComponent,
+            int flags) {
         if (!isContentCaptureEnabled()) return;
 
         if (VERBOSE) {
@@ -166,7 +167,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
 
         mHandler.sendMessage(obtainMessage(MainContentCaptureSession::handleStartSession, this,
-                applicationToken, activityComponent));
+                applicationToken, activityComponent, flags));
     }
 
     @Override
@@ -181,7 +182,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 obtainMessage(MainContentCaptureSession::handleDestroySession, this));
     }
 
-    private void handleStartSession(@NonNull IBinder token, @NonNull ComponentName componentName) {
+    private void handleStartSession(@NonNull IBinder token, @NonNull ComponentName componentName,
+            int flags) {
         if (mState != STATE_UNKNOWN) {
             // TODO(b/111276913): revisit this scenario
             Log.w(TAG, "ignoring handleStartSession(" + token + ") while on state "
@@ -196,7 +198,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             Log.v(TAG, "handleStartSession(): token=" + token + ", act="
                     + getActivityDebugName() + ", id=" + mId);
         }
-        final int flags = 0; // TODO(b/111276913): get proper flags
 
         try {
             if (mSystemServerInterface == null) return;
@@ -245,7 +246,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 Log.w(TAG, "Failed to link to death on " + binder + ": " + e);
             }
         }
-        if (resultCode == STATE_DISABLED_NO_SERVICE || resultCode == STATE_DISABLED_DUPLICATED_ID) {
+
+        // TODO(b/111276913): change the resultCode to use flags so there's just one flag for
+        // disabled stuff
+        if (resultCode == STATE_DISABLED_NO_SERVICE || resultCode == STATE_DISABLED_DUPLICATED_ID
+                || resultCode == STATE_DISABLED_BY_FLAG_SECURE) {
             mDisabled.set(true);
             handleResetSession(/* resetState= */ false);
         } else {
