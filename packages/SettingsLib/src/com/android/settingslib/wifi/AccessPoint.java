@@ -886,7 +886,17 @@ public class AccessPoint implements Comparable<AccessPoint> {
         // Update to new summary
         StringBuilder summary = new StringBuilder();
 
-        if (isActive()) {
+        if (isOsuProvider()) {
+            if (mOsuProvisioningComplete) {
+                summary.append(mContext.getString(R.string.osu_provisioning_complete));
+            } else if (mOsuFailure != null) {
+                summary.append(mOsuFailure);
+            } else if (mOsuStatus != null) {
+                summary.append(mOsuStatus);
+            } else {
+                summary.append(mContext.getString(R.string.tap_to_set_up));
+            }
+        } else if (isActive()) {
             if (isPasspoint()) {
                 // This is the active connection on passpoint
                 summary.append(getSummary(mContext, ssid, getDetailedState(),
@@ -931,16 +941,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
             } else if (mIsCarrierAp) {
                 summary.append(String.format(mContext.getString(
                         R.string.available_via_carrier), mCarrierName));
-            } else if (isOsuProvider()) {
-                if (mOsuProvisioningComplete) {
-                    summary.append(mContext.getString(R.string.osu_provisioning_complete));
-                } else if (mOsuFailure != null) {
-                    summary.append(mOsuFailure);
-                } else if (mOsuStatus != null) {
-                    summary.append(mOsuStatus);
-                } else {
-                    summary.append(mContext.getString(R.string.tap_to_set_up));
-                }
             } else if (!isReachable()) { // Wifi out of range
                 summary.append(mContext.getString(R.string.wifi_not_in_range));
             } else { // In range, not disabled.
@@ -1045,6 +1045,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * match based on SSID and security.
      */
     private boolean isInfoForThisAccessPoint(WifiConfiguration config, WifiInfo info) {
+        if (info.isOsuAp()) {
+            return (mOsuStatus != null);
+        }
+
         if (isPasspoint() == false && networkId != WifiConfiguration.INVALID_NETWORK_ID) {
             return networkId == info.getNetworkId();
         } else if (config != null) {
