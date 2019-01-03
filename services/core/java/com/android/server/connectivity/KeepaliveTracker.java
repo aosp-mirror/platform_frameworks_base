@@ -16,26 +16,27 @@
 
 package com.android.server.connectivity;
 
-// TODO: Clean up imports and remove references of PacketKeepalive constants.
-
-import static android.net.ConnectivityManager.PacketKeepalive.ERROR_INVALID_INTERVAL;
-import static android.net.ConnectivityManager.PacketKeepalive.ERROR_INVALID_IP_ADDRESS;
-import static android.net.ConnectivityManager.PacketKeepalive.ERROR_INVALID_NETWORK;
-import static android.net.ConnectivityManager.PacketKeepalive.MIN_INTERVAL;
-import static android.net.ConnectivityManager.PacketKeepalive.NATT_PORT;
-import static android.net.ConnectivityManager.PacketKeepalive.NO_KEEPALIVE;
-import static android.net.ConnectivityManager.PacketKeepalive.SUCCESS;
-import static android.net.NetworkAgent.CMD_START_PACKET_KEEPALIVE;
-import static android.net.NetworkAgent.CMD_STOP_PACKET_KEEPALIVE;
-import static android.net.NetworkAgent.EVENT_PACKET_KEEPALIVE;
+import static android.net.NattSocketKeepalive.NATT_PORT;
+import static android.net.NetworkAgent.CMD_START_SOCKET_KEEPALIVE;
+import static android.net.NetworkAgent.CMD_STOP_SOCKET_KEEPALIVE;
+import static android.net.NetworkAgent.EVENT_SOCKET_KEEPALIVE;
+import static android.net.SocketKeepalive.BINDER_DIED;
+import static android.net.SocketKeepalive.ERROR_INVALID_INTERVAL;
+import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
+import static android.net.SocketKeepalive.ERROR_INVALID_NETWORK;
 import static android.net.SocketKeepalive.ERROR_INVALID_SOCKET;
+import static android.net.SocketKeepalive.MAX_INTERVAL_SEC;
+import static android.net.SocketKeepalive.MIN_INTERVAL_SEC;
+import static android.net.SocketKeepalive.NO_KEEPALIVE;
+import static android.net.SocketKeepalive.SUCCESS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.KeepalivePacketData;
+import android.net.NattKeepalivePacketData;
 import android.net.NetworkAgent;
 import android.net.NetworkUtils;
+import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.util.IpUtils;
 import android.os.Binder;
 import android.os.Handler;
@@ -60,7 +61,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Manages packet keepalive requests.
+ * Manages socket keepalive requests.
  *
  * Provides methods to stop and start keepalive requests, and keeps track of keepalives across all
  * networks. This class is tightly coupled to ConnectivityService. It is not thread-safe and its
@@ -83,13 +84,13 @@ public class KeepaliveTracker {
     }
 
     /**
-     * Tracks information about a packet keepalive.
+     * Tracks information about a socket keepalive.
      *
      * All information about this keepalive is known at construction time except the slot number,
      * which is only returned when the hardware has successfully started the keepalive.
      */
     class KeepaliveInfo implements IBinder.DeathRecipient {
-        // Bookkeping data.
+        // Bookkeeping data.
         private final Messenger mMessenger;
         private final IBinder mBinder;
         private final int mUid;
@@ -98,7 +99,7 @@ public class KeepaliveTracker {
 
         /** Keepalive slot. A small integer that identifies this keepalive among the ones handled
           * by this network. */
-        private int mSlot = PacketKeepalive.NO_KEEPALIVE;
+        private int mSlot = NO_KEEPALIVE;
 
         // Packet data.
         private final KeepalivePacketData mPacket;
@@ -144,7 +145,7 @@ public class KeepaliveTracker {
                     .toString();
         }
 
-        /** Sends a message back to the application via its PacketKeepalive.Callback. */
+        /** Sends a message back to the application via its SocketKeepalive.Callback. */
         void notifyMessenger(int slot, int err) {
             KeepaliveTracker.this.notifyMessenger(mMessenger, slot, err);
         }
@@ -153,8 +154,8 @@ public class KeepaliveTracker {
         public void binderDied() {
             // Not called from ConnectivityService handler thread, so send it a message.
             mConnectivityServiceHandler.obtainMessage(
-                    NetworkAgent.CMD_STOP_PACKET_KEEPALIVE,
-                    mSlot, PacketKeepalive.BINDER_DIED, mNai.network).sendToTarget();
+                    NetworkAgent.CMD_STOP_SOCKET_KEEPALIVE,
+                    mSlot, BINDER_DIED, mNai.network).sendToTarget();
         }
 
         void unlinkDeathRecipient() {
@@ -181,7 +182,10 @@ public class KeepaliveTracker {
         }
 
         private int checkInterval() {
-            return mInterval >= MIN_INTERVAL ? SUCCESS : ERROR_INVALID_INTERVAL;
+            if (mInterval < MIN_INTERVAL_SEC || mInterval > MAX_INTERVAL_SEC) {
+                return ERROR_INVALID_INTERVAL;
+            }
+            return SUCCESS;
         }
 
         private int isValid() {
@@ -198,7 +202,7 @@ public class KeepaliveTracker {
             int error = isValid();
             if (error == SUCCESS) {
                 Log.d(TAG, "Starting keepalive " + mSlot + " on " + mNai.name());
-                mNai.asyncChannel.sendMessage(CMD_START_PACKET_KEEPALIVE, slot, mInterval, mPacket);
+                mNai.asyncChannel.sendMessage(CMD_START_SOCKET_KEEPALIVE, slot, mInterval, mPacket);
             } else {
                 handleStopKeepalive(mNai, mSlot, error);
                 return;
@@ -214,7 +218,7 @@ public class KeepaliveTracker {
             }
             if (isStarted) {
                 Log.d(TAG, "Stopping keepalive " + mSlot + " on " + mNai.name());
-                mNai.asyncChannel.sendMessage(CMD_STOP_PACKET_KEEPALIVE, mSlot);
+                mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
             }
             // TODO: at the moment we unconditionally return failure here. In cases where the
             // NetworkAgent is alive, should we ask it to reply, so it can return failure?
@@ -225,7 +229,7 @@ public class KeepaliveTracker {
 
     void notifyMessenger(Messenger messenger, int slot, int err) {
         Message message = Message.obtain();
-        message.what = EVENT_PACKET_KEEPALIVE;
+        message.what = EVENT_SOCKET_KEEPALIVE;
         message.arg1 = slot;
         message.arg2 = err;
         message.obj = null;
@@ -310,7 +314,7 @@ public class KeepaliveTracker {
     }
 
     /** Handle keepalive events from lower layer. */
-    public void handleEventPacketKeepalive(@NonNull NetworkAgentInfo nai,
+    public void handleEventSocketKeepalive(@NonNull NetworkAgentInfo nai,
             @NonNull Message message) {
         int slot = message.arg1;
         int reason = message.arg2;
@@ -369,16 +373,16 @@ public class KeepaliveTracker {
 
         KeepalivePacketData packet;
         try {
-            packet = KeepalivePacketData.nattKeepalivePacket(
+            packet = NattKeepalivePacketData.nattKeepalivePacket(
                     srcAddress, srcPort, dstAddress, NATT_PORT);
-        } catch (KeepalivePacketData.InvalidPacketException e) {
+        } catch (InvalidPacketException e) {
             notifyMessenger(messenger, NO_KEEPALIVE, e.error);
             return;
         }
         KeepaliveInfo ki = new KeepaliveInfo(messenger, binder, nai, packet, intervalSeconds);
         Log.d(TAG, "Created keepalive: " + ki.toString());
         mConnectivityServiceHandler.obtainMessage(
-                NetworkAgent.CMD_START_PACKET_KEEPALIVE, ki).sendToTarget();
+                CMD_START_SOCKET_KEEPALIVE, ki).sendToTarget();
     }
 
    /**
@@ -432,7 +436,7 @@ public class KeepaliveTracker {
     }
 
     public void dump(IndentingPrintWriter pw) {
-        pw.println("Packet keepalives:");
+        pw.println("Socket keepalives:");
         pw.increaseIndent();
         for (NetworkAgentInfo nai : mKeepalives.keySet()) {
             pw.println(nai.name());
