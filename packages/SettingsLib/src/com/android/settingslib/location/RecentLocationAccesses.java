@@ -183,7 +183,7 @@ public class RecentLocationAccesses {
         public final CharSequence contentDescription;
         public final long accessFinishTime;
 
-        private Access(String packageName, UserHandle userHandle, Drawable icon,
+        public Access(String packageName, UserHandle userHandle, Drawable icon,
                 CharSequence label, CharSequence contentDescription,
                 long accessFinishTime) {
             this.packageName = packageName;
