@@ -24,8 +24,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
-import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -91,7 +91,7 @@ public class ModuleInfoProvider {
         final PackageInfo pi;
         try {
             pi = mPackageManager.getPackageInfo(packageName,
-                PackageManager.GET_META_DATA, Process.SYSTEM_UID);
+                PackageManager.GET_META_DATA, UserHandle.USER_SYSTEM);
 
             Context packageContext = mContext.createPackageContext(packageName, 0);
             packageResources = packageContext.getResources();
