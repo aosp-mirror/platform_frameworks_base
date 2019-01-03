@@ -33,7 +33,6 @@ import com.android.settingslib.R;
  */
 public class PbapServerProfile implements LocalBluetoothProfile {
     private static final String TAG = "PbapServerProfile";
-    private static boolean V = true;
 
     private BluetoothPbap mService;
     private boolean mIsProfileReady;
@@ -56,13 +55,11 @@ public class PbapServerProfile implements LocalBluetoothProfile {
             implements BluetoothPbap.ServiceListener {
 
         public void onServiceConnected(BluetoothPbap proxy) {
-            if (V) Log.d(TAG,"Bluetooth service connected");
             mService = (BluetoothPbap) proxy;
             mIsProfileReady=true;
         }
 
         public void onServiceDisconnected() {
-            if (V) Log.d(TAG,"Bluetooth service disconnected");
             mIsProfileReady=false;
         }
     }
@@ -142,7 +139,7 @@ public class PbapServerProfile implements LocalBluetoothProfile {
     }
 
     protected void finalize() {
-        if (V) Log.d(TAG, "finalize()");
+        Log.d(TAG, "finalize()");
         if (mService != null) {
             try {
                 mService.close();
