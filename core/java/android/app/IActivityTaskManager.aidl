@@ -452,4 +452,10 @@ interface IActivityTaskManager {
      * Clears launch params for given packages.
      */
     void clearLaunchParamsForPackages(in List<String> packageNames);
+
+    /**
+     * Makes the display with the given id a single task instance display. I.e the display can only
+     * contain one task.
+     */
+    void setDisplayToSingleTaskInstance(int displayId);
 }

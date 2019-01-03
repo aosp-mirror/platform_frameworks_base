@@ -82,6 +82,7 @@ message ActivityDisplayProto {
     repeated ActivityStackProto stacks = 3;
     optional int32 focused_stack_id = 4;
     optional .com.android.server.wm.IdentifierProto resumed_activity = 5;
+    optional bool single_task_instance = 6;
 }
 
 message ActivityStackProto {

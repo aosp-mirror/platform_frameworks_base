@@ -72,6 +72,7 @@ package android.app {
     method public void resizeStack(int, android.graphics.Rect) throws java.lang.SecurityException;
     method public void resizeStack(int, android.graphics.Rect, boolean);
     method public void resizeTask(int, android.graphics.Rect);
+    method public void setDisplayToSingleTaskInstance(int);
     method public void setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
     method public void setTaskWindowingModeSplitScreenPrimary(int, int, boolean, boolean, android.graphics.Rect, boolean) throws java.lang.SecurityException;
     method public void startSystemLockTaskMode(int);

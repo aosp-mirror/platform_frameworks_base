@@ -83,6 +83,9 @@ public class ActivityView extends ViewGroup {
     private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
     private Surface mTmpSurface = new Surface();
 
+    /** The ActivityView is only allowed to contain one task. */
+    private final boolean mSingleTaskInstance;
+
     @UnsupportedAppUsage
     public ActivityView(Context context) {
         this(context, null /* attrs */);
@@ -93,7 +96,13 @@ public class ActivityView extends ViewGroup {
     }
 
     public ActivityView(Context context, AttributeSet attrs, int defStyle) {
+        this(context, attrs, defStyle, false /*singleTaskInstance*/);
+    }
+
+    public ActivityView(
+            Context context, AttributeSet attrs, int defStyle, boolean singleTaskInstance) {
         super(context, attrs, defStyle);
+        mSingleTaskInstance = singleTaskInstance;
 
         mActivityTaskManager = ActivityTaskManager.getService();
         mSurfaceView = new SurfaceView(context);
@@ -379,6 +388,9 @@ public class ActivityView extends ViewGroup {
         try {
             wm.reparentDisplayContent(displayId, mRootSurfaceControl.getHandle());
             wm.dontOverrideDisplayInfo(displayId);
+            if (mSingleTaskInstance) {
+                mActivityTaskManager.setDisplayToSingleTaskInstance(displayId);
+            }
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
