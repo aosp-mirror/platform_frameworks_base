@@ -229,6 +229,8 @@ public class BenchmarkRegistry {
                 return context.getString(R.string.cpu_gflops_name);
             case R.id.benchmark_overdraw:
                 return context.getString(R.string.overdraw_name);
+            case R.id.benchmark_bitmap_upload:
+                return context.getString(R.string.bitmap_upload_name);
             default:
                 return "Some Benchmark";
         }
