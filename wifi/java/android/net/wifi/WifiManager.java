@@ -2017,6 +2017,8 @@ public class WifiManager {
     public static final int WIFI_FEATURE_OWE              = 0x20000000; // Enhanced Open
     /** @hide */
     public static final int WIFI_FEATURE_LOW_LATENCY      = 0x40000000; // Low Latency modes
+    /** @hide */
+    public static final int WIFI_FEATURE_DPP              = 0x80000000; // DPP (Easy-Connect)
 
     private int getSupportedFeatures() {
         try {
@@ -4460,6 +4462,13 @@ public class WifiManager {
      */
     public boolean isOweSupported() {
         return isFeatureSupported(WIFI_FEATURE_OWE);
+    }
+
+    /**
+     * @return true if this device supports Wi-Fi Device Provisioning Protocol (Easy-connect)
+     */
+    public boolean isDppSupported() {
+        return isFeatureSupported(WIFI_FEATURE_DPP);
     }
 
     /**
