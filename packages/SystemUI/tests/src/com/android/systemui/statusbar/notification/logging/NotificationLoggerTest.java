@@ -42,6 +42,7 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -51,6 +52,8 @@ import com.google.android.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -72,9 +75,11 @@ public class NotificationLoggerTest extends SysuiTestCase {
     // Dependency mocks:
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationListener mListener;
+    @Captor private ArgumentCaptor<NotificationEntryListener> mEntryListenerCaptor;
 
     private NotificationData.Entry mEntry;
     private TestableNotificationLogger mLogger;
+    private NotificationEntryListener mNotificationEntryListener;
     private ConcurrentLinkedQueue<AssertionError> mErrorQueue = new ConcurrentLinkedQueue<>();
 
     @Before
@@ -94,6 +99,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
         mLogger = new TestableNotificationLogger(mListener, Dependency.get(UiOffloadThread.class),
                 mEntryManager, mock(StatusBarStateController.class), mBarService);
         mLogger.setUpWithContainer(mListContainer);
+        verify(mEntryManager).addNotificationEntryListener(mEntryListenerCaptor.capture());
+        mNotificationEntryListener = mEntryListenerCaptor.getValue();
     }
 
     @Test
@@ -150,6 +157,11 @@ public class NotificationLoggerTest extends SysuiTestCase {
         // The visibility objects are recycled by NotificationLogger, so we can't use specific
         // matchers here.
         verify(mBarService, times(1)).onNotificationVisibilityChanged(any(), any());
+    }
+
+    @Test
+    public void testHandleNullEntryOnEntryRemoved() {
+        mNotificationEntryListener.onEntryRemoved(null, "foobar", null, null, false, false);
     }
 
     private class TestableNotificationLogger extends NotificationLogger {
