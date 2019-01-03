@@ -329,11 +329,11 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
     private void updateRoundedCornerRadii() {
         final int newRoundedDefault = mContext.getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_radius);
+                com.android.internal.R.dimen.rounded_corner_radius);
         final int newRoundedDefaultTop = mContext.getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_radius_top);
+                com.android.internal.R.dimen.rounded_corner_radius_top);
         final int newRoundedDefaultBottom = mContext.getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_radius_bottom);
+                com.android.internal.R.dimen.rounded_corner_radius_bottom);
 
         final boolean roundedCornersChanged = mRoundedDefault != newRoundedDefault
                 || mRoundedDefaultBottom != newRoundedDefaultBottom
