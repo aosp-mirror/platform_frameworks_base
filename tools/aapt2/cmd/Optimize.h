@@ -61,9 +61,10 @@ class OptimizeCommand : public Command {
  public:
   explicit OptimizeCommand() : Command("optimize") {
     SetDescription("Preforms resource optimizations on an apk.");
-    AddOptionalFlag("-o", "Path to the output APK.", &options_.output_path);
-    AddOptionalFlag("-d", "Path to the output directory (for splits).", &options_.output_dir);
-    AddOptionalFlag("-x", "Path to XML configuration file.", &config_path_);
+    AddOptionalFlag("-o", "Path to the output APK.", &options_.output_path, Command::kPath);
+    AddOptionalFlag("-d", "Path to the output directory (for splits).", &options_.output_dir,
+        Command::kPath);
+    AddOptionalFlag("-x", "Path to XML configuration file.", &config_path_, Command::kPath);
     AddOptionalSwitch("-p", "Print the multi APK artifacts and exit.", &print_only_);
     AddOptionalFlag(
         "--target-densities",
