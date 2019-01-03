@@ -33,6 +33,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
@@ -304,6 +305,10 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 .setSubtype(mCode)
                 .addTaggedData(MetricsEvent.FIELD_NAV_ACTION, action)
                 .addTaggedData(MetricsEvent.FIELD_FLAGS, flags));
+        // TODO(b/122195391): Added logs to make sure sysui is sending back button events
+        if (mCode == KeyEvent.KEYCODE_BACK && flags != KeyEvent.FLAG_LONG_PRESS) {
+            Log.i(TAG, "Back button event: " + KeyEvent.actionToString(action));
+        }
         final int repeatCount = (flags & KeyEvent.FLAG_LONG_PRESS) != 0 ? 1 : 0;
         final KeyEvent ev = new KeyEvent(mDownTime, when, action, mCode, repeatCount,
                 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
