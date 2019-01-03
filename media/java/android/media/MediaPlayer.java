@@ -25,8 +25,10 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.SurfaceTexture;
+import android.media.SubtitleController.Anchor;
+import android.media.SubtitleTrack.RenderingWidget;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -35,30 +37,19 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
-import android.util.ArrayMap;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.widget.VideoView;
-import android.graphics.SurfaceTexture;
-import android.media.AudioManager;
-import android.media.MediaDrm;
-import android.media.MediaFormat;
-import android.media.MediaTimeProvider;
-import android.media.PlaybackParams;
-import android.media.SubtitleController;
-import android.media.SubtitleController.Anchor;
-import android.media.SubtitleData;
-import android.media.SubtitleTrack.RenderingWidget;
-import android.media.SyncParams;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -72,7 +63,6 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.Runnable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -2105,9 +2095,11 @@ public class MediaPlayer extends PlayerBase
         mOnInfoListener = null;
         mOnVideoSizeChangedListener = null;
         mOnTimedTextListener = null;
-        if (mTimeProvider != null) {
-            mTimeProvider.close();
-            mTimeProvider = null;
+        synchronized (mTimeProviderLock) {
+            if (mTimeProvider != null) {
+                mTimeProvider.close();
+                mTimeProvider = null;
+            }
         }
         synchronized(this) {
             mSubtitleDataListenerDisabled = false;
@@ -2147,9 +2139,11 @@ public class MediaPlayer extends PlayerBase
         if (mSubtitleController != null) {
             mSubtitleController.reset();
         }
-        if (mTimeProvider != null) {
-            mTimeProvider.close();
-            mTimeProvider = null;
+        synchronized (mTimeProviderLock) {
+            if (mTimeProvider != null) {
+                mTimeProvider.close();
+                mTimeProvider = null;
+            }
         }
 
         stayAwake(false);
@@ -2790,12 +2784,17 @@ public class MediaPlayer extends PlayerBase
                 synchronized (mIndexTrackPairs) {
                     mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(null, track));
                 }
-                Handler h = mTimeProvider.mEventHandler;
-                int what = TimeProvider.NOTIFY;
-                int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
-                Pair<SubtitleTrack, byte[]> trackData = Pair.create(track, contents.getBytes());
-                Message m = h.obtainMessage(what, arg1, 0, trackData);
-                h.sendMessage(m);
+                synchronized (mTimeProviderLock) {
+                    if (mTimeProvider != null) {
+                        Handler h = mTimeProvider.mEventHandler;
+                        int what = TimeProvider.NOTIFY;
+                        int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
+                        Pair<SubtitleTrack, byte[]> trackData =
+                                Pair.create(track, contents.getBytes());
+                        Message m = h.obtainMessage(what, arg1, 0, trackData);
+                        h.sendMessage(m);
+                    }
+                }
                 return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
             }
 
@@ -3020,12 +3019,17 @@ public class MediaPlayer extends PlayerBase
                             total += bytes;
                         }
                     }
-                    Handler h = mTimeProvider.mEventHandler;
-                    int what = TimeProvider.NOTIFY;
-                    int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
-                    Pair<SubtitleTrack, byte[]> trackData = Pair.create(track, bos.toByteArray());
-                    Message m = h.obtainMessage(what, arg1, 0, trackData);
-                    h.sendMessage(m);
+                    synchronized (mTimeProviderLock) {
+                        if (mTimeProvider != null) {
+                            Handler h = mTimeProvider.mEventHandler;
+                            int what = TimeProvider.NOTIFY;
+                            int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
+                            Pair<SubtitleTrack, byte[]> trackData =
+                                    Pair.create(track, bos.toByteArray());
+                            Message m = h.obtainMessage(what, arg1, 0, trackData);
+                            h.sendMessage(m);
+                        }
+                    }
                     return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
@@ -3308,14 +3312,17 @@ public class MediaPlayer extends PlayerBase
     private static final int MEDIA_AUDIO_ROUTING_CHANGED = 10000;
 
     private TimeProvider mTimeProvider;
+    private final Object mTimeProviderLock = new Object();
 
     /** @hide */
     @UnsupportedAppUsage
     public MediaTimeProvider getMediaTimeProvider() {
-        if (mTimeProvider == null) {
-            mTimeProvider = new TimeProvider(this);
+        synchronized (mTimeProviderLock) {
+            if (mTimeProvider == null) {
+                mTimeProvider = new TimeProvider(this);
+            }
+            return mTimeProvider;
         }
-        return mTimeProvider;
     }
 
     private class EventHandler extends Handler
