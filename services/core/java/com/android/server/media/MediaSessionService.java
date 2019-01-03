@@ -114,10 +114,11 @@ public class MediaSessionService extends SystemService implements Monitor {
     @GuardedBy("mLock")
     private final ArrayList<SessionsListenerRecord> mSessionsListeners
             = new ArrayList<SessionsListenerRecord>();
+    // Map user id as index to list of Session2Tokens
     // TODO: Keep session2 info in MediaSessionStack for prioritizing both session1 and session2 in
     //       one place.
     @GuardedBy("mLock")
-    private final List<Session2Token> mSession2Tokens = new ArrayList<>();
+    private final SparseArray<List<Session2Token>> mSession2TokensPerUser = new SparseArray<>();
 
     private KeyguardManager mKeyguardManager;
     private IAudioService mAudioService;
@@ -305,10 +306,13 @@ public class MediaSessionService extends SystemService implements Monitor {
         updateUser();
     }
 
+    // Called when the user with the userId is removed.
     @Override
     public void onStopUser(int userId) {
         if (DEBUG) Log.d(TAG, "onStopUser: " + userId);
         synchronized (mLock) {
+            // TODO: Also handle removing user in updateUser() because adding/switching user is
+            //       handled in updateUser().
             FullUserRecord user = getFullUserRecordLocked(userId);
             if (user != null) {
                 if (user.mFullUserId == userId) {
@@ -318,6 +322,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     user.destroySessionsForUserLocked(userId);
                 }
             }
+            mSession2TokensPerUser.remove(userId);
             updateUser();
         }
     }
@@ -363,6 +368,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                             mUserRecords.put(userInfo.id, new FullUserRecord(userInfo.id));
                         }
                     }
+                    if (mSession2TokensPerUser.get(userInfo.id) == null) {
+                        mSession2TokensPerUser.put(userInfo.id, new ArrayList<>());
+                    }
                 }
             }
             // Ensure that the current full user exists.
@@ -372,6 +380,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                 Log.w(TAG, "Cannot find FullUserInfo for the current user " + currentFullUserId);
                 mCurrentFullUserRecord = new FullUserRecord(currentFullUserId);
                 mUserRecords.put(currentFullUserId, mCurrentFullUserRecord);
+                if (mSession2TokensPerUser.get(currentFullUserId) == null) {
+                    mSession2TokensPerUser.put(currentFullUserId, new ArrayList<>());
+                }
             }
             mFullUserIds.put(currentFullUserId, currentFullUserId);
         }
@@ -732,9 +743,15 @@ public class MediaSessionService extends SystemService implements Monitor {
             pw.println(indent + "Restored MediaButtonReceiverComponentType: "
                     + mRestoredMediaButtonReceiverComponentType);
             mPriorityStack.dump(pw, indent);
-            pw.println(indent + "Session2Tokens - " + mSession2Tokens.size());
-            for (Session2Token session2Token : mSession2Tokens) {
-                pw.println(indent + "  " + session2Token);
+            pw.println(indent + "Session2Tokens:");
+            for (int i = 0; i < mSession2TokensPerUser.size(); i++) {
+                List<Session2Token> list = mSession2TokensPerUser.valueAt(i);
+                if (list == null || list.size() == 0) {
+                    continue;
+                }
+                for (Session2Token token : list) {
+                    pw.println(indent + "  " + token);
+                }
             }
         }
 
@@ -950,6 +967,34 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 }
                 return binders;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public List<Session2Token> getSession2Tokens(int userId) {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+
+            try {
+                // Check that they can make calls on behalf of the user and
+                // get the final user id
+                int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
+                        true /* allowAll */, true /* requireFull */, "getSession2Tokens",
+                        null /* optional packageName */);
+                List<Session2Token> result = new ArrayList<>();
+                synchronized (mLock) {
+                    if (resolvedUserId == UserHandle.USER_ALL) {
+                        for (int i = 0; i < mSession2TokensPerUser.size(); i++) {
+                            result.addAll(mSession2TokensPerUser.valueAt(i));
+                        }
+                    } else {
+                        result.addAll(mSession2TokensPerUser.get(userId));
+                    }
+                }
+                return result;
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1965,14 +2010,16 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void onConnected(MediaController2 controller, Session2CommandGroup allowedCommands) {
             synchronized (mLock) {
-                mSession2Tokens.add(mToken);
+                int userId = UserHandle.getUserId(mToken.getUid());
+                mSession2TokensPerUser.get(userId).add(mToken);
             }
         }
 
         @Override
         public void onDisconnected(MediaController2 controller) {
             synchronized (mLock) {
-                mSession2Tokens.remove(mToken);
+                int userId = UserHandle.getUserId(mToken.getUid());
+                mSession2TokensPerUser.get(userId).remove(mToken);
             }
         }
     }

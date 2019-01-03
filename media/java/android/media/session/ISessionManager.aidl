@@ -35,6 +35,7 @@ interface ISessionManager {
     ISession createSession(String packageName, in ISessionCallback cb, String tag, int userId);
     void notifySession2Created(in Session2Token sessionToken);
     List<IBinder> getSessions(in ComponentName compName, int userId);
+    List<Session2Token> getSession2Tokens(int userId);
     void dispatchMediaKeyEvent(String packageName, boolean asSystemService, in KeyEvent keyEvent,
             boolean needWakeLock);
     void dispatchVolumeKeyEvent(String packageName, String opPackageName, boolean asSystemService,
