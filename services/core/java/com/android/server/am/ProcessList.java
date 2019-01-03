@@ -1678,12 +1678,14 @@ public final class ProcessList {
             AppZygote appZygote = mAppZygotes.get(app.info.processName, app.info.uid);
             final ArrayList<ProcessRecord> zygoteProcessList;
             if (appZygote == null) {
-                final int userId = UserHandle.getUserId(app.info.uid);
                 final IsolatedUidRange uidRange =
                         mAppIsolatedUidRangeAllocator.getIsolatedUidRangeLocked(app.info);
-                // Allocate an isolated UID out of this range for the Zygote itself
-                final int zygoteIsolatedUid = uidRange.allocateIsolatedUidLocked(userId);
-                appZygote = new AppZygote(app.info, zygoteIsolatedUid);
+                final int userId = UserHandle.getUserId(app.info.uid);
+                // Create the app-zygote and provide it with the UID-range it's allowed
+                // to setresuid/setresgid to.
+                final int firstUid = UserHandle.getUid(userId, uidRange.mFirstUid);
+                final int lastUid = UserHandle.getUid(userId, uidRange.mLastUid);
+                appZygote = new AppZygote(app.info, app.info.uid, firstUid, lastUid);
                 mAppZygotes.put(app.info.processName, app.info.uid, appZygote);
                 zygoteProcessList = new ArrayList<ProcessRecord>();
                 mAppZygoteProcesses.put(appZygote, zygoteProcessList);

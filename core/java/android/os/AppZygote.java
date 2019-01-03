@@ -34,7 +34,14 @@ import com.android.internal.annotations.GuardedBy;
 public class AppZygote {
     private static final String LOG_TAG = "AppZygote";
 
+    // UID of the Zygote itself
     private final int mZygoteUid;
+
+    // First UID/GID of the range the AppZygote can setuid()/setgid() to
+    private final int mZygoteUidGidMin;
+
+    // Last UID/GID of the range the AppZygote can setuid()/setgid() to
+    private final int mZygoteUidGidMax;
 
     private final Object mLock = new Object();
 
@@ -47,9 +54,11 @@ public class AppZygote {
 
     private final ApplicationInfo mAppInfo;
 
-    public AppZygote(ApplicationInfo appInfo, int zygoteUid) {
+    public AppZygote(ApplicationInfo appInfo, int zygoteUid, int uidGidMin, int uidGidMax) {
         mAppInfo = appInfo;
         mZygoteUid = zygoteUid;
+        mZygoteUidGidMin = uidGidMin;
+        mZygoteUidGidMax = uidGidMax;
     }
 
     /**
@@ -104,7 +113,9 @@ public class AppZygote {
                     "app_zygote",  // seInfo
                     abi,  // abi
                     abi, // acceptedAbiList
-                    null);  // instructionSet
+                    null, // instructionSet
+                    mZygoteUidGidMin,
+                    mZygoteUidGidMax);
 
             ZygoteProcess.waitForConnectionToZygote(mZygote.getPrimarySocketAddress());
             // preload application code in the zygote
