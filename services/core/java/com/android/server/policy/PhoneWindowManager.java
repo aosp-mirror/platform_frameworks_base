@@ -844,7 +844,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void interceptBackKeyDown() {
-        MetricsLogger.count(mContext, "key_back_down", 1);
+        mLogger.count("key_back_down", 1);
         // Reset back key state for long press
         mBackKeyHandled = false;
 
@@ -858,6 +858,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // returns true if the key was handled and should not be passed to the user
     private boolean interceptBackKeyUp(KeyEvent event) {
+        mLogger.count("key_back_up", 1);
         // Cache handled state
         boolean handled = mBackKeyHandled;
 
