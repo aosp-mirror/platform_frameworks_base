@@ -373,6 +373,13 @@ public class BiometricService extends SystemService {
             public void onAuthenticationSucceeded(boolean requireConfirmation, byte[] token)
                     throws RemoteException {
                 try {
+                    // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
+                    // after user dismissed/canceled dialog).
+                    if (mCurrentAuthSession == null) {
+                        Slog.e(TAG, "onAuthenticationSucceeded(): Auth session is null");
+                        return;
+                    }
+
                     if (!requireConfirmation) {
                         mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
                         KeyStore.getInstance().addAuthToken(token);
@@ -398,6 +405,13 @@ public class BiometricService extends SystemService {
             public void onAuthenticationFailed(int cookie, boolean requireConfirmation)
                     throws RemoteException {
                 try {
+                    // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
+                    // after user dismissed/canceled dialog).
+                    if (mCurrentAuthSession == null) {
+                        Slog.e(TAG, "onAuthenticationFailed(): Auth session is null");
+                        return;
+                    }
+
                     mStatusBarService.onBiometricHelp(getContext().getResources().getString(
                             com.android.internal.R.string.biometric_not_recognized));
                     if (requireConfirmation) {
@@ -486,6 +500,13 @@ public class BiometricService extends SystemService {
 
             @Override
             public void onAcquired(int acquiredInfo, String message) throws RemoteException {
+                // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
+                // after user dismissed/canceled dialog).
+                if (mCurrentAuthSession == null) {
+                    Slog.e(TAG, "onAcquired(): Auth session is null");
+                    return;
+                }
+
                 if (acquiredInfo != BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
                     try {
                         mStatusBarService.onBiometricHelp(message);
