@@ -1313,16 +1313,17 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyDataConnection(int state, boolean isDataAllowed,
-            String reason, String apn, String apnType, LinkProperties linkProperties,
-            NetworkCapabilities networkCapabilities, int networkType, boolean roaming) {
+    public void notifyDataConnection(int state, boolean isDataAllowed, String apn, String apnType,
+                                     LinkProperties linkProperties,
+                                     NetworkCapabilities networkCapabilities, int networkType,
+                                     boolean roaming) {
         notifyDataConnectionForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID, state,
-            isDataAllowed,reason, apn, apnType, linkProperties,
-            networkCapabilities, networkType, roaming);
+                isDataAllowed, apn, apnType, linkProperties,
+                networkCapabilities, networkType, roaming);
     }
 
-    public void notifyDataConnectionForSubscriber(int subId, int state,
-            boolean isDataAllowed, String reason, String apn, String apnType,
+    public void notifyDataConnectionForSubscriber(int subId, int state, boolean isDataAllowed,
+                                                  String apn, String apnType,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
             int networkType, boolean roaming) {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
@@ -1331,7 +1332,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (VDBG) {
             log("notifyDataConnectionForSubscriber: subId=" + subId
                 + " state=" + state + " isDataAllowed=" + isDataAllowed
-                + " reason='" + reason
                 + "' apn='" + apn + "' apnType=" + apnType + " networkType=" + networkType
                 + " mRecords.size()=" + mRecords.size());
         }
@@ -1366,7 +1366,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     mDataConnectionNetworkType[phoneId] = networkType;
                 }
                 mPreciseDataConnectionState = new PreciseDataConnectionState(state, networkType,
-                        apnType, apn, reason, linkProperties, "");
+                        apnType, apn, linkProperties, "");
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)) {
@@ -1381,30 +1381,29 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
-        broadcastDataConnectionStateChanged(state, isDataAllowed, reason, apn,
-                apnType, linkProperties, networkCapabilities, roaming, subId);
-        broadcastPreciseDataConnectionStateChanged(state, networkType, apnType, apn, reason,
+        broadcastDataConnectionStateChanged(state, isDataAllowed, apn, apnType, linkProperties,
+                networkCapabilities, roaming, subId);
+        broadcastPreciseDataConnectionStateChanged(state, networkType, apnType, apn,
                 linkProperties, "");
     }
 
-    public void notifyDataConnectionFailed(String reason, String apnType) {
+    public void notifyDataConnectionFailed(String apnType) {
          notifyDataConnectionFailedForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID,
-                 reason, apnType);
+                 apnType);
     }
 
-    public void notifyDataConnectionFailedForSubscriber(int subId,
-            String reason, String apnType) {
+    public void notifyDataConnectionFailedForSubscriber(int subId, String apnType) {
         if (!checkNotifyPermission("notifyDataConnectionFailed()")) {
             return;
         }
         if (VDBG) {
             log("notifyDataConnectionFailedForSubscriber: subId=" + subId
-                + " reason=" + reason + " apnType=" + apnType);
+                    + " apnType=" + apnType);
         }
         synchronized (mRecords) {
             mPreciseDataConnectionState = new PreciseDataConnectionState(
                     TelephonyManager.DATA_UNKNOWN,TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                    apnType, "", reason, null, "");
+                    apnType, "", null, "");
             for (Record r : mRecords) {
                 if (r.matchPhoneStateListenerEvent(
                         PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)) {
@@ -1417,9 +1416,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
-        broadcastDataConnectionFailed(reason, apnType, subId);
+        broadcastDataConnectionFailed(apnType, subId);
         broadcastPreciseDataConnectionStateChanged(TelephonyManager.DATA_UNKNOWN,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, apnType, "", reason, null, "");
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, apnType, "", null, "");
     }
 
     public void notifyCellLocation(Bundle cellLocation) {
@@ -1529,15 +1528,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyPreciseDataConnectionFailed(String reason, String apnType,
-            String apn, String failCause) {
+    public void notifyPreciseDataConnectionFailed(String apnType, String apn, String failCause) {
         if (!checkNotifyPermission("notifyPreciseDataConnectionFailed()")) {
             return;
         }
         synchronized (mRecords) {
             mPreciseDataConnectionState = new PreciseDataConnectionState(
                     TelephonyManager.DATA_UNKNOWN, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                    apnType, apn, reason, null, failCause);
+                    apnType, apn, null, failCause);
             for (Record r : mRecords) {
                 if (r.matchPhoneStateListenerEvent(
                         PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)) {
@@ -1551,7 +1549,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             handleRemoveListLocked();
         }
         broadcastPreciseDataConnectionStateChanged(TelephonyManager.DATA_UNKNOWN,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, apnType, apn, reason, null, failCause);
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, apnType, apn, null, failCause);
     }
 
     @Override
@@ -1882,10 +1880,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         android.Manifest.permission.READ_CALL_LOG});
     }
 
-    private void broadcastDataConnectionStateChanged(int state,
-            boolean isDataAllowed,
-            String reason, String apn, String apnType, LinkProperties linkProperties,
-            NetworkCapabilities networkCapabilities, boolean roaming, int subId) {
+    private void broadcastDataConnectionStateChanged(int state, boolean isDataAllowed, String apn,
+                                                     String apnType, LinkProperties linkProperties,
+                                                     NetworkCapabilities networkCapabilities,
+                                                     boolean roaming, int subId) {
         // Note: not reporting to the battery stats service here, because the
         // status bar takes care of that after taking into account all of the
         // required info.
@@ -1894,9 +1892,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 PhoneConstantConversions.convertDataState(state).toString());
         if (!isDataAllowed) {
             intent.putExtra(PhoneConstants.NETWORK_UNAVAILABLE_KEY, true);
-        }
-        if (reason != null) {
-            intent.putExtra(PhoneConstants.STATE_CHANGE_REASON_KEY, reason);
         }
         if (linkProperties != null) {
             intent.putExtra(PhoneConstants.DATA_LINK_PROPERTIES_KEY, linkProperties);
@@ -1916,17 +1911,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
-    private void broadcastDataConnectionFailed(String reason, String apnType,
-            int subId) {
+    private void broadcastDataConnectionFailed(String apnType, int subId) {
         Intent intent = new Intent(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
-        intent.putExtra(PhoneConstants.FAILURE_REASON_KEY, reason);
         intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void broadcastPreciseCallStateChanged(int ringingCallState, int foregroundCallState,
-            int backgroundCallState) {
+                                                  int backgroundCallState) {
         Intent intent = new Intent(TelephonyManager.ACTION_PRECISE_CALL_STATE_CHANGED);
         intent.putExtra(TelephonyManager.EXTRA_RINGING_CALL_STATE, ringingCallState);
         intent.putExtra(TelephonyManager.EXTRA_FOREGROUND_CALL_STATE, foregroundCallState);
@@ -1936,16 +1929,16 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private void broadcastPreciseDataConnectionStateChanged(int state, int networkType,
-            String apnType, String apn, String reason, LinkProperties linkProperties,
-            String failCause) {
+                                                            String apnType, String apn,
+                                                            LinkProperties linkProperties,
+                                                            String failCause) {
         Intent intent = new Intent(TelephonyManager.ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED);
         intent.putExtra(PhoneConstants.STATE_KEY, state);
         intent.putExtra(PhoneConstants.DATA_NETWORK_TYPE_KEY, networkType);
-        if (reason != null) intent.putExtra(PhoneConstants.STATE_CHANGE_REASON_KEY, reason);
         if (apnType != null) intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
         if (apn != null) intent.putExtra(PhoneConstants.DATA_APN_KEY, apn);
         if (linkProperties != null) {
-            intent.putExtra(PhoneConstants.DATA_LINK_PROPERTIES_KEY,linkProperties);
+            intent.putExtra(PhoneConstants.DATA_LINK_PROPERTIES_KEY, linkProperties);
         }
         if (failCause != null) intent.putExtra(PhoneConstants.DATA_FAILURE_CAUSE_KEY, failCause);
 
