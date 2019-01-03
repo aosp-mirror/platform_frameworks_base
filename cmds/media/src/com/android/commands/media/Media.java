@@ -24,7 +24,7 @@ import android.media.MediaMetadata;
 import android.media.session.ISessionController;
 import android.media.session.ISessionControllerCallback;
 import android.media.session.ISessionManager;
-import android.media.session.ParcelableVolumeInfo;
+import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.HandlerThread;
@@ -224,7 +224,7 @@ public class Media extends BaseCommand {
         }
 
         @Override
-        public void onVolumeInfoChanged(ParcelableVolumeInfo info) throws RemoteException {
+        public void onVolumeInfoChanged(PlaybackInfo info) throws RemoteException {
             System.out.println("onVolumeInfoChanged " + info);
         }
 

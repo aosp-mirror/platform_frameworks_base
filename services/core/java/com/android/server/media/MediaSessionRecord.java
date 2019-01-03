@@ -34,7 +34,6 @@ import android.media.session.ISessionControllerCallback;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
-import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Binder;
@@ -628,7 +627,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mDestroyed) {
                 return;
             }
-            ParcelableVolumeInfo info = mController.getVolumeAttributes();
+            PlaybackInfo info = mController.getVolumeAttributes();
             for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
                 ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
@@ -1233,14 +1232,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public ParcelableVolumeInfo getVolumeAttributes() {
+        public PlaybackInfo getVolumeAttributes() {
             int volumeType;
             AudioAttributes attributes;
             synchronized (mLock) {
                 if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE) {
                     int current = mOptimisticVolume != -1 ? mOptimisticVolume : mCurrentVolume;
-                    return new ParcelableVolumeInfo(
-                            mVolumeType, mAudioAttrs, mVolumeControlType, mMaxVolume, current);
+                    return new PlaybackInfo(mVolumeType, mVolumeControlType, mMaxVolume, current,
+                            mAudioAttrs);
                 }
                 volumeType = mVolumeType;
                 attributes = mAudioAttrs;
@@ -1248,8 +1247,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             int stream = AudioAttributes.toLegacyStreamType(attributes);
             int max = mAudioManager.getStreamMaxVolume(stream);
             int current = mAudioManager.getStreamVolume(stream);
-            return new ParcelableVolumeInfo(
-                    volumeType, attributes, VolumeProvider.VOLUME_CONTROL_ABSOLUTE, max, current);
+            return new PlaybackInfo(volumeType, VolumeProvider.VOLUME_CONTROL_ABSOLUTE, max,
+                    current, attributes);
         }
 
         @Override
