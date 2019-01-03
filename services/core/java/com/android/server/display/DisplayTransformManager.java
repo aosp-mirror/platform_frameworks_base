@@ -45,6 +45,10 @@ public class DisplayTransformManager {
      */
     public static final int LEVEL_COLOR_MATRIX_NIGHT_DISPLAY = 100;
     /**
+     * Color transform level used by display white balance to adjust the display's white point.
+     */
+    public static final int LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE = 125;
+    /**
      * Color transform level used to adjust the color saturation of the display.
      */
     public static final int LEVEL_COLOR_MATRIX_SATURATION = 150;

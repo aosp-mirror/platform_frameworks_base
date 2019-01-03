@@ -60,6 +60,13 @@ public final class ColorDisplayManager {
         return context.getResources().getBoolean(R.bool.config_nightDisplayAvailable);
     }
 
+    /**
+     * Returns {@code true} if display white balance is supported by the device.
+     */
+    public static boolean isDisplayWhiteBalanceAvailable(Context context) {
+        return context.getResources().getBoolean(R.bool.config_displayWhiteBalanceAvailable);
+    }
+
     private static class ColorDisplayManagerInternal {
 
         private static ColorDisplayManagerInternal sInstance;
