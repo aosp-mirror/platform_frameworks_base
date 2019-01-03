@@ -274,7 +274,7 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
 
 static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTokenObj,
         jlong layerObject, jobject sourceCropObj, jfloat frameScale,
-        jlongArray excludeObjectArray) {
+        jlongArray excludeObjectArray, jint format) {
 
     auto layer = reinterpret_cast<SurfaceControl *>(layerObject);
     if (layer == NULL) {
@@ -311,8 +311,9 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTok
         dataspace = pickDataspaceFromColorMode(colorMode);
     }
     status_t res = ScreenshotClient::captureChildLayers(layer->getHandle(), dataspace,
-                                                        ui::PixelFormat::RGBA_8888, sourceCrop,
-                                                        excludeHandles, frameScale, &buffer);
+                                                        static_cast<ui::PixelFormat>(format),
+                                                        sourceCrop, excludeHandles, frameScale,
+                                                        &buffer);
     if (res != NO_ERROR) {
         return NULL;
     }
@@ -1376,7 +1377,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeScreenshot },
     {"nativeCaptureLayers",
             "(Landroid/os/IBinder;JLandroid/graphics/Rect;"
-            "F[J)"
+            "F[JI)"
             "Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;",
             (void*)nativeCaptureLayers },
     {"nativeSetInputWindowInfo", "(JJLandroid/view/InputWindowHandle;)V",

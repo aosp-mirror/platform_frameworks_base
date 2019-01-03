@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+
 import static com.android.server.wm.TaskSnapshotPersister.DISABLE_FULL_SIZED_BITMAPS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -248,6 +250,12 @@ class TaskSnapshotController {
     @Nullable
     SurfaceControl.ScreenshotGraphicBuffer createTaskSnapshot(@NonNull Task task,
             float scaleFraction) {
+        return createTaskSnapshot(task, scaleFraction, PixelFormat.RGBA_8888);
+    }
+
+    @Nullable
+    SurfaceControl.ScreenshotGraphicBuffer createTaskSnapshot(@NonNull Task task,
+            float scaleFraction, int pixelFormat) {
         if (task.getSurfaceControl() == null) {
             if (DEBUG_SCREENSHOT) {
                 Slog.w(TAG_WM, "Failed to take screenshot. No surface control for " + task);
@@ -258,7 +266,7 @@ class TaskSnapshotController {
         mTmpRect.offsetTo(0, 0);
         final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
                 SurfaceControl.captureLayers(
-                        task.getSurfaceControl(), mTmpRect, scaleFraction);
+                        task.getSurfaceControl(), mTmpRect, scaleFraction, pixelFormat);
         final GraphicBuffer buffer = screenshotBuffer != null ? screenshotBuffer.getGraphicBuffer()
                 : null;
         if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
@@ -299,8 +307,14 @@ class TaskSnapshotController {
             Slog.w(TAG_WM, "Failed to take screenshot. No main window for " + task);
             return null;
         }
+        final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
+        final boolean isShowWallpaper = (mainWindow.getAttrs().flags & FLAG_SHOW_WALLPAPER) != 0;
+        final int pixelFormat = mPersister.use16BitFormat() && activity.fillsParent()
+                && !(isWindowTranslucent && isShowWallpaper)
+                ? PixelFormat.RGB_565
+                : PixelFormat.RGBA_8888;
         final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
-                createTaskSnapshot(task, scaleFraction);
+                createTaskSnapshot(task, scaleFraction, pixelFormat);
 
         if (screenshotBuffer == null) {
             if (DEBUG_SCREENSHOT) {
@@ -308,7 +322,8 @@ class TaskSnapshotController {
             }
             return null;
         }
-        final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
+        final boolean isTranslucent = PixelFormat.formatHasAlpha(pixelFormat)
+                && (!activity.fillsParent() || isWindowTranslucent);
         return new TaskSnapshot(
                 System.currentTimeMillis() /* id */,
                 activity.mActivityComponent, screenshotBuffer.getGraphicBuffer(),
@@ -316,7 +331,7 @@ class TaskSnapshotController {
                 activity.getTask().getConfiguration().orientation,
                 getInsets(mainWindow), isLowRamDevice /* reduced */, scaleFraction /* scale */,
                 true /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),
-                !activity.fillsParent() || isWindowTranslucent);
+                isTranslucent);
     }
 
     private boolean shouldDisableSnapshots() {
