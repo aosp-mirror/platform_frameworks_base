@@ -90,7 +90,7 @@ public class NotificationData {
         private static final long INITIALIZATION_DELAY = 400;
         private static final long NOT_LAUNCHED_YET = -LAUNCH_COOLDOWN;
         private static final int COLOR_INVALID = 1;
-        public String key;
+        public final String key;
         public StatusBarNotification notification;
         public NotificationChannel channel;
         public long lastAudiblyAlertedMs;
