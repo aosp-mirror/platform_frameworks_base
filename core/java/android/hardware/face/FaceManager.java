@@ -975,14 +975,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
         }
         final String msg = getAcquiredString(mContext, acquireInfo, vendorCode);
-        if (msg == null) {
-            return;
-        }
         final int clientInfo = acquireInfo == FACE_ACQUIRED_VENDOR
                 ? (vendorCode + FACE_ACQUIRED_VENDOR_BASE) : acquireInfo;
         if (mEnrollmentCallback != null) {
             mEnrollmentCallback.onEnrollmentHelp(clientInfo, msg);
-        } else if (mAuthenticationCallback != null) {
+        } else if (mAuthenticationCallback != null && msg != null) {
             mAuthenticationCallback.onAuthenticationHelp(clientInfo, msg);
         }
     }
