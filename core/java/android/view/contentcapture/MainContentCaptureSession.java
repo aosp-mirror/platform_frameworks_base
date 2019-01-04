@@ -141,6 +141,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
+    MainContentCaptureSession getMainCaptureSession() {
+        return this;
+    }
+
+    @Override
     ContentCaptureSession newChild(@NonNull ContentCaptureContext clientContext) {
         final ContentCaptureSession child = new ChildContentCaptureSession(this, clientContext);
         notifyChildSessionStarted(mId, child.mId, clientContext);
@@ -389,14 +394,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         handleResetSession(/* resetState= */ true);
     }
 
-    // TODO(b/121033016): once we support multiple sessions, we might need to move some of these
+    // TODO(b/122454205): once we support multiple sessions, we might need to move some of these
     // clearings out.
     private void handleResetSession(boolean resetState) {
         if (resetState) {
             mState = STATE_UNKNOWN;
         }
 
-        // TODO(b/121033016): must reset children (which currently is owned by superclass)
+        // TODO(b/122454205): must reset children (which currently is owned by superclass)
         mApplicationToken = null;
         mComponentName = null;
         mEvents = null;
@@ -429,7 +434,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 && !mDisabled.get();
     }
 
-    // TODO(b/121033016): refactor "notifyXXXX" methods below to a common "Buffer" object that is
+    // TODO(b/122454205): refactor "notifyXXXX" methods below to a common "Buffer" object that is
     // shared between ActivityContentCaptureSession and ChildContentCaptureSession objects. Such
     // change should also get get rid of the "internalNotifyXXXX" methods above
     void notifyChildSessionStarted(@NonNull String parentSessionId,

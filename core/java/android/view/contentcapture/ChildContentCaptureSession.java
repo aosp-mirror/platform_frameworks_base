@@ -33,7 +33,7 @@ import java.io.PrintWriter;
 final class ChildContentCaptureSession extends ContentCaptureSession {
 
     @NonNull
-    private final MainContentCaptureSession mParent;
+    private final ContentCaptureSession mParent;
 
     /**
      * {@link ContentCaptureContext} set by client, or {@code null} when it's the
@@ -46,16 +46,25 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
     private final ContentCaptureContext mClientContext;
 
     /** @hide */
-    protected ChildContentCaptureSession(@NonNull MainContentCaptureSession parent,
+    protected ChildContentCaptureSession(@NonNull ContentCaptureSession parent,
             @NonNull ContentCaptureContext clientContext) {
         mParent = parent;
         mClientContext = Preconditions.checkNotNull(clientContext);
     }
 
     @Override
-    ContentCaptureSession newChild(@NonNull ContentCaptureContext context) {
-        // TODO(b/121033016): implement it
-        throw new UnsupportedOperationException("grand-children not implemented yet");
+    MainContentCaptureSession getMainCaptureSession() {
+        if (mParent instanceof MainContentCaptureSession) {
+            return (MainContentCaptureSession) mParent;
+        }
+        return mParent.getMainCaptureSession();
+    }
+
+    @Override
+    ContentCaptureSession newChild(@NonNull ContentCaptureContext clientContext) {
+        final ContentCaptureSession child = new ChildContentCaptureSession(this, clientContext);
+        getMainCaptureSession().notifyChildSessionStarted(mId, child.mId, clientContext);
+        return child;
     }
 
     @Override
@@ -65,27 +74,27 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
 
     @Override
     void onDestroy() {
-        mParent.notifyChildSessionFinished(mParent.mId, mId);
+        getMainCaptureSession().notifyChildSessionFinished(mParent.mId, mId);
     }
 
     @Override
     void internalNotifyViewAppeared(@NonNull ViewStructureImpl node) {
-        mParent.notifyViewAppeared(mId, node);
+        getMainCaptureSession().notifyViewAppeared(mId, node);
     }
 
     @Override
     void internalNotifyViewDisappeared(@NonNull AutofillId id) {
-        mParent.notifyViewDisappeared(mId, id);
+        getMainCaptureSession().notifyViewDisappeared(mId, id);
     }
 
     @Override
     void internalNotifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
             int flags) {
-        mParent.notifyViewTextChanged(mId, id, text, flags);
+        getMainCaptureSession().notifyViewTextChanged(mId, id, text, flags);
     }
     @Override
     boolean isContentCaptureEnabled() {
-        return mParent.isContentCaptureEnabled();
+        return getMainCaptureSession().isContentCaptureEnabled();
     }
 
     @Override

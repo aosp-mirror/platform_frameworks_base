@@ -117,13 +117,11 @@ public final class ContentCaptureManager {
     /** @hide */
     public void onActivityStarted(@NonNull IBinder applicationToken,
             @NonNull ComponentName activityComponent) {
-        // TODO(b/121033016): must start all sessions
         getMainContentCaptureSession().start(applicationToken, activityComponent);
     }
 
     /** @hide */
     public void onActivityStopped() {
-        // TODO(b/121033016): must finish all sessions
         getMainContentCaptureSession().destroy();
     }
 
@@ -135,7 +133,6 @@ public final class ContentCaptureManager {
      * @hide
      */
     public void flush() {
-        // TODO(b/121033016): must flush all sessions
         getMainContentCaptureSession().flush();
     }
 
