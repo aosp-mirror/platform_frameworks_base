@@ -360,7 +360,11 @@ status_t StatsService::command(int in, int out, int err, Vector<String8>& args,
             if (mShellSubscriber == nullptr) {
                 mShellSubscriber = new ShellSubscriber(mUidMap, mPullerManager);
             }
-            mShellSubscriber->startNewSubscription(in, out, resultReceiver);
+            int timeoutSec = -1;
+            if (argCount >= 2) {
+                timeoutSec = atoi(args[1].c_str());
+            }
+            mShellSubscriber->startNewSubscription(in, out, resultReceiver, timeoutSec);
             return NO_ERROR;
         }
     }

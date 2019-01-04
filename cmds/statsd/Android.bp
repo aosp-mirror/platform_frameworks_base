@@ -332,6 +332,8 @@ java_library {
         "src/stats_log.proto",
         "src/statsd_config.proto",
         "src/atoms.proto",
+        "src/shell/shell_config.proto",
+        "src/shell/shell_data.proto",
     ],
 
     static_libs: [
