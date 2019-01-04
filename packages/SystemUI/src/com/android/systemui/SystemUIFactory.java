@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -206,6 +207,12 @@ public class SystemUIFactory {
     @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
     public boolean provideAllowNotificationLongPress() {
         return true;
+    }
+
+    @Singleton
+    @Provides
+    public ShadeController provideShadeController(Context context) {
+        return SysUiServiceProvider.getComponent(context, StatusBar.class);
     }
 
     @Module

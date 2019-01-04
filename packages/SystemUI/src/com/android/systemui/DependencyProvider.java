@@ -44,8 +44,6 @@ import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
-import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -137,12 +135,6 @@ public class DependencyProvider {
     // anywhere it is needed.
     public DisplayMetrics provideDisplayMetrics() {
         return new DisplayMetrics();
-    }
-
-    @Singleton
-    @Provides
-    public ShadeController provideShadeController(Context context) {
-        return SysUiServiceProvider.getComponent(context, StatusBar.class);
     }
 
     @Singleton
