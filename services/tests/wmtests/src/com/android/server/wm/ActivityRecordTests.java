@@ -20,6 +20,9 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
@@ -38,6 +41,7 @@ import static org.junit.Assert.assertTrue;
 import android.app.ActivityOptions;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.PauseActivityItem;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.MutableBoolean;
@@ -209,5 +213,42 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.applyOptionsLocked();
         assertNull(mActivity.pendingOptions);
         assertNotNull(activity2.pendingOptions);
+    }
+
+    @Test
+    public void testNewOverrideConfigurationIncrementsSeq() {
+        final Configuration newConfig = new Configuration();
+
+        final int prevSeq = mActivity.getMergedOverrideConfiguration().seq;
+        mActivity.onRequestedOverrideConfigurationChanged(newConfig);
+        assertEquals(prevSeq + 1, mActivity.getMergedOverrideConfiguration().seq);
+    }
+
+    @Test
+    public void testNewParentConfigurationIncrementsSeq() {
+        final Configuration newConfig = new Configuration(
+                mTask.getRequestedOverrideConfiguration());
+        newConfig.orientation = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
+                ? Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
+
+        final int prevSeq = mActivity.getMergedOverrideConfiguration().seq;
+        mTask.onRequestedOverrideConfigurationChanged(newConfig);
+        assertEquals(prevSeq + 1, mActivity.getMergedOverrideConfiguration().seq);
+    }
+
+    @Test
+    public void testNotifiesSeqIncrementToAppToken() {
+        final Configuration appWindowTokenRequestedOrientation = mock(Configuration.class);
+        mActivity.mAppWindowToken = mock(AppWindowToken.class);
+        doReturn(appWindowTokenRequestedOrientation).when(mActivity.mAppWindowToken)
+                .getRequestedOverrideConfiguration();
+
+        final Configuration newConfig = new Configuration();
+        newConfig.orientation = Configuration.ORIENTATION_PORTRAIT;
+
+        final int prevSeq = mActivity.getMergedOverrideConfiguration().seq;
+        mActivity.onRequestedOverrideConfigurationChanged(newConfig);
+        assertEquals(prevSeq + 1, appWindowTokenRequestedOrientation.seq);
+        verify(mActivity.mAppWindowToken).onMergedOverrideConfigurationChanged();
     }
 }
