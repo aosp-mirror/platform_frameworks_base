@@ -17,14 +17,11 @@
 package android.media;
 
 import static android.media.Session2Command.COMMAND_CODE_CUSTOM;
-import static android.media.Session2Command.COMMAND_VERSION_1;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.media.Session2Command.Range;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.ArrayMap;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -61,7 +58,7 @@ public final class Session2CommandGroup implements Parcelable {
     /**
      * Default Constructor.
      */
-    public Session2CommandGroup() { }
+    public Session2CommandGroup() {}
 
     /**
      * Creates a new Session2CommandGroup with commands copied from another object.
@@ -89,38 +86,6 @@ public final class Session2CommandGroup implements Parcelable {
     }
 
     /**
-     * Adds a command to this command group.
-     *
-     * @param command A command to add. Shouldn't be {@code null}.
-     * @hide TODO remove this method
-     */
-    public void addCommand(@NonNull Session2Command command) {
-        if (command == null) {
-            throw new IllegalArgumentException("command shouldn't be null");
-        }
-        if (!hasCommand(command)) {
-            mCommands.add(command);
-        }
-    }
-
-    /**
-     * Adds a predefined command with given {@code commandCode} to this command group.
-     *
-     * @param commandCode A command code to add.
-     *                    Shouldn't be {@link Session2Command#COMMAND_CODE_CUSTOM}.
-     * @hide TODO remove this method
-     */
-    public void addCommand(@Session2Command.CommandCode int commandCode) {
-        if (commandCode == COMMAND_CODE_CUSTOM) {
-            throw new IllegalArgumentException(
-                    "Use addCommand(Session2Command) for COMMAND_CODE_CUSTOM.");
-        }
-        if (!hasCommand(commandCode)) {
-            mCommands.add(new Session2Command(commandCode));
-        }
-    }
-
-    /**
      * Checks whether this command group has a command that matches given {@code command}.
      *
      * @param command A command to find. Shouldn't be {@code null}.
@@ -138,7 +103,7 @@ public final class Session2CommandGroup implements Parcelable {
      * @param commandCode A command code to find.
      *                    Shouldn't be {@link Session2Command#COMMAND_CODE_CUSTOM}.
      */
-    public boolean hasCommand(@Session2Command.CommandCode int commandCode) {
+    public boolean hasCommand(int commandCode) {
         if (commandCode == COMMAND_CODE_CUSTOM) {
             throw new IllegalArgumentException("Use hasCommand(Command) for custom command");
         }
@@ -153,7 +118,8 @@ public final class Session2CommandGroup implements Parcelable {
     /**
      * Gets all commands of this command group.
      */
-    public @NonNull Set<Session2Command> getCommands() {
+    @NonNull
+    public Set<Session2Command> getCommands() {
         return new HashSet<>(mCommands);
     }
 
@@ -191,7 +157,8 @@ public final class Session2CommandGroup implements Parcelable {
          *
          * @param command A command to add. Shouldn't be {@code null}.
          */
-        public @NonNull Builder addCommand(@NonNull Session2Command command) {
+        @NonNull
+        public Builder addCommand(@NonNull Session2Command command) {
             if (command == null) {
                 throw new IllegalArgumentException("command shouldn't be null");
             }
@@ -205,7 +172,8 @@ public final class Session2CommandGroup implements Parcelable {
          * @param commandCode A command code to add.
          *                    Shouldn't be {@link Session2Command#COMMAND_CODE_CUSTOM}.
          */
-        public @NonNull Builder addCommand(@Session2Command.CommandCode int commandCode) {
+        @NonNull
+        public Builder addCommand(int commandCode) {
             if (commandCode == COMMAND_CODE_CUSTOM) {
                 throw new IllegalArgumentException(
                         "Use addCommand(Session2Command) for COMMAND_CODE_CUSTOM.");
@@ -215,33 +183,12 @@ public final class Session2CommandGroup implements Parcelable {
         }
 
         /**
-         * Adds all predefined session commands except for the commands added after the specified
-         * version without default implementation. This provides convenient way to add commands
-         * with implementation.
-         *
-         * @param version command version
-         * @see Session2Command#COMMAND_VERSION_1
-         * @see
-         * MediaSession2.Session2Callback#onConnect
-         */
-        public @NonNull Builder addAllPredefinedCommands(
-                @Session2Command.CommandVersion int version) {
-            if (version != COMMAND_VERSION_1) {
-                throw new IllegalArgumentException("Unknown command version " + version);
-            }
-            addAllPlayerCommands(version);
-            addAllVolumeCommands(version);
-            addAllSessionCommands(version);
-            addAllLibraryCommands(version);
-            return this;
-        }
-
-        /**
          * Removes a command from this group which matches given {@code command}.
          *
          * @param command A command to find. Shouldn't be {@code null}.
          */
-        public @NonNull Builder removeCommand(@NonNull Session2Command command) {
+        @NonNull
+        public Builder removeCommand(@NonNull Session2Command command) {
             if (command == null) {
                 throw new IllegalArgumentException("command shouldn't be null");
             }
@@ -255,7 +202,8 @@ public final class Session2CommandGroup implements Parcelable {
          * @param commandCode A command code to find.
          *                    Shouldn't be {@link Session2Command#COMMAND_CODE_CUSTOM}.
          */
-        public @NonNull Builder removeCommand(@Session2Command.CommandCode int commandCode) {
+        @NonNull
+        public Builder removeCommand(int commandCode) {
             if (commandCode == COMMAND_CODE_CUSTOM) {
                 throw new IllegalArgumentException("commandCode shouldn't be COMMAND_CODE_CUSTOM");
             }
@@ -263,59 +211,13 @@ public final class Session2CommandGroup implements Parcelable {
             return this;
         }
 
-        @NonNull Builder addAllPlayerCommands(@Session2Command.CommandVersion int version) {
-            addCommands(version, Session2Command.VERSION_PLAYER_COMMANDS_MAP);
-            return this;
-        }
-
-        @NonNull Builder addAllPlayerCommands(@Session2Command.CommandVersion int version,
-                boolean includePlaylistCommands) {
-            if (includePlaylistCommands) {
-                return addAllPlayerCommands(version);
-            }
-            for (int i = COMMAND_VERSION_1; i <= version; i++) {
-                Range include = Session2Command.VERSION_PLAYER_COMMANDS_MAP.get(i);
-                Range exclude = Session2Command.VERSION_PLAYER_PLAYLIST_COMMANDS_MAP.get(i);
-                for (int code = include.lower; code <= include.upper; code++) {
-                    if (code < exclude.lower && code > exclude.upper) {
-                        addCommand(code);
-                    }
-                }
-            }
-            return this;
-        }
-
-        @NonNull Builder addAllVolumeCommands(@Session2Command.CommandVersion int version) {
-            addCommands(version, Session2Command.VERSION_VOLUME_COMMANDS_MAP);
-            return this;
-        }
-
-        @NonNull Builder addAllSessionCommands(@Session2Command.CommandVersion int version) {
-            addCommands(version, Session2Command.VERSION_SESSION_COMMANDS_MAP);
-            return this;
-        }
-
-        @NonNull Builder addAllLibraryCommands(@Session2Command.CommandVersion int version) {
-            addCommands(version, Session2Command.VERSION_LIBRARY_COMMANDS_MAP);
-            return this;
-        }
-
-        private void addCommands(
-                @Session2Command.CommandVersion int version, ArrayMap<Integer, Range> map) {
-            for (int i = COMMAND_VERSION_1; i <= version; i++) {
-                Range range = map.get(i);
-                for (int code = range.lower; code <= range.upper; code++) {
-                    addCommand(code);
-                }
-            }
-        }
-
         /**
          * Builds {@link Session2CommandGroup}.
          *
          * @return a new {@link Session2CommandGroup}.
          */
-        public @NonNull Session2CommandGroup build() {
+        @NonNull
+        public Session2CommandGroup build() {
             return new Session2CommandGroup(mCommands);
         }
     }
