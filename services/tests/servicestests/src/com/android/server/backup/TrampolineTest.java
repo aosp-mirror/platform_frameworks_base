@@ -1149,31 +1149,31 @@ public class TrampolineTest {
 
     @Test
     public void beginFullBackup_calledBeforeInitialize_ignored() throws RemoteException {
-        mTrampoline.beginFullBackup(new FullBackupJob());
+        mTrampoline.beginFullBackup(mUserId, new FullBackupJob());
         verifyNoMoreInteractions(mBackupManagerServiceMock);
     }
 
     @Test
     public void beginFullBackup_forwarded() throws RemoteException {
         FullBackupJob fullBackupJob = new FullBackupJob();
-        when(mBackupManagerServiceMock.beginFullBackup(fullBackupJob)).thenReturn(true);
+        when(mBackupManagerServiceMock.beginFullBackup(mUserId, fullBackupJob)).thenReturn(true);
 
         mTrampoline.initializeService();
-        assertTrue(mTrampoline.beginFullBackup(fullBackupJob));
-        verify(mBackupManagerServiceMock).beginFullBackup(fullBackupJob);
+        assertTrue(mTrampoline.beginFullBackup(mUserId, fullBackupJob));
+        verify(mBackupManagerServiceMock).beginFullBackup(mUserId, fullBackupJob);
     }
 
     @Test
     public void endFullBackup_calledBeforeInitialize_ignored() throws RemoteException {
-        mTrampoline.endFullBackup();
+        mTrampoline.endFullBackup(mUserId);
         verifyNoMoreInteractions(mBackupManagerServiceMock);
     }
 
     @Test
     public void endFullBackup_forwarded() throws RemoteException {
         mTrampoline.initializeService();
-        mTrampoline.endFullBackup();
-        verify(mBackupManagerServiceMock).endFullBackup();
+        mTrampoline.endFullBackup(mUserId);
+        verify(mBackupManagerServiceMock).endFullBackup(mUserId);
     }
 
     @Test

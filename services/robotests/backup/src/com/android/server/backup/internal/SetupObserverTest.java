@@ -125,7 +125,7 @@ public class SetupObserverTest {
 
         setupObserver.onChange(true);
 
-        assertThat(KeyValueBackupJob.isScheduled()).isTrue();
+        assertThat(KeyValueBackupJob.isScheduled(mUserBackupManagerService.getUserId())).isTrue();
         // Verifies that the full backup job is scheduled. The job is scheduled via a posted message
         // on the backup handler so we verify that a message exists.
         assertThat(mUserBackupManagerService.getBackupHandler().hasMessagesOrCallbacks()).isTrue();

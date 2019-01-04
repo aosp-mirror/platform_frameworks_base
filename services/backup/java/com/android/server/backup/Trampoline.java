@@ -698,15 +698,15 @@ public class Trampoline extends IBackupManager.Stub {
 
     // Full backup/restore entry points - non-Binder; called directly
     // by the full-backup scheduled job
-    /* package */ boolean beginFullBackup(FullBackupJob scheduledJob) {
+    /* package */ boolean beginFullBackup(@UserIdInt int userId, FullBackupJob scheduledJob) {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.beginFullBackup(scheduledJob) : false;
+        return (svc != null) ? svc.beginFullBackup(userId, scheduledJob) : false;
     }
 
-    /* package */ void endFullBackup() {
+    /* package */ void endFullBackup(@UserIdInt int userId) {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.endFullBackup();
+            svc.endFullBackup(userId);
         }
     }
 }
