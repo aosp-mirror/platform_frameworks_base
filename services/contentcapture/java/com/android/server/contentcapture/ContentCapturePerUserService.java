@@ -95,7 +95,7 @@ final class ContentCapturePerUserService
         final ComponentName serviceComponentName = updateServiceInfoLocked();
 
         if (serviceComponentName == null) {
-            Slog.w(TAG, "updateRemoteService(): no service componennt name");
+            if (mMaster.debug) Slog.d(TAG, "updateRemoteService(): no service component name");
             return;
         }
 
@@ -163,7 +163,10 @@ final class ContentCapturePerUserService
             @NonNull String sessionId, int uid, int flags,
             @NonNull IResultReceiver clientReceiver) {
         if (!isEnabledLocked()) {
-            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED, /* binder=*/ null);
+            // TODO: it would be better to split in differet reasons, like
+            // STATE_DISABLED_NO_SERVICE and STATE_DISABLED_BY_DEVICE_POLICY
+            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_NO_SERVICE,
+                    /* binder= */ null);
             return;
         }
         final ComponentName serviceComponentName = getServiceComponentName();
@@ -195,8 +198,8 @@ final class ContentCapturePerUserService
             Slog.w(TAG, "startSession(id=" + existingSession + ", token=" + activityToken
                     + ": ignoring because service is not set");
             // TODO(b/111276913): use a new disabled state?
-            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED,
-                    /* binder=*/ null);
+            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_NO_SERVICE,
+                    /* binder= */ null);
             return;
         }
 
@@ -285,7 +288,7 @@ final class ContentCapturePerUserService
         final int numSessions = mSessions.size();
         for (int i = 0; i < numSessions; i++) {
             final ContentCaptureServerSession session = mSessions.valueAt(i);
-            session.destroyLocked(true);
+            session.destroyLocked(/* notifyRemoteService= */ true);
         }
         mSessions.clear();
     }

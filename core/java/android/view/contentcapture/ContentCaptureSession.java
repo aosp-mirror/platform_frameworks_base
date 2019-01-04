@@ -73,11 +73,11 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int STATE_ACTIVE = 2;
 
     /**
-     * Session is disabled.
+     * Session is disabled because there is no service for this user.
      *
      * @hide
      */
-    public static final int STATE_DISABLED = 3;
+    public static final int STATE_DISABLED_NO_SERVICE = 3;
 
     /**
      * Session is disabled because its id already existed on server.
@@ -164,7 +164,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      */
     public final void destroy() {
         if (!mDestroyed.compareAndSet(false, true)) {
-            Log.e(TAG, "destroy(): already destroyed");
+            Log.e(TAG, "destroy(" + mId + "): already destroyed");
             return;
         }
 
@@ -341,8 +341,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 return "WAITING_FOR_SERVER";
             case STATE_ACTIVE:
                 return "ACTIVE";
-            case STATE_DISABLED:
-                return "DISABLED";
+            case STATE_DISABLED_NO_SERVICE:
+                return "DISABLED_NO_SERVICE";
             case STATE_DISABLED_DUPLICATED_ID:
                 return "DISABLED_DUPLICATED_ID";
             default:
