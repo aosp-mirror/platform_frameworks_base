@@ -38,12 +38,10 @@ class PackageRollbackData {
      * The time when the upgrade occurred, for purposes of expiring
      * rollback data.
      */
-    public final Instant timestamp;
+    public Instant timestamp;
 
-    PackageRollbackData(PackageRollbackInfo info,
-            File backupDir, Instant timestamp) {
+    PackageRollbackData(PackageRollbackInfo info, File backupDir) {
         this.info = info;
         this.backupDir = backupDir;
-        this.timestamp = timestamp;
     }
 }
