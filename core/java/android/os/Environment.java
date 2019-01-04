@@ -382,6 +382,11 @@ public class Environment {
     }
 
     /** {@hide} */
+    public static File getDataStagingDirectory(String volumeUuid) {
+        return new File(getDataDirectory(volumeUuid), "staging");
+    }
+
+    /** {@hide} */
     public static File getDataUserCeDirectory(String volumeUuid) {
         return new File(getDataDirectory(volumeUuid), "user");
     }
