@@ -16,8 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
-        .ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -111,13 +110,6 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
      * @param maxNotifications max number of notifications to display
      */
     void setMaxDisplayedNotifications(int maxNotifications);
-
-    /**
-     * Handle snapping a non-dismissable row back if the user tried to dismiss it.
-     *
-     * @param entry the entry whose row needs to snap back
-     */
-    void snapViewIfNeeded(NotificationData.Entry entry);
 
     /**
      * Get the view parent for a notification entry. For example, NotificationStackScrollLayout.

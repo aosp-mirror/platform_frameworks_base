@@ -463,12 +463,6 @@ public class NotificationEntryManager implements
 
         updateNotifications();
 
-        if (!notification.isClearable()) {
-            // The user may have performed a dismiss action on the notification, since it's
-            // not clearable we should snap it back.
-            mListContainer.snapViewIfNeeded(entry);
-        }
-
         if (DEBUG) {
             // Is this for you?
             boolean isForCurrentUser = Dependency.get(KeyguardEnvironment.class)

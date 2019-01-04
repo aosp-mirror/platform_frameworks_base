@@ -97,6 +97,7 @@ import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
@@ -517,6 +518,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 mLowPriorityBeforeSpeedBump = "1".equals(newValue);
             }
         }, LOW_PRIORITY);
+
+        mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
+            @Override
+            public void onEntryUpdated(NotificationData.Entry entry) {
+                if (!entry.notification.isClearable()) {
+                    // The user may have performed a dismiss action on the notification, since it's
+                    // not clearable we should snap it back.
+                    snapViewIfNeeded(entry);
+                }
+            }
+        });
     }
 
     @Override
@@ -1538,9 +1550,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 true /* isDismissAll */);
     }
 
-    @Override
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    public void snapViewIfNeeded(NotificationData.Entry entry) {
+    private void snapViewIfNeeded(NotificationData.Entry entry) {
         ExpandableNotificationRow child = entry.getRow();
         boolean animate = mIsExpanded || isPinnedHeadsUp(child);
         // If the child is showing the notification menu snap to that
