@@ -34,14 +34,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
-import com.android.server.backup.UserBackupManagerFiles;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.utils.FullBackupUtils;
@@ -78,21 +76,21 @@ public class FullBackupEngine {
         private final File mFilesDir;
 
         FullBackupRunner(
+                UserBackupManagerService userBackupManagerService,
                 PackageInfo packageInfo,
                 IBackupAgent agent,
                 ParcelFileDescriptor pipe,
                 int token,
                 boolean includeApks)
                 throws IOException {
-            // TODO: http://b/22388012
-            mUserId = UserHandle.USER_SYSTEM;
+            mUserId = userBackupManagerService.getUserId();
             mPackageManager = backupManagerService.getPackageManager();
             mPackage = packageInfo;
             mAgent = agent;
             mPipe = ParcelFileDescriptor.dup(pipe.getFileDescriptor());
             mToken = token;
             mIncludeApks = includeApks;
-            mFilesDir = UserBackupManagerFiles.getFullBackupEngineFilesDir(mUserId);
+            mFilesDir = userBackupManagerService.getDataDir();
         }
 
         @Override
@@ -155,9 +153,12 @@ public class FullBackupEngine {
                         backupManagerService.getBackupManagerBinder(),
                         mTransportFlags);
             } catch (IOException e) {
-                Slog.e(TAG, "Error running full backup for " + mPackage.packageName);
+                Slog.e(TAG, "Error running full backup for " + mPackage.packageName, e);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote agent vanished during full backup of " + mPackage.packageName);
+                Slog.e(
+                        TAG,
+                        "Remote agent vanished during full backup of " + mPackage.packageName,
+                        e);
             } finally {
                 try {
                     mPipe.close();
@@ -233,7 +234,13 @@ public class FullBackupEngine {
                 pipes = ParcelFileDescriptor.createPipe();
 
                 FullBackupRunner runner =
-                        new FullBackupRunner(mPkg, mAgent, pipes[1], mOpToken, mIncludeApks);
+                        new FullBackupRunner(
+                                backupManagerService,
+                                mPkg,
+                                mAgent,
+                                pipes[1],
+                                mOpToken,
+                                mIncludeApks);
                 pipes[1].close(); // the runner has dup'd it
                 pipes[1] = null;
                 Thread t = new Thread(runner, "app-data-runner");

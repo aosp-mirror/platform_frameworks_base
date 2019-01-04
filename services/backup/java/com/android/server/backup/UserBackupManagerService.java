@@ -551,7 +551,7 @@ public class UserBackupManagerService {
         mUserBackupThread.quit();
     }
 
-    public int getUserId() {
+    public @UserIdInt int getUserId() {
         return mUserId;
     }
 
@@ -567,10 +567,6 @@ public class UserBackupManagerService {
         return mContext;
     }
 
-    public void setContext(Context context) {
-        mContext = context;
-    }
-
     public PackageManager getPackageManager() {
         return mPackageManager;
     }
@@ -581,10 +577,6 @@ public class UserBackupManagerService {
 
     public IPackageManager getPackageManagerBinder() {
         return mPackageManagerBinder;
-    }
-
-    public void setPackageManagerBinder(IPackageManager packageManagerBinder) {
-        mPackageManagerBinder = packageManagerBinder;
     }
 
     public IActivityManager getActivityManager() {
