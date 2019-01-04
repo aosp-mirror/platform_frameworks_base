@@ -947,6 +947,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final WindowProcessController wpc =
                 mService.getProcessController(r.processName, r.info.applicationInfo.uid);
 
+        boolean knownToBeDead = false;
         if (wpc != null && wpc.hasThread()) {
             try {
                 if ((r.info.flags & ActivityInfo.FLAG_MULTIPROCESS) == 0
@@ -965,6 +966,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
             // If a dead object exception was thrown -- fall through to
             // restart the application.
+            knownToBeDead = true;
         }
 
         // Suppress transition until the new activity becomes ready, otherwise the keyguard can
@@ -978,7 +980,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // ATMS lock held.
         final Message msg = PooledLambda.obtainMessage(
                 ActivityManagerInternal::startProcess, mService.mAmInternal, r.processName,
-                r.info.applicationInfo, true, "activity", r.intent.getComponent());
+                r.info.applicationInfo, knownToBeDead, "activity", r.intent.getComponent());
         mService.mH.sendMessage(msg);
     }
 
