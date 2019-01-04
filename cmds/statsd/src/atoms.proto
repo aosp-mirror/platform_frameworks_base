@@ -181,6 +181,7 @@ message Atom {
         DocsUISearchTypeReported docs_ui_search_type_reported = 120;
         DataStallEvent data_stall_event = 121;
         RescuePartyResetReported rescue_party_reset_reported = 122;
+        SignedConfigReported signed_config_reported = 123;
     }
 
     // Pulled events will start at field 10000.
@@ -3858,4 +3859,45 @@ message DataStallEvent {
 message RescuePartyResetReported {
     // The rescue level of this reset. A value of 0 indicates missing or unknown level information.
     optional int32 rescue_level = 1;
+}
+
+/**
+ * Logs when signed config is received from an APK, and if that config was applied successfully.
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/signedconfig/SignedConfigService.java
+ */
+message SignedConfigReported {
+    enum Type {
+        UNKNOWN_TYPE = 0;
+        GLOBAL_SETTINGS = 1;
+    }
+    optional Type type = 1;
+
+    // The final status of the signed config received.
+    enum Status {
+        UNKNOWN_STATUS = 0;
+        APPLIED = 1;
+        BASE64_FAILURE_CONFIG = 2;
+        BASE64_FAILURE_SIGNATURE = 3;
+        SECURITY_EXCEPTION = 4;
+        INVALID_CONFIG = 5;
+        OLD_CONFIG = 6;
+        SIGNATURE_CHECK_FAILED = 7;
+        NOT_APPLICABLE = 8;
+    }
+    optional Status status = 2;
+
+    // The version of the signed config processed.
+    optional int32 version = 3;
+
+    // The package name that the config was extracted from.
+    optional string from_package = 4;
+
+    enum Key {
+        NO_KEY = 0;
+        DEBUG = 1;
+        PRODUCTION = 2;
+    }
+    // Which key was used to verify the config.
+    optional Key verified_with = 5;
 }
