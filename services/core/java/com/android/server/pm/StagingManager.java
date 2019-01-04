@@ -19,9 +19,11 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.pm.PackageInstaller;
 import android.content.pm.ParceledListSlice;
+import android.os.Handler;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BackgroundThread;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +37,7 @@ public class StagingManager {
     private static final String TAG = "StagingManager";
 
     private final PackageManagerService mPm;
+    private final Handler mBgHandler;
 
     // STOPSHIP: This is a temporary mock implementation of staged sessions. This variable
     //           shouldn't be needed at all.
@@ -44,16 +47,17 @@ public class StagingManager {
 
     StagingManager(PackageManagerService pm) {
         mPm = pm;
+        mBgHandler = BackgroundThread.getHandler();
     }
 
     private void updateStoredSession(@NonNull PackageInstallerSession sessionInfo) {
         synchronized (mStagedSessions) {
             PackageInstallerSession storedSession = mStagedSessions.get(sessionInfo.sessionId);
-            if (storedSession == null) {
-                throw new IllegalStateException("Attempting to change state of a session not "
-                        + "known to StagingManager");
+            // storedSession might be null if a call to abortSession was made before the session
+            // is updated.
+            if (storedSession != null) {
+                mStagedSessions.put(sessionInfo.sessionId, sessionInfo);
             }
-            mStagedSessions.put(sessionInfo.sessionId, sessionInfo);
         }
     }
 
@@ -69,10 +73,13 @@ public class StagingManager {
 
     void commitSession(@NonNull PackageInstallerSession sessionInfo) {
         updateStoredSession(sessionInfo);
-        // TODO(b/118865310): Dispatch the session to apexd/PackageManager for verification. For
-        //                    now we directly mark it as ready.
-        sessionInfo.setStagedSessionReady();
-        mPm.sendSessionUpdatedBroadcast(sessionInfo.generateInfo(), sessionInfo.userId);
+
+        mBgHandler.post(() -> {
+            // TODO(b/118865310): Dispatch the session to apexd/PackageManager for verification. For
+            //                    now we directly mark it as ready.
+            sessionInfo.setStagedSessionReady();
+            mPm.sendSessionUpdatedBroadcast(sessionInfo.generateInfo(), sessionInfo.userId);
+        });
     }
 
     void createSession(@NonNull PackageInstallerSession sessionInfo) {
