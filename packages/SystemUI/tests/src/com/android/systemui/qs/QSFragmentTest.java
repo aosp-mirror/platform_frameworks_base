@@ -39,6 +39,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -92,7 +93,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         processAllMessages();
         QSTileHost host = new QSTileHost(mContext, mock(StatusBarIconController.class),
                 mock(QSFactoryImpl.class), new Handler(), Looper.myLooper(),
-                mock(PluginManager.class), mock(TunerService.class));
+                mock(PluginManager.class), mock(TunerService.class),
+                () -> mock(AutoTileManager.class));
         qs.setHost(host);
 
         qs.setListening(true);

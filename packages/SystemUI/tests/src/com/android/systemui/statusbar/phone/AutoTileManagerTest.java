@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -30,6 +31,8 @@ import com.android.internal.app.ColorDisplayController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.statusbar.policy.DataSaverController;
+import com.android.systemui.statusbar.policy.HotspotController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +54,11 @@ public class AutoTileManagerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mAutoTileManager = new AutoTileManager(mContext, mAutoAddTracker, mQsTileHost,
-                Handler.createAsync(TestableLooper.get(this).getLooper()));
+                Handler.createAsync(TestableLooper.get(this).getLooper()),
+                mock(HotspotController.class),
+                mock(DataSaverController.class),
+                mock(ManagedProfileController.class),
+                mock(ColorDisplayController.class));
     }
 
     @Test
