@@ -219,7 +219,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     /**
      * Callback from {@code system_server} after call to
      * {@link IContentCaptureManager#startSession(int, IBinder, ComponentName, String,
-     * ContentCaptureContext, int, IResultReceiver)}.
+     * int, IResultReceiver)}.
      *
      * @param resultCode session state
      * @param binder handle to {@code IContentCaptureDirectManager}
@@ -425,7 +425,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @Override
     boolean isContentCaptureEnabled() {
-        return mSystemServerInterface != null && !mDisabled.get();
+        return super.isContentCaptureEnabled() && mSystemServerInterface != null
+                && !mDisabled.get();
     }
 
     // TODO(b/121033016): refactor "notifyXXXX" methods below to a common "Buffer" object that is

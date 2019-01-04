@@ -34,6 +34,7 @@ import dalvik.system.CloseGuard;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Session used to notify a system-provided Content Capture service about events associated with
@@ -89,6 +90,12 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     protected final String mTag = getClass().getSimpleName();
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
+
+    /**
+     * Guard use to ignore events after it's destroyed.
+     */
+    @NonNull
+    private final AtomicBoolean mDestroyed = new AtomicBoolean();
 
     /** @hide */
     @Nullable
@@ -157,10 +164,10 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * <p>Once destroyed, any new notification will be dropped.
      */
     public final void destroy() {
-        //TODO(b/111276913): mark it as destroyed so other methods are ignored (and test on CTS)
-
-        //TODO(b/111276913): probably shouldn't check for it
-        if (!isContentCaptureEnabled()) return;
+        if (!mDestroyed.compareAndSet(false, true)) {
+            Log.e(mTag, "destroy(): already destroyed");
+            return;
+        }
 
         mCloseGuard.close();
 
@@ -298,10 +305,13 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         return new ViewNode.ViewStructureImpl(parentId, virtualId);
     }
 
-    abstract boolean isContentCaptureEnabled();
+    boolean isContentCaptureEnabled() {
+        return !mDestroyed.get();
+    }
 
     @CallSuper
     void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
+        pw.print(prefix); pw.print("destroyed: "); pw.println(mDestroyed.get());
         if (mChildren != null && !mChildren.isEmpty()) {
             final String prefix2 = prefix + "  ";
             final int numberChildren = mChildren.size();
