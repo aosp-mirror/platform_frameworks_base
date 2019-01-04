@@ -857,7 +857,7 @@ public class CameraTestUtils extends Assert {
         // JPEG doesn't have pixelstride and rowstride, treat it as 1D buffer.
         // Same goes for DEPTH_POINT_CLOUD
         if (format == ImageFormat.JPEG || format == ImageFormat.DEPTH_POINT_CLOUD ||
-                format == ImageFormat.RAW_PRIVATE) {
+                format == ImageFormat.DEPTH_JPEG || format == ImageFormat.RAW_PRIVATE) {
             buffer = planes[0].getBuffer();
             assertNotNull("Fail to get jpeg or depth ByteBuffer", buffer);
             data = new byte[buffer.remaining()];
@@ -940,6 +940,7 @@ public class CameraTestUtils extends Assert {
             case ImageFormat.RAW_PRIVATE:
             case ImageFormat.DEPTH16:
             case ImageFormat.DEPTH_POINT_CLOUD:
+            case ImageFormat.DEPTH_JPEG:
                 assertEquals("JPEG/RAW/depth Images should have one plane", 1, planes.length);
                 break;
             default:
@@ -1363,6 +1364,9 @@ public class CameraTestUtils extends Assert {
             case ImageFormat.RAW_PRIVATE:
                 validateRawPrivateData(data, width, height, image.getTimestamp(), filePath);
                 break;
+            case ImageFormat.DEPTH_JPEG:
+                validateDepthJpegData(data, width, height, format, image.getTimestamp(), filePath);
+                break;
             default:
                 throw new UnsupportedOperationException("Unsupported format for validation: "
                         + format);
@@ -1521,6 +1525,23 @@ public class CameraTestUtils extends Assert {
         if (DEBUG && filePath != null) {
             String fileName =
                     filePath + "/" + width + "x" + height + "_" + ts / 1e6 + ".depth_point_cloud";
+            dumpFile(fileName, depthData);
+        }
+
+        return;
+
+    }
+
+    private static void validateDepthJpegData(byte[] depthData, int width, int height, int format,
+            long ts, String filePath) {
+
+        if (VERBOSE) Log.v(TAG, "Validating depth jpeg data");
+
+        // Can't validate size since it is variable
+
+        if (DEBUG && filePath != null) {
+            String fileName =
+                    filePath + "/" + width + "x" + height + "_" + ts / 1e6 + ".jpg";
             dumpFile(fileName, depthData);
         }
 

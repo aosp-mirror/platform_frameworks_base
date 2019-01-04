@@ -63,6 +63,7 @@ class ImageUtils {
             case ImageFormat.DEPTH16:
             case ImageFormat.DEPTH_POINT_CLOUD:
             case ImageFormat.RAW_DEPTH:
+            case ImageFormat.DEPTH_JPEG:
                 return 1;
             case ImageFormat.PRIVATE:
                 return 0;
@@ -192,6 +193,7 @@ class ImageUtils {
             // 10x compression from RGB_888
             case ImageFormat.JPEG:
             case ImageFormat.DEPTH_POINT_CLOUD:
+            case ImageFormat.DEPTH_JPEG:
                 estimatedBytePerPixel = 0.3;
                 break;
             case ImageFormat.Y8:

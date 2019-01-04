@@ -95,13 +95,17 @@ public final class StreamConfigurationMap {
             StreamConfiguration[] depthConfigurations,
             StreamConfigurationDuration[] depthMinFrameDurations,
             StreamConfigurationDuration[] depthStallDurations,
+            StreamConfiguration[] dynamicDepthConfigurations,
+            StreamConfigurationDuration[] dynamicDepthMinFrameDurations,
+            StreamConfigurationDuration[] dynamicDepthStallDurations,
             HighSpeedVideoConfiguration[] highSpeedVideoConfigurations,
             ReprocessFormatsMap inputOutputFormatsMap,
             boolean listHighResolution) {
         this(configurations, minFrameDurations, stallDurations,
                     depthConfigurations, depthMinFrameDurations, depthStallDurations,
-                    highSpeedVideoConfigurations, inputOutputFormatsMap, listHighResolution,
-                    /*enforceImplementationDefined*/ true);
+                    dynamicDepthConfigurations, dynamicDepthMinFrameDurations,
+                    dynamicDepthStallDurations, highSpeedVideoConfigurations, inputOutputFormatsMap,
+                    listHighResolution, /*enforceImplementationDefined*/ true);
     }
 
     /**
@@ -131,6 +135,9 @@ public final class StreamConfigurationMap {
             StreamConfiguration[] depthConfigurations,
             StreamConfigurationDuration[] depthMinFrameDurations,
             StreamConfigurationDuration[] depthStallDurations,
+            StreamConfiguration[] dynamicDepthConfigurations,
+            StreamConfigurationDuration[] dynamicDepthMinFrameDurations,
+            StreamConfigurationDuration[] dynamicDepthStallDurations,
             HighSpeedVideoConfiguration[] highSpeedVideoConfigurations,
             ReprocessFormatsMap inputOutputFormatsMap,
             boolean listHighResolution,
@@ -161,6 +168,19 @@ public final class StreamConfigurationMap {
                     "depthMinFrameDurations");
             mDepthStallDurations = checkArrayElementsNotNull(depthStallDurations,
                     "depthStallDurations");
+        }
+
+        if (dynamicDepthConfigurations == null) {
+            mDynamicDepthConfigurations = new StreamConfiguration[0];
+            mDynamicDepthMinFrameDurations = new StreamConfigurationDuration[0];
+            mDynamicDepthStallDurations = new StreamConfigurationDuration[0];
+        } else {
+            mDynamicDepthConfigurations = checkArrayElementsNotNull(dynamicDepthConfigurations,
+                    "dynamicDepthConfigurations");
+            mDynamicDepthMinFrameDurations = checkArrayElementsNotNull(
+                    dynamicDepthMinFrameDurations, "dynamicDepthMinFrameDurations");
+            mDynamicDepthStallDurations = checkArrayElementsNotNull(dynamicDepthStallDurations,
+                    "dynamicDepthStallDurations");
         }
 
         if (highSpeedVideoConfigurations == null) {
@@ -204,6 +224,15 @@ public final class StreamConfigurationMap {
 
             mDepthOutputFormats.put(config.getFormat(),
                     mDepthOutputFormats.get(config.getFormat()) + 1);
+        }
+        for (StreamConfiguration config : mDynamicDepthConfigurations) {
+            if (!config.isOutput()) {
+                // Ignoring input configs
+                continue;
+            }
+
+            mDynamicDepthOutputFormats.put(config.getFormat(),
+                    mDynamicDepthOutputFormats.get(config.getFormat()) + 1);
         }
 
         if (configurations != null && enforceImplementationDefined &&
@@ -335,6 +364,8 @@ public final class StreamConfigurationMap {
         int dataspace = imageFormatToDataspace(format);
         if (dataspace == HAL_DATASPACE_DEPTH) {
             return mDepthOutputFormats.indexOfKey(internalFormat) >= 0;
+        } else if (dataspace == HAL_DATASPACE_DYNAMIC_DEPTH) {
+            return mDynamicDepthOutputFormats.indexOfKey(internalFormat) >= 0;
         } else {
             return getFormatsMap(/*output*/true).indexOfKey(internalFormat) >= 0;
         }
@@ -446,7 +477,9 @@ public final class StreamConfigurationMap {
         boolean isFlexible = SurfaceUtils.isFlexibleConsumer(surface);
 
         StreamConfiguration[] configs =
-                surfaceDataspace != HAL_DATASPACE_DEPTH ? mConfigurations : mDepthConfigurations;
+                surfaceDataspace == HAL_DATASPACE_DEPTH ? mDepthConfigurations :
+                surfaceDataspace == HAL_DATASPACE_DYNAMIC_DEPTH ? mDynamicDepthConfigurations :
+                mConfigurations;
         for (StreamConfiguration config : configs) {
             if (config.getFormat() == surfaceFormat && config.isOutput()) {
                 // Matching format, either need exact size match, or a flexible consumer
@@ -479,7 +512,9 @@ public final class StreamConfigurationMap {
         int dataspace = imageFormatToDataspace(format);
 
         StreamConfiguration[] configs =
-            dataspace != HAL_DATASPACE_DEPTH ? mConfigurations : mDepthConfigurations;
+            dataspace == HAL_DATASPACE_DEPTH ? mDepthConfigurations :
+            dataspace == HAL_DATASPACE_DYNAMIC_DEPTH ? mDynamicDepthConfigurations :
+            mConfigurations;
         for (StreamConfiguration config : configs) {
             if ((config.getFormat() == internalFormat) && config.isOutput() &&
                     config.getSize().equals(size)) {
@@ -992,6 +1027,12 @@ public final class StreamConfigurationMap {
                     Arrays.equals(mMinFrameDurations, other.mMinFrameDurations) &&
                     Arrays.equals(mStallDurations, other.mStallDurations) &&
                     Arrays.equals(mDepthConfigurations, other.mDepthConfigurations) &&
+                    Arrays.equals(mDepthMinFrameDurations, other.mDepthMinFrameDurations) &&
+                    Arrays.equals(mDepthStallDurations, other.mDepthStallDurations) &&
+                    Arrays.equals(mDynamicDepthConfigurations, other.mDynamicDepthConfigurations) &&
+                    Arrays.equals(mDynamicDepthMinFrameDurations,
+                            other.mDynamicDepthMinFrameDurations) &&
+                    Arrays.equals(mDynamicDepthStallDurations, other.mDynamicDepthStallDurations) &&
                     Arrays.equals(mHighSpeedVideoConfigurations,
                             other.mHighSpeedVideoConfigurations);
         }
@@ -1005,9 +1046,10 @@ public final class StreamConfigurationMap {
     public int hashCode() {
         // XX: do we care about order?
         return HashCodeHelpers.hashCodeGeneric(
-                mConfigurations, mMinFrameDurations,
-                mStallDurations,
-                mDepthConfigurations, mHighSpeedVideoConfigurations);
+                mConfigurations, mMinFrameDurations, mStallDurations,
+                mDepthConfigurations, mDepthMinFrameDurations, mDepthStallDurations,
+                mDynamicDepthConfigurations, mDynamicDepthMinFrameDurations,
+                mDynamicDepthStallDurations, mHighSpeedVideoConfigurations);
     }
 
     // Check that the argument is supported by #getOutputFormats or #getInputFormats
@@ -1020,6 +1062,10 @@ public final class StreamConfigurationMap {
         if (output) {
             if (internalDataspace == HAL_DATASPACE_DEPTH) {
                 if (mDepthOutputFormats.indexOfKey(internalFormat) >= 0) {
+                    return format;
+                }
+            } else if (internalDataspace == HAL_DATASPACE_DYNAMIC_DEPTH) {
+                if (mDynamicDepthOutputFormats.indexOfKey(internalFormat) >= 0) {
                     return format;
                 }
             } else {
@@ -1245,6 +1291,7 @@ public final class StreamConfigurationMap {
         switch (format) {
             case ImageFormat.JPEG:
             case ImageFormat.DEPTH_POINT_CLOUD:
+            case ImageFormat.DEPTH_JPEG:
                 return HAL_PIXEL_FORMAT_BLOB;
             case ImageFormat.DEPTH16:
                 return HAL_PIXEL_FORMAT_Y16;
@@ -1264,6 +1311,7 @@ public final class StreamConfigurationMap {
      * <li>ImageFormat.JPEG => HAL_DATASPACE_V0_JFIF
      * <li>ImageFormat.DEPTH_POINT_CLOUD => HAL_DATASPACE_DEPTH
      * <li>ImageFormat.DEPTH16 => HAL_DATASPACE_DEPTH
+     * <li>ImageFormat.DEPTH_JPEG => HAL_DATASPACE_DYNAMIC_DEPTH
      * <li>others => HAL_DATASPACE_UNKNOWN
      * </ul>
      * </p>
@@ -1293,6 +1341,8 @@ public final class StreamConfigurationMap {
             case ImageFormat.DEPTH16:
             case ImageFormat.RAW_DEPTH:
                 return HAL_DATASPACE_DEPTH;
+            case ImageFormat.DEPTH_JPEG:
+                return HAL_DATASPACE_DYNAMIC_DEPTH;
             default:
                 return HAL_DATASPACE_UNKNOWN;
         }
@@ -1343,12 +1393,16 @@ public final class StreamConfigurationMap {
         SparseIntArray formatsMap =
                 !output ? mInputFormats :
                 dataspace == HAL_DATASPACE_DEPTH ? mDepthOutputFormats :
+                dataspace == HAL_DATASPACE_DYNAMIC_DEPTH ? mDynamicDepthOutputFormats :
                 highRes ? mHighResOutputFormats :
                 mOutputFormats;
 
         int sizesCount = formatsMap.get(format);
-        if ( ((!output || dataspace == HAL_DATASPACE_DEPTH) && sizesCount == 0) ||
-                (output && dataspace != HAL_DATASPACE_DEPTH && mAllOutputFormats.get(format) == 0)) {
+        if ( ((!output || (dataspace == HAL_DATASPACE_DEPTH ||
+                            dataspace == HAL_DATASPACE_DYNAMIC_DEPTH)) && sizesCount == 0) ||
+                (output && (dataspace != HAL_DATASPACE_DEPTH &&
+                            dataspace != HAL_DATASPACE_DYNAMIC_DEPTH) &&
+                 mAllOutputFormats.get(format) == 0)) {
             // Only throw if this is really not supported at all
             throw new IllegalArgumentException("format not available");
         }
@@ -1357,9 +1411,13 @@ public final class StreamConfigurationMap {
         int sizeIndex = 0;
 
         StreamConfiguration[] configurations =
-                (dataspace == HAL_DATASPACE_DEPTH) ? mDepthConfigurations : mConfigurations;
+                (dataspace == HAL_DATASPACE_DEPTH) ? mDepthConfigurations :
+                (dataspace == HAL_DATASPACE_DYNAMIC_DEPTH) ? mDynamicDepthConfigurations :
+                mConfigurations;
         StreamConfigurationDuration[] minFrameDurations =
-                (dataspace == HAL_DATASPACE_DEPTH) ? mDepthMinFrameDurations : mMinFrameDurations;
+                (dataspace == HAL_DATASPACE_DEPTH) ? mDepthMinFrameDurations :
+                (dataspace == HAL_DATASPACE_DYNAMIC_DEPTH) ? mDynamicDepthMinFrameDurations :
+                mMinFrameDurations;
 
         for (StreamConfiguration config : configurations) {
             int fmt = config.getFormat();
@@ -1386,7 +1444,21 @@ public final class StreamConfigurationMap {
             }
         }
 
-        if (sizeIndex != sizesCount) {
+        // Dynamic depth streams can have both fast and also high res modes.
+        if ((sizeIndex != sizesCount) && (dataspace == HAL_DATASPACE_DYNAMIC_DEPTH)) {
+
+            if (sizeIndex > sizesCount) {
+                throw new AssertionError(
+                        "Too many dynamic depth sizes (expected " + sizesCount + ", actual " +
+                        sizeIndex + ")");
+            }
+
+            if (sizeIndex <= 0) {
+                sizes = new Size[0];
+            } else {
+                sizes = Arrays.copyOf(sizes, sizeIndex);
+            }
+        } else if (sizeIndex != sizesCount) {
             throw new AssertionError(
                     "Too few sizes (expected " + sizesCount + ", actual " + sizeIndex + ")");
         }
@@ -1408,6 +1480,10 @@ public final class StreamConfigurationMap {
         if (output) {
             for (int j = 0; j < mDepthOutputFormats.size(); j++) {
                 formats[i++] = depthFormatToPublic(mDepthOutputFormats.keyAt(j));
+            }
+            if (mDynamicDepthOutputFormats.size() > 0) {
+                // Only one publicly dynamic depth format is available.
+                formats[i++] = ImageFormat.DEPTH_JPEG;
             }
         }
         if (formats.length != i) {
@@ -1451,11 +1527,13 @@ public final class StreamConfigurationMap {
     private StreamConfigurationDuration[] getDurations(int duration, int dataspace) {
         switch (duration) {
             case DURATION_MIN_FRAME:
-                return (dataspace == HAL_DATASPACE_DEPTH) ?
-                        mDepthMinFrameDurations : mMinFrameDurations;
+                return (dataspace == HAL_DATASPACE_DEPTH) ? mDepthMinFrameDurations :
+                        (dataspace == HAL_DATASPACE_DYNAMIC_DEPTH) ?
+                        mDynamicDepthMinFrameDurations : mMinFrameDurations;
             case DURATION_STALL:
-                return (dataspace == HAL_DATASPACE_DEPTH) ?
-                        mDepthStallDurations : mStallDurations;
+                return (dataspace == HAL_DATASPACE_DEPTH) ? mDepthStallDurations :
+                        (dataspace == HAL_DATASPACE_DYNAMIC_DEPTH) ? mDynamicDepthStallDurations :
+                        mStallDurations;
             default:
                 throw new IllegalArgumentException("duration was invalid");
         }
@@ -1467,6 +1545,7 @@ public final class StreamConfigurationMap {
         int size = formatsMap.size();
         if (output) {
             size += mDepthOutputFormats.size();
+            size += mDynamicDepthOutputFormats.size();
         }
 
         return size;
@@ -1486,10 +1565,11 @@ public final class StreamConfigurationMap {
         return false;
     }
 
-    private boolean isSupportedInternalConfiguration(int format, int dataspace,
-            Size size) {
+    private boolean isSupportedInternalConfiguration(int format, int dataspace, Size size) {
         StreamConfiguration[] configurations =
-                (dataspace == HAL_DATASPACE_DEPTH) ? mDepthConfigurations : mConfigurations;
+                (dataspace == HAL_DATASPACE_DEPTH) ? mDepthConfigurations :
+                (dataspace == HAL_DATASPACE_DYNAMIC_DEPTH) ? mDynamicDepthConfigurations :
+                mConfigurations;
 
         for (int i = 0; i < configurations.length; i++) {
             if (configurations[i].getFormat() == format &&
@@ -1681,6 +1761,8 @@ public final class StreamConfigurationMap {
                 return "DEPTH16";
             case ImageFormat.DEPTH_POINT_CLOUD:
                 return "DEPTH_POINT_CLOUD";
+            case ImageFormat.DEPTH_JPEG:
+                return "DEPTH_JPEG";
             case ImageFormat.RAW_DEPTH:
                 return "RAW_DEPTH";
             case ImageFormat.PRIVATE:
@@ -1712,6 +1794,7 @@ public final class StreamConfigurationMap {
             (1 << HAL_DATASPACE_RANGE_SHIFT);
 
     private static final int HAL_DATASPACE_DEPTH = 0x1000;
+    private static final int HAL_DATASPACE_DYNAMIC_DEPTH = 0x1002;
 
     private static final long DURATION_20FPS_NS = 50000000L;
     /**
@@ -1727,6 +1810,10 @@ public final class StreamConfigurationMap {
     private final StreamConfiguration[] mDepthConfigurations;
     private final StreamConfigurationDuration[] mDepthMinFrameDurations;
     private final StreamConfigurationDuration[] mDepthStallDurations;
+
+    private final StreamConfiguration[] mDynamicDepthConfigurations;
+    private final StreamConfigurationDuration[] mDynamicDepthMinFrameDurations;
+    private final StreamConfigurationDuration[] mDynamicDepthStallDurations;
 
     private final HighSpeedVideoConfiguration[] mHighSpeedVideoConfigurations;
     private final ReprocessFormatsMap mInputOutputFormatsMap;
@@ -1745,6 +1832,8 @@ public final class StreamConfigurationMap {
     private final SparseIntArray mInputFormats = new SparseIntArray();
     /** internal format -> num depth output sizes mapping, for HAL_DATASPACE_DEPTH */
     private final SparseIntArray mDepthOutputFormats = new SparseIntArray();
+    /** internal format -> num dynamic depth output sizes mapping, for HAL_DATASPACE_DYNAMIC_DEPTH */
+    private final SparseIntArray mDynamicDepthOutputFormats = new SparseIntArray();
     /** High speed video Size -> FPS range count mapping*/
     private final HashMap</*HighSpeedVideoSize*/Size, /*Count*/Integer> mHighSpeedVideoSizeMap =
             new HashMap<Size, Integer>();

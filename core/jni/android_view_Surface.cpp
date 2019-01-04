@@ -131,6 +131,7 @@ int android_view_Surface_mapPublicFormatToHalFormat(PublicFormat f) {
     switch(f) {
         case PublicFormat::JPEG:
         case PublicFormat::DEPTH_POINT_CLOUD:
+        case PublicFormat::DEPTH_JPEG:
             return HAL_PIXEL_FORMAT_BLOB;
         case PublicFormat::DEPTH16:
             return HAL_PIXEL_FORMAT_Y16;
@@ -161,6 +162,8 @@ android_dataspace android_view_Surface_mapPublicFormatToHalDataspace(
         case PublicFormat::NV21:
         case PublicFormat::YV12:
             return HAL_DATASPACE_V0_JFIF;
+        case PublicFormat::DEPTH_JPEG:
+            return static_cast<android_dataspace> (HAL_DATASPACE_DYNAMIC_DEPTH);
         default:
             // Most formats map to UNKNOWN
             return HAL_DATASPACE_UNKNOWN;
@@ -223,8 +226,12 @@ PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
                 case HAL_DATASPACE_V0_JFIF:
                     return PublicFormat::JPEG;
                 default:
-                    // Assume otherwise-marked blobs are also JPEG
-                    return PublicFormat::JPEG;
+                    if (dataSpace == static_cast<android_dataspace>(HAL_DATASPACE_DYNAMIC_DEPTH)) {
+                        return PublicFormat::DEPTH_JPEG;
+                    } else {
+                        // Assume otherwise-marked blobs are also JPEG
+                        return PublicFormat::JPEG;
+                    }
             }
             break;
         case HAL_PIXEL_FORMAT_BGRA_8888:

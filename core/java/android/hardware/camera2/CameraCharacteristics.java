@@ -3721,6 +3721,59 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.RecommendedStreamConfiguration[]>("android.depth.availableRecommendedDepthStreamConfigurations", android.hardware.camera2.params.RecommendedStreamConfiguration[].class);
 
     /**
+     * <p>The available dynamic depth dataspace stream
+     * configurations that this camera device supports
+     * (i.e. format, width, height, output/input stream).</p>
+     * <p>These are output stream configurations for use with
+     * dataSpace DYNAMIC_DEPTH. The configurations are
+     * listed as <code>(format, width, height, input?)</code> tuples.</p>
+     * <p>Only devices that support depth output for at least
+     * the HAL_PIXEL_FORMAT_Y16 dense depth map along with
+     * HAL_PIXEL_FORMAT_BLOB with the same size or size with
+     * the same aspect ratio can have dynamic depth dataspace
+     * stream configuration. {@link CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE android.depth.depthIsExclusive} also
+     * needs to be set to FALSE.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> DEPTH_AVAILABLE_DYNAMIC_DEPTH_STREAM_CONFIGURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.depth.availableDynamicDepthStreamConfigurations", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>This lists the minimum frame duration for each
+     * format/size combination for dynamic depth output streams.</p>
+     * <p>This should correspond to the frame duration when only that
+     * stream is active, with all processing (typically in android.*.mode)
+     * set to either OFF or FAST.</p>
+     * <p>When multiple streams are used in a request, the minimum frame
+     * duration will be max(individual stream min durations).</p>
+     * <p>The minimum frame duration of a stream (of a particular format, size)
+     * is the same regardless of whether the stream is input or output.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DYNAMIC_DEPTH_MIN_FRAME_DURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDynamicDepthMinFrameDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>This lists the maximum stall duration for each
+     * output format/size combination for dynamic depth streams.</p>
+     * <p>A stall duration is how much extra time would get added
+     * to the normal minimum frame duration for a repeating request
+     * that has streams with non-zero stall.</p>
+     * <p>All dynamic depth output streams may have a nonzero stall
+     * duration.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DYNAMIC_DEPTH_STALL_DURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDynamicDepthStallDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
      * <p>String containing the ids of the underlying physical cameras.</p>
      * <p>For a logical camera, this is concatenation of all underlying physical camera ids.
      * The null terminator for physical camera id must be preserved so that the whole string
