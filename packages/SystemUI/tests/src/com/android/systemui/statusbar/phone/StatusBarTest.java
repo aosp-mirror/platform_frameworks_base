@@ -205,7 +205,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         mMetricsLogger = new FakeMetricsLogger();
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
-        mEntryManager = new TestableNotificationEntryManager(mPowerManager, mContext);
+        mEntryManager = new TestableNotificationEntryManager(mContext);
         mNotificationLogger = new NotificationLogger(mNotificationListener,
                 Dependency.get(UiOffloadThread.class), mEntryManager, mStatusBarStateController);
         mDependency.injectTestDependency(NotificationLogger.class, mNotificationLogger);
@@ -761,9 +761,8 @@ public class StatusBarTest extends SysuiTestCase {
 
     public static class TestableNotificationEntryManager extends NotificationEntryManager {
 
-        public TestableNotificationEntryManager(PowerManager powerManager, Context context) {
+        public TestableNotificationEntryManager(Context context) {
             super(context);
-            mPowerManager = powerManager;
         }
 
         public void setUpForTest(NotificationPresenter presenter,

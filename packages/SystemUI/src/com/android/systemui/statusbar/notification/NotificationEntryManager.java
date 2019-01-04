@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -91,9 +90,7 @@ public class NotificationEntryManager implements
     private Runnable mUpdateNotificationViewsCallback;
 
     private NotificationPresenter mPresenter;
-    protected PowerManager mPowerManager;
     private NotificationListenerService.RankingMap mLatestRankingMap;
-    protected HeadsUpManager mHeadsUpManager;
     protected NotificationData mNotificationData;
     protected NotificationListContainer mListContainer;
     @VisibleForTesting
@@ -129,7 +126,6 @@ public class NotificationEntryManager implements
 
     public NotificationEntryManager(Context context) {
         mContext = context;
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBubbleController.setDismissListener(this /* bubbleEventListener */);
         mNotificationData = new NotificationData();
         mDeferredNotificationViewUpdateHandler = new Handler();
@@ -162,8 +158,7 @@ public class NotificationEntryManager implements
             HeadsUpManager headsUpManager) {
         mPresenter = presenter;
         mUpdateNotificationViewsCallback = mPresenter::updateNotificationViews;
-        mHeadsUpManager = headsUpManager;
-        mNotificationData.setHeadsUpManager(mHeadsUpManager);
+        mNotificationData.setHeadsUpManager(headsUpManager);
         mListContainer = listContainer;
 
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
