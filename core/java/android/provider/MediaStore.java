@@ -1251,18 +1251,32 @@ public final class MediaStore {
             public static final String MINI_THUMB_MAGIC = "mini_thumb_magic";
 
             /**
-             * The bucket id of the image. This is a read-only property that
-             * is automatically computed from the DATA column.
-             * <P>Type: TEXT</P>
+             * The primary bucket ID of this media item. This can be useful to
+             * present the user a first-level clustering of related media items.
+             * This is a read-only column that is automatically computed.
+             * <p>
+             * Type: INTEGER
              */
             public static final String BUCKET_ID = "bucket_id";
 
             /**
-             * The bucket display name of the image. This is a read-only property that
-             * is automatically computed from the DATA column.
-             * <P>Type: TEXT</P>
+             * The primary bucket display name of this media item. This can be
+             * useful to present the user a first-level clustering of related
+             * media items. This is a read-only column that is automatically
+             * computed.
+             * <p>
+             * Type: TEXT
              */
             public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
+
+            /**
+             * The secondary bucket ID of this media item. This can be useful to
+             * present the user a second-level clustering of related media
+             * items. This is a read-only column that is automatically computed.
+             * <p>
+             * Type: INTEGER
+             */
+            public static final String SECONDARY_BUCKET_ID = "secondary_bucket_id";
         }
 
         public static final class Media implements ImageColumns {
@@ -2500,18 +2514,32 @@ public final class MediaStore {
             public static final String MINI_THUMB_MAGIC = "mini_thumb_magic";
 
             /**
-             * The bucket id of the video. This is a read-only property that
-             * is automatically computed from the DATA column.
-             * <P>Type: TEXT</P>
+             * The primary bucket ID of this media item. This can be useful to
+             * present the user a first-level clustering of related media items.
+             * This is a read-only column that is automatically computed.
+             * <p>
+             * Type: INTEGER
              */
             public static final String BUCKET_ID = "bucket_id";
 
             /**
-             * The bucket display name of the video. This is a read-only property that
-             * is automatically computed from the DATA column.
-             * <P>Type: TEXT</P>
+             * The primary bucket display name of this media item. This can be
+             * useful to present the user a first-level clustering of related
+             * media items. This is a read-only column that is automatically
+             * computed.
+             * <p>
+             * Type: TEXT
              */
             public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
+
+            /**
+             * The secondary bucket ID of this media item. This can be useful to
+             * present the user a second-level clustering of related media
+             * items. This is a read-only column that is automatically computed.
+             * <p>
+             * Type: INTEGER
+             */
+            public static final String SECONDARY_BUCKET_ID = "secondary_bucket_id";
 
             /**
              * The bookmark for the video. Time in ms. Represents the location in the video that the
