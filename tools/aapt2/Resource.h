@@ -113,7 +113,7 @@ struct ResourceNameRef {
   ResourceNameRef() = default;
   ResourceNameRef(const ResourceNameRef&) = default;
   ResourceNameRef(ResourceNameRef&&) = default;
-  ResourceNameRef(const ResourceName& rhs);  // NOLINT(implicit)
+  ResourceNameRef(const ResourceName& rhs);  // NOLINT(google-explicit-constructor)
   ResourceNameRef(const android::StringPiece& p, ResourceType t, const android::StringPiece& e);
   ResourceNameRef& operator=(const ResourceNameRef& rhs) = default;
   ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
@@ -144,7 +144,7 @@ struct ResourceId {
 
   ResourceId();
   ResourceId(const ResourceId& rhs);
-  ResourceId(uint32_t res_id);  // NOLINT(implicit)
+  ResourceId(uint32_t res_id);  // NOLINT(google-explicit-constructor)
   ResourceId(uint8_t p, uint8_t t, uint16_t e);
 
   bool is_valid() const;
