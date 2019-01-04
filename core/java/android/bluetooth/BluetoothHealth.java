@@ -16,15 +16,7 @@
 
 package android.bluetooth;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.Binder;
-import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -54,78 +46,58 @@ import java.util.List;
  * <li> When done, close the health channel by calling {@link #disconnectChannel}
  * and unregister the application configuration calling
  * {@link #unregisterAppConfiguration}
+ *
+ * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New apps
+ * should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+ * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+ * {@link BluetoothDevice#createL2capChannel(int)}
  */
+@Deprecated
 public final class BluetoothHealth implements BluetoothProfile {
     private static final String TAG = "BluetoothHealth";
-    private static final boolean DBG = true;
-    private static final boolean VDBG = false;
-
     /**
      * Health Profile Source Role - the health device.
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public static final int SOURCE_ROLE = 1 << 0;
 
     /**
      * Health Profile Sink Role the device talking to the health device.
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public static final int SINK_ROLE = 1 << 1;
 
     /**
      * Health Profile - Channel Type used - Reliable
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public static final int CHANNEL_TYPE_RELIABLE = 10;
 
     /**
      * Health Profile - Channel Type used - Streaming
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public static final int CHANNEL_TYPE_STREAMING = 11;
-
-    /**
-     * @hide
-     */
-    public static final int CHANNEL_TYPE_ANY = 12;
-
-    /** @hide */
-    public static final int HEALTH_OPERATION_SUCCESS = 6000;
-    /** @hide */
-    public static final int HEALTH_OPERATION_ERROR = 6001;
-    /** @hide */
-    public static final int HEALTH_OPERATION_INVALID_ARGS = 6002;
-    /** @hide */
-    public static final int HEALTH_OPERATION_GENERIC_FAILURE = 6003;
-    /** @hide */
-    public static final int HEALTH_OPERATION_NOT_FOUND = 6004;
-    /** @hide */
-    public static final int HEALTH_OPERATION_NOT_ALLOWED = 6005;
-
-    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
-            new IBluetoothStateChangeCallback.Stub() {
-                public void onBluetoothStateChange(boolean up) {
-                    if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
-                    if (!up) {
-                        if (VDBG) Log.d(TAG, "Unbinding service...");
-                        synchronized (mConnection) {
-                            try {
-                                mService = null;
-                                mContext.unbindService(mConnection);
-                            } catch (Exception re) {
-                                Log.e(TAG, "", re);
-                            }
-                        }
-                    } else {
-                        synchronized (mConnection) {
-                            try {
-                                if (mService == null) {
-                                    if (VDBG) Log.d(TAG, "Binding service...");
-                                    doBind();
-                                }
-                            } catch (Exception re) {
-                                Log.e(TAG, "", re);
-                            }
-                        }
-                    }
-                }
-            };
 
 
     /**
@@ -142,53 +114,17 @@ public final class BluetoothHealth implements BluetoothProfile {
      * @param callback A callback to indicate success or failure of the registration and all
      * operations done on this application configuration.
      * @return If true, callback will be called.
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public boolean registerSinkAppConfiguration(String name, int dataType,
             BluetoothHealthCallback callback) {
-        if (!isEnabled() || name == null) return false;
-
-        if (VDBG) log("registerSinkApplication(" + name + ":" + dataType + ")");
-        return registerAppConfiguration(name, dataType, SINK_ROLE,
-                CHANNEL_TYPE_ANY, callback);
-    }
-
-    /**
-     * Register an application configuration that acts as a Health SINK or in a Health
-     * SOURCE role.This is an asynchronous call and so
-     * the callback is used to notify success or failure if the function returns true.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @param name The friendly name associated with the application or configuration.
-     * @param dataType The dataType of the Source role of Health Profile.
-     * @param channelType The channel type. Will be one of {@link #CHANNEL_TYPE_RELIABLE}  or {@link
-     * #CHANNEL_TYPE_STREAMING}
-     * @param callback - A callback to indicate success or failure.
-     * @return If true, callback will be called.
-     * @hide
-     */
-    public boolean registerAppConfiguration(String name, int dataType, int role,
-            int channelType, BluetoothHealthCallback callback) {
-        boolean result = false;
-        if (!isEnabled() || !checkAppParam(name, role, channelType, callback)) return result;
-
-        if (VDBG) log("registerApplication(" + name + ":" + dataType + ")");
-        BluetoothHealthCallbackWrapper wrapper = new BluetoothHealthCallbackWrapper(callback);
-        BluetoothHealthAppConfiguration config =
-                new BluetoothHealthAppConfiguration(name, dataType, role, channelType);
-
-        final IBluetoothHealth service = mService;
-        if (service != null) {
-            try {
-                result = service.registerAppConfiguration(config, wrapper);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
-        return result;
+        Log.e(TAG, "registerSinkAppConfiguration(): BluetoothHealth is deprecated");
+        return false;
     }
 
     /**
@@ -199,22 +135,16 @@ public final class BluetoothHealth implements BluetoothProfile {
      *
      * @param config The health app configuration
      * @return Success or failure.
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public boolean unregisterAppConfiguration(BluetoothHealthAppConfiguration config) {
-        boolean result = false;
-        final IBluetoothHealth service = mService;
-        if (service != null && isEnabled() && config != null) {
-            try {
-                result = service.unregisterAppConfiguration(config);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
-
-        return result;
+        Log.e(TAG, "unregisterAppConfiguration(): BluetoothHealth is deprecated");
+        return false;
     }
 
     /**
@@ -228,49 +158,16 @@ public final class BluetoothHealth implements BluetoothProfile {
      * @param config The application configuration which has been registered using {@link
      * #registerSinkAppConfiguration(String, int, BluetoothHealthCallback) }
      * @return If true, the callback associated with the application config will be called.
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public boolean connectChannelToSource(BluetoothDevice device,
             BluetoothHealthAppConfiguration config) {
-        final IBluetoothHealth service = mService;
-        if (service != null && isEnabled() && isValidDevice(device) && config != null) {
-            try {
-                return service.connectChannelToSource(device, config);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
-        return false;
-    }
-
-    /**
-     * Connect to a health device which has the {@link #SINK_ROLE}.
-     * This is an asynchronous call. If this function returns true, the callback
-     * associated with the application configuration will be called.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @param device The remote Bluetooth device.
-     * @param config The application configuration which has been registered using {@link
-     * #registerSinkAppConfiguration(String, int, BluetoothHealthCallback) }
-     * @return If true, the callback associated with the application config will be called.
-     * @hide
-     */
-    public boolean connectChannelToSink(BluetoothDevice device,
-            BluetoothHealthAppConfiguration config, int channelType) {
-        final IBluetoothHealth service = mService;
-        if (service != null && isEnabled() && isValidDevice(device) && config != null) {
-            try {
-                return service.connectChannelToSink(device, config, channelType);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
+        Log.e(TAG, "connectChannelToSource(): BluetoothHealth is deprecated");
         return false;
     }
 
@@ -286,20 +183,16 @@ public final class BluetoothHealth implements BluetoothProfile {
      * #registerSinkAppConfiguration(String, int, BluetoothHealthCallback) }
      * @param channelId The channel id associated with the channel
      * @return If true, the callback associated with the application config will be called.
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public boolean disconnectChannel(BluetoothDevice device,
             BluetoothHealthAppConfiguration config, int channelId) {
-        final IBluetoothHealth service = mService;
-        if (service != null && isEnabled() && isValidDevice(device) && config != null) {
-            try {
-                return service.disconnectChannel(device, config, channelId);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
+        Log.e(TAG, "disconnectChannel(): BluetoothHealth is deprecated");
         return false;
     }
 
@@ -315,20 +208,16 @@ public final class BluetoothHealth implements BluetoothProfile {
      * @param device The remote Bluetooth health device
      * @param config The application configuration
      * @return null on failure, ParcelFileDescriptor on success.
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public ParcelFileDescriptor getMainChannelFd(BluetoothDevice device,
             BluetoothHealthAppConfiguration config) {
-        final IBluetoothHealth service = mService;
-        if (service != null && isEnabled() && isValidDevice(device) && config != null) {
-            try {
-                return service.getMainChannelFd(device, config);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
+        Log.e(TAG, "getMainChannelFd(): BluetoothHealth is deprecated");
         return null;
     }
 
@@ -348,17 +237,7 @@ public final class BluetoothHealth implements BluetoothProfile {
      */
     @Override
     public int getConnectionState(BluetoothDevice device) {
-        final IBluetoothHealth service = mService;
-        if (service != null && isEnabled() && isValidDevice(device)) {
-            try {
-                return service.getHealthDeviceConnectionState(device);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
+        Log.e(TAG, "getConnectionState(): BluetoothHealth is deprecated");
         return STATE_DISCONNECTED;
     }
 
@@ -378,17 +257,8 @@ public final class BluetoothHealth implements BluetoothProfile {
      */
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
-        final IBluetoothHealth service = mService;
-        if (service != null && isEnabled()) {
-            try {
-                return service.getConnectedHealthDevices();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return new ArrayList<BluetoothDevice>();
-            }
-        }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return new ArrayList<BluetoothDevice>();
+        Log.e(TAG, "getConnectedDevices(): BluetoothHealth is deprecated");
+        return new ArrayList<>();
     }
 
     /**
@@ -410,163 +280,81 @@ public final class BluetoothHealth implements BluetoothProfile {
      */
     @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
-        final IBluetoothHealth service = mService;
-        if (service != null && isEnabled()) {
-            try {
-                return service.getHealthDevicesMatchingConnectionStates(states);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return new ArrayList<BluetoothDevice>();
-            }
-        }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return new ArrayList<BluetoothDevice>();
+        Log.e(TAG, "getDevicesMatchingConnectionStates(): BluetoothHealth is deprecated");
+        return new ArrayList<>();
     }
 
-    private static class BluetoothHealthCallbackWrapper extends IBluetoothHealthCallback.Stub {
-        private BluetoothHealthCallback mCallback;
-
-        public BluetoothHealthCallbackWrapper(BluetoothHealthCallback callback) {
-            mCallback = callback;
-        }
-
-        @Override
-        public void onHealthAppConfigurationStatusChange(BluetoothHealthAppConfiguration config,
-                int status) {
-            mCallback.onHealthAppConfigurationStatusChange(config, status);
-        }
-
-        @Override
-        public void onHealthChannelStateChange(BluetoothHealthAppConfiguration config,
-                BluetoothDevice device, int prevState, int newState,
-                ParcelFileDescriptor fd, int channelId) {
-            mCallback.onHealthChannelStateChange(config, device, prevState, newState, fd,
-                    channelId);
-        }
-    }
-
-    /** Health Channel Connection State - Disconnected */
+    /** Health Channel Connection State - Disconnected
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
+     */
+    @Deprecated
     public static final int STATE_CHANNEL_DISCONNECTED = 0;
-    /** Health Channel Connection State - Connecting */
+    /** Health Channel Connection State - Connecting
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
+     */
+    @Deprecated
     public static final int STATE_CHANNEL_CONNECTING = 1;
-    /** Health Channel Connection State - Connected */
+    /** Health Channel Connection State - Connected
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
+     */
+    @Deprecated
     public static final int STATE_CHANNEL_CONNECTED = 2;
-    /** Health Channel Connection State - Disconnecting */
+    /** Health Channel Connection State - Disconnecting
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
+     */
+    @Deprecated
     public static final int STATE_CHANNEL_DISCONNECTING = 3;
 
-    /** Health App Configuration registration success */
-    public static final int APP_CONFIG_REGISTRATION_SUCCESS = 0;
-    /** Health App Configuration registration failure */
-    public static final int APP_CONFIG_REGISTRATION_FAILURE = 1;
-    /** Health App Configuration un-registration success */
-    public static final int APP_CONFIG_UNREGISTRATION_SUCCESS = 2;
-    /** Health App Configuration un-registration failure */
-    public static final int APP_CONFIG_UNREGISTRATION_FAILURE = 3;
-
-    private Context mContext;
-    private ServiceListener mServiceListener;
-    private volatile IBluetoothHealth mService;
-    BluetoothAdapter mAdapter;
-
-    /**
-     * Create a BluetoothHealth proxy object.
+    /** Health App Configuration registration success
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
-    /*package*/ BluetoothHealth(Context context, ServiceListener l) {
-        mContext = context;
-        mServiceListener = l;
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
-        IBluetoothManager mgr = mAdapter.getBluetoothManager();
-        if (mgr != null) {
-            try {
-                mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
-            } catch (RemoteException e) {
-                Log.e(TAG, "", e);
-            }
-        }
-
-        doBind();
-    }
-
-    boolean doBind() {
-        Intent intent = new Intent(IBluetoothHealth.class.getName());
-        ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
-        intent.setComponent(comp);
-        if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
-                UserHandle.CURRENT_OR_SELF)) {
-            Log.e(TAG, "Could not bind to Bluetooth Health Service with " + intent);
-            return false;
-        }
-        return true;
-    }
-
-    /*package*/ void close() {
-        if (VDBG) log("close()");
-        IBluetoothManager mgr = mAdapter.getBluetoothManager();
-        if (mgr != null) {
-            try {
-                mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
-            } catch (Exception e) {
-                Log.e(TAG, "", e);
-            }
-        }
-
-        synchronized (mConnection) {
-            if (mService != null) {
-                try {
-                    mService = null;
-                    mContext.unbindService(mConnection);
-                } catch (Exception re) {
-                    Log.e(TAG, "", re);
-                }
-            }
-        }
-        mServiceListener = null;
-    }
-
-    private final ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            if (DBG) Log.d(TAG, "Proxy object connected");
-            mService = IBluetoothHealth.Stub.asInterface(Binder.allowBlocking(service));
-
-            if (mServiceListener != null) {
-                mServiceListener.onServiceConnected(BluetoothProfile.HEALTH, BluetoothHealth.this);
-            }
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            if (DBG) Log.d(TAG, "Proxy object disconnected");
-            mService = null;
-            if (mServiceListener != null) {
-                mServiceListener.onServiceDisconnected(BluetoothProfile.HEALTH);
-            }
-        }
-    };
-
-    private boolean isEnabled() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-
-        if (adapter != null && adapter.getState() == BluetoothAdapter.STATE_ON) return true;
-        log("Bluetooth is Not enabled");
-        return false;
-    }
-
-    private static boolean isValidDevice(BluetoothDevice device) {
-        return device != null && BluetoothAdapter.checkBluetoothAddress(device.getAddress());
-    }
-
-    private boolean checkAppParam(String name, int role, int channelType,
-            BluetoothHealthCallback callback) {
-        if (name == null || (role != SOURCE_ROLE && role != SINK_ROLE)
-                || (channelType != CHANNEL_TYPE_RELIABLE && channelType != CHANNEL_TYPE_STREAMING
-                    && channelType != CHANNEL_TYPE_ANY)
-                || callback == null) {
-            return false;
-        }
-        if (role == SOURCE_ROLE && channelType == CHANNEL_TYPE_ANY) return false;
-        return true;
-    }
-
-    private static void log(String msg) {
-        Log.d(TAG, msg);
-    }
+    @Deprecated
+    public static final int APP_CONFIG_REGISTRATION_SUCCESS = 0;
+    /** Health App Configuration registration failure
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
+     */
+    @Deprecated
+    public static final int APP_CONFIG_REGISTRATION_FAILURE = 1;
+    /** Health App Configuration un-registration success
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
+     */
+    @Deprecated
+    public static final int APP_CONFIG_UNREGISTRATION_SUCCESS = 2;
+    /** Health App Configuration un-registration failure
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
+     */
+    @Deprecated
+    public static final int APP_CONFIG_UNREGISTRATION_FAILURE = 3;
 }
