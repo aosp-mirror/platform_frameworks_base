@@ -3744,10 +3744,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
                         broadcastIntentInPackage("android", SYSTEM_UID, intent, null, null, 0,
                                 null, null, permission.ACCESS_INSTANT_APPS, null, false, false,
-                                resolvedUserId);
+                                resolvedUserId, false);
                     } else {
                         broadcastIntentInPackage("android", SYSTEM_UID, intent, null, null, 0,
-                                null, null, null, null, false, false, resolvedUserId);
+                                null, null, null, null, false, false, resolvedUserId, false);
                     }
 
                     if (observer != null) {
@@ -13996,7 +13996,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
                             null, -1, -1, false, null, null, OP_NONE, null, receivers,
-                            null, 0, null, null, false, true, true, -1);
+                            null, 0, null, null, false, true, true, -1, false);
                     queue.enqueueParallelBroadcastLocked(r);
                     queue.scheduleBroadcastsLocked();
                 }
@@ -14235,6 +14235,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             IIntentReceiver resultTo, int resultCode, String resultData,
             Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle bOptions,
             boolean ordered, boolean sticky, int callingPid, int callingUid, int userId) {
+        return broadcastIntentLocked(callerApp, callerPackage, intent, resolvedType, resultTo,
+            resultCode, resultData, resultExtras, requiredPermissions, appOp, bOptions, ordered,
+            sticky, callingPid, callingUid, userId, false /* allowBackgroundActivityStarts */);
+    }
+
+    @GuardedBy("this")
+    final int broadcastIntentLocked(ProcessRecord callerApp,
+            String callerPackage, Intent intent, String resolvedType,
+            IIntentReceiver resultTo, int resultCode, String resultData,
+            Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle bOptions,
+            boolean ordered, boolean sticky, int callingPid, int callingUid, int userId,
+            boolean allowBackgroundActivityStarts) {
         intent = new Intent(intent);
 
         final boolean callerInstantApp = isInstantApp(callerApp, callerPackage, callingUid);
@@ -14735,7 +14747,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
                     callerPackage, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, appOp, brOptions, registeredReceivers, resultTo,
-                    resultCode, resultData, resultExtras, ordered, sticky, false, userId);
+                    resultCode, resultData, resultExtras, ordered, sticky, false, userId,
+                    allowBackgroundActivityStarts);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
             final boolean replaced = replacePending
                     && (queue.replaceParallelBroadcastLocked(r) != null);
@@ -14831,7 +14844,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
                     callerPackage, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, appOp, brOptions, receivers, resultTo, resultCode,
-                    resultData, resultExtras, ordered, sticky, false, userId);
+                    resultData, resultExtras, ordered, sticky, false, userId,
+                    allowBackgroundActivityStarts);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r
                     + ": prev had " + queue.mOrderedBroadcasts.size());
@@ -14978,7 +14992,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             Intent intent, String resolvedType, IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle resultExtras,
             String requiredPermission, Bundle bOptions, boolean serialized, boolean sticky,
-            int userId) {
+            int userId, boolean allowBackgroundActivityStarts) {
         synchronized(this) {
             intent = verifyBroadcastLocked(intent);
 
@@ -14988,7 +15002,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             int res = broadcastIntentLocked(null, packageName, intent, resolvedType,
                     resultTo, resultCode, resultData, resultExtras,
                     requiredPermissions, OP_NONE, bOptions, serialized,
-                    sticky, -1, uid, userId);
+                    sticky, -1, uid, userId, allowBackgroundActivityStarts);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
@@ -19044,6 +19058,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void setPendingIntentAllowBgActivityStarts(IIntentSender target,
+                IBinder whitelistToken, int flags) {
+            if (!(target instanceof PendingIntentRecord)) {
+                Slog.w(TAG, "setPendingIntentAllowBgActivityStarts():"
+                        + " not a PendingIntentRecord: " + target);
+                return;
+            }
+            synchronized (ActivityManagerService.this) {
+                ((PendingIntentRecord) target).setAllowBgActivityStarts(whitelistToken, flags);
+            }
+        }
+
+        @Override
         public void setDeviceIdleWhitelist(int[] allAppids, int[] exceptIdleAppids) {
             synchronized (ActivityManagerService.this) {
                 mDeviceIdleWhitelist = allAppids;
@@ -19430,11 +19457,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int broadcastIntentInPackage(String packageName, int uid, Intent intent,
                 String resolvedType, IIntentReceiver resultTo, int resultCode, String resultData,
                 Bundle resultExtras, String requiredPermission, Bundle bOptions, boolean serialized,
-                boolean sticky, int userId) {
+                boolean sticky, int userId, boolean allowBackgroundActivityStarts) {
             synchronized (ActivityManagerService.this) {
                 return ActivityManagerService.this.broadcastIntentInPackage(packageName, uid,
                         intent, resolvedType, resultTo, resultCode, resultData, resultExtras,
-                        requiredPermission, bOptions, serialized, sticky, userId);
+                        requiredPermission, bOptions, serialized, sticky, userId,
+                        allowBackgroundActivityStarts);
             }
         }
 

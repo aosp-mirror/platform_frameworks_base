@@ -75,6 +75,8 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
+import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG_CRITICAL;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG_NORMAL;
@@ -4420,6 +4422,8 @@ public class NotificationManagerService extends SystemService {
                     if (pendingIntent != null) {
                         am.setPendingIntentWhitelistDuration(pendingIntent.getTarget(),
                                 WHITELIST_TOKEN, duration);
+                        am.setPendingIntentAllowBgActivityStarts(pendingIntent.getTarget(),
+                                WHITELIST_TOKEN, (FLAG_ACTIVITY_SENDER | FLAG_BROADCAST_SENDER));
                     }
                 }
             }
