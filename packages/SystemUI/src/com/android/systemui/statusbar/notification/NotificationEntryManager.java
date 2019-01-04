@@ -339,8 +339,6 @@ public class NotificationEntryManager implements
                     extender.setShouldManageLifetime(entry, false /* shouldManage */);
                 }
 
-                mForegroundServiceController.removeNotification(entry.notification);
-
                 if (entry.rowExists()) {
                     entry.removeRow();
                     mListContainer.cleanUpViewStateForEntry(entry);
@@ -458,9 +456,6 @@ public class NotificationEntryManager implements
         NotificationData.Entry entry = createNotificationEntry(notification, ranking);
         abortExistingInflation(key);
 
-        mForegroundServiceController.addNotification(notification,
-                mNotificationData.getImportance(key));
-
         mPendingNotifications.put(key, entry);
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPendingEntryAdded(entry);
@@ -521,9 +516,6 @@ public class NotificationEntryManager implements
         entry.updateIcons(mContext, notification);
         getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
                 mNotificationData.get(entry.key) != null);
-
-        mForegroundServiceController.updateNotification(notification,
-                mNotificationData.getImportance(key));
 
         updateNotifications();
 
