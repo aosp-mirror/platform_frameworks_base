@@ -299,6 +299,59 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         assertEquals(1, mSnoozeHelper.getSnoozed(UserHandle.USER_SYSTEM, "pkg").size());
     }
 
+    @Test
+    public void testClearData() {
+        // snooze 2 from same package
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r, 1000);
+        mSnoozeHelper.snooze(r2, 1000);
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+
+        // clear data
+        mSnoozeHelper.clearData(UserHandle.USER_SYSTEM, "pkg");
+
+        // nothing snoozed; alarms canceled
+        assertFalse(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+        assertFalse(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+        // twice for initial snooze, twice for canceling the snooze
+        verify(mAm, times(4)).cancel(any(PendingIntent.class));
+    }
+
+    @Test
+    public void testClearData_otherRecordsUntouched() {
+        // 2 packages, 2 users
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.ALL);
+        NotificationRecord r3 = getNotificationRecord("pkg2", 3, "three", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r, 1000);
+        mSnoozeHelper.snooze(r2, 1000);
+        mSnoozeHelper.snooze(r3, 1000);
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_ALL, r2.sbn.getPackageName(), r2.getKey()));
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r3.sbn.getPackageName(), r3.getKey()));
+
+        // clear data
+        mSnoozeHelper.clearData(UserHandle.USER_SYSTEM, "pkg");
+
+        assertFalse(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_ALL, r2.sbn.getPackageName(), r2.getKey()));
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r3.sbn.getPackageName(), r3.getKey()));
+        // once for each initial snooze, once for canceling one snooze
+        verify(mAm, times(4)).cancel(any(PendingIntent.class));
+    }
+
     private NotificationRecord getNotificationRecord(String pkg, int id, String tag,
             UserHandle user, String groupKey, boolean groupSummary) {
         Notification n = new Notification.Builder(getContext(), TEST_CHANNEL_ID)

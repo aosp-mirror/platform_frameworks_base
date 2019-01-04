@@ -2642,6 +2642,9 @@ public class NotificationManagerService extends SystemService {
             // Zen
             mConditionProviders.onPackagesChanged(true, packages, uids);
 
+            // Snoozing
+            mSnoozeHelper.clearData(UserHandle.getUserId(uid), packageName);
+
             // Reset notification preferences
             if (!fromApp) {
                 mPreferencesHelper.onPackagesChanged(
