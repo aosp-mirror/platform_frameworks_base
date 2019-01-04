@@ -141,7 +141,7 @@ struct LinkOptions {
 
 class LinkContext : public IAaptContext {
  public:
-  LinkContext(IDiagnostics* diagnostics)
+  explicit LinkContext(IDiagnostics* diagnostics)
       : diagnostics_(diagnostics), name_mangler_({}), symbols_(&name_mangler_) {
   }
 
@@ -226,7 +226,7 @@ class LinkContext : public IAaptContext {
 // See b/37498913.
 class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
  public:
-  FeatureSplitSymbolTableDelegate(IAaptContext* context) : context_(context) {
+  explicit FeatureSplitSymbolTableDelegate(IAaptContext* context) : context_(context) {
   }
 
   virtual ~FeatureSplitSymbolTableDelegate() = default;
