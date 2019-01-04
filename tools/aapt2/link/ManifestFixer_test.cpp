@@ -832,4 +832,36 @@ TEST_F(ManifestFixerTest, UsesLibraryMustHaveNonEmptyName) {
   EXPECT_THAT(Verify(input), NotNull());
 }
 
+TEST_F(ManifestFixerTest, UsesFeatureAddDeprecated) {
+  std::string input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <uses-feature android:name="android.hardware.biometrics.fingerprint" />
+        <feature-group>
+          <uses-feature android:name="android.hardware.biometrics.fingerprint" />
+        </feature-group>
+      </manifest>)";
+
+  std::unique_ptr<xml::XmlResource> manifest = Verify(input);
+  ASSERT_THAT(manifest, NotNull());
+  EXPECT_THAT(manifest->root->FindChildWithAttribute("", "uses-feature",
+                                                     xml::kSchemaAndroid, "name",
+                                                     "android.hardware.biometrics.fingerprint"),
+              Ne(nullptr));
+  EXPECT_THAT(manifest->root->FindChildWithAttribute("", "uses-feature",
+                                                     xml::kSchemaAndroid, "name",
+                                                     "android.hardware.fingerprint"),
+              Ne(nullptr));
+
+  xml::Element* feature_group = manifest->root->FindChild("", "feature-group");
+  ASSERT_THAT(feature_group, Ne(nullptr));
+
+  EXPECT_THAT(feature_group->FindChildWithAttribute("", "uses-feature", xml::kSchemaAndroid, "name",
+                                                    "android.hardware.biometrics.fingerprint"),
+              Ne(nullptr));
+  EXPECT_THAT(feature_group->FindChildWithAttribute("", "uses-feature", xml::kSchemaAndroid, "name",
+                                                    "android.hardware.fingerprint"),
+              Ne(nullptr));
+}
+
 }  // namespace aapt
