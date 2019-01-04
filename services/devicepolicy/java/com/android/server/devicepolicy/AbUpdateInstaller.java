@@ -66,6 +66,9 @@ class AbUpdateInstaller extends UpdateInstaller {
         map.put(
                 DOWNLOAD_STATE_INITIALIZATION_ERROR,
                 InstallUpdateCallback.UPDATE_ERROR_INCORRECT_OS_VERSION);
+        map.put(
+                UpdateEngine.ErrorCodeConstants.PAYLOAD_TIMESTAMP_ERROR,
+                InstallUpdateCallback.UPDATE_ERROR_INCORRECT_OS_VERSION);
 
         // Error constants corresponding to errors related to bad update file.
         map.put(
