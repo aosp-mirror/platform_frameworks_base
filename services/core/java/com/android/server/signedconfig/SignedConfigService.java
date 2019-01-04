@@ -42,8 +42,8 @@ public class SignedConfigService {
     private static final String TAG = "SignedConfig";
 
     // TODO should these be elsewhere? In a public API?
-    private static final String KEY_CONFIG = "android.signedconfig";
-    private static final String KEY_CONFIG_SIGNATURE = "android.signedconfig.signature";
+    private static final String KEY_GLOBAL_SETTINGS = "android.settings.global";
+    private static final String KEY_GLOBAL_SETTINGS_SIGNATURE = "android.settings.global.signature";
 
     private static class UpdateReceiver extends BroadcastReceiver {
         @Override
@@ -80,25 +80,25 @@ public class SignedConfigService {
             if (DBG) Slog.d(TAG, "handlePackageBroadcast: no metadata");
             return;
         }
-        if (metaData.containsKey(KEY_CONFIG)
-                && metaData.containsKey(KEY_CONFIG_SIGNATURE)) {
-            String config = metaData.getString(KEY_CONFIG);
-            String signature = metaData.getString(KEY_CONFIG_SIGNATURE);
+        if (metaData.containsKey(KEY_GLOBAL_SETTINGS)
+                && metaData.containsKey(KEY_GLOBAL_SETTINGS_SIGNATURE)) {
+            String config = metaData.getString(KEY_GLOBAL_SETTINGS);
+            String signature = metaData.getString(KEY_GLOBAL_SETTINGS_SIGNATURE);
             try {
                 // Base64 encoding is standard (not URL safe) encoding: RFC4648
                 config = new String(Base64.getDecoder().decode(config), StandardCharsets.UTF_8);
             } catch (IllegalArgumentException iae) {
-                Slog.e(TAG, "Failed to base64 decode config from " + packageName);
+                Slog.e(TAG, "Failed to base64 decode global settings config from " + packageName);
                 return;
             }
             if (DBG) {
-                Slog.d(TAG, "Got signed config: " + config);
-                Slog.d(TAG, "Got config signature: " + signature);
+                Slog.d(TAG, "Got global settings config: " + config);
+                Slog.d(TAG, "Got global settings signature: " + signature);
             }
-            new SignedConfigApplicator(mContext, packageName).applyConfig(
+            new GlobalSettingsConfigApplicator(mContext, packageName).applyConfig(
                     config, signature);
         } else {
-            if (DBG) Slog.d(TAG, "Package has no config/signature.");
+            if (DBG) Slog.d(TAG, "Package has no global settings config/signature.");
         }
     }
 

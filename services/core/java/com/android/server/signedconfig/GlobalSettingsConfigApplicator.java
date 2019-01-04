@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-class SignedConfigApplicator {
+class GlobalSettingsConfigApplicator {
 
     private static final String TAG = "SignedConfig";
 
@@ -68,7 +68,7 @@ class SignedConfigApplicator {
     private final String mSourcePackage;
     private final SignatureVerifier mVerifier;
 
-    SignedConfigApplicator(Context context, String sourcePackage) {
+    GlobalSettingsConfigApplicator(Context context, String sourcePackage) {
         mContext = context;
         mSourcePackage = sourcePackage;
         mVerifier = new SignatureVerifier();
@@ -102,7 +102,7 @@ class SignedConfigApplicator {
 
     void applyConfig(String configStr, String signature) {
         if (!checkSignature(configStr, signature)) {
-            Slog.e(TAG, "Signature check on signed configuration in package " + mSourcePackage
+            Slog.e(TAG, "Signature check on global settings in package " + mSourcePackage
                     + " failed; ignoring");
             return;
         }
@@ -110,26 +110,26 @@ class SignedConfigApplicator {
         try {
             config = SignedConfig.parse(configStr, ALLOWED_KEYS, KEY_VALUE_MAPPERS);
         } catch (InvalidConfigException e) {
-            Slog.e(TAG, "Failed to parse config from package " + mSourcePackage, e);
+            Slog.e(TAG, "Failed to parse global settings from package " + mSourcePackage, e);
             return;
         }
         int currentVersion = getCurrentConfigVersion();
         if (currentVersion >= config.version) {
-            Slog.i(TAG, "Config from package " + mSourcePackage + " is older than existing: "
-                    + config.version + "<=" + currentVersion);
+            Slog.i(TAG, "Global settings from package " + mSourcePackage
+                    + " is older than existing: " + config.version + "<=" + currentVersion);
             return;
         }
         // We have new config!
-        Slog.i(TAG, "Got new signed config from package " + mSourcePackage + ": version "
+        Slog.i(TAG, "Got new global settings from package " + mSourcePackage + ": version "
                 + config.version + " replacing existing version " + currentVersion);
         SignedConfig.PerSdkConfig matchedConfig =
                 config.getMatchingConfig(Build.VERSION.SDK_INT);
         if (matchedConfig == null) {
-            Slog.i(TAG, "Config is not applicable to current SDK version; ignoring");
+            Slog.i(TAG, "Settings is not applicable to current SDK version; ignoring");
             return;
         }
 
-        Slog.i(TAG, "Updating signed config to version " + config.version);
+        Slog.i(TAG, "Updating global settings to version " + config.version);
         updateCurrentConfig(config.version, matchedConfig.values);
     }
 }
