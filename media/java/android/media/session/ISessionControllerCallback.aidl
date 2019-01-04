@@ -15,26 +15,25 @@
 
 package android.media.session;
 
-import android.media.AudioAttributes;
+import android.content.pm.ParceledListSlice;
 import android.media.MediaMetadata;
-import android.media.session.MediaSession;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
+import android.media.session.MediaSession;
 import android.os.Bundle;
 
 /**
  * @hide
  */
 oneway interface ISessionControllerCallback {
-    void notifyEvent(String event, in Bundle extras);
-    void notifySessionDestroyed();
+    void onEvent(String event, in Bundle extras);
+    void onSessionDestroyed();
 
     // These callbacks are for the TransportController
-    void notifyPlaybackStateChanged(in PlaybackState state);
-    void notifyMetadataChanged(in MediaMetadata metadata);
-    void notifyQueueChanged(in List<MediaSession.QueueItem> queue);
-    void notifyQueueTitleChanged(CharSequence title);
-    void notifyExtrasChanged(in Bundle extras);
-    void notifyVolumeInfoChanged(int volumeType, in AudioAttributes attrs, int controlType,
-            int maxVolume, int currentVolume);
+    void onPlaybackStateChanged(in PlaybackState state);
+    void onMetadataChanged(in MediaMetadata metadata);
+    void onQueueChanged(in ParceledListSlice queue);
+    void onQueueTitleChanged(CharSequence title);
+    void onExtrasChanged(in Bundle extras);
+    void onVolumeInfoChanged(in ParcelableVolumeInfo info);
 }

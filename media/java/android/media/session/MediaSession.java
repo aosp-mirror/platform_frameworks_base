@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
@@ -466,7 +467,7 @@ public final class MediaSession {
      */
     public void setQueue(@Nullable List<QueueItem> queue) {
         try {
-            mBinder.setQueue(queue);
+            mBinder.setQueue(queue == null ? null : new ParceledListSlice<QueueItem>(queue));
         } catch (RemoteException e) {
             Log.wtf("Dead object in setQueue.", e);
         }
@@ -1070,14 +1071,14 @@ public final class MediaSession {
         }
 
         private static RemoteUserInfo createRemoteUserInfo(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
+                ISessionControllerCallback caller) {
             return new RemoteUserInfo(packageName, pid, uid,
                     caller != null ? caller.asBinder() : null);
         }
 
         @Override
         public void onCommand(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String command, Bundle args, ResultReceiver cb) {
+                ISessionControllerCallback caller, String command, Bundle args, ResultReceiver cb) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchCommand(createRemoteUserInfo(packageName, pid, uid, caller),
@@ -1103,7 +1104,7 @@ public final class MediaSession {
 
         @Override
         public void onMediaButtonFromController(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, Intent mediaButtonIntent) {
+                ISessionControllerCallback caller, Intent mediaButtonIntent) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchMediaButton(createRemoteUserInfo(packageName, pid, uid, caller),
@@ -1113,7 +1114,7 @@ public final class MediaSession {
 
         @Override
         public void onPrepare(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
+                ISessionControllerCallback caller) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchPrepare(createRemoteUserInfo(packageName, pid, uid, caller));
@@ -1122,7 +1123,7 @@ public final class MediaSession {
 
         @Override
         public void onPrepareFromMediaId(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String mediaId,
+                ISessionControllerCallback caller, String mediaId,
                 Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
@@ -1133,7 +1134,7 @@ public final class MediaSession {
 
         @Override
         public void onPrepareFromSearch(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String query,
+                ISessionControllerCallback caller, String query,
                 Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
@@ -1144,7 +1145,7 @@ public final class MediaSession {
 
         @Override
         public void onPrepareFromUri(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, Uri uri, Bundle extras) {
+                ISessionControllerCallback caller, Uri uri, Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchPrepareFromUri(createRemoteUserInfo(packageName, pid, uid, caller),
@@ -1154,7 +1155,7 @@ public final class MediaSession {
 
         @Override
         public void onPlay(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
+                ISessionControllerCallback caller) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchPlay(createRemoteUserInfo(packageName, pid, uid, caller));
@@ -1163,7 +1164,7 @@ public final class MediaSession {
 
         @Override
         public void onPlayFromMediaId(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String mediaId,
+                ISessionControllerCallback caller, String mediaId,
                 Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
@@ -1174,7 +1175,7 @@ public final class MediaSession {
 
         @Override
         public void onPlayFromSearch(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String query,
+                ISessionControllerCallback caller, String query,
                 Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
@@ -1185,7 +1186,7 @@ public final class MediaSession {
 
         @Override
         public void onPlayFromUri(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, Uri uri, Bundle extras) {
+                ISessionControllerCallback caller, Uri uri, Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchPlayFromUri(createRemoteUserInfo(packageName, pid, uid, caller),
@@ -1195,7 +1196,7 @@ public final class MediaSession {
 
         @Override
         public void onSkipToTrack(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, long id) {
+                ISessionControllerCallback caller, long id) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchSkipToItem(createRemoteUserInfo(packageName, pid, uid, caller), id);
@@ -1204,7 +1205,7 @@ public final class MediaSession {
 
         @Override
         public void onPause(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
+                ISessionControllerCallback caller) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchPause(createRemoteUserInfo(packageName, pid, uid, caller));
@@ -1213,7 +1214,7 @@ public final class MediaSession {
 
         @Override
         public void onStop(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
+                ISessionControllerCallback caller) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchStop(createRemoteUserInfo(packageName, pid, uid, caller));
@@ -1222,7 +1223,7 @@ public final class MediaSession {
 
         @Override
         public void onNext(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
+                ISessionControllerCallback caller) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchNext(createRemoteUserInfo(packageName, pid, uid, caller));
@@ -1231,7 +1232,7 @@ public final class MediaSession {
 
         @Override
         public void onPrevious(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
+                ISessionControllerCallback caller) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchPrevious(createRemoteUserInfo(packageName, pid, uid, caller));
@@ -1240,7 +1241,7 @@ public final class MediaSession {
 
         @Override
         public void onFastForward(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
+                ISessionControllerCallback caller) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchFastForward(createRemoteUserInfo(packageName, pid, uid, caller));
@@ -1249,7 +1250,7 @@ public final class MediaSession {
 
         @Override
         public void onRewind(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
+                ISessionControllerCallback caller) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchRewind(createRemoteUserInfo(packageName, pid, uid, caller));
@@ -1258,7 +1259,7 @@ public final class MediaSession {
 
         @Override
         public void onSeekTo(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, long pos) {
+                ISessionControllerCallback caller, long pos) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchSeekTo(createRemoteUserInfo(packageName, pid, uid, caller), pos);
@@ -1266,7 +1267,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onRate(String packageName, int pid, int uid, ControllerCallbackLink caller,
+        public void onRate(String packageName, int pid, int uid, ISessionControllerCallback caller,
                 Rating rating) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
@@ -1276,7 +1277,7 @@ public final class MediaSession {
 
         @Override
         public void onCustomAction(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String action, Bundle args) {
+                ISessionControllerCallback caller, String action, Bundle args) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchCustomAction(createRemoteUserInfo(packageName, pid, uid, caller),
@@ -1286,7 +1287,7 @@ public final class MediaSession {
 
         @Override
         public void onAdjustVolume(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, int direction) {
+                ISessionControllerCallback caller, int direction) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchAdjustVolume(createRemoteUserInfo(packageName, pid, uid, caller),
@@ -1296,7 +1297,7 @@ public final class MediaSession {
 
         @Override
         public void onSetVolumeTo(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, int value) {
+                ISessionControllerCallback caller, int value) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchSetVolumeTo(createRemoteUserInfo(packageName, pid, uid, caller),

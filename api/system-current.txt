@@ -3163,34 +3163,6 @@ package android.media.audiopolicy {
 
 package android.media.session {
 
-  public final class ControllerCallbackLink implements android.os.Parcelable {
-    ctor public ControllerCallbackLink(android.media.session.ControllerCallbackLink.CallbackStub);
-    method public android.os.IBinder asBinder();
-    method public int describeContents();
-    method public void notifyEvent(java.lang.String, android.os.Bundle);
-    method public void notifyExtrasChanged(android.os.Bundle);
-    method public void notifyMetadataChanged(android.media.MediaMetadata);
-    method public void notifyPlaybackStateChanged(android.media.session.PlaybackState);
-    method public void notifyQueueChanged(java.util.List<android.media.session.MediaSession.QueueItem>);
-    method public void notifyQueueTitleChanged(java.lang.CharSequence);
-    method public void notifySessionDestroyed();
-    method public void notifyVolumeInfoChanged(int, android.media.AudioAttributes, int, int, int);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.session.ControllerCallbackLink> CREATOR;
-  }
-
-  public static abstract class ControllerCallbackLink.CallbackStub {
-    ctor public ControllerCallbackLink.CallbackStub();
-    method public void onEvent(java.lang.String, android.os.Bundle);
-    method public void onExtrasChanged(android.os.Bundle);
-    method public void onMetadataChanged(android.media.MediaMetadata);
-    method public void onPlaybackStateChanged(android.media.session.PlaybackState);
-    method public void onQueueChanged(java.util.List<android.media.session.MediaSession.QueueItem>);
-    method public void onQueueTitleChanged(java.lang.CharSequence);
-    method public void onSessionDestroyed();
-    method public void onVolumeInfoChanged(int, android.media.AudioAttributes, int, int, int);
-  }
-
   public final class MediaSessionManager {
     method public void setOnMediaKeyListener(android.media.session.MediaSessionManager.OnMediaKeyListener, android.os.Handler);
     method public void setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, android.os.Handler);
