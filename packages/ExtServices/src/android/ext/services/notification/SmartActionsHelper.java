@@ -26,7 +26,6 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.service.notification.NotificationAssistantService;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.LruCache;
 import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.TextClassification;
@@ -356,7 +355,7 @@ public class SmartActionsHelper {
                                         TextClassifier.HINT_TEXT_IS_NOT_EDITABLE)))
                 .build();
         TextLinks links = mTextClassifier.generateLinks(textLinksRequest);
-        ArrayMap<String, Integer> entityTypeFrequency = getEntityTypeFrequency(links);
+        EntityTypeCounter entityTypeCounter = EntityTypeCounter.fromTextLinks(links);
 
         ArrayList<Notification.Action> actions = new ArrayList<>();
         for (TextLinks.TextLink link : links.getLinks()) {
@@ -364,7 +363,7 @@ public class SmartActionsHelper {
             // case where a notification contains e.g. a list of phone numbers. In such cases, the
             // user likely wants to act on the whole list rather than an individual entity.
             if (link.getEntityCount() == 0
-                    || entityTypeFrequency.get(link.getEntity(0)) != 1) {
+                    || entityTypeCounter.getCount(link.getEntity(0)) != 1) {
                 continue;
             }
 
@@ -397,26 +396,5 @@ public class SmartActionsHelper {
             }
         }
         return actions;
-    }
-
-    /**
-     * Given the links extracted from a piece of text, returns the frequency of each entity
-     * type.
-     */
-    @NonNull
-    private ArrayMap<String, Integer> getEntityTypeFrequency(@NonNull TextLinks links) {
-        ArrayMap<String, Integer> entityTypeCount = new ArrayMap<>();
-        for (TextLinks.TextLink link : links.getLinks()) {
-            if (link.getEntityCount() == 0) {
-                continue;
-            }
-            String entityType = link.getEntity(0);
-            if (entityTypeCount.containsKey(entityType)) {
-                entityTypeCount.put(entityType, entityTypeCount.get(entityType) + 1);
-            } else {
-                entityTypeCount.put(entityType, 1);
-            }
-        }
-        return entityTypeCount;
     }
 }
