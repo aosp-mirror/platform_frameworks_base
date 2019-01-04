@@ -19,6 +19,7 @@ package android.accessibilityservice;
 import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -794,7 +795,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @see android.R.styleable#AccessibilityService_nonInteractiveUiTimeout
      */
-    public void setNonInteractiveUiTimeoutMillis(int timeout) {
+    public void setNonInteractiveUiTimeoutMillis(@IntRange(from = 0) int timeout) {
         mNonInteractiveUiTimeout = timeout;
     }
 
@@ -821,7 +822,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @see android.R.styleable#AccessibilityService_interactiveUiTimeout
      */
-    public void setInteractiveUiTimeoutMillis(int timeout) {
+    public void setInteractiveUiTimeoutMillis(@IntRange(from = 0) int timeout) {
         mInteractiveUiTimeout = timeout;
     }
 
