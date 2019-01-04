@@ -2377,6 +2377,10 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.SILENCE_GESTURE,
                 SecureSettingsProto.SILENCE_GESTURE_ENABLED);
 
+        dumpSetting(s, p,
+                Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                SecureSettingsProto.THEME_CUSTOMIZATION_OVERLAY_PACKAGES);
+
         // Please insert new settings using the same order as in SecureSettingsProto.
         p.end(token);
 

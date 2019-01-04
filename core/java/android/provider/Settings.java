@@ -8421,6 +8421,20 @@ public final class Settings {
         public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS =
                 "location_access_check_delay_millis";
 
+
+        /**
+         * Comma separated list of enabled overlay packages for all android.theme.customization.*
+         * categories. If there is no corresponding package included for a category, then all
+         * overlay packages in that category must be disabled.
+         * @hide
+         */
+        @SystemApi
+        public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES =
+                "theme_customization_overlay_packages";
+
+        private static final Validator THEME_CUSTOMIZATION_OVERLAY_PACKAGES_VALIDATOR =
+                new SettingsValidators.PackageNameListValidator(",");
+
         /**
          * This are the settings to be backed up.
          *
@@ -8544,6 +8558,7 @@ public final class Settings {
             LOCK_SCREEN_WHEN_TRUST_LOST,
             SKIP_GESTURE,
             SILENCE_GESTURE,
+            THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
         };
 
         /**
@@ -8714,6 +8729,8 @@ public final class Settings {
             VALIDATORS.put(LOCK_SCREEN_WHEN_TRUST_LOST, LOCK_SCREEN_WHEN_TRUST_LOST_VALIDATOR);
             VALIDATORS.put(SKIP_GESTURE, SKIP_GESTURE_VALIDATOR);
             VALIDATORS.put(SILENCE_GESTURE, SILENCE_GESTURE_VALIDATOR);
+            VALIDATORS.put(THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                    THEME_CUSTOMIZATION_OVERLAY_PACKAGES_VALIDATOR);
         }
 
         /**
