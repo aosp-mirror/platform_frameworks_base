@@ -124,6 +124,7 @@ public class DozeUi implements DozeMachine.Part {
                 unscheduleTimeTick();
                 break;
             case DOZE_REQUEST_PULSE:
+                scheduleTimeTick();
                 pulseWhileDozing(mMachine.getPulseReason());
                 break;
             case INITIALIZED:
