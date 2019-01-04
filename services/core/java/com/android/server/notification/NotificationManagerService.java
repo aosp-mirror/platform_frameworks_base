@@ -1316,6 +1316,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    void setHints(int hints) {
+        mListenerHints = hints;
+    }
+
+    @VisibleForTesting
     void setVibrator(Vibrator vibrator) {
         mVibrator = vibrator;
     }
@@ -3991,6 +3996,20 @@ public class NotificationManagerService extends SystemService {
         }
         if ((mListenerHints & HINT_HOST_DISABLE_EFFECTS) != 0) {
             return "listenerHints";
+        }
+        if (record != null && record.getAudioAttributes() != null) {
+            if ((mListenerHints & HINT_HOST_DISABLE_NOTIFICATION_EFFECTS) != 0) {
+                if (record.getAudioAttributes().getUsage()
+                        != AudioAttributes.USAGE_VOICE_COMMUNICATION) {
+                    return "listenerNoti";
+                }
+            }
+            if ((mListenerHints & HINT_HOST_DISABLE_CALL_EFFECTS) != 0) {
+                if (record.getAudioAttributes().getUsage()
+                        == AudioAttributes.USAGE_VOICE_COMMUNICATION) {
+                    return "listenerCall";
+                }
+            }
         }
         if (mCallState != TelephonyManager.CALL_STATE_IDLE && !mZenModeHelper.isCall(record)) {
             return "callState";
