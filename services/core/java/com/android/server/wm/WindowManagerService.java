@@ -6158,7 +6158,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     dumpWindowsLocked(pw, true, null);
                 }
                 return;
-            } else if ("all".equals(cmd) || "a".equals(cmd)) {
+            } else if ("all".equals(cmd)) {
                 synchronized (mGlobalLock) {
                     dumpWindowsLocked(pw, true, null);
                 }
