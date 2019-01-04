@@ -110,9 +110,9 @@ import com.android.server.backup.internal.ClearDataObserver;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.internal.Operation;
 import com.android.server.backup.internal.PerformInitializeTask;
-import com.android.server.backup.internal.ProvisionedObserver;
 import com.android.server.backup.internal.RunBackupReceiver;
 import com.android.server.backup.internal.RunInitializeReceiver;
+import com.android.server.backup.internal.SetupObserver;
 import com.android.server.backup.keyvalue.BackupRequest;
 import com.android.server.backup.params.AdbBackupParams;
 import com.android.server.backup.params.AdbParams;
@@ -261,7 +261,7 @@ public class UserBackupManagerService {
     private IBackupManager mBackupManagerBinder;
 
     private boolean mEnabled;   // access to this is synchronized on 'this'
-    private boolean mProvisioned;
+    private boolean mSetupComplete;
     private boolean mAutoRestore;
 
     private PendingIntent mRunBackupIntent;
@@ -314,9 +314,6 @@ public class UserBackupManagerService {
     private final Queue<PerformUnifiedRestoreTask> mPendingRestores = new ArrayDeque<>();
 
     private ActiveRestoreSession mActiveRestoreSession;
-
-    // Watch the device provisioning operation during setup
-    private ContentObserver mProvisionedObserver;
 
     /**
      * mCurrentOperations contains the list of currently active operations.
@@ -468,15 +465,19 @@ public class UserBackupManagerService {
 
         // Set up our bookkeeping
         final ContentResolver resolver = context.getContentResolver();
-        mProvisioned = Settings.Global.getInt(resolver,
-                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        mSetupComplete =
+                Settings.Secure.getIntForUser(
+                        resolver, Settings.Secure.USER_SETUP_COMPLETE, 0, mUserId)
+                        != 0;
         mAutoRestore = Settings.Secure.getInt(resolver,
                 Settings.Secure.BACKUP_AUTO_RESTORE, 1) != 0;
 
-        mProvisionedObserver = new ProvisionedObserver(this, mBackupHandler);
+        ContentObserver setupObserver = new SetupObserver(this, mBackupHandler);
         resolver.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
-                false, mProvisionedObserver);
+                Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE),
+                /* notifyForDescendents */ false,
+                setupObserver,
+                mUserId);
 
         mBaseStateDir = checkNotNull(baseStateDir, "baseStateDir cannot be null");
         mBaseStateDir.mkdirs();
@@ -550,6 +551,10 @@ public class UserBackupManagerService {
         mUserBackupThread.quit();
     }
 
+    public int getUserId() {
+        return mUserId;
+    }
+
     public BackupManagerConstants getConstants() {
         return mConstants;
     }
@@ -619,12 +624,12 @@ public class UserBackupManagerService {
         mEnabled = enabled;
     }
 
-    public boolean isProvisioned() {
-        return mProvisioned;
+    public boolean isSetupComplete() {
+        return mSetupComplete;
     }
 
-    public void setProvisioned(boolean provisioned) {
-        mProvisioned = provisioned;
+    public void setSetupComplete(boolean setupComplete) {
+        mSetupComplete = setupComplete;
     }
 
     public PowerManager.WakeLock getWakelock() {
@@ -1577,11 +1582,16 @@ public class UserBackupManagerService {
             throw new IllegalArgumentException("No packages are provided for backup");
         }
 
-        if (!mEnabled || !mProvisioned) {
-            Slog.i(TAG, "Backup requested but e=" + mEnabled + " p=" + mProvisioned);
+        if (!mEnabled || !mSetupComplete) {
+            Slog.i(
+                    TAG,
+                    "Backup requested but enabled="
+                            + mEnabled
+                            + " setupComplete="
+                            + mSetupComplete);
             BackupObserverUtils.sendBackupFinished(observer,
                     BackupManager.ERROR_BACKUP_NOT_ALLOWED);
-            final int logTag = mProvisioned
+            final int logTag = mSetupComplete
                     ? BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED
                     : BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
             monitor = BackupManagerMonitorUtils.monitorEvent(monitor, logTag, null,
@@ -2016,13 +2026,13 @@ public class UserBackupManagerService {
         FullBackupEntry entry = null;
         long latency = fullBackupInterval;
 
-        if (!mEnabled || !mProvisioned) {
+        if (!mEnabled || !mSetupComplete) {
             // Backups are globally disabled, so don't proceed.  We also don't reschedule
             // the job driving automatic backups; that job will be scheduled again when
             // the user enables backup.
             if (MORE_DEBUG) {
-                Slog.i(TAG, "beginFullBackup but e=" + mEnabled
-                        + " p=" + mProvisioned + "; ignoring");
+                Slog.i(TAG, "beginFullBackup but enabled=" + mEnabled
+                        + " setupComplete=" + mSetupComplete + "; ignoring");
             }
             return false;
         }
@@ -2423,12 +2433,6 @@ public class UserBackupManagerService {
         }
     }
 
-    /** Returns {@code true} if the system user has gone through SUW. */
-    public boolean deviceIsProvisioned() {
-        final ContentResolver resolver = mContext.getContentResolver();
-        return (Settings.Global.getInt(resolver, Settings.Global.DEVICE_PROVISIONED, 0) != 0);
-    }
-
     /**
      * Used by 'adb backup' to run a backup pass for packages supplied via the command line, writing
      * the resulting data stream to the supplied {@code fd}. This method is synchronous and does not
@@ -2461,8 +2465,7 @@ public class UserBackupManagerService {
 
         long oldId = Binder.clearCallingIdentity();
         try {
-            // Doesn't make sense to do a full backup prior to setup
-            if (!deviceIsProvisioned()) {
+            if (!mSetupComplete) {
                 Slog.i(TAG, "Backup not supported before setup");
                 return;
             }
@@ -2588,9 +2591,7 @@ public class UserBackupManagerService {
         long oldId = Binder.clearCallingIdentity();
 
         try {
-            // Check whether the device has been provisioned -- we don't handle
-            // full restores prior to completing the setup process.
-            if (!deviceIsProvisioned()) {
+            if (!mSetupComplete) {
                 Slog.i(TAG, "Full restore not permitted before setup");
                 return;
             }
@@ -2745,7 +2746,7 @@ public class UserBackupManagerService {
             }
 
             synchronized (mQueueLock) {
-                if (enable && !wasEnabled && mProvisioned) {
+                if (enable && !wasEnabled && mSetupComplete) {
                     // if we've just been enabled, start scheduling backup passes
                     KeyValueBackupJob.schedule(mContext, mConstants);
                     scheduleNextFullBackupJob(0);
@@ -2758,7 +2759,7 @@ public class UserBackupManagerService {
                     // This also constitutes an opt-out, so we wipe any data for
                     // this device from the backend.  We start that process with
                     // an alarm in order to guarantee wakelock states.
-                    if (wasEnabled && mProvisioned) {
+                    if (wasEnabled && mSetupComplete) {
                         // NOTE: we currently flush every registered transport, not just
                         // the currently-active one.
                         List<String> transportNames = new ArrayList<>();
@@ -3455,7 +3456,7 @@ public class UserBackupManagerService {
     private void dumpInternal(PrintWriter pw) {
         synchronized (mQueueLock) {
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
-                    + " / " + (!mProvisioned ? "not " : "") + "provisioned / "
+                    + " / " + (!mSetupComplete ? "not " : "") + "setup complete / "
                     + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init");
             pw.println("Auto-restore is " + (mAutoRestore ? "enabled" : "disabled"));
             if (mBackupRunning) pw.println("Backup currently running");

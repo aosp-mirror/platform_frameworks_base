@@ -829,7 +829,7 @@ public class UserBackupManagerServiceTest {
     public void testRequestBackup_whenNotProvisioned() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
-        backupManagerService.setProvisioned(false);
+        backupManagerService.setSetupComplete(false);
 
         int result = backupManagerService.requestBackup(new String[] {PACKAGE_1}, mObserver, 0);
 
@@ -848,7 +848,7 @@ public class UserBackupManagerServiceTest {
         setUpCurrentTransport(mTransportManager, mTransport.unregistered());
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setEnabled(true);
-        backupManagerService.setProvisioned(true);
+        backupManagerService.setSetupComplete(true);
 
         int result = backupManagerService.requestBackup(new String[] {PACKAGE_1}, mObserver, 0);
 
@@ -868,7 +868,7 @@ public class UserBackupManagerServiceTest {
         setUpCurrentTransport(mTransportManager, mTransport);
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setEnabled(true);
-        backupManagerService.setProvisioned(true);
+        backupManagerService.setSetupComplete(true);
         // Haven't set PACKAGE_1 as eligible
 
         int result = backupManagerService.requestBackup(new String[] {PACKAGE_1}, mObserver, 0);
@@ -965,7 +965,7 @@ public class UserBackupManagerServiceTest {
     private UserBackupManagerService createBackupManagerServiceForRequestBackup() {
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setEnabled(true);
-        backupManagerService.setProvisioned(true);
+        backupManagerService.setSetupComplete(true);
         return backupManagerService;
     }
 
