@@ -18,6 +18,6 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Black accent color name application label. [CHAR LIMIT=50] -->
-    <string name="accent_color_black_overlay" translatable="false">Black Accent Color</string>
+    <string name="accent_color_black_overlay" translatable="false">Black</string>
 </resources>
 
