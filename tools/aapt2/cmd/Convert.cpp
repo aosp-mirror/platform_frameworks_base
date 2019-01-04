@@ -60,16 +60,17 @@ class IApkSerializer {
 class BinaryApkSerializer : public IApkSerializer {
  public:
   BinaryApkSerializer(IAaptContext* context, const Source& source,
-                   const TableFlattenerOptions& options)
-      : IApkSerializer(context, source), tableFlattenerOptions_(options) {}
+                      const TableFlattenerOptions& table_flattener_options,
+                      const XmlFlattenerOptions& xml_flattener_options)
+      : IApkSerializer(context, source),
+        table_flattener_options_(table_flattener_options),
+        xml_flattener_options_(xml_flattener_options) {}
 
   bool SerializeXml(const xml::XmlResource* xml, const std::string& path, bool utf16,
                     IArchiveWriter* writer, uint32_t compression_flags) override {
     BigBuffer buffer(4096);
-    XmlFlattenerOptions options = {};
-    options.use_utf16 = utf16;
-    options.keep_raw_values = true;
-    XmlFlattener flattener(&buffer, options);
+    xml_flattener_options_.use_utf16 = utf16;
+    XmlFlattener flattener(&buffer, xml_flattener_options_);
     if (!flattener.Consume(context_, xml)) {
       return false;
     }
@@ -80,7 +81,7 @@ class BinaryApkSerializer : public IApkSerializer {
 
   bool SerializeTable(ResourceTable* table, IArchiveWriter* writer) override {
     BigBuffer buffer(4096);
-    TableFlattener table_flattener(tableFlattenerOptions_, &buffer);
+    TableFlattener table_flattener(table_flattener_options_, &buffer);
     if (!table_flattener.Consume(context_, table)) {
       return false;
     }
@@ -136,7 +137,8 @@ class BinaryApkSerializer : public IApkSerializer {
   }
 
  private:
-  TableFlattenerOptions tableFlattenerOptions_;
+  TableFlattenerOptions table_flattener_options_;
+  XmlFlattenerOptions xml_flattener_options_;
 
   DISALLOW_COPY_AND_ASSIGN(BinaryApkSerializer);
 };
@@ -252,13 +254,15 @@ class Context : public IAaptContext {
 };
 
 int Convert(IAaptContext* context, LoadedApk* apk, IArchiveWriter* output_writer,
-            ApkFormat output_format, TableFlattenerOptions& options) {
+            ApkFormat output_format, TableFlattenerOptions table_flattener_options,
+            XmlFlattenerOptions xml_flattener_options) {
   // Do not change the ordering of strings in the values string pool
-  options.sort_stringpool_entries = false;
+  table_flattener_options.sort_stringpool_entries = false;
 
   unique_ptr<IApkSerializer> serializer;
   if (output_format == ApkFormat::kBinary) {
-    serializer.reset(new BinaryApkSerializer(context, apk->GetSource(), options));
+    serializer.reset(new BinaryApkSerializer(context, apk->GetSource(), table_flattener_options,
+                                             xml_flattener_options));
   } else if (output_format == ApkFormat::kProto) {
     serializer.reset(new ProtoApkSerializer(context, apk->GetSource()));
   } else {
@@ -378,7 +382,8 @@ int ConvertCommand::Action(const std::vector<std::string>& args) {
     return 1;
   }
 
-  return Convert(&context, apk.get(), writer.get(), format, options_);
+  return Convert(&context, apk.get(), writer.get(), format, table_flattener_options_,
+                 xml_flattener_options_);
 }
 
 }  // namespace aapt

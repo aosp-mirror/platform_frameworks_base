@@ -1545,7 +1545,8 @@ class Linker {
   // to the IArchiveWriter.
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set, xml::XmlResource* manifest,
                 ResourceTable* table) {
-    const bool keep_raw_values = context_->GetPackageType() == PackageType::kStaticLib;
+    const bool keep_raw_values = (context_->GetPackageType() == PackageType::kStaticLib)
+                                 || options_.keep_raw_values;
     bool result = FlattenXml(context_, *manifest, kAndroidManifestPath, keep_raw_values,
                              true /*utf16*/, options_.output_format, writer);
     if (!result) {

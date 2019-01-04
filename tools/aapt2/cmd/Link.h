@@ -75,6 +75,7 @@ struct LinkOptions {
 
   // Flattening options.
   TableFlattenerOptions table_flattener_options;
+  bool keep_raw_values = false;
 
   // Split APK options.
   TableSplitterOptions table_splitter_options;
@@ -244,6 +245,8 @@ class LinkCommand : public Command {
         &options_.extensions_to_not_compress);
     AddOptionalSwitch("--no-compress", "Do not compress any resources.",
         &options_.do_not_compress_anything);
+    AddOptionalSwitch("--keep-raw-values", "Preserve raw attribute values in xml files.",
+        &options_.keep_raw_values);
     AddOptionalSwitch("--warn-manifest-validation",
         "Treat manifest validation errors as warnings.",
         &options_.manifest_fixer_options.warn_validation);
@@ -252,7 +255,6 @@ class LinkCommand : public Command {
             "Syntax: path/to/output.apk:<config>[,<config>[...]].\n"
             "On Windows, use a semicolon ';' separator instead.",
         &split_args_);
-    AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
     AddOptionalSwitch("--debug-mode",
         "Inserts android:debuggable=\"true\" in to the application node of the\n"
             "manifest, making the application debuggable even on production devices.",
@@ -260,6 +262,7 @@ class LinkCommand : public Command {
     AddOptionalSwitch("--strict-visibility",
         "Do not allow overlays with different visibility levels.",
         &options_.strict_visibility);
+    AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
   }
 
   int Action(const std::vector<std::string>& args) override;
