@@ -443,7 +443,6 @@ public class NotificationEntryManager implements
         }
 
         Dependency.get(LeakDetector.class).trackInstance(entry);
-        entry.createIcons(mContext, sbn);
         // Construct the expanded view.
         getRowBinder().inflateViews(entry, () -> performRemoveNotification(sbn),
                 mNotificationData.get(entry.key) != null);
@@ -523,7 +522,6 @@ public class NotificationEntryManager implements
 
         mNotificationData.update(entry, ranking, notification);
 
-        entry.updateIcons(mContext, notification);
         getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
                 mNotificationData.get(entry.key) != null);
 

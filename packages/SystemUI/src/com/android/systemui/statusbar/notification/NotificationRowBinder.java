@@ -120,17 +120,22 @@ public class NotificationRowBinder {
     /**
      * Inflates the views for the given entry (possibly asynchronously).
      */
-    public void inflateViews(NotificationData.Entry entry, Runnable onDismissRunnable,
-            boolean isUpdate) {
+    public void inflateViews(
+            NotificationData.Entry entry,
+            Runnable onDismissRunnable,
+            boolean isUpdate)
+            throws InflationException {
         ViewGroup parent = mListContainer.getViewParentForNotification(entry);
         PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
                 entry.notification.getUser().getIdentifier());
 
         final StatusBarNotification sbn = entry.notification;
         if (entry.rowExists()) {
+            entry.updateIcons(mContext, sbn);
             entry.reset();
             updateNotification(entry, pmUser, sbn, entry.getRow(), isUpdate);
         } else {
+            entry.createIcons(mContext, sbn);
             new RowInflaterTask().inflate(mContext, parent, entry,
                     row -> {
                         bindRow(entry, pmUser, sbn, row, onDismissRunnable);
