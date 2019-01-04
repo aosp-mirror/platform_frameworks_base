@@ -189,10 +189,13 @@ class NotificationSwipeHelper extends SwipeHelper
         boolean isFastNonDismissGesture =
                 gestureFastEnough && !gestureTowardsMenu && !isDismissGesture;
         boolean isMenuRevealingGestureAwayFromMenu = slowSwipedFarEnough || isFastNonDismissGesture;
-        if (isNonDismissGestureTowardsMenu
-                || (!isFalseGesture(ev) && isMenuRevealingGestureAwayFromMenu)) {
+        int menuSnapTarget = menuRow.getMenuSnapTarget();
+        boolean isNonFalseMenuRevealingGesture =
+                !isFalseGesture(ev) && isMenuRevealingGestureAwayFromMenu;
+        if ((isNonDismissGestureTowardsMenu || isNonFalseMenuRevealingGesture)
+                && menuSnapTarget != 0) {
             // Menu has not been snapped to previously and this is menu revealing gesture
-            snapOpen(animView, menuRow.getMenuSnapTarget(), velocity);
+            snapOpen(animView, menuSnapTarget, velocity);
             menuRow.onSnapOpen();
         } else if (isDismissGesture(ev) && !gestureTowardsMenu) {
             dismiss(animView, velocity);
