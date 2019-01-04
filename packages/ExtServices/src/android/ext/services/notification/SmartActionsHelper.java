@@ -384,8 +384,7 @@ public class SmartActionsHelper {
                         remoteAction.getIcon(),
                         remoteAction.getTitle(),
                         remoteAction.getActionIntent())
-                        .setSemanticAction(
-                                Notification.Action.SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION)
+                        .setContextual(true)
                         .addExtras(Bundle.forPair(KEY_ACTION_TYPE, classification.getEntity(0)))
                         .build();
                 actions.add(action);
