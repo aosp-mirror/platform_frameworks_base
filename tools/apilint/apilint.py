@@ -220,55 +220,65 @@ class Package():
     def __repr__(self):
         return self.raw
 
-class V2Tokenizer():
+class V2Tokenizer(object):
+    __slots__ = ["raw"]
+
     DELIMITER = re.compile(r'\s+|[()@<>;,={}/"]|\[\]')
     STRING_SPECIAL = re.compile(r'["\\]')
 
     def __init__(self, raw):
         self.raw = raw
-        self.current = 0
 
-    def __iter__(self):
-        return self
+    def tokenize(self):
+        tokens = []
+        current = 0
+        raw = self.raw
+        length = len(raw)
 
-    def next(self):
-        if self.current >= len(self.raw):
-            raise StopIteration
+        while current < length:
+            while current < length:
+                start = current
+                match = V2Tokenizer.DELIMITER.search(raw, start)
+                if match is not None:
+                    match_start = match.start()
+                    if match_start == current:
+                        end = match.end()
+                    else:
+                        end = match_start
+                else:
+                    end = length
 
-        start = self.current
-        match = V2Tokenizer.DELIMITER.search(self.raw, start)
-        if match:
-            match_start = match.start()
-            if match_start == self.current:
-                end = match.end()
-            else:
-                end = match_start
-        else:
-            end = len(self.raw)
+                token = raw[start:end]
+                current = end
 
-        token = self.raw[start:end]
-        self.current = end
+                if token == "" or token[0] == " ":
+                    continue
+                else:
+                    break
 
-        if token.strip() == "":
-            return self.next()
+            if token == "@":
+                if raw[start:start+11] == "@interface ":
+                    current = start + 11
+                    tokens.append("@interface")
+                    continue
+            elif token == '/':
+                if raw[start:start+2] == "//":
+                    current = length
+                    continue
+            elif token == '"':
+                current, string_token = self.tokenize_string(raw, length, current)
+                tokens.append(token + string_token)
+                continue
 
-        if token == "@" and self.raw[start:start+10] == "@interface":
-            return token + self.next()
+            tokens.append(token)
 
-        if token == '/' and self.raw[start:start+2] == "//":
-            self.current = len(self.raw)
-            raise StopIteration
+        return tokens
 
-        if token == '"':
-            return token + self.tokenize_string()
-
-        return token
-
-    def tokenize_string(self):
-        start = self.current
-        end = len(self.raw)
+    def tokenize_string(self, raw, length, current):
+        start = current
+        end = length
         while start < end:
-            match = V2Tokenizer.STRING_SPECIAL.search(self.raw, start)
+            match = V2Tokenizer.STRING_SPECIAL.search(raw, start)
             if match:
                 if match.group() == '"':
                     end = match.end()
@@ -279,19 +289,21 @@ class V2Tokenizer():
                 else:
                     raise ValueError("Unexpected match: `%s`" % (match.group()))
             else:
-                raise ValueError("Unexpected EOF tokenizing string: `%s`" % (self.raw[self.current - 1:],))
+                raise ValueError("Unexpected EOF tokenizing string: `%s`" % (raw[current - 1:],))
 
-        token = self.raw[self.current:end]
-        self.current = end
-        return token
+        token = raw[current:end]
+        return end, token
 
-class V2LineParser():
+class V2LineParser(object):
+    __slots__ = ["tokenized", "current", "len"]
+
     MODIFIERS = set("public protected internal private abstract default static final transient volatile synchronized".split())
     JAVA_LANG_TYPES = set("AbstractMethodError AbstractStringBuilder Appendable ArithmeticException ArrayIndexOutOfBoundsException ArrayStoreException AssertionError AutoCloseable Boolean BootstrapMethodError Byte Character CharSequence Class ClassCastException ClassCircularityError ClassFormatError ClassLoader ClassNotFoundException Cloneable CloneNotSupportedException Comparable Compiler Deprecated Double Enum EnumConstantNotPresentException Error Exception ExceptionInInitializerError Float FunctionalInterface IllegalAccessError IllegalAccessException IllegalArgumentException IllegalMonitorStateException IllegalStateException IllegalThreadStateException IncompatibleClassChangeError IndexOutOfBoundsException InheritableThreadLocal InstantiationError InstantiationException Integer InternalError InterruptedException Iterable LinkageError Long Math NegativeArraySizeException NoClassDefFoundError NoSuchFieldError NoSuchFieldException NoSuchMethodError NoSuchMethodException NullPointerException Number NumberFormatException Object OutOfMemoryError Override Package package-info.java Process ProcessBuilder ProcessEnvironment ProcessImpl Readable ReflectiveOperationException Runnable Runtime RuntimeException RuntimePermission SafeVarargs SecurityException SecurityManager Short StackOverflowError StackTraceElement StrictMath String StringBuffer StringBuilder StringIndexOutOfBoundsException SuppressWarnings System Thread ThreadDeath ThreadGroup ThreadLocal Throwable TypeNotPresentException UNIXProcess UnknownError UnsatisfiedLinkError UnsupportedClassVersionError UnsupportedOperationException VerifyError VirtualMachineError Void".split())
 
     def __init__(self, raw):
-        self.tokenized = list(V2Tokenizer(raw))
+        self.tokenized = V2Tokenizer(raw).tokenize()
         self.current = 0
+        self.len = len(self.tokenized)
 
     def parse_into_method(self, method):
         method.split = []
@@ -378,7 +390,7 @@ class V2LineParser():
         return found
 
     def eof(self):
-        return self.current == len(self.tokenized)
+        return self.current == self.len
 
     def parse_eof(self):
         if not self.eof():
