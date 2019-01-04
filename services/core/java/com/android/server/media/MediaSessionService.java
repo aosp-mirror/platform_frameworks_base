@@ -45,10 +45,10 @@ import android.media.session.ICallback;
 import android.media.session.IOnMediaKeyListener;
 import android.media.session.IOnVolumeKeyLongPressListener;
 import android.media.session.ISession;
+import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
-import android.media.session.SessionCallbackLink;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -414,7 +414,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         try {
-            session.getCallback().getBinder().unlinkToDeath(session, 0);
+            session.getCallback().asBinder().unlinkToDeath(session, 0);
         } catch (Exception e) {
             // ignore exceptions while destroying a session.
         }
@@ -500,7 +500,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private MediaSessionRecord createSessionInternal(int callerPid, int callerUid, int userId,
-            String callerPackageName, SessionCallbackLink cb, String tag) throws RemoteException {
+            String callerPackageName, ISessionCallback cb, String tag) throws RemoteException {
         synchronized (mLock) {
             return createSessionLocked(callerPid, callerUid, userId, callerPackageName, cb, tag);
         }
@@ -514,7 +514,7 @@ public class MediaSessionService extends SystemService implements Monitor {
      * 4. It needs to be added to the relevant user record.
      */
     private MediaSessionRecord createSessionLocked(int callerPid, int callerUid, int userId,
-            String callerPackageName, SessionCallbackLink cb, String tag) {
+            String callerPackageName, ISessionCallback cb, String tag) {
         FullUserRecord user = getFullUserRecordLocked(userId);
         if (user == null) {
             Log.wtf(TAG, "Request from invalid user: " +  userId);
@@ -524,7 +524,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         final MediaSessionRecord session = new MediaSessionRecord(callerPid, callerUid, userId,
                 callerPackageName, cb, tag, this, mHandler.getLooper());
         try {
-            cb.getBinder().linkToDeath(session, 0);
+            cb.asBinder().linkToDeath(session, 0);
         } catch (RemoteException e) {
             throw new RuntimeException("Media Session owner died prematurely.", e);
         }
@@ -875,7 +875,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         private boolean mVoiceButtonHandled = false;
 
         @Override
-        public ISession createSession(String packageName, SessionCallbackLink cb, String tag,
+        public ISession createSession(String packageName, ISessionCallback cb, String tag,
                 int userId) throws RemoteException {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
