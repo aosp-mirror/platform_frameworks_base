@@ -13,16 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.telephony.ims;
 
-import android.os.Parcelable;
+import android.os.Parcel;
 
 /**
- * RcsThread represents a single RCS conversation thread. It holds messages that were sent and
- * received and events that occurred on that thread.
+ * A part of a composite {@link RcsMessage} that holds a string
  * @hide - TODO(sahinc) make this public
  */
-public abstract class RcsThread implements Parcelable {
+public class RcsTextPart extends RcsPart {
+    public static final Creator<RcsTextPart> CREATOR = new Creator<RcsTextPart>() {
+        @Override
+        public RcsTextPart createFromParcel(Parcel in) {
+            return new RcsTextPart(in);
+        }
 
+        @Override
+        public RcsTextPart[] newArray(int size) {
+            return new RcsTextPart[size];
+        }
+    };
+
+    protected RcsTextPart(Parcel in) {
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+    }
 }
