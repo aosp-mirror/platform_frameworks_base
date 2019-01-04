@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -247,7 +248,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mock(StatusBarWindowController.class), mock(NotificationIconAreaController.class),
                 mDozeScrimController, mock(NotificationShelf.class),
                 mLockscreenUserManager, mCommandQueue, mNotificationPresenter,
-                mock(BubbleController.class), mock(NavigationBarController.class));
+                mock(BubbleController.class), mock(NavigationBarController.class),
+                mock(AutoHideController.class));
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         SystemUIFactory.getInstance().getRootComponent()
@@ -546,7 +548,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
 
         when(mCommandQueue.panelsEnabled()).thenReturn(false);
-        mStatusBar.disable(StatusBarManager.DISABLE_NONE,
+        mStatusBar.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
         verify(mNotificationPanelView).setQsExpansionEnabled(false);
         mStatusBar.animateExpandNotificationsPanel();
@@ -555,7 +557,8 @@ public class StatusBarTest extends SysuiTestCase {
         verify(mNotificationPanelView, never()).expand(anyBoolean());
 
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
-        mStatusBar.disable(StatusBarManager.DISABLE_NONE, StatusBarManager.DISABLE2_NONE, false);
+        mStatusBar.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
+                StatusBarManager.DISABLE2_NONE, false);
         verify(mNotificationPanelView).setQsExpansionEnabled(true);
         mStatusBar.animateExpandNotificationsPanel();
         verify(mNotificationPanelView).expandWithoutQs();
@@ -698,7 +701,8 @@ public class StatusBarTest extends SysuiTestCase {
                 CommandQueue commandQueue,
                 NotificationPresenter notificationPresenter,
                 BubbleController bubbleController,
-                NavigationBarController navBarController) {
+                NavigationBarController navBarController,
+                AutoHideController autoHideController) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -730,6 +734,7 @@ public class StatusBarTest extends SysuiTestCase {
             mGestureWakeLock = mock(PowerManager.WakeLock.class);
             mBubbleController = bubbleController;
             mNavigationBarController = navBarController;
+            mAutoHideController = autoHideController;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {

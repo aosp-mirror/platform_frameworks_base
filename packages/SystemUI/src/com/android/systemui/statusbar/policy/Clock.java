@@ -299,7 +299,10 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     }
 
     @Override
-    public void disable(int state1, int state2, boolean animate) {
+    public void disable(int displayId, int state1, int state2, boolean animate) {
+        if (displayId != getDisplay().getDisplayId()) {
+            return;
+        }
         boolean clockVisibleByPolicy = (state1 & StatusBarManager.DISABLE_CLOCK) == 0;
         if (clockVisibleByPolicy != mClockVisibleByPolicy) {
             setClockVisibilityByPolicy(clockVisibleByPolicy);

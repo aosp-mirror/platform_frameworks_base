@@ -18,6 +18,8 @@ import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+import static android.app.StatusBarManager.WindowType;
+import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
@@ -60,7 +62,6 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
-import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -69,7 +70,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
@@ -121,7 +121,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
-    private static final long AUTOHIDE_TIMEOUT_MS = 2250;
+    private static final long AUTODIM_TIMEOUT_MS = 2250;
 
     private final AccessibilityManagerWrapper mAccessibilityManagerWrapper;
     protected final AssistManager mAssistManager;
@@ -130,14 +130,13 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     protected NavigationBarView mNavigationBarView = null;
 
-    private int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
+    private @WindowVisibleState int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
     private int mNavigationIconHints = 0;
     private @TransitionMode int mNavigationBarMode;
     private AccessibilityManager mAccessibilityManager;
     private MagnificationContentObserver mMagnificationObserver;
     private ContentResolver mContentResolver;
-    private IWindowManager mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
 
     private int mDisabledFlags1;
     private int mDisabledFlags2;
@@ -153,6 +152,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     private int mSystemUiVisibility;
     private LightBarController mLightBarController;
+    private AutoHideController mAutoHideController;
 
     private OverviewProxyService mOverviewProxyService;
 
@@ -161,9 +161,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     public boolean mHomeBlockedThisTouch;
 
     private Handler mHandler = Dependency.get(Dependency.MAIN_HANDLER);
-
-    // last value sent to window manager
-    private int mLastDispatchedSystemUiVisibility = ~View.SYSTEM_UI_FLAG_VISIBLE;
 
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
         @Override
@@ -205,18 +202,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         if (visible) {
             // If the button will actually become visible and the navbar is about to hide,
             // tell the statusbar to keep it around for longer
-            touchAutoHide();
+            mAutoHideController.touchAutoHide();
         }
     };
 
     private final Runnable mAutoDim = () -> getBarTransitions().setAutoDim(true);
-
-    private final Runnable mAutoHide = () -> {
-        int requested = mSystemUiVisibility & ~View.NAVIGATION_BAR_TRANSIENT;
-        if (mSystemUiVisibility != requested) {
-            notifySystemUiVisibilityChanged(requested);
-        }
-    };
 
     @Inject
     public NavigationBarFragment(AccessibilityManagerWrapper accessibilityManagerWrapper,
@@ -376,8 +366,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     // ----- CommandQueue Callbacks -----
 
     @Override
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+    public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher) {
+        if (displayId != mDisplayId) {
+            return;
+        }
         boolean imeShown = (vis & InputMethodService.IME_VISIBLE) != 0;
         int hints = mNavigationIconHints;
         switch (backDisposition) {
@@ -410,15 +403,17 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     @Override
-    public void topAppWindowChanged(boolean showMenu) {
-        if (mNavigationBarView != null) {
+    public void topAppWindowChanged(int displayId, boolean showMenu) {
+        if (displayId == mDisplayId && mNavigationBarView != null) {
             mNavigationBarView.setMenuVisibility(showMenu);
         }
     }
 
     @Override
-    public void setWindowState(int window, int state) {
-        if (mNavigationBarView != null
+    public void setWindowState(
+            int displayId, @WindowType int window, @WindowVisibleState int state) {
+        if (displayId == mDisplayId
+                && mNavigationBarView != null
                 && window == StatusBarManager.WINDOW_NAVIGATION_BAR
                 && mNavigationBarWindowState != state) {
             mNavigationBarWindowState = state;
@@ -463,15 +458,18 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             mNavigationBarMode = barMode;
         }
         checkNavBarModes();
-        touchAutoHide();
+        mAutoHideController.touchAutoHide();
 
         mLightBarController.onNavigationVisibilityChanged(mSystemUiVisibility, 0 /* mask */,
-                    true /* nbModeChanged */, mNavigationBarMode);
+                true /* nbModeChanged */, mNavigationBarMode);
     }
 
     @Override
-    public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
-            int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+    public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+        if (displayId != mDisplayId) {
+            return;
+        }
         final int oldVal = mSystemUiVisibility;
         final int newVal = (oldVal & ~mask) | (vis & mask);
         final int diff = newVal ^ oldVal;
@@ -492,16 +490,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                     mNavigationBarMode = nbMode;
                     checkNavBarModes();
                 }
-                touchAutoHide();
-            }
-            if ((vis & View.NAVIGATION_BAR_UNHIDE) != 0) {
-                mSystemUiVisibility &= ~View.NAVIGATION_BAR_UNHIDE;
-            }
-
-
-            // On the default display, just make StatusBar do this job.
-            if (!mIsOnDefaultDisplay) {
-                notifySystemUiVisibilityChanged(mSystemUiVisibility);
+                mAutoHideController.touchAutoHide();
             }
         }
         mLightBarController.onNavigationVisibilityChanged(
@@ -536,7 +525,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     @Override
-    public void disable(int state1, int state2, boolean animate) {
+    public void disable(int displayId, int state1, int state2, boolean animate) {
+        if (displayId != mDisplayId) {
+            return;
+        }
         // Navigation bar flags are in both state1 and state2.
         final int masked = state1 & (StatusBarManager.DISABLE_HOME
                 | StatusBarManager.DISABLE_RECENT
@@ -664,7 +656,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     private boolean onNavigationTouch(View v, MotionEvent event) {
-        checkUserAutoHide(event);
+        mAutoHideController.checkUserAutoHide(event);
         return false;
     }
 
@@ -854,83 +846,27 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mNavigationBarView.setAccessibilityButtonState(showAccessibilityButton, targetSelection);
     }
 
-    private void touchAutoHide() {
-        // There is status bar on default display. Thus the hide animations should apply on both
-        // status/navigation bar.
-        if (mIsOnDefaultDisplay) {
-            mStatusBar.touchAutoHide();
-        } else {
-            touchAutoHideInternal();
-        }
-    }
-
-    private void touchAutoHideInternal() {
-        // update transient bar autoHide.
-        if (isSemiTransparent()) {
-            scheduleAutoHide();
-        } else {
-            cancelAutoHide();
-        }
-    }
-
-    private void checkUserAutoHide(MotionEvent event) {
-        // There is status bar on default display. Thus the hide animations should apply on both
-        // status/navigation bar.
-        if (mIsOnDefaultDisplay) {
-            mStatusBar.checkUserAutoHide(event);
-        } else {
-            checkUserAutoHideInternal(event);
-        }
-    }
-
-    private void checkUserAutoHideInternal(MotionEvent event) {
-        if ((mSystemUiVisibility & View.NAVIGATION_BAR_TRANSIENT) != 0
-                // a transient bar is revealed
-                && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar.
-                && event.getX() == 0 && event.getY() == 0) { // a touch outside both bars.
-            userAutoHide();
-        }
-    }
-
-    private void userAutoHide() {
-        cancelAutoHide();
-        mHandler.postDelayed(mAutoHide, 350); // longer than app gesture -> flag clear.
-    }
-
-    private void cancelAutoHide() {
-        mHandler.removeCallbacks(mAutoHide);
-    }
-
-    private void scheduleAutoHide() {
-        cancelAutoHide();
-        mHandler.postDelayed(mAutoHide, AUTOHIDE_TIMEOUT_MS);
-    }
-
-    private void notifySystemUiVisibilityChanged(int vis) {
-        try {
-            if (mLastDispatchedSystemUiVisibility != vis) {
-                mWindowManagerService.statusBarVisibilityChanged(mDisplayId, vis);
-                mLastDispatchedSystemUiVisibility = vis;
-            }
-        } catch (RemoteException ex) {
-        }
-    }
-
     // ----- Methods that DisplayNavigationBarController talks to -----
 
-    /** Applys auto dimming animation on navigation bar when touched. */
+    /** Applies auto dimming animation on navigation bar when touched. */
     public void touchAutoDim() {
         getBarTransitions().setAutoDim(false);
         mHandler.removeCallbacks(mAutoDim);
         int state = Dependency.get(StatusBarStateController.class).getState();
         if (state != StatusBarState.KEYGUARD && state != StatusBarState.SHADE_LOCKED) {
-            mHandler.postDelayed(mAutoDim, AUTOHIDE_TIMEOUT_MS);
+            mHandler.postDelayed(mAutoDim, AUTODIM_TIMEOUT_MS);
         }
     }
 
     public void setLightBarController(LightBarController lightBarController) {
         mLightBarController = lightBarController;
         mLightBarController.setNavigationBar(mNavigationBarView.getLightTransitionsController());
+    }
+
+    /** Sets {@link AutoHideController} to the navigation bar. */
+    public void setAutoHideController(AutoHideController autoHideController) {
+        mAutoHideController = autoHideController;
+        mAutoHideController.setNavigationBar(this);
     }
 
     public boolean isSemiTransparent() {

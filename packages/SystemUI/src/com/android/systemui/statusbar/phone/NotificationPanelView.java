@@ -312,6 +312,7 @@ public class NotificationPanelView extends PanelView implements
             Dependency.get(NotificationLockscreenUserManager.class);
     private final ShadeController mShadeController =
             Dependency.get(ShadeController.class);
+    private int mDisplayId;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -323,6 +324,7 @@ public class NotificationPanelView extends PanelView implements
         mAlphaPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.MULTIPLY));
         setPanelAlpha(255, false /* animate */);
         mCommandQueue = getComponent(context, CommandQueue.class);
+        mDisplayId = context.getDisplayId();
     }
 
     private void setStatusBar(StatusBar bar) {
@@ -2596,7 +2598,7 @@ public class NotificationPanelView extends PanelView implements
         }
         if (showIconsWhenExpanded != mShowIconsWhenExpanded) {
             mShowIconsWhenExpanded = showIconsWhenExpanded;
-            mCommandQueue.recomputeDisableFlags(false);
+            mCommandQueue.recomputeDisableFlags(mDisplayId, false);
         }
     }
 
@@ -2861,7 +2863,7 @@ public class NotificationPanelView extends PanelView implements
             if (hideIcons != mHideIconsDuringNotificationLaunch) {
                 mHideIconsDuringNotificationLaunch = hideIcons;
                 if (!hideIcons) {
-                    mCommandQueue.recomputeDisableFlags(true /* animate */);
+                    mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
                 }
             }
         }

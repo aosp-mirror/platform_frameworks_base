@@ -215,7 +215,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
-    public void disable(int state1, int state2, boolean animate) {
+    public void disable(int displayId, int state1, int state2, boolean animate) {
+        if (displayId != getContext().getDisplayId()) {
+            return;
+        }
         state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
 
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;

@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
@@ -270,6 +271,7 @@ public class Dependency extends SystemUI {
     @Inject
     Lazy<NotificationAlertingManager> mNotificationAlertingManager;
     @Inject Lazy<SensorPrivacyManager> mSensorPrivacyManager;
+    @Inject Lazy<AutoHideController> mAutoHideController;
     @Inject @Named(BG_LOOPER_NAME) Lazy<Looper> mBgLooper;
     @Inject @Named(BG_HANDLER_NAME) Lazy<Handler> mBgHandler;
     @Inject @Named(MAIN_HANDLER_NAME) Lazy<Handler> mMainHandler;
@@ -442,6 +444,12 @@ public class Dependency extends SystemUI {
         mProviders.put(BubbleController.class, mBubbleController::get);
         mProviders.put(NotificationEntryManager.class, mNotificationEntryManager::get);
         mProviders.put(NotificationAlertingManager.class, mNotificationAlertingManager::get);
+
+        // TODO(b/118592525): to support multi-display , we start to add something which is
+        //                    per-display, while others may be global. I think it's time to add
+        //                    a new class maybe named DisplayDependency to solve per-display
+        //                    Dependency problem.
+        mProviders.put(AutoHideController.class, mAutoHideController::get);
 
         sDependency = this;
     }

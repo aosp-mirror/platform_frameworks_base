@@ -42,6 +42,7 @@ import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -180,5 +181,12 @@ public class DependencyProvider {
     @Provides
     public ConfigurationController provideConfigurationController(Context context) {
         return new ConfigurationControllerImpl(context);
+    }
+
+    @Singleton
+    @Provides
+    public AutoHideController provideAutoHideController(Context context,
+            @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
+        return new AutoHideController(context, mainHandler);
     }
 }
