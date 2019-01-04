@@ -271,7 +271,10 @@ final class ActivityRecord extends ConfigurationContainer {
     boolean fullscreen; // The activity is opaque and fills the entire space of this task.
     // TODO: See if it possible to combine this with the fullscreen field.
     final boolean hasWallpaper; // Has a wallpaper window as a background.
-    final boolean noDisplay;  // activity is not displayed?
+    @VisibleForTesting
+    boolean noDisplay;  // activity is not displayed?
+    @VisibleForTesting
+    int mHandoverLaunchDisplayId = INVALID_DISPLAY; // Handover launch display id to next activity.
     private final boolean componentSpecified;  // did caller specify an explicit component?
     final boolean rootVoiceInteraction;  // was this the root activity of a voice interaction?
 
@@ -1019,6 +1022,8 @@ final class ActivityRecord extends ConfigurationContainer {
             if (useLockTask && lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_DEFAULT) {
                 lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
             }
+            // Gets launch display id from options. It returns INVALID_DISPLAY if not set.
+            mHandoverLaunchDisplayId = options.getLaunchDisplayId();
         }
     }
 
