@@ -839,6 +839,19 @@ public class TextViewActivityTest {
     }
 
     @Test
+    public void testNoAssistItemForTextFieldWithUnsupportedCharacters() throws Throwable {
+        useSystemDefaultTextClassifier();
+        final String text = "\u202Emoc.diordna.com";
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        mActivityRule.runOnUiThread(() -> textView.setText(text));
+        mInstrumentation.waitForIdleSync();
+
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('.')));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarDoesNotContainItem(android.R.id.textAssist);
+    }
+
+    @Test
     public void testPastePlainText_menuAction() {
         initializeClipboardWithText(TextStyle.STYLED);
 
