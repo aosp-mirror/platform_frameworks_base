@@ -17,14 +17,13 @@ package android.perftests.utils;
 
 import android.app.UiAutomation;
 import android.os.ParcelFileDescriptor;
-import android.support.test.InstrumentationRegistry;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
-import android.util.Log;
-
-import java.io.FileInputStream;
 
 import androidx.annotation.NonNull;
+import androidx.test.InstrumentationRegistry;
+
+import java.io.FileInputStream;
 
 /**
  * Provides Shell-based utilities such as running a command.
