@@ -24,15 +24,12 @@ import android.content.ComponentName;
 import android.content.Context;
 
 public class FullBackupJob extends JobService {
-    private static final String TAG = "FullBackupJob";
-    private static final boolean DEBUG = true;
-
     private static ComponentName sIdleService =
             new ComponentName("android", FullBackupJob.class.getName());
 
     private static final int JOB_ID = 0x5038;
 
-    JobParameters mParams;
+    private JobParameters mParams;
 
     public static void schedule(Context ctx, long minDelay, BackupManagerConstants constants) {
         JobScheduler js = (JobScheduler) ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE);
