@@ -348,6 +348,15 @@ static void nativeSetInputWindowInfo(JNIEnv* env, jclass clazz, jlong transactio
     transaction->setInputWindowInfo(ctrl, *handle->getInfo());
 }
 
+static void nativeTransferTouchFocus(JNIEnv* env, jclass clazz, jlong transactionObj,
+        jobject fromTokenObj, jobject toTokenObj) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    sp<IBinder> fromToken(ibinderForJavaObject(env, fromTokenObj));
+    sp<IBinder> toToken(ibinderForJavaObject(env, toTokenObj));
+    transaction->transferTouchFocus(fromToken, toToken);
+}
+
 static void nativeSetColor(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jfloatArray fColor) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -1032,7 +1041,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeCaptureLayers", "(Landroid/os/IBinder;Landroid/graphics/Rect;F)Landroid/graphics/GraphicBuffer;",
             (void*)nativeCaptureLayers },
     {"nativeSetInputWindowInfo", "(JJLandroid/view/InputWindowHandle;)V",
-     (void*)nativeSetInputWindowInfo },
+            (void*)nativeSetInputWindowInfo },
+    {"nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;)V",
+            (void*)nativeTransferTouchFocus },
     {"nativeGetDisplayedContentSamplingAttributes",
             "(Landroid/os/IBinder;)Landroid/hardware/display/DisplayedContentSamplingAttributes;",
             (void*)nativeGetDisplayedContentSamplingAttributes },
