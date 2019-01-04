@@ -65,7 +65,8 @@ public:
     /**
      * Start a new subscription.
      */
-    void startNewSubscription(int inFd, int outFd, sp<IResultReceiver> resultReceiver);
+    void startNewSubscription(int inFd, int outFd, sp<IResultReceiver> resultReceiver,
+                              int timeoutSec);
 
     void binderDied(const wp<IBinder>& who);
 

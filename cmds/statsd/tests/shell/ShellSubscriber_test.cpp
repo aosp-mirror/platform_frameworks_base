@@ -83,7 +83,7 @@ void runShellTest(ShellSubscription config, sp<MockUidMap> uidMap,
 
     // mimic a binder thread that a shell subscriber runs on. it would block.
     std::thread reader([&resultReceiver, &fds_config, &fds_data, &shellClient] {
-        shellClient->startNewSubscription(fds_config[0], fds_data[1], resultReceiver);
+        shellClient->startNewSubscription(fds_config[0], fds_data[1], resultReceiver, -1);
     });
     reader.detach();
 
