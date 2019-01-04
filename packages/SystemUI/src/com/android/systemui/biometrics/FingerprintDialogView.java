@@ -49,7 +49,7 @@ public class FingerprintDialogView extends BiometricDialogView {
 
     @Override
     protected boolean shouldAnimateForTransition(int oldState, int newState) {
-        if (oldState == STATE_NONE && newState == STATE_AUTHENTICATING) {
+        if (oldState == STATE_IDLE && newState == STATE_AUTHENTICATING) {
             return false;
         } else if (oldState == STATE_AUTHENTICATING && newState == STATE_ERROR) {
             return true;
@@ -68,9 +68,15 @@ public class FingerprintDialogView extends BiometricDialogView {
     }
 
     @Override
+    protected boolean shouldGrayAreaDismissDialog() {
+        // Fingerprint dialog always dismisses when region outside the dialog is tapped
+        return true;
+    }
+
+    @Override
     protected Drawable getAnimationForTransition(int oldState, int newState) {
         int iconRes;
-        if (oldState == STATE_NONE && newState == STATE_AUTHENTICATING) {
+        if (oldState == STATE_IDLE && newState == STATE_AUTHENTICATING) {
             iconRes = R.drawable.fingerprint_dialog_fp_to_error;
         } else if (oldState == STATE_AUTHENTICATING && newState == STATE_ERROR) {
             iconRes = R.drawable.fingerprint_dialog_fp_to_error;

@@ -395,7 +395,7 @@ public class BiometricService extends SystemService {
 
                     // Notify SysUI that the biometric has been authenticated. SysUI already knows
                     // the implicit/explicit state and will react accordingly.
-                    mStatusBarService.onBiometricAuthenticated();
+                    mStatusBarService.onBiometricAuthenticated(true);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception", e);
                 }
@@ -412,17 +412,20 @@ public class BiometricService extends SystemService {
                         return;
                     }
 
-                    mStatusBarService.onBiometricHelp(getContext().getResources().getString(
-                            com.android.internal.R.string.biometric_not_recognized));
-                    if (requireConfirmation) {
+                    mStatusBarService.onBiometricAuthenticated(false);
+
+                    // TODO: This logic will need to be updated if BP is multi-modal
+                    if ((mCurrentAuthSession.mModality & TYPE_FACE) != 0) {
+                        // Pause authentication. onBiometricAuthenticated(false) causes the
+                        // dialog to show a "try again" button for passive modalities.
                         mCurrentAuthSession.mState = STATE_AUTH_PAUSED;
-                        mStatusBarService.showBiometricTryAgain();
                         // Cancel authentication. Skip the token/package check since we are
                         // cancelling from system server. The interface is permission protected so
                         // this is fine.
                         cancelInternal(null /* token */, null /* package */,
                                 false /* fromClient */);
                     }
+
                     mCurrentAuthSession.mClientReceiver.onAuthenticationFailed();
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception", e);
@@ -579,8 +582,10 @@ public class BiometricService extends SystemService {
             }
 
             if (mPendingAuthSession.mModalitiesWaiting.isEmpty()) {
-                final boolean mContinuing = mCurrentAuthSession != null
-                        && mCurrentAuthSession.mState == STATE_AUTH_PAUSED;
+                final boolean continuing = mCurrentAuthSession != null &&
+                        (mCurrentAuthSession.mState == STATE_AUTH_PAUSED
+                                || mCurrentAuthSession.mState == STATE_AUTH_PAUSED_CANCELED);
+
                 mCurrentAuthSession = mPendingAuthSession;
                 mPendingAuthSession = null;
 
@@ -602,7 +607,7 @@ public class BiometricService extends SystemService {
                         modality |= pair.getKey();
                     }
 
-                    if (!mContinuing) {
+                    if (!continuing) {
                         mStatusBarService.showBiometricDialog(mCurrentAuthSession.mBundle,
                                 mInternalReceiver, modality, requireConfirmation, userId);
                         mActivityTaskManager.registerTaskStackListener(mTaskStackListener);

@@ -111,7 +111,6 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     private static final int MSG_SHOW_CHARGING_ANIMATION       = 44 << MSG_SHIFT;
     private static final int MSG_SHOW_PINNING_TOAST_ENTER_EXIT = 45 << MSG_SHIFT;
     private static final int MSG_SHOW_PINNING_TOAST_ESCAPE     = 46 << MSG_SHIFT;
-    private static final int MSG_BIOMETRIC_TRY_AGAIN           = 47 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -271,11 +270,10 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
 
         default void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
                 int type, boolean requireConfirmation, int userId) { }
-        default void onBiometricAuthenticated() { }
+        default void onBiometricAuthenticated(boolean authenticated) { }
         default void onBiometricHelp(String message) { }
         default void onBiometricError(String error) { }
         default void hideBiometricDialog() { }
-        default void showBiometricTryAgain() { }
     }
 
     @VisibleForTesting
@@ -736,9 +734,9 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
-    public void onBiometricAuthenticated() {
+    public void onBiometricAuthenticated(boolean authenticated) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED).sendToTarget();
+            mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED, authenticated).sendToTarget();
         }
     }
 
@@ -760,13 +758,6 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     public void hideBiometricDialog() {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_BIOMETRIC_HIDE).sendToTarget();
-        }
-    }
-
-    @Override
-    public void showBiometricTryAgain() {
-        synchronized (mLock) {
-            mHandler.obtainMessage(MSG_BIOMETRIC_TRY_AGAIN).sendToTarget();
         }
     }
 
@@ -991,7 +982,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     break;
                 case MSG_BIOMETRIC_AUTHENTICATED:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onBiometricAuthenticated();
+                        mCallbacks.get(i).onBiometricAuthenticated((boolean) msg.obj);
                     }
                     break;
                 case MSG_BIOMETRIC_HELP:
@@ -1022,11 +1013,6 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                 case MSG_SHOW_PINNING_TOAST_ESCAPE:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showPinningEscapeToast();
-                    }
-                    break;
-                case MSG_BIOMETRIC_TRY_AGAIN:
-                    for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showBiometricTryAgain();
                     }
                     break;
             }
