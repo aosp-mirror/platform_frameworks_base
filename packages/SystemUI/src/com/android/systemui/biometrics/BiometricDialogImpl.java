@@ -240,7 +240,10 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
             mConfirmShowing = true;
             mCurrentDialog.showConfirmationButton(true /* show */);
         } else {
-            handleHideDialog(false /* userCanceled */);
+            mCurrentDialog.updateState(BiometricDialogView.STATE_AUTHENTICATED);
+            mHandler.postDelayed(() -> {
+                handleHideDialog(false /* userCanceled */);
+            }, mCurrentDialog.getDelayAfterAuthenticatedDurationMs());
         }
     }
 

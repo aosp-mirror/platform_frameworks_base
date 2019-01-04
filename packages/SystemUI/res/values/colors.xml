@@ -130,6 +130,7 @@
 
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_dim_color">#80000000</color> <!-- 50% black -->
+    <color name="biometric_face_icon_gray">#ffbdc1c6</color>
 
     <!-- Logout button -->
     <color name="logout_button_bg_color">#ccffffff</color>
