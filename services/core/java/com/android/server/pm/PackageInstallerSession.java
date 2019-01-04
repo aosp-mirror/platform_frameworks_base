@@ -57,6 +57,7 @@ import android.content.pm.IPackageInstallerSession;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
+import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -982,9 +983,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mSealed = true;
 
         // Read transfers from the original owner stay open, but as the session's data
-        // cannot be modified anymore, there is no leak of information.
-        // For staged sessions, the validation is performed by StagingManager.
-        if (!params.isMultiPackage && !params.isStaged) {
+        // cannot be modified anymore, there is no leak of information. For staged sessions,
+        // further validation may be performed by the staging manager.
+        if (!params.isMultiPackage) {
             final PackageInfo pkgInfo = mPm.getPackageInfo(
                     params.appPackageName, PackageManager.GET_SIGNATURES
                             | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
@@ -1328,18 +1329,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mSigningDetails = apk.signingDetails;
         mResolvedBaseFile = addedFile;
 
-        assertApkConsistentLocked(String.valueOf(addedFile), apk);
-
-        if (mSigningDetails == PackageParser.SigningDetails.UNKNOWN) {
-            try {
-                // STOPSHIP: For APEX we should also implement proper APK Signature verification.
-                mSigningDetails = ApkSignatureVerifier.plsCertsNoVerifyOnlyCerts(
-                    pkgInfo.applicationInfo.sourceDir,
-                    PackageParser.SigningDetails.SignatureSchemeVersion.JAR);
-            } catch (PackageParserException e) {
-                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                    "Couldn't obtain signatures from base APK");
-            }
+        // STOPSHIP: Ensure that we remove the non-staged version of APEX installs in production
+        // because we currently do not verify that signatures are consistent with the previously
+        // installed version in that case.
+        //
+        // When that happens, this hack can be reverted and we can rely on APEXd to map between
+        // APEX files and their package names instead of parsing it out of the AndroidManifest
+        // such as here.
+        if (params.appPackageName == null) {
+            params.appPackageName = mPackageName;
         }
     }
 
@@ -2009,6 +2007,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionApplied = false;
             mStagedSessionFailed = false;
             mStagedSessionErrorCode = SessionInfo.NO_ERROR;
+        }
+    }
+
+    /** {@hide} */
+    void setStagedSessionFailed(@StagedSessionErrorCode int errorCode) {
+        synchronized (mLock) {
+            mStagedSessionReady = false;
+            mStagedSessionApplied = false;
+            mStagedSessionFailed = true;
+            mStagedSessionErrorCode = errorCode;
         }
     }
 
