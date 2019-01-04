@@ -159,28 +159,37 @@ public class NotificationContentViewTest extends SysuiTestCase {
         verify(mockHeadsUp, times(1)).showAppOpsIcons(any());
     }
 
-    private void setupAppGeneratedReplies(CharSequence[] smartReplyTitles) {
-        Notification.Action freeFormAction =
-                new Notification.Action.Builder(null, "Freeform Test Action", null).build();
-        setupAppGeneratedReplies(smartReplyTitles, freeFormAction);
+    private void setupAppGeneratedReplies(CharSequence[] smartReplies) {
+        setupAppGeneratedReplies(smartReplies, true /* allowSystemGeneratedReplies */);
     }
 
     private void setupAppGeneratedReplies(
-            CharSequence[] smartReplyTitles,
-            Notification.Action freeFormRemoteInputAction) {
+            CharSequence[] smartReplies, boolean allowSystemGeneratedReplies) {
         PendingIntent pendingIntent =
                 PendingIntent.getBroadcast(mContext, 0, new Intent(TEST_ACTION), 0);
         Notification.Action action =
                 new Notification.Action.Builder(null, "Test Action", pendingIntent).build();
-        when(mRemoteInput.getChoices()).thenReturn(smartReplyTitles);
+        when(mRemoteInput.getChoices()).thenReturn(smartReplies);
         Pair<RemoteInput, Notification.Action> remoteInputActionPair =
                 Pair.create(mRemoteInput, action);
         when(mNotification.findRemoteInputActionPair(false)).thenReturn(remoteInputActionPair);
 
+        Notification.Action freeFormRemoteInputAction =
+                createActionBuilder("Freeform Test Action")
+                .setAllowGeneratedReplies(allowSystemGeneratedReplies)
+                .build();
         Pair<RemoteInput, Notification.Action> freeFormRemoteInputActionPair =
                 Pair.create(mFreeFormRemoteInput, freeFormRemoteInputAction);
         when(mNotification.findRemoteInputActionPair(true)).thenReturn(
                 freeFormRemoteInputActionPair);
+
+        when(mSmartReplyConstants.requiresTargetingP()).thenReturn(false);
+    }
+
+    private void setupAppGeneratedSuggestions(
+            CharSequence[] smartReplies, List<Notification.Action> smartActions) {
+        setupAppGeneratedReplies(smartReplies);
+        when(mNotification.getContextualActions()).thenReturn(smartActions);
     }
 
     @Test
@@ -198,7 +207,6 @@ public class NotificationContentViewTest extends SysuiTestCase {
     public void chooseSmartRepliesAndActions_appGeneratedSmartReplies() {
         CharSequence[] smartReplies = new String[] {"Reply1", "Reply2"};
         setupAppGeneratedReplies(smartReplies);
-        when(mSmartReplyConstants.requiresTargetingP()).thenReturn(false);
 
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
@@ -211,12 +219,9 @@ public class NotificationContentViewTest extends SysuiTestCase {
     @Test
     public void chooseSmartRepliesAndActions_appGeneratedSmartRepliesAndActions() {
         CharSequence[] smartReplies = new String[] {"Reply1", "Reply2"};
-        setupAppGeneratedReplies(smartReplies);
-        when(mSmartReplyConstants.requiresTargetingP()).thenReturn(false);
-
         List<Notification.Action> smartActions =
                 createActions(new String[] {"Test Action 1", "Test Action 2"});
-        when(mNotification.getContextualActions()).thenReturn(smartActions);
+        setupAppGeneratedSuggestions(smartReplies, smartActions);
 
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
@@ -229,15 +234,11 @@ public class NotificationContentViewTest extends SysuiTestCase {
 
     @Test
     public void chooseSmartRepliesAndActions_sysGeneratedSmartReplies() {
-        Notification.Action freeFormAction = createActionBuilder("Freeform Action")
-                .setAllowGeneratedReplies(true)
-                .build();
         // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
         // replies.
-        setupAppGeneratedReplies(null, freeFormAction);
+        setupAppGeneratedReplies(null /* smartReplies */);
 
-        mEntry.smartReplies =
-                new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
+        mEntry.smartReplies = new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
@@ -248,12 +249,9 @@ public class NotificationContentViewTest extends SysuiTestCase {
 
     @Test
     public void chooseSmartRepliesAndActions_noSysGeneratedSmartRepliesIfNotAllowed() {
-        Notification.Action freeFormAction = createActionBuilder("Freeform Action")
-                .setAllowGeneratedReplies(false)
-                .build();
         // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
         // replies.
-        setupAppGeneratedReplies(null, freeFormAction);
+        setupAppGeneratedReplies(null /* smartReplies */, false /* allowSystemGeneratedReplies */);
 
         mEntry.smartReplies =
                 new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
@@ -268,7 +266,7 @@ public class NotificationContentViewTest extends SysuiTestCase {
     public void chooseSmartRepliesAndActions_sysGeneratedSmartActions() {
         // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
         // actions.
-        setupAppGeneratedReplies(null);
+        setupAppGeneratedReplies(null /* smartReplies */);
 
         mEntry.systemGeneratedSmartActions =
                 createActions(new String[] {"Sys Smart Action 1", "Sys Smart Action 2"});
@@ -283,18 +281,12 @@ public class NotificationContentViewTest extends SysuiTestCase {
 
     @Test
     public void chooseSmartRepliesAndActions_appGenPreferredOverSysGen() {
-        Notification.Action freeFormAction = createActionBuilder("Freeform Action")
-                .setAllowGeneratedReplies(true)
-                .build();
         CharSequence[] appGenSmartReplies = new String[] {"Reply1", "Reply2"};
         // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
         // replies.
-        setupAppGeneratedReplies(appGenSmartReplies, freeFormAction);
-        when(mSmartReplyConstants.requiresTargetingP()).thenReturn(false);
-
         List<Notification.Action> appGenSmartActions =
                 createActions(new String[] {"Test Action 1", "Test Action 2"});
-        when(mNotification.getContextualActions()).thenReturn(appGenSmartActions);
+        setupAppGeneratedSuggestions(appGenSmartReplies, appGenSmartActions);
 
         mEntry.smartReplies = new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
         mEntry.systemGeneratedSmartActions =
@@ -313,12 +305,12 @@ public class NotificationContentViewTest extends SysuiTestCase {
     public void chooseSmartRepliesAndActions_disallowSysGenSmartActions() {
         // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
         // actions.
-        setupAppGeneratedReplies(null);
-
+        setupAppGeneratedReplies(null /* smartReplies */, false /* allowSystemGeneratedReplies */);
         when(mNotification.getAllowSystemGeneratedContextualActions()).thenReturn(false);
-
+        mEntry.smartReplies = new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
         mEntry.systemGeneratedSmartActions =
                 createActions(new String[] {"Sys Smart Action 1", "Sys Smart Action 2"});
+
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
