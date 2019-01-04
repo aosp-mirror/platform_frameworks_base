@@ -91,11 +91,6 @@ public class KeyguardClockPositionAlgorithm {
     private int mBurnInPreventionOffsetY;
 
     /**
-     * Clock vertical padding when pulsing.
-     */
-    private int mPulsingPadding;
-
-    /**
      * Doze/AOD transition amount.
      */
     private float mDarkAmount;
@@ -105,10 +100,6 @@ public class KeyguardClockPositionAlgorithm {
      */
     private boolean mCurrentlySecure;
 
-    /**
-     * Dozing and receiving a notification (AOD notification.)
-     */
-    private boolean mPulsing;
     private float mEmptyDragAmount;
 
     /**
@@ -123,13 +114,11 @@ public class KeyguardClockPositionAlgorithm {
                 R.dimen.burn_in_prevention_offset_x);
         mBurnInPreventionOffsetY = res.getDimensionPixelSize(
                 R.dimen.burn_in_prevention_offset_y);
-        mPulsingPadding = res.getDimensionPixelSize(
-                R.dimen.widget_pulsing_bottom_padding);
     }
 
     public void setup(int minTopMargin, int maxShadeBottom, int notificationStackHeight,
             float panelExpansion, int parentHeight, int keyguardStatusHeight, float dark,
-            boolean secure, boolean pulsing, float emptyDragAmount) {
+            boolean secure, float emptyDragAmount) {
         mMinTopMargin = minTopMargin + mContainerTopPadding;
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
@@ -138,7 +127,6 @@ public class KeyguardClockPositionAlgorithm {
         mKeyguardStatusHeight = keyguardStatusHeight;
         mDarkAmount = dark;
         mCurrentlySecure = secure;
-        mPulsing = pulsing;
         mEmptyDragAmount = emptyDragAmount;
     }
 
@@ -146,7 +134,7 @@ public class KeyguardClockPositionAlgorithm {
         final int y = getClockY();
         result.clockY = y;
         result.clockAlpha = getClockAlpha(y);
-        result.stackScrollerPadding = y + (mPulsing ? mPulsingPadding : mKeyguardStatusHeight);
+        result.stackScrollerPadding = y + mKeyguardStatusHeight;
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
     }
 
@@ -185,9 +173,6 @@ public class KeyguardClockPositionAlgorithm {
     private int getClockY() {
         // Dark: Align the bottom edge of the clock at about half of the screen:
         float clockYDark = getMaxClockY() + burnInPreventionOffsetY();
-        if (mPulsing) {
-            clockYDark -= mPulsingPadding;
-        }
         clockYDark = MathUtils.max(0, clockYDark);
 
         float clockYRegular = getExpandedClockPosition();
@@ -228,11 +213,6 @@ public class KeyguardClockPositionAlgorithm {
     private float burnInPreventionOffsetX() {
         return getBurnInOffset(mBurnInPreventionOffsetX * 2, true /* xAxis */)
                 - mBurnInPreventionOffsetX;
-    }
-
-    @VisibleForTesting
-    void setPulsingPadding(int padding) {
-        mPulsingPadding = padding;
     }
 
     public static class Result {

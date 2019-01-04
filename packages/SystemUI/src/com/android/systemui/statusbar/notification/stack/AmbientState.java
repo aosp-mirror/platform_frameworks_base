@@ -75,7 +75,6 @@ public class AmbientState {
     private int mIntrinsicPadding;
     private int mExpandAnimationTopChange;
     private ExpandableNotificationRow mExpandingNotification;
-    private int mDarkTopPadding;
     private float mDarkAmount;
     private boolean mAppearing;
 
@@ -351,7 +350,8 @@ public class AmbientState {
     }
 
     public boolean hasPulsingNotifications() {
-        return mPulsing;
+        return mPulsing && mAmbientPulseManager != null
+                && mAmbientPulseManager.hasNotifications();
     }
 
     public void setPulsing(boolean hasPulsing) {
@@ -456,14 +456,6 @@ public class AmbientState {
 
     public boolean isDarkAtAll() {
         return mDarkAmount != 0;
-    }
-
-    public void setDarkTopPadding(int darkTopPadding) {
-        mDarkTopPadding = darkTopPadding;
-    }
-
-    public int getDarkTopPadding() {
-        return mDarkTopPadding;
     }
 
     public void setAppearing(boolean appearing) {

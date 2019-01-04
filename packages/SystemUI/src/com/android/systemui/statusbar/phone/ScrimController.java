@@ -274,8 +274,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         // Docking pulses may take a long time, wallpapers should also fade away after a while.
         if (mWallpaperSupportsAmbientMode && (
                 mDozeParameters.getAlwaysOn() && mState == ScrimState.AOD
-                        || mState == ScrimState.PULSING && mCallback != null
-                        && mCallback.isFadeOutWallpaper())) {
+                        || mState == ScrimState.PULSING && mCallback != null)) {
             if (!mWallpaperVisibilityTimedOut) {
                 mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
                         AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
@@ -900,6 +899,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
     }
 
+    public void setPulseReason(int pulseReason) {
+        ScrimState.PULSING.setPulseReason(pulseReason);
+    }
+
     public interface Callback {
         default void onStart() {
         }
@@ -908,9 +911,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         default void onFinished() {
         }
         default void onCancelled() {
-        }
-        default boolean isFadeOutWallpaper() {
-            return false;
         }
     }
 

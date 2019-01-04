@@ -107,6 +107,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private MetricsLogger mMetricsLogger;
+    @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     private TestableNotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
 
@@ -140,7 +141,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // holds a copy of the CUT's instances of these classes, so they still refer to the CUT's
         // member variables, not the spy's member variables.
         mStackScrollerInternal = new NotificationStackScrollLayout(getContext(), null,
-                true /* allowLongPress */);
+                true /* allowLongPress */, mNotificationRoundnessManager);
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelf(notificationShelf);
         mStackScroller.setStatusBar(mBar);

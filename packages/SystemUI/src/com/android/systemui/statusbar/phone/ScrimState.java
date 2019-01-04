@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.graphics.Color;
 import android.os.Trace;
 
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
@@ -125,8 +126,15 @@ public enum ScrimState {
     PULSING(5) {
         @Override
         public void prepare(ScrimState previousState) {
-            mCurrentInFrontAlpha = 0;
-            mCurrentBehindAlpha = mScrimBehindAlphaKeyguard;
+            mCurrentInFrontAlpha = 0f;
+            if (mPulseReason == DozeLog.PULSE_REASON_NOTIFICATION
+                    || mPulseReason == DozeLog.PULSE_REASON_DOCKING) {
+                mCurrentBehindAlpha = previousState.getBehindAlpha();
+                mCurrentBehindTint = Color.BLACK;
+            } else {
+                mCurrentBehindAlpha = mScrimBehindAlphaKeyguard;
+                mCurrentBehindTint = Color.TRANSPARENT;
+            }
             mBlankScreen = mDisplayRequiresBlanking;
         }
     },
@@ -189,6 +197,7 @@ public enum ScrimState {
     int mIndex;
     boolean mHasBackdrop;
     boolean mLaunchingAffordanceWithPreview;
+    int mPulseReason;
 
     ScrimState(int index) {
         mIndex = index;
@@ -259,6 +268,10 @@ public enum ScrimState {
 
     public void setAodFrontScrimAlpha(float aodFrontScrimAlpha) {
         mAodFrontScrimAlpha = aodFrontScrimAlpha;
+    }
+
+    public void setPulseReason(int pulseReason) {
+        mPulseReason = pulseReason;
     }
 
     public void setScrimBehindAlphaKeyguard(float scrimBehindAlphaKeyguard) {

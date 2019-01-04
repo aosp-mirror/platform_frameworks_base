@@ -47,7 +47,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private float mPanelExpansion;
     private int mKeyguardStatusHeight;
     private float mDark;
-    private boolean mPulsing;
 
     @Before
     public void setUp() {
@@ -208,20 +207,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     }
 
     @Test
-    public void notifPositionWhilePulsingOnAOD() {
-        // GIVEN on AOD and pulsing
-        givenAOD();
-        mNotificationStackHeight = EMPTY_HEIGHT;
-        mKeyguardStatusHeight = EMPTY_HEIGHT;
-        mPulsing = true;
-        mClockPositionAlgorithm.setPulsingPadding(200);
-        // WHEN the clock position algorithm is run
-        positionClock();
-        // THEN the notif padding doesn't adjust for pulsing.
-        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(1000);
-    }
-
-    @Test
     public void notifPositionMiddleOfScreenOnLockScreen() {
         // GIVEN on lock screen and both stack scroll and clock have 0 height
         givenLockScreen();
@@ -307,20 +292,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         assertThat(mClockPosition.stackScrollerPadding).isEqualTo(0);
     }
 
-    @Test
-    public void notifPositionWhilePulsingOnLockScreen() {
-        // GIVEN on lock screen and pulsing
-        givenLockScreen();
-        mNotificationStackHeight = EMPTY_HEIGHT;
-        mKeyguardStatusHeight = EMPTY_HEIGHT;
-        mPulsing = true;
-        mClockPositionAlgorithm.setPulsingPadding(200);
-        // WHEN the clock position algorithm is run
-        positionClock();
-        // THEN the notif padding adjusts for pulsing.
-        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(1200);
-    }
-
     private void givenAOD() {
         mPanelExpansion = 1.f;
         mDark = 1.f;
@@ -334,7 +305,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private void positionClock() {
         mClockPositionAlgorithm.setup(EMPTY_MARGIN, SCREEN_HEIGHT, mNotificationStackHeight,
                 mPanelExpansion, SCREEN_HEIGHT, mKeyguardStatusHeight, mDark, SECURE_LOCKED,
-                mPulsing, ZERO_DRAG);
+                ZERO_DRAG);
         mClockPositionAlgorithm.run(mClockPosition);
     }
 }

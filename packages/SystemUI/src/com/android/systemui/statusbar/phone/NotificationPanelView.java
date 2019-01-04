@@ -579,7 +579,6 @@ public class NotificationPanelView extends PanelView implements
                     mKeyguardStatusView.getHeight(),
                     mInterpolatedDarkAmount,
                     mStatusBar.isKeyguardCurrentlySecure(),
-                    mPulsing,
                     mEmptyDragAmount);
             mClockPositionAlgorithm.run(mClockPositionResult);
             PropertyAnimator.setProperty(mKeyguardStatusView, AnimatableProperty.X,
@@ -595,7 +594,8 @@ public class NotificationPanelView extends PanelView implements
             stackScrollerPadding = mClockPositionResult.stackScrollerPadding;
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
-        mNotificationStackScroller.setAntiBurnInOffsetX(mClockPositionResult.clockX);
+        int burnInXOffset = mPulsing ? 0 : mClockPositionResult.clockX;
+        mNotificationStackScroller.setAntiBurnInOffsetX(burnInXOffset);
 
         mStackScrollerMeasuringPass++;
         requestScrollerTopPaddingUpdate(animate);
@@ -2830,7 +2830,7 @@ public class NotificationPanelView extends PanelView implements
             mAnimateNextPositionUpdate = false;
         }
         mNotificationStackScroller.setPulsing(pulsing, animatePulse);
-        mKeyguardStatusView.setPulsing(pulsing, animatePulse);
+        mKeyguardStatusView.setPulsing(pulsing);
         mKeyguardBottomArea.setPulsing(pulsing, animatePulse);
     }
 
