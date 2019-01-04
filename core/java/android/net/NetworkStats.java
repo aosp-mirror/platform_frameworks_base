@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.os.Process.CLAT_UID;
+
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -828,13 +830,15 @@ public class NetworkStats implements Parcelable {
      *
      * <p>For 464xlat traffic, xt_qtaguid sees every IPv4 packet twice, once as a native IPv4
      * packet on the stacked interface, and once as translated to an IPv6 packet on the
-     * base interface. For correct stats accounting on the base interface, every 464xlat
-     * packet needs to be subtracted from the root UID on the base interface both for tx
-     * and rx traffic (http://b/12249687, http:/b/33681750).
+     * base interface. For correct stats accounting on the base interface, if using xt_qtaguid,
+     * every rx 464xlat packet needs to be subtracted from the root UID on the base interface
+     * (http://b/12249687, http:/b/33681750), and every tx 464xlat packet which was counted onto
+     * clat uid should be ignored.
      *
      * As for eBPF, the per uid stats is collected by different hook, the rx packets on base
-     * interface will not be counted. Thus, the adjustment on root uid is only needed in tx
-     * direction.
+     * interface will not be counted. Thus, the adjustment on root uid is not needed. However, the
+     * tx traffic counted in the same way xt_qtaguid does, so the traffic on clat uid still
+     * needs to be ignored.
      *
      * <p>This method will behave fine if {@code stackedIfaces} is an non-synchronized but add-only
      * {@code ConcurrentHashMap}
@@ -862,17 +866,14 @@ public class NetworkStats implements Parcelable {
             if (baseIface == null) {
                 continue;
             }
-            // Subtract any 464lat traffic seen for the root UID on the current base interface.
-            // However, for eBPF, the per uid stats is collected by different hook, the rx packets
-            // on base interface will not be counted. Thus, the adjustment on root uid is only
-            // needed in tx direction.
+            // Subtract xt_qtaguid 464lat rx traffic seen for the root UID on the current base
+            // interface. As for eBPF, the per uid stats is collected by different hook, the rx
+            // packets on base interface will not be counted.
             adjust.iface = baseIface;
             if (!useBpfStats) {
                 adjust.rxBytes = -(entry.rxBytes + entry.rxPackets * IPV4V6_HEADER_DELTA);
                 adjust.rxPackets = -entry.rxPackets;
             }
-            adjust.txBytes = -(entry.txBytes + entry.txPackets * IPV4V6_HEADER_DELTA);
-            adjust.txPackets = -entry.txPackets;
             adjustments.combineValues(adjust);
 
             // For 464xlat traffic, per uid stats only counts the bytes of the native IPv4 packet
@@ -884,6 +885,9 @@ public class NetworkStats implements Parcelable {
             stackedTraffic.setValues(i, entry);
         }
 
+        // Traffic on clat uid is v6 tx traffic that is already counted with app uid on the stacked
+        // v4 interface, so it needs to be removed to avoid double-counting.
+        baseTraffic.removeUids(new int[] {CLAT_UID});
         baseTraffic.combineAllValues(adjustments);
     }
 
