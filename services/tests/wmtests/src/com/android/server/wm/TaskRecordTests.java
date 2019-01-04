@@ -34,6 +34,7 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -178,6 +179,24 @@ public class TaskRecordTests extends ActivityTestsBase {
         final Rect fullScreenBounds = new Rect(0, 0, info.logicalWidth, info.logicalHeight);
         testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, fullScreenBounds,
                 mParentBounds);
+    }
+
+    /** Ensures that the alias intent won't have target component resolved. */
+    @Test
+    public void testTaskIntentActivityAlias() {
+        final String aliasActivity = DEFAULT_COMPONENT_PACKAGE_NAME + ".aliasActivity";
+        final String targetActivity = DEFAULT_COMPONENT_PACKAGE_NAME + ".targetActivity";
+        final Intent intent = new Intent();
+        intent.setComponent(new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME, aliasActivity));
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        info.packageName = DEFAULT_COMPONENT_PACKAGE_NAME;
+        info.targetActivity = targetActivity;
+
+        final TaskRecord task = TaskRecord.create(mService, 1 /* taskId */, info, intent,
+                null /* taskDescription */);
+        assertEquals("The alias activity component should be saved in task intent.", aliasActivity,
+                task.intent.getComponent().getClassName());
     }
 
     private void testStackBoundsConfiguration(int windowingMode, Rect parentBounds, Rect bounds,
