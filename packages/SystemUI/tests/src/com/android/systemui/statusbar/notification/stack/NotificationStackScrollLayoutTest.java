@@ -135,7 +135,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
 
         NotificationShelf notificationShelf = mock(NotificationShelf.class);
-        mStackScroller = spy(new NotificationStackScrollLayout(getContext()));
+        mStackScroller = spy(new NotificationStackScrollLayout(getContext(), null,
+                true /* allowLongPress */));
         mStackScroller.setShelf(notificationShelf);
         mStackScroller.setStatusBar(mBar);
         mStackScroller.setScrimController(mock(ScrimController.class));

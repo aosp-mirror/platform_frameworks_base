@@ -16,6 +16,7 @@
 
 package com.android.systemui;
 
+import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
 import android.annotation.Nullable;
@@ -198,6 +199,13 @@ public class SystemUIFactory {
     public NotificationInterruptionStateProvider provideNotificationInterruptionStateProvider(
             Context context) {
         return new NotificationInterruptionStateProvider(context);
+    }
+
+    @Singleton
+    @Provides
+    @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
+    public boolean provideAllowNotificationLongPress() {
+        return true;
     }
 
     @Module

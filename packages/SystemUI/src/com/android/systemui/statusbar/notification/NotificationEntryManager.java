@@ -41,7 +41,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.NotificationUpdateHandler;
 import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
@@ -193,10 +192,6 @@ public class NotificationEntryManager implements
 
     protected NotificationPresenter getPresenter() {
         return mPresenter;
-    }
-
-    public ExpandableNotificationRow.LongPressListener getNotificationLongClicker() {
-        return getRowBinder().getNotificationLongClicker();
     }
 
     @Override
