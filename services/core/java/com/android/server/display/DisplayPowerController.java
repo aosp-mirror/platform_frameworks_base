@@ -523,9 +523,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     public void onSwitchUser(@UserIdInt int newUserId) {
         handleSettingsChange(true /* userSwitch */);
         mBrightnessTracker.onSwitchUser(newUserId);
-        if (mAutomaticBrightnessController != null) {
-            mAutomaticBrightnessController.onSwitchUser(newUserId);
-        }
     }
 
     public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats(
@@ -1837,12 +1834,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         public void onScreenOff() {
             Message msg = mHandler.obtainMessage(MSG_SCREEN_OFF_UNBLOCKED, this);
             mHandler.sendMessage(msg);
-        }
-    }
-
-    void setAutoBrightnessLoggingEnabled(boolean enabled) {
-        if (mAutomaticBrightnessController != null) {
-            mAutomaticBrightnessController.setLoggingEnabled(enabled);
         }
     }
 }
