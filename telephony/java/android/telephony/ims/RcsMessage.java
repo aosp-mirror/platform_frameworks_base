@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.telephony.ims;
 
 import android.os.Parcelable;
 
 /**
- * RcsThread represents a single RCS conversation thread. It holds messages that were sent and
- * received and events that occurred on that thread.
+ * This is a single instance of a message sent or received over RCS.
  * @hide - TODO(sahinc) make this public
  */
-public abstract class RcsThread implements Parcelable {
-
+public abstract class RcsMessage implements Parcelable {
 }
