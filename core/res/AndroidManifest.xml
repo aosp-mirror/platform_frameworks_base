@@ -3854,6 +3854,10 @@
     <permission android:name="android.permission.PACKAGE_ROLLBACK_AGENT"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi @hide Allows managing apk level rollbacks. -->
+    <permission android:name="android.permission.MANAGE_ROLLBACKS"
+        android:protectionLevel="signature|installer" />
+
     <!-- @SystemApi @hide Allows an application to mark other applications as harmful -->
     <permission android:name="android.permission.SET_HARMFUL_APP_WARNINGS"
         android:protectionLevel="signature|verifier" />

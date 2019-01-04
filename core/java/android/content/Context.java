@@ -4009,9 +4009,9 @@ public abstract class Context {
      * with the rollback manager
      *
      * @see #getSystemService(String)
-     * @hide TODO(ruhler): hidden, @TestApi until we decide on public vs. @SystemApi.
+     * @hide
      */
-    @TestApi
+    @SystemApi
     public static final String ROLLBACK_SERVICE = "rollback";
 
     /**

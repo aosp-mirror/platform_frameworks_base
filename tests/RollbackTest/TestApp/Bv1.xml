@@ -15,17 +15,22 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.tests.rollback" >
+    package="com.android.tests.rollback.testapp.B"
+    android:versionCode="1"
+    android:versionName="1.0" >
 
-    <application>
-        <receiver android:name="com.android.tests.rollback.LocalIntentSender"
+
+    <uses-sdk android:minSdkVersion="19" />
+
+    <application android:label="Rollback Test App B v1">
+        <meta-data android:name="version" android:value="1" />
+        <receiver android:name="com.android.tests.rollback.testapp.ProcessUserData"
                   android:exported="true" />
-        <uses-library android:name="android.test.runner" />
+        <activity android:name="com.android.tests.rollback.testapp.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
-
-
-    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
-                     android:targetPackage="com.android.tests.rollback"
-                     android:label="Rollback Test"/>
-
 </manifest>

@@ -27,5 +27,11 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        try {
+            new ProcessUserData().processUserData(this);
+        } catch (ProcessUserData.UserDataException e) {
+            throw new AssertionError("Failed to process app user data", e);
+        }
     }
 }
