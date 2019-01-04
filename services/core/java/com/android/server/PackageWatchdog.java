@@ -19,10 +19,7 @@ package com.android.server;
 import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
-import android.os.Message;
-import android.os.Process;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -32,6 +29,7 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
@@ -50,8 +48,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Monitors the health of packages on the system and notifies interested observers when packages
@@ -70,7 +66,6 @@ public class PackageWatchdog {
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_NAME = "name";
     private static final String ATTR_DURATION = "duration";
-    private static final int MESSAGE_SAVE_FILE = 1;
 
     private static PackageWatchdog sPackageWatchdog;
 
@@ -79,20 +74,21 @@ public class PackageWatchdog {
     private final Context mContext;
     // Handler to run package cleanup runnables
     private final Handler mTimerHandler;
-    private final HandlerThread mIoThread = new HandlerThread("package_watchdog_io",
-            Process.THREAD_PRIORITY_BACKGROUND);
     private final Handler mIoHandler;
-    // Maps observer names to package observers that have been registered since the last boot
+    // Contains (observer-name -> external-observer-handle) that have been registered during the
+    // current boot.
+    // It is populated when observers call #registerHealthObserver and it does not survive reboots.
     @GuardedBy("mLock")
-    final Map<String, PackageHealthObserver> mRegisteredObservers = new ArrayMap<>();
-    // Maps observer names to internal observers (registered or not) loaded from file
+    final ArrayMap<String, PackageHealthObserver> mRegisteredObservers = new ArrayMap<>();
+    // Contains (observer-name -> internal-observer-handle) that have ever been registered from
+    // previous boots. Observers with all packages expired are periodically pruned.
+    // It is saved to disk on system shutdown and repouplated on startup so it survives reboots.
     @GuardedBy("mLock")
-    final Map<String, ObserverInternal> mAllObservers = new ArrayMap<>();
-    // /data/system/ directory
-    private final File mSystemDir = new File(Environment.getDataDirectory(), "system");
-    // File containing the XML data of monitored packages
+    final ArrayMap<String, ObserverInternal> mAllObservers = new ArrayMap<>();
+    // File containing the XML data of monitored packages /data/system/package-watchdog.xml
     private final AtomicFile mPolicyFile =
-            new AtomicFile(new File(mSystemDir, "package-watchdog.xml"));
+            new AtomicFile(new File(new File(Environment.getDataDirectory(), "system"),
+                           "package-watchdog.xml"));
     // Runnable to prune monitored packages that have expired
     private final Runnable mPackageCleanup;
     // Last SystemClock#uptimeMillis a package clean up was executed.
@@ -105,18 +101,19 @@ public class PackageWatchdog {
     private PackageWatchdog(Context context) {
         mContext = context;
         mTimerHandler = new Handler(Looper.myLooper());
-        mIoThread.start();
-        mIoHandler = new IoHandler(mIoThread.getLooper());
+        mIoHandler = BackgroundThread.getHandler();
         mPackageCleanup = this::rescheduleCleanup;
         loadFromFile();
     }
 
     /** Creates or gets singleton instance of PackageWatchdog. */
-    public static synchronized PackageWatchdog getInstance(Context context) {
-        if (sPackageWatchdog == null) {
-            sPackageWatchdog = new PackageWatchdog(context);
+    public static PackageWatchdog getInstance(Context context) {
+        synchronized (PackageWatchdog.class) {
+            if (sPackageWatchdog == null) {
+                sPackageWatchdog = new PackageWatchdog(context);
+            }
+            return sPackageWatchdog;
         }
-        return sPackageWatchdog;
     }
 
     /**
@@ -140,21 +137,20 @@ public class PackageWatchdog {
      * {@code observer} of any package failures within the monitoring duration.
      *
      * <p>If {@code observer} is already monitoring a package in {@code packageNames},
-     * the monitoring window of that package will be reset to {@code hours}.
+     * the monitoring window of that package will be reset to {@code durationMs}.
      *
      * @throws IllegalArgumentException if {@code packageNames} is empty
-     * or {@code hours} is less than 1
+     * or {@code durationMs} is less than 1
      */
     public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
-            int hours) {
-        if (packageNames.isEmpty() || hours < 1) {
+            int durationMs) {
+        if (packageNames.isEmpty() || durationMs < 1) {
             throw new IllegalArgumentException("Observation not started, no packages specified"
-                    + "or invalid hours");
+                    + "or invalid duration");
         }
-        long durationMs = TimeUnit.HOURS.toMillis(hours);
         List<MonitoredPackage> packages = new ArrayList<>();
-        for (String packageName : packageNames) {
-            packages.add(new MonitoredPackage(packageName, durationMs));
+        for (int i = 0; i < packageNames.size(); i++) {
+            packages.add(new MonitoredPackage(packageNames.get(i), durationMs));
         }
         synchronized (mLock) {
             ObserverInternal oldObserver = mAllObservers.get(observer.getName());
@@ -173,7 +169,7 @@ public class PackageWatchdog {
         // Always reschedule because we may need to expire packages
         // earlier than we are already scheduled for
         rescheduleCleanup();
-        sendIoMessage(MESSAGE_SAVE_FILE);
+        saveToFileAsync();
     }
 
     /**
@@ -186,7 +182,7 @@ public class PackageWatchdog {
             mAllObservers.remove(observer.getName());
             mRegisteredObservers.remove(observer.getName());
         }
-        sendIoMessage(MESSAGE_SAVE_FILE);
+        saveToFileAsync();
     }
 
     // TODO(zezeozue:) Accept current versionCodes of failing packages?
@@ -194,27 +190,43 @@ public class PackageWatchdog {
      * Called when a process fails either due to a crash or ANR.
      *
      * <p>All registered observers for the packages contained in the process will be notified in
-     * order of priority unitl an observer signifies that it has taken action and other observers
+     * order of priority until an observer signifies that it has taken action and other observers
      * should not notified.
      *
      * <p>This method could be called frequently if there is a severe problem on the device.
      */
     public void onPackageFailure(String[] packages) {
+        ArrayMap<String, List<PackageHealthObserver>> packagesToReport = new ArrayMap<>();
         synchronized (mLock) {
             if (mRegisteredObservers.isEmpty()) {
                 return;
             }
-            for (String packageName : packages) {
-                for (ObserverInternal observer : mAllObservers.values()) {
-                    if (observer.onPackageFailure(packageName)) {
-                        PackageHealthObserver activeObserver =
-                                mRegisteredObservers.get(observer.mName);
-                        if (activeObserver != null
-                                && activeObserver.onHealthCheckFailed(packageName)) {
-                            // Observer has handled, do not notify other observers
-                            break;
-                        }
+
+            for (int pIndex = 0; pIndex < packages.length; pIndex++) {
+                for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
+                    // Observers interested in receiving packageName failures
+                    List<PackageHealthObserver> observersToNotify = new ArrayList<>();
+                    PackageHealthObserver activeObserver =
+                            mRegisteredObservers.get(mAllObservers.valueAt(oIndex).mName);
+                    if (activeObserver != null) {
+                        observersToNotify.add(activeObserver);
                     }
+
+                    // Save interested observers and notify them outside the lock
+                    if (!observersToNotify.isEmpty()) {
+                        packagesToReport.put(packages[pIndex], observersToNotify);
+                    }
+                }
+            }
+        }
+
+        // Notify observers
+        for (int pIndex = 0; pIndex < packagesToReport.size(); pIndex++) {
+            List<PackageHealthObserver> observers = packagesToReport.valueAt(pIndex);
+            for (int oIndex = 0; oIndex < observers.size(); oIndex++) {
+                if (observers.get(oIndex).onHealthCheckFailed(packages[pIndex])) {
+                    // Observer has handled, do not notify others
+                    break;
                 }
             }
         }
@@ -225,7 +237,7 @@ public class PackageWatchdog {
     /** Writes the package information to file during shutdown. */
     public void writeNow() {
         if (!mAllObservers.isEmpty()) {
-            mIoHandler.removeMessages(MESSAGE_SAVE_FILE);
+            mIoHandler.removeCallbacks(this::saveToFile);
             pruneObservers(SystemClock.uptimeMillis() - mUptimeAtLastRescheduleMs);
             saveToFile();
             Slog.i(TAG, "Last write to update package durations");
@@ -235,7 +247,7 @@ public class PackageWatchdog {
     /** Register instances of this interface to receive notifications on package failure. */
     public interface PackageHealthObserver {
         /**
-         * Called when health check fails for the {@code packages}.
+         * Called when health check fails for the {@code packageName}.
          * @return {@code true} if action was taken and other observers should not be notified of
          * this failure, {@code false} otherwise.
          */
@@ -283,10 +295,12 @@ public class PackageWatchdog {
      */
     private long getEarliestPackageExpiryLocked() {
         long shortestDurationMs = Long.MAX_VALUE;
-        for (ObserverInternal observer : mAllObservers.values()) {
-            for (MonitoredPackage p : observer.mPackages.values()) {
-                if (p.mDurationMs < shortestDurationMs) {
-                    shortestDurationMs = p.mDurationMs;
+        for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
+            ArrayMap<String, MonitoredPackage> packages = mAllObservers.valueAt(oIndex).mPackages;
+            for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
+                long duration = packages.valueAt(pIndex).mDurationMs;
+                if (duration < shortestDurationMs) {
+                    shortestDurationMs = duration;
                 }
             }
         }
@@ -313,7 +327,7 @@ public class PackageWatchdog {
                 }
             }
         }
-        sendIoMessage(MESSAGE_SAVE_FILE);
+        saveToFileAsync();
     }
 
     /**
@@ -339,59 +353,53 @@ public class PackageWatchdog {
             }
         } catch (FileNotFoundException e) {
             // Nothing to monitor
-        } catch (IOException e) {
-            Log.wtf(TAG, "Unable to read monitored packages", e);
-        } catch (NumberFormatException e) {
-            Log.wtf(TAG, "Unable to parse monitored package windows", e);
-        } catch (XmlPullParserException e) {
-            Log.wtf(TAG, "Unable to parse monitored packages", e);
+        } catch (IOException | NumberFormatException | XmlPullParserException e) {
+            Log.wtf(TAG, "Unable to read monitored packages, deleting file", e);
+            mPolicyFile.delete();
         } finally {
             IoUtils.closeQuietly(infile);
         }
     }
 
     /**
-     * Persists mAllObservers to file and ignores threshold information.
-     *
-     * <p>Note that this is <b>not</b> thread safe and should only be called on the
-     * single threaded IoHandler.
+     * Persists mAllObservers to file. Threshold information is ignored.
      */
     private boolean saveToFile() {
-        FileOutputStream stream;
-        try {
-            stream = mPolicyFile.startWrite();
-        } catch (IOException e) {
-            Slog.w(TAG, "Cannot update monitored packages", e);
-            return false;
-        }
-
-        try {
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(stream, StandardCharsets.UTF_8.name());
-            out.startDocument(null, true);
-            out.startTag(null, TAG_PACKAGE_WATCHDOG);
-            out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
-            for (ObserverInternal observer : mAllObservers.values()) {
-                observer.write(out);
+        synchronized (mLock) {
+            FileOutputStream stream;
+            try {
+                stream = mPolicyFile.startWrite();
+            } catch (IOException e) {
+                Slog.w(TAG, "Cannot update monitored packages", e);
+                return false;
             }
-            out.endTag(null, TAG_PACKAGE_WATCHDOG);
-            out.endDocument();
-            mPolicyFile.finishWrite(stream);
-            return true;
-        } catch (IOException e) {
-            Slog.w(TAG, "Failed to save monitored packages, restoring backup", e);
-            mPolicyFile.failWrite(stream);
-            return false;
-        } finally {
-            IoUtils.closeQuietly(stream);
+
+            try {
+                XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(stream, StandardCharsets.UTF_8.name());
+                out.startDocument(null, true);
+                out.startTag(null, TAG_PACKAGE_WATCHDOG);
+                out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
+                for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
+                    mAllObservers.valueAt(oIndex).write(out);
+                }
+                out.endTag(null, TAG_PACKAGE_WATCHDOG);
+                out.endDocument();
+                mPolicyFile.finishWrite(stream);
+                return true;
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to save monitored packages, restoring backup", e);
+                mPolicyFile.failWrite(stream);
+                return false;
+            } finally {
+                IoUtils.closeQuietly(stream);
+            }
         }
     }
 
-    private void sendIoMessage(int what) {
-        if (!mIoHandler.hasMessages(what)) {
-            Message m = Message.obtain(mIoHandler, what);
-            mIoHandler.sendMessage(m);
-        }
+    private void saveToFileAsync() {
+        mIoHandler.removeCallbacks(this::saveToFile);
+        mIoHandler.post(this::saveToFile);
     }
 
     /**
@@ -435,7 +443,8 @@ public class PackageWatchdog {
 
         public void updatePackages(List<MonitoredPackage> packages) {
             synchronized (mName) {
-                for (MonitoredPackage p : packages) {
+                for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
+                    MonitoredPackage p = packages.get(pIndex);
                     mPackages.put(p.mName, p);
                 }
             }
@@ -552,21 +561,6 @@ public class PackageWatchdog {
                 mFailures++;
             }
             return mFailures >= TRIGGER_FAILURE_COUNT;
-        }
-    }
-
-    private class IoHandler extends Handler {
-        IoHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MESSAGE_SAVE_FILE:
-                    saveToFile();
-                    break;
-            }
         }
     }
 }
