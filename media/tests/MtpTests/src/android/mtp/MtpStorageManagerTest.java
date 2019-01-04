@@ -18,20 +18,19 @@ package android.mtp;
 import android.os.FileUtils;
 import android.os.UserHandle;
 import android.os.storage.StorageVolume;
-import android.support.test.filters.SmallTest;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.junit.runners.MethodSorters;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,8 +38,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * Tests for MtpStorageManager functionality.
