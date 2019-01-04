@@ -825,4 +825,24 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         assertNotEquals(-1, record.getLastAudiblyAlertedMs());
     }
+
+    @Test
+    public void testIsNewEnoughForAlerting_new() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertTrue(record.isNewEnoughForAlerting(record.mUpdateTimeMs));
+    }
+
+    @Test
+    public void testIsNewEnoughForAlerting_old() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertFalse(record.isNewEnoughForAlerting(record.mUpdateTimeMs + (1000 * 60 * 60)));
+    }
 }

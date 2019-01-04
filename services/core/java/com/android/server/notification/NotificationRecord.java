@@ -92,6 +92,8 @@ public final class NotificationRecord {
     static final String TAG = "NotificationRecord";
     static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     private static final int MAX_LOGTAG_LENGTH = 35;
+    // the period after which a notification is updated where it can make sound
+    private static final int MAX_SOUND_DELAY_MS = 2000;
     final StatusBarNotification sbn;
     IActivityManager mAm;
     UriGrantsManagerInternal mUgmInternal;
@@ -125,7 +127,8 @@ public final class NotificationRecord {
     private long mVisibleSinceMs;
 
     // The most recent update time, or the creation time if no updates.
-    private long mUpdateTimeMs;
+    @VisibleForTesting
+    final long mUpdateTimeMs;
 
     // The most recent interruption time, or the creation time if no updates. Differs from the
     // above value because updates are filtered based on whether they actually interrupted the
@@ -824,6 +827,10 @@ public final class NotificationRecord {
 
     public boolean isIntercepted() {
         return mIntercept;
+    }
+
+    public boolean isNewEnoughForAlerting(long now) {
+        return getFreshnessMs(now) <= MAX_SOUND_DELAY_MS;
     }
 
     public void setHidden(boolean hidden) {
