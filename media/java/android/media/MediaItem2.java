@@ -40,9 +40,8 @@ import java.util.concurrent.Executor;
  * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
  * for consistent behavior across all devices.
  * <p>
- * @hide
  */
-public class MediaItem2 implements Parcelable {
+public final class MediaItem2 implements Parcelable {
     private static final String TAG = "MediaItem2";
 
     // intentionally less than long.MAX_VALUE.
@@ -69,7 +68,6 @@ public class MediaItem2 implements Parcelable {
                 }
             };
 
-    // TODO: Use SessionPlayer2.UNKNOWN_TIME instead
     private static final long UNKNOWN_TIME = -1;
 
     private final long mStartPositionMs;
