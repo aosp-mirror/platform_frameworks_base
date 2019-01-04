@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState;
@@ -28,6 +27,7 @@ import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 
 import com.android.internal.util.function.TriConsumer;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import java.io.PrintWriter;
@@ -106,8 +106,8 @@ class InsetsSourceProvider {
             mTmpRect.inset(mWin.mGivenContentInsets);
         }
         mSource.setFrame(mTmpRect);
-        setServerVisible(mWin.isVisible() && !mWin.mGivenInsetsPending);
-
+        setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.mPolicyVisibility
+                && !mWin.mGivenInsetsPending);
     }
 
     void updateControlForTarget(@Nullable WindowState target) {
@@ -115,15 +115,15 @@ class InsetsSourceProvider {
             return;
         }
         if (target == null) {
-            revokeControl();
+            // Cancelling the animation will invoke onAnimationCancelled, resetting all the fields.
+            mWin.cancelAnimation();
             return;
         }
         mAdapter = new ControlAdapter();
         mWin.startAnimation(mDisplayContent.getPendingTransaction(), mAdapter,
-                false /* TODO hidden */);
+                !mClientVisible /* hidden */);
         mControllingWin = target;
         mControl = new InsetsSourceControl(mSource.getType(), mAdapter.mCapturedLeash);
-        setClientVisible(InsetsState.getDefaultVisibly(mSource.getType()));
     }
 
     boolean onInsetsModified(WindowState caller, InsetsSource modifiedSource) {
@@ -135,7 +135,12 @@ class InsetsSourceProvider {
     }
 
     private void setClientVisible(boolean clientVisible) {
+        if (mClientVisible == clientVisible) {
+            return;
+        }
         mClientVisible = clientVisible;
+        mDisplayContent.mWmService.mH.sendMessage(PooledLambda.obtainMessage(
+                DisplayContent::layoutAndAssignWindowLayersIfNeeded, mDisplayContent));
         updateVisibility();
     }
 
@@ -152,13 +157,8 @@ class InsetsSourceProvider {
         return mControl;
     }
 
-    void revokeControl() {
-        if (mControllingWin != null) {
-
-            // Cancelling the animation will invoke onAnimationCancelled, resetting all the fields.
-            mWin.cancelAnimation();
-        }
-        setClientVisible(InsetsState.getDefaultVisibly(mSource.getType()));
+    boolean isClientVisible() {
+        return mClientVisible;
     }
 
     private class ControlAdapter implements AnimationAdapter {
@@ -186,6 +186,7 @@ class InsetsSourceProvider {
         public void onAnimationCancelled(SurfaceControl animationLeash) {
             if (mAdapter == this) {
                 mStateController.notifyControlRevoked(mControllingWin, InsetsSourceProvider.this);
+                setClientVisible(InsetsState.getDefaultVisibly(mSource.getType()));
                 mControl = null;
                 mControllingWin = null;
                 mAdapter = null;
