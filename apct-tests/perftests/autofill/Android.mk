@@ -22,7 +22,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-test \
+    androidx.test.rules \
     androidx.annotation_annotation \
     apct-perftests-utils
 
