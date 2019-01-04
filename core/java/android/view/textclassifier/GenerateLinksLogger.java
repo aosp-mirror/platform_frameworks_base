@@ -39,7 +39,6 @@ import java.util.UUID;
 public final class GenerateLinksLogger {
 
     private static final String LOG_TAG = "GenerateLinksLogger";
-    private static final boolean DEBUG_LOG_ENABLED = false;
     private static final String ZERO = "0";
 
     private final MetricsLogger mMetricsLogger;
@@ -128,8 +127,9 @@ public final class GenerateLinksLogger {
     }
 
     private static void debugLog(LogMaker log) {
-        if (!DEBUG_LOG_ENABLED) return;
-
+        if (!Log.ENABLE_FULL_LOGGING) {
+            return;
+        }
         final String callId = Objects.toString(
                 log.getTaggedData(MetricsEvent.FIELD_LINKIFY_CALL_ID), "");
         final String entityType = Objects.toString(
@@ -143,7 +143,7 @@ public final class GenerateLinksLogger {
         final int latencyMs = Integer.parseInt(
                 Objects.toString(log.getTaggedData(MetricsEvent.FIELD_LINKIFY_LATENCY), ZERO));
 
-        Log.d(LOG_TAG,
+        Log.v(LOG_TAG,
                 String.format(Locale.US, "%s:%s %d links (%d/%d chars) %dms %s", callId, entityType,
                         numLinks, linkLength, textLength, latencyMs, log.getPackageName()));
     }
