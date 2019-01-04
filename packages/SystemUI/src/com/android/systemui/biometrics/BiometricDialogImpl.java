@@ -160,7 +160,10 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     @Override
     public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
             int type, boolean requireConfirmation, int userId) {
-        if (DEBUG) Log.d(TAG, "showBiometricDialog, type: " + type);
+        if (DEBUG) {
+            Log.d(TAG, "showBiometricDialog, type: " + type
+                    + ", requireConfirmation: " + requireConfirmation);
+        }
         // Remove these messages as they are part of the previous client
         mHandler.removeMessages(MSG_BIOMETRIC_ERROR);
         mHandler.removeMessages(MSG_BIOMETRIC_HELP);

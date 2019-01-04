@@ -706,7 +706,8 @@ public class BiometricService extends SystemService {
 
                 mCurrentModality = modality;
 
-                // Actually start authentication
+                // Start preparing for authentication. Authentication starts when
+                // all modalities requested have invoked onReadyForAuthentication.
                 authenticateInternal(token, sessionId, userId, receiver, opPackageName, bundle,
                         callingUid, callingPid, callingUserId, modality);
             });
@@ -725,6 +726,9 @@ public class BiometricService extends SystemService {
                 IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
                 int callingUid, int callingPid, int callingUserId, int modality) {
             try {
+                final boolean requireConfirmation = bundle.getBoolean(
+                        BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true /* default */);
+
                 // Generate random cookies to pass to the services that should prepare to start
                 // authenticating. Store the cookie here and wait for all services to "ack"
                 // with the cookie. Once all cookies are received, we can show the prompt
@@ -748,7 +752,7 @@ public class BiometricService extends SystemService {
                     Slog.w(TAG, "Iris unsupported");
                 }
                 if ((modality & TYPE_FACE) != 0) {
-                    mFaceService.prepareForAuthentication(true /* requireConfirmation */,
+                    mFaceService.prepareForAuthentication(requireConfirmation,
                             token, sessionId, userId, mInternalReceiver, opPackageName,
                             cookie, callingUid, callingPid, callingUserId);
                 }
