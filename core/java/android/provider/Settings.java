@@ -14070,11 +14070,10 @@ public final class Settings {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(CALL_METHOD_USER_KEY, resolver.getUserId());
-                arg.putInt(Settings.CALL_METHOD_RESET_MODE_KEY, resetMode);
+                arg.putInt(CALL_METHOD_RESET_MODE_KEY, resetMode);
                 if (prefix != null) {
                     arg.putString(Settings.CALL_METHOD_PREFIX_KEY, prefix);
                 }
-                arg.putInt(CALL_METHOD_RESET_MODE_KEY, resetMode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
                 cp.call(resolver.getPackageName(), sProviderHolder.mUri.getAuthority(),
                         CALL_METHOD_RESET_CONFIG, null, arg);

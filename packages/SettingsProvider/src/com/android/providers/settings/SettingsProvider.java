@@ -1097,7 +1097,7 @@ public class SettingsProvider extends ContentProvider {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_CONFIG,
                             UserHandle.USER_SYSTEM, name, value, null, makeDefault, true,
-                            getCallingPackage(), false, null);
+                            resolveCallingPackage(), false, null);
                 }
 
                 case MUTATION_OPERATION_DELETE: {
@@ -1107,7 +1107,7 @@ public class SettingsProvider extends ContentProvider {
 
                 case MUTATION_OPERATION_RESET: {
                     mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_CONFIG,
-                            UserHandle.USER_SYSTEM, getCallingPackage(), mode, null, prefix);
+                            UserHandle.USER_SYSTEM, resolveCallingPackage(), mode, null, prefix);
                 } return true;
             }
         }
@@ -2245,6 +2245,22 @@ public class SettingsProvider extends ContentProvider {
 
     private static boolean isKeyValid(String key) {
         return !(TextUtils.isEmpty(key) || SettingsState.isBinary(key));
+    }
+
+    private String resolveCallingPackage() {
+        switch (Binder.getCallingUid()) {
+            case Process.ROOT_UID: {
+                return "root";
+            }
+
+            case Process.SHELL_UID: {
+                return "com.android.shell";
+            }
+
+            default: {
+                return getCallingPackage();
+            }
+        }
     }
 
     private static final class Arguments {
