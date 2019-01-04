@@ -20,6 +20,7 @@ import static com.android.internal.util.Preconditions.checkCollectionElementsNot
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.Service;
@@ -33,26 +34,21 @@ import android.os.RemoteCallback;
 import java.util.List;
 
 /**
- * This service presents information regarding runtime permissions that is
- * used for presenting them in the UI. Runtime permissions are presented as
- * a single permission in the UI but may be composed of several individual
- * permissions.
+ * This service is meant to be implemented by the app controlling permissions.
  *
- * @see RuntimePermissionPresenter
- * @see RuntimePermissionPresentationInfo
+ * @see PermissionController
  *
  * @hide
  */
 @SystemApi
-public abstract class RuntimePermissionPresenterService extends Service {
+public abstract class PermissionControllerService extends Service {
 
     /**
      * The {@link Intent} action that must be declared as handled by a service
      * in its manifest for the system to recognize it as a runtime permission
      * presenter service.
      */
-    public static final String SERVICE_INTERFACE =
-            "android.permission.RuntimePermissionPresenterService";
+    public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
 
     // No need for locking - always set first and never modified
     private Handler mHandler;
@@ -96,16 +92,17 @@ public abstract class RuntimePermissionPresenterService extends Service {
 
     @Override
     public final IBinder onBind(Intent intent) {
-        return new IRuntimePermissionPresenter.Stub() {
+        return new IPermissionController.Stub() {
             @Override
             public void getAppPermissions(String packageName, RemoteCallback callback) {
                 checkNotNull(packageName, "packageName");
                 checkNotNull(callback, "callback");
 
+                enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
+
                 mHandler.sendMessage(
-                        obtainMessage(
-                                RuntimePermissionPresenterService::getAppPermissions,
-                                RuntimePermissionPresenterService.this, packageName, callback));
+                        obtainMessage(PermissionControllerService::getAppPermissions,
+                                PermissionControllerService.this, packageName, callback));
             }
 
             @Override
@@ -113,11 +110,11 @@ public abstract class RuntimePermissionPresenterService extends Service {
                 checkNotNull(packageName, "packageName");
                 checkNotNull(permissionName, "permissionName");
 
+                enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, null);
+
                 mHandler.sendMessage(
-                        obtainMessage(
-                                RuntimePermissionPresenterService::onRevokeRuntimePermission,
-                                RuntimePermissionPresenterService.this, packageName,
-                                permissionName));
+                        obtainMessage(PermissionControllerService::onRevokeRuntimePermission,
+                                PermissionControllerService.this, packageName, permissionName));
             }
 
             @Override
@@ -126,11 +123,12 @@ public abstract class RuntimePermissionPresenterService extends Service {
                 checkCollectionElementsNotNull(permissionNames, "permissionNames");
                 checkNotNull(callback, "callback");
 
+                enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
+
                 mHandler.sendMessage(
-                        obtainMessage(
-                                RuntimePermissionPresenterService::countPermissionApps,
-                                RuntimePermissionPresenterService.this, permissionNames,
-                                countOnlyGranted, countSystem, callback));
+                        obtainMessage(PermissionControllerService::countPermissionApps,
+                                PermissionControllerService.this, permissionNames, countOnlyGranted,
+                                countSystem, callback));
             }
         };
     }
@@ -139,7 +137,7 @@ public abstract class RuntimePermissionPresenterService extends Service {
         List<RuntimePermissionPresentationInfo> permissions = onGetAppPermissions(packageName);
         if (permissions != null && !permissions.isEmpty()) {
             Bundle result = new Bundle();
-            result.putParcelableList(RuntimePermissionPresenter.KEY_RESULT, permissions);
+            result.putParcelableList(PermissionControllerManager.KEY_RESULT, permissions);
             callback.sendResult(result);
         } else {
             callback.sendResult(null);
@@ -151,7 +149,7 @@ public abstract class RuntimePermissionPresenterService extends Service {
         int numApps = onCountPermissionApps(permissionNames, countOnlyGranted, countSystem);
 
         Bundle result = new Bundle();
-        result.putInt(RuntimePermissionPresenter.KEY_RESULT, numApps);
+        result.putInt(PermissionControllerManager.KEY_RESULT, numApps);
         callback.sendResult(result);
     }
 }

@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteCallback;
+import android.permission.PermissionControllerService;
 
 import java.util.List;
 
@@ -43,7 +44,7 @@ import java.util.List;
  *
  * @hide
  *
- * @deprecated use {@link android.permission.RuntimePermissionPresenterService} instead
+ * @deprecated use {@link PermissionControllerService} instead
  */
 @Deprecated
 @SystemApi

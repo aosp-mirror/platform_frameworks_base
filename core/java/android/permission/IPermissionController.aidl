@@ -19,11 +19,11 @@ package android.permission;
 import android.os.RemoteCallback;
 
 /**
- * Interface for communication with the permission presenter service.
+ * Interface for system apps to communication with the permission controller.
  *
  * @hide
  */
-oneway interface IRuntimePermissionPresenter {
+oneway interface IPermissionController {
     void getAppPermissions(String packageName, in RemoteCallback callback);
     void revokeRuntimePermission(String packageName, String permissionName);
     void countPermissionApps(in List<String> permissionNames, boolean countOnlyGranted,
