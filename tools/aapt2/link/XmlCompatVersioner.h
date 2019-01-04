@@ -55,7 +55,7 @@ class XmlCompatVersioner {
  public:
   using Rules = std::unordered_map<ResourceId, std::unique_ptr<IDegradeRule>>;
 
-  XmlCompatVersioner(const Rules* rules);
+  explicit XmlCompatVersioner(const Rules* rules);
 
   std::vector<std::unique_ptr<xml::XmlResource>> Process(IAaptContext* context,
                                                          xml::XmlResource* doc,
@@ -83,7 +83,7 @@ struct ReplacementAttr {
 
 class DegradeToManyRule : public IDegradeRule {
  public:
-  DegradeToManyRule(std::vector<ReplacementAttr> attrs);
+  explicit DegradeToManyRule(std::vector<ReplacementAttr> attrs);
   virtual ~DegradeToManyRule() = default;
 
   std::vector<DegradeResult> Degrade(const xml::Element& src_el, const xml::Attribute& src_attr,

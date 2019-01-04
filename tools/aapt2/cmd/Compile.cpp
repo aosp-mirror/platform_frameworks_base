@@ -645,7 +645,7 @@ static bool CompileFile(IAaptContext* context, const CompileOptions& options,
 
 class CompileContext : public IAaptContext {
  public:
-  CompileContext(IDiagnostics* diagnostics) : diagnostics_(diagnostics) {
+  explicit CompileContext(IDiagnostics* diagnostics) : diagnostics_(diagnostics) {
   }
 
   PackageType GetPackageType() override {
