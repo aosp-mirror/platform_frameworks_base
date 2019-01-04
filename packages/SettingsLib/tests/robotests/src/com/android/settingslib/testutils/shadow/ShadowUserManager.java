@@ -29,6 +29,7 @@ import java.util.List;
 
 @Implements(value = UserManager.class)
 public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager {
+    private List<UserInfo> mUserInfos = addProfile(0, "Owner");
 
     @Implementation
     protected static UserManager get(Context context) {
@@ -37,16 +38,24 @@ public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager
 
     @Implementation
     protected int[] getProfileIdsWithDisabled(int userId) {
-        return new int[]{0};
+        return mUserInfos.stream().mapToInt(s -> s.id).toArray();
     }
 
     @Implementation
     protected List<UserInfo> getProfiles() {
-        UserInfo userInfo = new UserInfo();
-        userInfo.id = 0;
-        List<UserInfo> userInfos = new ArrayList<>();
-        userInfos.add(userInfo);
-        return userInfos;
+        return mUserInfos;
+    }
+
+    public List<UserInfo> addProfile(int id, String name) {
+        List<UserInfo> userInfoList = mUserInfos;
+        if (userInfoList == null) {
+            userInfoList = new ArrayList<>();
+        }
+        final UserInfo userInfo = new UserInfo();
+        userInfo.id = id;
+        userInfo.name = name;
+        userInfoList.add(userInfo);
+        return userInfoList;
     }
 
     @Implementation
