@@ -39,6 +39,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_SCHEDULE_BACK
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
@@ -103,6 +104,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
 import com.android.server.backup.fullbackup.FullBackupEntry;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.internal.BackupHandler;
@@ -247,10 +249,11 @@ public class UserBackupManagerService {
     private final TransportManager mTransportManager;
     private final HandlerThread mUserBackupThread;
 
-    private final Context mContext;
-    private final PackageManager mPackageManager;
-    private final IPackageManager mPackageManagerBinder;
-    private final IActivityManager mActivityManager;
+    private Context mContext;
+    private PackageManager mPackageManager;
+    private IPackageManager mPackageManagerBinder;
+    private IActivityManager mActivityManager;
+    private ActivityManagerInternal mActivityManagerInternal;
     private PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
     private final IStorageManager mStorageManager;
@@ -460,6 +463,7 @@ public class UserBackupManagerService {
         mPackageManager = context.getPackageManager();
         mPackageManagerBinder = AppGlobals.getPackageManager();
         mActivityManager = ActivityManager.getService();
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -2069,7 +2073,8 @@ public class UserBackupManagerService {
 
                         final int privFlags = appInfo.applicationInfo.privateFlags;
                         headBusy = (privFlags & PRIVATE_FLAG_BACKUP_IN_FOREGROUND) == 0
-                                && mActivityManager.isAppForeground(appInfo.applicationInfo.uid);
+                                && mActivityManagerInternal.isAppForeground(
+                                        appInfo.applicationInfo.uid);
 
                         if (headBusy) {
                             final long nextEligible = System.currentTimeMillis()
@@ -2092,8 +2097,6 @@ public class UserBackupManagerService {
                         // queue entirely and move on, but if there's nothing else in the queue
                         // we should bail entirely.  headBusy cannot have been set to true yet.
                         runBackup = (mFullBackupQueue.size() > 1);
-                    } catch (RemoteException e) {
-                        // Cannot happen; the Activity Manager is in the same process
                     }
                 }
             } while (headBusy);

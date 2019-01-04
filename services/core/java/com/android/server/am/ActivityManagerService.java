@@ -5322,16 +5322,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    @Override
-    public boolean isAppForeground(int uid) {
-        int callerUid = Binder.getCallingUid();
-        if (UserHandle.isCore(callerUid) || callerUid == uid) {
-            return isAppForegroundInternal(uid);
-        }
-        return false;
-    }
-
-    private boolean isAppForegroundInternal(int uid) {
+    private boolean isAppForeground(int uid) {
         synchronized (this) {
             UidRecord uidRec = mActiveUids.get(uid);
             if (uidRec == null || uidRec.idle) {
@@ -19686,6 +19677,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final ProcessRecord pr = mPidsSelfLocked.get(pid);
                 return pr == null ? Zygote.MOUNT_EXTERNAL_NONE : pr.mountMode;
             }
+        }
+
+        @Override
+        public boolean isAppForeground(int uid) {
+            return ActivityManagerService.this.isAppForeground(uid);
         }
     }
 

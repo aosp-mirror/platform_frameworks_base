@@ -314,4 +314,7 @@ public abstract class ActivityManagerInternal {
 
     /** Returns mount mode for process running with given pid */
     public abstract int getStorageMountMode(int pid, int uid);
+
+    /** Returns true if the given uid is the app in the foreground. */
+    public abstract boolean isAppForeground(int uid);
 }

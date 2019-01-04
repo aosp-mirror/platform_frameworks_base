@@ -421,7 +421,6 @@ interface IActivityManager {
     void resizeDockedStack(in Rect dockedBounds, in Rect tempDockedTaskBounds,
             in Rect tempDockedTaskInsetBounds,
             in Rect tempOtherTaskBounds, in Rect tempOtherTaskInsetBounds);
-    boolean isAppForeground(int uid);
     void removeStack(int stackId);
     void makePackageIdle(String packageName, int userId);
     int getMemoryTrimLevel();
