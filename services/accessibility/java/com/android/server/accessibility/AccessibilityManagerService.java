@@ -16,6 +16,11 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityService.SHOW_MODE_AUTO;
+import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_KEYBOARD_ORIGINAL_VALUE;
+import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_KEYBOARD_OVERRIDDEN;
+import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HIDDEN;
+import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE_HARD_KEYBOARD;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_MASK;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.accessibility.AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED;
@@ -23,13 +28,9 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBIL
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
+
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
-import static android.accessibilityservice.AccessibilityService.SHOW_MODE_AUTO;
-import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HIDDEN;
-import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE_HARD_KEYBOARD;
-import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_KEYBOARD_ORIGINAL_VALUE;
-import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_KEYBOARD_OVERRIDDEN;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -121,6 +122,8 @@ import com.android.server.SystemService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
+import libcore.util.EmptyArray;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileDescriptor;
@@ -138,8 +141,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
-
-import libcore.util.EmptyArray;
 
 /**
  * This class is instantiated by the system as a system level service and can be
@@ -1827,8 +1828,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         updateFilterKeyEventsLocked(userState);
         updateTouchExplorationLocked(userState);
         updatePerformGesturesLocked(userState);
-        updateDisplayDaltonizerLocked(userState);
-        updateDisplayInversionLocked(userState);
         updateMagnificationLocked(userState);
         scheduleUpdateFingerprintGestureHandling(userState);
         scheduleUpdateInputFilter(userState);
@@ -2185,14 +2184,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
         return false;
-    }
-
-    private void updateDisplayDaltonizerLocked(UserState userState) {
-        DisplayAdjustmentUtils.applyDaltonizerSetting(mContext, userState.mUserId);
-    }
-
-    private void updateDisplayInversionLocked(UserState userState) {
-        DisplayAdjustmentUtils.applyInversionSetting(mContext, userState.mUserId);
     }
 
     private void updateMagnificationLocked(UserState userState) {
@@ -4104,15 +4095,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mTouchExplorationGrantedAccessibilityServicesUri = Settings.Secure
                 .getUriFor(Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES);
 
-        private final Uri mDisplayInversionEnabledUri = Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
-
-        private final Uri mDisplayDaltonizerEnabledUri = Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED);
-
-        private final Uri mDisplayDaltonizerUri = Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER);
-
         private final Uri mHighTextContrastUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED);
 
@@ -4152,12 +4134,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             contentResolver.registerContentObserver(
                     mTouchExplorationGrantedAccessibilityServicesUri,
                     false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(
-                    mDisplayInversionEnabledUri, false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(
-                    mDisplayDaltonizerEnabledUri, false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(
-                    mDisplayDaltonizerUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mHighTextContrastUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
@@ -4202,11 +4178,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (readTouchExplorationGrantedAccessibilityServicesLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
-                } else if (mDisplayDaltonizerEnabledUri.equals(uri)
-                        || mDisplayDaltonizerUri.equals(uri)) {
-                    updateDisplayDaltonizerLocked(userState);
-                } else if (mDisplayInversionEnabledUri.equals(uri)) {
-                    updateDisplayInversionLocked(userState);
                 } else if (mHighTextContrastUri.equals(uri)) {
                     if (readHighTextContrastEnabledSettingLocked(userState)) {
                         onUserStateChangedLocked(userState);

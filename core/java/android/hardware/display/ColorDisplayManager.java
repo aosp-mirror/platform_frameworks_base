@@ -88,6 +88,16 @@ public final class ColorDisplayManager {
         return context.getResources().getBoolean(R.bool.config_displayWhiteBalanceAvailable);
     }
 
+    /**
+     * Check if the color transforms are color accelerated. Some transforms are experimental only
+     * on non-accelerated platforms due to the performance implications.
+     *
+     * @hide
+     */
+    public static boolean isColorTransformAccelerated(Context context) {
+        return context.getResources().getBoolean(R.bool.config_setColorTransformAccelerated);
+    }
+
     private static class ColorDisplayManagerInternal {
 
         private static ColorDisplayManagerInternal sInstance;

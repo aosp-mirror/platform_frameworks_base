@@ -48,6 +48,7 @@ import android.provider.Settings.Secure;
 import android.provider.Settings.System;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
@@ -217,6 +218,29 @@ public final class ColorDisplayService extends SystemService {
         }
     };
 
+    /**
+     * Matrix and offset used for converting color to grayscale.
+     */
+    private static final float[] MATRIX_GRAYSCALE = new float[]{
+            .2126f, .2126f, .2126f, 0f,
+            .7152f, .7152f, .7152f, 0f,
+            .0722f, .0722f, .0722f, 0f,
+            0f, 0f, 0f, 1f
+    };
+
+    /**
+     * Matrix and offset used for luminance inversion. Represents a transform from RGB to YIQ color
+     * space, rotation around the Y axis by 180 degrees, transform back to RGB color space, and
+     * subtraction from 1. The last row represents a non-multiplied addition, see surfaceflinger's
+     * ProgramCache for full implementation details.
+     */
+    private static final float[] MATRIX_INVERT_COLOR = new float[] {
+            0.402f, -0.598f, -0.599f, 0f,
+            -1.174f, -0.174f, -1.175f, 0f,
+            -0.228f, -0.228f, 0.772f, 0f,
+            1f, 1f, 1f, 1f
+    };
+
     private final Handler mHandler;
 
     private int mCurrentUser = UserHandle.USER_NULL;
@@ -358,9 +382,16 @@ public final class ColorDisplayService extends SystemService {
                             case System.DISPLAY_COLOR_MODE:
                                 onDisplayColorModeChanged(mNightDisplayController.getColorMode());
                                 break;
-                            case Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED:
                             case Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED:
-                                onAccessibilityTransformChanged();
+                                onAccessibilityInversionChanged();
+                                onAccessibilityActivated();
+                                break;
+                            case Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED:
+                                onAccessibilityDaltonizerChanged();
+                                onAccessibilityActivated();
+                                break;
+                            case Secure.ACCESSIBILITY_DISPLAY_DALTONIZER:
+                                onAccessibilityDaltonizerChanged();
                                 break;
                             case Secure.DISPLAY_WHITE_BALANCE_ENABLED:
                                 onDisplayWhiteBalanceEnabled(isDisplayWhiteBalanceSettingEnabled());
@@ -388,6 +419,9 @@ public final class ColorDisplayService extends SystemService {
                 false /* notifyForDescendants */, mContentObserver, mCurrentUser);
         cr.registerContentObserver(
                 Secure.getUriFor(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED),
+                false /* notifyForDescendants */, mContentObserver, mCurrentUser);
+        cr.registerContentObserver(
+                Secure.getUriFor(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER),
                 false /* notifyForDescendants */, mContentObserver, mCurrentUser);
         cr.registerContentObserver(Secure.getUriFor(Secure.DISPLAY_WHITE_BALANCE_ENABLED),
                 false /* notifyForDescendants */, mContentObserver, mCurrentUser);
@@ -526,10 +560,43 @@ public final class ColorDisplayService extends SystemService {
         dtm.setColorMode(mode, mNightDisplayTintController.getMatrix());
     }
 
-    private void onAccessibilityTransformChanged() {
+    private void onAccessibilityActivated() {
         onDisplayColorModeChanged(mNightDisplayController.getColorMode());
     }
 
+    /**
+     * Apply the accessibility daltonizer transform based on the settings value.
+     */
+    private void onAccessibilityDaltonizerChanged() {
+        final boolean enabled = Secure.getIntForUser(getContext().getContentResolver(),
+                Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, mCurrentUser) != 0;
+        final int daltonizerMode = enabled ? Secure.getIntForUser(getContext().getContentResolver(),
+                Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
+                AccessibilityManager.DALTONIZER_CORRECT_DEUTERANOMALY, mCurrentUser)
+                : AccessibilityManager.DALTONIZER_DISABLED;
+
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+        if (daltonizerMode == AccessibilityManager.DALTONIZER_SIMULATE_MONOCHROMACY) {
+            // Monochromacy isn't supported by the native Daltonizer implementation; use grayscale.
+            dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_GRAYSCALE,
+                    MATRIX_GRAYSCALE);
+            dtm.setDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
+        } else {
+            dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_GRAYSCALE, null);
+            dtm.setDaltonizerMode(daltonizerMode);
+        }
+    }
+
+    /**
+     * Apply the accessibility inversion transform based on the settings value.
+     */
+    private void onAccessibilityInversionChanged() {
+        final boolean enabled = Secure.getIntForUser(getContext().getContentResolver(),
+                Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, mCurrentUser) != 0;
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+        dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_INVERT_COLOR,
+                enabled ? MATRIX_INVERT_COLOR : null);
+    }
 
     /**
      * Applies current color temperature matrix, or removes it if deactivated.
