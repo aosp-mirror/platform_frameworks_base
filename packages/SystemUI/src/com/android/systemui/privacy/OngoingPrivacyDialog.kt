@@ -50,6 +50,7 @@ class OngoingPrivacyDialog constructor(
                     object : DialogInterface.OnClickListener {
                         val intent = Intent(Intent.ACTION_REVIEW_PERMISSION_USAGE)
 
+                        @Suppress("DEPRECATION")
                         override fun onClick(dialog: DialogInterface?, which: Int) {
                             Dependency.get(ActivityStarter::class.java).startActivity(intent, false)
                         }
