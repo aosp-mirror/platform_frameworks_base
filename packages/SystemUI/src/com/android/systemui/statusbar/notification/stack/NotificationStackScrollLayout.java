@@ -88,6 +88,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEv
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper.DragDownCallback;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -167,6 +168,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      * gap is drawn between them). In this case we don't want to round their corners.
      */
     private static final int DISTANCE_BETWEEN_ADJACENT_SECTIONS_PX = 1;
+    private final AmbientPulseManager mAmbientPulseManager;
 
     private ExpandHelper mExpandHelper;
     private final NotificationSwipeHelper mSwipeHelper;
@@ -392,7 +394,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean mGroupExpandedForMeasure;
     private boolean mScrollable;
     private View mForcedScroll;
-    private ExpandableView mNeedingPulseAnimation;
 
     /**
      * @see #setDarkAmount(float, float)
@@ -481,7 +482,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
-            NotificationRoundnessManager notificationRoundnessManager) {
+            NotificationRoundnessManager notificationRoundnessManager,
+            AmbientPulseManager ambientPulseManager) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -491,6 +493,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mSections[i] = new NotificationSection(this);
         }
 
+        mAmbientPulseManager = ambientPulseManager;
         mAmbientState = new AmbientState(context);
         mRoundnessManager = notificationRoundnessManager;
         mBgColor = context.getColor(R.color.notification_shade_background_color);
@@ -573,6 +576,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (mAllowLongPress) {
             setLongPressListener(mGutsManager::openGuts);
         }
+    }
+
+    public float getWakeUpHeight() {
+        ActivatableNotificationView firstChild = getFirstChildWithBackground();
+        if (firstChild != null) {
+            return firstChild.getCollapsedHeight();
+        }
+        return 0;
     }
 
     @Override
@@ -1277,7 +1288,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mIsClipped = clipped;
         }
 
-        if (mPulsing || mAmbientState.isFullyDark() && mShowDarkShelf) {
+        if (!mAmbientPulseManager.hasNotifications()
+                && mAmbientState.isFullyDark() && mShowDarkShelf) {
             setClipBounds(null);
         } else if (mAmbientState.isDarkAtAll()) {
             setClipBounds(mBackgroundAnimationRect);
@@ -1514,7 +1526,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         return null;
     }
 
-    private ExpandableView getChildAtRawPosition(float touchX, float touchY) {
+    public ExpandableView getChildAtRawPosition(float touchX, float touchY) {
         getLocationOnScreen(mTempInt2);
         return getChildAtPosition(touchX - mTempInt2[0], touchY - mTempInt2[1]);
     }
@@ -3354,7 +3366,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         generateViewResizeEvent();
         generateGroupExpansionEvent();
         generateAnimateEverythingEvent();
-        generatePulsingAnimationEvent();
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -4354,10 +4365,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public void setIsExpanded(boolean isExpanded) {
+    private void setIsExpanded(boolean isExpanded) {
         boolean changed = isExpanded != mIsExpanded;
         mIsExpanded = isExpanded;
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
+        mAmbientState.setShadeExpanded(isExpanded);
+        mStateAnimator.setShadeExpanded(isExpanded);
         if (changed) {
             if (!mIsExpanded) {
                 mGroupManager.collapseAllGroups();
@@ -5099,12 +5112,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setShadeExpanded(boolean shadeExpanded) {
-        mAmbientState.setShadeExpanded(shadeExpanded);
-        mStateAnimator.setShadeExpanded(shadeExpanded);
-    }
-
     /**
      * Set the boundary for the bottom heads up position. The heads up will always be above this
      * position.
@@ -5166,24 +5173,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return;
         }
         mPulsing = pulsing;
-        mNeedingPulseAnimation = animated ? getFirstChildNotGone() : null;
         mAmbientState.setPulsing(pulsing);
         updateNotificationAnimationStates();
         updateAlgorithmHeightAndPadding();
         updateContentHeight();
         requestChildrenUpdate();
         notifyHeightChangeListener(null, animated);
-        mNeedsAnimation |= animated;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private void generatePulsingAnimationEvent() {
-        if (mNeedingPulseAnimation != null) {
-            int type = mPulsing ? AnimationEvent.ANIMATION_TYPE_PULSE_APPEAR
-                    : AnimationEvent.ANIMATION_TYPE_PULSE_DISAPPEAR;
-            mAnimationEvents.add(new AnimationEvent(mNeedingPulseAnimation, type));
-            mNeedingPulseAnimation = null;
-        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5626,6 +5621,27 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     /**
+     * Set how far the wake up is when waking up from pulsing. This is a height and will adjust the
+     * notification positions accordingly.
+     * @param height the new wake up height
+     * @return the overflow how much the height is further than he lowest notification
+     */
+    public float setPulseWakeUpHeight(float height) {
+        mAmbientState.setPulseWakeUpHeight(height);
+        requestChildrenUpdate();
+        return Math.max(0, height - mAmbientState.getInnerHeight(true /* ignorePulseHeight */));
+    }
+
+    /**
+     * Set the amount how much we're dozing. This is different from how dark the shade is, when
+     * the notification is pulsing.
+     */
+    public void setDozeAmount(float dozeAmount) {
+        mAmbientState.setDozeAmount(dozeAmount);
+        requestChildrenUpdate();
+    }
+
+    /**
      * A listener that is notified when the empty space below the notifications is clicked on
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5861,18 +5877,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         .animateTopInset()
                         .animateY()
                         .animateZ(),
-
-                // ANIMATION_TYPE_PULSE_APPEAR
-                new AnimationFilter()
-                        .animateAlpha()
-                        .hasDelays()
-                        .animateY(),
-
-                // ANIMATION_TYPE_PULSE_DISAPPEAR
-                new AnimationFilter()
-                        .animateAlpha()
-                        .hasDelays()
-                        .animateY(),
         };
 
         static int[] LENGTHS = new int[]{
@@ -5927,12 +5931,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_EVERYTHING
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
-
-                // ANIMATION_TYPE_PULSE_APPEAR
-                StackStateAnimator.ANIMATION_DURATION_PULSE_APPEAR,
-
-                // ANIMATION_TYPE_PULSE_DISAPPEAR
-                StackStateAnimator.ANIMATION_DURATION_PULSE_APPEAR / 2,
         };
 
         static final int ANIMATION_TYPE_ADD = 0;
@@ -5952,8 +5950,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         static final int ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK = 14;
         static final int ANIMATION_TYPE_HEADS_UP_OTHER = 15;
         static final int ANIMATION_TYPE_EVERYTHING = 16;
-        static final int ANIMATION_TYPE_PULSE_APPEAR = 17;
-        static final int ANIMATION_TYPE_PULSE_DISAPPEAR = 18;
 
         static final int DARK_ANIMATION_ORIGIN_INDEX_ABOVE = -1;
         static final int DARK_ANIMATION_ORIGIN_INDEX_BELOW = -2;

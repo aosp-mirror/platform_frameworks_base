@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.SysUiServiceProvider.getComponent;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
@@ -75,6 +76,7 @@ import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
@@ -108,7 +110,8 @@ public class NotificationPanelView extends PanelView implements
         View.OnClickListener, NotificationStackScrollLayout.OnOverscrollTopChangedListener,
         KeyguardAffordanceHelper.Callback, NotificationStackScrollLayout.OnEmptySpaceClickListener,
         OnHeadsUpChangedListener, QS.HeightListener, ZenModeController.Callback,
-        ConfigurationController.ConfigurationListener, StateListener {
+        ConfigurationController.ConfigurationListener, StateListener,
+        PulseExpansionHandler.ExpansionCallback {
 
     private static final boolean DEBUG = false;
 
@@ -144,6 +147,7 @@ public class NotificationPanelView extends PanelView implements
     private final PowerManager mPowerManager;
     private final AccessibilityManager mAccessibilityManager;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
+    private final PulseExpansionHandler mPulseExpansionHandler;
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -327,7 +331,8 @@ public class NotificationPanelView extends PanelView implements
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            NotificationWakeUpCoordinator coordinator) {
+            NotificationWakeUpCoordinator coordinator,
+            PulseExpansionHandler pulseExpansionHandler) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
         mFalsingManager = FalsingManager.getInstance(context);
@@ -339,6 +344,7 @@ public class NotificationPanelView extends PanelView implements
         setPanelAlpha(255, false /* animate */);
         mCommandQueue = getComponent(context, CommandQueue.class);
         mDisplayId = context.getDisplayId();
+        mPulseExpansionHandler = pulseExpansionHandler;
     }
 
     /**
@@ -377,6 +383,7 @@ public class NotificationPanelView extends PanelView implements
 
         mWakeUpCoordinator.setStackScroller(mNotificationStackScroller);
         mQsFrame = findViewById(R.id.qs_frame);
+        mPulseExpansionHandler.setUp(mNotificationStackScroller, this, mShadeController);
     }
 
     @Override
@@ -798,6 +805,9 @@ public class NotificationPanelView extends PanelView implements
             MetricsLogger.count(mContext, COUNTER_PANEL_OPEN_PEEK, 1);
             return true;
         }
+        if (mPulseExpansionHandler.onInterceptTouchEvent(event)) {
+            return true;
+        }
 
         if (!isFullyCollapsed() && onQsIntercept(event)) {
             return true;
@@ -957,6 +967,10 @@ public class NotificationPanelView extends PanelView implements
             return false;
         }
         initDownStates(event);
+        if (!mIsExpanding && mPulseExpansionHandler.onTouchEvent(event)) {
+            // We're expanding all the other ones shouldn't get this anymore
+            return true;
+        }
         if (mListenForHeadsUp && !mHeadsUpTouchHelper.isTrackingHeadsUp()
                 && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
             mIsExpansionFromHeadsUp = true;
@@ -1500,16 +1514,16 @@ public class NotificationPanelView extends PanelView implements
             int max = mBarState == StatusBarState.KEYGUARD
                     ? Math.max(maxNotificationPadding, maxQsPadding)
                     : maxQsPadding;
-            return (int) interpolate(getExpandedFraction(),
-                    mQsMinExpansionHeight, max);
+            return (int) MathUtils.lerp((float) mQsMinExpansionHeight, (float) max,
+                    getExpandedFraction());
         } else if (mQsSizeChangeAnimator != null) {
             return (int) mQsSizeChangeAnimator.getAnimatedValue();
         } else if (mKeyguardShowing) {
             // We can only do the smoother transition on Keyguard when we also are not collapsing
             // from a scrolled quick settings.
-            return interpolate(getQsExpansionFraction(),
-                    mNotificationStackScroller.getIntrinsicPadding(),
-                    mQsMaxExpansionHeight + mQsNotificationTopPadding);
+            return MathUtils.lerp((float) mNotificationStackScroller.getIntrinsicPadding(),
+                    (float) (mQsMaxExpansionHeight + mQsNotificationTopPadding),
+                    getQsExpansionFraction());
         } else {
             return mQsExpansionHeight + mQsNotificationTopPadding;
         }
@@ -1710,7 +1724,6 @@ public class NotificationPanelView extends PanelView implements
         updateUnlockIcon();
         updateNotificationTranslucency();
         updatePanelExpanded();
-        mNotificationStackScroller.setShadeExpanded(!isFullyCollapsed());
         if (DEBUG) {
             invalidate();
         }
@@ -2824,9 +2837,7 @@ public class NotificationPanelView extends PanelView implements
 
         final float darkAmount = dozing ? 1 : 0;
         mStatusBarStateController.setDozeAmount(darkAmount, animate);
-        if (animate) {
-            mWakeUpCoordinator.notifyAnimationStart(!mDozing);
-        }
+        mWakeUpCoordinator.setDozing(mDozing, animate);
     }
 
     @Override

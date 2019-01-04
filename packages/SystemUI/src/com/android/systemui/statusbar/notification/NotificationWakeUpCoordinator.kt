@@ -55,37 +55,47 @@ class NotificationWakeUpCoordinator @Inject constructor() {
         mStackScroller = stackScroller
     }
 
-    fun setNotificationsVisible(visible: Boolean, animate: Boolean) {
+    /**
+     * @param visible should notifications be visible
+     * @param animate should this change be animated
+     * @param increaseSpeed should the speed be increased of the animation
+     */
+    fun setNotificationsVisible(visible: Boolean, animate: Boolean, increaseSpeed: Boolean) {
         if (mNotificationsVisible == visible) {
             return
         }
         mNotificationsVisible = visible
         mDarkAnimator?.cancel();
         if (animate) {
-            startVisibilityAnimation()
             notifyAnimationStart(visible)
+            startVisibilityAnimation(increaseSpeed)
         } else {
             setVisibilityAmount(if (visible) 1.0f else 0.0f)
         }
     }
 
     fun setDozeAmount(linearAmount: Float, interpolatedAmount: Float) {
-        mLinearDozeAmount = linearAmount;
-        mDozeAmount = interpolatedAmount;
+        mLinearDozeAmount = linearAmount
+        mDozeAmount = interpolatedAmount
+        mStackScroller.setDozeAmount(mDozeAmount)
         updateDarkAmount()
     }
 
-    private fun startVisibilityAnimation() {
+    private fun startVisibilityAnimation(increaseSpeed: Boolean) {
         if (mNotificationVisibleAmount == 0f || mNotificationVisibleAmount == 1f) {
             mVisibilityInterpolator = if (mNotificationsVisible)
-                Interpolators.TOUCH_RESPONSE_REVERSE
+                Interpolators.TOUCH_RESPONSE
             else
-                Interpolators.FAST_OUT_SLOW_IN
+                Interpolators.FAST_OUT_SLOW_IN_REVERSE
         }
         val target = if (mNotificationsVisible) 1.0f else 0.0f
         val darkAnimator = ObjectAnimator.ofFloat(this, mNotificationVisibility, target)
         darkAnimator.setInterpolator(Interpolators.LINEAR)
-        darkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP.toLong())
+        var duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP.toLong()
+        if (increaseSpeed) {
+            duration = (duration.toFloat() / 1.5F).toLong();
+        }
+        darkAnimator.setDuration(duration)
         darkAnimator.start()
         mDarkAnimator = darkAnimator
     }
@@ -97,13 +107,30 @@ class NotificationWakeUpCoordinator @Inject constructor() {
         updateDarkAmount()
     }
 
+    fun getWakeUpHeight() : Float {
+        return mStackScroller.wakeUpHeight
+    }
+
     private fun updateDarkAmount() {
         val linearAmount = Math.min(1.0f - mLinearVisibilityAmount, mLinearDozeAmount)
         val amount = Math.min(1.0f - mVisibilityAmount, mDozeAmount)
         mStackScroller.setDarkAmount(linearAmount, amount)
     }
 
-    fun notifyAnimationStart(awake: Boolean) {
+    private fun notifyAnimationStart(awake: Boolean) {
         mStackScroller.notifyDarkAnimationStart(!awake)
+    }
+
+    fun setDozing(dozing: Boolean, animate: Boolean) {
+        if (dozing) {
+            setNotificationsVisible(false /* animate */, false, true /* visible */ )
+        }
+        if (animate) {
+            notifyAnimationStart(!dozing)
+        }
+    }
+
+    fun setPulseWakeUpHeight(height: Float): Float {
+        return mStackScroller.setPulseWakeUpHeight(height)
     }
 }

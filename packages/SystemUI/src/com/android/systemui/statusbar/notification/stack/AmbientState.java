@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.util.MathUtils;
 import android.view.View;
 
 import com.android.systemui.Dependency;
@@ -79,6 +80,8 @@ public class AmbientState {
     private ExpandableNotificationRow mExpandingNotification;
     private float mDarkAmount;
     private boolean mAppearing;
+    private float mPulseWakeUpHeight = Float.MAX_VALUE;
+    private float mDozeAmount = 0.0f;
 
     public AmbientState(Context context) {
         mSectionBoundaryIndices.add(NO_SECTION_BOUNDARY);
@@ -279,7 +282,21 @@ public class AmbientState {
     }
 
     public int getInnerHeight() {
-        return Math.max(Math.min(mLayoutHeight, mMaxLayoutHeight) - mTopPadding, mLayoutMinHeight);
+        return getInnerHeight(false /* ignorePulseHeight */);
+    }
+
+    /**
+     * @param ignorePulseHeight ignore the pulse height for this request
+     * @return the inner height of the algorithm.
+     */
+    public int getInnerHeight(boolean ignorePulseHeight) {
+        int height = Math.max(mLayoutMinHeight,
+                Math.min(mLayoutHeight, mMaxLayoutHeight) - mTopPadding);
+        if (ignorePulseHeight) {
+            return height;
+        }
+        float pulseHeight = Math.min(mPulseWakeUpHeight, (float) height);
+        return (int) MathUtils.lerp(height, pulseHeight, mDozeAmount);
     }
 
     public boolean isShadeExpanded() {
@@ -487,5 +504,18 @@ public class AmbientState {
 
     public boolean isAppearing() {
         return mAppearing;
+    }
+
+    public void setPulseWakeUpHeight(float height) {
+        mPulseWakeUpHeight = height;
+    }
+
+    public void setDozeAmount(float dozeAmount) {
+        if (dozeAmount != mDozeAmount) {
+            mDozeAmount = dozeAmount;
+            if (dozeAmount == 0.0f || dozeAmount == 1.0f) {
+                mPulseWakeUpHeight = Float.MAX_VALUE;
+            }
+        }
     }
 }

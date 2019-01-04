@@ -22,6 +22,7 @@ public class DirectionEvaluator {
         boolean vertical = Math.abs(yDiff) >= Math.abs(xDiff);
         switch (type) {
             case Classifier.QUICK_SETTINGS:
+            case Classifier.PULSE_EXPAND:
             case Classifier.NOTIFICATION_DRAG_DOWN:
                 if (!vertical || yDiff <= 0.0) {
                     return falsingEvaluation;
