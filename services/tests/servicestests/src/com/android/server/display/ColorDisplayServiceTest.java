@@ -918,15 +918,14 @@ public class ColorDisplayServiceTest {
         }
 
         setAccessibilityColorInversion(true);
-        setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+        setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
 
         startService();
-        assertAccessibilityTransformActivated(true /* activated */ );
-        assertUserColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
-        if (isColorModeValid(ColorDisplayController.COLOR_MODE_SATURATED)) {
-            assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
-        } else if (isColorModeValid(ColorDisplayController.COLOR_MODE_AUTOMATIC)) {
-            assertActiveColorMode(ColorDisplayController.COLOR_MODE_AUTOMATIC);
+        assertUserColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
+        if (isColorModeValid(ColorDisplayManager.COLOR_MODE_SATURATED)) {
+            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_SATURATED);
+        } else if (isColorModeValid(ColorDisplayManager.COLOR_MODE_AUTOMATIC)) {
+            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_AUTOMATIC);
         }
     }
 
@@ -937,15 +936,14 @@ public class ColorDisplayServiceTest {
         }
 
         setAccessibilityColorCorrection(true);
-        setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+        setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
 
         startService();
-        assertAccessibilityTransformActivated(true /* activated */ );
-        assertUserColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
-        if (isColorModeValid(ColorDisplayController.COLOR_MODE_SATURATED)) {
-            assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
-        } else if (isColorModeValid(ColorDisplayController.COLOR_MODE_AUTOMATIC)) {
-            assertActiveColorMode(ColorDisplayController.COLOR_MODE_AUTOMATIC);
+        assertUserColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
+        if (isColorModeValid(ColorDisplayManager.COLOR_MODE_SATURATED)) {
+            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_SATURATED);
+        } else if (isColorModeValid(ColorDisplayManager.COLOR_MODE_AUTOMATIC)) {
+            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_AUTOMATIC);
         }
     }
 
@@ -957,15 +955,14 @@ public class ColorDisplayServiceTest {
 
         setAccessibilityColorCorrection(true);
         setAccessibilityColorInversion(true);
-        setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+        setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
 
         startService();
-        assertAccessibilityTransformActivated(true /* activated */ );
-        assertUserColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
-        if (isColorModeValid(ColorDisplayController.COLOR_MODE_SATURATED)) {
-            assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
-        } else if (isColorModeValid(ColorDisplayController.COLOR_MODE_AUTOMATIC)) {
-            assertActiveColorMode(ColorDisplayController.COLOR_MODE_AUTOMATIC);
+        assertUserColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
+        if (isColorModeValid(ColorDisplayManager.COLOR_MODE_SATURATED)) {
+            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_SATURATED);
+        } else if (isColorModeValid(ColorDisplayManager.COLOR_MODE_AUTOMATIC)) {
+            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_AUTOMATIC);
         }
     }
 
@@ -977,12 +974,11 @@ public class ColorDisplayServiceTest {
 
         setAccessibilityColorCorrection(false);
         setAccessibilityColorInversion(false);
-        setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+        setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
 
         startService();
-        assertAccessibilityTransformActivated(false /* activated */ );
-        assertUserColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
-        assertActiveColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+        assertUserColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
+        assertActiveColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
     }
 
     /**
@@ -1095,17 +1091,6 @@ public class ColorDisplayServiceTest {
         assertWithMessage("Incorrect Night display activated state")
                 .that(mBinderService.isNightDisplayActivated())
                 .isEqualTo(activated);
-    }
-
-    /**
-     * Convenience method for asserting that Accessibility color transform is detected.
-     *
-     * @param state {@code true} if any Accessibility transform should be activated
-     */
-    private void assertAccessibilityTransformActivated(boolean state) {
-        assertWithMessage("Unexpected Accessibility color transform state")
-                .that(mColorDisplayController.getAccessibilityTransformActivated())
-                .isEqualTo(state);
     }
 
     /**
