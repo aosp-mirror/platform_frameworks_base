@@ -784,24 +784,8 @@ public abstract class LayoutInflater {
             ta.recycle();
         }
 
-        if (name.equals(TAG_1995)) {
-            // Let's party like it's 1995!
-            return new BlinkLayout(context, attrs);
-        }
-
         try {
-            View view;
-            if (mFactory2 != null) {
-                view = mFactory2.onCreateView(parent, name, context, attrs);
-            } else if (mFactory != null) {
-                view = mFactory.onCreateView(name, context, attrs);
-            } else {
-                view = null;
-            }
-
-            if (view == null && mPrivateFactory != null) {
-                view = mPrivateFactory.onCreateView(parent, name, context, attrs);
-            }
+            View view = tryCreateView(parent, name, context, attrs);
 
             if (view == null) {
                 final Object lastContext = mConstructorArgs[0];
@@ -833,6 +817,48 @@ public abstract class LayoutInflater {
             ie.setStackTrace(EMPTY_STACK_TRACE);
             throw ie;
         }
+    }
+
+    /**
+     * Tries to create a view from a tag name using the supplied attribute set.
+     *
+     * This method gives the factory provided by {@link LayoutInflater#setFactory} and
+     * {@link LayoutInflater#setFactory2} a chance to create a view. However, it does not apply all
+     * of the general view creation logic, and thus may return {@code null} for some tags. This
+     * method is used by {@link LayoutInflater#inflate} in creating {@code View} objects.
+     *
+     * @hide for use by precompiled layouts.
+     *
+     * @param parent the parent view, used to inflate layout params
+     * @param name the name of the XML tag used to define the view
+     * @param context the inflation context for the view, typically the
+     *                {@code parent} or base layout inflater context
+     * @param attrs the attribute set for the XML tag used to define the view
+     */
+    @UnsupportedAppUsage(trackingBug = 122360734)
+    @Nullable
+    public final View tryCreateView(@Nullable View parent, @NonNull String name,
+        @NonNull Context context,
+        @NonNull AttributeSet attrs) {
+        if (name.equals(TAG_1995)) {
+            // Let's party like it's 1995!
+            return new BlinkLayout(context, attrs);
+        }
+
+        View view;
+        if (mFactory2 != null) {
+            view = mFactory2.onCreateView(parent, name, context, attrs);
+        } else if (mFactory != null) {
+            view = mFactory.onCreateView(name, context, attrs);
+        } else {
+            view = null;
+        }
+
+        if (view == null && mPrivateFactory != null) {
+            view = mPrivateFactory.onCreateView(parent, name, context, attrs);
+        }
+
+        return view;
     }
 
     /**
