@@ -101,7 +101,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
     private LocationProviderProxy(Context context, LocationProviderManager locationProviderManager,
             String action, int overlaySwitchResId, int defaultServicePackageNameResId,
             int initialPackageNamesResId) {
-        super(locationProviderManager, false);
+        super(locationProviderManager);
 
         mServiceWatcher = new ServiceWatcher(context, TAG, action, overlaySwitchResId,
                 defaultServicePackageNameResId, initialPackageNamesResId,

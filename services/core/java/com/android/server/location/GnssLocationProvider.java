@@ -695,7 +695,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     public GnssLocationProvider(Context context, LocationProviderManager locationProviderManager,
             Looper looper) {
-        super(locationProviderManager, true);
+        super(locationProviderManager);
 
         mContext = context;
 
@@ -788,6 +788,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }, UserHandle.ALL, intentFilter, null, mHandler);
 
         setProperties(PROPERTIES);
+        setEnabled(true);
     }
 
     /**

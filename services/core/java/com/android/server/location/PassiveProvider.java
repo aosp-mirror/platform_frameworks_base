@@ -43,11 +43,12 @@ public class PassiveProvider extends AbstractLocationProvider {
     private boolean mReportLocation;
 
     public PassiveProvider(LocationProviderManager locationProviderManager) {
-        super(locationProviderManager, true);
+        super(locationProviderManager);
 
         mReportLocation = false;
 
         setProperties(PROPERTIES);
+        setEnabled(true);
     }
 
     @Override

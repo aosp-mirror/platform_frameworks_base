@@ -620,9 +620,6 @@ public class UserRestrictionsUtils {
                         && callingUid != Process.SYSTEM_UID) {
                     return true;
                 } else if (String.valueOf(Settings.Secure.LOCATION_MODE_OFF).equals(value)) {
-                    // Note LOCATION_MODE will be converted into LOCATION_PROVIDERS_ALLOWED
-                    // in android.provider.Settings.Secure.putStringForUser(), so we shouldn't come
-                    // here normally, but we still protect it here from a direct provider write.
                     return false;
                 }
                 restriction = UserManager.DISALLOW_SHARE_LOCATION;
