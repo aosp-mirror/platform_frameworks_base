@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.content.Context.CONTEXT_RESTRICTED;
 import static android.content.Context.DISPLAY_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -126,6 +127,7 @@ import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
+import android.hardware.hdmi.HdmiAudioSystemClient;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
@@ -195,6 +197,7 @@ import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.os.RoSystemProperties;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.PhoneWindow;
@@ -373,6 +376,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private ScreenshotHelper mScreenshotHelper;
     private boolean mHasFeatureWatch;
     private boolean mHasFeatureLeanback;
+    private boolean mHasFeatureHdmiCec;
 
     // Assigned on main thread, accessed on UI thread
     volatile VrManagerInternal mVrManagerInternal;
@@ -1453,7 +1457,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private HdmiControl getHdmiControl() {
         if (null == mHdmiControl) {
-            if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
+            if (!mHasFeatureHdmiCec) {
                 return null;
             }
             HdmiControlManager manager = (HdmiControlManager) mContext.getSystemService(
@@ -1689,6 +1693,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mHasFeatureWatch = mContext.getPackageManager().hasSystemFeature(FEATURE_WATCH);
         mHasFeatureLeanback = mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK);
+        mHasFeatureHdmiCec = mContext.getPackageManager().hasSystemFeature(FEATURE_HDMI_CEC);
         mAccessibilityShortcutController =
                 new AccessibilityShortcutController(mContext, new Handler(), mCurrentUserId);
         mLogger = new MetricsLogger();
@@ -4116,6 +4121,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void dispatchDirectAudioEvent(KeyEvent event) {
+        // When System Audio Mode is off, volume keys received by AVR can be either consumed by AVR
+        // or forwarded to the TV. It's up to Amplifier manufacturer’s implementation.
+        HdmiControlManager hdmiControlManager = getHdmiControlManager();
+        if (null != hdmiControlManager
+                && !hdmiControlManager.getSystemAudioMode()
+                && shouldCecAudioDeviceForwardVolumeKeysSystemAudioModeOff()) {
+            HdmiAudioSystemClient audioSystemClient = hdmiControlManager.getAudioSystemClient();
+            if (audioSystemClient != null) {
+                audioSystemClient.sendKeyEvent(
+                        event.getKeyCode(), event.getAction() == KeyEvent.ACTION_DOWN);
+                return;
+            }
+        }
         if (event.getAction() != KeyEvent.ACTION_DOWN) {
             return;
         }
@@ -4123,6 +4141,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int flags = AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_PLAY_SOUND
                 | AudioManager.FLAG_FROM_KEY;
         String pkgName = mContext.getOpPackageName();
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 try {
@@ -4152,6 +4171,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
         }
+    }
+
+    @Nullable
+    private HdmiControlManager getHdmiControlManager() {
+        if (!mHasFeatureHdmiCec) {
+            return null;
+        }
+        return (HdmiControlManager) mContext.getSystemService(HdmiControlManager.class);
+    }
+
+    private boolean shouldCecAudioDeviceForwardVolumeKeysSystemAudioModeOff() {
+        return RoSystemProperties.CEC_AUDIO_DEVICE_FORWARD_VOLUME_KEYS_SYSTEM_AUDIO_MODE_OFF;
     }
 
     void dispatchMediaKeyWithWakeLock(KeyEvent event) {

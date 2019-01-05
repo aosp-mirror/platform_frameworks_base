@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 
 import android.annotation.IntDef;
 import android.hardware.hdmi.HdmiDeviceInfo;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -316,7 +317,7 @@ final class Constants {
      * <p>When ARC is initiated, this port will be used to turn on ARC.
      */
     static final String PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT =
-        "persist.sys.hdmi.property_sytem_audio_device_arc_port";
+            "persist.sys.hdmi.property_sytem_audio_device_arc_port";
 
     /**
      * Property to strip local audio of amplifier and use local speaker

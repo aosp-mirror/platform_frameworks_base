@@ -388,6 +388,19 @@ public final class HdmiControlManager {
     }
 
     /**
+     * Gets whether the system is in system audio mode.
+     *
+     * @hide
+     */
+    public boolean getSystemAudioMode() {
+        try {
+            return mService.getSystemAudioMode();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Listener used to get hotplug event from HDMI port.
      */
     public interface HotplugEventListener {

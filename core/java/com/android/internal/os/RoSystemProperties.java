@@ -30,6 +30,14 @@ public class RoSystemProperties {
     public static final String CONTROL_PRIVAPP_PERMISSIONS =
             SystemProperties.get("ro.control_privapp_permissions");
 
+    /**
+     * Property to indicate if a CEC audio device should forward volume keys when system audio
+     * mode is off.
+     */
+    public static final boolean CEC_AUDIO_DEVICE_FORWARD_VOLUME_KEYS_SYSTEM_AUDIO_MODE_OFF =
+            SystemProperties.getBoolean(
+                    "ro.hdmi.cec_audio_device_forward_volume_keys_system_audio_mode_off", false);
+
     // ------ ro.config.* -------- //
     public static final boolean CONFIG_AVOID_GFX_ACCEL =
             SystemProperties.getBoolean("ro.config.avoid_gfx_accel", false);

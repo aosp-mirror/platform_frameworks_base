@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
+
 import static com.android.server.hdmi.Constants.DISABLED;
 import static com.android.server.hdmi.Constants.ENABLED;
 import static com.android.server.hdmi.Constants.OPTION_MHL_ENABLE;
@@ -67,6 +68,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
@@ -76,6 +78,9 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
 import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 import com.android.server.hdmi.HdmiCecLocalDevice.PendingActionClearedCallback;
+
+import libcore.util.EmptyArray;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -85,7 +90,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import libcore.util.EmptyArray;
 
 /**
  * Provides a service for sending and processing HDMI control messages,
@@ -1469,12 +1473,12 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public boolean getSystemAudioMode() {
+            // TODO(shubang): handle getSystemAudioMode() for all device types
             enforceAccessPermission();
             HdmiCecLocalDeviceTv tv = tv();
-            if (tv == null) {
-                return false;
-            }
-            return tv.isSystemAudioActivated();
+            HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
+            return (tv != null && tv.isSystemAudioActivated())
+                    || (audioSystem != null && audioSystem.isSystemAudioActivated());
         }
 
         @Override
