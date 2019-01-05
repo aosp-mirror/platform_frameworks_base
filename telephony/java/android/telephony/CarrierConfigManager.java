@@ -2231,7 +2231,7 @@ public class CarrierConfigManager {
      * e.g.) To use RSCP by default, set the value to "rscp". The signal strength level will
      * then be determined by #KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY
      * <p>
-     * Currently this only supports the value "rscp"
+     * Currently this supports the value "rscp" and "rssi".
      * @hide
      */
     // FIXME: this key and related keys must not be exposed without a consistent philosophy for
@@ -2875,7 +2875,7 @@ public class CarrierConfigManager {
                         -95, /* SIGNAL_STRENGTH_GOOD */
                         -85  /* SIGNAL_STRENGTH_GREAT */
                 });
-        sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "");
+        sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_OVER_UT_WARNING_BOOL, false);
