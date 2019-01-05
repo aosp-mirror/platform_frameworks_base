@@ -11,7 +11,7 @@ LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_CERTIFICATE := platform
 LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base
-LOCAL_STATIC_JAVA_LIBRARIES := junit android-support-test mockito-target-minus-junit4
+LOCAL_STATIC_JAVA_LIBRARIES := junit android-support-test mockito-target-minus-junit4 truth-prebuilt
 
 include $(BUILD_PACKAGE)
 

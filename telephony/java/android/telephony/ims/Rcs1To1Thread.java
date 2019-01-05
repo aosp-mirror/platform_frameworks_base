@@ -23,6 +23,10 @@ import android.os.Parcel;
  * @hide - TODO(sahinc) make this public
  */
 public class Rcs1To1Thread extends RcsThread {
+    public Rcs1To1Thread(int threadId) {
+        super(threadId);
+    }
+
     public static final Creator<Rcs1To1Thread> CREATOR = new Creator<Rcs1To1Thread>() {
         @Override
         public Rcs1To1Thread createFromParcel(Parcel in) {
@@ -36,6 +40,7 @@ public class Rcs1To1Thread extends RcsThread {
     };
 
     protected Rcs1To1Thread(Parcel in) {
+        super(in);
     }
 
     @Override
@@ -45,5 +50,7 @@ public class Rcs1To1Thread extends RcsThread {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(RCS_1_TO_1_TYPE);
+        super.writeToParcel(dest, flags);
     }
 }
