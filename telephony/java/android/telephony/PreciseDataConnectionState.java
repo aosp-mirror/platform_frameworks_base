@@ -17,10 +17,11 @@
 package android.telephony;
 
 import android.annotation.UnsupportedAppUsage;
+import android.net.LinkProperties;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.TelephonyManager;
-import android.net.LinkProperties;
+
+import java.util.Objects;
 
 /**
  * Contains precise data connection state.
@@ -32,7 +33,6 @@ import android.net.LinkProperties;
  *   <li>Network type of the connection.
  *   <li>APN type.
  *   <li>APN.
- *   <li>Data connection change reason.
  *   <li>The properties of the network link.
  *   <li>Data connection fail cause.
  * </ul>
@@ -45,7 +45,6 @@ public class PreciseDataConnectionState implements Parcelable {
     private int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     private String mAPNType = "";
     private String mAPN = "";
-    private String mReason = "";
     private LinkProperties mLinkProperties = null;
     private String mFailCause = "";
 
@@ -55,14 +54,12 @@ public class PreciseDataConnectionState implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
-    public PreciseDataConnectionState(int state, int networkType,
-            String apnType, String apn, String reason,
-            LinkProperties linkProperties, String failCause) {
+    public PreciseDataConnectionState(int state, int networkType, String apnType, String apn,
+                                      LinkProperties linkProperties, String failCause) {
         mState = state;
         mNetworkType = networkType;
         mAPNType = apnType;
         mAPN = apn;
-        mReason = reason;
         mLinkProperties = linkProperties;
         mFailCause = failCause;
     }
@@ -83,7 +80,6 @@ public class PreciseDataConnectionState implements Parcelable {
         mNetworkType = in.readInt();
         mAPNType = in.readString();
         mAPN = in.readString();
-        mReason = in.readString();
         mLinkProperties = (LinkProperties)in.readParcelable(null);
         mFailCause = in.readString();
     }
@@ -144,14 +140,6 @@ public class PreciseDataConnectionState implements Parcelable {
     }
 
     /**
-     * Get data connection change reason.
-     */
-    @UnsupportedAppUsage
-    public String getDataConnectionChangeReason() {
-        return mReason;
-    }
-
-    /**
      * Get the properties of the network link.
      */
     @UnsupportedAppUsage
@@ -178,7 +166,6 @@ public class PreciseDataConnectionState implements Parcelable {
         out.writeInt(mNetworkType);
         out.writeString(mAPNType);
         out.writeString(mAPN);
-        out.writeString(mReason);
         out.writeParcelable(mLinkProperties, flags);
         out.writeString(mFailCause);
     }
@@ -197,16 +184,7 @@ public class PreciseDataConnectionState implements Parcelable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + mState;
-        result = prime * result + mNetworkType;
-        result = prime * result + ((mAPNType == null) ? 0 : mAPNType.hashCode());
-        result = prime * result + ((mAPN == null) ? 0 : mAPN.hashCode());
-        result = prime * result + ((mReason == null) ? 0 : mReason.hashCode());
-        result = prime * result + ((mLinkProperties == null) ? 0 : mLinkProperties.hashCode());
-        result = prime * result + ((mFailCause == null) ? 0 : mFailCause.hashCode());
-        return result;
+        return Objects.hash(mState, mNetworkType, mAPNType, mAPN, mLinkProperties, mFailCause);
     }
 
     @Override
@@ -252,13 +230,6 @@ public class PreciseDataConnectionState implements Parcelable {
         if (mNetworkType != other.mNetworkType) {
             return false;
         }
-        if (mReason == null) {
-            if (other.mReason != null) {
-                return false;
-            }
-        } else if (!mReason.equals(other.mReason)) {
-            return false;
-        }
         if (mState != other.mState) {
             return false;
         }
@@ -273,7 +244,6 @@ public class PreciseDataConnectionState implements Parcelable {
         sb.append(", Network type: " + mNetworkType);
         sb.append(", APN type: " + mAPNType);
         sb.append(", APN: " + mAPN);
-        sb.append(", Change reason: " + mReason);
         sb.append(", Link properties: " + mLinkProperties);
         sb.append(", Fail cause: " + mFailCause);
 
