@@ -26,7 +26,7 @@ $ git blame api/current.txt -t -e > /tmp/currentblame.txt
 $ apilint.py /tmp/currentblame.txt previous.txt --no-color
 """
 
-import re, sys, collections, traceback, argparse
+import re, sys, collections, traceback, argparse, itertools
 
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -1073,48 +1073,66 @@ def verify_internal(clazz):
     if clazz.pkg.name.startswith("com.android"):
         error(clazz, None, None, "Internal classes must not be exposed")
 
+def layering_build_ranking(ranking_list):
+    r = {}
+    for rank, ps in enumerate(ranking_list):
+        if not isinstance(ps, list):
+            ps = [ps]
+        for p in ps:
+            rs = r
+            for n in p.split('.'):
+                if n not in rs:
+                    rs[n] = {}
+                rs = rs[n]
+            rs['-rank'] = rank
+    return r
+
+LAYERING_PACKAGE_RANKING = layering_build_ranking([
+    ["android.service","android.accessibilityservice","android.inputmethodservice","android.printservice","android.appwidget","android.webkit","android.preference","android.gesture","android.print"],
+    "android.app",
+    "android.widget",
+    "android.view",
+    "android.animation",
+    "android.provider",
+    ["android.content","android.graphics.drawable"],
+    "android.database",
+    "android.text",
+    "android.graphics",
+    "android.os",
+    "android.util"
+])
 
 def verify_layering(clazz):
     """Catch package layering violations.
     For example, something in android.os depending on android.app."""
-    ranking = [
-        ["android.service","android.accessibilityservice","android.inputmethodservice","android.printservice","android.appwidget","android.webkit","android.preference","android.gesture","android.print"],
-        "android.app",
-        "android.widget",
-        "android.view",
-        "android.animation",
-        "android.provider",
-        ["android.content","android.graphics.drawable"],
-        "android.database",
-        "android.text",
-        "android.graphics",
-        "android.os",
-        "android.util"
-    ]
 
     def rank(p):
-        for i in range(len(ranking)):
-            if isinstance(ranking[i], list):
-                for j in ranking[i]:
-                    if p.startswith(j): return i
+        r = None
+        l = LAYERING_PACKAGE_RANKING
+        for n in p.split('.'):
+            if n in l:
+                l = l[n]
+                if '-rank' in l:
+                    r = l['-rank']
             else:
-                if p.startswith(ranking[i]): return i
+                break
+        return r
 
     cr = rank(clazz.pkg.name)
     if cr is None: return
 
     for f in clazz.fields:
         ir = rank(f.typ)
-        if ir and ir < cr:
+        if ir is not None and ir < cr:
             warn(clazz, f, "FW6", "Field type violates package layering")
 
-    for m in clazz.methods:
+    for m in itertools.chain(clazz.methods, clazz.ctors):
         ir = rank(m.typ)
-        if ir and ir < cr:
+        if ir is not None and ir < cr:
             warn(clazz, m, "FW6", "Method return type violates package layering")
         for arg in m.args:
             ir = rank(arg)
-            if ir and ir < cr:
+            if ir is not None and ir < cr:
                 warn(clazz, m, "FW6", "Method argument type violates package layering")
 
 
@@ -1205,21 +1223,18 @@ def verify_exception(clazz):
             if len(m.args) == 0 and t in ["java.lang.IllegalArgumentException", "java.lang.NullPointerException"]:
                 warn(clazz, m, "S1", "Methods taking no arguments should throw IllegalStateException")
 
+GOOGLE_IGNORECASE = re.compile("google", re.IGNORECASE)
 
 def verify_google(clazz):
     """Verifies that APIs never reference Google."""
 
-    if re.search("google", clazz.raw, re.IGNORECASE):
+    if GOOGLE_IGNORECASE.search(clazz.raw) is not None:
         error(clazz, None, None, "Must never reference Google")
 
-    test = []
-    test.extend(clazz.ctors)
-    test.extend(clazz.fields)
-    test.extend(clazz.methods)
-
-    for t in test:
-        if re.search("google", t.raw, re.IGNORECASE):
-            error(clazz, t, None, "Must never reference Google")
+    for test in clazz.ctors, clazz.fields, clazz.methods:
+        for t in test:
+            if GOOGLE_IGNORECASE.search(t.raw) is not None:
+                error(clazz, t, None, "Must never reference Google")
 
 
 def verify_bitset(clazz):
