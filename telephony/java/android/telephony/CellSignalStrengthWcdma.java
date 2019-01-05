@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.telephony.Rlog;
+import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -41,8 +42,18 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
     private static final int WCDMA_RSSI_POOR = -107;
     private static final int WCDMA_RSSI_MIN = -113;
 
-    private static final int WCDMA_RSCP_MIN = -120;
+    private static final int[] sRssiThresholds = new int[]{
+            WCDMA_RSSI_POOR, WCDMA_RSSI_MODERATE, WCDMA_RSSI_GOOD, WCDMA_RSSI_GREAT};
+
     private static final int WCDMA_RSCP_MAX = -24;
+    private static final int WCDMA_RSCP_GREAT = -85;
+    private static final int WCDMA_RSCP_GOOD = -95;
+    private static final int WCDMA_RSCP_MODERATE = -105;
+    private static final int WCDMA_RSCP_POOR = -115;
+    private static final int WCDMA_RSCP_MIN = -120;
+
+    private static final int[] sRscpThresholds = new int[] {
+            WCDMA_RSCP_POOR, WCDMA_RSCP_MODERATE, WCDMA_RSCP_GOOD, WCDMA_RSCP_GREAT};
 
     // TODO: Because these are used as values in CarrierConfig, they should be exposed somehow.
     /** @hide */
@@ -53,6 +64,9 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
     public static final String LEVEL_CALCULATION_METHOD_RSSI = "rssi";
     /** @hide */
     public static final String LEVEL_CALCULATION_METHOD_RSCP = "rscp";
+
+    // Default to RSSI for backwards compatibility with older devices
+    private static final String sLevelCalculationMethod = LEVEL_CALCULATION_METHOD_RSSI;
 
     private int mRssi; // in dBm [-113, 51] or CellInfo.UNAVAILABLE if unknown
     private int mBitErrorRate; // bit error rate (0-7, 99) as defined in TS 27.007 8.5 or
@@ -121,10 +135,6 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
         mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
-    private static final String sLevelCalculationMethod = LEVEL_CALCULATION_METHOD_RSSI;
-    private static final int[] sThresholds = new int[]{
-            WCDMA_RSSI_POOR, WCDMA_RSSI_GOOD, WCDMA_RSSI_GOOD, WCDMA_RSSI_GREAT};
-
     /**
      * Retrieve an abstract level value for the overall signal strength.
      *
@@ -140,41 +150,46 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
     @Override
     public void updateLevel(PersistableBundle cc, ServiceState ss) {
         String calcMethod;
-        int[] thresholds;
+        int[] rscpThresholds;
 
         if (cc == null) {
             calcMethod = sLevelCalculationMethod;
-            thresholds = sThresholds;
+            rscpThresholds = sRscpThresholds;
         } else {
             // TODO: abstract this entire thing into a series of functions
             calcMethod = cc.getString(
                     CarrierConfigManager.KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING,
                     sLevelCalculationMethod);
-            thresholds = cc.getIntArray(
+            if (TextUtils.isEmpty(calcMethod)) calcMethod = sLevelCalculationMethod;
+            rscpThresholds = cc.getIntArray(
                     CarrierConfigManager.KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY);
-            if (thresholds == null) thresholds = sThresholds;
+            if (rscpThresholds == null || rscpThresholds.length != NUM_SIGNAL_STRENGTH_THRESHOLDS) {
+                rscpThresholds = sRscpThresholds;
+            }
         }
 
-        int level = thresholds.length;
+        int level = NUM_SIGNAL_STRENGTH_THRESHOLDS;
         switch (calcMethod) {
             case LEVEL_CALCULATION_METHOD_RSCP:
                 if (mRscp < WCDMA_RSCP_MIN || mRscp > WCDMA_RSCP_MAX) {
                     mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                     return;
                 }
-                while (level > 0 && mRscp < thresholds[level - 1]) level--;
+                while (level > 0 && mRscp < rscpThresholds[level - 1]) level--;
                 mLevel = level;
                 return;
+            default:
+                loge("Invalid Level Calculation Method for CellSignalStrengthWcdma = "
+                        + calcMethod);
+                /** fall through */
             case LEVEL_CALCULATION_METHOD_RSSI:
                 if (mRssi < WCDMA_RSSI_MIN || mRssi > WCDMA_RSSI_MAX) {
                     mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                     return;
                 }
-                while (level > 0 && mRssi < thresholds[level - 1]) level--;
+                while (level > 0 && mRssi < sRssiThresholds[level - 1]) level--;
                 mLevel = level;
                 return;
-            default:
-                mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
         }
     }
 
@@ -204,7 +219,7 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
     }
 
     /**
-     * Get the signal strength as dBm
+     * Get the RSSI as dBm
      *
      * @hide
      */
@@ -214,10 +229,30 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
 
     /**
      * Get the RSCP as dBm
+     *
      * @hide
      */
     public int getRscp() {
         return mRscp;
+    }
+
+    /**
+     * Get the Ec/No as dB
+     *
+     * @hide
+     */
+    public int getEcNo() {
+        return mEcNo;
+    }
+
+    /**
+     * Return the Bit Error Rate
+     *
+     * @returns the bit error rate (0-7, 99) as defined in TS 27.007 8.5 or UNAVAILABLE.
+     * @hide
+     */
+    public int getBitErrorRate() {
+        return mBitErrorRate;
     }
 
     @Override
@@ -304,9 +339,16 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
     };
 
     /**
-     * log
+     * log warning
      */
     private static void log(String s) {
         Rlog.w(LOG_TAG, s);
+    }
+
+    /**
+     * log error
+     */
+    private static void loge(String s) {
+        Rlog.e(LOG_TAG, s);
     }
 }
