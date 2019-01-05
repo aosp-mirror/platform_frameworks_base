@@ -8549,16 +8549,16 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * Returns if full apk verification can be skipped for the whole package, including the splits.
+     * Returns if forced apk verification can be skipped for the whole package, including splits.
      */
-    private boolean canSkipFullPackageVerification(PackageParser.Package pkg) {
-        if (!canSkipFullApkVerification(pkg.baseCodePath)) {
+    private boolean canSkipForcedPackageVerification(PackageParser.Package pkg) {
+        if (!canSkipForcedApkVerification(pkg.baseCodePath)) {
             return false;
         }
         // TODO: Allow base and splits to be verified individually.
         if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
             for (int i = 0; i < pkg.splitCodePaths.length; i++) {
-                if (!canSkipFullApkVerification(pkg.splitCodePaths[i])) {
+                if (!canSkipForcedApkVerification(pkg.splitCodePaths[i])) {
                     return false;
                 }
             }
@@ -8567,14 +8567,17 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * Returns if full apk verification can be skipped, depending on current FSVerity setup and
+     * Returns if forced apk verification can be skipped, depending on current FSVerity setup and
      * whether the apk contains signed root hash.  Note that the signer's certificate still needs to
      * match one in a trusted source, and should be done separately.
      */
-    private boolean canSkipFullApkVerification(String apkPath) {
-        final byte[] rootHashObserved;
+    private boolean canSkipForcedApkVerification(String apkPath) {
+        if (!PackageManagerServiceUtils.isLegacyApkVerityMode()) {
+            return VerityUtils.hasFsverity(apkPath);
+        }
+
         try {
-            rootHashObserved = VerityUtils.generateApkVerityRootHash(apkPath);
+            final byte[] rootHashObserved = VerityUtils.generateApkVerityRootHash(apkPath);
             if (rootHashObserved == null) {
                 return false;  // APK does not contain Merkle tree root hash.
             }
@@ -8746,7 +8749,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // in verified partition, or can be verified on access (when apk verity is enabled). In both
         // cases, only data in Signing Block is verified instead of the whole file.
         final boolean skipVerify = scanSystemPartition
-                || (forceCollect && canSkipFullPackageVerification(pkg));
+                || (forceCollect && canSkipForcedPackageVerification(pkg));
         collectCertificatesLI(pkgSetting, pkg, forceCollect, skipVerify);
 
         // Reset profile if the application version is changed
