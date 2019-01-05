@@ -154,6 +154,14 @@ class V2TokenizerTests(unittest.TestCase):
         self._test("class Some.Class extends SomeOther {",
                    ['class', 'Some.Class', 'extends', 'SomeOther', '{'])
 
+    def test_varargs(self):
+        self._test("name(String...)",
+                   ['name', '(', 'String', '...', ')'])
+
+    def test_kotlin(self):
+        self._test("String? name(String!...)",
+                   ['String', '?', 'name', '(', 'String', '!',  '...', ')'])
+
     def test_annotation(self):
         self._test("method @Nullable public void name();",
                    ['method', '@', 'Nullable', 'public', 'void', 'name', '(', ')', ';'])
@@ -270,6 +278,13 @@ class V2ParserTests(unittest.TestCase):
         self.assertEquals('int', f.typ)
         self.assertEquals('NAME', f.name)
         self.assertEquals('( 0.0 / 0.0 )', f.value)
+
+    def test_kotlin_types(self):
+        self._field('field public List<Integer[]?[]!>?[]![]? NAME;')
+        self._method("method <T?> Class<T!>?[]![][]? name(Type!, Type argname,"
+                         + "Class<T?>[][]?[]!...!) throws Exception, T;")
+        self._method("method <T> T name(T a = 1, T b = A(1), Lambda f = { false }, N? n = null, "
+                         + """double c = (1/0), float d = 1.0f, String s = "heyo", char c = 'a');""")
 
 if __name__ == "__main__":
     unittest.main()
