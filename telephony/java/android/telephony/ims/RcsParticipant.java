@@ -23,6 +23,16 @@ import android.os.Parcelable;
  * @hide - TODO(sahinc) make this public
  */
 public class RcsParticipant implements Parcelable {
+    /**
+     * Returns the row id of this participant.
+     *
+     * TODO(sahinc) implement
+     * @hide
+     */
+    public int getId() {
+        return 12345;
+    }
+
     public static final Creator<RcsParticipant> CREATOR = new Creator<RcsParticipant>() {
         @Override
         public RcsParticipant createFromParcel(Parcel in) {

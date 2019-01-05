@@ -36,6 +36,7 @@ public class RcsGroupThread extends RcsThread {
     };
 
     protected RcsGroupThread(Parcel in) {
+        super(in);
     }
 
     @Override
@@ -45,5 +46,7 @@ public class RcsGroupThread extends RcsThread {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(RCS_GROUP_TYPE);
+        super.writeToParcel(dest, flags);
     }
 }
