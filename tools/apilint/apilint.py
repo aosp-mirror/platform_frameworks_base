@@ -223,7 +223,7 @@ class Package():
 class V2Tokenizer(object):
     __slots__ = ["raw"]
 
-    DELIMITER = re.compile(r'\s+|[()@<>;,={}/"]|\[\]')
+    DELIMITER = re.compile(r'\s+|[()@<>;,={}/"!?]|\[\]|\.\.\.')
     STRING_SPECIAL = re.compile(r'["\\]')
 
     def __init__(self, raw):
@@ -435,19 +435,32 @@ class V2LineParser(object):
             ret.append(self.parse_token())
         return ret
 
+    def parse_kotlin_nullability(self):
+        t = self.lookahead()
+        if t == "?" or t == "!":
+            return self.parse_token()
+        return None
+
     def parse_type(self):
         type = self.parse_token()
         if type in V2LineParser.JAVA_LANG_TYPES:
             type = "java.lang." + type
         self.parse_matching_paren("<", ">")
-        while self.parse_if("[]"):
-            type += "[]"
+        while True:
+            t = self.lookahead()
+            if t == "[]":
+                type += self.parse_token()
+            elif self.parse_kotlin_nullability() is not None:
+                pass  # discard nullability for now
+            else:
+                break
         return type
 
     def parse_arg_type(self):
         type = self.parse_type()
         if self.parse_if("..."):
             type += "..."
+        self.parse_kotlin_nullability() # discard nullability for now
         return type
 
     def parse_name(self):
@@ -466,7 +479,15 @@ class V2LineParser(object):
 
     def parse_arg(self):
         self.parse_annotations()
-        return self.parse_arg_type()
+        type = self.parse_arg_type()
+        l = self.lookahead()
+        if l != "," and l != ")":
+            self.parse_token()  # kotlin argument name
+            if self.parse_if('='): # kotlin default value
+                (self.parse_matching_paren('(', ')') or
+                 self.parse_matching_paren('{', '}') or
+                 self.parse_token() and self.parse_matching_paren('(', ')'))
+        return type
 
     def parse_throws(self):
         ret = []
