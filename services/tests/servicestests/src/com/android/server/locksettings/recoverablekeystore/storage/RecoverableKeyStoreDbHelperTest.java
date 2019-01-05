@@ -60,6 +60,7 @@ public class RecoverableKeyStoreDbHelperTest {
     private static final String TEST_ROOT_ALIAS = "root_cert_alias";
     private static final byte[] TEST_CERT_PATH = "test-cert-path".getBytes(UTF_8);
     private static final long TEST_CERT_SERIAL = 1000L;
+    private static final byte[] TEST_KEY_METADATA = "test-key-metadata".getBytes(UTF_8);
 
     private static final String SQL_CREATE_V2_TABLE_KEYS =
             "CREATE TABLE " + KeysEntry.TABLE_NAME + "( "
@@ -120,14 +121,14 @@ public class RecoverableKeyStoreDbHelperTest {
     @Test
     public void onCreate() throws Exception {
         mDatabaseHelper.onCreate(mDatabase);
-        checkAllColumns();
+        checkAllColumns_latest();
     }
 
     @Test
     public void onUpgrade_beforeV2() throws Exception {
         mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 1,
                 RecoverableKeyStoreDbHelper.DATABASE_VERSION);
-        checkAllColumns();
+        checkAllColumns_latest();
     }
 
     @Test
@@ -135,11 +136,11 @@ public class RecoverableKeyStoreDbHelperTest {
         createV2Tables();
         mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 2,
                 RecoverableKeyStoreDbHelper.DATABASE_VERSION);
-        checkAllColumns();
+        checkAllColumns_latest();
     }
 
     @Test
-    public void onUpgrade_v2_to_v3_to_v4() throws Exception {
+    public void onUpgrade_v2_to_v3_to_v4_to_latest() throws Exception {
         createV2Tables();
 
         assertThat(isRootOfTrustTableAvailable()).isFalse(); // V2 doesn't have the table;
@@ -148,9 +149,12 @@ public class RecoverableKeyStoreDbHelperTest {
 
         assertThat(isRootOfTrustTableAvailable()).isFalse(); // V3 doesn't have the table;
 
-        mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 3,
+        mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 3, /*newVersion=*/ 4);
+        checkAllColumns_v4();
+
+        mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 4,
                 RecoverableKeyStoreDbHelper.DATABASE_VERSION);
-        checkAllColumns();
+        checkAllColumns_latest();
     }
 
     private boolean isRootOfTrustTableAvailable() {
@@ -160,11 +164,11 @@ public class RecoverableKeyStoreDbHelperTest {
         values.put(RootOfTrustEntry.COLUMN_NAME_ROOT_ALIAS, TEST_ROOT_ALIAS);
         values.put(RootOfTrustEntry.COLUMN_NAME_CERT_PATH, TEST_CERT_PATH);
         values.put(RootOfTrustEntry.COLUMN_NAME_CERT_SERIAL, TEST_CERT_SERIAL);
-        return mDatabase.insert(RootOfTrustEntry.TABLE_NAME, /*nullColumnHack=*/ null, values)
+        return mDatabase.replace(RootOfTrustEntry.TABLE_NAME, /*nullColumnHack=*/ null, values)
                 > -1;
     }
 
-    private void checkAllColumns() throws Exception {
+    private void checkAllColumns_v4() throws Exception {
         // Check the table containing encrypted application keys
         ContentValues values = new ContentValues();
         values.put(KeysEntry.COLUMN_NAME_USER_ID, TEST_USER_ID);
@@ -175,7 +179,7 @@ public class RecoverableKeyStoreDbHelperTest {
         values.put(KeysEntry.COLUMN_NAME_GENERATION_ID, TEST_GENERATION_ID);
         values.put(KeysEntry.COLUMN_NAME_LAST_SYNCED_AT, TEST_LAST_SYNCED_AT);
         values.put(KeysEntry.COLUMN_NAME_RECOVERY_STATUS, TEST_RECOVERY_STATUS);
-        assertThat(mDatabase.insert(KeysEntry.TABLE_NAME, /*nullColumnHack=*/ null, values))
+        assertThat(mDatabase.replace(KeysEntry.TABLE_NAME, /*nullColumnHack=*/ null, values))
                 .isGreaterThan(-1L);
 
         // Check the table about user metadata
@@ -183,7 +187,8 @@ public class RecoverableKeyStoreDbHelperTest {
         values.put(UserMetadataEntry.COLUMN_NAME_USER_ID, TEST_USER_ID);
         values.put(UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID,
                 TEST_PLATFORM_KEY_GENERATION_ID);
-        assertThat(mDatabase.insert(UserMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null, values))
+        assertThat(
+                mDatabase.replace(UserMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null, values))
                 .isGreaterThan(-1L);
 
         // Check the table about recovery service metadata
@@ -202,11 +207,32 @@ public class RecoverableKeyStoreDbHelperTest {
         values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_PATH, TEST_CERT_PATH);
         values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_SERIAL, TEST_CERT_SERIAL);
         assertThat(
-                mDatabase.insert(RecoveryServiceMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null,
+                mDatabase.replace(RecoveryServiceMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null,
                         values))
                 .isGreaterThan(-1L);
 
         // Check the table about recovery service and root of trust data introduced in V4
         assertThat(isRootOfTrustTableAvailable()).isTrue();
+    }
+
+    private void checkAllColumns_latest() throws Exception {
+        // Check all columns of the previous version first.
+        checkAllColumns_v4();
+
+        ContentValues values = new ContentValues();
+        values.put(KeysEntry.COLUMN_NAME_USER_ID, TEST_USER_ID);
+        values.put(KeysEntry.COLUMN_NAME_UID, TEST_UID);
+        values.put(KeysEntry.COLUMN_NAME_ALIAS, TEST_ALIAS);
+        values.put(KeysEntry.COLUMN_NAME_NONCE, TEST_NONCE);
+        values.put(KeysEntry.COLUMN_NAME_WRAPPED_KEY, TEST_WRAPPED_KEY);
+        values.put(KeysEntry.COLUMN_NAME_GENERATION_ID, TEST_GENERATION_ID);
+        values.put(KeysEntry.COLUMN_NAME_LAST_SYNCED_AT, TEST_LAST_SYNCED_AT);
+        values.put(KeysEntry.COLUMN_NAME_RECOVERY_STATUS, TEST_RECOVERY_STATUS);
+
+        // This column is added when upgrading from v4 to v5
+        values.put(KeysEntry.COLUMN_NAME_KEY_METADATA, TEST_KEY_METADATA);
+
+        assertThat(mDatabase.replace(KeysEntry.TABLE_NAME, /*nullColumnHack=*/ null, values))
+                .isGreaterThan(-1L);
     }
 }

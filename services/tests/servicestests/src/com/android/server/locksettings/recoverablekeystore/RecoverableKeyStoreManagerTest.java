@@ -52,6 +52,7 @@ import android.security.keystore.recovery.KeyDerivationParams;
 import android.security.keystore.recovery.RecoveryCertPath;
 import android.security.keystore.recovery.TrustedRootCertificates;
 import android.security.keystore.recovery.WrappedApplicationKey;
+import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -134,6 +135,8 @@ public class RecoverableKeyStoreManagerTest {
     private static final int GENERATION_ID = 1;
     private static final byte[] NONCE = getUtf8Bytes("nonce");
     private static final byte[] KEY_MATERIAL = getUtf8Bytes("keymaterial");
+    private static final byte[] KEY_METADATA_NULL = null;
+    private static final byte[] KEY_METADATA_NON_NULL = getUtf8Bytes("keymetametadata");
     private static final String KEY_ALGORITHM = "AES";
     private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
     private static final String WRAPPING_KEY_ALIAS = "RecoverableKeyStoreManagerTest/WrappingKey";
@@ -228,6 +231,77 @@ public class RecoverableKeyStoreManagerTest {
         } catch (NullPointerException e) {
             assertThat(e.getMessage()).contains("is null");
         }
+    }
+
+    @Test
+    public void importKeyWithMetadata_nullMetadata_storesTheKey() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        byte[] keyMaterial = randomBytes(APPLICATION_KEY_SIZE_BYTES);
+
+        mRecoverableKeyStoreManager.importKeyWithMetadata(
+                TEST_ALIAS, keyMaterial, KEY_METADATA_NULL);
+
+        assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNotNull();
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+    }
+
+    @Test
+    public void importKeyWithMetadata_nonNullMetadata_storesTheKey() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        byte[] keyMaterial = randomBytes(APPLICATION_KEY_SIZE_BYTES);
+
+        mRecoverableKeyStoreManager.importKeyWithMetadata(
+                TEST_ALIAS, keyMaterial, KEY_METADATA_NON_NULL);
+
+        assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNotNull();
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+    }
+
+    @Test
+    public void importKeyWithMetadata_throwsIfInvalidLength() throws Exception {
+        byte[] keyMaterial = randomBytes(APPLICATION_KEY_SIZE_BYTES - 1);
+        try {
+            mRecoverableKeyStoreManager.importKeyWithMetadata(
+                    TEST_ALIAS, keyMaterial, KEY_METADATA_NON_NULL);
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("not contain 256 bits");
+        }
+    }
+
+    @Test
+    public void importKeyWithMetadata_throwsIfNullKey() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.importKeyWithMetadata(
+                    TEST_ALIAS, /*keyBytes=*/ null, KEY_METADATA_NON_NULL);
+            fail("should have thrown");
+        } catch (NullPointerException e) {
+            assertThat(e.getMessage()).contains("is null");
+        }
+    }
+
+    @Test
+    public void generateKeyWithMetadata_nullMetadata_storesTheKey() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+
+        mRecoverableKeyStoreManager.generateKeyWithMetadata(TEST_ALIAS, KEY_METADATA_NULL);
+
+        assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNotNull();
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+    }
+
+    @Test
+    public void generateKeyWithMetadata_nonNullMetadata_storesTheKey() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+
+        mRecoverableKeyStoreManager.generateKeyWithMetadata(TEST_ALIAS, KEY_METADATA_NON_NULL);
+
+        assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNotNull();
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
     }
 
     @Test
@@ -1143,7 +1217,10 @@ public class RecoverableKeyStoreManagerTest {
         int status = 100;
         int status2 = 200;
         String alias = "key1";
-        WrappedKey wrappedKey = new WrappedKey(NONCE, KEY_MATERIAL, GENERATION_ID, status);
+        byte[] keyMetadata = null;
+
+        WrappedKey wrappedKey = new WrappedKey(NONCE, KEY_MATERIAL, keyMetadata, GENERATION_ID,
+                status);
         mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
         Map<String, Integer> statuses =
                 mRecoverableKeyStoreManager.getRecoveryStatus();
@@ -1169,7 +1246,8 @@ public class RecoverableKeyStoreManagerTest {
     private static byte[] encryptedApplicationKey(
             SecretKey recoveryKey, byte[] applicationKey) throws Exception {
         return KeySyncUtils.encryptKeysWithRecoveryKey(recoveryKey, ImmutableMap.of(
-                TEST_ALIAS, new SecretKeySpec(applicationKey, "AES")
+                TEST_ALIAS,
+                Pair.create(new SecretKeySpec(applicationKey, "AES"), /*metadata=*/ null)
         )).get(TEST_ALIAS);
     }
 
@@ -1203,7 +1281,7 @@ public class RecoverableKeyStoreManagerTest {
 
     private void generateKeyAndSimulateSync(int userId, int uid, int snapshotVersion)
             throws Exception{
-        mRecoverableKeyStoreManager.generateKey(TEST_ALIAS);
+        mRecoverableKeyStoreManager.generateKeyWithMetadata(TEST_ALIAS, KEY_METADATA_NULL);
         // Simulate key sync.
         mRecoverableKeyStoreDb.setSnapshotVersion(userId, uid, snapshotVersion);
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);

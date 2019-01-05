@@ -26,6 +26,7 @@ import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.KeyDerivationParams;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -258,9 +259,9 @@ public class KeySyncTask implements Runnable {
             localLskfHash = hashCredentialsBySaltedSha256(salt, mCredential);
         }
 
-        Map<String, SecretKey> rawKeys;
+        Map<String, Pair<SecretKey, byte[]>> rawKeysWithMetadata;
         try {
-            rawKeys = getKeysToSync(recoveryAgentUid);
+            rawKeysWithMetadata = getKeysToSync(recoveryAgentUid);
         } catch (GeneralSecurityException e) {
             Log.e(TAG, "Failed to load recoverable keys for sync", e);
             return;
@@ -278,7 +279,9 @@ public class KeySyncTask implements Runnable {
         }
         // Only include insecure key material for test
         if (mTestOnlyInsecureCertificateHelper.isTestOnlyCertificateAlias(rootCertAlias)) {
-            rawKeys = mTestOnlyInsecureCertificateHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
+            rawKeysWithMetadata =
+                    mTestOnlyInsecureCertificateHelper.keepOnlyWhitelistedInsecureKeys(
+                            rawKeysWithMetadata);
         }
 
         SecretKey recoveryKey;
@@ -292,7 +295,7 @@ public class KeySyncTask implements Runnable {
         Map<String, byte[]> encryptedApplicationKeys;
         try {
             encryptedApplicationKeys = KeySyncUtils.encryptKeysWithRecoveryKey(
-                    recoveryKey, rawKeys);
+                    recoveryKey, rawKeysWithMetadata);
         } catch (InvalidKeyException | NoSuchAlgorithmException e) {
             Log.wtf(TAG,
                     "Should be impossible: could not encrypt application keys with random key",
@@ -356,7 +359,8 @@ public class KeySyncTask implements Runnable {
                 .setCounterId(counterId)
                 .setServerParams(vaultHandle)
                 .setKeyChainProtectionParams(metadataList)
-                .setWrappedApplicationKeys(createApplicationKeyEntries(encryptedApplicationKeys))
+                .setWrappedApplicationKeys(
+                        createApplicationKeyEntries(encryptedApplicationKeys, rawKeysWithMetadata))
                 .setEncryptedRecoveryKeyBlob(encryptedRecoveryKey);
         try {
             keyChainSnapshotBuilder.setTrustedHardwareCertPath(certPath);
@@ -405,7 +409,7 @@ public class KeySyncTask implements Runnable {
     /**
      * Returns all of the recoverable keys for the user.
      */
-    private Map<String, SecretKey> getKeysToSync(int recoveryAgentUid)
+    private Map<String, Pair<SecretKey, byte[]>> getKeysToSync(int recoveryAgentUid)
             throws InsecureUserException, KeyStoreException, UnrecoverableKeyException,
             NoSuchAlgorithmException, NoSuchPaddingException, BadPlatformKeyException,
             InvalidKeyException, InvalidAlgorithmParameterException, IOException {
@@ -521,12 +525,14 @@ public class KeySyncTask implements Runnable {
     }
 
     private static List<WrappedApplicationKey> createApplicationKeyEntries(
-            Map<String, byte[]> encryptedApplicationKeys) {
+            Map<String, byte[]> encryptedApplicationKeys,
+            Map<String, Pair<SecretKey, byte[]>> originalKeysWithMetadata) {
         ArrayList<WrappedApplicationKey> keyEntries = new ArrayList<>();
         for (String alias : encryptedApplicationKeys.keySet()) {
             keyEntries.add(new WrappedApplicationKey.Builder()
                     .setAlias(alias)
                     .setEncryptedKeyMaterial(encryptedApplicationKeys.get(alias))
+                    .setMetadata(originalKeysWithMetadata.get(alias).second)
                     .build());
         }
         return keyEntries;
