@@ -296,7 +296,7 @@ public class PhoneStateListener {
 
     /**
      *  Listen for changes to preferred data subId.
-     *  See {@link SubscriptionManager#setPreferredData(int)}
+     *  See {@link SubscriptionManager#setPreferredDataSubId(int)}
      *  for more details.
      *
      *  @see #onPreferredDataSubIdChanged

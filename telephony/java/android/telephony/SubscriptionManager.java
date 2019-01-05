@@ -2405,10 +2405,39 @@ public class SubscriptionManager {
      *
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void setPreferredData(int subId) {
-        if (VDBG) logd("[setPreferredData]+ subId:" + subId);
-        setSubscriptionPropertyHelper(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID,
-                "setPreferredData", (iSub)-> iSub.setPreferredData(subId));
+    public void setPreferredDataSubscriptionId(int subId) {
+        if (VDBG) logd("[setPreferredDataSubscriptionId]+ subId:" + subId);
+        setSubscriptionPropertyHelper(DEFAULT_SUBSCRIPTION_ID, "setPreferredDataSubscriptionId",
+                (iSub)-> iSub.setPreferredDataSubscriptionId(subId));
+    }
+
+    /**
+     * Get which subscription is preferred for cellular data.
+     * It's also usually the subscription we set up internet connection on.
+     *
+     * PreferredData overwrites user setting of default data subscription. And it's used
+     * by AlternativeNetworkService or carrier apps to switch primary and CBRS
+     * subscription dynamically in multi-SIM devices.
+     *
+     * @return preferred subscription id for cellular data. {@link DEFAULT_SUBSCRIPTION_ID} if
+     * there's no prefered subscription.
+     *
+     * @hide
+     *
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getPreferredDataSubscriptionId() {
+        int preferredSubId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                preferredSubId = iSub.getPreferredDataSubscriptionId();
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return preferredSubId;
     }
 
     /**

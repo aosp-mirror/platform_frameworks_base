@@ -200,7 +200,15 @@ interface ISub {
      * @hide
      *
      */
-    int setPreferredData(int subId);
+    int setPreferredDataSubscriptionId(int subId);
+
+    /**
+     * Get which subscription is preferred for cellular data.
+     *
+     * @hide
+     *
+     */
+    int getPreferredDataSubscriptionId();
 
     /**
      * Get User downloaded Profiles.
