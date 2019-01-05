@@ -9864,10 +9864,11 @@ public class TelephonyManager {
         try {
             IOns iOpportunisticNetworkService = getIOns();
             if (iOpportunisticNetworkService != null) {
-                return iOpportunisticNetworkService.setPreferredData(subId, pkgForDebug);
+                return iOpportunisticNetworkService
+                        .setPreferredDataSubscriptionId(subId, pkgForDebug);
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "setPreferredData RemoteException", ex);
+            Rlog.e(TAG, "setPreferredDataSubscriptionId RemoteException", ex);
         }
         return false;
     }
@@ -9888,10 +9889,10 @@ public class TelephonyManager {
         try {
             IOns iOpportunisticNetworkService = getIOns();
             if (iOpportunisticNetworkService != null) {
-                subId = iOpportunisticNetworkService.getPreferredData(pkgForDebug);
+                subId = iOpportunisticNetworkService.getPreferredDataSubscriptionId(pkgForDebug);
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getPreferredData RemoteException", ex);
+            Rlog.e(TAG, "getPreferredDataSubscriptionId RemoteException", ex);
         }
         return subId;
     }
