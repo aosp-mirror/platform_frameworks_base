@@ -198,21 +198,27 @@ public class TaskGridLayoutAlgorithm  {
             return transformOut;
         }
 
+        int indexOverflow = Math.max(taskCount - MAX_LAYOUT_TASK_COUNT, 0);
+        boolean isTaskViewVisible = taskIndex >= indexOverflow;
+        if (!isTaskViewVisible) {
+            transformOut.reset();
+            transformOut.visible = false;
+            return transformOut;
+        }
+
+        taskCount = Math.min(MAX_LAYOUT_TASK_COUNT, taskCount);
+
         TaskGridRectInfo gridInfo = mTaskGridRectInfoList[taskCount - 1];
         mTaskGridRect.set(gridInfo.size);
 
-        int x = gridInfo.xOffsets[taskIndex];
-        int y = gridInfo.yOffsets[taskIndex];
+        int x = gridInfo.xOffsets[taskIndex - indexOverflow];
+        int y = gridInfo.yOffsets[taskIndex - indexOverflow];
         float z = stackLayout.mMaxTranslationZ;
 
         // We always set the dim alpha to 0, since we don't want grid task views to dim.
         float dimAlpha = 0f;
         // We always set the alpha of the view outline to 1, to make sure the shadow is visible.
         float viewOutlineAlpha = 1f;
-
-        // We also need to invert the index in order to display the most recent tasks first.
-        int taskLayoutIndex = taskCount - taskIndex - 1;
-        boolean isTaskViewVisible = taskLayoutIndex < MAX_LAYOUT_TASK_COUNT;
 
         // Fill out the transform
         transformOut.scale = 1f;
@@ -304,6 +310,7 @@ public class TaskGridLayoutAlgorithm  {
     }
 
     public void updateTaskGridRect(int taskCount) {
+        taskCount = Math.min(MAX_LAYOUT_TASK_COUNT, taskCount);
         if (taskCount > 0) {
             TaskGridRectInfo gridInfo = mTaskGridRectInfoList[taskCount - 1];
             mTaskGridRect.set(gridInfo.size);
