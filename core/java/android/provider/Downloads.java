@@ -409,6 +409,15 @@ public final class Downloads {
         public static final String COLUMN_MEDIAPROVIDER_URI = "mediaprovider_uri";
 
         /**
+         * Similar to {@link #COLUMN_MEDIAPROVIDER_URI}, except this cannot be updated/queried
+         * by apps and will be the source of truth when updating/deleting download entries in
+         * MediaProvider database.
+         *
+         * <P>Type: TEXT</P>
+         */
+        public static final String COLUMN_MEDIASTORE_URI = "mediastore_uri";
+
+        /**
          * The column that is used to remember whether the media scanner was invoked.
          * It can take the values: null or 0(not scanned), 1(scanned), 2 (not scannable).
          * <P>Type: TEXT</P>

@@ -119,7 +119,7 @@ public class MockContentProvider extends ContentProvider {
 
         @Override
         public IBinder asBinder() {
-            throw new UnsupportedOperationException();
+            return MockContentProvider.this.getIContentProviderBinder();
         }
 
         @Override
@@ -276,6 +276,13 @@ public class MockContentProvider extends ContentProvider {
     @Override
     public final IContentProvider getIContentProvider() {
         return mIContentProvider;
+    }
+
+    /**
+     * @hide
+     */
+    public IBinder getIContentProviderBinder() {
+        throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     /**
