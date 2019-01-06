@@ -18,6 +18,6 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Green accent color name application label. [CHAR LIMIT=50] -->
-    <string name="accent_color_green_overlay" translatable="false">Green Accent Color</string>
+    <string name="accent_color_green_overlay" translatable="false">Green</string>
 </resources>
 

@@ -20,11 +20,9 @@ import android.content.Context;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.car.CarNotificationEntryManager;
 import com.android.systemui.car.CarNotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.car.CarFacetButtonController;
 import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.volume.CarVolumeDialogComponent;
@@ -65,14 +63,14 @@ public class CarSystemUIFactory extends SystemUIFactory {
     }
 
     @Override
-    public NotificationEntryManager provideNotificationEntryManager(Context context) {
-        return new CarNotificationEntryManager(context);
-    }
-
-    @Override
     public NotificationInterruptionStateProvider provideNotificationInterruptionStateProvider(
             Context context) {
         return new CarNotificationInterruptionStateProvider(context);
+    }
+
+    @Override
+    public boolean provideAllowNotificationLongPress() {
+        return false;
     }
 
     @Module

@@ -82,6 +82,6 @@ public class RemoteInputQuickSettingsDisabler
      * to modify the disable flags according to the status of mRemoteInputActive and misLandscape.
      */
     private void recomputeDisableFlags() {
-        mCommandQueue.recomputeDisableFlags(true);
+        mCommandQueue.recomputeDisableFlags(mContext.getDisplayId(), true);
     }
 }

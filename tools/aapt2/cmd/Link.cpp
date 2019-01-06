@@ -78,7 +78,7 @@ namespace aapt {
 
 class LinkContext : public IAaptContext {
  public:
-  LinkContext(IDiagnostics* diagnostics)
+  explicit LinkContext(IDiagnostics* diagnostics)
       : diagnostics_(diagnostics), name_mangler_({}), symbols_(&name_mangler_) {
   }
 
@@ -163,7 +163,7 @@ class LinkContext : public IAaptContext {
 // See b/37498913.
 class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
  public:
-  FeatureSplitSymbolTableDelegate(IAaptContext* context) : context_(context) {
+  explicit FeatureSplitSymbolTableDelegate(IAaptContext* context) : context_(context) {
   }
 
   virtual ~FeatureSplitSymbolTableDelegate() = default;
@@ -1545,7 +1545,8 @@ class Linker {
   // to the IArchiveWriter.
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set, xml::XmlResource* manifest,
                 ResourceTable* table) {
-    const bool keep_raw_values = context_->GetPackageType() == PackageType::kStaticLib;
+    const bool keep_raw_values = (context_->GetPackageType() == PackageType::kStaticLib)
+                                 || options_.keep_raw_values;
     bool result = FlattenXml(context_, *manifest, kAndroidManifestPath, keep_raw_values,
                              true /*utf16*/, options_.output_format, writer);
     if (!result) {

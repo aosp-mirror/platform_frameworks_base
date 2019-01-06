@@ -2293,6 +2293,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "--apex":
                     sessionParams.installFlags |= PackageManager.INSTALL_APEX;
+                    // TODO(b/118865310): APEX packages should always imply
+                    //                    sessionParams.isStaged(). Enforce this when the staged
+                    //                    install workflow is complete.
                     break;
                 case "--multi-package":
                     sessionParams.setMultiPackage();
@@ -2588,7 +2591,7 @@ class PackageManagerShellCommand extends ShellCommand {
         try {
             session = new PackageInstaller.Session(
                     mInterface.getPackageInstaller().openSession(sessionId));
-            if (!session.isMultiPackage()) {
+            if (!session.isMultiPackage() && !session.isStaged()) {
                 // Sanity check that all .dm files match an apk.
                 // (The installer does not support standalone .dm files and will not process them.)
                 try {

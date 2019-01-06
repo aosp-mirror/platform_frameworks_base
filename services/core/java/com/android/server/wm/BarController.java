@@ -62,7 +62,8 @@ public class BarController {
     private StatusBarManagerInternal mStatusBarInternal;
 
     protected WindowState mWin;
-    private int mState = StatusBarManager.WINDOW_STATE_SHOWING;
+    private @StatusBarManager.WindowVisibleState int mState =
+            StatusBarManager.WINDOW_STATE_SHOWING;
     private int mTransientBarState;
     private boolean mPendingShow;
     private long mLastTranslucent;
@@ -199,7 +200,8 @@ public class BarController {
         return !mWin.isDrawnLw();
     }
 
-    private int computeStateLw(boolean wasVis, boolean wasAnim, WindowState win, boolean change) {
+    private @StatusBarManager.WindowVisibleState int computeStateLw(
+            boolean wasVis, boolean wasAnim, WindowState win, boolean change) {
         if (win.isDrawnLw()) {
             final boolean vis = win.isVisibleLw();
             final boolean anim = win.isAnimatingLw();
@@ -218,7 +220,7 @@ public class BarController {
         return mState;
     }
 
-    private boolean updateStateLw(final int state) {
+    private boolean updateStateLw(@StatusBarManager.WindowVisibleState final int state) {
         if (mWin != null && state != mState) {
             mState = state;
             if (DEBUG) Slog.d(mTag, "mState: " + StatusBarManager.windowStateToString(state));

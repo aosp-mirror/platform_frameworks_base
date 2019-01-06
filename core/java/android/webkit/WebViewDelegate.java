@@ -138,6 +138,20 @@ public final class WebViewDelegate {
     }
 
     /**
+     * Call webview draw functor. See API in draw_fn.h.
+     * @param canvas a hardware accelerated canvas (see {@link Canvas#isHardwareAccelerated()}).
+     * @param functor created by AwDrawFn_CreateFunctor in draw_fn.h.
+     */
+    public void drawWebViewFunctor(@NonNull Canvas canvas, int functor) {
+        if (!(canvas instanceof RecordingCanvas)) {
+            // Canvas#isHardwareAccelerated() is only true for subclasses of RecordingCanvas.
+            throw new IllegalArgumentException(canvas.getClass().getName()
+                    + " is not a RecordingCanvas canvas");
+        }
+        ((RecordingCanvas) canvas).drawWebViewFunctor(functor);
+    }
+
+    /**
      * Detaches the draw GL functor.
      *
      * @param nativeDrawGLFunctor the pointer to the native functor that implements

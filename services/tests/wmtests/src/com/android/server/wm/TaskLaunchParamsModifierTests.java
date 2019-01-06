@@ -199,6 +199,25 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(freeformDisplay.mDisplayId, mResult.mPreferredDisplayId);
     }
 
+    @Test
+    public void testUsesNoDisplaySourceHandoverDisplayIdIfSet() {
+        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FREEFORM);
+        final TestActivityDisplay fullscreenDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FULLSCREEN);
+
+        mCurrent.mPreferredDisplayId = fullscreenDisplay.mDisplayId;
+        ActivityRecord reusableActivity = createSourceActivity(fullscreenDisplay);
+        ActivityRecord source = createSourceActivity(freeformDisplay);
+        source.mHandoverLaunchDisplayId = freeformDisplay.mDisplayId;
+        source.noDisplay = true;
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(reusableActivity.getTaskRecord(),
+                null /* layout */, mActivity, source, null /* options */, mCurrent, mResult));
+
+        assertEquals(freeformDisplay.mDisplayId, mResult.mPreferredDisplayId);
+    }
+
     // =====================================
     // Launch Windowing Mode Related Tests
     // =====================================
@@ -759,6 +778,21 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         mCurrent.mPreferredDisplayId = freeformDisplay.mDisplayId;
         mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
+        mCurrent.mBounds.set(0, 0, 200, 100);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+
+        assertEquals(new Rect(0, 0, 200, 100), mResult.mBounds);
+    }
+
+    @Test
+    public void testReturnBoundsForFullscreenWindowingMode() {
+        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FREEFORM);
+
+        mCurrent.mPreferredDisplayId = freeformDisplay.mDisplayId;
+        mCurrent.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
         mCurrent.mBounds.set(0, 0, 200, 100);
 
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,

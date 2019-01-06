@@ -95,6 +95,11 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         startQueuedActions();
     }
 
+    @Override
+    protected int findKeyReceiverAddress() {
+        return Constants.ADDR_TV;
+    }
+
     @VisibleForTesting
     protected void systemAudioControlOnPowerOn(
             int systemAudioOnPowerOnProp, boolean lastSystemAudioControlStatus) {

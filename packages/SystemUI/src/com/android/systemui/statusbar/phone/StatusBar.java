@@ -20,9 +20,10 @@ import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+import static android.app.StatusBarManager.WindowType;
+import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
@@ -37,6 +38,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRAN
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
+import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -71,7 +73,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
 import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
@@ -79,6 +80,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -170,11 +172,11 @@ import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
-import com.android.systemui.statusbar.DisplayNavigationBarController;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -289,10 +291,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected static final boolean CLOSE_PANEL_WHEN_EMPTIED = true;
 
-    private static final int STATUS_OR_NAV_TRANSIENT =
-            View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
-    private static final long AUTOHIDE_TIMEOUT_MS = 2250;
-
     /**
      * The delay to reset the hint text when the hint animation is finished running.
      */
@@ -341,6 +339,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected BiometricUnlockController mBiometricUnlockController;
     private LightBarController mLightBarController;
     protected LockscreenWallpaper mLockscreenWallpaper;
+    @VisibleForTesting
+    protected AutoHideController mAutoHideController;
 
     private int mNaturalBarHeight = -1;
 
@@ -405,9 +405,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Rect mLastFullscreenStackBounds = new Rect();
     private final Rect mLastDockedStackBounds = new Rect();
 
-    // last value sent to window manager
-    private int mLastDispatchedSystemUiVisibility = ~View.SYSTEM_UI_FLAG_VISIBLE;
-
     private final DisplayMetrics mDisplayMetrics = Dependency.get(DisplayMetrics.class);
 
     // XXX: gesture research
@@ -447,20 +444,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected final H mHandler = createHandler();
 
     private int mInteractingWindows;
-    private boolean mAutohideSuspended;
-    private int mStatusBarMode;
+    private @TransitionMode int mStatusBarMode;
 
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     protected ScrimController mScrimController;
     protected DozeScrimController mDozeScrimController;
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
-
-    private final Runnable mAutohide = () -> {
-        int requested = mSystemUiVisibility & ~STATUS_OR_NAV_TRANSIENT;
-        if (mSystemUiVisibility != requested) {
-            notifyUiVisibilityChanged(requested);
-        }
-    };
 
     protected boolean mDozing;
     private boolean mDozingRequested;
@@ -584,11 +573,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mEntryManager.updateNotifications();
                 }
             };
-
-    protected DisplayManager mDisplayManager;
-
-    private NavigationBarFragment mNavigationBar;
-    private View mNavigationBarView;
+    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
 
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private boolean mVibrateOnOpening;
@@ -643,7 +628,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
-        mNavigationBarController = Dependency.get(DisplayNavigationBarController.class);
+        mNavigationBarController = Dependency.get(NavigationBarController.class);
         mBubbleController = Dependency.get(BubbleController.class);
         mBubbleController.setExpandListener(mBubbleExpandListener);
         KeyguardSliceProvider sliceProvider = KeyguardSliceProvider.getAttachedInstance();
@@ -661,6 +646,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
 
         mDisplay = mWindowManager.getDefaultDisplay();
+        mDisplayId = mDisplay.getDisplayId();
         updateDisplaySize();
 
         Resources res = mContext.getResources();
@@ -716,11 +702,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
 
-        setSystemUiVisibility(switches[1], switches[7], switches[8], 0xffffffff,
+        setSystemUiVisibility(mDisplayId, switches[1], switches[7], switches[8], 0xffffffff,
                 fullscreenStackBounds, dockedStackBounds);
-        topAppWindowChanged(switches[2] != 0);
+        topAppWindowChanged(mDisplayId, switches[2] != 0);
         // StatusBarManagerService has a back up of IME token and it's restored here.
-        setImeWindowStatus(binders.get(0), switches[3], switches[4], switches[5] != 0);
+        setImeWindowStatus(mDisplayId, binders.get(0), switches[3], switches[4], switches[5] != 0);
 
         // Set up the initial icon state
         int N = iconSlots.size();
@@ -907,11 +893,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         });
 
-        // TODO(115978725): Support light bar controller on external nav bars.
+        mAutoHideController = Dependency.get(AutoHideController.class);
+        mAutoHideController.setStatusBar(this);
+
         mLightBarController = Dependency.get(LightBarController.class);
-        if (mNavigationBar != null) {
-            mNavigationBar.setLightBarController(mLightBarController);
-        }
 
         ScrimView scrimBehind = mStatusBarWindow.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = mStatusBarWindow.findViewById(R.id.scrim_in_front);
@@ -1070,7 +1055,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * @param state2 disable2 flags
      */
     protected void setUpDisableFlags(int state1, int state2) {
-        mCommandQueue.disable(state1, state2, false /* animate */);
+        mCommandQueue.disable(mDisplayId, state1, state2, false /* animate */);
     }
 
     @Override
@@ -1097,25 +1082,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    // TODO(b/117478341): This was left such that CarStatusBar can override this method.
+    // Try to remove this.
     protected void createNavigationBar() {
-        try {
-            // TODO(117478341): Move this into DisplayNavigationBarController#createNavigationBars
-            // for-loop. We will also move the whole navigation bar logic together.
-            final boolean showNav = mWindowManagerService.hasNavigationBar(DEFAULT_DISPLAY);
-            if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
-            if (!showNav) return;
-
-            mNavigationBarView = NavigationBarFragment.create(mContext, (tag, fragment) -> {
-                mNavigationBar = (NavigationBarFragment) fragment;
-                if (mLightBarController != null) {
-                    mNavigationBar.setLightBarController(mLightBarController);
-                }
-                mNavigationBar.setCurrentSysuiVisibility(mSystemUiVisibility);
-            });
-        } catch (RemoteException ex) {
-            // no window manager? good luck with that
-        }
-        mNavigationBarController.createNavigationBars();
+        mNavigationBarController.createNavigationBars(true /* includeDefaultDisplay */);
     }
 
     /**
@@ -1124,7 +1094,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     protected View.OnTouchListener getStatusBarWindowTouchListener() {
         return (v, event) -> {
-            checkUserAutohide(event);
+            mAutoHideController.checkUserAutoHide(event);
             mRemoteInputManager.checkRemoteInputOutside(event);
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (mExpandedVisible) {
@@ -1259,8 +1229,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         int dockSide = WindowManagerProxy.getInstance().getDockSide();
         if (dockSide == WindowManager.DOCKED_INVALID) {
-            final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition(
-                    mDisplay.getDisplayId());
+            final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition(mDisplayId);
             if (navbarPos == NAV_BAR_POS_INVALID) {
                 return false;
             }
@@ -1369,7 +1338,10 @@ public class StatusBar extends SystemUI implements DemoMode,
      * State is one or more of the DISABLE constants from StatusBarManager.
      */
     @Override
-    public void disable(int state1, int state2, boolean animate) {
+    public void disable(int displayId, int state1, int state2, boolean animate) {
+        if (displayId != mDisplayId) {
+            return;
+        }
         state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
 
         animate &= mStatusBarWindowState != WINDOW_STATE_HIDDEN;
@@ -1647,10 +1619,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mWereIconsJustHidden = true;
                 mHandler.postDelayed(() -> {
                     mWereIconsJustHidden = false;
-                    mCommandQueue.recomputeDisableFlags(true);
+                    mCommandQueue.recomputeDisableFlags(mDisplayId, true);
                 }, 500);
             } else {
-                mCommandQueue.recomputeDisableFlags(animate);
+                mCommandQueue.recomputeDisableFlags(mDisplayId, animate);
             }
         }
         if (shouldHideIconsForBouncer) {
@@ -1816,7 +1788,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarWindowController.setPanelVisible(true);
 
         visibilityChanged(true);
-        mCommandQueue.recomputeDisableFlags(!force /* animate */);
+        mCommandQueue.recomputeDisableFlags(mDisplayId, !force /* animate */);
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
     }
 
@@ -1989,7 +1961,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             Log.d(TAG, "Not showing bouncer due to activity showing over lockscreen");
         }
         mCommandQueue.recomputeDisableFlags(
-                mNotificationPanel.hideStatusBarIconsWhenExpanded() /* animate */);
+                mDisplayId, mNotificationPanel.hideStatusBarIconsWhenExpanded() /* animate */);
 
         // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
         // the bouncer appear animation.
@@ -2046,7 +2018,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override // CommandQueue
-    public void setWindowState(int window, int state) {
+    public void setWindowState(
+            int displayId, @WindowType int window, @WindowVisibleState int state) {
+        if (displayId != mDisplayId) {
+            return;
+        }
         boolean showing = state == WINDOW_STATE_SHOWING;
         if (mStatusBarWindow != null
                 && window == StatusBarManager.WINDOW_STATUS_BAR
@@ -2065,14 +2041,17 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override // CommandQueue
-    public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
-            int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+    public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+        if (displayId != mDisplayId) {
+            return;
+        }
         final int oldVal = mSystemUiVisibility;
         final int newVal = (oldVal&~mask) | (vis&mask);
         final int diff = newVal ^ oldVal;
         if (DEBUG) Log.d(TAG, String.format(
-                "setSystemUiVisibility vis=%s mask=%s oldVal=%s newVal=%s diff=%s",
-                Integer.toHexString(vis), Integer.toHexString(mask),
+                "setSystemUiVisibility displayId=%d vis=%s mask=%s oldVal=%s newVal=%s diff=%s",
+                displayId, Integer.toHexString(vis), Integer.toHexString(mask),
                 Integer.toHexString(oldVal), Integer.toHexString(newVal),
                 Integer.toHexString(diff)));
         boolean sbModeChanged = false;
@@ -2086,7 +2065,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             // ready to unhide
             if ((vis & View.STATUS_BAR_UNHIDE) != 0) {
-                mSystemUiVisibility &= ~View.STATUS_BAR_UNHIDE;
                 mNoAnimationOnNextBarModeChange = true;
             }
 
@@ -2097,17 +2075,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (sbModeChanged && sbMode != mStatusBarMode) {
                 mStatusBarMode = sbMode;
                 checkBarModes();
-                touchAutoHide();
+                mAutoHideController.touchAutoHide();
             }
-
-            if ((vis & View.NAVIGATION_BAR_UNHIDE) != 0) {
-                mSystemUiVisibility &= ~View.NAVIGATION_BAR_UNHIDE;
-            }
-
-            // send updated sysui visibility to window manager
-            notifyUiVisibilityChanged(mSystemUiVisibility);
         }
-
         mLightBarController.onSystemUiVisibilityChanged(fullscreenStackVis, dockedStackVis,
                 mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode);
     }
@@ -2135,52 +2105,45 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    // TODO(115978725): Support auto hide on external nav bars.
-    void touchAutoHide() {
-        // update transient bar autohide
-        if (mStatusBarMode == MODE_SEMI_TRANSPARENT || (mNavigationBar != null
-                && mNavigationBar.isSemiTransparent())) {
-            scheduleAutohide();
-        } else {
-            cancelAutohide();
-        }
-    }
-
-    protected int computeStatusBarMode(int oldVal, int newVal) {
-        return computeBarMode(oldVal, newVal, View.STATUS_BAR_TRANSIENT,
-                View.STATUS_BAR_TRANSLUCENT, View.STATUS_BAR_TRANSPARENT);
+    protected @TransitionMode int computeStatusBarMode(int oldVal, int newVal) {
+        return computeBarMode(oldVal, newVal);
     }
 
     protected BarTransitions getStatusBarTransitions() {
         return mStatusBarView.getBarTransitions();
     }
 
-    protected int computeBarMode(int oldVis, int newVis,
-            int transientFlag, int translucentFlag, int transparentFlag) {
-        final int oldMode = barMode(oldVis, transientFlag, translucentFlag, transparentFlag);
-        final int newMode = barMode(newVis, transientFlag, translucentFlag, transparentFlag);
+    protected @TransitionMode int computeBarMode(int oldVis, int newVis) {
+        final int oldMode = barMode(oldVis);
+        final int newMode = barMode(newVis);
         if (oldMode == newMode) {
             return -1; // no mode change
         }
         return newMode;
     }
 
-    private int barMode(int vis, int transientFlag, int translucentFlag, int transparentFlag) {
-        int lightsOutTransparent = View.SYSTEM_UI_FLAG_LOW_PROFILE | transparentFlag;
-        return (vis & transientFlag) != 0 ? MODE_SEMI_TRANSPARENT
-                : (vis & translucentFlag) != 0 ? MODE_TRANSLUCENT
-                : (vis & lightsOutTransparent) == lightsOutTransparent ? MODE_LIGHTS_OUT_TRANSPARENT
-                : (vis & transparentFlag) != 0 ? MODE_TRANSPARENT
-                : (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0 ? MODE_LIGHTS_OUT
-                : MODE_OPAQUE;
+    private @TransitionMode int barMode(int vis) {
+        int lightsOutTransparent = View.SYSTEM_UI_FLAG_LOW_PROFILE | View.STATUS_BAR_TRANSPARENT;
+        if ((vis & View.STATUS_BAR_TRANSIENT) != 0) {
+            return MODE_SEMI_TRANSPARENT;
+        } else if ((vis & View.STATUS_BAR_TRANSLUCENT) != 0) {
+            return MODE_TRANSLUCENT;
+        } else if ((vis & lightsOutTransparent) == lightsOutTransparent) {
+            return MODE_LIGHTS_OUT_TRANSPARENT;
+        } else if ((vis & View.STATUS_BAR_TRANSPARENT) != 0) {
+            return MODE_TRANSPARENT;
+        } else if ((vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
+            return MODE_LIGHTS_OUT;
+        } else {
+            return MODE_OPAQUE;
+        }
     }
 
-    // TODO(115978725): Support animations on external nav bars.
     void checkBarModes() {
         if (mDemoMode) return;
         if (mStatusBarView != null) checkBarMode(mStatusBarMode, mStatusBarWindowState,
                 getStatusBarTransitions());
-        if (mNavigationBar != null) mNavigationBar.checkNavBarModes();
+        mNavigationBarController.checkNavBarModes(mDisplayId);
         mNoAnimationOnNextBarModeChange = false;
     }
 
@@ -2189,20 +2152,18 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.setQsScrimEnabled(scrimEnabled);
     }
 
-    void checkBarMode(int mode, int windowState, BarTransitions transitions) {
+    void checkBarMode(@TransitionMode int mode, @WindowVisibleState int windowState,
+            BarTransitions transitions) {
         final boolean anim = !mNoAnimationOnNextBarModeChange && mDeviceInteractive
                 && windowState != WINDOW_STATE_HIDDEN;
         transitions.transitionTo(mode, anim);
     }
 
-    // TODO(115978725): Support animations on external nav bars.
     private void finishBarAnimations() {
         if (mStatusBarView != null) {
             mStatusBarView.getBarTransitions().finishAnimations();
         }
-        if (mNavigationBar != null) {
-            mNavigationBar.finishBarAnimations();
-        }
+        mNavigationBarController.finishBarAnimations(mDisplayId);
     }
 
     private final Runnable mCheckBarModes = this::checkBarModes;
@@ -2213,13 +2174,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                 ? (mInteractingWindows | barWindow)
                 : (mInteractingWindows & ~barWindow);
         if (mInteractingWindows != 0) {
-            suspendAutohide();
+            mAutoHideController.suspendAutoHide();
         } else {
-            resumeSuspendedAutohide();
+            mAutoHideController.resumeSuspendedAutoHide();
         }
         // manually dismiss the volume panel when interacting with the nav bar
         if (changing && interacting && barWindow == StatusBarManager.WINDOW_NAVIGATION_BAR) {
-            touchAutoDim();
+            mNavigationBarController.touchAutoDim(mDisplayId);
             dismissVolumeDialog();
         }
         checkBarModes();
@@ -2231,59 +2192,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    private void resumeSuspendedAutohide() {
-        if (mAutohideSuspended) {
-            scheduleAutohide();
-            mHandler.postDelayed(mCheckBarModes, 500); // longer than home -> launcher
-        }
-    }
-
-    private void suspendAutohide() {
-        mHandler.removeCallbacks(mAutohide);
-        mHandler.removeCallbacks(mCheckBarModes);
-        mAutohideSuspended = (mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0;
-    }
-
-    private void cancelAutohide() {
-        mAutohideSuspended = false;
-        mHandler.removeCallbacks(mAutohide);
-    }
-
-    private void scheduleAutohide() {
-        cancelAutohide();
-        mHandler.postDelayed(mAutohide, AUTOHIDE_TIMEOUT_MS);
-    }
-
-    public void touchAutoDim() {
-        if (mNavigationBar != null) {
-            mNavigationBar.getBarTransitions().setAutoDim(false);
-        }
-        mHandler.removeCallbacks(mAutoDim);
-
-        // Do not dim the navigation buttons if the its tint is controlled by the bar's background
-        if (NavBarTintController.isEnabled(mContext)) {
-            return;
-        }
-        if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED) {
-            mHandler.postDelayed(mAutoDim, AUTOHIDE_TIMEOUT_MS);
-        }
-    }
-
-    void checkUserAutohide(MotionEvent event) {
-        if ((mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0  // a transient bar is revealed
-                && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar
-                && event.getX() == 0 && event.getY() == 0  // a touch outside both bars
-                && !mRemoteInputManager.getController()
-                        .isRemoteInputActive()) { // not due to typing in IME
-            userAutohide();
-        }
-    }
-
-    private void userAutohide() {
-        cancelAutohide();
-        mHandler.postDelayed(mAutohide, 350); // longer than app gesture -> flag clear
-    }
-
     private boolean areLightsOn() {
         return 0 == (mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
     }
@@ -2291,30 +2199,21 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void setLightsOn(boolean on) {
         Log.v(TAG, "setLightsOn(" + on + ")");
         if (on) {
-            setSystemUiVisibility(0, 0, 0, View.SYSTEM_UI_FLAG_LOW_PROFILE,
+            setSystemUiVisibility(mDisplayId, 0, 0, 0, View.SYSTEM_UI_FLAG_LOW_PROFILE,
                     mLastFullscreenStackBounds, mLastDockedStackBounds);
         } else {
-            setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE, 0, 0,
+            setSystemUiVisibility(mDisplayId, View.SYSTEM_UI_FLAG_LOW_PROFILE, 0, 0,
                     View.SYSTEM_UI_FLAG_LOW_PROFILE, mLastFullscreenStackBounds,
                     mLastDockedStackBounds);
         }
     }
 
-    private void notifyUiVisibilityChanged(int vis) {
-        try {
-            if (mLastDispatchedSystemUiVisibility != vis) {
-                // TODO (b/117478341): Resolve one status bar/ navigation bar assumption
-                mWindowManagerService.statusBarVisibilityChanged(Display.DEFAULT_DISPLAY, vis);
-                mLastDispatchedSystemUiVisibility = vis;
-            }
-        } catch (RemoteException ex) {
-        }
-    }
-
     @Override
-    public void topAppWindowChanged(boolean showMenu) {
+    public void topAppWindowChanged(int displayId, boolean showMenu) {
+        if (mDisplayId != displayId) return;
         if (SPEW) {
-            Log.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
+            Log.d(TAG, "display#" + displayId + ": "
+                    + (showMenu ? "showing" : "hiding") + " the MENU button");
         }
 
         // See above re: lights-out policy for legacy apps.
@@ -2929,10 +2828,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mWindowManager.removeViewImmediate(mStatusBarWindow);
             mStatusBarWindow = null;
         }
-        if (mNavigationBarView != null) {
-            mWindowManager.removeViewImmediate(mNavigationBarView);
-            mNavigationBarView = null;
-        }
         mNavigationBarController.destroy();
         mContext.unregisterReceiver(mBroadcastReceiver);
         mContext.unregisterReceiver(mDemoReceiver);
@@ -3002,15 +2897,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                     "transparent".equals(mode) ? MODE_TRANSPARENT :
                     "warning".equals(mode) ? MODE_WARNING :
                     -1;
-            // TODO(115978725): Support external nav bar transitions
             if (barMode != -1) {
                 boolean animate = true;
                 if (mStatusBarView != null) {
                     mStatusBarView.getBarTransitions().transitionTo(barMode, animate);
                 }
-                if (mNavigationBar != null) {
-                    mNavigationBar.getBarTransitions().transitionTo(barMode, animate);
-                }
+                mNavigationBarController.transitionTo(mDisplayId, barMode, animate);
             }
         }
         if (modeChange || command.equals(COMMAND_OPERATOR)) {
@@ -3148,7 +3040,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     .setDuration(FADE_KEYGUARD_DURATION)
                     .withLayer()
                     .withEndAction(this::onLaunchTransitionFadingEnded);
-            mCommandQueue.appTransitionStarting(SystemClock.uptimeMillis(),
+            mCommandQueue.appTransitionStarting(mDisplayId, SystemClock.uptimeMillis(),
                     LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION, true);
         };
         if (mNotificationPanel.isLaunchTransitionRunning()) {
@@ -3236,12 +3128,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mDraggedDownEntry = null;
             }
 
-            // TODO(115978725): Support animations on external nav bars.
             // Disable layout transitions in navbar for this transition because the load is just
             // too heavy for the CPU and GPU on any device.
-            if (mNavigationBar != null) {
-                mNavigationBar.disableAnimationsDuringHide(delay);
-            }
+            mNavigationBarController.disableAnimationsDuringHide(mDisplayId, delay);
         } else if (!mNotificationPanel.isCollapsing()) {
             instantCollapseNotificationPanel();
         }
@@ -3274,7 +3163,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Treat Keyguard exit animation as an app transition to achieve nice transition for status
         // bar.
         mKeyguardMonitor.notifyKeyguardGoingAway(true);
-        mCommandQueue.appTransitionPending(true);
+        mCommandQueue.appTransitionPending(mDisplayId, true /* forced */);
     }
 
     /**
@@ -3285,11 +3174,11 @@ public class StatusBar extends SystemUI implements DemoMode,
      * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
     public void setKeyguardFadingAway(long startTime, long delay, long fadeoutDuration) {
-        mCommandQueue.appTransitionStarting(startTime + fadeoutDuration
+        mCommandQueue.appTransitionStarting(mDisplayId, startTime + fadeoutDuration
                         - LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION,
                 LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION, true);
-        mCommandQueue.recomputeDisableFlags(fadeoutDuration > 0 /* animate */);
-        mCommandQueue.appTransitionStarting(
+        mCommandQueue.recomputeDisableFlags(mDisplayId, fadeoutDuration > 0 /* animate */);
+        mCommandQueue.appTransitionStarting(mDisplayId,
                     startTime - LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION,
                     LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION, true);
         mKeyguardMonitor.notifyKeyguardFadingAway(delay, fadeoutDuration);
@@ -3415,7 +3304,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Make our window larger and the panel expanded.
         makeExpandedVisible(true);
         mNotificationPanel.expand(false /* animate */);
-        mCommandQueue.recomputeDisableFlags(false /* animate */);
+        mCommandQueue.recomputeDisableFlags(mDisplayId, false /* animate */);
     }
 
     @Override
@@ -3471,7 +3360,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateReportRejectedTouchVisibility();
         updateDozing();
         updateTheme();
-        touchAutoDim();
+        mNavigationBarController.touchAutoDim(mDisplayId);
         Trace.beginSection("StatusBar#updateKeyguardState");
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardIndicationController.setVisible(true);
@@ -3592,11 +3481,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // TODO: Figure out way to remove these.
     public NavigationBarView getNavigationBarView() {
-        return (mNavigationBar != null ? (NavigationBarView) mNavigationBar.getView() : null);
-    }
-
-    public View getNavigationBarWindow() {
-        return mNavigationBarView;
+        return mNavigationBarController.getDefaultNavigationBarView();
     }
 
     /**
@@ -3660,7 +3545,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBouncerShowing = bouncerShowing;
         if (mStatusBarView != null) mStatusBarView.setBouncerShowing(bouncerShowing);
         updateHideIconsForBouncer(true /* animate */);
-        mCommandQueue.recomputeDisableFlags(true /* animate */);
+        mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
         updateScrimController();
     }
 
@@ -3785,13 +3670,17 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void appTransitionCancelled() {
-        getComponent(Divider.class).onAppTransitionFinished();
+    public void appTransitionCancelled(int displayId) {
+        if (displayId == mDisplayId) {
+            getComponent(Divider.class).onAppTransitionFinished();
+        }
     }
 
     @Override
-    public void appTransitionFinished() {
-        getComponent(Divider.class).onAppTransitionFinished();
+    public void appTransitionFinished(int displayId) {
+        if (displayId == mDisplayId) {
+            getComponent(Divider.class).onAppTransitionFinished();
+        }
     }
 
     @Override
@@ -4178,7 +4067,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private DeviceProvisionedController mDeviceProvisionedController
             = Dependency.get(DeviceProvisionedController.class);
 
-    protected DisplayNavigationBarController mNavigationBarController;
+    protected NavigationBarController mNavigationBarController;
 
     // UI-specific methods
 
@@ -4187,6 +4076,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private IDreamManager mDreamManager;
 
     protected Display mDisplay;
+    private int mDisplayId;
 
     protected Recents mRecents;
 
@@ -4314,7 +4204,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             // Immediately update the icon hidden state, since that should only apply if we're
             // staying fullscreen.
             mWereIconsJustHidden = false;
-            mCommandQueue.recomputeDisableFlags(true);
+            mCommandQueue.recomputeDisableFlags(mDisplayId, true);
         }
         updateHideIconsForBouncer(true /* animate */);
     }
@@ -4373,7 +4263,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void startPendingIntentDismissingKeyguard(
-            final PendingIntent intent, @Nullable final Runnable intentSentCallback) {
+            final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback) {
         final boolean afterKeyguardGone = intent.isActivity()
                 && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
@@ -4392,10 +4282,14 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (intent.isActivity()) {
                 mAssistManager.hideAssist();
             }
-            if (intentSentCallback != null) {
-                intentSentCallback.run();
+            if (intentSentUiThreadCallback != null) {
+                postOnUiThread(intentSentUiThreadCallback);
             }
         }, afterKeyguardGone);
+    }
+
+    private void postOnUiThread(Runnable runnable) {
+        mMainThreadHandler.post(runnable);
     }
 
     public static Bundle getActivityOptions(@Nullable RemoteAnimationAdapter animationAdapter) {
@@ -4506,13 +4400,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
     // End Extra BaseStatusBarMethods.
 
-    // TODO(115978725): Handle dimming for external nav bars
-    private final Runnable mAutoDim = () -> {
-        if (mNavigationBar != null) {
-            mNavigationBar.getBarTransitions().setAutoDim(true);
-        }
-    };
-
     public NotificationGutsManager getGutsManager() {
         return mGutsManager;
     }
@@ -4520,5 +4407,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Subcomponent
     public interface StatusBarInjector {
         void createStatusBar(StatusBar statusbar);
+    }
+
+    public @TransitionMode int getStatusBarMode() {
+        return mStatusBarMode;
     }
 }

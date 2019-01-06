@@ -558,7 +558,7 @@ abstract public class ManagedServices {
         if (pkgList != null && (pkgList.length > 0)) {
             boolean anyServicesInvolved = false;
             // Remove notification settings for uninstalled package
-            if (removingPackage) {
+            if (removingPackage && uidList != null) {
                 int size = Math.min(pkgList.length, uidList.length);
                 for (int i = 0; i < size; i++) {
                     final String pkg = pkgList[i];
@@ -570,9 +570,11 @@ abstract public class ManagedServices {
                 if (mEnabledServicesPackageNames.contains(pkgName)) {
                     anyServicesInvolved = true;
                 }
-                for (int uid : uidList) {
-                    if (isPackageAllowed(pkgName, UserHandle.getUserId(uid))) {
-                        anyServicesInvolved = true;
+                if (uidList != null && uidList.length > 0) {
+                    for (int uid : uidList) {
+                        if (isPackageAllowed(pkgName, UserHandle.getUserId(uid))) {
+                            anyServicesInvolved = true;
+                        }
                     }
                 }
             }

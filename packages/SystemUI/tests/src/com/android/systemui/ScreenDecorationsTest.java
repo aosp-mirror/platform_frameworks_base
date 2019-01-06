@@ -16,13 +16,13 @@ package com.android.systemui;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
-import  static com.android.systemui.ScreenDecorations.rectsToRegion;
+import static com.android.systemui.ScreenDecorations.rectsToRegion;
 import static com.android.systemui.tuner.TunablePadding.FLAG_END;
 import static com.android.systemui.tuner.TunablePadding.FLAG_START;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -87,7 +87,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mWindowManager = mock(WindowManager.class);
         mView = spy(new StatusBarWindowView(mContext, null));
         when(mStatusBar.getStatusBarWindow()).thenReturn(mView);
-        when(mStatusBar.getNavigationBarWindow()).thenReturn(mView);
         mContext.putComponent(StatusBar.class, mStatusBar);
 
         Display display = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
@@ -135,9 +134,12 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     public void testNoRounding_NoCutout() {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
-        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 0);
-        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius_top, 0);
-        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius_bottom, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_top, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom, 0);
         mContext.getOrCreateTestableResources()
                 .addOverride(dimen.rounded_corner_content_padding, 0);
 
@@ -154,7 +156,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     public void testRounding() {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
-        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 20);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 20);
         mContext.getOrCreateTestableResources()
                 .addOverride(dimen.rounded_corner_content_padding, 20);
 
@@ -174,7 +177,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     public void testCutout() {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, true);
-        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 0);
         mContext.getOrCreateTestableResources()
                 .addOverride(dimen.rounded_corner_content_padding, 0);
 
@@ -187,7 +191,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     public void testDelayedCutout() {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
-        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 0);
         mContext.getOrCreateTestableResources()
                 .addOverride(dimen.rounded_corner_content_padding, 0);
 
@@ -235,12 +240,14 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     public void testUpdateRoundedCorners() {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
-        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 20);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 20);
 
         mScreenDecorations.start();
         assertEquals(mScreenDecorations.mRoundedDefault, 20);
 
-        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 5);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 5);
         mScreenDecorations.onConfigurationChanged(null);
         assertEquals(mScreenDecorations.mRoundedDefault, 5);
     }

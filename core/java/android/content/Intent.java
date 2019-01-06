@@ -27,7 +27,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -2268,9 +2267,9 @@ public class Intent implements Parcelable, Cloneable {
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      *
-     * @hide TODO: hidden, @TestApi until we decide on public vs. @SystemApi.
+     * @hide
      */
-    @TestApi
+    @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_ROLLBACK_EXECUTED =
             "android.intent.action.PACKAGE_ROLLBACK_EXECUTED";

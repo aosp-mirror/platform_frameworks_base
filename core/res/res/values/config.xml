@@ -929,6 +929,9 @@
          in hardware. -->
     <bool name="config_setColorTransformAccelerated">false</bool>
 
+    <!-- Boolean indicating whether display white balance is supported. -->
+    <bool name="config_displayWhiteBalanceAvailable">false</bool>
+
     <!-- Control whether Night display is available. This should only be enabled on devices
          that have a HWC implementation that can apply the matrix passed to setColorTransform
          without impacting power, performance, and app compatibility (e.g. protected content). -->

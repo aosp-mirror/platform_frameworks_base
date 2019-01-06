@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.annotation.BytesLong;
+import android.annotation.DurationMillisLong;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,6 +56,7 @@ import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.service.media.CameraPrewarmService;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -130,6 +132,8 @@ public final class MediaStore {
     public static final String PARAM_SECONDARY = "secondary";
     /** {@hide} */
     public static final String PARAM_INCLUDE_PENDING = "includePending";
+    /** {@hide} */
+    public static final String PARAM_INCLUDE_TRASHED = "includeTrashed";
     /** {@hide} */
     public static final String PARAM_PROGRESS = "progress";
     /** {@hide} */
@@ -485,9 +489,26 @@ public final class MediaStore {
      * By default no pending items are returned.
      *
      * @see MediaColumns#IS_PENDING
+     * @see MediaStore#setIncludePending(Uri)
+     * @see MediaStore#createPending(Context, PendingParams)
      */
     public static @NonNull Uri setIncludePending(@NonNull Uri uri) {
         return uri.buildUpon().appendQueryParameter(PARAM_INCLUDE_PENDING, "1").build();
+    }
+
+    /**
+     * Update the given {@link Uri} to also include any trashed media items from
+     * calls such as
+     * {@link ContentResolver#query(Uri, String[], Bundle, CancellationSignal)}.
+     * By default no trashed items are returned.
+     *
+     * @see MediaColumns#IS_TRASHED
+     * @see MediaStore#setIncludeTrashed(Uri)
+     * @see MediaStore#trash(Context, Uri)
+     * @see MediaStore#untrash(Context, Uri)
+     */
+    public static @NonNull Uri setIncludeTrashed(@NonNull Uri uri) {
+        return uri.buildUpon().appendQueryParameter(PARAM_INCLUDE_TRASHED, "1").build();
     }
 
     /**
@@ -516,6 +537,9 @@ public final class MediaStore {
      *
      * @return token which can be passed to {@link #openPending(Context, Uri)}
      *         to work with this pending item.
+     * @see MediaColumns#IS_PENDING
+     * @see MediaStore#setIncludePending(Uri)
+     * @see MediaStore#createPending(Context, PendingParams)
      */
     public static @NonNull Uri createPending(@NonNull Context context,
             @NonNull PendingParams params) {
@@ -572,6 +596,8 @@ public final class MediaStore {
             this.insertValues.put(MediaColumns.DATE_ADDED, now);
             this.insertValues.put(MediaColumns.DATE_MODIFIED, now);
             this.insertValues.put(MediaColumns.IS_PENDING, 1);
+            this.insertValues.put(MediaColumns.DATE_EXPIRES,
+                    (System.currentTimeMillis() + DateUtils.DAY_IN_MILLIS) / 1000);
         }
 
         /**
@@ -696,6 +722,7 @@ public final class MediaStore {
         public @NonNull Uri publish() {
             final ContentValues values = new ContentValues();
             values.put(MediaColumns.IS_PENDING, 0);
+            values.putNull(MediaColumns.DATE_EXPIRES);
             mContext.getContentResolver().update(mUri, values, null, null);
             return mUri;
         }
@@ -714,6 +741,67 @@ public final class MediaStore {
             // progress is being actively made.
             notifyProgress(-1);
         }
+    }
+
+    /**
+     * Mark the given item as being "trashed", meaning it should be deleted at
+     * some point in the future. This is a more gentle operation than simply
+     * calling {@link ContentResolver#delete(Uri, String, String[])}, which
+     * would take effect immediately.
+     * <p>
+     * This method preserves trashed items for at least 48 hours before erasing
+     * them, giving the user a chance to untrash the item.
+     *
+     * @see MediaColumns#IS_TRASHED
+     * @see MediaStore#setIncludeTrashed(Uri)
+     * @see MediaStore#trash(Context, Uri)
+     * @see MediaStore#untrash(Context, Uri)
+     */
+    public static void trash(@NonNull Context context, @NonNull Uri uri) {
+        trash(context, uri, 48 * DateUtils.HOUR_IN_MILLIS);
+    }
+
+    /**
+     * Mark the given item as being "trashed", meaning it should be deleted at
+     * some point in the future. This is a more gentle operation than simply
+     * calling {@link ContentResolver#delete(Uri, String, String[])}, which
+     * would take effect immediately.
+     * <p>
+     * This method preserves trashed items for at least the given timeout before
+     * erasing them, giving the user a chance to untrash the item.
+     *
+     * @see MediaColumns#IS_TRASHED
+     * @see MediaStore#setIncludeTrashed(Uri)
+     * @see MediaStore#trash(Context, Uri)
+     * @see MediaStore#untrash(Context, Uri)
+     */
+    public static void trash(@NonNull Context context, @NonNull Uri uri,
+            @DurationMillisLong long timeoutMillis) {
+        if (timeoutMillis < 0) {
+            throw new IllegalArgumentException();
+        }
+
+        final ContentValues values = new ContentValues();
+        values.put(MediaColumns.IS_TRASHED, 1);
+        values.put(MediaColumns.DATE_EXPIRES,
+                (System.currentTimeMillis() + timeoutMillis) / 1000);
+        context.getContentResolver().update(uri, values, null, null);
+    }
+
+    /**
+     * Mark the given item as being "untrashed", meaning it should no longer be
+     * deleted as previously requested through {@link #trash(Context, Uri)}.
+     *
+     * @see MediaColumns#IS_TRASHED
+     * @see MediaStore#setIncludeTrashed(Uri)
+     * @see MediaStore#trash(Context, Uri)
+     * @see MediaStore#untrash(Context, Uri)
+     */
+    public static void untrash(@NonNull Context context, @NonNull Uri uri) {
+        final ContentValues values = new ContentValues();
+        values.put(MediaColumns.IS_TRASHED, 0);
+        values.putNull(MediaColumns.DATE_EXPIRES);
+        context.getContentResolver().update(uri, values, null, null);
     }
 
     /**
@@ -821,10 +909,32 @@ public final class MediaStore {
          * <p>
          * Type: BOOLEAN
          *
+         * @see MediaColumns#IS_PENDING
+         * @see MediaStore#setIncludePending(Uri)
          * @see MediaStore#createPending(Context, PendingParams)
-         * @see MediaStore#PARAM_INCLUDE_PENDING
          */
         public static final String IS_PENDING = "is_pending";
+
+        /**
+         * Flag indicating if a media item is trashed.
+         * <p>
+         * Type: BOOLEAN
+         *
+         * @see MediaColumns#IS_TRASHED
+         * @see MediaStore#setIncludeTrashed(Uri)
+         * @see MediaStore#trash(Context, Uri)
+         * @see MediaStore#untrash(Context, Uri)
+         */
+        public static final String IS_TRASHED = "is_trashed";
+
+        /**
+         * The time the file should be considered expired. Units are seconds
+         * since 1970. Typically only meaningful in the context of
+         * {@link #IS_PENDING} or {@link #IS_TRASHED}.
+         * <p>
+         * Type: INTEGER
+         */
+        public static final String DATE_EXPIRES = "date_expires";
 
         /**
          * The width of the image/video in pixels.
@@ -1251,18 +1361,32 @@ public final class MediaStore {
             public static final String MINI_THUMB_MAGIC = "mini_thumb_magic";
 
             /**
-             * The bucket id of the image. This is a read-only property that
-             * is automatically computed from the DATA column.
-             * <P>Type: TEXT</P>
+             * The primary bucket ID of this media item. This can be useful to
+             * present the user a first-level clustering of related media items.
+             * This is a read-only column that is automatically computed.
+             * <p>
+             * Type: INTEGER
              */
             public static final String BUCKET_ID = "bucket_id";
 
             /**
-             * The bucket display name of the image. This is a read-only property that
-             * is automatically computed from the DATA column.
-             * <P>Type: TEXT</P>
+             * The primary bucket display name of this media item. This can be
+             * useful to present the user a first-level clustering of related
+             * media items. This is a read-only column that is automatically
+             * computed.
+             * <p>
+             * Type: TEXT
              */
             public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
+
+            /**
+             * The secondary bucket ID of this media item. This can be useful to
+             * present the user a second-level clustering of related media
+             * items. This is a read-only column that is automatically computed.
+             * <p>
+             * Type: INTEGER
+             */
+            public static final String SECONDARY_BUCKET_ID = "secondary_bucket_id";
         }
 
         public static final class Media implements ImageColumns {
@@ -1338,7 +1462,7 @@ public final class MediaStore {
             public static final String insertImage(ContentResolver cr, Bitmap source,
                                                    String title, String description) {
                 ContentValues values = new ContentValues();
-                values.put(Images.Media.TITLE, title);
+                values.put(Images.Media.DISPLAY_NAME, title);
                 values.put(Images.Media.DESCRIPTION, description);
                 values.put(Images.Media.MIME_TYPE, "image/jpeg");
 
@@ -2500,18 +2624,32 @@ public final class MediaStore {
             public static final String MINI_THUMB_MAGIC = "mini_thumb_magic";
 
             /**
-             * The bucket id of the video. This is a read-only property that
-             * is automatically computed from the DATA column.
-             * <P>Type: TEXT</P>
+             * The primary bucket ID of this media item. This can be useful to
+             * present the user a first-level clustering of related media items.
+             * This is a read-only column that is automatically computed.
+             * <p>
+             * Type: INTEGER
              */
             public static final String BUCKET_ID = "bucket_id";
 
             /**
-             * The bucket display name of the video. This is a read-only property that
-             * is automatically computed from the DATA column.
-             * <P>Type: TEXT</P>
+             * The primary bucket display name of this media item. This can be
+             * useful to present the user a first-level clustering of related
+             * media items. This is a read-only column that is automatically
+             * computed.
+             * <p>
+             * Type: TEXT
              */
             public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
+
+            /**
+             * The secondary bucket ID of this media item. This can be useful to
+             * present the user a second-level clustering of related media
+             * items. This is a read-only column that is automatically computed.
+             * <p>
+             * Type: INTEGER
+             */
+            public static final String SECONDARY_BUCKET_ID = "secondary_bucket_id";
 
             /**
              * The bookmark for the video. Time in ms. Represents the location in the video that the

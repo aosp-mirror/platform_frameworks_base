@@ -16,18 +16,13 @@
 
 package android.media;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,368 +41,26 @@ import java.util.Objects;
  */
 public final class Session2Command implements Parcelable {
     /**
-     * The first version of session commands. This version is for commands introduced in API 29.
-     * <p>
-     * This would be used to specify which commands should be added by
-     * {@link Session2CommandGroup.Builder#addAllPredefinedCommands(int)}
-     *
-     * @see Session2CommandGroup.Builder#addAllPredefinedCommands(int)
-     */
-    public static final int COMMAND_VERSION_1 = 1;
-
-    /**
-     * @hide
-     */
-    public static final int COMMAND_VERSION_CURRENT = COMMAND_VERSION_1;
-
-    /**
-     * @hide
-     */
-    @IntDef({COMMAND_VERSION_1})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface CommandVersion {}
-
-    /**
-     * @hide
-     */
-    @IntDef({COMMAND_CODE_CUSTOM,
-            COMMAND_CODE_PLAYER_PLAY,
-            COMMAND_CODE_PLAYER_PAUSE,
-            COMMAND_CODE_PLAYER_PREPARE,
-            COMMAND_CODE_PLAYER_SEEK_TO,
-            COMMAND_CODE_PLAYER_SET_SPEED,
-            COMMAND_CODE_PLAYER_GET_PLAYLIST,
-            COMMAND_CODE_PLAYER_SET_PLAYLIST,
-            COMMAND_CODE_PLAYER_SKIP_TO_PLAYLIST_ITEM,
-            COMMAND_CODE_PLAYER_SKIP_TO_PREVIOUS_PLAYLIST_ITEM,
-            COMMAND_CODE_PLAYER_SKIP_TO_NEXT_PLAYLIST_ITEM,
-            COMMAND_CODE_PLAYER_SET_SHUFFLE_MODE,
-            COMMAND_CODE_PLAYER_SET_REPEAT_MODE,
-            COMMAND_CODE_PLAYER_GET_PLAYLIST_METADATA,
-            COMMAND_CODE_PLAYER_ADD_PLAYLIST_ITEM,
-            COMMAND_CODE_PLAYER_REMOVE_PLAYLIST_ITEM,
-            COMMAND_CODE_PLAYER_REPLACE_PLAYLIST_ITEM,
-            COMMAND_CODE_PLAYER_GET_CURRENT_MEDIA_ITEM,
-            COMMAND_CODE_PLAYER_UPDATE_LIST_METADATA,
-            COMMAND_CODE_PLAYER_SET_MEDIA_ITEM,
-            COMMAND_CODE_VOLUME_SET_VOLUME,
-            COMMAND_CODE_VOLUME_ADJUST_VOLUME,
-            COMMAND_CODE_SESSION_FAST_FORWARD,
-            COMMAND_CODE_SESSION_REWIND,
-            COMMAND_CODE_SESSION_SKIP_FORWARD,
-            COMMAND_CODE_SESSION_SKIP_BACKWARD,
-            COMMAND_CODE_SESSION_SET_RATING,
-            COMMAND_CODE_LIBRARY_GET_LIBRARY_ROOT,
-            COMMAND_CODE_LIBRARY_SUBSCRIBE,
-            COMMAND_CODE_LIBRARY_UNSUBSCRIBE,
-            COMMAND_CODE_LIBRARY_GET_CHILDREN,
-            COMMAND_CODE_LIBRARY_GET_ITEM,
-            COMMAND_CODE_LIBRARY_SEARCH,
-            COMMAND_CODE_LIBRARY_GET_SEARCH_RESULT
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface CommandCode {}
-
-    /**
      * Command code for the custom command which can be defined by string action in the
      * {@link Session2Command}.
      */
     public static final int COMMAND_CODE_CUSTOM = 0;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Player commands (i.e. commands to {@link Session2Player})
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    static final ArrayMap<Integer, Range> VERSION_PLAYER_COMMANDS_MAP = new ArrayMap<>();
-    static final ArrayMap<Integer, Range> VERSION_PLAYER_PLAYLIST_COMMANDS_MAP = new ArrayMap<>();
-
-    // TODO: check the link tag, and reassign int values properly.
     /**
-     * Command code for {@link MediaController2#play()}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info,
-     * Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
+     * Result code representing that the command is skipped or canceled. For an example, a seek
+     * command can be skipped if it is followed by another seek command.
      */
-    public static final int COMMAND_CODE_PLAYER_PLAY = 10000;
+    public static final int RESULT_INFO_SKIPPED = 1;
 
     /**
-     * Command code for {@link MediaController2#pause()}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info,
-     * Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
+     * Result code representing that the command is successfully completed.
      */
-    public static final int COMMAND_CODE_PLAYER_PAUSE = 10001;
+    public static final int RESULT_SUCCESS = 0;
 
     /**
-     * Command code for {@link MediaController2#prepare()}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info,
-     * Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
+     * Result code represents that call is ended with an unknown error.
      */
-    public static final int COMMAND_CODE_PLAYER_PREPARE = 10002;
-
-    /**
-     * Command code for {@link MediaController2#seekTo(long)}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info,
-     * Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_SEEK_TO = 10003;
-
-    /**
-     * Command code for {@link MediaController2#setPlaybackSpeed(float)}}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link Session22Callback#onCommandRequest(MediaSession2, Controller2Info,
-     * Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_SET_SPEED = 10004;
-
-    /**
-     * Command code for {@link MediaController2#getPlaylist()}. This will expose metadata
-     * information to the controller.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_GET_PLAYLIST = 10005;
-
-    /**
-     * Command code for {@link MediaController2#setPlaylist(List, MediaMetadata)}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the
-     * {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info, Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_SET_PLAYLIST = 10006;
-
-    /**
-     * Command code for {@link MediaController2#skipToPlaylistItem(int)}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the
-     * {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info, Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_SKIP_TO_PLAYLIST_ITEM = 10007;
-
-    /**
-     * Command code for {@link MediaController2#skipToPreviousPlaylistItem()}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link Session2Callback#onCommandRequest(
-     * MediaSession2, Controller2Info, Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_SKIP_TO_PREVIOUS_PLAYLIST_ITEM = 10008;
-
-    /**
-     * Command code for {@link MediaController2#skipToNextPlaylistItem()}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link Session2Callback#onCommandRequest(
-     * MediaSession2, Controller2Info, Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-
-    public static final int COMMAND_CODE_PLAYER_SKIP_TO_NEXT_PLAYLIST_ITEM = 10009;
-
-    /**
-     * Command code for {@link MediaController2#setShuffleMode(int)}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the
-     * {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info, Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_SET_SHUFFLE_MODE = 10010;
-
-    /**
-     * Command code for {@link MediaController2#setRepeatMode(int)}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the
-     * {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info, Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_SET_REPEAT_MODE = 10011;
-
-    /**
-     * Command code for {@link MediaController2#getPlaylistMetadata()}. This will expose metadata
-     * information to the controller.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_GET_PLAYLIST_METADATA = 10012;
-
-    /**
-     * Command code for {@link MediaController2#addPlaylistItem(int, String)}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the
-     * {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info, Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_ADD_PLAYLIST_ITEM = 10013;
-
-    /**
-     * Command code for {@link MediaController2#removePlaylistItem(int, String)}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the
-     * {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info, Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_REMOVE_PLAYLIST_ITEM = 10014;
-
-    /**
-     * Command code for {@link MediaController2#replacePlaylistItem(int, String)}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the
-     * {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info, Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_REPLACE_PLAYLIST_ITEM = 10015;
-
-    /**
-     * Command code for {@link MediaController2#getCurrentMediaItem()}. This will expose metadata
-     * information to the controller.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_GET_CURRENT_MEDIA_ITEM = 10016;
-
-    /**
-     * Command code for {@link MediaController2#updatePlaylistMetadata(MediaMetadata)}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the
-     * {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info, Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_UPDATE_LIST_METADATA = 10017;
-
-    /**
-     * Command code for {@link MediaController2#setMediaItem(String)}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the
-     * {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info, Session2Command)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_PLAYER_SET_MEDIA_ITEM = 10018;
-
-    static {
-        VERSION_PLAYER_COMMANDS_MAP.put(COMMAND_VERSION_1,
-                new Range(COMMAND_CODE_PLAYER_PLAY, COMMAND_CODE_PLAYER_SET_MEDIA_ITEM));
-    }
-
-    static {
-        VERSION_PLAYER_PLAYLIST_COMMANDS_MAP.put(COMMAND_VERSION_1,
-                new Range(COMMAND_CODE_PLAYER_GET_PLAYLIST,
-                        COMMAND_CODE_PLAYER_SET_MEDIA_ITEM));
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Volume commands (i.e. commands to {@link AudioManager} or {@link RouteMediaPlayer})
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    static final ArrayMap<Integer, Range> VERSION_VOLUME_COMMANDS_MAP = new ArrayMap<>();
-
-    /**
-     * Command code for {@link MediaController2#setVolumeTo(int, int)}.
-     * <p>
-     * <p>
-     * If the session doesn't reject the request through the
-     * {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info, Session2Command)},
-     * command would adjust the device volume. It would send to the player directly only if it's
-     * remote player. See RouteMediaPlayer for a remote player.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_VOLUME_SET_VOLUME = 30000;
-
-    /**
-     * Command code for {@link MediaController2#adjustVolume(int, int)}.
-     * <p>
-     * If the session doesn't reject the request through the
-     * {@link Session2Callback#onCommandRequest(MediaSession2, Controller2Info, Session2Command)},
-     * command would adjust the device volume. It would send to the player directly only if it's
-     * remote player. See RouteMediaPlayer for a remote player.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_VOLUME_ADJUST_VOLUME = 30001;
-
-    static {
-        VERSION_VOLUME_COMMANDS_MAP.put(COMMAND_VERSION_1,
-                new Range(COMMAND_CODE_VOLUME_SET_VOLUME,
-                        COMMAND_CODE_VOLUME_ADJUST_VOLUME));
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Session commands (i.e. commands to {@link MediaSession2#Session2Callback})
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    static final ArrayMap<Integer, Range> VERSION_SESSION_COMMANDS_MAP = new ArrayMap<>();
-
-    /**
-     * Command code for {@link MediaController2#fastForward()}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_SESSION_FAST_FORWARD = 40000;
-
-    /**
-     * Command code for {@link MediaController2#rewind()}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_SESSION_REWIND = 40001;
-
-    /**
-     * Command code for {@link MediaController2#skipForward()}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_SESSION_SKIP_FORWARD = 40002;
-
-    /**
-     * Command code for {@link MediaController2#skipBackward()}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_SESSION_SKIP_BACKWARD = 40003;
-
-    /**
-     * Command code for {@link MediaController2#setRating(String, Rating)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_SESSION_SET_RATING = 40010;
+    public static final int RESULT_ERROR_UNKNOWN_ERROR = -1;
 
     public static final Parcelable.Creator<Session2Command> CREATOR =
             new Parcelable.Creator<Session2Command>() {
@@ -422,82 +75,17 @@ public final class Session2Command implements Parcelable {
                 }
             };
 
-    static {
-        VERSION_SESSION_COMMANDS_MAP.put(COMMAND_VERSION_1,
-                new Range(COMMAND_CODE_SESSION_FAST_FORWARD, COMMAND_CODE_SESSION_SET_RATING));
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Session commands (i.e. commands to {@link MediaLibrarySession#MediaLibrarySessionCallback})
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    static final ArrayMap<Integer, Range> VERSION_LIBRARY_COMMANDS_MAP = new ArrayMap<>();
-
-    /**
-     * Command code for {@link MediaBrowser2#getLibraryRoot(Library2Params)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_LIBRARY_GET_LIBRARY_ROOT = 50000;
-
-    /**
-     * Command code for {@link MediaBrowser2#subscribe(String, Library2Params)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_LIBRARY_SUBSCRIBE = 50001;
-
-    /**
-     * Command code for {@link MediaBrowser2#unsubscribe(String)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_LIBRARY_UNSUBSCRIBE = 50002;
-
-    /**
-     * Command code for {@link MediaBrowser2#getChildren(String, int, int, Library2Params)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_LIBRARY_GET_CHILDREN = 50003;
-
-    /**
-     * Command code for {@link MediaBrowser2#getItem(String)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_LIBRARY_GET_ITEM = 50004;
-
-    /**
-     * Command code for {@link MediaBrowser2#search(String, LibraryParams)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_LIBRARY_SEARCH = 50005;
-
-    /**
-     * Command code for {@link MediaBrowser2#getSearchResult(String, int, int, Library2Params)}.
-     * <p>
-     * Code version is {@link #COMMAND_VERSION_1}.
-     */
-    public static final int COMMAND_CODE_LIBRARY_GET_SEARCH_RESULT = 50006;
-
-    static {
-        VERSION_LIBRARY_COMMANDS_MAP.put(COMMAND_VERSION_1,
-                new Range(COMMAND_CODE_LIBRARY_GET_LIBRARY_ROOT,
-                        COMMAND_CODE_LIBRARY_GET_SEARCH_RESULT));
-    }
-
-    @CommandCode private final int mCommandCode;
+    private final int mCommandCode;
     // Nonnull if it's custom command
     private final String mCustomCommand;
     private final Bundle mExtras;
 
     /**
-     * Constructor for creating a predefined command.
+     * Constructor for creating a command predefined in AndroidX media2.
      *
-     * @param commandCode A command code for predefined command.
+     * @param commandCode A command code for a command predefined in AndroidX media2.
      */
-    public Session2Command(@CommandCode int commandCode) {
+    public Session2Command(int commandCode) {
         if (commandCode == COMMAND_CODE_CUSTOM) {
             throw new IllegalArgumentException("commandCode shouldn't be COMMAND_CODE_CUSTOM");
         }
@@ -535,7 +123,7 @@ public final class Session2Command implements Parcelable {
      * Gets the command code of a predefined command.
      * This will return {@link #COMMAND_CODE_CUSTOM} for a custom command.
      */
-    public @CommandCode int getCommandCode() {
+    public int getCommandCode() {
         return mCommandCode;
     }
 
@@ -543,7 +131,8 @@ public final class Session2Command implements Parcelable {
      * Gets the action of a custom command.
      * This will return {@code null} for a predefined command.
      */
-    public @Nullable String getCustomCommand() {
+    @Nullable
+    public String getCustomCommand() {
         return mCustomCommand;
     }
 
@@ -551,7 +140,8 @@ public final class Session2Command implements Parcelable {
      * Gets the extra bundle of a custom command.
      * This will return {@code null} for a predefined command.
      */
-    public @Nullable Bundle getExtras() {
+    @Nullable
+    public Bundle getExtras() {
         return mExtras;
     }
 
@@ -582,15 +172,36 @@ public final class Session2Command implements Parcelable {
         return Objects.hash(mCustomCommand, mCommandCode);
     }
 
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
-    static final class Range {
-        public final int lower;
-        public final int upper;
+    /**
+     * Contains the result of {@link Session2Command}.
+     */
+    public static final class Result {
+        private final int mResultCode;
+        private final Bundle mResultData;
 
-        Range(int lower, int upper) {
-            this.lower = lower;
-            this.upper = upper;
+        /**
+         * Constructor of {@link Result}.
+         *
+         * @param resultCode result code
+         * @param resultData result data
+         */
+        public Result(int resultCode, Bundle resultData) {
+            mResultCode = resultCode;
+            mResultData = resultData;
+        }
+
+        /**
+         * Returns the result code.
+         */
+        public int getResultCode() {
+            return mResultCode;
+        }
+
+        /**
+         * Returns the result data.
+         */
+        public Bundle getResultData() {
+            return mResultData;
         }
     }
 }
-

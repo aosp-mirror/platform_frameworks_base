@@ -3379,6 +3379,11 @@
     <permission android:name="android.permission.REVOKE_RUNTIME_PERMISSIONS"
          android:protectionLevel="signature|installer|verifier" />
 
+    <!-- @SystemApi Allows the system to read runtime permission state.
+        @hide -->
+    <permission android:name="android.permission.GET_RUNTIME_PERMISSIONS"
+                android:protectionLevel="signature" />
+
     <!-- @hide Allows an application to observe permission changes. -->
     <permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"
         android:protectionLevel="signature|privileged" />
@@ -3853,6 +3858,10 @@
     -->
     <permission android:name="android.permission.PACKAGE_ROLLBACK_AGENT"
         android:protectionLevel="signature" />
+
+    <!-- @SystemApi @hide Allows managing apk level rollbacks. -->
+    <permission android:name="android.permission.MANAGE_ROLLBACKS"
+        android:protectionLevel="signature|installer" />
 
     <!-- @SystemApi @hide Allows an application to mark other applications as harmful -->
     <permission android:name="android.permission.SET_HARMFUL_APP_WARNINGS"

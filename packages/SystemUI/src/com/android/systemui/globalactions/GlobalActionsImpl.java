@@ -132,9 +132,9 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
     }
 
     @Override
-    public void disable(int state1, int state2, boolean animate) {
+    public void disable(int displayId, int state1, int state2, boolean animate) {
         final boolean disabled = (state2 & DISABLE2_GLOBAL_ACTIONS) != 0;
-        if (disabled == mDisabled) return;
+        if (displayId != mContext.getDisplayId() || disabled == mDisabled) return;
         mDisabled = disabled;
         if (disabled && mGlobalActions != null) {
             mGlobalActions.dismissDialog();

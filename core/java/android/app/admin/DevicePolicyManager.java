@@ -907,9 +907,8 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER";
 
     /**
-     * A String extra holding the URL-safe base64 encoded SHA-256 or SHA-1 hash (see notes below) of
-     * the file at download location specified in
-     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
+     * A String extra holding the URL-safe base64 encoded SHA-256 hash of the file at download
+     * location specified in {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
      *
      * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM} must be
      * present. The provided checksum must match the checksum of the file at the download
@@ -922,7 +921,8 @@ public class DevicePolicyManager {
      * <p><strong>Note:</strong> for devices running {@link android.os.Build.VERSION_CODES#LOLLIPOP}
      * and {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1} only SHA-1 hash is supported.
      * Starting from {@link android.os.Build.VERSION_CODES#M}, this parameter accepts SHA-256 in
-     * addition to SHA-1. Support for SHA-1 is likely to be removed in future OS releases.
+     * addition to SHA-1. From {@link android.os.Build.VERSION_CODES#Q}, only SHA-256 hash is
+     * supported.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM";

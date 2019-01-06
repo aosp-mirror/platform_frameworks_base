@@ -16,9 +16,11 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.LOW_PRIORITY;
+import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -136,6 +138,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
  */
@@ -165,6 +170,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private final Paint mBackgroundPaint = new Paint();
     private final boolean mShouldDrawNotificationBackground;
     private boolean mLowPriorityBeforeSpeedBump;
+    private final boolean mAllowLongPress;
 
     private float mExpandedHeight;
     private int mOwnScrollY;
@@ -452,26 +458,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private final NotificationGutsManager
             mNotificationGutsManager = Dependency.get(NotificationGutsManager.class);
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public NotificationStackScrollLayout(Context context) {
-        this(context, null);
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public NotificationStackScrollLayout(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public NotificationStackScrollLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public NotificationStackScrollLayout(Context context, AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+    @Inject
+    public NotificationStackScrollLayout(
+            @Named(VIEW_CONTEXT) Context context,
+            AttributeSet attrs,
+            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress) {
+        super(context, attrs, 0, 0);
         Resources res = getResources();
+
+        mAllowLongPress = allowLongPress;
 
         for (int i = 0; i < NUM_SECTIONS; i++) {
             mSections[i] = new NotificationSection(this);
@@ -532,7 +527,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         inflateEmptyShadeView();
         inflateFooterView();
         mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
-        setLongPressListener(mEntryManager.getNotificationLongClicker());
+        if (mAllowLongPress) {
+            setLongPressListener(mGutsManager::openGuts);
+        }
     }
 
     @Override

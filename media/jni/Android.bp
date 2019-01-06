@@ -95,14 +95,16 @@ cc_library_shared {
     ],
 
     shared_libs: [
-        "android.hardware.cas@1.0",  // for CasManager. VNDK???
-        "android.hardware.cas.native@1.0",  // CasManager. VNDK???
+        // MediaCas
+        "android.hardware.cas@1.0",
+        "android.hardware.cas.native@1.0",
         "android.hidl.allocator@1.0",
+        "libhidlbase",
         "libhidlmemory",
-        "libbinder",
-        "libgui",  // for VideoFrameScheduler
-        "libhidlbase",  // VNDK???
-        "libpowermanager",  // for JWakeLock. to be removed
+
+        "libpowermanager",  // Used by JWakeLock. Will be replace with public SDJ API.
+        "libmediametrics",  // Used by MediaMetrics. Will be replaced with stable C API.
+        "libbinder",  // Used by JWakeLock and MediaMetrics.
 
         "libutils",  // Have to use shared lib to make libandroid_runtime behave correctly.
                      // Otherwise, AndroidRuntime::getJNIEnv() will return NULL.
@@ -124,7 +126,6 @@ cc_library_shared {
         "libmedia_helper",
         "libmedia_player2_util",
         "libmediaextractor",
-        "libmediametrics",
         "libmediaplayer2",
         "libmediaplayer2-protos",
         "libmediandk_utils",

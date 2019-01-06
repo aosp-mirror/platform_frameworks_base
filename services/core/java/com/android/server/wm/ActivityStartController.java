@@ -258,7 +258,7 @@ public class ActivityStartController {
             String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
             int userId, TaskRecord inTask, String reason, boolean validateIncomingUser,
-            PendingIntentRecord originatingPendingIntent) {
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
 
         userId = checkTargetUser(userId, validateIncomingUser, realCallingPid, realCallingUid,
                 reason);
@@ -278,6 +278,7 @@ public class ActivityStartController {
                 .setMayWait(userId)
                 .setInTask(inTask)
                 .setOriginatingPendingIntent(originatingPendingIntent)
+                .setAllowBackgroundActivityStart(allowBackgroundActivityStart)
                 .execute();
     }
 
@@ -294,7 +295,8 @@ public class ActivityStartController {
      */
     final int startActivitiesInPackage(int uid, String callingPackage, Intent[] intents,
             String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
-            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent) {
+            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
+            boolean allowBackgroundActivityStart) {
 
         final String reason = "startActivityInPackage";
 
@@ -303,12 +305,13 @@ public class ActivityStartController {
 
         // TODO: Switch to user app stacks here.
         return startActivities(null, uid, callingPackage, intents, resolvedTypes, resultTo, options,
-                userId, reason, originatingPendingIntent);
+                userId, reason, originatingPendingIntent, allowBackgroundActivityStart);
     }
 
     int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options,
-            int userId, String reason, PendingIntentRecord originatingPendingIntent) {
+            int userId, String reason, PendingIntentRecord originatingPendingIntent,
+            boolean allowBackgroundActivityStart) {
         if (intents == null) {
             throw new NullPointerException("intents is null");
         }
@@ -387,6 +390,7 @@ public class ActivityStartController {
                             // top one as otherwise an activity below might consume it.
                             .setAllowPendingRemoteAnimationRegistryLookup(top /* allowLookup*/)
                             .setOriginatingPendingIntent(originatingPendingIntent)
+                            .setAllowBackgroundActivityStart(allowBackgroundActivityStart)
                             .execute();
 
                     if (res < 0) {

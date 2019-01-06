@@ -49,7 +49,7 @@ class KeepSet {
  public:
   KeepSet() = default;
 
-  KeepSet(bool conditional_keep_rules) : conditional_keep_rules_(conditional_keep_rules) {
+  explicit KeepSet(bool conditional_keep_rules) : conditional_keep_rules_(conditional_keep_rules) {
   }
 
   inline void AddManifestClass(const UsageLocation& file, const std::string& class_name) {

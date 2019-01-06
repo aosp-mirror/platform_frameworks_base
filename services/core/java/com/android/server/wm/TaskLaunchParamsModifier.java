@@ -219,10 +219,16 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 }
             }
 
-            if (launchMode == WINDOWING_MODE_FREEFORM && !currentParams.mBounds.isEmpty()) {
+            if (!currentParams.mBounds.isEmpty()) {
+                // Carry over bounds from callers regardless of launch mode because bounds is still
+                // used to restore last non-fullscreen bounds when launch mode is not freeform.
+                // Therefore it's not a resolution step for non-freeform launch mode and only
+                // consider it fully resolved only when launch mode is freeform.
                 outParams.mBounds.set(currentParams.mBounds);
-                fullyResolvedCurrentParam = true;
-                if (DEBUG) appendLog("inherit-bounds=" + outParams.mBounds);
+                if (launchMode == WINDOWING_MODE_FREEFORM) {
+                    fullyResolvedCurrentParam = true;
+                    if (DEBUG) appendLog("inherit-bounds=" + outParams.mBounds);
+                }
             }
         }
 
@@ -303,6 +309,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         if (optionLaunchId != INVALID_DISPLAY) {
             if (DEBUG) appendLog("display-from-option=" + optionLaunchId);
             displayId = optionLaunchId;
+        }
+
+        // If the source activity is a no-display activity, pass on the launch display id from
+        // source activity as currently preferred.
+        if (displayId == INVALID_DISPLAY && source != null && source.noDisplay) {
+            displayId = source.mHandoverLaunchDisplayId;
+            if (DEBUG) appendLog("display-from-no-display-source=" + displayId);
         }
 
         ActivityStack stack =

@@ -18,16 +18,18 @@ package com.android.systemui.biometrics;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.widget.ImageView;
 
 import com.android.systemui.R;
 
 /**
  * This class loads the view for the system-provided dialog. The view consists of:
- * Application Icon, Title, Subtitle, Description, Fingerprint Icon, Error/Help message area,
+ * Application Icon, Title, Subtitle, Description, Biometric Icon, Error/Help message area,
  * and positive/negative buttons.
  */
 public class FaceDialogView extends BiometricDialogView {
+
+    private static final int HIDE_DIALOG_DELAY = 500; // ms
+
     public FaceDialogView(Context context,
             DialogViewCallback callback) {
         super(context, callback);
@@ -53,10 +55,46 @@ public class FaceDialogView extends BiometricDialogView {
     }
 
     @Override
-    protected void updateIcon(int lastState, int newState) {
-        Drawable icon = mContext.getDrawable(R.drawable.face_dialog_icon);
+    protected boolean shouldAnimateForTransition(int oldState, int newState) {
+        if (oldState == STATE_NONE && newState == STATE_AUTHENTICATING) {
+            return false;
+        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_ERROR) {
+            return true;
+        } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATING) {
+            return true;
+        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_PENDING_CONFIRMATION) {
+            return true;
+        } else if (oldState == STATE_PENDING_CONFIRMATION && newState == STATE_AUTHENTICATED) {
+            return true;
+        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
+            return true;
+        }
+        return false;
+    }
 
-        final ImageView faceIcon = getLayout().findViewById(R.id.biometric_icon);
-        faceIcon.setImageDrawable(icon);
+    @Override
+    protected int getDelayAfterAuthenticatedDurationMs() {
+        return HIDE_DIALOG_DELAY;
+    }
+
+    @Override
+    protected Drawable getAnimationForTransition(int oldState, int newState) {
+        int iconRes;
+        if (oldState == STATE_NONE && newState == STATE_AUTHENTICATING) {
+            iconRes = R.drawable.face_dialog_face_to_error;
+        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_ERROR) {
+            iconRes = R.drawable.face_dialog_face_to_error;
+        } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATING) {
+            iconRes = R.drawable.face_dialog_error_to_face;
+        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_PENDING_CONFIRMATION) {
+            iconRes = R.drawable.face_dialog_face_gray_to_face_blue;
+        } else if (oldState == STATE_PENDING_CONFIRMATION && newState == STATE_AUTHENTICATED) {
+            iconRes = R.drawable.face_dialog_face_blue_to_checkmark;
+        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
+            iconRes = R.drawable.face_dialog_face_gray_to_checkmark;
+        } else {
+            return null;
+        }
+        return mContext.getDrawable(iconRes);
     }
 }

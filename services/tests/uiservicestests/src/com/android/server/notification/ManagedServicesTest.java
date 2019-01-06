@@ -859,6 +859,19 @@ public class ManagedServicesTest extends UiServiceTestCase {
         assertTrue(componentsToBind.get(10).contains(ComponentName.unflattenFromString("c/c")));
     }
 
+    @Test
+    public void testOnPackagesChanged_nullValuesPassed_noNullPointers() {
+        for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
+            ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                    mIpm, approvalLevel);
+            // null uid list
+            service.onPackagesChanged(true, new String[]{"this.is.a.package.name"}, null);
+
+            // null package list
+            service.onPackagesChanged(true, null, new int[]{103});
+        }
+    }
+
     private void loadXml(ManagedServices service) throws Exception {
         final StringBuffer xml = new StringBuffer();
         xml.append("<" + service.getConfig().xmlTag + ">\n");

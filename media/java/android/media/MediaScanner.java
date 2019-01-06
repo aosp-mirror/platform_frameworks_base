@@ -902,6 +902,7 @@ public class MediaScanner implements AutoCloseable {
             map.put(MediaStore.MediaColumns.SIZE, mFileSize);
             map.put(MediaStore.MediaColumns.MIME_TYPE, mMimeType);
             map.put(MediaStore.MediaColumns.IS_DRM, mIsDrm);
+            map.putNull(MediaStore.MediaColumns.HASH);
 
             String resolution = null;
             if (mWidth > 0 && mHeight > 0) {
@@ -934,7 +935,7 @@ public class MediaScanner implements AutoCloseable {
                     }
                 } else if (MediaFile.isImageMimeType(mMimeType)) {
                     // FIXME - add DESCRIPTION
-                } else if (mScanSuccess && MediaFile.isAudioMimeType(mMimeType)) {
+                } else if (MediaFile.isAudioMimeType(mMimeType)) {
                     map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0) ?
                             mArtist : MediaStore.UNKNOWN_STRING);
                     map.put(Audio.Media.ALBUM_ARTIST, (mAlbumArtist != null &&
@@ -949,10 +950,6 @@ public class MediaScanner implements AutoCloseable {
                     map.put(Audio.Media.TRACK, mTrack);
                     map.put(Audio.Media.DURATION, mDuration);
                     map.put(Audio.Media.COMPILATION, mCompilation);
-                }
-                if (!mScanSuccess) {
-                    // force mediaprovider to not determine the media type from the mime type
-                    map.put(Files.FileColumns.MEDIA_TYPE, 0);
                 }
             }
             return map;
@@ -1056,7 +1053,7 @@ public class MediaScanner implements AutoCloseable {
             Uri tableUri = mFilesUri;
             int mediaType = FileColumns.MEDIA_TYPE_NONE;
             MediaInserter inserter = mMediaInserter;
-            if (mScanSuccess && !mNoMedia) {
+            if (!mNoMedia) {
                 if (MediaFile.isVideoMimeType(mMimeType)) {
                     tableUri = mVideoUri;
                     mediaType = FileColumns.MEDIA_TYPE_VIDEO;
@@ -1131,7 +1128,7 @@ public class MediaScanner implements AutoCloseable {
                 // with squashed lower case paths
                 values.remove(MediaStore.MediaColumns.DATA);
 
-                if (mScanSuccess && !mNoMedia) {
+                if (!mNoMedia) {
                     // Changing media type must be done as separate update
                     if (mediaType != entry.mMediaType) {
                         final ContentValues mediaTypeValues = new ContentValues();

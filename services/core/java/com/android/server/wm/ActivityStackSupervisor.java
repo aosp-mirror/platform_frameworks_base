@@ -2657,7 +2657,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return mService.getActivityStartController().startActivityInPackage(
                     task.mCallingUid, callingPid, callingUid, callingPackage, intent, null, null,
                     null, 0, 0, options, userId, task, "startActivityFromRecents",
-                    false /* validateIncomingUser */, null /* originatingPendingIntent */);
+                    false /* validateIncomingUser */, null /* originatingPendingIntent */,
+                    false /* allowBackgroundActivityStart */);
         } finally {
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY && task != null) {
                 // If we are launching the task in the docked stack, put it into resizing mode so

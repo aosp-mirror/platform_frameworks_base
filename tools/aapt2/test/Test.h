@@ -23,5 +23,6 @@
 #include "test/Builders.h"
 #include "test/Common.h"
 #include "test/Context.h"
+#include "test/Fixture.h"
 
 #endif  // AAPT_TEST_TEST_H

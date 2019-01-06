@@ -36,7 +36,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -50,11 +49,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Set;
@@ -71,10 +66,6 @@ public class BackupManagerService {
     public static final boolean DEBUG = true;
     public static final boolean MORE_DEBUG = false;
     public static final boolean DEBUG_SCHEDULING = true;
-
-    // File containing backup-enabled state. Contains a single byte to denote enabled status.
-    // Nonzero is enabled; file missing or a zero byte is disabled.
-    private static final String BACKUP_ENABLE_FILE = "backup_enabled";
 
     // The published binder is a singleton Trampoline object that calls through to the proper code.
     // This indirection lets us turn down the heavy implementation object on the fly without
@@ -150,7 +141,8 @@ public class BackupManagerService {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
         try {
             // TODO(b/121198604): Make enable file per-user and clean up indirection.
-            mTrampoline.setBackupEnabledForUser(userId, readBackupEnableState(userId));
+            mTrampoline.setBackupEnabledForUser(
+                    userId, UserBackupManagerFilePersistedSettings.readBackupEnableState(userId));
         } catch (RemoteException e) {
             // Can't happen, it's a local object.
         }
@@ -770,44 +762,6 @@ public class BackupManagerService {
 
         if (userBackupManagerService != null) {
             userBackupManagerService.dump(fd, pw, args);
-        }
-    }
-
-    private static boolean readBackupEnableState(int userId) {
-        File base = new File(Environment.getDataDirectory(), "backup");
-        File enableFile = new File(base, BACKUP_ENABLE_FILE);
-        if (enableFile.exists()) {
-            try (FileInputStream fin = new FileInputStream(enableFile)) {
-                int state = fin.read();
-                return state != 0;
-            } catch (IOException e) {
-                // can't read the file; fall through to assume disabled
-                Slog.e(TAG, "Cannot read enable state; assuming disabled");
-            }
-        } else {
-            if (DEBUG) {
-                Slog.i(TAG, "isBackupEnabled() => false due to absent settings file");
-            }
-        }
-        return false;
-    }
-
-    static void writeBackupEnableState(boolean enable, int userId) {
-        File base = new File(Environment.getDataDirectory(), "backup");
-        File enableFile = new File(base, BACKUP_ENABLE_FILE);
-        File stage = new File(base, BACKUP_ENABLE_FILE + "-stage");
-        try (FileOutputStream fout = new FileOutputStream(stage)) {
-            fout.write(enable ? 1 : 0);
-            fout.close();
-            stage.renameTo(enableFile);
-            // will be synced immediately by the try-with-resources call to close()
-        } catch (IOException | RuntimeException e) {
-            Slog.e(
-                    TAG,
-                    "Unable to record backup enable state; reverting to disabled: "
-                            + e.getMessage());
-            enableFile.delete();
-            stage.delete();
         }
     }
 

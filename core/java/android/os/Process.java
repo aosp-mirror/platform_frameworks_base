@@ -111,6 +111,12 @@ public class Process {
     public static final int NFC_UID = 1027;
 
     /**
+     * Defines the UID/GID for the clatd process.
+     * @hide
+     * */
+    public static final int CLAT_UID = 1029;
+
+    /**
      * Defines the UID/GID for the Bluetooth service process.
      * @hide
      */

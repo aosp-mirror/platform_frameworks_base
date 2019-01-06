@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -41,7 +40,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.NotificationUpdateHandler;
 import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
@@ -92,9 +90,7 @@ public class NotificationEntryManager implements
     private Runnable mUpdateNotificationViewsCallback;
 
     private NotificationPresenter mPresenter;
-    protected PowerManager mPowerManager;
     private NotificationListenerService.RankingMap mLatestRankingMap;
-    protected HeadsUpManager mHeadsUpManager;
     protected NotificationData mNotificationData;
     protected NotificationListContainer mListContainer;
     @VisibleForTesting
@@ -130,7 +126,6 @@ public class NotificationEntryManager implements
 
     public NotificationEntryManager(Context context) {
         mContext = context;
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBubbleController.setDismissListener(this /* bubbleEventListener */);
         mNotificationData = new NotificationData();
         mDeferredNotificationViewUpdateHandler = new Handler();
@@ -163,8 +158,7 @@ public class NotificationEntryManager implements
             HeadsUpManager headsUpManager) {
         mPresenter = presenter;
         mUpdateNotificationViewsCallback = mPresenter::updateNotificationViews;
-        mHeadsUpManager = headsUpManager;
-        mNotificationData.setHeadsUpManager(mHeadsUpManager);
+        mNotificationData.setHeadsUpManager(headsUpManager);
         mListContainer = listContainer;
 
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
@@ -193,10 +187,6 @@ public class NotificationEntryManager implements
 
     protected NotificationPresenter getPresenter() {
         return mPresenter;
-    }
-
-    public ExpandableNotificationRow.LongPressListener getNotificationLongClicker() {
-        return getRowBinder().getNotificationLongClicker();
     }
 
     @Override
@@ -344,8 +334,6 @@ public class NotificationEntryManager implements
                     extender.setShouldManageLifetime(entry, false /* shouldManage */);
                 }
 
-                mForegroundServiceController.removeNotification(entry.notification);
-
                 if (entry.rowExists()) {
                     entry.removeRow();
                     mListContainer.cleanUpViewStateForEntry(entry);
@@ -443,7 +431,6 @@ public class NotificationEntryManager implements
         }
 
         Dependency.get(LeakDetector.class).trackInstance(entry);
-        entry.createIcons(mContext, sbn);
         // Construct the expanded view.
         getRowBinder().inflateViews(entry, () -> performRemoveNotification(sbn),
                 mNotificationData.get(entry.key) != null);
@@ -462,9 +449,6 @@ public class NotificationEntryManager implements
         rankingMap.getRanking(key, ranking);
         NotificationData.Entry entry = createNotificationEntry(notification, ranking);
         abortExistingInflation(key);
-
-        mForegroundServiceController.addNotification(notification,
-                mNotificationData.getImportance(key));
 
         mPendingNotifications.put(key, entry);
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
@@ -523,12 +507,8 @@ public class NotificationEntryManager implements
 
         mNotificationData.update(entry, ranking, notification);
 
-        entry.updateIcons(mContext, notification);
         getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
                 mNotificationData.get(entry.key) != null);
-
-        mForegroundServiceController.updateNotification(notification,
-                mNotificationData.getImportance(key));
 
         updateNotifications();
 

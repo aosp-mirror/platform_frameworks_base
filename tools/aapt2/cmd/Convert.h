@@ -20,6 +20,7 @@
 #include "Command.h"
 #include "LoadedApk.h"
 #include "format/binary/TableFlattener.h"
+#include "format/binary/XmlFlattener.h"
 
 namespace aapt {
 
@@ -27,14 +28,18 @@ class ConvertCommand : public Command {
  public:
   explicit ConvertCommand() : Command("convert") {
     SetDescription("Converts an apk between binary and proto formats.");
-    AddRequiredFlag("-o", "Output path", &output_path_);
+    AddRequiredFlag("-o", "Output path", &output_path_, Command::kPath);
     AddOptionalFlag("--output-format", android::base::StringPrintf("Format of the output. "
             "Accepted values are '%s' and '%s'. When not set, defaults to '%s'.",
         kOutputFormatProto, kOutputFormatBinary, kOutputFormatBinary), &output_format_);
     AddOptionalSwitch("--enable-sparse-encoding",
         "Enables encoding sparse entries using a binary search tree.\n"
-            "This decreases APK size at the cost of resource retrieval performance.",
-        &options_.use_sparse_entries);
+        "This decreases APK size at the cost of resource retrieval performance.",
+         &table_flattener_options_.use_sparse_entries);
+    AddOptionalSwitch("--keep-raw-values",
+        android::base::StringPrintf("Preserve raw attribute values in xml files when using the"
+            " '%s' output format", kOutputFormatBinary),
+        &xml_flattener_options_.keep_raw_values);
     AddOptionalSwitch("-v", "Enables verbose logging", &verbose_);
   }
 
@@ -44,14 +49,16 @@ class ConvertCommand : public Command {
   const static char* kOutputFormatProto;
   const static char* kOutputFormatBinary;
 
-  TableFlattenerOptions options_;
+  TableFlattenerOptions table_flattener_options_;
+  XmlFlattenerOptions xml_flattener_options_;
   std::string output_path_;
   Maybe<std::string> output_format_;
   bool verbose_ = false;
 };
 
 int Convert(IAaptContext* context, LoadedApk* input, IArchiveWriter* output_writer,
-            ApkFormat output_format, TableFlattenerOptions& options);
+            ApkFormat output_format,TableFlattenerOptions table_flattener_options,
+            XmlFlattenerOptions xml_flattener_options);
 
 }  // namespace aapt
 

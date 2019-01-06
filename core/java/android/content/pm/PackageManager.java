@@ -1368,6 +1368,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_BAD_DEX_METADATA = -117;
 
+    /**
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if there is any signature problem.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_BAD_SIGNATURE = -118;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
@@ -1928,6 +1936,30 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_NFC_HOST_CARD_EMULATION_NFCF = "android.hardware.nfc.hcef";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports uicc-
+     * based NFC card emulation.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC =
+                                                                       "android.hardware.nfc.uicc";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports eSE-
+     * based NFC card emulation.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE = "android.hardware.nfc.ese";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The Beam API is enabled on the device.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_NFC_BEAM = "android.sofware.nfc.beam";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -5969,27 +6001,28 @@ public abstract class PackageManager {
     }
 
     /**
-     * Returns whether or not a given package can be suspended via a call to {@link
+     * Returns any packages in a given set of packages that cannot be suspended via a call to {@link
      * #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
      * SuspendDialogInfo) setPackagesSuspended}. The platform prevents suspending certain critical
      * packages to keep the device in a functioning state, e.g. the default dialer.
      * Apps need to hold {@link Manifest.permission#SUSPEND_APPS SUSPEND_APPS} to call this api.
      *
      * <p>
-     * Note that this set of critical packages can change with time, so <em>a value of {@code true}
-     * returned by this api does not guarantee that a following call to {@link
-     * #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
-     * SuspendDialogInfo) setPackagesSuspended} for the same package will succeed</em>, especially
-     * if considerable time elapsed between the two calls.
+     * Note that this set of critical packages can change with time, so even though a package name
+     * was not returned by this call, it does not guarantee that a subsequent call to
+     * {@link #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
+     * SuspendDialogInfo) setPackagesSuspended} for that package will succeed, especially if
+     * significant time elapsed between the two calls.
      *
-     * @param packageName The package to check.
-     * @return {@code true} if the given package can be suspended, {@code false} otherwise.
+     * @param packageNames The packages to check.
+     * @return A list of packages that can not be currently suspended by the system.
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.SUSPEND_APPS)
-    public boolean canSuspendPackage(@NonNull String packageName) {
-        throw new UnsupportedOperationException("canSuspendPackage not implemented");
+    @NonNull
+    public String[] getUnsuspendablePackages(@NonNull String[] packageNames) {
+        throw new UnsupportedOperationException("canSuspendPackages not implemented");
     }
 
     /**
@@ -6242,6 +6275,7 @@ public abstract class PackageManager {
             case INSTALL_FAILED_ABORTED: return "INSTALL_FAILED_ABORTED";
             case INSTALL_FAILED_BAD_DEX_METADATA: return "INSTALL_FAILED_BAD_DEX_METADATA";
             case INSTALL_FAILED_MISSING_SPLIT: return "INSTALL_FAILED_MISSING_SPLIT";
+            case INSTALL_FAILED_BAD_SIGNATURE: return "INSTALL_FAILED_BAD_SIGNATURE";
             default: return Integer.toString(status);
         }
     }
@@ -6287,6 +6321,7 @@ public abstract class PackageManager {
             case INSTALL_PARSE_FAILED_MANIFEST_MALFORMED: return PackageInstaller.STATUS_FAILURE_INVALID;
             case INSTALL_PARSE_FAILED_MANIFEST_EMPTY: return PackageInstaller.STATUS_FAILURE_INVALID;
             case INSTALL_FAILED_BAD_DEX_METADATA: return PackageInstaller.STATUS_FAILURE_INVALID;
+            case INSTALL_FAILED_BAD_SIGNATURE: return PackageInstaller.STATUS_FAILURE_INVALID;
             case INSTALL_FAILED_INTERNAL_ERROR: return PackageInstaller.STATUS_FAILURE;
             case INSTALL_FAILED_USER_RESTRICTED: return PackageInstaller.STATUS_FAILURE_INCOMPATIBLE;
             case INSTALL_FAILED_DUPLICATE_PERMISSION: return PackageInstaller.STATUS_FAILURE_CONFLICT;

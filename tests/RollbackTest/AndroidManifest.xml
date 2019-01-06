@@ -17,9 +17,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.tests.rollback" >
 
-    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.DELETE_PACKAGES" />
-
     <application>
         <receiver android:name="com.android.tests.rollback.LocalIntentSender"
                   android:exported="true" />

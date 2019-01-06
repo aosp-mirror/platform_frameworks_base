@@ -17,6 +17,7 @@ package android.hardware.hdmi;
 
 import android.annotation.Nullable;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -52,7 +53,7 @@ public final class HdmiAudioSystemClient extends HdmiClient {
     @VisibleForTesting(visibility = Visibility.PACKAGE)
     public HdmiAudioSystemClient(IHdmiControlService service, @Nullable Handler handler) {
         super(service);
-        mHandler = handler == null ? new Handler() : handler;
+        mHandler = handler == null ? new Handler(Looper.getMainLooper()) : handler;
     }
 
     /** @hide */

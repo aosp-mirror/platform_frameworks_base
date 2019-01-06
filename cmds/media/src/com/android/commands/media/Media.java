@@ -19,12 +19,12 @@ package com.android.commands.media;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.media.AudioAttributes;
+import android.content.pm.ParceledListSlice;
 import android.media.MediaMetadata;
-import android.media.session.ControllerCallbackLink;
 import android.media.session.ISessionController;
+import android.media.session.ISessionControllerCallback;
 import android.media.session.ISessionManager;
-import android.media.session.MediaSession.QueueItem;
+import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.HandlerThread;
@@ -178,7 +178,13 @@ public class Media extends BaseCommand {
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD));
     }
 
-    class ControllerCallbackStub extends ControllerCallbackLink.CallbackStub {
+    class ControllerMonitor extends ISessionControllerCallback.Stub {
+        private final ISessionController mController;
+
+        public ControllerMonitor(ISessionController controller) {
+            mController = controller;
+        }
+
         @Override
         public void onSessionDestroyed() {
             System.out.println("onSessionDestroyed. Enter q to quit.");
@@ -202,37 +208,24 @@ public class Media extends BaseCommand {
         }
 
         @Override
-        public void onQueueChanged(List<QueueItem> queue) {
+        public void onQueueChanged(ParceledListSlice queue) throws RemoteException {
             System.out.println("onQueueChanged, "
-                    + (queue == null ? "null queue" : " size=" + queue.size()));
+                    + (queue == null ? "null queue" : " size=" + queue.getList().size()));
         }
 
         @Override
-        public void onQueueTitleChanged(CharSequence title) {
+        public void onQueueTitleChanged(CharSequence title) throws RemoteException {
             System.out.println("onQueueTitleChange " + title);
         }
 
         @Override
-        public void onExtrasChanged(Bundle extras) {
+        public void onExtrasChanged(Bundle extras) throws RemoteException {
             System.out.println("onExtrasChanged " + extras);
         }
 
         @Override
-        public void onVolumeInfoChanged(int volumeType, AudioAttributes attrs, int controlType,
-                int maxVolume, int currentVolume) {
-            System.out.println("onVolumeInfoChanged " + "volumeType=" + volumeType + ", attrs="
-                    + attrs + ", controlType=" + controlType + ", maxVolume=" + maxVolume
-                    + ", currentVolume=" + currentVolume);
-        }
-    }
-
-    private class ControllerMonitor {
-        private final ISessionController mController;
-        private final ControllerCallbackLink mControllerCallbackLink;
-
-        ControllerMonitor(ISessionController controller) {
-            mController = controller;
-            mControllerCallbackLink = new ControllerCallbackLink(new ControllerCallbackStub());
+        public void onVolumeInfoChanged(ParcelableVolumeInfo info) throws RemoteException {
+            System.out.println("onVolumeInfoChanged " + info);
         }
 
         void printUsageMessage() {
@@ -251,7 +244,7 @@ public class Media extends BaseCommand {
                 @Override
                 protected void onLooperPrepared() {
                     try {
-                        mController.registerCallbackListener(PACKAGE_NAME, mControllerCallbackLink);
+                        mController.registerCallbackListener(PACKAGE_NAME, ControllerMonitor.this);
                     } catch (RemoteException e) {
                         System.out.println("Error registering monitor callback");
                     }
@@ -294,7 +287,7 @@ public class Media extends BaseCommand {
             } finally {
                 cbThread.getLooper().quit();
                 try {
-                    mController.unregisterCallbackListener(mControllerCallbackLink);
+                    mController.unregisterCallbackListener(this);
                 } catch (Exception e) {
                     // ignoring
                 }

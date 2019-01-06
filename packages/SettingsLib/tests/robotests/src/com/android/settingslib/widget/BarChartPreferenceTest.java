@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,18 @@ import android.widget.TextView;
 import androidx.preference.PreferenceViewHolder;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class BarChartPreferenceTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     private Context mContext;
     private View mBarChartView;
@@ -44,6 +49,7 @@ public class BarChartPreferenceTest {
     private TextView mDetailsView;
     private PreferenceViewHolder mHolder;
     private BarChartPreference mPreference;
+    private BarChartInfo mBarChartInfo;
 
     @Before
     public void setUp() {
@@ -51,21 +57,31 @@ public class BarChartPreferenceTest {
         mBarChartView = View.inflate(mContext, R.layout.settings_bar_chart, null /* parent */);
         mHolder = PreferenceViewHolder.createInstanceForTests(mBarChartView);
         mPreference = new BarChartPreference(mContext, null /* attrs */);
-        mPreference.setBarChartTitle(R.string.debug_app);
 
         mIcon = mContext.getDrawable(R.drawable.ic_menu);
-        mBarView1 = (BarView) mBarChartView.findViewById(R.id.bar_view1);
-        mBarView2 = (BarView) mBarChartView.findViewById(R.id.bar_view2);
-        mBarView3 = (BarView) mBarChartView.findViewById(R.id.bar_view3);
-        mBarView4 = (BarView) mBarChartView.findViewById(R.id.bar_view4);
-        mDetailsView = (TextView) mBarChartView.findViewById(R.id.bar_chart_details);
+        mBarView1 = mBarChartView.findViewById(R.id.bar_view1);
+        mBarView2 = mBarChartView.findViewById(R.id.bar_view2);
+        mBarView3 = mBarChartView.findViewById(R.id.bar_view3);
+        mBarView4 = mBarChartView.findViewById(R.id.bar_view4);
+        mDetailsView = mBarChartView.findViewById(R.id.bar_chart_details);
+
+        mBarChartInfo = new BarChartInfo.Builder()
+                .setTitle(R.string.debug_app)
+                .setDetails(R.string.debug_app)
+                .setEmptyText(R.string.debug_app)
+                .setDetailsOnClickListener(v -> {
+                })
+                .build();
     }
 
     @Test
-    public void setBarChartTitleRes_setTitleRes_showInBarChartTitle() {
-        final TextView titleView = (TextView) mBarChartView.findViewById(R.id.bar_chart_title);
+    public void initializeBarChart_titleSet_shouldSetTitleInChartView() {
+        final TextView titleView = mBarChartView.findViewById(R.id.bar_chart_title);
+        final BarChartInfo barChartInfo = new BarChartInfo.Builder()
+                .setTitle(R.string.debug_app)
+                .build();
 
-        mPreference.setBarChartTitle(R.string.debug_app);
+        mPreference.initializeBarChart(barChartInfo);
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(titleView.getVisibility()).isEqualTo(View.VISIBLE);
@@ -73,21 +89,33 @@ public class BarChartPreferenceTest {
     }
 
     @Test
-    public void onBindViewHolder_notSetDetailsRes_barChartDetailsViewIsGone() {
-        // We don't call BarChartPreference#setBarChartDetails
+    public void initializeBarChart_noBarViewSet_shouldShowTitleAndEmptyView() {
+        final BarChartInfo barChartInfo = new BarChartInfo.Builder()
+                .setTitle(R.string.debug_app)
+                .setEmptyText(R.string.debug_app)
+                .build();
+
+        mPreference.initializeBarChart(barChartInfo);
+        // We don't add any bar view yet.
         mPreference.onBindViewHolder(mHolder);
 
-        assertThat(mDetailsView.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mBarChartView.findViewById(R.id.bar_chart_title).getVisibility())
+                .isEqualTo(View.VISIBLE);
+        assertThat(mBarChartView.findViewById(R.id.empty_view).getVisibility())
+                .isEqualTo(View.VISIBLE);
+        assertThat(mBarChartView.findViewById(R.id.bar_views_container).getVisibility())
+                .isEqualTo(View.GONE);
     }
 
     @Test
-    public void onBindViewHolder_notSetDetailsRes_barChartDetailsViewIsGoneThenReappears() {
-        // We don't call BarChartPreference#setBarChartDetails yet.
-        mPreference.onBindViewHolder(mHolder);
+    public void initializeBarChart_detailsSet_shouldShowBarChartDetailsView() {
+        final BarChartInfo barChartInfo = new BarChartInfo.Builder()
+                .setTitle(R.string.debug_app)
+                .setDetails(R.string.debug_app)
+                .addBarViewInfo(new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app))
+                .build();
 
-        assertThat(mDetailsView.getVisibility()).isEqualTo(View.GONE);
-
-        mPreference.setBarChartDetails(R.string.debug_app);
+        mPreference.initializeBarChart(barChartInfo);
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(mDetailsView.getVisibility()).isEqualTo(View.VISIBLE);
@@ -95,19 +123,30 @@ public class BarChartPreferenceTest {
     }
 
     @Test
-    public void setBarChartDetailsRes_setDetailsRes_showInBarChartDetails() {
-        mPreference.setBarChartDetails(R.string.debug_app);
+    public void initializeBarChart_detailsNotSet_shouldHideBarChartDetailsView() {
+        // We don't call BarChartInfo.Builder#setDetails yet.
+        final BarChartInfo barChartInfo = new BarChartInfo.Builder()
+                .setTitle(R.string.debug_app)
+                .addBarViewInfo(new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app))
+                .build();
+
+        mPreference.initializeBarChart(barChartInfo);
         mPreference.onBindViewHolder(mHolder);
 
-        assertThat(mDetailsView.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mDetailsView.getText()).isEqualTo(mContext.getText(R.string.debug_app));
+        assertThat(mDetailsView.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
-    public void setBarChartDetailsClickListener_setClickListener_detailsViewAttachClickListener() {
-        mPreference.setBarChartDetails(R.string.debug_app);
-        mPreference.setBarChartDetailsClickListener(v -> {
-        });
+    public void initializeBarChart_clickListenerSet_shouldSetClickListenerOnDetailsView() {
+        final BarChartInfo barChartInfo = new BarChartInfo.Builder()
+                .setTitle(R.string.debug_app)
+                .setDetails(R.string.debug_app)
+                .setDetailsOnClickListener(v -> {
+                })
+                .addBarViewInfo(new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app))
+                .build();
+
+        mPreference.initializeBarChart(barChartInfo);
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(mDetailsView.getVisibility()).isEqualTo(View.VISIBLE);
@@ -115,12 +154,13 @@ public class BarChartPreferenceTest {
     }
 
     @Test
-    public void setAllBarViewsInfo_setOneBarViewInfo_showOneBarView() {
+    public void setBarViewInfos_oneBarViewInfoSet_shouldShowOneBarView() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
                 new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app)
         };
 
-        mPreference.setAllBarViewsInfo(barViewsInfo);
+        mPreference.initializeBarChart(mBarChartInfo);
+        mPreference.setBarViewInfos(barViewsInfo);
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(mBarView1.getVisibility()).isEqualTo(View.VISIBLE);
@@ -132,13 +172,14 @@ public class BarChartPreferenceTest {
     }
 
     @Test
-    public void setAllBarViewsInfo_setTwoBarViewsInfo_showTwoBarViews() {
+    public void setBarViewInfos_twoBarViewInfosSet_shouldShowTwoBarViews() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
                 new BarViewInfo(mIcon, 20 /* barNumber */, R.string.debug_app),
                 new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app)
         };
 
-        mPreference.setAllBarViewsInfo(barViewsInfo);
+        mPreference.initializeBarChart(mBarChartInfo);
+        mPreference.setBarViewInfos(barViewsInfo);
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(mBarView1.getVisibility()).isEqualTo(View.VISIBLE);
@@ -151,14 +192,15 @@ public class BarChartPreferenceTest {
     }
 
     @Test
-    public void setAllBarViewsInfo_setThreeBarViewsInfo_showThreeBarViews() {
+    public void setBarViewInfos_threeBarViewInfosSet_shouldShowThreeBarViews() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
                 new BarViewInfo(mIcon, 20 /* barNumber */, R.string.debug_app),
                 new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app),
                 new BarViewInfo(mIcon, 5 /* barNumber */, R.string.debug_app)
         };
 
-        mPreference.setAllBarViewsInfo(barViewsInfo);
+        mPreference.initializeBarChart(mBarChartInfo);
+        mPreference.setBarViewInfos(barViewsInfo);
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(mBarView1.getVisibility()).isEqualTo(View.VISIBLE);
@@ -172,7 +214,7 @@ public class BarChartPreferenceTest {
     }
 
     @Test
-    public void setAllBarViewsInfo_setFourBarViewsInfo_showFourBarViews() {
+    public void setBarViewInfos_fourBarViewInfosSet_shouldShowFourBarViews() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
                 new BarViewInfo(mIcon, 20 /* barNumber */, R.string.debug_app),
                 new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app),
@@ -180,7 +222,8 @@ public class BarChartPreferenceTest {
                 new BarViewInfo(mIcon, 2 /* barNumber */, R.string.debug_app),
         };
 
-        mPreference.setAllBarViewsInfo(barViewsInfo);
+        mPreference.initializeBarChart(mBarChartInfo);
+        mPreference.setBarViewInfos(barViewsInfo);
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(mBarView1.getVisibility()).isEqualTo(View.VISIBLE);
@@ -194,7 +237,22 @@ public class BarChartPreferenceTest {
     }
 
     @Test
-    public void setAllBarViewsInfo_setFourBarViewsInfo_barViewWasSortedInDescending() {
+    public void setBarViewInfos_moreInfosThanMaxAllowed_shouldThrowIllegalStateException() {
+        thrown.expect(IllegalStateException.class);
+
+        final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
+                new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app),
+                new BarViewInfo(mIcon, 50 /* barNumber */, R.string.debug_app),
+                new BarViewInfo(mIcon, 5 /* barNumber */, R.string.debug_app),
+                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app),
+                new BarViewInfo(mIcon, 70 /* barNumber */, R.string.debug_app),
+        };
+
+        mPreference.setBarViewInfos(barViewsInfo);
+    }
+
+    @Test
+    public void setBarViewInfos_barViewInfosSet_shouldBeSortedInDescending() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
                 new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app),
                 new BarViewInfo(mIcon, 50 /* barNumber */, R.string.debug_app),
@@ -202,7 +260,8 @@ public class BarChartPreferenceTest {
                 new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app),
         };
 
-        mPreference.setAllBarViewsInfo(barViewsInfo);
+        mPreference.initializeBarChart(mBarChartInfo);
+        mPreference.setBarViewInfos(barViewsInfo);
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(mBarView1.getVisibility()).isEqualTo(View.VISIBLE);
@@ -216,12 +275,13 @@ public class BarChartPreferenceTest {
     }
 
     @Test
-    public void setAllBarViewsInfo_setValidSummaryRes_barViewShouldShowSummary() {
+    public void setBarViewInfos_validBarViewSummarySet_barViewShouldShowSummary() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
                 new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app),
         };
 
-        mPreference.setAllBarViewsInfo(barViewsInfo);
+        mPreference.initializeBarChart(mBarChartInfo);
+        mPreference.setBarViewInfos(barViewsInfo);
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(mBarView1.getVisibility()).isEqualTo(View.VISIBLE);
@@ -229,13 +289,14 @@ public class BarChartPreferenceTest {
     }
 
     @Test
-    public void setAllBarViewsInfo_setClickListenerForBarView_barViewAttachClickListener() {
+    public void setBarViewInfos_clickListenerForBarViewSet_barViewShouldHaveClickListener() {
         final BarViewInfo viewInfo = new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app);
         viewInfo.setClickListener(v -> {
         });
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{viewInfo};
 
-        mPreference.setAllBarViewsInfo(barViewsInfo);
+        mPreference.initializeBarChart(mBarChartInfo);
+        mPreference.setBarViewInfos(barViewsInfo);
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(mBarView1.getVisibility()).isEqualTo(View.VISIBLE);

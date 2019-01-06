@@ -75,6 +75,7 @@ struct LinkOptions {
 
   // Flattening options.
   TableFlattenerOptions table_flattener_options;
+  bool keep_raw_values = false;
 
   // Split APK options.
   TableSplitterOptions table_splitter_options;
@@ -100,24 +101,26 @@ class LinkCommand : public Command {
   explicit LinkCommand(IDiagnostics* diag) : Command("link", "l"),
                                              diag_(diag) {
     SetDescription("Links resources into an apk.");
-    AddRequiredFlag("-o", "Output path.", &options_.output_path);
+    AddRequiredFlag("-o", "Output path.", &options_.output_path, Command::kPath);
     AddRequiredFlag("--manifest", "Path to the Android manifest to build.",
-        &options_.manifest_path);
-    AddOptionalFlagList("-I", "Adds an Android APK to link against.", &options_.include_paths);
+        &options_.manifest_path, Command::kPath);
+    AddOptionalFlagList("-I", "Adds an Android APK to link against.", &options_.include_paths,
+         Command::kPath);
     AddOptionalFlagList("-A", "An assets directory to include in the APK. These are unprocessed.",
-        &options_.assets_dirs);
+        &options_.assets_dirs, Command::kPath);
     AddOptionalFlagList("-R", "Compilation unit to link, using `overlay` semantics.\n"
-        "The last conflicting resource given takes precedence.", &overlay_arg_list_);
+        "The last conflicting resource given takes precedence.", &overlay_arg_list_,
+        Command::kPath);
     AddOptionalFlag("--package-id",
         "Specify the package ID to use for this app. Must be greater or equal to\n"
             "0x7f and can't be used with --static-lib or --shared-lib.", &package_id_);
     AddOptionalFlag("--java", "Directory in which to generate R.java.",
-        &options_.generate_java_class_path);
+        &options_.generate_java_class_path, Command::kPath);
     AddOptionalFlag("--proguard", "Output file for generated Proguard rules.",
-        &options_.generate_proguard_rules_path);
+        &options_.generate_proguard_rules_path, Command::kPath);
     AddOptionalFlag("--proguard-main-dex",
         "Output file for generated Proguard rules for the main dex.",
-        &options_.generate_main_dex_proguard_rules_path);
+        &options_.generate_main_dex_proguard_rules_path, Command::kPath);
     AddOptionalSwitch("--proguard-conditional-keep-rules",
         "Generate conditional Proguard keep rules.",
         &options_.generate_conditional_proguard_rules);
@@ -242,6 +245,8 @@ class LinkCommand : public Command {
         &options_.extensions_to_not_compress);
     AddOptionalSwitch("--no-compress", "Do not compress any resources.",
         &options_.do_not_compress_anything);
+    AddOptionalSwitch("--keep-raw-values", "Preserve raw attribute values in xml files.",
+        &options_.keep_raw_values);
     AddOptionalSwitch("--warn-manifest-validation",
         "Treat manifest validation errors as warnings.",
         &options_.manifest_fixer_options.warn_validation);
@@ -250,7 +255,6 @@ class LinkCommand : public Command {
             "Syntax: path/to/output.apk:<config>[,<config>[...]].\n"
             "On Windows, use a semicolon ';' separator instead.",
         &split_args_);
-    AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
     AddOptionalSwitch("--debug-mode",
         "Inserts android:debuggable=\"true\" in to the application node of the\n"
             "manifest, making the application debuggable even on production devices.",
@@ -258,6 +262,7 @@ class LinkCommand : public Command {
     AddOptionalSwitch("--strict-visibility",
         "Do not allow overlays with different visibility levels.",
         &options_.strict_visibility);
+    AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
   }
 
   int Action(const std::vector<std::string>& args) override;

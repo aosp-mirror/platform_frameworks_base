@@ -136,7 +136,7 @@ cc_defaults {
         "android.hardware.power@1.0",
         "android.hardware.power@1.1",
         "android.hardware.power.stats@1.0",
-        "android.hardware.thermal@1.0",
+        "android.hardware.thermal@2.0",
         "libpackagelistparser",
         "libsysutils",
         "libcutils",
@@ -332,6 +332,8 @@ java_library {
         "src/stats_log.proto",
         "src/statsd_config.proto",
         "src/atoms.proto",
+        "src/shell/shell_config.proto",
+        "src/shell/shell_data.proto",
     ],
 
     static_libs: [

@@ -7957,6 +7957,15 @@ public final class Settings {
                 "night_display_last_activated_time";
 
         /**
+         * Control whether display white balance is currently enabled.
+         * @hide
+         */
+        public static final String DISPLAY_WHITE_BALANCE_ENABLED = "display_white_balance_enabled";
+
+        private static final Validator DISPLAY_WHITE_BALANCE_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * Names of the service components that the current user has explicitly allowed to
          * be a VR mode listener, separated by ':'.
          *
@@ -8405,6 +8414,7 @@ public final class Settings {
             NIGHT_DISPLAY_CUSTOM_END_TIME,
             NIGHT_DISPLAY_COLOR_TEMPERATURE,
             NIGHT_DISPLAY_AUTO_MODE,
+            DISPLAY_WHITE_BALANCE_ENABLED,
             SYNC_PARENT_SOUNDS,
             CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
             SWIPE_UP_TO_SWITCH_APPS_ENABLED,
@@ -8552,6 +8562,7 @@ public final class Settings {
             VALIDATORS.put(NIGHT_DISPLAY_COLOR_TEMPERATURE,
                     NIGHT_DISPLAY_COLOR_TEMPERATURE_VALIDATOR);
             VALIDATORS.put(NIGHT_DISPLAY_AUTO_MODE, NIGHT_DISPLAY_AUTO_MODE_VALIDATOR);
+            VALIDATORS.put(DISPLAY_WHITE_BALANCE_ENABLED, DISPLAY_WHITE_BALANCE_ENABLED_VALIDATOR);
             VALIDATORS.put(SYNC_PARENT_SOUNDS, SYNC_PARENT_SOUNDS_VALIDATOR);
             VALIDATORS.put(CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
                     CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED_VALIDATOR);
@@ -11971,11 +11982,16 @@ public final class Settings {
                 "angle_gl_driver_selection_values";
 
         /**
-         * App that is selected to use updated graphics driver.
+         * Apps that are selected to use Game Update Package.
          * @hide
          */
-        public static final String UPDATED_GFX_DRIVER_DEV_OPT_IN_APP =
-                "updated_gfx_driver_dev_opt_in_app";
+        public static final String GUP_DEV_OPT_IN_APPS = "gup_dev_opt_in_apps";
+
+        /**
+         * Apps on the black list that are forbidden to useGame Update Package.
+         * @hide
+         */
+        public static final String GUP_BLACK_LIST = "gup_black_list";
 
         /**
          * Ordered GPU debug layer list for Vulkan
@@ -14059,11 +14075,10 @@ public final class Settings {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(CALL_METHOD_USER_KEY, resolver.getUserId());
-                arg.putInt(Settings.CALL_METHOD_RESET_MODE_KEY, resetMode);
+                arg.putInt(CALL_METHOD_RESET_MODE_KEY, resetMode);
                 if (prefix != null) {
                     arg.putString(Settings.CALL_METHOD_PREFIX_KEY, prefix);
                 }
-                arg.putInt(CALL_METHOD_RESET_MODE_KEY, resetMode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
                 cp.call(resolver.getPackageName(), sProviderHolder.mUri.getAuthority(),
                         CALL_METHOD_RESET_CONFIG, null, arg);

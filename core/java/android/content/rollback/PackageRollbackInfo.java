@@ -16,7 +16,7 @@
 
 package android.content.rollback;
 
-import android.annotation.TestApi;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -25,9 +25,9 @@ import java.util.Objects;
 /**
  * Information about a rollback available for a particular package.
  *
- * @hide TODO: hidden, @TestApi until we decide on public vs. @SystemApi.
+ * @hide
  */
-@TestApi
+@SystemApi
 public final class PackageRollbackInfo implements Parcelable {
     /**
      * The name of a package being rolled back.

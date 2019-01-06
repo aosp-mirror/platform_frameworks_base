@@ -256,7 +256,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         // Check that no inflation error occurred.
         verify(mEntryListener, never()).onInflationError(any(), any());
-        verify(mForegroundServiceController).addNotification(eq(mSbn), anyInt());
 
         // Row inflation:
         ArgumentCaptor<NotificationData.Entry> entryCaptor = ArgumentCaptor.forClass(
@@ -292,7 +291,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mEntryListener, never()).onInflationError(any(), any());
 
         verify(mPresenter).updateNotificationViews();
-        verify(mForegroundServiceController).updateNotification(eq(mSbn), anyInt());
         verify(mEntryListener).onEntryUpdated(mEntry);
         assertNotNull(mEntry.getRow());
         assertEquals(mEntry.userSentiment,
@@ -310,7 +308,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         verify(mEntryListener, never()).onInflationError(any(), any());
 
-        verify(mForegroundServiceController).removeNotification(mSbn);
         verify(mListContainer).cleanUpViewStateForEntry(mEntry);
         verify(mPresenter).updateNotificationViews();
         verify(mEntryListener).onEntryRemoved(mEntry, mSbn.getKey(), mSbn,

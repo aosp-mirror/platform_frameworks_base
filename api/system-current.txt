@@ -62,6 +62,7 @@ package android {
     field public static final java.lang.String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final java.lang.String GET_APP_OPS_STATS = "android.permission.GET_APP_OPS_STATS";
     field public static final java.lang.String GET_PROCESS_STATE_AND_OOM_SCORE = "android.permission.GET_PROCESS_STATE_AND_OOM_SCORE";
+    field public static final java.lang.String GET_RUNTIME_PERMISSIONS = "android.permission.GET_RUNTIME_PERMISSIONS";
     field public static final java.lang.String GET_TOP_ACTIVITY_INFO = "android.permission.GET_TOP_ACTIVITY_INFO";
     field public static final java.lang.String GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS = "android.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS";
     field public static final java.lang.String GRANT_RUNTIME_PERMISSIONS = "android.permission.GRANT_RUNTIME_PERMISSIONS";
@@ -94,6 +95,7 @@ package android {
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final java.lang.String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final java.lang.String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
+    field public static final java.lang.String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
     field public static final java.lang.String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
     field public static final java.lang.String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final java.lang.String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
@@ -1038,6 +1040,7 @@ package android.content {
     field public static final java.lang.String OEM_LOCK_SERVICE = "oem_lock";
     field public static final java.lang.String PERMISSION_SERVICE = "permission";
     field public static final java.lang.String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
+    field public static final java.lang.String ROLLBACK_SERVICE = "rollback";
     field public static final java.lang.String SECURE_ELEMENT_SERVICE = "secure_element";
     field public static final java.lang.String STATS_MANAGER = "stats";
     field public static final java.lang.String SYSTEM_UPDATE_SERVICE = "system_update";
@@ -1069,6 +1072,7 @@ package android.content {
     field public static final java.lang.String ACTION_MANAGE_PERMISSIONS = "android.intent.action.MANAGE_PERMISSIONS";
     field public static final java.lang.String ACTION_MANAGE_PERMISSION_APPS = "android.intent.action.MANAGE_PERMISSION_APPS";
     field public static final java.lang.String ACTION_MASTER_CLEAR_NOTIFICATION = "android.intent.action.MASTER_CLEAR_NOTIFICATION";
+    field public static final java.lang.String ACTION_PACKAGE_ROLLBACK_EXECUTED = "android.intent.action.PACKAGE_ROLLBACK_EXECUTED";
     field public static final java.lang.String ACTION_PRE_BOOT_COMPLETED = "android.intent.action.PRE_BOOT_COMPLETED";
     field public static final java.lang.String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
     field public static final java.lang.String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
@@ -1204,6 +1208,7 @@ package android.content.pm {
     method public void setAllocateAggressive(boolean);
     method public void setAllowDowngrade(boolean);
     method public void setDontKillApp(boolean);
+    method public void setEnableRollback();
     method public void setGrantedRuntimePermissions(java.lang.String[]);
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
@@ -1221,7 +1226,6 @@ package android.content.pm {
   public abstract class PackageManager {
     method public abstract void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract boolean arePermissionsIndividuallyControlled();
-    method public boolean canSuspendPackage(java.lang.String);
     method public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(java.lang.String);
     method public android.content.pm.ApplicationInfo getApplicationInfoAsUser(java.lang.String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.dex.ArtManager getArtManager();
@@ -1235,6 +1239,7 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(java.lang.String);
     method public abstract int getIntentVerificationStatusAsUser(java.lang.String, int);
     method public abstract int getPermissionFlags(java.lang.String, java.lang.String, android.os.UserHandle);
+    method public java.lang.String[] getUnsuspendablePackages(java.lang.String[]);
     method public abstract void grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract int installExistingPackage(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int installExistingPackage(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -1394,6 +1399,41 @@ package android.content.pm.permission {
     method public boolean isStandard();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.pm.permission.RuntimePermissionPresentationInfo> CREATOR;
+  }
+
+}
+
+package android.content.rollback {
+
+  public final class PackageRollbackInfo implements android.os.Parcelable {
+    ctor public PackageRollbackInfo(java.lang.String, android.content.rollback.PackageRollbackInfo.PackageVersion, android.content.rollback.PackageRollbackInfo.PackageVersion);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.content.rollback.PackageRollbackInfo> CREATOR;
+    field public final android.content.rollback.PackageRollbackInfo.PackageVersion higherVersion;
+    field public final android.content.rollback.PackageRollbackInfo.PackageVersion lowerVersion;
+    field public final java.lang.String packageName;
+  }
+
+  public static class PackageRollbackInfo.PackageVersion {
+    ctor public PackageRollbackInfo.PackageVersion(long);
+    field public final long versionCode;
+  }
+
+  public final class RollbackInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.content.rollback.RollbackInfo> CREATOR;
+    field public final android.content.rollback.PackageRollbackInfo targetPackage;
+  }
+
+  public final class RollbackManager {
+    method public void executeRollback(android.content.rollback.RollbackInfo, android.content.IntentSender);
+    method public void expireRollbackForPackage(java.lang.String);
+    method public android.content.rollback.RollbackInfo getAvailableRollback(java.lang.String);
+    method public java.util.List<java.lang.String> getPackagesWithAvailableRollbacks();
+    method public java.util.List<android.content.rollback.RollbackInfo> getRecentlyExecutedRollbacks();
+    method public void reloadPersistedData();
   }
 
 }
@@ -2987,6 +3027,7 @@ package android.media {
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
     field public static final int FLAG_FROM_KEY = 65536; // 0x10000
+    field public static final int SUCCESS = 0; // 0x0
   }
 
   public static abstract class AudioManager.AudioServerStateCallback {
@@ -3103,8 +3144,10 @@ package android.media.audiopolicy {
     method public int detachMixes(java.util.List<android.media.audiopolicy.AudioMix>);
     method public int getFocusDuckingBehavior();
     method public int getStatus();
+    method public int removeUidDeviceAffinity(int);
     method public int setFocusDuckingBehavior(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setRegistration(java.lang.String);
+    method public int setUidDeviceAffinity(int, java.util.List<android.media.AudioDeviceInfo>);
     method public java.lang.String toLogFriendlyString();
     field public static final int FOCUS_POLICY_DUCKING_DEFAULT = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_APP = 0; // 0x0
@@ -3146,34 +3189,6 @@ package android.media.audiopolicy {
 
 package android.media.session {
 
-  public final class ControllerCallbackLink implements android.os.Parcelable {
-    ctor public ControllerCallbackLink(android.media.session.ControllerCallbackLink.CallbackStub);
-    method public int describeContents();
-    method public android.os.IBinder getBinder();
-    method public void notifyEvent(java.lang.String, android.os.Bundle);
-    method public void notifyExtrasChanged(android.os.Bundle);
-    method public void notifyMetadataChanged(android.media.MediaMetadata);
-    method public void notifyPlaybackStateChanged(android.media.session.PlaybackState);
-    method public void notifyQueueChanged(java.util.List<android.media.session.MediaSession.QueueItem>);
-    method public void notifyQueueTitleChanged(java.lang.CharSequence);
-    method public void notifySessionDestroyed();
-    method public void notifyVolumeInfoChanged(int, android.media.AudioAttributes, int, int, int);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.session.ControllerCallbackLink> CREATOR;
-  }
-
-  public static abstract class ControllerCallbackLink.CallbackStub {
-    ctor public ControllerCallbackLink.CallbackStub();
-    method public void onEvent(java.lang.String, android.os.Bundle);
-    method public void onExtrasChanged(android.os.Bundle);
-    method public void onMetadataChanged(android.media.MediaMetadata);
-    method public void onPlaybackStateChanged(android.media.session.PlaybackState);
-    method public void onQueueChanged(java.util.List<android.media.session.MediaSession.QueueItem>);
-    method public void onQueueTitleChanged(java.lang.CharSequence);
-    method public void onSessionDestroyed();
-    method public void onVolumeInfoChanged(int, android.media.AudioAttributes, int, int, int);
-  }
-
   public final class MediaSessionManager {
     method public void setOnMediaKeyListener(android.media.session.MediaSessionManager.OnMediaKeyListener, android.os.Handler);
     method public void setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, android.os.Handler);
@@ -3185,64 +3200,6 @@ package android.media.session {
 
   public static abstract interface MediaSessionManager.OnVolumeKeyLongPressListener {
     method public abstract void onVolumeKeyLongPress(android.view.KeyEvent);
-  }
-
-  public final class SessionCallbackLink implements android.os.Parcelable {
-    ctor public SessionCallbackLink(android.media.session.SessionCallbackLink.CallbackStub);
-    method public int describeContents();
-    method public android.os.IBinder getBinder();
-    method public void notifyAdjustVolume(java.lang.String, int, int, android.media.session.ControllerCallbackLink, int);
-    method public void notifyCommand(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public void notifyCustomAction(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle);
-    method public void notifyFastForward(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void notifyMediaButton(java.lang.String, int, int, android.content.Intent, int, android.os.ResultReceiver);
-    method public void notifyMediaButtonFromController(java.lang.String, int, int, android.media.session.ControllerCallbackLink, android.content.Intent);
-    method public void notifyNext(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void notifyPause(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void notifyPlay(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void notifyPlayFromMediaId(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle);
-    method public void notifyPlayFromSearch(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle);
-    method public void notifyPlayFromUri(java.lang.String, int, int, android.media.session.ControllerCallbackLink, android.net.Uri, android.os.Bundle);
-    method public void notifyPrepare(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void notifyPrepareFromMediaId(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle);
-    method public void notifyPrepareFromSearch(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle);
-    method public void notifyPrepareFromUri(java.lang.String, int, int, android.media.session.ControllerCallbackLink, android.net.Uri, android.os.Bundle);
-    method public void notifyPrevious(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void notifyRate(java.lang.String, int, int, android.media.session.ControllerCallbackLink, android.media.Rating);
-    method public void notifyRewind(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void notifySeekTo(java.lang.String, int, int, android.media.session.ControllerCallbackLink, long);
-    method public void notifySetVolumeTo(java.lang.String, int, int, android.media.session.ControllerCallbackLink, int);
-    method public void notifySkipToTrack(java.lang.String, int, int, android.media.session.ControllerCallbackLink, long);
-    method public void notifyStop(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.session.SessionCallbackLink> CREATOR;
-  }
-
-  public static abstract class SessionCallbackLink.CallbackStub {
-    ctor public SessionCallbackLink.CallbackStub();
-    method public void onAdjustVolume(java.lang.String, int, int, android.media.session.ControllerCallbackLink, int);
-    method public void onCommand(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public void onCustomAction(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle);
-    method public void onFastForward(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onMediaButton(java.lang.String, int, int, android.content.Intent, int, android.os.ResultReceiver);
-    method public void onMediaButtonFromController(java.lang.String, int, int, android.media.session.ControllerCallbackLink, android.content.Intent);
-    method public void onNext(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPause(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPlay(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPlayFromMediaId(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle);
-    method public void onPlayFromSearch(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle);
-    method public void onPlayFromUri(java.lang.String, int, int, android.media.session.ControllerCallbackLink, android.net.Uri, android.os.Bundle);
-    method public void onPrepare(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPrepareFromMediaId(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle);
-    method public void onPrepareFromSearch(java.lang.String, int, int, android.media.session.ControllerCallbackLink, java.lang.String, android.os.Bundle);
-    method public void onPrepareFromUri(java.lang.String, int, int, android.media.session.ControllerCallbackLink, android.net.Uri, android.os.Bundle);
-    method public void onPrevious(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onRate(java.lang.String, int, int, android.media.session.ControllerCallbackLink, android.media.Rating);
-    method public void onRewind(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onSeekTo(java.lang.String, int, int, android.media.session.ControllerCallbackLink, long);
-    method public void onSetVolumeTo(java.lang.String, int, int, android.media.session.ControllerCallbackLink, int);
-    method public void onSkipToTrack(java.lang.String, int, int, android.media.session.ControllerCallbackLink, long);
-    method public void onStop(java.lang.String, int, int, android.media.session.ControllerCallbackLink);
   }
 
 }
@@ -3701,6 +3658,26 @@ package android.net {
 
 package android.net.wifi {
 
+  public abstract class DppStatusCallback {
+    ctor public DppStatusCallback();
+    method public abstract void onConfiguratorSuccess(int);
+    method public abstract void onEnrolleeSuccess(int);
+    method public abstract void onFailure(int);
+    method public abstract void onProgress(int);
+    field public static final int DPP_EVENT_FAILURE = -7; // 0xfffffff9
+    field public static final int DPP_EVENT_FAILURE_AUTHENTICATION = -2; // 0xfffffffe
+    field public static final int DPP_EVENT_FAILURE_BUSY = -5; // 0xfffffffb
+    field public static final int DPP_EVENT_FAILURE_CONFIGURATION = -4; // 0xfffffffc
+    field public static final int DPP_EVENT_FAILURE_INVALID_NETWORK = -9; // 0xfffffff7
+    field public static final int DPP_EVENT_FAILURE_INVALID_URI = -1; // 0xffffffff
+    field public static final int DPP_EVENT_FAILURE_NOT_COMPATIBLE = -3; // 0xfffffffd
+    field public static final int DPP_EVENT_FAILURE_NOT_SUPPORTED = -8; // 0xfffffff8
+    field public static final int DPP_EVENT_FAILURE_TIMEOUT = -6; // 0xfffffffa
+    field public static final int DPP_EVENT_PROGRESS_AUTHENTICATION_SUCCESS = 0; // 0x0
+    field public static final int DPP_EVENT_PROGRESS_RESPONSE_PENDING = 1; // 0x1
+    field public static final int DPP_EVENT_SUCCESS_CONFIGURATION_SENT = 0; // 0x0
+  }
+
   public deprecated class RttManager {
     method public void disableResponder(android.net.wifi.RttManager.ResponderCallback);
     method public void enableResponder(android.net.wifi.RttManager.ResponderCallback);
@@ -3930,7 +3907,10 @@ package android.net.wifi {
     method public void save(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
     method public void setDeviceMobilityState(int);
     method public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
+    method public void startDppAsConfiguratorInitiator(java.lang.String, int, int, android.os.Handler, android.net.wifi.DppStatusCallback);
+    method public void startDppAsEnrolleeInitiator(java.lang.String, android.os.Handler, android.net.wifi.DppStatusCallback);
     method public boolean startScan(android.os.WorkSource);
+    method public void stopDppSession();
     method public void unregisterNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback);
     field public static final int CHANGE_REASON_ADDED = 0; // 0x0
     field public static final int CHANGE_REASON_CONFIG_CHANGE = 2; // 0x2
@@ -3940,6 +3920,8 @@ package android.net.wifi {
     field public static final int DEVICE_MOBILITY_STATE_LOW_MVMT = 2; // 0x2
     field public static final int DEVICE_MOBILITY_STATE_STATIONARY = 3; // 0x3
     field public static final int DEVICE_MOBILITY_STATE_UNKNOWN = 0; // 0x0
+    field public static final int DPP_NETWORK_ROLE_AP = 1; // 0x1
+    field public static final int DPP_NETWORK_ROLE_STA = 0; // 0x0
     field public static final java.lang.String EXTRA_CHANGE_REASON = "changeReason";
     field public static final java.lang.String EXTRA_MULTIPLE_NETWORKS_CHANGED = "multipleChanges";
     field public static final java.lang.String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
@@ -4613,6 +4595,16 @@ package android.os.storage {
 
 package android.permission {
 
+  public abstract class PermissionControllerService extends android.app.Service {
+    ctor public PermissionControllerService();
+    method public final void attachBaseContext(android.content.Context);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract int onCountPermissionApps(java.util.List<java.lang.String>, boolean, boolean);
+    method public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
+    method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
+  }
+
   public final class PermissionManager {
     method public java.util.List<android.permission.PermissionManager.SplitPermissionInfo> getSplitPermissions();
   }
@@ -4631,16 +4623,6 @@ package android.permission {
     method public boolean isStandard();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionPresentationInfo> CREATOR;
-  }
-
-  public abstract class RuntimePermissionPresenterService extends android.app.Service {
-    ctor public RuntimePermissionPresenterService();
-    method public final void attachBaseContext(android.content.Context);
-    method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract int onCountPermissionApps(java.util.List<java.lang.String>, boolean, boolean);
-    method public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
-    method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
-    field public static final java.lang.String SERVICE_INTERFACE = "android.permission.RuntimePermissionPresenterService";
   }
 
 }
@@ -7941,6 +7923,7 @@ package android.webkit {
     method public void callDrawGlFunction(android.graphics.Canvas, long, java.lang.Runnable);
     method public boolean canInvokeDrawGlFunctor(android.view.View);
     method public void detachDrawGlFunctor(android.view.View, long);
+    method public void drawWebViewFunctor(android.graphics.Canvas, int);
     method public android.app.Application getApplication();
     method public java.lang.String getDataDirectorySuffix();
     method public java.lang.String getErrorString(android.content.Context, int);

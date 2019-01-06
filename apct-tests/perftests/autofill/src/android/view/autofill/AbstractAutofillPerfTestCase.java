@@ -16,34 +16,23 @@
 
 package android.view.autofill;
 
+import static org.junit.Assert.assertTrue;
+
 import android.os.Looper;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.SettingsHelper;
 import android.perftests.utils.SettingsStateKeeperRule;
-import android.perftests.utils.ShellHelper;
-import android.view.View;
 import android.perftests.utils.StubActivity;
 import android.provider.Settings;
-import android.support.test.filters.LargeTest;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.InstrumentationRegistry;
 
-import com.android.perftests.autofill.R;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.rule.ActivityTestRule;
 
-import java.util.Locale;
-import java.util.Collection;
-import java.util.Arrays;
-
-import org.junit.Test;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * Base class for all autofill tests.

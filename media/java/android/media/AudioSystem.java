@@ -916,6 +916,13 @@ public class AudioSystem
 
     public static native int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register);
 
+    /** see AudioPolicy.setUidDeviceAffinities() */
+    public static native int setUidDeviceAffinities(int uid, @NonNull int[] types,
+            @NonNull String[] addresses);
+
+    /** see AudioPolicy.removeUidDeviceAffinities() */
+    public static native int removeUidDeviceAffinities(int uid);
+
     public static native int systemReady();
 
     public static native float getStreamVolumeDB(int stream, int index, int device);

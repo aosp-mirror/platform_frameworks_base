@@ -64,9 +64,11 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.AutofillFieldClassificationService.Scores;
 import android.service.autofill.AutofillService;
+import android.service.autofill.CompositeUserData;
 import android.service.autofill.Dataset;
 import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
+import android.service.autofill.FieldClassificationUserData;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
@@ -1237,11 +1239,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
+        // Merge UserData if necessary.
+        // Fields in packageUserData will override corresponding fields in genericUserData.
+        final UserData genericUserData = mService.getUserData();
         final UserData packageUserData = lastResponse.getUserData();
-
-        final UserData userData;
-        if (packageUserData != null) {
-            // Replace default userData
+        final FieldClassificationUserData userData;
+        if (packageUserData == null && genericUserData == null) {
+            userData = null;
+        } else if (packageUserData != null && genericUserData != null) {
+            userData = new CompositeUserData(genericUserData, packageUserData);
+        } else if (packageUserData != null) {
             userData = packageUserData;
         } else {
             userData = mService.getUserData();
@@ -1396,7 +1403,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull ArrayList<String> changedDatasetIds,
             @NonNull ArrayList<AutofillId> manuallyFilledFieldIds,
             @NonNull ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-            @NonNull UserData userData, @NonNull Collection<ViewState> viewStates) {
+            @NonNull FieldClassificationUserData userData,
+            @NonNull Collection<ViewState> viewStates) {
 
         final String[] userValues = userData.getValues();
         final String[] categoryIds = userData.getCategoryIds();

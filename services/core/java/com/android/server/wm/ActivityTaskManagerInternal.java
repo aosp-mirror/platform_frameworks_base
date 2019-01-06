@@ -197,16 +197,19 @@ public abstract class ActivityTaskManagerInternal {
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
      * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
      *        null if not originated by PendingIntent
+     * @param allowBackgroundActivityStart Whether the background activity start should be allowed
+     *        from originatingPendingIntent
      */
     public abstract int startActivitiesInPackage(int uid, String callingPackage, Intent[] intents,
             String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
-            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent);
+            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
+            boolean allowBackgroundActivityStart);
 
     public abstract int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
             String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
             int userId, TaskRecord inTask, String reason, boolean validateIncomingUser,
-            PendingIntentRecord originatingPendingIntent);
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart);
 
     /**
      * Start activity {@code intent} without calling user-id check.

@@ -445,7 +445,7 @@ class XmlPrinter : public xml::ConstVisitor {
  public:
   using xml::ConstVisitor::Visit;
 
-  XmlPrinter(Printer* printer) : printer_(printer) {
+  explicit XmlPrinter(Printer* printer) : printer_(printer) {
   }
 
   void Visit(const xml::Element* el) override {

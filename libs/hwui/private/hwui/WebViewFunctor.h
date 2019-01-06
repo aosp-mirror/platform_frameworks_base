@@ -17,6 +17,7 @@
 #ifndef FRAMEWORKS_BASE_WEBVIEWFUNCTOR_H
 #define FRAMEWORKS_BASE_WEBVIEWFUNCTOR_H
 
+#include <cutils/compiler.h>
 #include <private/hwui/DrawGlInfo.h>
 
 namespace android::uirenderer {
@@ -27,7 +28,7 @@ enum class RenderMode {
 };
 
 // Static for the lifetime of the process
-RenderMode WebViewFunctor_queryPlatformRenderMode();
+ANDROID_API RenderMode WebViewFunctor_queryPlatformRenderMode();
 
 struct WebViewSyncData {
     bool applyForceDark;
@@ -35,21 +36,21 @@ struct WebViewSyncData {
 
 struct WebViewFunctorCallbacks {
     // kModeSync, called on RenderThread
-    void (*onSync)(int functor, const WebViewSyncData& syncData);
+    void (*onSync)(int functor, void* data, const WebViewSyncData& syncData);
 
     // Called when either the context is destroyed _or_ when the functor's last reference goes
     // away. Will always be called with an active context and always on renderthread.
-    void (*onContextDestroyed)(int functor);
+    void (*onContextDestroyed)(int functor, void* data);
 
     // Called when the last reference to the handle goes away and the handle is considered
     // irrevocably destroyed. Will always be proceeded by a call to onContextDestroyed if
     // this functor had ever been drawn.
-    void (*onDestroyed)(int functor);
+    void (*onDestroyed)(int functor, void* data);
 
     union {
         struct {
             // Called on RenderThread. initialize is guaranteed to happen before this call
-            void (*draw)(int functor, const DrawGlInfo& params);
+            void (*draw)(int functor, void* data, const DrawGlInfo& params);
         } gles;
         // TODO: VK support. The current DrawVkInfo is monolithic and needs to be split up for
         // what params are valid on what callbacks
@@ -70,12 +71,12 @@ struct WebViewFunctorCallbacks {
 // Creates a new WebViewFunctor from the given prototype. The prototype is copied after
 // this function returns. Caller retains full ownership of it.
 // Returns -1 if the creation fails (such as an unsupported functorMode + platform mode combination)
-int WebViewFunctor_create(const WebViewFunctorCallbacks& prototype, RenderMode functorMode);
+ANDROID_API int WebViewFunctor_create(void* data, const WebViewFunctorCallbacks& prototype, RenderMode functorMode);
 
 // May be called on any thread to signal that the functor should be destroyed.
 // The functor will receive an onDestroyed when the last usage of it is released,
 // and it should be considered alive & active until that point.
-void WebViewFunctor_release(int functor);
+ANDROID_API void WebViewFunctor_release(int functor);
 
 }  // namespace android::uirenderer
 

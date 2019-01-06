@@ -24,6 +24,7 @@ import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA
 import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP_WAIT;
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
+import android.annotation.UserIdInt;
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.backup.BackupTransport;
@@ -40,6 +41,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.UserBackupManagerFiles;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.utils.FullBackupUtils;
@@ -66,6 +68,7 @@ public class FullBackupEngine {
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     class FullBackupRunner implements Runnable {
+        private final @UserIdInt int mUserId;
         private final PackageManager mPackageManager;
         private final PackageInfo mPackage;
         private final IBackupAgent mAgent;
@@ -81,13 +84,15 @@ public class FullBackupEngine {
                 int token,
                 boolean includeApks)
                 throws IOException {
+            // TODO: http://b/22388012
+            mUserId = UserHandle.USER_SYSTEM;
             mPackageManager = backupManagerService.getPackageManager();
             mPackage = packageInfo;
             mAgent = agent;
             mPipe = ParcelFileDescriptor.dup(pipe.getFileDescriptor());
             mToken = token;
             mIncludeApks = includeApks;
-            mFilesDir = new File("/data/system");
+            mFilesDir = UserBackupManagerFiles.getFullBackupEngineFilesDir(mUserId);
         }
 
         @Override
@@ -114,10 +119,8 @@ public class FullBackupEngine {
                     manifestFile.delete();
 
                     // Write widget data.
-                    // TODO: http://b/22388012
                     byte[] widgetData =
-                            AppWidgetBackupBridge.getWidgetState(
-                                    packageName, UserHandle.USER_SYSTEM);
+                            AppWidgetBackupBridge.getWidgetState(packageName, mUserId);
                     if (widgetData != null && widgetData.length > 0) {
                         File metadataFile = new File(mFilesDir, BACKUP_METADATA_FILENAME);
                         appMetadataBackupWriter.backupWidget(

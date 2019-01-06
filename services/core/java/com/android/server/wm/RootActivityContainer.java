@@ -913,6 +913,13 @@ class RootActivityContainer extends ConfigurationContainer
                     + " to its current displayId=" + displayId);
         }
 
+        if (activityDisplay.isSingleTaskInstance() && activityDisplay.getChildCount() > 0) {
+            // We don't allow moving stacks to single instance display that already has a child.
+            Slog.e(TAG, "Can not move stack=" + stack
+                    + " to single task instance display=" + activityDisplay);
+            return;
+        }
+
         stack.reparent(activityDisplay, onTop, false /* displayRemoved */);
         // TODO(multi-display): resize stacks properly if moved from split-screen.
     }

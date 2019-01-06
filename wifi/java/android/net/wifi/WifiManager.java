@@ -2017,6 +2017,8 @@ public class WifiManager {
     public static final int WIFI_FEATURE_OWE              = 0x20000000; // Enhanced Open
     /** @hide */
     public static final int WIFI_FEATURE_LOW_LATENCY      = 0x40000000; // Low Latency modes
+    /** @hide */
+    public static final int WIFI_FEATURE_DPP              = 0x80000000; // DPP (Easy-Connect)
 
     private int getSupportedFeatures() {
         try {
@@ -4463,6 +4465,13 @@ public class WifiManager {
     }
 
     /**
+     * @return true if this device supports Wi-Fi Device Provisioning Protocol (Easy-connect)
+     */
+    public boolean isDppSupported() {
+        return isFeatureSupported(WIFI_FEATURE_DPP);
+    }
+
+    /**
      * Gets the factory Wi-Fi MAC addresses.
      * @return Array of String representing Wi-Fi MAC addresses sorted lexically or an empty Array
      * if failed.
@@ -4539,6 +4548,148 @@ public class WifiManager {
             mService.setDeviceMobilityState(state);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /* DPP - Device Provisioning Protocol AKA "Easy Connect" */
+
+    /**
+     * DPP Network role: Station.
+     * @hide
+     */
+    @SystemApi
+    public static final int DPP_NETWORK_ROLE_STA = 0;
+
+    /**
+     * DPP Network role: Access Point.
+     * @hide
+     */
+    @SystemApi
+    public static final int DPP_NETWORK_ROLE_AP = 1;
+
+    /** @hide */
+    @IntDef(prefix = {"DPP_NETWORK_ROLE_"}, value = {
+            DPP_NETWORK_ROLE_STA,
+            DPP_NETWORK_ROLE_AP,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DppNetworkRole {}
+
+    /**
+     * Start DPP in Configurator-Initiator role. The current device will initiate DPP bootstrapping
+     * with a peer, and configure the peer with the SSID and password of the specified network using
+     * the DPP protocol on an encrypted link.
+     *
+     * @param enrolleeUri URI of the Enrollee obtained separately (e.g. QR code scanning)
+     * @param selectedNetworkId Selected network ID to be sent to the peer
+     * @param enrolleeNetworkRole The network role of the enrollee
+     * @param callback Callback for status updates
+     * @param handler The handler on whose thread to execute the callbacks. Null for main thread.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
+    public void startDppAsConfiguratorInitiator(@NonNull String enrolleeUri,
+            int selectedNetworkId, @DppNetworkRole int enrolleeNetworkRole,
+            @Nullable Handler handler, @NonNull DppStatusCallback callback) {
+        Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
+        Binder binder = new Binder();
+        try {
+            mService.startDppAsConfiguratorInitiator(binder, enrolleeUri, selectedNetworkId,
+                    enrolleeNetworkRole, new DppCallbackProxy(looper, callback));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Start DPP in Enrollee-Initiator role. The current device will initiate DPP bootstrapping
+     * with a peer, and receive the SSID and password from the peer configurator.
+     *
+     * @param configuratorUri URI of the Configurator obtained separately (e.g. QR code scanning)
+     * @param callback Callback for status updates
+     * @param handler The handler on whose thread to execute the callbacks. Null for main thread.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
+    public void startDppAsEnrolleeInitiator(@NonNull String configuratorUri,
+            @Nullable Handler handler, @NonNull DppStatusCallback callback) {
+        Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
+        Binder binder = new Binder();
+        try {
+            mService.startDppAsEnrolleeInitiator(binder, configuratorUri,
+                     new DppCallbackProxy(looper, callback));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Stop or abort a current DPP session.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
+    public void stopDppSession() {
+        try {
+            /* Request lower layers to stop/abort and clear resources */
+            mService.stopDppSession();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Helper class to support DPP callbacks
+     * @hide
+     */
+    @SystemApi
+    private static class DppCallbackProxy extends IDppCallback.Stub {
+        private final Handler mHandler;
+        private final DppStatusCallback mDppStatusCallback;
+
+        DppCallbackProxy(Looper looper, DppStatusCallback dppStatusCallback) {
+            mHandler = new Handler(looper);
+            mDppStatusCallback = dppStatusCallback;
+        }
+
+        @Override
+        public void onSuccessConfigReceived(int newNetworkId) {
+            Log.d(TAG, "DPP onSuccessConfigReceived callback");
+            mHandler.post(() -> {
+                mDppStatusCallback.onEnrolleeSuccess(newNetworkId);
+            });
+        }
+
+        @Override
+        public void onSuccess(int status) {
+            Log.d(TAG, "DPP onSuccess callback");
+            mHandler.post(() -> {
+                mDppStatusCallback.onConfiguratorSuccess(status);
+            });
+        }
+
+        @Override
+        public void onFailure(int status) {
+            Log.d(TAG, "DPP onFailure callback");
+            mHandler.post(() -> {
+                mDppStatusCallback.onFailure(status);
+            });
+        }
+
+        @Override
+        public void onProgress(int status) {
+            Log.d(TAG, "DPP onProgress callback");
+            mHandler.post(() -> {
+                mDppStatusCallback.onProgress(status);
+            });
         }
     }
 }

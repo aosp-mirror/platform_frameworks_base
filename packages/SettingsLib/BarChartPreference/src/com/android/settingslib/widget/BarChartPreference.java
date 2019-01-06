@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
@@ -41,31 +40,45 @@ import java.util.Arrays;
  *        android:key="bar_chart"/&gt;
  * </pre>
  *
- * <p>This code sample demonstrates how to initialize the contents of the BarChartPreference defined
- * in the previous XML layout:
- *
- * <pre>
- * BarViewInfo[] viewsInfo = new BarViewInfo [] {
- *     new BarViewInfo(icon, 18, res of summary),
- *     new BarViewInfo(icon, 25, res of summary),
- *     new BarViewInfo(icon, 10, res of summary),
- *     new BarViewInfo(icon, 3, res of summary),
- *  };
- * </pre>
+ * <p>This code sample demonstrates how to initialize the contents of the BarChartPreference
+ * defined in the previous XML layout:
  *
  * <pre>
  * BarChartPreference preference = ((BarChartPreference) findPreference("bar_chart"));
  *
- * preference.setBarChartTitleRes(R.string.title_res);
- * preference.setBarChartDetailsRes(R.string.details_res);
- * preference.setBarChartDetailsClickListener(v -> doSomething());
- * preference.setAllBarViewsData(viewsInfo);
+ * BarChartInfo info = new BarChartInfo.Builder()
+ *     .setTitle(R.string.permission_bar_chart_title)
+ *     .setDetails(R.string.permission_bar_chart_details)
+ *     .setEmptyText(R.string.permission_bar_chart_empty_text)
+ *     .addBarViewInfo(new barViewInfo(...))
+ *     .addBarViewInfo(new barViewInfo(...))
+ *     .addBarViewInfo(new barViewInfo(...))
+ *     .addBarViewInfo(new barViewInfo(...))
+ *     .setDetailsOnClickListener(v -> doSomething())
+ *     .build();
+ *
+ * preference.initializeBarChart(info);
+ * </pre>
+ *
+ *
+ * <p>You also can update new information for bar views by
+ * {@link BarChartPreference#setBarViewInfos(BarViewInfo[])}
+ *
+ * <pre>
+ * BarViewInfo[] barViewsInfo = new BarViewInfo [] {
+ *     new BarViewInfo(...),
+ *     new BarViewInfo(...),
+ *     new BarViewInfo(...),
+ *     new BarViewInfo(...),
+ * };
+ *
+ * preference.setBarViewInfos(barViewsInfo);
  * </pre>
  */
 public class BarChartPreference extends Preference {
 
+    static final int MAXIMUM_BAR_VIEWS = 4;
     private static final String TAG = "BarChartPreference";
-    private static final int MAXIMUM_BAR_VIEWS = 4;
     private static final int[] BAR_VIEWS = {
             R.id.bar_view1,
             R.id.bar_view2,
@@ -74,12 +87,7 @@ public class BarChartPreference extends Preference {
     };
 
     private int mMaxBarHeight;
-    @StringRes
-    private int mTitleId;
-    @StringRes
-    private int mDetailsId;
-    private BarViewInfo[] mBarViewsInfo;
-    private View.OnClickListener mDetailsOnClickListener;
+    private BarChartInfo mBarChartInfo;
 
     public BarChartPreference(Context context) {
         super(context);
@@ -103,40 +111,26 @@ public class BarChartPreference extends Preference {
     }
 
     /**
-     * Set the text resource for bar chart title.
-     */
-    public void setBarChartTitle(@StringRes int resId) {
-        mTitleId = resId;
-        notifyChanged();
-    }
-
-    /**
-     * Set the text resource for bar chart details.
-     */
-    public void setBarChartDetails(@StringRes int resId) {
-        mDetailsId = resId;
-        notifyChanged();
-    }
-
-    /**
-     * Register a callback to be invoked when bar chart details view is clicked.
-     */
-    public void setBarChartDetailsClickListener(@Nullable View.OnClickListener clickListener) {
-        mDetailsOnClickListener = clickListener;
-        notifyChanged();
-    }
-
-    /**
-     * Set all bar view information which you'd like to show in preference.
+     * According to the information in {@link BarChartInfo} to initialize bar chart.
      *
-     * @param barViewsInfo the barViewsInfo contain at least one {@link BarViewInfo}.
+     * @param barChartInfo The barChartInfo contains title, details, empty text, click listener
+     *                     attached on details view and four bar views.
      */
-    public void setAllBarViewsInfo(@NonNull BarViewInfo[] barViewsInfo) {
-        mBarViewsInfo = barViewsInfo;
-        // Do a sort in descending order, the first element would have max {@link
-        // BarViewInfo#mBarNumber}
-        Arrays.sort(mBarViewsInfo);
-        calculateAllBarViewHeights();
+    public void initializeBarChart(@NonNull BarChartInfo barChartInfo) {
+        mBarChartInfo = barChartInfo;
+        notifyChanged();
+    }
+
+    /**
+     * Sets all bar view information which you'd like to show in preference.
+     *
+     * @param barViewInfos the barViewInfos contain at least one {@link BarViewInfo}.
+     */
+    public void setBarViewInfos(@Nullable BarViewInfo[] barViewInfos) {
+        if (barViewInfos != null && barViewInfos.length > MAXIMUM_BAR_VIEWS) {
+            throw new IllegalStateException("We only support up to four bar views");
+        }
+        mBarChartInfo.setBarViewInfos(barViewInfos);
         notifyChanged();
     }
 
@@ -146,7 +140,17 @@ public class BarChartPreference extends Preference {
         holder.setDividerAllowedAbove(true);
         holder.setDividerAllowedBelow(true);
 
+        // We must show title of bar chart.
         bindChartTitleView(holder);
+
+        final BarViewInfo[] barViewInfos = mBarChartInfo.getBarViewInfos();
+        // If there is no any bar view, we just show an empty text.
+        if (barViewInfos == null || barViewInfos.length == 0) {
+            setEmptyViewVisible(holder, true /* visible */);
+            return;
+        }
+        setEmptyViewVisible(holder, false /* visible */);
+
         bindChartDetailsView(holder);
         updateBarChart(holder);
     }
@@ -160,43 +164,68 @@ public class BarChartPreference extends Preference {
 
     private void bindChartTitleView(PreferenceViewHolder holder) {
         final TextView titleView = (TextView) holder.findViewById(R.id.bar_chart_title);
-        titleView.setText(mTitleId);
+        titleView.setText(mBarChartInfo.getTitle());
     }
 
     private void bindChartDetailsView(PreferenceViewHolder holder) {
         final Button detailsView = (Button) holder.findViewById(R.id.bar_chart_details);
-        if (mDetailsId == 0) {
+        final int details = mBarChartInfo.getDetails();
+        if (details == 0) {
             detailsView.setVisibility(View.GONE);
         } else {
             detailsView.setVisibility(View.VISIBLE);
-            detailsView.setText(mDetailsId);
-            detailsView.setOnClickListener(mDetailsOnClickListener);
+            detailsView.setText(details);
+            detailsView.setOnClickListener(mBarChartInfo.getDetailsOnClickListener());
         }
     }
 
     private void updateBarChart(PreferenceViewHolder holder) {
+        normalizeBarViewHeights();
+
+        final BarViewInfo[] barViewInfos = mBarChartInfo.getBarViewInfos();
+
         for (int index = 0; index < MAXIMUM_BAR_VIEWS; index++) {
             final BarView barView = (BarView) holder.findViewById(BAR_VIEWS[index]);
 
-            // If there is no bar views data can be shown.
-            if (mBarViewsInfo == null || index >= mBarViewsInfo.length) {
+            // If there is no bar view info can be shown.
+            if (barViewInfos == null || index >= barViewInfos.length) {
                 barView.setVisibility(View.GONE);
                 continue;
             }
             barView.setVisibility(View.VISIBLE);
-            barView.updateView(mBarViewsInfo[index]);
+            barView.updateView(barViewInfos[index]);
         }
     }
 
-    private void calculateAllBarViewHeights() {
+    private void normalizeBarViewHeights() {
+        final BarViewInfo[] barViewInfos = mBarChartInfo.getBarViewInfos();
+        // If there is no any bar view info, we don't need to calculate the height of all bar views.
+        if (barViewInfos == null || barViewInfos.length == 0) {
+            return;
+        }
+        // Do a sort in descending order, the first element would have max {@link
+        // BarViewInfo#mHeight}
+        Arrays.sort(barViewInfos);
         // Since we sorted this array in advance, the first element must have the max {@link
         // BarViewInfo#mHeight}.
-        final int maxBarHeight = mBarViewsInfo[0].getHeight();
+        final int maxBarHeight = barViewInfos[0].getHeight();
         // If the max number of bar view is zero, then we don't calculate the unit for bar height.
         final int unit = maxBarHeight == 0 ? 0 : mMaxBarHeight / maxBarHeight;
 
-        for (BarViewInfo barView : mBarViewsInfo) {
+        for (BarViewInfo barView : barViewInfos) {
             barView.setNormalizedHeight(barView.getHeight() * unit);
         }
+    }
+
+    private void setEmptyViewVisible(PreferenceViewHolder holder, boolean visible) {
+        final View barViewsContainer = holder.findViewById(R.id.bar_views_container);
+        final TextView emptyView = (TextView) holder.findViewById(R.id.empty_view);
+        final int emptyTextRes = mBarChartInfo.getEmptyText();
+
+        if (emptyTextRes != 0) {
+            emptyView.setText(emptyTextRes);
+        }
+        emptyView.setVisibility(visible ? View.VISIBLE : View.GONE);
+        barViewsContainer.setVisibility(visible ? View.GONE : View.VISIBLE);
     }
 }

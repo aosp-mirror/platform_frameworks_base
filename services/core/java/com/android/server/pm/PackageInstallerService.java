@@ -209,8 +209,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             readSessionsLocked();
 
-            reconcileStagesLocked(StorageManager.UUID_PRIVATE_INTERNAL, false /*isInstant*/);
-            reconcileStagesLocked(StorageManager.UUID_PRIVATE_INTERNAL, true /*isInstant*/);
+            reconcileStagesLocked(StorageManager.UUID_PRIVATE_INTERNAL);
 
             final ArraySet<File> unclaimedIcons = newArraySet(
                     mSessionsDir.listFiles());
@@ -230,8 +229,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     @GuardedBy("mSessions")
-    private void reconcileStagesLocked(String volumeUuid, boolean isEphemeral) {
-        final File stagingDir = buildStagingDir(volumeUuid, isEphemeral);
+    private void reconcileStagesLocked(String volumeUuid) {
+        final File stagingDir = getTmpSessionDir(volumeUuid);
         final ArraySet<File> unclaimedStages = newArraySet(
                 stagingDir.listFiles(sStageFilter));
 
@@ -252,7 +251,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     public void onPrivateVolumeMounted(String volumeUuid) {
         synchronized (mSessions) {
-            reconcileStagesLocked(volumeUuid, false /*isInstant*/);
+            reconcileStagesLocked(volumeUuid);
         }
     }
 
@@ -269,9 +268,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             try {
                 final int sessionId = allocateSessionIdLocked();
                 mLegacySessions.put(sessionId, true);
-                final File stageDir = buildStageDir(volumeUuid, sessionId, isEphemeral);
-                prepareStageDir(stageDir);
-                return stageDir;
+                final File sessionStageDir = buildTmpSessionDir(sessionId, volumeUuid);
+                prepareStageDir(sessionStageDir);
+                return sessionStageDir;
             } catch (IllegalStateException e) {
                 throw new IOException(e);
             }
@@ -526,9 +525,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         String stageCid = null;
         if (!params.isMultiPackage) {
             if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-                final boolean isInstant =
-                        (params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
-                stageDir = buildStageDir(params.volumeUuid, sessionId, isInstant);
+                stageDir = buildSessionDir(sessionId, params);
             } else {
                 stageCid = buildExternalStageCid(sessionId);
             }
@@ -634,13 +631,21 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         throw new IllegalStateException("Failed to allocate session ID");
     }
 
-    private File buildStagingDir(String volumeUuid, boolean isEphemeral) {
+    private File getTmpSessionDir(String volumeUuid) {
         return Environment.getDataAppDirectory(volumeUuid);
     }
 
-    private File buildStageDir(String volumeUuid, int sessionId, boolean isEphemeral) {
-        final File stagingDir = buildStagingDir(volumeUuid, isEphemeral);
-        return new File(stagingDir, "vmdl" + sessionId + ".tmp");
+    private File buildTmpSessionDir(int sessionId, String volumeUuid) {
+        final File sessionStagingDir = getTmpSessionDir(volumeUuid);
+        return new File(sessionStagingDir, "vmdl" + sessionId + ".tmp");
+    }
+
+    private File buildSessionDir(int sessionId, SessionParams params) {
+        if (params.isStaged) {
+            final File sessionStagingDir = Environment.getDataStagingDirectory(params.volumeUuid);
+            return new File(sessionStagingDir, "session_" + sessionId);
+        }
+        return buildTmpSessionDir(sessionId, params.volumeUuid);
     }
 
     static void prepareStageDir(File stageDir) throws IOException {

@@ -16,33 +16,17 @@
 
 package android.view.autofill;
 
-import android.app.Activity;
-import android.os.Looper;
-import android.os.Bundle;
-import android.perftests.utils.PerfStatusReporter;
-import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.StubActivity;
-import android.provider.Settings;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.InstrumentationRegistry;
-import com.android.perftests.autofill.R;
-
-import java.util.Locale;
-import java.util.Collection;
-import java.util.Arrays;
-
-import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.runner.RunWith;
-
 import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT_HIDDEN;
 import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT_SHOWN;
+
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.StubActivity;
+import android.view.View;
+import android.widget.EditText;
+
+import com.android.perftests.autofill.R;
+
+import org.junit.Test;
 
 public class LoginTest extends AbstractAutofillPerfTestCase {
 

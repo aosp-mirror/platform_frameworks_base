@@ -81,6 +81,10 @@ final class BroadcastRecord extends Binder {
     int manifestSkipCount;  // number of manifest receivers skipped.
     BroadcastQueue queue;   // the outbound queue handling this broadcast
 
+    // if set to true, app's process will be temporarily whitelisted to start activities
+    // from background for the duration of the broadcast dispatch
+    final boolean allowBackgroundActivityStarts;
+
     static final int IDLE = 0;
     static final int APP_RECEIVE = 1;
     static final int CALL_IN_RECEIVE = 2;
@@ -223,7 +227,8 @@ final class BroadcastRecord extends Binder {
             int _callingPid, int _callingUid, boolean _callerInstantApp, String _resolvedType,
             String[] _requiredPermissions, int _appOp, BroadcastOptions _options, List _receivers,
             IIntentReceiver _resultTo, int _resultCode, String _resultData, Bundle _resultExtras,
-            boolean _serialized, boolean _sticky, boolean _initialSticky, int _userId) {
+            boolean _serialized, boolean _sticky, boolean _initialSticky, int _userId,
+            boolean _allowBackgroundActivityStarts) {
         if (_intent == null) {
             throw new NullPointerException("Can't construct with a null intent");
         }
@@ -252,6 +257,7 @@ final class BroadcastRecord extends Binder {
         userId = _userId;
         nextReceiver = 0;
         state = IDLE;
+        allowBackgroundActivityStarts = _allowBackgroundActivityStarts;
     }
 
     /**
@@ -295,6 +301,7 @@ final class BroadcastRecord extends Binder {
         manifestCount = from.manifestCount;
         manifestSkipCount = from.manifestSkipCount;
         queue = from.queue;
+        allowBackgroundActivityStarts = from.allowBackgroundActivityStarts;
     }
 
     public BroadcastRecord maybeStripForHistory() {

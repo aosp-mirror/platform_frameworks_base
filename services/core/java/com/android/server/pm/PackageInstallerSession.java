@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
+import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_SIGNATURE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
@@ -105,6 +106,8 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapter;
+import com.android.server.pm.dex.DexManager;
+import com.android.server.security.VerityUtils;
 
 import libcore.io.IoUtils;
 
@@ -284,6 +287,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final List<String> mResolvedNativeLibPaths = new ArrayList<>();
     @GuardedBy("mLock")
     private File mInheritedFilesBase;
+    @GuardedBy("mLock")
+    private boolean mVerityFound;
 
     private static final FileFilter sAddedFilter = new FileFilter() {
         @Override
@@ -293,6 +298,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (file.isDirectory()) return false;
             if (file.getName().endsWith(REMOVE_SPLIT_MARKER_EXTENSION)) return false;
             if (DexMetadataHelper.isDexMetadataFile(file)) return false;
+            if (VerityUtils.isFsveritySignatureFile(file)) return false;
             return true;
         }
     };
@@ -977,18 +983,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Read transfers from the original owner stay open, but as the session's data
         // cannot be modified anymore, there is no leak of information.
-        if (!params.isMultiPackage) {
+        // For staged sessions, the validation is performed by StagingManager.
+        if (!params.isMultiPackage && !params.isStaged) {
             final PackageInfo pkgInfo = mPm.getPackageInfo(
                     params.appPackageName, PackageManager.GET_SIGNATURES
                             | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
 
             resolveStageDirLocked();
 
-            // Verify that stage looks sane with respect to existing application.
-            // This currently only ensures packageName, versionCode, and certificate
-            // consistency.
             try {
                 if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+                    // TODO(b/118865310): Remove this when APEX validation is done via
+                    //                    StagingManager.
                     validateApexInstallLocked(pkgInfo);
                 } else {
                     // Verify that stage looks sane with respect to existing application.
@@ -1061,14 +1067,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void commitLocked()
             throws PackageManagerException {
+        if (params.isStaged) {
+            mStagingManager.commitSession(this);
+            destroyInternal();
+            dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
+            return;
+        }
         final PackageManagerService.ActiveInstallSession committingSession =
                 makeSessionActiveLocked();
         if (committingSession == null) {
-            return;
-        }
-        if (isStaged()) {
-            mStagingManager.commitSession(this);
-            dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
             return;
         }
         if (isMultiPackage()) {
@@ -1360,6 +1367,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mResolvedStagedFiles.clear();
         mResolvedInheritedFiles.clear();
 
+        // Partial installs must be consistent with existing install
+        if (params.mode == SessionParams.MODE_INHERIT_EXISTING
+                && (pkgInfo == null || pkgInfo.applicationInfo == null)) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Missing existing base package");
+        }
+        // Default to require only if existing base has fs-verity.
+        mVerityFound = params.mode == SessionParams.MODE_INHERIT_EXISTING
+                && VerityUtils.hasFsverity(pkgInfo.applicationInfo.getBaseCodePath());
+
         try {
             resolveStageDirLocked();
         } catch (IOException e) {
@@ -1423,15 +1440,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             final File targetFile = new File(mResolvedStageDir, targetName);
-            maybeRenameFile(addedFile, targetFile);
+            resolveAndStageFile(addedFile, targetFile);
 
             // Base is coming from session
             if (apk.splitName == null) {
                 mResolvedBaseFile = targetFile;
                 baseApk = apk;
             }
-
-            mResolvedStagedFiles.add(targetFile);
 
             final File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(addedFile);
             if (dexMetadataFile != null) {
@@ -1441,8 +1456,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
                 final File targetDexMetadataFile = new File(mResolvedStageDir,
                         DexMetadataHelper.buildDexMetadataPathForApk(targetName));
-                mResolvedStagedFiles.add(targetDexMetadataFile);
-                maybeRenameFile(dexMetadataFile, targetDexMetadataFile);
+                resolveAndStageFile(dexMetadataFile, targetDexMetadataFile);
             }
         }
 
@@ -1485,12 +1499,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
         } else {
-            // Partial installs must be consistent with existing install
-            if (pkgInfo == null || pkgInfo.applicationInfo == null) {
-                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                        "Missing existing base package for " + mPackageName);
-            }
-
             final PackageLite existing;
             final ApkLite existingBase;
             ApplicationInfo appInfo = pkgInfo.applicationInfo;
@@ -1594,10 +1602,53 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
         }
+        if (baseApk.preferCodeIntegrity) {
+            for (File file : mResolvedStagedFiles) {
+                if (file.getName().endsWith(".apk")
+                        && !DexManager.auditUncompressedCodeInApk(file.getPath())) {
+                    throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                            "Some code are not uncompressed and aligned correctly for "
+                            + mPackageName);
+                }
+            }
+        }
         if (baseApk.isSplitRequired && stagedSplits.size() <= 1) {
             throw new PackageManagerException(INSTALL_FAILED_MISSING_SPLIT,
                     "Missing split for " + mPackageName);
         }
+    }
+
+    private void resolveAndStageFile(File origFile, File targetFile)
+            throws PackageManagerException {
+        mResolvedStagedFiles.add(targetFile);
+        maybeRenameFile(origFile, targetFile);
+
+        final File originalSignature = new File(
+                VerityUtils.getFsveritySignatureFilePath(origFile.getPath()));
+        // Make sure .fsv_sig exists when it should, then resolve and stage it.
+        if (originalSignature.exists()) {
+            // mVerityFound can only change from false to true here during the staging loop. Since
+            // all or none of files should have .fsv_sig, this should only happen in the first time
+            // (or never), otherwise bail out.
+            if (!mVerityFound) {
+                mVerityFound = true;
+                if (mResolvedStagedFiles.size() > 1) {
+                    throw new PackageManagerException(INSTALL_FAILED_BAD_SIGNATURE,
+                            "Some file is missing fs-verity signature");
+                }
+            }
+        } else {
+            if (!mVerityFound) {
+                return;
+            }
+            throw new PackageManagerException(INSTALL_FAILED_BAD_SIGNATURE,
+                    "Missing corresponding fs-verity signature to " + origFile);
+        }
+
+        final File stagedSignature = new File(
+                VerityUtils.getFsveritySignatureFilePath(targetFile.getPath()));
+        maybeRenameFile(originalSignature, stagedSignature);
+        mResolvedStagedFiles.add(stagedSignature);
     }
 
     @GuardedBy("mLock")
@@ -1973,7 +2024,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 bridge.forceClose();
             }
         }
-        if (stageDir != null) {
+        // For staged sessions, we don't delete the directory where the packages have been copied,
+        // since these packages are supposed to be read on reboot. StagingManager is in charge of
+        // deleting these dirs when the staged session has reached a final state.
+        // TODO(b/118865310): Implement packageDir deletion in StagingManager.
+        if (stageDir != null && !params.isStaged) {
             try {
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
             } catch (InstallerException ignored) {

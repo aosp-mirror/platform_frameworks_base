@@ -1112,6 +1112,11 @@
          resource] to be present in order to function. Default value is false. -->
     <attr name="isSplitRequired" format="boolean" />
 
+    <!-- Flag to specify if this app prioritizes code integrity. The system may choose
+         to run with better integrity guarantee in various components if possible based on the app's
+         <code>targetSdkVersion</code>. -->
+    <attr name="preferCodeIntegrity" format="boolean" />
+
     <!-- Extra options for an activity's UI. Applies to either the {@code <activity>} or
          {@code <application>} tag. If specified on the {@code <application>}
          tag these will be considered defaults for all activities in the
@@ -1580,6 +1585,7 @@
              to honor this flag as well. -->
         <attr name="usesCleartextTraffic" />
         <attr name="multiArch" />
+        <attr name="preferCodeIntegrity" />
         <attr name="extractNativeLibs" />
         <attr name="defaultToDeviceProtectedStorage" format="boolean" />
         <attr name="directBootAware" />

@@ -1373,12 +1373,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean isVisible() {
-        return wouldBeVisibleIfPolicyIgnored() && mPolicyVisibility;
+        return wouldBeVisibleIfPolicyIgnored() && mPolicyVisibility
+                // If we don't have a provider, this window isn't used as a window generating
+                // insets, so nobody can hide it over the inset APIs.
+                && (mInsetProvider == null || mInsetProvider.isClientVisible());
     }
 
     /**
-     * @return True if the window would be visible if we'd ignore policy visibility, false
-     *         otherwise.
+     * @return {@code true} if the window would be visible if we'd ignore policy visibility,
+     *         {@code false} otherwise.
      */
     boolean wouldBeVisibleIfPolicyIgnored() {
         return mHasSurface && !isParentWindowHidden()

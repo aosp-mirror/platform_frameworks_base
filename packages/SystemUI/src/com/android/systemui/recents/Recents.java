@@ -54,8 +54,10 @@ public class Recents extends SystemUI implements CommandQueue.Callbacks {
     }
 
     @Override
-    public void appTransitionFinished() {
-        mImpl.onAppTransitionFinished();
+    public void appTransitionFinished(int displayId) {
+        if (mContext.getDisplayId() == displayId) {
+            mImpl.onAppTransitionFinished();
+        }
     }
 
     public void growRecents() {

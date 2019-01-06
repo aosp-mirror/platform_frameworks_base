@@ -70,7 +70,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private SignalCallback mSignalCallback = new SignalCallback() {
         @Override
         public void setIsAirplaneMode(NetworkController.IconState icon) {
-            mCommandQueue.recomputeDisableFlags(true /* animate */);
+            mCommandQueue.recomputeDisableFlags(getContext().getDisplayId(), true /* animate */);
         }
     };
 
@@ -155,7 +155,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     @Override
-    public void disable(int state1, int state2, boolean animate) {
+    public void disable(int displayId, int state1, int state2, boolean animate) {
+        if (displayId != getContext().getDisplayId()) {
+            return;
+        }
         state1 = adjustDisableFlags(state1);
         final int old1 = mDisabled1;
         final int diff1 = state1 ^ old1;
@@ -362,6 +365,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     @Override
     public void onDozingChanged(boolean isDozing) {
-        disable(mDisabled1, mDisabled1, false /* animate */);
+        disable(getContext().getDisplayId(), mDisabled1, mDisabled1, false /* animate */);
     }
 }

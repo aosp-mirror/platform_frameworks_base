@@ -46,7 +46,7 @@ import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
-import com.android.systemui.statusbar.DisplayNavigationBarController;
+import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
@@ -156,6 +157,12 @@ public class Dependency extends SystemUI {
     public static final String LEAK_REPORT_EMAIL_NAME = "leak_report_email";
 
     /**
+     * Whether this platform supports long-pressing notifications to show notification channel
+     * settings.
+     */
+    public static final String ALLOW_NOTIFICATION_LONG_PRESS_NAME = "allow_notif_longpress";
+
+    /**
      * Key for getting a background Looper for background work.
      */
     public static final DependencyKey<Looper> BG_LOOPER = new DependencyKey<>(BG_LOOPER_NAME);
@@ -244,7 +251,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<NotificationRemoteInputManager.Callback> mNotificationRemoteInputManagerCallback;
     @Inject Lazy<InitController> mInitController;
     @Inject Lazy<AppOpsController> mAppOpsController;
-    @Inject Lazy<DisplayNavigationBarController> mDisplayNavigationBarController;
+    @Inject Lazy<NavigationBarController> mNavigationBarController;
     @Inject Lazy<StatusBarStateController> mStatusBarStateController;
     @Inject Lazy<NotificationLockscreenUserManager> mNotificationLockscreenUserManager;
     @Inject Lazy<NotificationGroupAlertTransferHelper> mNotificationGroupAlertTransferHelper;
@@ -270,6 +277,8 @@ public class Dependency extends SystemUI {
     @Inject
     Lazy<NotificationAlertingManager> mNotificationAlertingManager;
     @Inject Lazy<SensorPrivacyManager> mSensorPrivacyManager;
+    @Inject Lazy<AutoHideController> mAutoHideController;
+    @Inject Lazy<ForegroundServiceNotificationListener> mForegroundServiceNotificationListener;
     @Inject @Named(BG_LOOPER_NAME) Lazy<Looper> mBgLooper;
     @Inject @Named(BG_HANDLER_NAME) Lazy<Handler> mBgHandler;
     @Inject @Named(MAIN_HANDLER_NAME) Lazy<Handler> mMainHandler;
@@ -410,8 +419,7 @@ public class Dependency extends SystemUI {
 
         mProviders.put(AppOpsController.class, mAppOpsController::get);
 
-        mProviders.put(DisplayNavigationBarController.class,
-                mDisplayNavigationBarController::get);
+        mProviders.put(NavigationBarController.class, mNavigationBarController::get);
 
         mProviders.put(StatusBarStateController.class, mStatusBarStateController::get);
         mProviders.put(NotificationLockscreenUserManager.class,
@@ -443,6 +451,14 @@ public class Dependency extends SystemUI {
         mProviders.put(BubbleController.class, mBubbleController::get);
         mProviders.put(NotificationEntryManager.class, mNotificationEntryManager::get);
         mProviders.put(NotificationAlertingManager.class, mNotificationAlertingManager::get);
+        mProviders.put(ForegroundServiceNotificationListener.class,
+                mForegroundServiceNotificationListener::get);
+
+        // TODO(b/118592525): to support multi-display , we start to add something which is
+        //                    per-display, while others may be global. I think it's time to add
+        //                    a new class maybe named DisplayDependency to solve per-display
+        //                    Dependency problem.
+        mProviders.put(AutoHideController.class, mAutoHideController::get);
 
         sDependency = this;
     }
@@ -512,6 +528,9 @@ public class Dependency extends SystemUI {
     public static void initDependencies(Context context) {
         if (sDependency != null) return;
         Dependency d = new Dependency();
+        SystemUIFactory.getInstance().getRootComponent()
+                .createDependency()
+                .createSystemUI(d);
         d.mContext = context;
         d.mComponents = new HashMap<>();
         d.start();

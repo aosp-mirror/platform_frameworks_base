@@ -30,7 +30,8 @@ namespace statsd {
 
 const static int FIELD_ID_ATOM = 1;
 
-void ShellSubscriber::startNewSubscription(int in, int out, sp<IResultReceiver> resultReceiver) {
+void ShellSubscriber::startNewSubscription(int in, int out, sp<IResultReceiver> resultReceiver,
+                                           int timeoutSec) {
     VLOG("start new shell subscription");
     {
         std::lock_guard<std::mutex> lock(mMutex);
@@ -50,11 +51,18 @@ void ShellSubscriber::startNewSubscription(int in, int out, sp<IResultReceiver> 
     // Read config forever until EOF is reached. Clients may send multiple configs -- each new
     // config replace the previous one.
     readConfig(in);
+    VLOG("timeout : %d", timeoutSec);
 
     // Now we have read an EOF we now wait for the semaphore until the client exits.
     VLOG("Now wait for client to exit");
     std::unique_lock<std::mutex> lk(mMutex);
-    mShellDied.wait(lk, [this, resultReceiver] { return mResultReceiver != resultReceiver; });
+
+    if (timeoutSec > 0) {
+        mShellDied.wait_for(lk, timeoutSec * 1s,
+                            [this, resultReceiver] { return mResultReceiver != resultReceiver; });
+    } else {
+        mShellDied.wait(lk, [this, resultReceiver] { return mResultReceiver != resultReceiver; });
+    }
 }
 
 void ShellSubscriber::updateConfig(const ShellSubscription& config) {

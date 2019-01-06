@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -82,6 +83,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -196,13 +198,14 @@ public class StatusBarTest extends SysuiTestCase {
                         mDreamManager);
         mDependency.injectTestDependency(NotificationInterruptionStateProvider.class,
                 mNotificationInterruptionStateProvider);
+        mDependency.injectMockDependency(NavigationBarController.class);
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
 
         mMetricsLogger = new FakeMetricsLogger();
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
-        mEntryManager = new TestableNotificationEntryManager(mPowerManager, mContext);
+        mEntryManager = new TestableNotificationEntryManager(mContext);
         mNotificationLogger = new NotificationLogger(mNotificationListener,
                 Dependency.get(UiOffloadThread.class), mEntryManager, mStatusBarStateController);
         mDependency.injectTestDependency(NotificationLogger.class, mNotificationLogger);
@@ -245,7 +248,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mock(StatusBarWindowController.class), mock(NotificationIconAreaController.class),
                 mDozeScrimController, mock(NotificationShelf.class),
                 mLockscreenUserManager, mCommandQueue, mNotificationPresenter,
-                mock(BubbleController.class));
+                mock(BubbleController.class), mock(NavigationBarController.class),
+                mock(AutoHideController.class));
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         SystemUIFactory.getInstance().getRootComponent()
@@ -544,7 +548,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
 
         when(mCommandQueue.panelsEnabled()).thenReturn(false);
-        mStatusBar.disable(StatusBarManager.DISABLE_NONE,
+        mStatusBar.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
         verify(mNotificationPanelView).setQsExpansionEnabled(false);
         mStatusBar.animateExpandNotificationsPanel();
@@ -553,7 +557,8 @@ public class StatusBarTest extends SysuiTestCase {
         verify(mNotificationPanelView, never()).expand(anyBoolean());
 
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
-        mStatusBar.disable(StatusBarManager.DISABLE_NONE, StatusBarManager.DISABLE2_NONE, false);
+        mStatusBar.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
+                StatusBarManager.DISABLE2_NONE, false);
         verify(mNotificationPanelView).setQsExpansionEnabled(true);
         mStatusBar.animateExpandNotificationsPanel();
         verify(mNotificationPanelView).expandWithoutQs();
@@ -695,7 +700,9 @@ public class StatusBarTest extends SysuiTestCase {
                 NotificationLockscreenUserManager notificationLockscreenUserManager,
                 CommandQueue commandQueue,
                 NotificationPresenter notificationPresenter,
-                BubbleController bubbleController) {
+                BubbleController bubbleController,
+                NavigationBarController navBarController,
+                AutoHideController autoHideController) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -726,6 +733,8 @@ public class StatusBarTest extends SysuiTestCase {
             mPresenter = notificationPresenter;
             mGestureWakeLock = mock(PowerManager.WakeLock.class);
             mBubbleController = bubbleController;
+            mNavigationBarController = navBarController;
+            mAutoHideController = autoHideController;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {
@@ -752,9 +761,8 @@ public class StatusBarTest extends SysuiTestCase {
 
     public static class TestableNotificationEntryManager extends NotificationEntryManager {
 
-        public TestableNotificationEntryManager(PowerManager powerManager, Context context) {
+        public TestableNotificationEntryManager(Context context) {
             super(context);
-            mPowerManager = powerManager;
         }
 
         public void setUpForTest(NotificationPresenter presenter,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,51 +18,51 @@ package android.telephony.ims;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.telephony.ims.aidl.IRcs;
+import android.util.Log;
 
 /**
  * RcsThread represents a single RCS conversation thread. It holds messages that were sent and
- * received and events that occured on that thread.
+ * received and events that occurred on that thread.
  * @hide - TODO(sahinc) make this public
  */
-public class RcsThread implements Parcelable {
+public abstract class RcsThread implements Parcelable {
+    // Since this is an abstract class that gets parcelled, the sub-classes need to write these
+    // magic values into the parcel so that we know which type to unparcel into.
+    protected static final int RCS_1_TO_1_TYPE = 998;
+    protected static final int RCS_GROUP_TYPE = 999;
+
+    protected int mThreadId;
+
+    protected RcsThread(int threadId) {
+        mThreadId = threadId;
+    }
+
+    protected RcsThread(Parcel in) {
+        mThreadId = in.readInt();
+    }
+
     public static final Creator<RcsThread> CREATOR = new Creator<RcsThread>() {
         @Override
         public RcsThread createFromParcel(Parcel in) {
-            return new RcsThread(in);
+            int type = in.readInt();
+
+            switch (type) {
+                case RCS_1_TO_1_TYPE:
+                    return new Rcs1To1Thread(in);
+                case RCS_GROUP_TYPE:
+                    return new RcsGroupThread(in);
+                default:
+                    Log.e(RcsMessageStore.TAG, "Cannot unparcel RcsThread, wrong type: " + type);
+            }
+            return null;
         }
 
         @Override
         public RcsThread[] newArray(int size) {
-            return new RcsThread[size];
+            return new RcsThread[0];
         }
     };
 
-    protected RcsThread(Parcel in) {
-    }
-
-    /**
-     * Returns the number of messages in this RCS thread.
-     *
-     * @hide
-     */
-    public int getMessageCount() {
-        try {
-            IRcs iRcs = IRcs.Stub.asInterface(ServiceManager.getService("ircs"));
-            if (iRcs != null) {
-                // TODO(sahinc): substitute to the regular thread id once we have database
-                // TODO(sahinc): connection in place
-                return iRcs.getMessageCount(/* rcsThreadId= */ 123);
-            }
-        } catch (RemoteException re) {
-            // TODO(sahinc): Log something meaningful
-        }
-        return 0;
-    }
-
-    /** Implement the Parcelable interface */
     @Override
     public int describeContents() {
         return 0;
@@ -70,5 +70,6 @@ public class RcsThread implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mThreadId);
     }
 }

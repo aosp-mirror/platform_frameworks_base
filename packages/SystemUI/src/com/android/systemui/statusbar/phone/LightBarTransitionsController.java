@@ -25,8 +25,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.util.MathUtils;
 import android.provider.Settings;
+import android.util.MathUtils;
 import android.util.TimeUtils;
 
 import com.android.systemui.Dependency;
@@ -66,6 +66,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
     private float mDarkIntensity;
     private float mNextDarkIntensity;
     private float mDozeAmount;
+    private int mDisplayId;
     private final Runnable mTransitionDeferringDoneRunnable = new Runnable() {
         @Override
         public void run() {
@@ -85,6 +86,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
         mStatusBarStateController.addCallback(this);
         mDozeAmount = mStatusBarStateController.getDozeAmount();
         mContext = context;
+        mDisplayId = mContext.getDisplayId();
     }
 
     public void destroy(Context context) {
@@ -104,15 +106,18 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
     }
 
     @Override
-    public void appTransitionPending(boolean forced) {
-        if (mKeyguardMonitor.isKeyguardGoingAway() && !forced) {
+    public void appTransitionPending(int displayId, boolean forced) {
+        if (mDisplayId != displayId || mKeyguardMonitor.isKeyguardGoingAway() && !forced) {
             return;
         }
         mTransitionPending = true;
     }
 
     @Override
-    public void appTransitionCancelled() {
+    public void appTransitionCancelled(int displayId) {
+        if (mDisplayId != displayId) {
+            return;
+        }
         if (mTransitionPending && mTintChangePending) {
             mTintChangePending = false;
             animateIconTint(mPendingDarkIntensity, 0 /* delay */, getTintAnimationDuration());
@@ -121,8 +126,9 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
     }
 
     @Override
-    public void appTransitionStarting(long startTime, long duration, boolean forced) {
-        if (mKeyguardMonitor.isKeyguardGoingAway() && !forced) {
+    public void appTransitionStarting(int displayId, long startTime, long duration,
+            boolean forced) {
+        if (mDisplayId != displayId || mKeyguardMonitor.isKeyguardGoingAway() && !forced) {
             return;
         }
         if (mTransitionPending && mTintChangePending) {

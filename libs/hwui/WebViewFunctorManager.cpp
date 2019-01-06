@@ -37,7 +37,8 @@ RenderMode WebViewFunctor_queryPlatformRenderMode() {
     }
 }
 
-int WebViewFunctor_create(const WebViewFunctorCallbacks& prototype, RenderMode functorMode) {
+int WebViewFunctor_create(void* data, const WebViewFunctorCallbacks& prototype,
+                          RenderMode functorMode) {
     if (functorMode != RenderMode::OpenGL_ES && functorMode != RenderMode::Vulkan) {
         ALOGW("Unknown rendermode %d", (int)functorMode);
         return -1;
@@ -47,7 +48,7 @@ int WebViewFunctor_create(const WebViewFunctorCallbacks& prototype, RenderMode f
         ALOGW("Unable to map from GLES platform to a vulkan functor");
         return -1;
     }
-    return WebViewFunctorManager::instance().createFunctor(prototype, functorMode);
+    return WebViewFunctorManager::instance().createFunctor(data, prototype, functorMode);
 }
 
 void WebViewFunctor_release(int functor) {
@@ -56,7 +57,9 @@ void WebViewFunctor_release(int functor) {
 
 static std::atomic_int sNextId{1};
 
-WebViewFunctor::WebViewFunctor(const WebViewFunctorCallbacks& callbacks, RenderMode functorMode) {
+WebViewFunctor::WebViewFunctor(void* data, const WebViewFunctorCallbacks& callbacks,
+                               RenderMode functorMode)
+        : mData(data) {
     mFunctor = sNextId++;
     mCallbacks = callbacks;
     mMode = functorMode;
@@ -66,12 +69,12 @@ WebViewFunctor::~WebViewFunctor() {
     destroyContext();
 
     ATRACE_NAME("WebViewFunctor::onDestroy");
-    mCallbacks.onDestroyed(mFunctor);
+    mCallbacks.onDestroyed(mFunctor, mData);
 }
 
 void WebViewFunctor::sync(const WebViewSyncData& syncData) const {
     ATRACE_NAME("WebViewFunctor::sync");
-    mCallbacks.onSync(mFunctor, syncData);
+    mCallbacks.onSync(mFunctor, mData, syncData);
 }
 
 void WebViewFunctor::drawGl(const DrawGlInfo& drawInfo) {
@@ -79,14 +82,14 @@ void WebViewFunctor::drawGl(const DrawGlInfo& drawInfo) {
     if (!mHasContext) {
         mHasContext = true;
     }
-    mCallbacks.gles.draw(mFunctor, drawInfo);
+    mCallbacks.gles.draw(mFunctor, mData, drawInfo);
 }
 
 void WebViewFunctor::destroyContext() {
     if (mHasContext) {
         mHasContext = false;
         ATRACE_NAME("WebViewFunctor::onContextDestroyed");
-        mCallbacks.onContextDestroyed(mFunctor);
+        mCallbacks.onContextDestroyed(mFunctor, mData);
     }
 }
 
@@ -95,9 +98,9 @@ WebViewFunctorManager& WebViewFunctorManager::instance() {
     return sInstance;
 }
 
-int WebViewFunctorManager::createFunctor(const WebViewFunctorCallbacks& callbacks,
+int WebViewFunctorManager::createFunctor(void* data, const WebViewFunctorCallbacks& callbacks,
                                          RenderMode functorMode) {
-    auto object = std::make_unique<WebViewFunctor>(callbacks, functorMode);
+    auto object = std::make_unique<WebViewFunctor>(data, callbacks, functorMode);
     int id = object->id();
     auto handle = object->createHandle();
     {

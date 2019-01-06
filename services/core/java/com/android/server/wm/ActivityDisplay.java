@@ -37,6 +37,7 @@ import static com.android.server.am.ActivityDisplayProto.CONFIGURATION_CONTAINER
 import static com.android.server.am.ActivityDisplayProto.FOCUSED_STACK_ID;
 import static com.android.server.am.ActivityDisplayProto.ID;
 import static com.android.server.am.ActivityDisplayProto.RESUMED_ACTIVITY;
+import static com.android.server.am.ActivityDisplayProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.am.ActivityDisplayProto.STACKS;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStackSupervisor.TAG_TASKS;
@@ -119,6 +120,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
      * finished before removing this object.
      */
     private boolean mRemoved;
+
+    /** The display can only contain one task. */
+    private boolean mSingleTaskInstance;
 
     /**
      * A focusable stack that is purposely to be positioned at the top. Although the stack may not
@@ -244,6 +248,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         final ActivityStack prevFocusedStack = updateLastFocusedStackReason != null
                 ? getFocusedStack() : null;
         final boolean wasContained = mStacks.remove(stack);
+        if (mSingleTaskInstance && getChildCount() > 0) {
+            throw new IllegalStateException(
+                    "positionChildAt: Can only have one child on display=" + this);
+        }
         final int insertPosition = getTopInsertPosition(stack, position);
         mStacks.add(insertPosition, stack);
 
@@ -402,6 +410,14 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
      * @return The newly created stack.
      */
     <T extends ActivityStack> T createStack(int windowingMode, int activityType, boolean onTop) {
+
+        if (mSingleTaskInstance && getChildCount() > 0) {
+            // Create stack on default display instead since this display can only contain 1 stack.
+            // TODO: Kinda a hack, but better that having the decision at each call point. Hoping
+            // this goes away once ActivityView is no longer using virtual displays.
+            return mRootActivityContainer.getDefaultDisplay().createStack(
+                    windowingMode, activityType, onTop);
+        }
 
         if (activityType == ACTIVITY_TYPE_UNDEFINED) {
             // Can't have an undefined stack type yet...so re-map to standard. Anyone that wants
@@ -1337,8 +1353,31 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
     }
 
+    void setDisplayToSingleTaskInstance() {
+        final int childCount = getChildCount();
+        if (childCount > 1) {
+            throw new IllegalArgumentException("Display already has multiple stacks. display="
+                    + this);
+        }
+        if (childCount > 0) {
+            final ActivityStack stack = getChildAt(0);
+            if (stack.getChildCount() > 1) {
+                throw new IllegalArgumentException("Display stack already has multiple tasks."
+                        + " display=" + this + " stack=" + stack);
+            }
+        }
+
+        mSingleTaskInstance = true;
+    }
+
+    /** Returns true if the display can only contain one task */
+    boolean isSingleTaskInstance() {
+        return mSingleTaskInstance;
+    }
+
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "displayId=" + mDisplayId + " stacks=" + mStacks.size());
+        pw.println(prefix + "displayId=" + mDisplayId + " stacks=" + mStacks.size()
+                + (mSingleTaskInstance ? " mSingleTaskInstance" : ""));
         final String myPrefix = prefix + " ";
         if (mHomeStack != null) {
             pw.println(myPrefix + "mHomeStack=" + mHomeStack);
@@ -1373,6 +1412,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         final long token = proto.start(fieldId);
         super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
         proto.write(ID, mDisplayId);
+        proto.write(SINGLE_TASK_INSTANCE, mSingleTaskInstance);
         final ActivityStack focusedStack = getFocusedStack();
         if (focusedStack != null) {
             proto.write(FOCUSED_STACK_ID, focusedStack.mStackId);

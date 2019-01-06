@@ -34,12 +34,15 @@ import dalvik.system.CloseGuard;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Session used to notify a system-provided Content Capture service about events associated with
  * views.
  */
 public abstract class ContentCaptureSession implements AutoCloseable {
+
+    private static final String TAG = ContentCaptureSession.class.getSimpleName();
 
     /**
      * Used on {@link #notifyViewTextChanged(AutofillId, CharSequence, int)} to indicate that the
@@ -85,10 +88,13 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     private static final int INITIAL_CHILDREN_CAPACITY = 5;
 
-    /** @hide */
-    protected final String mTag = getClass().getSimpleName();
-
     private final CloseGuard mCloseGuard = CloseGuard.get();
+
+    /**
+     * Guard use to ignore events after it's destroyed.
+     */
+    @NonNull
+    private final AtomicBoolean mDestroyed = new AtomicBoolean();
 
     /** @hide */
     @Nullable
@@ -134,7 +140,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             @NonNull ContentCaptureContext context) {
         final ContentCaptureSession child = newChild(context);
         if (DEBUG) {
-            Log.d(mTag, "createContentCaptureSession(" + context + ": parent=" + mId + ", child= "
+            Log.d(TAG, "createContentCaptureSession(" + context + ": parent=" + mId + ", child="
                     + child.mId);
         }
         if (mChildren == null) {
@@ -157,29 +163,29 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * <p>Once destroyed, any new notification will be dropped.
      */
     public final void destroy() {
-        //TODO(b/111276913): mark it as destroyed so other methods are ignored (and test on CTS)
-
-        //TODO(b/111276913): probably shouldn't check for it
-        if (!isContentCaptureEnabled()) return;
+        if (!mDestroyed.compareAndSet(false, true)) {
+            Log.e(TAG, "destroy(): already destroyed");
+            return;
+        }
 
         mCloseGuard.close();
 
         //TODO(b/111276913): check state (for example, how to handle if it's waiting for remote
         // id) and send it to the cache of batched commands
         if (VERBOSE) {
-            Log.v(mTag, "destroy(): state=" + getStateAsString(mState) + ", mId=" + mId);
+            Log.v(TAG, "destroy(): state=" + getStateAsString(mState) + ", mId=" + mId);
         }
 
         // Finish children first
         if (mChildren != null) {
             final int numberChildren = mChildren.size();
-            if (VERBOSE) Log.v(mTag, "Destroying " + numberChildren + " children first");
+            if (VERBOSE) Log.v(TAG, "Destroying " + numberChildren + " children first");
             for (int i = 0; i < numberChildren; i++) {
                 final ContentCaptureSession child = mChildren.get(i);
                 try {
                     child.destroy();
                 } catch (Exception e) {
-                    Log.w(mTag, "exception destroying child session #" + i + ": " + e);
+                    Log.w(TAG, "exception destroying child session #" + i + ": " + e);
                 }
             }
         }
@@ -298,14 +304,18 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         return new ViewNode.ViewStructureImpl(parentId, virtualId);
     }
 
-    abstract boolean isContentCaptureEnabled();
+    boolean isContentCaptureEnabled() {
+        return !mDestroyed.get();
+    }
 
     @CallSuper
     void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
+        pw.print(prefix); pw.print("id: "); pw.println(mId);
+        pw.print(prefix); pw.print("destroyed: "); pw.println(mDestroyed.get());
         if (mChildren != null && !mChildren.isEmpty()) {
             final String prefix2 = prefix + "  ";
             final int numberChildren = mChildren.size();
-            pw.print(prefix); pw.print("number children: "); pw.print(numberChildren);
+            pw.print(prefix); pw.print("number children: "); pw.println(numberChildren);
             for (int i = 0; i < numberChildren; i++) {
                 final ContentCaptureSession child = mChildren.get(i);
                 pw.print(prefix); pw.print(i); pw.println(": "); child.dump(prefix2, pw);

@@ -85,6 +85,7 @@ public class DozeSensors {
         mProxCallback = proxCallback;
         mResolver = mContext.getContentResolver();
 
+        boolean alwaysOn = mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT);
         mSensors = new TriggerSensor[] {
                 new TriggerSensor(
                         mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION),
@@ -116,7 +117,7 @@ public class DozeSensors {
                 new PluginSensor(
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_DISPLAY),
                         Settings.Secure.DOZE_WAKE_SCREEN_GESTURE,
-                        mConfig.wakeScreenGestureAvailable(),
+                        mConfig.wakeScreenGestureAvailable() && alwaysOn,
                         DozeLog.REASON_SENSOR_WAKE_UP,
                         false /* reports touch coordinates */,
                         false /* touchscreen */),

@@ -1362,8 +1362,9 @@ public final class ProcessList {
                 mService.mNativeDebuggingApp = null;
             }
 
-            if (app.info.isPrivilegedApp() &&
-                    DexManager.isPackageSelectedToRunOob(app.pkgList.mPkgList.keySet())) {
+            if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PREFER_CODE_INTEGRITY) != 0
+                    || (app.info.isPrivilegedApp()
+                        && DexManager.isPackageSelectedToRunOob(app.pkgList.mPkgList.keySet()))) {
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
@@ -1612,6 +1613,13 @@ public final class ProcessList {
                 // If this is a new package in the process, add the package to the list
                 app.addPackage(info.packageName, info.versionCode, mService.mProcessStats);
                 checkSlow(startTime, "startProcess: done, added package to proc");
+                return app;
+            } else if (app.getActiveInstrumentation() != null) {
+                // We don't want to kill running instrumentation.
+                if (DEBUG_PROCESSES) {
+                    Slog.v(TAG_PROCESSES, "Instrumentation already running: " + app);
+                }
+                checkSlow(startTime, "startProcess: keep instrumentation proc");
                 return app;
             }
 

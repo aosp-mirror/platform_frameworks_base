@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
 
 import android.animation.Animator;
@@ -31,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.IColorDisplayManager;
 import android.net.Uri;
 import android.opengl.Matrix;
@@ -86,11 +88,80 @@ public final class ColorDisplayService extends SystemService {
      */
     private static final ColorMatrixEvaluator COLOR_MATRIX_EVALUATOR = new ColorMatrixEvaluator();
 
+    private final TintController mNightDisplayTintController = new TintController() {
+
+        private float[] mMatrixNightDisplay = new float[16];
+        private final float[] mColorTempCoefficients = new float[9];
+
+        /**
+         * Set coefficients based on whether the color matrix is linear or not.
+         */
+        @Override
+        public void setUp(Context context, boolean needsLinear) {
+            final String[] coefficients = context.getResources().getStringArray(needsLinear
+                    ? R.array.config_nightDisplayColorTemperatureCoefficients
+                    : R.array.config_nightDisplayColorTemperatureCoefficientsNative);
+            for (int i = 0; i < 9 && i < coefficients.length; i++) {
+                mColorTempCoefficients[i] = Float.parseFloat(coefficients[i]);
+            }
+        }
+
+        @Override
+        public void setMatrix(int cct) {
+            if (mMatrixNightDisplay.length != 16) {
+                Slog.d(TAG, "The display transformation matrix must be 4x4");
+                return;
+            }
+
+            Matrix.setIdentityM(mMatrixNightDisplay, 0);
+
+            final float squareTemperature = cct * cct;
+            final float red = squareTemperature * mColorTempCoefficients[0]
+                    + cct * mColorTempCoefficients[1] + mColorTempCoefficients[2];
+            final float green = squareTemperature * mColorTempCoefficients[3]
+                    + cct * mColorTempCoefficients[4] + mColorTempCoefficients[5];
+            final float blue = squareTemperature * mColorTempCoefficients[6]
+                    + cct * mColorTempCoefficients[7] + mColorTempCoefficients[8];
+            mMatrixNightDisplay[0] = red;
+            mMatrixNightDisplay[5] = green;
+            mMatrixNightDisplay[10] = blue;
+        }
+
+        @Override
+        public float[] getMatrix() {
+            return isActivated() ? mMatrixNightDisplay : MATRIX_IDENTITY;
+        }
+
+        @Override
+        public int getLevel() {
+            return LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
+        }
+    };
+
+    private final TintController mDisplayWhiteBalanceTintController = new TintController() {
+
+        private float[] mMatrixDisplayWhiteBalance = new float[16];
+
+        @Override
+        public void setUp(Context context, boolean needsLinear) {
+        }
+
+        @Override
+        public float[] getMatrix() {
+            return isActivated() ? mMatrixDisplayWhiteBalance : MATRIX_IDENTITY;
+        }
+
+        @Override
+        public void setMatrix(int cct) {
+        }
+
+        @Override
+        public int getLevel() {
+            return LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
+        }
+    };
+
     private final Handler mHandler;
-
-    private float[] mMatrixNight = new float[16];
-
-    private final float[] mColorTempCoefficients = new float[9];
 
     private int mCurrentUser = UserHandle.USER_NULL;
     private ContentObserver mUserSetupObserver;
@@ -98,10 +169,12 @@ public final class ColorDisplayService extends SystemService {
 
     private ColorDisplayController mNightDisplayController;
     private ContentObserver mContentObserver;
-    private ValueAnimator mColorMatrixAnimator;
 
-    private Boolean mIsNightDisplayActivated;
+    private DisplayWhiteBalanceListener mDisplayWhiteBalanceListener;
+
     private NightDisplayAutoMode mNightDisplayAutoMode;
+
+    private Integer mDisplayWhiteBalanceColorTemperature;
 
     public ColorDisplayService(Context context) {
         super(context);
@@ -111,6 +184,7 @@ public final class ColorDisplayService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.COLOR_DISPLAY_SERVICE, new BinderService());
+        publishLocalService(ColorDisplayServiceInternal.class, new ColorDisplayServiceInternal());
     }
 
     @Override
@@ -232,6 +306,9 @@ public final class ColorDisplayService extends SystemService {
                             case Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED:
                                 onAccessibilityTransformChanged();
                                 break;
+                            case Secure.DISPLAY_WHITE_BALANCE_ENABLED:
+                                onDisplayWhiteBalanceEnabled(isDisplayWhiteBalanceSettingEnabled());
+                                break;
                         }
                     }
                 }
@@ -256,25 +333,41 @@ public final class ColorDisplayService extends SystemService {
         cr.registerContentObserver(
                 Secure.getUriFor(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED),
                 false /* notifyForDescendants */, mContentObserver, mCurrentUser);
+        cr.registerContentObserver(Secure.getUriFor(Secure.DISPLAY_WHITE_BALANCE_ENABLED),
+                false /* notifyForDescendants */, mContentObserver, mCurrentUser);
 
         // Set the color mode, if valid, and immediately apply the updated tint matrix based on the
         // existing activated state. This ensures consistency of tint across the color mode change.
         onDisplayColorModeChanged(mNightDisplayController.getColorMode());
 
-        // Reset the activated state.
-        mIsNightDisplayActivated = null;
+        if (ColorDisplayManager.isNightDisplayAvailable(getContext())) {
+            // Reset the activated state.
+            mNightDisplayTintController.setActivated(null);
 
-        setCoefficientMatrix(getContext(), DisplayTransformManager.needsLinearColorMatrix());
+            // Prepare the night display color transformation matrix.
+            mNightDisplayTintController
+                    .setUp(getContext(), DisplayTransformManager.needsLinearColorMatrix());
+            mNightDisplayTintController.setMatrix(mNightDisplayController.getColorTemperature());
 
-        // Prepare color transformation matrix.
-        setMatrix(mNightDisplayController.getColorTemperature(), mMatrixNight);
+            // Initialize the current auto mode.
+            onNightDisplayAutoModeChanged(mNightDisplayController.getAutoMode());
 
-        // Initialize the current auto mode.
-        onNightDisplayAutoModeChanged(mNightDisplayController.getAutoMode());
+            // Force the initialization current activated state.
+            if (mNightDisplayTintController.isActivatedStateNotSet()) {
+                onNightDisplayActivated(mNightDisplayController.isActivated());
+            }
+        }
 
-        // Force the initialization current activated state.
-        if (mIsNightDisplayActivated == null) {
-            onNightDisplayActivated(mNightDisplayController.isActivated());
+        if (ColorDisplayManager.isDisplayWhiteBalanceAvailable(getContext())) {
+            // Prepare the display white balance transform matrix.
+            mDisplayWhiteBalanceTintController
+                    .setUp(getContext(), DisplayTransformManager.needsLinearColorMatrix());
+            if (mDisplayWhiteBalanceColorTemperature != null) {
+                mDisplayWhiteBalanceTintController
+                        .setMatrix(mDisplayWhiteBalanceColorTemperature);
+            }
+
+            onDisplayWhiteBalanceEnabled(isDisplayWhiteBalanceSettingEnabled());
         }
     }
 
@@ -287,28 +380,31 @@ public final class ColorDisplayService extends SystemService {
             mNightDisplayController = null;
         }
 
-        if (mNightDisplayAutoMode != null) {
-            mNightDisplayAutoMode.onStop();
-            mNightDisplayAutoMode = null;
+        if (ColorDisplayManager.isNightDisplayAvailable(getContext())) {
+            if (mNightDisplayAutoMode != null) {
+                mNightDisplayAutoMode.onStop();
+                mNightDisplayAutoMode = null;
+            }
+            mNightDisplayTintController.endAnimator();
         }
 
-        if (mColorMatrixAnimator != null) {
-            mColorMatrixAnimator.end();
-            mColorMatrixAnimator = null;
+        if (ColorDisplayManager.isDisplayWhiteBalanceAvailable(getContext())) {
+            mDisplayWhiteBalanceTintController.endAnimator();
         }
     }
 
     private void onNightDisplayActivated(boolean activated) {
-        if (mIsNightDisplayActivated == null || mIsNightDisplayActivated != activated) {
+        if (mNightDisplayTintController.isActivatedStateNotSet()
+                || mNightDisplayTintController.isActivated() != activated) {
             Slog.i(TAG, activated ? "Turning on night display" : "Turning off night display");
 
-            mIsNightDisplayActivated = activated;
+            mNightDisplayTintController.setActivated(activated);
 
             if (mNightDisplayAutoMode != null) {
                 mNightDisplayAutoMode.onActivated(activated);
             }
 
-            applyTint(false);
+            applyTint(mNightDisplayTintController, false);
         }
     }
 
@@ -348,8 +444,8 @@ public final class ColorDisplayService extends SystemService {
     }
 
     private void onNightDisplayColorTemperatureChanged(int colorTemperature) {
-        setMatrix(colorTemperature, mMatrixNight);
-        applyTint(true);
+        mNightDisplayTintController.setMatrix(colorTemperature);
+        applyTint(mNightDisplayTintController, true);
     }
 
     private void onDisplayColorModeChanged(int mode) {
@@ -357,66 +453,53 @@ public final class ColorDisplayService extends SystemService {
             return;
         }
 
-        // Cancel the night display tint animator if it's running.
-        if (mColorMatrixAnimator != null) {
-            mColorMatrixAnimator.cancel();
+        mNightDisplayTintController.cancelAnimator();
+        mDisplayWhiteBalanceTintController.cancelAnimator();
+
+        mNightDisplayTintController
+                .setUp(getContext(), DisplayTransformManager.needsLinearColorMatrix(mode));
+        mNightDisplayTintController.setMatrix(mNightDisplayController.getColorTemperature());
+
+        mDisplayWhiteBalanceTintController
+                .setUp(getContext(), DisplayTransformManager.needsLinearColorMatrix(mode));
+        if (mDisplayWhiteBalanceColorTemperature != null) {
+            mDisplayWhiteBalanceTintController.setMatrix(mDisplayWhiteBalanceColorTemperature);
         }
 
-        setCoefficientMatrix(getContext(), DisplayTransformManager.needsLinearColorMatrix(mode));
-        setMatrix(mNightDisplayController.getColorTemperature(), mMatrixNight);
-
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
-        dtm.setColorMode(mode, (mIsNightDisplayActivated != null && mIsNightDisplayActivated)
-                ? mMatrixNight : MATRIX_IDENTITY);
+        dtm.setColorMode(mode, mNightDisplayTintController.getMatrix());
     }
 
     private void onAccessibilityTransformChanged() {
         onDisplayColorModeChanged(mNightDisplayController.getColorMode());
     }
 
-    /**
-     * Set coefficients based on whether the color matrix is linear or not.
-     */
-    private void setCoefficientMatrix(Context context, boolean needsLinear) {
-        final String[] coefficients = context.getResources().getStringArray(needsLinear
-                ? R.array.config_nightDisplayColorTemperatureCoefficients
-                : R.array.config_nightDisplayColorTemperatureCoefficientsNative);
-        for (int i = 0; i < 9 && i < coefficients.length; i++) {
-            mColorTempCoefficients[i] = Float.parseFloat(coefficients[i]);
-        }
-    }
 
     /**
      * Applies current color temperature matrix, or removes it if deactivated.
      *
      * @param immediate {@code true} skips transition animation
      */
-    private void applyTint(boolean immediate) {
-        // Cancel the old animator if still running.
-        if (mColorMatrixAnimator != null) {
-            mColorMatrixAnimator.cancel();
-        }
+    private void applyTint(TintController tintController, boolean immediate) {
+        tintController.cancelAnimator();
 
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
-        final float[] from = dtm.getColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY);
-        final float[] to = mIsNightDisplayActivated ? mMatrixNight : MATRIX_IDENTITY;
+        final float[] from = dtm.getColorMatrix(tintController.getLevel());
+        final float[] to = tintController.getMatrix();
 
         if (immediate) {
-            dtm.setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, to);
+            dtm.setColorMatrix(tintController.getLevel(), to);
         } else {
-            mColorMatrixAnimator = ValueAnimator.ofObject(COLOR_MATRIX_EVALUATOR,
-                    from == null ? MATRIX_IDENTITY : from, to);
-            mColorMatrixAnimator.setDuration(TRANSITION_DURATION);
-            mColorMatrixAnimator.setInterpolator(AnimationUtils.loadInterpolator(
+            tintController.setAnimator(ValueAnimator.ofObject(COLOR_MATRIX_EVALUATOR,
+                    from == null ? MATRIX_IDENTITY : from, to));
+            tintController.getAnimator().setDuration(TRANSITION_DURATION);
+            tintController.getAnimator().setInterpolator(AnimationUtils.loadInterpolator(
                     getContext(), android.R.interpolator.fast_out_slow_in));
-            mColorMatrixAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animator) {
-                    final float[] value = (float[]) animator.getAnimatedValue();
-                    dtm.setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, value);
-                }
+            tintController.getAnimator().addUpdateListener((ValueAnimator animator) -> {
+                final float[] value = (float[]) animator.getAnimatedValue();
+                dtm.setColorMatrix(tintController.getLevel(), value);
             });
-            mColorMatrixAnimator.addListener(new AnimatorListenerAdapter() {
+            tintController.getAnimator().addListener(new AnimatorListenerAdapter() {
 
                 private boolean mIsCancelled;
 
@@ -431,39 +514,13 @@ public final class ColorDisplayService extends SystemService {
                         // Ensure final color matrix is set at the end of the animation. If the
                         // animation is cancelled then don't set the final color matrix so the new
                         // animator can pick up from where this one left off.
-                        dtm.setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, to);
+                        dtm.setColorMatrix(tintController.getLevel(), to);
                     }
-                    mColorMatrixAnimator = null;
+                    tintController.setAnimator(null);
                 }
             });
-            mColorMatrixAnimator.start();
+            tintController.getAnimator().start();
         }
-    }
-
-    /**
-     * Set the color transformation {@code MATRIX_NIGHT} to the given color temperature.
-     *
-     * @param colorTemperature color temperature in Kelvin
-     * @param outTemp the 4x4 display transformation matrix for that color temperature
-     */
-    private void setMatrix(int colorTemperature, float[] outTemp) {
-        if (outTemp.length != 16) {
-            Slog.d(TAG, "The display transformation matrix must be 4x4");
-            return;
-        }
-
-        Matrix.setIdentityM(mMatrixNight, 0);
-
-        final float squareTemperature = colorTemperature * colorTemperature;
-        final float red = squareTemperature * mColorTempCoefficients[0]
-                + colorTemperature * mColorTempCoefficients[1] + mColorTempCoefficients[2];
-        final float green = squareTemperature * mColorTempCoefficients[3]
-                + colorTemperature * mColorTempCoefficients[4] + mColorTempCoefficients[5];
-        final float blue = squareTemperature * mColorTempCoefficients[6]
-                + colorTemperature * mColorTempCoefficients[7] + mColorTempCoefficients[8];
-        outTemp[0] = red;
-        outTemp[5] = green;
-        outTemp[10] = blue;
     }
 
     /**
@@ -498,6 +555,18 @@ public final class ColorDisplayService extends SystemService {
         return ldt.isBefore(compareTime) ? ldt.plusDays(1) : ldt;
     }
 
+    private void onDisplayWhiteBalanceEnabled(boolean enabled) {
+        mDisplayWhiteBalanceTintController.setActivated(enabled);
+        if (mDisplayWhiteBalanceListener != null) {
+            mDisplayWhiteBalanceListener.onDisplayWhiteBalanceStatusChanged(enabled);
+        }
+    }
+
+    private boolean isDisplayWhiteBalanceSettingEnabled() {
+        return Secure.getIntForUser(getContext().getContentResolver(),
+                Secure.DISPLAY_WHITE_BALANCE_ENABLED, 0, mCurrentUser) == 1;
+    }
+
     private boolean isDeviceColorManagedInternal() {
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
         return dtm.isDeviceColorManaged();
@@ -507,7 +576,7 @@ public final class ColorDisplayService extends SystemService {
      * Returns the last time the night display transform activation state was changed, or {@link
      * LocalDateTime#MIN} if night display has never been activated.
      */
-    private @NonNull LocalDateTime getNightDisplayLastActivatedTimeSetting() {
+    private LocalDateTime getNightDisplayLastActivatedTimeSetting() {
         final ContentResolver cr = getContext().getContentResolver();
         final String lastActivatedTime = Secure.getStringForUser(
                 cr, Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, getContext().getUserId());
@@ -577,11 +646,12 @@ public final class ColorDisplayService extends SystemService {
                 }
             }
 
-            if (mIsNightDisplayActivated == null || mIsNightDisplayActivated != activate) {
+            if (mNightDisplayTintController.isActivatedStateNotSet() || (
+                    mNightDisplayTintController.isActivated() != activate)) {
                 mNightDisplayController.setActivated(activate);
             }
 
-            updateNextAlarm(mIsNightDisplayActivated, now);
+            updateNextAlarm(mNightDisplayTintController.isActivated(), now);
         }
 
         private void updateNextAlarm(@Nullable Boolean activated, @NonNull LocalDateTime now) {
@@ -672,7 +742,8 @@ public final class ColorDisplayService extends SystemService {
                 }
             }
 
-            if (mIsNightDisplayActivated == null || mIsNightDisplayActivated != activate) {
+            if (mNightDisplayTintController.isActivatedStateNotSet() || (
+                    mNightDisplayTintController.isActivated() != activate)) {
                 mNightDisplayController.setActivated(activate);
             }
         }
@@ -722,6 +793,115 @@ public final class ColorDisplayService extends SystemService {
             }
             return mResultMatrix;
         }
+    }
+
+    private abstract static class TintController {
+
+        private ValueAnimator mAnimator;
+        private Boolean mIsActivated;
+
+        public ValueAnimator getAnimator() {
+            return mAnimator;
+        }
+
+        public void setAnimator(ValueAnimator animator) {
+            mAnimator = animator;
+        }
+
+        /**
+         * Cancel the animator if it's still running.
+         */
+        public void cancelAnimator() {
+            if (mAnimator != null) {
+                mAnimator.cancel();
+            }
+        }
+
+        /**
+         * End the animator if it's still running, jumping to the end state.
+         */
+        public void endAnimator() {
+            if (mAnimator != null) {
+                mAnimator.end();
+                mAnimator = null;
+            }
+        }
+
+        public void setActivated(Boolean isActivated) {
+            mIsActivated = isActivated;
+        }
+
+        public boolean isActivated() {
+            return mIsActivated != null && mIsActivated;
+        }
+
+        public boolean isActivatedStateNotSet() {
+            return mIsActivated == null;
+        }
+
+        /**
+         * Set up any constants needed for computing the matrix.
+         */
+        public abstract void setUp(Context context, boolean needsLinear);
+
+        /**
+         * Sets the 4x4 matrix to apply.
+         */
+        public abstract void setMatrix(int value);
+
+        /**
+         * Get the 4x4 matrix to apply.
+         */
+        public abstract float[] getMatrix();
+
+        /**
+         * Get the color transform level to apply the matrix.
+         */
+        public abstract int getLevel();
+    }
+
+    /**
+     * Local service that allows color transforms to be enabled from other system services.
+     */
+    public final class ColorDisplayServiceInternal {
+
+        /**
+         * Set the current CCT value for the display white balance transform, and if the transform
+         * is enabled, apply it.
+         *
+         * @param cct the color temperature in Kelvin.
+         */
+        public boolean setDisplayWhiteBalanceColorTemperature(int cct) {
+            // Update the transform matrix even if it can't be applied.
+            mDisplayWhiteBalanceColorTemperature = cct;
+            mDisplayWhiteBalanceTintController.setMatrix(cct);
+
+            if (mDisplayWhiteBalanceTintController.isActivated()) {
+                applyTint(mDisplayWhiteBalanceTintController, true);
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Sets the listener and returns whether display white balance is currently enabled.
+         */
+        public boolean setDisplayWhiteBalanceListener(DisplayWhiteBalanceListener listener) {
+            mDisplayWhiteBalanceListener = listener;
+            return mDisplayWhiteBalanceTintController.isActivated();
+        }
+    }
+
+    /**
+     * Listener for changes in display white balance status.
+     */
+    public interface DisplayWhiteBalanceListener {
+
+        /**
+         * Notify that the display white balance status has changed, either due to preemption by
+         * another transform or the feature being turned off.
+         */
+        void onDisplayWhiteBalanceStatusChanged(boolean enabled);
     }
 
     private final class BinderService extends IColorDisplayManager.Stub {

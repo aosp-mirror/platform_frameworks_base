@@ -16,7 +16,6 @@
 
 package android.media;
 
-// Code for AML only
 class MediaConstants {
     // Bundle key for int
     static final String KEY_PID = "android.media.key.PID";

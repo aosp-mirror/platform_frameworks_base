@@ -34,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class NavigationPrototypeController extends ContentObserver {
     private static final String HIDE_BACK_BUTTON_SETTING = "quickstepcontroller_hideback";
+    private static final String HIDE_HOME_BUTTON_SETTING = "quickstepcontroller_hidehome";
 
     static final String NAVBAR_EXPERIMENTS_DISABLED = "navbarexperiments_disabled";
     private final String GESTURE_MATCH_SETTING = "quickstepcontroller_gesture_match_map";
@@ -73,6 +74,7 @@ public class NavigationPrototypeController extends ContentObserver {
      */
     public void register() {
         registerObserver(HIDE_BACK_BUTTON_SETTING);
+        registerObserver(HIDE_HOME_BUTTON_SETTING);
         registerObserver(GESTURE_MATCH_SETTING);
         registerObserver(NAV_COLOR_ADAPT_ENABLE_SETTING);
     }
@@ -88,22 +90,20 @@ public class NavigationPrototypeController extends ContentObserver {
     public void onChange(boolean selfChange, Uri uri) {
         super.onChange(selfChange, uri);
         if (!selfChange && mListener != null) {
-            try {
-                final String path = uri.getPath();
-                if (path.endsWith(GESTURE_MATCH_SETTING)) {
-                    // Get the settings gesture map corresponding to each action
-                    // {@see updateSwipeLTRBackSetting}
-                    updateSwipeLTRBackSetting();
-                    mListener.onGestureRemap(mActionMap);
-                } else if (path.endsWith(HIDE_BACK_BUTTON_SETTING)) {
-                    mListener.onBackButtonVisibilityChanged(
-                            !getGlobalBool(HIDE_BACK_BUTTON_SETTING));
-                } else if (path.endsWith(NAV_COLOR_ADAPT_ENABLE_SETTING)) {
-                    mListener.onColorAdaptChanged(
-                            NavBarTintController.isEnabled(mContext));
-                }
-            } catch (SettingNotFoundException e) {
-                e.printStackTrace();
+            final String path = uri.getPath();
+            if (path.endsWith(GESTURE_MATCH_SETTING)) {
+                // Get the settings gesture map corresponding to each action
+                // {@see updateSwipeLTRBackSetting}
+                updateSwipeLTRBackSetting();
+                mListener.onGestureRemap(mActionMap);
+            } else if (path.endsWith(HIDE_BACK_BUTTON_SETTING)) {
+                mListener.onBackButtonVisibilityChanged(
+                        !getGlobalBool(HIDE_BACK_BUTTON_SETTING, false));
+            } else if (path.endsWith(HIDE_HOME_BUTTON_SETTING)) {
+                mListener.onHomeButtonVisibilityChanged(!hideHomeButton());
+            } else if (path.endsWith(NAV_COLOR_ADAPT_ENABLE_SETTING)) {
+                mListener.onColorAdaptChanged(
+                        NavBarTintController.isEnabled(mContext));
             }
         }
     }
@@ -114,6 +114,13 @@ public class NavigationPrototypeController extends ContentObserver {
      */
     int[] getGestureActionMap() {
         return mActionMap;
+    }
+
+    /**
+     * @return if home button should be invisible
+     */
+    boolean hideHomeButton() {
+        return getGlobalBool(HIDE_HOME_BUTTON_SETTING, false /* default */);
     }
 
     /**
@@ -131,8 +138,8 @@ public class NavigationPrototypeController extends ContentObserver {
         }
     }
 
-    private boolean getGlobalBool(String name) throws SettingNotFoundException {
-        return Settings.Global.getInt(mContext.getContentResolver(), name) == 1;
+    private boolean getGlobalBool(String name, boolean defaultVal) {
+        return Settings.Global.getInt(mContext.getContentResolver(), name, defaultVal ? 1 : 0) == 1;
     }
 
     private void registerObserver(String name) {
@@ -143,6 +150,7 @@ public class NavigationPrototypeController extends ContentObserver {
     public interface OnPrototypeChangedListener {
         void onGestureRemap(@GestureAction int[] actions);
         void onBackButtonVisibilityChanged(boolean visible);
+        void onHomeButtonVisibilityChanged(boolean visible);
         void onColorAdaptChanged(boolean enabled);
     }
 }

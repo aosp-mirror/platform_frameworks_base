@@ -73,6 +73,12 @@ public abstract class ActivityManagerInternal {
             IBinder whitelistToken, long duration);
 
     /**
+     * Allows for a {@link PendingIntent} to be whitelisted to start activities from background.
+     */
+    public abstract void setPendingIntentAllowBgActivityStarts(
+            IIntentSender target, IBinder whitelistToken, int flags);
+
+    /**
      * Allow DeviceIdleController to tell us about what apps are whitelisted.
      */
     public abstract void setDeviceIdleWhitelist(int[] allAppids, int[] exceptIdleAppids);
@@ -250,7 +256,7 @@ public abstract class ActivityManagerInternal {
     public abstract int broadcastIntentInPackage(String packageName, int uid, Intent intent,
             String resolvedType, IIntentReceiver resultTo, int resultCode, String resultData,
             Bundle resultExtras, String requiredPermission, Bundle bOptions, boolean serialized,
-            boolean sticky, int userId);
+            boolean sticky, int userId, boolean allowBackgroundActivityStarts);
     public abstract ComponentName startServiceInPackage(int uid, Intent service,
             String resolvedType, boolean fgRequired, String callingPackage, int userId)
             throws TransactionTooLargeException;

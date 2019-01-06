@@ -42,6 +42,9 @@ public abstract class CellSignalStrength {
     public static final int NUM_SIGNAL_STRENGTH_BINS = 5;
 
     /** @hide */
+    protected static final int NUM_SIGNAL_STRENGTH_THRESHOLDS = NUM_SIGNAL_STRENGTH_BINS - 1;
+
+    /** @hide */
     public static final String[] SIGNAL_STRENGTH_NAMES = {
         "none", "poor", "moderate", "good", "great"
     };

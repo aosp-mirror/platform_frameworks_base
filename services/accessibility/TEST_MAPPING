@@ -7,7 +7,7 @@
           "include-annotation": "android.platform.test.annotations.Presubmit"
         },
         {
-          "exclude-annotation": "android.support.test.filters.FlakyTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
     },
@@ -18,7 +18,7 @@
           "include-annotation": "android.platform.test.annotations.Presubmit"
         },
         {
-          "exclude-annotation": "android.support.test.filters.FlakyTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
     },
@@ -29,7 +29,7 @@
           "include-annotation": "android.platform.test.annotations.Presubmit"
         },
         {
-          "exclude-annotation": "android.support.test.filters.FlakyTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
     },
@@ -40,7 +40,7 @@
           "include-filter": "com.android.server.accessibility"
         },
         {
-          "exclude-annotation": "android.support.test.filters.FlakyTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
     },
@@ -51,7 +51,7 @@
           "include-filter": "com.android.internal.accessibility"
         },
         {
-          "exclude-annotation": "android.support.test.filters.FlakyTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
     },
@@ -62,7 +62,7 @@
           "include-filter": "android.view.accessibility"
         },
         {
-          "exclude-annotation": "android.support.test.filters.FlakyTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
     }
