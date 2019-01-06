@@ -4588,6 +4588,7 @@ package android.os.storage {
     method public void allocateBytes(java.util.UUID, long, int) throws java.io.IOException;
     method public void allocateBytes(java.io.FileDescriptor, long, int) throws java.io.IOException;
     method public long getAllocatableBytes(java.util.UUID, int) throws java.io.IOException;
+    method public static boolean hasIsolatedStorage();
     field public static final int FLAG_ALLOCATE_AGGRESSIVE = 1; // 0x1
   }
 
