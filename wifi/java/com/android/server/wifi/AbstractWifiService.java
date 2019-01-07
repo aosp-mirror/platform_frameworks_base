@@ -21,6 +21,7 @@ package com.android.server.wifi;
 import android.content.pm.ParceledListSlice;
 import android.net.DhcpInfo;
 import android.net.Network;
+import android.net.wifi.IDppCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ITrafficStateCallback;
@@ -35,6 +36,7 @@ import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.IBinder;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.WorkSource;
 
@@ -462,6 +464,23 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
 
     @Override
     public String[] getFactoryMacAddresses() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void startDppAsConfiguratorInitiator(IBinder binder, String enrolleeUri,
+            int selectedNetworkId, int netRole, IDppCallback callback) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void startDppAsEnrolleeInitiator(IBinder binder, String configuratorUri,
+            IDppCallback callback) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void stopDppSession() throws RemoteException {
         throw new UnsupportedOperationException();
     }
 }
