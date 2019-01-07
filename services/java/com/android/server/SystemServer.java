@@ -758,6 +758,7 @@ public final class SystemServer {
     private void startOtherServices() {
         final Context context = mSystemContext;
         VibratorService vibrator = null;
+        DynamicAndroidService dynamicAndroid = null;
         IStorageManager storageManager = null;
         NetworkManagementService networkManagement = null;
         IpSecService ipSecService = null;
@@ -865,6 +866,11 @@ public final class SystemServer {
             traceBeginAndSlog("StartVibratorService");
             vibrator = new VibratorService(context);
             ServiceManager.addService("vibrator", vibrator);
+            traceEnd();
+
+            traceBeginAndSlog("StartDynamicAndroidService");
+            dynamicAndroid = new DynamicAndroidService(context);
+            ServiceManager.addService("dynamic_android", dynamicAndroid);
             traceEnd();
 
             if (!isWatch) {
