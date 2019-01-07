@@ -1540,6 +1540,7 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    @SystemApi
     @TestApi
     public static boolean hasIsolatedStorage() {
         // Prefer to use snapshot for current boot when available
