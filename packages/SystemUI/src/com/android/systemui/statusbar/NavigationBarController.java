@@ -156,7 +156,7 @@ public class NavigationBarController implements Callbacks {
                             Dependency.get(NotificationRemoteInputManager.class),
                             Dependency.get(IWindowManager.class));
             navBar.setAutoHideController(autoHideController);
-            navBar.restoreSystemUiVisibilityState();
+            navBar.restoreAppearanceAndTransientState();
             mNavigationBars.append(displayId, navBar);
 
             if (result != null) {

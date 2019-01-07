@@ -111,7 +111,9 @@ class InsetsSourceProvider {
     void setWindow(@Nullable WindowState win,
             @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider) {
         if (mWin != null) {
-            mWin.setInsetProvider(null);
+            if (mControllable) {
+                mWin.setControllableInsetProvider(null);
+            }
             // The window may be animating such that we can hand out the leash to the control
             // target. Revoke the leash by cancelling the animation to correct the state.
             // TODO: Ideally, we should wait for the animation to finish so previous window can
@@ -123,12 +125,19 @@ class InsetsSourceProvider {
         if (win == null) {
             setServerVisible(false);
             mSource.setFrame(new Rect());
-        } else {
-            mWin.setInsetProvider(this);
+        } else if (mControllable) {
+            mWin.setControllableInsetProvider(this);
             if (mControlTarget != null) {
                 updateControlForTarget(mControlTarget, true /* force */);
             }
         }
+    }
+
+    /**
+     * @return Whether there is a window which backs this source.
+     */
+    boolean hasWindow() {
+        return mWin != null;
     }
 
     /**
@@ -225,6 +234,10 @@ class InsetsSourceProvider {
         return null;
     }
 
+    InsetsControlTarget getControlTarget() {
+        return mControlTarget;
+    }
+
     boolean isClientVisible() {
         return sNewInsetsMode == NEW_INSETS_MODE_NONE || mClientVisible;
     }
@@ -241,9 +254,13 @@ class InsetsSourceProvider {
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 OnAnimationFinishedCallback finishCallback) {
-            // TODO: use 0 alpha and remove t.hide() once b/138459974 is fixed.
-            t.setAlpha(animationLeash, 1 /* alpha */);
-            t.hide(animationLeash);
+            // TODO(b/118118435): We can remove the type check when implementing the transient bar
+            //                    animation.
+            if (mSource.getType() == TYPE_IME) {
+                // TODO: use 0 alpha and remove t.hide() once b/138459974 is fixed.
+                t.setAlpha(animationLeash, 1 /* alpha */);
+                t.hide(animationLeash);
+            }
 
             mCapturedLeash = animationLeash;
             final Rect frame = mWin.getWindowFrames().mFrame;

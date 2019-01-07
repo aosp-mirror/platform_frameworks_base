@@ -67,9 +67,9 @@ public class InsetsController implements WindowInsetsController {
      * Translation animation evaluator.
      */
     private static TypeEvaluator<Insets> sEvaluator = (fraction, startValue, endValue) -> Insets.of(
-            0,
+            (int) (startValue.left + fraction * (endValue.left - startValue.left)),
             (int) (startValue.top + fraction * (endValue.top - startValue.top)),
-            0,
+            (int) (startValue.right + fraction * (endValue.right - startValue.right)),
             (int) (startValue.bottom + fraction * (endValue.bottom - startValue.bottom)));
 
     /**

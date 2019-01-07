@@ -146,20 +146,11 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         }
         final Insets offset = Insets.subtract(mShownInsets, mPendingInsets);
         ArrayList<SurfaceParams> params = new ArrayList<>();
-        if (offset.left != 0) {
-            updateLeashesForSide(INSET_SIDE_LEFT, offset.left, mPendingInsets.left, params, state);
-        }
-        if (offset.top != 0) {
-            updateLeashesForSide(INSET_SIDE_TOP, offset.top, mPendingInsets.top, params, state);
-        }
-        if (offset.right != 0) {
-            updateLeashesForSide(INSET_SIDE_RIGHT, offset.right, mPendingInsets.right, params,
-                    state);
-        }
-        if (offset.bottom != 0) {
-            updateLeashesForSide(INSET_SIDE_BOTTOM, offset.bottom, mPendingInsets.bottom, params,
-                    state);
-        }
+        updateLeashesForSide(INSET_SIDE_LEFT, offset.left, mPendingInsets.left, params, state);
+        updateLeashesForSide(INSET_SIDE_TOP, offset.top, mPendingInsets.top, params, state);
+        updateLeashesForSide(INSET_SIDE_RIGHT, offset.right, mPendingInsets.right, params, state);
+        updateLeashesForSide(INSET_SIDE_BOTTOM, offset.bottom, mPendingInsets.bottom, params,
+                state);
         SyncRtSurfaceTransactionApplier applier = mTransactionApplierSupplier.get();
         applier.scheduleApply(params.toArray(new SurfaceParams[params.size()]));
         mCurrentInsets = mPendingInsets;
@@ -224,6 +215,9 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private void updateLeashesForSide(@InsetSide int side, int offset, int inset,
             ArrayList<SurfaceParams> surfaceParams, InsetsState state) {
         ArraySet<InsetsSourceConsumer> items = mSideSourceMap.get(side);
+        if (items == null) {
+            return;
+        }
         // TODO: Implement behavior when inset spans over multiple types
         for (int i = items.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = items.valueAt(i);
@@ -274,9 +268,15 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             SparseSetArray<InsetsSourceConsumer> sideSourcesMap,
             SparseArray<InsetsSourceConsumer> consumers) {
         for (int i = typeSideMap.size() - 1; i >= 0; i--) {
-            int type = typeSideMap.keyAt(i);
-            int side = typeSideMap.valueAt(i);
-            sideSourcesMap.add(side, consumers.get(type));
+            final int type = typeSideMap.keyAt(i);
+            final int side = typeSideMap.valueAt(i);
+            final InsetsSourceConsumer consumer = consumers.get(type);
+            if (consumer == null) {
+                // If the types that we are controlling are less than the types that the system has,
+                // there can be some null consumers.
+                continue;
+            }
+            sideSourcesMap.add(side, consumer);
         }
     }
 }

@@ -42,4 +42,11 @@ interface InsetsControlTarget {
      */
     default void hideInsets(@InsetType int types, boolean fromIme) {
     }
+
+    /**
+     * Returns {@code true} if the control target allows the system to show transient windows.
+     */
+    default boolean canShowTransient() {
+        return false;
+    }
 }

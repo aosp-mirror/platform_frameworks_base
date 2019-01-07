@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.view.AppearanceRegion;
 
 /** @hide */
 oneway interface IStatusBar
@@ -56,7 +57,7 @@ oneway interface IStatusBar
             int mask, in Rect fullscreenBounds, in Rect dockedBounds,
             boolean navbarColorManagedByIme);
 
-    void topAppWindowChanged(int displayId, boolean menuVisible);
+    void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive);
     void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher, boolean isMultiClientImeEnabled);
     void setWindowState(int display, int window, int state);
@@ -172,4 +173,38 @@ oneway interface IStatusBar
      * Notifies System UI whether the recents animation is running or not.
      */
     void onRecentsAnimationStateChanged(boolean running);
+
+    /**
+     * Notifies System UI side of system bar appearance change on the specified display.
+     *
+     * @param displayId the ID of the display to notify
+     * @param appearance the appearance of the focused window. The light top bar appearance is not
+     *                   controlled here, but primaryAppearance and secondaryAppearance.
+     * @param appearanceRegions a set of appearances which will be only applied in their own bounds.
+     *                         This is for system bars which across multiple stack, e.g., status
+     *                         bar, that the bar can have partial appearances in corresponding
+     *                         stacks.
+     * @param navbarColorManagedByIme {@code true} if navigation bar color is managed by IME.
+     */
+    void onSystemBarAppearanceChanged(int displayId, int appearance,
+            in AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme);
+
+    /**
+     * Notifies System UI to show transient bars. The transient bars are system bars, e.g., status
+     * bar and navigation bar which are temporarily visible to the user.
+     *
+     * @param displayId the ID of the display to notify.
+     * @param types the internal insets types of the bars are about to show transiently.
+     */
+    void showTransient(int displayId, in int[] types);
+
+    /**
+     * Notifies System UI to abort the transient state of system bars, which prevents the bars being
+     * hidden automatically. This is usually called when the app wants to show the permanent system
+     * bars again.
+     *
+     * @param displayId the ID of the display to notify.
+     * @param types the internal insets types of the bars are about to abort the transient state.
+     */
+    void abortTransient(int displayId, in int[] types);
 }
