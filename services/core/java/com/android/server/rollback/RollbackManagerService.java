@@ -17,8 +17,6 @@
 package com.android.server.rollback;
 
 import android.content.Context;
-import android.os.SELinux;
-import android.util.Log;
 
 import com.android.server.SystemService;
 
@@ -30,8 +28,6 @@ import com.android.server.SystemService;
  */
 public final class RollbackManagerService extends SystemService {
 
-    private static final String TAG = "RollbackManager";
-
     private RollbackManagerServiceImpl mService;
 
     public RollbackManagerService(Context context) {
@@ -41,12 +37,6 @@ public final class RollbackManagerService extends SystemService {
     @Override
     public void onStart() {
         mService = new RollbackManagerServiceImpl(getContext());
-
-        // TODO: Set up sepolicy to allow publishing the service.
-        if (SELinux.isSELinuxEnforced()) {
-            Log.w(TAG, "RollbackManager disabled pending selinux policy updates");
-        } else {
-            publishBinderService(Context.ROLLBACK_SERVICE, mService);
-        }
+        publishBinderService(Context.ROLLBACK_SERVICE, mService);
     }
 }
