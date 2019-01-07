@@ -208,8 +208,8 @@ public class UserBackupManagerService {
 
     public static final String RUN_BACKUP_ACTION = "android.app.backup.intent.RUN";
     public static final String RUN_INITIALIZE_ACTION = "android.app.backup.intent.INIT";
-    public static final String BACKUP_FINISHED_ACTION = "android.intent.action.BACKUP_FINISHED";
-    public static final String BACKUP_FINISHED_PACKAGE_EXTRA = "packageName";
+    private static final String BACKUP_FINISHED_ACTION = "android.intent.action.BACKUP_FINISHED";
+    private static final String BACKUP_FINISHED_PACKAGE_EXTRA = "packageName";
 
     // Bookkeeping of in-flight operations. The operation token is the index of the entry in the
     // pending operations list.
@@ -247,25 +247,25 @@ public class UserBackupManagerService {
     private final TransportManager mTransportManager;
     private final HandlerThread mUserBackupThread;
 
-    private Context mContext;
-    private PackageManager mPackageManager;
-    private IPackageManager mPackageManagerBinder;
-    private IActivityManager mActivityManager;
+    private final Context mContext;
+    private final PackageManager mPackageManager;
+    private final IPackageManager mPackageManagerBinder;
+    private final IActivityManager mActivityManager;
     private PowerManager mPowerManager;
-    private AlarmManager mAlarmManager;
-    private IStorageManager mStorageManager;
-    private BackupManagerConstants mConstants;
-    private PowerManager.WakeLock mWakelock;
-    private BackupHandler mBackupHandler;
+    private final AlarmManager mAlarmManager;
+    private final IStorageManager mStorageManager;
+    private final BackupManagerConstants mConstants;
+    private final PowerManager.WakeLock mWakelock;
+    private final BackupHandler mBackupHandler;
 
-    private IBackupManager mBackupManagerBinder;
+    private final IBackupManager mBackupManagerBinder;
 
     private boolean mEnabled;   // access to this is synchronized on 'this'
     private boolean mSetupComplete;
     private boolean mAutoRestore;
 
-    private PendingIntent mRunBackupIntent;
-    private PendingIntent mRunInitIntent;
+    private final PendingIntent mRunBackupIntent;
+    private final PendingIntent mRunInitIntent;
 
     private final ArraySet<String> mPendingInits = new ArraySet<>();  // transport names
 
@@ -273,7 +273,7 @@ public class UserBackupManagerService {
     private final SparseArray<HashSet<String>> mBackupParticipants = new SparseArray<>();
 
     // Backups that we haven't started yet.  Keys are package names.
-    private HashMap<String, BackupRequest> mPendingBackups = new HashMap<>();
+    private final HashMap<String, BackupRequest> mPendingBackups = new HashMap<>();
 
     // locking around the pending-backup management
     private final Object mQueueLock = new Object();
@@ -340,7 +340,7 @@ public class UserBackupManagerService {
     private final SparseArray<Operation> mCurrentOperations = new SparseArray<>();
     private final Object mCurrentOpLock = new Object();
     private final Random mTokenGenerator = new Random();
-    final AtomicInteger mNextToken = new AtomicInteger();
+    private final AtomicInteger mNextToken = new AtomicInteger();
 
     // Where we keep our journal files and other bookkeeping.
     private final File mBaseStateDir;
@@ -348,7 +348,7 @@ public class UserBackupManagerService {
     private final File mJournalDir;
     @Nullable
     private DataChangedJournal mJournal;
-    private File mFullBackupScheduleFile;
+    private final File mFullBackupScheduleFile;
 
     // Keep a log of all the apps we've ever backed up.
     private ProcessedPackagesJournal mProcessedPackagesJournal;
@@ -561,7 +561,7 @@ public class UserBackupManagerService {
         mUserBackupThread.quit();
     }
 
-    public int getUserId() {
+    public @UserIdInt int getUserId() {
         return mUserId;
     }
 
@@ -577,49 +577,25 @@ public class UserBackupManagerService {
         return mContext;
     }
 
-    public void setContext(Context context) {
-        mContext = context;
-    }
-
     public PackageManager getPackageManager() {
         return mPackageManager;
-    }
-
-    public void setPackageManager(PackageManager packageManager) {
-        mPackageManager = packageManager;
     }
 
     public IPackageManager getPackageManagerBinder() {
         return mPackageManagerBinder;
     }
 
-    public void setPackageManagerBinder(IPackageManager packageManagerBinder) {
-        mPackageManagerBinder = packageManagerBinder;
-    }
-
     public IActivityManager getActivityManager() {
         return mActivityManager;
-    }
-
-    public void setActivityManager(IActivityManager activityManager) {
-        mActivityManager = activityManager;
     }
 
     public AlarmManager getAlarmManager() {
         return mAlarmManager;
     }
 
-    public void setAlarmManager(AlarmManager alarmManager) {
-        mAlarmManager = alarmManager;
-    }
-
     @VisibleForTesting
     void setPowerManager(PowerManager powerManager) {
         mPowerManager = powerManager;
-    }
-
-    public void setBackupManagerBinder(IBackupManager backupManagerBinder) {
-        mBackupManagerBinder = backupManagerBinder;
     }
 
     public TransportManager getTransportManager() {
@@ -656,33 +632,16 @@ public class UserBackupManagerService {
         mWakelock.setWorkSource(workSource);
     }
 
-    public void setWakelock(PowerManager.WakeLock wakelock) {
-        mWakelock = wakelock;
-    }
-
     public Handler getBackupHandler() {
         return mBackupHandler;
-    }
-
-    public void setBackupHandler(BackupHandler backupHandler) {
-        mBackupHandler = backupHandler;
     }
 
     public PendingIntent getRunInitIntent() {
         return mRunInitIntent;
     }
 
-    public void setRunInitIntent(PendingIntent runInitIntent) {
-        mRunInitIntent = runInitIntent;
-    }
-
     public HashMap<String, BackupRequest> getPendingBackups() {
         return mPendingBackups;
-    }
-
-    public void setPendingBackups(
-            HashMap<String, BackupRequest> pendingBackups) {
-        mPendingBackups = pendingBackups;
     }
 
     public Object getQueueLock() {
@@ -697,20 +656,12 @@ public class UserBackupManagerService {
         mBackupRunning = backupRunning;
     }
 
-    public long getLastBackupPass() {
-        return mLastBackupPass;
-    }
-
     public void setLastBackupPass(long lastBackupPass) {
         mLastBackupPass = lastBackupPass;
     }
 
     public Object getClearDataLock() {
         return mClearDataLock;
-    }
-
-    public boolean isClearingData() {
-        return mClearingData;
     }
 
     public void setClearingData(boolean clearingData) {
@@ -731,11 +682,6 @@ public class UserBackupManagerService {
 
     public ActiveRestoreSession getActiveRestoreSession() {
         return mActiveRestoreSession;
-    }
-
-    public void setActiveRestoreSession(
-            ActiveRestoreSession activeRestoreSession) {
-        mActiveRestoreSession = activeRestoreSession;
     }
 
     public SparseArray<Operation> getCurrentOperations() {
@@ -771,16 +717,8 @@ public class UserBackupManagerService {
         return mRng;
     }
 
-    public Set<String> getAncestralPackages() {
-        return mAncestralPackages;
-    }
-
     public void setAncestralPackages(Set<String> ancestralPackages) {
         mAncestralPackages = ancestralPackages;
-    }
-
-    public long getAncestralToken() {
-        return mAncestralToken;
     }
 
     public void setAncestralToken(long ancestralToken) {
@@ -3147,8 +3085,7 @@ public class UserBackupManagerService {
         synchronized (mAgentConnectLock) {
             if (Binder.getCallingUid() == Process.SYSTEM_UID) {
                 Slog.d(TAG, "agentConnected pkg=" + packageName + " agent=" + agentBinder);
-                IBackupAgent agent = IBackupAgent.Stub.asInterface(agentBinder);
-                mConnectedAgent = agent;
+                mConnectedAgent = IBackupAgent.Stub.asInterface(agentBinder);
                 mConnecting = false;
             } else {
                 Slog.w(TAG, "Non-system process uid=" + Binder.getCallingUid()

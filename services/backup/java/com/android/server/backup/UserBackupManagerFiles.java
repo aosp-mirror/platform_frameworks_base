@@ -17,29 +17,35 @@
 package com.android.server.backup;
 
 import android.os.Environment;
+import android.os.UserHandle;
 
 import java.io.File;
 
 /** Directories used for user specific backup/restore persistent state and book-keeping. */
-public final class UserBackupManagerFiles {
+final class UserBackupManagerFiles {
     // Name of the directories the service stores bookkeeping data under.
     private static final String BACKUP_PERSISTENT_DIR = "backup";
     private static final String BACKUP_STAGING_DIR = "backup_stage";
 
+    private static File getBaseDir(int userId) {
+        return Environment.getDataSystemCeDirectory(userId);
+    }
+
     static File getBaseStateDir(int userId) {
-        // TODO (b/120424138) this should be per user
+        if (userId != UserHandle.USER_SYSTEM) {
+            return new File(getBaseDir(userId), BACKUP_PERSISTENT_DIR);
+        }
+        // TODO (b/120424138) remove if clause above and use same logic for system user.
+        // simultaneously, copy below dir to new system user dir
         return new File(Environment.getDataDirectory(), BACKUP_PERSISTENT_DIR);
     }
 
     static File getDataDir(int userId) {
-        // TODO (b/120424138) this should be per user
-        // This dir on /cache is managed directly in init.rc
+        if (userId != UserHandle.USER_SYSTEM) {
+            return new File(getBaseDir(userId), BACKUP_STAGING_DIR);
+        }
+        // TODO (b/120424138) remove if clause above and use same logic for system user. Since this
+        // is a staging dir, we dont need to copy below dir to new system user dir
         return new File(Environment.getDownloadCacheDirectory(), BACKUP_STAGING_DIR);
-    }
-
-    /** Directory used by full backup engine to store state. */
-    public static File getFullBackupEngineFilesDir(int userId) {
-        // TODO (b/120424138) this should be per user
-        return new File("/data/system");
     }
 }
