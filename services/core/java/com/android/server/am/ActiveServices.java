@@ -2503,6 +2503,9 @@ public final class ActiveServices {
                     && r.serviceInfo.packageName.equals(WebViewZygote.getPackageName())) {
                 hostingType = "webview_service";
             }
+            if ((r.serviceInfo.flags & ServiceInfo.FLAG_USE_APP_ZYGOTE) != 0) {
+                hostingType = "app_zygote";
+            }
         }
 
         // Not running -- get it started, and enqueue this service record

@@ -138,8 +138,7 @@ public final class UserHandle implements Parcelable {
      */
     public static boolean isIsolated(int uid) {
         if (uid > 0) {
-            final int appId = getAppId(uid);
-            return appId >= Process.FIRST_ISOLATED_UID && appId <= Process.LAST_ISOLATED_UID;
+            return Process.isIsolated(uid);
         } else {
             return false;
         }
@@ -294,9 +293,14 @@ public final class UserHandle implements Parcelable {
             sb.append('u');
             sb.append(getUserId(uid));
             final int appId = getAppId(uid);
-            if (appId >= Process.FIRST_ISOLATED_UID && appId <= Process.LAST_ISOLATED_UID) {
-                sb.append('i');
-                sb.append(appId - Process.FIRST_ISOLATED_UID);
+            if (isIsolated(appId)) {
+                if (appId > Process.FIRST_ISOLATED_UID) {
+                    sb.append('i');
+                    sb.append(appId - Process.FIRST_ISOLATED_UID);
+                } else {
+                    sb.append("ai");
+                    sb.append(appId - Process.FIRST_APP_ZYGOTE_ISOLATED_UID);
+                }
             } else if (appId >= Process.FIRST_APPLICATION_UID) {
                 sb.append('a');
                 sb.append(appId - Process.FIRST_APPLICATION_UID);
@@ -330,9 +334,14 @@ public final class UserHandle implements Parcelable {
             pw.print('u');
             pw.print(getUserId(uid));
             final int appId = getAppId(uid);
-            if (appId >= Process.FIRST_ISOLATED_UID && appId <= Process.LAST_ISOLATED_UID) {
-                pw.print('i');
-                pw.print(appId - Process.FIRST_ISOLATED_UID);
+            if (isIsolated(appId)) {
+                if (appId > Process.FIRST_ISOLATED_UID) {
+                    pw.print('i');
+                    pw.print(appId - Process.FIRST_ISOLATED_UID);
+                } else {
+                    pw.print("ai");
+                    pw.print(appId - Process.FIRST_APP_ZYGOTE_ISOLATED_UID);
+                }
             } else if (appId >= Process.FIRST_APPLICATION_UID) {
                 pw.print('a');
                 pw.print(appId - Process.FIRST_APPLICATION_UID);

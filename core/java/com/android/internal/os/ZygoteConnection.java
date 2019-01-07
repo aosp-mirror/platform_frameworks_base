@@ -27,9 +27,11 @@ import static com.android.internal.os.ZygoteConnectionConstants.CONNECTION_TIMEO
 import static com.android.internal.os.ZygoteConnectionConstants.MAX_ZYGOTE_ARGC;
 import static com.android.internal.os.ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
 
+import android.content.pm.ApplicationInfo;
 import android.net.Credentials;
 import android.net.LocalSocket;
 import android.os.FactoryTest;
+import android.os.Parcel;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -52,6 +54,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * A connection that can make spawn requests.
@@ -165,6 +168,21 @@ class ZygoteConnection {
         if (parsedArgs.preloadPackage != null) {
             handlePreloadPackage(parsedArgs.preloadPackage, parsedArgs.preloadPackageLibs,
                     parsedArgs.preloadPackageLibFileName, parsedArgs.preloadPackageCacheKey);
+            return null;
+        }
+
+        if (canPreloadApp() && parsedArgs.mPreloadApp != null) {
+            byte[] rawParcelData = Base64.getDecoder().decode(parsedArgs.mPreloadApp);
+            Parcel appInfoParcel = Parcel.obtain();
+            appInfoParcel.unmarshall(rawParcelData, 0, rawParcelData.length);
+            appInfoParcel.setDataPosition(0);
+            ApplicationInfo appInfo = ApplicationInfo.CREATOR.createFromParcel(appInfoParcel);
+            appInfoParcel.recycle();
+            if (appInfo != null) {
+                handlePreloadApp(appInfo);
+            } else {
+                throw new IllegalArgumentException("Failed to deserialize --preload-app");
+            }
             return null;
         }
 
@@ -341,7 +359,15 @@ class ZygoteConnection {
 
     protected void handlePreloadPackage(String packagePath, String libsPath, String libFileName,
             String cacheKey) {
-        throw new RuntimeException("Zyogte does not support package preloading");
+        throw new RuntimeException("Zygote does not support package preloading");
+    }
+
+    protected boolean canPreloadApp() {
+        return false;
+    }
+
+    protected void handlePreloadApp(ApplicationInfo aInfo) {
+        throw new RuntimeException("Zygote does not support app preloading");
     }
 
     /**
@@ -465,6 +491,12 @@ class ZygoteConnection {
          * The APK path of the package to preload, when using --preload-package.
          */
         String preloadPackage;
+
+        /**
+         * A Base64 string representing a serialize ApplicationInfo Parcel,
+           when using --preload-app.
+          */
+        String mPreloadApp;
 
         /**
          * The native library path of the package to preload, when using --preload-package.
@@ -666,6 +698,8 @@ class ZygoteConnection {
                     instructionSet = arg.substring(arg.indexOf('=') + 1);
                 } else if (arg.startsWith("--app-data-dir=")) {
                     appDataDir = arg.substring(arg.indexOf('=') + 1);
+                } else if (arg.equals("--preload-app")) {
+                    mPreloadApp = args[++curArg];
                 } else if (arg.equals("--preload-package")) {
                     preloadPackage = args[++curArg];
                     preloadPackageLibs = args[++curArg];
@@ -713,6 +747,11 @@ class ZygoteConnection {
                 if (args.length - curArg > 0) {
                     throw new IllegalArgumentException(
                             "Unexpected arguments after --preload-package.");
+                }
+            } else if (mPreloadApp != null) {
+                if (args.length - curArg > 0) {
+                    throw new IllegalArgumentException(
+                            "Unexpected arguments after --preload-app.");
                 }
             } else if (expectRuntimeArgs) {
                 if (!seenRuntimeArgs) {

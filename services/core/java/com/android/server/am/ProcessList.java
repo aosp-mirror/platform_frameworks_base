@@ -19,8 +19,6 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
-import static android.os.Process.FIRST_ISOLATED_UID;
-import static android.os.Process.LAST_ISOLATED_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.getFreeMemory;
@@ -34,6 +32,8 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PSS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityManagerService.KILL_APP_ZYGOTE_DELAY_MS;
+import static com.android.server.am.ActivityManagerService.KILL_APP_ZYGOTE_MSG;
 import static com.android.server.am.ActivityManagerService.PERSISTENT_MASK;
 import static com.android.server.am.ActivityManagerService.PROC_START_TIMEOUT;
 import static com.android.server.am.ActivityManagerService.PROC_START_TIMEOUT_MSG;
@@ -58,6 +58,7 @@ import android.graphics.Point;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.Uri;
+import android.os.AppZygote;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -75,10 +76,12 @@ import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.StatsLog;
 import android.view.Display;
 
@@ -108,6 +111,7 @@ import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 
 /**
@@ -354,10 +358,136 @@ public final class ProcessList {
     final SparseArray<ProcessRecord> mIsolatedProcesses = new SparseArray<>();
 
     /**
-     * Counter for assigning isolated process uids, to avoid frequently reusing the
-     * same ones.
+     * The currently running application zygotes.
      */
-    int mNextIsolatedProcessUid = 0;
+    final ProcessMap<AppZygote> mAppZygotes = new ProcessMap<AppZygote>();
+
+    /**
+     * The processes that are forked off an application zygote.
+     */
+    final ArrayMap<AppZygote, ArrayList<ProcessRecord>> mAppZygoteProcesses =
+            new ArrayMap<AppZygote, ArrayList<ProcessRecord>>();
+
+    final class IsolatedUidRange {
+        @VisibleForTesting
+        public final int mFirstUid;
+        @VisibleForTesting
+        public final int mLastUid;
+
+        @GuardedBy("ProcessList.this.mService")
+        private final SparseBooleanArray mUidUsed = new SparseBooleanArray();
+
+        @GuardedBy("ProcessList.this.mService")
+        private int mNextUid;
+
+        IsolatedUidRange(int firstUid, int lastUid) {
+            mFirstUid = firstUid;
+            mLastUid = lastUid;
+            mNextUid = firstUid;
+        }
+
+        @GuardedBy("ProcessList.this.mService")
+        int allocateIsolatedUidLocked(int userId) {
+            int uid;
+            int stepsLeft = (mLastUid - mFirstUid + 1);
+            for (int i = 0; i < stepsLeft; ++i) {
+                if (mNextUid < mFirstUid || mNextUid > mLastUid) {
+                    mNextUid = mFirstUid;
+                }
+                uid = UserHandle.getUid(userId, mNextUid);
+                mNextUid++;
+                if (!mUidUsed.get(uid, false)) {
+                    mUidUsed.put(uid, true);
+                    return uid;
+                }
+            }
+            return -1;
+        }
+
+        @GuardedBy("ProcessList.this.mService")
+        void freeIsolatedUidLocked(int uid) {
+            // Strip out userId
+            final int appId = UserHandle.getAppId(uid);
+            mUidUsed.delete(appId);
+        }
+    };
+
+    /**
+     * A class that allocates ranges of isolated UIDs per application, and keeps track of them.
+     */
+    final class IsolatedUidRangeAllocator {
+        private final int mFirstUid;
+        private final int mNumUidRanges;
+        private final int mNumUidsPerRange;
+        /**
+         * We map the uid range [mFirstUid, mFirstUid + mNumUidRanges * mNumUidsPerRange)
+         * back to an underlying bitset of [0, mNumUidRanges) and allocate out of that.
+         */
+        @GuardedBy("ProcessList.this.mService")
+        private final BitSet mAvailableUidRanges;
+        @GuardedBy("ProcessList.this.mService")
+        private final ProcessMap<IsolatedUidRange> mAppRanges = new ProcessMap<IsolatedUidRange>();
+
+        IsolatedUidRangeAllocator(int firstUid, int lastUid, int numUidsPerRange) {
+            mFirstUid = firstUid;
+            mNumUidsPerRange = numUidsPerRange;
+            mNumUidRanges = (lastUid - firstUid + 1) / numUidsPerRange;
+            mAvailableUidRanges = new BitSet(mNumUidRanges);
+            // Mark all as available
+            mAvailableUidRanges.set(0, mNumUidRanges);
+        }
+
+        @GuardedBy("ProcessList.this.mService")
+        IsolatedUidRange getIsolatedUidRangeLocked(ApplicationInfo info) {
+            return mAppRanges.get(info.processName, info.uid);
+        }
+
+        @GuardedBy("ProcessList.this.mService")
+        IsolatedUidRange getOrCreateIsolatedUidRangeLocked(ApplicationInfo info) {
+            IsolatedUidRange range = getIsolatedUidRangeLocked(info);
+            if (range == null) {
+                int uidRangeIndex = mAvailableUidRanges.nextSetBit(0);
+                if (uidRangeIndex < 0) {
+                    // No free range
+                    return null;
+                }
+                mAvailableUidRanges.clear(uidRangeIndex);
+                int actualUid = mFirstUid + uidRangeIndex * mNumUidsPerRange;
+                range = new IsolatedUidRange(actualUid, actualUid + mNumUidsPerRange - 1);
+                mAppRanges.put(info.processName, info.uid, range);
+            }
+            return range;
+        }
+
+        @GuardedBy("ProcessList.this.mService")
+        void freeUidRangeLocked(ApplicationInfo info) {
+            // Find the UID range
+            IsolatedUidRange range = mAppRanges.get(info.processName, info.uid);
+            if (range != null) {
+                // Map back to starting uid
+                final int uidRangeIndex = (range.mFirstUid - mFirstUid) / mNumUidsPerRange;
+                // Mark it as available in the underlying bitset
+                mAvailableUidRanges.set(uidRangeIndex);
+                // And the map
+                mAppRanges.remove(info.processName, info.uid);
+            }
+        }
+    }
+
+    /**
+     * The available isolated UIDs for processes that are not spawned from an application zygote.
+     */
+    @VisibleForTesting
+    IsolatedUidRange mGlobalIsolatedUids = new IsolatedUidRange(Process.FIRST_ISOLATED_UID,
+            Process.LAST_ISOLATED_UID);
+
+    /**
+     * An allocator for isolated UID ranges for apps that use an application zygote.
+     */
+    @VisibleForTesting
+    IsolatedUidRangeAllocator mAppIsolatedUidRangeAllocator =
+            new IsolatedUidRangeAllocator(Process.FIRST_APP_ZYGOTE_ISOLATED_UID,
+                    Process.LAST_APP_ZYGOTE_ISOLATED_UID, Process.NUM_UIDS_PER_APP_ZYGOTE);
 
     /**
      * Processes that are being forcibly torn down.
@@ -1505,6 +1635,67 @@ public final class ProcessList {
         }
     }
 
+    @GuardedBy("mService")
+    public void killAppZygoteIfNeededLocked(AppZygote appZygote) {
+        final ApplicationInfo appInfo = appZygote.getAppInfo();
+        ArrayList<ProcessRecord> zygoteProcesses = mAppZygoteProcesses.get(appZygote);
+        if (zygoteProcesses.size() == 0) { // Only remove if no longer in use now
+            mAppZygotes.remove(appInfo.processName, appInfo.uid);
+            mAppZygoteProcesses.remove(appZygote);
+            mAppIsolatedUidRangeAllocator.freeUidRangeLocked(appInfo);
+            appZygote.stopZygote();
+        }
+    }
+
+    @GuardedBy("mService")
+    private void removeProcessFromAppZygoteLocked(final ProcessRecord app) {
+        // Free the isolated uid for this process
+        final IsolatedUidRange appUidRange =
+                mAppIsolatedUidRangeAllocator.getIsolatedUidRangeLocked(app.info);
+        if (appUidRange != null) {
+            appUidRange.freeIsolatedUidLocked(app.uid);
+        }
+
+        final AppZygote appZygote = mAppZygotes.get(app.info.processName, app.info.uid);
+        if (appZygote != null) {
+            ArrayList<ProcessRecord> zygoteProcesses = mAppZygoteProcesses.get(appZygote);
+            zygoteProcesses.remove(app);
+            if (zygoteProcesses.size() == 0) {
+                Message msg = mService.mHandler.obtainMessage(KILL_APP_ZYGOTE_MSG);
+                msg.obj = appZygote;
+                mService.mHandler.sendMessageDelayed(msg, KILL_APP_ZYGOTE_DELAY_MS);
+            }
+        }
+    }
+
+    private AppZygote createAppZygoteForProcessIfNeeded(final ProcessRecord app) {
+        synchronized (mService) {
+            AppZygote appZygote = mAppZygotes.get(app.info.processName, app.info.uid);
+            final ArrayList<ProcessRecord> zygoteProcessList;
+            if (appZygote == null) {
+                final int userId = UserHandle.getUserId(app.info.uid);
+                final IsolatedUidRange uidRange =
+                        mAppIsolatedUidRangeAllocator.getIsolatedUidRangeLocked(app.info);
+                // Allocate an isolated UID out of this range for the Zygote itself
+                final int zygoteIsolatedUid = uidRange.allocateIsolatedUidLocked(userId);
+                appZygote = new AppZygote(app.info, zygoteIsolatedUid);
+                mAppZygotes.put(app.info.processName, app.info.uid, appZygote);
+                zygoteProcessList = new ArrayList<ProcessRecord>();
+                mAppZygoteProcesses.put(appZygote, zygoteProcessList);
+            } else {
+                mService.mHandler.removeMessages(KILL_APP_ZYGOTE_MSG, appZygote);
+                zygoteProcessList = mAppZygoteProcesses.get(appZygote);
+            }
+            // Note that we already add the app to mAppZygoteProcesses here;
+            // this is so that another thread can't come in and kill the zygote
+            // before we've even tried to start the process. If the process launch
+            // goes wrong, we'll clean this up in removeProcessNameLocked()
+            zygoteProcessList.add(app);
+
+            return appZygote;
+        }
+    }
+
     private Process.ProcessStartResult startProcess(String hostingType, String entryPoint,
             ProcessRecord app, int uid, int[] gids, int runtimeFlags, int mountExternal,
             String seInfo, String requiredAbi, String instructionSet, String invokeWith,
@@ -1520,6 +1711,15 @@ public final class ProcessList {
             final Process.ProcessStartResult startResult;
             if (hostingType.equals("webview_service")) {
                 startResult = startWebView(entryPoint,
+                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
+                        app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
+                        app.info.dataDir, null, app.info.packageName,
+                        packageNames, visibleVolIds,
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+            } else if (hostingType.equals("app_zygote")) {
+                final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
+
+                startResult = appZygote.getProcess().start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
@@ -1629,8 +1829,9 @@ public final class ProcessList {
                 ? hostingName.flattenToShortString() : null;
 
         if (app == null) {
+            final boolean fromAppZygote = "app_zygote".equals(hostingType);
             checkSlow(startTime, "startProcess: creating new process record");
-            app = newProcessRecordLocked(info, processName, isolated, isolatedUid);
+            app = newProcessRecordLocked(info, processName, isolated, isolatedUid, fromAppZygote);
             if (app == null) {
                 Slog.w(TAG, "Failed making new process record for "
                         + processName + "/" + info.uid + " isolated=" + isolated);
@@ -2003,29 +2204,31 @@ public final class ProcessList {
     }
 
     @GuardedBy("mService")
+    private IsolatedUidRange getOrCreateIsolatedUidRangeLocked(ApplicationInfo info,
+            boolean fromAppZygote) {
+        if (!fromAppZygote) {
+            // Allocate an isolated UID from the global range
+            return mGlobalIsolatedUids;
+        } else {
+            return mAppIsolatedUidRangeAllocator.getOrCreateIsolatedUidRangeLocked(info);
+        }
+    }
+
+    @GuardedBy("mService")
     final ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
-            boolean isolated, int isolatedUid) {
+            boolean isolated, int isolatedUid, boolean fromAppZygote) {
         String proc = customProcess != null ? customProcess : info.processName;
         final int userId = UserHandle.getUserId(info.uid);
         int uid = info.uid;
         if (isolated) {
             if (isolatedUid == 0) {
-                int stepsLeft = LAST_ISOLATED_UID - FIRST_ISOLATED_UID + 1;
-                while (true) {
-                    if (mNextIsolatedProcessUid < FIRST_ISOLATED_UID
-                            || mNextIsolatedProcessUid > LAST_ISOLATED_UID) {
-                        mNextIsolatedProcessUid = FIRST_ISOLATED_UID;
-                    }
-                    uid = UserHandle.getUid(userId, mNextIsolatedProcessUid);
-                    mNextIsolatedProcessUid++;
-                    if (mIsolatedProcesses.indexOfKey(uid) < 0) {
-                        // No process for this uid, use it.
-                        break;
-                    }
-                    stepsLeft--;
-                    if (stepsLeft <= 0) {
-                        return null;
-                    }
+                IsolatedUidRange uidRange = getOrCreateIsolatedUidRangeLocked(info, fromAppZygote);
+                if (uidRange == null) {
+                    return null;
+                }
+                uid = uidRange.allocateIsolatedUidLocked(userId);
+                if (uid == -1) {
+                    return null;
                 }
             } else {
                 // Special case for startIsolatedProcess (internal only), where
@@ -2093,6 +2296,13 @@ public final class ProcessList {
             old.uidRecord = null;
         }
         mIsolatedProcesses.remove(uid);
+        mGlobalIsolatedUids.freeIsolatedUidLocked(uid);
+        // Remove the (expected) ProcessRecord from the app zygote
+        final ProcessRecord record = expecting != null ? expecting : old;
+        if (record != null && record.appZygote) {
+            removeProcessFromAppZygoteLocked(record);
+        }
+
         return old;
     }
 

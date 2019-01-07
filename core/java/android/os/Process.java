@@ -205,6 +205,24 @@ public class Process {
     public static final int LAST_APPLICATION_UID = 19999;
 
     /**
+     * First uid used for fully isolated sandboxed processes spawned from an app zygote
+     * @hide
+     */
+    public static final int FIRST_APP_ZYGOTE_ISOLATED_UID = 90000;
+
+    /**
+     * Number of UIDs we allocate per application zygote
+     * @hide
+     */
+    public static final int NUM_UIDS_PER_APP_ZYGOTE = 100;
+
+    /**
+     * Last uid used for fully isolated sandboxed processes spawned from an app zygote
+     * @hide
+     */
+    public static final int LAST_APP_ZYGOTE_ISOLATED_UID = 98999;
+
+    /**
      * First uid used for fully isolated sandboxed processes (with no permissions of their own)
      * @hide
      */
@@ -650,7 +668,8 @@ public class Process {
     /** {@hide} */
     public static final boolean isIsolated(int uid) {
         uid = UserHandle.getAppId(uid);
-        return uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID;
+        return (uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID)
+                || (uid >= FIRST_APP_ZYGOTE_ISOLATED_UID && uid <= LAST_APP_ZYGOTE_ISOLATED_UID);
     }
 
     /**

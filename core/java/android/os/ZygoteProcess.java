@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ApplicationInfo;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.util.Log;
@@ -34,6 +35,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -673,6 +675,36 @@ public class ZygoteProcess {
     }
 
     /**
+     * Instructs the zygote to pre-load the application code for the given Application.
+     * Only the app zygote supports this function.
+     * TODO preloadPackageForAbi() can probably be removed and the callers an use this instead.
+     */
+    public boolean preloadApp(ApplicationInfo appInfo, String abi) throws ZygoteStartFailedEx,
+                                                                          IOException {
+        synchronized (mLock) {
+            ZygoteState state = openZygoteSocketIfNeeded(abi);
+            state.writer.write("2");
+            state.writer.newLine();
+
+            state.writer.write("--preload-app");
+            state.writer.newLine();
+
+            // Zygote args needs to be strings, so in order to pass ApplicationInfo,
+            // write it to a Parcel, and base64 the raw Parcel bytes to the other side.
+            Parcel parcel = Parcel.obtain();
+            appInfo.writeToParcel(parcel, 0 /* flags */);
+            String encodedParcelData = Base64.getEncoder().encodeToString(parcel.marshall());
+            parcel.recycle();
+            state.writer.write(encodedParcelData);
+            state.writer.newLine();
+
+            state.writer.flush();
+
+            return (state.inputStream.readInt() == 0);
+        }
+    }
+
+    /**
      * Instructs the zygote to pre-load the classes and native libraries at the given paths
      * for the specified abi. Not all zygotes support this function.
      */
@@ -763,6 +795,20 @@ public class ZygoteProcess {
      * secondary zygotes that inherit data from the zygote that this object
      * communicates with. This returns a new ZygoteProcess representing a connection
      * to the newly created zygote. Throws an exception if the zygote cannot be started.
+     *
+     * @param processClass The class to use as the child zygote's main entry
+     *                     point.
+     * @param niceName A more readable name to use for the process.
+     * @param uid The user-id under which the child zygote will run.
+     * @param gid The group-id under which the child zygote will run.
+     * @param gids Additional group-ids associated with the child zygote process.
+     * @param runtimeFlags Additional flags.
+     * @param seInfo null-ok SELinux information for the child zygote process.
+     * @param abi non-null the ABI of the child zygote
+     * @param acceptedAbiList ABIs this child zygote will accept connections for; this
+     *                        may be different from <code>abi</code> in case the children
+     *                        spawned from this Zygote only communicate using ABI-safe methods.
+     * @param instructionSet null-ok the instruction set to use.
      */
     public ChildZygoteProcess startChildZygote(final String processClass,
                                                final String niceName,
@@ -770,12 +816,14 @@ public class ZygoteProcess {
                                                int runtimeFlags,
                                                String seInfo,
                                                String abi,
+                                               String acceptedAbiList,
                                                String instructionSet) {
         // Create an unguessable address in the global abstract namespace.
         final LocalSocketAddress serverAddress = new LocalSocketAddress(
                 processClass + "/" + UUID.randomUUID().toString());
 
-        final String[] extraArgs = {Zygote.CHILD_ZYGOTE_SOCKET_NAME_ARG + serverAddress.getName()};
+        final String[] extraArgs = {Zygote.CHILD_ZYGOTE_SOCKET_NAME_ARG + serverAddress.getName(),
+                                    Zygote.CHILD_ZYGOTE_ABI_LIST_ARG + acceptedAbiList};
 
         Process.ProcessStartResult result;
         try {
