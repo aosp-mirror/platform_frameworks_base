@@ -79,8 +79,6 @@ public class PhoneConstants {
     public static final int SIM_ACTIVATION_TYPE_DATA = 1;
 
     public static final String PHONE_NAME_KEY = "phoneName";
-    public static final String FAILURE_REASON_KEY = "reason";
-    public static final String STATE_CHANGE_REASON_KEY = "reason";
     public static final String DATA_NETWORK_TYPE_KEY = "networkType";
     public static final String DATA_FAILURE_CAUSE_KEY = "failCause";
     public static final String DATA_APN_TYPE_KEY = "apnType";
