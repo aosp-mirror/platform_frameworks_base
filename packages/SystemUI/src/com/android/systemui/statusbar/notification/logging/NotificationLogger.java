@@ -399,7 +399,9 @@ public class NotificationLogger implements StateListener {
      * Called when the notification is expanded / collapsed.
      */
     public void onExpansionChanged(String key, boolean isUserAction, boolean isExpanded) {
-        mExpansionStateLogger.onExpansionChanged(key, isUserAction, isExpanded);
+        NotificationVisibility.NotificationLocation location =
+                getNotificationLocation(mEntryManager.getNotificationData().get(key));
+        mExpansionStateLogger.onExpansionChanged(key, isUserAction, isExpanded, location);
     }
 
     /**
@@ -433,10 +435,12 @@ public class NotificationLogger implements StateListener {
         }
 
         @VisibleForTesting
-        void onExpansionChanged(String key, boolean isUserAction, boolean isExpanded) {
+        void onExpansionChanged(String key, boolean isUserAction, boolean isExpanded,
+                NotificationVisibility.NotificationLocation location) {
             State state = getState(key);
             state.mIsUserAction = isUserAction;
             state.mIsExpanded = isExpanded;
+            state.mLocation = location;
             maybeNotifyOnNotificationExpansionChanged(key, state);
         }
 
@@ -452,6 +456,7 @@ public class NotificationLogger implements StateListener {
             for (NotificationVisibility nv : newlyVisibleAr) {
                 State state = getState(nv.key);
                 state.mIsVisible = true;
+                state.mLocation = nv.location;
                 maybeNotifyOnNotificationExpansionChanged(nv.key, state);
             }
             for (NotificationVisibility nv : noLongerVisibleAr) {
@@ -496,10 +501,8 @@ public class NotificationLogger implements StateListener {
             final State stateToBeLogged = new State(state);
             mUiOffloadThread.submit(() -> {
                 try {
-                    mBarService.onNotificationExpansionChanged(
-                            key, stateToBeLogged.mIsUserAction, stateToBeLogged.mIsExpanded,
-                            // TODO (b/120767764): fill in location
-                            ExpandableViewState.LOCATION_UNKNOWN /* notificationLocation */);
+                    mBarService.onNotificationExpansionChanged(key, stateToBeLogged.mIsUserAction,
+                            stateToBeLogged.mIsExpanded, stateToBeLogged.mLocation.ordinal());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to call onNotificationExpansionChanged: ", e);
                 }
@@ -513,6 +516,8 @@ public class NotificationLogger implements StateListener {
             Boolean mIsExpanded;
             @Nullable
             Boolean mIsVisible;
+            @Nullable
+            NotificationVisibility.NotificationLocation mLocation;
 
             private State() {}
 
@@ -520,10 +525,12 @@ public class NotificationLogger implements StateListener {
                 this.mIsUserAction = state.mIsUserAction;
                 this.mIsExpanded = state.mIsExpanded;
                 this.mIsVisible = state.mIsVisible;
+                this.mLocation = state.mLocation;
             }
 
             private boolean isFullySet() {
-                return mIsUserAction != null && mIsExpanded != null && mIsVisible != null;
+                return mIsUserAction != null && mIsExpanded != null && mIsVisible != null
+                        && mLocation != null;
             }
         }
     }

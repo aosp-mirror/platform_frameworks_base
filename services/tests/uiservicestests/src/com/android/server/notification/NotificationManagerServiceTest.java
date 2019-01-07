@@ -245,8 +245,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         @Override
-        void logSmartSuggestionsVisible(NotificationRecord r) {
-            super.logSmartSuggestionsVisible(r);
+        void logSmartSuggestionsVisible(NotificationRecord r, int notificationLocation) {
+            super.logSmartSuggestionsVisible(r, notificationLocation);
             countLogSmartSuggestionsVisible++;
         }
 
