@@ -264,9 +264,6 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         public void setMaxDisplayedNotifications(int maxNotifications) {}
 
         @Override
-        public void snapViewIfNeeded(Entry entry) {}
-
-        @Override
         public ViewGroup getViewParentForNotification(NotificationData.Entry entry) {
             return null;
         }
