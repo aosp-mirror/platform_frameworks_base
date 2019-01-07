@@ -18,6 +18,7 @@ package com.android.server.backup.internal;
 
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.getSetupCompleteSettingForUser;
 
 import android.content.Context;
 import android.database.ContentObserver;
@@ -53,13 +54,7 @@ public class SetupObserver extends ContentObserver {
      */
     public void onChange(boolean selfChange) {
         boolean previousSetupComplete = mUserBackupManagerService.isSetupComplete();
-        boolean newSetupComplete =
-                Settings.Secure.getIntForUser(
-                        mContext.getContentResolver(),
-                        Settings.Secure.USER_SETUP_COMPLETE,
-                        0,
-                        mUserId)
-                        != 0;
+        boolean newSetupComplete = getSetupCompleteSettingForUser(mContext, mUserId);
 
         boolean resolvedSetupComplete = previousSetupComplete || newSetupComplete;
         mUserBackupManagerService.setSetupComplete(resolvedSetupComplete);
