@@ -321,7 +321,7 @@ public class ActivityView extends ViewGroup {
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
             mTmpSurface = new Surface();
             if (mVirtualDisplay == null) {
-                initVirtualDisplay(new SurfaceSession(surfaceHolder.getSurface()));
+                initVirtualDisplay(new SurfaceSession());
                 if (mVirtualDisplay != null && mActivityViewCallback != null) {
                     mActivityViewCallback.onActivityViewReady(ActivityView.this);
                 }
@@ -389,6 +389,7 @@ public class ActivityView extends ViewGroup {
 
         mRootSurfaceControl = new SurfaceControl.Builder(surfaceSession)
                 .setContainerLayer(true)
+                .setParent(mSurfaceView.getSurfaceControl())
                 .setName(DISPLAY_NAME)
                 .build();
 

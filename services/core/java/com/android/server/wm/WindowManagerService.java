@@ -1874,7 +1874,7 @@ public class WindowManagerService extends IWindowManager.Stub
             long frameNumber, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
             Rect outVisibleInsets, Rect outStableInsets, Rect outOutsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper outCutout, MergedConfiguration mergedConfiguration,
-            Surface outSurface, InsetsState outInsetsState) {
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
         int result = 0;
         boolean configChanged;
         final boolean hasStatusBarPermission =
@@ -2047,7 +2047,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 result = win.relayoutVisibleWindow(result, attrChanges, oldVisibility);
 
                 try {
-                    result = createSurfaceControl(outSurface, result, win, winAnimator);
+                    result = createSurfaceControl(outSurfaceControl, result, win, winAnimator);
                 } catch (Exception e) {
                     displayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
 
@@ -2078,7 +2078,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // handled yet, or it might want to draw a last frame. If we already have a
                     // surface, let the client use that, but don't create new surface at this point.
                     Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: getSurface");
-                    winAnimator.mSurfaceController.getSurface(outSurface);
+                    winAnimator.mSurfaceController.getSurfaceControl(outSurfaceControl);
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 } else {
                     if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Releasing surface in: " + win);
@@ -2086,7 +2086,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     try {
                         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "wmReleaseOutSurface_"
                                 + win.mAttrs.getTitle());
-                        outSurface.release();
+                        outSurfaceControl.release();
                     } finally {
                         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     }
@@ -2182,7 +2182,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 + ", requestedHeight=" + requestedHeight
                 + ", viewVisibility=" + viewVisibility
                 + "\nRelayout returning frame=" + outFrame
-                + ", surface=" + outSurface);
+                + ", surface=" + outSurfaceControl);
 
             if (localLOGV || DEBUG_FOCUS) Slog.v(
                 TAG_WM, "Relayout of " + win + ": focusMayChange=" + focusMayChange);
@@ -2252,7 +2252,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return focusMayChange;
     }
 
-    private int createSurfaceControl(Surface outSurface, int result, WindowState win,
+    private int createSurfaceControl(SurfaceControl outSurfaceControl, int result, WindowState win,
             WindowStateAnimator winAnimator) {
         if (!win.mHasSurface) {
             result |= RELAYOUT_RES_SURFACE_CHANGED;
@@ -2266,13 +2266,13 @@ public class WindowManagerService extends IWindowManager.Stub
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
         if (surfaceController != null) {
-            surfaceController.getSurface(outSurface);
-            if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  OUT SURFACE " + outSurface + ": copied");
+            surfaceController.getSurfaceControl(outSurfaceControl);
+            if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  OUT SURFACE " + outSurfaceControl + ": copied");
         } else {
             // For some reason there isn't a surface.  Clear the
             // caller's object so they see the same state.
             Slog.w(TAG_WM, "Failed to create surface control for " + win);
-            outSurface.release();
+            outSurfaceControl.release();
         }
 
         return result;
