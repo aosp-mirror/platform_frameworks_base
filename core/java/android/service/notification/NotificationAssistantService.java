@@ -173,7 +173,8 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     }
 
     /**
-     * Implement this to know when a notification is expanded / collapsed.
+     * Implement this to know when a notification change (expanded / collapsed) is visible to user.
+     *
      * @param key the notification key
      * @param isUserAction whether the expanded change is caused by user action.
      * @param isExpanded whether the notification is expanded.

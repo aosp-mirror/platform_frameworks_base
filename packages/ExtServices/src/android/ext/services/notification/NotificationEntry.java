@@ -236,10 +236,6 @@ public class NotificationEntry {
         return mSeen;
     }
 
-    public boolean isExpanded() {
-        return mExpanded;
-    }
-
     public boolean isShowActionEventLogged() {
         return mIsShowActionEventLogged;
     }

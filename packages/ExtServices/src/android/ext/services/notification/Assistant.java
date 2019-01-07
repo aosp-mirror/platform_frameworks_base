@@ -344,7 +344,6 @@ public class Assistant extends NotificationAssistantService {
                 if (entry != null) {
                     entry.setSeen();
                     mAgingHelper.onNotificationSeen(entry);
-                    mSmartActionsHelper.onNotificationSeen(entry);
                 }
             }
         } catch (Throwable e) {

@@ -27,13 +27,10 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -43,6 +40,7 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
@@ -71,7 +69,6 @@ public class NotificationRowBinder {
             Dependency.get(NotificationInterruptionStateProvider.class);
 
     private final Context mContext;
-    private final IStatusBarService mBarService;
     private final NotificationMessagingUtil mMessagingUtil;
     private final ExpandableNotificationRow.ExpansionLogger mExpansionLogger =
             this::logNotificationExpansion;
@@ -85,6 +82,7 @@ public class NotificationRowBinder {
     private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
     private BindRowCallback mBindRowCallback;
     private NotificationClicker mNotificationClicker;
+    private final NotificationLogger mNotificationLogger = Dependency.get(NotificationLogger.class);
 
     @Inject
     public NotificationRowBinder(Context context,
@@ -92,8 +90,6 @@ public class NotificationRowBinder {
         mContext = context;
         mMessagingUtil = new NotificationMessagingUtil(context);
         mAllowLongPress = allowLongPress;
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
     private NotificationRemoteInputManager getRemoteInputManager() {
@@ -274,13 +270,7 @@ public class NotificationRowBinder {
     }
 
     private void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
-        mUiOffloadThread.submit(() -> {
-            try {
-                mBarService.onNotificationExpansionChanged(key, userAction, expanded);
-            } catch (RemoteException e) {
-                // Ignore.
-            }
-        });
+         mNotificationLogger.onExpansionChanged(key, userAction, expanded);
     }
 
     /** Callback for when a row is bound to an entry. */

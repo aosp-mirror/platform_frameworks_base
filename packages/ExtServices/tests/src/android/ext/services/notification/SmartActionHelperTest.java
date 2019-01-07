@@ -273,24 +273,22 @@ public class SmartActionHelperTest {
         final String message = "Where are you?";
         Notification notification = mNotificationBuilder.setContentText(message).build();
         when(mNotificationEntry.getNotification()).thenReturn(notification);
-        when(mNotificationEntry.isExpanded()).thenReturn(false);
 
         mSmartActionsHelper.suggestReplies(mNotificationEntry);
-        mSmartActionsHelper.onNotificationSeen(mNotificationEntry);
+        mSmartActionsHelper.onNotificationExpansionChanged(mNotificationEntry, false, false);
 
         verify(mTextClassifier, never()).onTextClassifierEvent(
                 Mockito.any(TextClassifierEvent.class));
     }
 
     @Test
-    public void testOnNotificationsSeen_expanded() {
+    public void testOnNotifications_expanded() {
         final String message = "Where are you?";
         Notification notification = mNotificationBuilder.setContentText(message).build();
         when(mNotificationEntry.getNotification()).thenReturn(notification);
-        when(mNotificationEntry.isExpanded()).thenReturn(true);
 
         mSmartActionsHelper.suggestReplies(mNotificationEntry);
-        mSmartActionsHelper.onNotificationSeen(mNotificationEntry);
+        mSmartActionsHelper.onNotificationExpansionChanged(mNotificationEntry, false, true);
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
