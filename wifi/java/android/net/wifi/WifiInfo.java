@@ -114,6 +114,11 @@ public class WifiInfo implements Parcelable {
     private boolean mTrusted;
 
     /**
+     * OSU (Online Sign Up) AP for Passpoint R2.
+     */
+    private boolean mOsuAp;
+
+    /**
      * Running total count of lost (not ACKed) transmitted unicast data packets.
      * @hide
      */
@@ -190,6 +195,7 @@ public class WifiInfo implements Parcelable {
         setFrequency(-1);
         setMeteredHint(false);
         setEphemeral(false);
+        setOsuAp(false);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
@@ -219,6 +225,7 @@ public class WifiInfo implements Parcelable {
             mMeteredHint = source.mMeteredHint;
             mEphemeral = source.mEphemeral;
             mTrusted = source.mTrusted;
+            mOsuAp = source.mOsuAp;
             txBad = source.txBad;
             txRetries = source.txRetries;
             txSuccess = source.txSuccess;
@@ -411,6 +418,15 @@ public class WifiInfo implements Parcelable {
         return mTrusted;
     }
 
+    /** {@hide} */
+    public void setOsuAp(boolean osuAp) {
+        mOsuAp = osuAp;
+    }
+
+    /** {@hide} */
+    public boolean isOsuAp() {
+        return mOsuAp;
+    }
 
     /** @hide */
     @UnsupportedAppUsage
@@ -565,6 +581,7 @@ public class WifiInfo implements Parcelable {
         dest.writeLong(rxSuccess);
         dest.writeDouble(rxSuccessRate);
         mSupplicantState.writeToParcel(dest, flags);
+        dest.writeInt(mOsuAp ? 1 : 0);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -600,6 +617,7 @@ public class WifiInfo implements Parcelable {
                 info.rxSuccess = in.readLong();
                 info.rxSuccessRate = in.readDouble();
                 info.mSupplicantState = SupplicantState.CREATOR.createFromParcel(in);
+                info.mOsuAp = in.readInt() != 0;
                 return info;
             }
 
