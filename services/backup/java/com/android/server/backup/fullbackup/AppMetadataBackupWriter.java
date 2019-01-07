@@ -7,6 +7,7 @@ import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA
 import static com.android.server.backup.UserBackupManagerService.BACKUP_WIDGET_METADATA_TOKEN;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
 import android.content.pm.PackageInfo;
@@ -15,7 +16,6 @@ import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.os.Build;
 import android.os.Environment;
-import android.os.UserHandle;
 import android.util.Log;
 import android.util.StringBuilderPrinter;
 
@@ -254,12 +254,11 @@ public class AppMetadataBackupWriter {
      * for 'adb backup'.
      */
     // TODO(b/113807190): Investigate and potentially remove.
-    public void backupObb(PackageInfo packageInfo) {
+    public void backupObb(@UserIdInt int userId, PackageInfo packageInfo) {
         // TODO: migrate this to SharedStorageBackup, since AID_SYSTEM doesn't have access to
         // external storage.
-        // TODO: http://b/22388012
         Environment.UserEnvironment userEnv =
-                new Environment.UserEnvironment(UserHandle.USER_SYSTEM);
+                new Environment.UserEnvironment(userId);
         File obbDir = userEnv.buildExternalStorageAppObbDirs(packageInfo.packageName)[0];
         if (obbDir != null) {
             if (MORE_DEBUG) {
