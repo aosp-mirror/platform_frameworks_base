@@ -969,7 +969,7 @@ public class NotificationManagerService extends SystemService {
                             r.getNumSmartActionsAdded())
                     .addTaggedData(
                             MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
-                            r.getSuggestionsGeneratedByAssistant());
+                            r.getSuggestionsGeneratedByAssistant() ? 1 : 0);
             mMetricsLogger.write(logMaker);
         }
     }
