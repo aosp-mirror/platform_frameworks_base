@@ -8572,7 +8572,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * match one in a trusted source, and should be done separately.
      */
     private boolean canSkipForcedApkVerification(String apkPath) {
-        if (!PackageManagerServiceUtils.isLegacyApkVerityMode()) {
+        if (!PackageManagerServiceUtils.isLegacyApkVerityEnabled()) {
             return VerityUtils.hasFsverity(apkPath);
         }
 
@@ -16866,10 +16866,11 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private void setUpFsVerityIfPossible(PackageParser.Package pkg) throws InstallerException,
             PrepareFailure, IOException, DigestException, NoSuchAlgorithmException {
-        if (!PackageManagerServiceUtils.isApkVerityEnabled()) {
+        final boolean standardMode = PackageManagerServiceUtils.isApkVerityEnabled();
+        final boolean legacyMode = PackageManagerServiceUtils.isLegacyApkVerityEnabled();
+        if (!standardMode && !legacyMode) {
             return;
         }
-        final boolean legacyMode = PackageManagerServiceUtils.isLegacyApkVerityMode();
 
         // Collect files we care for fs-verity setup.
         ArrayMap<String, String> fsverityCandidates = new ArrayMap<>();

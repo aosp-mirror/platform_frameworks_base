@@ -1374,7 +1374,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Missing existing base package");
         }
         // Default to require only if existing base has fs-verity.
-        mVerityFound = params.mode == SessionParams.MODE_INHERIT_EXISTING
+        mVerityFound = PackageManagerServiceUtils.isApkVerityEnabled()
+                && params.mode == SessionParams.MODE_INHERIT_EXISTING
                 && VerityUtils.hasFsverity(pkgInfo.applicationInfo.getBaseCodePath());
 
         try {
