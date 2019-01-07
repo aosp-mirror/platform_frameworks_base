@@ -1281,7 +1281,16 @@ public class WifiP2pManager {
         c.mAsyncChannel.sendMessage(REMOVE_GROUP, 0, c.putListener(listener));
     }
 
-    /** @hide */
+    /**
+     * Force p2p to enter or exit listen state
+     *
+     * @param c is the channel created at {@link #initialize(Context, Looper, ChannelListener)}
+     * @param enable enables or disables listening
+     * @param listener for callbacks on success or failure. Can be null.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void listen(Channel c, boolean enable, ActionListener listener) {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(enable ? START_LISTEN : STOP_LISTEN,
