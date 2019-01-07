@@ -26,7 +26,6 @@ import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.os.UidProto.Sync;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -40,7 +39,6 @@ import android.view.WindowManager.LayoutParams;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -238,7 +236,12 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             addTranslationToMatrix(side, offset, mTmpMatrix, mTmpFrame);
 
             state.getSource(source.getType()).setFrame(mTmpFrame);
-            surfaceParams.add(new SurfaceParams(leash, 1f, mTmpMatrix, null, 0, 0f, inset != 0));
+
+            // If the system is controlling the insets source, the leash can be null.
+            if (leash != null) {
+                surfaceParams.add(new SurfaceParams(leash, 1f /* alpha */, mTmpMatrix,
+                        null /* windowCrop */, 0 /* layer */, 0f /* cornerRadius*/, inset != 0));
+            }
         }
     }
 
