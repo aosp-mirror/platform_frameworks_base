@@ -254,6 +254,18 @@ public class TextLineTest {
     }
 
     @Test
+    public void testMeasure_wordSpacing() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+        paint.setWordSpacing(10.0f);
+
+        TextLine tl = getTextLine("I I", paint);
+        assertMeasurements(tl, 3, false,
+                new float[]{0.0f, 10.0f, 120.0f, 130.0f});
+    }
+
+    @Test
     public void testHandleRun_ellipsizedReplacementSpan_isSkipped() {
         final Spannable text = new SpannableStringBuilder("This is a... text");
 
