@@ -772,7 +772,6 @@ public class TelephonyManager {
      * The {@link #EXTRA_DATA_NETWORK_TYPE} extra indicates the connection network type.
      * The {@link #EXTRA_DATA_APN_TYPE} extra indicates the APN type.
      * The {@link #EXTRA_DATA_APN} extra indicates the APN.
-     * The {@link #EXTRA_DATA_CHANGE_REASON} extra indicates the connection change reason.
      * The {@link #EXTRA_DATA_IFACE_PROPERTIES} extra indicates the connection interface.
      * The {@link #EXTRA_DATA_FAILURE_CAUSE} extra indicates the connection fail cause.
      *
@@ -783,7 +782,6 @@ public class TelephonyManager {
      * @see #EXTRA_DATA_NETWORK_TYPE
      * @see #EXTRA_DATA_APN_TYPE
      * @see #EXTRA_DATA_APN
-     * @see #EXTRA_DATA_CHANGE_REASON
      * @see #EXTRA_DATA_IFACE
      * @see #EXTRA_DATA_FAILURE_CAUSE
      * @hide
@@ -869,18 +867,6 @@ public class TelephonyManager {
      * @hide
      */
     public static final String EXTRA_DATA_APN = PhoneConstants.DATA_APN_KEY;
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for an String representation of the change reason.
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getStringExtra(String name)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_CHANGE_REASON = PhoneConstants.STATE_CHANGE_REASON_KEY;
 
     /**
      * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
