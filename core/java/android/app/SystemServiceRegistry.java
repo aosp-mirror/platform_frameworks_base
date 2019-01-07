@@ -132,11 +132,13 @@ import android.os.BugreportManager;
 import android.os.Build;
 import android.os.DeviceIdleManager;
 import android.os.DropBoxManager;
+import android.os.DynamicAndroidManager;
 import android.os.HardwarePropertiesManager;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
 import android.os.IDeviceIdleController;
 import android.os.IDumpstate;
+import android.os.IDynamicAndroidService;
 import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
 import android.os.IRecoverySystem;
@@ -1259,6 +1261,17 @@ final class SystemServiceRegistry {
                         IBinder b = ServiceManager.getServiceOrThrow(Context.ROLLBACK_SERVICE);
                         return new RollbackManager(ctx.getOuterContext(),
                                 IRollbackManager.Stub.asInterface(b));
+                    }});
+
+        registerService(Context.DYNAMIC_ANDROID_SERVICE, DynamicAndroidManager.class,
+                new CachedServiceFetcher<DynamicAndroidManager>() {
+                    @Override
+                    public DynamicAndroidManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.DYNAMIC_ANDROID_SERVICE);
+                        return new DynamicAndroidManager(
+                                IDynamicAndroidService.Stub.asInterface(b));
                     }});
         //CHECKSTYLE:ON IndentationCheck
     }

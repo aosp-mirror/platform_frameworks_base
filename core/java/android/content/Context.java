@@ -4585,6 +4585,14 @@ public abstract class Context {
      */
     public static final String TELEPHONY_RCS_SERVICE = "ircs";
 
+     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.DynamicAndroidManager}.
+     * @hide
+     */
+    @SystemApi
+    public static final String DYNAMIC_ANDROID_SERVICE = "dynamic_android";
+
     /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
