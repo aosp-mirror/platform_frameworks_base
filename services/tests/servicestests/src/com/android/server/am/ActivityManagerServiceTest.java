@@ -29,6 +29,8 @@ import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.util.DebugUtils.valueToString;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.android.server.am.ActivityManagerInternalTest.CustomThread;
 import static com.android.server.am.ActivityManagerService.DISPATCH_UIDS_CHANGED_UI_MSG;
 import static com.android.server.am.ActivityManagerService.Injector;
@@ -69,6 +71,7 @@ import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.AppOpsService;
+import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -109,7 +112,7 @@ public class ActivityManagerServiceTest {
         UidRecord.CHANGE_ACTIVE
     };
 
-    @Mock private Context mContext;
+    private Context mContext = getInstrumentation().getTargetContext();
     @Mock private AppOpsService mAppOpsService;
     @Mock private PackageManager mPackageManager;
 
@@ -128,8 +131,8 @@ public class ActivityManagerServiceTest {
         mInjector = new TestInjector();
         mAms = new ActivityManagerService(mInjector);
         mAms.mWaitForNetworkTimeoutMs = 2000;
-
-        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
+        mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());
     }
 
     @After
