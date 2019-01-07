@@ -14,16 +14,30 @@
 // limitations under the License.
 //
 
+genrule {
+    name: "generate_compiled_layout",
+    tools: [":viewcompiler"],
+    cmd: "$(location :viewcompiler) $(in) --dex --out $(out) --package android.startop.test",
+    srcs: ["res/layout/layout1.xml"],
+    out: [
+        "layout1.dex",
+    ],
+}
+
 android_test {
     name: "dex-builder-test",
-    srcs: ["src/android/startop/test/DexBuilderTest.java"],
+    srcs: [
+        "src/android/startop/test/DexBuilderTest.java",
+        "src/android/startop/test/LayoutCompilerTest.java",
+    ],
     sdk_version: "current",
-    data: [":generate_dex_testcases"],
+    data: [":generate_dex_testcases", ":generate_compiled_layout"],
     static_libs: [
         "android-support-test",
         "guava",
     ],
     manifest: "AndroidManifest.xml",
+    resource_dirs: ["res"],
     test_config: "AndroidTest.xml",
     test_suites: ["general-tests"],
 }

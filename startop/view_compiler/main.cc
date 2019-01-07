@@ -16,8 +16,11 @@
 
 #include "gflags/gflags.h"
 
+#include "android-base/stringprintf.h"
 #include "dex_builder.h"
+#include "dex_layout_compiler.h"
 #include "java_lang_builder.h"
+#include "layout_validation.h"
 #include "tinyxml_layout_parser.h"
 #include "util.h"
 
@@ -32,6 +35,12 @@
 namespace {
 
 using namespace tinyxml2;
+using android::base::StringPrintf;
+using startop::dex::ClassBuilder;
+using startop::dex::DexBuilder;
+using startop::dex::MethodBuilder;
+using startop::dex::Prototype;
+using startop::dex::TypeDescriptor;
 using namespace startop::util;
 using std::string;
 
@@ -41,33 +50,43 @@ DEFINE_bool(dex, false, "Generate a DEX file instead of Java");
 DEFINE_string(out, kStdoutFilename, "Where to write the generated class");
 DEFINE_string(package, "", "The package name for the generated class (required)");
 
-class ViewCompilerXmlVisitor : public XMLVisitor {
+template <typename Visitor>
+class XmlVisitorAdapter : public XMLVisitor {
  public:
-  explicit ViewCompilerXmlVisitor(JavaLangViewBuilder* builder) : builder_(builder) {}
+  explicit XmlVisitorAdapter(Visitor* visitor) : visitor_{visitor} {}
 
   bool VisitEnter(const XMLDocument& /*doc*/) override {
-    builder_->Start();
+    visitor_->VisitStartDocument();
     return true;
   }
 
   bool VisitExit(const XMLDocument& /*doc*/) override {
-    builder_->Finish();
+    visitor_->VisitEndDocument();
     return true;
   }
 
   bool VisitEnter(const XMLElement& element, const XMLAttribute* /*firstAttribute*/) override {
-    builder_->StartView(element.Name());
+    visitor_->VisitStartTag(
+        std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(
+            element.Name()));
     return true;
   }
 
   bool VisitExit(const XMLElement& /*element*/) override {
-    builder_->FinishView();
+    visitor_->VisitEndTag();
     return true;
   }
 
  private:
-  JavaLangViewBuilder* builder_;
+  Visitor* visitor_;
 };
+
+template <typename Builder>
+void CompileLayout(XMLDocument* xml, Builder* builder) {
+  startop::LayoutCompilerVisitor visitor{builder};
+  XmlVisitorAdapter<decltype(visitor)> adapter{&visitor};
+  xml->Accept(&adapter);
+}
 
 }  // end namespace
 
@@ -88,16 +107,8 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  if (FLAGS_dex) {
-    startop::dex::WriteTestDexFile("test.dex");
-    return 0;
-  }
-
   const char* const filename = argv[kFileNameParam];
-  const string layout_name = FindLayoutNameFromFilename(filename);
-
-  // We want to generate Java language code to inflate exactly this layout. This means
-  // generating code to walk the resource XML too.
+  const string layout_name = startop::util::FindLayoutNameFromFilename(filename);
 
   XMLDocument xml;
   xml.LoadFile(filename);
@@ -108,15 +119,34 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  const bool is_stdout = FLAGS_out == kStdoutFilename;
+
   std::ofstream outfile;
-  if (FLAGS_out != kStdoutFilename) {
+  if (!is_stdout) {
     outfile.open(FLAGS_out);
   }
-  JavaLangViewBuilder builder{
-      FLAGS_package, layout_name, FLAGS_out == kStdoutFilename ? std::cout : outfile};
 
-  ViewCompilerXmlVisitor visitor{&builder};
-  xml.Accept(&visitor);
+  if (FLAGS_dex) {
+    DexBuilder dex_file;
+    string class_name = StringPrintf("%s.CompiledView", FLAGS_package.c_str());
+    ClassBuilder compiled_view{dex_file.MakeClass(class_name)};
+    MethodBuilder method{compiled_view.CreateMethod(
+        layout_name,
+        Prototype{TypeDescriptor::FromClassname("android.view.View"),
+                  TypeDescriptor::FromClassname("android.content.Context"),
+                  TypeDescriptor::Int()})};
+    startop::DexViewBuilder builder{&method};
+    CompileLayout(&xml, &builder);
+    method.Encode();
 
+    slicer::MemView image{dex_file.CreateImage()};
+
+    (is_stdout ? std::cout : outfile).write(image.ptr<const char>(), image.size());
+  } else {
+    // Generate Java language output.
+    JavaLangViewBuilder builder{FLAGS_package, layout_name, is_stdout ? std::cout : outfile};
+
+    CompileLayout(&xml, &builder);
+  }
   return 0;
 }
