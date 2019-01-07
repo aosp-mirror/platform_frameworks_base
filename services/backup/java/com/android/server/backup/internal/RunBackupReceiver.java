@@ -59,7 +59,8 @@ public class RunBackupReceiver extends BroadcastReceiver {
                 } else {
                     // Don't run backups now if we're disabled or not yet
                     // fully set up.
-                    if (backupManagerService.isEnabled() && backupManagerService.isProvisioned()) {
+                    if (backupManagerService.isEnabled()
+                            && backupManagerService.isSetupComplete()) {
                         if (!backupManagerService.isBackupRunning()) {
                             if (DEBUG) {
                                 Slog.v(TAG, "Running a backup pass");
@@ -77,8 +78,8 @@ public class RunBackupReceiver extends BroadcastReceiver {
                             Slog.i(TAG, "Backup time but one already running");
                         }
                     } else {
-                        Slog.w(TAG, "Backup pass but e=" + backupManagerService.isEnabled() + " p="
-                                + backupManagerService.isProvisioned());
+                        Slog.w(TAG, "Backup pass but enabled=" + backupManagerService.isEnabled()
+                                + " setupComplete=" + backupManagerService.isSetupComplete());
                     }
                 }
             }

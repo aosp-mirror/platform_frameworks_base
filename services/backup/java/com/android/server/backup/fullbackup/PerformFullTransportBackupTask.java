@@ -317,16 +317,16 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         int backupRunStatus = BackupManager.SUCCESS;
 
         try {
-            if (!backupManagerService.isEnabled() || !backupManagerService.isProvisioned()) {
+            if (!backupManagerService.isEnabled() || !backupManagerService.isSetupComplete()) {
                 // Backups are globally disabled, so don't proceed.
                 if (DEBUG) {
                     Slog.i(TAG, "full backup requested but enabled=" + backupManagerService
                             .isEnabled()
-                            + " provisioned=" + backupManagerService.isProvisioned()
+                            + " setupComplete=" + backupManagerService.isSetupComplete()
                             + "; ignoring");
                 }
                 int monitoringEvent;
-                if (backupManagerService.isProvisioned()) {
+                if (backupManagerService.isSetupComplete()) {
                     monitoringEvent = BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED;
                 } else {
                     monitoringEvent = BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
