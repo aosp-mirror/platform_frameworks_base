@@ -678,12 +678,13 @@ public class FullRestoreEngine extends RestoreEngine {
      * Returns whether the package is in the list of the packages for which clear app data should
      * be called despite the fact that they have backup agent.
      *
-     * <p>The list is read from {@link Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE}.
+     * <p>The list is read from {@link Settings.Secure#PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE}.
      */
     private boolean shouldForceClearAppDataOnFullRestore(String packageName) {
-        String packageListString = Settings.Secure.getString(
+        String packageListString = Settings.Secure.getStringForUser(
                 mBackupManagerService.getContext().getContentResolver(),
-                Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE);
+                Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE,
+                mBackupManagerService.getUserId());
         if (TextUtils.isEmpty(packageListString)) {
             return false;
         }

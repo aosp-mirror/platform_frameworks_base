@@ -371,8 +371,8 @@ public class UserBackupManagerService {
             Trampoline trampoline,
             Set<ComponentName> transportWhitelist) {
         String currentTransport =
-                Settings.Secure.getString(
-                        context.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
+                Settings.Secure.getStringForUser(
+                        context.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT, userId);
         if (TextUtils.isEmpty(currentTransport)) {
             currentTransport = null;
         }
@@ -434,6 +434,19 @@ public class UserBackupManagerService {
                 transportManager);
     }
 
+    /**
+     * Returns the value of {@link Settings.Secure#USER_SETUP_COMPLETE} for the specified user
+     * {@code userId} as a {@code boolean}.
+     */
+    public static boolean getSetupCompleteSettingForUser(Context context, int userId) {
+        return Settings.Secure.getIntForUser(
+                context.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE,
+                0,
+                userId)
+                != 0;
+    }
+
     private UserBackupManagerService(
             @UserIdInt int userId,
             Context context,
@@ -465,12 +478,9 @@ public class UserBackupManagerService {
 
         // Set up our bookkeeping
         final ContentResolver resolver = context.getContentResolver();
-        mSetupComplete =
-                Settings.Secure.getIntForUser(
-                        resolver, Settings.Secure.USER_SETUP_COMPLETE, 0, mUserId)
-                        != 0;
-        mAutoRestore = Settings.Secure.getInt(resolver,
-                Settings.Secure.BACKUP_AUTO_RESTORE, 1) != 0;
+        mSetupComplete = getSetupCompleteSettingForUser(context, userId);
+        mAutoRestore = Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.BACKUP_AUTO_RESTORE, 1, userId) != 0;
 
         ContentObserver setupObserver = new SetupObserver(this, mBackupHandler);
         resolver.registerContentObserver(
@@ -2807,8 +2817,8 @@ public class UserBackupManagerService {
         final long oldId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                Settings.Secure.putInt(mContext.getContentResolver(),
-                        Settings.Secure.BACKUP_AUTO_RESTORE, doAutoRestore ? 1 : 0);
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.BACKUP_AUTO_RESTORE, doAutoRestore ? 1 : 0, mUserId);
                 mAutoRestore = doAutoRestore;
             }
         } finally {
@@ -3021,8 +3031,8 @@ public class UserBackupManagerService {
 
     private void updateStateForTransport(String newTransportName) {
         // Publish the name change
-        Settings.Secure.putString(mContext.getContentResolver(),
-                Settings.Secure.BACKUP_TRANSPORT, newTransportName);
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.BACKUP_TRANSPORT, newTransportName, mUserId);
 
         // And update our current-dataset bookkeeping
         String callerLogString = "BMS.updateStateForTransport()";
