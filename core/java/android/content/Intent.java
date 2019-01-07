@@ -1833,6 +1833,23 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.REVIEW_PERMISSIONS";
 
     /**
+     * Activity action: Launch UI to manage special app accesses.
+     * <p>
+     * Input: Nothing.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_MANAGE_SPECIAL_APP_ACCESSES =
+            "android.intent.action.MANAGE_SPECIAL_APP_ACCESSES";
+
+    /**
      * Intent extra: A callback for reporting remote result as a bundle.
      * <p>
      * Type: IRemoteCallback
