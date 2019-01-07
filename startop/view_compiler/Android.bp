@@ -34,6 +34,7 @@ cc_library_host_static {
     defaults: ["viewcompiler_defaults"],
     srcs: [
         "dex_builder.cc",
+        "dex_layout_compiler.cc",
         "java_lang_builder.cc",
         "tinyxml_layout_parser.cc",
         "util.cc",
