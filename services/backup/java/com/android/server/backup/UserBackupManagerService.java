@@ -245,6 +245,7 @@ public class UserBackupManagerService {
     private final @UserIdInt int mUserId;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final TransportManager mTransportManager;
+    private final HandlerThread mUserBackupThread;
 
     private Context mContext;
     private PackageManager mPackageManager;
@@ -371,7 +372,6 @@ public class UserBackupManagerService {
             @UserIdInt int userId,
             Context context,
             Trampoline trampoline,
-            HandlerThread backupThread,
             Set<ComponentName> transportWhitelist) {
         String currentTransport =
                 Settings.Secure.getString(
@@ -389,8 +389,21 @@ public class UserBackupManagerService {
         File baseStateDir = UserBackupManagerFiles.getBaseStateDir(userId);
         File dataDir = UserBackupManagerFiles.getDataDir(userId);
 
+        HandlerThread userBackupThread =
+                new HandlerThread("backup-" + userId, Process.THREAD_PRIORITY_BACKGROUND);
+        userBackupThread.start();
+        if (DEBUG) {
+            Slog.d(TAG, "Started thread " + userBackupThread.getName() + " for user " + userId);
+        }
+
         return createAndInitializeService(
-                userId, context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
+                userId,
+                context,
+                trampoline,
+                userBackupThread,
+                baseStateDir,
+                dataDir,
+                transportManager);
     }
 
     /**
@@ -399,7 +412,7 @@ public class UserBackupManagerService {
      * @param userId The user which this service is for.
      * @param context The system server context.
      * @param trampoline A reference to the proxy to {@link BackupManagerService}.
-     * @param backupThread The thread running backup/restore operations for the user.
+     * @param userBackupThread The thread running backup/restore operations for the user.
      * @param baseStateDir The directory we store the user's persistent bookkeeping data.
      * @param dataDir The directory we store the user's temporary staging data.
      * @param transportManager The {@link TransportManager} responsible for handling the user's
@@ -410,19 +423,25 @@ public class UserBackupManagerService {
             @UserIdInt int userId,
             Context context,
             Trampoline trampoline,
-            HandlerThread backupThread,
+            HandlerThread userBackupThread,
             File baseStateDir,
             File dataDir,
             TransportManager transportManager) {
         return new UserBackupManagerService(
-                userId, context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
+                userId,
+                context,
+                trampoline,
+                userBackupThread,
+                baseStateDir,
+                dataDir,
+                transportManager);
     }
 
     private UserBackupManagerService(
             @UserIdInt int userId,
             Context context,
             Trampoline parent,
-            HandlerThread backupThread,
+            HandlerThread userBackupThread,
             File baseStateDir,
             File dataDir,
             TransportManager transportManager) {
@@ -443,9 +462,9 @@ public class UserBackupManagerService {
                 BackupAgentTimeoutParameters(Handler.getMain(), mContext.getContentResolver());
         mAgentTimeoutParameters.start();
 
-        // spin up the backup/restore handler thread
-        checkNotNull(backupThread, "backupThread cannot be null");
-        mBackupHandler = new BackupHandler(this, backupThread.getLooper());
+        checkNotNull(userBackupThread, "userBackupThread cannot be null");
+        mUserBackupThread = userBackupThread;
+        mBackupHandler = new BackupHandler(this, userBackupThread.getLooper());
 
         // Set up our bookkeeping
         final ContentResolver resolver = context.getContentResolver();
@@ -524,6 +543,11 @@ public class UserBackupManagerService {
 
         // Power management
         mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
+    }
+
+    /** Cleans up state when the user of this service is stopped. */
+    void tearDownService() {
+        mUserBackupThread.quit();
     }
 
     public BackupManagerConstants getConstants() {

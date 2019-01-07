@@ -27,6 +27,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.robolectric.Shadows.shadowOf;
 import static org.testng.Assert.expectThrows;
 
@@ -188,6 +189,19 @@ public class BackupManagerServiceTest {
         assertThat(serviceUsers.size()).isEqualTo(1);
         assertThat(serviceUsers.get(mUserOneId)).isNull();
         assertThat(serviceUsers.get(mUserTwoId)).isEqualTo(mUserTwoService);
+    }
+
+    /** Test that the service unregisters users when stopped. */
+    @Test
+    public void testStopServiceForUser_forRegisteredUser_tearsDownCorrectUser() throws Exception {
+        BackupManagerService backupManagerService =
+                createServiceAndRegisterUser(mUserOneId, mUserOneService);
+        backupManagerService.startServiceForUser(mUserTwoId, mUserTwoService);
+
+        backupManagerService.stopServiceForUser(mUserOneId);
+
+        verify(mUserOneService).tearDownService();
+        verifyNoMoreInteractions(mUserTwoService);
     }
 
     /** Test that the service unregisters users when stopped. */
