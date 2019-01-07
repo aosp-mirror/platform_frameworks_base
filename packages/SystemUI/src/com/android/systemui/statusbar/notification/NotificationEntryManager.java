@@ -15,8 +15,6 @@
  */
 package com.android.systemui.statusbar.notification;
 
-import static com.android.systemui.bubbles.BubbleController.DEBUG_DEMOTE_TO_NOTIF;
-
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
@@ -33,7 +31,6 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ForegroundServiceController;
-import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -64,8 +61,7 @@ public class NotificationEntryManager implements
         Dumpable,
         NotificationInflater.InflationCallback,
         NotificationUpdateHandler,
-        VisualStabilityManager.Callback,
-        BubbleController.BubbleDismissListener {
+        VisualStabilityManager.Callback {
     private static final String TAG = "NotificationEntryMgr";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -80,7 +76,6 @@ public class NotificationEntryManager implements
             Dependency.get(DeviceProvisionedController.class);
     private final ForegroundServiceController mForegroundServiceController =
             Dependency.get(ForegroundServiceController.class);
-    private final BubbleController mBubbleController = Dependency.get(BubbleController.class);
 
     // Lazily retrieved dependencies
     private NotificationRemoteInputManager mRemoteInputManager;
@@ -126,7 +121,6 @@ public class NotificationEntryManager implements
 
     public NotificationEntryManager(Context context) {
         mContext = context;
-        mBubbleController.setDismissListener(this /* bubbleEventListener */);
         mNotificationData = new NotificationData();
         mDeferredNotificationViewUpdateHandler = new Handler();
     }
@@ -151,6 +145,12 @@ public class NotificationEntryManager implements
             mNotificationRowBinder = Dependency.get(NotificationRowBinder.class);
         }
         return mNotificationRowBinder;
+    }
+
+    // TODO: Remove this once we can always use a mocked row binder in our tests
+    @VisibleForTesting
+    void setRowBinder(NotificationRowBinder notificationRowBinder) {
+        mNotificationRowBinder = notificationRowBinder;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -203,23 +203,6 @@ public class NotificationEntryManager implements
                 n.getKey(), null, nv, false /* forceRemove */, true /* removedByUser */);
     }
 
-    @Override
-    public void onStackDismissed() {
-        updateNotifications();
-    }
-
-    @Override
-    public void onBubbleDismissed(String key) {
-        NotificationData.Entry entry = mNotificationData.get(key);
-        if (entry != null) {
-            entry.setBubbleDismissed(true);
-            if (!DEBUG_DEMOTE_TO_NOTIF) {
-                performRemoveNotification(entry.notification);
-            }
-        }
-        updateNotifications();
-    }
-
     private void abortExistingInflation(String key) {
         if (mPendingNotifications.containsKey(key)) {
             NotificationData.Entry entry = mPendingNotifications.get(key);
@@ -247,21 +230,6 @@ public class NotificationEntryManager implements
         }
     }
 
-    private void addEntry(NotificationData.Entry shadeEntry) {
-        if (shadeEntry == null) {
-            return;
-        }
-        // Add the expanded view and icon.
-        mNotificationData.add(shadeEntry);
-        tagForeground(shadeEntry.notification);
-        updateNotifications();
-        for (NotificationEntryListener listener : mNotificationEntryListeners) {
-            listener.onNotificationAdded(shadeEntry);
-        }
-
-        maybeScheduleUpdateNotificationViews(shadeEntry);
-    }
-
     private void maybeScheduleUpdateNotificationViews(NotificationData.Entry entry) {
         long audibleAlertTimeout = RECENTLY_ALERTED_THRESHOLD_MS
                 - (System.currentTimeMillis() - entry.lastAudiblyAlertedMs);
@@ -283,7 +251,13 @@ public class NotificationEntryManager implements
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryInflated(entry, inflatedFlags);
                 }
-                addEntry(entry);
+                mNotificationData.add(entry);
+                tagForeground(entry.notification);
+                updateNotifications();
+                for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                    listener.onNotificationAdded(entry);
+                }
+                maybeScheduleUpdateNotificationViews(entry);
             } else {
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryReinflated(entry);
@@ -309,7 +283,6 @@ public class NotificationEntryManager implements
 
         abortExistingInflation(key);
 
-        StatusBarNotification old = null;
         boolean lifetimeExtended = false;
 
         if (entry != null) {
@@ -342,25 +315,15 @@ public class NotificationEntryManager implements
                 // Let's remove the children if this was a summary
                 handleGroupSummaryRemoved(key);
 
-                old = removeNotificationViews(key, ranking);
+                mNotificationData.remove(key, ranking);
+                updateNotifications();
+                Dependency.get(LeakDetector.class).trackGarbage(entry);
+
+                for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                    listener.onEntryRemoved(entry, visibility, removedByUser);
+                }
             }
         }
-
-        for (NotificationEntryListener listener : mNotificationEntryListeners) {
-            listener.onEntryRemoved(entry, key, old, visibility, lifetimeExtended, removedByUser);
-        }
-    }
-
-    private StatusBarNotification removeNotificationViews(String key,
-            NotificationListenerService.RankingMap ranking) {
-        NotificationData.Entry entry = mNotificationData.remove(key, ranking);
-        if (entry == null) {
-            Log.w(TAG, "removeNotification for unknown key: " + key);
-            return null;
-        }
-        updateNotifications();
-        Dependency.get(LeakDetector.class).trackGarbage(entry);
-        return entry.notification;
     }
 
     /**
@@ -418,25 +381,6 @@ public class NotificationEntryManager implements
         }
     }
 
-    private NotificationData.Entry createNotificationEntry(
-            StatusBarNotification sbn, NotificationListenerService.Ranking ranking)
-            throws InflationException {
-        if (DEBUG) {
-            Log.d(TAG, "createNotificationEntry(notification=" + sbn + " " + ranking);
-        }
-
-        NotificationData.Entry entry = new NotificationData.Entry(sbn, ranking);
-        if (BubbleController.shouldAutoBubble(getContext(), entry)) {
-            entry.setIsBubble(true);
-        }
-
-        Dependency.get(LeakDetector.class).trackInstance(entry);
-        // Construct the expanded view.
-        getRowBinder().inflateViews(entry, () -> performRemoveNotification(sbn),
-                mNotificationData.get(entry.key) != null);
-        return entry;
-    }
-
     private void addNotificationInternal(StatusBarNotification notification,
             NotificationListenerService.RankingMap rankingMap) throws InflationException {
         String key = notification.getKey();
@@ -447,7 +391,14 @@ public class NotificationEntryManager implements
         mNotificationData.updateRanking(rankingMap);
         NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
         rankingMap.getRanking(key, ranking);
-        NotificationData.Entry entry = createNotificationEntry(notification, ranking);
+
+        NotificationData.Entry entry = new NotificationData.Entry(notification, ranking);
+
+        Dependency.get(LeakDetector.class).trackInstance(entry);
+        // Construct the expanded view.
+        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
+                mNotificationData.get(entry.key) != null);
+
         abortExistingInflation(key);
 
         mPendingNotifications.put(key, entry);

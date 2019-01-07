@@ -121,6 +121,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private SmartReplyController mSmartReplyController;
     @Mock private RowInflaterTask mAsyncInflationTask;
+    @Mock private NotificationRowBinder mMockedRowBinder;
 
     private NotificationData.Entry mEntry;
     private StatusBarNotification mSbn;
@@ -310,8 +311,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         verify(mListContainer).cleanUpViewStateForEntry(mEntry);
         verify(mPresenter).updateNotificationViews();
-        verify(mEntryListener).onEntryRemoved(mEntry, mSbn.getKey(), mSbn,
-                null, false /* lifetimeExtended */, false /* removedByUser */);
+        verify(mEntryListener).onEntryRemoved(
+                mEntry, null, false /* removedByUser */);
         verify(mRow).setRemoved();
 
         assertNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
@@ -335,8 +336,31 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         assertNotNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
         verify(extender).setShouldManageLifetime(mEntry, true /* shouldManage */);
-        verify(mEntryListener).onEntryRemoved(mEntry, mSbn.getKey(), null,
-                null, true /* lifetimeExtended */, false /* removedByUser */);
+        verify(mEntryListener, never()).onEntryRemoved(
+                mEntry, null, false /* removedByUser */);
+    }
+
+    @Test
+    public void testRemoveNotification_onEntryRemoveNotFiredIfEntryDoesntExist() {
+        com.android.systemui.util.Assert.isNotMainThread();
+
+        mEntryManager.removeNotification("not_a_real_key", mRankingMap);
+
+        verify(mEntryListener, never()).onEntryRemoved(
+                mEntry, null, false /* removedByUser */);
+    }
+
+    @Test
+    public void testRemoveNotification_whilePending() throws InterruptedException {
+        com.android.systemui.util.Assert.isNotMainThread();
+
+        mEntryManager.setRowBinder(mMockedRowBinder);
+
+        mEntryManager.addNotification(mSbn, mRankingMap);
+        mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
+
+        verify(mEntryListener, never()).onEntryRemoved(
+                mEntry, null, false /* removedByUser */);
     }
 
     @Test
