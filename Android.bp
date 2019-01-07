@@ -502,6 +502,7 @@ java_defaults {
         "media/java/android/media/session/IOnMediaKeyListener.aidl",
         "media/java/android/media/session/IOnVolumeKeyLongPressListener.aidl",
         "media/java/android/media/session/ISession.aidl",
+        "media/java/android/media/session/ISession2TokensListener.aidl",
         "media/java/android/media/session/ISessionCallback.aidl",
         "media/java/android/media/session/ISessionController.aidl",
         "media/java/android/media/session/ISessionControllerCallback.aidl",
