@@ -55,7 +55,6 @@ public final class PbapClientProfile implements LocalBluetoothProfile {
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            Log.d(TAG, "Bluetooth service connected, profile:" + profile);
             mService = (BluetoothPbapClient) proxy;
             // We just bound to the service, so refresh the UI for any connected PBAP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
@@ -74,7 +73,6 @@ public final class PbapClientProfile implements LocalBluetoothProfile {
         }
 
         public void onServiceDisconnected(int profile) {
-            Log.d(TAG, "Bluetooth service disconnected, profile:" + profile);
             mIsProfileReady = false;
         }
     }

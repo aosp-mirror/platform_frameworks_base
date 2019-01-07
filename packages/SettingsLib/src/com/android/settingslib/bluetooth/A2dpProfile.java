@@ -35,7 +35,6 @@ import java.util.List;
 
 public class A2dpProfile implements LocalBluetoothProfile {
     private static final String TAG = "A2dpProfile";
-    private static boolean V = false;
 
     private Context mContext;
 
@@ -60,7 +59,6 @@ public class A2dpProfile implements LocalBluetoothProfile {
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (V) Log.d(TAG,"Bluetooth service connected");
             mService = (BluetoothA2dp) proxy;
             // We just bound to the service, so refresh the UI for any connected A2DP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
@@ -79,7 +77,6 @@ public class A2dpProfile implements LocalBluetoothProfile {
         }
 
         public void onServiceDisconnected(int profile) {
-            if (V) Log.d(TAG,"Bluetooth service disconnected");
             mIsProfileReady=false;
         }
     }
@@ -302,7 +299,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
     }
 
     protected void finalize() {
-        if (V) Log.d(TAG, "finalize()");
+        Log.d(TAG, "finalize()");
         if (mService != null) {
             try {
                 BluetoothAdapter.getDefaultAdapter().closeProfileProxy(BluetoothProfile.A2DP,
