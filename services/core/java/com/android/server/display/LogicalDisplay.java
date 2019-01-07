@@ -301,6 +301,7 @@ final class LogicalDisplay {
             boolean maskCutout =
                     (deviceInfo.flags & DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT) != 0;
             mBaseDisplayInfo.displayCutout = maskCutout ? null : deviceInfo.displayCutout;
+            mBaseDisplayInfo.displayId = mDisplayId;
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo = null;

@@ -185,6 +185,21 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Check if specified UID's content is present on display and should be granted access to it.
+     *
+     * @param uid UID to be checked.
+     * @param displayId id of the display where presence of the content is checked.
+     * @return {@code true} if UID is present on display, {@code false} otherwise.
+     */
+    public boolean isUidPresentOnDisplay(int uid, int displayId) {
+        try {
+            return mDm.isUidPresentOnDisplay(uid, displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets information about a logical display.
      *
      * The display metrics may be adjusted to provide compatibility
