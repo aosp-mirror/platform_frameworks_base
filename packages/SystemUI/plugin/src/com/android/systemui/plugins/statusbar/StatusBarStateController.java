@@ -95,9 +95,12 @@ public interface StatusBarStateController {
         default void onDozeAmountChanged(float linear, float eased) {}
 
         /**
-         * Callback to be notified when the sysui visibility changes
+         * Callback to be notified when the fullscreen or immersive state changes.
+         *
+         * @param isFullscreen if any of the system bar is hidden by the focused window.
+         * @param isImmersive if the navigation bar can stay hidden when the display gets tapped.
          */
-        default void onSystemUiVisibilityChanged(int visibility) {}
+        default void onFullscreenStateChanged(boolean isFullscreen, boolean isImmersive) {}
 
         /**
          * Callback to be notified when the pulsing state changes
