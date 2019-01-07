@@ -139,9 +139,6 @@ final class RemoteFillService
         if (mPendingRequest == pendingRequest) {
             mPendingRequest = null;
         }
-        if (mPendingRequest == null) {
-            scheduleUnbind();
-        }
         return true;
     }
 
