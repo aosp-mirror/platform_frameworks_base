@@ -16,22 +16,25 @@
 package android.service.autofill.augmented;
 
 import static android.service.autofill.augmented.AugmentedAutofillService.DEBUG;
+import static android.service.autofill.augmented.AugmentedAutofillService.VERBOSE;
+
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.app.Dialog;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.RemoteException;
 import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
 import android.service.autofill.augmented.PresentationParams.Area;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
+import android.view.autofill.IAutofillWindowPresenter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -71,7 +74,7 @@ public final class FillWindow implements AutoCloseable {
     /** Indicates the data being shown is a physical address */
     public static final long FLAG_METADATA_ADDRESS = 0x1;
 
-    // TODO(b/111330312): add moar flags
+    // TODO(b/111330312): add more flags
 
     /** @hide */
     @LongDef(prefix = { "FLAG" }, value = {
@@ -83,8 +86,17 @@ public final class FillWindow implements AutoCloseable {
     private final Object mLock = new Object();
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
+    private final @NonNull Handler mUiThreadHandler = new Handler(Looper.getMainLooper());
+    private final @NonNull FillWindowPresenter mFillWindowPresenter = new FillWindowPresenter();
+
     @GuardedBy("mLock")
-    private Dialog mDialog;
+    private WindowManager mWm;
+    @GuardedBy("mLock")
+    private View mFillView;
+    @GuardedBy("mLock")
+    private boolean mShowing;
+    @GuardedBy("mLock")
+    private Rect mBounds;
 
     @GuardedBy("mLock")
     private boolean mDestroyed;
@@ -140,51 +152,28 @@ public final class FillWindow implements AutoCloseable {
             // window instead of destroying. In fact, it might be better to allocate a full window
             // initially, which is transparent (and let touches get through) everywhere but in the
             // rect boundaries.
-            destroy();
 
             // TODO(b/111330312): make sure all touch events are handled, window is always closed,
             // etc.
 
-            mDialog = new Dialog(rootView.getContext()) {
-                @Override
-                public boolean onTouchEvent(MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-                        FillWindow.this.destroy();
+            mWm = rootView.getContext().getSystemService(WindowManager.class);
+            mFillView = rootView;
+            // Listen to the touch outside to destroy the window when typing is detected.
+            mFillView.setOnTouchListener(
+                    (view, motionEvent) -> {
+                        if (motionEvent.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                            if (VERBOSE) Log.v(TAG, "Outside touch detected, hiding the window");
+                            hide();
+                        }
+                        return false;
                     }
-                    return false;
-                }
-            };
-            mCloseGuard.open("destroy");
-            final Window window = mDialog.getWindow();
-            window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
-            // Makes sure touch outside the dialog is received by the window behind the dialog.
-            window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-            // Makes sure the touch outside the dialog is received by the dialog to dismiss it.
-            window.addFlags(WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
-            // Makes sure keyboard shows up.
-            window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-
-            final int height = rect.bottom - rect.top;
-            final int width = rect.right - rect.left;
-            final WindowManager.LayoutParams windowParams = window.getAttributes();
-            windowParams.gravity = Gravity.TOP | Gravity.LEFT;
-            windowParams.y = rect.top + height;
-            windowParams.height = height;
-            windowParams.x = rect.left;
-            windowParams.width = width;
-
-            window.setAttributes(windowParams);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-            window.setBackgroundDrawableResource(android.R.color.transparent);
-
-            mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            final ViewGroup.LayoutParams diagParams = new ViewGroup.LayoutParams(width, height);
-            mDialog.setContentView(rootView, diagParams);
-
+            );
+            mShowing = false;
+            mBounds = new Rect(area.getBounds());
             if (DEBUG) {
                 Log.d(TAG, "Created FillWindow: params= " + smartSuggestion + " view=" + rootView);
             }
-
+            mDestroyed = false;
             mProxy.setFillWindow(this);
             return true;
         }
@@ -194,16 +183,67 @@ public final class FillWindow implements AutoCloseable {
     void show() {
         // TODO(b/111330312): check if updated first / throw exception
         if (DEBUG) Log.d(TAG, "show()");
-
         synchronized (mLock) {
             checkNotDestroyedLocked();
-            if (mDialog == null) {
+            if (mWm == null || mFillView == null) {
                 throw new IllegalStateException("update() not called yet, or already destroyed()");
             }
-
-            mDialog.show();
             if (mProxy != null) {
+                try {
+                    mProxy.requestShowFillUi(mBounds.right - mBounds.left,
+                            mBounds.bottom - mBounds.top,
+                            /*anchorBounds=*/ null, mFillWindowPresenter);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Error requesting to show fill window", e);
+                }
                 mProxy.report(AutofillProxy.REPORT_EVENT_UI_SHOWN);
+            }
+        }
+    }
+
+    /**
+     * Hides the window.
+     *
+     * <p>The window is not destroyed and can be shown again
+     */
+    private void hide() {
+        if (DEBUG) Log.d(TAG, "hide()");
+        synchronized (mLock) {
+            checkNotDestroyedLocked();
+            if (mWm == null || mFillView == null) {
+                throw new IllegalStateException("update() not called yet, or already destroyed()");
+            }
+            if (mProxy != null && mShowing) {
+                try {
+                    mProxy.requestHideFillUi();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Error requesting to hide fill window", e);
+                }
+            }
+        }
+    }
+
+    private void handleShow(WindowManager.LayoutParams p) {
+        if (DEBUG) Log.d(TAG, "handleShow()");
+        synchronized (mLock) {
+            if (mWm != null && mFillView != null) {
+                p.flags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+                if (!mShowing) {
+                    mWm.addView(mFillView, p);
+                    mShowing = true;
+                } else {
+                    mWm.updateViewLayout(mFillView, p);
+                }
+            }
+        }
+    }
+
+    private void handleHide() {
+        if (DEBUG) Log.d(TAG, "handleHide()");
+        synchronized (mLock) {
+            if (mWm != null && mFillView != null && mShowing) {
+                mWm.removeView(mFillView);
+                mShowing = false;
             }
         }
     }
@@ -214,16 +254,16 @@ public final class FillWindow implements AutoCloseable {
      * <p>Once destroyed, this window cannot be used anymore
      */
     public void destroy() {
-        if (DEBUG) Log.d(TAG, "destroy(): mDestroyed=" + mDestroyed + " mDialog=" + mDialog);
-
-        synchronized (this) {
-            if (mDestroyed || mDialog == null) return;
-
-            mDialog.dismiss();
-            mDialog = null;
-            if (mProxy != null) {
-                mProxy.report(AutofillProxy.REPORT_EVENT_UI_DESTROYED);
-            }
+        if (DEBUG) {
+            Log.d(TAG,
+                    "destroy(): mDestroyed=" + mDestroyed + " mShowing=" + mShowing + " mFillView="
+                            + mFillView);
+        }
+        synchronized (mLock) {
+            if (mDestroyed) return;
+            hide();
+            mProxy.report(AutofillProxy.REPORT_EVENT_UI_DESTROYED);
+            mDestroyed = true;
             mCloseGuard.close();
         }
     }
@@ -250,11 +290,15 @@ public final class FillWindow implements AutoCloseable {
     public void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
         synchronized (this) {
             pw.print(prefix); pw.print("destroyed: "); pw.println(mDestroyed);
-            if (mDialog != null) {
-                pw.print(prefix); pw.print("dialog: ");
-                pw.println(mDialog.isShowing() ? "shown" : "hidden");
-                pw.print(prefix); pw.print("window: ");
-                pw.println(mDialog.getWindow().getAttributes());
+            if (mFillView != null) {
+                pw.print(prefix); pw.print("fill window: ");
+                pw.println(mShowing ? "shown" : "hidden");
+                pw.print(prefix); pw.print("fill view: ");
+                pw.println(mFillView);
+                pw.print(prefix); pw.print("mBounds: ");
+                pw.println(mBounds);
+                pw.print(prefix); pw.print("mWm: ");
+                pw.println(mWm);
             }
         }
     }
@@ -263,5 +307,20 @@ public final class FillWindow implements AutoCloseable {
     @Override
     public void close() throws Exception {
         destroy();
+    }
+
+    private final class FillWindowPresenter extends IAutofillWindowPresenter.Stub {
+        @Override
+        public void show(WindowManager.LayoutParams p, Rect transitionEpicenter,
+                boolean fitsSystemWindows, int layoutDirection) {
+            if (DEBUG) Log.d(TAG, "FillWindowPresenter.show()");
+            mUiThreadHandler.sendMessage(obtainMessage(FillWindow::handleShow, FillWindow.this, p));
+        }
+
+        @Override
+        public void hide(Rect transitionEpicenter) {
+            if (DEBUG) Log.d(TAG, "FillWindowPresenter.hide()");
+            mUiThreadHandler.sendMessage(obtainMessage(FillWindow::handleHide, FillWindow.this));
+        }
     }
 }

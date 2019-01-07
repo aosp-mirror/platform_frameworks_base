@@ -21,6 +21,7 @@ import java.util.List;
 import android.graphics.Rect;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
+import android.view.autofill.IAutofillWindowPresenter;
 
 /**
  * Object running in the application process and responsible to provide the functionalities
@@ -29,6 +30,24 @@ import android.view.autofill.AutofillValue;
  * @hide
  */
 interface IAugmentedAutofillManagerClient {
-   Rect getViewCoordinates(in AutofillId id);
-   void autofill(int sessionId, in List<AutofillId> ids, in List<AutofillValue> values);
+    /**
+      * Gets the coordinates of the input field view.
+      */
+    Rect getViewCoordinates(in AutofillId id);
+
+    /**
+     * Autofills the activity with the contents of the values.
+     */
+    void autofill(int sessionId, in List<AutofillId> ids, in List<AutofillValue> values);
+
+    /**
+      * Requests showing the fill UI.
+      */
+    void requestShowFillUi(int sessionId, in AutofillId id, int width, int height,
+            in Rect anchorBounds, in IAutofillWindowPresenter presenter);
+
+    /**
+      * Requests hiding the fill UI.
+      */
+    void requestHideFillUi(int sessionId, in AutofillId id);
 }

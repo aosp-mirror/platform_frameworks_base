@@ -187,6 +187,15 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
+    void onBackKeyPressed() {
+        final RemoteAugmentedAutofillService remoteService =
+                getRemoteAugmentedAutofillServiceLocked();
+        if (remoteService != null) {
+            remoteService.onDestroyAutofillWindowsRequest();
+        }
+    }
+
+    @GuardedBy("mLock")
     @Override // from PerUserSystemService
     protected boolean updateLocked(boolean disabled) {
         destroySessionsLocked();
