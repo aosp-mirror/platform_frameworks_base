@@ -765,8 +765,7 @@ public class NotificationManagerService extends SystemService {
                         .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, nv.rank)
                         .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count)
                         .addTaggedData(MetricsEvent.NOTIFICATION_ACTION_IS_SMART,
-                                (Notification.Action.SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION
-                                        == action.getSemanticAction()) ? 1 : 0)
+                                action.isContextual() ? 1 : 0)
                         .addTaggedData(
                                 MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
                                 generatedByAssistant ? 1 : 0));

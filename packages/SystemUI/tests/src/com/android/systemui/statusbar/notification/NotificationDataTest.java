@@ -400,8 +400,7 @@ public class NotificationDataTest extends SysuiTestCase {
                 Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
                 title,
                 PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"), 0))
-                        .setSemanticAction(
-                                Notification.Action.SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION)
+                        .setContextual(true)
                         .build();
     }
 

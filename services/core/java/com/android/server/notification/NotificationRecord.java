@@ -165,7 +165,7 @@ public final class NotificationRecord {
     private String mChannelIdLogTag;
     /**
      * This list contains system generated smart actions from NAS, app-generated smart actions are
-     * stored in Notification.actions marked as SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION.
+     * stored in Notification.actions with isContextual() set to true.
      */
     private ArrayList<Notification.Action> mSystemGeneratedSmartActions;
     private ArrayList<CharSequence> mSmartReplies;
