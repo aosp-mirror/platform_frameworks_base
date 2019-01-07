@@ -65,7 +65,8 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
+import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
@@ -123,7 +124,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private RowInflaterTask mAsyncInflationTask;
     @Mock private NotificationRowBinder mMockedRowBinder;
 
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
     private StatusBarNotification mSbn;
     private TestableNotificationEntryManager mEntryManager;
     private CountDownLatch mCountDownLatch;
@@ -137,7 +138,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         }
 
         @Override
-        public void onAsyncInflationFinished(NotificationData.Entry entry,
+        public void onAsyncInflationFinished(NotificationEntry entry,
                 @NotificationInflater.InflationFlag int inflatedFlags) {
             super.onAsyncInflationFinished(entry, inflatedFlags);
 
@@ -222,7 +223,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 .setContentText("Text");
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, n.build(), new UserHandle(ActivityManager.getCurrentUser()), null, 0);
-        mEntry = new NotificationData.Entry(mSbn);
+        mEntry = new NotificationEntry(mSbn);
         mEntry.expandedIcon = mock(StatusBarIconView.class);
 
         mEntryManager = new TestableNotificationEntryManager(mContext);
@@ -259,10 +260,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mEntryListener, never()).onInflationError(any(), any());
 
         // Row inflation:
-        ArgumentCaptor<NotificationData.Entry> entryCaptor = ArgumentCaptor.forClass(
-                NotificationData.Entry.class);
+        ArgumentCaptor<NotificationEntry> entryCaptor = ArgumentCaptor.forClass(
+                NotificationEntry.class);
         verify(mBindCallback).onBindRow(entryCaptor.capture(), any(), eq(mSbn), any());
-        NotificationData.Entry entry = entryCaptor.getValue();
+        NotificationEntry entry = entryCaptor.getValue();
         verify(mRemoteInputManager).bindRow(entry.getRow());
 
         // Row content inflation:

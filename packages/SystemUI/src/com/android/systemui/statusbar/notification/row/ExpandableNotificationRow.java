@@ -86,10 +86,10 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
@@ -199,7 +199,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private ExpansionLogger mLogger;
     private String mLoggingKey;
     private NotificationGuts mGuts;
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
     private StatusBarNotification mStatusBarNotification;
     private String mAppName;
 
@@ -451,7 +451,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      *
      * @param entry the entry this row is tied to
      */
-    public void setEntry(@NonNull NotificationData.Entry entry) {
+    public void setEntry(@NonNull NotificationEntry entry) {
         mEntry = entry;
         mStatusBarNotification = entry.notification;
         cacheIsSystemNotification();
@@ -685,7 +685,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mStatusBarNotification;
     }
 
-    public NotificationData.Entry getEntry() {
+    public NotificationEntry getEntry() {
         return mEntry;
     }
 
@@ -1422,7 +1422,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void performDismiss(boolean fromAccessibility) {
         if (isOnlyChildInGroup()) {
-            NotificationData.Entry groupSummary =
+            NotificationEntry groupSummary =
                     mGroupManager.getLogicalGroupSummary(getStatusBarNotification());
             if (groupSummary.isClearable()) {
                 // If this is the only child in the group, dismiss the group, but don't try to show
@@ -2538,7 +2538,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * @return Whether this view is allowed to be dismissed. Only valid for visible notifications as
      *         otherwise some state might not be updated. To request about the general clearability
-     *         see {@link NotificationData.Entry#isClearable()}.
+     *         see {@link NotificationEntry#isClearable()}.
      */
     public boolean canViewBeDismissed() {
         return mEntry.isClearable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
@@ -2969,7 +2969,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public interface OnExpandClickListener {
-        void onExpandClicked(NotificationData.Entry clickedEntry, boolean nowExpanded);
+        void onExpandClicked(NotificationEntry clickedEntry, boolean nowExpanded);
     }
 
     @Override

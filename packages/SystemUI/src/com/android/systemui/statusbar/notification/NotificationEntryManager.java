@@ -36,7 +36,9 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.NotificationUpdateHandler;
-import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
@@ -68,7 +70,7 @@ public class NotificationEntryManager implements
     public static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
 
     protected final Context mContext;
-    protected final HashMap<String, NotificationData.Entry> mPendingNotifications = new HashMap<>();
+    protected final HashMap<String, NotificationEntry> mPendingNotifications = new HashMap<>();
 
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
@@ -113,7 +115,7 @@ public class NotificationEntryManager implements
         if (mPendingNotifications.size() == 0) {
             pw.println("null");
         } else {
-            for (NotificationData.Entry entry : mPendingNotifications.values()) {
+            for (NotificationEntry entry : mPendingNotifications.values()) {
                 pw.println(entry.notification);
             }
         }
@@ -205,11 +207,11 @@ public class NotificationEntryManager implements
 
     private void abortExistingInflation(String key) {
         if (mPendingNotifications.containsKey(key)) {
-            NotificationData.Entry entry = mPendingNotifications.get(key);
+            NotificationEntry entry = mPendingNotifications.get(key);
             entry.abortTask();
             mPendingNotifications.remove(key);
         }
-        NotificationData.Entry addedEntry = mNotificationData.get(key);
+        NotificationEntry addedEntry = mNotificationData.get(key);
         if (addedEntry != null) {
             addedEntry.abortTask();
         }
@@ -230,7 +232,7 @@ public class NotificationEntryManager implements
         }
     }
 
-    private void maybeScheduleUpdateNotificationViews(NotificationData.Entry entry) {
+    private void maybeScheduleUpdateNotificationViews(NotificationEntry entry) {
         long audibleAlertTimeout = RECENTLY_ALERTED_THRESHOLD_MS
                 - (System.currentTimeMillis() - entry.lastAudiblyAlertedMs);
         if (audibleAlertTimeout > 0) {
@@ -240,7 +242,7 @@ public class NotificationEntryManager implements
     }
 
     @Override
-    public void onAsyncInflationFinished(NotificationData.Entry entry,
+    public void onAsyncInflationFinished(NotificationEntry entry,
             @InflationFlag int inflatedFlags) {
         mPendingNotifications.remove(entry.key);
         // If there was an async task started after the removal, we don't want to add it back to
@@ -279,7 +281,7 @@ public class NotificationEntryManager implements
             @Nullable NotificationVisibility visibility,
             boolean forceRemove,
             boolean removedByUser) {
-        final NotificationData.Entry entry = mNotificationData.get(key);
+        final NotificationEntry entry = mNotificationData.get(key);
 
         abortExistingInflation(key);
 
@@ -337,19 +339,19 @@ public class NotificationEntryManager implements
      *
      */
     private void handleGroupSummaryRemoved(String key) {
-        NotificationData.Entry entry = mNotificationData.get(key);
+        NotificationEntry entry = mNotificationData.get(key);
         if (entry != null && entry.rowExists() && entry.isSummaryWithChildren()) {
             if (entry.notification.getOverrideGroupKey() != null && !entry.isRowDismissed()) {
                 // We don't want to remove children for autobundled notifications as they are not
                 // always cancelled. We only remove them if they were dismissed by the user.
                 return;
             }
-            List<NotificationData.Entry> childEntries = entry.getChildren();
+            List<NotificationEntry> childEntries = entry.getChildren();
             if (childEntries == null) {
                 return;
             }
             for (int i = 0; i < childEntries.size(); i++) {
-                NotificationData.Entry childEntry = childEntries.get(i);
+                NotificationEntry childEntry = childEntries.get(i);
                 boolean isForeground = (entry.notification.getNotification().flags
                         & Notification.FLAG_FOREGROUND_SERVICE) != 0;
                 boolean keepForReply =
@@ -369,10 +371,10 @@ public class NotificationEntryManager implements
     }
 
     public void updateNotificationsOnDensityOrFontScaleChanged() {
-        ArrayList<NotificationData.Entry> userNotifications =
+        ArrayList<NotificationEntry> userNotifications =
                 mNotificationData.getNotificationsForCurrentUser();
         for (int i = 0; i < userNotifications.size(); i++) {
-            NotificationData.Entry entry = userNotifications.get(i);
+            NotificationEntry entry = userNotifications.get(i);
             entry.onDensityOrFontScaleChanged();
             boolean exposedGuts = entry.areGutsExposed();
             if (exposedGuts) {
@@ -392,7 +394,7 @@ public class NotificationEntryManager implements
         NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
         rankingMap.getRanking(key, ranking);
 
-        NotificationData.Entry entry = new NotificationData.Entry(notification, ranking);
+        NotificationEntry entry = new NotificationEntry(notification, ranking);
 
         Dependency.get(LeakDetector.class).trackInstance(entry);
         // Construct the expanded view.
@@ -445,7 +447,7 @@ public class NotificationEntryManager implements
 
         final String key = notification.getKey();
         abortExistingInflation(key);
-        NotificationData.Entry entry = mNotificationData.get(key);
+        NotificationEntry entry = mNotificationData.get(key);
         if (entry == null) {
             return;
         }
@@ -494,14 +496,14 @@ public class NotificationEntryManager implements
     }
 
     public void updateNotificationRanking(NotificationListenerService.RankingMap rankingMap) {
-        List<NotificationData.Entry> entries = new ArrayList<>();
+        List<NotificationEntry> entries = new ArrayList<>();
         entries.addAll(mNotificationData.getActiveNotifications());
         entries.addAll(mPendingNotifications.values());
 
         // Has a copy of the current UI adjustments.
         ArrayMap<String, NotificationUiAdjustment> oldAdjustments = new ArrayMap<>();
         ArrayMap<String, Integer> oldImportances = new ArrayMap<>();
-        for (NotificationData.Entry entry : entries) {
+        for (NotificationEntry entry : entries) {
             NotificationUiAdjustment adjustment =
                     NotificationUiAdjustment.extractFromNotificationEntry(entry);
             oldAdjustments.put(entry.key, adjustment);
@@ -513,7 +515,7 @@ public class NotificationEntryManager implements
         updateRankingOfPendingNotifications(rankingMap);
 
         // By comparing the old and new UI adjustments, reinflate the view accordingly.
-        for (NotificationData.Entry entry : entries) {
+        for (NotificationEntry entry : entries) {
             getRowBinder().onNotificationRankingUpdated(
                     entry,
                     oldImportances.get(entry.key),
@@ -531,7 +533,7 @@ public class NotificationEntryManager implements
             return;
         }
         NotificationListenerService.Ranking tmpRanking = new NotificationListenerService.Ranking();
-        for (NotificationData.Entry pendingNotification : mPendingNotifications.values()) {
+        for (NotificationEntry pendingNotification : mPendingNotifications.values()) {
             rankingMap.getRanking(pendingNotification.key, tmpRanking);
             pendingNotification.populateFromRanking(tmpRanking);
         }
@@ -542,7 +544,7 @@ public class NotificationEntryManager implements
      * notifications whose views have not yet been inflated. In general, the system pretends like
      * these don't exist, although there are a couple exceptions.
      */
-    public Iterable<NotificationData.Entry> getPendingNotificationsIterator() {
+    public Iterable<NotificationEntry> getPendingNotificationsIterator() {
         return mPendingNotifications.values();
     }
 }

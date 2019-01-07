@@ -25,7 +25,7 @@ import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 
 import javax.inject.Inject;
@@ -83,7 +83,7 @@ public class AmbientPulseManager extends AlertingNotificationManager {
 
     @Override
     protected void onAlertEntryAdded(AlertEntry alertEntry) {
-        NotificationData.Entry entry = alertEntry.mEntry;
+        NotificationEntry entry = alertEntry.mEntry;
         entry.setAmbientPulsing(true);
         for (OnAmbientChangedListener listener : mListeners) {
             listener.onAmbientStateChanged(entry, true);
@@ -92,7 +92,7 @@ public class AmbientPulseManager extends AlertingNotificationManager {
 
     @Override
     protected void onAlertEntryRemoved(AlertEntry alertEntry) {
-        NotificationData.Entry entry = alertEntry.mEntry;
+        NotificationEntry entry = alertEntry.mEntry;
         entry.setAmbientPulsing(false);
         for (OnAmbientChangedListener listener : mListeners) {
             listener.onAmbientStateChanged(entry, false);
@@ -131,7 +131,7 @@ public class AmbientPulseManager extends AlertingNotificationManager {
          * @param entry the entry that changed
          * @param isPulsing true if the entry is now pulsing, false otherwise
          */
-        void onAmbientStateChanged(NotificationData.Entry entry, boolean isPulsing);
+        void onAmbientStateChanged(NotificationEntry entry, boolean isPulsing);
     }
 
     private final class AmbientEntry extends AlertEntry {

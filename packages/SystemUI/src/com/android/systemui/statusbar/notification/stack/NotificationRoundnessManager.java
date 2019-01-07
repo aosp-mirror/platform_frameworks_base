@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.NUM_SECTIONS;
 
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -49,12 +49,12 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     }
 
     @Override
-    public void onHeadsUpPinned(NotificationData.Entry headsUp) {
+    public void onHeadsUpPinned(NotificationEntry headsUp) {
         updateView(headsUp.getRow(), false /* animate */);
     }
 
     @Override
-    public void onHeadsUpUnPinned(NotificationData.Entry headsUp) {
+    public void onHeadsUpUnPinned(NotificationEntry headsUp) {
         updateView(headsUp.getRow(), true /* animate */);
     }
 

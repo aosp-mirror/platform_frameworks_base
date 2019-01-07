@@ -60,10 +60,10 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -131,7 +131,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
-            public void onPendingEntryAdded(NotificationData.Entry entry) {
+            public void onPendingEntryAdded(NotificationEntry entry) {
                 handleFullScreenIntent(entry);
             }
         });
@@ -267,7 +267,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             }
         }
         Intent fillInIntent = null;
-        NotificationData.Entry entry = row.getEntry();
+        NotificationEntry entry = row.getEntry();
         CharSequence remoteInputText = null;
         if (!TextUtils.isEmpty(entry.remoteInputText)) {
             remoteInputText = entry.remoteInputText;
@@ -345,7 +345,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }, null, false /* afterKeyguardGone */);
     }
 
-    private void handleFullScreenIntent(NotificationData.Entry entry) {
+    private void handleFullScreenIntent(NotificationEntry entry) {
         boolean isHeadsUped = mNotificationInterruptionStateProvider.shouldHeadsUp(entry);
         if (!isHeadsUped && entry.notification.getNotification().fullScreenIntent != null) {
             if (shouldSuppressFullScreenIntent(entry)) {
@@ -413,7 +413,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 || !mActivityLaunchAnimator.isAnimationPending();
     }
 
-    private boolean shouldSuppressFullScreenIntent(NotificationData.Entry entry) {
+    private boolean shouldSuppressFullScreenIntent(NotificationEntry entry) {
         if (mPresenter.isDeviceInVrMode()) {
             return true;
         }

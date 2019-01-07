@@ -38,10 +38,10 @@ import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
-import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -102,9 +102,9 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
     }
 
-    private NotificationData.Entry createEntry() throws Exception {
+    private NotificationEntry createEntry() throws Exception {
         ExpandableNotificationRow row = mHelper.createRow();
-        NotificationData.Entry entry = new NotificationData.Entry(row.getStatusBarNotification());
+        NotificationEntry entry = new NotificationEntry(row.getStatusBarNotification());
         entry.setRow(row);
         return entry;
     }
@@ -113,9 +113,9 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     public void testNotificationsBecomingBundled() throws Exception {
         // Tests 3 top level notifications becoming a single bundled notification with |entry0| as
         // the summary.
-        NotificationData.Entry entry0 = createEntry();
-        NotificationData.Entry entry1 = createEntry();
-        NotificationData.Entry entry2 = createEntry();
+        NotificationEntry entry0 = createEntry();
+        NotificationEntry entry1 = createEntry();
+        NotificationEntry entry2 = createEntry();
 
         // Set up the prior state to look like three top level notifications.
         mListContainer.addContainerView(entry0.getRow());
@@ -142,9 +142,9 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Test
     public void testNotificationsBecomingUnbundled() throws Exception {
         // Tests a bundled notification becoming three top level notifications.
-        NotificationData.Entry entry0 = createEntry();
-        NotificationData.Entry entry1 = createEntry();
-        NotificationData.Entry entry2 = createEntry();
+        NotificationEntry entry0 = createEntry();
+        NotificationEntry entry1 = createEntry();
+        NotificationEntry entry2 = createEntry();
         entry0.getRow().addChildNotification(entry1.getRow());
         entry0.getRow().addChildNotification(entry2.getRow());
 
@@ -173,8 +173,8 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Test
     public void testNotificationsBecomingSuppressed() throws Exception {
         // Tests two top level notifications becoming a suppressed summary and a child.
-        NotificationData.Entry entry0 = createEntry();
-        NotificationData.Entry entry1 = createEntry();
+        NotificationEntry entry0 = createEntry();
+        NotificationEntry entry1 = createEntry();
         entry0.getRow().addChildNotification(entry1.getRow());
 
         // Set up the prior state to look like a top level notification.
@@ -199,7 +199,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
 
     @Test
     public void testUpdateNotificationViews_appOps() throws Exception {
-        NotificationData.Entry entry0 = createEntry();
+        NotificationEntry entry0 = createEntry();
         entry0.setRow(spy(entry0.getRow()));
         when(mNotificationData.getActiveNotifications()).thenReturn(
                 Lists.newArrayList(entry0));
@@ -264,7 +264,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         public void setMaxDisplayedNotifications(int maxNotifications) {}
 
         @Override
-        public ViewGroup getViewParentForNotification(NotificationData.Entry entry) {
+        public ViewGroup getViewParentForNotification(NotificationEntry entry) {
             return null;
         }
 
@@ -280,10 +280,10 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         }
 
         @Override
-        public void cleanUpViewStateForEntry(Entry entry) { }
+        public void cleanUpViewStateForEntry(NotificationEntry entry) { }
 
         @Override
-        public boolean isInVisibleLocation(Entry entry) {
+        public boolean isInVisibleLocation(NotificationEntry entry) {
             return true;
         }
 

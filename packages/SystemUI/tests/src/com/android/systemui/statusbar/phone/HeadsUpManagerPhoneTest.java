@@ -16,15 +16,20 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.view.View;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
+import static org.mockito.Mockito.when;
+
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.View;
 
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,11 +38,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.assertFalse;
-
-import static org.mockito.Mockito.when;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -96,7 +96,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     @Test
     public void testCanRemoveImmediately_notTopEntry() {
-        NotificationData.Entry laterEntry = new NotificationData.Entry(createNewNotification(1));
+        NotificationEntry laterEntry = new NotificationEntry(createNewNotification(1));
         laterEntry.setRow(mRow);
         mHeadsUpManager.showNotification(mEntry);
         mHeadsUpManager.showNotification(laterEntry);

@@ -21,7 +21,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
@@ -83,7 +83,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                 } else if (child == null && !mCallback.isExpanded()) {
                     // We might touch above the visible heads up child, but then we still would
                     // like to capture it.
-                    NotificationData.Entry topEntry = mHeadsUpManager.getTopEntry();
+                    NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
                     if (topEntry != null && topEntry.isRowPinned()) {
                         mPickedChild = topEntry.getRow();
                         mTouchingHeadsUpView = true;

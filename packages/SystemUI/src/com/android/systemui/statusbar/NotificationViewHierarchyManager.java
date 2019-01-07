@@ -27,9 +27,9 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -150,13 +150,13 @@ public class NotificationViewHierarchyManager {
      */
     //TODO: Rewrite this to focus on Entries, or some other data object instead of views
     public void updateNotificationViews() {
-        ArrayList<NotificationData.Entry> activeNotifications = mEntryManager.getNotificationData()
+        ArrayList<NotificationEntry> activeNotifications = mEntryManager.getNotificationData()
                 .getActiveNotifications();
         ArrayList<ExpandableNotificationRow> toShow = new ArrayList<>(activeNotifications.size());
-        ArrayList<NotificationData.Entry> toBubble = new ArrayList<>();
+        ArrayList<NotificationEntry> toBubble = new ArrayList<>();
         final int N = activeNotifications.size();
         for (int i = 0; i < N; i++) {
-            NotificationData.Entry ent = activeNotifications.get(i);
+            NotificationEntry ent = activeNotifications.get(i);
             if (ent.isRowDismissed() || ent.isRowRemoved()) {
                 // we don't want to update removed notifications because they could
                 // temporarily become children if they were isolated before.
@@ -187,7 +187,7 @@ public class NotificationViewHierarchyManager {
             ent.getRow().setSensitive(sensitive, deviceSensitive);
             ent.getRow().setNeedsRedaction(needsRedaction);
             if (mGroupManager.isChildInGroupWithSummary(ent.notification)) {
-                NotificationData.Entry summary = mGroupManager.getGroupSummary(ent.notification);
+                NotificationEntry summary = mGroupManager.getGroupSummary(ent.notification);
                 List<ExpandableNotificationRow> orderedChildren =
                         mTmpChildOrderMap.get(summary.getRow());
                 if (orderedChildren == null) {
@@ -271,7 +271,7 @@ public class NotificationViewHierarchyManager {
 
         for (int i = 0; i < toBubble.size(); i++) {
             // TODO: might make sense to leave them in the shade and just reposition them
-            NotificationData.Entry ent = toBubble.get(i);
+            NotificationEntry ent = toBubble.get(i);
             mBubbleController.addBubble(ent);
         }
 
@@ -385,7 +385,7 @@ public class NotificationViewHierarchyManager {
         }
         while(!stack.isEmpty()) {
             ExpandableNotificationRow row = stack.pop();
-            NotificationData.Entry entry = row.getEntry();
+            NotificationEntry entry = row.getEntry();
             boolean isChildNotification =
                     mGroupManager.isChildInGroupWithSummary(entry.notification);
 
@@ -408,7 +408,7 @@ public class NotificationViewHierarchyManager {
             if (!showOnKeyguard) {
                 // min priority notifications should show if their summary is showing
                 if (mGroupManager.isChildInGroupWithSummary(entry.notification)) {
-                    NotificationData.Entry summary = mGroupManager.getLogicalGroupSummary(
+                    NotificationEntry summary = mGroupManager.getLogicalGroupSummary(
                             entry.notification);
                     if (summary != null && mLockscreenUserManager.shouldShowOnKeyguard(
                             summary.notification))         {

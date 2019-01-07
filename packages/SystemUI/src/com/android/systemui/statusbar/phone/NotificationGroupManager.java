@@ -27,7 +27,7 @@ import com.android.systemui.statusbar.AmbientPulseManager.OnAmbientChangedListen
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -97,7 +97,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         }
     }
 
-    public void onEntryRemoved(NotificationData.Entry removed) {
+    public void onEntryRemoved(NotificationEntry removed) {
         onEntryRemovedInternal(removed, removed.notification);
         mIsolatedEntries.remove(removed.key);
     }
@@ -109,7 +109,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
      * @param sbn the notification the entry has, which doesn't need to be the same as it's internal
      *            notification
      */
-    private void onEntryRemovedInternal(NotificationData.Entry removed,
+    private void onEntryRemovedInternal(NotificationEntry removed,
             final StatusBarNotification sbn) {
         String groupKey = getGroupKey(sbn);
         final NotificationGroup group = mGroupMap.get(groupKey);
@@ -136,7 +136,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         }
     }
 
-    public void onEntryAdded(final NotificationData.Entry added) {
+    public void onEntryAdded(final NotificationEntry added) {
         if (added.isRowRemoved()) {
             added.setDebugThrowable(new Throwable());
         }
@@ -152,7 +152,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
             }
         }
         if (isGroupChild) {
-            NotificationData.Entry existing = group.children.get(added.key);
+            NotificationEntry existing = group.children.get(added.key);
             if (existing != null && existing != added) {
                 Throwable existingThrowable = existing.getDebugThrowable();
                 Log.wtf(TAG, "Inconsistent entries found with the same key " + added.key
@@ -169,9 +169,9 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
             group.expanded = added.areChildrenExpanded();
             updateSuppression(group);
             if (!group.children.isEmpty()) {
-                ArrayList<NotificationData.Entry> childrenCopy
+                ArrayList<NotificationEntry> childrenCopy
                         = new ArrayList<>(group.children.values());
-                for (NotificationData.Entry child : childrenCopy) {
+                for (NotificationEntry child : childrenCopy) {
                     onEntryBecomingChild(child);
                 }
                 for (OnGroupChangeListener listener : mListeners) {
@@ -181,7 +181,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         }
     }
 
-    private void onEntryBecomingChild(NotificationData.Entry entry) {
+    private void onEntryBecomingChild(NotificationEntry entry) {
         if (shouldIsolate(entry)) {
             isolateNotification(entry);
         }
@@ -221,7 +221,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         return count;
     }
 
-    private NotificationData.Entry getIsolatedChild(String groupKey) {
+    private NotificationEntry getIsolatedChild(String groupKey) {
         for (StatusBarNotification sbn : mIsolatedEntries.values()) {
             if (sbn.getGroupKey().equals(groupKey) && isIsolated(sbn)) {
                 return mGroupMap.get(sbn.getKey()).summary;
@@ -230,7 +230,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         return null;
     }
 
-    public void onEntryUpdated(NotificationData.Entry entry,
+    public void onEntryUpdated(NotificationEntry entry,
             StatusBarNotification oldNotification) {
         String oldKey = oldNotification.getGroupKey();
         String newKey = entry.notification.getGroupKey();
@@ -267,7 +267,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         if (!isOnlyChild(sbn)) {
             return false;
         }
-        NotificationData.Entry logicalGroupSummary = getLogicalGroupSummary(sbn);
+        NotificationEntry logicalGroupSummary = getLogicalGroupSummary(sbn);
         return logicalGroupSummary != null
                 && !logicalGroupSummary.notification.equals(sbn);
     }
@@ -343,7 +343,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
      * Get the summary of a specified status bar notification. For isolated notification this return
      * itself.
      */
-    public NotificationData.Entry getGroupSummary(StatusBarNotification sbn) {
+    public NotificationEntry getGroupSummary(StatusBarNotification sbn) {
         return getGroupSummary(getGroupKey(sbn));
     }
 
@@ -352,12 +352,12 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
      * but the logical summary, i.e when a child is isolated, it still returns the summary as if
      * it wasn't isolated.
      */
-    public NotificationData.Entry getLogicalGroupSummary(StatusBarNotification sbn) {
+    public NotificationEntry getLogicalGroupSummary(StatusBarNotification sbn) {
         return getGroupSummary(sbn.getGroupKey());
     }
 
     @Nullable
-    private NotificationData.Entry getGroupSummary(String groupKey) {
+    private NotificationEntry getGroupSummary(String groupKey) {
         NotificationGroup group = mGroupMap.get(groupKey);
         //TODO: see if this can become an Entry
         return group == null ? null
@@ -371,13 +371,13 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
      * @param summary summary of a group
      * @return list of the children
      */
-    public ArrayList<NotificationData.Entry> getLogicalChildren(StatusBarNotification summary) {
+    public ArrayList<NotificationEntry> getLogicalChildren(StatusBarNotification summary) {
         NotificationGroup group = mGroupMap.get(summary.getGroupKey());
         if (group == null) {
             return null;
         }
-        ArrayList<NotificationData.Entry> children = new ArrayList<>(group.children.values());
-        NotificationData.Entry isolatedChild = getIsolatedChild(summary.getGroupKey());
+        ArrayList<NotificationEntry> children = new ArrayList<>(group.children.values());
+        NotificationEntry isolatedChild = getIsolatedChild(summary.getGroupKey());
         if (isolatedChild != null) {
             children.add(isolatedChild);
         }
@@ -443,24 +443,24 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     }
 
     @Override
-    public void onHeadsUpPinned(NotificationData.Entry entry) {
+    public void onHeadsUpPinned(NotificationEntry entry) {
     }
 
     @Override
-    public void onHeadsUpUnPinned(NotificationData.Entry entry) {
+    public void onHeadsUpUnPinned(NotificationEntry entry) {
     }
 
     @Override
-    public void onAmbientStateChanged(NotificationData.Entry entry, boolean isAmbient) {
+    public void onAmbientStateChanged(NotificationEntry entry, boolean isAmbient) {
         onAlertStateChanged(entry, isAmbient);
     }
 
     @Override
-    public void onHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp) {
+    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
         onAlertStateChanged(entry, isHeadsUp);
     }
 
-    private void onAlertStateChanged(NotificationData.Entry entry, boolean isAlerting) {
+    private void onAlertStateChanged(NotificationEntry entry, boolean isAlerting) {
         if (isAlerting) {
             if (shouldIsolate(entry)) {
                 isolateNotification(entry);
@@ -479,7 +479,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
      * @return true if the entry should be isolated
      */
 
-    private boolean shouldIsolate(NotificationData.Entry entry) {
+    private boolean shouldIsolate(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
         NotificationGroup notificationGroup = mGroupMap.get(sbn.getGroupKey());
         if (!sbn.isGroup() || sbn.getNotification().isGroupSummary()) {
@@ -499,7 +499,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
      *
      * @param entry the notification to isolate
      */
-    private void isolateNotification(NotificationData.Entry entry) {
+    private void isolateNotification(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
 
         // We will be isolated now, so lets update the groups
@@ -523,7 +523,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
      *
      * @param entry the notification to un-isolate
      */
-    private void stopIsolatingNotification(NotificationData.Entry entry) {
+    private void stopIsolatingNotification(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
         if (mIsolatedEntries.containsKey(sbn.getKey())) {
             // not isolated anymore, we need to update the groups
@@ -564,8 +564,8 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     }
 
     public static class NotificationGroup {
-        public final HashMap<String, NotificationData.Entry> children = new HashMap<>();
-        public NotificationData.Entry summary;
+        public final HashMap<String, NotificationEntry> children = new HashMap<>();
+        public NotificationEntry summary;
         public boolean expanded;
         /**
          * Is this notification group suppressed, i.e its summary is hidden
@@ -580,7 +580,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
                             ? Log.getStackTraceString(summary.getDebugThrowable())
                             : "");
             result += "\n    children size: " + children.size();
-            for (NotificationData.Entry child : children.values()) {
+            for (NotificationEntry child : children.values()) {
                 result += "\n      " + child.notification
                 + (child.getDebugThrowable() != null
                         ? Log.getStackTraceString(child.getDebugThrowable())

@@ -40,6 +40,8 @@ import android.testing.TestableLooper.RunWithLooper;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -191,12 +193,12 @@ public class NotificationFilterTest extends SysuiTestCase {
 
         // test should filter out hidden notifications:
         // hidden
-        NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
+        NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
         entry.suspended = true;
         assertTrue(mNotificationFilter.shouldFilterOut(entry));
 
         // not hidden
-        entry = new NotificationData.Entry(mMockStatusBarNotification);
+        entry = new NotificationEntry(mMockStatusBarNotification);
         entry.suspended = false;
         assertFalse(mNotificationFilter.shouldFilterOut(entry));
     }

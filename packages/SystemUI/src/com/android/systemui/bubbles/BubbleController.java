@@ -35,9 +35,9 @@ import android.widget.FrameLayout;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
 import java.util.ArrayList;
@@ -180,7 +180,7 @@ public class BubbleController {
     /**
      * Adds a bubble associated with the provided notification entry or updates it if it exists.
      */
-    public void addBubble(NotificationData.Entry notif) {
+    public void addBubble(NotificationEntry notif) {
         if (mBubbles.containsKey(notif.key)) {
             // It's an update
             BubbleView bubble = mBubbles.get(notif.key);
@@ -226,7 +226,7 @@ public class BubbleController {
             bv.getEntry().setBubbleDismissed(true);
         }
 
-        NotificationData.Entry entry = mNotificationEntryManager.getNotificationData().get(key);
+        NotificationEntry entry = mNotificationEntryManager.getNotificationData().get(key);
         if (entry != null) {
             entry.setBubbleDismissed(true);
             if (!DEBUG_DEMOTE_TO_NOTIF) {
@@ -241,7 +241,7 @@ public class BubbleController {
     @SuppressWarnings("FieldCanBeLocal")
     private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
         @Override
-        public void onPendingEntryAdded(NotificationData.Entry entry) {
+        public void onPendingEntryAdded(NotificationEntry entry) {
             if (shouldAutoBubble(mContext, entry)) {
                 entry.setIsBubble(true);
             }
@@ -275,7 +275,7 @@ public class BubbleController {
         }
         ArrayList<BubbleView> viewsToRemove = new ArrayList<>();
         for (BubbleView bv : mBubbles.values()) {
-            NotificationData.Entry entry = bv.getEntry();
+            NotificationEntry entry = bv.getEntry();
             if (entry != null) {
                 if (entry.isRowRemoved() || entry.isBubbleDismissed() || entry.isRowDismissed()) {
                     viewsToRemove.add(bv);
@@ -332,7 +332,7 @@ public class BubbleController {
     /**
      * Whether the notification should bubble or not.
      */
-    private static boolean shouldAutoBubble(Context context, NotificationData.Entry entry) {
+    private static boolean shouldAutoBubble(Context context, NotificationEntry entry) {
         if (entry.isBubbleDismissed()) {
             return false;
         }

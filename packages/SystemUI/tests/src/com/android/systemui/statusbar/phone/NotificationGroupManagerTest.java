@@ -29,7 +29,7 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.AmbientPulseManager;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
@@ -69,8 +69,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
     @Test
     public void testIsOnlyChildInGroup() {
-        NotificationData.Entry childEntry = mGroupTestHelper.createChildNotification();
-        NotificationData.Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
 
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
@@ -80,8 +80,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
     @Test
     public void testIsChildInGroupWithSummary() {
-        NotificationData.Entry childEntry = mGroupTestHelper.createChildNotification();
-        NotificationData.Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
 
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
@@ -92,8 +92,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
     @Test
     public void testIsSummaryOfGroupWithChildren() {
-        NotificationData.Entry childEntry = mGroupTestHelper.createChildNotification();
-        NotificationData.Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
 
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
@@ -105,8 +105,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
     @Test
     public void testRemoveChildFromGroupWithSummary() {
-        NotificationData.Entry childEntry = mGroupTestHelper.createChildNotification();
-        NotificationData.Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
         mGroupManager.onEntryAdded(mGroupTestHelper.createChildNotification());
@@ -118,8 +118,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
     @Test
     public void testRemoveSummaryFromGroupWithSummary() {
-        NotificationData.Entry childEntry = mGroupTestHelper.createChildNotification();
-        NotificationData.Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
         mGroupManager.onEntryAdded(mGroupTestHelper.createChildNotification());
@@ -132,8 +132,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
     @Test
     public void testHeadsUpEntryIsIsolated() {
-        NotificationData.Entry childEntry = mGroupTestHelper.createChildNotification();
-        NotificationData.Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
         mGroupManager.onEntryAdded(mGroupTestHelper.createChildNotification());
@@ -149,8 +149,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
     @Test
     public void testAmbientPulseEntryIsIsolated() {
-        NotificationData.Entry childEntry = mGroupTestHelper.createChildNotification();
-        NotificationData.Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
+        NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
         mGroupManager.onEntryAdded(mGroupTestHelper.createChildNotification());

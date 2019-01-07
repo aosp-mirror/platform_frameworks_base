@@ -24,8 +24,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputActiveExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputHistoryExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.SmartReplyHistoryExtender;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.ShadeController;
 
@@ -60,7 +60,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
     private TestableNotificationRemoteInputManager mRemoteInputManager;
     private StatusBarNotification mSbn;
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
     private RemoteInputHistoryExtender mRemoteInputHistoryExtender;
     private SmartReplyHistoryExtender mSmartReplyHistoryExtender;
     private RemoteInputActiveExtender mRemoteInputActiveExtender;
@@ -75,7 +75,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 Handler.createAsync(Looper.myLooper()));
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
-        mEntry = new NotificationData.Entry(mSbn);
+        mEntry = new NotificationEntry(mSbn);
         mEntry.setRow(mRow);
 
         mRemoteInputManager.setUpWithPresenterForTest(mCallback,
@@ -170,7 +170,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         // Setup a notification entry with 1 remote input.
         StatusBarNotification newSbn =
                 mRemoteInputManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", false);
-        NotificationData.Entry entry = new NotificationData.Entry(newSbn);
+        NotificationEntry entry = new NotificationEntry(newSbn);
 
         // Try rebuilding to add another reply.
         newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInput(entry, "Reply 2", true);

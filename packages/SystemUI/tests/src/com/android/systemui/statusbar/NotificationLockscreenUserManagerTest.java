@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static android.content.Intent.ACTION_DEVICE_LOCKED_CHANGED;
 import static android.content.Intent.ACTION_USER_SWITCHED;
 
 import static junit.framework.Assert.assertFalse;
@@ -42,8 +41,8 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 

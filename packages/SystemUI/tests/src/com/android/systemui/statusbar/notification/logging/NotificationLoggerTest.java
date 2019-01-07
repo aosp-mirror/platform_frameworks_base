@@ -41,9 +41,10 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 
@@ -77,7 +78,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Mock private NotificationListener mListener;
     @Captor private ArgumentCaptor<NotificationEntryListener> mEntryListenerCaptor;
 
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
     private TestableNotificationLogger mLogger;
     private NotificationEntryListener mNotificationEntryListener;
     private ConcurrentLinkedQueue<AssertionError> mErrorQueue = new ConcurrentLinkedQueue<>();
@@ -93,7 +94,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         StatusBarNotification sbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME,
                 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
-        mEntry = new NotificationData.Entry(sbn);
+        mEntry = new NotificationEntry(sbn);
         mEntry.setRow(mRow);
 
         mLogger = new TestableNotificationLogger(mListener, Dependency.get(UiOffloadThread.class),

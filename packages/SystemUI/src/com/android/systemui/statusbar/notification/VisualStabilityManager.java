@@ -21,6 +21,7 @@ import android.view.View;
 import androidx.collection.ArraySet;
 
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -52,7 +53,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
     public VisualStabilityManager(NotificationEntryManager notificationEntryManager) {
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
-            public void onEntryReinflated(NotificationData.Entry entry) {
+            public void onEntryReinflated(NotificationEntry entry) {
                 if (entry.hasLowPriorityStateUpdated()) {
                     onLowPriorityUpdated(entry);
                     if (mPresenter != null) {
@@ -163,7 +164,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
     }
 
     @Override
-    public void onHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp) {
+    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
         if (isHeadsUp) {
             // Heads up notifications should in general be allowed to reorder if they are out of
             // view and stay at the current location if they aren't.
@@ -171,7 +172,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
         }
     }
 
-    private void onLowPriorityUpdated(NotificationData.Entry entry) {
+    private void onLowPriorityUpdated(NotificationEntry entry) {
         mLowPriorityReorderingViews.add(entry.getRow());
     }
 

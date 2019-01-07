@@ -47,7 +47,7 @@ import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 
 import org.junit.Before;
@@ -73,7 +73,7 @@ public class NotificationContentViewTest extends SysuiTestCase {
     StatusBarNotification mStatusBarNotification;
     @Mock
     Notification mNotification;
-    NotificationData.Entry mEntry;
+    NotificationEntry mEntry;
     @Mock
     RemoteInput mRemoteInput;
     @Mock
@@ -107,7 +107,7 @@ public class NotificationContentViewTest extends SysuiTestCase {
         // Smart replies and actions
         when(mNotification.getAllowSystemGeneratedContextualActions()).thenReturn(true);
         when(mStatusBarNotification.getNotification()).thenReturn(mNotification);
-        mEntry = new NotificationData.Entry(mStatusBarNotification);
+        mEntry = new NotificationEntry(mStatusBarNotification);
         when(mSmartReplyConstants.isEnabled()).thenReturn(true);
         mActionIcon = Icon.createWithResource(mContext, R.drawable.ic_person);
     }

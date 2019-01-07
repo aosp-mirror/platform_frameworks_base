@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static com.android.systemui.statusbar.notification.NotificationData.Entry;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
@@ -29,6 +27,7 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 
 import java.util.stream.Stream;
@@ -48,7 +47,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * NotificationManagerService side, but we keep it to prevent the UI from looking weird and
      * will remove when possible. See {@link NotificationLifetimeExtender}
      */
-    protected final ArraySet<Entry> mExtendedLifetimeAlertEntries = new ArraySet<>();
+    protected final ArraySet<NotificationEntry> mExtendedLifetimeAlertEntries = new ArraySet<>();
 
     protected NotificationSafeToRemoveCallback mNotificationLifetimeFinishedCallback;
     protected int mMinimumDisplayTime;
@@ -61,7 +60,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * Adds the notification to be managed.
      * @param entry entry to show
      */
-    public void showNotification(@NonNull Entry entry) {
+    public void showNotification(@NonNull NotificationEntry entry) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "showNotification");
         }
@@ -139,7 +138,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * @return the entry
      */
     @Nullable
-    public Entry getEntry(@NonNull String key) {
+    public NotificationEntry getEntry(@NonNull String key) {
         AlertEntry entry = mAlertEntries.get(key);
         return entry != null ? entry.mEntry : null;
     }
@@ -149,7 +148,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * @return all entries
      */
     @NonNull
-    public Stream<Entry> getAllEntries() {
+    public Stream<NotificationEntry> getAllEntries() {
         return mAlertEntries.values().stream().map(headsUpEntry -> headsUpEntry.mEntry);
     }
 
@@ -180,7 +179,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * Add a new entry and begin managing it.
      * @param entry the entry to add
      */
-    protected final void addAlertEntry(@NonNull Entry entry) {
+    protected final void addAlertEntry(@NonNull NotificationEntry entry) {
         AlertEntry alertEntry = createAlertEntry();
         alertEntry.setEntry(entry);
         mAlertEntries.put(entry.key, alertEntry);
@@ -203,7 +202,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
         if (alertEntry == null) {
             return;
         }
-        Entry entry = alertEntry.mEntry;
+        NotificationEntry entry = alertEntry.mEntry;
         mAlertEntries.remove(key);
         onAlertEntryRemoved(alertEntry);
         entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
@@ -250,12 +249,12 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
     }
 
     @Override
-    public boolean shouldExtendLifetime(Entry entry) {
+    public boolean shouldExtendLifetime(NotificationEntry entry) {
         return !canRemoveImmediately(entry.key);
     }
 
     @Override
-    public void setShouldManageLifetime(Entry entry, boolean shouldExtend) {
+    public void setShouldManageLifetime(NotificationEntry entry, boolean shouldExtend) {
         if (shouldExtend) {
             mExtendedLifetimeAlertEntries.add(entry);
         } else {
@@ -265,17 +264,17 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     protected class AlertEntry implements Comparable<AlertEntry> {
-        @Nullable public Entry mEntry;
+        @Nullable public NotificationEntry mEntry;
         public long mPostTime;
         public long mEarliestRemovaltime;
 
         @Nullable protected Runnable mRemoveAlertRunnable;
 
-        public void setEntry(@NonNull final Entry entry) {
+        public void setEntry(@NonNull final NotificationEntry entry) {
             setEntry(entry, () -> removeAlertEntry(entry.key));
         }
 
-        public void setEntry(@NonNull final Entry entry,
+        public void setEntry(@NonNull final NotificationEntry entry,
                 @Nullable Runnable removeAlertRunnable) {
             mEntry = entry;
             mRemoveAlertRunnable = removeAlertRunnable;
