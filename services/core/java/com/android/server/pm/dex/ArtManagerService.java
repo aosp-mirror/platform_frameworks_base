@@ -472,6 +472,33 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     }
 
     /**
+     * Compile layout resources in a given package.
+     */
+    public boolean compileLayouts(PackageParser.Package pkg) {
+        try {
+            final String packageName = pkg.packageName;
+            final String apkPath = pkg.baseCodePath;
+            final ApplicationInfo appInfo = pkg.applicationInfo;
+            final String outDexFile = appInfo.dataDir + "/code_cache/compiled_view.dex";
+            Log.i("PackageManager", "Compiling layouts in " + packageName + " (" + apkPath +
+                    ") to " + outDexFile);
+            long callingId = Binder.clearCallingIdentity();
+            try {
+                synchronized (mInstallLock) {
+                    return mInstaller.compileLayouts(apkPath, packageName, outDexFile,
+                            appInfo.uid);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(callingId);
+            }
+        }
+        catch (Throwable e) {
+            Log.e("PackageManager", "Failed to compile layouts", e);
+            return false;
+        }
+    }
+
+    /**
      * Build the profiles names for all the package code paths (excluding resource only paths).
      * Return the map [code path -> profile name].
      */
