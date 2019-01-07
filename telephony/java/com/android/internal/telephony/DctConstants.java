@@ -24,7 +24,7 @@ public class DctConstants {
     /**
      * IDLE: ready to start data connection setup, default state
      * CONNECTING: state of issued startPppd() but not finish yet
-     * SCANNING: data connection fails with one apn but other apns are available
+     * RETRYING: data connection fails with one apn but other apns are available
      *           ready to start data connection on other apns (before INITING)
      * CONNECTED: IP connection is setup
      * DISCONNECTING: Connection.disconnect() has been called, but PDP
@@ -34,19 +34,16 @@ public class DctConstants {
      *
      * getDataConnectionState() maps State to DataState
      *      FAILED or IDLE : DISCONNECTED
-     *      RETRYING or CONNECTING or SCANNING: CONNECTING
+     *      RETRYING or CONNECTING: CONNECTING
      *      CONNECTED : CONNECTED or DISCONNECTING
      */
     public enum State {
         IDLE,
         CONNECTING,
-        SCANNING,
+        RETRYING,
         CONNECTED,
         DISCONNECTING,
         FAILED,
-        RETRYING        // After moving retry manager to ApnContext, we'll never enter this state!
-                        // Todo: Remove this state and other places that use this state and then
-                        // rename SCANNING to RETRYING.
     }
 
     public enum Activity {
@@ -81,7 +78,6 @@ public class DctConstants {
     public static final int EVENT_RESTART_RADIO = BASE + 26;
     public static final int EVENT_CLEAN_UP_ALL_CONNECTIONS = BASE + 29;
     public static final int EVENT_ICC_CHANGED = BASE + 33;
-    public static final int EVENT_DISCONNECT_DC_RETRYING = BASE + 34;
     public static final int EVENT_DATA_SETUP_COMPLETE_ERROR = BASE + 35;
     public static final int CMD_SET_ENABLE_FAIL_FAST_MOBILE_DATA = BASE + 36;
     public static final int CMD_ENABLE_MOBILE_PROVISIONING = BASE + 37;
