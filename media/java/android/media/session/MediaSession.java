@@ -1453,7 +1453,7 @@ public final class MediaSession {
         private RemoteUserInfo mCurrentControllerInfo;
 
         public CallbackMessageHandler(Looper looper, MediaSession.Callback callback) {
-            super(looper, null, true);
+            super(looper);
             mCallback = callback;
             mCallback.mHandler = this;
         }
@@ -1461,6 +1461,7 @@ public final class MediaSession {
         public void post(RemoteUserInfo caller, int what, Object obj, Bundle data, long delayMs) {
             Pair<RemoteUserInfo, Object> objWithCaller = Pair.create(caller, obj);
             Message msg = obtainMessage(what, objWithCaller);
+            msg.setAsynchronous(true);
             msg.setData(data);
             if (delayMs > 0) {
                 sendMessageDelayed(msg, delayMs);

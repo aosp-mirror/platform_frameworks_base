@@ -1154,7 +1154,7 @@ public final class MediaController {
         private boolean mRegistered = false;
 
         public MessageHandler(Looper looper, MediaController.Callback cb) {
-            super(looper, null, true);
+            super(looper);
             mCallback = cb;
         }
 
@@ -1193,6 +1193,7 @@ public final class MediaController {
 
         public void post(int what, Object obj, Bundle data) {
             Message msg = obtainMessage(what, obj);
+            msg.setAsynchronous(true);
             msg.setData(data);
             msg.sendToTarget();
         }
