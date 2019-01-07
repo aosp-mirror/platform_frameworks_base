@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -44,6 +45,7 @@ import androidx.slice.core.SliceQuery;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.StatusBarStateController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -67,6 +69,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     private AlarmManager mAlarmManager;
     @Mock
     private NotificationMediaManager mNotificationMediaManager;
+    @Mock
+    private StatusBarStateController mStatusBarStateController;
     private TestableKeyguardSliceProvider mProvider;
     private boolean mIsZenMode;
 
@@ -76,7 +80,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         mIsZenMode = false;
         mProvider = new TestableKeyguardSliceProvider();
         mProvider.attachInfo(getContext(), null);
-        mProvider.initDependencies();
+        mProvider.initDependencies(mNotificationMediaManager, mStatusBarStateController);
         SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));
     }
 
@@ -98,6 +102,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     @Test
     public void onBindSlice_readsMedia() {
         MediaMetadata metadata = mock(MediaMetadata.class);
+        mProvider.onDozingChanged(true);
         mProvider.onMetadataChanged(metadata);
         mProvider.onBindSlice(mProvider.getUri());
         verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_TITLE));
@@ -162,7 +167,31 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     @Test
     public void onMetadataChanged_updatesSlice() {
         mProvider.onMetadataChanged(mock(MediaMetadata.class));
+        mProvider.onDozingChanged(true);
         verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
+
+        // Hides after waking up
+        reset(mContentResolver);
+        mProvider.onDozingChanged(false);
+        verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
+
+        // And won't update slice if device is awake
+        reset(mContentResolver);
+        mProvider.onMetadataChanged(mock(MediaMetadata.class));
+        verify(mContentResolver, never()).notifyChange(eq(mProvider.getUri()), eq(null));
+    }
+
+    @Test
+    public void onDozingChanged_updatesSliceIfMedia() {
+        // Show media when dozing
+        mProvider.onMetadataChanged(mock(MediaMetadata.class));
+        mProvider.onDozingChanged(true);
+        verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
+
+        // Do not notify again if nothing changed
+        reset(mContentResolver);
+        mProvider.onDozingChanged(true);
+        verify(mContentResolver, never()).notifyChange(eq(mProvider.getUri()), eq(null));
     }
 
     private class TestableKeyguardSliceProvider extends KeyguardSliceProvider {
@@ -200,11 +229,6 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         @Override
         protected String getFormattedDateLocked() {
             return super.getFormattedDateLocked() + mCounter++;
-        }
-
-        @Override
-        public void initDependencies() {
-            mMediaManager = mNotificationMediaManager;
         }
     }
 
