@@ -16,7 +16,6 @@
 
 package android.net.wifi;
 
-
 import android.content.pm.ParceledListSlice;
 
 import android.net.wifi.hotspot2.OsuProvider;
@@ -63,7 +62,7 @@ interface IWifiManager
 
     ParceledListSlice getPrivilegedConfiguredNetworks();
 
-    List<WifiConfiguration> getAllMatchingWifiConfigs(in List<ScanResult> scanResult);
+    Map getAllMatchingFqdnsForScanResults(in List<ScanResult> scanResult);
 
     List<OsuProvider> getMatchingOsuProviders(in List<ScanResult> scanResult);
 
@@ -76,6 +75,8 @@ interface IWifiManager
     boolean removePasspointConfiguration(in String fqdn, String packageName);
 
     List<PasspointConfiguration> getPasspointConfigurations();
+
+    List<WifiConfiguration> getWifiConfigsForPasspointProfiles(in List<String> fqdnList);
 
     void queryPasspointIcon(long bssid, String fileName);
 

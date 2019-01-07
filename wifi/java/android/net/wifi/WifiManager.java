@@ -44,6 +44,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1191,25 +1192,39 @@ public class WifiManager {
     }
 
     /**
-     * Returns all matching WifiConfigurations for a given list of ScanResult.
+     * Returns a list of all matching WifiConfigurations for a given list of ScanResult.
      *
      * An empty list will be returned when no configurations are installed or if no configurations
      * match the ScanResult.
-
+     *
      * @param scanResults a list of scanResult that represents the BSSID
-     * @return A list of {@link WifiConfiguration} that can have duplicate entries.
+     * @return List that consists of {@link WifiConfiguration} and corresponding scanResults.
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public List<WifiConfiguration> getAllMatchingWifiConfigs(
+    public List<Pair<WifiConfiguration, List<ScanResult>>> getAllMatchingWifiConfigs(
             @NonNull List<ScanResult> scanResults) {
+        List<Pair<WifiConfiguration, List<ScanResult>>> configs = new ArrayList<>();
         try {
-            return mService.getAllMatchingWifiConfigs(scanResults);
+            Map<String, List<ScanResult>> results = mService.getAllMatchingFqdnsForScanResults(
+                    scanResults);
+            if (results.isEmpty()) {
+                return configs;
+            }
+            List<WifiConfiguration> wifiConfigurations =
+                    mService.getWifiConfigsForPasspointProfiles(new ArrayList<>(results.keySet()));
+            for (WifiConfiguration configuration : wifiConfigurations) {
+                List<ScanResult> scanResultList = results.get(configuration.FQDN);
+                if (scanResultList != null) {
+                    configs.add(Pair.create(configuration, scanResultList));
+                }
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+
+        return configs;
     }
 
     /**

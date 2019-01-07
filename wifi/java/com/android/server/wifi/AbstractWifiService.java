@@ -106,7 +106,8 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
     }
 
     @Override
-    public List<WifiConfiguration> getAllMatchingWifiConfigs(List<ScanResult> scanResults) {
+    public Map<String, List<ScanResult>> getAllMatchingFqdnsForScanResults(
+            List<ScanResult> scanResults) {
         throw new UnsupportedOperationException();
     }
 
@@ -151,6 +152,11 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
 
     @Override
     public List<PasspointConfiguration> getPasspointConfigurations() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<WifiConfiguration> getWifiConfigsForPasspointProfiles(List<String> fqdnList) {
         throw new UnsupportedOperationException();
     }
 
