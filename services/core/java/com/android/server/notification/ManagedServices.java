@@ -767,6 +767,23 @@ abstract public class ManagedServices {
         return installed;
     }
 
+    protected Set<String> getAllowedPackages() {
+        final Set<String> allowedPackages = new ArraySet<>();
+        for (int k = 0; k < mApproved.size(); k++) {
+            ArrayMap<Boolean, ArraySet<String>> allowedByType = mApproved.valueAt(k);
+            for (int i = 0; i < allowedByType.size(); i++) {
+                final ArraySet<String> allowed = allowedByType.valueAt(i);
+                for (int j = 0; j < allowed.size(); j++) {
+                    String pkgName = getPackageName(allowed.valueAt(j));
+                    if (!TextUtils.isEmpty(pkgName)) {
+                        allowedPackages.add(pkgName);
+                    }
+                }
+            }
+        }
+        return allowedPackages;
+    }
+
     private void trimApprovedListsAccordingToInstalledServices() {
         int N = mApproved.size();
         for (int i = 0 ; i < N; i++) {

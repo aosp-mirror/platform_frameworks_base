@@ -1701,8 +1701,16 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void sendRegisteredOnlyBroadcast(String action) {
-        getContext().sendBroadcastAsUser(new Intent(action)
-                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), UserHandle.ALL, null);
+        Intent intent = new Intent(action);
+        getContext().sendBroadcastAsUser(intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                UserHandle.ALL, null);
+        // explicitly send the broadcast to all DND packages, even if they aren't currently running
+        intent.setFlags(0);
+        final Set<String> dndApprovedPackages = mConditionProviders.getAllowedPackages();
+        for (String pkg : dndApprovedPackages) {
+            intent.setPackage(pkg);
+            getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
+        }
     }
 
     @Override
