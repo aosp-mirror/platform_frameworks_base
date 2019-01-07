@@ -2864,16 +2864,18 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param userId
      * @param event
      * @param appToken ActivityRecord's appToken.
+     * @param taskRoot TaskRecord's root
      */
     public void updateActivityUsageStats(ComponentName activity, int userId, int event,
-            IBinder appToken) {
+            IBinder appToken, ComponentName taskRoot) {
         if (DEBUG_SWITCH) {
             Slog.d(TAG_SWITCH, "updateActivityUsageStats: comp="
                     + activity + " hash=" + appToken.hashCode() + " event=" + event);
         }
         synchronized (this) {
             if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(activity, userId, event, appToken.hashCode());
+                mUsageStatsService.reportEvent(activity, userId, event, appToken.hashCode(),
+                        taskRoot);
             }
         }
     }
@@ -2911,7 +2913,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(service, userId,
                         started ? UsageEvents.Event.FOREGROUND_SERVICE_START
-                                : UsageEvents.Event.FOREGROUND_SERVICE_STOP, 0);
+                                : UsageEvents.Event.FOREGROUND_SERVICE_STOP, 0, null);
             }
         }
     }
@@ -17521,10 +17523,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void updateActivityUsageStats(ComponentName activity, int userId, int event,
-                IBinder appToken) {
+                IBinder appToken, ComponentName taskRoot) {
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.updateActivityUsageStats(activity, userId, event,
-                        appToken);
+                        appToken, taskRoot);
             }
         }
 

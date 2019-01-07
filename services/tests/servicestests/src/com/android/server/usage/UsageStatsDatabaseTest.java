@@ -45,6 +45,8 @@ import java.util.Locale;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class UsageStatsDatabaseTest {
+
+    private static final int MAX_TESTED_VERSION = 4;
     protected Context mContext;
     private UsageStatsDatabase mUsageStatsDatabase;
     private File mTestDir;
@@ -131,8 +133,8 @@ public class UsageStatsDatabaseTest {
 
         for (int i = 0; i < numberOfEvents; i++) {
             Event event = new Event();
-            final int packageInt = ((i / 3) % 7);
-            event.mPackage = "fake.package.name" + packageInt; //clusters of 3 events from 7 "apps"
+            final int packageInt = ((i / 3) % 7); //clusters of 3 events from 7 "apps"
+            event.mPackage = "fake.package.name" + packageInt;
             if (packageInt == 3) {
                 // Third app is an instant app
                 event.mFlags |= Event.FLAG_IS_PACKAGE_INSTANT_APP;
@@ -143,6 +145,13 @@ public class UsageStatsDatabaseTest {
             event.mTimeStamp = time;
             event.mEventType = i % (MAX_EVENT_TYPE + 1); //"random" event type
             event.mInstanceId = instanceId;
+
+
+            final int rootPackageInt = (i % 5); // 5 "apps" start each task
+            event.mTaskRootPackage = "fake.package.name" + rootPackageInt;
+
+            final int rootClassInt = i % 6;
+            event.mTaskRootClass = ".fake.class.name" + rootClassInt;
 
             switch (event.mEventType) {
                 case Event.CONFIGURATION_CHANGE:
@@ -163,7 +172,7 @@ public class UsageStatsDatabaseTest {
                     break;
             }
 
-            mIntervalStats.events.insert(event);
+            mIntervalStats.addEvent(event);
             mIntervalStats.update(event.mPackage, event.mClass, event.mTimeStamp, event.mEventType,
                     event.mInstanceId);
 
@@ -234,31 +243,40 @@ public class UsageStatsDatabaseTest {
         assertEquals(us1.mChooserCounts, us2.mChooserCounts);
     }
 
-    void compareUsageEvent(Event e1, Event e2, int debugId) {
-        assertEquals(e1.mPackage, e2.mPackage, "Usage event " + debugId);
-        assertEquals(e1.mClass, e2.mClass, "Usage event " + debugId);
-        assertEquals(e1.mTimeStamp, e2.mTimeStamp, "Usage event " + debugId);
-        assertEquals(e1.mEventType, e2.mEventType, "Usage event " + debugId);
-        switch (e1.mEventType) {
-            case Event.CONFIGURATION_CHANGE:
-                assertEquals(e1.mConfiguration, e2.mConfiguration,
-                        "Usage event " + debugId + e2.mConfiguration.toString());
-                break;
-            case Event.SHORTCUT_INVOCATION:
-                assertEquals(e1.mShortcutId, e2.mShortcutId, "Usage event " + debugId);
-                break;
-            case Event.STANDBY_BUCKET_CHANGED:
-                assertEquals(e1.mBucketAndReason, e2.mBucketAndReason, "Usage event " + debugId);
-                break;
-            case Event.NOTIFICATION_INTERRUPTION:
-                assertEquals(e1.mNotificationChannelId, e2.mNotificationChannelId,
-                        "Usage event " + debugId);
-                break;
+    void compareUsageEvent(Event e1, Event e2, int debugId, int minVersion) {
+        switch (minVersion) {
+            case 4: // test fields added in version 4
+                assertEquals(e1.mInstanceId, e2.mInstanceId, "Usage event " + debugId);
+                assertEquals(e1.mTaskRootPackage, e2.mTaskRootPackage, "Usage event " + debugId);
+                assertEquals(e1.mTaskRootClass, e2.mTaskRootClass, "Usage event " + debugId);
+                // fallthrough
+            default:
+                assertEquals(e1.mPackage, e2.mPackage, "Usage event " + debugId);
+                assertEquals(e1.mClass, e2.mClass, "Usage event " + debugId);
+                assertEquals(e1.mTimeStamp, e2.mTimeStamp, "Usage event " + debugId);
+                assertEquals(e1.mEventType, e2.mEventType, "Usage event " + debugId);
+                switch (e1.mEventType) {
+                    case Event.CONFIGURATION_CHANGE:
+                        assertEquals(e1.mConfiguration, e2.mConfiguration,
+                                "Usage event " + debugId + e2.mConfiguration.toString());
+                        break;
+                    case Event.SHORTCUT_INVOCATION:
+                        assertEquals(e1.mShortcutId, e2.mShortcutId, "Usage event " + debugId);
+                        break;
+                    case Event.STANDBY_BUCKET_CHANGED:
+                        assertEquals(e1.mBucketAndReason, e2.mBucketAndReason,
+                                "Usage event " + debugId);
+                        break;
+                    case Event.NOTIFICATION_INTERRUPTION:
+                        assertEquals(e1.mNotificationChannelId, e2.mNotificationChannelId,
+                                "Usage event " + debugId);
+                        break;
+                }
+                assertEquals(e1.mFlags, e2.mFlags);
         }
-        assertEquals(e1.mFlags, e2.mFlags);
     }
 
-    void compareIntervalStats(IntervalStats stats1, IntervalStats stats2) {
+    void compareIntervalStats(IntervalStats stats1, IntervalStats stats2, int minVersion) {
         assertEquals(stats1.majorVersion, stats2.majorVersion);
         assertEquals(stats1.minorVersion, stats2.minorVersion);
         assertEquals(stats1.beginTime, stats2.beginTime);
@@ -311,7 +329,7 @@ public class UsageStatsDatabaseTest {
         } else {
             assertEquals(stats1.events.size(), stats2.events.size());
             for (int i = 0; i < stats1.events.size(); i++) {
-                compareUsageEvent(stats1.events.get(i), stats2.events.get(i), i);
+                compareUsageEvent(stats1.events.get(i), stats2.events.get(i), i, minVersion);
             }
         }
     }
@@ -326,7 +344,7 @@ public class UsageStatsDatabaseTest {
                 mIntervalStatsVerifier);
 
         assertEquals(1, stats.size());
-        compareIntervalStats(mIntervalStats, stats.get(0));
+        compareIntervalStats(mIntervalStats, stats.get(0), MAX_TESTED_VERSION);
     }
 
     /**
@@ -359,8 +377,10 @@ public class UsageStatsDatabaseTest {
                 mIntervalStatsVerifier);
 
         assertEquals(1, stats.size());
+
+        final int minVersion = oldVersion < newVersion ? oldVersion : newVersion;
         // The written and read IntervalStats should match
-        compareIntervalStats(mIntervalStats, stats.get(0));
+        compareIntervalStats(mIntervalStats, stats.get(0), minVersion);
     }
 
     /**
@@ -401,7 +421,7 @@ public class UsageStatsDatabaseTest {
         if (mIntervalStats.events != null) mIntervalStats.events.clear();
 
         // The written and read IntervalStats should match
-        compareIntervalStats(mIntervalStats, stats.get(0));
+        compareIntervalStats(mIntervalStats, stats.get(0), version);
     }
 
     /**

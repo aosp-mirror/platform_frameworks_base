@@ -5313,9 +5313,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     void updateActivityUsageStats(ActivityRecord activity, int event) {
+        ComponentName taskRoot = null;
+        final TaskRecord task = activity.getTaskRecord();
+        if (task != null) {
+            final ActivityRecord rootActivity = task.getRootActivity();
+            if (rootActivity != null) {
+                taskRoot = rootActivity.mActivityComponent;
+            }
+        }
+
         final Message m = PooledLambda.obtainMessage(
                 ActivityManagerInternal::updateActivityUsageStats, mAmInternal,
-                activity.mActivityComponent, activity.mUserId, event, activity.appToken);
+                activity.mActivityComponent, activity.mUserId, event, activity.appToken, taskRoot);
         mH.sendMessage(m);
     }
 

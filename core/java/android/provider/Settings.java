@@ -11495,6 +11495,20 @@ public final class Settings {
         public static final String DISPLAY_PANEL_LPM = "display_panel_lpm";
 
         /**
+         * App time limit usage source setting.
+         * This controls which app in a task will be considered the source of usage when
+         * calculating app usage time limits.
+         *
+         * 1 -> task root app
+         * 2 -> current app
+         * Any other value defaults to task root app.
+         *
+         * Need to reboot the device for this setting to take effect.
+         * @hide
+         */
+        public static final String APP_TIME_LIMIT_USAGE_SOURCE = "app_time_limit_usage_source";
+
+        /**
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          * <p>

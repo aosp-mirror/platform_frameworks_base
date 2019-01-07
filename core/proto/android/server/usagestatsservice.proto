@@ -88,6 +88,11 @@ message IntervalStatsProto {
     // If class field is an Activity, instance_id is a unique id of the
     // Activity object.
     optional int32 instance_id = 14;
+    // task_root_package_index contains the index + 1 of the task root package name in the string
+    // pool
+    optional int32 task_root_package_index = 15;
+    // task_root_class_index contains the index + 1 of the task root class name in the string pool
+    optional int32 task_root_class_index = 16;
   }
 
   // The following fields contain supplemental data used to build IntervalStats, such as a string
