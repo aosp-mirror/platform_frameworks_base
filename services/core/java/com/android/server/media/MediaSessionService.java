@@ -40,6 +40,8 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
+import android.media.MediaController2;
+import android.media.Session2CommandGroup;
 import android.media.Session2Token;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.ICallback;
@@ -54,6 +56,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
@@ -73,6 +76,7 @@ import android.util.SparseIntArray;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -97,17 +101,23 @@ public class MediaSessionService extends SystemService implements Monitor {
     private static final int MEDIA_KEY_LISTENER_TIMEOUT = 1000;
 
     private final SessionManagerImpl mSessionManagerImpl;
-
-    // Keeps the full user id for each user.
-    private final SparseIntArray mFullUserIds = new SparseIntArray();
-    private final SparseArray<FullUserRecord> mUserRecords = new SparseArray<FullUserRecord>();
-    private final ArrayList<SessionsListenerRecord> mSessionsListeners
-            = new ArrayList<SessionsListenerRecord>();
-    private final Object mLock = new Object();
     private final MessageHandler mHandler = new MessageHandler();
     private final PowerManager.WakeLock mMediaEventWakeLock;
     private final int mLongPressTimeout;
     private final INotificationManager mNotificationManager;
+    private final Object mLock = new Object();
+    // Keeps the full user id for each user.
+    @GuardedBy("mLock")
+    private final SparseIntArray mFullUserIds = new SparseIntArray();
+    @GuardedBy("mLock")
+    private final SparseArray<FullUserRecord> mUserRecords = new SparseArray<FullUserRecord>();
+    @GuardedBy("mLock")
+    private final ArrayList<SessionsListenerRecord> mSessionsListeners
+            = new ArrayList<SessionsListenerRecord>();
+    // TODO: Keep session2 info in MediaSessionStack for prioritizing both session1 and session2 in
+    //       one place.
+    @GuardedBy("mLock")
+    private final List<Session2Token> mSession2Tokens = new ArrayList<>();
 
     private KeyguardManager mKeyguardManager;
     private IAudioService mAudioService;
@@ -722,6 +732,10 @@ public class MediaSessionService extends SystemService implements Monitor {
             pw.println(indent + "Restored MediaButtonReceiverComponentType: "
                     + mRestoredMediaButtonReceiverComponentType);
             mPriorityStack.dump(pw, indent);
+            pw.println(indent + "Session2Tokens - " + mSession2Tokens.size());
+            for (Session2Token session2Token : mSession2Tokens) {
+                pw.println(indent + "  " + session2Token);
+            }
         }
 
         @Override
@@ -904,7 +918,17 @@ public class MediaSessionService extends SystemService implements Monitor {
                 if (DEBUG) {
                     Log.d(TAG, "Session2 is created " + sessionToken);
                 }
-                // TODO: Keep the session.
+                if (uid != sessionToken.getUid()) {
+                    throw new SecurityException("Unexpected Session2Token's UID, expected=" + uid
+                            + " but actually=" + sessionToken.getUid());
+                }
+                Controller2Callback callback = new Controller2Callback(sessionToken);
+                // Note: It's safe not to keep controller here because it wouldn't be GC'ed until
+                //       it's closed.
+                // TODO: Keep controller as well for better readability
+                //       because the GC behavior isn't straightforward.
+                MediaController2 controller = new MediaController2(getContext(), sessionToken,
+                        new HandlerExecutor(mHandler), callback);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1928,6 +1952,28 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
             removeMessages(MSG_SESSIONS_CHANGED, userIdInteger);
             obtainMessage(MSG_SESSIONS_CHANGED, userIdInteger).sendToTarget();
+        }
+    }
+
+    private class Controller2Callback extends MediaController2.ControllerCallback {
+        private final Session2Token mToken;
+
+        Controller2Callback(Session2Token token) {
+            mToken = token;
+        }
+
+        @Override
+        public void onConnected(MediaController2 controller, Session2CommandGroup allowedCommands) {
+            synchronized (mLock) {
+                mSession2Tokens.add(mToken);
+            }
+        }
+
+        @Override
+        public void onDisconnected(MediaController2 controller) {
+            synchronized (mLock) {
+                mSession2Tokens.remove(mToken);
+            }
         }
     }
 }
