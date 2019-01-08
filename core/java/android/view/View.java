@@ -7660,10 +7660,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Convenience method for sending a {@link AccessibilityEvent#TYPE_ANNOUNCEMENT}
-     * {@link AccessibilityEvent} to make an announcement which is related to some
-     * sort of a context change for which none of the events representing UI transitions
-     * is a good fit. For example, announcing a new page in a book. If accessibility
-     * is not enabled this method does nothing.
+     * {@link AccessibilityEvent} to suggest that an accessibility service announce the
+     * specified text to its users.
+     * <p>
+     * Note: The event generated with this API carries no semantic meaning, and is appropriate only
+     * in exceptional situations. Apps can generally achieve correct behavior for accessibility by
+     * accurately supplying the semantics of their UI.
+     * They should not need to specify what exactly is announced to users.
      *
      * @param text The announcement text.
      */
