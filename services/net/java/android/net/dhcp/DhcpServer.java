@@ -101,6 +101,13 @@ public class DhcpServer {
     @NonNull
     private DhcpServingParams mServingParams;
 
+    /**
+     * Clock to be used by DhcpServer to track time for lease expiration.
+     *
+     * <p>The clock should track time as may be measured by clients obtaining a lease. It does not
+     * need to be monotonous across restarts of the server as long as leases are cleared when the
+     * server is stopped.
+     */
     public static class Clock {
         /**
          * @see SystemClock#elapsedRealtime()
@@ -110,13 +117,43 @@ public class DhcpServer {
         }
     }
 
+    /**
+     * Dependencies for the DhcpServer. Useful to be mocked in tests.
+     */
     public interface Dependencies {
+        /**
+         * Send a packet to the specified datagram socket.
+         *
+         * @param fd File descriptor of the socket.
+         * @param buffer Data to be sent.
+         * @param dst Destination address of the packet.
+         */
         void sendPacket(@NonNull FileDescriptor fd, @NonNull ByteBuffer buffer,
                 @NonNull InetAddress dst) throws ErrnoException, IOException;
+
+        /**
+         * Create a DhcpLeaseRepository for the server.
+         * @param servingParams Parameters used to serve DHCP requests.
+         * @param log Log to be used by the repository.
+         * @param clock Clock that the repository must use to track time.
+         */
         DhcpLeaseRepository makeLeaseRepository(@NonNull DhcpServingParams servingParams,
                 @NonNull SharedLog log, @NonNull Clock clock);
+
+        /**
+         * Create a packet listener that will send packets to be processed.
+         */
         DhcpPacketListener makePacketListener();
+
+        /**
+         * Create a clock that the server will use to track time.
+         */
         Clock makeClock();
+
+        /**
+         * Add an entry to the ARP cache table.
+         * @param fd Datagram socket file descriptor that must use the new entry.
+         */
         void addArpEntry(@NonNull Inet4Address ipv4Addr, @NonNull MacAddress ethAddr,
                 @NonNull String ifname, @NonNull FileDescriptor fd) throws IOException;
     }
@@ -134,7 +171,7 @@ public class DhcpServer {
             return new DhcpLeaseRepository(
                     DhcpServingParams.makeIpPrefix(servingParams.serverAddr),
                     servingParams.excludedAddrs,
-                    servingParams.dhcpLeaseTimeSecs*1000, log.forSubComponent(REPO_TAG), clock);
+                    servingParams.dhcpLeaseTimeSecs * 1000, log.forSubComponent(REPO_TAG), clock);
         }
 
         @Override
@@ -212,7 +249,7 @@ public class DhcpServer {
     }
 
     private class ServerHandler extends Handler {
-        public ServerHandler(@NonNull Looper looper) {
+        ServerHandler(@NonNull Looper looper) {
             super(looper);
         }
 
@@ -496,22 +533,24 @@ public class DhcpServer {
     }
 
     private class PacketListener extends DhcpPacketListener {
-        public PacketListener() {
+        PacketListener() {
             super(mHandler);
         }
 
         @Override
-        protected void onReceive(DhcpPacket packet, Inet4Address srcAddr, int srcPort) {
+        protected void onReceive(@NonNull DhcpPacket packet, @NonNull Inet4Address srcAddr,
+                int srcPort) {
             processPacket(packet, srcPort);
         }
 
         @Override
-        protected void logError(String msg, Exception e) {
+        protected void logError(@NonNull String msg, Exception e) {
             mLog.e("Error receiving packet: " + msg, e);
         }
 
         @Override
-        protected void logParseError(byte[] packet, int length, DhcpPacket.ParseException e) {
+        protected void logParseError(@NonNull byte[] packet, int length,
+                @NonNull DhcpPacket.ParseException e) {
             mLog.e("Error parsing packet", e);
         }
 

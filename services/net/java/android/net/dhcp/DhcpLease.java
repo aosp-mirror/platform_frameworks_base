@@ -58,6 +58,11 @@ public class DhcpLease {
         mHostname = hostname;
     }
 
+    /**
+     * Get the clientId associated with this lease, if any.
+     *
+     * <p>If the lease is not associated to a clientId, this returns null.
+     */
     @Nullable
     public byte[] getClientId() {
         if (mClientId == null) {
@@ -97,6 +102,11 @@ public class DhcpLease {
                 (hostname == null ? mHostname : hostname));
     }
 
+    /**
+     * Determine whether this lease matches a client with the specified parameters.
+     * @param clientId clientId of the client if any, or null otherwise.
+     * @param hwAddr Hardware address of the client.
+     */
     public boolean matchesClient(@Nullable byte[] clientId, @NonNull MacAddress hwAddr) {
         if (mClientId != null) {
             return Arrays.equals(mClientId, clientId);
@@ -110,7 +120,7 @@ public class DhcpLease {
         if (!(obj instanceof DhcpLease)) {
             return false;
         }
-        final DhcpLease other = (DhcpLease)obj;
+        final DhcpLease other = (DhcpLease) obj;
         return Arrays.equals(mClientId, other.mClientId)
                 && mHwAddr.equals(other.mHwAddr)
                 && mNetAddr.equals(other.mNetAddr)
