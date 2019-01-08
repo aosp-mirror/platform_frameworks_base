@@ -699,8 +699,50 @@ public class AppTimeLimitControllerTests {
         assertTrue(hasUsageSessionObserver(UID, OBS_ID1));
     }
 
+    /** Verify the timeout message is delivered at the right time after past usage was reported */
+    @Test
+    public void testAppUsageObserver_PastUsage() throws Exception {
+        setTime(10_000L);
+        addAppUsageObserver(OBS_ID1, GROUP1, 6_000L);
+        setTime(20_000L);
+        startPastUsage(PKG_SOC1, 5_000);
+        setTime(21_000L);
+        assertTrue(mLimitReachedLatch.await(2_000L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_SOC1);
+        // Verify that the observer was removed
+        assertFalse(hasAppUsageObserver(UID, OBS_ID1));
+    }
+
+    /**
+     * Verify the timeout message is delivered at the right time after past usage was reported
+     * that overlaps with already known usage
+     */
+    @Test
+    public void testAppUsageObserver_PastUsageOverlap() throws Exception {
+        setTime(0L);
+        addAppUsageObserver(OBS_ID1, GROUP1, 20_000L);
+        setTime(10_000L);
+        startUsage(PKG_SOC1);
+        setTime(20_000L);
+        stopUsage(PKG_SOC1);
+        setTime(25_000L);
+        startPastUsage(PKG_SOC1, 9_000);
+        setTime(26_000L);
+        // the 4 seconds of overlapped usage should not be counted
+        assertFalse(mLimitReachedLatch.await(2_000L, TimeUnit.MILLISECONDS));
+        setTime(30_000L);
+        assertTrue(mLimitReachedLatch.await(4_000L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_SOC1);
+        // Verify that the observer was removed
+        assertFalse(hasAppUsageObserver(UID, OBS_ID1));
+    }
+
     private void startUsage(String packageName) {
         mController.noteUsageStart(packageName, USER_ID);
+    }
+
+    private void startPastUsage(String packageName, int timeAgo) {
+        mController.noteUsageStart(packageName, USER_ID, timeAgo);
     }
 
     private void stopUsage(String packageName) {
