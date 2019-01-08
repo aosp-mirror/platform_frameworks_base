@@ -18,6 +18,7 @@
 
 #include <private/hwui/WebViewFunctor.h>
 #include "Properties.h"
+#include "renderthread/RenderThread.h"
 
 #include <log/log.h>
 #include <utils/Trace.h>
@@ -90,6 +91,10 @@ void WebViewFunctor::destroyContext() {
         mHasContext = false;
         ATRACE_NAME("WebViewFunctor::onContextDestroyed");
         mCallbacks.onContextDestroyed(mFunctor, mData);
+
+        // grContext may be null in unit tests.
+        auto* grContext = renderthread::RenderThread::getInstance().getGrContext();
+        if (grContext) grContext->resetContext();
     }
 }
 
