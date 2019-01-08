@@ -21,6 +21,9 @@ import static org.mockito.Mockito.mock;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.util.Size;
 
 import java.util.function.Function;
 
@@ -74,6 +77,14 @@ public class ChooserWrapperActivity extends ChooserActivity {
         return super.getPackageManager();
     }
 
+    @Override
+    protected Bitmap loadThumbnail(Uri uri, Size size) {
+        if (sOverrides.previewThumbnail != null) {
+            return sOverrides.previewThumbnail;
+        }
+        return super.loadThumbnail(uri, size);
+    }
+
     /**
      * We cannot directly mock the activity created since instrumentation creates it.
      * <p>
@@ -85,11 +96,13 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public Function<TargetInfo, Boolean> onSafelyStartCallback;
         public ResolverListController resolverListController;
         public Boolean isVoiceInteraction;
+        public Bitmap previewThumbnail;
 
         public void reset() {
             onSafelyStartCallback = null;
             isVoiceInteraction = null;
             createPackageManager = null;
+            previewThumbnail = null;
             resolverListController = mock(ResolverListController.class);
         }
     }

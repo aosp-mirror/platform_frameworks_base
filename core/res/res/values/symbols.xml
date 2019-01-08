@@ -50,6 +50,10 @@
   <java-symbol type="id" name="characterPicker" />
   <java-symbol type="id" name="clearDefaultHint" />
   <java-symbol type="id" name="contentPanel" />
+  <java-symbol type="id" name="content_preview" />
+  <java-symbol type="id" name="content_preview_thumbnail" />
+  <java-symbol type="id" name="content_preview_text" />
+  <java-symbol type="id" name="content_preview_title" />
   <java-symbol type="id" name="current_scene" />
   <java-symbol type="id" name="scene_layoutid_cache" />
   <java-symbol type="id" name="customPanel" />
@@ -2703,9 +2707,9 @@
   <java-symbol type="layout" name="date_picker_month_item_material" />
   <java-symbol type="id" name="month_view" />
   <java-symbol type="integer" name="config_zen_repeat_callers_threshold" />
+  <java-symbol type="dimen" name="chooser_corner_radius" />
   <java-symbol type="layout" name="chooser_grid" />
   <java-symbol type="layout" name="resolve_grid_item" />
-  <java-symbol type="id" name="title_icon" />
   <java-symbol type="id" name="day_picker_view_pager" />
   <java-symbol type="layout" name="day_picker_content_material" />
   <java-symbol type="drawable" name="scroll_indicator_material" />

@@ -24,6 +24,7 @@ import android.app.prediction.AppPredictor;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
 import android.app.prediction.AppTargetId;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -41,9 +42,13 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.database.DataSetObserver;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -62,7 +67,9 @@ import android.service.chooser.ChooserTargetService;
 import android.service.chooser.IChooserTargetResult;
 import android.service.chooser.IChooserTargetService;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Size;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,9 +80,11 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Space;
+import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -85,6 +94,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.google.android.collect.Lists;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -262,16 +272,31 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         mReplacementExtras = intent.getBundleExtra(Intent.EXTRA_REPLACEMENT_EXTRAS);
-        CharSequence title = intent.getCharSequenceExtra(Intent.EXTRA_TITLE);
+
+        // Do not allow the title to be changed when sharing content
+        CharSequence title = null;
+        if (target != null) {
+            String targetAction = target.getAction();
+            if (!(Intent.ACTION_SEND.equals(targetAction) || Intent.ACTION_SEND_MULTIPLE.equals(
+                    targetAction))) {
+                title = intent.getCharSequenceExtra(Intent.EXTRA_TITLE);
+            } else {
+                Log.w(TAG, "Ignoring intent's EXTRA_TITLE, deprecated in P. You may wish to set a"
+                        + " preview title by using EXTRA_TITLE property of the wrapped"
+                        + " EXTRA_INTENT.");
+            }
+        }
+
         int defaultTitleRes = 0;
         if (title == null) {
             defaultTitleRes = com.android.internal.R.string.chooseActivity;
         }
+
         Parcelable[] pa = intent.getParcelableArrayExtra(Intent.EXTRA_INITIAL_INTENTS);
         Intent[] initialIntents = null;
         if (pa != null) {
             initialIntents = new Intent[pa.length];
-            for (int i=0; i<pa.length; i++) {
+            for (int i = 0; i < pa.length; i++) {
                 if (!(pa[i] instanceof Intent)) {
                     Log.w(TAG, "Initial intent #" + i + " not an Intent: " + pa[i]);
                     finish();
@@ -361,6 +386,68 @@ public class ChooserActivity extends ResolverActivity {
 
         if (DEBUG) {
             Log.d(TAG, "System Time Cost is " + systemCost);
+        }
+    }
+
+    /**
+     * Override method to add content preview area, specific to the chooser activity.
+     */
+    @Override
+    public void setHeader() {
+        super.setHeader();
+
+        Intent targetIntent = getTargetIntent();
+        if (targetIntent == null) {
+            return;
+        }
+
+        ViewGroup contentPreviewLayout = findViewById(R.id.content_preview);
+        String action = targetIntent.getAction();
+        if (!(Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action))) {
+            contentPreviewLayout.setVisibility(View.GONE);
+            return;
+        }
+
+        showDefaultContentPreview(contentPreviewLayout, targetIntent);
+    }
+
+    private void showDefaultContentPreview(final ViewGroup parentLayout,
+            final Intent targetIntent) {
+        CharSequence sharingText = targetIntent.getCharSequenceExtra(Intent.EXTRA_TEXT);
+        TextView previewTextView = findViewById(R.id.content_preview_text);
+        if (sharingText == null) {
+            previewTextView.setVisibility(View.GONE);
+        } else {
+            previewTextView.setText(sharingText);
+        }
+
+        String previewTitle = targetIntent.getStringExtra(Intent.EXTRA_TITLE);
+        TextView previewTitleView = findViewById(R.id.content_preview_title);
+        if (previewTitle == null) {
+            previewTitleView.setVisibility(View.GONE);
+        } else {
+            previewTitleView.setText(previewTitle);
+        }
+
+        ClipData previewData = targetIntent.getClipData();
+        Uri previewThumbnail = null;
+        if (previewData != null) {
+            if (previewData.getItemCount() > 0) {
+                ClipData.Item previewDataItem = previewData.getItemAt(0);
+                previewThumbnail = previewDataItem.getUri();
+            }
+        }
+
+        ImageView previewThumbnailView = findViewById(R.id.content_preview_thumbnail);
+        if (previewThumbnail == null) {
+            previewThumbnailView.setVisibility(View.GONE);
+        } else {
+            Bitmap bmp = loadThumbnail(previewThumbnail, new Size(200, 200));
+            if (bmp == null) {
+                previewThumbnailView.setVisibility(View.GONE);
+            } else {
+                previewThumbnailView.setImageBitmap(bmp);
+            }
         }
     }
 
@@ -630,15 +717,19 @@ public class ChooserActivity extends ResolverActivity {
                 }
             }
             if (targetsToQuery >= QUERY_TARGET_SERVICE_LIMIT) {
-                if (DEBUG) Log.d(TAG, "queryTargets hit query target limit "
-                        + QUERY_TARGET_SERVICE_LIMIT);
+                if (DEBUG) {
+                    Log.d(TAG, "queryTargets hit query target limit "
+                            + QUERY_TARGET_SERVICE_LIMIT);
+                }
                 break;
             }
         }
 
         if (!mServiceConnections.isEmpty()) {
-            if (DEBUG) Log.d(TAG, "queryTargets setting watchdog timer for "
-                    + WATCHDOG_TIMEOUT_MILLIS + "ms");
+            if (DEBUG) {
+                Log.d(TAG, "queryTargets setting watchdog timer for "
+                        + WATCHDOG_TIMEOUT_MILLIS + "ms");
+            }
             mChooserHandler.sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT,
                     WATCHDOG_TIMEOUT_MILLIS);
         } else {
@@ -969,6 +1060,20 @@ public class ChooserActivity extends ResolverActivity {
                 mLaunchedFromUid);
     }
 
+    @VisibleForTesting
+    protected Bitmap loadThumbnail(Uri uri, Size size) {
+        if (uri == null || size == null) {
+            return null;
+        }
+
+        try {
+            return getContentResolver().loadThumbnail(uri, size, null);
+        } catch (IOException | NullPointerException ex) {
+            Log.w(TAG, "Error loading preview thumbnail for uri: " + uri.toString(), ex);
+        }
+        return null;
+    }
+
     final class ChooserTargetInfo implements TargetInfo {
         private final DisplayResolveInfo mSourceInfo;
         private final ResolveInfo mBackupResolveInfo;
@@ -1247,7 +1352,7 @@ public class ChooserActivity extends ResolverActivity {
                     UserManager userManager =
                             (UserManager) getSystemService(Context.USER_SERVICE);
                     if (ii instanceof LabeledIntent) {
-                        LabeledIntent li = (LabeledIntent)ii;
+                        LabeledIntent li = (LabeledIntent) ii;
                         ri.resolvePackageName = li.getSourcePackage();
                         ri.labelRes = li.getLabelResource();
                         ri.nonLocalizedLabel = li.getNonLocalizedLabel();
@@ -1391,8 +1496,10 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets) {
-            if (DEBUG) Log.d(TAG, "addServiceResults " + origTarget + ", " + targets.size()
-                    + " targets");
+            if (DEBUG) {
+                Log.d(TAG, "addServiceResults " + origTarget + ", " + targets.size()
+                        + " targets");
+            }
 
             if (mTargetsNeedPruning && targets.size() > 0) {
                 // First proper update since we got an onListRebuilt() with (transient) 0 items.
@@ -1492,8 +1599,9 @@ public class ChooserActivity extends ResolverActivity {
         public int getCount() {
             return (int) (
                     getCallerTargetRowCount()
-                    + getServiceTargetRowCount()
-                    + Math.ceil((float) mChooserListAdapter.getStandardTargetCount() / mColumnCount)
+                            + getServiceTargetRowCount()
+                            + Math.ceil(
+                            (float) mChooserListAdapter.getStandardTargetCount() / mColumnCount)
             );
         }
 
@@ -1860,7 +1968,7 @@ public class ChooserActivity extends ResolverActivity {
 
             final int chooserTargetRows = mChooserRowAdapter.getServiceTargetRowCount();
             int offset = 0;
-            for (int i = 0; i < chooserTargetRows; i++)  {
+            for (int i = 0; i < chooserTargetRows; i++) {
                 final int pos = mChooserRowAdapter.getCallerTargetRowCount() + i;
                 final int vt = mChooserRowAdapter.getItemViewType(pos);
                 if (vt != mCachedViewType) {
@@ -1880,6 +1988,67 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
+        }
+    }
+
+
+    /**
+     * Used internally to round image corners while obeying view padding.
+     */
+    public static class RoundedRectImageView extends ImageView {
+        private int mRadius = 0;
+        private Path mPath = new Path();
+
+        public RoundedRectImageView(Context context) {
+            super(context);
+        }
+
+        public RoundedRectImageView(Context context, AttributeSet attrs) {
+            this(context, attrs, 0);
+        }
+
+        public RoundedRectImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+            this(context, attrs, defStyleAttr, 0);
+        }
+
+        public RoundedRectImageView(Context context, AttributeSet attrs, int defStyleAttr,
+                int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
+            mRadius = context.getResources().getDimensionPixelSize(R.dimen.chooser_corner_radius);
+        }
+
+        private void updatePath(int width, int height) {
+            mPath.reset();
+
+            int imageWidth = width - getPaddingLeft() - getPaddingRight();
+            int imageHeight = height - getPaddingTop() - getPaddingBottom();
+            mPath.addRoundRect(getPaddingLeft(), getPaddingTop(), imageWidth, imageHeight, mRadius,
+                    mRadius, Path.Direction.CW);
+        }
+
+        /**
+          * Sets the corner radius on all corners
+          *
+          * param radius 0 for no radius, &gt; 0 for a visible corner radius
+          */
+        public void setRadius(int radius) {
+            mRadius = radius;
+            updatePath(getWidth(), getHeight());
+        }
+
+        @Override
+        protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+            super.onSizeChanged(width, height, oldWidth, oldHeight);
+            updatePath(width, height);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            if (mRadius != 0) {
+                canvas.clipPath(mPath);
+            }
+
+            super.onDraw(canvas);
         }
     }
 }

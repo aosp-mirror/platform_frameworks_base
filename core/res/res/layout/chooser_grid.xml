@@ -29,8 +29,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alwaysShow="true"
-            android:elevation="8dp"
-            android:paddingStart="16dp"
             android:background="?attr/colorBackgroundFloating" >
         <TextView android:id="@+id/profile_button"
                   android:layout_width="wrap_content"
@@ -46,25 +44,66 @@
                   android:layout_alignParentTop="true"
                   android:layout_alignParentRight="true"
                   android:singleLine="true"/>
-        <ImageView android:id="@+id/title_icon"
-                   android:layout_width="24dp"
-                   android:layout_height="24dp"
-                   android:layout_marginEnd="16dp"
-                   android:visibility="gone"
-                   android:scaleType="fitCenter"
-                   android:layout_below="@id/profile_button"
-                   android:layout_alignParentLeft="true"/>
+
         <TextView android:id="@+id/title"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
                   android:textAppearance="?attr/textAppearanceMedium"
-                  android:textSize="14sp"
-                  android:gravity="start|center_vertical"
+                  android:textSize="20sp"
+                  android:gravity="center"
                   android:paddingEnd="?attr/dialogPreferredPadding"
                   android:paddingTop="12dp"
-                  android:paddingBottom="12dp"
+                  android:paddingBottom="6dp"
                   android:layout_below="@id/profile_button"
-                  android:layout_toRightOf="@id/title_icon"/>
+                  android:layout_centerHorizontal="true"/>
+    </RelativeLayout>
+
+    <RelativeLayout 
+        android:id="@+id/content_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorBackgroundFloating">
+      
+      <view class="com.android.internal.app.ChooserActivity$RoundedRectImageView"
+            android:id="@+id/content_preview_thumbnail"
+            android:layout_alignParentTop="true"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:gravity="center"
+            android:adjustViewBounds="true"
+            android:maxWidth="90dp"
+            android:maxHeight="90dp"
+            android:scaleType="fitCenter"
+            android:padding="5dp"/>
+
+      <TextView
+          android:id="@+id/content_preview_title"
+          android:layout_alignParentTop="true"
+          android:layout_toEndOf="@id/content_preview_thumbnail"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="start|top"
+          android:textAppearance="?attr/textAppearanceMedium"
+          android:maxLines="2"
+          android:ellipsize="end"
+          android:paddingStart="15dp"
+          android:paddingEnd="15dp"
+          android:paddingTop="10dp" />
+
+      <TextView
+          android:id="@+id/content_preview_text"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_below="@id/content_preview_title"
+          android:layout_toEndOf="@id/content_preview_thumbnail"
+          android:gravity="start|top"
+          android:maxLines="2"
+          android:ellipsize="end"
+          android:paddingStart="15dp"
+          android:paddingEnd="15dp"
+          android:paddingTop="10dp"
+          android:paddingBottom="5dp"/>
     </RelativeLayout>
 
     <ListView
