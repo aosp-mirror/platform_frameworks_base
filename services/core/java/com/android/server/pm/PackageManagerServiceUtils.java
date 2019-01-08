@@ -555,19 +555,19 @@ public class PackageManagerServiceUtils {
     /** Standard fs-verity. */
     private static final int FSVERITY_ENABLED = 2;
 
-    /** Returns true if APK Verity is enabled. */
+    /** Returns true if standard APK Verity is enabled. */
     static boolean isApkVerityEnabled() {
-        int mode = SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED);
-        return mode == FSVERITY_LEGACY || mode == FSVERITY_ENABLED;
+        return SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED) == FSVERITY_ENABLED;
     }
 
-    static boolean isLegacyApkVerityMode() {
+    static boolean isLegacyApkVerityEnabled() {
         return SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED) == FSVERITY_LEGACY;
     }
 
     /** Returns true to force apk verification if the updated package (in /data) is a priv app. */
     static boolean isApkVerificationForced(@Nullable PackageSetting disabledPs) {
-        return disabledPs != null && disabledPs.isPrivileged() && isApkVerityEnabled();
+        return disabledPs != null && disabledPs.isPrivileged() && (
+                isApkVerityEnabled() || isLegacyApkVerityEnabled());
     }
 
     /**
