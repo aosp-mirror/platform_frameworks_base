@@ -825,6 +825,7 @@ aidl_interface {
     local_include_dir: "core/java",
     srcs: [
         "core/java/android/net/INetworkStackConnector.aidl",
+        "core/java/android/net/dhcp/DhcpServingParamsParcel.aidl",
     ],
     api_dir: "aidl/networkstack",
 }
