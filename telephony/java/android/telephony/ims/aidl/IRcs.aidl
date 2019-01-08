@@ -37,8 +37,13 @@ interface IRcs {
 
     Rcs1To1Thread createRcs1To1Thread(in RcsParticipant participant);
 
-    RcsParticipant createRcsParticipant(String canonicalAddress);
-
     // RcsThread APIs
     int getMessageCount(int rcsThreadId);
+
+    // RcsParticipant APIs
+    RcsParticipant createRcsParticipant(String canonicalAddress);
+
+    void updateRcsParticipantCanonicalAddress(int id, String canonicalAddress);
+
+    void updateRcsParticipantAlias(int id, String alias);
 }
