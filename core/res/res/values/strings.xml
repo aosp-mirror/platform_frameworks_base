@@ -5238,6 +5238,15 @@
     <!-- Content description of the overlay icon in the notification. [CHAR LIMIT=NONE] -->
     <string name="notification_appops_overlay_active">displaying over other apps on your screen</string>
 
+    <!-- Dynamic mode battery saver strings -->
+    <!-- The user visible name of the notification channel for the routine mode battery saver fyi notification [CHAR_LIMIT=80]-->
+    <string name="dynamic_mode_notification_channel_name">Routine Mode info notification</string>
+    <!-- Title of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
+    <string name="dynamic_mode_notification_title">Battery may run out before usual charge</string>
+    <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
+    <string name="dynamic_mode_notification_summary">Battery Saver activated to extend battery life</string>
+
+
     <!-- Strings for car -->
     <!-- String displayed when loading a user in the car [CHAR LIMIT=30] -->
     <string name="car_loading_profile">Loading</string>

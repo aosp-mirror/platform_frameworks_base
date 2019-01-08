@@ -1169,7 +1169,7 @@
     <integer name="config_lowBatteryAutoTriggerDefaultLevel">15</integer>
 
     <!-- The app which will handle routine based automatic battery saver, if empty the UI for
-             routine based battery saver will be hidden -->
+         routine based battery saver will be hidden -->
     <string name="config_batterySaverScheduleProvider"></string>
 
     <!-- Close low battery warning when battery level reaches the lowBatteryWarningLevel
