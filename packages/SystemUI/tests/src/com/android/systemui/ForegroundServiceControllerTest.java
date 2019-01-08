@@ -36,9 +36,9 @@ import android.support.test.runner.AndroidJUnit4;
 import android.widget.RemoteViews;
 
 import com.android.internal.messages.nano.SystemMessageProto;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -391,18 +391,18 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     }
 
     private void entryRemoved(StatusBarNotification notification) {
-        mEntryListener.onEntryRemoved(new NotificationData.Entry(notification),
+        mEntryListener.onEntryRemoved(new NotificationEntry(notification),
                 null, false);
     }
 
     private void entryAdded(StatusBarNotification notification, int importance) {
-        NotificationData.Entry entry = new NotificationData.Entry(notification);
+        NotificationEntry entry = new NotificationEntry(notification);
         entry.importance = importance;
         mEntryListener.onPendingEntryAdded(entry);
     }
 
     private void entryUpdated(StatusBarNotification notification, int importance) {
-        NotificationData.Entry entry = new NotificationData.Entry(notification);
+        NotificationEntry entry = new NotificationEntry(notification);
         entry.importance = importance;
         mEntryListener.onEntryUpdated(entry);
     }

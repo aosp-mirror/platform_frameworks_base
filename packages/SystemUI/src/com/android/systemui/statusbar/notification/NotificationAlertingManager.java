@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -71,18 +72,18 @@ public class NotificationAlertingManager {
 
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
-            public void onEntryInflated(NotificationData.Entry entry, int inflatedFlags) {
+            public void onEntryInflated(NotificationEntry entry, int inflatedFlags) {
                 showAlertingView(entry, inflatedFlags);
             }
 
             @Override
-            public void onEntryUpdated(NotificationData.Entry entry) {
+            public void onEntryUpdated(NotificationEntry entry) {
                 updateAlertState(entry);
             }
 
             @Override
             public void onEntryRemoved(
-                    NotificationData.Entry entry,
+                    NotificationEntry entry,
                     NotificationVisibility visibility,
                     boolean removedByUser) {
                 stopAlerting(entry.key);
@@ -101,7 +102,7 @@ public class NotificationAlertingManager {
      * @param entry         entry to add
      * @param inflatedFlags flags representing content views that were inflated
      */
-    private void showAlertingView(NotificationData.Entry entry,
+    private void showAlertingView(NotificationEntry entry,
             @NotificationInflater.InflationFlag int inflatedFlags) {
         if ((inflatedFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
             // Possible for shouldHeadsUp to change between the inflation starting and ending.
@@ -123,7 +124,7 @@ public class NotificationAlertingManager {
         }
     }
 
-    private void updateAlertState(NotificationData.Entry entry) {
+    private void updateAlertState(NotificationEntry entry) {
         boolean alertAgain = alertAgain(entry, entry.notification.getNotification());
         AlertingNotificationManager alertManager;
         boolean shouldAlert;
@@ -150,7 +151,7 @@ public class NotificationAlertingManager {
     }
 
     private static boolean alertAgain(
-            NotificationData.Entry oldEntry, Notification newNotification) {
+            NotificationEntry oldEntry, Notification newNotification) {
         return oldEntry == null || !oldEntry.hasInterrupted()
                 || (newNotification.flags & Notification.FLAG_ONLY_ALERT_ONCE) == 0;
     }

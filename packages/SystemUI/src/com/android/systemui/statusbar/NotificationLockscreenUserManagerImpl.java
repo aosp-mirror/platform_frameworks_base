@@ -46,9 +46,9 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
@@ -407,7 +407,7 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     /** @return true if the entry needs redaction when on the lockscreen. */
-    public boolean needsRedaction(NotificationData.Entry ent) {
+    public boolean needsRedaction(NotificationEntry ent) {
         int userId = ent.notification.getUserId();
 
         boolean currentUserWantsRedaction = !userAllowsPrivateNotificationsInPublic(mCurrentUserId);

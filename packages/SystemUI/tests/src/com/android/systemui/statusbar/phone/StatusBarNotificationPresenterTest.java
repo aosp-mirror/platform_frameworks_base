@@ -40,7 +40,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 
@@ -82,7 +82,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        NotificationEntry entry = new NotificationEntry(sbn);
         mCommandQueue.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_EXPAND, 0,
                 false /* animate */);
         TestableLooper.get(this).processAllMessages();
@@ -96,7 +96,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        NotificationEntry entry = new NotificationEntry(sbn);
         mCommandQueue.disable(DEFAULT_DISPLAY, 0, StatusBarManager.DISABLE2_NOTIFICATION_SHADE,
                 false /* animate */);
         TestableLooper.get(this).processAllMessages();

@@ -30,7 +30,7 @@ import android.util.Log;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 
 import java.io.FileDescriptor;
@@ -108,11 +108,11 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         }
     }
 
-    protected boolean shouldHeadsUpBecomePinned(@NonNull NotificationData.Entry entry) {
+    protected boolean shouldHeadsUpBecomePinned(@NonNull NotificationEntry entry) {
         return hasFullScreenIntent(entry);
     }
 
-    protected boolean hasFullScreenIntent(@NonNull NotificationData.Entry entry) {
+    protected boolean hasFullScreenIntent(@NonNull NotificationEntry entry) {
         return entry.notification.getNotification().fullScreenIntent != null;
     }
 
@@ -121,7 +121,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "setEntryPinned: " + isPinned);
         }
-        NotificationData.Entry entry = headsUpEntry.mEntry;
+        NotificationEntry entry = headsUpEntry.mEntry;
         if (entry.isRowPinned() != isPinned) {
             entry.setRowPinned(isPinned);
             updatePinnedMode();
@@ -141,7 +141,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
     @Override
     protected void onAlertEntryAdded(AlertEntry alertEntry) {
-        NotificationData.Entry entry = alertEntry.mEntry;
+        NotificationEntry entry = alertEntry.mEntry;
         entry.setHeadsUp(true);
         setEntryPinned((HeadsUpEntry) alertEntry, shouldHeadsUpBecomePinned(entry));
         for (OnHeadsUpChangedListener listener : mListeners) {
@@ -151,7 +151,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
     @Override
     protected void onAlertEntryRemoved(AlertEntry alertEntry) {
-        NotificationData.Entry entry = alertEntry.mEntry;
+        NotificationEntry entry = alertEntry.mEntry;
         entry.setHeadsUp(false);
         setEntryPinned((HeadsUpEntry) alertEntry, false /* isPinned */);
         for (OnHeadsUpChangedListener listener : mListeners) {
@@ -222,7 +222,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      * Returns the top Heads Up Notification, which appears to show at first.
      */
     @Nullable
-    public NotificationData.Entry getTopEntry() {
+    public NotificationEntry getTopEntry() {
         HeadsUpEntry topEntry = getTopHeadsUpEntry();
         return (topEntry != null) ? topEntry.mEntry : null;
     }
@@ -323,7 +323,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      * @return -1 if the first argument should be ranked higher than the second, 1 if the second
      * one should be ranked higher and 0 if they are equal.
      */
-    public int compare(@NonNull NotificationData.Entry a, @NonNull NotificationData.Entry b) {
+    public int compare(@NonNull NotificationEntry a, @NonNull NotificationEntry b) {
         AlertEntry aEntry = getHeadsUpEntry(a.key);
         AlertEntry bEntry = getHeadsUpEntry(b.key);
         if (aEntry == null || bEntry == null) {
@@ -336,7 +336,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      * Set an entry to be expanded and therefore stick in the heads up area if it's pinned
      * until it's collapsed again.
      */
-    public void setExpanded(@NonNull NotificationData.Entry entry, boolean expanded) {
+    public void setExpanded(@NonNull NotificationEntry entry, boolean expanded) {
         HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.key);
         if (headsUpEntry != null && entry.isRowPinned()) {
             headsUpEntry.setExpanded(expanded);

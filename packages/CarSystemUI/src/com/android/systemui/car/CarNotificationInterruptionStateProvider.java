@@ -18,8 +18,8 @@ package com.android.systemui.car;
 
 import android.content.Context;
 
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /** Auto-specific implementation of {@link NotificationInterruptionStateProvider}. */
 public class CarNotificationInterruptionStateProvider extends
@@ -29,7 +29,7 @@ public class CarNotificationInterruptionStateProvider extends
     }
 
     @Override
-    public boolean shouldHeadsUp(NotificationData.Entry entry) {
+    public boolean shouldHeadsUp(NotificationEntry entry) {
         // Because space is usually constrained in the auto use-case, there should not be a
         // pinned notification when the shade has been expanded. Ensure this by not pinning any
         // notification if the shade is already opened.

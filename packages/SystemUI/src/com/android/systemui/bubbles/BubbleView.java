@@ -31,7 +31,7 @@ import android.widget.LinearLayout;
 
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
@@ -43,7 +43,7 @@ public class BubbleView extends LinearLayout implements BubbleTouchHandler.Float
     private Context mContext;
     private View mIconView;
 
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
     private int mBubbleSize;
     private int mIconSize;
 
@@ -72,7 +72,7 @@ public class BubbleView extends LinearLayout implements BubbleTouchHandler.Float
      *
      * @param entry the notification to display as a bubble.
      */
-    public void setNotif(NotificationData.Entry entry) {
+    public void setNotif(NotificationEntry entry) {
         removeAllViews();
         // TODO: migrate to inflater
         mIconView = new ImageView(mContext);
@@ -89,7 +89,7 @@ public class BubbleView extends LinearLayout implements BubbleTouchHandler.Float
     /**
      * Updates the UI based on the entry.
      */
-    public void update(NotificationData.Entry entry) {
+    public void update(NotificationEntry entry) {
         mEntry = entry;
         Notification n = entry.notification.getNotification();
         Icon ic = n.getLargeIcon() != null ? n.getLargeIcon() : n.getSmallIcon();
@@ -112,7 +112,7 @@ public class BubbleView extends LinearLayout implements BubbleTouchHandler.Float
     /**
      * @return the notification entry associated with this bubble.
      */
-    public NotificationData.Entry getEntry() {
+    public NotificationEntry getEntry() {
         return mEntry;
     }
 

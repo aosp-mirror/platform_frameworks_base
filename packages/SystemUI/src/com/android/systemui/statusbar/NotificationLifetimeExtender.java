@@ -2,7 +2,7 @@ package com.android.systemui.statusbar;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
  * Interface for anything that may need to keep notifications managed even after
@@ -24,7 +24,7 @@ public interface NotificationLifetimeExtender {
      * @param entry the entry containing the notification to check
      * @return true if the notification lifetime should be extended
      */
-    boolean shouldExtendLifetime(@NonNull NotificationData.Entry entry);
+    boolean shouldExtendLifetime(@NonNull NotificationEntry entry);
 
     /**
      * Sets whether or not the lifetime should be managed by the extender.  In practice, if
@@ -37,7 +37,7 @@ public interface NotificationLifetimeExtender {
      * @param entry the entry that needs an extended lifetime
      * @param shouldManage true if the extender should manage the entry now, false otherwise
      */
-    void setShouldManageLifetime(@NonNull NotificationData.Entry entry, boolean shouldManage);
+    void setShouldManageLifetime(@NonNull NotificationEntry entry, boolean shouldManage);
 
     /**
      * The callback for when the notification is now safe to remove (i.e. its lifetime has ended).

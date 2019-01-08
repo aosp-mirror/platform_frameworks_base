@@ -23,9 +23,9 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.tuner.TunerService;
 
@@ -182,7 +182,7 @@ public class NotificationIconAreaController implements DarkReceiver {
         return mStatusBar.getStatusBarHeight();
     }
 
-    protected boolean shouldShowNotificationIcon(NotificationData.Entry entry,
+    protected boolean shouldShowNotificationIcon(NotificationEntry entry,
             boolean showAmbient, boolean showLowPriority, boolean hideDismissed,
             boolean hideRepliedMessages) {
         if (mEntryManager.getNotificationData().isAmbient(entry.key) && !showAmbient) {
@@ -247,7 +247,7 @@ public class NotificationIconAreaController implements DarkReceiver {
      * @param hideDismissed should dismissed icons be hidden
      * @param hideRepliedMessages should messages that have been replied to be hidden
      */
-    private void updateIconsForLayout(Function<NotificationData.Entry, StatusBarIconView> function,
+    private void updateIconsForLayout(Function<NotificationEntry, StatusBarIconView> function,
             NotificationIconContainer hostLayout, boolean showAmbient, boolean showLowPriority,
             boolean hideDismissed, boolean hideRepliedMessages) {
         ArrayList<StatusBarIconView> toShow = new ArrayList<>(
@@ -257,7 +257,7 @@ public class NotificationIconAreaController implements DarkReceiver {
         for (int i = 0; i < mNotificationScrollLayout.getChildCount(); i++) {
             View view = mNotificationScrollLayout.getChildAt(i);
             if (view instanceof ExpandableNotificationRow) {
-                NotificationData.Entry ent = ((ExpandableNotificationRow) view).getEntry();
+                NotificationEntry ent = ((ExpandableNotificationRow) view).getEntry();
                 if (shouldShowNotificationIcon(ent, showAmbient, showLowPriority, hideDismissed,
                         hideRepliedMessages)) {
                     toShow.add(function.apply(ent));

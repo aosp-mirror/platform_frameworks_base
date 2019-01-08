@@ -53,9 +53,9 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
@@ -265,8 +265,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     public void testUpdateFooter_remoteInput() {
         setBarStateForTest(StatusBarState.SHADE);
-        ArrayList<Entry> entries = new ArrayList<>();
-        entries.add(mock(Entry.class));
+        ArrayList<NotificationEntry> entries = new ArrayList<>();
+        entries.add(mock(NotificationEntry.class));
         when(mNotificationData.getActiveNotifications()).thenReturn(entries);
 
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
@@ -282,8 +282,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     public void testUpdateFooter_oneClearableNotification() {
         setBarStateForTest(StatusBarState.SHADE);
-        ArrayList<Entry> entries = new ArrayList<>();
-        entries.add(mock(Entry.class));
+        ArrayList<NotificationEntry> entries = new ArrayList<>();
+        entries.add(mock(NotificationEntry.class));
         when(mNotificationData.getActiveNotifications()).thenReturn(entries);
 
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
@@ -298,8 +298,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     public void testUpdateFooter_oneNonClearableNotification() {
         setBarStateForTest(StatusBarState.SHADE);
-        ArrayList<Entry> entries = new ArrayList<>();
-        entries.add(mock(Entry.class));
+        ArrayList<NotificationEntry> entries = new ArrayList<>();
+        entries.add(mock(NotificationEntry.class));
         when(mEntryManager.getNotificationData().getActiveNotifications()).thenReturn(entries);
         assertTrue(mEntryManager.getNotificationData().getActiveNotifications().size() != 0);
 
@@ -314,7 +314,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         // add notification
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
-        NotificationData.Entry entry = mock(NotificationData.Entry.class);
+        NotificationEntry entry = mock(NotificationEntry.class);
         when(row.getEntry()).thenReturn(entry);
         when(entry.isClearable()).thenReturn(true);
         mStackScroller.addContainerView(row);

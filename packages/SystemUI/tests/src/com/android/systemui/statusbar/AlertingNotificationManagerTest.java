@@ -36,7 +36,7 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 
@@ -67,7 +67,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
 
     private AlertingNotificationManager mAlertingNotificationManager;
 
-    protected NotificationData.Entry mEntry;
+    protected NotificationEntry mEntry;
     protected Handler mTestHandler;
     private StatusBarNotification mSbn;
     protected boolean mTimedOut = false;
@@ -119,7 +119,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     public void setUp() {
         mTestHandler = Handler.createAsync(Looper.myLooper());
         mSbn = createNewNotification(0 /* id */);
-        mEntry = new NotificationData.Entry(mSbn);
+        mEntry = new NotificationEntry(mSbn);
         mEntry.setRow(mRow);
 
         mAlertingNotificationManager = createAlertingNotificationManager();
@@ -170,7 +170,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     public void testReleaseAllImmediately() {
         for (int i = 0; i < TEST_NUM_NOTIFICATIONS; i++) {
             StatusBarNotification sbn = createNewNotification(i);
-            NotificationData.Entry entry = new NotificationData.Entry(sbn);
+            NotificationEntry entry = new NotificationEntry(sbn);
             entry.setRow(mRow);
             mAlertingNotificationManager.showNotification(entry);
         }

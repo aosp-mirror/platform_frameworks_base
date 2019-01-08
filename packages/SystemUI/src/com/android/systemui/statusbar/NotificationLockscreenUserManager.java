@@ -18,7 +18,7 @@ import android.content.pm.UserInfo;
 import android.service.notification.StatusBarNotification;
 import android.util.SparseArray;
 
-import com.android.systemui.statusbar.notification.NotificationData.Entry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 public interface NotificationLockscreenUserManager {
     String PERMISSION_SELF = "com.android.systemui.permission.SELF";
@@ -55,7 +55,7 @@ public interface NotificationLockscreenUserManager {
 
     void updatePublicMode();
 
-    boolean needsRedaction(Entry entry);
+    boolean needsRedaction(NotificationEntry entry);
 
     boolean userAllowsPrivateNotificationsInPublic(int currentUserId);
 }

@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.systemui.statusbar.notification;
+package com.android.systemui.statusbar.notification.collection;
 
 import static android.app.AppOpsManager.OP_ACCEPT_HANDOVER;
 import static android.app.AppOpsManager.OP_CAMERA;
@@ -59,7 +59,9 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationTestHelper;
-import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -203,7 +205,7 @@ public class NotificationDataTest extends SysuiTestCase {
                 mRow.getEntry().notification)).thenReturn(false);
         when(mEnvironment.isNotificationForCurrentProfiles(
                 row2.getEntry().notification)).thenReturn(true);
-        ArrayList<NotificationData.Entry> result =
+        ArrayList<NotificationEntry> result =
                 mNotificationData.getNotificationsForCurrentUser();
 
         assertEquals(result.size(), 1);
@@ -217,7 +219,7 @@ public class NotificationDataTest extends SysuiTestCase {
                 TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
         Notification n = mMockStatusBarNotification.getNotification();
         n.flags = Notification.FLAG_FOREGROUND_SERVICE;
-        NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
+        NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
         mNotificationData.add(entry);
 
         assertTrue(entry.isExemptFromDndVisualSuppression());
@@ -234,7 +236,7 @@ public class NotificationDataTest extends SysuiTestCase {
         nb.setStyle(new Notification.MediaStyle().setMediaSession(mock(MediaSession.Token.class)));
         n = nb.build();
         when(mMockStatusBarNotification.getNotification()).thenReturn(n);
-        NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
+        NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
         mNotificationData.add(entry);
 
         assertTrue(entry.isExemptFromDndVisualSuppression());
@@ -246,7 +248,7 @@ public class NotificationDataTest extends SysuiTestCase {
         initStatusBarNotification(false);
         when(mMockStatusBarNotification.getKey()).thenReturn(
                 TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
-        NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
+        NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
         entry.mIsSystemNotification = true;
         mNotificationData.add(entry);
 
@@ -259,7 +261,7 @@ public class NotificationDataTest extends SysuiTestCase {
         initStatusBarNotification(false);
         when(mMockStatusBarNotification.getKey()).thenReturn(
                 TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
-        NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
+        NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
         entry.mIsSystemNotification = true;
         mNotificationData.add(entry);
 
@@ -313,8 +315,8 @@ public class NotificationDataTest extends SysuiTestCase {
         snoozeCriterions.add(snoozeCriterion);
         when(ranking.getSnoozeCriteria()).thenReturn(snoozeCriterions);
 
-        NotificationData.Entry entry =
-                new NotificationData.Entry(mMockStatusBarNotification, ranking);
+        NotificationEntry entry =
+                new NotificationEntry(mMockStatusBarNotification, ranking);
 
         assertEquals(systemGeneratedSmartActions, entry.systemGeneratedSmartActions);
         assertEquals(NOTIFICATION_CHANNEL, entry.channel);
@@ -343,7 +345,7 @@ public class NotificationDataTest extends SysuiTestCase {
         StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
                 notification, mContext.getUser(), "", 0);
 
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        NotificationEntry entry = new NotificationEntry(sbn);
         entry.setHasSentReply();
 
         assertTrue(entry.isLastMessageFromReply());

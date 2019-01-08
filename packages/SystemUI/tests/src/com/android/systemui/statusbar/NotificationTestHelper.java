@@ -32,7 +32,7 @@ import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.NotificationInflaterTest;
@@ -238,7 +238,7 @@ public class NotificationTestHelper {
                 mUser,
                 null /* overrideGroupKey */,
                 System.currentTimeMillis());
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        NotificationEntry entry = new NotificationEntry(sbn);
         entry.setRow(row);
         entry.createIcons(mContext, sbn);
         entry.channel = new NotificationChannel(

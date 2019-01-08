@@ -29,6 +29,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import org.junit.Before;
@@ -44,13 +45,13 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
     private VisualStabilityManager.Callback mCallback = mock(VisualStabilityManager.Callback.class);
     private VisibilityLocationProvider mLocationProvider = mock(VisibilityLocationProvider.class);
     private ExpandableNotificationRow mRow = mock(ExpandableNotificationRow.class);
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
 
     @Before
     public void setUp() {
         mVisualStabilityManager.setUpWithPresenter(mock(NotificationPresenter.class));
         mVisualStabilityManager.setVisibilityLocationProvider(mLocationProvider);
-        mEntry = new NotificationData.Entry(mock(StatusBarNotification.class));
+        mEntry = new NotificationEntry(mock(StatusBarNotification.class));
         mEntry.setRow(mRow);
     }
 

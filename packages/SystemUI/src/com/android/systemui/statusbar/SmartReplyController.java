@@ -21,8 +21,8 @@ import android.util.ArraySet;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.util.Set;
 
@@ -54,7 +54,7 @@ public class SmartReplyController {
     /**
      * Notifies StatusBarService a smart reply is sent.
      */
-    public void smartReplySent(NotificationData.Entry entry, int replyIndex, CharSequence reply,
+    public void smartReplySent(NotificationEntry entry, int replyIndex, CharSequence reply,
             boolean generatedByAssistant) {
         mCallback.onSmartReplySent(entry, reply);
         mSendingKeys.add(entry.key);
@@ -70,7 +70,7 @@ public class SmartReplyController {
      * Notifies StatusBarService a smart action is clicked.
      */
     public void smartActionClicked(
-            NotificationData.Entry entry, int actionIndex, Notification.Action action,
+            NotificationEntry entry, int actionIndex, Notification.Action action,
             boolean generatedByAssistant) {
         final int count = mEntryManager.getNotificationData().getActiveNotifications().size();
         final int rank = mEntryManager.getNotificationData().getRank(entry.key);
@@ -95,7 +95,7 @@ public class SmartReplyController {
     /**
      * Smart Replies and Actions have been added to the UI.
      */
-    public void smartSuggestionsAdded(final NotificationData.Entry entry, int replyCount,
+    public void smartSuggestionsAdded(final NotificationEntry entry, int replyCount,
             int actionCount, boolean generatedByAssistant) {
         try {
             mBarService.onNotificationSmartSuggestionsAdded(
@@ -105,7 +105,7 @@ public class SmartReplyController {
         }
     }
 
-    public void stopSending(final NotificationData.Entry entry) {
+    public void stopSending(final NotificationEntry entry) {
         if (entry != null) {
             mSendingKeys.remove(entry.notification.getKey());
         }
@@ -121,6 +121,6 @@ public class SmartReplyController {
          * @param entry the entry for the notification
          * @param reply the reply that was sent
          */
-        void onSmartReplySent(NotificationData.Entry entry, CharSequence reply);
+        void onSmartReplySent(NotificationEntry entry, CharSequence reply);
     }
 }

@@ -192,12 +192,11 @@ import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationClicker;
-import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -489,7 +488,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private Runnable mLaunchTransitionEndRunnable;
     protected boolean mLaunchTransitionFadingAway;
-    private NotificationData.Entry mDraggedDownEntry;
+    private NotificationEntry mDraggedDownEntry;
     private boolean mLaunchCameraOnScreenTurningOn;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
     private int mLastCameraLaunchSource;
@@ -1510,21 +1509,21 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void onHeadsUpPinned(NotificationData.Entry entry) {
+    public void onHeadsUpPinned(NotificationEntry entry) {
         dismissVolumeDialog();
     }
 
     @Override
-    public void onHeadsUpUnPinned(NotificationData.Entry entry) {
+    public void onHeadsUpUnPinned(NotificationEntry entry) {
     }
 
     @Override
-    public void onHeadsUpStateChanged(Entry entry, boolean isHeadsUp) {
+    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
         mEntryManager.updateNotificationRanking(null /* rankingMap */);
     }
 
     @Override
-    public void onAmbientStateChanged(Entry entry, boolean isAmbient) {
+    public void onAmbientStateChanged(NotificationEntry entry, boolean isAmbient) {
         mEntryManager.updateNotificationRanking(null);
         if (isAmbient) {
             mDozeServiceHost.fireNotificationPulse();
@@ -2551,11 +2550,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     };
 
     public void resetUserExpandedStates() {
-        ArrayList<Entry> activeNotifications = mEntryManager.getNotificationData()
+        ArrayList<NotificationEntry> activeNotifications = mEntryManager.getNotificationData()
                 .getActiveNotifications();
         final int notificationCount = activeNotifications.size();
         for (int i = 0; i < notificationCount; i++) {
-            NotificationData.Entry entry = activeNotifications.get(i);
+            NotificationEntry entry = activeNotifications.get(i);
             entry.resetUserExpansion();
         }
     }
@@ -3506,7 +3505,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         int userId = mLockscreenUserManager.getCurrentUserId();
         ExpandableNotificationRow row = null;
-        NotificationData.Entry entry = null;
+        NotificationEntry entry = null;
         if (expandView instanceof ExpandableNotificationRow) {
             entry = ((ExpandableNotificationRow) expandView).getEntry();
             entry.setUserExpanded(true /* userExpanded */, true /* allowChildExpansion */);

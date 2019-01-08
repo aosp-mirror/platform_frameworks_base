@@ -60,7 +60,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -183,8 +183,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(row.getGuts()).thenReturn(guts);
         doNothing().when(row).inflateGuts();
 
-        NotificationData.Entry realEntry = realRow.getEntry();
-        NotificationData.Entry entry = spy(realEntry);
+        NotificationEntry realEntry = realRow.getEntry();
+        NotificationEntry entry = spy(realEntry);
 
         when(entry.getRow()).thenReturn(row);
         when(entry.getGuts()).thenReturn(guts);
@@ -443,7 +443,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         NotificationGuts guts = new NotificationGuts(mContext);
         ExpandableNotificationRow row = spy(createTestNotificationRow());
         doReturn(guts).when(row).getGuts();
-        NotificationData.Entry entry = row.getEntry();
+        NotificationEntry entry = row.getEntry();
         entry.setRow(row);
         mGutsManager.setExposedGuts(guts);
 
@@ -452,7 +452,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
     @Test
     public void testSetShouldManageLifetime_setShouldManage() {
-        NotificationData.Entry entry = createTestNotificationRow().getEntry();
+        NotificationEntry entry = createTestNotificationRow().getEntry();
         mGutsManager.setShouldManageLifetime(entry, true /* shouldManage */);
 
         assertTrue(entry.key.equals(mGutsManager.mKeyToRemoveOnGutsClosed));
@@ -460,7 +460,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
     @Test
     public void testSetShouldManageLifetime_setShouldNotManage() {
-        NotificationData.Entry entry = createTestNotificationRow().getEntry();
+        NotificationEntry entry = createTestNotificationRow().getEntry();
         mGutsManager.mKeyToRemoveOnGutsClosed = entry.key;
         mGutsManager.setShouldManageLifetime(entry, false /* shouldManage */);
 

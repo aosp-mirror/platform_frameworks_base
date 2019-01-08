@@ -28,7 +28,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -143,7 +143,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     }
 
     @Override
-    public void onHeadsUpPinned(NotificationData.Entry entry) {
+    public void onHeadsUpPinned(NotificationEntry entry) {
         updateTopEntry();
         updateHeader(entry);
     }
@@ -206,11 +206,11 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     }
 
     private void updateTopEntry() {
-        NotificationData.Entry newEntry = null;
+        NotificationEntry newEntry = null;
         if (!mIsExpanded && mHeadsUpManager.hasPinnedHeadsUp()) {
             newEntry = mHeadsUpManager.getTopEntry();
         }
-        NotificationData.Entry previousEntry = mHeadsUpStatusBarView.getShowingEntry();
+        NotificationEntry previousEntry = mHeadsUpStatusBarView.getShowingEntry();
         mHeadsUpStatusBarView.setEntry(newEntry);
         if (newEntry != previousEntry) {
             boolean animateIsolation = false;
@@ -298,7 +298,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     }
 
     @Override
-    public void onHeadsUpUnPinned(NotificationData.Entry entry) {
+    public void onHeadsUpUnPinned(NotificationEntry entry) {
         updateTopEntry();
         updateHeader(entry);
     }
@@ -338,7 +338,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         });
     }
 
-    public void updateHeader(NotificationData.Entry entry) {
+    public void updateHeader(NotificationEntry entry) {
         ExpandableNotificationRow row = entry.getRow();
         float headerVisibleAmount = 1.0f;
         if (row.isPinned() || row.isHeadsUpAnimatingAway() || row == mTrackedChild) {

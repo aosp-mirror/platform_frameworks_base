@@ -96,13 +96,13 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.FakeShadowView;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -521,7 +521,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
-            public void onEntryUpdated(NotificationData.Entry entry) {
+            public void onEntryUpdated(NotificationEntry entry) {
                 if (!entry.notification.isClearable()) {
                     // The user may have performed a dismiss action on the notification, since it's
                     // not clearable we should snap it back.
@@ -602,14 +602,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
   @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
   public RemoteInputController.Delegate createDelegate() {
         return new RemoteInputController.Delegate() {
-            public void setRemoteInputActive(NotificationData.Entry entry,
+            public void setRemoteInputActive(NotificationEntry entry,
                     boolean remoteInputActive) {
                 mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
                 entry.notifyHeightChanged(true /* needsAnimation */);
                 updateFooter();
             }
 
-            public void lockScrollTo(NotificationData.Entry entry) {
+            public void lockScrollTo(NotificationEntry entry) {
                 NotificationStackScrollLayout.this.lockScrollTo(entry.getRow());
             }
 
@@ -922,7 +922,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @Override
     @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
-    public boolean isInVisibleLocation(NotificationData.Entry entry) {
+    public boolean isInVisibleLocation(NotificationEntry entry) {
         ExpandableNotificationRow row = entry.getRow();
         ExpandableViewState childViewState = row.getViewState();
 
@@ -1236,13 +1236,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private int getTopHeadsUpPinnedHeight() {
-        NotificationData.Entry topEntry = mHeadsUpManager.getTopEntry();
+        NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
         if (topEntry == null) {
             return 0;
         }
         ExpandableNotificationRow row = topEntry.getRow();
         if (row.isChildInGroup()) {
-            final NotificationData.Entry groupSummary
+            final NotificationEntry groupSummary
                     = mGroupManager.getGroupSummary(row.getStatusBarNotification());
             if (groupSummary != null) {
                 row = groupSummary.getRow();
@@ -1417,7 +1417,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     && touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
                 if (slidingChild instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) slidingChild;
-                    NotificationData.Entry entry = row.getEntry();
+                    NotificationEntry entry = row.getEntry();
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
                             && mHeadsUpManager.getTopEntry().getRow() != row
                             && mGroupManager.getGroupSummary(
@@ -1551,7 +1551,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    private void snapViewIfNeeded(NotificationData.Entry entry) {
+    private void snapViewIfNeeded(NotificationEntry entry) {
         ExpandableNotificationRow child = entry.getRow();
         boolean animate = mIsExpanded || isPinnedHeadsUp(child);
         // If the child is showing the notification menu snap to that
@@ -1561,7 +1561,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @Override
     @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    public ViewGroup getViewParentForNotification(NotificationData.Entry entry) {
+    public ViewGroup getViewParentForNotification(NotificationEntry entry) {
         return this;
     }
 
@@ -2064,7 +2064,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private boolean isPulsing(NotificationData.Entry entry) {
+    private boolean isPulsing(NotificationEntry entry) {
         return mAmbientState.isPulsing(entry);
     }
 
@@ -2569,7 +2569,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     @Override
-    public void cleanUpViewStateForEntry(NotificationData.Entry entry) {
+    public void cleanUpViewStateForEntry(NotificationEntry entry) {
         View child = entry.getRow();
         if (child == mSwipeHelper.getTranslatingParentView()) {
             mSwipeHelper.clearTranslatingParentView();
@@ -2697,7 +2697,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean isChildInInvisibleGroup(View child) {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            NotificationData.Entry groupSummary =
+            NotificationEntry groupSummary =
                     mGroupManager.getGroupSummary(row.getStatusBarNotification());
             if (groupSummary != null && groupSummary.getRow() != row) {
                 return row.getVisibility() == View.INVISIBLE;
@@ -4716,7 +4716,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mHeadsUpManager.setAnimationStateHandler(this::setHeadsUpGoingAwayAnimationsAllowed);
     }
 
-    public void generateHeadsUpAnimation(NotificationData.Entry entry, boolean isHeadsUp) {
+    public void generateHeadsUpAnimation(NotificationEntry entry, boolean isHeadsUp) {
         ExpandableNotificationRow row = entry.getHeadsUpAnimationView();
         generateHeadsUpAnimation(row, isHeadsUp);
     }

@@ -37,7 +37,7 @@ import com.android.internal.widget.ImageMessageConsumer;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.Assert;
@@ -614,7 +614,7 @@ public class NotificationInflater {
             @Nullable InflationCallback endListener, ExpandableNotificationRow row,
             boolean redactAmbient) {
         Assert.isMainThread();
-        NotificationData.Entry entry = row.getEntry();
+        NotificationEntry entry = row.getEntry();
         NotificationContentView privateLayout = row.getPrivateLayout();
         NotificationContentView publicLayout = row.getPublicLayout();
         if (runningInflations.isEmpty()) {
@@ -724,7 +724,7 @@ public class NotificationInflater {
          * @param entry the entry with the content views set
          * @param inflatedFlags the flags associated with the content views that were inflated
          */
-        void onAsyncInflationFinished(NotificationData.Entry entry,
+        void onAsyncInflationFinished(NotificationEntry entry,
                 @InflationFlag int inflatedFlags);
 
         /**
@@ -782,7 +782,7 @@ public class NotificationInflater {
             mRedactAmbient = redactAmbient;
             mRemoteViewClickHandler = remoteViewClickHandler;
             mCallback = callback;
-            NotificationData.Entry entry = row.getEntry();
+            NotificationEntry entry = row.getEntry();
             entry.setInflationTask(this);
         }
 
@@ -857,7 +857,7 @@ public class NotificationInflater {
         }
 
         @Override
-        public void onAsyncInflationFinished(NotificationData.Entry entry,
+        public void onAsyncInflationFinished(NotificationEntry entry,
                 @InflationFlag int inflatedFlags) {
             mRow.getEntry().onInflationTaskFinished();
             mRow.onNotificationUpdated();

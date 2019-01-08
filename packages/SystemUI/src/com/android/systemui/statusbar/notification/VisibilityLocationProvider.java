@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification;
 
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+
 /**
  * An object that can determine the visibility of a Notification.
  */
@@ -27,5 +29,5 @@ public interface VisibilityLocationProvider {
      * @param entry
      * @return true if row is in a visible location
      */
-    boolean isInVisibleLocation(NotificationData.Entry entry);
+    boolean isInVisibleLocation(NotificationEntry entry);
 }

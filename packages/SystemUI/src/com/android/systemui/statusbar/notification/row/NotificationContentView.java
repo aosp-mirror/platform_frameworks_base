@@ -46,8 +46,8 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationCustomViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -1231,7 +1231,7 @@ public class NotificationContentView extends FrameLayout {
         updateAllSingleLineViews();
     }
 
-    public void onNotificationUpdated(NotificationData.Entry entry) {
+    public void onNotificationUpdated(NotificationEntry entry) {
         mStatusBarNotification = entry.notification;
         mOnContentViewInactiveListeners.clear();
         mBeforeN = entry.targetSdk < Build.VERSION_CODES.N;
@@ -1292,7 +1292,7 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
-    private void applyRemoteInputAndSmartReply(final NotificationData.Entry entry) {
+    private void applyRemoteInputAndSmartReply(final NotificationEntry entry) {
         if (mRemoteInputController == null) {
             return;
         }
@@ -1313,7 +1313,7 @@ public class NotificationContentView extends FrameLayout {
     @VisibleForTesting
     static SmartRepliesAndActions chooseSmartRepliesAndActions(
             SmartReplyConstants smartReplyConstants,
-            final NotificationData.Entry entry) {
+            final NotificationEntry entry) {
         boolean enableAppGeneratedSmartReplies = (smartReplyConstants.isEnabled()
                 && (!smartReplyConstants.requiresTargetingP()
                 || entry.targetSdk >= Build.VERSION_CODES.P));
@@ -1370,7 +1370,7 @@ public class NotificationContentView extends FrameLayout {
                 smartReplies, smartActions, freeformRemoteInputActionPair != null);
     }
 
-    private void applyRemoteInput(NotificationData.Entry entry, boolean hasFreeformRemoteInput) {
+    private void applyRemoteInput(NotificationEntry entry, boolean hasFreeformRemoteInput) {
         View bigContentView = mExpandedChild;
         if (bigContentView != null) {
             mExpandedRemoteInput = applyRemoteInput(bigContentView, entry, hasFreeformRemoteInput,
@@ -1402,7 +1402,7 @@ public class NotificationContentView extends FrameLayout {
         mCachedHeadsUpRemoteInput = null;
     }
 
-    private RemoteInputView applyRemoteInput(View view, NotificationData.Entry entry,
+    private RemoteInputView applyRemoteInput(View view, NotificationEntry entry,
             boolean hasRemoteInput, PendingIntent existingPendingIntent,
             RemoteInputView cachedView, NotificationViewWrapper wrapper) {
         View actionContainerCandidate = view.findViewById(
@@ -1470,7 +1470,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     private void applySmartReplyView(SmartRepliesAndActions smartRepliesAndActions,
-            NotificationData.Entry entry) {
+            NotificationEntry entry) {
         if (mExpandedChild != null) {
             mExpandedSmartReplyView =
                     applySmartReplyView(mExpandedChild, smartRepliesAndActions, entry);
@@ -1496,7 +1496,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     private SmartReplyView applySmartReplyView(View view,
-            SmartRepliesAndActions smartRepliesAndActions, NotificationData.Entry entry) {
+            SmartRepliesAndActions smartRepliesAndActions, NotificationEntry entry) {
         View smartReplyContainerCandidate = view.findViewById(
                 com.android.internal.R.id.smart_reply_container);
         if (!(smartReplyContainerCandidate instanceof LinearLayout)) {

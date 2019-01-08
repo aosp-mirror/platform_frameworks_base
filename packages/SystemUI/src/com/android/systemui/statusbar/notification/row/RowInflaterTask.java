@@ -25,7 +25,7 @@ import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.InflationTask;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
  * An inflater task that asynchronously inflates a ExpandableNotificationRow
@@ -36,14 +36,14 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
     private static final boolean TRACE_ORIGIN = true;
 
     private RowInflationFinishedListener mListener;
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
     private boolean mCancelled;
     private Throwable mInflateOrigin;
 
     /**
      * Inflates a new notificationView. This should not be called twice on this object
      */
-    public void inflate(Context context, ViewGroup parent, NotificationData.Entry entry,
+    public void inflate(Context context, ViewGroup parent, NotificationEntry entry,
             RowInflationFinishedListener listener) {
         if (TRACE_ORIGIN) {
             mInflateOrigin = new Throwable("inflate requested here");

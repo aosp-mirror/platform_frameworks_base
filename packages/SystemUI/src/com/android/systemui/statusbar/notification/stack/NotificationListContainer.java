@@ -22,8 +22,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -117,7 +117,7 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
      * @param entry entry to get the view parent for
      * @return the view parent for entry
      */
-    ViewGroup getViewParentForNotification(NotificationData.Entry entry);
+    ViewGroup getViewParentForNotification(NotificationEntry entry);
 
     /**
      * Resets the currently exposed menu view.
@@ -140,7 +140,7 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
      *
      * @param entry the entry whose view's view state needs to be cleaned up (say that 5 times fast)
      */
-    void cleanUpViewStateForEntry(NotificationData.Entry entry);
+    void cleanUpViewStateForEntry(NotificationEntry entry);
 
 
     /**
