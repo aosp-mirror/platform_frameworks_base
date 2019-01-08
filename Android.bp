@@ -668,8 +668,6 @@ java_defaults {
     exclude_srcs: [
         // See comment on framework-atb-backward-compatibility module below
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
-        // See comment on framework-oahl-backward-compatibility module below
-        "core/java/android/content/pm/OrgApacheHttpLegacyUpdater.java",
     ],
 
     no_framework_libs: true,
