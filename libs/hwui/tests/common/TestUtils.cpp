@@ -82,7 +82,7 @@ void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint
                                  float y) {
     auto utf16 = asciiToUtf16(text);
     uint32_t length = strlen(text);
-    SkPaint glyphPaint(paint);
+    Paint glyphPaint(paint);
     glyphPaint.setTextEncoding(kGlyphID_SkTextEncoding);
     canvas->drawText(utf16.get(), length,  // text buffer
                      0, length,            // draw range
@@ -93,7 +93,7 @@ void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint
 void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint,
                                  const SkPath& path) {
     auto utf16 = asciiToUtf16(text);
-    SkPaint glyphPaint(paint);
+    Paint glyphPaint(paint);
     glyphPaint.setTextEncoding(kGlyphID_SkTextEncoding);
     canvas->drawTextOnPath(utf16.get(), strlen(text), minikin::Bidi::LTR, path, 0, 0, glyphPaint,
                            nullptr);
