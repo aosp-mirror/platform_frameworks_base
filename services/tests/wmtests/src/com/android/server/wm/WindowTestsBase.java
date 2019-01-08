@@ -53,6 +53,7 @@ import android.view.WindowManager;
 import com.android.server.AttributeCache;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -95,15 +96,20 @@ class WindowTestsBase {
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
 
-    @Rule
-    public final WindowManagerServiceRule mWmRule = new WindowManagerServiceRule();
-
-    static WindowState.PowerManagerWrapper sPowerManagerWrapper;  // TODO(roosa): make non-static.
+    static WindowState.PowerManagerWrapper sPowerManagerWrapper;
 
     @BeforeClass
     public static void setUpOnceBase() {
         AttributeCache.init(getInstrumentation().getTargetContext());
+
+        WmServiceUtils.setUpWindowManagerService();
+
         sPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
+    }
+
+    @AfterClass
+    public static void tearDonwOnceBase() {
+        WmServiceUtils.tearDownWindowManagerService();
     }
 
     @Before
@@ -115,7 +121,7 @@ class WindowTestsBase {
 
             final Context context = getInstrumentation().getTargetContext();
 
-            mWm = mWmRule.getWindowManagerService();
+            mWm = WmServiceUtils.getWindowManagerService();
             beforeCreateDisplay();
 
             context.getDisplay().getDisplayInfo(mDisplayInfo);
@@ -214,7 +220,7 @@ class WindowTestsBase {
      * Waits until the main handler for WM has processed all messages.
      */
     void waitUntilHandlersIdle() {
-        mWmRule.waitUntilWindowManagerHandlersIdle();
+        WmServiceUtils.waitUntilWindowManagerHandlersIdle();
     }
 
     private WindowToken createWindowToken(

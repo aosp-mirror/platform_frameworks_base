@@ -119,6 +119,10 @@ class ActivityTestsBase {
     @After
     public void tearDownBase() {
         mTestInjector.tearDown();
+        if (mService != null) {
+            mService.setWindowManager(null);
+            mService = null;
+        }
     }
 
     ActivityTaskManagerService createActivityTaskManagerService() {
@@ -638,7 +642,13 @@ class ActivityTestsBase {
         }
     }
 
+    private static WindowManagerService sMockWindowManagerService;
+
     private static WindowManagerService prepareMockWindowManager() {
+        if (sMockWindowManagerService != null) {
+            return sMockWindowManagerService;
+        }
+
         final WindowManagerService service = mock(WindowManagerService.class);
         service.mRoot = mock(RootWindowContainer.class);
 
@@ -650,6 +660,7 @@ class ActivityTestsBase {
             return null;
         }).when(service).inSurfaceTransaction(any());
 
+        sMockWindowManagerService = service;
         return service;
     }
 
