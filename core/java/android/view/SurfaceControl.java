@@ -360,11 +360,18 @@ public class SurfaceControl implements Parcelable {
      */
     public static final int WINDOW_TYPE_DONT_SCREENSHOT = 441731;
 
+    private void assignNativeObject(long nativeObject) {
+        if (mNativeObject != 0) {
+            release();
+        }
+        mNativeObject = nativeObject;
+    }
+
     public void copyFrom(SurfaceControl other) {
         mName = other.mName;
         mWidth = other.mWidth;
         mHeight = other.mHeight;
-        mNativeObject = nativeCopyFromSurfaceControl(other.mNativeObject);
+        assignNativeObject(nativeCopyFromSurfaceControl(other.mNativeObject));
     }
 
     /**
@@ -685,12 +692,11 @@ public class SurfaceControl implements Parcelable {
         mWidth = in.readInt();
         mHeight = in.readInt();
 
-        release();
+        long object = 0;
         if (in.readInt() != 0) {
-            mNativeObject = nativeReadFromParcel(in);
-        } else {
-            mNativeObject = 0;
+            object = nativeReadFromParcel(in);
         }
+        assignNativeObject(object);
     }
 
     @Override
