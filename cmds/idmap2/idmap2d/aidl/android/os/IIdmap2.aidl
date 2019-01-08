@@ -20,9 +20,18 @@ package android.os;
  * @hide
  */
 interface IIdmap2 {
+  const int POLICY_PUBLIC = 0x00000001;
+  const int POLICY_SYSTEM_PARTITION = 0x00000002;
+  const int POLICY_VENDOR_PARTITION = 0x00000004;
+  const int POLICY_PRODUCT_PARTITION = 0x00000008;
+
   @utf8InCpp String getIdmapPath(@utf8InCpp String overlayApkPath, int userId);
   boolean removeIdmap(@utf8InCpp String overlayApkPath, int userId);
-  boolean verifyIdmap(@utf8InCpp String overlayApkPath, int userId);
+  boolean verifyIdmap(@utf8InCpp String overlayApkPath, int fulfilledPolicies,
+                      boolean enforceOverlayable, int userId);
   @nullable @utf8InCpp String createIdmap(@utf8InCpp String targetApkPath,
-                                          @utf8InCpp String overlayApkPath, int userId);
+                                          @utf8InCpp String overlayApkPath,
+                                          int fulfilledPolicies,
+                                          boolean enforceOverlayable,
+                                          int userId);
 }
