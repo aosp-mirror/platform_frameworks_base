@@ -15,7 +15,6 @@
  */
 package com.android.systemui.statusbar.notification.logging;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -34,9 +33,9 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -116,11 +115,11 @@ public class NotificationLogger implements StateListener {
             //    notifications.
             // 3. Report newly visible and no-longer visible notifications.
             // 4. Keep currently visible notifications for next report.
-            ArrayList<NotificationData.Entry> activeNotifications = mEntryManager
+            ArrayList<NotificationEntry> activeNotifications = mEntryManager
                     .getNotificationData().getActiveNotifications();
             int N = activeNotifications.size();
             for (int i = 0; i < N; i++) {
-                NotificationData.Entry entry = activeNotifications.get(i);
+                NotificationEntry entry = activeNotifications.get(i);
                 String key = entry.notification.getKey();
                 boolean isVisible = mListContainer.isInVisibleLocation(entry);
                 NotificationVisibility visObj = NotificationVisibility.obtain(key, i, N, isVisible);
@@ -168,14 +167,11 @@ public class NotificationLogger implements StateListener {
         entryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onEntryRemoved(
-                    @Nullable NotificationData.Entry entry,
-                    String key,
-                    StatusBarNotification old,
+                    NotificationEntry entry,
                     NotificationVisibility visibility,
-                    boolean lifetimeExtended,
                     boolean removedByUser) {
-                if (removedByUser && visibility != null && entry != null) {
-                    logNotificationClear(key, entry.notification, visibility);
+                if (removedByUser && visibility != null) {
+                    logNotificationClear(entry.key, entry.notification, visibility);
                 }
             }
 

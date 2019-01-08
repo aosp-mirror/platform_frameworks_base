@@ -13,8 +13,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.backup.restore.PerformAdbRestoreTask;
-
 import libcore.io.IoUtils;
 
 import java.io.File;
@@ -42,11 +40,10 @@ public class KeyValueAdbRestoreEngine implements Runnable {
     private final UserBackupManagerService mBackupManagerService;
     private final File mDataDir;
 
-    FileMetadata mInfo;
-    PerformAdbRestoreTask mRestoreTask;
-    ParcelFileDescriptor mInFD;
-    IBackupAgent mAgent;
-    int mToken;
+    private final FileMetadata mInfo;
+    private final ParcelFileDescriptor mInFD;
+    private final IBackupAgent mAgent;
+    private final int mToken;
 
     public KeyValueAdbRestoreEngine(UserBackupManagerService backupManagerService,
             File dataDir, FileMetadata info, ParcelFileDescriptor inFD, IBackupAgent agent,

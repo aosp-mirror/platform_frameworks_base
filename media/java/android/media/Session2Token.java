@@ -102,7 +102,8 @@ public final class Session2Token implements Parcelable {
     private final ComponentName mComponentName;
 
     /**
-     * Constructor for the token.
+     * Constructor for the token with type {@link #TYPE_SESSION_SERVICE} or
+     * {@link #TYPE_LIBRARY_SERVICE}.
      *
      * @param context The context.
      * @param serviceComponent The component name of the service.
@@ -119,7 +120,7 @@ public final class Session2Token implements Parcelable {
         final int uid = getUid(manager, serviceComponent.getPackageName());
 
         // TODO: Uncomment below to stop hardcode type.
-        final int type = TYPE_SESSION;
+        final int type = TYPE_SESSION_SERVICE;
 //        final int type;
 //        if (isInterfaceDeclared(manager, MediaLibraryService2.SERVICE_INTERFACE,
 //                serviceComponent)) {

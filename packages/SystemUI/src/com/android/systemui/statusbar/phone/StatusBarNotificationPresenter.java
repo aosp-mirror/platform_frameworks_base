@@ -60,12 +60,12 @@ import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
-import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -183,27 +183,23 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         Dependency.get(InitController.class).addPostInitTask(() -> {
             NotificationEntryListener notificationEntryListener = new NotificationEntryListener() {
                 @Override
-                public void onNotificationAdded(Entry entry) {
+                public void onNotificationAdded(NotificationEntry entry) {
                     // Recalculate the position of the sliding windows and the titles.
                     mShadeController.updateAreThereNotifications();
                 }
 
                 @Override
-                public void onEntryUpdated(Entry entry) {
+                public void onEntryUpdated(NotificationEntry entry) {
                     mShadeController.updateAreThereNotifications();
                 }
 
                 @Override
                 public void onEntryRemoved(
-                        @Nullable Entry entry,
-                        String key,
-                        StatusBarNotification old,
+                        @Nullable NotificationEntry entry,
                         NotificationVisibility visibility,
-                        boolean lifetimeExtended,
                         boolean removedByUser) {
-                    if (!lifetimeExtended) {
-                        StatusBarNotificationPresenter.this.onNotificationRemoved(key, old);
-                    }
+                    StatusBarNotificationPresenter.this.onNotificationRemoved(
+                            entry.key, entry.notification);
                     if (removedByUser) {
                         maybeEndAmbientPulse();
                     }
@@ -262,10 +258,10 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     private void updateNotificationOnUiModeChanged() {
-        ArrayList<Entry> userNotifications
+        ArrayList<NotificationEntry> userNotifications
                 = mEntryManager.getNotificationData().getNotificationsForCurrentUser();
         for (int i = 0; i < userNotifications.size(); i++) {
-            Entry entry = userNotifications.get(i);
+            NotificationEntry entry = userNotifications.get(i);
             ExpandableNotificationRow row = entry.getRow();
             if (row != null) {
                 row.onUiModeChanged();
@@ -327,7 +323,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         return !mEntryManager.getNotificationData().getActiveNotifications().isEmpty();
     }
 
-    public boolean canHeadsUp(Entry entry, StatusBarNotification sbn) {
+    public boolean canHeadsUp(NotificationEntry entry, StatusBarNotification sbn) {
         if (mShadeController.isDozing()) {
             return false;
         }
@@ -385,7 +381,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     @Override
-    public void onBindRow(Entry entry, PackageManager pmUser,
+    public void onBindRow(NotificationEntry entry, PackageManager pmUser,
             StatusBarNotification sbn, ExpandableNotificationRow row) {
         row.setAboveShelfChangedListener(mAboveShelfObserver);
         row.setSecureStateProvider(mUnlockMethodCache::canSkipBouncer);
@@ -443,7 +439,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     @Override
-    public void onExpandClicked(Entry clickedEntry, boolean nowExpanded) {
+    public void onExpandClicked(NotificationEntry clickedEntry, boolean nowExpanded) {
         mHeadsUpManager.setExpanded(clickedEntry, nowExpanded);
         if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD && nowExpanded) {
             mShadeController.goToLockedShade(clickedEntry.getRow());

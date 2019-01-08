@@ -28,6 +28,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -82,7 +84,7 @@ public class NotificationFilter {
     /**
      * @return true if the provided notification should NOT be shown right now.
      */
-    public boolean shouldFilterOut(NotificationData.Entry entry) {
+    public boolean shouldFilterOut(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.notification;
         if (!(getEnvironment().isDeviceProvisioned()
                 || showNotificationEvenIfUnprovisioned(sbn))) {

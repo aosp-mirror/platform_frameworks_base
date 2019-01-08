@@ -1066,93 +1066,19 @@ final class AccessibilityController {
 
                 final int visibleWindowCount = visibleWindows.size();
                 HashSet<Integer> skipRemainingWindowsForTasks = new HashSet<>();
-                for (int i = visibleWindowCount - 1; i >= 0; i--) {
+
+                // Iterate until we figure out what is touchable for the entire screen.
+                for (int i = visibleWindowCount - 1; i >= 0 && !unaccountedSpace.isEmpty(); i--) {
                     final WindowState windowState = visibleWindows.valueAt(i);
-                    final int flags = windowState.mAttrs.flags;
-                    final Task task = windowState.getTask();
 
-                    // If the window is part of a task that we're finished with - ignore.
-                    if (task != null && skipRemainingWindowsForTasks.contains(task.mTaskId)) {
-                        continue;
-                    }
-
-                    // Ignore non-touchable windows, except the split-screen divider, which is
-                    // occasionally non-touchable but still useful for identifying split-screen
-                    // mode.
-                    if (((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0)
-                            && (windowState.mAttrs.type != TYPE_DOCK_DIVIDER)) {
-                        continue;
-                    }
-
-                    // Compute the bounds in the screen.
                     final Rect boundsInScreen = mTempRect;
                     computeWindowBoundsInScreen(windowState, boundsInScreen);
 
-                    // If the window is completely covered by other windows - ignore.
-                    if (unaccountedSpace.quickReject(boundsInScreen)) {
-                        continue;
-                    }
-
-                    // Add windows of certain types not covered by modal windows.
-                    if (isReportedWindowType(windowState.mAttrs.type)) {
-                        // Add the window to the ones to be reported.
+                    if (windowMattersToAccessibility(windowState, boundsInScreen, unaccountedSpace,
+                            skipRemainingWindowsForTasks)) {
                         addPopulatedWindowInfo(windowState, boundsInScreen, windows, addedWindows);
-                        if (windowState.isFocused()) {
-                            focusedWindowAdded = true;
-                        }
-                    }
-
-                    if (windowState.mAttrs.type !=
-                            WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
-
-                        // Account for the space this window takes if the window
-                        // is not an accessibility overlay which does not change
-                        // the reported windows.
-                        unaccountedSpace.op(boundsInScreen, unaccountedSpace,
-                                Region.Op.REVERSE_DIFFERENCE);
-
-                        // If a window is modal it prevents other windows from being touched
-                        if ((flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
-                            // Account for all space in the task, whether the windows in it are
-                            // touchable or not. The modal window blocks all touches from the task's
-                            // area.
-                            unaccountedSpace.op(windowState.getDisplayFrameLw(), unaccountedSpace,
-                                    Region.Op.REVERSE_DIFFERENCE);
-
-                            if (task != null) {
-                                // If the window is associated with a particular task, we can skip the
-                                // rest of the windows for that task.
-                                skipRemainingWindowsForTasks.add(task.mTaskId);
-                                continue;
-                            } else {
-                                // If the window is not associated with a particular task, then it is
-                                // globally modal. In this case we can skip all remaining windows.
-                                break;
-                            }
-                        }
-                    }
-
-                    // We figured out what is touchable for the entire screen - done.
-                    if (unaccountedSpace.isEmpty()) {
-                        break;
-                    }
-                }
-
-                // Always report the focused window.
-                if (!focusedWindowAdded) {
-                    for (int i = visibleWindowCount - 1; i >= 0; i--) {
-                        WindowState windowState = visibleWindows.valueAt(i);
-                        if (windowState.isFocused()) {
-                            // Compute the bounds in the screen.
-                            Rect boundsInScreen = mTempRect;
-                            computeWindowBoundsInScreen(windowState, boundsInScreen);
-
-                            // Add the window to the ones to be reported.
-                            addPopulatedWindowInfo(
-                                    windowState, boundsInScreen, windows, addedWindows);
-                            break;
-                        }
+                        updateUnaccountedSpace(windowState, boundsInScreen, unaccountedSpace,
+                                skipRemainingWindowsForTasks);
                     }
                 }
 
@@ -1219,6 +1145,73 @@ final class AccessibilityController {
 
             // Recycle the windows as we do not need them.
             clearAndRecycleWindows(windows);
+        }
+
+        private boolean windowMattersToAccessibility(WindowState windowState, Rect boundsInScreen,
+                Region unaccountedSpace, HashSet<Integer> skipRemainingWindowsForTasks) {
+            if (windowState.isFocused()) {
+                return true;
+            }
+
+            // If the window is part of a task that we're finished with - ignore.
+            final Task task = windowState.getTask();
+            if (task != null && skipRemainingWindowsForTasks.contains(task.mTaskId)) {
+                return false;
+            }
+
+            // Ignore non-touchable windows, except the split-screen divider, which is
+            // occasionally non-touchable but still useful for identifying split-screen
+            // mode.
+            if (((windowState.mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0)
+                    && (windowState.mAttrs.type != TYPE_DOCK_DIVIDER)) {
+                return false;
+            }
+
+            // If the window is completely covered by other windows - ignore.
+            if (unaccountedSpace.quickReject(boundsInScreen)) {
+                return false;
+            }
+
+            // Add windows of certain types not covered by modal windows.
+            if (isReportedWindowType(windowState.mAttrs.type)) {
+                return true;
+            }
+
+            return false;
+        }
+
+        private void updateUnaccountedSpace(WindowState windowState, Rect boundsInScreen,
+                Region unaccountedSpace, HashSet<Integer> skipRemainingWindowsForTasks) {
+            if (windowState.mAttrs.type
+                    != WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
+
+                // Account for the space this window takes if the window
+                // is not an accessibility overlay which does not change
+                // the reported windows.
+                unaccountedSpace.op(boundsInScreen, unaccountedSpace,
+                        Region.Op.REVERSE_DIFFERENCE);
+
+                // If a window is modal it prevents other windows from being touched
+                if ((windowState.mAttrs.flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
+                    // Account for all space in the task, whether the windows in it are
+                    // touchable or not. The modal window blocks all touches from the task's
+                    // area.
+                    unaccountedSpace.op(windowState.getDisplayFrameLw(), unaccountedSpace,
+                            Region.Op.REVERSE_DIFFERENCE);
+
+                    final Task task = windowState.getTask();
+                    if (task != null) {
+                        // If the window is associated with a particular task, we can skip the
+                        // rest of the windows for that task.
+                        skipRemainingWindowsForTasks.add(task.mTaskId);
+                    } else {
+                        // If the window is not associated with a particular task, then it is
+                        // globally modal. In this case we can skip all remaining windows.
+                        unaccountedSpace.setEmpty();
+                    }
+                }
+            }
         }
 
         private void computeWindowBoundsInScreen(WindowState windowState, Rect outBounds) {

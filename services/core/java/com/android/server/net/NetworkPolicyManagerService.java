@@ -270,14 +270,12 @@ import java.util.concurrent.TimeUnit;
  * enforcement.
  *
  * <p>
- * This class uses 2-3 locks to synchronize state:
+ * This class uses 2 locks to synchronize state:
  * <ul>
  * <li>{@code mUidRulesFirstLock}: used to guard state related to individual UIDs (such as firewall
  * rules).
  * <li>{@code mNetworkPoliciesSecondLock}: used to guard state related to network interfaces (such
  * as network policies).
- * <li>{@code allLocks}: not a "real" lock, but an indication (through @GuardedBy) that all locks
- * must be held.
  * </ul>
  *
  * <p>
@@ -419,7 +417,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final Object mUidRulesFirstLock = new Object();
     final Object mNetworkPoliciesSecondLock = new Object();
 
-    @GuardedBy("allLocks") volatile boolean mSystemReady;
+    @GuardedBy({"mUidRulesFirstLock", "mNetworkPoliciesSecondLock"})
+    volatile boolean mSystemReady;
 
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictBackground;
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictPower;
@@ -558,7 +557,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final ServiceThread mUidEventThread;
 
-    @GuardedBy("allLocks")
+    @GuardedBy({"mUidRulesFirstLock", "mNetworkPoliciesSecondLock"})
     private final AtomicFile mPolicyFile;
 
     private final AppOpsManager mAppOps;

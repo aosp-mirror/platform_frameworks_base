@@ -95,13 +95,13 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
-import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -135,7 +135,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private IDreamManager mDreamManager;
     @Mock private ScrimController mScrimController;
     @Mock private DozeScrimController mDozeScrimController;
-    @Mock private ArrayList<Entry> mNotificationList;
+    @Mock private ArrayList<NotificationEntry> mNotificationList;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private NotificationData mNotificationData;
     @Mock
@@ -409,7 +409,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        NotificationEntry entry = new NotificationEntry(sbn);
         entry.importance = IMPORTANCE_HIGH;
 
         assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
@@ -430,7 +430,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        NotificationEntry entry = new NotificationEntry(sbn);
         entry.importance = IMPORTANCE_HIGH;
 
         assertFalse(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
@@ -447,7 +447,7 @@ public class StatusBarTest extends SysuiTestCase {
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        NotificationEntry entry = new NotificationEntry(sbn);
         entry.suppressedVisualEffects = SUPPRESSED_EFFECT_PEEK;
         entry.importance = IMPORTANCE_HIGH;
 
@@ -465,7 +465,7 @@ public class StatusBarTest extends SysuiTestCase {
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        NotificationEntry entry = new NotificationEntry(sbn);
         entry.importance = IMPORTANCE_HIGH;
 
         assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));

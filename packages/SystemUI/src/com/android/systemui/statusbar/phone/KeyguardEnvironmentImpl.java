@@ -22,7 +22,7 @@ import android.util.Log;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
+import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 public class KeyguardEnvironmentImpl implements KeyguardEnvironment {

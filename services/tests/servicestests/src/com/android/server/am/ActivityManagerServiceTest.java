@@ -29,6 +29,8 @@ import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.util.DebugUtils.valueToString;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.android.server.am.ActivityManagerInternalTest.CustomThread;
 import static com.android.server.am.ActivityManagerService.DISPATCH_UIDS_CHANGED_UI_MSG;
 import static com.android.server.am.ActivityManagerService.Injector;
@@ -69,6 +71,9 @@ import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.AppOpsService;
+import com.android.server.am.ProcessList.IsolatedUidRange;
+import com.android.server.am.ProcessList.IsolatedUidRangeAllocator;
+import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -109,7 +114,7 @@ public class ActivityManagerServiceTest {
         UidRecord.CHANGE_ACTIVE
     };
 
-    @Mock private Context mContext;
+    private Context mContext = getInstrumentation().getTargetContext();
     @Mock private AppOpsService mAppOpsService;
     @Mock private PackageManager mPackageManager;
 
@@ -128,8 +133,8 @@ public class ActivityManagerServiceTest {
         mInjector = new TestInjector();
         mAms = new ActivityManagerService(mInjector);
         mAms.mWaitForNetworkTimeoutMs = 2000;
-
-        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
+        mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());
     }
 
     @After
@@ -289,6 +294,113 @@ public class ActivityManagerServiceTest {
             thread.assertWaiting("Unexpected state for " + uidRec);
             thread.interrupt();
         }
+    }
+
+    private void validateAppZygoteIsolatedUidRange(IsolatedUidRange uidRange) {
+        assertNotNull(uidRange);
+        assertTrue(uidRange.mFirstUid >= Process.FIRST_APP_ZYGOTE_ISOLATED_UID
+                && uidRange.mFirstUid <= Process.LAST_APP_ZYGOTE_ISOLATED_UID);
+        assertTrue(uidRange.mLastUid >= Process.FIRST_APP_ZYGOTE_ISOLATED_UID
+                && uidRange.mLastUid <= Process.LAST_APP_ZYGOTE_ISOLATED_UID);
+        assertTrue(uidRange.mLastUid > uidRange.mFirstUid
+                && ((uidRange.mLastUid - uidRange.mFirstUid + 1)
+                     == Process.NUM_UIDS_PER_APP_ZYGOTE));
+    }
+
+    private void verifyUidRangesNoOverlap(IsolatedUidRange uidRange1, IsolatedUidRange uidRange2) {
+        IsolatedUidRange lowRange = uidRange1.mFirstUid <= uidRange2.mFirstUid ? uidRange1 : uidRange2;
+        IsolatedUidRange highRange = lowRange == uidRange1  ? uidRange2 : uidRange1;
+
+        assertTrue(highRange.mFirstUid > lowRange.mLastUid);
+    }
+
+    @Test
+    public void testIsolatedUidRangeAllocator() {
+        final IsolatedUidRangeAllocator allocator = mAms.mProcessList.mAppIsolatedUidRangeAllocator;
+
+        // Create initial range
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.processName = "com.android.test.app";
+        appInfo.uid = 10000;
+        final IsolatedUidRange range = allocator.getOrCreateIsolatedUidRangeLocked(appInfo);
+        validateAppZygoteIsolatedUidRange(range);
+        verifyIsolatedUidAllocator(range);
+
+        // Create a second range
+        ApplicationInfo appInfo2 = new ApplicationInfo();
+        appInfo2.processName = "com.android.test.app2";
+        appInfo2.uid = 10001;
+        IsolatedUidRange range2 = allocator.getOrCreateIsolatedUidRangeLocked(appInfo2);
+        validateAppZygoteIsolatedUidRange(range2);
+        verifyIsolatedUidAllocator(range2);
+
+        // Verify ranges don't overlap
+        verifyUidRangesNoOverlap(range, range2);
+
+        // Free range, reallocate and verify
+        allocator.freeUidRangeLocked(appInfo2);
+        range2 = allocator.getOrCreateIsolatedUidRangeLocked(appInfo2);
+        validateAppZygoteIsolatedUidRange(range2);
+        verifyUidRangesNoOverlap(range, range2);
+        verifyIsolatedUidAllocator(range2);
+
+        // Free both, then try to allocate the maximum number of UID ranges
+        allocator.freeUidRangeLocked(appInfo);
+        allocator.freeUidRangeLocked(appInfo2);
+
+        int maxNumUidRanges = (Process.LAST_APP_ZYGOTE_ISOLATED_UID
+                - Process.FIRST_APP_ZYGOTE_ISOLATED_UID + 1) / Process.NUM_UIDS_PER_APP_ZYGOTE;
+        for (int i = 0; i < maxNumUidRanges; i++) {
+            appInfo = new ApplicationInfo();
+            appInfo.uid = 10000 + i;
+            appInfo.processName = "com.android.test.app" + Integer.toString(i);
+            IsolatedUidRange uidRange = allocator.getOrCreateIsolatedUidRangeLocked(appInfo);
+            validateAppZygoteIsolatedUidRange(uidRange);
+            verifyIsolatedUidAllocator(uidRange);
+        }
+
+        // Try to allocate another one and make sure it fails
+        appInfo = new ApplicationInfo();
+        appInfo.uid = 9000;
+        appInfo.processName = "com.android.test.app.failed";
+        IsolatedUidRange failedRange = allocator.getOrCreateIsolatedUidRangeLocked(appInfo);
+
+        assertNull(failedRange);
+    }
+
+    public void verifyIsolatedUid(ProcessList.IsolatedUidRange range, int uid) {
+        assertTrue(uid >= range.mFirstUid && uid <= range.mLastUid);
+    }
+
+    public void verifyIsolatedUidAllocator(ProcessList.IsolatedUidRange range) {
+        int uid = range.allocateIsolatedUidLocked(0);
+        verifyIsolatedUid(range, uid);
+
+        int uid2 = range.allocateIsolatedUidLocked(0);
+        verifyIsolatedUid(range, uid2);
+        assertTrue(uid2 != uid);
+
+        // Free both
+        range.freeIsolatedUidLocked(uid);
+        range.freeIsolatedUidLocked(uid2);
+
+        // Allocate the entire range
+        for (int i = 0; i < (range.mLastUid - range.mFirstUid + 1); ++i) {
+            uid = range.allocateIsolatedUidLocked(0);
+            verifyIsolatedUid(range, uid);
+        }
+
+        // Ensure the next one fails
+        uid = range.allocateIsolatedUidLocked(0);
+        assertEquals(uid, -1);
+    }
+
+    @Test
+    public void testGlobalIsolatedUidAllocator() {
+        final IsolatedUidRange globalUidRange = mAms.mProcessList.mGlobalIsolatedUids;
+        assertEquals(globalUidRange.mFirstUid, Process.FIRST_ISOLATED_UID);
+        assertEquals(globalUidRange.mLastUid, Process.LAST_ISOLATED_UID);
+        verifyIsolatedUidAllocator(globalUidRange);
     }
 
     @Test

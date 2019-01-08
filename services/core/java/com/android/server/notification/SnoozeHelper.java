@@ -17,6 +17,7 @@ package com.android.server.notification;
 
 import android.annotation.NonNull;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -163,7 +164,6 @@ public class SnoozeHelper {
                     mSnoozedNotifications.get(userId).get(pkg);
             if (recordsForPkg != null) {
                 final Set<Map.Entry<String, NotificationRecord>> records = recordsForPkg.entrySet();
-                String key = null;
                 for (Map.Entry<String, NotificationRecord> record : records) {
                     final StatusBarNotification sbn = record.getValue().sbn;
                     if (Objects.equals(sbn.getTag(), tag) && sbn.getId() == id) {
@@ -301,6 +301,30 @@ public class SnoozeHelper {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    protected void clearData(int userId, String pkg) {
+        ArrayMap<String, ArrayMap<String, NotificationRecord>> records =
+                mSnoozedNotifications.get(userId);
+        if (records == null) {
+            return;
+        }
+        ArrayMap<String, NotificationRecord> pkgRecords = records.get(pkg);
+        if (pkgRecords == null) {
+            return;
+        }
+        for (int i = pkgRecords.size() - 1; i >= 0; i--) {
+            final NotificationRecord r = pkgRecords.removeAt(i);
+            if (r != null) {
+                mPackages.remove(r.getKey());
+                mUsers.remove(r.getKey());
+                final PendingIntent pi = createPendingIntent(pkg, r.getKey(), userId);
+                mAm.cancel(pi);
+                MetricsLogger.action(r.getLogMaker()
+                        .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED)
+                        .setType(MetricsProto.MetricsEvent.TYPE_DISMISS));
             }
         }
     }

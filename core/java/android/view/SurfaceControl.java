@@ -67,6 +67,7 @@ public class SurfaceControl implements Parcelable {
             int w, int h, int format, int flags, long parentObject, int windowType, int ownerUid)
             throws OutOfResourcesException;
     private static native long nativeReadFromParcel(Parcel in);
+    private static native long nativeCopyFromSurfaceControl(long nativeObject);
     private static native void nativeWriteToParcel(long nativeObject, Parcel out);
     private static native void nativeRelease(long nativeObject);
     private static native void nativeDestroy(long nativeObject);
@@ -169,7 +170,7 @@ public class SurfaceControl implements Parcelable {
             IBinder toToken);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
-    private final String mName;
+    private String mName;
     long mNativeObject; // package visibility only for Surface.java access
 
     // TODO: Move this to native.
@@ -358,6 +359,13 @@ public class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final int WINDOW_TYPE_DONT_SCREENSHOT = 441731;
+
+    public void copyFrom(SurfaceControl other) {
+        mName = other.mName;
+        mWidth = other.mWidth;
+        mHeight = other.mHeight;
+        mNativeObject = nativeCopyFromSurfaceControl(other.mNativeObject);
+    }
 
     /**
      * Builder class for {@link SurfaceControl} objects.
@@ -660,14 +668,29 @@ public class SurfaceControl implements Parcelable {
     }
 
     private SurfaceControl(Parcel in) {
+        readFromParcel(in);
+        mCloseGuard.open("release");
+    }
+
+    public SurfaceControl() {
+        mCloseGuard.open("release");
+    }
+
+    public void readFromParcel(Parcel in) {
+        if (in == null) {
+            throw new IllegalArgumentException("source must not be null");
+        }
+
         mName = in.readString();
         mWidth = in.readInt();
         mHeight = in.readInt();
-        mNativeObject = nativeReadFromParcel(in);
-        if (mNativeObject == 0) {
-            throw new IllegalArgumentException("Couldn't read SurfaceControl from parcel=" + in);
+
+        release();
+        if (in.readInt() != 0) {
+            mNativeObject = nativeReadFromParcel(in);
+        } else {
+            mNativeObject = 0;
         }
-        mCloseGuard.open("release");
     }
 
     @Override
@@ -680,7 +703,16 @@ public class SurfaceControl implements Parcelable {
         dest.writeString(mName);
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
+        if (mNativeObject == 0) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+        }
         nativeWriteToParcel(mNativeObject, dest);
+
+        if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
+            release();
+        }
     }
 
     /**
@@ -761,6 +793,10 @@ public class SurfaceControl implements Parcelable {
     private void checkNotReleased() {
         if (mNativeObject == 0) throw new NullPointerException(
                 "mNativeObject is null. Have you called release() already?");
+    }
+
+    public boolean isValid() {
+        return mNativeObject != 0;
     }
 
     /*

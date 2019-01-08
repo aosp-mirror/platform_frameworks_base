@@ -547,7 +547,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
                 if (creating) {
                     viewRoot.createBoundsSurface(mSubLayer);
-                    mSurfaceSession = new SurfaceSession(viewRoot.mBoundsSurface);
+                    mSurfaceSession = new SurfaceSession();
                     mDeferredDestroySurfaceControl = mSurfaceControl;
 
                     updateOpaqueFlag();
@@ -559,6 +559,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                             new SurfaceControl.Builder(mSurfaceSession)
                                     .setBufferSize(mSurfaceWidth, mSurfaceHeight)
                                     .setFormat(mFormat)
+                                    .setParent(viewRoot.getSurfaceControl())
                                     .setFlags(mSurfaceFlags));
                 } else if (mSurfaceControl == null) {
                     return;

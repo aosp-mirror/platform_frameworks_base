@@ -3684,7 +3684,7 @@ message MetricsEvent {
     ACTION_SETTINGS_TILE_CLICK = 830;
 
     // OPEN: Notification unsnoozed. CLOSE: Notification snoozed. UPDATE: snoozed notification
-    // updated
+    // updated. TYPE_DISMISS: snoozing canceled due to data being cleared on package
     // CATEGORY: NOTIFICATION
     // OS: O
     NOTIFICATION_SNOOZED = 831;

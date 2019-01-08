@@ -37,7 +37,6 @@ import android.media.session.PlaybackState;
 import android.os.Handler;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -47,9 +46,9 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -157,15 +156,10 @@ public class NotificationMediaManager implements Dumpable {
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onEntryRemoved(
-                    @Nullable Entry entry,
-                    String key,
-                    StatusBarNotification old,
+                    NotificationEntry entry,
                     NotificationVisibility visibility,
-                    boolean lifetimeExtended,
                     boolean removedByUser) {
-                if (!lifetimeExtended) {
-                    onNotificationRemoved(key);
-                }
+                onNotificationRemoved(entry.key);
             }
         });
     }
@@ -194,7 +188,7 @@ public class NotificationMediaManager implements Dumpable {
             return null;
         }
         synchronized (mEntryManager.getNotificationData()) {
-            Entry entry = mEntryManager.getNotificationData().get(mMediaNotificationKey);
+            NotificationEntry entry = mEntryManager.getNotificationData().get(mMediaNotificationKey);
             if (entry == null || entry.expandedIcon == null) {
                 return null;
             }
@@ -216,15 +210,15 @@ public class NotificationMediaManager implements Dumpable {
         boolean metaDataChanged = false;
 
         synchronized (mEntryManager.getNotificationData()) {
-            ArrayList<Entry> activeNotifications =
+            ArrayList<NotificationEntry> activeNotifications =
                     mEntryManager.getNotificationData().getActiveNotifications();
             final int N = activeNotifications.size();
 
             // Promote the media notification with a controller in 'playing' state, if any.
-            Entry mediaNotification = null;
+            NotificationEntry mediaNotification = null;
             MediaController controller = null;
             for (int i = 0; i < N; i++) {
-                final Entry entry = activeNotifications.get(i);
+                final NotificationEntry entry = activeNotifications.get(i);
 
                 if (entry.isMediaNotification()) {
                     final MediaSession.Token token =
@@ -264,7 +258,7 @@ public class NotificationMediaManager implements Dumpable {
                             final String pkg = aController.getPackageName();
 
                             for (int i = 0; i < N; i++) {
-                                final Entry entry = activeNotifications.get(i);
+                                final NotificationEntry entry = activeNotifications.get(i);
                                 if (entry.notification.getPackageName().equals(pkg)) {
                                     if (DEBUG_MEDIA) {
                                         Log.v(TAG, "DEBUG_MEDIA: found controller matching "

@@ -99,7 +99,7 @@ interface IWindowSession {
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
             out Rect outOutsets, out Rect outBackdropFrame,
             out DisplayCutout.ParcelableWrapper displayCutout,
-            out MergedConfiguration outMergedConfiguration, out Surface outSurface,
+            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
             out InsetsState insetsState);
 
     /*

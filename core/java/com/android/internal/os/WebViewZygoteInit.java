@@ -18,11 +18,7 @@ package com.android.internal.os;
 
 import android.app.ApplicationLoaders;
 import android.net.LocalSocket;
-import android.net.LocalServerSocket;
 import android.os.Build;
-import android.system.ErrnoException;
-import android.system.Os;
-import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebViewFactory;
@@ -43,8 +39,6 @@ import java.lang.reflect.Method;
  */
 class WebViewZygoteInit {
     public static final String TAG = "WebViewZygoteInit";
-
-    private static ZygoteServer sServer;
 
     private static class WebViewZygoteServer extends ZygoteServer {
         @Override
@@ -127,48 +121,7 @@ class WebViewZygoteInit {
 
     public static void main(String argv[]) {
         Log.i(TAG, "Starting WebViewZygoteInit");
-
-        String socketName = null;
-        for (String arg : argv) {
-            Log.i(TAG, arg);
-            if (arg.startsWith(Zygote.CHILD_ZYGOTE_SOCKET_NAME_ARG)) {
-                socketName = arg.substring(Zygote.CHILD_ZYGOTE_SOCKET_NAME_ARG.length());
-            }
-        }
-        if (socketName == null) {
-            throw new RuntimeException("No " + Zygote.CHILD_ZYGOTE_SOCKET_NAME_ARG + " specified");
-        }
-
-        try {
-            Os.prctl(OsConstants.PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
-        } catch (ErrnoException ex) {
-            throw new RuntimeException("Failed to set PR_SET_NO_NEW_PRIVS", ex);
-        }
-
-        sServer = new WebViewZygoteServer();
-
-        final Runnable caller;
-        try {
-            sServer.registerServerSocketAtAbstractName(socketName);
-
-            // Add the abstract socket to the FD whitelist so that the native zygote code
-            // can properly detach it after forking.
-            Zygote.nativeAllowFileAcrossFork("ABSTRACT/" + socketName);
-
-            // The select loop returns early in the child process after a fork and
-            // loops forever in the zygote.
-            caller = sServer.runSelectLoop(TextUtils.join(",", Build.SUPPORTED_ABIS));
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Fatal exception:", e);
-            throw e;
-        } finally {
-            sServer.closeServerSocket();
-        }
-
-        // We're in the child process and have exited the select loop. Proceed to execute the
-        // command.
-        if (caller != null) {
-            caller.run();
-        }
+        WebViewZygoteServer server = new WebViewZygoteServer();
+        ChildZygoteInit.runZygoteServer(server, argv);
     }
 }

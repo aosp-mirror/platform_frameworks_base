@@ -48,7 +48,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationTestHelper;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -88,7 +88,7 @@ public class NotificationInflaterTest extends SysuiTestCase {
             }
 
             @Override
-            public void onAsyncInflationFinished(NotificationData.Entry entry,
+            public void onAsyncInflationFinished(NotificationEntry entry,
                     @NotificationInflater.InflationFlag int inflatedFlags) {
             }
         });
@@ -174,7 +174,7 @@ public class NotificationInflaterTest extends SysuiTestCase {
                     }
 
                     @Override
-                    public void onAsyncInflationFinished(NotificationData.Entry entry,
+                    public void onAsyncInflationFinished(NotificationEntry entry,
                             @NotificationInflater.InflationFlag int inflatedFlags) {
                         countDownLatch.countDown();
                     }
@@ -256,7 +256,7 @@ public class NotificationInflaterTest extends SysuiTestCase {
             }
 
             @Override
-            public void onAsyncInflationFinished(NotificationData.Entry entry,
+            public void onAsyncInflationFinished(NotificationEntry entry,
                     @NotificationInflater.InflationFlag int inflatedFlags) {
                 if (expectingException) {
                     exceptionHolder.setException(new RuntimeException(

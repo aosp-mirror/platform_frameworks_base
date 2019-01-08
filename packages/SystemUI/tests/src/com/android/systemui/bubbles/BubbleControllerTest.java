@@ -18,6 +18,10 @@ package com.android.systemui.bubbles;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
 import android.content.Context;
@@ -29,6 +33,9 @@ import android.widget.FrameLayout;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
@@ -36,6 +43,8 @@ import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -45,6 +54,8 @@ import org.mockito.MockitoAnnotations;
 public class BubbleControllerTest extends SysuiTestCase {
 
     @Mock
+    private NotificationEntryManager mNotificationEntryManager;
+    @Mock
     private WindowManager mWindowManager;
     @Mock
     private IActivityManager mActivityManager;
@@ -52,17 +63,23 @@ public class BubbleControllerTest extends SysuiTestCase {
     private DozeParameters mDozeParameters;
     @Mock
     private FrameLayout mStatusBarView;
+    @Captor
+    private ArgumentCaptor<NotificationEntryListener> mEntryListenerCaptor;
 
     private TestableBubbleController mBubbleController;
     private StatusBarWindowController mStatusBarWindowController;
+    private NotificationEntryListener mEntryListener;
 
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mRow;
     private ExpandableNotificationRow mRow2;
 
+    private final NotificationData mNotificationData = new NotificationData();
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
 
         // Bubbles get added to status bar window view
         mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
@@ -74,7 +91,15 @@ public class BubbleControllerTest extends SysuiTestCase {
         mRow = mNotificationTestHelper.createBubble();
         mRow2 = mNotificationTestHelper.createBubble();
 
+        // Return non-null notification data from the NEM
+        when(mNotificationEntryManager.getNotificationData()).thenReturn(mNotificationData);
+
         mBubbleController = new TestableBubbleController(mContext, mStatusBarWindowController);
+
+        // Get a reference to the BubbleController's entry listener
+        verify(mNotificationEntryManager, atLeastOnce())
+                .addNotificationEntryListener(mEntryListenerCaptor.capture());
+        mEntryListener = mEntryListenerCaptor.getValue();
     }
 
     @Test
@@ -102,6 +127,8 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         mBubbleController.removeBubble(mRow.getEntry().key);
         assertFalse(mStatusBarWindowController.getBubblesShowing());
+        assertTrue(mRow.getEntry().isBubbleDismissed());
+        verify(mNotificationEntryManager).updateNotifications();
     }
 
     @Test
@@ -112,6 +139,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         mBubbleController.dismissStack();
         assertFalse(mStatusBarWindowController.getBubblesShowing());
+        verify(mNotificationEntryManager, times(3)).updateNotifications();
     }
 
     @Test
@@ -138,6 +166,12 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         mBubbleController.collapseStack();
         assertFalse(mBubbleController.isStackExpanded());
+    }
+
+    @Test
+    public void testMarkNewNotificationAsBubble() {
+        mEntryListener.onPendingEntryAdded(mRow.getEntry());
+        assertTrue(mRow.getEntry().isBubble());
     }
 
     static class TestableBubbleController extends BubbleController {

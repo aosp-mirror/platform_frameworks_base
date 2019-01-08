@@ -829,7 +829,7 @@ public class UserBackupManagerServiceTest {
     public void testRequestBackup_whenNotProvisioned() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
-        backupManagerService.setProvisioned(false);
+        backupManagerService.setSetupComplete(false);
 
         int result = backupManagerService.requestBackup(new String[] {PACKAGE_1}, mObserver, 0);
 
@@ -848,7 +848,7 @@ public class UserBackupManagerServiceTest {
         setUpCurrentTransport(mTransportManager, mTransport.unregistered());
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setEnabled(true);
-        backupManagerService.setProvisioned(true);
+        backupManagerService.setSetupComplete(true);
 
         int result = backupManagerService.requestBackup(new String[] {PACKAGE_1}, mObserver, 0);
 
@@ -868,7 +868,7 @@ public class UserBackupManagerServiceTest {
         setUpCurrentTransport(mTransportManager, mTransport);
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setEnabled(true);
-        backupManagerService.setProvisioned(true);
+        backupManagerService.setSetupComplete(true);
         // Haven't set PACKAGE_1 as eligible
 
         int result = backupManagerService.requestBackup(new String[] {PACKAGE_1}, mObserver, 0);
@@ -965,14 +965,13 @@ public class UserBackupManagerServiceTest {
     private UserBackupManagerService createBackupManagerServiceForRequestBackup() {
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setEnabled(true);
-        backupManagerService.setProvisioned(true);
+        backupManagerService.setSetupComplete(true);
         return backupManagerService;
     }
 
     /**
-     * Test verifying that {@link UserBackupManagerService#createAndInitializeService(Context,
-     * Trampoline, HandlerThread, File, File, TransportManager)} posts a transport registration task
-     * to the backup thread.
+     * Test verifying that creating a new instance posts a transport registration task to the backup
+     * thread.
      */
     @Test
     public void testCreateAndInitializeService_postRegisterTransports() {
@@ -992,9 +991,8 @@ public class UserBackupManagerServiceTest {
     }
 
     /**
-     * Test verifying that {@link UserBackupManagerService#createAndInitializeService(Context,
-     * Trampoline, HandlerThread, File, File, TransportManager)} does not directly register
-     * transports on the main thread.
+     * Test verifying that creating a new instance does not directly register transports on the main
+     * thread.
      */
     @Test
     public void testCreateAndInitializeService_doesNotRegisterTransportsSynchronously() {
@@ -1013,11 +1011,7 @@ public class UserBackupManagerServiceTest {
         verify(mTransportManager, never()).registerTransports();
     }
 
-    /**
-     * Test checking non-null argument on {@link
-     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
-     * File, TransportManager)}.
-     */
+    /** Test checking non-null argument on instance creation. */
     @Test
     public void testCreateAndInitializeService_withNullContext_throws() {
         expectThrows(
@@ -1033,11 +1027,7 @@ public class UserBackupManagerServiceTest {
                                 mTransportManager));
     }
 
-    /**
-     * Test checking non-null argument on {@link
-     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
-     * File, TransportManager)}.
-     */
+    /** Test checking non-null argument on instance creation. */
     @Test
     public void testCreateAndInitializeService_withNullTrampoline_throws() {
         expectThrows(
@@ -1053,11 +1043,7 @@ public class UserBackupManagerServiceTest {
                                 mTransportManager));
     }
 
-    /**
-     * Test checking non-null argument on {@link
-     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
-     * File, TransportManager)}.
-     */
+    /** Test checking non-null argument on instance creation. */
     @Test
     public void testCreateAndInitializeService_withNullBackupThread_throws() {
         expectThrows(
@@ -1073,11 +1059,7 @@ public class UserBackupManagerServiceTest {
                                 mTransportManager));
     }
 
-    /**
-     * Test checking non-null argument on {@link
-     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
-     * File, TransportManager)}.
-     */
+    /** Test checking non-null argument on instance creation. */
     @Test
     public void testCreateAndInitializeService_withNullStateDir_throws() {
         expectThrows(

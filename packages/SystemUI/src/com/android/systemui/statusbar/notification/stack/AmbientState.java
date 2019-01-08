@@ -25,7 +25,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -358,7 +358,7 @@ public class AmbientState {
         mPulsing = hasPulsing;
     }
 
-    public boolean isPulsing(NotificationData.Entry entry) {
+    public boolean isPulsing(NotificationEntry entry) {
         if (!mPulsing || mAmbientPulseManager == null) {
             return false;
         }

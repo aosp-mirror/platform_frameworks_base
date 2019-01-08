@@ -24,9 +24,9 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -49,26 +49,21 @@ public class ForegroundServiceNotificationListener {
         mForegroundServiceController = foregroundServiceController;
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
-            public void onPendingEntryAdded(NotificationData.Entry entry) {
+            public void onPendingEntryAdded(NotificationEntry entry) {
                 addNotification(entry.notification, entry.importance);
             }
 
             @Override
-            public void onEntryUpdated(NotificationData.Entry entry) {
+            public void onEntryUpdated(NotificationEntry entry) {
                 updateNotification(entry.notification, entry.importance);
             }
 
             @Override
             public void onEntryRemoved(
-                    NotificationData.Entry entry,
-                    String key,
-                    StatusBarNotification old,
+                    NotificationEntry entry,
                     NotificationVisibility visibility,
-                    boolean lifetimeExtended,
                     boolean removedByUser) {
-                if (entry != null && !lifetimeExtended) {
-                    removeNotification(entry.notification);
-                }
+                removeNotification(entry.notification);
             }
         });
     }

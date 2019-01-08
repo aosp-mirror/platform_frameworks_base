@@ -765,8 +765,7 @@ public class NotificationManagerService extends SystemService {
                         .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, nv.rank)
                         .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count)
                         .addTaggedData(MetricsEvent.NOTIFICATION_ACTION_IS_SMART,
-                                (Notification.Action.SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION
-                                        == action.getSemanticAction()) ? 1 : 0)
+                                action.isContextual() ? 1 : 0)
                         .addTaggedData(
                                 MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
                                 generatedByAssistant ? 1 : 0));
@@ -970,7 +969,7 @@ public class NotificationManagerService extends SystemService {
                             r.getNumSmartActionsAdded())
                     .addTaggedData(
                             MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
-                            r.getSuggestionsGeneratedByAssistant());
+                            r.getSuggestionsGeneratedByAssistant() ? 1 : 0);
             mMetricsLogger.write(logMaker);
         }
     }
@@ -1702,8 +1701,16 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void sendRegisteredOnlyBroadcast(String action) {
-        getContext().sendBroadcastAsUser(new Intent(action)
-                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), UserHandle.ALL, null);
+        Intent intent = new Intent(action);
+        getContext().sendBroadcastAsUser(intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                UserHandle.ALL, null);
+        // explicitly send the broadcast to all DND packages, even if they aren't currently running
+        intent.setFlags(0);
+        final Set<String> dndApprovedPackages = mConditionProviders.getAllowedPackages();
+        for (String pkg : dndApprovedPackages) {
+            intent.setPackage(pkg);
+            getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
+        }
     }
 
     @Override
@@ -2641,6 +2648,9 @@ public class NotificationManagerService extends SystemService {
 
             // Zen
             mConditionProviders.onPackagesChanged(true, packages, uids);
+
+            // Snoozing
+            mSnoozeHelper.clearData(UserHandle.getUserId(uid), packageName);
 
             // Reset notification preferences
             if (!fromApp) {
@@ -5698,19 +5708,17 @@ public class NotificationManagerService extends SystemService {
             }
             int indexBefore = findNotificationRecordIndexLocked(record);
             boolean interceptBefore = record.isIntercepted();
-            float contactAffinityBefore = record.getContactAffinity();
             int visibilityBefore = record.getPackageVisibilityOverride();
             recon.applyChangesLocked(record);
             applyZenModeLocked(record);
             mRankingHelper.sort(mNotificationList);
             int indexAfter = findNotificationRecordIndexLocked(record);
             boolean interceptAfter = record.isIntercepted();
-            float contactAffinityAfter = record.getContactAffinity();
             int visibilityAfter = record.getPackageVisibilityOverride();
             changed = indexBefore != indexAfter || interceptBefore != interceptAfter
                     || visibilityBefore != visibilityAfter;
             if (interceptBefore && !interceptAfter
-                    && Float.compare(contactAffinityBefore, contactAffinityAfter) != 0) {
+                    && record.isNewEnoughForAlerting(System.currentTimeMillis())) {
                 buzzBeepBlinkLocked(record);
             }
         }

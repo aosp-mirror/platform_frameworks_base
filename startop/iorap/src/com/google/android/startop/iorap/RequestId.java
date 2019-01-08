@@ -71,7 +71,7 @@ public class RequestId implements Parcelable {
 
     @Override
     public String toString() {
-        return String.format("{requestId: %ld}", requestId);
+        return String.format("{requestId: %d}", requestId);
     }
 
     @Override

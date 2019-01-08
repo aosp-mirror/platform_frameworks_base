@@ -916,6 +916,17 @@ static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj) 
     return reinterpret_cast<jlong>(surface.get());
 }
 
+static jlong nativeCopyFromSurfaceControl(JNIEnv* env, jclass clazz, jlong surfaceControlNativeObj) {
+    sp<SurfaceControl> surface(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
+    if (surface == nullptr) {
+        return 0;
+    }
+
+    sp<SurfaceControl> newSurface = new SurfaceControl(surface);
+    newSurface->incStrong((void *)nativeCreate);
+    return reinterpret_cast<jlong>(newSurface.get());
+}
+
 static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
@@ -924,7 +935,9 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
         return;
     }
     SurfaceControl* const self = reinterpret_cast<SurfaceControl *>(nativeObject);
-    self->writeToParcel(parcel);
+    if (self != nullptr) {
+        self->writeToParcel(parcel);
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -934,6 +947,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeCreate },
     {"nativeReadFromParcel", "(Landroid/os/Parcel;)J",
             (void*)nativeReadFromParcel },
+    {"nativeCopyFromSurfaceControl", "(J)J" ,
+            (void*)nativeCopyFromSurfaceControl },
     {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteToParcel },
     {"nativeRelease", "(J)V",

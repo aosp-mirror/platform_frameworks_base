@@ -25,6 +25,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
+import android.view.ViewRootImpl;
 
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -158,7 +159,7 @@ class InsetsSourceProvider {
     }
 
     boolean isClientVisible() {
-        return mClientVisible;
+        return !ViewRootImpl.USE_NEW_INSETS || mClientVisible;
     }
 
     private class ControlAdapter implements AnimationAdapter {

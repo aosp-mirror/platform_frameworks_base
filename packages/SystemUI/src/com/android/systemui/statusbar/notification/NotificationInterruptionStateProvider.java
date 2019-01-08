@@ -37,6 +37,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -139,7 +140,7 @@ public class NotificationInterruptionStateProvider {
      * @param entry the entry to check
      * @return true if the entry should heads up, false otherwise
      */
-    public boolean shouldHeadsUp(NotificationData.Entry entry) {
+    public boolean shouldHeadsUp(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
 
         if (getShadeController().isDozing()) {
@@ -227,7 +228,7 @@ public class NotificationInterruptionStateProvider {
      * @param entry the entry to check
      * @return true if the entry should ambient pulse, false otherwise
      */
-    public boolean shouldPulse(NotificationData.Entry entry) {
+    public boolean shouldPulse(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
 
         if (!getShadeController().isDozing()) {
@@ -273,14 +274,14 @@ public class NotificationInterruptionStateProvider {
 
     /**
      * Common checks between heads up alerting and ambient pulse alerting.  See
-     * {@link #shouldHeadsUp(NotificationData.Entry)} and
-     * {@link #shouldPulse(NotificationData.Entry)}.  Notifications that fail any of these checks
+     * {@link #shouldHeadsUp(NotificationEntry)} and
+     * {@link #shouldPulse(NotificationEntry)}.  Notifications that fail any of these checks
      * should not alert at all.
      *
      * @param entry the entry to check
      * @return true if these checks pass, false if the notification should not alert
      */
-    protected boolean canAlertCommon(NotificationData.Entry entry) {
+    protected boolean canAlertCommon(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
 
         if (mNotificationFilter.shouldFilterOut(entry)) {
@@ -325,7 +326,7 @@ public class NotificationInterruptionStateProvider {
          * @param sbn   notification that might be heads upped
          * @return false if the notification can not be heads upped
          */
-        boolean canHeadsUp(NotificationData.Entry entry, StatusBarNotification sbn);
+        boolean canHeadsUp(NotificationEntry entry, StatusBarNotification sbn);
 
     }
 

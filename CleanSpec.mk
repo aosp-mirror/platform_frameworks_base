@@ -252,6 +252,7 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/overlay/ExperimentNavigation
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/vendor/overlay/ExperimentNavigationBarSlim)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/vendor/overlay/ExperimentNavigationBarSlim)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/priv-app/SystemUI)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio)
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
 # ******************************************************************

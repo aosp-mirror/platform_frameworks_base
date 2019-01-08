@@ -57,7 +57,6 @@ final class SapProfile implements LocalBluetoothProfile {
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            Log.d(TAG, "Bluetooth service connected, profile:" + profile);
             mService = (BluetoothSap) proxy;
             // We just bound to the service, so refresh the UI for any connected SAP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
@@ -79,7 +78,6 @@ final class SapProfile implements LocalBluetoothProfile {
         }
 
         public void onServiceDisconnected(int profile) {
-            Log.d(TAG, "Bluetooth service disconnected, profile:" + profile);
             mProfileManager.callServiceDisconnectedListeners();
             mIsProfileReady=false;
         }

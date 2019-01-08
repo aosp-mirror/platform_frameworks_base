@@ -28,6 +28,7 @@ import android.view.DisplayCutout;
 import android.view.IWindowSession;
 import android.view.InsetsState;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
@@ -106,7 +107,7 @@ public class MainActivity extends Activity {
                                 window.mSeq, mLayoutParams, -1, -1, View.VISIBLE, 0, -1, mTmpRect,
                                 mTmpRect, mTmpRect, mTmpRect, mTmpRect, mTmpRect, mTmpRect,
                                 new DisplayCutout.ParcelableWrapper(), new MergedConfiguration(),
-                                new Surface(), new InsetsState());
+                                new SurfaceControl(), new InsetsState());
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }

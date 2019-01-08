@@ -50,7 +50,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.statusbar.SmartReplyController;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.ShadeController;
 
@@ -94,7 +94,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
     private int mSpacing;
 
     @Mock private SmartReplyController mLogger;
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
     private Notification mNotification;
 
     @Mock ActivityStarter mActivityStarter;
@@ -127,7 +127,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         StatusBarNotification sbn = mock(StatusBarNotification.class);
         when(sbn.getNotification()).thenReturn(mNotification);
         when(sbn.getKey()).thenReturn(TEST_NOTIFICATION_KEY);
-        mEntry = new NotificationData.Entry(sbn);
+        mEntry = new NotificationEntry(sbn);
 
         mActionIcon = Icon.createWithResource(mContext, R.drawable.ic_person);
     }

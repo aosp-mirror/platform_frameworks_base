@@ -478,8 +478,8 @@ class WindowSurfaceController {
         return mSurfaceControl.getHandle();
     }
 
-    void getSurface(Surface outSurface) {
-        outSurface.copyFrom(mSurfaceControl);
+    void getSurfaceControl(SurfaceControl outSurfaceControl) {
+        outSurfaceControl.copyFrom(mSurfaceControl);
     }
 
     int getLayer() {

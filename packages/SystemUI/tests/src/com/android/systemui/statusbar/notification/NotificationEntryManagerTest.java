@@ -65,7 +65,8 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
+import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
@@ -121,8 +122,9 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private SmartReplyController mSmartReplyController;
     @Mock private RowInflaterTask mAsyncInflationTask;
+    @Mock private NotificationRowBinder mMockedRowBinder;
 
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
     private StatusBarNotification mSbn;
     private TestableNotificationEntryManager mEntryManager;
     private CountDownLatch mCountDownLatch;
@@ -136,7 +138,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         }
 
         @Override
-        public void onAsyncInflationFinished(NotificationData.Entry entry,
+        public void onAsyncInflationFinished(NotificationEntry entry,
                 @NotificationInflater.InflationFlag int inflatedFlags) {
             super.onAsyncInflationFinished(entry, inflatedFlags);
 
@@ -221,7 +223,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 .setContentText("Text");
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, n.build(), new UserHandle(ActivityManager.getCurrentUser()), null, 0);
-        mEntry = new NotificationData.Entry(mSbn);
+        mEntry = new NotificationEntry(mSbn);
         mEntry.expandedIcon = mock(StatusBarIconView.class);
 
         mEntryManager = new TestableNotificationEntryManager(mContext);
@@ -258,10 +260,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mEntryListener, never()).onInflationError(any(), any());
 
         // Row inflation:
-        ArgumentCaptor<NotificationData.Entry> entryCaptor = ArgumentCaptor.forClass(
-                NotificationData.Entry.class);
+        ArgumentCaptor<NotificationEntry> entryCaptor = ArgumentCaptor.forClass(
+                NotificationEntry.class);
         verify(mBindCallback).onBindRow(entryCaptor.capture(), any(), eq(mSbn), any());
-        NotificationData.Entry entry = entryCaptor.getValue();
+        NotificationEntry entry = entryCaptor.getValue();
         verify(mRemoteInputManager).bindRow(entry.getRow());
 
         // Row content inflation:
@@ -310,8 +312,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         verify(mListContainer).cleanUpViewStateForEntry(mEntry);
         verify(mPresenter).updateNotificationViews();
-        verify(mEntryListener).onEntryRemoved(mEntry, mSbn.getKey(), mSbn,
-                null, false /* lifetimeExtended */, false /* removedByUser */);
+        verify(mEntryListener).onEntryRemoved(
+                mEntry, null, false /* removedByUser */);
         verify(mRow).setRemoved();
 
         assertNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
@@ -335,8 +337,31 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         assertNotNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
         verify(extender).setShouldManageLifetime(mEntry, true /* shouldManage */);
-        verify(mEntryListener).onEntryRemoved(mEntry, mSbn.getKey(), null,
-                null, true /* lifetimeExtended */, false /* removedByUser */);
+        verify(mEntryListener, never()).onEntryRemoved(
+                mEntry, null, false /* removedByUser */);
+    }
+
+    @Test
+    public void testRemoveNotification_onEntryRemoveNotFiredIfEntryDoesntExist() {
+        com.android.systemui.util.Assert.isNotMainThread();
+
+        mEntryManager.removeNotification("not_a_real_key", mRankingMap);
+
+        verify(mEntryListener, never()).onEntryRemoved(
+                mEntry, null, false /* removedByUser */);
+    }
+
+    @Test
+    public void testRemoveNotification_whilePending() throws InterruptedException {
+        com.android.systemui.util.Assert.isNotMainThread();
+
+        mEntryManager.setRowBinder(mMockedRowBinder);
+
+        mEntryManager.addNotification(mSbn, mRankingMap);
+        mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
+
+        verify(mEntryListener, never()).onEntryRemoved(
+                mEntry, null, false /* removedByUser */);
     }
 
     @Test

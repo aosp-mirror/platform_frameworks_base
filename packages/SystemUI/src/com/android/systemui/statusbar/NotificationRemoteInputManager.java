@@ -51,9 +51,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -103,7 +103,7 @@ public class NotificationRemoteInputManager implements Dumpable {
      * Notifications that are already removed but are kept around because the remote input is
      * actively being used (i.e. user is typing in it).  See {@link RemoteInputActiveExtender}.
      */
-    protected final ArraySet<NotificationData.Entry> mEntriesKeptForRemoteInputActive =
+    protected final ArraySet<NotificationEntry> mEntriesKeptForRemoteInputActive =
             new ArraySet<>();
 
     // Dependencies:
@@ -253,14 +253,11 @@ public class NotificationRemoteInputManager implements Dumpable {
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onEntryRemoved(
-                    @Nullable NotificationData.Entry entry,
-                    String key,
-                    StatusBarNotification old,
+                    @Nullable NotificationEntry entry,
                     NotificationVisibility visibility,
-                    boolean lifetimeExtended,
                     boolean removedByUser) {
                 if (removedByUser && entry != null) {
-                    onPerformRemoveNotification(entry, key);
+                    onPerformRemoveNotification(entry, entry.key);
                 }
             }
         });
@@ -272,7 +269,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mRemoteInputController = new RemoteInputController(delegate);
         mRemoteInputController.addCallback(new RemoteInputController.Callback() {
             @Override
-            public void onRemoteInputSent(NotificationData.Entry entry) {
+            public void onRemoteInputSent(NotificationEntry entry) {
                 if (FORCE_REMOTE_INPUT_HISTORY
                         && isNotificationKeptForRemoteInputHistory(entry.key)) {
                     mNotificationLifetimeFinishedCallback.onSafeToRemove(entry.key);
@@ -416,7 +413,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     }
 
     @VisibleForTesting
-    void onPerformRemoveNotification(NotificationData.Entry entry, final String key) {
+    void onPerformRemoveNotification(NotificationEntry entry, final String key) {
         if (mKeysKeptForRemoteInputHistory.contains(key)) {
             mKeysKeptForRemoteInputHistory.remove(key);
         }
@@ -427,7 +424,7 @@ public class NotificationRemoteInputManager implements Dumpable {
 
     public void onPanelCollapsed() {
         for (int i = 0; i < mEntriesKeptForRemoteInputActive.size(); i++) {
-            NotificationData.Entry entry = mEntriesKeptForRemoteInputActive.valueAt(i);
+            NotificationEntry entry = mEntriesKeptForRemoteInputActive.valueAt(i);
             mRemoteInputController.removeRemoteInput(entry, null);
             if (mNotificationLifetimeFinishedCallback != null) {
                 mNotificationLifetimeFinishedCallback.onSafeToRemove(entry.key);
@@ -440,7 +437,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         return mKeysKeptForRemoteInputHistory.contains(key);
     }
 
-    public boolean shouldKeepForRemoteInputHistory(NotificationData.Entry entry) {
+    public boolean shouldKeepForRemoteInputHistory(NotificationEntry entry) {
         if (entry.isDismissed()) {
             return false;
         }
@@ -450,7 +447,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         return (mRemoteInputController.isSpinning(entry.key) || entry.hasJustSentRemoteInput());
     }
 
-    public boolean shouldKeepForSmartReplyHistory(NotificationData.Entry entry) {
+    public boolean shouldKeepForSmartReplyHistory(NotificationEntry entry) {
         if (entry.isDismissed()) {
             return false;
         }
@@ -470,13 +467,13 @@ public class NotificationRemoteInputManager implements Dumpable {
 
     @VisibleForTesting
     StatusBarNotification rebuildNotificationForCanceledSmartReplies(
-            NotificationData.Entry entry) {
+            NotificationEntry entry) {
         return rebuildNotificationWithRemoteInput(entry, null /* remoteInputTest */,
                 false /* showSpinner */);
     }
 
     @VisibleForTesting
-    StatusBarNotification rebuildNotificationWithRemoteInput(NotificationData.Entry entry,
+    StatusBarNotification rebuildNotificationWithRemoteInput(NotificationEntry entry,
             CharSequence remoteInputText, boolean showSpinner) {
         StatusBarNotification sbn = entry.notification;
 
@@ -533,7 +530,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     }
 
     @VisibleForTesting
-    public Set<NotificationData.Entry> getEntriesKeptForRemoteInputActive() {
+    public Set<NotificationEntry> getEntriesKeptForRemoteInputActive() {
         return mEntriesKeptForRemoteInputActive;
     }
 
@@ -556,12 +553,12 @@ public class NotificationRemoteInputManager implements Dumpable {
      */
     protected class RemoteInputHistoryExtender extends RemoteInputExtender {
         @Override
-        public boolean shouldExtendLifetime(@NonNull NotificationData.Entry entry) {
+        public boolean shouldExtendLifetime(@NonNull NotificationEntry entry) {
             return shouldKeepForRemoteInputHistory(entry);
         }
 
         @Override
-        public void setShouldManageLifetime(NotificationData.Entry entry,
+        public void setShouldManageLifetime(NotificationEntry entry,
                 boolean shouldExtend) {
             if (shouldExtend) {
                 CharSequence remoteInputText = entry.remoteInputText;
@@ -602,12 +599,12 @@ public class NotificationRemoteInputManager implements Dumpable {
      */
     protected class SmartReplyHistoryExtender extends RemoteInputExtender {
         @Override
-        public boolean shouldExtendLifetime(@NonNull NotificationData.Entry entry) {
+        public boolean shouldExtendLifetime(@NonNull NotificationEntry entry) {
             return shouldKeepForSmartReplyHistory(entry);
         }
 
         @Override
-        public void setShouldManageLifetime(NotificationData.Entry entry,
+        public void setShouldManageLifetime(NotificationEntry entry,
                 boolean shouldExtend) {
             if (shouldExtend) {
                 StatusBarNotification newSbn = rebuildNotificationForCanceledSmartReplies(entry);
@@ -640,7 +637,7 @@ public class NotificationRemoteInputManager implements Dumpable {
      */
     protected class RemoteInputActiveExtender extends RemoteInputExtender {
         @Override
-        public boolean shouldExtendLifetime(@NonNull NotificationData.Entry entry) {
+        public boolean shouldExtendLifetime(@NonNull NotificationEntry entry) {
             if (entry.isDismissed()) {
                 return false;
             }
@@ -648,7 +645,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
 
         @Override
-        public void setShouldManageLifetime(NotificationData.Entry entry,
+        public void setShouldManageLifetime(NotificationEntry entry,
                 boolean shouldExtend) {
             if (shouldExtend) {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {

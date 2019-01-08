@@ -36,8 +36,8 @@ import android.testing.TestableLooper;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.Before;
@@ -58,7 +58,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
     private static final int TEST_ACTION_COUNT = 3;
 
     private Notification mNotification;
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
     private SmartReplyController mSmartReplyController;
     private NotificationRemoteInputManager mRemoteInputManager;
 
@@ -92,7 +92,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
 
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, mNotification, new UserHandle(ActivityManager.getCurrentUser()), null, 0);
-        mEntry = new NotificationData.Entry(mSbn);
+        mEntry = new NotificationEntry(mSbn);
     }
 
     @Test

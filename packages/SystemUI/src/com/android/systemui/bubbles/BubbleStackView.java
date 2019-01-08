@@ -40,7 +40,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
@@ -247,7 +247,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
      * @param bubbleView the view to update in the stack.
      * @param entry the entry to update it with.
      */
-    public void updateBubble(BubbleView bubbleView, NotificationData.Entry entry) {
+    public void updateBubble(BubbleView bubbleView, NotificationEntry entry) {
         // TODO - move to top of bubble stack, make it show its update if it makes sense
         bubbleView.update(entry);
         if (bubbleView.equals(mExpandedBubble)) {

@@ -16,15 +16,14 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
-        .ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -113,19 +112,12 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
     void setMaxDisplayedNotifications(int maxNotifications);
 
     /**
-     * Handle snapping a non-dismissable row back if the user tried to dismiss it.
-     *
-     * @param entry the entry whose row needs to snap back
-     */
-    void snapViewIfNeeded(NotificationData.Entry entry);
-
-    /**
      * Get the view parent for a notification entry. For example, NotificationStackScrollLayout.
      *
      * @param entry entry to get the view parent for
      * @return the view parent for entry
      */
-    ViewGroup getViewParentForNotification(NotificationData.Entry entry);
+    ViewGroup getViewParentForNotification(NotificationEntry entry);
 
     /**
      * Resets the currently exposed menu view.
@@ -148,7 +140,7 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
      *
      * @param entry the entry whose view's view state needs to be cleaned up (say that 5 times fast)
      */
-    void cleanUpViewStateForEntry(NotificationData.Entry entry);
+    void cleanUpViewStateForEntry(NotificationEntry entry);
 
 
     /**

@@ -48,7 +48,7 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -116,7 +116,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mNotificationActivityStarter = notificationActivityStarter;
     }
 
-    public void onDensityOrFontScaleChanged(NotificationData.Entry entry) {
+    public void onDensityOrFontScaleChanged(NotificationEntry entry) {
         setExposedGuts(entry.getGuts());
         bindGuts(entry.getRow());
     }
@@ -429,7 +429,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     }
 
     @Override
-    public boolean shouldExtendLifetime(NotificationData.Entry entry) {
+    public boolean shouldExtendLifetime(NotificationEntry entry) {
         return entry != null
                 &&(mNotificationGutsExposed != null
                     && entry.getGuts() != null
@@ -438,7 +438,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     }
 
     @Override
-    public void setShouldManageLifetime(NotificationData.Entry entry, boolean shouldExtend) {
+    public void setShouldManageLifetime(NotificationEntry entry, boolean shouldExtend) {
         if (shouldExtend) {
             mKeyToRemoveOnGutsClosed = entry.key;
             if (Log.isLoggable(TAG, Log.DEBUG)) {

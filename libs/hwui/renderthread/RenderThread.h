@@ -123,6 +123,7 @@ private:
     friend class RenderProxy;
     friend class DummyVsyncSource;
     friend class android::uirenderer::TestUtils;
+    friend class android::uirenderer::WebViewFunctor;
 
     RenderThread();
     virtual ~RenderThread();

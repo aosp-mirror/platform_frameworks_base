@@ -110,9 +110,9 @@ import com.android.server.backup.internal.ClearDataObserver;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.internal.Operation;
 import com.android.server.backup.internal.PerformInitializeTask;
-import com.android.server.backup.internal.ProvisionedObserver;
 import com.android.server.backup.internal.RunBackupReceiver;
 import com.android.server.backup.internal.RunInitializeReceiver;
+import com.android.server.backup.internal.SetupObserver;
 import com.android.server.backup.keyvalue.BackupRequest;
 import com.android.server.backup.params.AdbBackupParams;
 import com.android.server.backup.params.AdbParams;
@@ -208,8 +208,8 @@ public class UserBackupManagerService {
 
     public static final String RUN_BACKUP_ACTION = "android.app.backup.intent.RUN";
     public static final String RUN_INITIALIZE_ACTION = "android.app.backup.intent.INIT";
-    public static final String BACKUP_FINISHED_ACTION = "android.intent.action.BACKUP_FINISHED";
-    public static final String BACKUP_FINISHED_PACKAGE_EXTRA = "packageName";
+    private static final String BACKUP_FINISHED_ACTION = "android.intent.action.BACKUP_FINISHED";
+    private static final String BACKUP_FINISHED_PACKAGE_EXTRA = "packageName";
 
     // Bookkeeping of in-flight operations. The operation token is the index of the entry in the
     // pending operations list.
@@ -245,26 +245,27 @@ public class UserBackupManagerService {
     private final @UserIdInt int mUserId;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final TransportManager mTransportManager;
+    private final HandlerThread mUserBackupThread;
 
-    private Context mContext;
-    private PackageManager mPackageManager;
-    private IPackageManager mPackageManagerBinder;
-    private IActivityManager mActivityManager;
+    private final Context mContext;
+    private final PackageManager mPackageManager;
+    private final IPackageManager mPackageManagerBinder;
+    private final IActivityManager mActivityManager;
     private PowerManager mPowerManager;
-    private AlarmManager mAlarmManager;
-    private IStorageManager mStorageManager;
-    private BackupManagerConstants mConstants;
-    private PowerManager.WakeLock mWakelock;
-    private BackupHandler mBackupHandler;
+    private final AlarmManager mAlarmManager;
+    private final IStorageManager mStorageManager;
+    private final BackupManagerConstants mConstants;
+    private final PowerManager.WakeLock mWakelock;
+    private final BackupHandler mBackupHandler;
 
-    private IBackupManager mBackupManagerBinder;
+    private final IBackupManager mBackupManagerBinder;
 
     private boolean mEnabled;   // access to this is synchronized on 'this'
-    private boolean mProvisioned;
+    private boolean mSetupComplete;
     private boolean mAutoRestore;
 
-    private PendingIntent mRunBackupIntent;
-    private PendingIntent mRunInitIntent;
+    private final PendingIntent mRunBackupIntent;
+    private final PendingIntent mRunInitIntent;
 
     private final ArraySet<String> mPendingInits = new ArraySet<>();  // transport names
 
@@ -272,7 +273,7 @@ public class UserBackupManagerService {
     private final SparseArray<HashSet<String>> mBackupParticipants = new SparseArray<>();
 
     // Backups that we haven't started yet.  Keys are package names.
-    private HashMap<String, BackupRequest> mPendingBackups = new HashMap<>();
+    private final HashMap<String, BackupRequest> mPendingBackups = new HashMap<>();
 
     // locking around the pending-backup management
     private final Object mQueueLock = new Object();
@@ -314,9 +315,6 @@ public class UserBackupManagerService {
 
     private ActiveRestoreSession mActiveRestoreSession;
 
-    // Watch the device provisioning operation during setup
-    private ContentObserver mProvisionedObserver;
-
     /**
      * mCurrentOperations contains the list of currently active operations.
      *
@@ -342,7 +340,7 @@ public class UserBackupManagerService {
     private final SparseArray<Operation> mCurrentOperations = new SparseArray<>();
     private final Object mCurrentOpLock = new Object();
     private final Random mTokenGenerator = new Random();
-    final AtomicInteger mNextToken = new AtomicInteger();
+    private final AtomicInteger mNextToken = new AtomicInteger();
 
     // Where we keep our journal files and other bookkeeping.
     private final File mBaseStateDir;
@@ -350,7 +348,7 @@ public class UserBackupManagerService {
     private final File mJournalDir;
     @Nullable
     private DataChangedJournal mJournal;
-    private File mFullBackupScheduleFile;
+    private final File mFullBackupScheduleFile;
 
     // Keep a log of all the apps we've ever backed up.
     private ProcessedPackagesJournal mProcessedPackagesJournal;
@@ -371,11 +369,10 @@ public class UserBackupManagerService {
             @UserIdInt int userId,
             Context context,
             Trampoline trampoline,
-            HandlerThread backupThread,
             Set<ComponentName> transportWhitelist) {
         String currentTransport =
-                Settings.Secure.getString(
-                        context.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
+                Settings.Secure.getStringForUser(
+                        context.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT, userId);
         if (TextUtils.isEmpty(currentTransport)) {
             currentTransport = null;
         }
@@ -389,8 +386,21 @@ public class UserBackupManagerService {
         File baseStateDir = UserBackupManagerFiles.getBaseStateDir(userId);
         File dataDir = UserBackupManagerFiles.getDataDir(userId);
 
+        HandlerThread userBackupThread =
+                new HandlerThread("backup-" + userId, Process.THREAD_PRIORITY_BACKGROUND);
+        userBackupThread.start();
+        if (DEBUG) {
+            Slog.d(TAG, "Started thread " + userBackupThread.getName() + " for user " + userId);
+        }
+
         return createAndInitializeService(
-                userId, context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
+                userId,
+                context,
+                trampoline,
+                userBackupThread,
+                baseStateDir,
+                dataDir,
+                transportManager);
     }
 
     /**
@@ -399,7 +409,7 @@ public class UserBackupManagerService {
      * @param userId The user which this service is for.
      * @param context The system server context.
      * @param trampoline A reference to the proxy to {@link BackupManagerService}.
-     * @param backupThread The thread running backup/restore operations for the user.
+     * @param userBackupThread The thread running backup/restore operations for the user.
      * @param baseStateDir The directory we store the user's persistent bookkeeping data.
      * @param dataDir The directory we store the user's temporary staging data.
      * @param transportManager The {@link TransportManager} responsible for handling the user's
@@ -410,19 +420,38 @@ public class UserBackupManagerService {
             @UserIdInt int userId,
             Context context,
             Trampoline trampoline,
-            HandlerThread backupThread,
+            HandlerThread userBackupThread,
             File baseStateDir,
             File dataDir,
             TransportManager transportManager) {
         return new UserBackupManagerService(
-                userId, context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
+                userId,
+                context,
+                trampoline,
+                userBackupThread,
+                baseStateDir,
+                dataDir,
+                transportManager);
+    }
+
+    /**
+     * Returns the value of {@link Settings.Secure#USER_SETUP_COMPLETE} for the specified user
+     * {@code userId} as a {@code boolean}.
+     */
+    public static boolean getSetupCompleteSettingForUser(Context context, int userId) {
+        return Settings.Secure.getIntForUser(
+                context.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE,
+                0,
+                userId)
+                != 0;
     }
 
     private UserBackupManagerService(
             @UserIdInt int userId,
             Context context,
             Trampoline parent,
-            HandlerThread backupThread,
+            HandlerThread userBackupThread,
             File baseStateDir,
             File dataDir,
             TransportManager transportManager) {
@@ -443,21 +472,22 @@ public class UserBackupManagerService {
                 BackupAgentTimeoutParameters(Handler.getMain(), mContext.getContentResolver());
         mAgentTimeoutParameters.start();
 
-        // spin up the backup/restore handler thread
-        checkNotNull(backupThread, "backupThread cannot be null");
-        mBackupHandler = new BackupHandler(this, backupThread.getLooper());
+        checkNotNull(userBackupThread, "userBackupThread cannot be null");
+        mUserBackupThread = userBackupThread;
+        mBackupHandler = new BackupHandler(this, userBackupThread.getLooper());
 
         // Set up our bookkeeping
         final ContentResolver resolver = context.getContentResolver();
-        mProvisioned = Settings.Global.getInt(resolver,
-                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
-        mAutoRestore = Settings.Secure.getInt(resolver,
-                Settings.Secure.BACKUP_AUTO_RESTORE, 1) != 0;
+        mSetupComplete = getSetupCompleteSettingForUser(context, userId);
+        mAutoRestore = Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.BACKUP_AUTO_RESTORE, 1, userId) != 0;
 
-        mProvisionedObserver = new ProvisionedObserver(this, mBackupHandler);
+        ContentObserver setupObserver = new SetupObserver(this, mBackupHandler);
         resolver.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
-                false, mProvisionedObserver);
+                Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE),
+                /* notifyForDescendents */ false,
+                setupObserver,
+                mUserId);
 
         mBaseStateDir = checkNotNull(baseStateDir, "baseStateDir cannot be null");
         mBaseStateDir.mkdirs();
@@ -526,6 +556,15 @@ public class UserBackupManagerService {
         mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
     }
 
+    /** Cleans up state when the user of this service is stopped. */
+    void tearDownService() {
+        mUserBackupThread.quit();
+    }
+
+    public @UserIdInt int getUserId() {
+        return mUserId;
+    }
+
     public BackupManagerConstants getConstants() {
         return mConstants;
     }
@@ -538,49 +577,25 @@ public class UserBackupManagerService {
         return mContext;
     }
 
-    public void setContext(Context context) {
-        mContext = context;
-    }
-
     public PackageManager getPackageManager() {
         return mPackageManager;
-    }
-
-    public void setPackageManager(PackageManager packageManager) {
-        mPackageManager = packageManager;
     }
 
     public IPackageManager getPackageManagerBinder() {
         return mPackageManagerBinder;
     }
 
-    public void setPackageManagerBinder(IPackageManager packageManagerBinder) {
-        mPackageManagerBinder = packageManagerBinder;
-    }
-
     public IActivityManager getActivityManager() {
         return mActivityManager;
-    }
-
-    public void setActivityManager(IActivityManager activityManager) {
-        mActivityManager = activityManager;
     }
 
     public AlarmManager getAlarmManager() {
         return mAlarmManager;
     }
 
-    public void setAlarmManager(AlarmManager alarmManager) {
-        mAlarmManager = alarmManager;
-    }
-
     @VisibleForTesting
     void setPowerManager(PowerManager powerManager) {
         mPowerManager = powerManager;
-    }
-
-    public void setBackupManagerBinder(IBackupManager backupManagerBinder) {
-        mBackupManagerBinder = backupManagerBinder;
     }
 
     public TransportManager getTransportManager() {
@@ -595,12 +610,12 @@ public class UserBackupManagerService {
         mEnabled = enabled;
     }
 
-    public boolean isProvisioned() {
-        return mProvisioned;
+    public boolean isSetupComplete() {
+        return mSetupComplete;
     }
 
-    public void setProvisioned(boolean provisioned) {
-        mProvisioned = provisioned;
+    public void setSetupComplete(boolean setupComplete) {
+        mSetupComplete = setupComplete;
     }
 
     public PowerManager.WakeLock getWakelock() {
@@ -617,33 +632,16 @@ public class UserBackupManagerService {
         mWakelock.setWorkSource(workSource);
     }
 
-    public void setWakelock(PowerManager.WakeLock wakelock) {
-        mWakelock = wakelock;
-    }
-
     public Handler getBackupHandler() {
         return mBackupHandler;
-    }
-
-    public void setBackupHandler(BackupHandler backupHandler) {
-        mBackupHandler = backupHandler;
     }
 
     public PendingIntent getRunInitIntent() {
         return mRunInitIntent;
     }
 
-    public void setRunInitIntent(PendingIntent runInitIntent) {
-        mRunInitIntent = runInitIntent;
-    }
-
     public HashMap<String, BackupRequest> getPendingBackups() {
         return mPendingBackups;
-    }
-
-    public void setPendingBackups(
-            HashMap<String, BackupRequest> pendingBackups) {
-        mPendingBackups = pendingBackups;
     }
 
     public Object getQueueLock() {
@@ -658,20 +656,12 @@ public class UserBackupManagerService {
         mBackupRunning = backupRunning;
     }
 
-    public long getLastBackupPass() {
-        return mLastBackupPass;
-    }
-
     public void setLastBackupPass(long lastBackupPass) {
         mLastBackupPass = lastBackupPass;
     }
 
     public Object getClearDataLock() {
         return mClearDataLock;
-    }
-
-    public boolean isClearingData() {
-        return mClearingData;
     }
 
     public void setClearingData(boolean clearingData) {
@@ -692,11 +682,6 @@ public class UserBackupManagerService {
 
     public ActiveRestoreSession getActiveRestoreSession() {
         return mActiveRestoreSession;
-    }
-
-    public void setActiveRestoreSession(
-            ActiveRestoreSession activeRestoreSession) {
-        mActiveRestoreSession = activeRestoreSession;
     }
 
     public SparseArray<Operation> getCurrentOperations() {
@@ -732,16 +717,8 @@ public class UserBackupManagerService {
         return mRng;
     }
 
-    public Set<String> getAncestralPackages() {
-        return mAncestralPackages;
-    }
-
     public void setAncestralPackages(Set<String> ancestralPackages) {
         mAncestralPackages = ancestralPackages;
-    }
-
-    public long getAncestralToken() {
-        return mAncestralToken;
     }
 
     public void setAncestralToken(long ancestralToken) {
@@ -1553,11 +1530,16 @@ public class UserBackupManagerService {
             throw new IllegalArgumentException("No packages are provided for backup");
         }
 
-        if (!mEnabled || !mProvisioned) {
-            Slog.i(TAG, "Backup requested but e=" + mEnabled + " p=" + mProvisioned);
+        if (!mEnabled || !mSetupComplete) {
+            Slog.i(
+                    TAG,
+                    "Backup requested but enabled="
+                            + mEnabled
+                            + " setupComplete="
+                            + mSetupComplete);
             BackupObserverUtils.sendBackupFinished(observer,
                     BackupManager.ERROR_BACKUP_NOT_ALLOWED);
-            final int logTag = mProvisioned
+            final int logTag = mSetupComplete
                     ? BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED
                     : BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
             monitor = BackupManagerMonitorUtils.monitorEvent(monitor, logTag, null,
@@ -1992,13 +1974,13 @@ public class UserBackupManagerService {
         FullBackupEntry entry = null;
         long latency = fullBackupInterval;
 
-        if (!mEnabled || !mProvisioned) {
+        if (!mEnabled || !mSetupComplete) {
             // Backups are globally disabled, so don't proceed.  We also don't reschedule
             // the job driving automatic backups; that job will be scheduled again when
             // the user enables backup.
             if (MORE_DEBUG) {
-                Slog.i(TAG, "beginFullBackup but e=" + mEnabled
-                        + " p=" + mProvisioned + "; ignoring");
+                Slog.i(TAG, "beginFullBackup but enabled=" + mEnabled
+                        + " setupComplete=" + mSetupComplete + "; ignoring");
             }
             return false;
         }
@@ -2399,12 +2381,6 @@ public class UserBackupManagerService {
         }
     }
 
-    /** Returns {@code true} if the system user has gone through SUW. */
-    public boolean deviceIsProvisioned() {
-        final ContentResolver resolver = mContext.getContentResolver();
-        return (Settings.Global.getInt(resolver, Settings.Global.DEVICE_PROVISIONED, 0) != 0);
-    }
-
     /**
      * Used by 'adb backup' to run a backup pass for packages supplied via the command line, writing
      * the resulting data stream to the supplied {@code fd}. This method is synchronous and does not
@@ -2437,8 +2413,7 @@ public class UserBackupManagerService {
 
         long oldId = Binder.clearCallingIdentity();
         try {
-            // Doesn't make sense to do a full backup prior to setup
-            if (!deviceIsProvisioned()) {
+            if (!mSetupComplete) {
                 Slog.i(TAG, "Backup not supported before setup");
                 return;
             }
@@ -2564,9 +2539,7 @@ public class UserBackupManagerService {
         long oldId = Binder.clearCallingIdentity();
 
         try {
-            // Check whether the device has been provisioned -- we don't handle
-            // full restores prior to completing the setup process.
-            if (!deviceIsProvisioned()) {
+            if (!mSetupComplete) {
                 Slog.i(TAG, "Full restore not permitted before setup");
                 return;
             }
@@ -2721,7 +2694,7 @@ public class UserBackupManagerService {
             }
 
             synchronized (mQueueLock) {
-                if (enable && !wasEnabled && mProvisioned) {
+                if (enable && !wasEnabled && mSetupComplete) {
                     // if we've just been enabled, start scheduling backup passes
                     KeyValueBackupJob.schedule(mContext, mConstants);
                     scheduleNextFullBackupJob(0);
@@ -2734,7 +2707,7 @@ public class UserBackupManagerService {
                     // This also constitutes an opt-out, so we wipe any data for
                     // this device from the backend.  We start that process with
                     // an alarm in order to guarantee wakelock states.
-                    if (wasEnabled && mProvisioned) {
+                    if (wasEnabled && mSetupComplete) {
                         // NOTE: we currently flush every registered transport, not just
                         // the currently-active one.
                         List<String> transportNames = new ArrayList<>();
@@ -2782,8 +2755,8 @@ public class UserBackupManagerService {
         final long oldId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                Settings.Secure.putInt(mContext.getContentResolver(),
-                        Settings.Secure.BACKUP_AUTO_RESTORE, doAutoRestore ? 1 : 0);
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.BACKUP_AUTO_RESTORE, doAutoRestore ? 1 : 0, mUserId);
                 mAutoRestore = doAutoRestore;
             }
         } finally {
@@ -2996,8 +2969,8 @@ public class UserBackupManagerService {
 
     private void updateStateForTransport(String newTransportName) {
         // Publish the name change
-        Settings.Secure.putString(mContext.getContentResolver(),
-                Settings.Secure.BACKUP_TRANSPORT, newTransportName);
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.BACKUP_TRANSPORT, newTransportName, mUserId);
 
         // And update our current-dataset bookkeeping
         String callerLogString = "BMS.updateStateForTransport()";
@@ -3112,8 +3085,7 @@ public class UserBackupManagerService {
         synchronized (mAgentConnectLock) {
             if (Binder.getCallingUid() == Process.SYSTEM_UID) {
                 Slog.d(TAG, "agentConnected pkg=" + packageName + " agent=" + agentBinder);
-                IBackupAgent agent = IBackupAgent.Stub.asInterface(agentBinder);
-                mConnectedAgent = agent;
+                mConnectedAgent = IBackupAgent.Stub.asInterface(agentBinder);
                 mConnecting = false;
             } else {
                 Slog.w(TAG, "Non-system process uid=" + Binder.getCallingUid()
@@ -3431,7 +3403,7 @@ public class UserBackupManagerService {
     private void dumpInternal(PrintWriter pw) {
         synchronized (mQueueLock) {
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
-                    + " / " + (!mProvisioned ? "not " : "") + "provisioned / "
+                    + " / " + (!mSetupComplete ? "not " : "") + "setup complete / "
                     + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init");
             pw.println("Auto-restore is " + (mAutoRestore ? "enabled" : "disabled"));
             if (mBackupRunning) pw.println("Backup currently running");

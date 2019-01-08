@@ -37,6 +37,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceSession;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -320,7 +321,7 @@ public class ActivityView extends ViewGroup {
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
             mTmpSurface = new Surface();
             if (mVirtualDisplay == null) {
-                initVirtualDisplay(new SurfaceSession(surfaceHolder.getSurface()));
+                initVirtualDisplay(new SurfaceSession());
                 if (mVirtualDisplay != null && mActivityViewCallback != null) {
                     mActivityViewCallback.onActivityViewReady(ActivityView.this);
                 }
@@ -354,6 +355,12 @@ public class ActivityView extends ViewGroup {
         }
     }
 
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        mSurfaceView.setVisibility(visibility);
+    }
+
     private void initVirtualDisplay(SurfaceSession surfaceSession) {
         if (mVirtualDisplay != null) {
             throw new IllegalStateException("Trying to initialize for the second time.");
@@ -382,6 +389,7 @@ public class ActivityView extends ViewGroup {
 
         mRootSurfaceControl = new SurfaceControl.Builder(surfaceSession)
                 .setContainerLayer(true)
+                .setParent(mSurfaceView.getSurfaceControl())
                 .setName(DISPLAY_NAME)
                 .build();
 

@@ -35,6 +35,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.text.TextPaint;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextClock;
 
@@ -42,6 +44,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +64,7 @@ import org.mockito.MockitoAnnotations;
 public class KeyguardClockSwitchTest extends SysuiTestCase {
     private PluginManager mPluginManager;
     private FrameLayout mClockContainer;
+    private StatusBarStateController.StateListener mStateListener;
 
     @Mock
     TextClock mClockView;
@@ -75,6 +80,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         mClockContainer = mKeyguardClockSwitch.findViewById(R.id.clock_view);
         MockitoAnnotations.initMocks(this);
         when(mClockView.getPaint()).thenReturn(mock(TextPaint.class));
+        mStateListener = mKeyguardClockSwitch.getStateListener();
     }
 
     @Test
@@ -271,5 +277,29 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         mKeyguardClockSwitch.setStyle(style);
 
         verify(plugin).setStyle(style);
+    }
+
+    @Test
+    public void onStateChanged_InvisibleInShade() {
+        // GIVEN that the big clock container is visible
+        ViewGroup container = mock(ViewGroup.class);
+        when(container.getVisibility()).thenReturn(View.VISIBLE);
+        mKeyguardClockSwitch.setBigClockContainer(container);
+        // WHEN transitioned to SHADE state
+        mStateListener.onStateChanged(StatusBarState.SHADE);
+        // THEN the container is invisible.
+        verify(container).setVisibility(View.INVISIBLE);
+    }
+
+    @Test
+    public void onStateChanged_VisibleInKeyguard() {
+        // GIVEN that the big clock container is invisible
+        ViewGroup container = mock(ViewGroup.class);
+        when(container.getVisibility()).thenReturn(View.INVISIBLE);
+        mKeyguardClockSwitch.setBigClockContainer(container);
+        // WHEN transitioned to KEYGUARD state
+        mStateListener.onStateChanged(StatusBarState.KEYGUARD);
+        // THEN the container is visible.
+        verify(container).setVisibility(View.VISIBLE);
     }
 }

@@ -1427,18 +1427,13 @@ public class Notification implements Parcelable
          */
         public static final int SEMANTIC_ACTION_CALL = 10;
 
-        /**
-         * {@code SemanticAction}: Contextual action - dependent on the current notification. E.g.
-         * open a Map application with an address shown in the notification.
-         */
-        public static final int SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION = 11;
-
         private final Bundle mExtras;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private Icon mIcon;
         private final RemoteInput[] mRemoteInputs;
         private boolean mAllowGeneratedReplies = true;
         private final @SemanticAction int mSemanticAction;
+        private final boolean mIsContextual;
 
         /**
          * Small icon representing the action.
@@ -1474,6 +1469,7 @@ public class Notification implements Parcelable
             mRemoteInputs = in.createTypedArray(RemoteInput.CREATOR);
             mAllowGeneratedReplies = in.readInt() == 1;
             mSemanticAction = in.readInt();
+            mIsContextual = in.readInt() == 1;
         }
 
         /**
@@ -1482,13 +1478,13 @@ public class Notification implements Parcelable
         @Deprecated
         public Action(int icon, CharSequence title, PendingIntent intent) {
             this(Icon.createWithResource("", icon), title, intent, new Bundle(), null, true,
-                    SEMANTIC_ACTION_NONE);
+                    SEMANTIC_ACTION_NONE, false /* isContextual */);
         }
 
         /** Keep in sync with {@link Notification.Action.Builder#Builder(Action)}! */
         private Action(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
                 RemoteInput[] remoteInputs, boolean allowGeneratedReplies,
-                       @SemanticAction int semanticAction) {
+                       @SemanticAction int semanticAction, boolean isContextual) {
             this.mIcon = icon;
             if (icon != null && icon.getType() == Icon.TYPE_RESOURCE) {
                 this.icon = icon.getResId();
@@ -1499,6 +1495,7 @@ public class Notification implements Parcelable
             this.mRemoteInputs = remoteInputs;
             this.mAllowGeneratedReplies = allowGeneratedReplies;
             this.mSemanticAction = semanticAction;
+            this.mIsContextual = isContextual;
         }
 
         /**
@@ -1546,6 +1543,15 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Returns whether this is a contextual Action, i.e. whether the action is dependent on the
+         * notification message body. An example of a contextual action could be an action opening a
+         * map application with an address shown in the notification.
+         */
+        public boolean isContextual() {
+            return mIsContextual;
+        }
+
+        /**
          * Get the list of inputs to be collected from the user that ONLY accept data when this
          * action is sent. These remote inputs are guaranteed to return true on a call to
          * {@link RemoteInput#isDataOnly}.
@@ -1570,6 +1576,7 @@ public class Notification implements Parcelable
             private final Bundle mExtras;
             private ArrayList<RemoteInput> mRemoteInputs;
             private @SemanticAction int mSemanticAction;
+            private boolean mIsContextual;
 
             /**
              * Construct a new builder for {@link Action} object.
@@ -1684,6 +1691,16 @@ public class Notification implements Parcelable
             }
 
             /**
+             * Sets whether this {@link Action} is a contextual action, i.e. whether the action is
+             * dependent on the notification message body. An example of a contextual action could
+             * be an action opening a map application with an address shown in the notification.
+             */
+            public Builder setContextual(boolean isContextual) {
+                mIsContextual = isContextual;
+                return this;
+            }
+
+            /**
              * Apply an extender to this action builder. Extenders may be used to add
              * metadata or change options on this builder.
              */
@@ -1697,7 +1714,7 @@ public class Notification implements Parcelable
              * necessary to display the action.
              */
             private void checkContextualActionNullFields() {
-                if (mSemanticAction != SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION) return;
+                if (!mIsContextual) return;
 
                 if (mIcon == null) {
                     throw new NullPointerException("Contextual Actions must contain a valid icon");
@@ -1743,7 +1760,7 @@ public class Notification implements Parcelable
                 RemoteInput[] textInputsArr = textInputs.isEmpty()
                         ? null : textInputs.toArray(new RemoteInput[textInputs.size()]);
                 return new Action(mIcon, mTitle, mIntent, mExtras, textInputsArr,
-                        mAllowGeneratedReplies, mSemanticAction);
+                        mAllowGeneratedReplies, mSemanticAction, mIsContextual);
             }
         }
 
@@ -1756,7 +1773,8 @@ public class Notification implements Parcelable
                     mExtras == null ? new Bundle() : new Bundle(mExtras),
                     getRemoteInputs(),
                     getAllowGeneratedReplies(),
-                    getSemanticAction());
+                    getSemanticAction(),
+                    isContextual());
         }
 
         @Override
@@ -1784,6 +1802,7 @@ public class Notification implements Parcelable
             out.writeTypedArray(mRemoteInputs, flags);
             out.writeInt(mAllowGeneratedReplies ? 1 : 0);
             out.writeInt(mSemanticAction);
+            out.writeInt(mIsContextual ? 1 : 0);
         }
 
         public static final Parcelable.Creator<Action> CREATOR =
@@ -2073,8 +2092,7 @@ public class Notification implements Parcelable
                 SEMANTIC_ACTION_UNMUTE,
                 SEMANTIC_ACTION_THUMBS_UP,
                 SEMANTIC_ACTION_THUMBS_DOWN,
-                SEMANTIC_ACTION_CALL,
-                SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION
+                SEMANTIC_ACTION_CALL
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface SemanticAction {}
@@ -3230,8 +3248,7 @@ public class Notification implements Parcelable
     }
 
     /**
-     * Returns the actions that are contextual (marked as SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION) out
-     * of the actions in this notification.
+     * Returns the actions that are contextual out of the actions in this notification.
      *
      * @hide
      */
@@ -3240,8 +3257,7 @@ public class Notification implements Parcelable
 
         List<Notification.Action> contextualActions = new ArrayList<>();
         for (Notification.Action action : actions) {
-            if (action.getSemanticAction()
-                    == Notification.Action.SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION) {
+            if (action.isContextual()) {
                 contextualActions.add(action);
             }
         }
@@ -5062,8 +5078,7 @@ public class Notification implements Parcelable
                 List<Notification.Action> actions) {
             List<Notification.Action> nonContextualActions = new ArrayList<>();
             for (Notification.Action action : actions) {
-                if (action.getSemanticAction()
-                        != Action.SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION) {
+                if (!action.isContextual()) {
                     nonContextualActions.add(action);
                 }
             }

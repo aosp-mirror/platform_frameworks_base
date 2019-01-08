@@ -16,6 +16,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
 
 import java.util.Objects;
 import java.util.TimeZone;
@@ -82,6 +84,24 @@ public class KeyguardClockSwitch extends RelativeLayout {
                     }
                 }
             };
+    private final StatusBarStateController.StateListener mStateListener =
+            new StatusBarStateController.StateListener() {
+                @Override
+                public void onStateChanged(int newState) {
+                    if (mBigClockContainer == null) {
+                        return;
+                    }
+                    if (newState == StatusBarState.SHADE) {
+                        if (mBigClockContainer.getVisibility() == View.VISIBLE) {
+                            mBigClockContainer.setVisibility(View.INVISIBLE);
+                        }
+                    } else {
+                        if (mBigClockContainer.getVisibility() == View.INVISIBLE) {
+                            mBigClockContainer.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+    };
 
     public KeyguardClockSwitch(Context context) {
         this(context, null);
@@ -104,12 +124,14 @@ public class KeyguardClockSwitch extends RelativeLayout {
         super.onAttachedToWindow();
         Dependency.get(PluginManager.class).addPluginListener(mClockPluginListener,
                 ClockPlugin.class);
+        Dependency.get(StatusBarStateController.class).addCallback(mStateListener);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(PluginManager.class).removePluginListener(mClockPluginListener);
+        Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
     }
 
     /**
@@ -237,5 +259,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
     @VisibleForTesting (otherwise = VisibleForTesting.NONE)
     PluginListener getClockPluginListener() {
         return mClockPluginListener;
+    }
+
+    @VisibleForTesting (otherwise = VisibleForTesting.NONE)
+    StatusBarStateController.StateListener getStateListener() {
+        return mStateListener;
     }
 }

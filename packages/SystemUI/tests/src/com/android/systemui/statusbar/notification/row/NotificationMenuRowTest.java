@@ -35,7 +35,7 @@ import android.testing.ViewUtils;
 import android.view.ViewGroup;
 
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
@@ -54,7 +54,7 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     public void setup() {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mRow = mock(ExpandableNotificationRow.class);
-        NotificationData.Entry entry = new NotificationData.Entry(
+        NotificationEntry entry = new NotificationEntry(
                 mock(StatusBarNotification.class));
         entry.channel = mock(NotificationChannel.class);
         when(mRow.getEntry()).thenReturn(entry);

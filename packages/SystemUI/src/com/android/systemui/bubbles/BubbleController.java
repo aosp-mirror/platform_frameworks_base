@@ -33,8 +33,11 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
 import java.util.ArrayList;
@@ -57,45 +60,29 @@ public class BubbleController {
     private static final String TAG = "BubbleController";
 
     // Enables some subset of notifs to automatically become bubbles
-    public static final boolean DEBUG_ENABLE_AUTO_BUBBLE = false;
+    private static final boolean DEBUG_ENABLE_AUTO_BUBBLE = false;
     // When a bubble is dismissed, recreate it as a notification
-    public static final boolean DEBUG_DEMOTE_TO_NOTIF = false;
+    private static final boolean DEBUG_DEMOTE_TO_NOTIF = false;
 
     // Secure settings
     private static final String ENABLE_AUTO_BUBBLE_MESSAGES = "experiment_autobubble_messaging";
     private static final String ENABLE_AUTO_BUBBLE_ONGOING = "experiment_autobubble_ongoing";
     private static final String ENABLE_AUTO_BUBBLE_ALL = "experiment_autobubble_all";
 
-    private Context mContext;
-    private BubbleDismissListener mDismissListener;
+    private final Context mContext;
+    private final NotificationEntryManager mNotificationEntryManager;
     private BubbleStateChangeListener mStateChangeListener;
     private BubbleExpandListener mExpandListener;
 
-    private Map<String, BubbleView> mBubbles = new HashMap<>();
+    private final Map<String, BubbleView> mBubbles = new HashMap<>();
     private BubbleStackView mStackView;
-    private Point mDisplaySize;
+    private final Point mDisplaySize;
 
     // Bubbles get added to the status bar view
-    @VisibleForTesting
-    protected StatusBarWindowController mStatusBarWindowController;
+    private final StatusBarWindowController mStatusBarWindowController;
 
     // Used for determining view rect for touch interaction
     private Rect mTempRect = new Rect();
-
-    /**
-     * Listener to find out about bubble / bubble stack dismissal events.
-     */
-    public interface BubbleDismissListener {
-        /**
-         * Called when the entire stack of bubbles is dismissed by the user.
-         */
-        void onStackDismissed();
-
-        /**
-         * Called when a specific bubble is dismissed by the user.
-         */
-        void onBubbleDismissed(String key);
-    }
 
     /**
      * Listener to be notified when some states of the bubbles change.
@@ -123,17 +110,13 @@ public class BubbleController {
     @Inject
     public BubbleController(Context context, StatusBarWindowController statusBarWindowController) {
         mContext = context;
+        mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mDisplaySize = new Point();
         wm.getDefaultDisplay().getSize(mDisplaySize);
         mStatusBarWindowController = statusBarWindowController;
-    }
 
-    /**
-     * Set a listener to be notified of bubble dismissal events.
-     */
-    public void setDismissListener(BubbleDismissListener listener) {
-        mDismissListener = listener;
+        mNotificationEntryManager.addNotificationEntryListener(mEntryListener);
     }
 
     /**
@@ -180,7 +163,7 @@ public class BubbleController {
     /**
      * Tell the stack of bubbles to be dismissed, this will remove all of the bubbles in the stack.
      */
-    public void dismissStack() {
+    void dismissStack() {
         if (mStackView == null) {
             return;
         }
@@ -190,16 +173,14 @@ public class BubbleController {
         for (String key: mBubbles.keySet()) {
             removeBubble(key);
         }
-        if (mDismissListener != null) {
-            mDismissListener.onStackDismissed();
-        }
+        mNotificationEntryManager.updateNotifications();
         updateBubblesShowing();
     }
 
     /**
      * Adds a bubble associated with the provided notification entry or updates it if it exists.
      */
-    public void addBubble(NotificationData.Entry notif) {
+    public void addBubble(NotificationEntry notif) {
         if (mBubbles.containsKey(notif.key)) {
             // It's an update
             BubbleView bubble = mBubbles.get(notif.key);
@@ -238,17 +219,34 @@ public class BubbleController {
     /**
      * Removes the bubble associated with the {@param uri}.
      */
-    public void removeBubble(String key) {
+    void removeBubble(String key) {
         BubbleView bv = mBubbles.get(key);
         if (mStackView != null && bv != null) {
             mStackView.removeBubble(bv);
             bv.getEntry().setBubbleDismissed(true);
         }
-        if (mDismissListener != null) {
-            mDismissListener.onBubbleDismissed(key);
+
+        NotificationEntry entry = mNotificationEntryManager.getNotificationData().get(key);
+        if (entry != null) {
+            entry.setBubbleDismissed(true);
+            if (!DEBUG_DEMOTE_TO_NOTIF) {
+                mNotificationEntryManager.performRemoveNotification(entry.notification);
+            }
         }
+        mNotificationEntryManager.updateNotifications();
+
         updateBubblesShowing();
     }
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
+        @Override
+        public void onPendingEntryAdded(NotificationEntry entry) {
+            if (shouldAutoBubble(mContext, entry)) {
+                entry.setIsBubble(true);
+            }
+        }
+    };
 
     private void updateBubblesShowing() {
         boolean hasBubblesShowing = false;
@@ -277,7 +275,7 @@ public class BubbleController {
         }
         ArrayList<BubbleView> viewsToRemove = new ArrayList<>();
         for (BubbleView bv : mBubbles.values()) {
-            NotificationData.Entry entry = bv.getEntry();
+            NotificationEntry entry = bv.getEntry();
             if (entry != null) {
                 if (entry.isRowRemoved() || entry.isBubbleDismissed() || entry.isRowDismissed()) {
                     viewsToRemove.add(bv);
@@ -309,7 +307,7 @@ public class BubbleController {
     }
 
     @VisibleForTesting
-    public BubbleStackView getStackView() {
+    BubbleStackView getStackView() {
         return mStackView;
     }
 
@@ -317,7 +315,7 @@ public class BubbleController {
     /**
      * Gets an appropriate starting point to position the bubble stack.
      */
-    public static Point getStartPoint(int size, Point displaySize) {
+    private static Point getStartPoint(int size, Point displaySize) {
         final int x = displaySize.x - size + EDGE_OVERLAP;
         final int y = displaySize.y / 4;
         return new Point(x, y);
@@ -326,7 +324,7 @@ public class BubbleController {
     /**
      * Gets an appropriate position for the bubble when the stack is expanded.
      */
-    public static Point getExpandPoint(BubbleStackView view, int size, Point displaySize) {
+    static Point getExpandPoint(BubbleStackView view, int size, Point displaySize) {
         // Same place for now..
         return new Point(EDGE_OVERLAP, size);
     }
@@ -334,7 +332,7 @@ public class BubbleController {
     /**
      * Whether the notification should bubble or not.
      */
-    public static boolean shouldAutoBubble(Context context, NotificationData.Entry entry) {
+    private static boolean shouldAutoBubble(Context context, NotificationEntry entry) {
         if (entry.isBubbleDismissed()) {
             return false;
         }

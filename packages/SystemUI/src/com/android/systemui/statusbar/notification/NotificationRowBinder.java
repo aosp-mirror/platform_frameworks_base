@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
@@ -126,7 +127,7 @@ public class NotificationRowBinder {
      * Inflates the views for the given entry (possibly asynchronously).
      */
     public void inflateViews(
-            NotificationData.Entry entry,
+            NotificationEntry entry,
             Runnable onDismissRunnable,
             boolean isUpdate)
             throws InflationException {
@@ -149,7 +150,7 @@ public class NotificationRowBinder {
         }
     }
 
-    private void bindRow(NotificationData.Entry entry, PackageManager pmUser,
+    private void bindRow(NotificationEntry entry, PackageManager pmUser,
             StatusBarNotification sbn, ExpandableNotificationRow row,
             Runnable onDismissRunnable) {
         row.setExpansionLogger(mExpansionLogger, entry.notification.getKey());
@@ -197,7 +198,7 @@ public class NotificationRowBinder {
      * reinflating them.
      */
     public void onNotificationRankingUpdated(
-            NotificationData.Entry entry,
+            NotificationEntry entry,
             @Nullable Integer oldImportance,
             NotificationUiAdjustment oldAdjustment,
             NotificationUiAdjustment newAdjustment,
@@ -224,7 +225,7 @@ public class NotificationRowBinder {
 
     //TODO: This method associates a row with an entry, but eventually needs to not do that
     private void updateNotification(
-            NotificationData.Entry entry,
+            NotificationEntry entry,
             PackageManager pmUser,
             StatusBarNotification sbn,
             ExpandableNotificationRow row,
@@ -292,7 +293,7 @@ public class NotificationRowBinder {
          * @param sbn    notification
          * @param row    row for the notification
          */
-        void onBindRow(NotificationData.Entry entry, PackageManager pmUser,
+        void onBindRow(NotificationEntry entry, PackageManager pmUser,
                 StatusBarNotification sbn, ExpandableNotificationRow row);
     }
 }

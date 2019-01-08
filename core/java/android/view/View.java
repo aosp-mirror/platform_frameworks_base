@@ -25053,9 +25053,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         final ViewRootImpl root = mAttachInfo.mViewRootImpl;
-        final SurfaceSession session = new SurfaceSession(root.mSurface);
+        final SurfaceSession session = new SurfaceSession();
         final SurfaceControl surfaceControl = new SurfaceControl.Builder(session)
                 .setName("drag surface")
+                .setParent(root.getSurfaceControl())
                 .setBufferSize(shadowSize.x, shadowSize.y)
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .build();

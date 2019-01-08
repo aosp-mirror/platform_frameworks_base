@@ -271,7 +271,7 @@ public final class Magnifier {
             if (mWindow == null) {
                 synchronized (mLock) {
                     mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
-                            mParentSurface.mSurface, mWindowWidth, mWindowHeight,
+                            mParentSurface.mSurfaceControl, mWindowWidth, mWindowHeight,
                             mWindowElevation, mWindowCornerRadius,
                             mOverlay != null ? mOverlay : new ColorDrawable(Color.TRANSPARENT),
                             Handler.getMain() /* draw the magnifier on the UI thread */, mLock,
@@ -528,17 +528,20 @@ public final class Magnifier {
                 final int surfaceHeight =
                         viewRootImpl.getHeight() + surfaceInsets.top + surfaceInsets.bottom;
                 validMainWindowSurface =
-                        new SurfaceInfo(mainWindowSurface, surfaceWidth, surfaceHeight, true);
+                        new SurfaceInfo(viewRootImpl.getSurfaceControl(), mainWindowSurface,
+                                surfaceWidth, surfaceHeight, true);
             }
         }
         // Get the surface backing the magnified view, if it is a SurfaceView.
         SurfaceInfo validSurfaceViewSurface = SurfaceInfo.NULL;
         if (mView instanceof SurfaceView) {
+            final SurfaceControl sc = ((SurfaceView) mView).getSurfaceControl();
             final SurfaceHolder surfaceHolder = ((SurfaceView) mView).getHolder();
             final Surface surfaceViewSurface = surfaceHolder.getSurface();
-            if (surfaceViewSurface != null && surfaceViewSurface.isValid()) {
+
+            if (sc != null && sc.isValid()) {
                 final Rect surfaceFrame = surfaceHolder.getSurfaceFrame();
-                validSurfaceViewSurface = new SurfaceInfo(surfaceViewSurface,
+                validSurfaceViewSurface = new SurfaceInfo(sc, surfaceViewSurface,
                         surfaceFrame.right, surfaceFrame.bottom, false);
             }
         }
@@ -733,15 +736,18 @@ public final class Magnifier {
      * Contains a surface and metadata corresponding to it.
      */
     private static class SurfaceInfo {
-        public static final SurfaceInfo NULL = new SurfaceInfo(null, 0, 0, false);
+        public static final SurfaceInfo NULL = new SurfaceInfo(null, null, 0, 0, false);
 
         private Surface mSurface;
+        private SurfaceControl mSurfaceControl;
         private int mWidth;
         private int mHeight;
         private boolean mIsMainWindowSurface;
 
-        SurfaceInfo(final Surface surface, final int width, final int height,
+        SurfaceInfo(final SurfaceControl surfaceControl, final Surface surface,
+                final int width, final int height,
                 final boolean isMainWindowSurface) {
+            mSurfaceControl = surfaceControl;
             mSurface = surface;
             mWidth = width;
             mHeight = height;
@@ -819,7 +825,7 @@ public final class Magnifier {
         private Bitmap mCurrentContent;
 
         InternalPopupWindow(final Context context, final Display display,
-                final Surface parentSurface, final int width, final int height,
+                final SurfaceControl parentSurfaceControl, final int width, final int height,
                 final float elevation, final float cornerRadius, final Drawable overlay,
                 final Handler handler, final Object lock, final Callback callback) {
             mDisplay = display;
@@ -834,12 +840,13 @@ public final class Magnifier {
             // Setup the surface we will use for drawing the content and shadow.
             mSurfaceWidth = mContentWidth + 2 * mOffsetX;
             mSurfaceHeight = mContentHeight + 2 * mOffsetY;
-            mSurfaceSession = new SurfaceSession(parentSurface);
+            mSurfaceSession = new SurfaceSession();
             mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .setBufferSize(mSurfaceWidth, mSurfaceHeight)
                     .setName("magnifier surface")
                     .setFlags(SurfaceControl.HIDDEN)
+                    .setParent(parentSurfaceControl)
                     .build();
             mSurface = new Surface();
             mSurface.copyFrom(mSurfaceControl);
