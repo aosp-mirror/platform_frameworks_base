@@ -8235,10 +8235,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             structure.setId(id, null, null, null);
         }
-        if (viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
-            //TODO(b/111276913): STOPSHIP - don't set it if not needed
-            structure.setDataIsSensitive(false);
-        }
 
         if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
                 || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
