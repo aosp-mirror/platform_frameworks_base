@@ -16,6 +16,7 @@
 
 package android.permission;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
@@ -26,12 +27,19 @@ import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteCallback;
+import android.util.ArrayMap;
 
+import com.android.internal.util.Preconditions;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This service is meant to be implemented by the app controlling permissions.
@@ -58,6 +66,20 @@ public abstract class PermissionControllerService extends Service {
         super.attachBaseContext(base);
         mHandler = new Handler(base.getMainLooper());
     }
+
+    /**
+     * Revoke a set of runtime permissions for various apps.
+     *
+     * @param requests The permissions to revoke as {@code Map<packageName, List<permission>>}
+     * @param doDryRun Compute the permissions that would be revoked, but not actually revoke them
+     * @param reason Why the permission should be revoked
+     * @param callerPackageName The package name of the calling app
+     *
+     * @return the actually removed permissions as {@code Map<packageName, List<permission>>}
+     */
+    public abstract @NonNull Map<String, List<String>> onRevokeRuntimePermissions(
+            @NonNull Map<String, List<String>> requests, boolean doDryRun,
+            @PermissionControllerManager.Reason int reason, @NonNull String callerPackageName);
 
     /**
      * Gets the runtime permissions for an app.
@@ -93,6 +115,41 @@ public abstract class PermissionControllerService extends Service {
     @Override
     public final IBinder onBind(Intent intent) {
         return new IPermissionController.Stub() {
+            @Override
+            public void revokeRuntimePermissions(
+                    Bundle bundleizedRequest, boolean doDryRun, int reason,
+                    String callerPackageName, RemoteCallback callback) {
+                checkNotNull(bundleizedRequest, "bundleizedRequest");
+                checkNotNull(callerPackageName);
+                checkNotNull(callback);
+
+                Map<String, List<String>> request = new ArrayMap<>();
+                for (String packageName : bundleizedRequest.keySet()) {
+                    Preconditions.checkNotNull(packageName);
+
+                    ArrayList<String> permissions =
+                            bundleizedRequest.getStringArrayList(packageName);
+                    Preconditions.checkCollectionElementsNotNull(permissions, "permissions");
+
+                    request.put(packageName, permissions);
+                }
+
+                enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, null);
+
+                // Verify callerPackageName
+                try {
+                    PackageInfo pkgInfo = getPackageManager().getPackageInfo(callerPackageName, 0);
+                    checkArgument(getCallingUid() == pkgInfo.applicationInfo.uid);
+                } catch (PackageManager.NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+
+                mHandler.sendMessage(obtainMessage(
+                        PermissionControllerService::revokeRuntimePermissions,
+                        PermissionControllerService.this, request, doDryRun, reason,
+                        callerPackageName, callback));
+            }
+
             @Override
             public void getAppPermissions(String packageName, RemoteCallback callback) {
                 checkNotNull(packageName, "packageName");
@@ -131,6 +188,27 @@ public abstract class PermissionControllerService extends Service {
                                 countSystem, callback));
             }
         };
+    }
+
+    private void revokeRuntimePermissions(@NonNull Map<String, List<String>> requests,
+            boolean doDryRun, @PermissionControllerManager.Reason int reason,
+            @NonNull String callerPackageName, @NonNull RemoteCallback callback) {
+        Map<String, List<String>> revoked = onRevokeRuntimePermissions(requests,
+                doDryRun, reason, callerPackageName);
+
+        checkNotNull(revoked);
+        Bundle bundledizedRevoked = new Bundle();
+        for (Map.Entry<String, List<String>> appRevocation : revoked.entrySet()) {
+            checkNotNull(appRevocation.getKey());
+            checkCollectionElementsNotNull(appRevocation.getValue(), "permissions");
+
+            bundledizedRevoked.putStringArrayList(appRevocation.getKey(),
+                    new ArrayList<>(appRevocation.getValue()));
+        }
+
+        Bundle result = new Bundle();
+        result.putBundle(PermissionControllerManager.KEY_RESULT, bundledizedRevoked);
+        callback.sendResult(result);
     }
 
     private void getAppPermissions(@NonNull String packageName, @NonNull RemoteCallback callback) {

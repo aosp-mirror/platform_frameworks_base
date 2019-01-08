@@ -17,6 +17,7 @@
 package android.permission;
 
 import android.os.RemoteCallback;
+import android.os.Bundle;
 
 /**
  * Interface for system apps to communication with the permission controller.
@@ -24,6 +25,8 @@ import android.os.RemoteCallback;
  * @hide
  */
 oneway interface IPermissionController {
+    void revokeRuntimePermissions(in Bundle request, boolean doDryRun, int reason,
+            String callerPackageName, in RemoteCallback callback);
     void getAppPermissions(String packageName, in RemoteCallback callback);
     void revokeRuntimePermission(String packageName, String permissionName);
     void countPermissionApps(in List<String> permissionNames, boolean countOnlyGranted,
