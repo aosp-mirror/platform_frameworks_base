@@ -6207,7 +6207,7 @@ public final class Settings {
         public static final String CHARGING_SOUNDS_ENABLED = "charging_sounds_enabled";
 
         /**
-         * Whether to vibrate for wireless charging events.
+         * Whether to vibrate for charging events.
          * @hide
          */
         public static final String CHARGING_VIBRATION_ENABLED = "charging_vibration_enabled";
