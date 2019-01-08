@@ -77,7 +77,7 @@ import java.util.Arrays;
  */
 public class BarChartPreference extends Preference {
 
-    static final int MAXIMUM_BAR_VIEWS = 4;
+    public static final int MAXIMUM_BAR_VIEWS = 4;
     private static final String TAG = "BarChartPreference";
     private static final int[] BAR_VIEWS = {
             R.id.bar_view1,
