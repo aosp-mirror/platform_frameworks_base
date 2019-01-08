@@ -1234,12 +1234,13 @@ public class WifiManager {
      * An empty list will be returned if no match is found.
      *
      * @param scanResults a list of ScanResult
-     * @return A list of {@link OsuProvider} that does not contain duplicate entries.
+     * @return Map that consists {@link OsuProvider} and a list of matching {@link ScanResult}
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public List<OsuProvider> getMatchingOsuProviders(List<ScanResult> scanResults) {
+    public Map<OsuProvider, List<ScanResult>> getMatchingOsuProviders(
+            List<ScanResult> scanResults) {
         try {
             return mService.getMatchingOsuProviders(scanResults);
         } catch (RemoteException e) {
