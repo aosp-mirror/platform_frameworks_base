@@ -645,7 +645,7 @@ public abstract class WallpaperService extends Service {
             try {
                 final WallpaperColors newColors = onComputeColors();
                 if (mConnection != null) {
-                    mConnection.onWallpaperColorsChanged(newColors);
+                    mConnection.onWallpaperColorsChanged(newColors, mDisplay.getDisplayId());
                 } else {
                     Log.w(TAG, "Can't notify system because wallpaper connection "
                             + "was not established.");
@@ -1473,7 +1473,7 @@ public abstract class WallpaperService extends Service {
                         break;
                     }
                     try {
-                        mConnection.onWallpaperColorsChanged(mEngine.onComputeColors());
+                        mConnection.onWallpaperColorsChanged(mEngine.onComputeColors(), mDisplayId);
                     } catch (RemoteException e) {
                         // Connection went away, nothing to do in here.
                     }
