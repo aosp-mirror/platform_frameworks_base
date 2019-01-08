@@ -50,9 +50,9 @@ import androidx.slice.builders.SliceAction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -68,7 +68,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class KeyguardSliceProvider extends SliceProvider implements
         NextAlarmController.NextAlarmChangeCallback, ZenModeController.Callback,
-        NotificationMediaManager.MediaListener {
+        NotificationMediaManager.MediaListener, StatusBarStateController.StateListener {
 
     private static final StyleSpan BOLD_STYLE = new StyleSpan(Typeface.BOLD);
     public static final String KEYGUARD_SLICE_URI = "content://com.android.systemui.keyguard/main";
@@ -109,7 +109,9 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private AlarmManager.AlarmClockInfo mNextAlarmInfo;
     private PendingIntent mPendingIntent;
     protected NotificationMediaManager mMediaManager;
+    private StatusBarStateController mStatusBarStateController;
     protected MediaMetadata mMediaMetaData;
+    protected boolean mDozing;
 
     /**
      * Receiver responsible for time ticking and updating the date format.
@@ -167,9 +169,20 @@ public class KeyguardSliceProvider extends SliceProvider implements
         mMediaUri = Uri.parse(KEYGUARD_MEDIA_URI);
     }
 
-    public void initDependencies() {
-        mMediaManager = Dependency.get(NotificationMediaManager.class);
+    /**
+     * Initialize dependencies that don't exist during {@link android.content.ContentProvider}
+     * instantiation.
+     *
+     * @param mediaManager {@link NotificationMediaManager} singleton.
+     * @param statusBarStateController {@link StatusBarStateController} singleton.
+     */
+    public void initDependencies(
+            NotificationMediaManager mediaManager,
+            StatusBarStateController statusBarStateController) {
+        mMediaManager = mediaManager;
         mMediaManager.addCallback(this);
+        mStatusBarStateController = statusBarStateController;
+        mStatusBarStateController.addCallback(this);
     }
 
     @AnyThread
@@ -179,7 +192,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
         Slice slice;
         synchronized (this) {
             ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
-            if (mMediaMetaData != null) {
+            if (needsMediaLocked()) {
                 addMediaLocked(builder);
             } else {
                 builder.addRow(new RowBuilder(mDateUri).setTitle(mLastText));
@@ -191,6 +204,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
         }
         Trace.endSection();
         return slice;
+    }
+
+    protected boolean needsMediaLocked() {
+        return mMediaMetaData != null && mDozing;
     }
 
     protected void addMediaLocked(ListBuilder listBuilder) {
@@ -209,7 +226,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
             }
 
             RowBuilder mediaBuilder = new RowBuilder(mMediaUri).setTitle(builder);
-            Icon notificationIcon = mMediaManager.getMediaIcon();
+            Icon notificationIcon = mMediaManager == null ? null : mMediaManager.getMediaIcon();
             if (notificationIcon != null) {
                 IconCompat icon = IconCompat.createFromIcon(notificationIcon);
                 mediaBuilder.addEndItem(icon, ListBuilder.ICON_IMAGE);
@@ -389,13 +406,35 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @Override
     public void onMetadataChanged(MediaMetadata metadata) {
+        final boolean notify;
         synchronized (this) {
+            boolean neededMedia = needsMediaLocked();
             mMediaMetaData = metadata;
+            notify = neededMedia != needsMediaLocked();
         }
-        notifyChange();
+        if (notify) {
+            notifyChange();
+        }
     }
 
     protected void notifyChange() {
         mContentResolver.notifyChange(mSliceUri, null /* observer */);
+    }
+
+    @Override
+    public void onDozingChanged(boolean isDozing) {
+        final boolean notify;
+        synchronized (this) {
+            boolean neededMedia = needsMediaLocked();
+            mDozing = isDozing;
+            notify = neededMedia != needsMediaLocked();
+        }
+        if (notify) {
+            notifyChange();
+        }
+    }
+
+    @Override
+    public void onStateChanged(int newState) {
     }
 }
