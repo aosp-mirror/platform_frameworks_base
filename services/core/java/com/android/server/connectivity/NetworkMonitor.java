@@ -126,21 +126,21 @@ public class NetworkMonitor extends StateMachine {
     private static final int DEFAULT_DATA_STALL_EVALUATION_TYPES =
             (1 << DATA_STALL_EVALUATION_TYPE_DNS);
 
-    static enum EvaluationResult {
+    enum EvaluationResult {
         VALIDATED(true),
         CAPTIVE_PORTAL(false);
-        final boolean isValidated;
+        final boolean mIsValidated;
         EvaluationResult(boolean isValidated) {
-            this.isValidated = isValidated;
+            this.mIsValidated = isValidated;
         }
     }
 
-    static enum ValidationStage {
+    enum ValidationStage {
         FIRST_VALIDATION(true),
         REVALIDATION(false);
-        final boolean isFirstValidation;
+        final boolean mIsFirstValidation;
         ValidationStage(boolean isFirstValidation) {
-            this.isFirstValidation = isFirstValidation;
+            this.mIsFirstValidation = isFirstValidation;
         }
     }
 
@@ -251,7 +251,7 @@ public class NetworkMonitor extends StateMachine {
 
     // Start mReevaluateDelayMs at this value and double.
     private static final int INITIAL_REEVALUATE_DELAY_MS = 1000;
-    private static final int MAX_REEVALUATE_DELAY_MS = 10*60*1000;
+    private static final int MAX_REEVALUATE_DELAY_MS = 10 * 60 * 1000;
     // Before network has been evaluated this many times, ignore repeated reevaluate requests.
     private static final int IGNORE_REEVALUATE_ATTEMPTS = 5;
     private int mReevaluateToken = 0;
@@ -261,7 +261,7 @@ public class NetworkMonitor extends StateMachine {
     // Stop blaming UID that requested re-evaluation after this many attempts.
     private static final int BLAME_FOR_EVALUATION_ATTEMPTS = 5;
     // Delay between reevaluations once a captive portal has been found.
-    private static final int CAPTIVE_PORTAL_REEVALUATE_DELAY_MS = 10*60*1000;
+    private static final int CAPTIVE_PORTAL_REEVALUATE_DELAY_MS = 10 * 60 * 1000;
 
     private static final int NUM_VALIDATION_LOG_LINES = 20;
 
@@ -393,10 +393,17 @@ public class NetworkMonitor extends StateMachine {
         start();
     }
 
+    /**
+     * Request the NetworkMonitor to reevaluate the network.
+     */
     public void forceReevaluation(int responsibleUid) {
         sendMessage(CMD_FORCE_REEVALUATION, responsibleUid, 0);
     }
 
+    /**
+     * Send a notification to NetworkMonitor indicating that private DNS settings have changed.
+     * @param newCfg The new private DNS configuration.
+     */
     public void notifyPrivateDnsSettingsChanged(PrivateDnsConfig newCfg) {
         // Cancel any outstanding resolutions.
         removeMessages(CMD_PRIVATE_DNS_SETTINGS_CHANGED);
@@ -655,8 +662,9 @@ public class NetworkMonitor extends StateMachine {
         public boolean processMessage(Message message) {
             switch (message.what) {
                 case CMD_REEVALUATE:
-                    if (message.arg1 != mReevaluateToken || mUserDoesNotWant)
+                    if (message.arg1 != mReevaluateToken || mUserDoesNotWant) {
                         return HANDLED;
+                    }
                     // Don't bother validating networks that don't satisfy the default request.
                     // This includes:
                     //  - VPNs which can be considered explicitly desired by the user and the
@@ -813,9 +821,9 @@ public class NetworkMonitor extends StateMachine {
         }
 
         private boolean isStrictModeHostnameResolved() {
-            return (mPrivateDnsConfig != null) &&
-                   mPrivateDnsConfig.hostname.equals(mPrivateDnsProviderHostname) &&
-                   (mPrivateDnsConfig.ips.length > 0);
+            return (mPrivateDnsConfig != null)
+                    && mPrivateDnsConfig.hostname.equals(mPrivateDnsProviderHostname)
+                    && (mPrivateDnsConfig.ips.length > 0);
         }
 
         private void resolveStrictModeHostname() {
@@ -852,9 +860,9 @@ public class NetworkMonitor extends StateMachine {
 
         private boolean sendPrivateDnsProbe() {
             // q.v. system/netd/server/dns/DnsTlsTransport.cpp
-            final String ONE_TIME_HOSTNAME_SUFFIX = "-dnsotls-ds.metric.gstatic.com";
-            final String host = UUID.randomUUID().toString().substring(0, 8) +
-                    ONE_TIME_HOSTNAME_SUFFIX;
+            final String oneTimeHostnameSuffix = "-dnsotls-ds.metric.gstatic.com";
+            final String host = UUID.randomUUID().toString().substring(0, 8)
+                    + oneTimeHostnameSuffix;
             final Stopwatch watch = new Stopwatch().start();
             try {
                 final InetAddress[] ips = mNetworkAgentInfo.network().getAllByName(host);
@@ -966,7 +974,7 @@ public class NetworkMonitor extends StateMachine {
     // most one per address family. This ensures we only wait up to 20 seconds for TCP connections
     // to complete, regardless of how many IP addresses a host has.
     private static class OneAddressPerFamilyNetwork extends Network {
-        public OneAddressPerFamilyNetwork(Network network) {
+        OneAddressPerFamilyNetwork(Network network) {
             // Always bypass Private DNS.
             super(network.getPrivateDnsBypassingCopy());
         }
@@ -1000,7 +1008,8 @@ public class NetworkMonitor extends StateMachine {
     }
 
     public boolean getWifiScansAlwaysAvailableDisabled() {
-        return mDependencies.getSetting(mContext, Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0;
+        return mDependencies.getSetting(
+                mContext, Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0;
     }
 
     private String getCaptivePortalServerHttpsUrl() {
@@ -1246,10 +1255,10 @@ public class NetworkMonitor extends StateMachine {
             // Time how long it takes to get a response to our request
             long responseTimestamp = SystemClock.elapsedRealtime();
 
-            validationLog(probeType, url, "time=" + (responseTimestamp - requestTimestamp) + "ms" +
-                    " ret=" + httpResponseCode +
-                    " request=" + requestHeader +
-                    " headers=" + urlConnection.getHeaderFields());
+            validationLog(probeType, url, "time=" + (responseTimestamp - requestTimestamp) + "ms"
+                    + " ret=" + httpResponseCode
+                    + " request=" + requestHeader
+                    + " headers=" + urlConnection.getHeaderFields());
             // NOTE: We may want to consider an "HTTP/1.0 204" response to be a captive
             // portal.  The only example of this seen so far was a captive portal.  For
             // the time being go with prior behavior of assuming it's not a captive
@@ -1267,7 +1276,7 @@ public class NetworkMonitor extends StateMachine {
                     // sign-in to an empty page. Probably the result of a broken transparent proxy.
                     // See http://b/9972012.
                     validationLog(probeType, url,
-                        "200 response with Content-length=0 interpreted as 204 response.");
+                            "200 response with Content-length=0 interpreted as 204 response.");
                     httpResponseCode = CaptivePortalProbeResult.SUCCESS_CODE;
                 } else if (urlConnection.getContentLengthLong() == -1) {
                     // When no Content-length (default value == -1), attempt to read a byte from the
@@ -1309,7 +1318,7 @@ public class NetworkMonitor extends StateMachine {
             private final boolean mIsHttps;
             private volatile CaptivePortalProbeResult mResult = CaptivePortalProbeResult.FAILED;
 
-            public ProbeThread(boolean isHttps) {
+            ProbeThread(boolean isHttps) {
                 mIsHttps = isHttps;
             }
 
@@ -1443,8 +1452,10 @@ public class NetworkMonitor extends StateMachine {
                     if (cellInfo.isRegistered()) {
                         numRegisteredCellInfo++;
                         if (numRegisteredCellInfo > 1) {
-                            if (VDBG) logw("more than one registered CellInfo." +
-                                    " Can't tell which is active.  Bailing.");
+                            if (VDBG) {
+                                logw("more than one registered CellInfo."
+                                        + " Can't tell which is active.  Bailing.");
+                            }
                             return;
                         }
                         if (cellInfo instanceof CellInfoCdma) {
@@ -1492,14 +1503,14 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private int networkEventType(ValidationStage s, EvaluationResult r) {
-        if (s.isFirstValidation) {
-            if (r.isValidated) {
+        if (s.mIsFirstValidation) {
+            if (r.mIsValidated) {
                 return NetworkEvent.NETWORK_FIRST_VALIDATION_SUCCESS;
             } else {
                 return NetworkEvent.NETWORK_FIRST_VALIDATION_PORTAL_FOUND;
             }
         } else {
-            if (r.isValidated) {
+            if (r.mIsValidated) {
                 return NetworkEvent.NETWORK_REVALIDATION_SUCCESS;
             } else {
                 return NetworkEvent.NETWORK_REVALIDATION_PORTAL_FOUND;
@@ -1517,7 +1528,7 @@ public class NetworkMonitor extends StateMachine {
 
     private void logValidationProbe(long durationMs, int probeType, int probeResult) {
         int[] transports = mNetworkAgentInfo.networkCapabilities.getTransportTypes();
-        boolean isFirstValidation = validationStage().isFirstValidation;
+        boolean isFirstValidation = validationStage().mIsFirstValidation;
         ValidationProbeEvent ev = new ValidationProbeEvent();
         ev.probeType = ValidationProbeEvent.makeProbeType(probeType, isFirstValidation);
         ev.returnCode = probeResult;
@@ -1535,10 +1546,20 @@ public class NetworkMonitor extends StateMachine {
             return new Random();
         }
 
+        /**
+         * Get the value of a global integer setting.
+         * @param symbol Name of the setting
+         * @param defaultValue Value to return if the setting is not defined.
+         */
         public int getSetting(Context context, String symbol, int defaultValue) {
             return Settings.Global.getInt(context.getContentResolver(), symbol, defaultValue);
         }
 
+        /**
+         * Get the value of a global String setting.
+         * @param symbol Name of the setting
+         * @param defaultValue Value to return if the setting is not defined.
+         */
         public String getSetting(Context context, String symbol, String defaultValue) {
             final String value = Settings.Global.getString(context.getContentResolver(), symbol);
             return value != null ? value : defaultValue;
