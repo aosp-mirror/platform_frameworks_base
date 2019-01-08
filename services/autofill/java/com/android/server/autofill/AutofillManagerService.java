@@ -70,6 +70,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.SyncResultReceiver;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.autofill.ui.AutoFillUI;
@@ -606,15 +607,15 @@ public final class AutofillManagerService
     }
 
     private void send(@NonNull IResultReceiver receiver, @Nullable String value) {
-        send(receiver, AutofillManager.SyncResultReceiver.bundleFor(value));
+        send(receiver, SyncResultReceiver.bundleFor(value));
     }
 
     private void send(@NonNull IResultReceiver receiver, @Nullable String[] value) {
-        send(receiver, AutofillManager.SyncResultReceiver.bundleFor(value));
+        send(receiver, SyncResultReceiver.bundleFor(value));
     }
 
     private void send(@NonNull IResultReceiver receiver, @Nullable Parcelable value) {
-        send(receiver, AutofillManager.SyncResultReceiver.bundleFor(value));
+        send(receiver, SyncResultReceiver.bundleFor(value));
     }
 
     private void send(@NonNull IResultReceiver receiver, boolean value) {
