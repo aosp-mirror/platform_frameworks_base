@@ -216,9 +216,9 @@ message SystemMessage {
     // Package: android
     NOTE_SOFTAP_CONFIG_CHANGED = 50;
 
-    // Notify the user that connected to app suggested network.
+    // Notify the user that an app suggested network is available for connection.
     // Package: android
-    NOTE_CONNECTED_TO_NETWORK_SUGGESTION = 51;
+    NOTE_NETWORK_SUGGESTION_AVAILABLE = 51;
 
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
