@@ -68,4 +68,8 @@ interface INfcAdapter
     void removeNfcUnlockHandler(INfcUnlockHandler unlockHandler);
 
     void verifyNfcPermission();
+    boolean isNfcSecureEnabled();
+    boolean deviceSupportsNfcSecure();
+    boolean setNfcSecure(boolean enable);
+
 }
