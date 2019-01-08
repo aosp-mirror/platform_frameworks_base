@@ -18,7 +18,9 @@ package com.android.server.connectivity;
 
 import android.net.ConnectivityManager;
 import android.net.INetd;
+import android.net.InetAddresses;
 import android.net.InterfaceConfiguration;
+import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
@@ -31,6 +33,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.net.BaseNetworkObserver;
 
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.util.Objects;
 
 /**
@@ -72,8 +75,10 @@ public class Nat464Xlat extends BaseNetworkObserver {
         RUNNING,    // start() called, and the stacked iface is known to be up.
     }
 
+    private IpPrefix mNat64Prefix;
     private String mBaseIface;
     private String mIface;
+    private Inet6Address mIPv6Address;
     private State mState = State.IDLE;
 
     public Nat464Xlat(NetworkAgentInfo nai, INetd netd, INetworkManagementService nmService) {
@@ -91,12 +96,17 @@ public class Nat464Xlat extends BaseNetworkObserver {
         // TODO: migrate to NetworkCapabilities.TRANSPORT_*.
         final boolean supported = ArrayUtils.contains(NETWORK_TYPES, nai.networkInfo.getType());
         final boolean connected = ArrayUtils.contains(NETWORK_STATES, nai.networkInfo.getState());
-        // We only run clat on networks that don't have a native IPv4 address.
-        final boolean hasIPv4Address =
-                (nai.linkProperties != null) && nai.linkProperties.hasIPv4Address();
-        final boolean skip464xlat =
-                (nai.netMisc() != null) && nai.netMisc().skip464xlat;
-        return supported && connected && !hasIPv4Address && !skip464xlat;
+
+        // We only run clat on networks that have a global IPv6 address and a NAT64 prefix and don't
+        // have a native IPv4 address.
+        LinkProperties lp = nai.linkProperties;
+        final boolean isNat64Network = (lp != null) && lp.hasGlobalIPv6Address()
+                && lp.getNat64Prefix() != null && !lp.hasIPv4Address();
+
+        // If the network tells us it doesn't use clat, respect that.
+        final boolean skip464xlat = (nai.netMisc() != null) && nai.netMisc().skip464xlat;
+
+        return supported && connected && isNat64Network && !skip464xlat;
     }
 
     /**
@@ -132,14 +142,21 @@ public class Nat464Xlat extends BaseNetworkObserver {
             Slog.e(TAG, "Can't register interface observer for clat on " + mNetwork.name());
             return;
         }
+
+        String addrStr = null;
         try {
-            mNetd.clatdStart(baseIface);
+            addrStr = mNetd.clatdStart(baseIface, mNat64Prefix.toString());
         } catch (RemoteException | IllegalStateException e) {
             Slog.e(TAG, "Error starting clatd on " + baseIface, e);
         }
         mIface = CLAT_PREFIX + baseIface;
         mBaseIface = baseIface;
         mState = State.STARTING;
+        try {
+            mIPv6Address = (Inet6Address) InetAddresses.parseNumericAddress(addrStr);
+        } catch (ClassCastException | IllegalArgumentException | NullPointerException e) {
+            Slog.e(TAG, "Invalid IPv6 address " + addrStr);
+        }
     }
 
     /**
@@ -220,12 +237,18 @@ public class Nat464Xlat extends BaseNetworkObserver {
         }
     }
 
+    public void setNat64Prefix(IpPrefix nat64Prefix) {
+        mNat64Prefix = nat64Prefix;
+    }
+
     /**
      * Copies the stacked clat link in oldLp, if any, to the passed LinkProperties.
      * This is necessary because the LinkProperties in mNetwork come from the transport layer, which
      * has no idea that 464xlat is running on top of it.
      */
     public void fixupLinkProperties(LinkProperties oldLp, LinkProperties lp) {
+        lp.setNat64Prefix(mNat64Prefix);
+
         if (!isRunning()) {
             return;
         }

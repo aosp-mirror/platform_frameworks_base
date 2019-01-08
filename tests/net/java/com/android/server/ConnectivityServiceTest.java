@@ -1798,6 +1798,12 @@ public class ConnectivityServiceTest {
                     fn.test((NetworkCapabilities) cbi.arg));
         }
 
+        void expectLinkPropertiesLike(Predicate<LinkProperties> fn, MockNetworkAgent agent) {
+            CallbackInfo cbi = expectCallback(CallbackState.LINK_PROPERTIES, agent);
+            assertTrue("Received LinkProperties don't match expectations : " + cbi.arg,
+                    fn.test((LinkProperties) cbi.arg));
+        }
+
         void expectBlockedStatusCallback(boolean expectBlocked, MockNetworkAgent agent) {
             CallbackInfo cbi = expectCallback(CallbackState.BLOCKED_STATUS, agent);
             boolean actualBlocked = (boolean) cbi.arg;
@@ -5087,6 +5093,9 @@ public class ConnectivityServiceTest {
     public void testStackedLinkProperties() throws UnknownHostException, RemoteException {
         final LinkAddress myIpv4 = new LinkAddress("1.2.3.4/24");
         final LinkAddress myIpv6 = new LinkAddress("2001:db8:1::1/64");
+        final String kNat64PrefixString = "2001:db8:64:64:64:64::";
+        final IpPrefix kNat64Prefix = new IpPrefix(InetAddress.getByName(kNat64PrefixString), 96);
+
         final NetworkRequest networkRequest = new NetworkRequest.Builder()
                 .addTransportType(TRANSPORT_CELLULAR)
                 .addCapability(NET_CAPABILITY_INTERNET)
@@ -5110,10 +5119,19 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         mCellNetworkAgent.connect(true);
         networkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
-        verify(mMockNetd, times(1)).clatdStart(MOBILE_IFNAME);
-        Nat464Xlat clat = mService.getNat464Xlat(mCellNetworkAgent);
 
-        // Clat iface up, expect stack link updated.
+        // When NAT64 prefix detection succeeds, LinkProperties are updated and clatd is started.
+        Nat464Xlat clat = mService.getNat464Xlat(mCellNetworkAgent);
+        assertNull(mCm.getLinkProperties(mCellNetworkAgent.getNetwork()).getNat64Prefix());
+        mService.mNetdEventCallback.onNat64PrefixEvent(mCellNetworkAgent.getNetwork().netId,
+                true /* added */, kNat64PrefixString, 96);
+        LinkProperties lpBeforeClat = (LinkProperties) networkCallback.expectCallback(
+                CallbackState.LINK_PROPERTIES, mCellNetworkAgent).arg;
+        assertEquals(0, lpBeforeClat.getStackedLinks().size());
+        assertEquals(kNat64Prefix, lpBeforeClat.getNat64Prefix());
+        verify(mMockNetd, times(1)).clatdStart(MOBILE_IFNAME, kNat64Prefix.toString());
+
+        // Clat iface comes up. Expect stacked link to be added.
         clat.interfaceLinkStateChanged(CLAT_PREFIX + MOBILE_IFNAME, true);
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
         List<LinkProperties> stackedLps = mCm.getLinkProperties(mCellNetworkAgent.getNetwork())
@@ -5130,20 +5148,50 @@ public class ConnectivityServiceTest {
         assertNotEquals(stackedLpsAfterChange, Collections.EMPTY_LIST);
         assertEquals(makeClatLinkProperties(myIpv4), stackedLpsAfterChange.get(0));
 
-        // Add ipv4 address, expect stacked linkproperties be cleaned up
+        // Add ipv4 address, expect that clatd is stopped and stacked linkproperties are cleaned up.
         cellLp.addLinkAddress(myIpv4);
         cellLp.addRoute(new RouteInfo(myIpv4, null, MOBILE_IFNAME));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
         verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
-
-        // Clat iface removed, expect linkproperties revert to original one
-        clat.interfaceRemoved(CLAT_PREFIX + MOBILE_IFNAME);
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
-        LinkProperties actualLpAfterIpv4 = mCm.getLinkProperties(mCellNetworkAgent.getNetwork());
-        assertEquals(cellLp, actualLpAfterIpv4);
 
-        // Clean up
+        // As soon as stop is called, the linkproperties lose the stacked interface.
+        LinkProperties actualLpAfterIpv4 = mCm.getLinkProperties(mCellNetworkAgent.getNetwork());
+        LinkProperties expected = new LinkProperties(cellLp);
+        expected.setNat64Prefix(kNat64Prefix);
+        assertEquals(expected, actualLpAfterIpv4);
+        assertEquals(0, actualLpAfterIpv4.getStackedLinks().size());
+
+        // The interface removed callback happens but has no effect after stop is called.
+        clat.interfaceRemoved(CLAT_PREFIX + MOBILE_IFNAME);
+        networkCallback.assertNoCallback();
+
+        reset(mMockNetd);
+
+        // Remove IPv4 address and expect clatd to be started again.
+        cellLp.removeLinkAddress(myIpv4);
+        cellLp.removeRoute(new RouteInfo(myIpv4, null, MOBILE_IFNAME));
+        cellLp.removeDnsServer(InetAddress.getByName("8.8.8.8"));
+        mCellNetworkAgent.sendLinkProperties(cellLp);
+        networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
+        verify(mMockNetd, times(1)).clatdStart(MOBILE_IFNAME, kNat64Prefix.toString());
+
+        // Clat iface comes up. Expect stacked link to be added.
+        clat.interfaceLinkStateChanged(CLAT_PREFIX + MOBILE_IFNAME, true);
+        networkCallback.expectLinkPropertiesLike((lp) -> lp.getStackedLinks().size() == 1,
+                mCellNetworkAgent);
+
+        // NAT64 prefix is removed. Expect that clat is stopped.
+        mService.mNetdEventCallback.onNat64PrefixEvent(mCellNetworkAgent.getNetwork().netId,
+                false /* added */, kNat64PrefixString, 96);
+        networkCallback.expectLinkPropertiesLike((lp) -> lp.getNat64Prefix() == null,
+                mCellNetworkAgent);
+        verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
+        networkCallback.expectLinkPropertiesLike((lp) -> lp.getStackedLinks().size() == 0,
+                mCellNetworkAgent);
+
+        // Clean up.
         mCellNetworkAgent.disconnect();
         networkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
         networkCallback.assertNoCallback();
