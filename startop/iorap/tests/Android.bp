@@ -18,8 +18,15 @@ java_library {
     srcs: ["src/**/*.kt"],
 
     static_libs: [
-      // non-test dependencies
-      "libiorap-java",
+      // Non-test dependencies
+
+      // library under test
+      "services.startop.iorap",
+      // need the system_server code to be on the classpath,
+      "services.core",
+
+      // Test Dependencies
+
       // test android dependencies
       "platform-test-annotations",
       "android-support-test",

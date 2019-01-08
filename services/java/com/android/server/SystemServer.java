@@ -145,6 +145,7 @@ import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
+import com.google.android.startop.iorap.IorapForwardingService;
 
 import dalvik.system.VMRuntime;
 
@@ -1007,10 +1008,13 @@ public final class SystemServer {
             mSystemServiceManager.startService(PinnerService.class);
             traceEnd();
 
+            traceBeginAndSlog("IorapForwardingService");
+            mSystemServiceManager.startService(IorapForwardingService.class);
+            traceEnd();
+
             traceBeginAndSlog("SignedConfigService");
             SignedConfigService.registerUpdateReceiver(mSystemContext);
             traceEnd();
-
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service", e);
