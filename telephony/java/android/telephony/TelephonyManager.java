@@ -76,8 +76,8 @@ import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telecom.ITelecomService;
 import com.android.internal.telephony.CellNetworkScanResult;
-import com.android.internal.telephony.IAns;
 import com.android.internal.telephony.INumberVerificationCallback;
+import com.android.internal.telephony.IOns;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
@@ -4615,8 +4615,8 @@ public class TelephonyManager {
         return ITelephonyRegistry.Stub.asInterface(ServiceManager.getService("telephony.registry"));
     }
 
-    private IAns getIAns() {
-        return IAns.Stub.asInterface(ServiceManager.getService("ians"));
+    private IOns getIOns() {
+        return IOns.Stub.asInterface(ServiceManager.getService("ions"));
     }
 
     //
@@ -9275,10 +9275,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Enable or disable AlternativeNetworkService.
+     * Enable or disable OpportunisticNetworkService.
      *
      * This method should be called to enable or disable
-     * AlternativeNetwork service on the device.
+     * OpportunisticNetwork service on the device.
      *
      * <p>
      * Requires Permission:
@@ -9289,25 +9289,25 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public boolean setAlternativeNetworkState(boolean enable) {
+    public boolean setOpportunisticNetworkState(boolean enable) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         boolean ret = false;
         try {
-            IAns iAlternativeNetworkService = getIAns();
-            if (iAlternativeNetworkService != null) {
-                ret = iAlternativeNetworkService.setEnable(enable, pkgForDebug);
+            IOns iOpportunisticNetworkService = getIOns();
+            if (iOpportunisticNetworkService != null) {
+                ret = iOpportunisticNetworkService.setEnable(enable, pkgForDebug);
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "enableAlternativeNetwork RemoteException", ex);
+            Rlog.e(TAG, "enableOpportunisticNetwork RemoteException", ex);
         }
 
         return ret;
     }
 
     /**
-     * is AlternativeNetworkService enabled
+     * is OpportunisticNetworkService enabled
      *
-     * This method should be called to determine if the AlternativeNetworkService is
+     * This method should be called to determine if the OpportunisticNetworkService is
      * enabled
      *
      * <p>
@@ -9316,17 +9316,17 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public boolean isAlternativeNetworkEnabled() {
+    public boolean isOpportunisticNetworkEnabled() {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         boolean isEnabled = false;
 
         try {
-            IAns iAlternativeNetworkService = getIAns();
-            if (iAlternativeNetworkService != null) {
-                isEnabled = iAlternativeNetworkService.isEnabled(pkgForDebug);
+            IOns iOpportunisticNetworkService = getIOns();
+            if (iOpportunisticNetworkService != null) {
+                isEnabled = iOpportunisticNetworkService.isEnabled(pkgForDebug);
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "enableAlternativeNetwork RemoteException", ex);
+            Rlog.e(TAG, "enableOpportunisticNetwork RemoteException", ex);
         }
 
         return isEnabled;
@@ -9681,9 +9681,9 @@ public class TelephonyManager {
     public boolean setPreferredOpportunisticDataSubscription(int subId) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         try {
-            IAns iAlternativeNetworkService = getIAns();
-            if (iAlternativeNetworkService != null) {
-                return iAlternativeNetworkService.setPreferredData(subId, pkgForDebug);
+            IOns iOpportunisticNetworkService = getIOns();
+            if (iOpportunisticNetworkService != null) {
+                return iOpportunisticNetworkService.setPreferredData(subId, pkgForDebug);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setPreferredData RemoteException", ex);
@@ -9705,9 +9705,9 @@ public class TelephonyManager {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
-            IAns iAlternativeNetworkService = getIAns();
-            if (iAlternativeNetworkService != null) {
-                subId = iAlternativeNetworkService.getPreferredData(pkgForDebug);
+            IOns iOpportunisticNetworkService = getIOns();
+            if (iOpportunisticNetworkService != null) {
+                subId = iOpportunisticNetworkService.getPreferredData(pkgForDebug);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getPreferredData RemoteException", ex);
@@ -9718,8 +9718,8 @@ public class TelephonyManager {
     /**
      * Update availability of a list of networks in the current location.
      *
-     * This api should be called to inform AlternativeNetwork Service about the availability
-     * of a network at the current location. This information will be used by AlternativeNetwork
+     * This api should be called to inform OpportunisticNetwork Service about the availability
+     * of a network at the current location. This information will be used by OpportunisticNetwork
      * service to decide to attach to the network opportunistically. If an empty list is passed,
      * it is assumed that no network is available.
      * Requires that the calling app has carrier privileges on both primary and
@@ -9734,9 +9734,9 @@ public class TelephonyManager {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         boolean ret = false;
         try {
-            IAns iAlternativeNetworkService = getIAns();
-            if (iAlternativeNetworkService != null) {
-                ret = iAlternativeNetworkService.updateAvailableNetworks(availableNetworks,
+            IOns iOpportunisticNetworkService = getIOns();
+            if (iOpportunisticNetworkService != null) {
+                ret = iOpportunisticNetworkService.updateAvailableNetworks(availableNetworks,
                         pkgForDebug);
             }
         } catch (RemoteException ex) {
