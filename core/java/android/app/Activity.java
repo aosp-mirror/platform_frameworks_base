@@ -1023,7 +1023,9 @@ public class Activity extends ContextThemeWrapper
      *
      * @return The content capture manager
      */
-    @NonNull private ContentCaptureManager getContentCaptureManager() {
+    @Nullable private ContentCaptureManager getContentCaptureManager() {
+        // ContextCapture disabled for system apps
+        if (getApplicationInfo().isSystemApp()) return null;
         if (mContentCaptureManager == null) {
             mContentCaptureManager = getSystemService(ContentCaptureManager.class);
         }
