@@ -27,6 +27,7 @@ import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
@@ -34,7 +35,6 @@ import dalvik.system.CloseGuard;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Session used to notify a system-provided Content Capture service about events associated with
@@ -73,11 +73,11 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int STATE_ACTIVE = 2;
 
     /**
-     * Session is disabled.
+     * Session is disabled because there is no service for this user.
      *
      * @hide
      */
-    public static final int STATE_DISABLED = 3;
+    public static final int STATE_DISABLED_NO_SERVICE = 3;
 
     /**
      * Session is disabled because its id already existed on server.
@@ -90,11 +90,14 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
+    private final Object mLock = new Object();
+
     /**
      * Guard use to ignore events after it's destroyed.
      */
     @NonNull
-    private final AtomicBoolean mDestroyed = new AtomicBoolean();
+    @GuardedBy("mLock")
+    private boolean mDestroyed;
 
     /** @hide */
     @Nullable
@@ -108,17 +111,18 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /**
      * List of children session.
      */
-    // TODO(b/121033016): need to synchonize access, either by changing on handler or UI thread
-    // (for now there's no handler on this class, so we need to wait for the next refactoring),
-    // most likely the former (as we have no guarantee that createContentCaptureSession()
-    // it will be called in the UiThread; for example, WebView most likely won't call on it)
     @Nullable
+    @GuardedBy("mLock")
     private ArrayList<ContentCaptureSession> mChildren;
 
     /** @hide */
     protected ContentCaptureSession() {
         mCloseGuard.open("destroy");
     }
+
+    /** @hide */
+    @NonNull
+    abstract MainContentCaptureSession getMainCaptureSession();
 
     /**
      * Gets the id used to identify this session.
@@ -143,10 +147,12 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             Log.d(TAG, "createContentCaptureSession(" + context + ": parent=" + mId + ", child="
                     + child.mId);
         }
-        if (mChildren == null) {
-            mChildren = new ArrayList<>(INITIAL_CHILDREN_CAPACITY);
+        synchronized (mLock) {
+            if (mChildren == null) {
+                mChildren = new ArrayList<>(INITIAL_CHILDREN_CAPACITY);
+            }
+            mChildren.add(child);
         }
-        mChildren.add(child);
         return child;
     }
 
@@ -163,29 +169,31 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * <p>Once destroyed, any new notification will be dropped.
      */
     public final void destroy() {
-        if (!mDestroyed.compareAndSet(false, true)) {
-            Log.e(TAG, "destroy(): already destroyed");
-            return;
-        }
+        synchronized (mLock) {
+            if (mDestroyed) {
+                Log.e(TAG, "destroy(" + mId + "): already destroyed");
+                return;
+            }
+            mDestroyed = true;
 
-        mCloseGuard.close();
+            mCloseGuard.close();
 
-        //TODO(b/111276913): check state (for example, how to handle if it's waiting for remote
-        // id) and send it to the cache of batched commands
-        if (VERBOSE) {
-            Log.v(TAG, "destroy(): state=" + getStateAsString(mState) + ", mId=" + mId);
-        }
-
-        // Finish children first
-        if (mChildren != null) {
-            final int numberChildren = mChildren.size();
-            if (VERBOSE) Log.v(TAG, "Destroying " + numberChildren + " children first");
-            for (int i = 0; i < numberChildren; i++) {
-                final ContentCaptureSession child = mChildren.get(i);
-                try {
-                    child.destroy();
-                } catch (Exception e) {
-                    Log.w(TAG, "exception destroying child session #" + i + ": " + e);
+            //TODO(b/111276913): check state (for example, how to handle if it's waiting for remote
+            // id) and send it to the cache of batched commands
+            if (VERBOSE) {
+                Log.v(TAG, "destroy(): state=" + getStateAsString(mState) + ", mId=" + mId);
+            }
+            // Finish children first
+            if (mChildren != null) {
+                final int numberChildren = mChildren.size();
+                if (VERBOSE) Log.v(TAG, "Destroying " + numberChildren + " children first");
+                for (int i = 0; i < numberChildren; i++) {
+                    final ContentCaptureSession child = mChildren.get(i);
+                    try {
+                        child.destroy();
+                    } catch (Exception e) {
+                        Log.w(TAG, "exception destroying child session #" + i + ": " + e);
+                    }
                 }
             }
         }
@@ -305,23 +313,26 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     }
 
     boolean isContentCaptureEnabled() {
-        return !mDestroyed.get();
+        synchronized (mLock) {
+            return !mDestroyed;
+        }
     }
 
     @CallSuper
     void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
         pw.print(prefix); pw.print("id: "); pw.println(mId);
-        pw.print(prefix); pw.print("destroyed: "); pw.println(mDestroyed.get());
-        if (mChildren != null && !mChildren.isEmpty()) {
-            final String prefix2 = prefix + "  ";
-            final int numberChildren = mChildren.size();
-            pw.print(prefix); pw.print("number children: "); pw.println(numberChildren);
-            for (int i = 0; i < numberChildren; i++) {
-                final ContentCaptureSession child = mChildren.get(i);
-                pw.print(prefix); pw.print(i); pw.println(": "); child.dump(prefix2, pw);
+        synchronized (mLock) {
+            pw.print(prefix); pw.print("destroyed: "); pw.println(mDestroyed);
+            if (mChildren != null && !mChildren.isEmpty()) {
+                final String prefix2 = prefix + "  ";
+                final int numberChildren = mChildren.size();
+                pw.print(prefix); pw.print("number children: "); pw.println(numberChildren);
+                for (int i = 0; i < numberChildren; i++) {
+                    final ContentCaptureSession child = mChildren.get(i);
+                    pw.print(prefix); pw.print(i); pw.println(": "); child.dump(prefix2, pw);
+                }
             }
         }
-
     }
 
     @Override
@@ -341,8 +352,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 return "WAITING_FOR_SERVER";
             case STATE_ACTIVE:
                 return "ACTIVE";
-            case STATE_DISABLED:
-                return "DISABLED";
+            case STATE_DISABLED_NO_SERVICE:
+                return "DISABLED_NO_SERVICE";
             case STATE_DISABLED_DUPLICATED_ID:
                 return "DISABLED_DUPLICATED_ID";
             default:

@@ -251,6 +251,10 @@ public final class ContentCaptureEvent implements Parcelable {
     public String toString() {
         final StringBuilder string = new StringBuilder("ContentCaptureEvent[type=")
                 .append(getTypeAsString(mType));
+        string.append(", session=").append(mSessionId);
+        if (mType == TYPE_SESSION_STARTED && mParentSessionId != null) {
+            string.append(", parent=").append(mParentSessionId);
+        }
         if (mFlags > 0) {
             string.append(", flags=").append(mFlags);
         }
