@@ -475,6 +475,11 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
     }
 
     @Override
+    public void setDeviceMobilityState(int state) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void startDppAsConfiguratorInitiator(IBinder binder, String enrolleeUri,
             int selectedNetworkId, int netRole, IDppCallback callback) {
         throw new UnsupportedOperationException();
