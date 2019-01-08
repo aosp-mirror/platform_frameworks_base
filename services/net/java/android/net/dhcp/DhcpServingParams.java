@@ -17,6 +17,7 @@
 package android.net.dhcp;
 
 import static android.net.NetworkUtils.getPrefixMaskAsInet4Address;
+import static android.net.NetworkUtils.intToInet4AddressHTH;
 import static android.net.dhcp.DhcpPacket.INFINITE_LEASE;
 import static android.net.util.NetworkConstants.IPV4_MAX_MTU;
 import static android.net.util.NetworkConstants.IPV4_MIN_MTU;
@@ -24,6 +25,7 @@ import static android.net.util.NetworkConstants.IPV4_MIN_MTU;
 import static java.lang.Integer.toUnsignedLong;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
@@ -103,6 +105,37 @@ public class DhcpServingParams {
         this.metered = metered;
     }
 
+    /**
+     * Create parameters from a stable AIDL-compatible parcel.
+     */
+    public static DhcpServingParams fromParcelableObject(@NonNull DhcpServingParamsParcel parcel)
+            throws InvalidParameterException {
+        final LinkAddress serverAddr = new LinkAddress(
+                intToInet4AddressHTH(parcel.serverAddr),
+                parcel.serverAddrPrefixLength);
+        return new Builder()
+                .setServerAddr(serverAddr)
+                .setDefaultRouters(toInet4AddressSet(parcel.defaultRouters))
+                .setDnsServers(toInet4AddressSet(parcel.dnsServers))
+                .setExcludedAddrs(toInet4AddressSet(parcel.excludedAddrs))
+                .setDhcpLeaseTimeSecs(parcel.dhcpLeaseTimeSecs)
+                .setLinkMtu(parcel.linkMtu)
+                .setMetered(parcel.metered)
+                .build();
+    }
+
+    private static Set<Inet4Address> toInet4AddressSet(@Nullable int[] addrs) {
+        if (addrs == null) {
+            return new HashSet<>(0);
+        }
+
+        final HashSet<Inet4Address> res = new HashSet<>();
+        for (int addr : addrs) {
+            res.add(intToInet4AddressHTH(addr));
+        }
+        return res;
+    }
+
     @NonNull
     public Inet4Address getServerInet4Addr() {
         return (Inet4Address) serverAddr.getAddress();
@@ -134,13 +167,13 @@ public class DhcpServingParams {
      * of the parameters.
      */
     public static class Builder {
-        private LinkAddress serverAddr;
-        private Set<Inet4Address> defaultRouters;
-        private Set<Inet4Address> dnsServers;
-        private Set<Inet4Address> excludedAddrs;
-        private long dhcpLeaseTimeSecs;
-        private int linkMtu = MTU_UNSET;
-        private boolean metered;
+        private LinkAddress mServerAddr;
+        private Set<Inet4Address> mDefaultRouters;
+        private Set<Inet4Address> mDnsServers;
+        private Set<Inet4Address> mExcludedAddrs;
+        private long mDhcpLeaseTimeSecs;
+        private int mLinkMtu = MTU_UNSET;
+        private boolean mMetered;
 
         /**
          * Set the server address and served prefix for the DHCP server.
@@ -148,7 +181,7 @@ public class DhcpServingParams {
          * <p>This parameter is required.
          */
         public Builder setServerAddr(@NonNull LinkAddress serverAddr) {
-            this.serverAddr = serverAddr;
+            this.mServerAddr = serverAddr;
             return this;
         }
 
@@ -159,7 +192,7 @@ public class DhcpServingParams {
          * always be set explicitly before building the {@link DhcpServingParams}.
          */
         public Builder setDefaultRouters(@NonNull Set<Inet4Address> defaultRouters) {
-            this.defaultRouters = defaultRouters;
+            this.mDefaultRouters = defaultRouters;
             return this;
         }
 
@@ -189,7 +222,7 @@ public class DhcpServingParams {
          * {@link DhcpServingParams}.
          */
         public Builder setDnsServers(@NonNull Set<Inet4Address> dnsServers) {
-            this.dnsServers = dnsServers;
+            this.mDnsServers = dnsServers;
             return this;
         }
 
@@ -219,7 +252,7 @@ public class DhcpServingParams {
          * and do not need to be set here.
          */
         public Builder setExcludedAddrs(@NonNull Set<Inet4Address> excludedAddrs) {
-            this.excludedAddrs = excludedAddrs;
+            this.mExcludedAddrs = excludedAddrs;
             return this;
         }
 
@@ -239,7 +272,7 @@ public class DhcpServingParams {
          * <p>This parameter is required.
          */
         public Builder setDhcpLeaseTimeSecs(long dhcpLeaseTimeSecs) {
-            this.dhcpLeaseTimeSecs = dhcpLeaseTimeSecs;
+            this.mDhcpLeaseTimeSecs = dhcpLeaseTimeSecs;
             return this;
         }
 
@@ -250,7 +283,7 @@ public class DhcpServingParams {
          * is optional and defaults to {@link #MTU_UNSET}.
          */
         public Builder setLinkMtu(int linkMtu) {
-            this.linkMtu = linkMtu;
+            this.mLinkMtu = linkMtu;
             return this;
         }
 
@@ -260,7 +293,7 @@ public class DhcpServingParams {
          * <p>If not set, the default value is false.
          */
         public Builder setMetered(boolean metered) {
-            this.metered = metered;
+            this.mMetered = metered;
             return this;
         }
 
@@ -274,54 +307,57 @@ public class DhcpServingParams {
          */
         @NonNull
         public DhcpServingParams build() throws InvalidParameterException {
-            if (serverAddr == null) {
+            if (mServerAddr == null) {
                 throw new InvalidParameterException("Missing serverAddr");
             }
-            if (defaultRouters == null) {
+            if (mDefaultRouters == null) {
                 throw new InvalidParameterException("Missing defaultRouters");
             }
-            if (dnsServers == null) {
+            if (mDnsServers == null) {
                 // Empty set is OK, but enforce explicitly setting it
                 throw new InvalidParameterException("Missing dnsServers");
             }
-            if (dhcpLeaseTimeSecs <= 0 || dhcpLeaseTimeSecs > toUnsignedLong(INFINITE_LEASE)) {
-                throw new InvalidParameterException("Invalid lease time: " + dhcpLeaseTimeSecs);
+            if (mDhcpLeaseTimeSecs <= 0 || mDhcpLeaseTimeSecs > toUnsignedLong(INFINITE_LEASE)) {
+                throw new InvalidParameterException("Invalid lease time: " + mDhcpLeaseTimeSecs);
             }
-            if (linkMtu != MTU_UNSET && (linkMtu < IPV4_MIN_MTU || linkMtu > IPV4_MAX_MTU)) {
-                throw new InvalidParameterException("Invalid link MTU: " + linkMtu);
+            if (mLinkMtu != MTU_UNSET && (mLinkMtu < IPV4_MIN_MTU || mLinkMtu > IPV4_MAX_MTU)) {
+                throw new InvalidParameterException("Invalid link MTU: " + mLinkMtu);
             }
-            if (!serverAddr.isIPv4()) {
+            if (!mServerAddr.isIPv4()) {
                 throw new InvalidParameterException("serverAddr must be IPv4");
             }
-            if (serverAddr.getPrefixLength() < MIN_PREFIX_LENGTH
-                    || serverAddr.getPrefixLength() > MAX_PREFIX_LENGTH) {
+            if (mServerAddr.getPrefixLength() < MIN_PREFIX_LENGTH
+                    || mServerAddr.getPrefixLength() > MAX_PREFIX_LENGTH) {
                 throw new InvalidParameterException("Prefix length is not in supported range");
             }
 
-            final IpPrefix prefix = makeIpPrefix(serverAddr);
-            for (Inet4Address addr : defaultRouters) {
+            final IpPrefix prefix = makeIpPrefix(mServerAddr);
+            for (Inet4Address addr : mDefaultRouters) {
                 if (!prefix.contains(addr)) {
                     throw new InvalidParameterException(String.format(
-                            "Default router %s is not in server prefix %s", addr, serverAddr));
+                            "Default router %s is not in server prefix %s", addr, mServerAddr));
                 }
             }
 
             final Set<Inet4Address> excl = new HashSet<>();
-            if (excludedAddrs != null) {
-                excl.addAll(excludedAddrs);
+            if (mExcludedAddrs != null) {
+                excl.addAll(mExcludedAddrs);
             }
-            excl.add((Inet4Address) serverAddr.getAddress());
-            excl.addAll(defaultRouters);
-            excl.addAll(dnsServers);
+            excl.add((Inet4Address) mServerAddr.getAddress());
+            excl.addAll(mDefaultRouters);
+            excl.addAll(mDnsServers);
 
-            return new DhcpServingParams(serverAddr,
-                    Collections.unmodifiableSet(new HashSet<>(defaultRouters)),
-                    Collections.unmodifiableSet(new HashSet<>(dnsServers)),
+            return new DhcpServingParams(mServerAddr,
+                    Collections.unmodifiableSet(new HashSet<>(mDefaultRouters)),
+                    Collections.unmodifiableSet(new HashSet<>(mDnsServers)),
                     Collections.unmodifiableSet(excl),
-                    dhcpLeaseTimeSecs, linkMtu, metered);
+                    mDhcpLeaseTimeSecs, mLinkMtu, mMetered);
         }
     }
 
+    /**
+     * Utility method to create an IpPrefix with the address and prefix length of a LinkAddress.
+     */
     @NonNull
     static IpPrefix makeIpPrefix(@NonNull LinkAddress addr) {
         return new IpPrefix(addr.getAddress(), addr.getPrefixLength());
