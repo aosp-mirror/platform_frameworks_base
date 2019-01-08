@@ -95,7 +95,7 @@ TEST(ThreadBase, lifecyclePerf) {
     };
 
     struct Counter {
-        Counter(EventCount* count) : mCount(count) { mCount->construct++; }
+        explicit Counter(EventCount* count) : mCount(count) { mCount->construct++; }
 
         Counter(const Counter& other) : mCount(other.mCount) {
             if (mCount) mCount->copy++;
