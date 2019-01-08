@@ -438,8 +438,9 @@ static jobject nativeGetDisplayedContentSamplingAttributes(JNIEnv* env, jclass c
 static jboolean nativeSetDisplayedContentSamplingEnabled(JNIEnv* env, jclass clazz,
         jobject tokenObj, jboolean enable, jint componentMask, jint maxFrames) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    return SurfaceComposerClient::setDisplayContentSamplingEnabled(
+    status_t rc = SurfaceComposerClient::setDisplayContentSamplingEnabled(
             token, enable, componentMask, maxFrames);
+    return rc == OK;
 }
 
 static jobject nativeGetDisplayedContentSample(JNIEnv* env, jclass clazz, jobject tokenObj,

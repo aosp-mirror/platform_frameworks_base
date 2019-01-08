@@ -389,7 +389,7 @@ public class DisplayManagerServiceTest {
         if (attr == null) return; //sampling not supported on device, skip remainder of test.
 
         boolean enabled = displayManager.setDisplayedContentSamplingEnabledInternal(0, true, 0, 0);
-        assertTrue(!enabled);
+        assertTrue(enabled);
 
         displayManager.setDisplayedContentSamplingEnabledInternal(0, false, 0, 0);
         DisplayedContentSample sample = displayManager.getDisplayedContentSampleInternal(0, 0, 0);
