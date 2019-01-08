@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
@@ -29,6 +30,7 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
@@ -46,8 +48,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Monitors the health of packages on the system and notifies interested observers when packages
@@ -58,7 +62,7 @@ public class PackageWatchdog {
     // Duration to count package failures before it resets to 0
     private static final int TRIGGER_DURATION_MS = 60000;
     // Number of package failures within the duration above before we notify observers
-    private static final int TRIGGER_FAILURE_COUNT = 5;
+    static final int TRIGGER_FAILURE_COUNT = 5;
     private static final int DB_VERSION = 1;
     private static final String TAG_PACKAGE_WATCHDOG = "package-watchdog";
     private static final String TAG_PACKAGE = "package";
@@ -75,20 +79,13 @@ public class PackageWatchdog {
     // Handler to run package cleanup runnables
     private final Handler mTimerHandler;
     private final Handler mIoHandler;
-    // Contains (observer-name -> external-observer-handle) that have been registered during the
-    // current boot.
-    // It is populated when observers call #registerHealthObserver and it does not survive reboots.
-    @GuardedBy("mLock")
-    final ArrayMap<String, PackageHealthObserver> mRegisteredObservers = new ArrayMap<>();
-    // Contains (observer-name -> internal-observer-handle) that have ever been registered from
+    // Contains (observer-name -> observer-handle) that have ever been registered from
     // previous boots. Observers with all packages expired are periodically pruned.
     // It is saved to disk on system shutdown and repouplated on startup so it survives reboots.
     @GuardedBy("mLock")
-    final ArrayMap<String, ObserverInternal> mAllObservers = new ArrayMap<>();
+    private final ArrayMap<String, ObserverInternal> mAllObservers = new ArrayMap<>();
     // File containing the XML data of monitored packages /data/system/package-watchdog.xml
-    private final AtomicFile mPolicyFile =
-            new AtomicFile(new File(new File(Environment.getDataDirectory(), "system"),
-                           "package-watchdog.xml"));
+    private final AtomicFile mPolicyFile;
     // Runnable to prune monitored packages that have expired
     private final Runnable mPackageCleanup;
     // Last SystemClock#uptimeMillis a package clean up was executed.
@@ -98,13 +95,31 @@ public class PackageWatchdog {
     // 0 if mPackageCleanup not running.
     private long mDurationAtLastReschedule;
 
+    // TODO(zezeozue): Remove redundant context param
     private PackageWatchdog(Context context) {
         mContext = context;
+        mPolicyFile = new AtomicFile(new File(new File(Environment.getDataDirectory(), "system"),
+                        "package-watchdog.xml"));
         mTimerHandler = new Handler(Looper.myLooper());
         mIoHandler = BackgroundThread.getHandler();
         mPackageCleanup = this::rescheduleCleanup;
         loadFromFile();
     }
+
+    /**
+     * Creates a PackageWatchdog for testing that uses the same {@code looper} for all handlers
+     * and creates package-watchdog.xml in an apps data directory.
+     */
+    @VisibleForTesting
+    PackageWatchdog(Context context, Looper looper) {
+        mContext = context;
+        mPolicyFile = new AtomicFile(new File(context.getFilesDir(), "package-watchdog.xml"));
+        mTimerHandler = new Handler(looper);
+        mIoHandler = mTimerHandler;
+        mPackageCleanup = this::rescheduleCleanup;
+        loadFromFile();
+    }
+
 
     /** Creates or gets singleton instance of PackageWatchdog. */
     public static PackageWatchdog getInstance(Context context) {
@@ -124,7 +139,10 @@ public class PackageWatchdog {
      */
     public void registerHealthObserver(PackageHealthObserver observer) {
         synchronized (mLock) {
-            mRegisteredObservers.put(observer.getName(), observer);
+            ObserverInternal internalObserver = mAllObservers.get(observer.getName());
+            if (internalObserver != null) {
+                internalObserver.mRegisteredObserver = observer;
+            }
             if (mDurationAtLastReschedule == 0) {
                 // Nothing running, schedule
                 rescheduleCleanup();
@@ -143,7 +161,7 @@ public class PackageWatchdog {
      * or {@code durationMs} is less than 1
      */
     public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
-            int durationMs) {
+            long durationMs) {
         if (packageNames.isEmpty() || durationMs < 1) {
             throw new IllegalArgumentException("Observation not started, no packages specified"
                     + "or invalid duration");
@@ -180,9 +198,30 @@ public class PackageWatchdog {
     public void unregisterHealthObserver(PackageHealthObserver observer) {
         synchronized (mLock) {
             mAllObservers.remove(observer.getName());
-            mRegisteredObservers.remove(observer.getName());
         }
         saveToFileAsync();
+    }
+
+    /**
+     * Returns packages observed by {@code observer}
+     *
+     * @return an empty set if {@code observer} has some packages observerd from a previous boot
+     * but has not registered itself in the current boot to receive notifications. Returns null
+     * if there are no active packages monitored from any boot.
+     */
+    @Nullable
+    public Set<String> getPackages(PackageHealthObserver observer) {
+        synchronized (mLock) {
+            for (int i = 0; i < mAllObservers.size(); i++) {
+                if (observer.getName().equals(mAllObservers.keyAt(i))) {
+                    if (observer.equals(mAllObservers.valueAt(i).mRegisteredObserver)) {
+                        return mAllObservers.valueAt(i).mPackages.keySet();
+                    }
+                    return Collections.emptySet();
+                }
+            }
+        }
+        return null;
     }
 
     // TODO(zezeozue:) Accept current versionCodes of failing packages?
@@ -198,24 +237,23 @@ public class PackageWatchdog {
     public void onPackageFailure(String[] packages) {
         ArrayMap<String, List<PackageHealthObserver>> packagesToReport = new ArrayMap<>();
         synchronized (mLock) {
-            if (mRegisteredObservers.isEmpty()) {
+            if (mAllObservers.isEmpty()) {
                 return;
             }
 
             for (int pIndex = 0; pIndex < packages.length; pIndex++) {
+                // Observers interested in receiving packageName failures
+                List<PackageHealthObserver> observersToNotify = new ArrayList<>();
                 for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
-                    // Observers interested in receiving packageName failures
-                    List<PackageHealthObserver> observersToNotify = new ArrayList<>();
-                    PackageHealthObserver activeObserver =
-                            mRegisteredObservers.get(mAllObservers.valueAt(oIndex).mName);
-                    if (activeObserver != null) {
-                        observersToNotify.add(activeObserver);
+                    PackageHealthObserver registeredObserver =
+                            mAllObservers.valueAt(oIndex).mRegisteredObserver;
+                    if (registeredObserver != null) {
+                        observersToNotify.add(registeredObserver);
                     }
-
-                    // Save interested observers and notify them outside the lock
-                    if (!observersToNotify.isEmpty()) {
-                        packagesToReport.put(packages[pIndex], observersToNotify);
-                    }
+                }
+                // Save interested observers and notify them outside the lock
+                if (!observersToNotify.isEmpty()) {
+                    packagesToReport.put(packages[pIndex], observersToNotify);
                 }
             }
         }
@@ -223,8 +261,11 @@ public class PackageWatchdog {
         // Notify observers
         for (int pIndex = 0; pIndex < packagesToReport.size(); pIndex++) {
             List<PackageHealthObserver> observers = packagesToReport.valueAt(pIndex);
+            String packageName = packages[pIndex];
             for (int oIndex = 0; oIndex < observers.size(); oIndex++) {
-                if (observers.get(oIndex).onHealthCheckFailed(packages[pIndex])) {
+                PackageHealthObserver observer = observers.get(oIndex);
+                if (mAllObservers.get(observer.getName()).onPackageFailure(packageName)
+                        && observer.onHealthCheckFailed(packageName)) {
                     // Observer has handled, do not notify others
                     break;
                 }
@@ -275,10 +316,12 @@ public class PackageWatchdog {
             // O if mPackageCleanup not running
             long elapsedDurationMs = mUptimeAtLastRescheduleMs == 0
                     ? 0 : uptimeMs - mUptimeAtLastRescheduleMs;
-            // O if mPackageCleanup not running
+            // Less than O if mPackageCleanup unexpectedly didn't run yet even though
+            // and we are past the last duration scheduled to run
             long remainingDurationMs = mDurationAtLastReschedule - elapsedDurationMs;
-
-            if (mUptimeAtLastRescheduleMs == 0 || nextDurationToScheduleMs < remainingDurationMs) {
+            if (mUptimeAtLastRescheduleMs == 0
+                    || remainingDurationMs <= 0
+                    || nextDurationToScheduleMs < remainingDurationMs) {
                 // First schedule or an earlier reschedule
                 pruneObservers(elapsedDurationMs);
                 mTimerHandler.removeCallbacks(mPackageCleanup);
@@ -305,6 +348,7 @@ public class PackageWatchdog {
             }
         }
         Slog.v(TAG, "Earliest package time is " + shortestDurationMs);
+
         return shortestDurationMs;
     }
 
@@ -409,6 +453,8 @@ public class PackageWatchdog {
     static class ObserverInternal {
         public final String mName;
         public final ArrayMap<String, MonitoredPackage> mPackages;
+        @Nullable
+        public PackageHealthObserver mRegisteredObserver;
 
         ObserverInternal(String name, List<MonitoredPackage> packages) {
             mName = name;
