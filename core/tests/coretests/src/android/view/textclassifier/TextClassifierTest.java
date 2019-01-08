@@ -368,6 +368,7 @@ public class TextClassifierTest {
         assertThat(textLanguage, isTextLanguage("ja"));
     }
 
+    /* DISABLED: b/122467291
     @Test
     public void testSuggestConversationActions_textReplyOnly_maxThree() {
         if (isTextClassifierDisabled()) return;
@@ -395,7 +396,7 @@ public class TextClassifierTest {
             assertThat(conversationAction,
                     isConversationAction(ConversationActions.TYPE_TEXT_REPLY));
         }
-    }
+    }*/
 
     @Test
     public void testSuggestConversationActions_textReplyOnly_noMax() {
