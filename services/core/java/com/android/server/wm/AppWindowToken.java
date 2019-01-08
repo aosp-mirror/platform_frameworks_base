@@ -1714,7 +1714,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> makeChildSurface(null));
             }
-            mLetterbox.layout(getParent().getBounds(), w.getFrameLw());
+            getPosition(mTmpPoint);
+            mLetterbox.layout(getParent().getBounds(), w.getFrameLw(), mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
