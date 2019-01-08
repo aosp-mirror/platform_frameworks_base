@@ -17,6 +17,7 @@ package android.net.ip;
 
 import android.net.ProxyInfoParcelable;
 import android.net.ProvisioningConfigurationParcelable;
+import android.net.TcpKeepalivePacketDataParcelable;
 
 /** @hide */
 oneway interface IIpClient {
@@ -29,4 +30,6 @@ oneway interface IIpClient {
     void setTcpBufferSizes(in String tcpBufferSizes);
     void setHttpProxy(in ProxyInfoParcelable proxyInfo);
     void setMulticastFilter(boolean enabled);
+    void addKeepalivePacketFilter(int slot, in TcpKeepalivePacketDataParcelable pkt);
+    void removeKeepalivePacketFilter(int slot);
 }

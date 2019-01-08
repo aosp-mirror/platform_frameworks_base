@@ -6329,6 +6329,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
+    public void startTcpKeepalive(Network network, FileDescriptor fd, int intervalSeconds,
+            Messenger messenger, IBinder binder) {
+        enforceKeepalivePermission();
+        mKeepaliveTracker.startTcpKeepalive(
+                getNetworkAgentInfoForNetwork(network), fd, intervalSeconds, messenger, binder);
+    }
+
+    @Override
     public void stopKeepalive(Network network, int slot) {
         mHandler.sendMessage(mHandler.obtainMessage(
                 NetworkAgent.CMD_STOP_SOCKET_KEEPALIVE, slot, SocketKeepalive.SUCCESS, network));
