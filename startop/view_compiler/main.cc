@@ -17,6 +17,7 @@
 #include "gflags/gflags.h"
 
 #include "android-base/stringprintf.h"
+#include "apk_layout_compiler.h"
 #include "dex_builder.h"
 #include "dex_layout_compiler.h"
 #include "java_lang_builder.h"
@@ -46,6 +47,7 @@ using std::string;
 
 constexpr char kStdoutFilename[]{"stdout"};
 
+DEFINE_bool(apk, false, "Compile layouts in an APK");
 DEFINE_bool(dex, false, "Generate a DEX file instead of Java");
 DEFINE_string(out, kStdoutFilename, "Where to write the generated class");
 DEFINE_string(package, "", "The package name for the generated class (required)");
@@ -108,6 +110,21 @@ int main(int argc, char** argv) {
   }
 
   const char* const filename = argv[kFileNameParam];
+  const bool is_stdout = FLAGS_out == kStdoutFilename;
+
+  std::ofstream outfile;
+  if (!is_stdout) {
+    outfile.open(FLAGS_out);
+  }
+
+  if (FLAGS_apk) {
+    startop::CompileApkLayouts(
+        filename,
+        FLAGS_dex ? startop::CompilationTarget::kDex : startop::CompilationTarget::kJavaLanguage,
+        is_stdout ? std::cout : outfile);
+    return 0;
+  }
+
   const string layout_name = startop::util::FindLayoutNameFromFilename(filename);
 
   XMLDocument xml;
@@ -117,13 +134,6 @@ int main(int argc, char** argv) {
   if (!startop::CanCompileLayout(xml, &message)) {
     LOG(ERROR) << "Layout not supported: " << message;
     return 1;
-  }
-
-  const bool is_stdout = FLAGS_out == kStdoutFilename;
-
-  std::ofstream outfile;
-  if (!is_stdout) {
-    outfile.open(FLAGS_out);
   }
 
   if (FLAGS_dex) {
