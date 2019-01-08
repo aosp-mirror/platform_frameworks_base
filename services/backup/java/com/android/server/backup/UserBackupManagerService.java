@@ -556,6 +556,11 @@ public class UserBackupManagerService {
         mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
     }
 
+    void initializeBackupEnableState() {
+        boolean isEnabled = UserBackupManagerFilePersistedSettings.readBackupEnableState(mUserId);
+        setBackupEnabled(isEnabled);
+    }
+
     /** Cleans up state when the user of this service is stopped. */
     void tearDownService() {
         mUserBackupThread.quit();

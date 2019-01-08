@@ -16,6 +16,7 @@
 
 package com.android.server.backup;
 
+import static android.Manifest.permission.BACKUP;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThread;
@@ -27,7 +28,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.robolectric.Shadows.shadowOf;
 import static org.testng.Assert.expectThrows;
 
@@ -201,7 +201,7 @@ public class BackupManagerServiceTest {
         backupManagerService.stopServiceForUser(mUserOneId);
 
         verify(mUserOneService).tearDownService();
-        verifyNoMoreInteractions(mUserTwoService);
+        verify(mUserTwoService, never()).tearDownService();
     }
 
     /** Test that the service unregisters users when stopped. */
@@ -1542,6 +1542,7 @@ public class BackupManagerServiceTest {
     }
 
     private BackupManagerService createService() {
+        mShadowContext.grantPermissions(BACKUP);
         return new BackupManagerService(
                 mContext, new Trampoline(mContext), startBackupThread(null));
     }
