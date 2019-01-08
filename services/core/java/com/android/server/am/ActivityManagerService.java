@@ -2429,16 +2429,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mBackgroundLaunchBroadcasts;
     }
 
+    /**
+     * Returns true if the package {@code pkg1} running under user handle {@code uid1} is
+     * allowed association with the package {@code pkg2} running under user handle {@code uid2}.
+     * <p> If either of the packages are running as  part of the core system, then the
+     * association is implicitly allowed.
+     */
     boolean validateAssociationAllowedLocked(String pkg1, int uid1, String pkg2, int uid2) {
         if (mAllowedAssociations == null) {
             mAllowedAssociations = SystemConfig.getInstance().getAllowedAssociations();
         }
         // Interactions with the system uid are always allowed, since that is the core system
-        // that everyone needs to be able to interact with.
-        if (UserHandle.getAppId(uid1) == SYSTEM_UID) {
-            return true;
-        }
-        if (UserHandle.getAppId(uid2) == SYSTEM_UID) {
+        // that everyone needs to be able to interact with. Also allow reflexive associations
+        // within the same uid.
+        if (uid1 == uid2 || UserHandle.getAppId(uid1) == SYSTEM_UID
+                || UserHandle.getAppId(uid2) == SYSTEM_UID) {
             return true;
         }
         // We won't allow this association if either pkg1 or pkg2 has a limit on the
@@ -2454,6 +2459,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (pkgs != null) {
             return pkgs.contains(pkg1);
         }
+        // If no explicit associations are provided in the manifest, then assume the app is
+        // allowed associations with any package.
         return true;
     }
 
