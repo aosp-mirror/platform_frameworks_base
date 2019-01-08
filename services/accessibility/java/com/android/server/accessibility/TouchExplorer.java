@@ -809,13 +809,9 @@ class TouchExplorer extends BaseEventStreamTransformation
 
         // Announce the end of the gesture recognition.
         sendAccessibilityEvent(AccessibilityEvent.TYPE_GESTURE_DETECTION_END);
+        // Don't announce the end of a the touch interaction if users didn't lift their fingers.
         if (interactionEnd) {
-            // Announce the end of a the touch interaction.
             sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
-        } else {
-            // If gesture detection is end, but user doesn't release the finger, announce the
-            // transition to exploration state.
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
         }
 
         mExitGestureDetectionModeDelayed.cancel();
@@ -1151,10 +1147,7 @@ class TouchExplorer extends BaseEventStreamTransformation
         public void run() {
             // Announce the end of gesture recognition.
             sendAccessibilityEvent(AccessibilityEvent.TYPE_GESTURE_DETECTION_END);
-            // Clearing puts is in touch exploration state with a finger already
-            // down, so announce the transition to exploration state.
             clear();
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
         }
     }
 
