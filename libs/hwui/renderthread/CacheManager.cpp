@@ -30,6 +30,7 @@
 #include <gui/Surface.h>
 #include <math.h>
 #include <set>
+#include <SkMathPriv.h>
 
 namespace android {
 namespace uirenderer {
@@ -41,11 +42,6 @@ namespace renderthread {
 // be ARGB_8888.
 #define SURFACE_SIZE_MULTIPLIER (12.0f * 4.0f)
 #define BACKGROUND_RETENTION_PERCENTAGE (0.5f)
-
-// for super large fonts we will draw them as paths so no need to keep linearly
-// increasing the font cache size.
-#define FONT_CACHE_MIN_MB (0.5f)
-#define FONT_CACHE_MAX_MB (4.0f)
 
 CacheManager::CacheManager(const DisplayInfo& display) : mMaxSurfaceArea(display.w * display.h) {
     mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(
@@ -106,25 +102,10 @@ public:
 void CacheManager::configureContext(GrContextOptions* contextOptions, const void* identity, ssize_t size) {
     contextOptions->fAllowPathMaskCaching = true;
 
-    float screenMP = mMaxSurfaceArea / 1024.0f / 1024.0f;
-    float fontCacheMB = 0;
-    float decimalVal = std::modf(screenMP, &fontCacheMB);
-
-    // This is a basic heuristic to size the cache to a multiple of 512 KB
-    if (decimalVal > 0.8f) {
-        fontCacheMB += 1.0f;
-    } else if (decimalVal > 0.5f) {
-        fontCacheMB += 0.5f;
-    }
-
-    // set limits on min/max size of the cache
-    fontCacheMB = std::max(FONT_CACHE_MIN_MB, std::min(FONT_CACHE_MAX_MB, fontCacheMB));
-
-    // We must currently set the size of the text cache based on the size of the
-    // display even though we like to  be dynamicallysizing it to the size of the window.
-    // Skia's implementation doesn't provide a mechanism to resize the font cache due to
-    // the potential cost of recreating the glyphs.
-    contextOptions->fGlyphCacheTextureMaximumBytes = fontCacheMB * 1024 * 1024;
+    // This sets the maximum size for a single texture atlas in the GPU font cache.  If necessary,
+    // the cache can allocate additional textures that are counted against the total cache limits
+    // provided to Skia.
+    contextOptions->fGlyphCacheTextureMaximumBytes = GrNextSizePow2(mMaxSurfaceArea);
 
     if (mTaskManager.canRunTasks()) {
         if (!mTaskProcessor.get()) {
