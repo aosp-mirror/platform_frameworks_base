@@ -48,7 +48,7 @@ static bool _TvAppNoRoundedCornerColorFilter(
 
 class TvApp : public TestScene {
 public:
-    TvApp(BitmapAllocationTestUtils::BitmapAllocator allocator)
+    explicit TvApp(BitmapAllocationTestUtils::BitmapAllocator allocator)
             : TestScene(), mAllocator(allocator) {}
 
     sp<RenderNode> mBg;
@@ -232,7 +232,7 @@ private:
 
 class TvAppNoRoundedCorner : public TvApp {
 public:
-    TvAppNoRoundedCorner(BitmapAllocationTestUtils::BitmapAllocator allocator) : TvApp(allocator) {}
+    explicit TvAppNoRoundedCorner(BitmapAllocationTestUtils::BitmapAllocator allocator) : TvApp(allocator) {}
 
 private:
     virtual float roundedCornerRadius() override { return dp(0); }
@@ -240,7 +240,7 @@ private:
 
 class TvAppColorFilter : public TvApp {
 public:
-    TvAppColorFilter(BitmapAllocationTestUtils::BitmapAllocator allocator) : TvApp(allocator) {}
+    explicit TvAppColorFilter(BitmapAllocationTestUtils::BitmapAllocator allocator) : TvApp(allocator) {}
 
 private:
     virtual bool useOverlay() override { return false; }
@@ -248,7 +248,7 @@ private:
 
 class TvAppNoRoundedCornerColorFilter : public TvApp {
 public:
-    TvAppNoRoundedCornerColorFilter(BitmapAllocationTestUtils::BitmapAllocator allocator)
+    explicit TvAppNoRoundedCornerColorFilter(BitmapAllocationTestUtils::BitmapAllocator allocator)
             : TvApp(allocator) {}
 
 private:
