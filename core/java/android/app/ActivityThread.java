@@ -451,6 +451,14 @@ public final class ActivityThread extends ClientTransactionHandler {
         ViewRootImpl.ActivityConfigCallback configCallback;
         ActivityClientRecord nextIdle;
 
+        // Indicates whether this activity is currently the topmost resumed one in the system.
+        // This holds the last reported value from server.
+        boolean isTopResumedActivity;
+        // This holds the value last sent to the activity. This is needed, because an update from
+        // server may come at random time, but we always need to report changes between ON_RESUME
+        // and ON_PAUSE to the app.
+        boolean lastReportedTopResumedState;
+
         ProfilerInfo profilerInfo;
 
         @UnsupportedAppUsage
@@ -3302,16 +3310,14 @@ public final class ActivityThread extends ClientTransactionHandler {
         final boolean resumed = !r.paused;
         if (resumed) {
             r.activity.mTemporaryPause = true;
-            mInstrumentation.callActivityOnPause(r.activity);
+            performPauseActivityIfNeeded(r, "performNewIntents");
         }
         checkAndBlockForNetworkAccess();
         deliverNewIntents(r, intents);
         if (resumed) {
-            r.activity.performResume(false, "performNewIntents");
+            performResumeActivity(token, false, "performNewIntents");
             r.activity.mTemporaryPause = false;
-        }
-
-        if (r.paused && andPause) {
+        } else if (andPause) {
             // In this case the activity was in the paused state when we delivered the intent,
             // to guarantee onResume gets called after onNewIntent we temporarily resume the
             // activity and pause again as the caller wanted.
@@ -3964,6 +3970,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             r.state = null;
             r.persistentState = null;
             r.setState(ON_RESUME);
+
+            reportTopResumedActivityChanged(r, r.isTopResumedActivity);
         } catch (Exception e) {
             if (!mInstrumentation.onException(r.activity, e)) {
                 throw new RuntimeException("Unable to resume activity "
@@ -4118,6 +4126,45 @@ public final class ActivityThread extends ClientTransactionHandler {
         Looper.myQueue().addIdleHandler(new Idler());
     }
 
+
+    @Override
+    public void handleTopResumedActivityChanged(IBinder token, boolean onTop, String reason) {
+        ActivityClientRecord r = mActivities.get(token);
+        if (r == null || r.activity == null) {
+            Slog.w(TAG, "Not found target activity to report position change for token: " + token);
+            return;
+        }
+
+        if (DEBUG_ORDER) {
+            Slog.d(TAG, "Received position change to top: " + onTop + " for activity: " + r);
+        }
+
+        if (r.isTopResumedActivity == onTop) {
+            throw new IllegalStateException("Activity top position already set to onTop=" + onTop);
+        }
+
+        r.isTopResumedActivity = onTop;
+
+        if (r.getLifecycleState() == ON_RESUME) {
+            reportTopResumedActivityChanged(r, onTop);
+        } else {
+            if (DEBUG_ORDER) {
+                Slog.d(TAG, "Won't deliver top position change in state=" + r.getLifecycleState());
+            }
+        }
+    }
+
+    /**
+     * Call {@link Activity#onTopResumedActivityChanged(boolean)} if its top resumed state changed
+     * since the last report.
+     */
+    private void reportTopResumedActivityChanged(ActivityClientRecord r, boolean onTop) {
+        if (r.lastReportedTopResumedState != onTop) {
+            r.lastReportedTopResumedState = onTop;
+            r.activity.onTopResumedActivityChanged(onTop);
+        }
+    }
+
     @Override
     public void handlePauseActivity(IBinder token, boolean finished, boolean userLeaving,
             int configChanges, PendingTransactionActions pendingActions, String reason) {
@@ -4208,6 +4255,10 @@ public final class ActivityThread extends ClientTransactionHandler {
             // You are already paused silly...
             return;
         }
+
+        // Always reporting top resumed position loss when pausing an activity. If necessary, it
+        // will be restored in performResumeActivity().
+        reportTopResumedActivityChanged(r, false /* onTop */);
 
         try {
             r.activity.mCalled = false;

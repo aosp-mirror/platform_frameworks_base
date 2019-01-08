@@ -2524,6 +2524,7 @@ class ActivityStack extends ConfigurationContainer {
             // Protect against recursion.
             mInResumeTopActivity = true;
             result = resumeTopActivityInnerLocked(prev, options);
+            mRootActivityContainer.updateTopResumedActivityIfNeeded();
 
             // When resuming the top activity, it may be necessary to pause the top activity (for
             // example, returning to the lock screen. We suppress the normal pause logic in

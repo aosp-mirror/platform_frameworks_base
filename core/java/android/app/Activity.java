@@ -1808,6 +1808,29 @@ public class Activity extends ContextThemeWrapper
         mCalled = true;
     }
 
+    /**
+     * Called when activity gets or looses the top resumed position in the system.
+     *
+     * <p>Starting with {@link android.os.Build.VERSION_CODES#Q} multiple activities can be resumed
+     * at the same time in multi-window and multi-display modes. This callback should be used
+     * instead of {@link #onResume()} as an indication that the activity can try to open
+     * exclusive-access devices like camera.</p>
+     *
+     * <p>It will always be delivered after the activity was resumed and before it is paused. In
+     * some cases it might be skipped and activity can go straight from {@link #onResume()} to
+     * {@link #onPause()} without receiving the top resumed state.</p>
+     *
+     * @param isTopResumedActivity {@code true} if it's the topmost resumed activity in the system,
+     *                             {@code false} otherwise. A call with this as {@code true} will
+     *                             always be followed by another one with {@code false}.
+     *
+     * @see #onResume()
+     * @see #onPause()
+     * @see #onWindowFocusChanged(boolean)
+     */
+    public void onTopResumedActivityChanged(boolean isTopResumedActivity) {
+    }
+
     void setVoiceInteractor(IVoiceInteractor voiceInteractor) {
         if (mVoiceInteractor != null) {
             for (Request activeRequest: mVoiceInteractor.getActiveRequests()) {
