@@ -509,6 +509,10 @@ package android.graphics {
     method public static android.graphics.ImageDecoder.Source createSource(android.content.res.Resources, java.io.InputStream, int);
   }
 
+  public class Paint {
+    method public void setColor(long);
+  }
+
 }
 
 package android.graphics.drawable {
