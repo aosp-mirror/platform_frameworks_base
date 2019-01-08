@@ -458,6 +458,11 @@
          heads-up notifications.  -->
     <bool name="config_smart_replies_in_notifications_show_in_heads_up">true</bool>
 
+    <!-- Smart replies in notifications: Minimum number of system generated smart replies that
+         should be shown in a notification. If we cannot show at least this many replies we instead
+         show none. -->
+    <integer name="config_smart_replies_in_notifications_min_num_system_generated_replies">0</integer>
+
     <!-- Screenshot editing default activity.  Must handle ACTION_EDIT image/png intents.
          Blank sends the user to the Chooser first.
          This name is in the ComponentName flattened format (package/class)  -->
