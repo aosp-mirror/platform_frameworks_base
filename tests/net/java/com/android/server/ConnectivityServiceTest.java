@@ -152,6 +152,7 @@ import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -748,6 +749,10 @@ public class ConnectivityServiceTest {
         // mExpectations is non-null.
         private boolean mExpectingAdditions;
 
+        // Used to collect the networks requests managed by this factory. This is a duplicate of
+        // the internal information stored in the NetworkFactory (which is private).
+        private SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<>();
+
         public MockNetworkFactory(Looper looper, Context context, String logTag,
                 NetworkCapabilities filter) {
             super(looper, context, logTag, filter);
@@ -789,6 +794,7 @@ public class ConnectivityServiceTest {
             }
 
             // Add the request.
+            mNetworkRequests.put(request.requestId, request);
             super.handleAddRequest(request, score);
 
             // Reduce the number of request additions we're waiting for.
@@ -806,6 +812,7 @@ public class ConnectivityServiceTest {
             }
 
             // Remove the request.
+            mNetworkRequests.remove(request.requestId);
             super.handleRemoveRequest(request);
 
             // Reduce the number of request removals we're waiting for.
@@ -813,6 +820,11 @@ public class ConnectivityServiceTest {
                 assertTrue("Removed more requests than expected", mExpectations.getCount() > 0);
                 mExpectations.countDown();
             }
+        }
+
+        // Trigger releasing the request as unfulfillable
+        public void triggerUnfulfillable(NetworkRequest r) {
+            super.releaseRequestAsUnfulfillableByAnyFactory(r);
         }
 
         private void assertNoExpectations() {
@@ -847,9 +859,11 @@ public class ConnectivityServiceTest {
             mExpectations = null;
         }
 
-        public void waitForNetworkRequests(final int count) throws InterruptedException {
+        public SparseArray<NetworkRequest> waitForNetworkRequests(final int count)
+                throws InterruptedException {
             waitForRequests();
             assertEquals(count, getMyRequestCount());
+            return mNetworkRequests;
         }
     }
 
@@ -3521,6 +3535,55 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
         networkCallback.assertNoCallback();
+    }
+
+    /**
+     * Validate the callback flow for a factory releasing a request as unfulfillable.
+     */
+    @Test
+    public void testUnfulfillableNetworkRequest() throws Exception {
+        NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
+                NetworkCapabilities.TRANSPORT_WIFI).build();
+        final TestNetworkCallback networkCallback = new TestNetworkCallback();
+
+        final HandlerThread handlerThread = new HandlerThread("testUnfulfillableNetworkRequest");
+        handlerThread.start();
+        NetworkCapabilities filter = new NetworkCapabilities()
+                .addTransportType(TRANSPORT_WIFI)
+                .addCapability(NET_CAPABILITY_INTERNET);
+        final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
+                mServiceContext, "testFactory", filter);
+        testFactory.setScoreFilter(40);
+
+        // Register the factory and expect it to receive the default request.
+        testFactory.expectAddRequests(1);
+        testFactory.register();
+        SparseArray<NetworkRequest> requests = testFactory.waitForNetworkRequests(1);
+
+        assertEquals(1, requests.size()); // have 1 request at this point
+        int origRequestId = requests.valueAt(0).requestId;
+
+        // Now file the test request and expect it.
+        testFactory.expectAddRequests(1);
+        mCm.requestNetwork(nr, networkCallback);
+        requests = testFactory.waitForNetworkRequests(2); // have 2 requests at this point
+
+        int newRequestId = 0;
+        for (int i = 0; i < requests.size(); ++i) {
+            if (requests.valueAt(i).requestId != origRequestId) {
+                newRequestId = requests.valueAt(i).requestId;
+                break;
+            }
+        }
+
+        // Simulate the factory releasing the request as unfulfillable and expect onUnavailable!
+        testFactory.expectRemoveRequests(1);
+        testFactory.triggerUnfulfillable(requests.get(newRequestId));
+        networkCallback.expectCallback(CallbackState.UNAVAILABLE, null);
+        testFactory.waitForRequests();
+
+        testFactory.unregister();
+        handlerThread.quit();
     }
 
     private static class TestKeepaliveCallback extends PacketKeepaliveCallback {
