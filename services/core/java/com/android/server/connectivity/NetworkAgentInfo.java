@@ -236,7 +236,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public final AsyncChannel asyncChannel;
 
     // Used by ConnectivityService to keep track of 464xlat.
-    public Nat464Xlat clatd;
+    public final Nat464Xlat clatd;
 
     // Set after asynchronous creation of the NetworkMonitor.
     private volatile INetworkMonitor mNetworkMonitor;
@@ -244,8 +244,6 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private static final String TAG = ConnectivityService.class.getSimpleName();
     private static final boolean VDBG = false;
     private final ConnectivityService mConnService;
-    private final INetd mNetd;
-    private final INetworkManagementService mNMS;
     private final Context mContext;
     private final Handler mHandler;
 
@@ -260,9 +258,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         linkProperties = lp;
         networkCapabilities = nc;
         currentScore = score;
+        clatd = new Nat464Xlat(this, netd, nms);
         mConnService = connService;
-        mNetd = netd;
-        mNMS = nms;
         mContext = context;
         mHandler = handler;
         networkMisc = misc;
@@ -595,30 +592,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
     }
 
-    public void updateClat(INetworkManagementService netd) {
-        if (Nat464Xlat.requiresClat(this)) {
-            maybeStartClat();
-        } else {
-            maybeStopClat();
+    /** Starts or stops clatd as required. */
+    public void updateClat() {
+        if (!clatd.isStarted() && Nat464Xlat.requiresClat(this)) {
+            clatd.start();
+        } else if (clatd.isStarted() && !Nat464Xlat.requiresClat(this)) {
+            clatd.stop();
         }
-    }
-
-    /** Ensure clat has started for this network. */
-    public void maybeStartClat() {
-        if (clatd != null && clatd.isStarted()) {
-            return;
-        }
-        clatd = new Nat464Xlat(this, mNetd, mNMS);
-        clatd.start();
-    }
-
-    /** Ensure clat has stopped for this network. */
-    public void maybeStopClat() {
-        if (clatd == null) {
-            return;
-        }
-        clatd.stop();
-        clatd = null;
     }
 
     public String toString() {

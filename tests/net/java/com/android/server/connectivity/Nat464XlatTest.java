@@ -19,6 +19,7 @@ package com.android.server.connectivity;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -43,6 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -145,18 +147,104 @@ public class Nat464XlatTest {
         nat.stop();
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
-
-        // Stacked interface removed notification arrives.
-        nat.interfaceRemoved(STACKED_IFACE);
-        mLooper.dispatchNext();
-
-        verify(mNms).unregisterObserver(eq(nat));
         verify(mConnectivity, times(2)).handleUpdateLinkProperties(eq(mNai), c.capture());
+        verify(mNms).unregisterObserver(eq(nat));
         assertTrue(c.getValue().getStackedLinks().isEmpty());
         assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
         assertIdle(nat);
 
+        // Stacked interface removed notification arrives and is ignored.
+        nat.interfaceRemoved(STACKED_IFACE);
+        mLooper.dispatchNext();
+
         verifyNoMoreInteractions(mNetd, mNms, mConnectivity);
+    }
+
+    private void checkStartStopStart(boolean interfaceRemovedFirst) throws Exception {
+        Nat464Xlat nat = makeNat464Xlat();
+        ArgumentCaptor<LinkProperties> c = ArgumentCaptor.forClass(LinkProperties.class);
+        InOrder inOrder = inOrder(mNetd, mConnectivity);
+
+        // ConnectivityService starts clat.
+        nat.start();
+
+        inOrder.verify(mNetd).clatdStart(eq(BASE_IFACE));
+
+        // Stacked interface up notification arrives.
+        nat.interfaceLinkStateChanged(STACKED_IFACE, true);
+        mLooper.dispatchNext();
+
+        inOrder.verify(mConnectivity).handleUpdateLinkProperties(eq(mNai), c.capture());
+        assertFalse(c.getValue().getStackedLinks().isEmpty());
+        assertTrue(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
+        assertRunning(nat);
+
+        // ConnectivityService stops clat (Network disconnects, IPv4 addr appears, ...).
+        nat.stop();
+
+        inOrder.verify(mNetd).clatdStop(eq(BASE_IFACE));
+
+        inOrder.verify(mConnectivity, times(1)).handleUpdateLinkProperties(eq(mNai), c.capture());
+        assertTrue(c.getValue().getStackedLinks().isEmpty());
+        assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
+        assertIdle(nat);
+
+        if (interfaceRemovedFirst) {
+            // Stacked interface removed notification arrives and is ignored.
+            nat.interfaceRemoved(STACKED_IFACE);
+            mLooper.dispatchNext();
+            nat.interfaceLinkStateChanged(STACKED_IFACE, false);
+            mLooper.dispatchNext();
+        }
+
+        assertTrue(c.getValue().getStackedLinks().isEmpty());
+        assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
+        assertIdle(nat);
+        inOrder.verifyNoMoreInteractions();
+
+        // ConnectivityService starts clatd again.
+        nat.start();
+
+        inOrder.verify(mNetd).clatdStart(eq(BASE_IFACE));
+
+        if (!interfaceRemovedFirst) {
+            // Stacked interface removed notification arrives and is ignored.
+            nat.interfaceRemoved(STACKED_IFACE);
+            mLooper.dispatchNext();
+            nat.interfaceLinkStateChanged(STACKED_IFACE, false);
+            mLooper.dispatchNext();
+        }
+
+        // Stacked interface up notification arrives.
+        nat.interfaceLinkStateChanged(STACKED_IFACE, true);
+        mLooper.dispatchNext();
+
+        inOrder.verify(mConnectivity).handleUpdateLinkProperties(eq(mNai), c.capture());
+        assertFalse(c.getValue().getStackedLinks().isEmpty());
+        assertTrue(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
+        assertRunning(nat);
+
+        // ConnectivityService stops clat again.
+        nat.stop();
+
+        inOrder.verify(mNetd).clatdStop(eq(BASE_IFACE));
+
+        inOrder.verify(mConnectivity, times(1)).handleUpdateLinkProperties(eq(mNai), c.capture());
+        assertTrue(c.getValue().getStackedLinks().isEmpty());
+        assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
+        assertIdle(nat);
+
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testStartStopStart() throws Exception {
+        checkStartStopStart(true);
+    }
+
+    @Test
+    public void testStartStopStartBeforeInterfaceRemoved() throws Exception {
+        checkStartStopStart(false);
     }
 
     @Test
@@ -184,9 +272,9 @@ public class Nat464XlatTest {
         nat.interfaceRemoved(STACKED_IFACE);
         mLooper.dispatchNext();
 
-        verify(mNms).unregisterObserver(eq(nat));
         verify(mNetd).clatdStop(eq(BASE_IFACE));
         verify(mConnectivity, times(2)).handleUpdateLinkProperties(eq(mNai), c.capture());
+        verify(mNms).unregisterObserver(eq(nat));
         assertTrue(c.getValue().getStackedLinks().isEmpty());
         assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
         assertIdle(nat);
@@ -210,8 +298,8 @@ public class Nat464XlatTest {
         // ConnectivityService immediately stops clat (Network disconnects, IPv4 addr appears, ...)
         nat.stop();
 
-        verify(mNms).unregisterObserver(eq(nat));
         verify(mNetd).clatdStop(eq(BASE_IFACE));
+        verify(mNms).unregisterObserver(eq(nat));
         assertIdle(nat);
 
         // In-flight interface up notification arrives: no-op
@@ -241,8 +329,8 @@ public class Nat464XlatTest {
         // ConnectivityService immediately stops clat (Network disconnects, IPv4 addr appears, ...)
         nat.stop();
 
-        verify(mNms).unregisterObserver(eq(nat));
         verify(mNetd).clatdStop(eq(BASE_IFACE));
+        verify(mNms).unregisterObserver(eq(nat));
         assertIdle(nat);
 
         verifyNoMoreInteractions(mNetd, mNms, mConnectivity);
