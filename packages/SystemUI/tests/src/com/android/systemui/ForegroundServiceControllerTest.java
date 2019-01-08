@@ -404,6 +404,6 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     private void entryUpdated(StatusBarNotification notification, int importance) {
         NotificationEntry entry = new NotificationEntry(notification);
         entry.importance = importance;
-        mEntryListener.onEntryUpdated(entry);
+        mEntryListener.onPostEntryUpdated(entry);
     }
 }

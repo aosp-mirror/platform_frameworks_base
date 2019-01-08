@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -65,6 +66,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -83,6 +85,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -135,6 +138,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         TestableNotificationEntryManager(Context context) {
             super(context);
             mCountDownLatch = new CountDownLatch(1);
+        }
+
+        public void setNotificationData(NotificationData data) {
+            mNotificationData = data;
         }
 
         @Override
@@ -292,11 +299,40 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         verify(mEntryListener, never()).onInflationError(any(), any());
 
+        verify(mEntryListener).onPreEntryUpdated(mEntry);
         verify(mPresenter).updateNotificationViews();
-        verify(mEntryListener).onEntryUpdated(mEntry);
+        verify(mEntryListener).onPostEntryUpdated(mEntry);
+
         assertNotNull(mEntry.getRow());
         assertEquals(mEntry.userSentiment,
                 NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
+    }
+
+    @Test
+    public void testUpdateNotification_prePostEntryOrder() throws Exception {
+        com.android.systemui.util.Assert.isNotMainThread();
+        TestableLooper.get(this).processAllMessages();
+
+        NotificationData notifData = mock(NotificationData.class);
+        when(notifData.get(mEntry.key)).thenReturn(mEntry);
+
+        mEntryManager.setNotificationData(notifData);
+
+        mEntryManager.updateNotification(mSbn, mRankingMap);
+        TestableLooper.get(this).processMessages(1);
+        // Wait for content update.
+        assertTrue(mEntryManager.getCountDownLatch().await(10, TimeUnit.SECONDS));
+
+        verify(mEntryListener, never()).onInflationError(any(), any());
+
+        // Ensure that update callbacks happen in correct order
+        InOrder order = inOrder(mEntryListener, notifData, mPresenter, mEntryListener);
+        order.verify(mEntryListener).onPreEntryUpdated(mEntry);
+        order.verify(notifData).filterAndSort();
+        order.verify(mPresenter).updateNotificationViews();
+        order.verify(mEntryListener).onPostEntryUpdated(mEntry);
+
+        assertNotNull(mEntry.getRow());
     }
 
     @Test

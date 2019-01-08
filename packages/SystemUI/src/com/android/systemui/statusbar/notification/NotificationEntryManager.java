@@ -463,6 +463,10 @@ public class NotificationEntryManager implements
         getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
                 mNotificationData.get(entry.key) != null);
 
+        for (NotificationEntryListener listener : mNotificationEntryListeners) {
+            listener.onPreEntryUpdated(entry);
+        }
+
         updateNotifications();
 
         if (DEBUG) {
@@ -473,7 +477,7 @@ public class NotificationEntryManager implements
         }
 
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
-            listener.onEntryUpdated(entry);
+            listener.onPostEntryUpdated(entry);
         }
 
         maybeScheduleUpdateNotificationViews(entry);

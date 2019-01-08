@@ -189,7 +189,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 }
 
                 @Override
-                public void onEntryUpdated(NotificationEntry entry) {
+                public void onPostEntryUpdated(NotificationEntry entry) {
                     mShadeController.updateAreThereNotifications();
                 }
 

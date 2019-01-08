@@ -77,7 +77,7 @@ public class NotificationAlertingManager {
             }
 
             @Override
-            public void onEntryUpdated(NotificationEntry entry) {
+            public void onPostEntryUpdated(NotificationEntry entry) {
                 updateAlertState(entry);
             }
 
