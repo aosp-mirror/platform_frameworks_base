@@ -38,7 +38,7 @@ public final class TextClassification {
     /**
      * @hide
      */
-    static final TextClassification EMPTY = new TextClassification.Builder().build();
+    public static final TextClassification EMPTY = new TextClassification.Builder().build();
 
     @NonNull private final String mText;
     @Nullable private final Drawable mIcon;
