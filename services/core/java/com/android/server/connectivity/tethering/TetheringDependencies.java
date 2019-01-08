@@ -34,32 +34,53 @@ import java.util.ArrayList;
  * @hide
  */
 public class TetheringDependencies {
+    /**
+     * Get a reference to the offload hardware interface to be used by tethering.
+     */
     public OffloadHardwareInterface getOffloadHardwareInterface(Handler h, SharedLog log) {
         return new OffloadHardwareInterface(h, log);
     }
 
+    /**
+     * Get a reference to the UpstreamNetworkMonitor to be used by tethering.
+     */
     public UpstreamNetworkMonitor getUpstreamNetworkMonitor(Context ctx, StateMachine target,
             SharedLog log, int what) {
         return new UpstreamNetworkMonitor(ctx, target, log, what);
     }
 
+    /**
+     * Get a reference to the IPv6TetheringCoordinator to be used by tethering.
+     */
     public IPv6TetheringCoordinator getIPv6TetheringCoordinator(
             ArrayList<IpServer> notifyList, SharedLog log) {
         return new IPv6TetheringCoordinator(notifyList, log);
     }
 
+    /**
+     * Get dependencies to be used by IpServer.
+     */
     public IpServer.Dependencies getIpServerDependencies() {
         return new IpServer.Dependencies();
     }
 
+    /**
+     * Indicates whether tethering is supported on the device.
+     */
     public boolean isTetheringSupported() {
         return true;
     }
 
+    /**
+     * Get the NetworkRequest that should be fulfilled by the default network.
+     */
     public NetworkRequest getDefaultNetworkRequest() {
         return null;
     }
 
+    /**
+     * Get a reference to the EntitlementManager to be used by tethering.
+     */
     public EntitlementManager getEntitlementManager(Context ctx, SharedLog log,
             MockableSystemProperties systemProperties) {
         return new EntitlementManager(ctx, log, systemProperties);
