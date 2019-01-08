@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.Handler;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.view.Display;
@@ -54,6 +55,7 @@ import org.mockito.invocation.InvocationOnMock;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * A test rule that sets up a fresh WindowManagerService instance before each test and makes sure
@@ -193,12 +195,29 @@ public class WindowManagerServiceRule implements TestRule {
         if (wm == null) {
             return;
         }
-        wm.mH.removeCallbacksAndMessages(null);
-        wm.mAnimationHandler.removeCallbacksAndMessages(null);
-        SurfaceAnimationThread.getHandler().removeCallbacksAndMessages(null);
-        wm.mH.runWithScissors(() -> { }, 0);
-        wm.mAnimationHandler.runWithScissors(() -> { }, 0);
-        SurfaceAnimationThread.getHandler().runWithScissors(() -> { }, 0);
+        // Removing delayed FORCE_GC message decreases time for waiting idle.
+        wm.mH.removeMessages(WindowManagerService.H.FORCE_GC);
+        waitHandlerIdle(wm.mH);
+        waitHandlerIdle(wm.mAnimationHandler);
+        waitHandlerIdle(SurfaceAnimationThread.getHandler());
+    }
+
+    private static void waitHandlerIdle(Handler handler) {
+        if (handler.hasMessagesOrCallbacks()) {
+            final CountDownLatch latch = new CountDownLatch(1);
+            // Wait for delayed messages are processed.
+            handler.getLooper().getQueue().addIdleHandler(() -> {
+                if (handler.hasMessagesOrCallbacks()) {
+                    return true; // keep idle handler.
+                }
+                latch.countDown();
+                return false; // remove idle handler.
+            });
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+            }
+        }
     }
 
     private void destroyAllSurfaceTransactions() {
