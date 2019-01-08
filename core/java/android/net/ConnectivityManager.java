@@ -16,6 +16,7 @@
 package android.net;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -909,6 +910,7 @@ public class ConnectivityManager {
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @Nullable
     public NetworkInfo getActiveNetworkInfo() {
         try {
             return mService.getActiveNetworkInfo();
@@ -928,6 +930,7 @@ public class ConnectivityManager {
      *        {@code null} if no default network is currently active
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @Nullable
     public Network getActiveNetwork() {
         try {
             return mService.getActiveNetwork();
@@ -949,6 +952,7 @@ public class ConnectivityManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @Nullable
     public Network getActiveNetworkForUid(int uid) {
         return getActiveNetworkForUid(uid, false);
     }
@@ -1074,6 +1078,7 @@ public class ConnectivityManager {
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @Nullable
     public NetworkInfo getNetworkInfo(int networkType) {
         try {
             return mService.getNetworkInfo(networkType);
@@ -1095,7 +1100,8 @@ public class ConnectivityManager {
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    public NetworkInfo getNetworkInfo(Network network) {
+    @Nullable
+    public NetworkInfo getNetworkInfo(@Nullable Network network) {
         return getNetworkInfoForUid(network, Process.myUid(), false);
     }
 
@@ -1121,6 +1127,7 @@ public class ConnectivityManager {
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @NonNull
     public NetworkInfo[] getAllNetworkInfo() {
         try {
             return mService.getAllNetworkInfo();
@@ -1156,6 +1163,7 @@ public class ConnectivityManager {
      * @return an array of {@link Network} objects.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @NonNull
     public Network[] getAllNetworks() {
         try {
             return mService.getAllNetworks();
@@ -1230,7 +1238,8 @@ public class ConnectivityManager {
      * @return The {@link LinkProperties} for the network, or {@code null}.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    public LinkProperties getLinkProperties(Network network) {
+    @Nullable
+    public LinkProperties getLinkProperties(@Nullable Network network) {
         try {
             return mService.getLinkProperties(network);
         } catch (RemoteException e) {
@@ -1246,7 +1255,8 @@ public class ConnectivityManager {
      * @return The {@link android.net.NetworkCapabilities} for the network, or {@code null}.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    public NetworkCapabilities getNetworkCapabilities(Network network) {
+    @Nullable
+    public NetworkCapabilities getNetworkCapabilities(@Nullable Network network) {
         try {
             return mService.getNetworkCapabilities(network);
         } catch (RemoteException e) {
@@ -2000,7 +2010,7 @@ public class ConnectivityManager {
      *
      * @param l Previously registered listener.
      */
-    public void removeDefaultNetworkActiveListener(OnNetworkActiveListener l) {
+    public void removeDefaultNetworkActiveListener(@NonNull OnNetworkActiveListener l) {
         INetworkActivityListener rl = mNetworkActivityListeners.get(l);
         Preconditions.checkArgument(rl != null, "Listener was not registered.");
         try {
@@ -2528,7 +2538,7 @@ public class ConnectivityManager {
      *             working and non-working connectivity.
      */
     @Deprecated
-    public void reportBadNetwork(Network network) {
+    public void reportBadNetwork(@Nullable Network network) {
         printStackTrace();
         try {
             // One of these will be ignored because it matches system's current state.
@@ -2551,7 +2561,7 @@ public class ConnectivityManager {
      * @param hasConnectivity {@code true} if the application was able to successfully access the
      *                        Internet using {@code network} or {@code false} if not.
      */
-    public void reportNetworkConnectivity(Network network, boolean hasConnectivity) {
+    public void reportNetworkConnectivity(@Nullable Network network, boolean hasConnectivity) {
         printStackTrace();
         try {
             mService.reportNetworkConnectivity(network, hasConnectivity);
@@ -2625,6 +2635,7 @@ public class ConnectivityManager {
      * @return the {@link ProxyInfo} for the current HTTP proxy, or {@code null} if no
      *        HTTP proxy is active.
      */
+    @Nullable
     public ProxyInfo getDefaultProxy() {
         return getProxyForNetwork(getBoundNetworkForProcess());
     }
@@ -3156,8 +3167,9 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
-            int timeoutMs, int legacyType, Handler handler) {
+    public void requestNetwork(@NonNull NetworkRequest request,
+            @NonNull NetworkCallback networkCallback, int timeoutMs, int legacyType,
+            @NonNull Handler handler) {
         CallbackHandler cbHandler = new CallbackHandler(handler);
         NetworkCapabilities nc = request.networkCapabilities;
         sendRequestForNetwork(nc, networkCallback, timeoutMs, REQUEST, legacyType, cbHandler);
@@ -3194,7 +3206,8 @@ public class ConnectivityManager {
      * @throws IllegalArgumentException if {@code request} specifies any mutable
      *         {@code NetworkCapabilities}.
      */
-    public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback) {
+    public void requestNetwork(@NonNull NetworkRequest request,
+            @NonNull NetworkCallback networkCallback) {
         requestNetwork(request, networkCallback, getDefaultHandler());
     }
 
@@ -3229,8 +3242,8 @@ public class ConnectivityManager {
      * @throws IllegalArgumentException if {@code request} specifies any mutable
      *         {@code NetworkCapabilities}.
      */
-    public void requestNetwork(
-            NetworkRequest request, NetworkCallback networkCallback, Handler handler) {
+    public void requestNetwork(@NonNull NetworkRequest request,
+            @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
         int legacyType = inferLegacyTypeForNetworkCapabilities(request.networkCapabilities);
         CallbackHandler cbHandler = new CallbackHandler(handler);
         requestNetwork(request, networkCallback, 0, legacyType, cbHandler);
@@ -3264,8 +3277,8 @@ public class ConnectivityManager {
      *                  before {@link NetworkCallback#onUnavailable()} is called. The timeout must
      *                  be a positive value (i.e. >0).
      */
-    public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
-            int timeoutMs) {
+    public void requestNetwork(@NonNull NetworkRequest request,
+            @NonNull NetworkCallback networkCallback, int timeoutMs) {
         checkTimeout(timeoutMs);
         int legacyType = inferLegacyTypeForNetworkCapabilities(request.networkCapabilities);
         requestNetwork(request, networkCallback, timeoutMs, legacyType, getDefaultHandler());
@@ -3298,8 +3311,8 @@ public class ConnectivityManager {
      * @param timeoutMs The time in milliseconds to attempt looking for a suitable network
      *                  before {@link NetworkCallback#onUnavailable} is called.
      */
-    public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
-            Handler handler, int timeoutMs) {
+    public void requestNetwork(@NonNull NetworkRequest request,
+            @NonNull NetworkCallback networkCallback, @NonNull Handler handler, int timeoutMs) {
         checkTimeout(timeoutMs);
         int legacyType = inferLegacyTypeForNetworkCapabilities(request.networkCapabilities);
         CallbackHandler cbHandler = new CallbackHandler(handler);
@@ -3371,7 +3384,8 @@ public class ConnectivityManager {
      *         {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED} or
      *         {@link NetworkCapabilities#NET_CAPABILITY_CAPTIVE_PORTAL}.
      */
-    public void requestNetwork(NetworkRequest request, PendingIntent operation) {
+    public void requestNetwork(@NonNull NetworkRequest request,
+            @NonNull PendingIntent operation) {
         printStackTrace();
         checkPendingIntentNotNull(operation);
         try {
@@ -3395,7 +3409,7 @@ public class ConnectivityManager {
      *                  {@link #requestNetwork(NetworkRequest, android.app.PendingIntent)} with the
      *                  corresponding NetworkRequest you'd like to remove. Cannot be null.
      */
-    public void releaseNetworkRequest(PendingIntent operation) {
+    public void releaseNetworkRequest(@NonNull PendingIntent operation) {
         printStackTrace();
         checkPendingIntentNotNull(operation);
         try {
@@ -3428,7 +3442,8 @@ public class ConnectivityManager {
      *                        The callback is invoked on the default internal Handler.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    public void registerNetworkCallback(NetworkRequest request, NetworkCallback networkCallback) {
+    public void registerNetworkCallback(@NonNull NetworkRequest request,
+            @NonNull NetworkCallback networkCallback) {
         registerNetworkCallback(request, networkCallback, getDefaultHandler());
     }
 
@@ -3443,8 +3458,8 @@ public class ConnectivityManager {
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    public void registerNetworkCallback(
-            NetworkRequest request, NetworkCallback networkCallback, Handler handler) {
+    public void registerNetworkCallback(@NonNull NetworkRequest request,
+            @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
         CallbackHandler cbHandler = new CallbackHandler(handler);
         NetworkCapabilities nc = request.networkCapabilities;
         sendRequestForNetwork(nc, networkCallback, 0, LISTEN, TYPE_NONE, cbHandler);
@@ -3480,7 +3495,8 @@ public class ConnectivityManager {
      *                  comes from {@link PendingIntent#getBroadcast}. Cannot be null.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    public void registerNetworkCallback(NetworkRequest request, PendingIntent operation) {
+    public void registerNetworkCallback(@NonNull NetworkRequest request,
+            @NonNull PendingIntent operation) {
         printStackTrace();
         checkPendingIntentNotNull(operation);
         try {
@@ -3502,7 +3518,7 @@ public class ConnectivityManager {
      *                        The callback is invoked on the default internal Handler.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    public void registerDefaultNetworkCallback(NetworkCallback networkCallback) {
+    public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback) {
         registerDefaultNetworkCallback(networkCallback, getDefaultHandler());
     }
 
@@ -3516,7 +3532,8 @@ public class ConnectivityManager {
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    public void registerDefaultNetworkCallback(NetworkCallback networkCallback, Handler handler) {
+    public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
+            @NonNull Handler handler) {
         // This works because if the NetworkCapabilities are null,
         // ConnectivityService takes them from the default request.
         //
@@ -3541,7 +3558,7 @@ public class ConnectivityManager {
      * @param network {@link Network} specifying which network you're interested.
      * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
      */
-    public boolean requestBandwidthUpdate(Network network) {
+    public boolean requestBandwidthUpdate(@NonNull Network network) {
         try {
             return mService.requestBandwidthUpdate(network);
         } catch (RemoteException e) {
@@ -3562,7 +3579,7 @@ public class ConnectivityManager {
      *
      * @param networkCallback The {@link NetworkCallback} used when making the request.
      */
-    public void unregisterNetworkCallback(NetworkCallback networkCallback) {
+    public void unregisterNetworkCallback(@NonNull NetworkCallback networkCallback) {
         printStackTrace();
         checkCallbackNotNull(networkCallback);
         final List<NetworkRequest> reqs = new ArrayList<>();
@@ -3601,7 +3618,7 @@ public class ConnectivityManager {
      *                  {@link #registerNetworkCallback(NetworkRequest, android.app.PendingIntent)}.
      *                  Cannot be null.
      */
-    public void unregisterNetworkCallback(PendingIntent operation) {
+    public void unregisterNetworkCallback(@NonNull PendingIntent operation) {
         checkPendingIntentNotNull(operation);
         releaseNetworkRequest(operation);
     }
@@ -3723,7 +3740,7 @@ public class ConnectivityManager {
      * @return a bitwise OR of zero or more of the  {@code MULTIPATH_PREFERENCE_*} constants.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    public @MultipathPreference int getMultipathPreference(Network network) {
+    public @MultipathPreference int getMultipathPreference(@Nullable Network network) {
         try {
             return mService.getMultipathPreference(network);
         } catch (RemoteException e) {
@@ -3761,7 +3778,7 @@ public class ConnectivityManager {
      *                the current binding.
      * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
      */
-    public boolean bindProcessToNetwork(Network network) {
+    public boolean bindProcessToNetwork(@Nullable Network network) {
         // Forcing callers to call through non-static function ensures ConnectivityManager
         // instantiated.
         return setProcessDefaultNetwork(network);
@@ -3789,7 +3806,7 @@ public class ConnectivityManager {
      *             is a direct replacement.
      */
     @Deprecated
-    public static boolean setProcessDefaultNetwork(Network network) {
+    public static boolean setProcessDefaultNetwork(@Nullable Network network) {
         int netId = (network == null) ? NETID_UNSET : network.netId;
         if (netId == NetworkUtils.getBoundNetworkForProcess()) {
             return true;
@@ -3820,6 +3837,7 @@ public class ConnectivityManager {
      *
      * @return {@code Network} to which this process is bound, or {@code null}.
      */
+    @Nullable
     public Network getBoundNetworkForProcess() {
         // Forcing callers to call thru non-static function ensures ConnectivityManager
         // instantiated.
@@ -3836,6 +3854,7 @@ public class ConnectivityManager {
      *             {@code getBoundNetworkForProcess} is a direct replacement.
      */
     @Deprecated
+    @Nullable
     public static Network getProcessDefaultNetwork() {
         int netId = NetworkUtils.getBoundNetworkForProcess();
         if (netId == NETID_UNSET) return null;
@@ -3962,6 +3981,7 @@ public class ConnectivityManager {
      *
      * @return Hash of network watchlist config file. Null if config does not exist.
      */
+    @Nullable
     public byte[] getNetworkWatchlistConfigHash() {
         try {
             return mService.getNetworkWatchlistConfigHash();
@@ -3983,8 +4003,8 @@ public class ConnectivityManager {
      * (e.g., if it is associated with the calling VPN app's tunnel) or
      * {@link android.os.Process#INVALID_UID} if the connection is not found.
      */
-    public int getConnectionOwnerUid(int protocol, InetSocketAddress local,
-                                     InetSocketAddress remote) {
+    public int getConnectionOwnerUid(int protocol, @NonNull InetSocketAddress local,
+            @NonNull InetSocketAddress remote) {
         ConnectionInfo connectionInfo = new ConnectionInfo(protocol, local, remote);
         try {
             return mService.getConnectionOwnerUid(connectionInfo);
