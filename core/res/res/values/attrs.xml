@@ -3660,7 +3660,12 @@
              the settings for this service. This setting cannot be changed at runtime. -->
         <attr name="settingsActivity" />
         <!-- Attribute whether the accessibility service wants to be able to retrieve the
-             active window content. This setting cannot be changed at runtime. -->
+             active window content. This setting cannot be changed at runtime.
+             <p>
+             Required to allow setting the {@link android.accessibilityservice
+             #AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} flag.
+             </p>
+         -->
         <attr name="canRetrieveWindowContent" format="boolean" />
         <!-- Attribute whether the accessibility service wants to be able to request touch
              exploration mode in which touched items are spoken aloud and the UI can be
