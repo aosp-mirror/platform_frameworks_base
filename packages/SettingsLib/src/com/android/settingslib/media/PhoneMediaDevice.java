@@ -62,20 +62,22 @@ public class PhoneMediaDevice extends MediaDevice {
     }
 
     @Override
-    public void connect() {
+    public boolean connect() {
         final HearingAidProfile hapProfile = mProfileManager.getHearingAidProfile();
         final A2dpProfile a2dpProfile = mProfileManager.getA2dpProfile();
 
+        boolean isConnected = false;
+
         if (hapProfile != null && a2dpProfile != null) {
-            mIsConnected = hapProfile.setActiveDevice(null) && a2dpProfile.setActiveDevice(null);
-            super.connect();
+            isConnected = hapProfile.setActiveDevice(null) && a2dpProfile.setActiveDevice(null);
+            setConnectedRecord();
         }
-        Log.d(TAG, "connect() device : " + getName() + ", is selected : " + mIsConnected);
+        Log.d(TAG, "connect() device : " + getName() + ", is selected : " + isConnected);
+        return isConnected;
     }
 
     @Override
     public void disconnect() {
         //TODO(b/117129183): disconnected last select device
-        mIsConnected = false;
     }
 }

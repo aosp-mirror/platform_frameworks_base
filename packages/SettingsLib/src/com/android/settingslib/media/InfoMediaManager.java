@@ -22,6 +22,8 @@ import android.util.Log;
 import androidx.mediarouter.media.MediaRouteSelector;
 import androidx.mediarouter.media.MediaRouter;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * InfoMediaManager provide interface to get InfoMediaDevice list.
  */
@@ -29,9 +31,13 @@ public class InfoMediaManager extends MediaManager {
 
     private static final String TAG = "InfoMediaManager";
 
-    private final MediaRouterCallback mMediaRouterCallback = new MediaRouterCallback();
+    @VisibleForTesting
+    final MediaRouterCallback mMediaRouterCallback = new MediaRouterCallback();
+    @VisibleForTesting
+    MediaRouteSelector mSelector;
+    @VisibleForTesting
+    MediaRouter mMediaRouter;
 
-    private MediaRouter mMediaRouter;
     private String mPackageName;
 
     InfoMediaManager(Context context, String packageName, Notification notification) {
@@ -39,24 +45,20 @@ public class InfoMediaManager extends MediaManager {
 
         mMediaRouter = MediaRouter.getInstance(context);
         mPackageName = packageName;
+        mSelector = new MediaRouteSelector.Builder()
+                .addControlCategory(getControlCategoryByPackageName(mPackageName))
+                .build();
     }
 
     @Override
     public void startScan() {
         mMediaDevices.clear();
-        startScanCastDevice();
-    }
-
-    private void startScanCastDevice() {
-        final MediaRouteSelector selector = new MediaRouteSelector.Builder()
-                .addControlCategory(getControlCategoryByPackageName(mPackageName))
-                .build();
-
-        mMediaRouter.addCallback(selector, mMediaRouterCallback,
+        mMediaRouter.addCallback(mSelector, mMediaRouterCallback,
                 MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
     }
 
-    private String getControlCategoryByPackageName(String packageName) {
+    @VisibleForTesting
+    String getControlCategoryByPackageName(String packageName) {
         //TODO(b/117129183): Use package name to get ControlCategory.
         //Since api not ready, return fixed ControlCategory for prototype.
         return "com.google.android.gms.cast.CATEGORY_CAST/4F8B3483";
