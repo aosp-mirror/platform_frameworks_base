@@ -185,7 +185,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * Implement this to know when a direct reply is sent from a notification.
      * @param key the notification key
      */
-    public void onNotificationDirectReply(@NonNull String key) {}
+    public void onNotificationDirectReplied(@NonNull String key) {}
 
     /**
      * Implement this to know when a suggested reply is sent.
@@ -407,7 +407,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     SomeArgs args = (SomeArgs) msg.obj;
                     String key = (String) args.arg1;
                     args.recycle();
-                    onNotificationDirectReply(key);
+                    onNotificationDirectReplied(key);
                     break;
                 }
                 case MSG_ON_SUGGESTED_REPLY_SENT: {

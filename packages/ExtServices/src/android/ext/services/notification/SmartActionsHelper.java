@@ -165,7 +165,7 @@ public class SmartActionsHelper {
         }
     }
 
-    void onNotificationDirectReply(@NonNull String key) {
+    void onNotificationDirectReplied(@NonNull String key) {
         if (mTextClassifier == null) {
             return;
         }
