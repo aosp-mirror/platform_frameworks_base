@@ -1489,7 +1489,7 @@ public class NotificationContentView extends FrameLayout {
                 }
             }
         }
-        if (mHeadsUpChild != null) {
+        if (mHeadsUpChild != null && mSmartReplyConstants.getShowInHeadsUp()) {
             mHeadsUpSmartReplyView =
                     applySmartReplyView(mHeadsUpChild, smartRepliesAndActions, entry);
         }

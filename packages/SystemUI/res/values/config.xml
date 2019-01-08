@@ -454,6 +454,10 @@
          RemoteInput.Builder.setEditChoicesBeforeSending. -->
     <bool name="config_smart_replies_in_notifications_edit_choices_before_sending">false</bool>
 
+    <!-- Smart replies in notifications: Whether smart suggestions in notifications are enabled in
+         heads-up notifications.  -->
+    <bool name="config_smart_replies_in_notifications_show_in_heads_up">true</bool>
+
     <!-- Screenshot editing default activity.  Must handle ACTION_EDIT image/png intents.
          Blank sends the user to the Chooser first.
          This name is in the ComponentName flattened format (package/class)  -->
