@@ -115,9 +115,9 @@ public final class TextClassifierImpl implements TextClassifier {
     @GuardedBy("mLock") // Do not access outside this lock.
     private ActionsSuggestionsModel mActionsImpl;
 
-    private final Object mLoggerLock = new Object();
-    @GuardedBy("mLoggerLock") // Do not access outside this lock.
-    private SelectionSessionLogger mSessionLogger;
+    private final SelectionSessionLogger mSessionLogger = new SelectionSessionLogger();
+    private final TextClassifierEventTronLogger mTextClassifierEventTronLogger =
+            new TextClassifierEventTronLogger();
 
     private final TextClassificationConstants mSettings;
 
@@ -337,12 +337,7 @@ public final class TextClassifierImpl implements TextClassifier {
     @Override
     public void onSelectionEvent(SelectionEvent event) {
         Preconditions.checkNotNull(event);
-        synchronized (mLoggerLock) {
-            if (mSessionLogger == null) {
-                mSessionLogger = new SelectionSessionLogger();
-            }
-            mSessionLogger.writeEvent(event);
-        }
+        mSessionLogger.writeEvent(event);
     }
 
     @Override
@@ -350,6 +345,7 @@ public final class TextClassifierImpl implements TextClassifier {
         if (DEBUG) {
             Log.d(DEFAULT_LOG_TAG, "onTextClassifierEvent() called with: event = [" + event + "]");
         }
+        mTextClassifierEventTronLogger.writeEvent(event);
     }
 
     /** @inheritDoc */

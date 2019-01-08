@@ -6735,6 +6735,34 @@ message MetricsEvent {
     // OS: Q
     SETTINGS_GUP_DASHBOARD = 1613;
 
+    // CATEGORY: The category for all actions relating to language detection logging.
+    // OS: Q
+    LANGUAGE_DETECTION = 1614;
+
+    // CATEGORY: The category for all actions relating to conversation actions logging.
+    // OS: Q
+    CONVERSATION_ACTIONS = 1615;
+
+    // ACTION: Actions from a text classifier are shown to user.
+    // CATEGORY: CONVERSATION_ACTIONS
+    // OS: Q
+    ACTION_TEXT_CLASSIFIER_ACTIONS_SHOWN = 1616;
+
+    // ACTION: Event time of a text classifier event in unix timestamp.
+    // CATEGORY: CONVERSATION_ACTIONS, LANGUAGE_DETECTION
+    // OS: Q
+    FIELD_TEXT_CLASSIFIER_EVENT_TIME = 1617;
+
+    // ACTION: Users compose their own replies instead of using suggested ones.
+    // CATEGORY: CONVERSATION_ACTIONS
+    // OS: Q
+    ACTION_TEXT_CLASSIFIER_MANUAL_REPLY = 1618;
+
+    // ACTION: Text classifier generates an action.
+    // CATEGORY: CONVERSATION_ACTIONS
+    // OS: Q
+    ACTION_TEXT_CLASSIFIER_ACTIONS_GENERATED = 1619;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
