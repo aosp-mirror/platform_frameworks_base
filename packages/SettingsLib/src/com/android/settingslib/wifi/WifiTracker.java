@@ -586,7 +586,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                     Map<Integer, List<ScanResult>>> pairing : passpointConfigsAndScans) {
                 WifiConfiguration config = pairing.first;
 
-                // TODO(b/118705403): Prioritize home networks before roaming networks
                 List<ScanResult> scanResults = new ArrayList<>();
 
                 List<ScanResult> homeScans =
@@ -601,8 +600,12 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                     roamingScans = new ArrayList<>();
                 }
 
-                scanResults.addAll(homeScans);
-                scanResults.addAll(roamingScans);
+                // TODO(b/118705403): Differentiate home network vs roaming network for summary info
+                if (!homeScans.isEmpty()) {
+                    scanResults.addAll(homeScans);
+                } else {
+                    scanResults.addAll(roamingScans);
+                }
 
                 if (seenFQDNs.add(config.FQDN)) {
                     int bestRssi = Integer.MIN_VALUE;
