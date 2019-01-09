@@ -8061,6 +8061,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
                 break;
+
+            case KeyEvent.KEYCODE_FORWARD_DEL:
+                if (event.hasModifiers(KeyEvent.META_SHIFT_ON) && canCut()) {
+                    if (onTextContextMenuItem(ID_CUT)) {
+                        return KEY_EVENT_HANDLED;
+                    }
+                }
+                break;
+
+            case KeyEvent.KEYCODE_INSERT:
+                if (event.hasModifiers(KeyEvent.META_CTRL_ON) && canCopy()) {
+                    if (onTextContextMenuItem(ID_COPY)) {
+                        return KEY_EVENT_HANDLED;
+                    }
+                } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON) && canPaste()) {
+                    if (onTextContextMenuItem(ID_PASTE)) {
+                        return KEY_EVENT_HANDLED;
+                    }
+                }
+                break;
         }
 
         if (mEditor != null && mEditor.mKeyListener != null) {
@@ -10827,25 +10847,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                     break;
                 case KeyEvent.KEYCODE_V:
-                    if (canPaste()) {
-                        return onTextContextMenuItem(ID_PASTE);
-                    }
-                    break;
-                case KeyEvent.KEYCODE_INSERT:
-                    if (canCopy()) {
-                        return onTextContextMenuItem(ID_COPY);
-                    }
-                    break;
-            }
-        } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-            // Handle Shift-only shortcuts.
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_FORWARD_DEL:
-                    if (canCut()) {
-                        return onTextContextMenuItem(ID_CUT);
-                    }
-                    break;
-                case KeyEvent.KEYCODE_INSERT:
                     if (canPaste()) {
                         return onTextContextMenuItem(ID_PASTE);
                     }
