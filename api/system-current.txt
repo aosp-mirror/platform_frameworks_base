@@ -927,6 +927,9 @@ package android.app.usage {
     method public java.util.Map<java.lang.String, java.lang.Integer> getAppStandbyBuckets();
     method public void registerAppUsageObserver(int, java.lang.String[], long, java.util.concurrent.TimeUnit, android.app.PendingIntent);
     method public void registerUsageSessionObserver(int, java.lang.String[], long, java.util.concurrent.TimeUnit, long, java.util.concurrent.TimeUnit, android.app.PendingIntent, android.app.PendingIntent);
+    method public void reportUsageStart(android.app.Activity, java.lang.String);
+    method public void reportUsageStart(android.app.Activity, java.lang.String, long);
+    method public void reportUsageStop(android.app.Activity, java.lang.String);
     method public void setAppStandbyBucket(java.lang.String, int);
     method public void setAppStandbyBuckets(java.util.Map<java.lang.String, java.lang.Integer>);
     method public void unregisterAppUsageObserver(int);
@@ -4491,6 +4494,7 @@ package android.os {
     field public static final int PAYLOAD_HASH_MISMATCH_ERROR = 10; // 0xa
     field public static final int PAYLOAD_MISMATCHED_TYPE_ERROR = 6; // 0x6
     field public static final int PAYLOAD_SIZE_MISMATCH_ERROR = 11; // 0xb
+    field public static final int PAYLOAD_TIMESTAMP_ERROR = 51; // 0x33
     field public static final int POST_INSTALL_RUNNER_ERROR = 5; // 0x5
     field public static final int SUCCESS = 0; // 0x0
     field public static final int UPDATED_BUT_NOT_ACTIVE = 52; // 0x34
@@ -4595,6 +4599,17 @@ package android.os.storage {
 
 package android.permission {
 
+  public final class PermissionControllerManager {
+    method public void revokeRuntimePermissions(java.util.Map<java.lang.String, java.util.List<java.lang.String>>, boolean, int, java.util.concurrent.Executor, android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
+    field public static final int REASON_INSTALLER_POLICY_VIOLATION = 2; // 0x2
+    field public static final int REASON_MALWARE = 1; // 0x1
+  }
+
+  public static abstract class PermissionControllerManager.OnRevokeRuntimePermissionsCallback {
+    ctor public PermissionControllerManager.OnRevokeRuntimePermissionsCallback();
+    method public abstract void onRevokeRuntimePermissions(java.util.Map<java.lang.String, java.util.List<java.lang.String>>);
+  }
+
   public abstract class PermissionControllerService extends android.app.Service {
     ctor public PermissionControllerService();
     method public final void attachBaseContext(android.content.Context);
@@ -4602,6 +4617,7 @@ package android.permission {
     method public abstract int onCountPermissionApps(java.util.List<java.lang.String>, boolean, boolean);
     method public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
     method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
+    method public abstract java.util.Map<java.lang.String, java.util.List<java.lang.String>> onRevokeRuntimePermissions(java.util.Map<java.lang.String, java.util.List<java.lang.String>>, boolean, int, java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
   }
 
@@ -5127,6 +5143,8 @@ package android.service.autofill.augmented {
 
   public abstract class AugmentedAutofillService extends android.app.Service {
     ctor public AugmentedAutofillService();
+    method protected final void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
+    method protected void dump(java.io.PrintWriter, java.lang.String[]);
     method public void onFillRequest(android.service.autofill.augmented.FillRequest, android.os.CancellationSignal, android.service.autofill.augmented.FillController, android.service.autofill.augmented.FillCallback);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.augmented.AugmentedAutofillService";
   }

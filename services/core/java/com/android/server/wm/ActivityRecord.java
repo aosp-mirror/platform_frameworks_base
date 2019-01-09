@@ -728,9 +728,10 @@ final class ActivityRecord extends ConfigurationContainer {
             mLastReportedMultiWindowMode = inPictureInPictureMode;
             final Configuration newConfig = new Configuration();
             if (targetStackBounds != null && !targetStackBounds.isEmpty()) {
-                task.computeResolvedOverrideConfiguration(newConfig,
-                        task.getParent().getConfiguration(),
-                        task.getRequestedOverrideConfiguration());
+                newConfig.setTo(task.getRequestedOverrideConfiguration());
+                Rect outBounds = newConfig.windowConfiguration.getBounds();
+                task.adjustForMinimalTaskDimensions(outBounds, outBounds);
+                task.computeConfigResourceOverrides(newConfig, task.getParent().getConfiguration());
             }
             schedulePictureInPictureModeChanged(newConfig);
             scheduleMultiWindowModeChanged(newConfig);
@@ -2503,7 +2504,8 @@ final class ActivityRecord extends ConfigurationContainer {
             return;
         }
 
-        final IBinder binder = freezeScreenIfNeeded ? appToken.asBinder() : null;
+        final IBinder binder =
+                (freezeScreenIfNeeded && appToken != null) ? appToken.asBinder() : null;
         mAppWindowToken.setOrientation(requestedOrientation, binder, this);
     }
 
@@ -2547,7 +2549,6 @@ final class ActivityRecord extends ConfigurationContainer {
 
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
     private void updateOverrideConfiguration() {
-        mTmpConfig.unset();
         computeBounds(mTmpBounds);
 
         if (mTmpBounds.equals(getRequestedOverrideBounds())) {
@@ -2558,8 +2559,10 @@ final class ActivityRecord extends ConfigurationContainer {
 
         // Bounds changed...update configuration to match.
         if (!matchParentBounds()) {
-            task.computeResolvedOverrideConfiguration(mTmpConfig,
-                    task.getParent().getConfiguration(), getRequestedOverrideConfiguration());
+            mTmpConfig.setTo(getRequestedOverrideConfiguration());
+            task.computeConfigResourceOverrides(mTmpConfig, task.getParent().getConfiguration());
+        } else {
+            mTmpConfig.unset();
         }
 
         onRequestedOverrideConfigurationChanged(mTmpConfig);

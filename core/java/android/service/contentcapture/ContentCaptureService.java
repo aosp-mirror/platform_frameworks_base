@@ -123,12 +123,12 @@ public abstract class ContentCaptureService extends Service {
     };
 
     /**
-     * List of sessions per UID.
+     * UIDs associated with each session.
      *
      * <p>This map is populated when an session is started, which is called by the system server
      * and can be trusted. Then subsequent calls made by the app are verified against this map.
      */
-    private final ArrayMap<String, Integer> mSessionsByUid = new ArrayMap<>();
+    private final ArrayMap<String, Integer> mSessionUids = new ArrayMap<>();
 
     @CallSuper
     @Override
@@ -285,13 +285,13 @@ public abstract class ContentCaptureService extends Service {
     @Override
     @CallSuper
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        final int size = mSessionsByUid.size();
+        final int size = mSessionUids.size();
         pw.print("Number sessions: "); pw.println(size);
         if (size > 0) {
             final String prefix = "  ";
             for (int i = 0; i < size; i++) {
-                pw.print(prefix); pw.print(mSessionsByUid.keyAt(i));
-                pw.print(": uid="); pw.println(mSessionsByUid.valueAt(i));
+                pw.print(prefix); pw.print(mSessionUids.keyAt(i));
+                pw.print(": uid="); pw.println(mSessionUids.valueAt(i));
             }
         }
     }
@@ -309,7 +309,7 @@ public abstract class ContentCaptureService extends Service {
 
     private void handleOnCreateSession(@NonNull ContentCaptureContext context,
             @NonNull String sessionId, int uid, IResultReceiver clientReceiver) {
-        mSessionsByUid.put(sessionId, uid);
+        mSessionUids.put(sessionId, uid);
         onCreateContentCaptureSession(context, new ContentCaptureSessionId(sessionId));
         setClientState(clientReceiver, ContentCaptureSession.STATE_ACTIVE,
                 mClientInterface.asBinder());
@@ -336,11 +336,11 @@ public abstract class ContentCaptureService extends Service {
                 case ContentCaptureEvent.TYPE_SESSION_STARTED:
                     final ContentCaptureContext clientContext = event.getClientContext();
                     clientContext.setParentSessionId(event.getParentSessionId());
-                    mSessionsByUid.put(sessionIdString, uid);
+                    mSessionUids.put(sessionIdString, uid);
                     onCreateContentCaptureSession(clientContext, sessionId);
                     break;
                 case ContentCaptureEvent.TYPE_SESSION_FINISHED:
-                    mSessionsByUid.remove(sessionIdString);
+                    mSessionUids.remove(sessionIdString);
                     onDestroyContentCaptureSession(sessionId);
                     break;
                 default:
@@ -355,7 +355,7 @@ public abstract class ContentCaptureService extends Service {
     }
 
     private void handleFinishSession(@NonNull String sessionId) {
-        mSessionsByUid.remove(sessionId);
+        mSessionUids.remove(sessionId);
         onDestroyContentCaptureSession(new ContentCaptureSessionId(sessionId));
     }
 
@@ -372,10 +372,13 @@ public abstract class ContentCaptureService extends Service {
             default:
                 sessionId = event.getSessionId();
         }
-        final Integer rightUid = mSessionsByUid.get(sessionId);
+        final Integer rightUid = mSessionUids.get(sessionId);
         if (rightUid == null) {
-            if (VERBOSE) Log.v(TAG, "No session for " + sessionId);
-            // Just ignore, as the session could have finished
+            if (DEBUG) {
+                Log.d(TAG, "handleIsRightCallerFor(" + event + "): no session for " + sessionId
+                        + ": " + mSessionUids);
+            }
+            // Just ignore, as the session could have been finished already
             return false;
         }
         if (rightUid != uid) {

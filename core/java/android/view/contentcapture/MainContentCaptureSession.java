@@ -141,6 +141,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
+    MainContentCaptureSession getMainCaptureSession() {
+        return this;
+    }
+
+    @Override
     ContentCaptureSession newChild(@NonNull ContentCaptureContext clientContext) {
         final ContentCaptureSession child = new ChildContentCaptureSession(this, clientContext);
         notifyChildSessionStarted(mId, child.mId, clientContext);
@@ -171,6 +176,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @Override
     void onDestroy() {
+        mHandler.removeMessages(MSG_FLUSH);
         mHandler.sendMessage(
                 obtainMessage(MainContentCaptureSession::handleDestroySession, this));
     }
@@ -237,7 +243,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 Log.w(TAG, "Failed to link to death on " + binder + ": " + e);
             }
         }
-        if (resultCode == STATE_DISABLED || resultCode == STATE_DISABLED_DUPLICATED_ID) {
+        if (resultCode == STATE_DISABLED_NO_SERVICE || resultCode == STATE_DISABLED_DUPLICATED_ID) {
             mDisabled.set(true);
             handleResetSession(/* resetState= */ false);
         } else {
@@ -246,7 +252,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (VERBOSE) {
             Log.v(TAG, "handleSessionStarted() result: code=" + resultCode + ", id=" + mId
                     + ", state=" + getStateAsString(mState) + ", disabled=" + mDisabled.get()
-                    + ", binder=" + binder);
+                    + ", binder=" + binder + ", events=" + (mEvents == null ? 0 : mEvents.size()));
         }
     }
 
@@ -285,14 +291,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             return;
         }
 
-        if (mState != STATE_ACTIVE) {
+        if (mState != STATE_ACTIVE && numberEvents >= MAX_BUFFER_SIZE) {
             // Callback from startSession hasn't been called yet - typically happens on system
             // apps that are started before the system service
             // TODO(b/111276913): try to ignore session while system is not ready / boot
             // not complete instead. Similarly, the manager service should return right away
             // when the user does not have a service set
-            if (VERBOSE) {
-                Log.v(TAG, "Closing session for " + getActivityDebugName()
+            if (DEBUG) {
+                Log.d(TAG, "Closing session for " + getActivityDebugName()
                         + " after " + numberEvents + " delayed events and state "
                         + getStateAsString(mState));
             }
@@ -331,7 +337,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (mEvents == null) return;
 
         if (mDirectServiceInterface == null) {
-            if (DEBUG) Log.d(TAG, "handleForceFlush(): hold your horses, client not ready yet!");
+            if (VERBOSE) {
+                Log.v(TAG, "handleForceFlush(): hold your horses, client not ready: " + mEvents);
+            }
             if (!mHandler.hasMessages(MSG_FLUSH)) {
                 handleScheduleFlush(/* checkExisting= */ false);
             }
@@ -386,14 +394,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         handleResetSession(/* resetState= */ true);
     }
 
-    // TODO(b/121033016): once we support multiple sessions, we might need to move some of these
+    // TODO(b/122454205): once we support multiple sessions, we might need to move some of these
     // clearings out.
     private void handleResetSession(boolean resetState) {
         if (resetState) {
             mState = STATE_UNKNOWN;
         }
 
-        // TODO(b/121033016): must reset children (which currently is owned by superclass)
+        // TODO(b/122454205): must reset children (which currently is owned by superclass)
         mApplicationToken = null;
         mComponentName = null;
         mEvents = null;
@@ -426,7 +434,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 && !mDisabled.get();
     }
 
-    // TODO(b/121033016): refactor "notifyXXXX" methods below to a common "Buffer" object that is
+    // TODO(b/122454205): refactor "notifyXXXX" methods below to a common "Buffer" object that is
     // shared between ActivityContentCaptureSession and ChildContentCaptureSession objects. Such
     // change should also get get rid of the "internalNotifyXXXX" methods above
     void notifyChildSessionStarted(@NonNull String parentSessionId,
@@ -435,14 +443,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 new ContentCaptureEvent(childSessionId, TYPE_SESSION_STARTED)
                         .setParentSessionId(parentSessionId)
                         .setClientContext(clientContext),
-                        /* forceFlush= */ false));
+                        /* forceFlush= */ true));
     }
 
     void notifyChildSessionFinished(@NonNull String parentSessionId,
             @NonNull String childSessionId) {
         mHandler.sendMessage(obtainMessage(MainContentCaptureSession::handleSendEvent, this,
                 new ContentCaptureEvent(childSessionId, TYPE_SESSION_FINISHED)
-                        .setParentSessionId(parentSessionId), /* forceFlush= */ false));
+                        .setParentSessionId(parentSessionId), /* forceFlush= */ true));
     }
 
     void notifyViewAppeared(@NonNull String sessionId, @NonNull ViewStructureImpl node) {

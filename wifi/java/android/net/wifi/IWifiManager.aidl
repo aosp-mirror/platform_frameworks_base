@@ -64,7 +64,7 @@ interface IWifiManager
 
     Map getAllMatchingFqdnsForScanResults(in List<ScanResult> scanResult);
 
-    List<OsuProvider> getMatchingOsuProviders(in List<ScanResult> scanResult);
+    Map getMatchingOsuProviders(in List<ScanResult> scanResult);
 
     Map getMatchingPasspointConfigsForOsuProviders(in List<OsuProvider> osuProviders);
 

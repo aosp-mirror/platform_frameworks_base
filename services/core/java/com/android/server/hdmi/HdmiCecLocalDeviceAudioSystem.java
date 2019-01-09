@@ -25,6 +25,7 @@ import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.SystemProperties;
+import android.provider.Settings.Global;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -50,6 +51,11 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
 
     private boolean mTvSystemAudioModeSupport;
 
+    // Whether the auido system will turn TV off when it's powering off
+    private boolean mAutoTvOff;
+    // Whether the auido system will broadcast standby to the system when it's powering off
+    private boolean mAutoDeviceOff;
+
     // Whether ARC is available or not. "true" means that ARC is established between TV and
     // AVR as audio receiver.
     @ServiceThreadOnly private boolean mArcEstablished = false;
@@ -60,6 +66,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         // TODO(amyjojo) make System Audio Control controllable by users
         /*mSystemAudioControlFeatureEnabled =
         mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);*/
+        mAutoDeviceOff = mService.readBooleanSetting(
+            Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, true);
+        mAutoTvOff = mService.readBooleanSetting(
+            Global.HDMI_CONTROL_AUTO_TV_OFF_ENABLED, true);
     }
 
     @Override
@@ -74,6 +84,21 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
                     mSystemAudioActivated ? "true" : "false");
         }
         terminateSystemAudioMode();
+
+        HdmiLogger.debug(TAG + " onStandby, initiatedByCec:" + initiatedByCec
+                + ", mAutoDeviceOff: " + mAutoDeviceOff + ", mAutoTvOff: " + mAutoTvOff);
+        if (!mService.isControlEnabled() || initiatedByCec) {
+            return;
+        }
+        if (mAutoDeviceOff) {
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_BROADCAST));
+        } else if (mAutoTvOff) {
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_TV));
+        }
+        return;
+
     }
 
     @Override
@@ -490,5 +515,18 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         synchronized (mLock) {
             return mArcEstablished;
         }
+    }
+
+    @ServiceThreadOnly
+    protected void setAutoTvOff(boolean autoTvOff) {
+        assertRunOnServiceThread();
+        mAutoTvOff = autoTvOff;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    void setAutoDeviceOff(boolean autoDeviceOff) {
+        assertRunOnServiceThread();
+        mAutoDeviceOff = autoDeviceOff;
     }
 }

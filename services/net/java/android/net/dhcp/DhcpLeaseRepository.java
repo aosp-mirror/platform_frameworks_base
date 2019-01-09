@@ -29,8 +29,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.IpPrefix;
 import android.net.MacAddress;
-import android.net.util.SharedLog;
 import android.net.dhcp.DhcpServer.Clock;
+import android.net.util.SharedLog;
 import android.util.ArrayMap;
 
 import java.net.Inet4Address;
@@ -117,7 +117,7 @@ class DhcpLeaseRepository {
      */
     private final LinkedHashMap<Inet4Address, Long> mDeclinedAddrs = new LinkedHashMap<>();
 
-    public DhcpLeaseRepository(@NonNull IpPrefix prefix, @NonNull Set<Inet4Address> reservedAddrs,
+    DhcpLeaseRepository(@NonNull IpPrefix prefix, @NonNull Set<Inet4Address> reservedAddrs,
             long leaseTimeMs, @NonNull SharedLog log, @NonNull Clock clock) {
         updateParams(prefix, reservedAddrs, leaseTimeMs);
         mLog = log;
@@ -250,8 +250,8 @@ class DhcpLeaseRepository {
                 // reqAddr null (RENEWING/REBINDING): client renewing its own lease for clientAddr.
                 // reqAddr set with sid not set (INIT-REBOOT): client verifying configuration.
                 // In both cases, throw if clientAddr or reqAddr does not match the known lease.
-                throw new InvalidAddressException("Incorrect address for client in " +
-                        (reqAddr != null ? "INIT-REBOOT" : "RENEWING/REBINDING"));
+                throw new InvalidAddressException("Incorrect address for client in "
+                        + (reqAddr != null ? "INIT-REBOOT" : "RENEWING/REBINDING"));
             }
         }
 

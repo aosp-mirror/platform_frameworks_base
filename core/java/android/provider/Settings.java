@@ -6207,7 +6207,7 @@ public final class Settings {
         public static final String CHARGING_SOUNDS_ENABLED = "charging_sounds_enabled";
 
         /**
-         * Whether to vibrate for wireless charging events.
+         * Whether to vibrate for charging events.
          * @hide
          */
         public static final String CHARGING_VIBRATION_ENABLED = "charging_vibration_enabled";
@@ -8882,6 +8882,14 @@ public final class Settings {
         public static final String ADD_USERS_WHEN_LOCKED = "add_users_when_locked";
 
         /**
+         * Whether applying ramping ringer on incoming phone call ringtone.
+         * <p>1 = apply ramping ringer
+         * <p>0 = do not apply ramping ringer
+         * @hide
+         */
+        public static final String APPLY_RAMPING_RINGER = "apply_ramping_ringer";
+
+        /**
          * Setting whether the global gesture for enabling accessibility is enabled.
          * If this gesture is enabled the user will be able to perfrom it to enable
          * the accessibility state without visiting the settings app.
@@ -9415,13 +9423,23 @@ public final class Settings {
                 "hdmi_control_auto_wakeup_enabled";
 
         /**
-         * Whether TV will also turn off other CEC devices when it goes to standby mode.
+         * Whether TV or Audio System will also turn off other CEC devices when it goes to standby
+         * mode.
          * (0 = false, 1 = true)
          *
          * @hide
          */
         public static final String HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED =
                 "hdmi_control_auto_device_off_enabled";
+
+        /**
+         * Whether Audio System will also turn off TV when it goes to standby mode.
+         * (0 = false, 1 = true)
+         *
+         * @hide
+         */
+        public static final String HDMI_CONTROL_AUTO_TV_OFF_ENABLED =
+                "hdmi_control_auto_tv_off_enabled";
 
         /**
          * If <b>true</b>, enables out-of-the-box execution for priv apps.

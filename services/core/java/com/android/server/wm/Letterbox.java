@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.view.SurfaceControl.HIDDEN;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 
@@ -30,6 +31,7 @@ import java.util.function.Supplier;
 public class Letterbox {
 
     private static final Rect EMPTY_RECT = new Rect();
+    private static final Point ZERO_POINT = new Point(0, 0);
 
     private final Supplier<SurfaceControl.Builder> mFactory;
     private final Rect mOuter = new Rect();
@@ -53,14 +55,19 @@ public class Letterbox {
      * frames will be covered by black color surfaces.
      *
      * The caller must use {@link #applySurfaceChanges} to apply the new layout to the surface.
-     *
      * @param outer the outer frame of the letterbox (this frame will be black, except the area
-     *              that intersects with the {code inner} frame).
-     * @param inner the inner frame of the letterbox (this frame will be clear)
+     *              that intersects with the {code inner} frame), in global coordinates
+     * @param inner the inner frame of the letterbox (this frame will be clear), in global
+     *              coordinates
+     * @param surfaceOrigin the origin of the surface factory in global coordinates
      */
-    public void layout(Rect outer, Rect inner) {
+    public void layout(Rect outer, Rect inner, Point surfaceOrigin) {
         mOuter.set(outer);
         mInner.set(inner);
+        mOuter.offset(-surfaceOrigin.x, -surfaceOrigin.y);
+        mInner.offset(-surfaceOrigin.x, -surfaceOrigin.y);
+        outer = mOuter;
+        inner = mInner;
 
         mTop.layout(outer.left, outer.top, inner.right, inner.top);
         mLeft.layout(outer.left, inner.top, inner.left, outer.bottom);
@@ -94,7 +101,7 @@ public class Letterbox {
      * The caller must use {@link #applySurfaceChanges} to apply the new layout to the surface.
      */
     public void hide() {
-        layout(EMPTY_RECT, EMPTY_RECT);
+        layout(EMPTY_RECT, EMPTY_RECT, ZERO_POINT);
     }
 
     /**

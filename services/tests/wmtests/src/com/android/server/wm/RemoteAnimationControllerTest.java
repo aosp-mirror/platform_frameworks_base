@@ -143,8 +143,8 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testTimeout_scaled() throws Exception {
-        mWm.setAnimationScale(2, 5.0f);
         try {
+            mWm.setAnimationScale(2, 5.0f);
             final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
                     "testWin");
             final AnimationAdapter adapter = mController.createAnimationAdapter(win.mAppToken,

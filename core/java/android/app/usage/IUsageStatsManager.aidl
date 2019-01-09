@@ -55,4 +55,8 @@ interface IUsageStatsManager {
             long sessionThresholdTimeMs, in PendingIntent limitReachedCallbackIntent,
             in PendingIntent sessionEndCallbackIntent, String callingPackage);
     void unregisterUsageSessionObserver(int sessionObserverId, String callingPackage);
+    void reportUsageStart(in IBinder activity, String token, String callingPackage);
+    void reportPastUsageStart(in IBinder activity, String token, long timeAgoMs,
+            String callingPackage);
+    void reportUsageStop(in IBinder activity, String token, String callingPackage);
 }

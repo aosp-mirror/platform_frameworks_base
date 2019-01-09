@@ -21,6 +21,11 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
@@ -133,17 +138,6 @@ public class TaskRecordTests extends ActivityTestsBase {
         assertTrue(task.returnsToHomeStack());
     }
 
-    /** Ensures that bounds are clipped to their parent. */
-    @Test
-    public void testAppBounds_BoundsClipping() {
-        final Rect shiftedBounds = new Rect(mParentBounds);
-        shiftedBounds.offset(10, 10);
-        final Rect expectedBounds = new Rect(mParentBounds);
-        expectedBounds.intersect(shiftedBounds);
-        testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, shiftedBounds,
-                expectedBounds);
-    }
-
     /** Ensures that empty bounds are not propagated to the configuration. */
     @Test
     public void testAppBounds_EmptyBounds() {
@@ -167,18 +161,108 @@ public class TaskRecordTests extends ActivityTestsBase {
         final Rect insetBounds = new Rect(mParentBounds);
         insetBounds.inset(5, 5, 5, 5);
         testStackBoundsConfiguration(
-                WINDOWING_MODE_FULLSCREEN, mParentBounds, insetBounds, insetBounds);
+                WINDOWING_MODE_FREEFORM, mParentBounds, insetBounds, insetBounds);
     }
 
-    /** Ensures that full screen free form bounds are clipped */
+    /** Tests that the task bounds adjust properly to changes between FULLSCREEN and FREEFORM */
     @Test
-    public void testAppBounds_FullScreenFreeFormBounds() {
+    public void testBoundsOnModeChangeFreeformToFullscreen() {
         ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        ActivityStack stack = new StackBuilder(mRootActivityContainer).setDisplay(display)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        TaskRecord task = stack.getChildAt(0);
+        task.getRootActivity().mAppWindowToken.setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
         DisplayInfo info = new DisplayInfo();
         display.mDisplay.getDisplayInfo(info);
         final Rect fullScreenBounds = new Rect(0, 0, info.logicalWidth, info.logicalHeight);
-        testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, fullScreenBounds,
-                mParentBounds);
+        final Rect freeformBounds = new Rect(fullScreenBounds);
+        freeformBounds.inset((int) (freeformBounds.width() * 0.2),
+                (int) (freeformBounds.height() * 0.2));
+        task.setBounds(freeformBounds);
+
+        assertEquals(freeformBounds, task.getBounds());
+
+        // FULLSCREEN inherits bounds
+        stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        assertEquals(fullScreenBounds, task.getBounds());
+        assertEquals(freeformBounds, task.mLastNonFullscreenBounds);
+
+        // FREEFORM restores bounds
+        stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertEquals(freeformBounds, task.getBounds());
+    }
+
+    /**
+     * This is a temporary hack to trigger an onConfigurationChange at the task level after an
+     * orientation is requested. Normally this is done by the onDescendentOrientationChanged call
+     * up the WM hierarchy, but since the WM hierarchy is mocked out, it doesn't happen here.
+     * TODO: remove this when we either get a WM hierarchy or when hierarchies are merged.
+     */
+    private void setActivityRequestedOrientation(ActivityRecord activity, int orientation) {
+        activity.setRequestedOrientation(orientation);
+        ConfigurationContainer taskRecord = activity.getParent();
+        taskRecord.onConfigurationChanged(taskRecord.getParent().getConfiguration());
+    }
+
+    /**
+     * Tests that a task with forced orientation has orientation-consistent bounds within the
+     * parent.
+     */
+    @Test
+    public void testFullscreenBoundsForcedOrientation() {
+        final Rect fullScreenBounds = new Rect(0, 0, 1920, 1080);
+        final Rect fullScreenBoundsPort = new Rect(0, 0, 1080, 1920);
+        DisplayInfo info = new DisplayInfo();
+        info.logicalWidth = fullScreenBounds.width();
+        info.logicalHeight = fullScreenBounds.height();
+        ActivityDisplay display = addNewActivityDisplayAt(info, POSITION_TOP);
+        assertTrue(mRootActivityContainer.getActivityDisplay(display.mDisplayId) != null);
+        ActivityStack stack = new StackBuilder(mRootActivityContainer)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
+        TaskRecord task = stack.getChildAt(0);
+        ActivityRecord root = task.getRootActivity();
+        ActivityRecord top = new ActivityBuilder(mService).setTask(task).setStack(stack).build();
+        assertEquals(root, task.getRootActivity());
+
+        assertEquals(fullScreenBounds, task.getBounds());
+
+        // Setting app to fixed portrait fits within parent
+        setActivityRequestedOrientation(root, SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(root, task.getRootActivity());
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, task.getRootActivity().getOrientation());
+        assertTrue(task.getBounds().width() < task.getBounds().height());
+        assertEquals(fullScreenBounds.height(), task.getBounds().height());
+
+        // Setting non-root app has no effect
+        setActivityRequestedOrientation(root, SCREEN_ORIENTATION_LANDSCAPE);
+        assertTrue(task.getBounds().width() < task.getBounds().height());
+
+        // Setting app to unspecified restores
+        setActivityRequestedOrientation(root, SCREEN_ORIENTATION_UNSPECIFIED);
+        assertEquals(fullScreenBounds, task.getBounds());
+
+        // Setting app to fixed landscape and changing display
+        setActivityRequestedOrientation(root, SCREEN_ORIENTATION_LANDSCAPE);
+        display.setBounds(fullScreenBoundsPort);
+        assertTrue(task.getBounds().width() > task.getBounds().height());
+        assertEquals(fullScreenBoundsPort.width(), task.getBounds().width());
+
+        // in FREEFORM, no constraint
+        final Rect freeformBounds = new Rect(display.getBounds());
+        freeformBounds.inset((int) (freeformBounds.width() * 0.2),
+                (int) (freeformBounds.height() * 0.2));
+        stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        task.setBounds(freeformBounds);
+        assertEquals(freeformBounds, task.getBounds());
+
+        // FULLSCREEN letterboxes bounds
+        stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        assertTrue(task.getBounds().width() > task.getBounds().height());
+        assertEquals(fullScreenBoundsPort.width(), task.getBounds().width());
+
+        // FREEFORM restores bounds as before
+        stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertEquals(freeformBounds, task.getBounds());
     }
 
     /** Ensures that the alias intent won't have target component resolved. */

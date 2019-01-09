@@ -37,6 +37,7 @@ import static com.android.server.wm.ConfigurationContainerProto.OVERRIDE_CONFIGU
 import android.annotation.CallSuper;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 
@@ -240,6 +241,14 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     public void getBounds(Rect outBounds) {
         outBounds.set(getBounds());
+    }
+
+    /**
+     * Sets {@code out} to the top-left corner of the bounds as returned by {@link #getBounds()}.
+     */
+    public void getPosition(Point out) {
+        Rect bounds = getBounds();
+        out.set(bounds.left, bounds.top);
     }
 
     /**

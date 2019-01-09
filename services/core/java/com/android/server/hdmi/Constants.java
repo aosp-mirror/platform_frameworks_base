@@ -300,7 +300,7 @@ final class Constants {
      * <p>Default is true.
      */
     static final String PROPERTY_ARC_SUPPORT =
-        "persist.sys.hdmi.property_arc_support";
+            "persist.sys.hdmi.property_arc_support";
 
     /**
      * Property to save the audio port to switch to when system audio control is on.
@@ -310,7 +310,7 @@ final class Constants {
      * <p>Default is ARC port.
      */
     static final String PROPERTY_SYSTEM_AUDIO_MODE_AUDIO_PORT =
-        "persist.sys.hdmi.property_sytem_audio_mode_audio_port";
+            "persist.sys.hdmi.property_sytem_audio_mode_audio_port";
 
     /**
      * Property to save the ARC port id on system audio device.
@@ -318,6 +318,15 @@ final class Constants {
      */
     static final String PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT =
             "persist.sys.hdmi.property_sytem_audio_device_arc_port";
+
+    /**
+     * Property to indicate if a CEC audio device should forward volume keys when system audio mode
+     * is off.
+     *
+     * <p>Default is false.
+     */
+    static final String PROPERTY_CEC_AUDIO_DEVICE_FORWARD_VOLUME_KEYS_SYSTEM_AUDIO_MODE_OFF =
+            "persist.sys.hdmi.property_cec_audio_device_forward_volume_keys_system_audio_mode_off";
 
     /**
      * Property to strip local audio of amplifier and use local speaker

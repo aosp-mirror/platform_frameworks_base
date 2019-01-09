@@ -870,8 +870,11 @@ final class AutofillManagerServiceImpl
         }
         pw.print(prefix); pw.print("Default component: "); pw.println(getContext()
                 .getString(R.string.config_defaultAutofillService));
-        pw.print(prefix); pw.print("mAugmentedAutofillNamer: ");
-        mAugmentedAutofillResolver.dumpShort(pw); pw.println();
+
+        pw.print(prefix); pw.println("mAugmentedAutofillNamer: ");
+        pw.print(prefix2); mAugmentedAutofillResolver.dumpShort(pw); pw.println();
+        pw.print(prefix2); mAugmentedAutofillResolver.dumpShort(pw, mUserId); pw.println();
+
         if (mRemoteAugmentedAutofillService != null) {
             pw.print(prefix); pw.println("RemoteAugmentedAutofillService: ");
             mRemoteAugmentedAutofillService.dump(prefix2, pw);

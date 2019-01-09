@@ -1354,9 +1354,9 @@ public abstract class ColorSpace {
      */
     @NonNull
     static ColorSpace get(@IntRange(from = MIN_ID, to = MAX_ID) int index) {
-        if (index < 0 || index > Named.values().length) {
+        if (index < 0 || index >= Named.values().length) {
             throw new IllegalArgumentException("Invalid ID, must be in the range [0.." +
-                    Named.values().length + "]");
+                    Named.values().length + ")");
         }
         return sNamedColorSpaces[index];
     }

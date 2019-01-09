@@ -3519,4 +3519,9 @@
 
   <!-- For Secondary Launcher -->
   <java-symbol type="string" name="config_secondaryHomeComponent" />
+  
+  <java-symbol type="string" name="dynamic_mode_notification_channel_name" />
+  <java-symbol type="string" name="dynamic_mode_notification_title" />
+  <java-symbol type="string" name="dynamic_mode_notification_summary" />
+  <java-symbol type="drawable" name="ic_battery" />
 </resources>

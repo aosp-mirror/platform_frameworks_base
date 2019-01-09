@@ -66,6 +66,7 @@ public class UpdateEngine {
         public static final int PAYLOAD_HASH_MISMATCH_ERROR = 10;
         public static final int PAYLOAD_SIZE_MISMATCH_ERROR = 11;
         public static final int DOWNLOAD_PAYLOAD_VERIFICATION_ERROR = 12;
+        public static final int PAYLOAD_TIMESTAMP_ERROR = 51;
         public static final int UPDATED_BUT_NOT_ACTIVE = 52;
     }
 

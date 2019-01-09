@@ -29,6 +29,6 @@
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="android.hardware.hdmi" />
         <option name="hidden-api-checks" value="false"/>
-        <option name="runner" value="android.support.test.runner.AndroidJUnitRunner"/>
+        <option name="runner" value="androidx.test.runner.AndroidJUnitRunner"/>
     </test>
 </configuration>
