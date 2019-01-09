@@ -35,17 +35,20 @@
 
         <activity android:name=".ActivityViewActivity"
                   android:label="AV"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density">
+                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density"
+                  android:windowSoftInputMode="stateHidden|adjustResize">
         </activity>
 
         <activity android:name=".ActivityViewResizeActivity"
                   android:label="AV Resize"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density">
+                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density"
+                  android:windowSoftInputMode="stateHidden|adjustResize">
         </activity>
 
         <activity android:name=".ActivityViewScrollActivity"
                   android:label="AV Scroll"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density">
+                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density"
+                  android:windowSoftInputMode="stateHidden">
         </activity>
 
         <activity android:name=".ActivityViewTestActivity"
