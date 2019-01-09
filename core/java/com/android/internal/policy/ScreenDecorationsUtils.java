@@ -16,9 +16,9 @@
 
 package com.android.internal.policy;
 
-import com.android.internal.R;
-
 import android.content.res.Resources;
+
+import com.android.internal.R;
 
 /**
  * Utility functions for screen decorations used by both window manager and System UI.
@@ -31,20 +31,31 @@ public class ScreenDecorationsUtils {
      * scaling, this means that we don't have to reload them on config changes.
      */
     public static float getWindowCornerRadius(Resources resources) {
+        if (!supportsRoundedCornersOnWindows(resources)) {
+            return 0f;
+        }
+
         // Radius that should be used in case top or bottom aren't defined.
         float defaultRadius = resources.getDimension(R.dimen.rounded_corner_radius);
 
         float topRadius = resources.getDimension(R.dimen.rounded_corner_radius_top);
-        if (topRadius == 0) {
+        if (topRadius == 0f) {
             topRadius = defaultRadius;
         }
         float bottomRadius = resources.getDimension(R.dimen.rounded_corner_radius_bottom);
-        if (bottomRadius == 0) {
+        if (bottomRadius == 0f) {
             bottomRadius = defaultRadius;
         }
 
         // Always use the smallest radius to make sure the rounded corners will
         // completely cover the display.
         return Math.min(topRadius, bottomRadius);
+    }
+
+    /**
+     * If live rounded corners are supported on windows.
+     */
+    public static boolean supportsRoundedCornersOnWindows(Resources resources) {
+        return resources.getBoolean(R.bool.config_supportsRoundedCornersOnWindows);
     }
 }

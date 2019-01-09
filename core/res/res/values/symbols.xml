@@ -3513,6 +3513,7 @@
   <java-symbol type="dimen" name="rounded_corner_radius" />
   <java-symbol type="dimen" name="rounded_corner_radius_top" />
   <java-symbol type="dimen" name="rounded_corner_radius_bottom" />
+  <java-symbol type="bool" name="config_supportsRoundedCornersOnWindows" />
 
   <java-symbol type="string" name="config_defaultModuleMetadataProvider" />
 
