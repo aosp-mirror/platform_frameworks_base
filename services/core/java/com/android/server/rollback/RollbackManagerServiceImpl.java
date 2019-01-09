@@ -230,9 +230,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // that rare case, we'll check when we execute the rollback whether
         // it's out of date or not, so no need to check package versions here.
 
-        // TODO: Once the RollbackInfo API supports info about dependant
-        // packages, add that info here.
-        return new RollbackInfo(data.info);
+        for (PackageRollbackInfo info : data.packages) {
+            if (info.packageName.equals(packageName)) {
+                // TODO: Once the RollbackInfo API supports info about
+                // dependant packages, add that info here.
+                return new RollbackInfo(info);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -246,7 +251,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                packageNames.add(data.info.packageName);
+                for (PackageRollbackInfo info : data.packages) {
+                    packageNames.add(info.packageName);
+                }
             }
         }
         return new StringParceledListSlice(new ArrayList<>(packageNames));
@@ -287,11 +294,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private void executeRollbackInternal(RollbackInfo rollback,
             String callerPackageName, IntentSender statusReceiver) {
-        String packageName = rollback.targetPackage.packageName;
-        Log.i(TAG, "Initiating rollback of " + packageName);
+        String targetPackageName = rollback.targetPackage.packageName;
+        Log.i(TAG, "Initiating rollback of " + targetPackageName);
 
         // Get the latest RollbackData for the target package.
-        RollbackData data = getRollbackForPackage(packageName);
+        RollbackData data = getRollbackForPackage(targetPackageName);
         if (data == null) {
             sendFailure(statusReceiver, "No rollback available for package.");
             return;
@@ -300,9 +307,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // Verify the latest rollback matches the version requested.
         // TODO: Check dependant packages too once RollbackInfo includes that
         // information.
-        if (!rollback.targetPackage.higherVersion.equals(data.info.higherVersion)) {
-            sendFailure(statusReceiver, "Rollback is out of date.");
-            return;
+        for (PackageRollbackInfo info : data.packages) {
+            if (info.packageName.equals(targetPackageName)
+                    && !rollback.targetPackage.higherVersion.equals(info.higherVersion)) {
+                sendFailure(statusReceiver, "Rollback is out of date.");
+                return;
+            }
         }
 
         // Verify the RollbackData is up to date with what's installed on
@@ -313,18 +323,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // rollback racing with a roll-forward fix of a buggy package.
         // Figure out how to ensure we don't commit the rollback if
         // roll forward happens at the same time.
-        PackageRollbackInfo.PackageVersion installedVersion =
-                getInstalledPackageVersion(data.info.packageName);
-        if (installedVersion == null) {
-            // TODO: Test this case
-            sendFailure(statusReceiver, "Target package to roll back is not installed");
-            return;
-        }
+        for (PackageRollbackInfo info : data.packages) {
+            PackageRollbackInfo.PackageVersion installedVersion =
+                    getInstalledPackageVersion(info.packageName);
+            if (installedVersion == null) {
+                // TODO: Test this case
+                sendFailure(statusReceiver, "Package to roll back is not installed");
+                return;
+            }
 
-        if (!data.info.higherVersion.equals(installedVersion)) {
-            // TODO: Test this case
-            sendFailure(statusReceiver, "Target package version to roll back not installed.");
-            return;
+            if (!info.higherVersion.equals(installedVersion)) {
+                // TODO: Test this case
+                sendFailure(statusReceiver, "Package version to roll back not installed.");
+                return;
+            }
         }
 
         // Get a context for the caller to use to install the downgraded
@@ -339,31 +351,39 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         PackageManager pm = context.getPackageManager();
         try {
-            PackageInstaller.Session session = null;
-
             PackageInstaller packageInstaller = pm.getPackageInstaller();
-            PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+            PackageInstaller.SessionParams parentParams = new PackageInstaller.SessionParams(
                     PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-            params.setAllowDowngrade(true);
-            int sessionId = packageInstaller.createSession(params);
-            session = packageInstaller.openSession(sessionId);
+            parentParams.setAllowDowngrade(true);
+            parentParams.setMultiPackage();
+            int parentSessionId = packageInstaller.createSession(parentParams);
+            PackageInstaller.Session parentSession = packageInstaller.openSession(parentSessionId);
 
-            // TODO: Will it always be called "base.apk"? What about splits?
-            // What about apex?
-            File packageDir = new File(data.backupDir, data.info.packageName);
-            File baseApk = new File(packageDir, "base.apk");
-            try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(baseApk,
-                    ParcelFileDescriptor.MODE_READ_ONLY)) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    session.write("base.apk", 0, baseApk.length(), fd);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
+            for (PackageRollbackInfo info : data.packages) {
+                PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+                        PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+                params.setAllowDowngrade(true);
+                int sessionId = packageInstaller.createSession(params);
+                PackageInstaller.Session session = packageInstaller.openSession(sessionId);
+
+                // TODO: Will it always be called "base.apk"? What about splits?
+                // What about apex?
+                File packageDir = new File(data.backupDir, info.packageName);
+                File baseApk = new File(packageDir, "base.apk");
+                try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(baseApk,
+                        ParcelFileDescriptor.MODE_READ_ONLY)) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        session.write("base.apk", 0, baseApk.length(), fd);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                 }
+                parentSession.addChildSessionId(sessionId);
             }
 
             final LocalIntentReceiver receiver = new LocalIntentReceiver();
-            session.commit(receiver.getIntentSender());
+            parentSession.commit(receiver.getIntentSender());
 
             Intent result = receiver.getResult();
             int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
@@ -378,13 +398,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             sendSuccess(statusReceiver);
 
             Intent broadcast = new Intent(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED,
-                    Uri.fromParts("package", packageName, Manifest.permission.MANAGE_ROLLBACKS));
+                    Uri.fromParts("package", targetPackageName,
+                        Manifest.permission.MANAGE_ROLLBACKS));
 
             // TODO: This call emits the warning "Calling a method in the
             // system process without a qualified user". Fix that.
             mContext.sendBroadcast(broadcast);
         } catch (IOException e) {
-            Log.e(TAG, "Unable to roll back " + packageName, e);
+            Log.e(TAG, "Unable to roll back " + targetPackageName, e);
             sendFailure(statusReceiver, "IOException: " + e.toString());
             return;
         }
@@ -418,9 +439,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
             while (iter.hasNext()) {
                 RollbackData data = iter.next();
-                if (data.info.packageName.equals(packageName)) {
-                    iter.remove();
-                    removeFile(data.backupDir);
+                for (PackageRollbackInfo info : data.packages) {
+                    if (info.packageName.equals(packageName)) {
+                        iter.remove();
+                        removeFile(data.backupDir);
+                        break;
+                    }
                 }
             }
         }
@@ -466,6 +490,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             // is called, though there's no reason besides testing for that to
             // be called.
             if (rollbackDir.isDirectory() && enabledFile.isFile()) {
+                RollbackData data = new RollbackData(rollbackDir);
                 try {
                     PackageRollbackInfo info = null;
                     for (File packageDir : rollbackDir.listFiles()) {
@@ -477,20 +502,17 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             String packageName = jsonObject.getString("packageName");
                             long higherVersionCode = jsonObject.getLong("higherVersionCode");
                             long lowerVersionCode = jsonObject.getLong("lowerVersionCode");
-                            if (info != null) {
-                                throw new IOException("TODO: Support multi-package rollback");
-                            }
-                            info = new PackageRollbackInfo(packageName,
-                                    new PackageRollbackInfo.PackageVersion(higherVersionCode),
-                                    new PackageRollbackInfo.PackageVersion(lowerVersionCode));
+
+                            data.packages.add(new PackageRollbackInfo(packageName,
+                                        new PackageRollbackInfo.PackageVersion(higherVersionCode),
+                                        new PackageRollbackInfo.PackageVersion(lowerVersionCode)));
                         }
                     }
 
-                    if (info == null) {
+                    if (data.packages.isEmpty()) {
                         throw new IOException("No package rollback info found");
                     }
 
-                    RollbackData data = new RollbackData(info, rollbackDir);
                     String enabledString = IoUtils.readFileAsString(enabledFile.getAbsolutePath());
                     data.timestamp = Instant.parse(enabledString.trim());
                     mAvailableRollbacks.add(data);
@@ -547,10 +569,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
             while (iter.hasNext()) {
                 RollbackData data = iter.next();
-                if (data.info.packageName.equals(packageName)
-                        && !data.info.higherVersion.equals(installedVersion)) {
-                    iter.remove();
-                    removeFile(data.backupDir);
+                for (PackageRollbackInfo info : data.packages) {
+                    if (info.packageName.equals(packageName)
+                            && !info.higherVersion.equals(installedVersion)) {
+                        iter.remove();
+                        removeFile(data.backupDir);
+                        break;
+                    }
                 }
             }
         }
@@ -810,9 +835,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return false;
         }
 
-        RollbackData data = new RollbackData(
-                new PackageRollbackInfo(packageName, newVersion, installedVersion),
-                backupDir);
+        RollbackData data = new RollbackData(backupDir);
+        data.packages.add(new PackageRollbackInfo(packageName, newVersion, installedVersion));
 
         synchronized (mLock) {
             mPendingRollbacks.put(sessionId, data);
@@ -951,8 +975,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                if (data.info.packageName.equals(packageName)) {
-                    return data;
+                for (PackageRollbackInfo info : data.packages) {
+                    if (info.packageName.equals(packageName)) {
+                        return data;
+                    }
                 }
             }
         }

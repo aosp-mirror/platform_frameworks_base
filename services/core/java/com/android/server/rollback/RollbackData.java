@@ -20,14 +20,18 @@ import android.content.rollback.PackageRollbackInfo;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Information about a rollback available for a particular package.
- * This is similar to {@link PackageRollbackInfo}, but extended with
- * additional information for internal bookkeeping.
+ * Information about a rollback available for a set of atomically installed
+ * packages.
  */
 class RollbackData {
-    public final PackageRollbackInfo info;
+    /**
+     * The per-package rollback information.
+     */
+    public final List<PackageRollbackInfo> packages = new ArrayList<>();
 
     /**
      * The directory where the rollback data is stored.
@@ -40,8 +44,7 @@ class RollbackData {
      */
     public Instant timestamp;
 
-    RollbackData(PackageRollbackInfo info, File backupDir) {
-        this.info = info;
+    RollbackData(File backupDir) {
         this.backupDir = backupDir;
     }
 }
