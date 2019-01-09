@@ -1761,14 +1761,13 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback
     private void notifyFocusChanged(IBinder token) {
-        if (mFocusedWindow != token) {
-            if (mFocusedWindowHasCapture) {
-                setPointerCapture(false);
-            }
-            if (token instanceof IWindow) {
-                mFocusedWindow = (IWindow) token;
-            }
+        if (mFocusedWindow.asBinder() == token) {
+            Log.w(TAG, "notifyFocusChanged called with unchanged mFocusedWindow=" + mFocusedWindow);
+            return;
         }
+
+        setPointerCapture(false);
+        mFocusedWindow = IWindow.Stub.asInterface(token);
     }
 
     // Native callback.
