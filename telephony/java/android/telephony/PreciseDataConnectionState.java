@@ -16,10 +16,12 @@
 
 package android.telephony;
 
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.LinkProperties;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.data.ApnSetting;
 
 import java.util.Objects;
 
@@ -31,7 +33,7 @@ import java.util.Objects;
  * <ul>
  *   <li>Data connection state.
  *   <li>Network type of the connection.
- *   <li>APN type.
+ *   <li>APN types.
  *   <li>APN.
  *   <li>The properties of the network link.
  *   <li>Data connection fail cause.
@@ -39,14 +41,15 @@ import java.util.Objects;
  *
  * @hide
  */
-public class PreciseDataConnectionState implements Parcelable {
+@SystemApi
+public final class PreciseDataConnectionState implements Parcelable {
 
-    private int mState = TelephonyManager.DATA_UNKNOWN;
-    private int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-    private String mAPNType = "";
+    private @TelephonyManager.DataState int mState = TelephonyManager.DATA_UNKNOWN;
+    private @TelephonyManager.NetworkType int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    private @DataFailCause.FailCause int mFailCause = DataFailCause.NONE;
+    private @ApnSetting.ApnType int mAPNTypes = ApnSetting.TYPE_NONE;
     private String mAPN = "";
     private LinkProperties mLinkProperties = null;
-    private String mFailCause = "";
 
     /**
      * Constructor
@@ -54,11 +57,14 @@ public class PreciseDataConnectionState implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
-    public PreciseDataConnectionState(int state, int networkType, String apnType, String apn,
-                                      LinkProperties linkProperties, String failCause) {
+    public PreciseDataConnectionState(@TelephonyManager.DataState int state,
+                                      @TelephonyManager.NetworkType int networkType,
+                                      @ApnSetting.ApnType int apnTypes, String apn,
+                                      LinkProperties linkProperties,
+                                      @DataFailCause.FailCause int failCause) {
         mState = state;
         mNetworkType = networkType;
-        mAPNType = apnType;
+        mAPNTypes = apnTypes;
         mAPN = apn;
         mLinkProperties = linkProperties;
         mFailCause = failCause;
@@ -74,73 +80,52 @@ public class PreciseDataConnectionState implements Parcelable {
 
     /**
      * Construct a PreciseDataConnectionState object from the given parcel.
+     *
+     * @hide
      */
     private PreciseDataConnectionState(Parcel in) {
         mState = in.readInt();
         mNetworkType = in.readInt();
-        mAPNType = in.readString();
+        mAPNTypes = in.readInt();
         mAPN = in.readString();
         mLinkProperties = (LinkProperties)in.readParcelable(null);
-        mFailCause = in.readString();
+        mFailCause = in.readInt();
     }
 
     /**
-     * Get data connection state
-     *
-     * @see TelephonyManager#DATA_UNKNOWN
-     * @see TelephonyManager#DATA_DISCONNECTED
-     * @see TelephonyManager#DATA_CONNECTING
-     * @see TelephonyManager#DATA_CONNECTED
-     * @see TelephonyManager#DATA_SUSPENDED
+     * Returns the state of data connection that supported the apn types returned by
+     * {@link #getDataConnectionApnTypeBitMask()}
      */
-    @UnsupportedAppUsage
-    public int getDataConnectionState() {
+    public @TelephonyManager.DataState int getDataConnectionState() {
         return mState;
     }
 
     /**
-     * Get data connection network type
-     *
-     * @see TelephonyManager#NETWORK_TYPE_UNKNOWN
-     * @see TelephonyManager#NETWORK_TYPE_GPRS
-     * @see TelephonyManager#NETWORK_TYPE_EDGE
-     * @see TelephonyManager#NETWORK_TYPE_UMTS
-     * @see TelephonyManager#NETWORK_TYPE_CDMA
-     * @see TelephonyManager#NETWORK_TYPE_EVDO_0
-     * @see TelephonyManager#NETWORK_TYPE_EVDO_A
-     * @see TelephonyManager#NETWORK_TYPE_1xRTT
-     * @see TelephonyManager#NETWORK_TYPE_HSDPA
-     * @see TelephonyManager#NETWORK_TYPE_HSUPA
-     * @see TelephonyManager#NETWORK_TYPE_HSPA
-     * @see TelephonyManager#NETWORK_TYPE_IDEN
-     * @see TelephonyManager#NETWORK_TYPE_EVDO_B
-     * @see TelephonyManager#NETWORK_TYPE_LTE
-     * @see TelephonyManager#NETWORK_TYPE_EHRPD
-     * @see TelephonyManager#NETWORK_TYPE_HSPAP
+     * Returns the network type associated with this data connection.
+     * @hide
      */
-    @UnsupportedAppUsage
-    public int getDataConnectionNetworkType() {
+    public @TelephonyManager.NetworkType int getDataConnectionNetworkType() {
         return mNetworkType;
     }
 
     /**
-     * Get data connection APN type
+     * Returns the data connection APN types supported by this connection and triggers
+     * {@link PreciseDataConnectionState} change.
      */
-    @UnsupportedAppUsage
-    public String getDataConnectionAPNType() {
-        return mAPNType;
+    public @ApnSetting.ApnType int getDataConnectionApnTypeBitMask() {
+        return mAPNTypes;
     }
 
     /**
-     * Get data connection APN.
+     * Returns APN {@link ApnSetting} of this data connection.
      */
-    @UnsupportedAppUsage
-    public String getDataConnectionAPN() {
+    public String getDataConnectionApn() {
         return mAPN;
     }
 
     /**
-     * Get the properties of the network link.
+     * Get the properties of the network link {@link LinkProperties}.
+     * @hide
      */
     @UnsupportedAppUsage
     public LinkProperties getDataConnectionLinkProperties() {
@@ -148,10 +133,9 @@ public class PreciseDataConnectionState implements Parcelable {
     }
 
     /**
-     * Get data connection fail cause, in case there was a failure.
+     * Returns data connection fail cause, in case there was a failure.
      */
-    @UnsupportedAppUsage
-    public String getDataConnectionFailCause() {
+    public @DataFailCause.FailCause int getDataConnectionFailCause() {
         return mFailCause;
     }
 
@@ -164,10 +148,10 @@ public class PreciseDataConnectionState implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mState);
         out.writeInt(mNetworkType);
-        out.writeString(mAPNType);
+        out.writeInt(mAPNTypes);
         out.writeString(mAPN);
         out.writeParcelable(mLinkProperties, flags);
-        out.writeString(mFailCause);
+        out.writeInt(mFailCause);
     }
 
     public static final Parcelable.Creator<PreciseDataConnectionState> CREATOR
@@ -184,56 +168,23 @@ public class PreciseDataConnectionState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mState, mNetworkType, mAPNType, mAPN, mLinkProperties, mFailCause);
+        return Objects.hash(mState, mNetworkType, mAPNTypes, mAPN, mLinkProperties,
+                mFailCause);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
+
+        if (!(obj instanceof PreciseDataConnectionState)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
+
         PreciseDataConnectionState other = (PreciseDataConnectionState) obj;
-        if (mAPN == null) {
-            if (other.mAPN != null) {
-                return false;
-            }
-        } else if (!mAPN.equals(other.mAPN)) {
-            return false;
-        }
-        if (mAPNType == null) {
-            if (other.mAPNType != null) {
-                return false;
-            }
-        } else if (!mAPNType.equals(other.mAPNType)) {
-            return false;
-        }
-        if (mFailCause == null) {
-            if (other.mFailCause != null) {
-                return false;
-            }
-        } else if (!mFailCause.equals(other.mFailCause)) {
-            return false;
-        }
-        if (mLinkProperties == null) {
-            if (other.mLinkProperties != null) {
-                return false;
-            }
-        } else if (!mLinkProperties.equals(other.mLinkProperties)) {
-            return false;
-        }
-        if (mNetworkType != other.mNetworkType) {
-            return false;
-        }
-        if (mState != other.mState) {
-            return false;
-        }
-        return true;
+        return Objects.equals(mAPN, other.mAPN) && mAPNTypes == other.mAPNTypes
+                && mFailCause == other.mFailCause
+                && Objects.equals(mLinkProperties, other.mLinkProperties)
+                && mNetworkType == other.mNetworkType
+                && mState == other.mState;
     }
 
     @Override
@@ -242,10 +193,10 @@ public class PreciseDataConnectionState implements Parcelable {
 
         sb.append("Data Connection state: " + mState);
         sb.append(", Network type: " + mNetworkType);
-        sb.append(", APN type: " + mAPNType);
+        sb.append(", APN types: " + ApnSetting.getApnTypesStringFromBitmask(mAPNTypes));
         sb.append(", APN: " + mAPN);
         sb.append(", Link properties: " + mLinkProperties);
-        sb.append(", Fail cause: " + mFailCause);
+        sb.append(", Fail cause: " + DataFailCause.toString(mFailCause));
 
         return sb.toString();
     }

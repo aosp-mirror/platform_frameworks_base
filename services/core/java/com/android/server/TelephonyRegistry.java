@@ -34,6 +34,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.telephony.CellInfo;
 import android.telephony.CellLocation;
+import android.telephony.DataFailCause;
 import android.telephony.DisconnectCause;
 import android.telephony.LocationAccessPolicy;
 import android.telephony.PhoneCapability;
@@ -47,6 +48,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
 import android.util.LocalLog;
 import android.util.StatsLog;
@@ -1366,7 +1368,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     mDataConnectionNetworkType[phoneId] = networkType;
                 }
                 mPreciseDataConnectionState = new PreciseDataConnectionState(state, networkType,
-                        apnType, apn, linkProperties, "");
+                        ApnSetting.getApnTypesBitmaskFromString(apnType), apn,
+                        linkProperties, DataFailCause.NONE);
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)) {
@@ -1384,7 +1387,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         broadcastDataConnectionStateChanged(state, isDataAllowed, apn, apnType, linkProperties,
                 networkCapabilities, roaming, subId);
         broadcastPreciseDataConnectionStateChanged(state, networkType, apnType, apn,
-                linkProperties, "");
+                linkProperties, DataFailCause.NONE);
     }
 
     public void notifyDataConnectionFailed(String apnType) {
@@ -1403,7 +1406,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             mPreciseDataConnectionState = new PreciseDataConnectionState(
                     TelephonyManager.DATA_UNKNOWN,TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                    apnType, "", null, "");
+                    ApnSetting.getApnTypesBitmaskFromString(apnType), "", null,
+                    DataFailCause.NONE);
             for (Record r : mRecords) {
                 if (r.matchPhoneStateListenerEvent(
                         PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)) {
@@ -1418,7 +1422,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         broadcastDataConnectionFailed(apnType, subId);
         broadcastPreciseDataConnectionStateChanged(TelephonyManager.DATA_UNKNOWN,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, apnType, "", null, "");
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, apnType, "", null,
+                DataFailCause.NONE);
     }
 
     public void notifyCellLocation(Bundle cellLocation) {
@@ -1528,14 +1533,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyPreciseDataConnectionFailed(String apnType, String apn, String failCause) {
+    public void notifyPreciseDataConnectionFailed(String apnType,
+            String apn, @DataFailCause.FailCause int failCause) {
         if (!checkNotifyPermission("notifyPreciseDataConnectionFailed()")) {
             return;
         }
         synchronized (mRecords) {
             mPreciseDataConnectionState = new PreciseDataConnectionState(
                     TelephonyManager.DATA_UNKNOWN, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                    apnType, apn, null, failCause);
+                    ApnSetting.getApnTypesBitmaskFromString(apnType), apn, null, failCause);
             for (Record r : mRecords) {
                 if (r.matchPhoneStateListenerEvent(
                         PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)) {
@@ -1928,9 +1934,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private void broadcastPreciseDataConnectionStateChanged(int state, int networkType,
-                                                            String apnType, String apn,
-                                                            LinkProperties linkProperties,
-                                                            String failCause) {
+            String apnType, String apn, LinkProperties linkProperties,
+            @DataFailCause.FailCause int failCause) {
         Intent intent = new Intent(TelephonyManager.ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED);
         intent.putExtra(PhoneConstants.STATE_KEY, state);
         intent.putExtra(PhoneConstants.DATA_NETWORK_TYPE_KEY, networkType);
@@ -1939,7 +1944,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (linkProperties != null) {
             intent.putExtra(PhoneConstants.DATA_LINK_PROPERTIES_KEY, linkProperties);
         }
-        if (failCause != null) intent.putExtra(PhoneConstants.DATA_FAILURE_CAUSE_KEY, failCause);
+        intent.putExtra(PhoneConstants.DATA_FAILURE_CAUSE_KEY, failCause);
 
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 android.Manifest.permission.READ_PRECISE_PHONE_STATE);
