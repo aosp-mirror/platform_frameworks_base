@@ -150,7 +150,7 @@ public class ImageReader implements AutoCloseable {
      * consumer end-points. For example, if the application intends to send the images to
      * {@link android.media.MediaCodec} or {@link android.media.MediaRecorder} for hardware video
      * encoding, the format and usage flag combination needs to be
-     * {@link ImageFormat#PRIVATE PRIVATE} and {@link HardwareBuffer#USAGE0_VIDEO_ENCODE}. When an
+     * {@link ImageFormat#PRIVATE PRIVATE} and {@link HardwareBuffer#USAGE_VIDEO_ENCODE}. When an
      * {@link ImageReader} object is created with a valid size and such format/usage flag
      * combination, the application can send the {@link Image images} to an {@link ImageWriter} that
      * is created with the input {@link android.view.Surface} provided by the
@@ -173,7 +173,7 @@ public class ImageReader implements AutoCloseable {
      * ImageReaders using other format such as {@link ImageFormat#YUV_420_888 YUV_420_888}.
      * </p>
      * <p>
-     * Note that not all format and usage flag combination is supported by the
+     * Note that not all format and usage flag combinations are supported by the
      * {@link ImageReader}. Below are the supported combinations by the {@link ImageReader}
      * (assuming the consumer end-points support the such image consumption, e.g., hardware video
      * encoding).
@@ -186,13 +186,13 @@ public class ImageReader implements AutoCloseable {
      *   <td>non-{@link android.graphics.ImageFormat#PRIVATE PRIVATE} formats defined by
      *   {@link android.graphics.ImageFormat ImageFormat} or
      *   {@link android.graphics.PixelFormat PixelFormat}</td>
-     *   <td>{@link HardwareBuffer#USAGE0_CPU_READ} or
-     *   {@link HardwareBuffer#USAGE0_CPU_READ_OFTEN}</td>
+     *   <td>{@link HardwareBuffer#USAGE_CPU_READ_RARELY} or
+     *   {@link HardwareBuffer#USAGE_CPU_READ_OFTEN}</td>
      * </tr>
      * <tr>
      *   <td>{@link android.graphics.ImageFormat#PRIVATE}</td>
-     *   <td>{@link HardwareBuffer#USAGE0_VIDEO_ENCODE} or
-     *   {@link HardwareBuffer#USAGE0_GPU_SAMPLED_IMAGE}, or combined</td>
+     *   <td>{@link HardwareBuffer#USAGE_VIDEO_ENCODE} or
+     *   {@link HardwareBuffer#USAGE_GPU_SAMPLED_IMAGE}, or combined</td>
      * </tr>
      * </table>
      * Using other combinations may result in {@link IllegalArgumentException}.
@@ -208,11 +208,10 @@ public class ImageReader implements AutoCloseable {
      *            become available for access through {@link #acquireLatestImage()} or
      *            {@link #acquireNextImage()}. Must be greater than 0.
      * @param usage The intended usage of the images produced by this ImageReader. It needs
-     *            to be one of the Usage0 defined by {@link HardwareBuffer}, or an
+     *            to be one of the Usage defined by {@link HardwareBuffer}, or an
      *            {@link IllegalArgumentException} will be thrown.
      * @see Image
      * @see HardwareBuffer
-     * @hide
      */
     public static ImageReader newInstance(int width, int height, int format, int maxImages,
             long usage) {

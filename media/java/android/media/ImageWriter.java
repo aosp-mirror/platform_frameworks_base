@@ -168,7 +168,6 @@ public class ImageWriter implements AutoCloseable {
      *            {@link ImageFormat} or {@link PixelFormat}.
      *
      * @return a new ImageWriter instance.
-     * @hide
      */
     public static ImageWriter newInstance(Surface surface, int maxImages, int format) {
         if (!ImageFormat.isPublicFormat(format) && !PixelFormat.isPublicFormat(format)) {
