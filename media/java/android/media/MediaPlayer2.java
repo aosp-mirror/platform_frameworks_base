@@ -537,6 +537,19 @@ public class MediaPlayer2 implements AutoCloseable
     public native long getCurrentPosition();
 
     /**
+     * Gets the duration of the current data source.
+     * Same as {@link #getDuration(DataSourceDesc)} with
+     * {@code dsd = getCurrentDataSource()}.
+     *
+     * @return the duration in milliseconds, if no duration is available
+     *         (for example, if streaming live content), -1 is returned.
+     * @throws NullPointerException if current data source is null
+     */
+    public long getDuration() {
+        return getDuration(getCurrentDataSource());
+    }
+
+    /**
      * Gets the duration of the dsd.
      *
      * @param dsd the descriptor of data source of which you want to get duration
@@ -557,6 +570,18 @@ public class MediaPlayer2 implements AutoCloseable
     }
 
     private native long native_getDuration(long srcId);
+
+    /**
+     * Gets the buffered media source position of current data source.
+     * Same as {@link #getBufferedPosition(DataSourceDesc)} with
+     * {@code dsd = getCurrentDataSource()}.
+     *
+     * @return the current buffered media source position in milliseconds
+     * @throws NullPointerException if current data source is null
+     */
+    public long getBufferedPosition() {
+        return getBufferedPosition(getCurrentDataSource());
+    }
 
     /**
      * Gets the buffered media source position of given dsd.
@@ -2015,6 +2040,21 @@ public class MediaPlayer2 implements AutoCloseable
     };
 
     /**
+     * Returns a List of track information of current data source.
+     * Same as {@link #getTrackInfo(DataSourceDesc)} with
+     * {@code dsd = getCurrentDataSource()}.
+     *
+     * @return List of track info. The total number of tracks is the array length.
+     * Must be called again if an external timed text source has been added after
+     * addTimedTextSource method is called.
+     * @throws IllegalStateException if it is called in an invalid state.
+     * @throws NullPointerException if current data source is null
+     */
+    public @NonNull List<TrackInfo> getTrackInfo() {
+        return getTrackInfo(getCurrentDataSource());
+    }
+
+    /**
      * Returns a List of track information.
      *
      * @param dsd the descriptor of data source of which you want to get track info
@@ -2024,7 +2064,6 @@ public class MediaPlayer2 implements AutoCloseable
      * @throws IllegalStateException if it is called in an invalid state.
      * @throws NullPointerException if dsd is null
      */
-
     public @NonNull List<TrackInfo> getTrackInfo(@NonNull DataSourceDesc dsd) {
         if (dsd == null) {
             throw new NullPointerException("non-null dsd is expected");
@@ -2060,9 +2099,34 @@ public class MediaPlayer2 implements AutoCloseable
     }
 
     /**
-     * Returns the index of the audio, video, or subtitle track currently selected for playback,
+     * Returns the index of the audio, video, or subtitle track currently selected for playback.
      * The return value is an index into the array returned by {@link #getTrackInfo}, and can
-     * be used in calls to {@link #selectTrack} or {@link #deselectTrack}.
+     * be used in calls to {@link #selectTrack(int)} or {@link #deselectTrack(int)}.
+     * Same as {@link #getSelectedTrack(DataSourceDesc, int)} with
+     * {@code dsd = getCurrentDataSource()}.
+     *
+     * @param trackType should be one of {@link TrackInfo#MEDIA_TRACK_TYPE_VIDEO},
+     * {@link TrackInfo#MEDIA_TRACK_TYPE_AUDIO}, or
+     * {@link TrackInfo#MEDIA_TRACK_TYPE_SUBTITLE}
+     * @return index of the audio, video, or subtitle track currently selected for playback;
+     * a negative integer is returned when there is no selected track for {@code trackType} or
+     * when {@code trackType} is not one of audio, video, or subtitle.
+     * @throws IllegalStateException if called after {@link #close()}
+     * @throws NullPointerException if current data source is null
+     *
+     * @see #getTrackInfo()
+     * @see #selectTrack(int)
+     * @see #deselectTrack(int)
+     */
+    public int getSelectedTrack(int trackType) {
+        return getSelectedTrack(getCurrentDataSource(), trackType);
+    }
+
+    /**
+     * Returns the index of the audio, video, or subtitle track currently selected for playback.
+     * The return value is an index into the array returned by {@link #getTrackInfo}, and can
+     * be used in calls to {@link #selectTrack(DataSourceDesc, int)} or
+     * {@link #deselectTrack(DataSourceDesc, int)}.
      *
      * @param dsd the descriptor of data source of which you want to get selected track
      * @param trackType should be one of {@link TrackInfo#MEDIA_TRACK_TYPE_VIDEO},
@@ -2074,9 +2138,9 @@ public class MediaPlayer2 implements AutoCloseable
      * @throws IllegalStateException if called after {@link #close()}
      * @throws NullPointerException if dsd is null
      *
-     * @see #getTrackInfo
-     * @see #selectTrack
-     * @see #deselectTrack
+     * @see #getTrackInfo(DataSourceDesc)
+     * @see #selectTrack(DataSourceDesc, int)
+     * @see #deselectTrack(DataSourceDesc, int)
      */
     public int getSelectedTrack(@NonNull DataSourceDesc dsd, int trackType) {
         if (dsd == null) {
@@ -2097,6 +2161,23 @@ public class MediaPlayer2 implements AutoCloseable
             return -1;
         }
         return response.getValues(0).getInt32Value();
+    }
+
+    /**
+     * Selects a track of current data source.
+     * Same as {@link #selectTrack(DataSourceDesc, int)} with
+     * {@code dsd = getCurrentDataSource()}.
+     *
+     * @param index the index of the track to be selected. The valid range of the index
+     * is 0..total number of track - 1. The total number of tracks as well as the type of
+     * each individual track can be found by calling {@link #getTrackInfo()} method.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
+     *
+     * @see MediaPlayer2#getTrackInfo()
+     */
+    // This is an asynchronous call.
+    public Object selectTrack(int index) {
+        return selectTrack(getCurrentDataSource(), index);
     }
 
     /**
@@ -2123,10 +2204,10 @@ public class MediaPlayer2 implements AutoCloseable
      * @param dsd the descriptor of data source of which you want to select track
      * @param index the index of the track to be selected. The valid range of the index
      * is 0..total number of track - 1. The total number of tracks as well as the type of
-     * each individual track can be found by calling {@link #getTrackInfo} method.
+     * each individual track can be found by calling {@link #getTrackInfo(DataSourceDesc)} method.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      *
-     * @see MediaPlayer2#getTrackInfo
+     * @see MediaPlayer2#getTrackInfo(DataSourceDesc)
      */
     // This is an asynchronous call.
     public Object selectTrack(@NonNull DataSourceDesc dsd, int index) {
@@ -2136,6 +2217,23 @@ public class MediaPlayer2 implements AutoCloseable
                 selectOrDeselectTrack(dsd, index, true /* select */);
             }
         });
+    }
+
+    /**
+     * Deselect a track of current data source.
+     * Same as {@link #deselectTrack(DataSourceDesc, int)} with
+     * {@code dsd = getCurrentDataSource()}.
+     *
+     * @param index the index of the track to be deselected. The valid range of the index
+     * is 0..total number of tracks - 1. The total number of tracks as well as the type of
+     * each individual track can be found by calling {@link #getTrackInfo()} method.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
+     *
+     * @see MediaPlayer2#getTrackInfo()
+     */
+    // This is an asynchronous call.
+    public Object deselectTrack(int index) {
+        return deselectTrack(getCurrentDataSource(), index);
     }
 
     /**
@@ -2151,7 +2249,7 @@ public class MediaPlayer2 implements AutoCloseable
      * each individual track can be found by calling {@link #getTrackInfo} method.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      *
-     * @see MediaPlayer2#getTrackInfo
+     * @see MediaPlayer2#getTrackInfo(DataSourceDesc)
      */
     // This is an asynchronous call.
     public Object deselectTrack(@NonNull DataSourceDesc dsd, int index) {
