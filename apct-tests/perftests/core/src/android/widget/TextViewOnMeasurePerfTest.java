@@ -25,24 +25,20 @@ import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.TextAppearanceSpan;
-import android.view.LayoutInflater;
 
-import com.android.perftests.core.R;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
-import java.util.Random;
-import java.util.Locale;
-
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertTrue;
+import java.util.Locale;
+import java.util.Random;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)

@@ -24,15 +24,16 @@ import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.BoringLayout;
 import android.text.Layout;
 import android.text.PrecomputedText;
 import android.text.TextPaint;
 import android.text.TextPerfUtils;
 import android.view.View.MeasureSpec;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Rule;
