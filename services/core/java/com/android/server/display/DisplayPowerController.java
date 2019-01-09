@@ -472,7 +472,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
                         initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
                         autoBrightnessResetAmbientLuxAfterWarmUp, ambientBrightnessThresholds,
-                        screenBrightnessThresholds, shortTermModelTimeout);
+                        screenBrightnessThresholds, shortTermModelTimeout,
+                        context.getPackageManager());
             } else {
                 mUseSoftwareAutoBrightnessConfig = false;
             }
@@ -1836,6 +1837,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         public void onScreenOff() {
             Message msg = mHandler.obtainMessage(MSG_SCREEN_OFF_UNBLOCKED, this);
             mHandler.sendMessage(msg);
+        }
+    }
+
+    void setAutoBrightnessLoggingEnabled(boolean enabled) {
+        if (mAutomaticBrightnessController != null) {
+            mAutomaticBrightnessController.setLoggingEnabled(enabled);
         }
     }
 }

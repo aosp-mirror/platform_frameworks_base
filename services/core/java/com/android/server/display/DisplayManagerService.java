@@ -2144,6 +2144,14 @@ public final class DisplayManagerService extends SystemService {
                     mContext.getPackageName());
         }
 
+        void setAutoBrightnessLoggingEnabled(boolean enabled) {
+            if (mDisplayPowerController != null) {
+                synchronized (mSyncRoot) {
+                    mDisplayPowerController.setAutoBrightnessLoggingEnabled(enabled);
+                }
+            }
+        }
+
         private boolean validatePackageName(int uid, String packageName) {
             if (packageName != null) {
                 String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
