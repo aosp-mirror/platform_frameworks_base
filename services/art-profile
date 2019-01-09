@@ -6970,6 +6970,7 @@ PLcom/android/server/am/ActivityManagerService$LocalService;->enforceCallerIsRec
 PLcom/android/server/am/ActivityManagerService$LocalService;->getMemoryStateForProcesses()Ljava/util/List;
 PLcom/android/server/am/ActivityManagerService$LocalService;->getTopVisibleActivities()Ljava/util/List;
 PLcom/android/server/am/ActivityManagerService$LocalService;->getUidProcessState(I)I
+PLcom/android/server/am/ActivityManagerService$LocalService;->isAppForeground(I)Z
 PLcom/android/server/am/ActivityManagerService$LocalService;->isCallerRecents(I)Z
 PLcom/android/server/am/ActivityManagerService$LocalService;->isRuntimeRestarted()Z
 PLcom/android/server/am/ActivityManagerService$LocalService;->isSystemReady()Z
@@ -7125,7 +7126,6 @@ PLcom/android/server/am/ActivityManagerService;->hasUsageStatsPermission(Ljava/l
 PLcom/android/server/am/ActivityManagerService;->installEncryptionUnawareProviders(I)V
 PLcom/android/server/am/ActivityManagerService;->installSystemProviders()V
 PLcom/android/server/am/ActivityManagerService;->isAllowedWhileBooting(Landroid/content/pm/ApplicationInfo;)Z
-PLcom/android/server/am/ActivityManagerService;->isAppForeground(I)Z
 PLcom/android/server/am/ActivityManagerService;->isAssistDataAllowedOnCurrentActivity()Z
 PLcom/android/server/am/ActivityManagerService;->isGetTasksAllowed(Ljava/lang/String;II)Z
 PLcom/android/server/am/ActivityManagerService;->isInLockTaskMode()Z
