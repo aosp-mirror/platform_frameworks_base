@@ -511,6 +511,7 @@ package android.graphics {
 
   public class Paint {
     method public void setColor(long);
+    method public void setShadowLayer(float, float, float, long);
   }
 
 }
