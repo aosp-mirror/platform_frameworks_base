@@ -18,7 +18,9 @@ package com.android.settingslib.applications;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.shadow.api.Shadow.extract;
@@ -33,12 +35,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.IconDrawableFactory;
 
 import com.android.settingslib.applications.ApplicationsState.AppEntry;
@@ -46,11 +52,11 @@ import com.android.settingslib.applications.ApplicationsState.Callbacks;
 import com.android.settingslib.applications.ApplicationsState.Session;
 import com.android.settingslib.testutils.shadow.ShadowUserManager;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -78,6 +84,8 @@ public class ApplicationsStateRoboTest {
 
     /** Class under test */
     private ApplicationsState mApplicationsState;
+    private Session mSession;
+
 
     @Mock
     private Callbacks mCallbacks;
@@ -85,6 +93,8 @@ public class ApplicationsStateRoboTest {
     private ArgumentCaptor<ArrayList<AppEntry>> mAppEntriesCaptor;
     @Mock
     private StorageStatsManager mStorageStatsManager;
+    @Mock
+    private IPackageManager mPackageManagerService;
 
     @Implements(value = IconDrawableFactory.class)
     public static class ShadowIconDrawableFactory {
@@ -99,6 +109,11 @@ public class ApplicationsStateRoboTest {
     public static class ShadowPackageManager extends
             org.robolectric.shadows.ShadowApplicationPackageManager {
 
+        // test installed modules, 2 regular, 2 hidden
+        private final String[] mModuleNames = {
+            "test.module.1", "test.hidden.module.2", "test.hidden.module.3", "test.module.4"};
+        private final List<ModuleInfo> mInstalledModules = new ArrayList<>();
+
         @Implementation
         protected ComponentName getHomeActivities(List<ResolveInfo> outActivities) {
             ResolveInfo resolveInfo = new ResolveInfo();
@@ -107,6 +122,16 @@ public class ApplicationsStateRoboTest {
             resolveInfo.activityInfo.enabled = true;
             outActivities.add(resolveInfo);
             return ComponentName.createRelative(resolveInfo.activityInfo.packageName, "foo");
+        }
+
+        @Implementation
+        public List<ModuleInfo> getInstalledModules(int flags) {
+            if (mInstalledModules.isEmpty()) {
+                for (String moduleName : mModuleNames) {
+                    mInstalledModules.add(createModuleInfo(moduleName));
+                }
+            }
+            return mInstalledModules;
         }
 
         public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
@@ -120,6 +145,15 @@ public class ApplicationsStateRoboTest {
             resolveInfo.filter.addCategory(Intent.CATEGORY_LAUNCHER);
             resolveInfos.add(resolveInfo);
             return resolveInfos;
+        }
+
+        private ModuleInfo createModuleInfo(String packageName) {
+            final ModuleInfo info = new ModuleInfo();
+            info.setName(packageName);
+            info.setPackageName(packageName);
+            // will treat any app with package name that contains "hidden" as hidden module
+            info.setHidden(!TextUtils.isEmpty(packageName) && packageName.contains("hidden"));
+            return info;
         }
     }
 
@@ -136,12 +170,28 @@ public class ApplicationsStateRoboTest {
         storageStats.codeBytes = 10;
         storageStats.dataBytes = 20;
         storageStats.cacheBytes = 30;
-        when(mStorageStatsManager.queryStatsForPackage(ArgumentMatchers.any(UUID.class),
-                anyString(), ArgumentMatchers.any(UserHandle.class))).thenReturn(storageStats);
+        when(mStorageStatsManager.queryStatsForPackage(any(UUID.class),
+                anyString(), any(UserHandle.class))).thenReturn(storageStats);
+
+        // Set up 3 installed apps, in which 1 is hidden module
+        final List<ApplicationInfo> infos = new ArrayList<>();
+        infos.add(createApplicationInfo("test.package.1"));
+        infos.add(createApplicationInfo("test.hidden.module.2"));
+        infos.add(createApplicationInfo("test.package.3"));
+        when(mPackageManagerService.getInstalledApplications(
+            anyInt() /* flags */, anyInt() /* userId */)).thenReturn(new ParceledListSlice(infos));
 
         ApplicationsState.sInstance = null;
-        mApplicationsState = ApplicationsState.getInstance(RuntimeEnvironment.application);
+        mApplicationsState =
+            ApplicationsState.getInstance(RuntimeEnvironment.application, mPackageManagerService);
         mApplicationsState.clearEntries();
+
+        mSession = mApplicationsState.newSession(mCallbacks);
+    }
+
+    @After
+    public void tearDown() {
+        mSession.onDestroy();
     }
 
     private ApplicationInfo createApplicationInfo(String packageName) {
@@ -187,12 +237,11 @@ public class ApplicationsStateRoboTest {
 
     @Test
     public void testDefaultSessionLoadsAll() {
-        Session session = mApplicationsState.newSession(mCallbacks);
-        session.onResume();
+        mSession.onResume();
 
         addApp(HOME_PACKAGE_NAME, 1);
         addApp(LAUNCHABLE_PACKAGE_NAME, 2);
-        session.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
+        mSession.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
         processAllMessages();
         verify(mCallbacks).onRebuildComplete(mAppEntriesCaptor.capture());
 
@@ -211,17 +260,15 @@ public class ApplicationsStateRoboTest {
         AppEntry launchableEntry = findAppEntry(appEntries, 2);
         assertThat(launchableEntry.hasLauncherEntry).isTrue();
         assertThat(launchableEntry.launcherEntryEnabled).isTrue();
-        session.onDestroy();
     }
 
     @Test
     public void testCustomSessionLoadsIconsOnly() {
-        Session session = mApplicationsState.newSession(mCallbacks);
-        session.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_ICONS);
-        session.onResume();
+        mSession.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_ICONS);
+        mSession.onResume();
 
         addApp(LAUNCHABLE_PACKAGE_NAME, 1);
-        session.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
+        mSession.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
         processAllMessages();
         verify(mCallbacks).onRebuildComplete(mAppEntriesCaptor.capture());
 
@@ -232,17 +279,15 @@ public class ApplicationsStateRoboTest {
         assertThat(launchableEntry.icon).isNotNull();
         assertThat(launchableEntry.size).isEqualTo(-1);
         assertThat(launchableEntry.hasLauncherEntry).isFalse();
-        session.onDestroy();
     }
 
     @Test
     public void testCustomSessionLoadsSizesOnly() {
-        Session session = mApplicationsState.newSession(mCallbacks);
-        session.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_SIZES);
-        session.onResume();
+        mSession.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_SIZES);
+        mSession.onResume();
 
         addApp(LAUNCHABLE_PACKAGE_NAME, 1);
-        session.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
+        mSession.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
         processAllMessages();
         verify(mCallbacks).onRebuildComplete(mAppEntriesCaptor.capture());
 
@@ -253,17 +298,15 @@ public class ApplicationsStateRoboTest {
         assertThat(launchableEntry.icon).isNull();
         assertThat(launchableEntry.hasLauncherEntry).isFalse();
         assertThat(launchableEntry.size).isGreaterThan(0L);
-        session.onDestroy();
     }
 
     @Test
     public void testCustomSessionLoadsHomeOnly() {
-        Session session = mApplicationsState.newSession(mCallbacks);
-        session.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_HOME_APP);
-        session.onResume();
+        mSession.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_HOME_APP);
+        mSession.onResume();
 
         addApp(HOME_PACKAGE_NAME, 1);
-        session.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
+        mSession.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
         processAllMessages();
         verify(mCallbacks).onRebuildComplete(mAppEntriesCaptor.capture());
 
@@ -275,17 +318,15 @@ public class ApplicationsStateRoboTest {
         assertThat(launchableEntry.hasLauncherEntry).isFalse();
         assertThat(launchableEntry.size).isEqualTo(-1);
         assertThat(launchableEntry.isHomeApp).isTrue();
-        session.onDestroy();
     }
 
     @Test
     public void testCustomSessionLoadsLeanbackOnly() {
-        Session session = mApplicationsState.newSession(mCallbacks);
-        session.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_LEANBACK_LAUNCHER);
-        session.onResume();
+        mSession.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_LEANBACK_LAUNCHER);
+        mSession.onResume();
 
         addApp(LAUNCHABLE_PACKAGE_NAME, 1);
-        session.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
+        mSession.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
         processAllMessages();
         verify(mCallbacks).onRebuildComplete(mAppEntriesCaptor.capture());
 
@@ -298,6 +339,16 @@ public class ApplicationsStateRoboTest {
         assertThat(launchableEntry.isHomeApp).isFalse();
         assertThat(launchableEntry.hasLauncherEntry).isTrue();
         assertThat(launchableEntry.launcherEntryEnabled).isTrue();
-        session.onDestroy();
     }
+
+    @Test
+    public void onResume_shouldNotIncludeSystemHiddenModule() {
+        mSession.onResume();
+
+        final List<ApplicationInfo> mApplications = mApplicationsState.mApplications;
+        assertThat(mApplications).hasSize(2);
+        assertThat(mApplications.get(0).packageName).isEqualTo("test.package.1");
+        assertThat(mApplications.get(1).packageName).isEqualTo("test.package.3");
+    }
+
 }
