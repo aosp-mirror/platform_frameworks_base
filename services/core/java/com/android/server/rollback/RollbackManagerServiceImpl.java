@@ -220,26 +220,19 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 android.Manifest.permission.MANAGE_ROLLBACKS,
                 "getAvailableRollback");
 
+        RollbackData data = getRollbackForPackage(packageName);
+        if (data == null) {
+            return null;
+        }
+
         // Note: The rollback for the package ought to be for the currently
         // installed version, otherwise the rollback data is out of date. In
         // that rare case, we'll check when we execute the rollback whether
         // it's out of date or not, so no need to check package versions here.
 
-        synchronized (mLock) {
-            // TODO: Have ensureRollbackDataLoadedLocked return the list of
-            // available rollbacks, to hopefully avoid forgetting to call it?
-            ensureRollbackDataLoadedLocked();
-            for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
-                RollbackData data = mAvailableRollbacks.get(i);
-                if (data.info.packageName.equals(packageName)) {
-                    // TODO: Once the RollbackInfo API supports info about
-                    // dependant packages, add that info here.
-                    return new RollbackInfo(data.info);
-                }
-            }
-        }
-
-        return null;
+        // TODO: Once the RollbackInfo API supports info about dependant
+        // packages, add that info here.
+        return new RollbackInfo(data.info);
     }
 
     @Override
@@ -297,43 +290,40 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         String packageName = rollback.targetPackage.packageName;
         Log.i(TAG, "Initiating rollback of " + packageName);
 
-        PackageRollbackInfo.PackageVersion installedVersion =
-                getInstalledPackageVersion(packageName);
-        if (installedVersion == null) {
-            // TODO: Test this case
-            sendFailure(statusReceiver, "Target package to roll back is not installed");
+        // Get the latest RollbackData for the target package.
+        RollbackData data = getRollbackForPackage(packageName);
+        if (data == null) {
+            sendFailure(statusReceiver, "No rollback available for package.");
             return;
         }
 
-        if (!rollback.targetPackage.higherVersion.equals(installedVersion)) {
-            // TODO: Test this case
-            sendFailure(statusReceiver, "Target package version to roll back not installed.");
+        // Verify the latest rollback matches the version requested.
+        // TODO: Check dependant packages too once RollbackInfo includes that
+        // information.
+        if (!rollback.targetPackage.higherVersion.equals(data.info.higherVersion)) {
+            sendFailure(statusReceiver, "Rollback is out of date.");
             return;
         }
 
+        // Verify the RollbackData is up to date with what's installed on
+        // device.
         // TODO: We assume that between now and the time we commit the
         // downgrade install, the currently installed package version does not
         // change. This is not safe to assume, particularly in the case of a
         // rollback racing with a roll-forward fix of a buggy package.
         // Figure out how to ensure we don't commit the rollback if
         // roll forward happens at the same time.
-        RollbackData data = null;
-        synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
-            for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
-                RollbackData available = mAvailableRollbacks.get(i);
-                // TODO: Check if available.info.lowerVersion matches
-                // rollback.targetPackage.lowerVersion?
-                if (available.info.packageName.equals(packageName)
-                        && available.info.higherVersion.equals(installedVersion)) {
-                    data = available;
-                    break;
-                }
-            }
+        PackageRollbackInfo.PackageVersion installedVersion =
+                getInstalledPackageVersion(data.info.packageName);
+        if (installedVersion == null) {
+            // TODO: Test this case
+            sendFailure(statusReceiver, "Target package to roll back is not installed");
+            return;
         }
 
-        if (data == null) {
-            sendFailure(statusReceiver, "Rollback not available");
+        if (!data.info.higherVersion.equals(installedVersion)) {
+            // TODO: Test this case
+            sendFailure(statusReceiver, "Target package version to roll back not installed.");
             return;
         }
 
@@ -359,6 +349,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             session = packageInstaller.openSession(sessionId);
 
             // TODO: Will it always be called "base.apk"? What about splits?
+            // What about apex?
             File packageDir = new File(data.backupDir, data.info.packageName);
             File baseApk = new File(packageDir, "base.apk");
             try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(baseApk,
@@ -946,5 +937,25 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
         }
+    }
+
+    /*
+     * Returns the RollbackData, if any, for an available rollback that would
+     * roll back the given package. Note: This assumes we have at most one
+     * available rollback for a given package at any one time.
+     */
+    private RollbackData getRollbackForPackage(String packageName) {
+        synchronized (mLock) {
+            // TODO: Have ensureRollbackDataLoadedLocked return the list of
+            // available rollbacks, to hopefully avoid forgetting to call it?
+            ensureRollbackDataLoadedLocked();
+            for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
+                RollbackData data = mAvailableRollbacks.get(i);
+                if (data.info.packageName.equals(packageName)) {
+                    return data;
+                }
+            }
+        }
+        return null;
     }
 }
