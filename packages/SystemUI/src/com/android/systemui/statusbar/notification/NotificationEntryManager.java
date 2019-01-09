@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.NotificationUpdateHandler;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -72,8 +71,6 @@ public class NotificationEntryManager implements
     protected final Context mContext;
     protected final HashMap<String, NotificationEntry> mPendingNotifications = new HashMap<>();
 
-    private final NotificationGutsManager mGutsManager =
-            Dependency.get(NotificationGutsManager.class);
     private final DeviceProvisionedController mDeviceProvisionedController =
             Dependency.get(DeviceProvisionedController.class);
     private final ForegroundServiceController mForegroundServiceController =
@@ -366,19 +363,6 @@ public class NotificationEntryManager implements
                 // we need to set this state earlier as otherwise we might generate some weird
                 // animations
                 entry.removeRow();
-            }
-        }
-    }
-
-    public void updateNotificationsOnDensityOrFontScaleChanged() {
-        ArrayList<NotificationEntry> userNotifications =
-                mNotificationData.getNotificationsForCurrentUser();
-        for (int i = 0; i < userNotifications.size(); i++) {
-            NotificationEntry entry = userNotifications.get(i);
-            entry.onDensityOrFontScaleChanged();
-            boolean exposedGuts = entry.areGutsExposed();
-            if (exposedGuts) {
-                mGutsManager.onDensityOrFontScaleChanged(entry);
             }
         }
     }
