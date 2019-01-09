@@ -104,8 +104,9 @@ public final class Magnifier {
     private final int mDefaultHorizontalSourceToMagnifierOffset;
     // The vertical offset between the source and window coords when #show(float, float) is used.
     private final int mDefaultVerticalSourceToMagnifierOffset;
-    // Whether the magnifier will be clamped inside the main surface and not overlap system insets.
-    private final boolean mForcePositionWithinWindowSystemInsetsBounds;
+    // Whether the area where the magnifier can be positioned will be clipped to the main window
+    // and within system insets.
+    private final boolean mClippingEnabled;
     // The behavior of the left bound of the rectangle where the content can be copied from.
     private @SourceBound int mLeftContentBound;
     // The behavior of the top bound of the rectangle where the content can be copied from.
@@ -165,7 +166,7 @@ public final class Magnifier {
         params.mOverlay = new ColorDrawable(a.getColor(
                 R.styleable.Magnifier_magnifierColorOverlay, Color.TRANSPARENT));
         a.recycle();
-        params.mForcePositionWithinWindowSystemInsetsBounds = true;
+        params.mClippingEnabled = true;
         params.mLeftContentBound = SOURCE_BOUND_MAX_VISIBLE;
         params.mTopContentBound = SOURCE_BOUND_MAX_IN_SURFACE;
         params.mRightContentBound = SOURCE_BOUND_MAX_VISIBLE;
@@ -203,8 +204,7 @@ public final class Magnifier {
                 params.mHorizontalDefaultSourceToMagnifierOffset;
         mDefaultVerticalSourceToMagnifierOffset =
                 params.mVerticalDefaultSourceToMagnifierOffset;
-        mForcePositionWithinWindowSystemInsetsBounds =
-                params.mForcePositionWithinWindowSystemInsetsBounds;
+        mClippingEnabled = params.mClippingEnabled;
         mLeftContentBound = params.mLeftContentBound;
         mTopContentBound = params.mTopContentBound;
         mRightContentBound = params.mRightContentBound;
@@ -447,7 +447,7 @@ public final class Magnifier {
     }
 
     /**
-     * Returns the overlay to be drawn on the top of the magnifier content, or
+     * Returns the overlay to be drawn on the top of the magnifier, or
      * {@code null} if no overlay should be drawn.
      * @return the overlay
      * @see Magnifier.Builder#setOverlay(Drawable)
@@ -459,13 +459,15 @@ public final class Magnifier {
 
     /**
      * Returns whether the magnifier position will be adjusted such that the magnifier will be
-     * fully within the bounds of the main application window, by also avoiding any overlap with
-     * system insets (such as the one corresponding to the status bar).
+     * fully within the bounds of the main application window, by also avoiding any overlap
+     * with system insets (such as the one corresponding to the status bar) i.e. whether the
+     * area where the magnifier can be positioned will be clipped to the main application window
+     * and the system insets.
      * @return whether the magnifier position will be adjusted
-     * @see Magnifier.Builder#setForcePositionWithinWindowSystemInsetsBounds(boolean)
+     * @see Magnifier.Builder#setClippingEnabled(boolean)
      */
-    public boolean isForcePositionWithinWindowSystemInsetsBounds() {
-        return mForcePositionWithinWindowSystemInsetsBounds;
+    public boolean isClippingEnabled() {
+        return mClippingEnabled;
     }
 
     /**
@@ -711,7 +713,7 @@ public final class Magnifier {
      * @return the current window coordinates, after they are clamped inside the parent surface
      */
     private Point getCurrentClampedWindowCoordinates() {
-        if (!mForcePositionWithinWindowSystemInsetsBounds) {
+        if (!mClippingEnabled) {
             // No position adjustment should be done, so return the raw coordinates.
             return new Point(mWindowCoords);
         }
@@ -1136,7 +1138,7 @@ public final class Magnifier {
         private @Nullable Drawable mOverlay;
         private int mHorizontalDefaultSourceToMagnifierOffset;
         private int mVerticalDefaultSourceToMagnifierOffset;
-        private boolean mForcePositionWithinWindowSystemInsetsBounds;
+        private boolean mClippingEnabled;
         private @SourceBound int mLeftContentBound;
         private @SourceBound int mTopContentBound;
         private @SourceBound int mRightContentBound;
@@ -1164,7 +1166,7 @@ public final class Magnifier {
                     resources.getDimensionPixelSize(R.dimen.default_magnifier_vertical_offset);
             mOverlay = new ColorDrawable(resources.getColor(
                     R.color.default_magnifier_color_overlay, null));
-            mForcePositionWithinWindowSystemInsetsBounds = true;
+            mClippingEnabled = true;
             mLeftContentBound = SOURCE_BOUND_MAX_VISIBLE;
             mTopContentBound = SOURCE_BOUND_MAX_VISIBLE;
             mRightContentBound = SOURCE_BOUND_MAX_VISIBLE;
@@ -1227,11 +1229,11 @@ public final class Magnifier {
         }
 
         /**
-         * Sets an overlay that will be drawn on the top of the magnifier content.
-         * In general, the overlay should not be opaque, in order to let the expected magnifier
-         * content be partially visible. The default overlay is {@code null} (no overlay).
-         * As an example, TextView applies a white {@link ColorDrawable} overlay with
-         * 5% alpha, aiming to make the magnifier distinguishable when shown in dark
+         * Sets an overlay that will be drawn on the top of the magnifier.
+         * In general, the overlay should not be opaque, in order to let the magnified
+         * content be partially visible in the magnifier. The default overlay is {@code null}
+         * (no overlay). As an example, TextView applies a white {@link ColorDrawable}
+         * overlay with 5% alpha, aiming to make the magnifier distinguishable when shown in dark
          * application regions. To disable the overlay, the parameter should be set
          * to {@code null}. If not null, the overlay will be automatically redrawn
          * when the drawable is invalidated. To achieve this, the magnifier will set a new
@@ -1265,22 +1267,24 @@ public final class Magnifier {
          * Defines the behavior of the magnifier when it is requested to position outside the
          * surface of the main application window. The default value is {@code true}, which means
          * that the position will be adjusted such that the magnifier will be fully within the
-         * bounds of the main application window, by also avoiding any overlap with system insets
-         * (such as the one corresponding to the status bar). If you require a custom behavior, this
-         * flag should be set to {@code false}, meaning that the magnifier will be able to cross the
-         * main application surface boundaries (and also overlap the system insets). This should be
-         * handled with care, when passing coordinates to {@link #show(float, float)}; note that:
+         * bounds of the main application window, while also avoiding any overlap with system insets
+         * (such as the one corresponding to the status bar). If this flag is set to {@code false},
+         * the area where the magnifier can be positioned will no longer be clipped, so the
+         * magnifier will be able to extend outside the main application window boundaries (and also
+         * overlap the system insets). This can be useful if you require a custom behavior, but it
+         * should be handled with care, when passing coordinates to {@link #show(float, float)};
+         * note that:
          * <ul>
          *   <li>in a multiwindow context, if the magnifier crosses the boundary between the two
          *   windows, it will not be able to show over the window of the other application</li>
          *   <li>if the magnifier overlaps the status bar, there is no guarantee about which one
          *   will be displayed on top. This should be handled with care.</li>
          * </ul>
-         * @param force whether the magnifier position will be adjusted
+         * @param clip whether the magnifier position will be adjusted
          */
         @NonNull
-        public Builder setForcePositionWithinWindowSystemInsetsBounds(boolean force) {
-            mForcePositionWithinWindowSystemInsetsBounds = force;
+        public Builder setClippingEnabled(boolean clip) {
+            mClippingEnabled = clip;
             return this;
         }
 
