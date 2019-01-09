@@ -30,7 +30,7 @@ import java.util.Objects;
 public final class CellSignalStrengthLte extends CellSignalStrength implements Parcelable {
 
     private static final String LOG_TAG = "CellSignalStrengthLte";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     /**
      * Indicates the unknown or undetectable RSSI value in ASU.
