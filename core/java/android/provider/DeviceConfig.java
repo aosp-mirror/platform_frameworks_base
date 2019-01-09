@@ -53,6 +53,13 @@ public final class DeviceConfig {
     public static final Uri CONTENT_URI = Uri.parse("content://" + Settings.AUTHORITY + "/config");
 
     /**
+     * Namespace for all Game Driver features.
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_GAME_DRIVER = "game_driver";
+
+    /**
      * Namespace for all input-related features that are used at the native level.
      * These features are applied at reboot.
      *
