@@ -159,6 +159,12 @@
     <!-- Message of notification shown when trying to enable USB debugging but a secondary user is the current foreground user. -->
     <string name="usb_debugging_secondary_user_message">The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user.</string>
 
+    <!-- Title of USB contaminant presence dialog [CHAR LIMIT=NONE] -->
+    <string name="usb_contaminant_title">USB port disabled</string>
+
+    <!-- Message of USB contaminant presence dialog [CHAR LIMIT=NONE] -->
+    <string name="usb_contaminant_message">To protect your device from liquid or debris, the USB port is disabled and won\u2019t detect any accessories.\n\nYou\u2019ll be notified when it\u2019s safe to use the USB port again.</string>
+
     <!-- Checkbox label for application compatibility mode ON (zooming app to look like it's running
          on a phone).  [CHAR LIMIT=25] -->
     <string name="compat_mode_on">Zoom to fill screen</string>

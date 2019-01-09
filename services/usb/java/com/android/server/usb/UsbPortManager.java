@@ -33,6 +33,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -187,6 +188,8 @@ public class UsbPortManager {
         PortInfo currentPortInfo = null;
         Resources r = mContext.getResources();
 
+        // Not handling multiple ports here. Showing the notification
+        // for the first port that returns CONTAMINANT_PRESENCE_DETECTED.
         for (PortInfo portInfo : mPorts.values()) {
             if (portInfo.mUsbPortStatus.getContaminantDetectionStatus()
                     == UsbPortStatus.CONTAMINANT_DETECTION_DETECTED) {
@@ -210,12 +213,22 @@ public class UsbPortManager {
             CharSequence message = r.getText(
                     com.android.internal.R.string.usb_contaminant_detected_message);
 
+            Intent intent = new Intent();
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setClassName("com.android.systemui",
+                    "com.android.systemui.usb.UsbContaminantActivity");
+            intent.putExtra(UsbManager.EXTRA_PORT, ParcelableUsbPort.of(currentPortInfo.mUsbPort));
+
+            PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
+                                intent, 0, null, UserHandle.CURRENT);
+
             Notification.Builder builder = new Notification.Builder(mContext, channel)
                     .setOngoing(true)
                     .setTicker(title)
                     .setColor(mContext.getColor(
                            com.android.internal.R.color
                            .system_notification_accent_color))
+                    .setContentIntent(pi)
                     .setContentTitle(title)
                     .setContentText(message)
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
@@ -253,7 +266,6 @@ public class UsbPortManager {
                     UserHandle.ALL);
         }
     }
-
 
     public UsbPort[] getPorts() {
         synchronized (mLock) {
