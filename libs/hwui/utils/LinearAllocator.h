@@ -168,7 +168,7 @@ public:
     };
     // enable allocators to be constructed from other templated types
     template <class U>
-    LinearStdAllocator(const LinearStdAllocator<U>& other)  // NOLINT(implicit)
+    LinearStdAllocator(const LinearStdAllocator<U>& other)  // NOLINT(google-explicit-constructor)
             : linearAllocator(other.linearAllocator) {}
 
     T* allocate(size_t num, const void* = 0) {

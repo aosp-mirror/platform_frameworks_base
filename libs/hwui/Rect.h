@@ -57,15 +57,15 @@ public:
 
     inline Rect(float width, float height) : left(0.0f), top(0.0f), right(width), bottom(height) {}
 
-    inline Rect(const SkIRect& rect)
-            :  // NOLINT, implicit
+    inline Rect(const SkIRect& rect) // NOLINT(google-explicit-constructor)
+            :
             left(rect.fLeft)
             , top(rect.fTop)
             , right(rect.fRight)
             , bottom(rect.fBottom) {}
 
-    inline Rect(const SkRect& rect)
-            :  // NOLINT, implicit
+    inline Rect(const SkRect& rect) // NOLINT(google-explicit-constructor)
+            :
             left(rect.fLeft)
             , top(rect.fTop)
             , right(rect.fRight)
