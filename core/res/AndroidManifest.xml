@@ -4744,6 +4744,11 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
+        <service android:name="com.android.server.ZramWriteback"
+                 android:exported="false"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
         <service android:name="com.android.server.backup.FullBackupJob"
                  android:exported="true"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
