@@ -309,6 +309,11 @@ public abstract class DhcpPacket {
     protected final byte[] mClientMac;
 
     /**
+     * The server host name from server.
+     */
+    protected String mServerHostName;
+
+    /**
      * Asks the packet object to create a ByteBuffer serialization of
      * the packet for transmission.
      */
@@ -848,6 +853,7 @@ public abstract class DhcpPacket {
         Inet4Address ipDst = null;
         Inet4Address bcAddr = null;
         Inet4Address requestedIp = null;
+        String serverHostName = null;
 
         // The following are all unsigned integers. Internally we store them as signed integers of
         // the same length because that way we're guaranteed that they can't be out of the range of
@@ -989,9 +995,9 @@ public abstract class DhcpPacket {
         packet.get(clientMac);
 
         // skip over address padding (16 octets allocated)
-        packet.position(packet.position() + (16 - addrLen)
-                        + 64    // skip server host name (64 chars)
-                        + 128); // skip boot file name (128 chars)
+        packet.position(packet.position() + (16 - addrLen));
+        serverHostName = readAsciiString(packet, 64, false);
+        packet.position(packet.position() + 128);
 
         // Ensure this is a DHCP packet with a magic cookie, and not BOOTP. http://b/31850211
         if (packet.remaining() < 4) {
@@ -1192,6 +1198,7 @@ public abstract class DhcpPacket {
         newPacket.mT2 = T2;
         newPacket.mVendorId = vendorId;
         newPacket.mVendorInfo = vendorInfo;
+        newPacket.mServerHostName = serverHostName;
         return newPacket;
     }
 
@@ -1251,6 +1258,7 @@ public abstract class DhcpPacket {
         results.vendorInfo = mVendorInfo;
         results.leaseDuration = (mLeaseTime != null) ? mLeaseTime : INFINITE_LEASE;
         results.mtu = (mMtu != null && MIN_MTU <= mMtu && mMtu <= MAX_MTU) ? mMtu : 0;
+        results.serverHostName = mServerHostName;
 
         return results;
     }
