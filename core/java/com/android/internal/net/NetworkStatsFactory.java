@@ -20,6 +20,7 @@ import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 
 import android.annotation.Nullable;
@@ -33,10 +34,8 @@ import com.android.internal.util.ProcFileReader;
 
 import libcore.io.IoUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.ProtocolException;
 import java.util.Arrays;
@@ -127,7 +126,7 @@ public class NetworkStatsFactory {
     }
 
     public NetworkStatsFactory() {
-        this(new File("/proc/"), new File("/sys/fs/bpf/traffic_uid_stats_map").exists());
+        this(new File("/proc/"), new File("/sys/fs/bpf/map_netd_app_uid_stats_map").exists());
     }
 
     @VisibleForTesting
