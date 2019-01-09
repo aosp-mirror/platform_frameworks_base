@@ -33,13 +33,14 @@ enum MimeType {
     MIME_UNKNOWN = 0;
     MIME_NONE = 1;
     MIME_ANY = 2;
-    MIME_AUDIO = 3;
-    MIME_IMAGE = 4;
-    MIME_MESSAGE = 5;
-    MIME_MULTIPART = 6;
-    MIME_TEXT = 7;
-    MIME_VIDEO = 8;
-    MIME_OTHER = 9;
+    MIME_APPLICATION = 3;
+    MIME_AUDIO = 4;
+    MIME_IMAGE = 5;
+    MIME_MESSAGE = 6;
+    MIME_MULTIPART = 7;
+    MIME_TEXT = 8;
+    MIME_VIDEO = 9;
+    MIME_OTHER = 10;
 }
 
 enum Root {
@@ -163,6 +164,8 @@ enum UserAction {
     ACTION_EXTRACT_TO = 29;
     ACTION_VIEW_IN_APPLICATION = 30;
     ACTION_INSPECTOR = 31;
+    ACTION_SEARCH_CHIP = 32;
+    ACTION_SEARCH_HISTORY = 33;
 }
 
 enum InvalidScopedAccess {
@@ -171,4 +174,21 @@ enum InvalidScopedAccess {
     SCOPED_DIR_ACCESS_INVALID_DIRECTORY = 2;
     SCOPED_DIR_ACCESS_ERROR = 3;
     SCOPED_DIR_ACCESS_DEPRECATED = 4;
+}
+
+enum SearchType {
+    TYPE_UNKNOWN = 0;
+    TYPE_CHIP_IMAGES = 1;
+    TYPE_CHIP_AUDIOS = 2;
+    TYPE_CHIP_VIDEOS = 3;
+    TYPE_CHIP_DOCS = 4;
+    TYPE_SEARCH_HISTORY = 5;
+    TYPE_SEARCH_STRING = 6;
+}
+
+enum SearchMode {
+    SEARCH_UNKNOWN = 0;
+    SEARCH_KEYWORD = 1;
+    SEARCH_CHIPS = 2;
+    SEARCH_KEYWORD_N_CHIPS = 3;
 }
