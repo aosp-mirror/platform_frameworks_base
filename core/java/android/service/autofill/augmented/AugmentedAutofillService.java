@@ -214,7 +214,7 @@ public abstract class AugmentedAutofillService extends Service {
     }
 
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    protected final void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mAutofillProxies != null) {
             final int size = mAutofillProxies.size();
             pw.print("Number proxies: "); pw.println(size);
@@ -225,6 +225,15 @@ public abstract class AugmentedAutofillService extends Service {
                 proxy.dump("  ", pw);
             }
         }
+        dump(pw, args);
+    }
+
+    /**
+     * Implementation specific {@code dump}.
+     */
+    protected void dump(@NonNull PrintWriter pw,
+            @SuppressWarnings("unused") @NonNull String[] args) {
+        pw.print(getClass().getName()); pw.println(": nothing to dump");
     }
 
     /** @hide */

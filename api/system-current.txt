@@ -5143,6 +5143,8 @@ package android.service.autofill.augmented {
 
   public abstract class AugmentedAutofillService extends android.app.Service {
     ctor public AugmentedAutofillService();
+    method protected final void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
+    method protected void dump(java.io.PrintWriter, java.lang.String[]);
     method public void onFillRequest(android.service.autofill.augmented.FillRequest, android.os.CancellationSignal, android.service.autofill.augmented.FillController, android.service.autofill.augmented.FillCallback);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.augmented.AugmentedAutofillService";
   }
