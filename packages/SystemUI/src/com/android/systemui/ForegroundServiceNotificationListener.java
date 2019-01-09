@@ -54,7 +54,7 @@ public class ForegroundServiceNotificationListener {
             }
 
             @Override
-            public void onEntryUpdated(NotificationEntry entry) {
+            public void onPostEntryUpdated(NotificationEntry entry) {
                 updateNotification(entry.notification, entry.importance);
             }
 
