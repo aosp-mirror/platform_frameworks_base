@@ -202,6 +202,9 @@ class InsetsStateController {
     }
 
     private void notifyPendingInsetsControlChanged() {
+        if (mPendingControlChanged.isEmpty()) {
+            return;
+        }
         mDisplayContent.mWmService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             for (int i = mPendingControlChanged.size() - 1; i >= 0; i--) {
                 final WindowState controllingWin = mPendingControlChanged.valueAt(i);
