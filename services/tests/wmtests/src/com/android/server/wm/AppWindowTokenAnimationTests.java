@@ -87,8 +87,8 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
         verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
 
         callbackCaptor.getValue().onAnimationFinished(mSpec);
-        verify(mTransaction).destroy(eq(leash));
-        verify(mTransaction).destroy(eq(animationBoundsLayer));
+        verify(mTransaction).reparent(eq(leash), eq(null));
+        verify(mTransaction).reparent(eq(animationBoundsLayer), eq(null));
         assertThat(mToken.mNeedsAnimationBoundsLayer).isFalse();
     }
 
@@ -100,8 +100,8 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
         final SurfaceControl animationBoundsLayer = mToken.mAnimationBoundsLayer;
 
         mToken.mSurfaceAnimator.cancelAnimation();
-        verify(mTransaction).destroy(eq(leash));
-        verify(mTransaction).destroy(eq(animationBoundsLayer));
+        verify(mTransaction).reparent(eq(leash), eq(null));
+        verify(mTransaction).reparent(eq(animationBoundsLayer), eq(null));
         assertThat(mToken.mNeedsAnimationBoundsLayer).isFalse();
     }
 

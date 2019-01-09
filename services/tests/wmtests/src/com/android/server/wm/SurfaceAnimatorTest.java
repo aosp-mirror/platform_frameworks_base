@@ -96,7 +96,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         callbackCaptor.getValue().onAnimationFinished(mSpec);
         assertNotAnimating(mAnimatable);
         assertTrue(mAnimatable.mFinishedCallbackCalled);
-        verify(mTransaction).destroy(eq(mAnimatable.mLeash));
+        verify(mTransaction).reparent(eq(mAnimatable.mLeash), eq(null));
         // TODO: Verify reparenting once we use mPendingTransaction to reparent it back
     }
 
@@ -106,7 +106,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         final SurfaceControl firstLeash = mAnimatable.mLeash;
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec2, true /* hidden */);
 
-        verify(mTransaction).destroy(eq(firstLeash));
+        verify(mTransaction).reparent(eq(firstLeash), eq(null));
         assertFalse(mAnimatable.mFinishedCallbackCalled);
 
         final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
@@ -133,7 +133,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertNotAnimating(mAnimatable);
         verify(mSpec).onAnimationCancelled(any());
         assertTrue(mAnimatable.mFinishedCallbackCalled);
-        verify(mTransaction).destroy(eq(mAnimatable.mLeash));
+        verify(mTransaction).reparent(eq(mAnimatable.mLeash), eq(null));
     }
 
     @Test
@@ -155,7 +155,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         verifyZeroInteractions(mSpec);
         assertNotAnimating(mAnimatable);
         assertTrue(mAnimatable.mFinishedCallbackCalled);
-        verify(mTransaction).destroy(eq(mAnimatable.mLeash));
+        verify(mTransaction).reparent(eq(mAnimatable.mLeash), eq(null));
     }
 
     @Test
@@ -171,11 +171,11 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertNotAnimating(mAnimatable);
         assertAnimating(mAnimatable2);
         assertEquals(leash, mAnimatable2.mSurfaceAnimator.mLeash);
-        verify(mTransaction, never()).destroy(eq(leash));
+        verify(mTransaction, never()).reparent(eq(leash), eq(null));
         callbackCaptor.getValue().onAnimationFinished(mSpec);
         assertNotAnimating(mAnimatable2);
         assertTrue(mAnimatable2.mFinishedCallbackCalled);
-        verify(mTransaction).destroy(eq(leash));
+        verify(mTransaction).reparent(eq(leash), eq(null));
     }
 
     @Test
@@ -198,7 +198,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         mDeferFinishAnimatable.mEndDeferFinishCallback.run();
         assertNotAnimating(mAnimatable2);
         assertTrue(mDeferFinishAnimatable.mFinishedCallbackCalled);
-        verify(mTransaction).destroy(eq(mDeferFinishAnimatable.mLeash));
+        verify(mTransaction).reparent(eq(mDeferFinishAnimatable.mLeash), eq(null));
     }
 
     private void assertAnimating(MyAnimatable animatable) {
