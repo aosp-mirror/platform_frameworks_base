@@ -413,6 +413,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         if (mExpanded == expanded) return;
         mExpanded = expanded;
         mHeaderQsPanel.setExpanded(expanded);
+        updateEverything();
     }
 
     /**
@@ -682,6 +683,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 .alpha(0f)
                 .setDuration(FADE_ANIMATION_DURATION_MS)
                 .start();
+    }
+
+    public void updateEverything() {
+        post(() -> setClickable(false));
     }
 
     public void setQSPanel(final QSPanel qsPanel) {
