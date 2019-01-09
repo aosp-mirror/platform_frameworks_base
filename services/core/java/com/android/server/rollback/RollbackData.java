@@ -30,7 +30,7 @@ class RollbackData {
     public final PackageRollbackInfo info;
 
     /**
-     * The directory where the apk backup is stored.
+     * The directory where the rollback data is stored.
      */
     public final File backupDir;
 

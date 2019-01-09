@@ -109,16 +109,19 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     // to store this data:
     //   /data/rollback/
     //      available/
-    //          com.package.A-XXX/
-    //              base.apk
-    //              info.json
+    //          XXX/
+    //              com.package.A/
+    //                  base.apk
+    //                  info.json
     //              enabled.txt
-    //          com.package.B-YYY/
-    //              base.apk
-    //              info.json
+    //          YYY/
+    //              com.package.B/
+    //                  base.apk
+    //                  info.json
     //              enabled.txt
     //      recently_executed.json
     //
+    // * XXX, YYY are random strings from Files.createTempDirectory
     // * info.json contains the package version to roll back from/to.
     // * enabled.txt contains a timestamp for when the rollback was first
     //   made available. This file is not written until the rollback is made
@@ -356,7 +359,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             session = packageInstaller.openSession(sessionId);
 
             // TODO: Will it always be called "base.apk"? What about splits?
-            File baseApk = new File(data.backupDir, "base.apk");
+            File packageDir = new File(data.backupDir, data.info.packageName);
+            File baseApk = new File(packageDir, "base.apk");
             try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(baseApk,
                     ParcelFileDescriptor.MODE_READ_ONLY)) {
                 final long token = Binder.clearCallingIdentity();
@@ -472,18 +476,30 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             // be called.
             if (rollbackDir.isDirectory() && enabledFile.isFile()) {
                 try {
-                    File jsonFile = new File(rollbackDir, "info.json");
-                    String jsonString = IoUtils.readFileAsString(jsonFile.getAbsolutePath());
-                    JSONObject jsonObject = new JSONObject(jsonString);
-                    String packageName = jsonObject.getString("packageName");
-                    long higherVersionCode = jsonObject.getLong("higherVersionCode");
-                    long lowerVersionCode = jsonObject.getLong("lowerVersionCode");
-                    RollbackData data = new RollbackData(
-                            new PackageRollbackInfo(packageName,
-                                new PackageRollbackInfo.PackageVersion(higherVersionCode),
-                                new PackageRollbackInfo.PackageVersion(lowerVersionCode)),
-                            rollbackDir);
+                    PackageRollbackInfo info = null;
+                    for (File packageDir : rollbackDir.listFiles()) {
+                        if (packageDir.isDirectory()) {
+                            File jsonFile = new File(packageDir, "info.json");
+                            String jsonString = IoUtils.readFileAsString(
+                                    jsonFile.getAbsolutePath());
+                            JSONObject jsonObject = new JSONObject(jsonString);
+                            String packageName = jsonObject.getString("packageName");
+                            long higherVersionCode = jsonObject.getLong("higherVersionCode");
+                            long lowerVersionCode = jsonObject.getLong("lowerVersionCode");
+                            if (info != null) {
+                                throw new IOException("TODO: Support multi-package rollback");
+                            }
+                            info = new PackageRollbackInfo(packageName,
+                                    new PackageRollbackInfo.PackageVersion(higherVersionCode),
+                                    new PackageRollbackInfo.PackageVersion(lowerVersionCode));
+                        }
+                    }
 
+                    if (info == null) {
+                        throw new IOException("No package rollback info found");
+                    }
+
+                    RollbackData data = new RollbackData(info, rollbackDir);
                     String enabledString = IoUtils.readFileAsString(enabledFile.getAbsolutePath());
                     data.timestamp = Instant.parse(enabledString.trim());
                     mAvailableRollbacks.add(data);
@@ -771,33 +787,35 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         File backupDir;
         try {
             backupDir = Files.createTempDirectory(
-                mAvailableRollbacksDir.toPath(), packageName + "-").toFile();
+                    mAvailableRollbacksDir.toPath(), null).toFile();
         } catch (IOException e) {
             Log.e(TAG, "Unable to create rollback for " + packageName, e);
             return false;
         }
 
+        File packageDir = new File(backupDir, packageName);
+        packageDir.mkdirs();
         try {
             JSONObject json = new JSONObject();
             json.put("packageName", packageName);
             json.put("higherVersionCode", newVersion.versionCode);
             json.put("lowerVersionCode", installedVersion.versionCode);
 
-            File jsonFile = new File(backupDir, "info.json");
+            File jsonFile = new File(packageDir, "info.json");
             PrintWriter pw = new PrintWriter(jsonFile);
             pw.println(json.toString());
             pw.close();
         } catch (IOException | JSONException e) {
             Log.e(TAG, "Unable to create rollback for " + packageName, e);
-            removeFile(backupDir);
+            removeFile(packageDir);
             return false;
         }
 
         // TODO: Copy by hard link instead to save on cpu and storage space?
-        int status = PackageManagerServiceUtils.copyPackage(installedPackage.codePath, backupDir);
+        int status = PackageManagerServiceUtils.copyPackage(installedPackage.codePath, packageDir);
         if (status != PackageManager.INSTALL_SUCCEEDED) {
             Log.e(TAG, "Unable to copy package for rollback for " + packageName);
-            removeFile(backupDir);
+            removeFile(packageDir);
             return false;
         }
 
