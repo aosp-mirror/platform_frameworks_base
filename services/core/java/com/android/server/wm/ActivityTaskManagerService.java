@@ -7012,5 +7012,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return mStackSupervisor.getActivityMetricsLogger().getLaunchObserverRegistry();
             }
         }
+
+        @Override
+        public ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution) {
+            synchronized (mGlobalLock) {
+                return ActivityTaskManagerService.this.getTaskSnapshot(taskId, reducedResolution);
+            }
+        }
     }
 }

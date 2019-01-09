@@ -92,6 +92,7 @@ package android {
     field public static final java.lang.String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final java.lang.String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
     field public static final java.lang.String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
+    field public static final java.lang.String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
     field public static final java.lang.String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final java.lang.String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
@@ -849,6 +850,73 @@ package android.app.backup {
 
 }
 
+package android.app.contentsuggestions {
+
+  public final class ClassificationsRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public java.util.List<android.app.contentsuggestions.ContentSelection> getSelections();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ClassificationsRequest> CREATOR;
+  }
+
+  public static final class ClassificationsRequest.Builder {
+    ctor public ClassificationsRequest.Builder(java.util.List<android.app.contentsuggestions.ContentSelection>);
+    method public android.app.contentsuggestions.ClassificationsRequest build();
+    method public android.app.contentsuggestions.ClassificationsRequest.Builder setExtras(android.os.Bundle);
+  }
+
+  public final class ContentClassification implements android.os.Parcelable {
+    ctor public ContentClassification(java.lang.String, android.os.Bundle);
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public java.lang.String getId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ContentClassification> CREATOR;
+  }
+
+  public final class ContentSelection implements android.os.Parcelable {
+    ctor public ContentSelection(java.lang.String, android.os.Bundle);
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public java.lang.String getId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ContentSelection> CREATOR;
+  }
+
+  public final class ContentSuggestionsManager {
+    method public void classifyContentSelections(android.app.contentsuggestions.ClassificationsRequest, java.util.concurrent.Executor, android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
+    method public void notifyInteraction(java.lang.String, android.os.Bundle);
+    method public void provideContextImage(int, android.os.Bundle);
+    method public void suggestContentSelections(android.app.contentsuggestions.SelectionsRequest, java.util.concurrent.Executor, android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
+  }
+
+  public static abstract interface ContentSuggestionsManager.ClassificationsCallback {
+    method public abstract void onContentClassificationsAvailable(int, java.util.List<android.app.contentsuggestions.ContentClassification>);
+  }
+
+  public static abstract interface ContentSuggestionsManager.SelectionsCallback {
+    method public abstract void onContentSelectionsAvailable(int, java.util.List<android.app.contentsuggestions.ContentSelection>);
+  }
+
+  public final class SelectionsRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public android.graphics.Point getInterestPoint();
+    method public int getTaskId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.SelectionsRequest> CREATOR;
+  }
+
+  public static final class SelectionsRequest.Builder {
+    ctor public SelectionsRequest.Builder(int);
+    method public android.app.contentsuggestions.SelectionsRequest build();
+    method public android.app.contentsuggestions.SelectionsRequest.Builder setExtras(android.os.Bundle);
+    method public android.app.contentsuggestions.SelectionsRequest.Builder setInterestPoint(android.graphics.Point);
+  }
+
+}
+
 package android.app.job {
 
   public abstract class JobScheduler {
@@ -1126,6 +1194,7 @@ package android.content {
     method public void startActivityAsUser(android.content.Intent, android.os.UserHandle);
     field public static final java.lang.String APP_PREDICTION_SERVICE = "app_prediction";
     field public static final java.lang.String BACKUP_SERVICE = "backup";
+    field public static final java.lang.String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
     field public static final java.lang.String CONTEXTHUB_SERVICE = "contexthub";
     field public static final java.lang.String EUICC_CARD_SERVICE = "euicc_card";
     field public static final java.lang.String HDMI_CONTROL_SERVICE = "hdmi_control";
@@ -5370,6 +5439,19 @@ package android.service.contentcapture {
     method public android.app.assist.AssistStructure getAssistStructure();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.contentcapture.SnapshotData> CREATOR;
+  }
+
+}
+
+package android.service.contentsuggestions {
+
+  public abstract class ContentSuggestionsService extends android.app.Service {
+    ctor public ContentSuggestionsService();
+    method public abstract void classifyContentSelections(android.app.contentsuggestions.ClassificationsRequest, android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
+    method public abstract void notifyInteraction(java.lang.String, android.os.Bundle);
+    method public abstract void processContextImage(int, android.graphics.Bitmap, android.os.Bundle);
+    method public abstract void suggestContentSelections(android.app.contentsuggestions.SelectionsRequest, android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.contentsuggestions.ContentSuggestionsService";
   }
 
 }

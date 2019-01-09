@@ -23,6 +23,7 @@ java_library {
         "services.backup",
         "services.companion",
         "services.contentcapture",
+        "services.contentsuggestions",
         "services.coverage",
         "services.devicepolicy",
         "services.midi",

@@ -3975,6 +3975,15 @@ public abstract class Context {
     public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
 
     /**
+     * Used for getting content selections and classifications for task snapshots.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
+
+    /**
      * Official published name of the app prediction service.
      *
      * @hide
