@@ -15,4 +15,4 @@
 
 package android.media.session;
 
-parcelable ParcelableVolumeInfo;
+parcelable MediaController.PlaybackInfo;

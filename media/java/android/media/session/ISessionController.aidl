@@ -21,8 +21,8 @@ import android.content.pm.ParceledListSlice;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.session.ISessionControllerCallback;
+import android.media.session.MediaController;
 import android.media.session.MediaSession;
-import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
@@ -47,7 +47,7 @@ interface ISessionController {
     String getTag();
     PendingIntent getLaunchPendingIntent();
     long getFlags();
-    ParcelableVolumeInfo getVolumeAttributes();
+    MediaController.PlaybackInfo getVolumeAttributes();
     void adjustVolume(String packageName, String opPackageName,
             in ISessionControllerCallback caller, boolean asSystemService, int direction,
             int flags);

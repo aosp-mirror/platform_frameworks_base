@@ -32,6 +32,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
@@ -327,10 +329,7 @@ public final class MediaController {
      */
     public @Nullable PlaybackInfo getPlaybackInfo() {
         try {
-            ParcelableVolumeInfo result = mSessionBinder.getVolumeAttributes();
-            return new PlaybackInfo(result.volumeType, result.audioAttrs, result.controlType,
-                    result.maxVolume, result.currentVolume);
-
+            return mSessionBinder.getVolumeAttributes();
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error calling getAudioInfo.", e);
         }
@@ -986,15 +985,15 @@ public final class MediaController {
      * Holds information about the current playback and how audio is handled for
      * this session.
      */
-    public static final class PlaybackInfo {
-        /**
-         * The session uses remote playback.
-         */
-        public static final int PLAYBACK_TYPE_REMOTE = 2;
+    public static final class PlaybackInfo implements Parcelable {
         /**
          * The session uses local playback.
          */
         public static final int PLAYBACK_TYPE_LOCAL = 1;
+        /**
+         * The session uses remote playback.
+         */
+        public static final int PLAYBACK_TYPE_REMOTE = 2;
 
         private final int mVolumeType;
         private final int mVolumeControl;
@@ -1005,12 +1004,20 @@ public final class MediaController {
         /**
          * @hide
          */
-        public PlaybackInfo(int type, AudioAttributes attrs, int control, int max, int current) {
+        public PlaybackInfo(int type, int control, int max, int current, AudioAttributes attrs) {
             mVolumeType = type;
-            mAudioAttrs = attrs;
             mVolumeControl = control;
             mMaxVolume = max;
             mCurrentVolume = current;
+            mAudioAttrs = attrs;
+        }
+
+        PlaybackInfo(Parcel in) {
+            mVolumeType = in.readInt();
+            mVolumeControl = in.readInt();
+            mMaxVolume = in.readInt();
+            mCurrentVolume = in.readInt();
+            mAudioAttrs = in.readParcelable(null);
         }
 
         /**
@@ -1024,18 +1031,6 @@ public final class MediaController {
          */
         public int getPlaybackType() {
             return mVolumeType;
-        }
-
-        /**
-         * Get the audio attributes for this session. The attributes will affect
-         * volume handling for the session. When the volume type is
-         * {@link PlaybackInfo#PLAYBACK_TYPE_REMOTE} these may be ignored by the
-         * remote volume handler.
-         *
-         * @return The attributes for this session.
-         */
-        public AudioAttributes getAudioAttributes() {
-            return mAudioAttrs;
         }
 
         /**
@@ -1070,6 +1065,52 @@ public final class MediaController {
         public int getCurrentVolume() {
             return mCurrentVolume;
         }
+
+        /**
+         * Get the audio attributes for this session. The attributes will affect
+         * volume handling for the session. When the volume type is
+         * {@link PlaybackInfo#PLAYBACK_TYPE_REMOTE} these may be ignored by the
+         * remote volume handler.
+         *
+         * @return The attributes for this session.
+         */
+        public AudioAttributes getAudioAttributes() {
+            return mAudioAttrs;
+        }
+
+        @Override
+        public String toString() {
+            return "volumeType=" + mVolumeType + ", volumeControl=" + mVolumeControl
+                    + ", maxVolume=" + mMaxVolume + ", currentVolume=" + mCurrentVolume
+                    + ", audioAttrs=" + mAudioAttrs;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mVolumeType);
+            dest.writeInt(mVolumeControl);
+            dest.writeInt(mMaxVolume);
+            dest.writeInt(mCurrentVolume);
+            dest.writeParcelable(mAudioAttrs, flags);
+        }
+
+        public static final Parcelable.Creator<PlaybackInfo> CREATOR =
+                new Parcelable.Creator<PlaybackInfo>() {
+            @Override
+            public PlaybackInfo createFromParcel(Parcel in) {
+                return new PlaybackInfo(in);
+            }
+
+            @Override
+            public PlaybackInfo[] newArray(int size) {
+                return new PlaybackInfo[size];
+            }
+        };
     }
 
     private final static class CallbackStub extends ISessionControllerCallback.Stub {
@@ -1138,11 +1179,9 @@ public final class MediaController {
         }
 
         @Override
-        public void onVolumeInfoChanged(ParcelableVolumeInfo pvi) {
+        public void onVolumeInfoChanged(PlaybackInfo info) {
             MediaController controller = mController.get();
             if (controller != null) {
-                PlaybackInfo info = new PlaybackInfo(pvi.volumeType, pvi.audioAttrs,
-                        pvi.controlType, pvi.maxVolume, pvi.currentVolume);
                 controller.postMessage(MSG_UPDATE_VOLUME, info, null);
             }
         }
