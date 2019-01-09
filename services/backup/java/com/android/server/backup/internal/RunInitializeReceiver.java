@@ -24,41 +24,50 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
-import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.server.backup.UserBackupManagerService;
 
-public class RunInitializeReceiver extends BroadcastReceiver {
-    private final UserBackupManagerService mBackupManagerService;
+import java.util.Set;
 
-    public RunInitializeReceiver(UserBackupManagerService backupManagerService) {
-        mBackupManagerService = backupManagerService;
+/**
+ * A {@link BroadcastReceiver} for the action {@link UserBackupManagerService#RUN_INITIALIZE_ACTION}
+ * that runs an initialization operation on all pending transports.
+ */
+public class RunInitializeReceiver extends BroadcastReceiver {
+    private final UserBackupManagerService mUserBackupManagerService;
+
+    public RunInitializeReceiver(UserBackupManagerService userBackupManagerService) {
+        mUserBackupManagerService = userBackupManagerService;
     }
 
     public void onReceive(Context context, Intent intent) {
-        if (RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
-            synchronized (mBackupManagerService.getQueueLock()) {
-                final ArraySet<String> pendingInits = mBackupManagerService.getPendingInits();
-                if (DEBUG) {
-                    Slog.v(TAG, "Running a device init; " + pendingInits.size() + " pending");
-                }
+        if (!RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
+            return;
+        }
 
-                if (pendingInits.size() > 0) {
-                    final String[] transports =
-                            pendingInits.toArray(new String[pendingInits.size()]);
+        synchronized (mUserBackupManagerService.getQueueLock()) {
+            Set<String> pendingInits = mUserBackupManagerService.getPendingInits();
+            if (DEBUG) {
+                Slog.v(TAG, "Running a device init; " + pendingInits.size() + " pending");
+            }
 
-                    mBackupManagerService.clearPendingInits();
+            if (pendingInits.size() > 0) {
+                String[] transports = pendingInits.toArray(new String[pendingInits.size()]);
 
-                    PowerManager.WakeLock wakelock = mBackupManagerService.getWakelock();
-                    wakelock.acquire();
-                    OnTaskFinishedListener listener = caller -> wakelock.release();
+                mUserBackupManagerService.clearPendingInits();
 
-                    Runnable task =
-                            new PerformInitializeTask(
-                                    mBackupManagerService, transports, null, listener);
-                    mBackupManagerService.getBackupHandler().post(task);
-                }
+                PowerManager.WakeLock wakelock = mUserBackupManagerService.getWakelock();
+                wakelock.acquire();
+                OnTaskFinishedListener listener = caller -> wakelock.release();
+
+                Runnable task =
+                        new PerformInitializeTask(
+                                mUserBackupManagerService,
+                                transports,
+                                /* observer */ null,
+                                listener);
+                mUserBackupManagerService.getBackupHandler().post(task);
             }
         }
     }
