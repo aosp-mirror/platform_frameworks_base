@@ -24,7 +24,7 @@ namespace debug {
 
 class GlesErrorCheckWrapper : public GlesDriver {
 public:
-    GlesErrorCheckWrapper(GlesDriver& base) : mBase(base) {}
+    explicit GlesErrorCheckWrapper(GlesDriver& base) : mBase(base) {}
 
 #define GL_ENTRY(ret, api, ...) virtual ret api##_(__VA_ARGS__) override;
 #include "gles_decls.in"
