@@ -39,7 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/monitoring_title_device_owned"
-                style="@android:style/TextAppearance.Material.Title"
+                style="@style/TextAppearance.DeviceManagementDialog.Title"
                 android:textColor="?android:attr/textColorPrimary"
                 android:paddingBottom="@dimen/qs_footer_dialog_subtitle_padding"
             />
@@ -64,7 +64,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/monitoring_subtitle_ca_certificate"
-                style="@android:style/TextAppearance.Material.Title"
+                style="@style/TextAppearance.DeviceManagementDialog.Title"
                 android:textColor="?android:attr/textColorPrimary"
                 android:paddingBottom="@dimen/qs_footer_dialog_subtitle_padding"
             />
@@ -89,7 +89,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/monitoring_subtitle_network_logging"
-                style="@android:style/TextAppearance.Material.Title"
+                style="@style/TextAppearance.DeviceManagementDialog.Title"
                 android:textColor="?android:attr/textColorPrimary"
                 android:paddingBottom="@dimen/qs_footer_dialog_subtitle_padding"
             />
@@ -114,7 +114,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/monitoring_subtitle_vpn"
-                style="@android:style/TextAppearance.Material.Title"
+                style="@style/TextAppearance.DeviceManagementDialog.Title"
                 android:textColor="?android:attr/textColorPrimary"
                 android:paddingBottom="@dimen/qs_footer_dialog_subtitle_padding"
             />
