@@ -2256,7 +2256,7 @@
 
     <!-- @SystemApi @TestApi @hide Allows an application to create/manage/remove stacks -->
     <permission android:name="android.permission.MANAGE_ACTIVITY_STACKS"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi @TestApi @hide Allows an application to embed other activities -->
     <permission android:name="android.permission.ACTIVITY_EMBEDDING"
