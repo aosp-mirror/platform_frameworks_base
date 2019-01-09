@@ -71,6 +71,7 @@ import static java.util.stream.Collectors.toList;
 
 import android.annotation.Nullable;
 import android.app.Application;
+import android.app.ApplicationPackageManager;
 import android.app.IBackupAgent;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
@@ -134,6 +135,8 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.Resetter;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowQueuedWork;
@@ -157,6 +160,7 @@ import java.util.stream.Stream;
 @Config(
         shadows = {
             FrameworkShadowLooper.class,
+            KeyValueBackupTaskTest.ShadowApplicationPackageManager.class,
             ShadowBackupDataInput.class,
             ShadowBackupDataOutput.class,
             ShadowEventLog.class,
@@ -244,6 +248,7 @@ public class KeyValueBackupTaskTest {
     @After
     public void tearDown() throws Exception {
         ShadowBackupDataInput.reset();
+        ShadowApplicationPackageManager.reset();
     }
 
     @Test
@@ -2435,7 +2440,8 @@ public class KeyValueBackupTaskTest {
             mPackageManager.setApplicationEnabledSetting(
                     packageData.packageName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
             PackageInfo packageInfo = getPackageInfo(packageData);
-            mShadowPackageManager.addPackage(packageInfo);
+            mShadowPackageManager.installPackage(packageInfo);
+            ShadowApplicationPackageManager.setPackageInfo(packageInfo);
             mContext.sendBroadcast(getPackageAddedIntent(packageData));
             // Run the backup looper because on the receiver we post MSG_SCHEDULE_BACKUP_PACKAGE
             mShadowBackupLooper.runToEndOfTasks();
@@ -2846,6 +2852,31 @@ public class KeyValueBackupTaskTest {
                 BackupDataOutput data,
                 ParcelFileDescriptor newState) {
             throw mException;
+        }
+    }
+
+    /**
+     * Extends {@link org.robolectric.shadows.ShadowApplicationPackageManager} to return the correct
+     * package in user-specific invocations.
+     */
+    @Implements(value = ApplicationPackageManager.class)
+    public static class ShadowApplicationPackageManager
+            extends org.robolectric.shadows.ShadowApplicationPackageManager {
+        private static PackageInfo sPackageInfo;
+
+        static void setPackageInfo(PackageInfo packageInfo) {
+            sPackageInfo = packageInfo;
+        }
+
+        @Override
+        protected PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId) {
+            return sPackageInfo;
+        }
+
+        /** Clear {@link #sPackageInfo}. */
+        @Resetter
+        public static void reset() {
+            sPackageInfo = null;
         }
     }
 }
