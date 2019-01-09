@@ -89,6 +89,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.IWindowManager;
 
 import com.android.internal.R;
@@ -599,6 +600,20 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
             // scale if the crop height winds up not matching the recommended metrics
             needScale = (wpData.mHeight != cropHint.height());
+
+            //make sure screen aspect ratio is preserved if width is scaled under screen size
+            if (needScale) {
+                final DisplayInfo displayInfo = new DisplayInfo();
+                mDisplayManager.getDisplay(DEFAULT_DISPLAY).getDisplayInfo(displayInfo);
+                final float scaleByHeight = (float) wpData.mHeight / (float) cropHint.height();
+                final int newWidth = (int) (cropHint.width() * scaleByHeight);
+                if (newWidth < displayInfo.logicalWidth) {
+                    final float screenAspectRatio =
+                            (float) displayInfo.logicalHeight / (float) displayInfo.logicalWidth;
+                    cropHint.bottom = (int) (cropHint.width() * screenAspectRatio);
+                    needCrop = true;
+                }
+            }
 
             if (DEBUG) {
                 Slog.v(TAG, "crop: w=" + cropHint.width() + " h=" + cropHint.height());
