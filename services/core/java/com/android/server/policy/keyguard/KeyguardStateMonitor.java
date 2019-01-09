@@ -18,6 +18,7 @@ package com.android.server.policy.keyguard;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.security.keystore.IKeystoreService;
@@ -27,7 +28,11 @@ import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.internal.widget.LockPatternUtils;
 
+import lineageos.providers.LineageSettings;
+import vendor.lineage.trust.V1_0.IUsbRestrict;
+
 import java.io.PrintWriter;
+import java.util.NoSuchElementException;
 
 /**
  * Maintains a cached copy of Keyguard's state.
@@ -53,12 +58,16 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
     private final LockPatternUtils mLockPatternUtils;
     private final StateCallback mCallback;
 
+    private IUsbRestrict mUsbRestrictor = null;
+    private ContentResolver mContentResolver;
+
     IKeystoreService mKeystoreService;
 
     public KeyguardStateMonitor(Context context, IKeyguardService service, StateCallback callback) {
         mLockPatternUtils = new LockPatternUtils(context);
         mCurrentUserId = ActivityManager.getCurrentUser();
         mCallback = callback;
+        mContentResolver = context.getContentResolver();
 
         mKeystoreService = IKeystoreService.Stub.asInterface(ServiceManager
                 .getService("android.security.keystore"));
@@ -110,6 +119,28 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
                     Slog.e(TAG, "Error informing keystore of screen lock after retrying once", e);
                 }
                 --retry;
+            }
+        }
+
+        if (mUsbRestrictor == null) {
+            try {
+                mUsbRestrictor = IUsbRestrict.getService();
+                if (mUsbRestrictor == null) {
+                    // Ignore, the hal is not available
+                    return;
+                }
+            } catch (NoSuchElementException | RemoteException ignored) {
+                return;
+            }
+        }
+
+        boolean shouldRestrictUsb = LineageSettings.Secure.getInt(mContentResolver,
+                LineageSettings.Secure.TRUST_RESTRICT_USB_KEYGUARD, 0) == 1;
+        if (shouldRestrictUsb) {
+            try {
+                mUsbRestrictor.setEnabled(showing);
+            } catch (RemoteException ignored) {
+                // This feature is not supported
             }
         }
     }
