@@ -393,7 +393,7 @@ public final class TextClassifierImpl implements TextClassifier {
                     actionsImpl.suggestActions(nativeConversation, null);
 
             Collection<String> expectedTypes = resolveActionTypesFromRequest(request);
-            List<ConversationActions.ConversationAction> conversationActions = new ArrayList<>();
+            List<ConversationAction> conversationActions = new ArrayList<>();
             int maxSuggestions = nativeSuggestions.length;
             if (request.getMaxSuggestions() > 0) {
                 maxSuggestions = Math.min(request.getMaxSuggestions(), nativeSuggestions.length);
@@ -405,7 +405,7 @@ public final class TextClassifierImpl implements TextClassifier {
                     continue;
                 }
                 conversationActions.add(
-                        new ConversationActions.ConversationAction.Builder(actionType)
+                        new ConversationAction.Builder(actionType)
                                 .setTextReply(nativeSuggestion.getResponseText())
                                 .setConfidenceScore(nativeSuggestion.getScore())
                                 .build());
@@ -445,10 +445,10 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private Collection<String> resolveActionTypesFromRequest(ConversationActions.Request request) {
         List<String> defaultActionTypes =
-                request.getHints().contains(ConversationActions.HINT_FOR_NOTIFICATION)
+                request.getHints().contains(ConversationActions.Request.HINT_FOR_NOTIFICATION)
                         ? mSettings.getNotificationConversationActionTypes()
                         : mSettings.getInAppConversationActionTypes();
-        return request.getTypeConfig().resolveTypes(defaultActionTypes);
+        return request.getTypeConfig().resolveEntityListModifications(defaultActionTypes);
     }
 
     private AnnotatorModel getAnnotatorImpl(LocaleList localeList)

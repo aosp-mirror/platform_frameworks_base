@@ -26,7 +26,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.metrics.LogMaker;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.textclassifier.ConversationActions;
+import android.view.textclassifier.ConversationAction;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassifierEvent;
 import android.view.textclassifier.TextClassifierEventTronLogger;
@@ -69,7 +69,7 @@ public class TextClassifierEventTronLoggerTest {
                 new TextClassifierEvent.Builder(
                         TextClassifierEvent.CATEGORY_CONVERSATION_ACTIONS,
                         TextClassifierEvent.TYPE_SMART_ACTION)
-                        .setEntityType(ConversationActions.TYPE_CALL_PHONE)
+                        .setEntityType(ConversationAction.TYPE_CALL_PHONE)
                         .setEventTime(EVENT_TIME)
                         .setEventContext(textClassificationContext)
                         .build();
@@ -84,7 +84,7 @@ public class TextClassifierEventTronLoggerTest {
         assertThat(logMaker.getType()).isEqualTo(
                 ACTION_TEXT_SELECTION_SMART_SHARE);
         assertThat(logMaker.getTaggedData(FIELD_SELECTION_ENTITY_TYPE))
-                .isEqualTo(ConversationActions.TYPE_CALL_PHONE);
+                .isEqualTo(ConversationAction.TYPE_CALL_PHONE);
         assertThat(logMaker.getTaggedData(FIELD_TEXT_CLASSIFIER_EVENT_TIME))
                 .isEqualTo(EVENT_TIME);
         assertThat(logMaker.getPackageName()).isEqualTo(PACKAGE_NAME);
