@@ -1190,7 +1190,8 @@ public final class Settings {
     /**
      * Activity Action: Show Do Not Disturb access settings.
      * <p>
-     * Users can grant and deny access to Do Not Disturb configuration from here.
+     * Users can grant and deny access to Do Not Disturb configuration from here. Managed
+     * profiles cannot grant Do Not Disturb access.
      * See {@link android.app.NotificationManager#isNotificationPolicyAccessGranted()} for more
      * details.
      * <p>
