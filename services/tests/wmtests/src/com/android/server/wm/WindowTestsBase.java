@@ -198,8 +198,8 @@ class WindowTestsBase {
                 mDisplayContent.mInputMethodTarget = null;
             }
 
-            // Wait until everything is really cleaned up.
-            waitUntilHandlersIdle();
+            // Cleaned up everything in Handler.
+            WmServiceUtils.cleanupWindowManagerHandlers();
         } catch (Exception e) {
             Log.e(TAG, "Failed to tear down test", e);
             throw e;

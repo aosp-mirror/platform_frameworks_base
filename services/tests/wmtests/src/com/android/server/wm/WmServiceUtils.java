@@ -171,6 +171,16 @@ class WmServiceUtils {
         return sService;
     }
 
+    static void cleanupWindowManagerHandlers() {
+        final WindowManagerService wm = getWindowManagerService();
+        if (wm == null) {
+            return;
+        }
+        wm.mH.removeCallbacksAndMessages(null);
+        wm.mAnimationHandler.removeCallbacksAndMessages(null);
+        SurfaceAnimationThread.getHandler().removeCallbacksAndMessages(null);
+    }
+
     static void waitUntilWindowManagerHandlersIdle() {
         final WindowManagerService wm = getWindowManagerService();
         if (wm == null) {
