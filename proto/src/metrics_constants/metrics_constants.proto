@@ -6794,6 +6794,13 @@ message MetricsEvent {
     // OS: Q
     NOTIFICATION_BLOCKING_HELPER = 1621;
 
+    // ACTION: Tap & Pay -> Default Application Setting -> Use Forground
+    // OS: Q
+    ACTION_NFC_PAYMENT_FOREGROUND_SETTING = 1622;
+
+    // ACTION: Tap & Pay -> Default Application Setting -> Use Default
+    // OS: Q
+    ACTION_NFC_PAYMENT_ALWAYS_SETTING = 1623;
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
