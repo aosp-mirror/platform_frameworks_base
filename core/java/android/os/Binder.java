@@ -273,6 +273,30 @@ public class Binder implements IBinder {
     public static final native int getCallingUid();
 
     /**
+     * Returns {@code true} if the current thread is currently executing an
+     * incoming transaction.
+     *
+     * @hide
+     */
+    @CriticalNative
+    public static final native boolean isHandlingTransaction();
+
+    /**
+     * Return the Linux uid assigned to the process that sent the transaction
+     * currently being processed.
+     *
+     * @throws IllegalStateException if the current thread is not currently
+     *        executing an incoming transaction.
+     */
+    public static final int getCallingUidOrThrow() {
+        if (!isHandlingTransaction()) {
+            throw new IllegalStateException(
+                  "Thread is not in a binder transcation");
+        }
+        return getCallingUid();
+    }
+
+    /**
      * Return the UserHandle assigned to the process that sent you the
      * current transaction that is being processed.  This is the user
      * of the caller.  It is distinct from {@link #getCallingUid()} in that a
