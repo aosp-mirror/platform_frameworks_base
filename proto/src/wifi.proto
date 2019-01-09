@@ -1800,6 +1800,17 @@ message WifiUsabilityStatsEntry {
 
   // Sequence number from external system app to framework
   optional int32 seq_num_to_framework = 19;
+
+  // The total time CCA is on busy status on the current frequency in ms
+  // counted from the last radio chip reset
+  optional int64 total_cca_busy_freq_time_ms = 20;
+
+  // The total radio on time of the current frequency from the last radio
+  // chip reset
+  optional int64 total_radio_on_freq_time_ms = 21;
+
+  // The total number of beacons received from the last radio chip reset
+  optional int64 total_beacon_rx = 22;
 }
 
 message WifiUsabilityStats {
