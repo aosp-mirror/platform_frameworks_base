@@ -345,8 +345,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     int getRelevantEventTypes() {
-        return (mUsesAccessibilityCache ? AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK : 0)
-                | mEventTypes;
+        return (mUsesAccessibilityCache ? AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK
+                : AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) | mEventTypes;
     }
 
     @Override
