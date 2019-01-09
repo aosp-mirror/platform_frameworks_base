@@ -132,6 +132,9 @@ public:
     // Creates a fence that is signaled, when all the pending Vulkan commands are flushed.
     status_t createReleaseFence(sp<Fence>& nativeFence);
 
+    // Returned pointers are owned by VulkanManager.
+    VkFunctorInitParams getVkFunctorInitParams() const;
+
 private:
     friend class RenderThread;
 
@@ -233,6 +236,12 @@ private:
     VkCommandPool mCommandPool = VK_NULL_HANDLE;
 
     VkCommandBuffer mDummyCB = VK_NULL_HANDLE;
+
+    // Variables saved to populate VkFunctorInitParams.
+    uint32_t mInstanceVersion = 0u;
+    std::vector<const char*> mInstanceExtensions;
+    std::vector<const char*> mDeviceExtensions;
+    VkPhysicalDeviceFeatures2 mPhysicalDeviceFeatures2{};
 
     enum class SwapBehavior {
         Discard,

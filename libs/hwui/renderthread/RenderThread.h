@@ -47,6 +47,10 @@ class Readback;
 class RenderState;
 class TestUtils;
 
+namespace skiapipeline {
+class VkFunctorDrawHandler;
+}
+
 namespace renderthread {
 
 class CanvasContext;
@@ -124,6 +128,7 @@ private:
     friend class DummyVsyncSource;
     friend class android::uirenderer::TestUtils;
     friend class android::uirenderer::WebViewFunctor;
+    friend class android::uirenderer::skiapipeline::VkFunctorDrawHandler;
 
     RenderThread();
     virtual ~RenderThread();

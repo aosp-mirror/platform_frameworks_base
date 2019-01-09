@@ -32,15 +32,18 @@ namespace skiapipeline {
  */
 class VkFunctorDrawHandler : public FunctorDrawable::GpuDrawHandler {
 public:
-    explicit VkFunctorDrawHandler(Functor* functor);
+    VkFunctorDrawHandler(sp<WebViewFunctor::Handle> functor_handle, const SkMatrix& matrix,
+                         const SkIRect& clip, const SkImageInfo& image_info);
     ~VkFunctorDrawHandler() override;
 
     void draw(const GrBackendDrawableInfo& info) override;
 
 private:
     typedef GpuDrawHandler INHERITED;
-
-    Functor* mFunctor;
+    sp<WebViewFunctor::Handle> mFunctorHandle;
+    const SkMatrix mMatrix;
+    const SkIRect mClip;
+    const SkImageInfo mImageInfo;
 };
 
 /**
@@ -57,7 +60,8 @@ protected:
     // SkDrawable functions:
     void onDraw(SkCanvas* canvas) override;
     std::unique_ptr<FunctorDrawable::GpuDrawHandler> onSnapGpuDrawHandler(
-            GrBackendApi backendApi, const SkMatrix& matrix) override;
+            GrBackendApi backendApi, const SkMatrix& matrix, const SkIRect& clip,
+            const SkImageInfo& image_info) override;
 };
 
 }  // namespace skiapipeline
