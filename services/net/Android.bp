@@ -2,3 +2,19 @@ java_library_static {
     name: "services.net",
     srcs: ["java/**/*.java"],
 }
+
+// TODO: move to networking module with DhcpClient and remove lib
+java_library {
+    name: "dhcp-packet-lib",
+    srcs: [
+        "java/android/net/dhcp/*Packet.java",
+    ]
+}
+
+// TODO: move to networking module with IpNeighborMonitor/ConnectivityPacketTracker and remove lib
+java_library {
+    name: "frameworks-net-shared-utils",
+    srcs: [
+        "java/android/net/util/FdEventsReader.java",
+    ]
+}
