@@ -224,12 +224,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     volatile boolean mInParole;
 
     /**
-     * Current limit on the number of concurrent JobServiceContext entries we want to
-     * keep actively running a job.
-     */
-    int mMaxActiveJobs = 1;
-
-    /**
      * A mapping of which uids are currently in the foreground to their effective priority.
      */
     final SparseIntArray mUidPriorityOverride = new SparseIntArray();
@@ -332,41 +326,68 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    private static class MaxJobCounts {
+    static class MaxJobCounts {
         private final KeyValueListParser.IntValue mTotal;
-        private final KeyValueListParser.IntValue mBg;
+        private final KeyValueListParser.IntValue mMaxBg;
+        private final KeyValueListParser.IntValue mMinBg;
 
-        private MaxJobCounts(int totalDefault, String totalKey, int bgDefault, String bgKey) {
+        MaxJobCounts(int totalDefault, String totalKey,
+                int maxBgDefault, String maxBgKey, int minBgDefault, String minBgKey) {
             mTotal = new KeyValueListParser.IntValue(totalKey, totalDefault);
-            mBg = new KeyValueListParser.IntValue(bgKey, bgDefault);
+            mMaxBg = new KeyValueListParser.IntValue(maxBgKey, maxBgDefault);
+            mMinBg = new KeyValueListParser.IntValue(minBgKey, minBgDefault);
         }
 
         public void parse(KeyValueListParser parser) {
             mTotal.parse(parser);
-            mBg.parse(parser);
+            mMaxBg.parse(parser);
+            mMinBg.parse(parser);
 
-            if (mBg.getValue() > mTotal.getValue()) {
-                mBg.setValue(mTotal.getValue());
+            if (mTotal.getValue() < 1) {
+                mTotal.setValue(1);
+            } else if (mTotal.getValue() > MAX_JOB_CONTEXTS_COUNT) {
+                mTotal.setValue(MAX_JOB_CONTEXTS_COUNT);
             }
 
+            if (mMaxBg.getValue() < 1) {
+                mMaxBg.setValue(1);
+            } else if (mMaxBg.getValue() > mTotal.getValue()) {
+                mMaxBg.setValue(mTotal.getValue());
+            }
+            if (mMinBg.getValue() < 0) {
+                mMinBg.setValue(0);
+            } else {
+                if (mMinBg.getValue() > mMaxBg.getValue()) {
+                    mMinBg.setValue(mMaxBg.getValue());
+                }
+                if (mMinBg.getValue() >= mTotal.getValue()) {
+                    mMinBg.setValue(mTotal.getValue() - 1);
+                }
+            }
         }
 
         public int getTotalMax() {
             return mTotal.getValue();
         }
 
-        public int getBgMax() {
-            return mBg.getValue();
+        public int getMaxBg() {
+            return mMaxBg.getValue();
+        }
+
+        public int getMinBg() {
+            return mMinBg.getValue();
         }
 
         public void dump(PrintWriter pw, String prefix) {
             mTotal.dump(pw, prefix);
-            mBg.dump(pw, prefix);
+            mMaxBg.dump(pw, prefix);
+            mMinBg.dump(pw, prefix);
         }
 
         public void dumpProto(ProtoOutputStream proto, long tagTotal, long tagBg) {
             mTotal.dumpProto(proto, tagTotal);
-            mBg.dumpProto(proto, tagBg);
+            mMaxBg.dumpProto(proto, tagBg);
+            mMinBg.dumpProto(proto, tagBg);
         }
     }
 
@@ -386,11 +407,14 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_MIN_READY_JOBS_COUNT = "min_ready_jobs_count";
         private static final String KEY_HEAVY_USE_FACTOR = "heavy_use_factor";
         private static final String KEY_MODERATE_USE_FACTOR = "moderate_use_factor";
-        private static final String KEY_FG_JOB_COUNT = "fg_job_count";
-        private static final String KEY_BG_NORMAL_JOB_COUNT = "bg_normal_job_count";
-        private static final String KEY_BG_MODERATE_JOB_COUNT = "bg_moderate_job_count";
-        private static final String KEY_BG_LOW_JOB_COUNT = "bg_low_job_count";
-        private static final String KEY_BG_CRITICAL_JOB_COUNT = "bg_critical_job_count";
+
+        // The following values used to be used on P and below. Do not reuse them.
+        private static final String DEPRECATED_KEY_FG_JOB_COUNT = "fg_job_count";
+        private static final String DEPRECATED_KEY_BG_NORMAL_JOB_COUNT = "bg_normal_job_count";
+        private static final String DEPRECATED_KEY_BG_MODERATE_JOB_COUNT = "bg_moderate_job_count";
+        private static final String DEPRECATED_KEY_BG_LOW_JOB_COUNT = "bg_low_job_count";
+        private static final String DEPRECATED_KEY_BG_CRITICAL_JOB_COUNT = "bg_critical_job_count";
+
         private static final String KEY_MAX_STANDARD_RESCHEDULE_COUNT
                 = "max_standard_reschedule_count";
         private static final String KEY_MAX_WORK_RESCHEDULE_COUNT = "max_work_reschedule_count";
@@ -429,11 +453,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final int DEFAULT_MIN_READY_JOBS_COUNT = 1;
         private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
         private static final float DEFAULT_MODERATE_USE_FACTOR = .5f;
-        private static final int DEFAULT_FG_JOB_COUNT = 4;
-        private static final int DEFAULT_BG_NORMAL_JOB_COUNT = 6;
-        private static final int DEFAULT_BG_MODERATE_JOB_COUNT = 4;
-        private static final int DEFAULT_BG_LOW_JOB_COUNT = 1;
-        private static final int DEFAULT_BG_CRITICAL_JOB_COUNT = 1;
         private static final int DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT = Integer.MAX_VALUE;
         private static final int DEFAULT_MAX_WORK_RESCHEDULE_COUNT = Integer.MAX_VALUE;
         private static final long DEFAULT_MIN_LINEAR_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
@@ -506,66 +525,52 @@ public class JobSchedulerService extends com.android.server.SystemService
          * This is the job execution factor that is considered to be moderate use of the system.
          */
         float MODERATE_USE_FACTOR = DEFAULT_MODERATE_USE_FACTOR;
-        /**
-         * The number of MAX_JOB_CONTEXTS_COUNT we reserve for the foreground app.
-         */
-        int FG_JOB_COUNT = DEFAULT_FG_JOB_COUNT;
-        /**
-         * The maximum number of background jobs we allow when the system is in a normal
-         * memory state.
-         */
-        int BG_NORMAL_JOB_COUNT = DEFAULT_BG_NORMAL_JOB_COUNT;
-        /**
-         * The maximum number of background jobs we allow when the system is in a moderate
-         * memory state.
-         */
-        int BG_MODERATE_JOB_COUNT = DEFAULT_BG_MODERATE_JOB_COUNT;
-        /**
-         * The maximum number of background jobs we allow when the system is in a low
-         * memory state.
-         */
-        int BG_LOW_JOB_COUNT = DEFAULT_BG_LOW_JOB_COUNT;
-        /**
-         * The maximum number of background jobs we allow when the system is in a critical
-         * memory state.
-         */
-        int BG_CRITICAL_JOB_COUNT = DEFAULT_BG_CRITICAL_JOB_COUNT;
 
         // Max job counts for screen on / off, for each memory trim level.
-        // TODO Remove the old configs such as FG_JOB_COUNT and BG_*_COUNT, once the code switches
-        // to the below configs.
-
         final MaxJobCounts MAX_JOB_COUNTS_ON_NORMAL = new MaxJobCounts(
-                4, "max_job_total_on_normal",
-                2, "max_job_bg_on_normal");
+                8, "max_job_total_on_normal",
+                6, "max_job_max_bg_on_normal",
+                2, "max_job_min_bg_on_normal");
 
         final MaxJobCounts MAX_JOB_COUNTS_ON_MODERATE = new MaxJobCounts(
-                4, "max_job_total_on_moderate",
-                1, "max_job_bg_on_moderate");
+                8, "max_job_total_on_moderate",
+                4, "max_job_max_bg_on_moderate",
+                2, "max_job_min_bg_on_moderate");
 
         final MaxJobCounts MAX_JOB_COUNTS_ON_LOW = new MaxJobCounts(
-                4, "max_job_total_on_low",
-                1, "max_job_bg_on_low");
+                5, "max_job_total_on_low",
+                1, "max_job_max_bg_on_low",
+                1, "max_job_min_bg_on_low");
 
         final MaxJobCounts MAX_JOB_COUNTS_ON_CRITICAL = new MaxJobCounts(
-                2, "max_job_total_on_critical",
-                1, "max_job_bg_on_critical");
+                5, "max_job_total_on_critical",
+                1, "max_job_max_bg_on_critical",
+                1, "max_job_min_bg_on_critical");
 
         final MaxJobCounts MAX_JOB_COUNTS_OFF_NORMAL = new MaxJobCounts(
-                8, "max_job_total_off_normal",
-                4, "max_job_bg_off_normal");
+                10, "max_job_total_off_normal",
+                6, "max_job_max_bg_off_normal",
+                2, "max_job_min_bg_off_normal");
 
         final MaxJobCounts MAX_JOB_COUNTS_OFF_MODERATE = new MaxJobCounts(
-                6, "max_job_total_off_moderate",
-                4, "max_job_bg_off_moderate");
+                10, "max_job_total_off_moderate",
+                4, "max_job_max_bg_off_moderate",
+                2, "max_job_min_bg_off_moderate");
 
         final MaxJobCounts MAX_JOB_COUNTS_OFF_LOW = new MaxJobCounts(
-                4, "max_job_total_off_low",
-                1, "max_job_bg_off_low");
+                5, "max_job_total_off_low",
+                1, "max_job_max_bg_off_low",
+                1, "max_job_min_bg_off_low");
 
         final MaxJobCounts MAX_JOB_COUNTS_OFF_CRITICAL = new MaxJobCounts(
-                2, "max_job_total_off_critical",
-                1, "max_job_bg_off_critical");
+                5, "max_job_total_off_critical",
+                1, "max_job_max_bg_off_critical",
+                1, "max_job_min_bg_off_critical");
+
+        /** Wait for this long after screen off before increasing the job concurrency. */
+        final KeyValueListParser.IntValue SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS =
+                new KeyValueListParser.IntValue(
+                        "screen_off_job_concurrency_increase_delay_ms", 30_000);
 
         /**
          * The maximum number of times we allow a job to have itself rescheduled before
@@ -706,28 +711,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DEFAULT_HEAVY_USE_FACTOR);
             MODERATE_USE_FACTOR = mParser.getFloat(KEY_MODERATE_USE_FACTOR,
                     DEFAULT_MODERATE_USE_FACTOR);
-            FG_JOB_COUNT = mParser.getInt(KEY_FG_JOB_COUNT,
-                    DEFAULT_FG_JOB_COUNT);
-            BG_NORMAL_JOB_COUNT = mParser.getInt(KEY_BG_NORMAL_JOB_COUNT,
-                    DEFAULT_BG_NORMAL_JOB_COUNT);
-            if ((FG_JOB_COUNT+BG_NORMAL_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
-                BG_NORMAL_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
-            }
-            BG_MODERATE_JOB_COUNT = mParser.getInt(KEY_BG_MODERATE_JOB_COUNT,
-                    DEFAULT_BG_MODERATE_JOB_COUNT);
-            if ((FG_JOB_COUNT+BG_MODERATE_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
-                BG_MODERATE_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
-            }
-            BG_LOW_JOB_COUNT = mParser.getInt(KEY_BG_LOW_JOB_COUNT,
-                    DEFAULT_BG_LOW_JOB_COUNT);
-            if ((FG_JOB_COUNT+BG_LOW_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
-                BG_LOW_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
-            }
-            BG_CRITICAL_JOB_COUNT = mParser.getInt(KEY_BG_CRITICAL_JOB_COUNT,
-                    DEFAULT_BG_CRITICAL_JOB_COUNT);
-            if ((FG_JOB_COUNT+BG_CRITICAL_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
-                BG_CRITICAL_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
-            }
 
             MAX_JOB_COUNTS_ON_NORMAL.parse(mParser);
             MAX_JOB_COUNTS_ON_MODERATE.parse(mParser);
@@ -798,11 +781,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.printPair(KEY_MIN_READY_JOBS_COUNT, MIN_READY_JOBS_COUNT).println();
             pw.printPair(KEY_HEAVY_USE_FACTOR, HEAVY_USE_FACTOR).println();
             pw.printPair(KEY_MODERATE_USE_FACTOR, MODERATE_USE_FACTOR).println();
-            pw.printPair(KEY_FG_JOB_COUNT, FG_JOB_COUNT).println();
-            pw.printPair(KEY_BG_NORMAL_JOB_COUNT, BG_NORMAL_JOB_COUNT).println();
-            pw.printPair(KEY_BG_MODERATE_JOB_COUNT, BG_MODERATE_JOB_COUNT).println();
-            pw.printPair(KEY_BG_LOW_JOB_COUNT, BG_LOW_JOB_COUNT).println();
-            pw.printPair(KEY_BG_CRITICAL_JOB_COUNT, BG_CRITICAL_JOB_COUNT).println();
 
             MAX_JOB_COUNTS_ON_NORMAL.dump(pw, "");
             MAX_JOB_COUNTS_ON_MODERATE.dump(pw, "");
@@ -859,11 +837,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             proto.write(ConstantsProto.MIN_READY_JOBS_COUNT, MIN_READY_JOBS_COUNT);
             proto.write(ConstantsProto.HEAVY_USE_FACTOR, HEAVY_USE_FACTOR);
             proto.write(ConstantsProto.MODERATE_USE_FACTOR, MODERATE_USE_FACTOR);
-            proto.write(ConstantsProto.FG_JOB_COUNT, FG_JOB_COUNT);
-            proto.write(ConstantsProto.BG_NORMAL_JOB_COUNT, BG_NORMAL_JOB_COUNT);
-            proto.write(ConstantsProto.BG_MODERATE_JOB_COUNT, BG_MODERATE_JOB_COUNT);
-            proto.write(ConstantsProto.BG_LOW_JOB_COUNT, BG_LOW_JOB_COUNT);
-            proto.write(ConstantsProto.BG_CRITICAL_JOB_COUNT, BG_CRITICAL_JOB_COUNT);
 
             // TODO Dump max job counts.
 
@@ -1558,6 +1531,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             } catch (RemoteException e) {
                 // ignored; both services live in system_server
             }
+
+            mConcurrencyManager.onSystemReady();
+
             // Remove any jobs that are not associated with any of the current users.
             cancelJobsForNonExistentUsers();
             // Register thermal callback
@@ -1685,7 +1661,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Reschedules the given job based on the job's backoff policy. It doesn't make sense to
      * specify an override deadline on a failed job (the failed job will run even though it's not
      * ready), so we reschedule it with {@link JobStatus#NO_LATEST_RUNTIME}, but specify that any
-     * ready job with {@link JobStatus#numFailures} > 0 will be executed.
+     * ready job with {@link JobStatus#getNumFailures()} > 0 will be executed.
      *
      * @param failureToReschedule Provided job status that we will reschedule.
      * @return A newly instantiated JobStatus with the same constraints as the last job except
@@ -2467,7 +2443,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * A controller can force a job into the pending queue even if it's already running, but
      * here is where we decide whether to actually execute it.
      */
-    private void maybeRunPendingJobsLocked() {
+    void maybeRunPendingJobsLocked() {
         if (DEBUG) {
             Slog.d(TAG, "pending queue: " + mPendingJobs.size() + " jobs.");
         }
@@ -3480,8 +3456,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                 pw.println();
                 pw.print("mReadyToRock="); pw.println(mReadyToRock);
                 pw.print("mReportedActive="); pw.println(mReportedActive);
-                pw.print("mMaxActiveJobs="); pw.println(mMaxActiveJobs);
             }
+            pw.println();
+
+            mConcurrencyManager.dumpLocked(pw);
+
             pw.println();
             pw.print("PersistStats: ");
             pw.println(mJobs.getPersistStats());
@@ -3634,8 +3613,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (filterUid == -1) {
                 proto.write(JobSchedulerServiceDumpProto.IS_READY_TO_ROCK, mReadyToRock);
                 proto.write(JobSchedulerServiceDumpProto.REPORTED_ACTIVE, mReportedActive);
-                proto.write(JobSchedulerServiceDumpProto.MAX_ACTIVE_JOBS, mMaxActiveJobs);
             }
+            mConcurrencyManager.dumpProtoLocked(proto);
         }
 
         proto.flush();
