@@ -48,7 +48,7 @@ static void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int outFd);
 
 class FileDescriptor {
 public:
-    FileDescriptor(int fd) : mFd(fd) {}
+    explicit FileDescriptor(int fd) : mFd(fd) {}
     ~FileDescriptor() {
         if (mFd != -1) {
             close(mFd);
@@ -56,7 +56,7 @@ public:
         }
     }
     bool valid() { return mFd != -1; }
-    operator int() { return mFd; }
+    operator int() { return mFd; } // NOLINT(google-explicit-constructor)
 
 private:
     int mFd;
@@ -64,7 +64,7 @@ private:
 
 class FileOutputStreamLite : public io::ZeroCopyOutputStream {
 public:
-    FileOutputStreamLite(int fd) : mCopyAdapter(fd), mImpl(&mCopyAdapter) {}
+    explicit FileOutputStreamLite(int fd) : mCopyAdapter(fd), mImpl(&mCopyAdapter) {}
     virtual ~FileOutputStreamLite() {}
 
     int GetErrno() { return mCopyAdapter.mErrno; }
@@ -82,7 +82,7 @@ private:
         int mFd;
         int mErrno = 0;
 
-        FDAdapter(int fd) : mFd(fd) {}
+        explicit FDAdapter(int fd) : mFd(fd) {}
         virtual ~FDAdapter() {}
 
         virtual bool Write(const void* buffer, int size) override {
