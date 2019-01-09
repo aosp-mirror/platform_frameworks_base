@@ -291,6 +291,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 new DebugFlag("debug.optimize_startinput", false);
     }
 
+    @UserIdInt
+    private int mLastSwitchUserId;
 
     final Context mContext;
     final Resources mRes;
@@ -1436,6 +1438,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
         }
 
+        mLastSwitchUserId = userId;
+
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(
                 mRes, context.getContentResolver(), mMethodMap, mMethodList, userId, !mSystemReady);
@@ -1523,6 +1527,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (DEBUG) Slog.d(TAG, "Switching user stage 3/3. newUserId=" + newUserId
                 + " selectedIme=" + mSettings.getSelectedInputMethod());
+
+        mLastSwitchUserId = newUserId;
     }
 
     void updateCurrentProfileIds() {
@@ -4424,6 +4430,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return refreshDebugProperties();
             }
 
+            if ("get-last-switch-user-id".equals(cmd)) {
+                return mService.getLastSwitchUserId(this);
+            }
+
             // For existing "adb shell ime <command>".
             if ("ime".equals(cmd)) {
                 final String imeCommand = getNextArg();
@@ -4515,6 +4525,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // ----------------------------------------------------------------------
     // Shell command handlers:
+
+    @BinderThread
+    @ShellCommandResult
+    private int getLastSwitchUserId(@NonNull ShellCommand shellCommand) {
+        synchronized (mMethodMap) {
+            shellCommand.getOutPrintWriter().println(mLastSwitchUserId);
+            return ShellCommandResult.SUCCESS;
+        }
+    }
 
     /**
      * Handles {@code adb shell ime list}.
