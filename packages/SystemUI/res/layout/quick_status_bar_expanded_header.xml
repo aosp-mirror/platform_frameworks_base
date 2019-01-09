@@ -24,14 +24,13 @@
     android:layout_gravity="@integer/notification_panel_layout_gravity"
     android:background="@android:color/transparent"
     android:baselineAligned="false"
-    android:clickable="true"
+    android:clickable="false"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:paddingTop="0dp"
     android:paddingEnd="0dp"
     android:paddingStart="0dp"
-    android:elevation="4dp"
-    android:importantForAccessibility="no" >
+    android:elevation="4dp" >
 
     <include layout="@layout/quick_status_bar_header_system_icons" />
 
