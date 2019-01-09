@@ -38,7 +38,7 @@ static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkSca
     canvas->drawRect(left, top, right, bottom, paint);
 }
 
-void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& paint) {
+void Canvas::drawTextDecorations(float x, float y, float length, const Paint& paint) {
     uint32_t flags;
     PaintFilter* paintFilter = getPaintFilter();
     if (paintFilter) {
