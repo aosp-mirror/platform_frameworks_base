@@ -16,9 +16,6 @@
 
 package android.net.util;
 
-import java.nio.ByteBuffer;
-
-
 /**
  * Networking protocol constants.
  *
@@ -81,8 +78,6 @@ public final class NetworkConstants {
      *     - https://tools.ietf.org/html/rfc791
      */
     public static final int IPV4_HEADER_MIN_LEN = 20;
-    public static final int IPV4_MIN_MTU = 68;
-    public static final int IPV4_MAX_MTU = 65_535;
     public static final int IPV4_IHL_MASK = 0xf;
     public static final int IPV4_FLAGS_OFFSET = 6;
     public static final int IPV4_FRAGMENT_MASK = 0x1fff;
