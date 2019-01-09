@@ -8199,6 +8199,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>The populated structure is then passed to the service through
      * {@link ContentCaptureSession#notifyViewAppeared(ViewStructure)}.
      *
+     * <p><b>Note: </b>views that manage a virtual structure under this view must populate just
+     * the node representing this view and return right away, then asynchronously report (not
+     * necessarily in the UI thread) when the children nodes appear, disappear or have their text
+     * changed by calling
+     * {@link ContentCaptureSession#notifyViewAppeared(ViewStructure)},
+     * {@link ContentCaptureSession#notifyViewDisappeared(AutofillId)}, and
+     * {@link ContentCaptureSession#notifyViewTextChanged(AutofillId, CharSequence, int)}
+     * respectively. The structure for the a child must be created using
+     * {@link ContentCaptureSession#newVirtualViewStructure(AutofillId, int)}, and the
+     * {@code autofillId} for a child can be obtained either through
+     * {@code childStructure.getAutofillId()} or
+     * {@link ContentCaptureSession#newAutofillId(AutofillId, int)}.
+     *
      * <p><b>Note: </b>the following methods of the {@code structure} will be ignored:
      * <ul>
      *   <li>{@link ViewStructure#setChildCount(int)}
