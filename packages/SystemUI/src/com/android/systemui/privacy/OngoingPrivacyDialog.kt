@@ -52,7 +52,8 @@ class OngoingPrivacyDialog constructor(
 
                         @Suppress("DEPRECATION")
                         override fun onClick(dialog: DialogInterface?, which: Int) {
-                            Dependency.get(ActivityStarter::class.java).startActivity(intent, false)
+                            Dependency.get(ActivityStarter::class.java)
+                                    .postStartActivityDismissingKeyguard(intent, 0)
                         }
                     })
         }
