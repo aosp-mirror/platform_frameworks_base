@@ -16,6 +16,7 @@
 
 package android.net.dhcp;
 
+import static android.net.InetAddresses.parseNumericAddress;
 import static android.net.dhcp.DhcpLease.HOSTNAME_NONE;
 import static android.net.dhcp.DhcpLeaseRepository.CLIENTID_UNSPEC;
 import static android.net.dhcp.DhcpLeaseRepository.INETADDR_UNSPEC;
@@ -29,7 +30,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import static java.lang.String.format;
-import static java.net.InetAddress.parseNumericAddress;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

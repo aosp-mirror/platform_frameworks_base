@@ -14,28 +14,22 @@
 // limitations under the License.
 //
 
-// Library including the network stack, used to compile the network stack app, or linked into the
-// system server on devices that run the stack there
-java_library {
-    name: "NetworkStackLib",
-    installable: true,
-    srcs: [
-        "src/**/*.java",
-    ],
+android_test {
+    name: "NetworkStackTests",
+    srcs: ["src/**/*.java"],
     static_libs: [
-        "dhcp-packet-lib",
-        "frameworks-net-shared-utils",
+        "android-support-test",
+        "mockito-target-extended-minus-junit4",
+        "NetworkStackLib",
+        "testables",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+    jni_libs: [
+        // For mockito extended
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
     ]
-}
-
-// Updatable network stack packaged as an application
-android_app {
-    name: "NetworkStack",
-    platform_apis: true,
-    certificate: "platform",
-    privileged: true,
-    static_libs: [
-        "NetworkStackLib"
-    ],
-    manifest: "AndroidManifest.xml",
 }
