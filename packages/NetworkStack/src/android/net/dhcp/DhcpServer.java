@@ -23,7 +23,8 @@ import static android.net.dhcp.DhcpPacket.DHCP_CLIENT;
 import static android.net.dhcp.DhcpPacket.DHCP_HOST_NAME;
 import static android.net.dhcp.DhcpPacket.DHCP_SERVER;
 import static android.net.dhcp.DhcpPacket.ENCAP_BOOTP;
-import static android.net.dhcp.DhcpPacket.INFINITE_LEASE;
+import static android.net.dhcp.IDhcpServer.STATUS_INVALID_ARGUMENT;
+import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
@@ -32,21 +33,28 @@ import static android.system.OsConstants.SO_BINDTODEVICE;
 import static android.system.OsConstants.SO_BROADCAST;
 import static android.system.OsConstants.SO_REUSEADDR;
 
+import static com.android.server.util.NetworkStackConstants.INFINITE_LEASE;
+import static com.android.server.util.PermissionUtil.checkNetworkStackCallingPermission;
+
 import static java.lang.Integer.toUnsignedLong;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.INetworkStackStatusCallback;
 import android.net.MacAddress;
 import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.util.SharedLog;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
@@ -70,7 +78,7 @@ import java.util.ArrayList;
  * on the looper asynchronously.
  * @hide
  */
-public class DhcpServer {
+public class DhcpServer extends IDhcpServer.Stub {
     private static final String REPO_TAG = "Repository";
 
     // Lease time to transmit to client instead of a negative time in case a lease expired before
@@ -82,7 +90,7 @@ public class DhcpServer {
     private static final int CMD_UPDATE_PARAMS = 3;
 
     @NonNull
-    private final ServerHandler mHandler;
+    private final HandlerThread mHandlerThread;
     @NonNull
     private final String mIfName;
     @NonNull
@@ -93,9 +101,13 @@ public class DhcpServer {
     private final Dependencies mDeps;
     @NonNull
     private final Clock mClock;
-    @NonNull
-    private final DhcpPacketListener mPacketListener;
 
+    @Nullable
+    private volatile ServerHandler mHandler;
+
+    // Accessed only on the handler thread
+    @Nullable
+    private DhcpPacketListener mPacketListener;
     @Nullable
     private FileDescriptor mSocket;
     @NonNull
@@ -156,6 +168,12 @@ public class DhcpServer {
          */
         void addArpEntry(@NonNull Inet4Address ipv4Addr, @NonNull MacAddress ethAddr,
                 @NonNull String ifname, @NonNull FileDescriptor fd) throws IOException;
+
+        /**
+         * Verify that the caller is allowed to call public methods on DhcpServer.
+         * @throws SecurityException The caller is not allowed to call public methods on DhcpServer.
+         */
+        void checkCaller() throws SecurityException;
     }
 
     private class DependenciesImpl implements Dependencies {
@@ -189,6 +207,11 @@ public class DhcpServer {
                 @NonNull String ifname, @NonNull FileDescriptor fd) throws IOException {
             NetworkUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
         }
+
+        @Override
+        public void checkCaller() {
+            checkNetworkStackCallingPermission();
+        }
     }
 
     private static class MalformedPacketException extends Exception {
@@ -197,41 +220,62 @@ public class DhcpServer {
         }
     }
 
-    public DhcpServer(@NonNull Looper looper, @NonNull String ifName,
+    public DhcpServer(@NonNull String ifName,
             @NonNull DhcpServingParams params, @NonNull SharedLog log) {
-        this(looper, ifName, params, log, null);
+        this(new HandlerThread(DhcpServer.class.getSimpleName() + "." + ifName),
+                ifName, params, log, null);
     }
 
     @VisibleForTesting
-    DhcpServer(@NonNull Looper looper, @NonNull String ifName,
+    DhcpServer(@NonNull HandlerThread handlerThread, @NonNull String ifName,
             @NonNull DhcpServingParams params, @NonNull SharedLog log,
             @Nullable Dependencies deps) {
         if (deps == null) {
             deps = new DependenciesImpl();
         }
-        mHandler = new ServerHandler(looper);
+        mHandlerThread = handlerThread;
         mIfName = ifName;
         mServingParams = params;
         mLog = log;
         mDeps = deps;
         mClock = deps.makeClock();
-        mPacketListener = deps.makePacketListener();
         mLeaseRepo = deps.makeLeaseRepository(mServingParams, mLog, mClock);
     }
 
     /**
      * Start listening for and responding to packets.
+     *
+     * <p>It is not legal to call this method more than once; in particular the server cannot be
+     * restarted after being stopped.
      */
-    public void start() {
-        mHandler.sendEmptyMessage(CMD_START_DHCP_SERVER);
+    @Override
+    public void start(@Nullable INetworkStackStatusCallback cb) {
+        mDeps.checkCaller();
+        mHandlerThread.start();
+        mHandler = new ServerHandler(mHandlerThread.getLooper());
+        sendMessage(CMD_START_DHCP_SERVER, cb);
     }
 
     /**
      * Update serving parameters. All subsequently received requests will be handled with the new
      * parameters, and current leases that are incompatible with the new parameters are dropped.
      */
-    public void updateParams(@NonNull DhcpServingParams params) {
-        sendMessage(CMD_UPDATE_PARAMS, params);
+    @Override
+    public void updateParams(@Nullable DhcpServingParamsParcel params,
+            @Nullable INetworkStackStatusCallback cb) throws RemoteException {
+        mDeps.checkCaller();
+        final DhcpServingParams parsedParams;
+        try {
+            // throws InvalidParameterException with null params
+            parsedParams = DhcpServingParams.fromParcelableObject(params);
+        } catch (DhcpServingParams.InvalidParameterException e) {
+            mLog.e("Invalid parameters sent to DhcpServer", e);
+            if (cb != null) {
+                cb.onStatusAvailable(STATUS_INVALID_ARGUMENT);
+            }
+            return;
+        }
+        sendMessage(CMD_UPDATE_PARAMS, new Pair<>(parsedParams, cb));
     }
 
     /**
@@ -240,11 +284,17 @@ public class DhcpServer {
      * <p>As the server is stopped asynchronously, some packets may still be processed shortly after
      * calling this method.
      */
-    public void stop() {
-        mHandler.sendEmptyMessage(CMD_STOP_DHCP_SERVER);
+    @Override
+    public void stop(@Nullable INetworkStackStatusCallback cb) {
+        mDeps.checkCaller();
+        sendMessage(CMD_STOP_DHCP_SERVER, cb);
     }
 
     private void sendMessage(int what, @Nullable Object obj) {
+        if (mHandler == null) {
+            mLog.e("Attempting to send a command to stopped DhcpServer: " + what);
+            return;
+        }
         mHandler.sendMessage(mHandler.obtainMessage(what, obj));
     }
 
@@ -255,23 +305,42 @@ public class DhcpServer {
 
         @Override
         public void handleMessage(@NonNull Message msg) {
+            final INetworkStackStatusCallback cb;
             switch (msg.what) {
                 case CMD_UPDATE_PARAMS:
-                    final DhcpServingParams params = (DhcpServingParams) msg.obj;
+                    final Pair<DhcpServingParams, INetworkStackStatusCallback> pair =
+                            (Pair<DhcpServingParams, INetworkStackStatusCallback>) msg.obj;
+                    final DhcpServingParams params = pair.first;
                     mServingParams = params;
                     mLeaseRepo.updateParams(
                             DhcpServingParams.makeIpPrefix(mServingParams.serverAddr),
                             params.excludedAddrs,
                             params.dhcpLeaseTimeSecs);
+
+                    cb = pair.second;
                     break;
                 case CMD_START_DHCP_SERVER:
-                    // This is a no-op if the listener is already started
+                    mPacketListener = mDeps.makePacketListener();
                     mPacketListener.start();
+                    cb = (INetworkStackStatusCallback) msg.obj;
                     break;
                 case CMD_STOP_DHCP_SERVER:
-                    // This is a no-op if the listener was not started
-                    mPacketListener.stop();
+                    if (mPacketListener != null) {
+                        mPacketListener.stop();
+                        mPacketListener = null;
+                    }
+                    mHandlerThread.quitSafely();
+                    cb = (INetworkStackStatusCallback) msg.obj;
                     break;
+                default:
+                    return;
+            }
+            if (cb != null) {
+                try {
+                    cb.onStatusAvailable(STATUS_SUCCESS);
+                } catch (RemoteException e) {
+                    mLog.e("Could not send status back to caller", e);
+                }
             }
         }
     }
@@ -572,7 +641,7 @@ public class DhcpServer {
                 return mSocket;
             } catch (IOException | ErrnoException e) {
                 mLog.e("Error creating UDP socket", e);
-                DhcpServer.this.stop();
+                DhcpServer.this.stop(null);
                 return null;
             } finally {
                 TrafficStats.setThreadStatsTag(oldTag);

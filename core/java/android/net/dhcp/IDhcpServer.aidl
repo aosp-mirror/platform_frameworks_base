@@ -13,13 +13,20 @@
  * See the License for the specific language governing perNmissions and
  * limitations under the License.
  */
-package android.net;
 
+package android.net.dhcp;
+
+import android.net.INetworkStackStatusCallback;
 import android.net.dhcp.DhcpServingParamsParcel;
-import android.net.dhcp.IDhcpServerCallbacks;
 
 /** @hide */
-oneway interface INetworkStackConnector {
-    void makeDhcpServer(in String ifName, in DhcpServingParamsParcel params,
-        in IDhcpServerCallbacks cb);
+oneway interface IDhcpServer {
+    const int STATUS_UNKNOWN = 0;
+    const int STATUS_SUCCESS = 1;
+    const int STATUS_INVALID_ARGUMENT = 2;
+    const int STATUS_UNKNOWN_ERROR = 3;
+
+    void start(in INetworkStackStatusCallback cb);
+    void updateParams(in DhcpServingParamsParcel params, in INetworkStackStatusCallback cb);
+    void stop(in INetworkStackStatusCallback cb);
 }
