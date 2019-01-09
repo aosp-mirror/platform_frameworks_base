@@ -199,6 +199,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         final int flags = 0; // TODO(b/111276913): get proper flags
 
         try {
+            if (mSystemServerInterface == null) return;
+
             mSystemServerInterface.startSession(mContext.getUserId(), mApplicationToken,
                     componentName, mId, flags, new IResultReceiver.Stub() {
                         @Override
@@ -383,6 +385,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
 
         try {
+            if (mSystemServerInterface == null) return;
+
             mSystemServerInterface.finishSession(mContext.getUserId(), mId);
         } catch (RemoteException e) {
             Log.e(TAG, "Error destroying system-service session " + mId + " for "
