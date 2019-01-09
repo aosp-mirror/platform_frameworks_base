@@ -1326,7 +1326,7 @@ public final class PowerManager {
      * @return Battery saver state data.
      *
      * @hide
-     * @see com.android.server.power.BatterySaverPolicy
+     * @see com.android.server.power.batterysaver.BatterySaverPolicy
      * @see PowerSaveState
      */
     public PowerSaveState getPowerSaveState(@ServiceType int serviceType) {

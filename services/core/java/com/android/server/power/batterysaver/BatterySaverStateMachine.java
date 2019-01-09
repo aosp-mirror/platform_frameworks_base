@@ -30,7 +30,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
-import com.android.server.power.BatterySaverPolicy;
 import com.android.server.power.BatterySaverStateMachineProto;
 
 import java.io.PrintWriter;
@@ -220,8 +219,8 @@ public class BatterySaverStateMachine {
     }
 
     /**
-     * Run a {@link Runnable} on a background handler, but lazily. If the same {@link Runnable},
-     * it'll be first removed before a new one is posted.
+     * Run a {@link Runnable} on a background handler, but lazily. If the same {@link Runnable} is
+     * already registered, it'll be first removed before being re-posted.
      */
     @VisibleForTesting
     void runOnBgThreadLazy(Runnable r, int delayMillis) {
