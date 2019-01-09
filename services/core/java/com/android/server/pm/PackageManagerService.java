@@ -15618,13 +15618,25 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!hasDynamicLibraries) {
             return null;
         }
+        final boolean isUpdatedSystemApp = pkg.isUpdatedSystemApp();
+        // We may not yet have disabled the updated package yet, so be sure to grab the
+        // current setting if that's the case.
+        final PackageSetting updatedSystemPs = isUpdatedSystemApp
+                ? scanResult.request.disabledPkgSetting == null
+                        ? scanResult.request.oldPkgSetting
+                        : scanResult.request.disabledPkgSetting
+                : null;
+        if (isUpdatedSystemApp && (updatedSystemPs.pkg == null
+                || updatedSystemPs.pkg.libraryNames == null)) {
+            Slog.w(TAG, "Package " + pkg.packageName + " declares libraries that are not "
+                    + "declared on the system image; skipping");
+            return null;
+        }
         final ArrayList<SharedLibraryInfo> infos =
                 new ArrayList<>(scanResult.dynamicSharedLibraryInfos.size());
-        final boolean updatedSystemApp = pkg.isUpdatedSystemApp();
         for (SharedLibraryInfo info : scanResult.dynamicSharedLibraryInfos) {
-            String name = info.getName();
-            boolean allowed = false;
-            if (updatedSystemApp) {
+            final String name = info.getName();
+            if (isUpdatedSystemApp) {
                 // New library entries can only be added through the
                 // system image.  This is important to get rid of a lot
                 // of nasty edge cases: for example if we allowed a non-
@@ -15634,36 +15646,20 @@ public class PackageManagerService extends IPackageManager.Stub
                 // have allowed apps on the device which aren't compatible
                 // with it.  Better to just have the restriction here, be
                 // conservative, and create many fewer cases that can negatively
-                // impact the user experience. We may not yet have disabled the
-                // updated package yet, so be sure to grab the current setting if
-                // that's the case.
-                final PackageSetting sysPs = scanResult.request.disabledPkgSetting == null
-                        ? scanResult.request.oldPkgSetting
-                        : scanResult.request.disabledPkgSetting;
-                if (sysPs.pkg != null && sysPs.pkg.libraryNames != null) {
-                    for (int j = 0; j < sysPs.pkg.libraryNames.size(); j++) {
-                        if (name.equals(sysPs.pkg.libraryNames.get(j))) {
-                            allowed = true;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                allowed = true;
-            }
-            if (allowed) {
-                if (sharedLibExists(
-                        name, SharedLibraryInfo.VERSION_UNDEFINED, existingSharedLibraries)) {
-                    Slog.w(TAG, "Package " + pkg.packageName + " library "
-                            + name + " already exists; skipping");
+                // impact the user experience.
+                if (!updatedSystemPs.pkg.libraryNames.contains(name)) {
+                    Slog.w(TAG, "Package " + pkg.packageName + " declares library " + name
+                            + " that is not declared on system image; skipping");
                     continue;
                 }
-                infos.add(info);
-            } else {
-                Slog.w(TAG, "Package " + pkg.packageName + " declares lib "
-                        + name + " that is not declared on system image; skipping");
+            }
+            if (sharedLibExists(
+                    name, SharedLibraryInfo.VERSION_UNDEFINED, existingSharedLibraries)) {
+                Slog.w(TAG, "Package " + pkg.packageName + " declares library " + name
+                        + " that already exists; skipping");
                 continue;
             }
+            infos.add(info);
         }
         return infos;
     }
