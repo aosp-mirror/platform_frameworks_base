@@ -44,6 +44,9 @@ public class Input extends BaseCommand {
     private static final String INVALID_DISPLAY_ARGUMENTS =
             "Error: Invalid arguments for display ID.";
 
+    private static final float DEFAULT_PRESSURE = 1.0f;
+    private static final float NO_PRESSURE = 0.0f;
+
     private static final Map<String, Integer> SOURCES = new HashMap<String, Integer>() {{
         put("keyboard", InputDevice.SOURCE_KEYBOARD);
         put("dpad", InputDevice.SOURCE_DPAD);
@@ -76,6 +79,7 @@ public class Input extends BaseCommand {
         COMMANDS.put("draganddrop", new InputDragAndDrop());
         COMMANDS.put("press", new InputPress());
         COMMANDS.put("roll", new InputRoll());
+        COMMANDS.put("motionevent", new InputMotionEvent());
     }
 
     @Override
@@ -304,6 +308,41 @@ public class Input extends BaseCommand {
         }
     }
 
+    class InputMotionEvent implements InputCmd {
+        @Override
+        public void run(int inputSource, int displayId) {
+            inputSource = getSource(inputSource, InputDevice.SOURCE_TOUCHSCREEN);
+            sendMotionEvent(inputSource, nextArgRequired(), Float.parseFloat(nextArgRequired()),
+                    Float.parseFloat(nextArgRequired()), displayId);
+        }
+
+        private void sendMotionEvent(int inputSource, String motionEventType, float x, float y,
+                int displayId) {
+            final int action;
+            final float pressure;
+
+            switch (motionEventType.toUpperCase()) {
+                case "DOWN":
+                    action = MotionEvent.ACTION_DOWN;
+                    pressure = DEFAULT_PRESSURE;
+                    break;
+                case "UP":
+                    action = MotionEvent.ACTION_UP;
+                    pressure = NO_PRESSURE;
+                    break;
+                case "MOVE":
+                    action = MotionEvent.ACTION_MOVE;
+                    pressure = DEFAULT_PRESSURE;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown motionevent " + motionEventType);
+            }
+
+            final long now = SystemClock.uptimeMillis();
+            injectMotionEvent(inputSource, action, now, now, x, y, pressure, displayId);
+        }
+    }
+
     /**
      * Abstract class for command
      * use nextArgRequired or nextArg to check next argument if necessary.
@@ -391,5 +430,6 @@ public class Input extends BaseCommand {
                 + " (Default: touchscreen)");
         out.println("      press (Default: trackball)");
         out.println("      roll <dx> <dy> (Default: trackball)");
+        out.println("      event <DOWN|UP|MOVE> <x> <y> (Default: touchscreen)");
     }
 }
