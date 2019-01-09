@@ -77,10 +77,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         // TODO(amyjojo) make System Audio Control controllable by users
         /*mSystemAudioControlFeatureEnabled =
         mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);*/
+        // TODO(b/80297700): set read-only property in config instead of setting here
+        SystemProperties.set(Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, "false");
         mAutoDeviceOff = mService.readBooleanSetting(
-            Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, true);
+                Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, true);
         mAutoTvOff = mService.readBooleanSetting(
-            Global.HDMI_CONTROL_AUTO_TV_OFF_ENABLED, true);
+                Global.HDMI_CONTROL_AUTO_TV_OFF_ENABLED, true);
     }
 
     @Override
@@ -425,7 +427,21 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         if (newSystemAudioMode && port >= 0) {
             switchToAudioInput();
         }
-        // TODO(b/80297700): Mute device when TV terminates the system audio control
+        // Mute device when feature is turned off and unmute device when feature is turned on.
+        // PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE is false when device never needs to be muted.
+        boolean currentMuteStatus =
+                mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
+        if (SystemProperties.getBoolean(
+                Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, true)
+                && currentMuteStatus == newSystemAudioMode) {
+            mService.getAudioManager()
+                    .adjustStreamVolume(
+                            AudioManager.STREAM_MUSIC,
+                            newSystemAudioMode
+                                    ? AudioManager.ADJUST_UNMUTE
+                                    : AudioManager.ADJUST_MUTE,
+                                    0);
+        }
         updateAudioManagerForSystemAudio(newSystemAudioMode);
         synchronized (mLock) {
             if (mSystemAudioActivated != newSystemAudioMode) {
