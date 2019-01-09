@@ -39,7 +39,6 @@ import com.android.internal.util.Preconditions;
 public final class TextClassifierEventTronLogger {
 
     private static final String TAG = "TCEventTronLogger";
-    private static final boolean DEBUG_LOG_ENABLED = false;
 
     private final MetricsLogger mMetricsLogger;
 
@@ -125,7 +124,7 @@ public final class TextClassifierEventTronLogger {
     }
 
     private void debugLog(LogMaker log) {
-        if (!DEBUG_LOG_ENABLED) {
+        if (!Log.ENABLE_FULL_LOGGING) {
             return;
         }
         final String id = String.valueOf(log.getTaggedData(FIELD_SELECTION_SESSION_ID));
@@ -147,6 +146,6 @@ public final class TextClassifierEventTronLogger {
         builder.append(", model=").append(model);
         builder.append(", entityType=").append(entityType);
 
-        Log.d(TAG, builder.toString());
+        Log.v(TAG, builder.toString());
     }
 }
