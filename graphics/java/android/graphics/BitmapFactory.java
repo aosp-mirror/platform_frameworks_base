@@ -440,7 +440,8 @@ public class BitmapFactory {
             if (opts == null) return;
 
             if (opts.inBitmap != null && opts.inBitmap.getConfig() == Bitmap.Config.HARDWARE) {
-                throw new IllegalArgumentException("Bitmaps with Config.HARWARE are always immutable");
+                throw new IllegalArgumentException(
+                        "Bitmaps with Config.HARDWARE are always immutable");
             }
 
             if (opts.inMutable && opts.inPreferredConfig == Bitmap.Config.HARDWARE) {
