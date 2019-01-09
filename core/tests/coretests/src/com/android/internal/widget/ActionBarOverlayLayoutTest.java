@@ -167,7 +167,7 @@ public class ActionBarOverlayLayoutTest {
     }
 
     private WindowInsets insetsWith(Insets content, DisplayCutout cutout) {
-        return new WindowInsets(content.toRect(), null, null, false, false, cutout);
+        return new WindowInsets(content.toRect(), null, false, false, cutout);
     }
 
     private ViewGroup createViewGroupWithId(int id) {

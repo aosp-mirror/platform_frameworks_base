@@ -16,12 +16,19 @@
 
 package android.view;
 
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.indexOf;
+import static android.view.WindowInsets.Type.sideBars;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.WindowInsets.Builder;
+import android.view.WindowInsets.Type;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,13 +40,13 @@ public class WindowInsetsTest {
 
     @Test
     public void systemWindowInsets_afterConsuming_isConsumed() {
-        assertTrue(new WindowInsets(new Rect(1, 2, 3, 4), null, null, false, false, null)
+        assertTrue(new WindowInsets(new Rect(1, 2, 3, 4), null, false, false, null)
                 .consumeSystemWindowInsets().isConsumed());
     }
 
     @Test
     public void multiNullConstructor_isConsumed() {
-        assertTrue(new WindowInsets(null, null, null, false, false, null).isConsumed());
+        assertTrue(new WindowInsets((Rect) null, null, false, false, null).isConsumed());
     }
 
     @Test
@@ -47,4 +54,12 @@ public class WindowInsetsTest {
         assertTrue(new WindowInsets((Rect) null).isConsumed());
     }
 
+    @Test
+    public void typeMap() {
+        Builder b = new WindowInsets.Builder();
+        b.setInsets(sideBars(), Insets.of(0, 0, 0, 100));
+        b.setInsets(ime(), Insets.of(0, 0, 0, 300));
+        WindowInsets insets = b.build();
+        assertEquals(300, insets.getSystemWindowInsets().bottom);
+    }
 }
