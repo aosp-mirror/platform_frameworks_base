@@ -91,12 +91,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     // Package rollback data for rollback-enabled installs that have not yet
     // been committed. Maps from sessionId to rollback data.
     @GuardedBy("mLock")
-    private final Map<Integer, PackageRollbackData> mPendingRollbacks = new HashMap<>();
+    private final Map<Integer, RollbackData> mPendingRollbacks = new HashMap<>();
 
     // Package rollback data available to be used for rolling back a package.
     // This list is null until the rollback data has been loaded.
     @GuardedBy("mLock")
-    private List<PackageRollbackData> mAvailableRollbacks;
+    private List<RollbackData> mAvailableRollbacks;
 
     // The list of recently executed rollbacks.
     // This list is null until the rollback data has been loaded.
@@ -227,7 +227,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             // available rollbacks, to hopefully avoid forgetting to call it?
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
-                PackageRollbackData data = mAvailableRollbacks.get(i);
+                RollbackData data = mAvailableRollbacks.get(i);
                 if (data.info.packageName.equals(packageName)) {
                     // TODO: Once the RollbackInfo API supports info about
                     // dependant packages, add that info here.
@@ -249,7 +249,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
-                PackageRollbackData data = mAvailableRollbacks.get(i);
+                RollbackData data = mAvailableRollbacks.get(i);
                 packageNames.add(data.info.packageName);
             }
         }
@@ -314,11 +314,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // rollback racing with a roll-forward fix of a buggy package.
         // Figure out how to ensure we don't commit the rollback if
         // roll forward happens at the same time.
-        PackageRollbackData data = null;
+        RollbackData data = null;
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
-                PackageRollbackData available = mAvailableRollbacks.get(i);
+                RollbackData available = mAvailableRollbacks.get(i);
                 // TODO: Check if available.info.lowerVersion matches
                 // rollback.targetPackage.lowerVersion?
                 if (available.info.packageName.equals(packageName)
@@ -420,9 +420,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // testing anyway.
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
-            Iterator<PackageRollbackData> iter = mAvailableRollbacks.iterator();
+            Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
             while (iter.hasNext()) {
-                PackageRollbackData data = iter.next();
+                RollbackData data = iter.next();
                 if (data.info.packageName.equals(packageName)) {
                     iter.remove();
                     removeFile(data.backupDir);
@@ -478,7 +478,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     String packageName = jsonObject.getString("packageName");
                     long higherVersionCode = jsonObject.getLong("higherVersionCode");
                     long lowerVersionCode = jsonObject.getLong("lowerVersionCode");
-                    PackageRollbackData data = new PackageRollbackData(
+                    RollbackData data = new RollbackData(
                             new PackageRollbackInfo(packageName,
                                 new PackageRollbackInfo.PackageVersion(higherVersionCode),
                                 new PackageRollbackInfo.PackageVersion(lowerVersionCode)),
@@ -537,9 +537,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
-            Iterator<PackageRollbackData> iter = mAvailableRollbacks.iterator();
+            Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
             while (iter.hasNext()) {
-                PackageRollbackData data = iter.next();
+                RollbackData data = iter.next();
                 if (data.info.packageName.equals(packageName)
                         && !data.info.higherVersion.equals(installedVersion)) {
                     iter.remove();
@@ -659,9 +659,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
 
-            Iterator<PackageRollbackData> iter = mAvailableRollbacks.iterator();
+            Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
             while (iter.hasNext()) {
-                PackageRollbackData data = iter.next();
+                RollbackData data = iter.next();
                 if (!now.isBefore(data.timestamp.plusMillis(ROLLBACK_LIFETIME_DURATION_MILLIS))) {
                     iter.remove();
                     removeFile(data.backupDir);
@@ -801,7 +801,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return false;
         }
 
-        PackageRollbackData data = new PackageRollbackData(
+        RollbackData data = new RollbackData(
                 new PackageRollbackInfo(packageName, newVersion, installedVersion),
                 backupDir);
 
@@ -889,7 +889,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         @Override
         public void onFinished(int sessionId, boolean success) {
-            PackageRollbackData data = null;
+            RollbackData data = null;
             synchronized (mLock) {
                 data = mPendingRollbacks.remove(sessionId);
             }

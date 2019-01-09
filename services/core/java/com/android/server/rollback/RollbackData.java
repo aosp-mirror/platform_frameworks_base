@@ -26,7 +26,7 @@ import java.time.Instant;
  * This is similar to {@link PackageRollbackInfo}, but extended with
  * additional information for internal bookkeeping.
  */
-class PackageRollbackData {
+class RollbackData {
     public final PackageRollbackInfo info;
 
     /**
@@ -40,7 +40,7 @@ class PackageRollbackData {
      */
     public Instant timestamp;
 
-    PackageRollbackData(PackageRollbackInfo info, File backupDir) {
+    RollbackData(PackageRollbackInfo info, File backupDir) {
         this.info = info;
         this.backupDir = backupDir;
     }
