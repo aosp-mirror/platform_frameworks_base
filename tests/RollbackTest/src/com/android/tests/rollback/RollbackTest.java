@@ -190,6 +190,8 @@ public class RollbackTest {
 
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
+            // TODO: Test this with multi-package rollback, not just single
+            // package rollback.
             // Prep installation of TEST_APP_A
             RollbackTestUtils.uninstall(TEST_APP_A);
             RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
@@ -511,7 +513,7 @@ public class RollbackTest {
      * TODO: Stop ignoring this test once support for multi-package rollback
      * is implemented.
      */
-    @Ignore @Test
+    @Test
     public void testMultiPackage() throws Exception {
         try {
             RollbackTestUtils.adoptShellPermissionIdentity(

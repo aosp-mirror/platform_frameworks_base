@@ -93,6 +93,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @GuardedBy("mLock")
     private final Map<Integer, RollbackData> mPendingRollbacks = new HashMap<>();
 
+    // Map from child session id's for enabled rollbacks to their
+    // corresponding parent session ids.
+    @GuardedBy("mLock")
+    private final Map<Integer, Integer> mChildSessions = new HashMap<>();
+
     // Package rollback data available to be used for rolling back a package.
     // This list is null until the rollback data has been loaded.
     @GuardedBy("mLock")
@@ -771,16 +776,29 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         Log.i(TAG, "Enabling rollback for install of " + packageName);
 
         // Figure out the session id associated with this install.
-        int sessionId = PackageInstaller.SessionInfo.INVALID_ID;
+        int parentSessionId = PackageInstaller.SessionInfo.INVALID_ID;
+        int childSessionId = PackageInstaller.SessionInfo.INVALID_ID;
         PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
         for (PackageInstaller.SessionInfo info : installer.getAllSessions()) {
-            if (sessionMatchesForEnableRollback(info, installFlags, newPackageCodePath)) {
-                // TODO: Check we only have one matching session?
-                sessionId = info.getSessionId();
+            if (info.isMultiPackage()) {
+                for (int childId : info.getChildSessionIds()) {
+                    PackageInstaller.SessionInfo child = installer.getSessionInfo(childId);
+                    if (sessionMatchesForEnableRollback(child, installFlags, newPackageCodePath)) {
+                        // TODO: Check we only have one matching session?
+                        parentSessionId = info.getSessionId();
+                        childSessionId = childId;
+                    }
+                }
+            } else {
+                if (sessionMatchesForEnableRollback(info, installFlags, newPackageCodePath)) {
+                    // TODO: Check we only have one matching session?
+                    parentSessionId = info.getSessionId();
+                    childSessionId = parentSessionId;
+                }
             }
         }
 
-        if (sessionId == PackageInstaller.SessionInfo.INVALID_ID) {
+        if (parentSessionId == PackageInstaller.SessionInfo.INVALID_ID) {
             Log.e(TAG, "Unable to find session id for enabled rollback.");
             return false;
         }
@@ -800,16 +818,28 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageRollbackInfo.PackageVersion installedVersion =
                 new PackageRollbackInfo.PackageVersion(installedPackage.getLongVersionCode());
 
-        File backupDir;
+        PackageRollbackInfo info = new PackageRollbackInfo(
+                packageName, newVersion, installedVersion);
+
+        RollbackData data;
         try {
-            backupDir = Files.createTempDirectory(
-                    mAvailableRollbacksDir.toPath(), null).toFile();
+            synchronized (mLock) {
+                mChildSessions.put(childSessionId, parentSessionId);
+                data = mPendingRollbacks.get(parentSessionId);
+                if (data == null) {
+                    File backupDir = Files.createTempDirectory(
+                            mAvailableRollbacksDir.toPath(), null).toFile();
+                    data = new RollbackData(backupDir);
+                    mPendingRollbacks.put(parentSessionId, data);
+                }
+                data.packages.add(info);
+            }
         } catch (IOException e) {
             Log.e(TAG, "Unable to create rollback for " + packageName, e);
             return false;
         }
 
-        File packageDir = new File(backupDir, packageName);
+        File packageDir = new File(data.backupDir, packageName);
         packageDir.mkdirs();
         try {
             JSONObject json = new JSONObject();
@@ -833,13 +863,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             Log.e(TAG, "Unable to copy package for rollback for " + packageName);
             removeFile(packageDir);
             return false;
-        }
-
-        RollbackData data = new RollbackData(backupDir);
-        data.packages.add(new PackageRollbackInfo(packageName, newVersion, installedVersion));
-
-        synchronized (mLock) {
-            mPendingRollbacks.put(sessionId, data);
         }
 
         return true;
@@ -924,6 +947,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         public void onFinished(int sessionId, boolean success) {
             RollbackData data = null;
             synchronized (mLock) {
+                Integer parentSessionId = mChildSessions.remove(sessionId);
+                if (parentSessionId != null) {
+                    sessionId = parentSessionId;
+                }
                 data = mPendingRollbacks.remove(sessionId);
             }
 
