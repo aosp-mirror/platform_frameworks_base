@@ -8882,6 +8882,14 @@ public final class Settings {
         public static final String ADD_USERS_WHEN_LOCKED = "add_users_when_locked";
 
         /**
+         * Whether applying ramping ringer on incoming phone call ringtone.
+         * <p>1 = apply ramping ringer
+         * <p>0 = do not apply ramping ringer
+         * @hide
+         */
+        public static final String APPLY_RAMPING_RINGER = "apply_ramping_ringer";
+
+        /**
          * Setting whether the global gesture for enabling accessibility is enabled.
          * If this gesture is enabled the user will be able to perfrom it to enable
          * the accessibility state without visiting the settings app.
