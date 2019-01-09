@@ -46,8 +46,6 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.FlashlightControllerImpl;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotControllerImpl;
-import com.android.systemui.statusbar.policy.IconLogger;
-import com.android.systemui.statusbar.policy.IconLoggerImpl;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -129,11 +127,6 @@ public abstract class DependencyBinder {
     @Binds
     public abstract NotificationRemoteInputManager.Callback provideNotificationRemoteInputManager(
             StatusBarRemoteInputCallback callbackImpl);
-
-    /**
-     */
-    @Binds
-    public abstract IconLogger provideIconLogger(IconLoggerImpl loggerImpl);
 
     /**
      */
