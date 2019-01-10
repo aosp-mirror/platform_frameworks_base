@@ -35,10 +35,10 @@ import android.os.BatteryManager;
 import android.os.HardwarePropertiesManager;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
@@ -46,14 +46,16 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.power.PowerUI.WarningsUI;
 import com.android.systemui.statusbar.phone.StatusBar;
 
-import java.time.Duration;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -90,6 +92,11 @@ public class PowerUITest extends SysuiTestCase {
 
         setUnderThreshold();
         createPowerUi();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mPowerUI = null;
     }
 
     @Test
@@ -193,20 +200,6 @@ public class PowerUITest extends SysuiTestCase {
         setOverThreshold();
         final Boolean overheat = true;
         final Boolean shouldBeepSound = false;
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
-        resources.addOverride(R.integer.config_alarmTemperature, 58);
-        resources.addOverride(R.bool.config_alarmTemperatureBeepSound, shouldBeepSound);
-
-        mPowerUI.start();
-        verify(mMockWarnings).notifyHighTemperatureAlarm(overheat, shouldBeepSound);
-    }
-
-    @Test
-    public void testConfig_alarmsWithBeepSound() {
-        setOverThreshold();
-        final Boolean overheat = true;
-        final Boolean shouldBeepSound = true;
         TestableResources resources = mContext.getOrCreateTestableResources();
         resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
         resources.addOverride(R.integer.config_alarmTemperature, 58);
