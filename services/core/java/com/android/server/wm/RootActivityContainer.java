@@ -234,7 +234,7 @@ class RootActivityContainer extends ConfigurationContainer
         mWindowManager = wm;
         setWindowContainer(mWindowManager.mRoot);
         mDisplayManager = mService.mContext.getSystemService(DisplayManager.class);
-        mDisplayManager.registerDisplayListener(this, mService.mH);
+        mDisplayManager.registerDisplayListener(this, mService.mUiHandler);
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
         final Display[] displays = mDisplayManager.getDisplays();
