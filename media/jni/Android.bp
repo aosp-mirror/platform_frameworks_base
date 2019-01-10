@@ -102,7 +102,6 @@ cc_library_shared {
         "libhidlbase",
         "libhidlmemory",
 
-        "libpowermanager",  // Used by JWakeLock. Will be replace with public SDK API.
         "libmediametrics",  // Used by MediaMetrics. Will be replaced with stable C API.
         "libbinder",  // Used by JWakeLock and MediaMetrics.
 
