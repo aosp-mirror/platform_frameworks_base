@@ -146,6 +146,7 @@ LIBANDROID {
     AHardwareBuffer_getNativeHandle; # introduced=26
     AHardwareBuffer_isSupported; # introduced=29
     AHardwareBuffer_lock; # introduced=26
+    AHardwareBuffer_lockPlanes; # introduced=29
     AHardwareBuffer_recvHandleFromUnixSocket; # introduced=26
     AHardwareBuffer_release; # introduced=26
     AHardwareBuffer_sendHandleToUnixSocket; # introduced=26
