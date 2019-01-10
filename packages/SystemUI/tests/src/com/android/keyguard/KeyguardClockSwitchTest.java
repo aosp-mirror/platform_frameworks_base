@@ -21,7 +21,6 @@ import static android.view.View.VISIBLE;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -42,18 +41,17 @@ import android.widget.TextClock;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ClockPlugin;
-import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.function.Consumer;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -62,7 +60,6 @@ import org.mockito.MockitoAnnotations;
 // the keyguard_clcok_switch layout is inflated.
 @RunWithLooper(setAsMainLooper = true)
 public class KeyguardClockSwitchTest extends SysuiTestCase {
-    private PluginManager mPluginManager;
     private FrameLayout mClockContainer;
     private StatusBarStateController.StateListener mStateListener;
 
@@ -73,7 +70,6 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mPluginManager = mDependency.injectMockDependency(PluginManager.class);
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         mKeyguardClockSwitch =
                 (KeyguardClockSwitch) layoutInflater.inflate(R.layout.keyguard_clock_switch, null);
@@ -84,29 +80,12 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     }
 
     @Test
-    public void onAttachToWindow_addPluginListener() {
-        mKeyguardClockSwitch.onAttachedToWindow();
-
-        ArgumentCaptor<PluginListener> listener = ArgumentCaptor.forClass(PluginListener.class);
-        verify(mPluginManager).addPluginListener(listener.capture(), eq(ClockPlugin.class));
-    }
-
-    @Test
-    public void onDetachToWindow_removePluginListener() {
-        mKeyguardClockSwitch.onDetachedFromWindow();
-
-        ArgumentCaptor<PluginListener> listener = ArgumentCaptor.forClass(PluginListener.class);
-        verify(mPluginManager).removePluginListener(listener.capture());
-    }
-
-    @Test
     public void onPluginConnected_showPluginClock() {
         ClockPlugin plugin = mock(ClockPlugin.class);
         TextClock pluginView = new TextClock(getContext());
         when(plugin.getView()).thenReturn(pluginView);
-        PluginListener listener = mKeyguardClockSwitch.getClockPluginListener();
 
-        listener.onPluginConnected(plugin, null);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(plugin);
 
         verify(mClockView).setVisibility(GONE);
         assertThat(plugin.getView().getParent()).isEqualTo(mClockContainer);
@@ -122,9 +101,8 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         ClockPlugin plugin = mock(ClockPlugin.class);
         TextClock pluginView = new TextClock(getContext());
         when(plugin.getBigClockView()).thenReturn(pluginView);
-        PluginListener listener = mKeyguardClockSwitch.getClockPluginListener();
         // WHEN the plugin is connected
-        listener.onPluginConnected(plugin, null);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(plugin);
         // THEN the big clock container is visible and it is the parent of the
         // big clock view.
         assertThat(bigClockContainer.getVisibility()).isEqualTo(VISIBLE);
@@ -134,8 +112,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     @Test
     public void onPluginConnected_nullView() {
         ClockPlugin plugin = mock(ClockPlugin.class);
-        PluginListener listener = mKeyguardClockSwitch.getClockPluginListener();
-        listener.onPluginConnected(plugin, null);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(plugin);
         verify(mClockView, never()).setVisibility(GONE);
     }
 
@@ -144,12 +121,11 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         // GIVEN a plugin has already connected
         ClockPlugin plugin1 = mock(ClockPlugin.class);
         when(plugin1.getView()).thenReturn(new TextClock(getContext()));
-        PluginListener listener = mKeyguardClockSwitch.getClockPluginListener();
-        listener.onPluginConnected(plugin1, null);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(plugin1);
         // WHEN a second plugin is connected
         ClockPlugin plugin2 = mock(ClockPlugin.class);
         when(plugin2.getView()).thenReturn(new TextClock(getContext()));
-        listener.onPluginConnected(plugin2, null);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(plugin2);
         // THEN only the view from the second plugin should be a child of KeyguardClockSwitch.
         assertThat(plugin2.getView().getParent()).isEqualTo(mClockContainer);
         assertThat(plugin1.getView().getParent()).isNull();
@@ -161,10 +137,9 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         TextClock pluginView = new TextClock(getContext());
         when(plugin.getView()).thenReturn(pluginView);
         mClockView.setVisibility(GONE);
-        PluginListener listener = mKeyguardClockSwitch.getClockPluginListener();
 
-        listener.onPluginConnected(plugin, null);
-        listener.onPluginDisconnected(plugin);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(plugin);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(null);
 
         verify(mClockView).setVisibility(VISIBLE);
         assertThat(plugin.getView().getParent()).isNull();
@@ -180,10 +155,9 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         ClockPlugin plugin = mock(ClockPlugin.class);
         TextClock pluginView = new TextClock(getContext());
         when(plugin.getBigClockView()).thenReturn(pluginView);
-        PluginListener listener = mKeyguardClockSwitch.getClockPluginListener();
-        listener.onPluginConnected(plugin, null);
-        // WHEN the plugin is disconnected
-        listener.onPluginDisconnected(plugin);
+        // WHEN the plugin is connected and then disconnected
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(plugin);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(null);
         // THEN the big lock container is GONE and the big clock view doesn't have
         // a parent.
         assertThat(bigClockContainer.getVisibility()).isEqualTo(GONE);
@@ -193,27 +167,9 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     @Test
     public void onPluginDisconnected_nullView() {
         ClockPlugin plugin = mock(ClockPlugin.class);
-        PluginListener listener = mKeyguardClockSwitch.getClockPluginListener();
-        listener.onPluginConnected(plugin, null);
-        listener.onPluginDisconnected(plugin);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(plugin);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(null);
         verify(mClockView, never()).setVisibility(GONE);
-    }
-
-    @Test
-    public void onPluginDisconnected_firstOfTwoDisconnected() {
-        // GIVEN two plugins are connected
-        ClockPlugin plugin1 = mock(ClockPlugin.class);
-        when(plugin1.getView()).thenReturn(new TextClock(getContext()));
-        PluginListener listener = mKeyguardClockSwitch.getClockPluginListener();
-        listener.onPluginConnected(plugin1, null);
-        ClockPlugin plugin2 = mock(ClockPlugin.class);
-        when(plugin2.getView()).thenReturn(new TextClock(getContext()));
-        listener.onPluginConnected(plugin2, null);
-        // WHEN the first plugin is disconnected
-        listener.onPluginDisconnected(plugin1);
-        // THEN the view from the second plugin is still a child of KeyguardClockSwitch.
-        assertThat(plugin2.getView().getParent()).isEqualTo(mClockContainer);
-        assertThat(plugin1.getView().getParent()).isNull();
     }
 
     @Test
@@ -221,13 +177,13 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         // GIVEN two plugins are connected
         ClockPlugin plugin1 = mock(ClockPlugin.class);
         when(plugin1.getView()).thenReturn(new TextClock(getContext()));
-        PluginListener listener = mKeyguardClockSwitch.getClockPluginListener();
-        listener.onPluginConnected(plugin1, null);
+        Consumer<ClockPlugin> consumer = mKeyguardClockSwitch.getClockPluginConsumer();
+        consumer.accept(plugin1);
         ClockPlugin plugin2 = mock(ClockPlugin.class);
         when(plugin2.getView()).thenReturn(new TextClock(getContext()));
-        listener.onPluginConnected(plugin2, null);
+        consumer.accept(plugin2);
         // WHEN the second plugin is disconnected
-        listener.onPluginDisconnected(plugin2);
+        consumer.accept(null);
         // THEN the default clock should be shown.
         verify(mClockView).setVisibility(VISIBLE);
         assertThat(plugin1.getView().getParent()).isNull();
@@ -246,8 +202,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         ClockPlugin plugin = mock(ClockPlugin.class);
         TextClock pluginView = new TextClock(getContext());
         when(plugin.getView()).thenReturn(pluginView);
-        PluginListener listener = mKeyguardClockSwitch.getClockPluginListener();
-        listener.onPluginConnected(plugin, null);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(plugin);
 
         mKeyguardClockSwitch.setTextColor(Color.WHITE);
 
@@ -271,8 +226,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         TextClock pluginView = new TextClock(getContext());
         when(plugin.getView()).thenReturn(pluginView);
         Style style = mock(Style.class);
-        PluginListener listener = mKeyguardClockSwitch.getClockPluginListener();
-        listener.onPluginConnected(plugin, null);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(plugin);
 
         mKeyguardClockSwitch.setStyle(style);
 
