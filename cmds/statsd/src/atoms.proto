@@ -24,6 +24,7 @@ import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/app/settings_enums.proto";
 import "frameworks/base/core/proto/android/app/job/enums.proto";
+import "frameworks/base/core/proto/android/bluetooth/a2dp/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hci/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hfp/enums.proto";
@@ -215,6 +216,15 @@ message Atom {
         BiometricHalDeathReported biometric_hal_death_reported = 148;
         BubbleUIChanged bubble_ui_changed = 149;
         ScheduledJobConstraintChanged scheduled_job_constraint_changed = 150;
+        BluetoothActiveDeviceChanged bluetooth_active_device_changed = 151;
+        BluetoothA2dpPlaybackStateChanged bluetooth_a2dp_playback_state_changed = 152;
+        BluetoothA2dpCodecConfigChanged bluetooth_a2dp_codec_config_changed = 153;
+        BluetoothA2dpCodecCapabilityChanged bluetooth_a2dp_codec_capability_changed = 154;
+        BluetoothA2dpAudioUnderrunReported bluetooth_a2dp_audio_underrun_reported = 155;
+        BluetoothA2dpAudioOverrunReported bluetooth_a2dp_audio_overrun_reported = 156;
+        BluetoothDeviceRssiReported bluetooth_device_rssi_reported = 157;
+        BluetoothDeviceFailedContactCounterReported bluetooth_device_failed_contact_counter_reported = 158;
+        BluetoothDeviceTxPowerLevelReported bluetooth_device_tx_power_level_reported = 159;
     }
 
     // Pulled events will start at field 10000.
@@ -1409,6 +1419,27 @@ message BluetoothScoConnectionStateChanged {
     optional android.bluetooth.hfp.ScoCodec codec = 3;
 }
 
+/**
+ * Logged when active device of a profile changes
+ *
+ * Logged from:
+ *     packages/apps/Bluetooth/src/com/android/bluetooth/a2dp/A2dpService.java
+ *     packages/apps/Bluetooth/src/com/android/bluetooth/hfp/HeadsetService.java
+ *     packages/apps/Bluetooth/src/com/android/bluetooth/hearingaid/HearingAidService.java
+ */
+message BluetoothActiveDeviceChanged {
+    // The profile whose active device has changed. Eg. A2DP, HEADSET, HEARING_AID
+    // From android.bluetooth.BluetoothProfile
+    optional int32 bt_profile = 1;
+    // An identifier that can be used to match events for this new active device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if there is no active device for this profile
+    optional bytes obfuscated_id = 2 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
 // Logs when there is an event affecting Bluetooth device's link layer connection.
 // - This event is triggered when there is a related HCI command or event
 // - Users of this metrics can deduce Bluetooth device's connection state from these events
@@ -1511,6 +1542,245 @@ message WatchdogRollbackOccurred {
     optional int32 package_version_code = 3;
 }
 
+/**
+ * Logs when there is a change in Bluetooth A2DP playback state
+ *
+ * Logged from:
+ *     packages/apps/Bluetooth/src/com/android/bluetooth/a2dp/A2dpService.java
+ */
+message BluetoothA2dpPlaybackStateChanged {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Current playback state
+    // Default: PLAYBACK_STATE_UNKNOWN
+    optional android.bluetooth.a2dp.PlaybackStateEnum playback_state = 2;
+    // Current audio coding mode
+    // Default: AUDIO_CODING_MODE_UNKNOWN
+    optional android.bluetooth.a2dp.AudioCodingModeEnum audio_coding_mode = 3;
+}
+
+/**
+ * Logs when there is a change in A2DP codec config for a particular remote device
+ *
+ * Logged from:
+ *     frameworks/base/core/java/android/bluetooth/BluetoothCodecConfig.java
+ *     packages/apps/Bluetooth/src/com/android/bluetooth/a2dp/A2dpService.java
+ */
+message BluetoothA2dpCodecConfigChanged {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Type of codec as defined by various SOURCE_CODEC_TYPE_* constants in BluetoothCodecConfig
+    // Default SOURCE_CODEC_TYPE_INVALID
+    optional int32 codec_type = 2;
+    // Codec priroity, the higher the more preferred, -1 for disabled
+    // Default: CODEC_PRIORITY_DEFAULT
+    optional int32 codec_priority = 3;
+    // Sample rate in Hz as defined by various SAMPLE_RATE_* constants in BluetoothCodecConfig
+    // Default: SAMPLE_RATE_NONE
+    optional int32 sample_rate = 4;
+    // Bits per sample as defined by various BITS_PER_SAMPLE_* constants in BluetoothCodecConfig
+    // Default: BITS_PER_SAMPLE_NONE
+    optional int32 bits_per_sample = 5;
+    // Channel mode as defined by various CHANNEL_MODE_* constants in BluetoothCodecConfig
+    // Default: CHANNEL_MODE_NONE
+    optional int32 channel_mode = 6;
+    // Codec specific values
+    // Default 0
+    optional int64 codec_specific_1 = 7;
+    optional int64 codec_specific_2 = 8;
+    optional int64 codec_specific_3 = 9;
+    optional int64 codec_specific_4 = 10;
+}
+
+/**
+ * Logs when there is a change in selectable A2DP codec capability for a paricular remote device
+ * Each codec's capability is logged separately due to statsd restriction
+ *
+ * Logged from:
+ *     frameworks/base/core/java/android/bluetooth/BluetoothCodecConfig.java
+ *     packages/apps/Bluetooth/src/com/android/bluetooth/a2dp/A2dpService.java
+ */
+message BluetoothA2dpCodecCapabilityChanged {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Type of codec as defined by various SOURCE_CODEC_TYPE_* constants in BluetoothCodecConfig
+    // Default SOURCE_CODEC_TYPE_INVALID
+    optional int32 codec_type = 2;
+    // Codec priroity, the higher the more preferred, -1 for disabled
+    // Default: CODEC_PRIORITY_DEFAULT
+    optional int32 codec_priority = 3;
+    // A bit field of supported sample rates as defined by various SAMPLE_RATE_* constants
+    // in BluetoothCodecConfig
+    // Default: empty and SAMPLE_RATE_NONE for individual item
+    optional int32 sample_rate = 4;
+    // A bit field of supported bits per sample as defined by various BITS_PER_SAMPLE_* constants
+    // in BluetoothCodecConfig
+    // Default: empty and BITS_PER_SAMPLE_NONE for individual item
+    optional int32 bits_per_sample = 5;
+    // A bit field of supported channel mode as defined by various CHANNEL_MODE_* constants in
+    // BluetoothCodecConfig
+    // Default: empty and CHANNEL_MODE_NONE for individual item
+    optional int32 channel_mode = 6;
+    // Codec specific values
+    // Default 0
+    optional int64 codec_specific_1 = 7;
+    optional int64 codec_specific_2 = 8;
+    optional int64 codec_specific_3 = 9;
+    optional int64 codec_specific_4 = 10;
+}
+
+/**
+ * Logs when A2DP failed to read from PCM source.
+ * This typically happens when audio HAL cannot supply A2DP with data fast enough for encoding.
+ *
+ * Logged from:
+ *     system/bt
+ */
+message BluetoothA2dpAudioUnderrunReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Encoding interval in nanoseconds
+    // Default: 0
+    optional int64 encoding_interval_nanos = 2;
+    // Number of bytes of PCM data that could not be read from the source
+    // Default: 0
+    optional int32 num_missing_pcm_bytes = 3;
+}
+
+/**
+ * Logs when A2DP failed send encoded data to the remote device fast enough such that the transmit
+ * buffer queue is full and we have to drop data
+ *
+ * Logged from:
+ *     system/bt
+ */
+message BluetoothA2dpAudioOverrunReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Encoding interval in nanoseconds
+    // Default: 0
+    optional int64 encoding_interval_nanos = 2;
+    // Number of buffers dropped in this event
+    // Each buffer is encoded in one encoding interval and consists of multiple encoded frames
+    // Default: 0
+    optional int32 num_dropped_buffers = 3;
+    // Number of encoded buffers dropped in this event
+    // Default 0
+    optional int32 num_dropped_encoded_frames = 4;
+    // Number of encoded bytes dropped in this event
+    // Default: 0
+    optional int32 num_dropped_encoded_bytes = 5;
+}
+
+/**
+ * Logs when we receive reports regarding a device's RSSI value
+ *
+ * Logged from:
+ *     system/bt
+ */
+message BluetoothDeviceRssiReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Connection handle of this connection if available
+    // Range: 0x0000 - 0x0EFF (12 bits)
+    // Default: 0xFFFF if the handle is unknown
+    optional int32 connection_handle = 2;
+    // HCI command status code if this is triggerred by hci_cmd
+    // Default: STATUS_UNKNOWN
+    optional android.bluetooth.hci.StatusEnum hci_status = 3;
+    // BR/EDR
+    //   Range: -128 ≤ N ≤ 127 (signed integer)
+    //   Units: dB
+    // LE:
+    //   Range: -127 to 20, 127 (signed integer)
+    //   Units: dBm
+    // Invalid when an out of range value is reported
+    optional int32 rssi = 4;
+}
+
+/**
+ * Logs when we receive reports regarding how many consecutive failed contacts for a connection
+ *
+ * Logged from:
+ *     system/bt
+ */
+message BluetoothDeviceFailedContactCounterReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Connection handle of this connection if available
+    // Range: 0x0000 - 0x0EFF (12 bits)
+    // Default: 0xFFFF if the handle is unknown
+    optional int32 connection_handle = 2;
+    // HCI command status code if this is triggerred by hci_cmd
+    // Default: STATUS_UNKNOWN
+    optional android.bluetooth.hci.StatusEnum cmd_status = 3;
+    // Number of consecutive failed contacts for a connection corresponding to the Handle
+    // Range: uint16_t, 0-0xFFFF
+    // Default: 0xFFFFF
+    optional int32 failed_contact_counter = 4;
+}
+
+/**
+ * Logs when we receive reports regarding the tranmit power level used for a specific connection
+ *
+ * Logged from:
+ *     system/bt
+ */
+message BluetoothDeviceTxPowerLevelReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Connection handle of this connection if available
+    // Range: 0x0000 - 0x0EFF (12 bits)
+    // Default: 0xFFFF if the handle is unknown
+    optional int32 connection_handle = 2;
+    // HCI command status code if this is triggerred by hci_cmd
+    // Default: STATUS_UNKNOWN
+    optional android.bluetooth.hci.StatusEnum hci_status = 3;
+    // Range: -30 ≤ N ≤ 20
+    // Units: dBm
+    // Invalid when an out of range value is reported
+    optional int32 transmit_power_level = 4;
+}
 
 /**
  * Logs when something is plugged into or removed from the USB-C connector.
