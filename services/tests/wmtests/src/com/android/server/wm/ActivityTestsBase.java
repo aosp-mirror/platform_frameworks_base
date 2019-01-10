@@ -169,6 +169,7 @@ class ActivityTestsBase {
         private final ActivityTaskManagerService mService;
 
         private ComponentName mComponent;
+        private String mTargetActivity;
         private TaskRecord mTaskRecord;
         private int mUid;
         private boolean mCreateTask;
@@ -182,6 +183,11 @@ class ActivityTestsBase {
 
         ActivityBuilder setComponent(ComponentName component) {
             mComponent = component;
+            return this;
+        }
+
+        ActivityBuilder setTargetActivity(String targetActivity) {
+            mTargetActivity = targetActivity;
             return this;
         }
 
@@ -239,6 +245,10 @@ class ActivityTestsBase {
             aInfo.applicationInfo = new ApplicationInfo();
             aInfo.applicationInfo.packageName = mComponent.getPackageName();
             aInfo.applicationInfo.uid = mUid;
+            aInfo.packageName = mComponent.getPackageName();
+            if (mTargetActivity != null) {
+                aInfo.targetActivity = mTargetActivity;
+            }
             aInfo.flags |= mActivityFlags;
             aInfo.launchMode = mLaunchMode;
 
