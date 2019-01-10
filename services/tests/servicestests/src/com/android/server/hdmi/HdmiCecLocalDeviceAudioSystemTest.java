@@ -17,6 +17,7 @@ package com.android.server.hdmi;
 
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
+import static com.android.server.hdmi.Constants.ADDR_TUNER_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
@@ -64,70 +65,71 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     @Before
     public void setUp() {
         mHdmiControlService =
-                new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
-                    @Override
-                    AudioManager getAudioManager() {
-                        return new AudioManager() {
-                            @Override
-                            public int getStreamVolume(int streamType) {
-                                switch (streamType) {
-                                    case STREAM_MUSIC:
-                                        return mMusicVolume;
-                                    default:
-                                        return 0;
-                                }
+            new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
+                @Override
+                AudioManager getAudioManager() {
+                    return new AudioManager() {
+                        @Override
+                        public int getStreamVolume(int streamType) {
+                            switch (streamType) {
+                                case STREAM_MUSIC:
+                                    return mMusicVolume;
+                                default:
+                                    return 0;
                             }
+                        }
 
-                            @Override
-                            public boolean isStreamMute(int streamType) {
-                                switch (streamType) {
-                                    case STREAM_MUSIC:
-                                        return mMusicMute;
-                                    default:
-                                        return false;
-                                }
+                        @Override
+                        public boolean isStreamMute(int streamType) {
+                            switch (streamType) {
+                                case STREAM_MUSIC:
+                                    return mMusicMute;
+                                default:
+                                    return false;
                             }
+                        }
 
-                            @Override
-                            public int getStreamMaxVolume(int streamType) {
-                                switch (streamType) {
-                                    case STREAM_MUSIC:
-                                        return mMusicMaxVolume;
-                                    default:
-                                        return 100;
-                                }
+                        @Override
+                        public int getStreamMaxVolume(int streamType) {
+                            switch (streamType) {
+                                case STREAM_MUSIC:
+                                    return mMusicMaxVolume;
+                                default:
+                                    return 100;
                             }
+                        }
 
-                            @Override
-                            public void adjustStreamVolume(
-                                    int streamType, int direction, int flags) {
-                                switch (streamType) {
-                                    case STREAM_MUSIC:
-                                        if (direction == AudioManager.ADJUST_UNMUTE) {
-                                            mMusicMute = false;
-                                        } else if (direction == AudioManager.ADJUST_MUTE) {
-                                            mMusicMute = true;
-                                        }
-                                    default:
-                                }
+                        @Override
+                        public void adjustStreamVolume(
+                                int streamType, int direction, int flags) {
+                            switch (streamType) {
+                                case STREAM_MUSIC:
+                                    if (direction == AudioManager.ADJUST_UNMUTE) {
+                                        mMusicMute = false;
+                                    } else if (direction == AudioManager.ADJUST_MUTE) {
+                                        mMusicMute = true;
+                                    }
+                                    break;
+                                default:
                             }
+                        }
 
-                            @Override
-                            public void setWiredDeviceConnectionState(
-                                    int type, int state, String address, String name) {
-                                // Do nothing.
-                            }
-                        };
-                    }
+                        @Override
+                        public void setWiredDeviceConnectionState(
+                                int type, int state, String address, String name) {
+                            // Do nothing.
+                        }
+                    };
+                }
 
-                    @Override
-                    void wakeUp() {}
+                @Override
+                void wakeUp() {}
 
-                    @Override
-                    boolean isControlEnabled() {
-                        return true;
-                    }
-                };
+                @Override
+                boolean isControlEnabled() {
+                    return true;
+                }
+            };
 
         mMyLooper = mTestLooper.getLooper();
         mHdmiCecLocalDeviceAudioSystem = new HdmiCecLocalDeviceAudioSystem(mHdmiControlService);
@@ -135,7 +137,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiControlService.setIoLooper(mMyLooper);
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController =
-                HdmiCecController.createWithNativeWrapper(mHdmiControlService, mNativeWrapper);
+            HdmiCecController.createWithNativeWrapper(mHdmiControlService, mNativeWrapper);
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
@@ -170,11 +172,12 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     @Test
     public void handleGiveSystemAudioModeStatus_originalOff() throws Exception {
         HdmiCecMessage expectedMessage =
-                HdmiCecMessageBuilder.buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, false);
+                HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                        ADDR_AUDIO_SYSTEM, ADDR_TV, false);
         HdmiCecMessage messageGive =
                 HdmiCecMessageBuilder.buildGiveSystemAudioModeStatus(ADDR_TV, ADDR_AUDIO_SYSTEM);
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive))
-                .isTrue();
+            .isTrue();
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
@@ -190,9 +193,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
         mHdmiCecLocalDeviceAudioSystem.setSystemAudioControlFeatureEnabled(false);
         assertThat(
-                        mHdmiCecLocalDeviceAudioSystem.handleRequestShortAudioDescriptor(
-                                MESSAGE_REQUEST_SAD_LCPM))
-                .isTrue();
+            mHdmiCecLocalDeviceAudioSystem.handleRequestShortAudioDescriptor(
+                MESSAGE_REQUEST_SAD_LCPM))
+            .isTrue();
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
@@ -206,11 +209,11 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                         Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR,
                         Constants.ABORT_NOT_IN_CORRECT_MODE);
 
-        mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(false);
+        mHdmiCecLocalDeviceAudioSystem.checkSupportAndSetSystemAudioMode(false);
         assertThat(
-                        mHdmiCecLocalDeviceAudioSystem.handleRequestShortAudioDescriptor(
-                                MESSAGE_REQUEST_SAD_LCPM))
-                .isEqualTo(true);
+            mHdmiCecLocalDeviceAudioSystem.handleRequestShortAudioDescriptor(
+                MESSAGE_REQUEST_SAD_LCPM))
+            .isEqualTo(true);
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
@@ -224,11 +227,11 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                         Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR,
                         Constants.ABORT_UNABLE_TO_DETERMINE);
 
-        mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(true);
+        mHdmiCecLocalDeviceAudioSystem.checkSupportAndSetSystemAudioMode(true);
         assertThat(
-                        mHdmiCecLocalDeviceAudioSystem.handleRequestShortAudioDescriptor(
-                                MESSAGE_REQUEST_SAD_LCPM))
-                .isEqualTo(true);
+            mHdmiCecLocalDeviceAudioSystem.handleRequestShortAudioDescriptor(
+                MESSAGE_REQUEST_SAD_LCPM))
+            .isEqualTo(true);
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
@@ -244,17 +247,17 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         HdmiCecMessage expectedMessage =
                 HdmiCecMessageBuilder.buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, false);
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive))
-                .isTrue();
+            .isTrue();
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
         // Check if correctly turned on
         mNativeWrapper.clearResultMessages();
         expectedMessage =
-                HdmiCecMessageBuilder.buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, true);
+            HdmiCecMessageBuilder.buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, true);
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleSetSystemAudioMode(messageSet)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive))
-                .isTrue();
+            .isTrue();
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
         assertThat(mMusicMute).isFalse();
@@ -273,15 +276,15 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 HdmiCecMessageBuilder.buildSetSystemAudioMode(
                         ADDR_AUDIO_SYSTEM, ADDR_BROADCAST, false);
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleSystemAudioModeRequest(messageRequestOff))
-                .isTrue();
+            .isTrue();
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
 
         mNativeWrapper.clearResultMessages();
         expectedMessage =
-                HdmiCecMessageBuilder.buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, false);
+            HdmiCecMessageBuilder.buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, false);
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive))
-                .isTrue();
+            .isTrue();
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
         assertThat(mMusicMute).isTrue();
@@ -292,7 +295,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiCecLocalDeviceAudioSystem.setAutoDeviceOff(false);
         mHdmiCecLocalDeviceAudioSystem.setAutoTvOff(false);
         // Set system audio control on first
-        mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(true);
+        mHdmiCecLocalDeviceAudioSystem.checkSupportAndSetSystemAudioMode(true);
         // Check if standby correctly turns off the feature
         mHdmiCecLocalDeviceAudioSystem.onStandby(false, STANDBY_SCREEN_OFF);
         mTestLooper.dispatchAll();
@@ -309,9 +312,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiCecLocalDeviceAudioSystem.systemAudioControlOnPowerOn(
                 Constants.ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON, true);
         assertThat(
-                        mHdmiCecLocalDeviceAudioSystem.getActions(
-                                SystemAudioInitiationActionFromAvr.class))
-                .isNotEmpty();
+            mHdmiCecLocalDeviceAudioSystem.getActions(
+                SystemAudioInitiationActionFromAvr.class))
+            .isNotEmpty();
     }
 
     @Test
@@ -320,9 +323,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiCecLocalDeviceAudioSystem.systemAudioControlOnPowerOn(
                 Constants.NEVER_SYSTEM_AUDIO_CONTROL_ON_POWER_ON, false);
         assertThat(
-                        mHdmiCecLocalDeviceAudioSystem.getActions(
-                                SystemAudioInitiationActionFromAvr.class))
-                .isEmpty();
+            mHdmiCecLocalDeviceAudioSystem.getActions(
+                SystemAudioInitiationActionFromAvr.class))
+            .isEmpty();
     }
 
     @Test
@@ -331,9 +334,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiCecLocalDeviceAudioSystem.systemAudioControlOnPowerOn(
                 Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON, false);
         assertThat(
-                        mHdmiCecLocalDeviceAudioSystem.getActions(
-                                SystemAudioInitiationActionFromAvr.class))
-                .isEmpty();
+            mHdmiCecLocalDeviceAudioSystem.getActions(
+                SystemAudioInitiationActionFromAvr.class))
+            .isEmpty();
     }
 
     @Test
@@ -342,9 +345,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiCecLocalDeviceAudioSystem.systemAudioControlOnPowerOn(
                 Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON, true);
         assertThat(
-                        mHdmiCecLocalDeviceAudioSystem.getActions(
-                                SystemAudioInitiationActionFromAvr.class))
-                .isNotEmpty();
+            mHdmiCecLocalDeviceAudioSystem.getActions(
+                SystemAudioInitiationActionFromAvr.class))
+            .isNotEmpty();
     }
 
     @Test
@@ -354,12 +357,12 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleActiveSource(message)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mHdmiCecLocalDeviceAudioSystem.getActiveSource().equals(expectedActiveSource))
-                .isTrue();
+            .isTrue();
     }
 
     @Test
     public void terminateSystemAudioMode_systemAudioModeOff() throws Exception {
-        mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(false);
+        mHdmiCecLocalDeviceAudioSystem.checkSupportAndSetSystemAudioMode(false);
         assertThat(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated()).isFalse();
         mMusicMute = false;
         HdmiCecMessage message =
@@ -373,7 +376,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
     @Test
     public void terminateSystemAudioMode_systemAudioModeOn() throws Exception {
-        mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(true);
+        mHdmiCecLocalDeviceAudioSystem.checkSupportAndSetSystemAudioMode(true);
         assertThat(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated()).isTrue();
         mMusicMute = false;
         HdmiCecMessage expectedMessage =
@@ -458,7 +461,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mHdmiCecLocalDeviceAudioSystem.getActions(ArcInitiationActionFromAvr.class))
-                .isNotEmpty();
+            .isNotEmpty();
     }
 
     @Test
@@ -473,7 +476,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcTermination(message)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mHdmiCecLocalDeviceAudioSystem.getActions(ArcTerminationActionFromAvr.class))
-                .isNotEmpty();
+            .isNotEmpty();
     }
 
     @Test
@@ -521,12 +524,37 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 
-    @Test
-    public void handleSetStreamPath_underCurrentDevice() {
-        assertThat(mHdmiCecLocalDeviceAudioSystem.getLocalActivePath()).isEqualTo(0);
+    public void handleSystemAudioModeRequest_fromNonTV_tVNotSupport() {
         HdmiCecMessage message =
-                HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, 0x2100);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.handleSetStreamPath(message)).isTrue();
-        assertThat(mHdmiCecLocalDeviceAudioSystem.getLocalActivePath()).isEqualTo(1);
+                HdmiCecMessageBuilder.buildSystemAudioModeRequest(
+                        ADDR_TUNER_1, ADDR_AUDIO_SYSTEM,
+                        mAvrPhysicalAddress, true);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                        ADDR_AUDIO_SYSTEM,
+                        ADDR_TUNER_1,
+                        Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST,
+                        Constants.ABORT_REFUSED);
+
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleSystemAudioModeRequest(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void handleSystemAudioModeRequest_fromNonTV_tVSupport() {
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildSystemAudioModeRequest(
+                        ADDR_TUNER_1, ADDR_AUDIO_SYSTEM,
+                        mAvrPhysicalAddress, true);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildSetSystemAudioMode(
+                        ADDR_AUDIO_SYSTEM, Constants.ADDR_BROADCAST, true);
+        mHdmiCecLocalDeviceAudioSystem.setTvSystemAudioModeSupport(true);
+
+
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleSystemAudioModeRequest(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 }
