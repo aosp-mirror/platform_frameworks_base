@@ -478,6 +478,7 @@ public class SettingsBackupTest {
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS,
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES,
                     Settings.Global.GUP_DEV_OPT_IN_APPS,
+                    Settings.Global.GUP_DEV_OPT_OUT_APPS,
                     Settings.Global.GUP_BLACK_LIST,
                     Settings.Global.GPU_DEBUG_LAYER_APP,
                     Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,

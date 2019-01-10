@@ -480,14 +480,19 @@ public class GraphicsEnvironment {
             return;
         }
 
-        String applicationPackageName = context.getPackageName();
-        String devOptInApplicationName = coreSettings.getString(
-                Settings.Global.GUP_DEV_OPT_IN_APPS);
-        boolean devOptIn = applicationPackageName.equals(devOptInApplicationName);
-        boolean whitelisted = onWhitelist(context, driverPackageName, ai.packageName);
-        if (!devOptIn && !whitelisted) {
+        if (getGlobalSettingsString(coreSettings, Settings.Global.GUP_DEV_OPT_OUT_APPS)
+                        .contains(ai.packageName)) {
             if (DEBUG) {
-                Log.w(TAG, applicationPackageName + " is not on the whitelist.");
+                Log.w(TAG, ai.packageName + " opts out from GUP.");
+            }
+            return;
+        }
+
+        if (!getGlobalSettingsString(coreSettings, Settings.Global.GUP_DEV_OPT_IN_APPS)
+                        .contains(ai.packageName)
+                && !onWhitelist(context, driverPackageName, ai.packageName)) {
+            if (DEBUG) {
+                Log.w(TAG, ai.packageName + " is not on the whitelist.");
             }
             return;
         }

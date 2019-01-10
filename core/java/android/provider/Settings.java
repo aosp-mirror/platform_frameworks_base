@@ -12000,10 +12000,16 @@ public final class Settings {
                 "angle_gl_driver_selection_values";
 
         /**
-         * Apps that are selected to use Game Update Package.
+         * List of Apps selected to use Game Update Packages.
          * @hide
          */
         public static final String GUP_DEV_OPT_IN_APPS = "gup_dev_opt_in_apps";
+
+        /**
+         * List of Apps selected not to use Game Update Packages.
+         * @hide
+         */
+        public static final String GUP_DEV_OPT_OUT_APPS = "gup_dev_opt_out_apps";
 
         /**
          * Apps on the black list that are forbidden to useGame Update Package.
