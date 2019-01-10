@@ -189,6 +189,7 @@ public class WifiManager {
      */
     public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_REMOVE_INVALID = 5;
 
+    /** @hide */
     @IntDef(prefix = { "STATUS_NETWORK_SUGGESTIONS_" }, value = {
             STATUS_NETWORK_SUGGESTIONS_SUCCESS,
             STATUS_NETWORK_SUGGESTIONS_ERROR_INTERNAL,
@@ -1652,7 +1653,7 @@ public class WifiManager {
      * suggestion back using this API.</li>
      *
      * @param networkSuggestions List of network suggestions provided by the app.
-     * @return Status code corresponding to the values in {@link NetworkSuggestionsStatusCode}.
+     * @return Status code for the operation. One of the STATUS_NETWORK_SUGGESTIONS_ values.
      * {@link WifiNetworkSuggestion#equals(Object)} any previously provided suggestions by the app.
      * @throws {@link SecurityException} if the caller is missing required permissions.
      */
@@ -1673,8 +1674,7 @@ public class WifiManager {
      *
      * @param networkSuggestions List of network suggestions to be removed. Pass an empty list
      *                           to remove all the previous suggestions provided by the app.
-     * @return Status code corresponding to the values in
-     * {@link NetworkSuggestionsStatusCode}.
+     * @return Status code for the operation. One of the STATUS_NETWORK_SUGGESTIONS_ values.
      * Any matching suggestions are removed from the device and will not be considered for any
      * further connection attempts.
      */
