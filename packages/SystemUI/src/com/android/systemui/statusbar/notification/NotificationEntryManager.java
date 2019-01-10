@@ -18,11 +18,9 @@ package com.android.systemui.statusbar.notification;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
-import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -41,7 +39,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
 
@@ -68,8 +65,6 @@ public class NotificationEntryManager implements
     @VisibleForTesting
     protected final HashMap<String, NotificationEntry> mPendingNotifications = new HashMap<>();
 
-    private final DeviceProvisionedController mDeviceProvisionedController =
-            Dependency.get(DeviceProvisionedController.class);
     private final ForegroundServiceController mForegroundServiceController =
             Dependency.get(ForegroundServiceController.class);
 
@@ -81,24 +76,11 @@ public class NotificationEntryManager implements
     private NotificationListenerService.RankingMap mLatestRankingMap;
     @VisibleForTesting
     protected NotificationData mNotificationData;
-    private NotificationListContainer mListContainer;
+
     @VisibleForTesting
     final ArrayList<NotificationLifetimeExtender> mNotificationLifetimeExtenders
             = new ArrayList<>();
     private final List<NotificationEntryListener> mNotificationEntryListeners = new ArrayList<>();
-
-    private final DeviceProvisionedController.DeviceProvisionedListener
-            mDeviceProvisionedListener =
-            new DeviceProvisionedController.DeviceProvisionedListener() {
-                @Override
-                public void onDeviceProvisionedChanged() {
-                    updateNotifications();
-                }
-            };
-
-    public void destroy() {
-        mDeviceProvisionedController.removeCallback(mDeviceProvisionedListener);
-    }
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -151,9 +133,6 @@ public class NotificationEntryManager implements
             HeadsUpManager headsUpManager) {
         mPresenter = presenter;
         mNotificationData.setHeadsUpManager(headsUpManager);
-        mListContainer = listContainer;
-
-        mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
     }
 
     /** Adds multiple {@link NotificationLifetimeExtender}s. */
@@ -227,7 +206,9 @@ public class NotificationEntryManager implements
                     listener.onEntryInflated(entry, inflatedFlags);
                 }
                 mNotificationData.add(entry);
-                tagForeground(entry.notification);
+                for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                    listener.onBeforeNotificationAdded(entry);
+                }
                 updateNotifications();
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onNotificationAdded(entry);
@@ -283,7 +264,6 @@ public class NotificationEntryManager implements
 
                 if (entry.rowExists()) {
                     entry.removeRow();
-                    mListContainer.cleanUpViewStateForEntry(entry);
                 }
 
                 // Let's remove the children if this was a summary
@@ -368,19 +348,6 @@ public class NotificationEntryManager implements
         }
     }
 
-    @VisibleForTesting
-    void tagForeground(StatusBarNotification notification) {
-        ArraySet<Integer> activeOps = mForegroundServiceController.getAppOps(
-                notification.getUserId(), notification.getPackageName());
-        if (activeOps != null) {
-            int N = activeOps.size();
-            for (int i = 0; i < N; i++) {
-                updateNotificationsForAppOp(activeOps.valueAt(i), notification.getUid(),
-                        notification.getPackageName(), true);
-            }
-        }
-    }
-
     @Override
     public void addNotification(StatusBarNotification notification,
             NotificationListenerService.RankingMap ranking) {
@@ -388,15 +355,6 @@ public class NotificationEntryManager implements
             addNotificationInternal(notification, ranking);
         } catch (InflationException e) {
             handleInflationException(notification, e);
-        }
-    }
-
-    public void updateNotificationsForAppOp(int appOp, int uid, String pkg, boolean showIcon) {
-        String foregroundKey = mForegroundServiceController.getStandardLayoutKey(
-                UserHandle.getUserId(uid), pkg);
-        if (foregroundKey != null) {
-            mNotificationData.updateAppOp(appOp, uid, pkg, foregroundKey, showIcon);
-            updateNotifications();
         }
     }
 
@@ -452,8 +410,9 @@ public class NotificationEntryManager implements
 
     public void updateNotifications() {
         mNotificationData.filterAndSort();
-
-        mPresenter.updateNotificationViews();
+        if (mPresenter != null) {
+            mPresenter.updateNotificationViews();
+        }
     }
 
     public void updateNotificationRanking(NotificationListenerService.RankingMap rankingMap) {

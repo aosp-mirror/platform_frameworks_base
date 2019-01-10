@@ -33,6 +33,13 @@ public interface NotificationEntryListener {
     default void onPendingEntryAdded(NotificationEntry entry) {
     }
 
+    // TODO: Combine this with onPreEntryUpdated into "onBeforeEntryFiltered" or similar
+    /**
+     * Called when a new entry is created but before it has been filtered or displayed to the user.
+     */
+    default void onBeforeNotificationAdded(NotificationEntry entry) {
+    }
+
     /**
      * Called when a new entry is created.
      */
