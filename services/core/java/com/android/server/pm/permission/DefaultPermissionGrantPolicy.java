@@ -737,6 +737,14 @@ public final class DefaultPermissionGrantPolicy {
         grantSystemFixedPermissionsToSystemPackage("com.android.sharedstoragebackup", userId,
                 STORAGE_PERMISSIONS);
 
+        // Content Capture Service
+        String contentCaptureServicePackageName =
+                mContext.getPackageManager().getContentCaptureServicePackageName();
+        if (!TextUtils.isEmpty(contentCaptureServicePackageName)) {
+            grantPermissionsToSystemPackage(contentCaptureServicePackageName, userId,
+                    MICROPHONE_PERMISSIONS);
+        }
+
         if (mPermissionGrantedCallback != null) {
             mPermissionGrantedCallback.onDefaultRuntimePermissionsGranted(userId);
         }
