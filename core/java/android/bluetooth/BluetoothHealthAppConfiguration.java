@@ -25,72 +25,14 @@ import android.os.Parcelable;
  * the {@link BluetoothHealth} class. This class represents an application configuration
  * that the Bluetooth Health third party application will register to communicate with the
  * remote Bluetooth health device.
+ *
+ * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+ * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+ * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+ * {@link BluetoothDevice#createL2capChannel(int)}
  */
+@Deprecated
 public final class BluetoothHealthAppConfiguration implements Parcelable {
-    private final String mName;
-    private final int mDataType;
-    private final int mRole;
-    private final int mChannelType;
-
-    /**
-     * Constructor to register the SINK role
-     *
-     * @param name Friendly name associated with the application configuration
-     * @param dataType Data Type of the remote Bluetooth Health device
-     * @hide
-     */
-    BluetoothHealthAppConfiguration(String name, int dataType) {
-        mName = name;
-        mDataType = dataType;
-        mRole = BluetoothHealth.SINK_ROLE;
-        mChannelType = BluetoothHealth.CHANNEL_TYPE_ANY;
-    }
-
-    /**
-     * Constructor to register the application configuration.
-     *
-     * @param name Friendly name associated with the application configuration
-     * @param dataType Data Type of the remote Bluetooth Health device
-     * @param role {@link BluetoothHealth#SOURCE_ROLE} or {@link BluetoothHealth#SINK_ROLE}
-     * @hide
-     */
-    BluetoothHealthAppConfiguration(String name, int dataType, int role, int
-            channelType) {
-        mName = name;
-        mDataType = dataType;
-        mRole = role;
-        mChannelType = channelType;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof BluetoothHealthAppConfiguration) {
-            BluetoothHealthAppConfiguration config = (BluetoothHealthAppConfiguration) o;
-
-            if (mName == null) return false;
-
-            return mName.equals(config.getName()) && mDataType == config.getDataType()
-                    && mRole == config.getRole() && mChannelType == config.getChannelType();
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = 17;
-        result = 31 * result + (mName != null ? mName.hashCode() : 0);
-        result = 31 * result + mDataType;
-        result = 31 * result + mRole;
-        result = 31 * result + mChannelType;
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "BluetoothHealthAppConfiguration [mName = " + mName + ",mDataType = " + mDataType
-                + ", mRole = " + mRole + ",mChannelType = " + mChannelType + "]";
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -100,50 +42,59 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
      * Return the data type associated with this application configuration.
      *
      * @return dataType
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public int getDataType() {
-        return mDataType;
+        return 0;
     }
 
     /**
      * Return the name of the application configuration.
      *
      * @return String name
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public String getName() {
-        return mName;
+        return null;
     }
 
     /**
      * Return the role associated with this application configuration.
      *
      * @return One of {@link BluetoothHealth#SOURCE_ROLE} or {@link BluetoothHealth#SINK_ROLE}
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     public int getRole() {
-        return mRole;
+        return 0;
     }
 
     /**
-     * Return the channel type associated with this application configuration.
-     *
-     * @return One of {@link BluetoothHealth#CHANNEL_TYPE_RELIABLE} or {@link
-     * BluetoothHealth#CHANNEL_TYPE_STREAMING} or {@link BluetoothHealth#CHANNEL_TYPE_ANY}.
-     * @hide
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
-    public int getChannelType() {
-        return mChannelType;
-    }
-
+    @Deprecated
     public static final Parcelable.Creator<BluetoothHealthAppConfiguration> CREATOR =
             new Parcelable.Creator<BluetoothHealthAppConfiguration>() {
                 @Override
                 public BluetoothHealthAppConfiguration createFromParcel(Parcel in) {
-                    String name = in.readString();
-                    int type = in.readInt();
-                    int role = in.readInt();
-                    int channelType = in.readInt();
-                    return new BluetoothHealthAppConfiguration(name, type, role,
-                            channelType);
+                    return new BluetoothHealthAppConfiguration();
                 }
 
                 @Override
@@ -153,10 +104,5 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
             };
 
     @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mName);
-        out.writeInt(mDataType);
-        out.writeInt(mRole);
-        out.writeInt(mChannelType);
-    }
+    public void writeToParcel(Parcel out, int flags) {}
 }
