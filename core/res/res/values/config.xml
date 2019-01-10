@@ -3648,4 +3648,8 @@
          set in AndroidManifest.
          {@see android.view.Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS} -->
     <string name="config_secondaryHomeComponent" translatable="false">com.android.launcher3/com.android.launcher3.SecondaryDisplayLauncher</string>
+
+    <!-- If device supports corner radius on windows.
+         This should be turned off on low-end devices to improve animation performance. -->
+    <bool name="config_supportsRoundedCornersOnWindows">true</bool>
 </resources>

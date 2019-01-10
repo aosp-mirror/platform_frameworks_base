@@ -101,6 +101,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private float mBackButtonAlpha;
     private MotionEvent mStatusBarGestureDownEvent;
     private float mWindowCornerRadius;
+    private boolean mSupportsRoundedCornersOnWindows;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
 
@@ -244,6 +245,18 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         }
 
+        public boolean supportsRoundedCornersOnWindows() {
+            if (!verifyCaller("supportsRoundedCornersOnWindows")) {
+                return false;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                return mSupportsRoundedCornersOnWindows;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         private boolean verifyCaller(String reason) {
             final int callerId = Binder.getCallingUserHandle().getIdentifier();
             if (callerId != mCurrentBoundedUserId) {
@@ -353,6 +366,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mInteractionFlags = Prefs.getInt(mContext, Prefs.Key.QUICK_STEP_INTERACTION_FLAGS,
                 getDefaultInteractionFlags());
         mWindowCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext.getResources());
+        mSupportsRoundedCornersOnWindows = ScreenDecorationsUtils
+                .supportsRoundedCornersOnWindows(mContext.getResources());
 
         // Listen for the package update changes.
         if (mDeviceProvisionedController.getCurrentUser() == UserHandle.USER_SYSTEM) {
