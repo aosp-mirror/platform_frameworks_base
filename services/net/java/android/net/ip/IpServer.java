@@ -17,20 +17,26 @@
 package android.net.ip;
 
 import static android.net.NetworkUtils.numericToInetAddress;
-import static android.net.util.NetworkConstants.asByte;
+import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.util.NetworkConstants.FF;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
+import static android.net.util.NetworkConstants.asByte;
 
+import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetd;
+import android.net.INetworkStackStatusCallback;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.NetworkStack;
 import android.net.RouteInfo;
-import android.net.dhcp.DhcpServer;
-import android.net.dhcp.DhcpServingParams;
+import android.net.dhcp.DhcpServerCallbacks;
+import android.net.dhcp.DhcpServingParamsParcel;
+import android.net.dhcp.DhcpServingParamsParcelExt;
+import android.net.dhcp.IDhcpServer;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
 import android.net.util.InterfaceParams;
 import android.net.util.InterfaceSet;
@@ -126,6 +132,10 @@ public class IpServer extends StateMachine {
     }
 
     public static class Dependencies {
+        private final Context mContext;
+        public Dependencies(Context context) {
+            mContext = context;
+        }
         public RouterAdvertisementDaemon getRouterAdvertisementDaemon(InterfaceParams ifParams) {
             return new RouterAdvertisementDaemon(ifParams);
         }
@@ -138,9 +148,12 @@ public class IpServer extends StateMachine {
             return NetdService.getInstance();
         }
 
-        public DhcpServer makeDhcpServer(Looper looper, String ifName,
-                DhcpServingParams params, SharedLog log) {
-            return new DhcpServer(looper, ifName, params, log);
+        /**
+         * Create a DhcpServer instance to be used by IpServer.
+         */
+        public void makeDhcpServer(String ifName, DhcpServingParamsParcel params,
+                DhcpServerCallbacks cb) {
+            mContext.getSystemService(NetworkStack.class).makeDhcpServer(ifName, params, cb);
         }
     }
 
@@ -197,7 +210,10 @@ public class IpServer extends StateMachine {
     // Advertisements (otherwise, we do not add them to mLinkProperties at all).
     private LinkProperties mLastIPv6LinkProperties;
     private RouterAdvertisementDaemon mRaDaemon;
-    private DhcpServer mDhcpServer;
+
+    // To be accessed only on the handler thread
+    private int mDhcpServerStartIndex = 0;
+    private IDhcpServer mDhcpServer;
     private RaParams mLastRaParams;
 
     public IpServer(
@@ -252,35 +268,109 @@ public class IpServer extends StateMachine {
 
     private boolean startIPv4() { return configureIPv4(true); }
 
+    /**
+     * Convenience wrapper around INetworkStackStatusCallback to run callbacks on the IpServer
+     * handler.
+     *
+     * <p>Different instances of this class can be created for each call to IDhcpServer methods,
+     * with different implementations of the callback, to differentiate handling of success/error in
+     * each call.
+     */
+    private abstract class OnHandlerStatusCallback extends INetworkStackStatusCallback.Stub {
+        @Override
+        public void onStatusAvailable(int statusCode) {
+            getHandler().post(() -> callback(statusCode));
+        }
+
+        public abstract void callback(int statusCode);
+    }
+
+    private class DhcpServerCallbacksImpl extends DhcpServerCallbacks {
+        private final int mStartIndex;
+
+        private DhcpServerCallbacksImpl(int startIndex) {
+            mStartIndex = startIndex;
+        }
+
+        @Override
+        public void onDhcpServerCreated(int statusCode, IDhcpServer server) throws RemoteException {
+            getHandler().post(() -> {
+                // We are on the handler thread: mDhcpServerStartIndex can be read safely.
+                if (mStartIndex != mDhcpServerStartIndex) {
+                    // This start request is obsolete. When the |server| binder token goes out of
+                    // scope, the garbage collector will finalize it, which causes the network stack
+                    // process garbage collector to collect the server itself.
+                    return;
+                }
+
+                if (statusCode != STATUS_SUCCESS) {
+                    mLog.e("Error obtaining DHCP server: " + statusCode);
+                    handleError();
+                    return;
+                }
+
+                mDhcpServer = server;
+                try {
+                    mDhcpServer.start(new OnHandlerStatusCallback() {
+                        @Override
+                        public void callback(int startStatusCode) {
+                            if (startStatusCode != STATUS_SUCCESS) {
+                                mLog.e("Error starting DHCP server: " + startStatusCode);
+                                handleError();
+                            }
+                        }
+                    });
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
+                }
+            });
+        }
+
+        private void handleError() {
+            mLastError = ConnectivityManager.TETHER_ERROR_DHCPSERVER_ERROR;
+            transitionTo(mInitialState);
+        }
+    }
+
     private boolean startDhcp(Inet4Address addr, int prefixLen) {
         if (mUsingLegacyDhcp) {
             return true;
         }
-        final DhcpServingParams params;
-        try {
-            params = new DhcpServingParams.Builder()
-                    .setDefaultRouters(addr)
-                    .setDhcpLeaseTimeSecs(DHCP_LEASE_TIME_SECS)
-                    .setDnsServers(addr)
-                    .setServerAddr(new LinkAddress(addr, prefixLen))
-                    .setMetered(true)
-                    .build();
-            // TODO: also advertise link MTU
-        } catch (DhcpServingParams.InvalidParameterException e) {
-            Log.e(TAG, "Invalid DHCP parameters", e);
-            return false;
-        }
+        final DhcpServingParamsParcel params;
+        params = new DhcpServingParamsParcelExt()
+                .setDefaultRouters(addr)
+                .setDhcpLeaseTimeSecs(DHCP_LEASE_TIME_SECS)
+                .setDnsServers(addr)
+                .setServerAddr(new LinkAddress(addr, prefixLen))
+                .setMetered(true);
+        // TODO: also advertise link MTU
 
-        mDhcpServer = mDeps.makeDhcpServer(getHandler().getLooper(), mIfaceName, params,
-                mLog.forSubComponent("DHCP"));
-        mDhcpServer.start();
+        mDhcpServerStartIndex++;
+        mDeps.makeDhcpServer(
+                mIfaceName, params, new DhcpServerCallbacksImpl(mDhcpServerStartIndex));
         return true;
     }
 
     private void stopDhcp() {
+        // Make all previous start requests obsolete so servers are not started later
+        mDhcpServerStartIndex++;
+
         if (mDhcpServer != null) {
-            mDhcpServer.stop();
-            mDhcpServer = null;
+            try {
+                mDhcpServer.stop(new OnHandlerStatusCallback() {
+                    @Override
+                    public void callback(int statusCode) {
+                        if (statusCode != STATUS_SUCCESS) {
+                            mLog.e("Error stopping DHCP server: " + statusCode);
+                            mLastError = ConnectivityManager.TETHER_ERROR_DHCPSERVER_ERROR;
+                            // Not much more we can do here
+                        }
+                    }
+                });
+                mDhcpServer = null;
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
         }
     }
 

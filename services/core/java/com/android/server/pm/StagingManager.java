@@ -17,10 +17,23 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
+import android.apex.ApexInfo;
+import android.apex.IApexService;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.SessionInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.PackageParser.SigningDetails;
+import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.Signature;
 import android.os.Handler;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.text.TextUtils;
+import android.util.Slog;
 import android.util.SparseArray;
+import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
@@ -71,14 +84,70 @@ public class StagingManager {
         return new ParceledListSlice<>(result);
     }
 
+    private static boolean validateApexSignatureLocked(String apexPath, String packageName) {
+        final SigningDetails signingDetails;
+        try {
+            signingDetails = ApkSignatureVerifier.verify(apexPath, SignatureSchemeVersion.JAR);
+        } catch (PackageParserException e) {
+            Slog.e(TAG, "Unable to parse APEX package: " + apexPath, e);
+            return false;
+        }
+
+        final IApexService apex = IApexService.Stub.asInterface(
+                ServiceManager.getService("apexservice"));
+        final ApexInfo apexInfo;
+        try {
+            apexInfo = apex.getActivePackage(packageName);
+        } catch (RemoteException re) {
+            Slog.e(TAG, "Unable to contact APEXD", re);
+            return false;
+        }
+
+        if (apexInfo == null || TextUtils.isEmpty(apexInfo.packageName)) {
+            // TODO: What is the right thing to do here ? This implies there's no active package
+            // with the given name. This should never be the case in production (where we only
+            // accept updates to existing APEXes) but may be required for testing.
+            return true;
+        }
+
+        final SigningDetails existingSigningDetails;
+        try {
+            existingSigningDetails = ApkSignatureVerifier.verify(
+                apexInfo.packagePath, SignatureSchemeVersion.JAR);
+        } catch (PackageParserException e) {
+            Slog.e(TAG, "Unable to parse APEX package: " + apexInfo.packagePath, e);
+            return false;
+        }
+
+        // Now that we have both sets of signatures, demand that they're an exact match.
+        if (Signature.areExactMatch(existingSigningDetails.signatures, signingDetails.signatures)) {
+            return true;
+        }
+
+        return false;
+    }
+
     void commitSession(@NonNull PackageInstallerSession sessionInfo) {
         updateStoredSession(sessionInfo);
 
         mBgHandler.post(() -> {
-            // TODO(b/118865310): Dispatch the session to apexd/PackageManager for verification. For
-            //                    now we directly mark it as ready.
             sessionInfo.setStagedSessionReady();
-            mPm.sendSessionUpdatedBroadcast(sessionInfo.generateInfo(), sessionInfo.userId);
+
+            SessionInfo session = sessionInfo.generateInfo(false);
+            // For APEXes, we validate the signature here before we write the package to the
+            // staging directory. For APKs, the signature verification will be done by the package
+            // manager at the point at which it applies the staged install.
+            //
+            // TODO: Decide whether we want to fail fast by detecting signature mismatches right
+            // away.
+            if ((sessionInfo.params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+                if (!validateApexSignatureLocked(session.resolvedBaseCodePath,
+                        session.appPackageName)) {
+                    sessionInfo.setStagedSessionFailed(SessionInfo.VERIFICATION_FAILED);
+                }
+            }
+
+            mPm.sendSessionUpdatedBroadcast(sessionInfo.generateInfo(false), sessionInfo.userId);
         });
     }
 

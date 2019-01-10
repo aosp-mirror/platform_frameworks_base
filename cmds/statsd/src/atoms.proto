@@ -173,6 +173,10 @@ message Atom {
         WifiRunningStateChanged wifi_running_state_changed = 114;
         AppCompacted app_compacted = 115;
         NetworkDnsEventReported network_dns_event_Reported = 116;
+        DocsUIPickerLaunchedFromReported docs_ui_picker_launched_from_reported = 117;
+        DocsUIPickResultReported docs_ui_pick_result_reported = 118;
+        DocsUISearchModeReported docs_ui_search_mode_reported = 119;
+        DocsUISearchTypeReported docs_ui_search_type_reported = 120;
     }
 
     // Pulled events will start at field 10000.
@@ -3653,6 +3657,52 @@ message DocsUIUserActionReported {
  */
 message DocsUIInvalidScopedAccessRequestReported {
     optional android.stats.docsui.InvalidScopedAccess type = 1;
+}
+
+/**
+ * Logs the package name that launches docsui picker mode.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUIPickerLaunchedFromReported {
+    optional string package_name = 1;
+}
+
+/**
+ * Logs the search type.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUISearchTypeReported {
+    optional android.stats.docsui.SearchType search_type = 1;
+}
+
+/**
+ * Logs the search mode.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUISearchModeReported {
+    optional android.stats.docsui.SearchMode search_mode = 1;
+}
+
+/**
+ * Logs the pick result information.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUIPickResultReported {
+    optional int32 total_action_count = 1;
+    optional int64 duration_millis = 2;
+    optional int32 file_count= 3;
+    optional bool is_searching = 4;
+    optional android.stats.docsui.Root picked_from = 5;
+    optional android.stats.docsui.MimeType mime_type = 6;
+    optional int32 repeatedly_pick_times = 7;
 }
 
 /**

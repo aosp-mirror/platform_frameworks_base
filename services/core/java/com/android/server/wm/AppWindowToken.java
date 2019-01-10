@@ -2356,7 +2356,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     public void onAnimationLeashDestroyed(Transaction t) {
         super.onAnimationLeashDestroyed(t);
         if (mAnimationBoundsLayer != null) {
-            t.destroy(mAnimationBoundsLayer);
+            t.reparent(mAnimationBoundsLayer, null);
             mAnimationBoundsLayer = null;
         }
 

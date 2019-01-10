@@ -75,8 +75,9 @@ public class TextLine {
     private int mEllipsisEnd;
 
     // Additional width of whitespace for justification. This value is per whitespace, thus
-    // the line width will increase by mAddedWidth x (number of stretchable whitespaces).
-    private float mAddedWidth;
+    // the line width will increase by mAddedWidthForJustify x (number of stretchable whitespaces).
+    private float mAddedWidthForJustify;
+    private boolean mIsJustifying;
 
     private final TextPaint mWorkPaint = new TextPaint();
     private final TextPaint mActivePaint = new TextPaint();
@@ -229,7 +230,8 @@ public class TextLine {
             }
         }
         mTabs = tabStops;
-        mAddedWidth = 0;
+        mAddedWidthForJustify = 0;
+        mIsJustifying = false;
 
         mEllipsisStart = ellipsisStart != ellipsisEnd ? ellipsisStart : 0;
         mEllipsisEnd = ellipsisStart != ellipsisEnd ? ellipsisEnd : 0;
@@ -255,7 +257,8 @@ public class TextLine {
             return;
         }
         final float width = Math.abs(measure(end, false, null));
-        mAddedWidth = (justifyWidth - width) / spaces;
+        mAddedWidthForJustify = (justifyWidth - width) / spaces;
+        mIsJustifying = true;
     }
 
     /**
@@ -713,7 +716,9 @@ public class TextLine {
 
         TextPaint wp = mWorkPaint;
         wp.set(mPaint);
-        wp.setWordSpacing(mAddedWidth);
+        if (mIsJustifying) {
+            wp.setWordSpacing(mAddedWidthForJustify);
+        }
 
         int spanStart = runStart;
         int spanLimit;
@@ -849,7 +854,9 @@ public class TextLine {
             FontMetricsInt fmi, boolean needWidth, int offset,
             @Nullable ArrayList<DecorationInfo> decorations) {
 
-        wp.setWordSpacing(mAddedWidth);
+        if (mIsJustifying) {
+            wp.setWordSpacing(mAddedWidthForJustify);
+        }
         // Get metrics first (even for empty strings or "0" width runs)
         if (fmi != null) {
             expandMetricsFromPaint(fmi, wp);

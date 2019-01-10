@@ -46,7 +46,7 @@ public:
 
     Paint();
     Paint(const Paint& paint);
-    Paint(const SkPaint& paint);  // NOLINT(implicit)
+    Paint(const SkPaint& paint);  // NOLINT(google-explicit-constructor)
     ~Paint();
 
     Paint& operator=(const Paint& other);

@@ -366,9 +366,9 @@ public class Assistant extends NotificationAssistantService {
     }
 
     @Override
-    public void onNotificationDirectReply(@NonNull String key) {
-        if (DEBUG) Log.i(TAG, "onNotificationDirectReply " + key);
-        mSmartActionsHelper.onNotificationDirectReply(key);
+    public void onNotificationDirectReplied(@NonNull String key) {
+        if (DEBUG) Log.i(TAG, "onNotificationDirectReplied " + key);
+        mSmartActionsHelper.onNotificationDirectReplied(key);
     }
 
     @Override

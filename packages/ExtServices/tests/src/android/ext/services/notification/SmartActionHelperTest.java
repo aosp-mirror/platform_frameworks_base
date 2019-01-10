@@ -241,7 +241,7 @@ public class SmartActionHelperTest {
         when(mNotificationEntry.getNotification()).thenReturn(notification);
 
         mSmartActionsHelper.suggestReplies(mNotificationEntry);
-        mSmartActionsHelper.onNotificationDirectReply(NOTIFICATION_KEY);
+        mSmartActionsHelper.onNotificationDirectReplied(NOTIFICATION_KEY);
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);

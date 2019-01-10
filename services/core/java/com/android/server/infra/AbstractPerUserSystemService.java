@@ -214,7 +214,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
 
     /**
      * Gets the current name of the service, which is either the default service or the
-     *  {@link #setTemporaryServiceLocked(String, int) temporary one}.
+     *  {@link AbstractMasterSystemService#setTemporaryService(int, String, int) temporary one}.
      */
     protected final @Nullable String getComponentNameLocked() {
         return mMaster.mServiceNameResolver.getServiceName(mUserId);
@@ -225,17 +225,6 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
      */
     public final boolean isTemporaryServiceSetLocked() {
         return mMaster.mServiceNameResolver.isTemporary(mUserId);
-    }
-
-    /**
-     * Temporary sets the service implementation.
-     *
-     * @param componentName name of the new component
-     * @param durationMs how long the change will be valid (the service will be automatically reset
-     * to the default component after this timeout expires).
-     */
-    protected final void setTemporaryServiceLocked(@NonNull String componentName, int durationMs) {
-        mMaster.mServiceNameResolver.setTemporaryService(mUserId, componentName, durationMs);
     }
 
     /**

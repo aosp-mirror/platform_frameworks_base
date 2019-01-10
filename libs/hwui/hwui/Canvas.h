@@ -303,18 +303,18 @@ public:
     static int GetApiLevel() { return sApiLevel; }
 
 protected:
-    void drawTextDecorations(float x, float y, float length, const SkPaint& paint);
+    void drawTextDecorations(float x, float y, float length, const Paint& paint);
 
     /**
      * glyphFunc: valid only for the duration of the call and should not be cached.
      * drawText: count is of glyphs
      * totalAdvance: used to define width of text decorations (underlines, strikethroughs).
      */
-    virtual void drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& paint, float x,
+    virtual void drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& paint, float x,
                             float y, float boundsLeft, float boundsTop, float boundsRight,
                             float boundsBottom, float totalAdvance) = 0;
     virtual void drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
-                                  const SkPaint& paint, const SkPath& path, size_t start,
+                                  const Paint& paint, const SkPath& path, size_t start,
                                   size_t end) = 0;
     static int sApiLevel;
 

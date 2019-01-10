@@ -2293,9 +2293,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "--apex":
                     sessionParams.installFlags |= PackageManager.INSTALL_APEX;
-                    // TODO(b/118865310): APEX packages should always imply
-                    //                    sessionParams.isStaged(). Enforce this when the staged
-                    //                    install workflow is complete.
+                    sessionParams.setStaged();
                     break;
                 case "--multi-package":
                     sessionParams.setMultiPackage();

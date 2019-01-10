@@ -1,5 +1,7 @@
 package com.android.settingslib;
 
+import static android.telephony.ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN;
+
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.Intent;
@@ -429,12 +431,14 @@ public class Utils {
         // and do not support voice service, and on these SIM cards, we
         // want to show signal bars for data service as well as the "no
         // service" or "emergency calls only" text that indicates that voice
-        // is not available.
+        // is not available. Note that we ignore the IWLAN service state
+        // because that state indicates the use of VoWIFI and not cell service
         int state = serviceState.getState();
         int dataState = serviceState.getDataRegState();
         if (state == ServiceState.STATE_OUT_OF_SERVICE
                 || state == ServiceState.STATE_EMERGENCY_ONLY) {
-            if (dataState == ServiceState.STATE_IN_SERVICE) {
+            if (dataState == ServiceState.STATE_IN_SERVICE
+                    && serviceState.getDataNetworkType() != RIL_RADIO_TECHNOLOGY_IWLAN) {
                 return ServiceState.STATE_IN_SERVICE;
             }
         }

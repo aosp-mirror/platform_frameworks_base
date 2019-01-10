@@ -40,9 +40,15 @@ public interface NotificationEntryListener {
     }
 
     /**
-     * Called when a notification was updated.
+     * Called when a notification is updated, before any filtering of notifications have occurred.
      */
-    default void onEntryUpdated(NotificationEntry entry) {
+    default void onPreEntryUpdated(NotificationEntry entry) {
+    }
+
+    /**
+     * Called when a notification was updated, after any filtering of notifications have occurred.
+     */
+    default void onPostEntryUpdated(NotificationEntry entry) {
     }
 
     /**

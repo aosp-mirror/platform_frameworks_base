@@ -376,9 +376,13 @@ public class StaticLayout extends Layout {
          * Set paragraph justification mode. The default value is
          * {@link Layout#JUSTIFICATION_MODE_NONE}. If the last line is too short for justification,
          * the last line will be displayed with the alignment set by {@link #setAlignment}.
+         * When Justification mode is JUSTIFICATION_MODE_INTER_WORD, wordSpacing on the given
+         * {@link Paint} will be ignored. This behavior also affects Spans which change the
+         * wordSpacing.
          *
          * @param justificationMode justification mode for the paragraph.
          * @return this builder, useful for chaining.
+         * @see Paint#setWordSpacing(float)
          */
         @NonNull
         public Builder setJustificationMode(@JustificationMode int justificationMode) {

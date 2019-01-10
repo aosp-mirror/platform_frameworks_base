@@ -116,6 +116,8 @@ public final class TextClassifierEvent implements Parcelable {
     public static final int TYPE_SELECTION_RESET = 18;
     /** User composed a reply. */
     public static final int TYPE_MANUAL_REPLY = 19;
+    /** TextClassifier generated some actions */
+    public static final int TYPE_ACTIONS_GENERATED = 20;
 
     @Category private final int mEventCategory;
     @Type private final int mEventType;

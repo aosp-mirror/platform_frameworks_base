@@ -18,8 +18,9 @@ package android.text;
 import android.graphics.Canvas;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.support.test.filters.LargeTest;
 import android.text.NonEditableTextGenerator.TextType;
+
+import androidx.test.filters.LargeTest;
 
 import org.junit.Rule;
 import org.junit.Test;

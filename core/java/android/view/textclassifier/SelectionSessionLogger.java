@@ -39,7 +39,6 @@ import java.util.StringJoiner;
 public final class SelectionSessionLogger {
 
     private static final String LOG_TAG = "SelectionSessionLogger";
-    private static final boolean DEBUG_LOG_ENABLED = false;
     static final String CLASSIFIER_ID = "androidtc";
 
     private static final int START_EVENT_DELTA = MetricsEvent.FIELD_SELECTION_SINCE_START;
@@ -195,8 +194,9 @@ public final class SelectionSessionLogger {
     }
 
     private static void debugLog(LogMaker log) {
-        if (!DEBUG_LOG_ENABLED) return;
-
+        if (!Log.ENABLE_FULL_LOGGING) {
+            return;
+        }
         final String widgetType = Objects.toString(log.getTaggedData(WIDGET_TYPE), UNKNOWN);
         final String widgetVersion = Objects.toString(log.getTaggedData(WIDGET_VERSION), "");
         final String widget = widgetVersion.isEmpty()
@@ -221,7 +221,7 @@ public final class SelectionSessionLogger {
         final int eventEnd = Integer.parseInt(
                 Objects.toString(log.getTaggedData(EVENT_END), ZERO));
 
-        Log.d(LOG_TAG,
+        Log.v(LOG_TAG,
                 String.format(Locale.US, "%2d: %s/%s/%s, range=%d,%d - smart_range=%d,%d (%s/%s)",
                         index, type, subType, entity, eventStart, eventEnd, smartStart, smartEnd,
                         widget, model));

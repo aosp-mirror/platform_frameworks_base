@@ -81,7 +81,7 @@ public:
 
     explicit Matrix4(const float* v) { load(v); }
 
-    Matrix4(const SkMatrix& v) {  // NOLINT, implicit
+    Matrix4(const SkMatrix& v) {  // NOLINT(google-explicit-constructor)
         load(v);
     }
 

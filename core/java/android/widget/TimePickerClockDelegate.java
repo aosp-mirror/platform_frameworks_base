@@ -454,16 +454,13 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
                 (RelativeLayout.LayoutParams) mAmPmLayout.getLayoutParams();
         if (params.getRule(RelativeLayout.RIGHT_OF) != 0
                 || params.getRule(RelativeLayout.LEFT_OF) != 0) {
+            final int margin = (int) (mContext.getResources().getDisplayMetrics().density * 8);
             // Horizontal mode, with AM/PM appearing to left/right of hours and minutes.
             final boolean isAmPmAtLeft;
             if (TextUtils.getLayoutDirectionFromLocale(mLocale) == View.LAYOUT_DIRECTION_LTR) {
                 isAmPmAtLeft = isAmPmAtStart;
             } else {
                 isAmPmAtLeft = !isAmPmAtStart;
-            }
-            if (mIsAmPmAtLeft == isAmPmAtLeft) {
-                // AM/PM is already at the correct location. No change needed.
-                return;
             }
 
             if (isAmPmAtLeft) {
@@ -472,6 +469,14 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
             } else {
                 params.removeRule(RelativeLayout.LEFT_OF);
                 params.addRule(RelativeLayout.RIGHT_OF, mMinuteView.getId());
+            }
+
+            if (isAmPmAtStart) {
+                params.setMarginStart(0);
+                params.setMarginEnd(margin);
+            } else {
+                params.setMarginStart(margin);
+                params.setMarginEnd(0);
             }
             mIsAmPmAtLeft = isAmPmAtLeft;
         } else if (params.getRule(RelativeLayout.BELOW) != 0

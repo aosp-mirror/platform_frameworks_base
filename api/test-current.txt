@@ -394,6 +394,7 @@ package android.content.pm {
 package android.content.res {
 
   public final class Configuration implements java.lang.Comparable android.os.Parcelable {
+    field public int assetsSeq;
     field public final android.app.WindowConfiguration windowConfiguration;
   }
 
@@ -1236,7 +1237,7 @@ package android.service.notification {
     method public final void adjustNotifications(java.util.List<android.service.notification.Adjustment>);
     method public void onActionClicked(java.lang.String, android.app.Notification.Action, int);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public void onNotificationDirectReply(java.lang.String);
+    method public void onNotificationDirectReplied(java.lang.String);
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification);
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification, android.app.NotificationChannel);
     method public void onNotificationExpansionChanged(java.lang.String, boolean, boolean);

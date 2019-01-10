@@ -274,10 +274,14 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         }
 
         synchronized (mLock) {
-            final S service = getServiceForUserLocked(userId);
-            if (service != null) {
-                service.setTemporaryServiceLocked(componentName, durationMs);
+            final S oldService = peekServiceForUserLocked(userId);
+            if (oldService != null) {
+                oldService.removeSelfFromCacheLocked();
             }
+            mServiceNameResolver.setTemporaryService(userId, componentName, durationMs);
+
+            // Must update the service on cache so its initialization code is triggered
+            updateCachedServiceLocked(userId);
         }
     }
 
@@ -500,6 +504,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     protected void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
         boolean realDebug = debug;
         boolean realVerbose = verbose;
+        final String prefix2 = "    ";
 
         try {
             // Temporarily turn on full logging;
@@ -510,6 +515,13 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             if (mServiceNameResolver != null) {
                 pw.print(prefix); pw.print("Name resolver: ");
                 mServiceNameResolver.dumpShort(pw); pw.println();
+                final UserManager um = getContext().getSystemService(UserManager.class);
+                final List<UserInfo> users = um.getUsers();
+                for (int i = 0; i < users.size(); i++) {
+                    final int userId = users.get(i).id;
+                    pw.print(prefix2); pw.print(userId); pw.print(": ");
+                    mServiceNameResolver.dumpShort(pw, userId); pw.println();
+                }
             }
             pw.print(prefix); pw.print("Disabled users: "); pw.println(mDisabledUsers);
             pw.print(prefix); pw.print("Allow instant service: "); pw.println(mAllowInstantService);
@@ -522,7 +534,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                 pw.println("none");
             } else {
                 pw.println(size);
-                final String prefix2 = "    ";
                 for (int i = 0; i < size; i++) {
                     pw.print(prefix); pw.print("Service at "); pw.print(i); pw.println(": ");
                     final S service = mServicesCache.valueAt(i);

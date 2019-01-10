@@ -56,4 +56,9 @@ public final class SecureSettingsServiceNameResolver implements ServiceNameResol
     public void dumpShort(@NonNull PrintWriter pw, @UserIdInt int userId) {
         pw.print("defaultService="); pw.print(getDefaultServiceName(userId));
     }
+
+    @Override
+    public String toString() {
+        return "SecureSettingsServiceNameResolver[" + mProperty + "]";
+    }
 }

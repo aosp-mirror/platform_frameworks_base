@@ -55,7 +55,7 @@ import java.io.PrintWriter;
 /**
  * A helper to animate and manipulate the PiP.
  */
-public class PipMotionHelper implements Handler.Callback {
+public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Callback {
 
     private static final String TAG = "PipMotionHelper";
     private static final boolean DEBUG = false;
@@ -172,7 +172,8 @@ public class PipMotionHelper implements Handler.Callback {
     /**
      * Dismisses the pinned stack.
      */
-    void dismissPip() {
+    @Override
+    public void dismissPip() {
         if (DEBUG) {
             Log.d(TAG, "dismissPip: callers=\n" + Debug.getCallers(5, "    "));
         }

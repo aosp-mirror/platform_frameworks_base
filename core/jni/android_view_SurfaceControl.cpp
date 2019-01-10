@@ -870,14 +870,6 @@ static void nativeSetOverrideScalingMode(JNIEnv* env, jclass clazz, jlong transa
     transaction->setOverrideScalingMode(ctrl, scalingMode);
 }
 
-static void nativeDestroyInTransaction(JNIEnv* env, jclass clazz,
-                                       jlong transactionObj,
-                                       jlong nativeObject) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    auto ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
-    transaction->destroySurface(ctrl);
-}
-
 static jobject nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     return javaObjectForIBinder(env, ctrl->getHandle());
@@ -1048,8 +1040,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSeverChildren } ,
     {"nativeSetOverrideScalingMode", "(JJI)V",
             (void*)nativeSetOverrideScalingMode },
-    {"nativeDestroy", "(JJ)V",
-            (void*)nativeDestroyInTransaction },
     {"nativeGetHandle", "(J)Landroid/os/IBinder;",
             (void*)nativeGetHandle },
     {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/graphics/Rect;IIZI)Landroid/graphics/GraphicBuffer;",

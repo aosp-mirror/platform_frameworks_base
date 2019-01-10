@@ -428,9 +428,9 @@ public class SmartReplyView extends ViewGroup {
                     markButtonsWithPendingSqueezeStatusAs(
                             LayoutParams.SQUEEZE_STATUS_FAILED, coveredSuggestions);
 
-                    // The current button doesn't fit, so there's no point in measuring further
-                    // buttons.
-                    break;
+                    // The current button doesn't fit, keep on adding lower-priority buttons in case
+                    // any of those fit.
+                    continue;
                 }
 
                 // The current button fits, so mark all squeezed buttons as "successfully squeezed"

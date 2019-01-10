@@ -18,12 +18,13 @@ package android.textclassifier;
 import android.content.Context;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
 import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLanguage;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
 
 import org.junit.Before;
 import org.junit.Rule;

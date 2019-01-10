@@ -60,7 +60,7 @@ interface IWifiManager
 
     ParceledListSlice getConfiguredNetworks(String packageName);
 
-    ParceledListSlice getPrivilegedConfiguredNetworks();
+    ParceledListSlice getPrivilegedConfiguredNetworks(String packageName);
 
     Map getAllMatchingFqdnsForScanResults(in List<ScanResult> scanResult);
 

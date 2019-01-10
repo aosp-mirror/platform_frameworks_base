@@ -22,6 +22,10 @@ java_library {
     srcs: [
         "src/**/*.java",
     ],
+    static_libs: [
+        "dhcp-packet-lib",
+        "frameworks-net-shared-utils",
+    ]
 }
 
 // Updatable network stack packaged as an application

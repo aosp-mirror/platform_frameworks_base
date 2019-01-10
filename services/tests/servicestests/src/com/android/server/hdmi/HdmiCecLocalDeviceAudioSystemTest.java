@@ -34,7 +34,6 @@ import androidx.test.filters.SmallTest;
 import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -60,6 +59,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private int mMusicVolume;
     private int mMusicMaxVolume;
     private boolean mMusicMute;
+    private int mAvrPhysicalAddress;
 
     @Before
     public void setUp() {
@@ -145,7 +145,10 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();
+        mAvrPhysicalAddress  = 0x2000;
+        mNativeWrapper.setPhysicalAddress(mAvrPhysicalAddress);
         SystemProperties.set(Constants.PROPERTY_ARC_SUPPORT, "true");
+        SystemProperties.set(Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, "true");
     }
 
     @Test
@@ -176,7 +179,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 
-    @Ignore("b/80297700")
     @Test
     public void handleRequestShortAudioDescriptor_featureDisabled() throws Exception {
         HdmiCecMessage expectedMessage =
@@ -258,7 +260,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mMusicMute).isFalse();
     }
 
-    @Ignore("b/80297700")
     @Test
     public void handleSystemAudioModeRequest_turnOffByTv() throws Exception {
         assertThat(mMusicMute).isFalse();
@@ -286,9 +287,10 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mMusicMute).isTrue();
     }
 
-    @Ignore("b/80297700")
     @Test
     public void onStandbyAudioSystem_currentSystemAudioControlOn() throws Exception {
+        mHdmiCecLocalDeviceAudioSystem.setAutoDeviceOff(false);
+        mHdmiCecLocalDeviceAudioSystem.setAutoTvOff(false);
         // Set system audio control on first
         mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(true);
         // Check if standby correctly turns off the feature
@@ -369,7 +371,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getResultMessages()).isEmpty();
     }
 
-    @Ignore("b/80297700")
     @Test
     public void terminateSystemAudioMode_systemAudioModeOn() throws Exception {
         mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(true);
@@ -386,42 +387,48 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
-    public void isPhysicalAddressMeOrBelow_isMe() throws Exception {
+    public void pathToPort_isMe() throws Exception {
         int targetPhysicalAddress = 0x1000;
         mNativeWrapper.setPhysicalAddress(0x1000);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-                .isTrue();
+        assertThat(mHdmiCecLocalDeviceAudioSystem
+                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
+                .isEqualTo(0);
     }
 
     @Test
-    public void isPhysicalAddressMeOrBelow_isBelow() throws Exception {
+    public void pathToPort_isBelow() throws Exception {
         int targetPhysicalAddress = 0x1100;
         mNativeWrapper.setPhysicalAddress(0x1000);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-                .isTrue();
+        assertThat(mHdmiCecLocalDeviceAudioSystem
+                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
+                .isEqualTo(1);
     }
 
     @Test
-    public void isPhysicalAddressMeOrBelow_neitherMeNorBelow() throws Exception {
+    public void pathToPort_neitherMeNorBelow() throws Exception {
         int targetPhysicalAddress = 0x3000;
         mNativeWrapper.setPhysicalAddress(0x2000);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-                .isFalse();
+        assertThat(mHdmiCecLocalDeviceAudioSystem
+                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
+                .isEqualTo(-1);
 
         targetPhysicalAddress = 0x2200;
         mNativeWrapper.setPhysicalAddress(0x3300);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-                .isFalse();
+        assertThat(mHdmiCecLocalDeviceAudioSystem
+                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
+                .isEqualTo(-1);
 
         targetPhysicalAddress = 0x2213;
         mNativeWrapper.setPhysicalAddress(0x2212);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-                .isFalse();
+        assertThat(mHdmiCecLocalDeviceAudioSystem
+                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
+                .isEqualTo(-1);
 
         targetPhysicalAddress = 0x2340;
         mNativeWrapper.setPhysicalAddress(0x2310);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-                .isFalse();
+        assertThat(mHdmiCecLocalDeviceAudioSystem
+                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
+                .isEqualTo(-1);
     }
 
     @Test
@@ -512,5 +519,14 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void handleSetStreamPath_underCurrentDevice() {
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getLocalActivePath()).isEqualTo(0);
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, 0x2100);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleSetStreamPath(message)).isTrue();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getLocalActivePath()).isEqualTo(1);
     }
 }

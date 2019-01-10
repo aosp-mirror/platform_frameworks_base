@@ -104,6 +104,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             Dependency.get(NotificationMediaManager.class);
     private final VisualStabilityManager mVisualStabilityManager =
             Dependency.get(VisualStabilityManager.class);
+    private final NotificationGutsManager mGutsManager =
+            Dependency.get(NotificationGutsManager.class);
     protected AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
 
     private final NotificationPanelView mNotificationPanel;
@@ -189,7 +191,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 }
 
                 @Override
-                public void onEntryUpdated(NotificationEntry entry) {
+                public void onPostEntryUpdated(NotificationEntry entry) {
                     mShadeController.updateAreThereNotifications();
                 }
 
@@ -206,14 +208,12 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 }
             };
 
-            NotificationGutsManager gutsManager = Dependency.get(NotificationGutsManager.class);
-
             mViewHierarchyManager.setUpWithPresenter(this, notifListContainer);
             mEntryManager.setUpWithPresenter(this, notifListContainer, mHeadsUpManager);
             mEntryManager.addNotificationEntryListener(notificationEntryListener);
             mEntryManager.addNotificationLifetimeExtender(mHeadsUpManager);
             mEntryManager.addNotificationLifetimeExtender(mAmbientPulseManager);
-            mEntryManager.addNotificationLifetimeExtender(gutsManager);
+            mEntryManager.addNotificationLifetimeExtender(mGutsManager);
             mEntryManager.addNotificationLifetimeExtenders(
                     remoteInputManager.getLifetimeExtenders());
             mNotificationRowBinder.setUpWithPresenter(this, notifListContainer, mHeadsUpManager,
@@ -223,7 +223,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             mLockscreenUserManager.setUpWithPresenter(this);
             mMediaManager.setUpWithPresenter(this);
             mVisualStabilityManager.setUpWithPresenter(this);
-            gutsManager.setUpWithPresenter(this,
+            mGutsManager.setUpWithPresenter(this,
                     notifListContainer, mCheckSaveListener, mOnSettingsClickListener);
             // ForegroundServiceControllerListener adds its listener in its constructor
             // but we need to request it here in order for it to be instantiated.
@@ -242,7 +242,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         MessagingMessage.dropCache();
         MessagingGroup.dropCache();
         if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
-            mEntryManager.updateNotificationsOnDensityOrFontScaleChanged();
+            updateNotificationsOnDensityOrFontScaleChanged();
         } else {
             mReinflateNotificationsOnUserSwitched = true;
         }
@@ -265,6 +265,19 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             ExpandableNotificationRow row = entry.getRow();
             if (row != null) {
                 row.onUiModeChanged();
+            }
+        }
+    }
+
+    private void updateNotificationsOnDensityOrFontScaleChanged() {
+        ArrayList<NotificationEntry> userNotifications =
+                mEntryManager.getNotificationData().getNotificationsForCurrentUser();
+        for (int i = 0; i < userNotifications.size(); i++) {
+            NotificationEntry entry = userNotifications.get(i);
+            entry.onDensityOrFontScaleChanged();
+            boolean exposedGuts = entry.areGutsExposed();
+            if (exposedGuts) {
+                mGutsManager.onDensityOrFontScaleChanged(entry);
             }
         }
     }
@@ -367,7 +380,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         if (MULTIUSER_DEBUG) mNotificationPanelDebugText.setText("USER " + newUserId);
         mCommandQueue.animateCollapsePanels();
         if (mReinflateNotificationsOnUserSwitched) {
-            mEntryManager.updateNotificationsOnDensityOrFontScaleChanged();
+            updateNotificationsOnDensityOrFontScaleChanged();
             mReinflateNotificationsOnUserSwitched = false;
         }
         if (mDispatchUiModeChangeOnUserSwitched) {

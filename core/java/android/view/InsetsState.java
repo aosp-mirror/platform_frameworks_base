@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.WindowInsets.Type.indexOf;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Insets;
@@ -114,8 +116,8 @@ public class InsetsState implements Parcelable {
     public WindowInsets calculateInsets(Rect frame, boolean isScreenRound,
             boolean alwaysConsumeNavBar, DisplayCutout cutout,
             @Nullable @InsetSide SparseIntArray typeSideMap) {
-        Insets systemInsets = Insets.NONE;
-        Insets maxInsets = Insets.NONE;
+        Insets[] typeInsetsMap = new Insets[Type.SIZE];
+        Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
         final Rect relativeFrame = new Rect(frame);
         final Rect relativeFrameMax = new Rect(frame);
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
@@ -123,32 +125,38 @@ public class InsetsState implements Parcelable {
             if (source == null) {
                 continue;
             }
-            systemInsets = processSource(source, systemInsets, relativeFrame,
-                    false /* ignoreVisibility */, typeSideMap);
+            processSource(source, relativeFrame, false /* ignoreVisibility */, typeInsetsMap,
+                    typeSideMap);
 
             // IME won't be reported in max insets as the size depends on the EditorInfo of the IME
             // target.
             if (source.getType() != TYPE_IME) {
-                maxInsets = processSource(source, maxInsets, relativeFrameMax,
-                        true /* ignoreVisibility */, null /* typeSideMap */);
+                processSource(source, relativeFrameMax, true /* ignoreVisibility */,
+                        typeMaxInsetsMap, null /* typeSideMap */);
             }
         }
-        return new WindowInsets(new Rect(systemInsets), null, new Rect(maxInsets), isScreenRound,
+        return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, isScreenRound,
                 alwaysConsumeNavBar, cutout);
     }
 
-    private Insets processSource(InsetsSource source, Insets insets, Rect relativeFrame,
-            boolean ignoreVisibility, @Nullable @InsetSide SparseIntArray typeSideMap) {
-        Insets currentInsets = source.calculateInsets(relativeFrame, ignoreVisibility);
-        insets = Insets.add(currentInsets, insets);
-        relativeFrame.inset(insets);
-        if (typeSideMap != null && !Insets.NONE.equals(currentInsets)) {
-            @InsetSide int insetSide = getInsetSide(currentInsets);
+    private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,
+            Insets[] typeInsetsMap, @Nullable @InsetSide SparseIntArray typeSideMap) {
+        Insets insets = source.calculateInsets(relativeFrame, ignoreVisibility);
+
+        int index = indexOf(toPublicType(source.getType()));
+        Insets existing = typeInsetsMap[index];
+        if (existing == null) {
+            typeInsetsMap[index] = insets;
+        } else {
+            typeInsetsMap[index] = Insets.max(existing, insets);
+        }
+
+        if (typeSideMap != null && !Insets.NONE.equals(insets)) {
+            @InsetSide int insetSide = getInsetSide(insets);
             if (insetSide != INSET_SIDE_UNKNWON) {
-                typeSideMap.put(source.getType(), getInsetSide(currentInsets));
+                typeSideMap.put(source.getType(), getInsetSide(insets));
             }
         }
-        return insets;
     }
 
     /**
@@ -227,6 +235,21 @@ public class InsetsState implements Parcelable {
             result.add(TYPE_IME);
         }
         return result;
+    }
+
+    static @InsetType int toPublicType(@InternalInsetType int type) {
+        switch (type) {
+            case TYPE_TOP_BAR:
+                return Type.TOP_BAR;
+            case TYPE_SIDE_BAR_1:
+            case TYPE_SIDE_BAR_2:
+            case TYPE_SIDE_BAR_3:
+                return Type.SIDE_BARS;
+            case TYPE_IME:
+                return Type.IME;
+            default:
+                throw new IllegalArgumentException("Unknown type: " + type);
+        }
     }
 
     public static boolean getDefaultVisibly(@InsetType int type) {

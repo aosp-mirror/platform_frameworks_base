@@ -16,15 +16,24 @@
 
 package com.android.server;
 
-import static android.os.Binder.getCallingUid;
+import static android.net.dhcp.IDhcpServer.STATUS_INVALID_ARGUMENT;
+import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
+import static android.net.dhcp.IDhcpServer.STATUS_UNKNOWN_ERROR;
+
+import static com.android.server.util.PermissionUtil.checkNetworkStackCallingPermission;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Service;
 import android.content.Intent;
 import android.net.INetworkStackConnector;
+import android.net.dhcp.DhcpServer;
+import android.net.dhcp.DhcpServingParams;
+import android.net.dhcp.DhcpServingParamsParcel;
+import android.net.dhcp.IDhcpServerCallbacks;
+import android.net.util.SharedLog;
 import android.os.IBinder;
-import android.os.Process;
+import android.os.RemoteException;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -54,21 +63,37 @@ public class NetworkStackService extends Service {
     }
 
     private static class NetworkStackConnector extends INetworkStackConnector.Stub {
-        // TODO: makeDhcpServer(), etc. will go here.
+        @NonNull
+        private final SharedLog mLog = new SharedLog(TAG);
+
+        @Override
+        public void makeDhcpServer(@NonNull String ifName, @NonNull DhcpServingParamsParcel params,
+                @NonNull IDhcpServerCallbacks cb) throws RemoteException {
+            checkNetworkStackCallingPermission();
+            final DhcpServer server;
+            try {
+                server = new DhcpServer(
+                        ifName,
+                        DhcpServingParams.fromParcelableObject(params),
+                        mLog.forSubComponent(ifName + ".DHCP"));
+            } catch (DhcpServingParams.InvalidParameterException e) {
+                mLog.e("Invalid DhcpServingParams", e);
+                cb.onDhcpServerCreated(STATUS_INVALID_ARGUMENT, null);
+                return;
+            } catch (Exception e) {
+                mLog.e("Unknown error starting DhcpServer", e);
+                cb.onDhcpServerCreated(STATUS_UNKNOWN_ERROR, null);
+                return;
+            }
+            cb.onDhcpServerCreated(STATUS_SUCCESS, server);
+        }
 
         @Override
         protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter fout,
                 @Nullable String[] args) {
-            checkCaller();
+            checkNetworkStackCallingPermission();
             fout.println("NetworkStack logs:");
-            // TODO: dump logs here
-        }
-    }
-
-    private static void checkCaller() {
-        // TODO: check that the calling PID is the system server.
-        if (getCallingUid() != Process.SYSTEM_UID && getCallingUid() != Process.ROOT_UID) {
-            throw new SecurityException("Invalid caller: " + getCallingUid());
+            mLog.dump(fd, fout, args);
         }
     }
 }

@@ -17,6 +17,12 @@
 package com.android.server.display;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager.StackInfo;
+import android.app.ActivityTaskManager;
+import android.app.IActivityTaskManager;
+import android.app.TaskStackListener;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -27,6 +33,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.util.EventLog;
@@ -34,6 +41,7 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -41,7 +49,6 @@ import java.io.PrintWriter;
 class AutomaticBrightnessController {
     private static final String TAG = "AutomaticBrightnessController";
 
-    private static final boolean DEBUG = false;
     private static final boolean DEBUG_PRETEND_LIGHT_SENSOR_ABSENT = false;
 
     // If true, enables the use of the screen auto-brightness adjustment setting.
@@ -56,16 +63,11 @@ class AutomaticBrightnessController {
     // the user is satisfied with the result before storing the sample.
     private static final int BRIGHTNESS_ADJUSTMENT_SAMPLE_DEBOUNCE_MILLIS = 10000;
 
-    // Timeout after which we remove the effects any user interactions might've had on the
-    // brightness mapping. This timeout doesn't start until we transition to a non-interactive
-    // display policy so that we don't reset while users are using their devices, but also so that
-    // we don't erroneously keep the short-term model if the device is dozing but the display is
-    // fully on.
-    private static final int SHORT_TERM_MODEL_TIMEOUT_MILLIS = 30000;
-
     private static final int MSG_UPDATE_AMBIENT_LUX = 1;
     private static final int MSG_BRIGHTNESS_ADJUSTMENT_SAMPLE = 2;
     private static final int MSG_INVALIDATE_SHORT_TERM_MODEL = 3;
+    private static final int MSG_UPDATE_FOREGROUND_APP = 4;
+    private static final int MSG_UPDATE_FOREGROUND_APP_SYNC = 5;
 
     // Length of the ambient light horizon used to calculate the long term estimate of ambient
     // light.
@@ -125,6 +127,15 @@ class AutomaticBrightnessController {
     // Configuration object for determining thresholds to change brightness dynamically
     private final HysteresisLevels mAmbientBrightnessThresholds;
     private final HysteresisLevels mScreenBrightnessThresholds;
+
+    private boolean mLoggingEnabled;
+
+    // Timeout after which we remove the effects any user interactions might've had on the
+    // brightness mapping. This timeout doesn't start until we transition to a non-interactive
+    // display policy so that we don't reset while users are using their devices, but also so that
+    // we don't erroneously keep the short-term model if the device is dozing but the display is
+    // fully on.
+    private long mShortTermModelTimeout;
 
     // Amount of time to delay auto-brightness after screen on while waiting for
     // the light sensor to warm-up in milliseconds.
@@ -192,13 +203,26 @@ class AutomaticBrightnessController {
     private float mShortTermModelAnchor;
     private float SHORT_TERM_MODEL_THRESHOLD_RATIO = 0.6f;
 
+    // Context-sensitive brightness configurations require keeping track of the foreground app's
+    // package name and category, which is done by registering a TaskStackListener to call back to
+    // us onTaskStackChanged, and then using the ActivityTaskManager to get the foreground app's
+    // package namd and PackageManager to get its category (so might as well cache them).
+    private String mForegroundAppPackageName;
+    private String mPendingForegroundAppPackageName;
+    private @ApplicationInfo.Category int mForegroundAppCategory;
+    private @ApplicationInfo.Category int mPendingForegroundAppCategory;
+    private TaskStackListenerImpl mTaskStackListener;
+    private IActivityTaskManager mActivityTaskManager;
+    private PackageManager mPackageManager;
+
     public AutomaticBrightnessController(Callbacks callbacks, Looper looper,
             SensorManager sensorManager, BrightnessMappingStrategy mapper,
             int lightSensorWarmUpTime, int brightnessMin, int brightnessMax, float dozeScaleFactor,
             int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
             HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds) {
+            HysteresisLevels screenBrightnessThresholds, long shortTermModelTimeout,
+            PackageManager packageManager) {
         mCallbacks = callbacks;
         mSensorManager = sensorManager;
         mBrightnessMapper = mapper;
@@ -216,6 +240,7 @@ class AutomaticBrightnessController {
         mWeightingIntercept = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
         mAmbientBrightnessThresholds = ambientBrightnessThresholds;
         mScreenBrightnessThresholds = screenBrightnessThresholds;
+        mShortTermModelTimeout = shortTermModelTimeout;
         mShortTermModelValid = true;
         mShortTermModelAnchor = -1;
 
@@ -226,6 +251,31 @@ class AutomaticBrightnessController {
         if (!DEBUG_PRETEND_LIGHT_SENSOR_ABSENT) {
             mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         }
+
+        mActivityTaskManager = ActivityTaskManager.getService();
+        mPackageManager = packageManager;
+        mTaskStackListener = new TaskStackListenerImpl();
+        mForegroundAppPackageName = null;
+        mPendingForegroundAppPackageName = null;
+        mForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
+        mPendingForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
+    }
+
+    /**
+     * Enable/disable logging.
+     *
+     * @param loggingEnabled
+     *      Whether logging should be on/off.
+     *
+     * @return Whether the method succeeded or not.
+     */
+    public boolean setLoggingEnabled(boolean loggingEnabled) {
+        if (mLoggingEnabled == loggingEnabled) {
+            return false;
+        }
+        mBrightnessMapper.setLoggingEnabled(loggingEnabled);
+        mLoggingEnabled = loggingEnabled;
+        return true;
     }
 
     public int getAutomaticScreenBrightness() {
@@ -290,12 +340,12 @@ class AutomaticBrightnessController {
         }
         final int oldPolicy = mDisplayPolicy;
         mDisplayPolicy = policy;
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             Slog.d(TAG, "Display policy transitioning from " + oldPolicy + " to " + policy);
         }
         if (!isInteractivePolicy(policy) && isInteractivePolicy(oldPolicy)) {
             mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_SHORT_TERM_MODEL,
-                    SHORT_TERM_MODEL_TIMEOUT_MILLIS);
+                    mShortTermModelTimeout);
         } else if (isInteractivePolicy(policy) && !isInteractivePolicy(oldPolicy)) {
             mHandler.removeMessages(MSG_INVALIDATE_SHORT_TERM_MODEL);
         }
@@ -317,7 +367,7 @@ class AutomaticBrightnessController {
         mBrightnessMapper.addUserDataPoint(mAmbientLux, brightness);
         mShortTermModelValid = true;
         mShortTermModelAnchor = mAmbientLux;
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             Slog.d(TAG, "ShortTermModel: anchor=" + mShortTermModelAnchor);
         }
         return true;
@@ -330,7 +380,7 @@ class AutomaticBrightnessController {
     }
 
     private void invalidateShortTermModel() {
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             Slog.d(TAG, "ShortTermModel: invalidate user data");
         }
         mShortTermModelValid = false;
@@ -377,13 +427,17 @@ class AutomaticBrightnessController {
         pw.println("  mAmbientLightRingBuffer=" + mAmbientLightRingBuffer);
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
         pw.println("  mDisplayPolicy=" + DisplayPowerRequest.policyToString(mDisplayPolicy));
+        pw.println("  mShortTermModelTimeout=" + mShortTermModelTimeout);
         pw.println("  mShortTermModelAnchor=" + mShortTermModelAnchor);
         pw.println("  mShortTermModelValid=" + mShortTermModelValid);
         pw.println("  mBrightnessAdjustmentSamplePending=" + mBrightnessAdjustmentSamplePending);
         pw.println("  mBrightnessAdjustmentSampleOldLux=" + mBrightnessAdjustmentSampleOldLux);
         pw.println("  mBrightnessAdjustmentSampleOldBrightness="
                 + mBrightnessAdjustmentSampleOldBrightness);
-        pw.println("  mShortTermModelValid=" + mShortTermModelValid);
+        pw.println("  mForegroundAppPackageName=" + mForegroundAppPackageName);
+        pw.println("  mPendingForegroundAppPackageName=" + mPendingForegroundAppPackageName);
+        pw.println("  mForegroundAppCategory=" + mForegroundAppCategory);
+        pw.println("  mPendingForegroundAppCategory=" + mPendingForegroundAppCategory);
 
         pw.println();
         mBrightnessMapper.dump(pw);
@@ -399,6 +453,7 @@ class AutomaticBrightnessController {
                 mLightSensorEnabled = true;
                 mLightSensorEnableTime = SystemClock.uptimeMillis();
                 mCurrentLightSensorRate = mInitialLightSensorRate;
+                registerForegroundAppUpdater();
                 mSensorManager.registerListener(mLightSensorListener, mLightSensor,
                         mCurrentLightSensorRate * 1000, mHandler);
                 return true;
@@ -411,6 +466,7 @@ class AutomaticBrightnessController {
             mAmbientLightRingBuffer.clear();
             mCurrentLightSensorRate = -1;
             mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
+            unregisterForegroundAppUpdater();
             mSensorManager.unregisterListener(mLightSensorListener);
         }
         return false;
@@ -441,7 +497,7 @@ class AutomaticBrightnessController {
     private void adjustLightSensorRate(int lightSensorRate) {
         // if the light sensor rate changed, update the sensor listener
         if (lightSensorRate != mCurrentLightSensorRate) {
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "adjustLightSensorRate: " +
                         "previousRate=" + mCurrentLightSensorRate + ", " +
                         "currentRate=" + lightSensorRate);
@@ -458,7 +514,7 @@ class AutomaticBrightnessController {
     }
 
     private void setAmbientLux(float lux) {
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             Slog.d(TAG, "setAmbientLux(" + lux + ")");
         }
         if (lux < 0) {
@@ -476,7 +532,7 @@ class AutomaticBrightnessController {
             final float maxAmbientLux =
                 mShortTermModelAnchor + mShortTermModelAnchor * SHORT_TERM_MODEL_THRESHOLD_RATIO;
             if (minAmbientLux < mAmbientLux && mAmbientLux < maxAmbientLux) {
-                if (DEBUG) {
+                if (mLoggingEnabled) {
                     Slog.d(TAG, "ShortTermModel: re-validate user data, ambient lux is " +
                             minAmbientLux + " < " + mAmbientLux + " < " + maxAmbientLux);
                 }
@@ -490,7 +546,7 @@ class AutomaticBrightnessController {
     }
 
     private float calculateAmbientLux(long now, long horizon) {
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             Slog.d(TAG, "calculateAmbientLux(" + now + ", " + horizon + ")");
         }
         final int N = mAmbientLightRingBuffer.size();
@@ -509,7 +565,7 @@ class AutomaticBrightnessController {
                 break;
             }
         }
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             Slog.d(TAG, "calculateAmbientLux: selected endIndex=" + endIndex + ", point=(" +
                     mAmbientLightRingBuffer.getTime(endIndex) + ", " +
                     mAmbientLightRingBuffer.getLux(endIndex) + ")");
@@ -527,7 +583,7 @@ class AutomaticBrightnessController {
             final long startTime = eventTime - now;
             float weight = calculateWeight(startTime, endTime);
             float lux = mAmbientLightRingBuffer.getLux(i);
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "calculateAmbientLux: [" + startTime + ", " + endTime + "]: " +
                         "lux=" + lux + ", " +
                         "weight=" + weight);
@@ -536,7 +592,7 @@ class AutomaticBrightnessController {
             sum += lux * weight;
             endTime = startTime;
         }
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             Slog.d(TAG, "calculateAmbientLux: " +
                     "totalWeight=" + totalWeight + ", " +
                     "newAmbientLux=" + (sum / totalWeight));
@@ -591,7 +647,7 @@ class AutomaticBrightnessController {
             final long timeWhenSensorWarmedUp =
                 mLightSensorWarmUpTimeConfig + mLightSensorEnableTime;
             if (time < timeWhenSensorWarmedUp) {
-                if (DEBUG) {
+                if (mLoggingEnabled) {
                     Slog.d(TAG, "updateAmbientLux: Sensor not  ready yet: " +
                             "time=" + time + ", " +
                             "timeWhenSensorWarmedUp=" + timeWhenSensorWarmedUp);
@@ -602,7 +658,7 @@ class AutomaticBrightnessController {
             }
             setAmbientLux(calculateAmbientLux(time, AMBIENT_LIGHT_SHORT_HORIZON_MILLIS));
             mAmbientLuxValid = true;
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "updateAmbientLux: Initializing: " +
                         "mAmbientLightRingBuffer=" + mAmbientLightRingBuffer + ", " +
                         "mAmbientLux=" + mAmbientLux);
@@ -630,10 +686,10 @@ class AutomaticBrightnessController {
                         && fastAmbientLux <= mAmbientDarkeningThreshold
                         && nextDarkenTransition <= time)) {
             setAmbientLux(fastAmbientLux);
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "updateAmbientLux: "
                         + ((fastAmbientLux > mAmbientLux) ? "Brightened" : "Darkened") + ": "
-                        + "mAmbientBrighteningThreshold=" + mAmbientBrighteningThreshold + ", "
+                        + "mBrighteningLuxThreshold=" + mAmbientBrighteningThreshold + ", "
                         + "mAmbientLightRingBuffer=" + mAmbientLightRingBuffer + ", "
                         + "mAmbientLux=" + mAmbientLux);
             }
@@ -650,7 +706,7 @@ class AutomaticBrightnessController {
         // weighted ambient lux or not.
         nextTransitionTime =
                 nextTransitionTime > time ? nextTransitionTime : time + mNormalLightSensorRate;
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             Slog.d(TAG, "updateAmbientLux: Scheduling ambient lux update for " +
                     nextTransitionTime + TimeUtils.formatUptime(nextTransitionTime));
         }
@@ -662,7 +718,8 @@ class AutomaticBrightnessController {
             return;
         }
 
-        float value = mBrightnessMapper.getBrightness(mAmbientLux);
+        float value = mBrightnessMapper.getBrightness(mAmbientLux, mForegroundAppPackageName,
+                mForegroundAppCategory);
 
         int newScreenAutoBrightness =
                 clampScreenBrightness(Math.round(value * PowerManager.BRIGHTNESS_ON));
@@ -673,7 +730,7 @@ class AutomaticBrightnessController {
         if (mScreenAutoBrightness != -1
                 && newScreenAutoBrightness > mScreenDarkeningThreshold
                 && newScreenAutoBrightness < mScreenBrighteningThreshold) {
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "ignoring newScreenAutoBrightness: " + mScreenDarkeningThreshold
                         + " < " + newScreenAutoBrightness + " < " + mScreenBrighteningThreshold);
             }
@@ -681,8 +738,7 @@ class AutomaticBrightnessController {
         }
 
         if (mScreenAutoBrightness != newScreenAutoBrightness) {
-
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "updateAutoBrightness: " +
                         "mScreenAutoBrightness=" + mScreenAutoBrightness + ", " +
                         "newScreenAutoBrightness=" + newScreenAutoBrightness);
@@ -729,7 +785,7 @@ class AutomaticBrightnessController {
         if (mBrightnessAdjustmentSamplePending) {
             mBrightnessAdjustmentSamplePending = false;
             if (mAmbientLuxValid && mScreenAutoBrightness >= 0) {
-                if (DEBUG) {
+                if (mLoggingEnabled) {
                     Slog.d(TAG, "Auto-brightness adjustment changed by user: " +
                             "lux=" + mAmbientLux + ", " +
                             "brightness=" + mScreenAutoBrightness + ", " +
@@ -743,6 +799,83 @@ class AutomaticBrightnessController {
                         mScreenAutoBrightness);
             }
         }
+    }
+
+    // Register a TaskStackListener to call back to us onTaskStackChanged, so we can update the
+    // foreground app's package name and category and correct the brightness accordingly.
+    private void registerForegroundAppUpdater() {
+        try {
+            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+            // This will not get called until the foreground app changes for the first time, so
+            // call it explicitly to get the current foreground app's info.
+            updateForegroundApp();
+        } catch (RemoteException e) {
+            if (mLoggingEnabled) {
+                Slog.e(TAG, "Failed to register foreground app updater: " + e);
+            }
+            // Nothing to do.
+        }
+    }
+
+    private void unregisterForegroundAppUpdater() {
+        try {
+            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+        } catch (RemoteException e) {
+            // Nothing to do.
+        }
+        mForegroundAppPackageName = null;
+        mForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
+    }
+
+    // Set the foreground app's package name and category, so brightness can be corrected per app.
+    private void updateForegroundApp() {
+        if (mLoggingEnabled) {
+            Slog.d(TAG, "Attempting to update foreground app");
+        }
+        // The ActivityTaskManager's lock tends to get contended, so this is done in a background
+        // thread and applied via this thread's handler synchronously.
+        BackgroundThread.getHandler().post(new Runnable() {
+            public void run() {
+                try {
+                    // The foreground app is the top activity of the focused tasks stack.
+                    final StackInfo info = mActivityTaskManager.getFocusedStackInfo();
+                    if (info == null || info.topActivity == null) {
+                        return;
+                    }
+                    final String packageName = info.topActivity.getPackageName();
+                    // If the app didn't change, there's nothing to do. Otherwise, we have to
+                    // update the category and re-apply the brightness correction.
+                    if (mForegroundAppPackageName != null
+                            && mForegroundAppPackageName.equals(packageName)) {
+                        return;
+                    }
+                    mPendingForegroundAppPackageName = packageName;
+                    mPendingForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
+                    try {
+                        ApplicationInfo app = mPackageManager.getApplicationInfo(packageName,
+                                PackageManager.MATCH_ANY_USER);
+                        mPendingForegroundAppCategory = app.category;
+                    } catch (PackageManager.NameNotFoundException e) {
+                        // Nothing to do
+                    }
+                    mHandler.sendEmptyMessage(MSG_UPDATE_FOREGROUND_APP_SYNC);
+                } catch (RemoteException e) {
+                    // Nothing to do
+                }
+            }
+        });
+    }
+
+    private void updateForegroundAppSync() {
+        if (mLoggingEnabled) {
+            Slog.d(TAG, "Updating foreground app: packageName=" + mPendingForegroundAppPackageName
+                    + ", category=" + mPendingForegroundAppCategory);
+        }
+        mForegroundAppPackageName = mPendingForegroundAppPackageName;
+        mPendingForegroundAppPackageName = null;
+        mForegroundAppCategory = mPendingForegroundAppCategory;
+        mPendingForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
+        updateAutoBrightness(true /* sendUpdate */);
     }
 
     private final class AutomaticBrightnessHandler extends Handler {
@@ -764,6 +897,14 @@ class AutomaticBrightnessController {
                 case MSG_INVALIDATE_SHORT_TERM_MODEL:
                     invalidateShortTermModel();
                     break;
+
+                case MSG_UPDATE_FOREGROUND_APP:
+                    updateForegroundApp();
+                    break;
+
+                case MSG_UPDATE_FOREGROUND_APP_SYNC:
+                    updateForegroundAppSync();
+                    break;
             }
         }
     }
@@ -783,6 +924,15 @@ class AutomaticBrightnessController {
             // Not used.
         }
     };
+
+    // Call back whenever the tasks stack changes, which includes tasks being created, removed, and
+    // moving to top.
+    class TaskStackListenerImpl extends TaskStackListener {
+        @Override
+        public void onTaskStackChanged() {
+            mHandler.sendEmptyMessage(MSG_UPDATE_FOREGROUND_APP);
+        }
+    }
 
     /** Callbacks to request updates to the display's power state. */
     interface Callbacks {

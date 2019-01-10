@@ -503,26 +503,46 @@ public class UserBackupManagerService {
 
         mBackupPasswordManager = new BackupPasswordManager(mContext, mBaseStateDir, mRng);
 
-        // Alarm receivers for scheduled backups & initialization operations
-        BroadcastReceiver mRunBackupReceiver = new RunBackupReceiver(this);
+        // Receivers for scheduled backups and transport initialization operations.
+        BroadcastReceiver runBackupReceiver = new RunBackupReceiver(this);
         IntentFilter filter = new IntentFilter();
         filter.addAction(RUN_BACKUP_ACTION);
-        context.registerReceiver(mRunBackupReceiver, filter,
-                android.Manifest.permission.BACKUP, null);
+        context.registerReceiverAsUser(
+                runBackupReceiver,
+                UserHandle.of(userId),
+                filter,
+                android.Manifest.permission.BACKUP,
+                /* scheduler */ null);
 
-        BroadcastReceiver mRunInitReceiver = new RunInitializeReceiver(this);
+        BroadcastReceiver runInitReceiver = new RunInitializeReceiver(this);
         filter = new IntentFilter();
         filter.addAction(RUN_INITIALIZE_ACTION);
-        context.registerReceiver(mRunInitReceiver, filter,
-                android.Manifest.permission.BACKUP, null);
+        context.registerReceiverAsUser(
+                runInitReceiver,
+                UserHandle.of(userId),
+                filter,
+                android.Manifest.permission.BACKUP,
+                /* scheduler */ null);
 
         Intent backupIntent = new Intent(RUN_BACKUP_ACTION);
         backupIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mRunBackupIntent = PendingIntent.getBroadcast(context, 0, backupIntent, 0);
+        mRunBackupIntent =
+                PendingIntent.getBroadcastAsUser(
+                        context,
+                        /* requestCode */ 0,
+                        backupIntent,
+                        /* flags */ 0,
+                        UserHandle.of(userId));
 
         Intent initIntent = new Intent(RUN_INITIALIZE_ACTION);
         initIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mRunInitIntent = PendingIntent.getBroadcast(context, 0, initIntent, 0);
+        mRunInitIntent =
+                PendingIntent.getBroadcastAsUser(
+                        context,
+                        /* requestCode */ 0,
+                        initIntent,
+                        /* flags */ 0,
+                        UserHandle.of(userId));
 
         // Set up the backup-request journaling
         mJournalDir = new File(mBaseStateDir, "pending");

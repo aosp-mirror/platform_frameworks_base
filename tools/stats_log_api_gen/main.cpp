@@ -775,6 +775,7 @@ static void write_java_method(
     const AtomDecl &attributionDecl) {
     for (set<vector<java_type_t>>::const_iterator signature = signatures.begin();
         signature != signatures.end(); signature++) {
+        fprintf(out, "    /** @hide */\n");
         fprintf(out, "    public static native int %s(int code", method_name.c_str());
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature->begin();
@@ -820,6 +821,7 @@ static void write_java_work_source_method(FILE* out, const set<vector<java_type_
         }
 
         // Method header (signature)
+        fprintf(out, "    /** @hide */\n");
         fprintf(out, "    public static void write(int code");
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature->begin();
@@ -900,6 +902,7 @@ write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionD
         if (non_chained_decl != atom_code_to_non_chained_decl_map.end()) {
             write_java_usage(out, "write_non_chained", constant, *non_chained_decl->second);
         }
+        fprintf(out, "     * @hide\n");
         fprintf(out, "     */\n");
         fprintf(out, "    public static final int %s = %d;\n", constant.c_str(), atom->code);
     }
@@ -916,6 +919,7 @@ write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionD
                     field->name.c_str());
                 for (map<int, string>::const_iterator value = field->enumValues.begin();
                     value != field->enumValues.end(); value++) {
+                    fprintf(out, "    /** @hide */\n");
                     fprintf(out, "    public static final int %s__%s__%s = %d;\n",
                         make_constant_name(atom->message).c_str(),
                         make_constant_name(field->name).c_str(),

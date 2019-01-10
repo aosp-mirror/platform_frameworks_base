@@ -702,6 +702,12 @@ public class MediaRecorder implements AudioRouting,
      * is no guarantee that the recorder will have stopped by the time the
      * listener is notified.
      *
+     * <p>When using MPEG-4 container ({@link #setOutputFormat(int)} with
+     * {@link OutputFormat#MPEG_4}), it is recommended to set maximum duration that fits the use
+     * case. Setting a larger than required duration may result in a larger than needed output file
+     * because of space reserved for MOOV box expecting large movie data in this recording session.
+     *  Unused space of MOOV box is turned into FREE box in the output file.</p>
+     *
      * @param max_duration_ms the maximum duration in ms (if zero or negative, disables the duration limit)
      *
      */
@@ -716,6 +722,12 @@ public class MediaRecorder implements AudioRouting,
      * and recording will be stopped. Stopping happens asynchronously, there
      * is no guarantee that the recorder will have stopped by the time the
      * listener is notified.
+     *
+     * <p>When using MPEG-4 container ({@link #setOutputFormat(int)} with
+     * {@link OutputFormat#MPEG_4}), it is recommended to set maximum filesize that fits the use
+     * case. Setting a larger than required filesize may result in a larger than needed output file
+     * because of space reserved for MOOV box expecting large movie data in this recording session.
+     * Unused space of MOOV box is turned into FREE box in the output file.</p>
      *
      * @param max_filesize_bytes the maximum filesize in bytes (if zero or negative, disables the limit)
      *

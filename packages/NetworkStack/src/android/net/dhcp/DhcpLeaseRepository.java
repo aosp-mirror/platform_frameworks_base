@@ -21,7 +21,8 @@ import static android.net.NetworkUtils.intToInet4AddressHTH;
 import static android.net.NetworkUtils.prefixLengthToV4NetmaskIntHTH;
 import static android.net.dhcp.DhcpLease.EXPIRATION_NEVER;
 import static android.net.dhcp.DhcpLease.inet4AddrToString;
-import static android.net.util.NetworkConstants.IPV4_ADDR_BITS;
+
+import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_BITS;
 
 import static java.lang.Math.min;
 

@@ -4585,9 +4585,18 @@ public class TelephonyManager {
       }
     }
 
-    /** Data connection state: Unknown.  Used before we know the state.
-     * @hide
-     */
+    /** @hide */
+    @IntDef(prefix = {"DATA_"}, value = {
+            DATA_UNKNOWN,
+            DATA_DISCONNECTED,
+            DATA_CONNECTING,
+            DATA_CONNECTED,
+            DATA_SUSPENDED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DataState{}
+
+    /** Data connection state: Unknown.  Used before we know the state. */
     public static final int DATA_UNKNOWN        = -1;
     /** Data connection state: Disconnected. IP traffic not available. */
     public static final int DATA_DISCONNECTED   = 0;
@@ -5849,9 +5858,14 @@ public class TelephonyManager {
 
     /**
      * Returns the IMS Service Table (IST) that was loaded from the ISIM.
+     *
+     * See 3GPP TS 31.103 (Section 4.2.7) for the definition and more information on this table.
+     *
      * @return IMS Service Table or null if not present or not loaded
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getIsimIst() {
         try {
             IPhoneSubInfo info = getSubscriberInfo();

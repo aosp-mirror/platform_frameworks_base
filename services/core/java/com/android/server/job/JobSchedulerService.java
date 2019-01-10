@@ -332,6 +332,44 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    private static class MaxJobCounts {
+        private final KeyValueListParser.IntValue mTotal;
+        private final KeyValueListParser.IntValue mBg;
+
+        private MaxJobCounts(int totalDefault, String totalKey, int bgDefault, String bgKey) {
+            mTotal = new KeyValueListParser.IntValue(totalKey, totalDefault);
+            mBg = new KeyValueListParser.IntValue(bgKey, bgDefault);
+        }
+
+        public void parse(KeyValueListParser parser) {
+            mTotal.parse(parser);
+            mBg.parse(parser);
+
+            if (mBg.getValue() > mTotal.getValue()) {
+                mBg.setValue(mTotal.getValue());
+            }
+
+        }
+
+        public int getTotalMax() {
+            return mTotal.getValue();
+        }
+
+        public int getBgMax() {
+            return mBg.getValue();
+        }
+
+        public void dump(PrintWriter pw, String prefix) {
+            mTotal.dump(pw, prefix);
+            mBg.dump(pw, prefix);
+        }
+
+        public void dumpProto(ProtoOutputStream proto, long tagTotal, long tagBg) {
+            mTotal.dumpProto(proto, tagTotal);
+            mBg.dumpProto(proto, tagBg);
+        }
+    }
+
     /**
      * All times are in milliseconds. These constants are kept synchronized with the system
      * global Settings. Any access to this class or its fields should be done while
@@ -492,6 +530,43 @@ public class JobSchedulerService extends com.android.server.SystemService
          * memory state.
          */
         int BG_CRITICAL_JOB_COUNT = DEFAULT_BG_CRITICAL_JOB_COUNT;
+
+        // Max job counts for screen on / off, for each memory trim level.
+        // TODO Remove the old configs such as FG_JOB_COUNT and BG_*_COUNT, once the code switches
+        // to the below configs.
+
+        final MaxJobCounts MAX_JOB_COUNTS_ON_NORMAL = new MaxJobCounts(
+                4, "max_job_total_on_normal",
+                2, "max_job_bg_on_normal");
+
+        final MaxJobCounts MAX_JOB_COUNTS_ON_MODERATE = new MaxJobCounts(
+                4, "max_job_total_on_moderate",
+                1, "max_job_bg_on_moderate");
+
+        final MaxJobCounts MAX_JOB_COUNTS_ON_LOW = new MaxJobCounts(
+                4, "max_job_total_on_low",
+                1, "max_job_bg_on_low");
+
+        final MaxJobCounts MAX_JOB_COUNTS_ON_CRITICAL = new MaxJobCounts(
+                2, "max_job_total_on_critical",
+                1, "max_job_bg_on_critical");
+
+        final MaxJobCounts MAX_JOB_COUNTS_OFF_NORMAL = new MaxJobCounts(
+                8, "max_job_total_off_normal",
+                4, "max_job_bg_off_normal");
+
+        final MaxJobCounts MAX_JOB_COUNTS_OFF_MODERATE = new MaxJobCounts(
+                6, "max_job_total_off_moderate",
+                4, "max_job_bg_off_moderate");
+
+        final MaxJobCounts MAX_JOB_COUNTS_OFF_LOW = new MaxJobCounts(
+                4, "max_job_total_off_low",
+                1, "max_job_bg_off_low");
+
+        final MaxJobCounts MAX_JOB_COUNTS_OFF_CRITICAL = new MaxJobCounts(
+                2, "max_job_total_off_critical",
+                1, "max_job_bg_off_critical");
+
         /**
          * The maximum number of times we allow a job to have itself rescheduled before
          * giving up on it, for standard jobs.
@@ -566,7 +641,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         /**
          * The quota window size of the particular standby bucket. Apps in this standby bucket are
-         * expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * expected to run only {@link #QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
          * WINDOW_SIZE_MS.
          */
         public long QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS =
@@ -574,7 +649,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         /**
          * The quota window size of the particular standby bucket. Apps in this standby bucket are
-         * expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * expected to run only {@link #QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
          * WINDOW_SIZE_MS.
          */
         public long QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS =
@@ -582,7 +657,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         /**
          * The quota window size of the particular standby bucket. Apps in this standby bucket are
-         * expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * expected to run only {@link #QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
          * WINDOW_SIZE_MS.
          */
         public long QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS =
@@ -590,7 +665,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         /**
          * The quota window size of the particular standby bucket. Apps in this standby bucket are
-         * expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * expected to run only {@link #QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
          * WINDOW_SIZE_MS.
          */
         public long QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS =
@@ -653,6 +728,17 @@ public class JobSchedulerService extends com.android.server.SystemService
             if ((FG_JOB_COUNT+BG_CRITICAL_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
                 BG_CRITICAL_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
             }
+
+            MAX_JOB_COUNTS_ON_NORMAL.parse(mParser);
+            MAX_JOB_COUNTS_ON_MODERATE.parse(mParser);
+            MAX_JOB_COUNTS_ON_LOW.parse(mParser);
+            MAX_JOB_COUNTS_ON_CRITICAL.parse(mParser);
+
+            MAX_JOB_COUNTS_OFF_NORMAL.parse(mParser);
+            MAX_JOB_COUNTS_OFF_MODERATE.parse(mParser);
+            MAX_JOB_COUNTS_OFF_LOW.parse(mParser);
+            MAX_JOB_COUNTS_OFF_CRITICAL.parse(mParser);
+
             MAX_STANDARD_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_STANDARD_RESCHEDULE_COUNT,
                     DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT);
             MAX_WORK_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_WORK_RESCHEDULE_COUNT,
@@ -717,6 +803,17 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.printPair(KEY_BG_MODERATE_JOB_COUNT, BG_MODERATE_JOB_COUNT).println();
             pw.printPair(KEY_BG_LOW_JOB_COUNT, BG_LOW_JOB_COUNT).println();
             pw.printPair(KEY_BG_CRITICAL_JOB_COUNT, BG_CRITICAL_JOB_COUNT).println();
+
+            MAX_JOB_COUNTS_ON_NORMAL.dump(pw, "");
+            MAX_JOB_COUNTS_ON_MODERATE.dump(pw, "");
+            MAX_JOB_COUNTS_ON_LOW.dump(pw, "");
+            MAX_JOB_COUNTS_ON_CRITICAL.dump(pw, "");
+
+            MAX_JOB_COUNTS_OFF_NORMAL.dump(pw, "");
+            MAX_JOB_COUNTS_OFF_MODERATE.dump(pw, "");
+            MAX_JOB_COUNTS_OFF_LOW.dump(pw, "");
+            MAX_JOB_COUNTS_OFF_CRITICAL.dump(pw, "");
+
             pw.printPair(KEY_MAX_STANDARD_RESCHEDULE_COUNT, MAX_STANDARD_RESCHEDULE_COUNT).println();
             pw.printPair(KEY_MAX_WORK_RESCHEDULE_COUNT, MAX_WORK_RESCHEDULE_COUNT).println();
             pw.printPair(KEY_MIN_LINEAR_BACKOFF_TIME, MIN_LINEAR_BACKOFF_TIME).println();
@@ -767,6 +864,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             proto.write(ConstantsProto.BG_MODERATE_JOB_COUNT, BG_MODERATE_JOB_COUNT);
             proto.write(ConstantsProto.BG_LOW_JOB_COUNT, BG_LOW_JOB_COUNT);
             proto.write(ConstantsProto.BG_CRITICAL_JOB_COUNT, BG_CRITICAL_JOB_COUNT);
+
+            // TODO Dump max job counts.
+
             proto.write(ConstantsProto.MAX_STANDARD_RESCHEDULE_COUNT, MAX_STANDARD_RESCHEDULE_COUNT);
             proto.write(ConstantsProto.MAX_WORK_RESCHEDULE_COUNT, MAX_WORK_RESCHEDULE_COUNT);
             proto.write(ConstantsProto.MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME);

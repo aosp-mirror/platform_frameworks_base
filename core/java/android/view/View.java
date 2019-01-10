@@ -939,6 +939,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static boolean sAcceptZeroSizeDragShadow;
 
+    /**
+     * Prior to Q, {@link #dispatchApplyWindowInsets} had some issues:
+     * <ul>
+     *     <li>The modified insets changed by {@link #onApplyWindowInsets} were passed to the
+     *     entire view hierarchy in prefix order, including siblings as well as siblings of parents
+     *     further down the hierarchy. This violates the basic concepts of the view hierarchy, and
+     *     thus, the hierarchical dispatching mechanism was hard to use for apps.</li>
+     *
+     *     <li>Dispatch was stopped after the insets were fully consumed. This is somewhat confusing
+     *     for developers, but more importantly, by adding more granular information to
+     *     {@link WindowInsets} it becomes really cumbersome to define what consumed actually means
+     *     </li>
+     * </ul>
+     *
+     * In order to make window inset dispatching work properly, we dispatch window insets
+     * in the view hierarchy in a proper hierarchical manner and don't stop dispatching if the
+     * insets are consumed if this flag is set to {@code false}.
+     */
+    static boolean sBrokenInsetsDispatch;
+
     /** @hide */
     @IntDef({NOT_FOCUSABLE, FOCUSABLE, FOCUSABLE_AUTO})
     @Retention(RetentionPolicy.SOURCE)
@@ -5107,6 +5127,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             sAlwaysAssignFocus = targetSdkVersion < Build.VERSION_CODES.P;
 
             sAcceptZeroSizeDragShadow = targetSdkVersion < Build.VERSION_CODES.P;
+
+            sBrokenInsetsDispatch = !ViewRootImpl.USE_NEW_INSETS
+                    || targetSdkVersion < Build.VERSION_CODES.Q;
 
             sCompatibilityDone = true;
         }

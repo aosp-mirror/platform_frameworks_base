@@ -23,16 +23,20 @@ import android.content.ServiceConnection;
 import android.net.Uri;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.google.common.util.concurrent.SettableFuture;
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest

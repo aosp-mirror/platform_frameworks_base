@@ -18,13 +18,6 @@ package com.android.server.dreams;
 
 import static android.Manifest.permission.BIND_DREAM_SERVICE;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
-import com.android.internal.util.DumpUtils;
-import com.android.server.FgThread;
-import com.android.server.LocalServices;
-import com.android.server.SystemService;
-
-import android.Manifest;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -52,6 +45,12 @@ import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.util.Slog;
 import android.view.Display;
+
+import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.internal.util.DumpUtils;
+import com.android.server.FgThread;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -84,6 +83,7 @@ public final class DreamManagerService extends SystemService {
     private boolean mCurrentDreamCanDoze;
     private boolean mCurrentDreamIsDozing;
     private boolean mCurrentDreamIsWaking;
+    private boolean mForceAmbientDisplayEnabled;
     private int mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
     private int mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
@@ -139,6 +139,7 @@ public final class DreamManagerService extends SystemService {
         pw.println("mCurrentDreamCanDoze=" + mCurrentDreamCanDoze);
         pw.println("mCurrentDreamIsDozing=" + mCurrentDreamIsDozing);
         pw.println("mCurrentDreamIsWaking=" + mCurrentDreamIsWaking);
+        pw.println("mForceAmbientDisplayEnabled=" + mForceAmbientDisplayEnabled);
         pw.println("mCurrentDreamDozeScreenState="
                 + Display.stateToString(mCurrentDreamDozeScreenState));
         pw.println("mCurrentDreamDozeScreenBrightness=" + mCurrentDreamDozeScreenBrightness);
@@ -257,6 +258,16 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
+    private void forceAmbientDisplayEnabledInternal(boolean enabled) {
+        if (DEBUG) {
+            Slog.d(TAG, "Force ambient display enabled: " + enabled);
+        }
+
+        synchronized (mLock) {
+            mForceAmbientDisplayEnabled = enabled;
+        }
+    }
+
     private ComponentName chooseDreamForUser(boolean doze, int userId) {
         if (doze) {
             ComponentName dozeComponent = getDozeComponent(userId);
@@ -328,7 +339,7 @@ public final class DreamManagerService extends SystemService {
     }
 
     private ComponentName getDozeComponent(int userId) {
-        if (mDozeConfig.enabled(userId)) {
+        if (mForceAmbientDisplayEnabled || mDozeConfig.enabled(userId)) {
             return ComponentName.unflattenFromString(mDozeConfig.ambientDisplayComponent());
         } else {
             return null;
@@ -627,6 +638,18 @@ public final class DreamManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 stopDozingInternal(token);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void forceAmbientDisplayEnabled(boolean enabled) {
+            checkPermission(android.Manifest.permission.DEVICE_POWER);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                forceAmbientDisplayEnabledInternal(enabled);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

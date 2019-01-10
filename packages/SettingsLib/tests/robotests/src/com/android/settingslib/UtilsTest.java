@@ -247,6 +247,15 @@ public class UtilsTest {
     }
 
     @Test
+    public void isInService_voiceOutOfServiceDataInServiceOnIwLan_returnFalse() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mServiceState.getDataNetworkType())
+                .thenReturn(ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN);
+        when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        assertThat(Utils.isInService(mServiceState)).isFalse();
+    }
+
+    @Test
     public void isInService_voiceOutOfServiceDataOutOfService_returnFalse() {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
         when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);

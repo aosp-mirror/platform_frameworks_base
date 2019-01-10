@@ -32,6 +32,7 @@ import java.util.StringJoiner;
  *
  * All access to class methods other than dump() must be on the same thread.
  *
+ * TODO: this is a copy of SharedLog in the NetworkStack. Remove after Tethering is migrated.
  * @hide
  */
 public class SharedLog {

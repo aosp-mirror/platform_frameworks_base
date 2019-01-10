@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.NotificationUpdateHandler;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -72,8 +71,6 @@ public class NotificationEntryManager implements
     protected final Context mContext;
     protected final HashMap<String, NotificationEntry> mPendingNotifications = new HashMap<>();
 
-    private final NotificationGutsManager mGutsManager =
-            Dependency.get(NotificationGutsManager.class);
     private final DeviceProvisionedController mDeviceProvisionedController =
             Dependency.get(DeviceProvisionedController.class);
     private final ForegroundServiceController mForegroundServiceController =
@@ -370,19 +367,6 @@ public class NotificationEntryManager implements
         }
     }
 
-    public void updateNotificationsOnDensityOrFontScaleChanged() {
-        ArrayList<NotificationEntry> userNotifications =
-                mNotificationData.getNotificationsForCurrentUser();
-        for (int i = 0; i < userNotifications.size(); i++) {
-            NotificationEntry entry = userNotifications.get(i);
-            entry.onDensityOrFontScaleChanged();
-            boolean exposedGuts = entry.areGutsExposed();
-            if (exposedGuts) {
-                mGutsManager.onDensityOrFontScaleChanged(entry);
-            }
-        }
-    }
-
     private void addNotificationInternal(StatusBarNotification notification,
             NotificationListenerService.RankingMap rankingMap) throws InflationException {
         String key = notification.getKey();
@@ -463,6 +447,10 @@ public class NotificationEntryManager implements
         getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
                 mNotificationData.get(entry.key) != null);
 
+        for (NotificationEntryListener listener : mNotificationEntryListeners) {
+            listener.onPreEntryUpdated(entry);
+        }
+
         updateNotifications();
 
         if (DEBUG) {
@@ -473,7 +461,7 @@ public class NotificationEntryManager implements
         }
 
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
-            listener.onEntryUpdated(entry);
+            listener.onPostEntryUpdated(entry);
         }
 
         maybeScheduleUpdateNotificationViews(entry);

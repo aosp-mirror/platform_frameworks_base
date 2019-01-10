@@ -369,7 +369,7 @@ public class SignalStrength implements Parcelable {
     public int getLevel() {
         int level = getPrimary().getLevel();
         if (level < SIGNAL_STRENGTH_NONE_OR_UNKNOWN || level > SIGNAL_STRENGTH_GREAT) {
-            log("Invalid Level " + level + ", this=" + this);
+            loge("Invalid Level " + level + ", this=" + this);
             return SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
         }
         return getPrimary().getLevel();
@@ -657,9 +657,16 @@ public class SignalStrength implements Parcelable {
     }
 
     /**
-     * log
+     * log warning
      */
     private static void log(String s) {
         Rlog.w(LOG_TAG, s);
+    }
+
+    /**
+     * log error
+     */
+    private static void loge(String s) {
+        Rlog.e(LOG_TAG, s);
     }
 }

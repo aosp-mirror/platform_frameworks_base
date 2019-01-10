@@ -375,12 +375,12 @@ public class AppWidgetHostView extends FrameLayout {
     }
 
     /**
-     * Sets whether the widget should is being displayed on a light/white background and use an
+     * Sets whether the widget is being displayed on a light/white background and use an
      * alternate UI if available.
      * @see RemoteViews#setLightBackgroundLayoutId(int)
      */
-    public void setOnLightBackground(boolean useDarkTextLayout) {
-        mOnLightBackground = useDarkTextLayout;
+    public void setOnLightBackground(boolean onLightBackground) {
+        mOnLightBackground = onLightBackground;
     }
 
     /**

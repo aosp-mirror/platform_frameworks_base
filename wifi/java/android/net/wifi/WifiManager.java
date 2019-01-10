@@ -16,6 +16,10 @@
 
 package android.net.wifi;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_WIFI_STATE;
+import static android.Manifest.permission.READ_WIFI_CREDENTIAL;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1136,6 +1140,10 @@ public class WifiManager {
     /**
      * Return a list of all the networks configured for the current foreground
      * user.
+     *
+     * Requires the same permissions as {@link #getScanResults}.
+     * If such access is not allowed, this API will always return an empty list.
+     *
      * Not all fields of WifiConfiguration are returned. Only the following
      * fields are filled in:
      * <ul>
@@ -1162,6 +1170,7 @@ public class WifiManager {
      * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return an empty list.
      */
     @Deprecated
+    @RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, ACCESS_WIFI_STATE})
     public List<WifiConfiguration> getConfiguredNetworks() {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
@@ -1177,11 +1186,11 @@ public class WifiManager {
 
     /** @hide */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_WIFI_CREDENTIAL)
+    @RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, ACCESS_WIFI_STATE, READ_WIFI_CREDENTIAL})
     public List<WifiConfiguration> getPrivilegedConfiguredNetworks() {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
-                mService.getPrivilegedConfiguredNetworks();
+                    mService.getPrivilegedConfiguredNetworks(mContext.getOpPackageName());
             if (parceledList == null) {
                 return Collections.emptyList();
             }

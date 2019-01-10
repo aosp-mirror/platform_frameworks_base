@@ -521,7 +521,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
-            public void onEntryUpdated(NotificationEntry entry) {
+            public void onPostEntryUpdated(NotificationEntry entry) {
                 if (!entry.notification.isClearable()) {
                     // The user may have performed a dismiss action on the notification, since it's
                     // not clearable we should snap it back.
