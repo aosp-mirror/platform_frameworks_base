@@ -2270,9 +2270,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         final LayoutParams attrs = win.getAttrs();
-        final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleLw() &&
-                ((imeTarget.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0
-                        || !canBeHiddenByKeyguardLw(imeTarget));
+        final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleLw()
+                && (imeTarget.canShowWhenLocked() || !canBeHiddenByKeyguardLw(imeTarget));
 
         // Show IME over the keyguard if the target allows it
         boolean allowWhenLocked = (win.isInputMethodWindow() || imeTarget == this)
@@ -2280,7 +2279,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (isKeyguardLocked() && isKeyguardOccluded()) {
             // Show SHOW_WHEN_LOCKED windows if Keyguard is occluded.
-            allowWhenLocked |= (attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
+            allowWhenLocked |= win.canShowWhenLocked()
                     // Show error dialogs over apps that are shown on lockscreen
                     || (attrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
         }

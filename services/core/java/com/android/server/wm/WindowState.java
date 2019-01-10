@@ -2405,6 +2405,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && !cantReceiveTouchInput();
     }
 
+    @Override
+    public boolean canShowWhenLocked() {
+        final boolean showBecauseOfActivity =
+                mAppToken != null && mAppToken.mActivityRecord.canShowWhenLocked();
+        final boolean showBecauseOfWindow = (getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0;
+        return showBecauseOfActivity || showBecauseOfWindow;
+    }
+
     /** @return false if this window desires touch events. */
     boolean cantReceiveTouchInput() {
         return mAppToken != null && mAppToken.getTask() != null
