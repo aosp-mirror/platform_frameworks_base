@@ -21,6 +21,7 @@ import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -33,8 +34,9 @@ import com.android.internal.telecom.ICallScreeningService;
 
 /**
  * This service can be implemented by the default dialer (see
- * {@link TelecomManager#getDefaultDialerPackage()}) to allow or disallow incoming calls before
- * they are shown to a user.
+ * {@link TelecomManager#getDefaultDialerPackage()}) or a third party app to allow or disallow
+ * incoming calls before they are shown to a user.  This service can also provide
+ * {@link CallIdentification} information for calls.
  * <p>
  * Below is an example manifest registration for a {@code CallScreeningService}.
  * <pre>
@@ -56,6 +58,34 @@ import com.android.internal.telecom.ICallScreeningService;
  *     information about a {@link Call.Details call} which will be shown to the user in the
  *     Dialer app.</li>
  * </ol>
+ * <p>
+ * <h2>Becoming the {@link CallScreeningService}</h2>
+ * Telecom will bind to a single app chosen by the user which implements the
+ * {@link CallScreeningService} API when there are new incoming and outgoing calls.
+ * <p>
+ * The code snippet below illustrates how your app can request that it fills the call screening
+ * role.
+ * <pre>
+ * {@code
+ * private static final int REQUEST_ID = 1;
+ *
+ * public void requestRole() {
+ *     RoleManager roleManager = (RoleManager) getSystemService(ROLE_SERVICE);
+ *     Intent intent = roleManager.createRequestRoleIntent("android.app.role.CALL_SCREENING_APP");
+ *     startActivityForResult(intent, REQUEST_ID);
+ * }
+ *
+ * &#64;Override
+ * public void onActivityResult(int requestCode, int resultCode, Intent data) {
+ *     if (requestCode == REQUEST_ID) {
+ *         if (resultCode == android.app.Activity.RESULT_OK) {
+ *             // Your app is now the call screening app
+ *         } else {
+ *             // Your app is not the call screening app
+ *         }
+ *     }
+ * }
+ * </pre>
  */
 public abstract class CallScreeningService extends Service {
     /**
@@ -222,30 +252,46 @@ public abstract class CallScreeningService extends Service {
     }
 
     /**
-     * Called when a new incoming call is added.
-     * {@link CallScreeningService#respondToCall(Call.Details, CallScreeningService.CallResponse)}
-     * should be called to allow or disallow the call.
+     * Called when a new incoming or outgoing call is added which is not in the user's contact list.
+     * <p>
+     * A {@link CallScreeningService} must indicate whether an incoming call is allowed or not by
+     * calling
+     * {@link CallScreeningService#respondToCall(Call.Details, CallScreeningService.CallResponse)}.
+     * Your app can tell if a call is an incoming call by checking to see if
+     * {@link Call.Details#getCallDirection()} is {@link Call.Details#DIRECTION_INCOMING}.
+     * <p>
+     * For incoming or outgoing calls, the {@link CallScreeningService} can call
+     * {@link #provideCallIdentification(Call.Details, CallIdentification)} in order to provide
+     * {@link CallIdentification} for the call.
      * <p>
      * Note: The {@link Call.Details} instance provided to a call screening service will only have
      * the following properties set.  The rest of the {@link Call.Details} properties will be set to
      * their default value or {@code null}.
      * <ul>
-     *     <li>{@link Call.Details#getState()}</li>
+     *     <li>{@link Call.Details#getCallDirection()}</li>
      *     <li>{@link Call.Details#getConnectTimeMillis()}</li>
      *     <li>{@link Call.Details#getCreationTimeMillis()}</li>
      *     <li>{@link Call.Details#getHandle()}</li>
      *     <li>{@link Call.Details#getHandlePresentation()}</li>
      * </ul>
+     * <p>
+     * Only calls where the {@link Call.Details#getHandle() handle} {@link Uri#getScheme() scheme}
+     * is {@link PhoneAccount#SCHEME_TEL} are passed for call
+     * screening.  Further, only calls which are not in the user's contacts are passed for
+     * screening.  For outgoing calls, no post-dial digits are passed.
      *
-     * @param callDetails Information about a new incoming call, see {@link Call.Details}.
+     * @param callDetails Information about a new call, see {@link Call.Details}.
      */
     public abstract void onScreenCall(@NonNull Call.Details callDetails);
 
     /**
-     * Responds to the given call, either allowing it or disallowing it.
+     * Responds to the given incoming call, either allowing it or disallowing it.
      * <p>
      * The {@link CallScreeningService} calls this method to inform the system whether the call
      * should be silently blocked or not.
+     * <p>
+     * Calls to this method are ignored unless the {@link Call.Details#getCallDirection()} is
+     * {@link Call.Details#DIRECTION_INCOMING}.
      *
      * @param callDetails The call to allow.
      *                    <p>
