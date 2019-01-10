@@ -25,12 +25,20 @@ public class AppOpItem {
     private int mUid;
     private String mPackageName;
     private long mTimeStarted;
+    private String mState;
 
     public AppOpItem(int code, int uid, String packageName, long timeStarted) {
         this.mCode = code;
         this.mUid = uid;
         this.mPackageName = packageName;
         this.mTimeStarted = timeStarted;
+        mState = new StringBuilder()
+                .append("AppOpItem(")
+                .append("Op code=").append(code).append(", ")
+                .append("UID=").append(uid).append(", ")
+                .append("Package name=").append(packageName)
+                .append(")")
+                .toString();
     }
 
     public int getCode() {
@@ -47,5 +55,10 @@ public class AppOpItem {
 
     public long getTimeStarted() {
         return mTimeStarted;
+    }
+
+    @Override
+    public String toString() {
+        return mState;
     }
 }
