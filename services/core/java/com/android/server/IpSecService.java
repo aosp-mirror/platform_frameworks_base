@@ -44,7 +44,7 @@ import android.net.LinkAddress;
 import android.net.Network;
 import android.net.NetworkUtils;
 import android.net.TrafficStats;
-import android.net.util.NetdService;
+import android.net.shared.NetdService;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;

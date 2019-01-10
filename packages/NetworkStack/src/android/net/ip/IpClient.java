@@ -16,7 +16,11 @@
 
 package android.net.ip;
 
+import static android.net.shared.IpConfigurationParcelableUtil.toStableParcelable;
 import static android.net.shared.LinkPropertiesParcelableUtil.fromStableParcelable;
+import static android.net.shared.LinkPropertiesParcelableUtil.toStableParcelable;
+
+import static com.android.server.util.PermissionUtil.checkNetworkStackCallingPermission;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -30,15 +34,16 @@ import android.net.ProvisioningConfigurationParcelable;
 import android.net.ProxyInfo;
 import android.net.ProxyInfoParcelable;
 import android.net.RouteInfo;
-import android.net.StaticIpConfiguration;
 import android.net.apf.ApfCapabilities;
 import android.net.apf.ApfFilter;
 import android.net.dhcp.DhcpClient;
+import android.net.ip.IIpClientCallbacks;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
 import android.net.shared.InitialConfiguration;
+import android.net.shared.NetdService;
+import android.net.shared.ProvisioningConfiguration;
 import android.net.util.InterfaceParams;
-import android.net.util.NetdService;
 import android.net.util.SharedLog;
 import android.os.ConditionVariable;
 import android.os.INetworkManagementService;
@@ -53,7 +58,6 @@ import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IState;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
@@ -69,6 +73,7 @@ import java.net.InetAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Predicate;
@@ -101,11 +106,13 @@ public class IpClient extends StateMachine {
     private static final ConcurrentHashMap<String, SharedLog> sSmLogs = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, LocalLog> sPktLogs = new ConcurrentHashMap<>();
 
-    // If |args| is non-empty, assume it's a list of interface names for which
-    // we should print IpClient logs (filter out all others).
-    public static void dumpAllLogs(PrintWriter writer, String[] args) {
+    /**
+     * Dump all state machine and connectivity packet logs to the specified writer.
+     * @param skippedIfaces Interfaces for which logs should not be dumped.
+     */
+    public static void dumpAllLogs(PrintWriter writer, Set<String> skippedIfaces) {
         for (String ifname : sSmLogs.keySet()) {
-            if (!ArrayUtils.isEmpty(args) && !ArrayUtils.contains(args, ifname)) continue;
+            if (skippedIfaces.contains(ifname)) continue;
 
             writer.println(String.format("--- BEGIN %s ---", ifname));
 
@@ -127,19 +134,6 @@ public class IpClient extends StateMachine {
         }
     }
 
-    /**
-     * TODO: remove after migrating clients to use IpClientCallbacks directly
-     * @see IpClientCallbacks
-     */
-    public static class Callback extends IpClientCallbacks {}
-
-    /**
-     * TODO: remove once clients are migrated to IpClientUtil.WaitForProvisioningCallback
-     * @see IpClientUtil.WaitForProvisioningCallbacks
-     */
-    public static class WaitForProvisioningCallback
-            extends IpClientUtil.WaitForProvisioningCallbacks {}
-
     // Use a wrapper class to log in order to ensure complete and detailed
     // logging. This method is lighter weight than annotations/reflection
     // and has the following benefits:
@@ -160,181 +154,134 @@ public class IpClient extends StateMachine {
     // once passed on to the callback they may be modified by another thread.
     //
     // TODO: Find an lighter weight approach.
-    private class LoggingCallbackWrapper extends IpClientCallbacks {
+    public static class IpClientCallbacksWrapper {
         private static final String PREFIX = "INVOKE ";
-        private final IpClientCallbacks mCallback;
+        private final IIpClientCallbacks mCallback;
+        private final SharedLog mLog;
 
-        LoggingCallbackWrapper(IpClientCallbacks callback) {
-            mCallback = (callback != null) ? callback : new IpClientCallbacks();
+        @VisibleForTesting
+        protected IpClientCallbacksWrapper(IIpClientCallbacks callback, SharedLog log) {
+            mCallback = callback;
+            mLog = log;
         }
 
         private void log(String msg) {
             mLog.log(PREFIX + msg);
         }
 
-        @Override
+        private void log(String msg, Throwable e) {
+            mLog.e(PREFIX + msg, e);
+        }
+
         public void onPreDhcpAction() {
             log("onPreDhcpAction()");
-            mCallback.onPreDhcpAction();
+            try {
+                mCallback.onPreDhcpAction();
+            } catch (RemoteException e) {
+                log("Failed to call onPreDhcpAction", e);
+            }
         }
-        @Override
+
         public void onPostDhcpAction() {
             log("onPostDhcpAction()");
-            mCallback.onPostDhcpAction();
+            try {
+                mCallback.onPostDhcpAction();
+            } catch (RemoteException e) {
+                log("Failed to call onPostDhcpAction", e);
+            }
         }
-        @Override
+
         public void onNewDhcpResults(DhcpResults dhcpResults) {
             log("onNewDhcpResults({" + dhcpResults + "})");
-            mCallback.onNewDhcpResults(dhcpResults);
+            try {
+                mCallback.onNewDhcpResults(toStableParcelable(dhcpResults));
+            } catch (RemoteException e) {
+                log("Failed to call onNewDhcpResults", e);
+            }
         }
-        @Override
+
         public void onProvisioningSuccess(LinkProperties newLp) {
             log("onProvisioningSuccess({" + newLp + "})");
-            mCallback.onProvisioningSuccess(newLp);
+            try {
+                mCallback.onProvisioningSuccess(toStableParcelable(newLp));
+            } catch (RemoteException e) {
+                log("Failed to call onProvisioningSuccess", e);
+            }
         }
-        @Override
+
         public void onProvisioningFailure(LinkProperties newLp) {
             log("onProvisioningFailure({" + newLp + "})");
-            mCallback.onProvisioningFailure(newLp);
+            try {
+                mCallback.onProvisioningFailure(toStableParcelable(newLp));
+            } catch (RemoteException e) {
+                log("Failed to call onProvisioningFailure", e);
+            }
         }
-        @Override
+
         public void onLinkPropertiesChange(LinkProperties newLp) {
             log("onLinkPropertiesChange({" + newLp + "})");
-            mCallback.onLinkPropertiesChange(newLp);
+            try {
+                mCallback.onLinkPropertiesChange(toStableParcelable(newLp));
+            } catch (RemoteException e) {
+                log("Failed to call onLinkPropertiesChange", e);
+            }
         }
-        @Override
+
         public void onReachabilityLost(String logMsg) {
             log("onReachabilityLost(" + logMsg + ")");
-            mCallback.onReachabilityLost(logMsg);
+            try {
+                mCallback.onReachabilityLost(logMsg);
+            } catch (RemoteException e) {
+                log("Failed to call onReachabilityLost", e);
+            }
         }
-        @Override
+
         public void onQuit() {
             log("onQuit()");
-            mCallback.onQuit();
+            try {
+                mCallback.onQuit();
+            } catch (RemoteException e) {
+                log("Failed to call onQuit", e);
+            }
         }
-        @Override
+
         public void installPacketFilter(byte[] filter) {
             log("installPacketFilter(byte[" + filter.length + "])");
-            mCallback.installPacketFilter(filter);
+            try {
+                mCallback.installPacketFilter(filter);
+            } catch (RemoteException e) {
+                log("Failed to call installPacketFilter", e);
+            }
         }
-        @Override
+
         public void startReadPacketFilter() {
             log("startReadPacketFilter()");
-            mCallback.startReadPacketFilter();
+            try {
+                mCallback.startReadPacketFilter();
+            } catch (RemoteException e) {
+                log("Failed to call startReadPacketFilter", e);
+            }
         }
-        @Override
+
         public void setFallbackMulticastFilter(boolean enabled) {
             log("setFallbackMulticastFilter(" + enabled + ")");
-            mCallback.setFallbackMulticastFilter(enabled);
+            try {
+                mCallback.setFallbackMulticastFilter(enabled);
+            } catch (RemoteException e) {
+                log("Failed to call setFallbackMulticastFilter", e);
+            }
         }
-        @Override
+
         public void setNeighborDiscoveryOffload(boolean enable) {
             log("setNeighborDiscoveryOffload(" + enable + ")");
-            mCallback.setNeighborDiscoveryOffload(enable);
-        }
-    }
-
-    /**
-     * TODO: remove after migrating clients to use the shared configuration class directly.
-     * @see android.net.shared.ProvisioningConfiguration
-     */
-    public static class ProvisioningConfiguration
-            extends android.net.shared.ProvisioningConfiguration {
-        public ProvisioningConfiguration(android.net.shared.ProvisioningConfiguration other) {
-            super(other);
-        }
-
-        /**
-         * @see android.net.shared.ProvisioningConfiguration.Builder
-         */
-        public static class Builder extends android.net.shared.ProvisioningConfiguration.Builder {
-            // Override all methods to have a return type matching this Builder
-            @Override
-            public Builder withoutIPv4() {
-                super.withoutIPv4();
-                return this;
-            }
-
-            @Override
-            public Builder withoutIPv6() {
-                super.withoutIPv6();
-                return this;
-            }
-
-            @Override
-            public Builder withoutMultinetworkPolicyTracker() {
-                super.withoutMultinetworkPolicyTracker();
-                return this;
-            }
-
-            @Override
-            public Builder withoutIpReachabilityMonitor() {
-                super.withoutIpReachabilityMonitor();
-                return this;
-            }
-
-            @Override
-            public Builder withPreDhcpAction() {
-                super.withPreDhcpAction();
-                return this;
-            }
-
-            @Override
-            public Builder withPreDhcpAction(int dhcpActionTimeoutMs) {
-                super.withPreDhcpAction(dhcpActionTimeoutMs);
-                return this;
-            }
-
-            @Override
-            public Builder withStaticConfiguration(StaticIpConfiguration staticConfig) {
-                super.withStaticConfiguration(staticConfig);
-                return this;
-            }
-
-            @Override
-            public Builder withApfCapabilities(ApfCapabilities apfCapabilities) {
-                super.withApfCapabilities(apfCapabilities);
-                return this;
-            }
-
-            @Override
-            public Builder withProvisioningTimeoutMs(int timeoutMs) {
-                super.withProvisioningTimeoutMs(timeoutMs);
-                return this;
-            }
-
-            @Override
-            public Builder withRandomMacAddress() {
-                super.withRandomMacAddress();
-                return this;
-            }
-
-            @Override
-            public Builder withStableMacAddress() {
-                super.withStableMacAddress();
-                return this;
-            }
-
-            @Override
-            public Builder withNetwork(Network network) {
-                super.withNetwork(network);
-                return this;
-            }
-
-            @Override
-            public Builder withDisplayName(String displayName) {
-                super.withDisplayName(displayName);
-                return this;
-            }
-
-            @Override
-            public ProvisioningConfiguration build() {
-                return new ProvisioningConfiguration(mConfig);
+            try {
+                mCallback.setNeighborDiscoveryOffload(enable);
+            } catch (RemoteException e) {
+                log("Failed to call setNeighborDiscoveryOffload", e);
             }
         }
     }
 
-    public static final String DUMP_ARG = "ipclient";
     public static final String DUMP_ARG_CONFIRM = "confirm";
 
     private static final int CMD_TERMINATE_AFTER_STOP             = 1;
@@ -388,7 +335,7 @@ public class IpClient extends StateMachine {
     private final String mInterfaceName;
     private final String mClatInterfaceName;
     @VisibleForTesting
-    protected final IpClientCallbacks mCallback;
+    protected final IpClientCallbacksWrapper mCallback;
     private final Dependencies mDependencies;
     private final CountDownLatch mShutdownLatch;
     private final ConnectivityManager mCm;
@@ -444,7 +391,7 @@ public class IpClient extends StateMachine {
         }
     }
 
-    public IpClient(Context context, String ifName, IpClientCallbacks callback) {
+    public IpClient(Context context, String ifName, IIpClientCallbacks callback) {
         this(context, ifName, callback, new Dependencies());
     }
 
@@ -452,7 +399,7 @@ public class IpClient extends StateMachine {
      * An expanded constructor, useful for dependency injection.
      * TODO: migrate all test users to mock IpClient directly and remove this ctor.
      */
-    public IpClient(Context context, String ifName, IpClientCallbacks callback,
+    public IpClient(Context context, String ifName, IIpClientCallbacks callback,
             INetworkManagementService nwService) {
         this(context, ifName, callback, new Dependencies() {
             @Override
@@ -463,7 +410,7 @@ public class IpClient extends StateMachine {
     }
 
     @VisibleForTesting
-    IpClient(Context context, String ifName, IpClientCallbacks callback, Dependencies deps) {
+    IpClient(Context context, String ifName, IIpClientCallbacks callback, Dependencies deps) {
         super(IpClient.class.getSimpleName() + "." + ifName);
         Preconditions.checkNotNull(ifName);
         Preconditions.checkNotNull(callback);
@@ -473,7 +420,6 @@ public class IpClient extends StateMachine {
         mContext = context;
         mInterfaceName = ifName;
         mClatInterfaceName = CLAT_PREFIX + ifName;
-        mCallback = new LoggingCallbackWrapper(callback);
         mDependencies = deps;
         mShutdownLatch = new CountDownLatch(1);
         mCm = mContext.getSystemService(ConnectivityManager.class);
@@ -484,6 +430,7 @@ public class IpClient extends StateMachine {
         sPktLogs.putIfAbsent(mInterfaceName, new LocalLog(MAX_PACKET_RECORDS));
         mConnectivityPacketLog = sPktLogs.get(mInterfaceName);
         mMsgStateLogger = new MessageHandlingLogger();
+        mCallback = new IpClientCallbacksWrapper(callback, mLog);
 
         // TODO: Consider creating, constructing, and passing in some kind of
         // InterfaceController.Dependencies class.
@@ -561,45 +508,53 @@ public class IpClient extends StateMachine {
     class IpClientConnector extends IIpClient.Stub {
         @Override
         public void completedPreDhcpAction() {
+            checkNetworkStackCallingPermission();
             IpClient.this.completedPreDhcpAction();
         }
         @Override
         public void confirmConfiguration() {
+            checkNetworkStackCallingPermission();
             IpClient.this.confirmConfiguration();
         }
         @Override
         public void readPacketFilterComplete(byte[] data) {
+            checkNetworkStackCallingPermission();
             IpClient.this.readPacketFilterComplete(data);
         }
         @Override
         public void shutdown() {
+            checkNetworkStackCallingPermission();
             IpClient.this.shutdown();
         }
         @Override
         public void startProvisioning(ProvisioningConfigurationParcelable req) {
-            IpClient.this.startProvisioning(
-                    android.net.shared.ProvisioningConfiguration.fromStableParcelable(req));
+            checkNetworkStackCallingPermission();
+            IpClient.this.startProvisioning(ProvisioningConfiguration.fromStableParcelable(req));
         }
         @Override
         public void stop() {
+            checkNetworkStackCallingPermission();
             IpClient.this.stop();
         }
         @Override
         public void setTcpBufferSizes(String tcpBufferSizes) {
+            checkNetworkStackCallingPermission();
             IpClient.this.setTcpBufferSizes(tcpBufferSizes);
         }
         @Override
         public void setHttpProxy(ProxyInfoParcelable proxyInfo) {
+            checkNetworkStackCallingPermission();
             IpClient.this.setHttpProxy(fromStableParcelable(proxyInfo));
         }
         @Override
         public void setMulticastFilter(boolean enabled) {
+            checkNetworkStackCallingPermission();
             IpClient.this.setMulticastFilter(enabled);
         }
-        // TODO: remove and have IpClient logs dumped in NetworkStack dumpsys
-        public void dumpIpClientLogs(FileDescriptor fd, PrintWriter pw, String[] args) {
-            IpClient.this.dump(fd, pw, args);
-        }
+    }
+
+    public String getInterfaceName() {
+        return mInterfaceName;
     }
 
     private void configureAndStartStateMachine() {
@@ -645,25 +600,10 @@ public class IpClient extends StateMachine {
         sendMessage(CMD_TERMINATE_AFTER_STOP);
     }
 
-    // In order to avoid deadlock, this method MUST NOT be called on the
-    // IpClient instance's thread. This prohibition includes code executed by
-    // when methods on the passed-in IpClient.Callback instance are called.
-    public void awaitShutdown() {
-        try {
-            mShutdownLatch.await();
-        } catch (InterruptedException e) {
-            mLog.e("Interrupted while awaiting shutdown: " + e);
-        }
-    }
-
-    public static ProvisioningConfiguration.Builder buildProvisioningConfiguration() {
-        return new ProvisioningConfiguration.Builder();
-    }
-
     /**
      * Start provisioning with the provided parameters.
      */
-    public void startProvisioning(android.net.shared.ProvisioningConfiguration req) {
+    public void startProvisioning(ProvisioningConfiguration req) {
         if (!req.isValid()) {
             doImmediateProvisioningFailure(IpManagerEvent.ERROR_INVALID_PROVISIONING);
             return;
@@ -678,17 +618,6 @@ public class IpClient extends StateMachine {
 
         mCallback.setNeighborDiscoveryOffload(true);
         sendMessage(CMD_START, new android.net.shared.ProvisioningConfiguration(req));
-    }
-
-    // TODO: Delete this.
-    public void startProvisioning(StaticIpConfiguration staticIpConfig) {
-        startProvisioning(buildProvisioningConfiguration()
-                .withStaticConfiguration(staticIpConfig)
-                .build());
-    }
-
-    public void startProvisioning() {
-        startProvisioning(new android.net.shared.ProvisioningConfiguration());
     }
 
     /**
