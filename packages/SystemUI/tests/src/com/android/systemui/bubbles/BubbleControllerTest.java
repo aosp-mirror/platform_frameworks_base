@@ -74,7 +74,8 @@ public class BubbleControllerTest extends SysuiTestCase {
     private ExpandableNotificationRow mRow;
     private ExpandableNotificationRow mRow2;
 
-    private final NotificationData mNotificationData = new NotificationData();
+    @Mock
+    private NotificationData mNotificationData;
 
     @Before
     public void setUp() throws Exception {
@@ -93,6 +94,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Return non-null notification data from the NEM
         when(mNotificationEntryManager.getNotificationData()).thenReturn(mNotificationData);
+        when(mNotificationData.getChannel(mRow.getEntry().key)).thenReturn(mRow.getEntry().channel);
 
         mBubbleController = new TestableBubbleController(mContext, mStatusBarWindowController);
 
@@ -100,11 +102,6 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mNotificationEntryManager, atLeastOnce())
                 .addNotificationEntryListener(mEntryListenerCaptor.capture());
         mEntryListener = mEntryListenerCaptor.getValue();
-    }
-
-    @Test
-    public void testIsBubble() {
-        assertTrue(mRow.getEntry().isBubble());
     }
 
     @Test
