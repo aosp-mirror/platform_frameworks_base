@@ -1674,40 +1674,93 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public List<InputMethodInfo> getInputMethodList() {
-        return getInputMethodList(false /* isVrOnly */);
+        final int callingUserId = UserHandle.getCallingUserId();
+        synchronized (mMethodMap) {
+            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(callingUserId,
+                    mSettings.getCurrentUserId(), null);
+            if (resolvedUserIds.length != 1) {
+                return Collections.emptyList();
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return getInputMethodListLocked(false /* isVrOnly */, resolvedUserIds[0]);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
     }
 
     @Override
     public List<InputMethodInfo> getVrInputMethodList() {
-        return getInputMethodList(true /* isVrOnly */);
-    }
-
-    private List<InputMethodInfo> getInputMethodList(final boolean isVrOnly) {
+        final int callingUserId = UserHandle.getCallingUserId();
         synchronized (mMethodMap) {
-            // TODO: Make this work even for non-current users?
-            if (!calledFromValidUserLocked()) {
+            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(callingUserId,
+                    mSettings.getCurrentUserId(), null);
+            if (resolvedUserIds.length != 1) {
                 return Collections.emptyList();
             }
-            ArrayList<InputMethodInfo> methodList = new ArrayList<>();
-            for (InputMethodInfo info : mMethodList) {
-
-                if (info.isVrOnly() == isVrOnly) {
-                    methodList.add(info);
-                }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return getInputMethodListLocked(true /* isVrOnly */, resolvedUserIds[0]);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
-            return methodList;
         }
     }
 
     @Override
     public List<InputMethodInfo> getEnabledInputMethodList() {
+        final int callingUserId = UserHandle.getCallingUserId();
         synchronized (mMethodMap) {
-            // TODO: Make this work even for non-current users?
-            if (!calledFromValidUserLocked()) {
+            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(callingUserId,
+                    mSettings.getCurrentUserId(), null);
+            if (resolvedUserIds.length != 1) {
                 return Collections.emptyList();
             }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return getEnabledInputMethodListLocked(resolvedUserIds[0]);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @GuardedBy("mMethodMap")
+    private List<InputMethodInfo> getInputMethodListLocked(boolean isVrOnly,
+            @UserIdInt int userId) {
+        final ArrayList<InputMethodInfo> methodList;
+        if (userId == mSettings.getCurrentUserId()) {
+            // Create a copy.
+            methodList = new ArrayList<>(mMethodList);
+        } else {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodList = new ArrayList<>();
+            final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+                    new ArrayMap<>();
+            AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+            queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
+                    methodList);
+        }
+        methodList.removeIf(imi -> imi.isVrOnly() != isVrOnly);
+        return methodList;
+    }
+
+    @GuardedBy("mMethodMap")
+    private List<InputMethodInfo> getEnabledInputMethodListLocked(@UserIdInt int userId) {
+        if (userId == mSettings.getCurrentUserId()) {
             return mSettings.getEnabledInputMethodListLocked();
         }
+        final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+        final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
+        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+                new ArrayMap<>();
+        AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+        queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
+                methodList);
+        final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
+                mContext.getContentResolver(), methodMap, methodList, userId, true);
+        return settings.getEnabledInputMethodListLocked();
     }
 
     /**
@@ -1717,11 +1770,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
             boolean allowsImplicitlySelectedSubtypes) {
+        final int callingUserId = UserHandle.getCallingUserId();
         synchronized (mMethodMap) {
-            // TODO: Make this work even for non-current users?
-            if (!calledFromValidUserLocked()) {
+            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(callingUserId,
+                    mSettings.getCurrentUserId(), null);
+            if (resolvedUserIds.length != 1) {
                 return Collections.emptyList();
             }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return getEnabledInputMethodSubtypeListLocked(imiId,
+                        allowsImplicitlySelectedSubtypes, resolvedUserIds[0]);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @GuardedBy("mMethodMap")
+    private List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(String imiId,
+            boolean allowsImplicitlySelectedSubtypes, @UserIdInt int userId) {
+        if (userId == mSettings.getCurrentUserId()) {
             final InputMethodInfo imi;
             if (imiId == null && mCurMethodId != null) {
                 imi = mMethodMap.get(mCurMethodId);
@@ -1734,6 +1803,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return mSettings.getEnabledInputMethodSubtypeListLocked(
                     mContext, imi, allowsImplicitlySelectedSubtypes);
         }
+        final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+        final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
+        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+                new ArrayMap<>();
+        AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+        queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
+                methodList);
+        final InputMethodInfo imi = methodMap.get(imiId);
+        if (imi == null) {
+            return Collections.emptyList();
+        }
+        final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
+                mContext.getContentResolver(), methodMap, methodList, userId, true);
+        return settings.getEnabledInputMethodSubtypeListLocked(
+                mContext, imi, allowsImplicitlySelectedSubtypes);
     }
 
     /**
@@ -4545,6 +4629,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private int handleShellCommandListInputMethods(@NonNull ShellCommand shellCommand) {
         boolean all = false;
         boolean brief = false;
+        int userIdToBeResolved = UserHandle.USER_CURRENT;
         while (true) {
             final String nextOption = shellCommand.getNextOption();
             if (nextOption == null) {
@@ -4557,19 +4642,34 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 case "-s":
                     brief = true;
                     break;
+                case "-u":
+                case "--user":
+                    userIdToBeResolved = UserHandle.parseUserArg(shellCommand.getNextArgRequired());
+                    break;
             }
         }
-        final List<InputMethodInfo> methods = all ?
-                getInputMethodList() : getEnabledInputMethodList();
-        final PrintWriter pr = shellCommand.getOutPrintWriter();
-        final Printer printer = x -> pr.println(x);
-        final int N = methods.size();
-        for (int i = 0; i < N; ++i) {
-            if (brief) {
-                pr.println(methods.get(i).getId());
-            } else {
-                pr.print(methods.get(i).getId()); pr.println(":");
-                methods.get(i).dump(printer, "  ");
+        synchronized (mMethodMap) {
+            final PrintWriter pr = shellCommand.getOutPrintWriter();
+            final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
+                    mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
+            for (int userId : userIds) {
+                final List<InputMethodInfo> methods = all
+                        ? getInputMethodListLocked(false, userId)
+                        : getEnabledInputMethodListLocked(userId);
+                if (userIds.length > 1) {
+                    pr.print("User #");
+                    pr.print(userId);
+                    pr.println(":");
+                }
+                for (InputMethodInfo info : methods) {
+                    if (brief) {
+                        pr.println(info.getId());
+                    } else {
+                        pr.print(info.getId());
+                        pr.println(":");
+                        info.dump(pr::println, "  ");
+                    }
+                }
             }
         }
         return ShellCommandResult.SUCCESS;
