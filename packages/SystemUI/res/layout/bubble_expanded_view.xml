@@ -20,11 +20,23 @@
     android:layout_width="match_parent"
     android:id="@+id/bubble_expanded_view">
 
-    <!-- TODO: header -->
-
     <View
         android:id="@+id/pointer_view"
         android:layout_width="@dimen/bubble_pointer_width"
         android:layout_height="@dimen/bubble_pointer_height"
     />
+
+    <TextView
+        android:id="@+id/bubble_content_header"
+        android:background="@drawable/bubble_expanded_header_bg"
+        android:textAppearance="@*android:style/TextAppearance.Material.Title"
+        android:textSize="18sp"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bubble_expanded_header_height"
+        android:gravity="start|center_vertical"
+        android:singleLine="true"
+        android:paddingLeft="@dimen/bubble_expanded_header_horizontal_padding"
+        android:paddingRight="@dimen/bubble_expanded_header_horizontal_padding"
+    />
+
 </com.android.systemui.bubbles.BubbleExpandedViewContainer>
