@@ -74,12 +74,7 @@ import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.server.location.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
 import com.android.server.location.NtpTimeHelper.InjectNtpTimeCallback;
 
-import libcore.io.IoUtils;
-
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -87,11 +82,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
 
 /**
  * A GNSS implementation of LocationProvider used by LocationManager.
@@ -147,7 +138,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int LOCATION_HAS_SPEED_ACCURACY = 64;
     private static final int LOCATION_HAS_BEARING_ACCURACY = 128;
 
-
     // IMPORTANT - the GPS_DELETE_* symbols here must match GnssAidingData enum in IGnss.hal
     private static final int GPS_DELETE_EPHEMERIS = 0x0001;
     private static final int GPS_DELETE_ALMANAC = 0x0002;
@@ -199,9 +189,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // Request setid
     private static final int AGPS_RIL_REQUEST_SETID_IMSI = 1;
     private static final int AGPS_RIL_REQUEST_SETID_MSISDN = 2;
-
-    //TODO(b/33112647): Create gps_debug.conf with commented career parameters.
-    private static final String DEBUG_PROPERTIES_FILE = "/etc/gps_debug.conf";
 
     // ref. location info
     private static final int AGPS_REF_LOCATION_TYPE_GSM_CELLID = 1;
@@ -375,7 +362,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
      * Properties loaded from PROPERTIES_FILE.
      * It must be accessed only inside {@link #mHandler}.
      */
-    private Properties mProperties;
+    private GnssConfiguration mGnssConfiguration;
 
     private String mSuplServerHost;
     private int mSuplServerPort = TCP_MIN_PORT;
@@ -410,10 +397,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // Alarms
     private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
     private final static String ALARM_TIMEOUT = "com.android.internal.location.ALARM_TIMEOUT";
-
-    // Persist property for LPP_PROFILE
-    private final static String LPP_PROFILE = "persist.sys.gps.lpp";
-
 
     private final PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
@@ -502,7 +485,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
      */
     @Override
     public void onUpdateSatelliteBlacklist(int[] constellations, int[] svids) {
-        mHandler.post(() -> native_set_satellite_blacklist(constellations, svids));
+        mHandler.post(() -> mGnssConfiguration.setSatelliteBlacklist(constellations, svids));
     }
 
     private void subscriptionOrCarrierConfigChanged(Context context) {
@@ -525,17 +508,17 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 }
                 if (isKeepLppProfile) {
                     // load current properties for the carrier
-                    loadPropertiesFromCarrierConfig(context, mProperties);
-                    String lpp_profile = mProperties.getProperty("LPP_PROFILE");
+                    mGnssConfiguration.loadPropertiesFromCarrierConfig();
+                    String lpp_profile = mGnssConfiguration.getLppProfile();
                     // set the persist property LPP_PROFILE for the value
                     if (lpp_profile != null) {
-                        SystemProperties.set(LPP_PROFILE, lpp_profile);
+                        SystemProperties.set(GnssConfiguration.LPP_PROFILE, lpp_profile);
                     }
                 } else {
                     // reset the persist property
-                    SystemProperties.set(LPP_PROFILE, "");
+                    SystemProperties.set(GnssConfiguration.LPP_PROFILE, "");
                 }
-                reloadGpsProperties(context, mProperties);
+                reloadGpsProperties();
                 mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
             }
         } else {
@@ -564,133 +547,14 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         return native_is_supported();
     }
 
-    interface SetCarrierProperty {
-        boolean set(int value);
-    }
-
-    private void reloadGpsProperties(Context context, Properties properties) {
-        if (DEBUG) Log.d(TAG, "Reset GPS properties, previous size = " + properties.size());
-        loadPropertiesFromCarrierConfig(context, properties);
-
-        String lpp_prof = SystemProperties.get(LPP_PROFILE);
-        if (!TextUtils.isEmpty(lpp_prof)) {
-            // override default value of this if lpp_prof is not empty
-            properties.setProperty("LPP_PROFILE", lpp_prof);
-        }
-        /*
-         * Overlay carrier properties from a debug configuration file.
-         */
-        loadPropertiesFromGpsDebugConfig(properties);
+    private void reloadGpsProperties() {
+        mGnssConfiguration.reloadGpsProperties();
+        setSuplHostPort();
         // TODO: we should get rid of C2K specific setting.
-        setSuplHostPort(properties.getProperty("SUPL_HOST"),
-                properties.getProperty("SUPL_PORT"));
-        mC2KServerHost = properties.getProperty("C2K_HOST");
-        String portString = properties.getProperty("C2K_PORT");
-        if (mC2KServerHost != null && portString != null) {
-            try {
-                mC2KServerPort = Integer.parseInt(portString);
-            } catch (NumberFormatException e) {
-                Log.e(TAG, "unable to parse C2K_PORT: " + portString);
-            }
-        }
-        if (native_is_gnss_configuration_supported()) {
-            Map<String, SetCarrierProperty> map = new HashMap<String, SetCarrierProperty>() {
-                {
-                    put("SUPL_VER", GnssLocationProvider::native_set_supl_version);
-                    put("SUPL_MODE", GnssLocationProvider::native_set_supl_mode);
-                    put("SUPL_ES", GnssLocationProvider::native_set_supl_es);
-                    put("LPP_PROFILE", GnssLocationProvider::native_set_lpp_profile);
-                    put("A_GLONASS_POS_PROTOCOL_SELECT",
-                            GnssLocationProvider::native_set_gnss_pos_protocol_select);
-                    put("USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL",
-                            GnssLocationProvider::native_set_emergency_supl_pdn);
-                    put("GPS_LOCK", GnssLocationProvider::native_set_gps_lock);
-                }
-            };
-
-            for (Entry<String, SetCarrierProperty> entry : map.entrySet()) {
-                String propertyName = entry.getKey();
-                String propertyValueString = properties.getProperty(propertyName);
-                if (propertyValueString != null) {
-                    try {
-                        int propertyValueInt = Integer.decode(propertyValueString);
-                        boolean result = entry.getValue().set(propertyValueInt);
-                        if (!result) {
-                            Log.e(TAG, "Unable to set " + propertyName);
-                        }
-                    } catch (NumberFormatException e) {
-                        Log.e(TAG, "unable to parse propertyName: " + propertyValueString);
-                    }
-                }
-            }
-        } else if (DEBUG) {
-            Log.d(TAG, "Skipped configuration update because GNSS configuration in GPS HAL is not"
-                    + " supported");
-        }
-
-        // SUPL_ES configuration.
-        String suplESProperty = mProperties.getProperty("SUPL_ES");
-        if (suplESProperty != null) {
-            try {
-                mSuplEsEnabled = (Integer.parseInt(suplESProperty) == 1);
-            } catch (NumberFormatException e) {
-                Log.e(TAG, "unable to parse SUPL_ES: " + suplESProperty);
-            }
-        }
-
-        String emergencyExtensionSecondsString
-                = properties.getProperty("ES_EXTENSION_SEC", "0");
-        try {
-            int emergencyExtensionSeconds =
-                    Integer.parseInt(emergencyExtensionSecondsString);
-            mNIHandler.setEmergencyExtensionSeconds(emergencyExtensionSeconds);
-        } catch (NumberFormatException e) {
-            Log.e(TAG, "unable to parse ES_EXTENSION_SEC: "
-                    + emergencyExtensionSecondsString);
-        }
-    }
-
-    private void loadPropertiesFromCarrierConfig(Context context, Properties properties) {
-        CarrierConfigManager configManager = (CarrierConfigManager)
-                mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
-        if (configManager == null) {
-            return;
-        }
-        PersistableBundle configs = configManager.getConfigForSubId(
-                SubscriptionManager.getDefaultDataSubscriptionId());
-        if (configs == null) {
-            if (DEBUG) Log.d(TAG, "SIM not ready, use default carrier config.");
-            configs = CarrierConfigManager.getDefaultConfig();
-        }
-        for (String configKey : configs.keySet()) {
-            if (configKey.startsWith(CarrierConfigManager.Gps.KEY_PREFIX)) {
-                String key = configKey
-                        .substring(CarrierConfigManager.Gps.KEY_PREFIX.length())
-                        .toUpperCase();
-                Object value = configs.get(configKey);
-                if (value instanceof String) {
-                    // All GPS properties are of String type; convert so.
-                    if (DEBUG) Log.d(TAG, "Gps config: " + key + " = " + value);
-                    properties.setProperty(key, (String) value);
-                }
-            }
-        }
-    }
-
-    private void loadPropertiesFromGpsDebugConfig(Properties properties) {
-        try {
-            File file = new File(DEBUG_PROPERTIES_FILE);
-            FileInputStream stream = null;
-            try {
-                stream = new FileInputStream(file);
-                properties.load(stream);
-            } finally {
-                IoUtils.closeQuietly(stream);
-            }
-
-        } catch (IOException e) {
-            if (DEBUG) Log.d(TAG, "Could not open GPS configuration file " + DEBUG_PROPERTIES_FILE);
-        }
+        mC2KServerHost = mGnssConfiguration.getC2KHost();
+        mC2KServerPort = mGnssConfiguration.getC2KPort(TCP_MIN_PORT);
+        mNIHandler.setEmergencyExtensionSeconds(mGnssConfiguration.getEsExtensionSec());
+        mSuplEsEnabled = mGnssConfiguration.getSuplEs(0) == 1;
     }
 
     public GnssLocationProvider(Context context, LocationProviderManager locationProviderManager,
@@ -733,7 +597,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         // relative long time, so the ctor() is kept to create objects needed by this instance,
         // while IO initialization and registration is delegated to our internal handler
         // this approach is just fine because events are posted to our handler anyway
-        mProperties = new Properties();
+        mGnssConfiguration = new GnssConfiguration(mContext);
         sendMessage(INITIALIZE_HANDLER, 0, null);
 
         // Create a GPS net-initiated handler.
@@ -918,7 +782,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mDownloadXtraWakeLock.acquire(DOWNLOAD_XTRA_DATA_TIMEOUT_MS);
         Log.i(TAG, "WakeLock acquired by handleDownloadXtraData()");
         AsyncTask.THREAD_POOL_EXECUTOR.execute(() -> {
-            GpsXtraDownloader xtraDownloader = new GpsXtraDownloader(mProperties);
+            GpsXtraDownloader xtraDownloader = new GpsXtraDownloader(
+                    mGnssConfiguration.getProperties());
             byte[] data = xtraDownloader.downloadXtraData();
             if (data != null) {
                 if (DEBUG) Log.d(TAG, "calling native_inject_xtra_data");
@@ -963,17 +828,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    private void setSuplHostPort(String hostString, String portString) {
-        if (hostString != null) {
-            mSuplServerHost = hostString;
-        }
-        if (portString != null) {
-            try {
-                mSuplServerPort = Integer.parseInt(portString);
-            } catch (NumberFormatException e) {
-                Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
-            }
-        }
+    private void setSuplHostPort() {
+        mSuplServerHost = mGnssConfiguration.getSuplHost();
+        mSuplServerPort = mGnssConfiguration.getSuplPort(TCP_MIN_PORT);
         if (mSuplServerHost != null
                 && mSuplServerPort > TCP_MIN_PORT
                 && mSuplServerPort <= TCP_MAX_PORT) {
@@ -986,23 +843,17 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
      * Checks what SUPL mode to use, according to the AGPS mode as well as the
      * allowed mode from properties.
      *
-     * @param properties  GPS properties
      * @param agpsEnabled whether AGPS is enabled by settings value
      * @param singleShot  whether "singleshot" is needed
      * @return SUPL mode (MSA vs MSB vs STANDALONE)
      */
-    private int getSuplMode(Properties properties, boolean agpsEnabled, boolean singleShot) {
+    private int getSuplMode(boolean agpsEnabled, boolean singleShot) {
         if (agpsEnabled) {
-            String modeString = properties.getProperty("SUPL_MODE");
-            int suplMode = 0;
-            if (!TextUtils.isEmpty(modeString)) {
-                try {
-                    suplMode = Integer.parseInt(modeString);
-                } catch (NumberFormatException e) {
-                    Log.e(TAG, "unable to parse SUPL_MODE: " + modeString);
-                    return GPS_POSITION_MODE_STANDALONE;
-                }
+            int suplMode = mGnssConfiguration.getSuplMode(0);
+            if (suplMode == 0) {
+                return GPS_POSITION_MODE_STANDALONE;
             }
+
             // MS-Based is the preferred mode for Assisted-GPS position computation, so we favor
             // such mode when it is available
             if (hasCapability(GPS_CAPABILITY_MSB) && (suplMode & AGPS_SUPL_MODE_MSB) != 0) {
@@ -1307,7 +1158,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             boolean agpsEnabled =
                     (Settings.Global.getInt(mContext.getContentResolver(),
                             Settings.Global.ASSISTED_GPS_ENABLED, 1) != 0);
-            mPositionMode = getSuplMode(mProperties, agpsEnabled, singleShot);
+            mPositionMode = getSuplMode(agpsEnabled, singleShot);
 
             if (DEBUG) {
                 String mode;
@@ -1670,7 +1521,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 // re-calls native_init() and other setup.
                 handleEnable();
                 // resend configuration into the restarted HAL service.
-                reloadGpsProperties(mContext, mProperties);
+                reloadGpsProperties();
             }
         });
     }
@@ -2072,7 +1923,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
             // load default GPS configuration
             // (this configuration might change in the future based on SIM changes)
-            reloadGpsProperties(mContext, mProperties);
+            reloadGpsProperties();
 
             // TODO: When this object "finishes" we should unregister by invoking
             // SubscriptionManager.getInstance(mContext).unregister
@@ -2227,8 +2078,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private static native boolean native_is_supported();
 
-    private static native boolean native_is_gnss_configuration_supported();
-
     private static native void native_init_once();
 
     private native boolean native_init();
@@ -2284,21 +2133,4 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             int lac, int cid);
 
     private native void native_agps_set_id(int type, String setid);
-
-    // GNSS Configuration
-    private static native boolean native_set_supl_version(int version);
-
-    private static native boolean native_set_supl_mode(int mode);
-
-    private static native boolean native_set_supl_es(int es);
-
-    private static native boolean native_set_lpp_profile(int lppProfile);
-
-    private static native boolean native_set_gnss_pos_protocol_select(int gnssPosProtocolSelect);
-
-    private static native boolean native_set_gps_lock(int gpsLock);
-
-    private static native boolean native_set_emergency_supl_pdn(int emergencySuplPdn);
-
-    private static native boolean native_set_satellite_blacklist(int[] constellations, int[] svIds);
 }
