@@ -55,6 +55,8 @@ public final class LinkProperties implements Parcelable {
     private String mIfaceName;
     private ArrayList<LinkAddress> mLinkAddresses = new ArrayList<>();
     private ArrayList<InetAddress> mDnses = new ArrayList<>();
+    // PCSCF addresses are addresses of SIP proxies that only exist for the IMS core service.
+    private ArrayList<InetAddress> mPcscfs = new ArrayList<InetAddress>();
     private ArrayList<InetAddress> mValidatedPrivateDnses = new ArrayList<>();
     private boolean mUsePrivateDns;
     private String mPrivateDnsServerName;
@@ -179,6 +181,7 @@ public final class LinkProperties implements Parcelable {
             mValidatedPrivateDnses.addAll(source.mValidatedPrivateDnses);
             mUsePrivateDns = source.mUsePrivateDns;
             mPrivateDnsServerName = source.mPrivateDnsServerName;
+            mPcscfs.addAll(source.mPcscfs);
             mDomains = source.mDomains;
             mRoutes.addAll(source.mRoutes);
             mHttpProxy = (source.mHttpProxy == null) ? null : new ProxyInfo(source.mHttpProxy);
@@ -525,6 +528,60 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Adds the given {@link InetAddress} to the list of PCSCF servers, if not present.
+     *
+     * @param pcscfServer The {@link InetAddress} to add to the list of PCSCF servers.
+     * @return true if the PCSCF server was added, false otherwise.
+     * @hide
+     */
+    public boolean addPcscfServer(InetAddress pcscfServer) {
+        if (pcscfServer != null && !mPcscfs.contains(pcscfServer)) {
+            mPcscfs.add(pcscfServer);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Removes the given {@link InetAddress} from the list of PCSCF servers.
+     *
+     * @param pcscf Server The {@link InetAddress} to remove from the list of PCSCF servers.
+     * @return true if the PCSCF server was removed, false otherwise.
+     * @hide
+     */
+    public boolean removePcscfServer(InetAddress pcscfServer) {
+        if (pcscfServer != null) {
+            return mPcscfs.remove(pcscfServer);
+        }
+        return false;
+    }
+
+    /**
+     * Replaces the PCSCF servers in this {@code LinkProperties} with
+     * the given {@link Collection} of {@link InetAddress} objects.
+     *
+     * @param addresses The {@link Collection} of PCSCF servers to set in this object.
+     * @hide
+     */
+    public void setPcscfServers(Collection<InetAddress> pcscfServers) {
+        mPcscfs.clear();
+        for (InetAddress pcscfServer: pcscfServers) {
+            addPcscfServer(pcscfServer);
+        }
+    }
+
+    /**
+     * Returns all the {@link InetAddress} for PCSCF servers on this link.
+     *
+     * @return An unmodifiable {@link List} of {@link InetAddress} for PCSCF servers on
+     *         this link.
+     * @hide
+     */
+    public List<InetAddress> getPcscfServers() {
+        return Collections.unmodifiableList(mPcscfs);
+    }
+
+    /**
      * Sets the DNS domain search path used on this link.
      *
      * @param domains A {@link String} listing in priority order the comma separated
@@ -767,6 +824,7 @@ public final class LinkProperties implements Parcelable {
         mDnses.clear();
         mUsePrivateDns = false;
         mPrivateDnsServerName = null;
+        mPcscfs.clear();
         mDomains = null;
         mRoutes.clear();
         mHttpProxy = null;
@@ -811,6 +869,12 @@ public final class LinkProperties implements Parcelable {
         if (mPrivateDnsServerName != null) {
             resultJoiner.add("PrivateDnsServerName:");
             resultJoiner.add(mPrivateDnsServerName);
+        }
+
+        if (!mPcscfs.isEmpty()) {
+            resultJoiner.add("PcscfAddresses: [");
+            resultJoiner.add(TextUtils.join(",", mPcscfs));
+            resultJoiner.add("]");
         }
 
         if (!mValidatedPrivateDnses.isEmpty()) {
@@ -960,6 +1024,36 @@ public final class LinkProperties implements Parcelable {
             if (ia instanceof Inet6Address) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this link has an IPv4 PCSCF server.
+     *
+     * @return {@code true} if there is an IPv4 PCSCF server, {@code false} otherwise.
+     * @hide
+     */
+    public boolean hasIPv4PcscfServer() {
+        for (InetAddress ia : mPcscfs) {
+          if (ia instanceof Inet4Address) {
+            return true;
+          }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this link has an IPv6 PCSCF server.
+     *
+     * @return {@code true} if there is an IPv6 PCSCF server, {@code false} otherwise.
+     * @hide
+     */
+    public boolean hasIPv6PcscfServer() {
+        for (InetAddress ia : mPcscfs) {
+          if (ia instanceof Inet6Address) {
+            return true;
+          }
         }
         return false;
     }
@@ -1117,6 +1211,19 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Compares this {@code LinkProperties} PCSCF addresses against the target
+     *
+     * @param target LinkProperties to compare.
+     * @return {@code true} if both are identical, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isIdenticalPcscfs(LinkProperties target) {
+        Collection<InetAddress> targetPcscfs = target.getPcscfServers();
+        return (mPcscfs.size() == targetPcscfs.size()) ?
+                    mPcscfs.containsAll(targetPcscfs) : false;
+    }
+
+    /**
      * Compares this {@code LinkProperties} Routes against the target
      *
      * @param target LinkProperties to compare.
@@ -1218,6 +1325,7 @@ public final class LinkProperties implements Parcelable {
                 && isIdenticalDnses(target)
                 && isIdenticalPrivateDns(target)
                 && isIdenticalValidatedPrivateDnses(target)
+                && isIdenticalPcscfs(target)
                 && isIdenticalRoutes(target)
                 && isIdenticalHttpProxy(target)
                 && isIdenticalStackedLinks(target)
@@ -1334,6 +1442,7 @@ public final class LinkProperties implements Parcelable {
                 + mMtu * 51
                 + ((null == mTcpBufferSizes) ? 0 : mTcpBufferSizes.hashCode())
                 + (mUsePrivateDns ? 57 : 0)
+                + mPcscfs.size() * 67
                 + ((null == mPrivateDnsServerName) ? 0 : mPrivateDnsServerName.hashCode());
     }
 
@@ -1357,6 +1466,10 @@ public final class LinkProperties implements Parcelable {
         }
         dest.writeBoolean(mUsePrivateDns);
         dest.writeString(mPrivateDnsServerName);
+        dest.writeInt(mPcscfs.size());
+        for (InetAddress d : mPcscfs) {
+            dest.writeByteArray(d.getAddress());
+        }
         dest.writeString(mDomains);
         dest.writeInt(mMtu);
         dest.writeString(mTcpBufferSizes);
@@ -1406,6 +1519,12 @@ public final class LinkProperties implements Parcelable {
                 }
                 netProp.setUsePrivateDns(in.readBoolean());
                 netProp.setPrivateDnsServerName(in.readString());
+                addressCount = in.readInt();
+                for (int i = 0; i < addressCount; i++) {
+                    try {
+                        netProp.addPcscfServer(InetAddress.getByAddress(in.createByteArray()));
+                    } catch (UnknownHostException e) { }
+                }
                 netProp.setDomains(in.readString());
                 netProp.setMtu(in.readInt());
                 netProp.setTcpBufferSizes(in.readString());
