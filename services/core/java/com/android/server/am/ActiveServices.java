@@ -1654,6 +1654,10 @@ public final class ActiveServices {
                 }
             }
 
+            if ((flags & Context.BIND_RESTRICT_ASSOCIATIONS) != 0) {
+                mAm.requireAllowedAssociationsLocked(s.appInfo.packageName);
+            }
+
             mAm.startAssociationLocked(callerApp.uid, callerApp.processName,
                     callerApp.getCurProcState(), s.appInfo.uid, s.appInfo.longVersionCode,
                     s.instanceName, s.processName);
