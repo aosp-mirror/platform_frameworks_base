@@ -38,14 +38,13 @@ import android.os.IBinder;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.RemoteException;
 import android.os.WorkSource;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * Abstract class implementing IWifiManager with stub methods throwing runtime exceptions.
+ * Empty concrete class implementing IWifiManager with stub methods throwing runtime exceptions.
  *
  * This class is meant to be extended by real implementations of IWifiManager in order to facilitate
  * cross-repo changes to WiFi internal APIs, including the introduction of new APIs, the removal of
@@ -56,10 +55,13 @@ import java.util.Map;
  * then given a short grace period to update themselves before the @Deprecated stub is removed for
  * good. If the API scheduled for removal has a replacement or an overload (signature change),
  * these should be introduced before the stub is removed to allow children to migrate.
+ *
+ * When a new API is added to IWifiManager.aidl, a stub should be added in BaseWifiService as
+ * well otherwise compilation will fail.
  */
-public abstract class AbstractWifiService extends IWifiManager.Stub {
+public class BaseWifiService extends IWifiManager.Stub {
 
-    private static final String TAG = AbstractWifiService.class.getSimpleName();
+    private static final String TAG = BaseWifiService.class.getSimpleName();
 
     @Override
     public int getSupportedFeatures() {
