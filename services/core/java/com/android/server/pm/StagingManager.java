@@ -53,9 +53,6 @@ public class StagingManager {
     private final PackageManagerService mPm;
     private final Handler mBgHandler;
 
-    // STOPSHIP: This is a temporary mock implementation of staged sessions. This variable
-    //           shouldn't be needed at all.
-    // TODO(b/118865310): Implement staged sessions logic.
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
@@ -190,5 +187,12 @@ public class StagingManager {
         synchronized (mStagedSessions) {
             mStagedSessions.remove(sessionInfo.sessionId);
         }
+    }
+
+    void restoreSession(@NonNull PackageInstallerSession session) {
+        updateStoredSession(session);
+        // TODO(b/118865310): This method is called when PackageInstaller is re-instantiated, e.g.
+        // at reboot. Staging manager should at this point recover state from apexd and decide what
+        // to do with the session.
     }
 }
