@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+
 import com.android.internal.os.Zygote;
 
 import dalvik.annotation.optimization.FastNative;
@@ -313,7 +315,7 @@ public final class Trace {
      * @param sectionName The name of the code section to appear in the trace.  This may be at
      * most 127 Unicode code units long.
      */
-    public static void beginSection(String sectionName) {
+    public static void beginSection(@NonNull String sectionName) {
         if (isTagEnabled(TRACE_TAG_APP)) {
             if (sectionName.length() > MAX_SECTION_NAME_LEN) {
                 throw new IllegalArgumentException("sectionName is too long");
@@ -345,7 +347,7 @@ public final class Trace {
      * @param methodName The method name to appear in the trace.
      * @param cookie Unique identifier for distinguishing simultaneous events
      */
-    public static void beginAsyncSection(String methodName, int cookie) {
+    public static void beginAsyncSection(@NonNull String methodName, int cookie) {
         asyncTraceBegin(TRACE_TAG_APP, methodName, cookie);
     }
 
@@ -357,7 +359,7 @@ public final class Trace {
      * @param methodName The method name to appear in the trace.
      * @param cookie Unique identifier for distinguishing simultaneous events
      */
-    public static void endAsyncSection(String methodName, int cookie) {
+    public static void endAsyncSection(@NonNull String methodName, int cookie) {
         asyncTraceEnd(TRACE_TAG_APP, methodName, cookie);
     }
 
@@ -367,7 +369,7 @@ public final class Trace {
      * @param counterName The counter name to appear in the trace.
      * @param counterValue The counter value.
      */
-    public static void setCounter(String counterName, long counterValue) {
+    public static void setCounter(@NonNull String counterName, long counterValue) {
         if (isTagEnabled(TRACE_TAG_APP)) {
             nativeTraceCounter(TRACE_TAG_APP, counterName, counterValue);
         }
