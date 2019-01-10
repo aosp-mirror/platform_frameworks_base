@@ -339,7 +339,7 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         NotificationStackScrollLayout stackScrollLayout = getStackScrollLayout();
-        if (mService.isDozing() && !stackScrollLayout.hasPulsingNotifications()) {
+        if (mService.isDozing() && !mService.isPulsing()) {
             // Capture all touch events in always-on.
             return true;
         }
@@ -347,8 +347,7 @@ public class StatusBarWindowView extends FrameLayout {
         if (mNotificationPanel.isFullyExpanded()
                 && stackScrollLayout.getVisibility() == View.VISIBLE
                 && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
-                && !mService.isBouncerShowing()
-                && !mService.isDozing()) {
+                && !mService.isBouncerShowing()) {
             intercept = mDragDownHelper.onInterceptTouchEvent(ev);
         }
         if (!intercept) {
@@ -369,7 +368,7 @@ public class StatusBarWindowView extends FrameLayout {
         boolean handled = false;
         if (mService.isDozing()) {
             mDoubleTapHelper.onTouchEvent(ev);
-            handled = true;
+            handled = !mService.isPulsing();
         }
         if ((mStatusBarStateController.getState() == StatusBarState.KEYGUARD && !handled)
                 || mDragDownHelper.isDraggingDown()) {
