@@ -12,6 +12,7 @@ import static org.robolectric.Shadows.shadowOf;
 import static org.testng.Assert.expectThrows;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.Application;
 import android.app.backup.BackupDataInput;
 import android.app.backup.FullBackupDataOutput;
@@ -62,6 +63,7 @@ public class AppMetadataBackupWriterTest {
     private static final String TEST_PACKAGE_INSTALLER = "com.test.package.installer";
     private static final Long TEST_PACKAGE_VERSION_CODE = 100L;
 
+    private @UserIdInt int mUserId;
     private PackageManager mPackageManager;
     private ShadowApplicationPackageManager mShadowPackageManager;
     private File mFilesDir;
@@ -72,6 +74,7 @@ public class AppMetadataBackupWriterTest {
     public void setUp() throws Exception {
         Application application = RuntimeEnvironment.application;
 
+        mUserId = UserHandle.USER_SYSTEM;
         mPackageManager = application.getPackageManager();
         mShadowPackageManager = (ShadowApplicationPackageManager) shadowOf(mPackageManager);
 
@@ -352,7 +355,7 @@ public class AppMetadataBackupWriterTest {
         byte[] obbBytes = "obb".getBytes();
         File obbFile = createObbFileAndWrite(obbDir, obbBytes);
 
-        mBackupWriter.backupObb(packageInfo);
+        mBackupWriter.backupObb(mUserId, packageInfo);
 
         byte[] writtenBytes = getWrittenBytes(mBackupDataOutputFile, /* includeTarHeader */ false);
         assertThat(writtenBytes).isEqualTo(obbBytes);
@@ -366,7 +369,7 @@ public class AppMetadataBackupWriterTest {
         File obbDir = createObbDirForPackage(packageInfo.packageName);
         // No obb file created.
 
-        mBackupWriter.backupObb(packageInfo);
+        mBackupWriter.backupObb(mUserId, packageInfo);
 
         assertThat(mBackupDataOutputFile.length()).isEqualTo(0);
     }

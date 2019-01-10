@@ -54,12 +54,12 @@ import java.io.OutputStream;
  */
 public class FullBackupEngine {
     private UserBackupManagerService backupManagerService;
-    OutputStream mOutput;
-    FullBackupPreflight mPreflightHook;
-    BackupRestoreTask mTimeoutMonitor;
-    IBackupAgent mAgent;
-    boolean mIncludeApks;
-    PackageInfo mPkg;
+    private OutputStream mOutput;
+    private FullBackupPreflight mPreflightHook;
+    private BackupRestoreTask mTimeoutMonitor;
+    private IBackupAgent mAgent;
+    private boolean mIncludeApks;
+    private PackageInfo mPkg;
     private final long mQuota;
     private final int mOpToken;
     private final int mTransportFlags;
@@ -130,7 +130,7 @@ public class FullBackupEngine {
                 // TODO(b/113807190): Look into removing, only used for 'adb backup'.
                 if (writeApk) {
                     appMetadataBackupWriter.backupApk(mPackage);
-                    appMetadataBackupWriter.backupObb(mPackage);
+                    appMetadataBackupWriter.backupObb(mUserId, mPackage);
                 }
 
                 if (DEBUG) {
