@@ -16,6 +16,8 @@
 
 #define LOG_TAG "PacProcessor"
 
+#include <string>
+
 #include <utils/Log.h>
 #include <utils/Mutex.h>
 #include "android_runtime/AndroidRuntime.h"
@@ -30,17 +32,17 @@ namespace android {
 net::ProxyResolverV8* proxyResolver = NULL;
 bool pacSet = false;
 
-String16 jstringToString16(JNIEnv* env, jstring jstr) {
+std::u16string jstringToString16(JNIEnv* env, jstring jstr) {
     const jchar* str = env->GetStringCritical(jstr, 0);
-    String16 str16(reinterpret_cast<const char16_t*>(str),
+    std::u16string str16(reinterpret_cast<const char16_t*>(str),
                    env->GetStringLength(jstr));
     env->ReleaseStringCritical(jstr, str);
     return str16;
 }
 
-jstring string16ToJstring(JNIEnv* env, String16 string) {
-    const char16_t* str = string.string();
-    size_t len = string.size();
+jstring string16ToJstring(JNIEnv* env, std::u16string string) {
+    const char16_t* str = string.data();
+    size_t len = string.length();
 
     return env->NewString(reinterpret_cast<const jchar*>(str), len);
 }
@@ -67,7 +69,7 @@ static jboolean com_android_pacprocessor_PacNative_destroyV8ParserNativeLocked(J
 
 static jboolean com_android_pacprocessor_PacNative_setProxyScriptNativeLocked(JNIEnv* env, jobject,
         jstring script) {
-    String16 script16 = jstringToString16(env, script);
+    std::u16string script16 = jstringToString16(env, script);
 
     if (proxyResolver == NULL) {
         ALOGE("V8 Parser not started when setting PAC script");
@@ -85,9 +87,9 @@ static jboolean com_android_pacprocessor_PacNative_setProxyScriptNativeLocked(JN
 
 static jstring com_android_pacprocessor_PacNative_makeProxyRequestNativeLocked(JNIEnv* env, jobject,
         jstring url, jstring host) {
-    String16 url16 = jstringToString16(env, url);
-    String16 host16 = jstringToString16(env, host);
-    String16 ret;
+    std::u16string url16 = jstringToString16(env, url);
+    std::u16string host16 = jstringToString16(env, host);
+    std::u16string ret;
 
     if (proxyResolver == NULL) {
         ALOGE("V8 Parser not initialized when running PAC script");
@@ -100,7 +102,7 @@ static jstring com_android_pacprocessor_PacNative_makeProxyRequestNativeLocked(J
     }
 
     if (proxyResolver->GetProxyForURL(url16, host16, &ret) != OK) {
-        String8 ret8(ret);
+        String8 ret8(ret.data());
         ALOGE("Error Running PAC: %s", ret8.string());
         return NULL;
     }
