@@ -84,7 +84,11 @@ public interface WindowInsetsAnimationListener {
         /**
          * Queries the lower inset bound of the animation. If the animation is about showing or
          * hiding a window that cause insets, the lower bound is {@link Insets#NONE} and the upper
-         * bound is the same as {@link WindowInsets#getInsets(int)} for the fully shown state.
+         * bound is the same as {@link WindowInsets#getInsets(int)} for the fully shown state. This
+         * is the same as {@link WindowInsetsAnimationController#getHiddenStateInsets} and
+         * {@link WindowInsetsAnimationController#getShownStateInsets} in case the listener gets
+         * invoked because of an animation that originates from
+         * {@link WindowInsetsAnimationController}.
          * <p>
          * However, if the size of a window that causes insets is changing, these are the
          * lower/upper bounds of that size animation.
@@ -93,6 +97,7 @@ public interface WindowInsetsAnimationListener {
          * running at the same time for different inset types.
          *
          * @see #getUpperBound()
+         * @see WindowInsetsAnimationController#getHiddenStateInsets
          * TODO: It's a bit weird that these are global per window but onProgress is hierarchical.
          * TODO: If multiple types are animating, querying the bound per type isn't possible. Should
          * we:
@@ -108,6 +113,7 @@ public interface WindowInsetsAnimationListener {
 
         /**
          * @see #getLowerBound()
+         * @see WindowInsetsAnimationController#getShownStateInsets
          */
         public Insets getUpperBound() {
             return mUpperBound;
