@@ -36,8 +36,6 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-static std::mutex sLock{};
-static ThreadBase* sGLDrawThread = nullptr;
 static renderthread::EglManager sEglManager;
 
 // ScopedDrawRequest makes sure a GL thread is started and EGL context is initialized on it.
@@ -47,32 +45,20 @@ public:
 
 private:
     void beginDraw() {
-        std::lock_guard _lock{sLock};
-
-        if (!sGLDrawThread) {
-            sGLDrawThread = new ThreadBase{};
-        }
-
-        if (!sGLDrawThread->isRunning()) {
-            sGLDrawThread->start("GLFunctorThread");
-        }
-
         if (!sEglManager.hasEglContext()) {
-            sGLDrawThread->queue().runSync([]() { sEglManager.initialize(); });
+            sEglManager.initialize();
         }
     }
 };
 
 void VkInteropFunctorDrawable::vkInvokeFunctor(Functor* functor) {
     ScopedDrawRequest _drawRequest{};
-    sGLDrawThread->queue().runSync([&]() {
-        EGLDisplay display = sEglManager.eglDisplay();
-        DrawGlInfo::Mode mode = DrawGlInfo::kModeProcessNoContext;
-        if (display != EGL_NO_DISPLAY) {
-            mode = DrawGlInfo::kModeProcess;
-        }
-        (*functor)(mode, nullptr);
-    });
+    EGLDisplay display = sEglManager.eglDisplay();
+    DrawGlInfo::Mode mode = DrawGlInfo::kModeProcessNoContext;
+    if (display != EGL_NO_DISPLAY) {
+        mode = DrawGlInfo::kModeProcess;
+    }
+    (*functor)(mode, nullptr);
 }
 
 #define FENCE_TIMEOUT 2000000000
@@ -113,7 +99,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     // TODO: draw command has completed.
     // TODO: A simple but inefficient way is to flush and issue a QueueWaitIdle call. See
     // TODO: GrVkGpu::destroyResources() for example.
-    bool success = sGLDrawThread->queue().runSync([&]() -> bool {
+    {
         ATRACE_FORMAT("WebViewDraw_%dx%d", mFBInfo.width(), mFBInfo.height());
         EGLDisplay display = sEglManager.eglDisplay();
         LOG_ALWAYS_FATAL_IF(display == EGL_NO_DISPLAY, "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
@@ -125,7 +111,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         if (autoImage.image == EGL_NO_IMAGE_KHR) {
             ALOGW("Could not create EGL image, err =%s",
                   uirenderer::renderthread::EglManager::eglErrorString());
-            return false;
+            return;
         }
 
         AutoSkiaGlTexture glTexture;
@@ -156,7 +142,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             ALOGE("Failed framebuffer check for created target buffer: %s",
                   GLUtils::getGLFramebufferError());
-            return false;
+            return;
         }
 
         glDisable(GL_STENCIL_TEST);
@@ -183,11 +169,6 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         LOG_ALWAYS_FATAL_IF(waitStatus != EGL_CONDITION_SATISFIED_KHR,
                             "Failed to wait for the fence %#x", eglGetError());
         eglDestroySyncKHR(display, glDrawFinishedFence);
-        return true;
-    });
-
-    if (!success) {
-        return;
     }
 
     SkPaint paint;
@@ -208,15 +189,14 @@ VkInteropFunctorDrawable::~VkInteropFunctorDrawable() {
     if (auto lp = std::get_if<LegacyFunctor>(&mAnyFunctor)) {
         if (lp->listener) {
             ScopedDrawRequest _drawRequest{};
-            sGLDrawThread->queue().runSync(
-                    [&]() { lp->listener->onGlFunctorReleased(lp->functor); });
+            lp->listener->onGlFunctorReleased(lp->functor);
         }
     }
 }
 
 void VkInteropFunctorDrawable::syncFunctor(const WebViewSyncData& data) const {
     ScopedDrawRequest _drawRequest{};
-    sGLDrawThread->queue().runSync([&]() { FunctorDrawable::syncFunctor(data); });
+    FunctorDrawable::syncFunctor(data);
 }
 
 }  // namespace skiapipeline
