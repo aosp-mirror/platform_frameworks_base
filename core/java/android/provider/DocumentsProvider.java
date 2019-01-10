@@ -687,6 +687,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      *         extras {@link Bundle} when any QUERY_ARG_* value was honored
      *         during the preparation of the results.
      *
+     * @see Root#COLUMN_QUERY_ARGS
      * @see ContentResolver#EXTRA_HONORED_ARGS
      * @see DocumentsContract#EXTRA_LOADING
      * @see DocumentsContract#EXTRA_INFO

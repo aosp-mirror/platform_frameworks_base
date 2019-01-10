@@ -640,6 +640,28 @@ public final class DocumentsContract {
         public static final String COLUMN_MIME_TYPES = "mime_types";
 
         /**
+         * Query arguments supported by this root. This column is optional
+         * and related to {@link #COLUMN_FLAGS} and {@link #FLAG_SUPPORTS_SEARCH}.
+         * If the flags include {@link #FLAG_SUPPORTS_SEARCH}, and the column is
+         * {@code null}, the root is assumed to support {@link #QUERY_ARG_DISPLAY_NAME}
+         * search of {@link Document#COLUMN_DISPLAY_NAME}. Multiple query arguments
+         * can be separated by a newline. For example, a root supporting
+         * {@link #QUERY_ARG_MIME_TYPES} and {@link #QUERY_ARG_DISPLAY_NAME} might
+         * return "android:query-arg-mime-types\nandroid:query-arg-display-name".
+         * <p>
+         * Type: STRING
+         * @see #COLUMN_FLAGS
+         * @see #FLAG_SUPPORTS_SEARCH
+         * @see #QUERY_ARG_DISPLAY_NAME
+         * @see #QUERY_ARG_FILE_SIZE_OVER
+         * @see #QUERY_ARG_LAST_MODIFIED_AFTER
+         * @see #QUERY_ARG_MIME_TYPES
+         * @see DocumentsProvider#querySearchDocuments(String, String[],
+         *      Bundle)
+         */
+        public static final String COLUMN_QUERY_ARGS = "query_args";
+
+        /**
          * MIME type for a root.
          */
         public static final String MIME_TYPE_ITEM = "vnd.android.document/root";
@@ -680,6 +702,8 @@ public final class DocumentsContract {
          *      String)
          * @see DocumentsProvider#querySearchDocuments(String, String,
          *      String[])
+         * @see DocumentsProvider#querySearchDocuments(String, String[],
+         *      Bundle)
          */
         public static final int FLAG_SUPPORTS_SEARCH = 1 << 3;
 
