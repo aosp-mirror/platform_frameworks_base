@@ -2954,7 +2954,7 @@ package android.location {
     method public void setLocationControllerExtraPackage(java.lang.String);
     method public void setLocationControllerExtraPackageEnabled(boolean);
     method public void setLocationEnabledForUser(boolean, android.os.UserHandle);
-    method public boolean setProviderEnabledForUser(java.lang.String, boolean, android.os.UserHandle);
+    method public deprecated boolean setProviderEnabledForUser(java.lang.String, boolean, android.os.UserHandle);
     method public boolean unregisterGnssBatchedLocationCallback(android.location.BatchedLocationCallback);
   }
 
