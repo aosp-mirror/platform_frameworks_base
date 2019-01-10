@@ -33,6 +33,12 @@ interface IRollbackManager {
     void executeRollback(in RollbackInfo rollback, String callerPackageName,
             in IntentSender statusReceiver);
 
+    // Exposed for use from the system server only. Callback from the package
+    // manager during the install flow when user data can be restored for a given
+    // package.
+    void restoreUserData(String packageName, int userId, int appId, long ceDataInode,
+            String seInfo, int token);
+
     // Exposed for test purposes only.
     void reloadPersistedData();
 

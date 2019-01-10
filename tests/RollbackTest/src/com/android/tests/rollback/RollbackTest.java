@@ -38,7 +38,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -470,7 +469,7 @@ public class RollbackTest {
      * Test that app user data is rolled back.
      * TODO: Stop ignoring this test once user data rollback is supported.
      */
-    @Ignore @Test
+    @Test
     public void testUserDataRollback() throws Exception {
         try {
             RollbackTestUtils.adoptShellPermissionIdentity(
@@ -479,9 +478,9 @@ public class RollbackTest {
                     Manifest.permission.MANAGE_ROLLBACKS);
 
             RollbackTestUtils.uninstall(TEST_APP_A);
-            RollbackTestUtils.install("RollbackTestAppV1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
             processUserData(TEST_APP_A);
-            RollbackTestUtils.install("RollbackTestAppV2.apk", true);
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
             processUserData(TEST_APP_A);
 
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
