@@ -4865,4 +4865,26 @@ public class WifiManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Provide a Wi-Fi usability score information to be recorded (but not acted upon) by the
+     * framework. The Wi-Fi usability score is derived from {@link WifiUsabilityStatsListener}
+     * where a score is matched to Wi-Fi usability statistics using the sequence number. The score
+     * is used to quantify whether Wi-Fi is usable in a future time.
+     *
+     * @param seqNum Sequence number of the Wi-Fi usability score.
+     * @param score The Wi-Fi usability score.
+     * @param predictionHorizonSec Prediction horizon of the Wi-Fi usability score.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE)
+    public void updateWifiUsabilityScore(int seqNum, int score, int predictionHorizonSec) {
+        try {
+            mService.updateWifiUsabilityScore(seqNum, score, predictionHorizonSec);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

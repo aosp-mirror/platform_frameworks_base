@@ -476,4 +476,9 @@ public class BaseWifiService extends IWifiManager.Stub {
     public void removeWifiUsabilityStatsListener(int listenerIdentifier) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void updateWifiUsabilityScore(int seqNum, int score, int predictionHorizonSec) {
+        throw new UnsupportedOperationException();
+    }
 }

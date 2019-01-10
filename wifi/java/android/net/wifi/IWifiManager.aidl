@@ -214,4 +214,6 @@ interface IWifiManager
         in IDppCallback callback);
 
     void stopDppSession();
+
+    void updateWifiUsabilityScore(int seqNum, int score, int predictionHorizonSec);
 }

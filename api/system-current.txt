@@ -4637,6 +4637,7 @@ package android.net.wifi {
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void startSubscriptionProvisioning(android.net.wifi.hotspot2.OsuProvider, android.net.wifi.hotspot2.ProvisioningCallback, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void stopEasyConnectSession();
     method @RequiresPermission("android.permission.NETWORK_SETTINGS") public void unregisterNetworkRequestMatchCallback(@NonNull android.net.wifi.WifiManager.NetworkRequestMatchCallback);
+    method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void updateWifiUsabilityScore(int, int, int);
     field public static final int CHANGE_REASON_ADDED = 0; // 0x0
     field public static final int CHANGE_REASON_CONFIG_CHANGE = 2; // 0x2
     field public static final int CHANGE_REASON_REMOVED = 1; // 0x1
