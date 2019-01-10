@@ -2158,6 +2158,7 @@ public class Activity extends ContextThemeWrapper
      * for helping activities determine the proper time to cancel a notification.
      *
      * @see #onUserInteraction()
+     * @see android.content.Intent#FLAG_ACTIVITY_NO_USER_ACTION
      */
     protected void onUserLeaveHint() {
     }
