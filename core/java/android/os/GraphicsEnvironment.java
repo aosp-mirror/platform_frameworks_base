@@ -353,6 +353,26 @@ public class GraphicsEnvironment {
     }
 
     /**
+     * Attempt to setup ANGLE with a (temporary) default rules file: b/121153494
+     * True: Rules file was loaded.
+     * False: Rules file was *not* loaded.
+     */
+    private boolean setupAngleRulesDebug(String packageName, String paths, String devOptIn) {
+        // b/121153494
+        // Skip APK rules file checking.
+        if (!DEBUG) {
+            Log.v(TAG, "Skipping loading the rules file.");
+            // Fill in some default values for now, so the loader can get an answer when it asks.
+            // Most importantly, we need to indicate which app we are init'ing and what the
+            // developer options for it are so we can turn on ANGLE if needed.
+            setAngleInfo(paths, packageName, devOptIn, null, 0, 0);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Attempt to setup ANGLE with a rules file loaded from the ANGLE APK.
      * True: APK rules file was loaded.
      * False: APK rules file was *not* loaded.
@@ -427,6 +447,12 @@ public class GraphicsEnvironment {
 
         if (setupAngleWithTempRulesFile(context, packageName, paths, devOptIn)) {
             // We setup ANGLE with a temp rules file, so we're done here.
+            return;
+        }
+
+        // b/121153494
+        if (setupAngleRulesDebug(packageName, paths, devOptIn)) {
+            // We setup ANGLE with defaults, so we're done here.
             return;
         }
 
