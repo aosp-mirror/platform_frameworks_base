@@ -14,13 +14,13 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ClockPlugin;
-import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.policy.ExtensionController;
+import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 
-import java.util.Objects;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
@@ -47,43 +47,15 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * or not to show it below the alternate clock.
      */
     private View mKeyguardStatusArea;
+    /**
+     * Used to select between plugin or default implementations of ClockPlugin interface.
+     */
+    private Extension<ClockPlugin> mClockExtension;
+    /**
+     * Consumer that accepts the a new ClockPlugin implementation when the Extension reloads.
+     */
+    private final Consumer<ClockPlugin> mClockPluginConsumer = plugin -> setClockPlugin(plugin);
 
-    private final PluginListener<ClockPlugin> mClockPluginListener =
-            new PluginListener<ClockPlugin>() {
-                @Override
-                public void onPluginConnected(ClockPlugin plugin, Context pluginContext) {
-                    disconnectPlugin();
-                    View smallClockView = plugin.getView();
-                    if (smallClockView != null) {
-                        // For now, assume that the most recently connected plugin is the
-                        // selected clock face. In the future, the user should be able to
-                        // pick a clock face from the available plugins.
-                        mSmallClockFrame.addView(smallClockView, -1,
-                                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                        ViewGroup.LayoutParams.WRAP_CONTENT));
-                        initPluginParams();
-                        mClockView.setVisibility(View.GONE);
-                    }
-                    View bigClockView = plugin.getBigClockView();
-                    if (bigClockView != null && mBigClockContainer != null) {
-                        mBigClockContainer.addView(bigClockView);
-                        mBigClockContainer.setVisibility(View.VISIBLE);
-                    }
-                    if (!plugin.shouldShowStatusArea()) {
-                        mKeyguardStatusArea.setVisibility(View.GONE);
-                    }
-                    mClockPlugin = plugin;
-                }
-
-                @Override
-                public void onPluginDisconnected(ClockPlugin plugin) {
-                    if (Objects.equals(plugin, mClockPlugin)) {
-                        disconnectPlugin();
-                        mClockView.setVisibility(View.VISIBLE);
-                        mKeyguardStatusArea.setVisibility(View.VISIBLE);
-                    }
-                }
-            };
     private final StatusBarStateController.StateListener mStateListener =
             new StatusBarStateController.StateListener() {
                 @Override
@@ -122,16 +94,59 @@ public class KeyguardClockSwitch extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Dependency.get(PluginManager.class).addPluginListener(mClockPluginListener,
-                ClockPlugin.class);
+        mClockExtension = Dependency.get(ExtensionController.class).newExtension(ClockPlugin.class)
+                .withPlugin(ClockPlugin.class)
+                .withCallback(mClockPluginConsumer)
+                .build();
         Dependency.get(StatusBarStateController.class).addCallback(mStateListener);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Dependency.get(PluginManager.class).removePluginListener(mClockPluginListener);
+        mClockExtension.destroy();
         Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
+    }
+
+    private void setClockPlugin(ClockPlugin plugin) {
+        // Disconnect from existing plugin.
+        if (mClockPlugin != null) {
+            View smallClockView = mClockPlugin.getView();
+            if (smallClockView != null && smallClockView.getParent() == mSmallClockFrame) {
+                mSmallClockFrame.removeView(smallClockView);
+            }
+            if (mBigClockContainer != null) {
+                mBigClockContainer.removeAllViews();
+                mBigClockContainer.setVisibility(View.GONE);
+            }
+            mClockPlugin = null;
+        }
+        if (plugin == null) {
+            mClockView.setVisibility(View.VISIBLE);
+            mKeyguardStatusArea.setVisibility(View.VISIBLE);
+            return;
+        }
+        // Attach small and big clock views to hierarchy.
+        View smallClockView = plugin.getView();
+        if (smallClockView != null) {
+            mSmallClockFrame.addView(smallClockView, -1,
+                    new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT));
+            mClockView.setVisibility(View.GONE);
+        }
+        View bigClockView = plugin.getBigClockView();
+        if (bigClockView != null && mBigClockContainer != null) {
+            mBigClockContainer.addView(bigClockView);
+            mBigClockContainer.setVisibility(View.VISIBLE);
+        }
+        // Hide default clock.
+        if (!plugin.shouldShowStatusArea()) {
+            mKeyguardStatusArea.setVisibility(View.GONE);
+        }
+        // Initialize plugin parameters.
+        mClockPlugin = plugin;
+        mClockPlugin.setStyle(getPaint().getStyle());
+        mClockPlugin.setTextColor(getCurrentTextColor());
     }
 
     /**
@@ -232,33 +247,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
-    /**
-     * When plugin changes, set all kept parameters into newer plugin.
-     */
-    private void initPluginParams() {
-        if (mClockPlugin != null) {
-            mClockPlugin.setStyle(getPaint().getStyle());
-            mClockPlugin.setTextColor(getCurrentTextColor());
-        }
-    }
-
-    private void disconnectPlugin() {
-        if (mClockPlugin != null) {
-            View smallClockView = mClockPlugin.getView();
-            if (smallClockView != null) {
-                mSmallClockFrame.removeView(smallClockView);
-            }
-            if (mBigClockContainer != null) {
-                mBigClockContainer.removeAllViews();
-                mBigClockContainer.setVisibility(View.GONE);
-            }
-            mClockPlugin = null;
-        }
-    }
-
     @VisibleForTesting (otherwise = VisibleForTesting.NONE)
-    PluginListener getClockPluginListener() {
-        return mClockPluginListener;
+    Consumer<ClockPlugin> getClockPluginConsumer() {
+        return mClockPluginConsumer;
     }
 
     @VisibleForTesting (otherwise = VisibleForTesting.NONE)
