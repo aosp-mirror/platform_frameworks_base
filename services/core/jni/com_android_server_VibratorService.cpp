@@ -22,6 +22,7 @@
 #include <android/hardware/vibrator/1.1/types.h>
 #include <android/hardware/vibrator/1.2/IVibrator.h>
 #include <android/hardware/vibrator/1.2/types.h>
+#include <android/hardware/vibrator/1.3/IVibrator.h>
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
@@ -42,6 +43,7 @@ using android::hardware::vibrator::V1_1::Effect_1_1;
 namespace V1_0 = android::hardware::vibrator::V1_0;
 namespace V1_1 = android::hardware::vibrator::V1_1;
 namespace V1_2 = android::hardware::vibrator::V1_2;
+namespace V1_3 = android::hardware::vibrator::V1_3;
 
 namespace android {
 
@@ -136,6 +138,19 @@ static void vibratorSetAmplitude(JNIEnv*, jobject, jint amplitude) {
     }
 }
 
+static jboolean vibratorSupportsExternalControl(JNIEnv*, jobject) {
+    return halCall(&V1_3::IVibrator::supportsExternalControl).withDefault(false);
+}
+
+static void vibratorSetExternalControl(JNIEnv*, jobject, jboolean enabled) {
+    Status status = halCall(&V1_3::IVibrator::setExternalControl, static_cast<uint32_t>(enabled))
+        .withDefault(Status::UNKNOWN_ERROR);
+    if (status != Status::OK) {
+      ALOGE("Failed to set vibrator external control (%" PRIu32 ").",
+            static_cast<uint32_t>(status));
+    }
+}
+
 static jlong vibratorPerformEffect(JNIEnv*, jobject, jlong effect, jint strength) {
     Status status;
     uint32_t lengthMs;
@@ -187,7 +202,9 @@ static const JNINativeMethod method_table[] = {
     { "vibratorOff", "()V", (void*)vibratorOff },
     { "vibratorSupportsAmplitudeControl", "()Z", (void*)vibratorSupportsAmplitudeControl},
     { "vibratorSetAmplitude", "(I)V", (void*)vibratorSetAmplitude},
-    { "vibratorPerformEffect", "(JJ)J", (void*)vibratorPerformEffect}
+    { "vibratorPerformEffect", "(JJ)J", (void*)vibratorPerformEffect},
+    { "vibratorSupportsExternalControl", "()Z", (void*)vibratorSupportsExternalControl},
+    { "vibratorSetExternalControl", "(Z)V", (void*)vibratorSetExternalControl},
 };
 
 int register_android_server_VibratorService(JNIEnv *env)
