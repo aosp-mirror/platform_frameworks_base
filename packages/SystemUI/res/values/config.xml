@@ -449,6 +449,11 @@
          better (narrower) line-break for a double-line smart reply button. -->
     <integer name="config_smart_replies_in_notifications_max_squeeze_remeasure_attempts">3</integer>
 
+    <!-- Smart replies in notifications: Whether by default tapping on a choice should let the user
+         edit the input before it is sent to the app. Developers can override this via
+         RemoteInput.Builder.setEditChoicesBeforeSending. -->
+    <bool name="config_smart_replies_in_notifications_edit_choices_before_sending">false</bool>
+
     <!-- Screenshot editing default activity.  Must handle ACTION_EDIT image/png intents.
          Blank sends the user to the Chooser first.
          This name is in the ComponentName flattened format (package/class)  -->
