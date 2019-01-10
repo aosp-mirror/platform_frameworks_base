@@ -27,7 +27,7 @@
 
 namespace android::uirenderer {
 
-class ThreadBase : protected Thread {
+class ThreadBase : public Thread {
     PREVENT_COPY_AND_ASSIGN(ThreadBase);
 
 public:

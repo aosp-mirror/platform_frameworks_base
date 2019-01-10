@@ -93,7 +93,9 @@ EglManager::EglManager()
         , mHasWideColorGamutSupport(false) {}
 
 EglManager::~EglManager() {
-    destroy();
+    if (hasEglContext()) {
+        ALOGW("~EglManager() leaked an EGL context");
+    }
 }
 
 void EglManager::initialize() {

@@ -34,7 +34,7 @@
 namespace android::uirenderer {
 
 static std::mutex sLock{};
-static ThreadBase* sUploadThread = nullptr;
+static sp<ThreadBase> sUploadThread = nullptr;
 static renderthread::EglManager sEglManager;
 static int sPendingUploads = 0;
 static nsecs_t sLastUpload = 0;
@@ -255,6 +255,17 @@ sk_sp<Bitmap> HardwareBitmapUploader::allocateHardwareBitmap(const SkBitmap& sou
 
     return Bitmap::createFrom(buffer.get(), bitmap.refColorSpace(), bitmap.alphaType(),
                               Bitmap::computePalette(bitmap));
+}
+
+void HardwareBitmapUploader::terminate() {
+    std::lock_guard _lock{sLock};
+    LOG_ALWAYS_FATAL_IF(sPendingUploads, "terminate called while uploads in progress");
+    if (sUploadThread) {
+        sUploadThread->requestExit();
+        sUploadThread->join();
+        sUploadThread = nullptr;
+    }
+    sEglManager.destroy();
 }
 
 }  // namespace android::uirenderer
