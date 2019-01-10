@@ -534,12 +534,6 @@ public class VibratorService extends IVibratorService.Stub
                 return;
             }
             verifyIncomingUid(uid);
-            if (mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
-                    > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
-                Slog.e(TAG, "Ignoring incoming vibration as process with uid = "
-                        + uid + " is background");
-                return;
-            }
             if (!verifyVibrationEffect(effect)) {
                 return;
             }
@@ -577,6 +571,13 @@ public class VibratorService extends IVibratorService.Stub
                 }
 
                 Vibration vib = new Vibration(token, effect, usageHint, uid, opPkg, reason);
+                if (mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
+                        > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                        && vib.isHapticFeedback()) {
+                    Slog.e(TAG, "Ignoring incoming vibration as process with uid = "
+                            + uid + " is background");
+                    return;
+                }
                 linkVibration(vib);
                 long ident = Binder.clearCallingIdentity();
                 try {
