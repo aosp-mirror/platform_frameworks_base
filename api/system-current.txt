@@ -5547,6 +5547,12 @@ package android.provider {
     field public static final String NAMESPACE_NOTIFICATION_ASSISTANT = "notification_assistant";
   }
 
+  public static interface DeviceConfig.FsiBoot {
+    field public static final String NAMESPACE = "fsi_boot";
+    field public static final String OOB_ENABLED = "oob_enabled";
+    field public static final String OOB_WHITELIST = "oob_whitelist";
+  }
+
   public static interface DeviceConfig.OnPropertyChangedListener {
     method public void onPropertyChanged(String, String, String);
   }

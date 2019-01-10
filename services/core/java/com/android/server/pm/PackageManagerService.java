@@ -10574,8 +10574,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 Log.d(TAG, "Scanning package " + pkg.packageName);
         }
 
-        DexManager.maybeLogUnexpectedPackageDetails(pkg);
-
         // Initialize package source and resource directories
         final File scanFile = new File(pkg.codePath);
         final File destCodeFile = new File(pkg.applicationInfo.getCodePath());
@@ -20672,7 +20670,6 @@ public class PackageManagerService extends IPackageManager.Stub
         storage.registerListener(mStorageListener);
 
         mInstallerService.systemReady();
-        mDexManager.systemReady();
         mPackageDexOptimizer.systemReady();
 
         getStorageManagerInternal().addExternalStoragePolicy(
