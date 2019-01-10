@@ -265,6 +265,10 @@
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
+    <style name="TextAppearance.DeviceManagementDialog.Title" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle">
+        <item name="android:gravity">center</item>
+    </style>
+
     <style name="BaseBrightnessDialogContainer" parent="@style/Theme.SystemUI">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
