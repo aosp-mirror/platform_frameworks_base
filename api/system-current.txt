@@ -6443,6 +6443,7 @@ package android.telephony {
     method public deprecated boolean getDataEnabled(int);
     method public boolean getEmergencyCallbackMode();
     method public java.lang.String getIsimDomain();
+    method public java.lang.String getIsimIst();
     method public int getPreferredNetworkTypeBitmap();
     method public int getRadioPowerState();
     method public int getSimApplicationState();
@@ -6985,6 +6986,7 @@ package android.telephony.ims {
   public class ImsMmTelManager {
     method public static android.telephony.ims.ImsMmTelManager createForSubscriptionId(android.content.Context, int);
     method public int getVoWiFiModeSetting();
+    method public int getVoWiFiRoamingModeSetting();
     method public boolean isAdvancedCallingSettingEnabled();
     method public boolean isAvailable(int, int);
     method public boolean isCapable(int, int);
