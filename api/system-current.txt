@@ -5249,6 +5249,7 @@ package android.service.contentcapture {
     method public void onCreateContentCaptureSession(android.view.contentcapture.ContentCaptureContext, android.view.contentcapture.ContentCaptureSessionId);
     method public void onDestroyContentCaptureSession(android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
+    method public void onUserDataRemovalRequest(android.view.contentcapture.UserDataRemovalRequest);
     method public final void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);
     method public final void setContentCaptureWhitelist(java.util.List<java.lang.String>, java.util.List<android.content.ComponentName>);
     method public final void setPackageContentCaptureEnabled(java.lang.String, boolean);
