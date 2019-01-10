@@ -329,7 +329,7 @@ static jobject JHwBinder_native_getService(
         return NULL;
     }
 
-    LOG(INFO) << "HwBinder: Starting thread pool for " << serviceName << "::" << ifaceName;
+    LOG(INFO) << "HwBinder: Starting thread pool for getting: " << ifaceName << "/" << serviceName;
     ::android::hardware::ProcessState::self()->startThreadPool();
 
     return JHwRemoteBinder::NewObject(env, service);
