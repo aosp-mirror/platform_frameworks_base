@@ -23,7 +23,13 @@ import android.util.Log;
 
 /**
  * This abstract class is used to implement {@link BluetoothHealth} callbacks.
+ *
+ * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+ * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+ * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+ * {@link BluetoothDevice#createL2capChannel(int)}
  */
+@Deprecated
 public abstract class BluetoothHealthCallback {
     private static final String TAG = "BluetoothHealthCallback";
 
@@ -38,8 +44,14 @@ public abstract class BluetoothHealthCallback {
      * BluetoothHealth#APP_CONFIG_REGISTRATION_FAILURE} or
      * {@link BluetoothHealth#APP_CONFIG_UNREGISTRATION_SUCCESS}
      * or {@link BluetoothHealth#APP_CONFIG_UNREGISTRATION_FAILURE}
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
     @BinderThread
+    @Deprecated
     public void onHealthAppConfigurationStatusChange(BluetoothHealthAppConfiguration config,
             int status) {
         Log.d(TAG, "onHealthAppConfigurationStatusChange: " + config + "Status: " + status);
@@ -58,8 +70,14 @@ public abstract class BluetoothHealthCallback {
      * @param fd The Parcel File Descriptor when the channel state is connected.
      * @param channelId The id associated with the channel. This id will be used in future calls
      * like when disconnecting the channel.
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()(int)}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
     @BinderThread
+    @Deprecated
     public void onHealthChannelStateChange(BluetoothHealthAppConfiguration config,
             BluetoothDevice device, int prevState, int newState, ParcelFileDescriptor fd,
             int channelId) {
