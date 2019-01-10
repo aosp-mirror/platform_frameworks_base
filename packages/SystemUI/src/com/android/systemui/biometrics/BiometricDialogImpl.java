@@ -33,9 +33,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Receives messages sent from AuthenticationClient and shows the appropriate biometric UI (e.g.
  * BiometricDialogView).
@@ -52,10 +49,8 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     private static final int MSG_BUTTON_NEGATIVE = 6;
     private static final int MSG_USER_CANCELED = 7;
     private static final int MSG_BUTTON_POSITIVE = 8;
-    private static final int MSG_BIOMETRIC_SHOW_TRY_AGAIN = 9;
-    private static final int MSG_TRY_AGAIN_PRESSED = 10;
+    private static final int MSG_TRY_AGAIN_PRESSED = 9;
 
-    private Map<Integer, BiometricDialogView> mDialogs; // BiometricAuthenticator type, view
     private SomeArgs mCurrentDialogArgs;
     private BiometricDialogView mCurrentDialog;
     private WindowManager mWindowManager;
@@ -63,21 +58,22 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     private boolean mDialogShowing;
     private Callback mCallback = new Callback();
 
-    private boolean mTryAgainShowing; // No good place to save state before config change :/
-    private boolean mConfirmShowing; // No good place to save state before config change :/
-
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch(msg.what) {
                 case MSG_SHOW_DIALOG:
-                    handleShowDialog((SomeArgs) msg.obj, false /* skipAnimation */);
+                    handleShowDialog((SomeArgs) msg.obj, false /* skipAnimation */,
+                            null /* savedState */);
                     break;
                 case MSG_BIOMETRIC_AUTHENTICATED:
-                    handleBiometricAuthenticated();
+                    handleBiometricAuthenticated((boolean) msg.obj);
                     break;
                 case MSG_BIOMETRIC_HELP:
-                    handleBiometricHelp((String) msg.obj);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    handleBiometricHelp((String) args.arg1 /* message */,
+                            (boolean) args.arg2 /* requireTryAgain */);
+                    args.recycle();
                     break;
                 case MSG_BIOMETRIC_ERROR:
                     handleBiometricError((String) msg.obj);
@@ -93,9 +89,6 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
                     break;
                 case MSG_BUTTON_POSITIVE:
                     handleButtonPositive();
-                    break;
-                case MSG_BIOMETRIC_SHOW_TRY_AGAIN:
-                    handleShowTryAgain();
                     break;
                 case MSG_TRY_AGAIN_PRESSED:
                     handleTryAgainPressed();
@@ -137,30 +130,22 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
 
     @Override
     public void start() {
-        createDialogs();
-
-        if (!mDialogs.isEmpty()) {
+        final PackageManager pm = mContext.getPackageManager();
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)
+                || pm.hasSystemFeature(PackageManager.FEATURE_FACE)
+                || pm.hasSystemFeature(PackageManager.FEATURE_IRIS)) {
             getComponent(CommandQueue.class).addCallback(this);
             mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        }
-    }
-
-    private void createDialogs() {
-        final PackageManager pm = mContext.getPackageManager();
-        mDialogs = new HashMap<>();
-        if (pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
-            mDialogs.put(BiometricAuthenticator.TYPE_FACE, new FaceDialogView(mContext, mCallback));
-        }
-        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-            mDialogs.put(BiometricAuthenticator.TYPE_FINGERPRINT,
-                    new FingerprintDialogView(mContext, mCallback));
         }
     }
 
     @Override
     public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
             int type, boolean requireConfirmation, int userId) {
-        if (DEBUG) Log.d(TAG, "showBiometricDialog, type: " + type);
+        if (DEBUG) {
+            Log.d(TAG, "showBiometricDialog, type: " + type
+                    + ", requireConfirmation: " + requireConfirmation);
+        }
         // Remove these messages as they are part of the previous client
         mHandler.removeMessages(MSG_BIOMETRIC_ERROR);
         mHandler.removeMessages(MSG_BIOMETRIC_HELP);
@@ -176,15 +161,18 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     }
 
     @Override
-    public void onBiometricAuthenticated() {
-        if (DEBUG) Log.d(TAG, "onBiometricAuthenticated");
-        mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED).sendToTarget();
+    public void onBiometricAuthenticated(boolean authenticated) {
+        if (DEBUG) Log.d(TAG, "onBiometricAuthenticated: " + authenticated);
+        mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED, authenticated).sendToTarget();
     }
 
     @Override
     public void onBiometricHelp(String message) {
         if (DEBUG) Log.d(TAG, "onBiometricHelp: " + message);
-        mHandler.obtainMessage(MSG_BIOMETRIC_HELP, message).sendToTarget();
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = message;
+        args.arg2 = false; // requireTryAgain
+        mHandler.obtainMessage(MSG_BIOMETRIC_HELP, args).sendToTarget();
     }
 
     @Override
@@ -199,16 +187,21 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         mHandler.obtainMessage(MSG_HIDE_DIALOG, false /* userCanceled */).sendToTarget();
     }
 
-    @Override
-    public void showBiometricTryAgain() {
-        if (DEBUG) Log.d(TAG, "showBiometricTryAgain");
-        mHandler.obtainMessage(MSG_BIOMETRIC_SHOW_TRY_AGAIN).sendToTarget();
-    }
-
-    private void handleShowDialog(SomeArgs args, boolean skipAnimation) {
+    private void handleShowDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
         mCurrentDialogArgs = args;
         final int type = args.argi1;
-        mCurrentDialog = mDialogs.get(type);
+
+        if (type == BiometricAuthenticator.TYPE_FINGERPRINT) {
+            mCurrentDialog = new FingerprintDialogView(mContext, mCallback);
+        } else if (type == BiometricAuthenticator.TYPE_FACE) {
+            mCurrentDialog = new FaceDialogView(mContext, mCallback);
+        } else {
+            Log.e(TAG, "Unsupported type: " + type);
+        }
+
+        if (savedState != null) {
+            mCurrentDialog.restoreState(savedState);
+        }
 
         if (DEBUG) Log.d(TAG, "handleShowDialog, isAnimatingAway: "
                 + mCurrentDialog.isAnimatingAway() + " type: " + type);
@@ -224,32 +217,36 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         mCurrentDialog.setRequireConfirmation((boolean) args.arg3);
         mCurrentDialog.setUserId(args.argi2);
         mCurrentDialog.setSkipIntro(skipAnimation);
-        mCurrentDialog.setPendingTryAgain(mTryAgainShowing);
-        mCurrentDialog.setPendingConfirm(mConfirmShowing);
         mWindowManager.addView(mCurrentDialog, mCurrentDialog.getLayoutParams());
         mDialogShowing = true;
     }
 
-    private void handleBiometricAuthenticated() {
-        if (DEBUG) Log.d(TAG, "handleBiometricAuthenticated");
+    private void handleBiometricAuthenticated(boolean authenticated) {
+        if (DEBUG) Log.d(TAG, "handleBiometricAuthenticated: " + authenticated);
 
-        mCurrentDialog.announceForAccessibility(
-                mContext.getResources()
-                        .getText(mCurrentDialog.getAuthenticatedAccessibilityResourceId()));
-        if (mCurrentDialog.requiresConfirmation()) {
-            mConfirmShowing = true;
-            mCurrentDialog.showConfirmationButton(true /* show */);
+        if (authenticated) {
+            mCurrentDialog.announceForAccessibility(
+                    mContext.getResources()
+                            .getText(mCurrentDialog.getAuthenticatedAccessibilityResourceId()));
+            if (mCurrentDialog.requiresConfirmation()) {
+                mCurrentDialog.showConfirmationButton(true /* show */);
+            } else {
+                mCurrentDialog.updateState(BiometricDialogView.STATE_AUTHENTICATED);
+                mHandler.postDelayed(() -> {
+                    handleHideDialog(false /* userCanceled */);
+                }, mCurrentDialog.getDelayAfterAuthenticatedDurationMs());
+            }
         } else {
-            mCurrentDialog.updateState(BiometricDialogView.STATE_AUTHENTICATED);
-            mHandler.postDelayed(() -> {
-                handleHideDialog(false /* userCanceled */);
-            }, mCurrentDialog.getDelayAfterAuthenticatedDurationMs());
+            handleBiometricHelp(mContext.getResources()
+                    .getString(com.android.internal.R.string.biometric_not_recognized),
+                    true /* requireTryAgain */);
+            mCurrentDialog.showTryAgainButton(true /* show */);
         }
     }
 
-    private void handleBiometricHelp(String message) {
+    private void handleBiometricHelp(String message, boolean requireTryAgain) {
         if (DEBUG) Log.d(TAG, "handleBiometricHelp: " + message);
-        mCurrentDialog.showHelpMessage(message);
+        mCurrentDialog.showHelpMessage(message, requireTryAgain);
     }
 
     private void handleBiometricError(String error) {
@@ -258,7 +255,6 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
             if (DEBUG) Log.d(TAG, "Dialog already dismissed");
             return;
         }
-        mTryAgainShowing = false;
         mCurrentDialog.showErrorMessage(error);
     }
 
@@ -279,8 +275,6 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         }
         mReceiver = null;
         mDialogShowing = false;
-        mConfirmShowing = false;
-        mTryAgainShowing = false;
         mCurrentDialog.startDismiss();
     }
 
@@ -294,7 +288,6 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception when handling negative button", e);
         }
-        mTryAgainShowing = false;
         handleHideDialog(false /* userCanceled */);
     }
 
@@ -308,25 +301,16 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception when handling positive button", e);
         }
-        mConfirmShowing = false;
         handleHideDialog(false /* userCanceled */);
     }
 
     private void handleUserCanceled() {
-        mTryAgainShowing = false;
-        mConfirmShowing = false;
         handleHideDialog(true /* userCanceled */);
-    }
-
-    private void handleShowTryAgain() {
-        mCurrentDialog.showTryAgainButton(true /* show */);
-        mTryAgainShowing = true;
     }
 
     private void handleTryAgainPressed() {
         try {
             mCurrentDialog.clearTemporaryMessage();
-            mTryAgainShowing = false;
             mReceiver.onTryAgainPressed();
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException when handling try again", e);
@@ -337,13 +321,20 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         final boolean wasShowing = mDialogShowing;
+
+        // Save the state of the current dialog (buttons showing, etc)
+        final Bundle savedState = new Bundle();
+        if (mCurrentDialog != null) {
+            mCurrentDialog.onSaveState(savedState);
+        }
+
         if (mDialogShowing) {
             mCurrentDialog.forceRemove();
             mDialogShowing = false;
         }
-        createDialogs();
+
         if (wasShowing) {
-            handleShowDialog(mCurrentDialogArgs, true /* skipAnimation */);
+            handleShowDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);
         }
     }
 }

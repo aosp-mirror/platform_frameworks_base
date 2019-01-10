@@ -156,7 +156,7 @@ public class FaceService extends BiometricServiceBase {
                     mDaemonWrapper, mHalDeviceId, token,
                     new BiometricPromptServiceListenerImpl(wrapperReceiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName, cookie,
-                    true /* requireConfirmation */);
+                    requireConfirmation);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
