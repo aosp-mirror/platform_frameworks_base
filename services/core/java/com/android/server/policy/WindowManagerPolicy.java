@@ -634,6 +634,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Notifies window manager that user is switched.
          */
         void onUserSwitched();
+
+        /**
+         * Hint to window manager that the user is interacting with a display that should be treated
+         * as the top display.
+         */
+        void moveDisplayToTop(int displayId);
     }
 
     /**

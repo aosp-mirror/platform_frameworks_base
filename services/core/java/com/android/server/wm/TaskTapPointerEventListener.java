@@ -67,7 +67,7 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                     return;
                 }
                 WindowContainer parent = mDisplayContent.getParent();
-                if (parent != null) {
+                if (parent != null && parent.getTopChild() != mDisplayContent) {
                     parent.positionChildAt(WindowContainer.POSITION_TOP, mDisplayContent,
                             true /* includingParents */);
                 }
