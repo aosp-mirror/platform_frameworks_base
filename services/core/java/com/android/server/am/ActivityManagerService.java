@@ -19478,8 +19478,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public ComponentName startServiceInPackage(int uid, Intent service, String resolvedType,
-                boolean fgRequired, String callingPackage, int userId)
-                throws TransactionTooLargeException {
+                boolean fgRequired, String callingPackage, int userId,
+                boolean allowBackgroundActivityStarts) throws TransactionTooLargeException {
             synchronized(ActivityManagerService.this) {
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
                         "startServiceInPackage: " + service + " type=" + resolvedType);
@@ -19487,7 +19487,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ComponentName res;
                 try {
                     res = mServices.startServiceLocked(null, service,
-                            resolvedType, -1, uid, fgRequired, callingPackage, userId);
+                            resolvedType, -1, uid, fgRequired, callingPackage, userId,
+                            allowBackgroundActivityStarts);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }

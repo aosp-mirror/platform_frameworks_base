@@ -258,8 +258,8 @@ public abstract class ActivityManagerInternal {
             Bundle resultExtras, String requiredPermission, Bundle bOptions, boolean serialized,
             boolean sticky, int userId, boolean allowBackgroundActivityStarts);
     public abstract ComponentName startServiceInPackage(int uid, Intent service,
-            String resolvedType, boolean fgRequired, String callingPackage, int userId)
-            throws TransactionTooLargeException;
+            String resolvedType, boolean fgRequired, String callingPackage, int userId,
+            boolean allowBackgroundActivityStarts) throws TransactionTooLargeException;
 
     public abstract void disconnectActivityFromServices(Object connectionHolder);
     public abstract void cleanUpServices(int userId, ComponentName component, Intent baseIntent);
