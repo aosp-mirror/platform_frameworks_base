@@ -3391,6 +3391,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("    Limit output to data associated with the given app op mode.");
         pw.println("  --package [PACKAGE]");
         pw.println("    Limit output to data associated with the given package name.");
+        pw.println("  --watchers");
+        pw.println("    Only output the watcher sections.");
     }
 
     private void dumpTimesLocked(PrintWriter pw, String firstPrefix, String prefix, long[] times,
@@ -3429,6 +3431,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         String dumpPackage = null;
         int dumpUid = -1;
         int dumpMode = -1;
+        boolean dumpWatchers = false;
 
         if (args != null) {
             for (int i=0; i<args.length; i++) {
@@ -3476,6 +3479,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (dumpMode < 0) {
                         return;
                     }
+                } else if ("--watchers".equals(arg)) {
+                    dumpWatchers = true;
                 } else if (arg.length() > 0 && arg.charAt(0) == '-'){
                     pw.println("Unknown option: " + arg);
                     return;
@@ -3496,7 +3501,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             final Date date = new Date();
             boolean needSep = false;
-            if (dumpOp < 0 && dumpMode < 0 && dumpPackage == null && mProfileOwners != null) {
+            if (dumpOp < 0 && dumpMode < 0 && dumpPackage == null && mProfileOwners != null
+                    && !dumpWatchers) {
                 pw.println("  Profile owners:");
                 for (int poi = 0; poi < mProfileOwners.size(); poi++) {
                     pw.print("    User #");
@@ -3517,7 +3523,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     ArraySet<ModeCallback> callbacks = mOpModeWatchers.valueAt(i);
                     for (int j=0; j<callbacks.size(); j++) {
                         final ModeCallback cb = callbacks.valueAt(j);
-                        if (dumpPackage != null && cb.mWatchingUid >= 0
+                        if (dumpPackage != null
                                 && dumpUid != UserHandle.getAppId(cb.mWatchingUid)) {
                             continue;
                         }
@@ -3561,7 +3567,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 boolean printedHeader = false;
                 for (int i=0; i<mModeWatchers.size(); i++) {
                     final ModeCallback cb = mModeWatchers.valueAt(i);
-                    if (dumpPackage != null && cb.mWatchingUid >= 0
+                    if (dumpPackage != null
                             && dumpUid != UserHandle.getAppId(cb.mWatchingUid)) {
                         continue;
                     }
@@ -3587,7 +3593,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (dumpOp >= 0 && activeWatchers.indexOfKey(dumpOp) < 0) {
                         continue;
                     }
-                    if (dumpPackage != null && cb.mWatchingUid >= 0
+                    if (dumpPackage != null
                             && dumpUid != UserHandle.getAppId(cb.mWatchingUid)) {
                         continue;
                     }
@@ -3627,7 +3633,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (dumpOp >= 0 && notedWatchers.indexOfKey(dumpOp) < 0) {
                         continue;
                     }
-                    if (dumpPackage != null && cb.mWatchingUid >= 0
+                    if (dumpPackage != null
                             && dumpUid != UserHandle.getAppId(cb.mWatchingUid)) {
                         continue;
                     }
@@ -3655,7 +3661,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     pw.println(cb);
                 }
             }
-            if (mClients.size() > 0 && dumpMode < 0) {
+            if (mClients.size() > 0 && dumpMode < 0 && !dumpWatchers) {
                 needSep = true;
                 boolean printedHeader = false;
                 for (int i=0; i<mClients.size(); i++) {
@@ -3692,7 +3698,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
             if (mAudioRestrictions.size() > 0 && dumpOp < 0 && dumpPackage != null
-                    && dumpMode < 0) {
+                    && dumpMode < 0 && !dumpWatchers) {
                 boolean printedHeader = false;
                 for (int o=0; o<mAudioRestrictions.size(); o++) {
                     final String op = AppOpsManager.opToName(mAudioRestrictions.keyAt(o));
@@ -3725,6 +3731,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final SparseIntArray opModes = uidState.opModes;
                 final ArrayMap<String, Ops> pkgOps = uidState.pkgOps;
 
+                if (dumpWatchers) {
+                    continue;
+                }
                 if (dumpOp >= 0 || dumpPackage != null || dumpMode >= 0) {
                     boolean hasOp = dumpOp < 0 || (uidState.opModes != null
                             && uidState.opModes.indexOfKey(dumpOp) >= 0);
@@ -3880,17 +3889,33 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = 0; i < userRestrictionCount; i++) {
                 IBinder token = mOpUserRestrictions.keyAt(i);
                 ClientRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
-                pw.println("  User restrictions for token " + token + ":");
+                boolean printedTokenHeader = false;
+
+                if (dumpMode >= 0 || dumpWatchers) {
+                    continue;
+                }
 
                 final int restrictionCount = restrictionState.perUserRestrictions != null
                         ? restrictionState.perUserRestrictions.size() : 0;
-                if (restrictionCount > 0) {
-                    pw.println("      Restricted ops:");
+                if (restrictionCount > 0 && dumpPackage == null) {
+                    boolean printedOpsHeader = false;
                     for (int j = 0; j < restrictionCount; j++) {
                         int userId = restrictionState.perUserRestrictions.keyAt(j);
                         boolean[] restrictedOps = restrictionState.perUserRestrictions.valueAt(j);
                         if (restrictedOps == null) {
                             continue;
+                        }
+                        if (dumpOp >= 0 && (dumpOp >= restrictedOps.length
+                                || !restrictedOps[dumpOp])) {
+                            continue;
+                        }
+                        if (!printedTokenHeader) {
+                            pw.println("  User restrictions for token " + token + ":");
+                            printedTokenHeader = true;
+                        }
+                        if (!printedOpsHeader) {
+                            pw.println("      Restricted ops:");
+                            printedOpsHeader = true;
                         }
                         StringBuilder restrictedOpsValue = new StringBuilder();
                         restrictedOpsValue.append("[");
@@ -3911,11 +3936,37 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 final int excludedPackageCount = restrictionState.perUserExcludedPackages != null
                         ? restrictionState.perUserExcludedPackages.size() : 0;
-                if (excludedPackageCount > 0) {
-                    pw.println("      Excluded packages:");
+                if (excludedPackageCount > 0 && dumpOp < 0) {
+                    boolean printedPackagesHeader = false;
                     for (int j = 0; j < excludedPackageCount; j++) {
                         int userId = restrictionState.perUserExcludedPackages.keyAt(j);
                         String[] packageNames = restrictionState.perUserExcludedPackages.valueAt(j);
+                        if (packageNames == null) {
+                            continue;
+                        }
+                        boolean hasPackage;
+                        if (dumpPackage != null) {
+                            hasPackage = false;
+                            for (String pkg : packageNames) {
+                                if (dumpPackage.equals(pkg)) {
+                                    hasPackage = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            hasPackage = true;
+                        }
+                        if (!hasPackage) {
+                            continue;
+                        }
+                        if (!printedTokenHeader) {
+                            pw.println("  User restrictions for token " + token + ":");
+                            printedTokenHeader = true;
+                        }
+                        if (!printedPackagesHeader) {
+                            pw.println("      Excluded packages:");
+                            printedPackagesHeader = true;
+                        }
                         pw.print("        "); pw.print("user: "); pw.print(userId);
                                 pw.print(" packages: "); pw.println(Arrays.toString(packageNames));
                     }
