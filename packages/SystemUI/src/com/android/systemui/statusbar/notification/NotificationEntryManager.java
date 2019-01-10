@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
-import android.os.Handler;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -51,7 +50,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * NotificationEntryManager is responsible for the adding, removing, and updating of notifications.
@@ -66,8 +64,6 @@ public class NotificationEntryManager implements
     private static final String TAG = "NotificationEntryMgr";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    public static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
-
     protected final Context mContext;
     protected final HashMap<String, NotificationEntry> mPendingNotifications = new HashMap<>();
 
@@ -79,9 +75,6 @@ public class NotificationEntryManager implements
     // Lazily retrieved dependencies
     private NotificationRemoteInputManager mRemoteInputManager;
     private NotificationRowBinder mNotificationRowBinder;
-
-    private final Handler mDeferredNotificationViewUpdateHandler;
-    private Runnable mUpdateNotificationViewsCallback;
 
     private NotificationPresenter mPresenter;
     private NotificationListenerService.RankingMap mLatestRankingMap;
@@ -121,7 +114,6 @@ public class NotificationEntryManager implements
     public NotificationEntryManager(Context context) {
         mContext = context;
         mNotificationData = new NotificationData();
-        mDeferredNotificationViewUpdateHandler = new Handler();
     }
 
     /** Adds a {@link NotificationEntryListener}. */
@@ -156,7 +148,6 @@ public class NotificationEntryManager implements
             NotificationListContainer listContainer,
             HeadsUpManager headsUpManager) {
         mPresenter = presenter;
-        mUpdateNotificationViewsCallback = mPresenter::updateNotificationViews;
         mNotificationData.setHeadsUpManager(headsUpManager);
         mListContainer = listContainer;
 
@@ -229,15 +220,6 @@ public class NotificationEntryManager implements
         }
     }
 
-    private void maybeScheduleUpdateNotificationViews(NotificationEntry entry) {
-        long audibleAlertTimeout = RECENTLY_ALERTED_THRESHOLD_MS
-                - (System.currentTimeMillis() - entry.lastAudiblyAlertedMs);
-        if (audibleAlertTimeout > 0) {
-            mDeferredNotificationViewUpdateHandler.postDelayed(
-                    mUpdateNotificationViewsCallback, audibleAlertTimeout);
-        }
-    }
-
     @Override
     public void onAsyncInflationFinished(NotificationEntry entry,
             @InflationFlag int inflatedFlags) {
@@ -256,7 +238,6 @@ public class NotificationEntryManager implements
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onNotificationAdded(entry);
                 }
-                maybeScheduleUpdateNotificationViews(entry);
             } else {
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryReinflated(entry);
@@ -463,8 +444,6 @@ public class NotificationEntryManager implements
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPostEntryUpdated(entry);
         }
-
-        maybeScheduleUpdateNotificationViews(entry);
     }
 
     @Override
