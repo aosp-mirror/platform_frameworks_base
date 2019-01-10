@@ -27,6 +27,7 @@ import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
@@ -220,8 +221,7 @@ public class NotificationTestHelper {
             notificationBuilder.setGroup(groupKey);
         }
         if (isBubble) {
-            PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, new Intent(), 0);
-            notificationBuilder.setAppOverlayIntent(bubbleIntent);
+            notificationBuilder.setBubbleMetadata(makeBubbleMetadata());
         }
         return notificationBuilder.build();
     }
@@ -281,5 +281,15 @@ public class NotificationTestHelper {
         // here.
         mGroupManager.onEntryAdded(entry);
         return row;
+    }
+
+    private Notification.BubbleMetadata makeBubbleMetadata() {
+        PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, new Intent(), 0);
+        return new Notification.BubbleMetadata.Builder()
+                .setIntent(bubbleIntent)
+                .setTitle("bubble title")
+                .setIcon(Icon.createWithResource(mContext, 1))
+                .setDesiredHeight(314)
+                .build();
     }
 }

@@ -809,7 +809,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel.setBypassDnd(true);
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         channel.setShowBadge(true);
-        channel.setAllowAppOverlay(false);
+        channel.setAllowBubbles(false);
         int lockMask = 0;
         for (int i = 0; i < NotificationChannel.LOCKABLE_FIELDS.length; i++) {
             lockMask |= NotificationChannel.LOCKABLE_FIELDS[i];
@@ -826,7 +826,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertFalse(savedChannel.canBypassDnd());
         assertFalse(Notification.VISIBILITY_SECRET == savedChannel.getLockscreenVisibility());
         assertEquals(channel.canShowBadge(), savedChannel.canShowBadge());
-        assertEquals(channel.canOverlayApps(), savedChannel.canOverlayApps());
+        assertEquals(channel.canBubble(), savedChannel.canBubble());
 
         verify(mHandler, never()).requestSort();
     }
@@ -840,7 +840,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel.setBypassDnd(true);
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         channel.setShowBadge(true);
-        channel.setAllowAppOverlay(false);
+        channel.setAllowBubbles(false);
         int lockMask = 0;
         for (int i = 0; i < NotificationChannel.LOCKABLE_FIELDS.length; i++) {
             lockMask |= NotificationChannel.LOCKABLE_FIELDS[i];
@@ -857,7 +857,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertFalse(savedChannel.canBypassDnd());
         assertFalse(Notification.VISIBILITY_SECRET == savedChannel.getLockscreenVisibility());
         assertEquals(channel.canShowBadge(), savedChannel.canShowBadge());
-        assertEquals(channel.canOverlayApps(), savedChannel.canOverlayApps());
+        assertEquals(channel.canBubble(), savedChannel.canBubble());
     }
 
     @Test
@@ -969,16 +969,16 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testLockFields_appOverlay() {
+    public void testLockFields_allowBubble() {
         mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, getChannel(), true, false);
         assertEquals(0,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, getChannel().getId(), false)
                         .getUserLockedFields());
 
         final NotificationChannel update = getChannel();
-        update.setAllowAppOverlay(false);
+        update.setAllowBubbles(false);
         mHelper.updateNotificationChannel(PKG_N_MR1, UID_N_MR1, update, true);
-        assertEquals(NotificationChannel.USER_LOCKED_ALLOW_APP_OVERLAY,
+        assertEquals(NotificationChannel.USER_LOCKED_ALLOW_BUBBLE,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, update.getId(), false)
                         .getUserLockedFields());
     }
@@ -2161,30 +2161,30 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAllowAppOverlay_defaults() throws Exception {
-        assertTrue(mHelper.areAppOverlaysAllowed(PKG_O, UID_O));
+    public void testAllowBubbles_defaults() throws Exception {
+        assertTrue(mHelper.areBubblessAllowed(PKG_O, UID_O));
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
         loadStreamXml(baos, false);
 
-        assertTrue(mHelper.areAppOverlaysAllowed(PKG_O, UID_O));
+        assertTrue(mHelper.areBubblessAllowed(PKG_O, UID_O));
         assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
     }
 
     @Test
-    public void testAllowAppOverlay_xml() throws Exception {
-        mHelper.setAppOverlaysAllowed(PKG_O, UID_O, false);
-        assertFalse(mHelper.areAppOverlaysAllowed(PKG_O, UID_O));
-        assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_APP_OVERLAY,
+    public void testAllowBubbles_xml() throws Exception {
+        mHelper.setBubblesAllowed(PKG_O, UID_O, false);
+        assertFalse(mHelper.areBubblessAllowed(PKG_O, UID_O));
+        assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE,
                 mHelper.getAppLockedFields(PKG_O, UID_O));
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
         loadStreamXml(baos, false);
 
-        assertFalse(mHelper.areAppOverlaysAllowed(PKG_O, UID_O));
-        assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_APP_OVERLAY,
+        assertFalse(mHelper.areBubblessAllowed(PKG_O, UID_O));
+        assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE,
                 mHelper.getAppLockedFields(PKG_O, UID_O));
     }
 
@@ -2290,14 +2290,14 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.lockChannelsForOEM(new String[] {PKG_O});
 
         NotificationChannel update = new NotificationChannel("a", "a", IMPORTANCE_NONE);
-        update.setAllowAppOverlay(false);
+        update.setAllowBubbles(false);
 
         mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
 
         assertEquals(IMPORTANCE_HIGH,
                 mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
         assertEquals(false,
-                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).canOverlayApps());
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).canBubble());
 
         mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
 

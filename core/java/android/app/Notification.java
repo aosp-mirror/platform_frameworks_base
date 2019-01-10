@@ -1276,7 +1276,7 @@ public class Notification implements Parcelable
     private String mShortcutId;
     private CharSequence mSettingsText;
 
-    private PendingIntent mAppOverlayIntent;
+    private BubbleMetadata mBubbleMetadata;
 
     /** @hide */
     @IntDef(prefix = { "GROUP_ALERT_" }, value = {
@@ -2278,7 +2278,7 @@ public class Notification implements Parcelable
 
         mGroupAlertBehavior = parcel.readInt();
         if (parcel.readInt() != 0) {
-            mAppOverlayIntent = PendingIntent.CREATOR.createFromParcel(parcel);
+            mBubbleMetadata = BubbleMetadata.CREATOR.createFromParcel(parcel);
         }
 
         mAllowSystemGeneratedContextualActions = parcel.readBoolean();
@@ -2396,7 +2396,7 @@ public class Notification implements Parcelable
         that.mBadgeIcon = this.mBadgeIcon;
         that.mSettingsText = this.mSettingsText;
         that.mGroupAlertBehavior = this.mGroupAlertBehavior;
-        that.mAppOverlayIntent = this.mAppOverlayIntent;
+        that.mBubbleMetadata = this.mBubbleMetadata;
         that.mAllowSystemGeneratedContextualActions = this.mAllowSystemGeneratedContextualActions;
 
         if (!heavy) {
@@ -2719,9 +2719,9 @@ public class Notification implements Parcelable
 
         parcel.writeInt(mGroupAlertBehavior);
 
-        if (mAppOverlayIntent != null) {
+        if (mBubbleMetadata != null) {
             parcel.writeInt(1);
-            mAppOverlayIntent.writeToParcel(parcel, 0);
+            mBubbleMetadata.writeToParcel(parcel, 0);
         } else {
             parcel.writeInt(0);
         }
@@ -3141,11 +3141,11 @@ public class Notification implements Parcelable
     }
 
     /**
-     * Returns the intent that will be used to display app content in a floating window over the
-     * existing foreground activity.
+     * Returns the bubble metadata that will be used to display app content in a floating window
+     * over the existing foreground activity.
      */
-    public PendingIntent getAppOverlayIntent() {
-        return mAppOverlayIntent;
+    public BubbleMetadata getBubbleMetadata() {
+        return mBubbleMetadata;
     }
 
     /**
@@ -3508,19 +3508,18 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Sets the intent that will be used to display app content in a floating window
-         * over the existing foreground activity.
+         * Sets the {@link BubbleMetadata} that will be used to display app content in a floating
+         * window over the existing foreground activity.
          *
-         * <p>This intent will be ignored unless this notification is posted to a channel that
-         * allows {@link NotificationChannel#canOverlayApps() app overlays}.</p>
+         * <p>This data will be ignored unless the notification is posted to a channel that
+         * allows {@link NotificationChannel#canBubble() bubbles}.</p>
          *
-         * <p>Notifications with a valid and allowed app overlay intent will be displayed as
-         * floating windows outside of the notification shade on unlocked devices. When a user
-         * interacts with one of these windows, this app overlay intent will be invoked and
-         * displayed.</p>
+         * <b>Notifications with a valid and allowed bubble metadata will display in collapsed state
+         * outside of the notification shade on unlocked devices. When a user interacts with the
+         * collapsed state, the bubble intent will be invoked and displayed.</b>
          */
-        public Builder setAppOverlayIntent(PendingIntent intent) {
-            mN.mAppOverlayIntent = intent;
+        public Builder setBubbleMetadata(BubbleMetadata data) {
+            mN.mBubbleMetadata = data;
             return this;
         }
 
@@ -8421,6 +8420,186 @@ public class Notification implements Parcelable
             return remoteViews;
         }
     }
+
+    /**
+     * Encapsulates the information needed to display a notification as a bubble.
+     *
+     * <p>A bubble is used to display app content in a floating window over the existing
+     * foreground activity. A bubble has a collapsed state represented by an icon,
+     * {@link BubbleMetadata.Builder#setIcon(Icon)} and an expanded state which is populated
+     * via {@link BubbleMetadata.Builder#setIntent(PendingIntent)}.</p>
+     *
+     * <b>Notifications with a valid and allowed bubble will display in collapsed state
+     * outside of the notification shade on unlocked devices. When a user interacts with the
+     * collapsed bubble, the bubble intent will be invoked and displayed.</b>
+     *
+     * @see Notification.Builder#setBubbleMetadata(BubbleMetadata)
+     */
+    public static final class BubbleMetadata implements Parcelable {
+
+        private PendingIntent mPendingIntent;
+        private CharSequence mTitle;
+        private Icon mIcon;
+        private int mDesiredHeight;
+
+        private BubbleMetadata(PendingIntent intent, CharSequence title, Icon icon, int height) {
+            mPendingIntent = intent;
+            mTitle = title;
+            mIcon = icon;
+            mDesiredHeight = height;
+        }
+
+        private BubbleMetadata(Parcel in) {
+            mPendingIntent = PendingIntent.CREATOR.createFromParcel(in);
+            mTitle = in.readCharSequence();
+            mIcon = Icon.CREATOR.createFromParcel(in);
+            mDesiredHeight = in.readInt();
+        }
+
+        /**
+         * @return the pending intent used to populate the floating window for this bubble.
+         */
+        public PendingIntent getIntent() {
+            return mPendingIntent;
+        }
+
+        /**
+         * @return the title that will appear along with the app content defined by
+         * {@link #getIntent()} for this bubble.
+         */
+        public CharSequence getTitle() {
+            return mTitle;
+        }
+
+        /**
+         * @return the icon that will be displayed for this bubble when it is collapsed.
+         */
+        public Icon getIcon() {
+            return mIcon;
+        }
+
+        /**
+         * @return the ideal height for the floating window that app content defined by
+         * {@link #getIntent()} for this bubble.
+         */
+        public int getDesiredHeight() {
+            return mDesiredHeight;
+        }
+
+        public static final Parcelable.Creator<BubbleMetadata> CREATOR =
+                new Parcelable.Creator<BubbleMetadata>() {
+
+                    @Override
+                    public BubbleMetadata createFromParcel(Parcel source) {
+                        return new BubbleMetadata(source);
+                    }
+
+                    @Override
+                    public BubbleMetadata[] newArray(int size) {
+                        return new BubbleMetadata[size];
+                    }
+                };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            mPendingIntent.writeToParcel(out, 0);
+            out.writeCharSequence(mTitle);
+            mIcon.writeToParcel(out, 0);
+            out.writeInt(mDesiredHeight);
+        }
+
+        /**
+         * Builder to construct a {@link BubbleMetadata} object.
+         */
+        public static class Builder {
+
+            private PendingIntent mPendingIntent;
+            private CharSequence mTitle;
+            private Icon mIcon;
+            private int mDesiredHeight;
+
+            /**
+             * Constructs a new builder object.
+             */
+            public Builder() {
+            }
+
+            /**
+             * Sets the intent that will be used when the bubble is expanded. This will display the
+             * app content in a floating window over the existing foreground activity.
+             */
+            public BubbleMetadata.Builder setIntent(PendingIntent intent) {
+                if (intent == null) {
+                    throw new IllegalArgumentException("Bubble requires non-null pending intent");
+                }
+                mPendingIntent = intent;
+                return this;
+            }
+
+            /**
+             * Sets the title that will appear along with the app content for this bubble.
+             *
+             * <p>A title is required and should expect to fit on a single line and make sense when
+             * shown with the content defined by {@link #setIntent(PendingIntent)}.</p>
+             */
+            public BubbleMetadata.Builder setTitle(CharSequence title) {
+                if (TextUtils.isEmpty(title)) {
+                    throw new IllegalArgumentException("Bubbles require non-null or empty title");
+                }
+                mTitle = title;
+                return this;
+            }
+
+            /**
+             * Sets the icon that will represent the bubble when it is collapsed.
+             *
+             * <p>An icon is required and should be representative of the content within the bubble.
+             * If your app produces multiple bubbles, the image should be unique for each of them.
+             * </p>
+             */
+            public BubbleMetadata.Builder setIcon(Icon icon) {
+                if (icon == null) {
+                    throw new IllegalArgumentException("Bubbles require non-null icon");
+                }
+                mIcon = icon;
+                return this;
+            }
+
+            /**
+             * Sets the desired height for the app content defined by
+             * {@link #setIntent(PendingIntent)}, this height may not be respected if there is not
+             * enough space on the screen or if the provided height is too small to be useful.
+             */
+            public BubbleMetadata.Builder setDesiredHeight(int height) {
+                mDesiredHeight = Math.max(height, 0);
+                return this;
+            }
+
+            /**
+             * Creates the {@link BubbleMetadata} defined by this builder.
+             * <p>Will throw {@link IllegalStateException} if required fields have not been set
+             * on this builder.</p>
+             */
+            public BubbleMetadata build() {
+                if (mPendingIntent == null) {
+                    throw new IllegalStateException("Must supply pending intent to bubble");
+                }
+                if (TextUtils.isEmpty(mTitle)) {
+                    throw new IllegalStateException("Must supply a title for the bubble");
+                }
+                if (mIcon == null) {
+                    throw new IllegalStateException("Must supply an icon for the bubble");
+                }
+                return new BubbleMetadata(mPendingIntent, mTitle, mIcon, mDesiredHeight);
+            }
+        }
+    }
+
 
     // When adding a new Style subclass here, don't forget to update
     // Builder.getNotificationStyleClass.

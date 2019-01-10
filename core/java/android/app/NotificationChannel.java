@@ -85,7 +85,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_FG_SERVICE_SHOWN = "fgservice";
     private static final String ATT_GROUP = "group";
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
-    private static final String ATT_ALLOW_APP_OVERLAY = "app_overlay";
+    private static final String ATT_ALLOW_BUBBLE = "allow_bubble";
     private static final String DELIMITER = ",";
 
     /**
@@ -121,7 +121,7 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
-    public static final int USER_LOCKED_ALLOW_APP_OVERLAY = 0x00000100;
+    public static final int USER_LOCKED_ALLOW_BUBBLE = 0x00000100;
 
     /**
      * @hide
@@ -134,7 +134,7 @@ public final class NotificationChannel implements Parcelable {
             USER_LOCKED_VIBRATION,
             USER_LOCKED_SOUND,
             USER_LOCKED_SHOW_BADGE,
-            USER_LOCKED_ALLOW_APP_OVERLAY
+            USER_LOCKED_ALLOW_BUBBLE
     };
 
     private static final int DEFAULT_LIGHT_COLOR = 0;
@@ -144,7 +144,7 @@ public final class NotificationChannel implements Parcelable {
             NotificationManager.IMPORTANCE_UNSPECIFIED;
     private static final boolean DEFAULT_DELETED = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
-    private static final boolean DEFAULT_ALLOW_APP_OVERLAY = true;
+    private static final boolean DEFAULT_ALLOW_BUBBLE = true;
 
     @UnsupportedAppUsage
     private final String mId;
@@ -168,7 +168,7 @@ public final class NotificationChannel implements Parcelable {
     private AudioAttributes mAudioAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
     // If this is a blockable system notification channel.
     private boolean mBlockableSystem = false;
-    private boolean mAllowAppOverlay = DEFAULT_ALLOW_APP_OVERLAY;
+    private boolean mAllowBubbles = DEFAULT_ALLOW_BUBBLE;
     private boolean mImportanceLockedByOEM;
 
     /**
@@ -231,7 +231,7 @@ public final class NotificationChannel implements Parcelable {
         mAudioAttributes = in.readInt() > 0 ? AudioAttributes.CREATOR.createFromParcel(in) : null;
         mLightColor = in.readInt();
         mBlockableSystem = in.readBoolean();
-        mAllowAppOverlay = in.readBoolean();
+        mAllowBubbles = in.readBoolean();
         mImportanceLockedByOEM = in.readBoolean();
     }
 
@@ -285,7 +285,7 @@ public final class NotificationChannel implements Parcelable {
         }
         dest.writeInt(mLightColor);
         dest.writeBoolean(mBlockableSystem);
-        dest.writeBoolean(mAllowAppOverlay);
+        dest.writeBoolean(mAllowBubbles);
         dest.writeBoolean(mImportanceLockedByOEM);
     }
 
@@ -480,7 +480,7 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Sets whether notifications posted to this channel can appear outside of the notification
-     * shade, floating over other apps' content.
+     * shade, floating over other apps' content as a bubble.
      *
      * <p>This value will be ignored for channels that aren't allowed to pop on screen (that is,
      * channels whose {@link #getImportance() importance} is <
@@ -488,10 +488,10 @@ public final class NotificationChannel implements Parcelable {
      *
      * <p>Only modifiable before the channel is submitted to
      *      * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.</p>
-     * @see Notification#getAppOverlayIntent()
+     * @see Notification#getBubbleMetadata()
      */
-    public void setAllowAppOverlay(boolean allowAppOverlay) {
-        mAllowAppOverlay = allowAppOverlay;
+    public void setAllowBubbles(boolean allowBubbles) {
+        mAllowBubbles = allowBubbles;
     }
 
     /**
@@ -610,16 +610,16 @@ public final class NotificationChannel implements Parcelable {
      * Returns whether notifications posted to this channel can display outside of the notification
      * shade, in a floating window on top of other apps.
      */
-    public boolean canOverlayApps() {
-        return isAppOverlayAllowed() && getImportance() >= IMPORTANCE_HIGH;
+    public boolean canBubble() {
+        return isBubbleAllowed() && getImportance() >= IMPORTANCE_HIGH;
     }
 
     /**
-     * Like {@link #canOverlayApps()}, but only checks the permission, not the importance.
+     * Like {@link #canBubble()}, but only checks the permission, not the importance.
      * @hide
      */
-    public boolean isAppOverlayAllowed() {
-        return mAllowAppOverlay;
+    public boolean isBubbleAllowed() {
+        return mAllowBubbles;
     }
 
     /**
@@ -719,7 +719,7 @@ public final class NotificationChannel implements Parcelable {
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
         setFgServiceShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
         setBlockableSystem(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
-        setAllowAppOverlay(safeBool(parser, ATT_ALLOW_APP_OVERLAY, DEFAULT_ALLOW_APP_OVERLAY));
+        setAllowBubbles(safeBool(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
     }
 
     @Nullable
@@ -838,8 +838,8 @@ public final class NotificationChannel implements Parcelable {
         if (isBlockableSystem()) {
             out.attribute(null, ATT_BLOCKABLE_SYSTEM, Boolean.toString(isBlockableSystem()));
         }
-        if (canOverlayApps() != DEFAULT_ALLOW_APP_OVERLAY) {
-            out.attribute(null, ATT_ALLOW_APP_OVERLAY, Boolean.toString(canOverlayApps()));
+        if (canBubble() != DEFAULT_ALLOW_BUBBLE) {
+            out.attribute(null, ATT_ALLOW_BUBBLE, Boolean.toString(canBubble()));
         }
 
         out.endTag(null, TAG_CHANNEL);
@@ -883,7 +883,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
         record.put(ATT_GROUP, getGroup());
         record.put(ATT_BLOCKABLE_SYSTEM, isBlockableSystem());
-        record.put(ATT_ALLOW_APP_OVERLAY, canOverlayApps());
+        record.put(ATT_ALLOW_BUBBLE, canBubble());
         return record;
     }
 
@@ -983,7 +983,7 @@ public final class NotificationChannel implements Parcelable {
                 && mShowBadge == that.mShowBadge
                 && isDeleted() == that.isDeleted()
                 && isBlockableSystem() == that.isBlockableSystem()
-                && mAllowAppOverlay == that.mAllowAppOverlay
+                && mAllowBubbles == that.mAllowBubbles
                 && Objects.equals(getId(), that.getId())
                 && Objects.equals(getName(), that.getName())
                 && Objects.equals(mDesc, that.mDesc)
@@ -1000,7 +1000,7 @@ public final class NotificationChannel implements Parcelable {
                 getLockscreenVisibility(), getSound(), mLights, getLightColor(),
                 getUserLockedFields(),
                 isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getGroup(),
-                getAudioAttributes(), isBlockableSystem(), mAllowAppOverlay,
+                getAudioAttributes(), isBlockableSystem(), mAllowBubbles,
                 mImportanceLockedByOEM);
         result = 31 * result + Arrays.hashCode(mVibration);
         return result;
@@ -1028,7 +1028,7 @@ public final class NotificationChannel implements Parcelable {
                 + ", mGroup='" + mGroup + '\''
                 + ", mAudioAttributes=" + mAudioAttributes
                 + ", mBlockableSystem=" + mBlockableSystem
-                + ", mAllowAppOverlay=" + mAllowAppOverlay
+                + ", mAllowBubbles=" + mAllowBubbles
                 + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
                 + '}';
         pw.println(prefix + output);
@@ -1055,7 +1055,7 @@ public final class NotificationChannel implements Parcelable {
                 + ", mGroup='" + mGroup + '\''
                 + ", mAudioAttributes=" + mAudioAttributes
                 + ", mBlockableSystem=" + mBlockableSystem
-                + ", mAllowAppOverlay=" + mAllowAppOverlay
+                + ", mAllowBubbles=" + mAllowBubbles
                 + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
                 + '}';
     }
@@ -1090,7 +1090,7 @@ public final class NotificationChannel implements Parcelable {
             mAudioAttributes.writeToProto(proto, NotificationChannelProto.AUDIO_ATTRIBUTES);
         }
         proto.write(NotificationChannelProto.IS_BLOCKABLE_SYSTEM, mBlockableSystem);
-        proto.write(NotificationChannelProto.ALLOW_APP_OVERLAY, mAllowAppOverlay);
+        proto.write(NotificationChannelProto.ALLOW_APP_OVERLAY, mAllowBubbles);
 
         proto.end(token);
     }
