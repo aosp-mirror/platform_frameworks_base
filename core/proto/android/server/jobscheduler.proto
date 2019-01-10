@@ -403,18 +403,23 @@ message StateControllerProto {
         optional bool is_charging = 1;
         optional bool is_in_parole = 2;
 
+        // List of UIDs currently in the foreground.
+        repeated int32 foreground_uids = 3;
+
         message TrackedJob {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
             optional JobStatusShortInfoProto info = 1;
             optional int32 source_uid = 2;
             optional JobStatusDumpProto.Bucket effective_standby_bucket = 3;
-            optional bool has_quota = 4;
+            // If the job started while the app was in the TOP state.
+            optional bool is_top_started_job = 4;
+            optional bool has_quota = 5;
             // The amount of time that this job has remaining in its quota. This
             // can be negative if the job is out of quota.
-            optional int64 remaining_quota_ms = 5;
+            optional int64 remaining_quota_ms = 6;
         }
-        repeated TrackedJob tracked_jobs = 3;
+        repeated TrackedJob tracked_jobs = 4;
 
         message Package {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -456,7 +461,7 @@ message StateControllerProto {
 
             repeated TimingSession saved_sessions = 3;
         }
-        repeated PackageStats package_stats = 4;
+        repeated PackageStats package_stats = 5;
     }
     message StorageController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;

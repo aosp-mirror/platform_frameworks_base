@@ -33,6 +33,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -43,7 +44,12 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
+import android.app.AppGlobals;
+import android.app.IActivityManager;
+import android.app.IUidObserver;
 import android.app.job.JobInfo;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -56,13 +62,16 @@ import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.SparseBooleanArray;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
+import com.android.server.job.JobStore;
 import com.android.server.job.controllers.QuotaController.ExecutionStats;
 import com.android.server.job.controllers.QuotaController.TimingSession;
 
@@ -96,8 +105,12 @@ public class QuotaControllerTest {
     private BroadcastReceiver mChargingReceiver;
     private Constants mConstants;
     private QuotaController mQuotaController;
+    private int mSourceUid;
+    private IUidObserver mUidObserver;
 
     private MockitoSession mMockingSession;
+    @Mock
+    private ActivityManagerInternal mActivityMangerInternal;
     @Mock
     private AlarmManager mAlarmManager;
     @Mock
@@ -106,6 +119,8 @@ public class QuotaControllerTest {
     private JobSchedulerService mJobSchedulerService;
     @Mock
     private UsageStatsManagerInternal mUsageStatsManager;
+
+    private JobStore mJobStore;
 
     @Before
     public void setUp() {
@@ -123,8 +138,17 @@ public class QuotaControllerTest {
         when(mJobSchedulerService.getLock()).thenReturn(mJobSchedulerService);
         when(mJobSchedulerService.getConstants()).thenReturn(mConstants);
         // Called in QuotaController constructor.
+        IActivityManager activityManager = ActivityManager.getService();
+        spyOn(activityManager);
+        try {
+            doNothing().when(activityManager).registerUidObserver(any(), anyInt(), anyInt(), any());
+        } catch (RemoteException e) {
+            fail("registerUidObserver threw exception: " + e.getMessage());
+        }
         when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
         when(mContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mAlarmManager);
+        doReturn(mActivityMangerInternal)
+                .when(() -> LocalServices.getService(ActivityManagerInternal.class));
         doReturn(mock(BatteryManagerInternal.class))
                 .when(() -> LocalServices.getService(BatteryManagerInternal.class));
         doReturn(mUsageStatsManager)
@@ -132,6 +156,9 @@ public class QuotaControllerTest {
         // Used in JobStatus.
         doReturn(mock(PackageManagerInternal.class))
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
+        // Used in QuotaController.Handler.
+        mJobStore = JobStore.initAndGetForTesting(mContext, mContext.getFilesDir());
+        when(mJobSchedulerService.getJobStore()).thenReturn(mJobStore);
 
         // Freeze the clocks at 24 hours after this moment in time. Several tests create sessions
         // in the past, and QuotaController sometimes floors values at 0, so if the test time
@@ -150,10 +177,23 @@ public class QuotaControllerTest {
         // Capture the listeners.
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
+        ArgumentCaptor<IUidObserver> uidObserverCaptor =
+                ArgumentCaptor.forClass(IUidObserver.class);
         mQuotaController = new QuotaController(mJobSchedulerService);
 
         verify(mContext).registerReceiver(receiverCaptor.capture(), any());
         mChargingReceiver = receiverCaptor.getValue();
+        try {
+            verify(activityManager).registerUidObserver(
+                    uidObserverCaptor.capture(),
+                    eq(ActivityManager.UID_OBSERVER_PROCSTATE),
+                    eq(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE),
+                    any());
+            mUidObserver = uidObserverCaptor.getValue();
+            mSourceUid = AppGlobals.getPackageManager().getPackageUid(SOURCE_PACKAGE, 0, 0);
+        } catch (RemoteException e) {
+            fail(e.getMessage());
+        }
     }
 
     @After
@@ -182,6 +222,25 @@ public class QuotaControllerTest {
         mChargingReceiver.onReceive(mContext, intent);
     }
 
+    private void setProcessState(int procState) {
+        try {
+            doReturn(procState).when(mActivityMangerInternal).getUidProcessState(mSourceUid);
+            SparseBooleanArray foregroundUids = mQuotaController.getForegroundUids();
+            spyOn(foregroundUids);
+            mUidObserver.onUidStateChanged(mSourceUid, procState, 0);
+            if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+                verify(foregroundUids, timeout(SECOND_IN_MILLIS).times(1))
+                        .put(eq(mSourceUid), eq(true));
+                assertTrue(foregroundUids.get(mSourceUid));
+            } else {
+                verify(foregroundUids, timeout(SECOND_IN_MILLIS).times(1)).delete(eq(mSourceUid));
+                assertFalse(foregroundUids.get(mSourceUid));
+            }
+        } catch (RemoteException e) {
+            fail("registerUidObserver threw exception: " + e.getMessage());
+        }
+    }
+
     private void setStandbyBucket(int bucketIndex) {
         int bucket;
         switch (bucketIndex) {
@@ -204,9 +263,18 @@ public class QuotaControllerTest {
                 anyLong())).thenReturn(bucket);
     }
 
-    private void setStandbyBucket(int bucketIndex, JobStatus job) {
+    private void setStandbyBucket(int bucketIndex, JobStatus... jobs) {
         setStandbyBucket(bucketIndex);
-        job.setStandbyBucket(bucketIndex);
+        for (JobStatus job : jobs) {
+            job.setStandbyBucket(bucketIndex);
+        }
+    }
+
+    private void trackJobs(JobStatus... jobs) {
+        for (JobStatus job : jobs) {
+            mJobStore.add(job);
+            mQuotaController.maybeStartTrackingJobLocked(job, null);
+        }
     }
 
     private JobStatus createJobStatus(String testTag, int jobId) {
@@ -214,8 +282,11 @@ public class QuotaControllerTest {
                 new ComponentName(mContext, "TestQuotaJobService"))
                 .setMinimumLatency(Math.abs(jobId) + 1)
                 .build();
-        return JobStatus.createFromJobInfo(
+        JobStatus js = JobStatus.createFromJobInfo(
                 jobInfo, CALLING_UID, SOURCE_PACKAGE, SOURCE_USER_ID, testTag);
+        // Make sure tests aren't passing just because the default bucket is likely ACTIVE.
+        js.setStandbyBucket(FREQUENT_INDEX);
+        return js;
     }
 
     private TimingSession createTimingSession(long start, long duration, int count) {
@@ -709,6 +780,7 @@ public class QuotaControllerTest {
         verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         JobStatus jobStatus = createJobStatus("testMaybeScheduleStartAlarmLocked_Active", 1);
+        setStandbyBucket(standbyBucket, jobStatus);
         mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
         mQuotaController.prepareForExecutionLocked(jobStatus);
         advanceElapsedClock(5 * MINUTE_IN_MILLIS);
@@ -1339,19 +1411,23 @@ public class QuotaControllerTest {
         setDischarging();
 
         JobStatus jobStatus = createJobStatus("testTimerTracking_AllForeground", 1);
-        jobStatus.uidActive = true;
+        setProcessState(ActivityManager.PROCESS_STATE_TOP);
         mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
 
         assertNull(mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
 
         mQuotaController.prepareForExecutionLocked(jobStatus);
         advanceElapsedClock(5 * SECOND_IN_MILLIS);
+        // Change to a state that should still be considered foreground.
+        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        advanceElapsedClock(5 * SECOND_IN_MILLIS);
         mQuotaController.maybeStopTrackingJobLocked(jobStatus, null, false);
         assertNull(mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
     }
 
     /**
-     * Tests that Timers properly track overlapping foreground and background jobs.
+     * Tests that Timers properly track sessions when switching between foreground and background
+     * states.
      */
     @Test
     public void testTimerTracking_ForegroundAndBackground() {
@@ -1360,7 +1436,6 @@ public class QuotaControllerTest {
         JobStatus jobBg1 = createJobStatus("testTimerTracking_ForegroundAndBackground", 1);
         JobStatus jobBg2 = createJobStatus("testTimerTracking_ForegroundAndBackground", 2);
         JobStatus jobFg3 = createJobStatus("testTimerTracking_ForegroundAndBackground", 3);
-        jobFg3.uidActive = true;
         mQuotaController.maybeStartTrackingJobLocked(jobBg1, null);
         mQuotaController.maybeStartTrackingJobLocked(jobBg2, null);
         mQuotaController.maybeStartTrackingJobLocked(jobFg3, null);
@@ -1368,6 +1443,7 @@ public class QuotaControllerTest {
         List<TimingSession> expected = new ArrayList<>();
 
         // UID starts out inactive.
+        setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
         long start = JobSchedulerService.sElapsedRealtimeClock.millis();
         mQuotaController.prepareForExecutionLocked(jobBg1);
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
@@ -1379,45 +1455,220 @@ public class QuotaControllerTest {
 
         // Bg job starts while inactive, spans an entire active session, and ends after the
         // active session.
-        // Fg job starts after the bg job and ends before the bg job.
-        // Entire bg job duration should be counted since it started before active session. However,
-        // count should only be 1 since Timer shouldn't count fg jobs.
+        // App switching to foreground state then fg job starts.
+        // App remains in foreground state after coming to foreground, so there should only be one
+        // session.
         start = JobSchedulerService.sElapsedRealtimeClock.millis();
         mQuotaController.maybeStartTrackingJobLocked(jobBg2, null);
         mQuotaController.prepareForExecutionLocked(jobBg2);
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
+        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
         mQuotaController.prepareForExecutionLocked(jobFg3);
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
         mQuotaController.maybeStopTrackingJobLocked(jobFg3, null, false);
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
         mQuotaController.maybeStopTrackingJobLocked(jobBg2, null, false);
-        expected.add(createTimingSession(start, 30 * SECOND_IN_MILLIS, 1));
         assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
 
         advanceElapsedClock(SECOND_IN_MILLIS);
 
         // Bg job 1 starts, then fg job starts. Bg job 1 job ends. Shortly after, uid goes
         // "inactive" and then bg job 2 starts. Then fg job ends.
-        // This should result in two TimingSessions with a count of one each.
+        // This should result in two TimingSessions:
+        //  * The first should have a count of 1
+        //  * The second should have a count of 2 since it will include both jobs
         start = JobSchedulerService.sElapsedRealtimeClock.millis();
         mQuotaController.maybeStartTrackingJobLocked(jobBg1, null);
         mQuotaController.maybeStartTrackingJobLocked(jobBg2, null);
         mQuotaController.maybeStartTrackingJobLocked(jobFg3, null);
+        setProcessState(ActivityManager.PROCESS_STATE_LAST_ACTIVITY);
         mQuotaController.prepareForExecutionLocked(jobBg1);
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
+        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
         mQuotaController.prepareForExecutionLocked(jobFg3);
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
         mQuotaController.maybeStopTrackingJobLocked(jobBg1, jobBg1, true);
-        expected.add(createTimingSession(start, 20 * SECOND_IN_MILLIS, 1));
         advanceElapsedClock(10 * SECOND_IN_MILLIS); // UID "inactive" now
         start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        setProcessState(ActivityManager.PROCESS_STATE_TOP_SLEEPING);
         mQuotaController.prepareForExecutionLocked(jobBg2);
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
         mQuotaController.maybeStopTrackingJobLocked(jobFg3, null, false);
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
         mQuotaController.maybeStopTrackingJobLocked(jobBg2, null, false);
-        expected.add(createTimingSession(start, 20 * SECOND_IN_MILLIS, 1));
+        expected.add(createTimingSession(start, 20 * SECOND_IN_MILLIS, 2));
         assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
+    /**
+     * Tests that Timers properly track overlapping top and background jobs.
+     */
+    @Test
+    public void testTimerTracking_TopAndNonTop() {
+        setDischarging();
+
+        JobStatus jobBg1 = createJobStatus("testTimerTracking_TopAndNonTop", 1);
+        JobStatus jobBg2 = createJobStatus("testTimerTracking_TopAndNonTop", 2);
+        JobStatus jobFg1 = createJobStatus("testTimerTracking_TopAndNonTop", 3);
+        JobStatus jobTop = createJobStatus("testTimerTracking_TopAndNonTop", 4);
+        mQuotaController.maybeStartTrackingJobLocked(jobBg1, null);
+        mQuotaController.maybeStartTrackingJobLocked(jobBg2, null);
+        mQuotaController.maybeStartTrackingJobLocked(jobFg1, null);
+        mQuotaController.maybeStartTrackingJobLocked(jobTop, null);
+        assertNull(mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+        List<TimingSession> expected = new ArrayList<>();
+
+        // UID starts out inactive.
+        setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+        long start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.prepareForExecutionLocked(jobBg1);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobBg1, jobBg1, true);
+        expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
+        assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(SECOND_IN_MILLIS);
+
+        // Bg job starts while inactive, spans an entire active session, and ends after the
+        // active session.
+        // App switching to top state then fg job starts.
+        // App remains in top state after coming to top, so there should only be one
+        // session.
+        start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.maybeStartTrackingJobLocked(jobBg2, null);
+        mQuotaController.prepareForExecutionLocked(jobBg2);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
+        setProcessState(ActivityManager.PROCESS_STATE_TOP);
+        mQuotaController.prepareForExecutionLocked(jobTop);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobTop, null, false);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobBg2, null, false);
+        assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(SECOND_IN_MILLIS);
+
+        // Bg job 1 starts, then top job starts. Bg job 1 job ends. Then app goes to
+        // foreground_service and a new job starts. Shortly after, uid goes
+        // "inactive" and then bg job 2 starts. Then top job ends, followed by bg and fg jobs.
+        // This should result in two TimingSessions:
+        //  * The first should have a count of 1
+        //  * The second should have a count of 2, which accounts for the bg2 and fg, but not top
+        //    jobs.
+        start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.maybeStartTrackingJobLocked(jobBg1, null);
+        mQuotaController.maybeStartTrackingJobLocked(jobBg2, null);
+        mQuotaController.maybeStartTrackingJobLocked(jobTop, null);
+        setProcessState(ActivityManager.PROCESS_STATE_LAST_ACTIVITY);
+        mQuotaController.prepareForExecutionLocked(jobBg1);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
+        setProcessState(ActivityManager.PROCESS_STATE_TOP);
+        mQuotaController.prepareForExecutionLocked(jobTop);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobBg1, jobBg1, true);
+        advanceElapsedClock(5 * SECOND_IN_MILLIS);
+        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        mQuotaController.prepareForExecutionLocked(jobFg1);
+        advanceElapsedClock(5 * SECOND_IN_MILLIS);
+        setProcessState(ActivityManager.PROCESS_STATE_TOP);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS); // UID "inactive" now
+        start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        setProcessState(ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+        mQuotaController.prepareForExecutionLocked(jobBg2);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobTop, null, false);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobBg2, null, false);
+        mQuotaController.maybeStopTrackingJobLocked(jobFg1, null, false);
+        expected.add(createTimingSession(start, 20 * SECOND_IN_MILLIS, 2));
+        assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
+    /**
+     * Tests that TOP jobs aren't stopped when an app runs out of quota.
+     */
+    @Test
+    public void testTracking_OutOfQuota_ForegroundAndBackground() {
+        setDischarging();
+
+        JobStatus jobBg = createJobStatus("testTracking_OutOfQuota_ForegroundAndBackground", 1);
+        JobStatus jobTop = createJobStatus("testTracking_OutOfQuota_ForegroundAndBackground", 2);
+        trackJobs(jobBg, jobTop);
+        setStandbyBucket(WORKING_INDEX, jobTop, jobBg); // 2 hour window
+        // Now the package only has 20 seconds to run.
+        final long remainingTimeMs = 20 * SECOND_IN_MILLIS;
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(
+                        JobSchedulerService.sElapsedRealtimeClock.millis() - HOUR_IN_MILLIS,
+                        10 * MINUTE_IN_MILLIS - remainingTimeMs, 1));
+
+        InOrder inOrder = inOrder(mJobSchedulerService);
+
+        // UID starts out inactive.
+        setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
+        // Start the job.
+        mQuotaController.prepareForExecutionLocked(jobBg);
+        advanceElapsedClock(remainingTimeMs / 2);
+        // New job starts after UID is in the foreground. Since the app is now in the foreground, it
+        // should continue to have remainingTimeMs / 2 time remaining.
+        setProcessState(ActivityManager.PROCESS_STATE_TOP);
+        mQuotaController.prepareForExecutionLocked(jobTop);
+        advanceElapsedClock(remainingTimeMs);
+
+        // Wait for some extra time to allow for job processing.
+        inOrder.verify(mJobSchedulerService,
+                timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
+                .onControllerStateChanged();
+        assertEquals(remainingTimeMs / 2, mQuotaController.getRemainingExecutionTimeLocked(jobBg));
+        assertEquals(remainingTimeMs / 2, mQuotaController.getRemainingExecutionTimeLocked(jobTop));
+        // Go to a background state.
+        setProcessState(ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+        advanceElapsedClock(remainingTimeMs / 2 + 1);
+        inOrder.verify(mJobSchedulerService,
+                timeout(remainingTimeMs / 2 + 2 * SECOND_IN_MILLIS).times(1))
+                .onControllerStateChanged();
+        // Top job should still be allowed to run.
+        assertFalse(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+        assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+
+        // New jobs to run.
+        JobStatus jobBg2 = createJobStatus("testTracking_OutOfQuota_ForegroundAndBackground", 3);
+        JobStatus jobTop2 = createJobStatus("testTracking_OutOfQuota_ForegroundAndBackground", 4);
+        JobStatus jobFg = createJobStatus("testTracking_OutOfQuota_ForegroundAndBackground", 5);
+        setStandbyBucket(WORKING_INDEX, jobBg2, jobTop2, jobFg);
+
+        advanceElapsedClock(20 * SECOND_IN_MILLIS);
+        setProcessState(ActivityManager.PROCESS_STATE_TOP);
+        inOrder.verify(mJobSchedulerService, timeout(SECOND_IN_MILLIS).times(1))
+                .onControllerStateChanged();
+        trackJobs(jobFg, jobTop);
+        mQuotaController.prepareForExecutionLocked(jobTop);
+        assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+        assertTrue(jobFg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+        assertTrue(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+
+        // App still in foreground so everything should be in quota.
+        advanceElapsedClock(20 * SECOND_IN_MILLIS);
+        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+        assertTrue(jobFg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+        assertTrue(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+
+        advanceElapsedClock(20 * SECOND_IN_MILLIS);
+        setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
+        inOrder.verify(mJobSchedulerService, timeout(SECOND_IN_MILLIS).times(1))
+                .onControllerStateChanged();
+        // App is now in background and out of quota. Fg should now change to out of quota since it
+        // wasn't started. Top should remain in quota since it started when the app was in TOP.
+        assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+        assertFalse(jobFg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+        assertFalse(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+        trackJobs(jobBg2);
+        assertFalse(jobBg2.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
     }
 
     /**
