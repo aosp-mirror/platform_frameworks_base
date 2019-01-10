@@ -125,6 +125,9 @@ public:
 
     /* Sets the sprite transformation matrix. */
     virtual void setTransformationMatrix(const SpriteTransformationMatrix& matrix) = 0;
+
+    /* Sets the id of the display where the sprite should be shown. */
+    virtual void setDisplayId(int32_t displayId) = 0;
 };
 
 /*
@@ -170,6 +173,7 @@ private:
         DIRTY_LAYER = 1 << 4,
         DIRTY_VISIBILITY = 1 << 5,
         DIRTY_HOTSPOT = 1 << 6,
+        DIRTY_DISPLAY_ID = 1 << 7,
     };
 
     /* Describes the state of a sprite.
@@ -180,7 +184,7 @@ private:
     struct SpriteState {
         inline SpriteState() :
                 dirty(0), visible(false),
-                positionX(0), positionY(0), layer(0), alpha(1.0f),
+                positionX(0), positionY(0), layer(0), alpha(1.0f), displayId(ADISPLAY_ID_DEFAULT),
                 surfaceWidth(0), surfaceHeight(0), surfaceDrawn(false), surfaceVisible(false) {
         }
 
@@ -193,6 +197,7 @@ private:
         int32_t layer;
         float alpha;
         SpriteTransformationMatrix transformationMatrix;
+        int32_t displayId;
 
         sp<SurfaceControl> surfaceControl;
         int32_t surfaceWidth;
@@ -225,6 +230,7 @@ private:
         virtual void setLayer(int32_t layer);
         virtual void setAlpha(float alpha);
         virtual void setTransformationMatrix(const SpriteTransformationMatrix& matrix);
+        virtual void setDisplayId(int32_t displayId);
 
         inline const SpriteState& getStateLocked() const {
             return mLocked.state;
