@@ -62,9 +62,10 @@ public class NotificationEntryManager implements
         NotificationUpdateHandler,
         VisualStabilityManager.Callback {
     private static final String TAG = "NotificationEntryMgr";
-    protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    protected final Context mContext;
+    private final Context mContext;
+    @VisibleForTesting
     protected final HashMap<String, NotificationEntry> mPendingNotifications = new HashMap<>();
 
     private final DeviceProvisionedController mDeviceProvisionedController =
@@ -78,8 +79,9 @@ public class NotificationEntryManager implements
 
     private NotificationPresenter mPresenter;
     private NotificationListenerService.RankingMap mLatestRankingMap;
+    @VisibleForTesting
     protected NotificationData mNotificationData;
-    protected NotificationListContainer mListContainer;
+    private NotificationListContainer mListContainer;
     @VisibleForTesting
     final ArrayList<NotificationLifetimeExtender> mNotificationLifetimeExtenders
             = new ArrayList<>();
@@ -169,14 +171,6 @@ public class NotificationEntryManager implements
 
     public NotificationData getNotificationData() {
         return mNotificationData;
-    }
-
-    protected Context getContext() {
-        return mContext;
-    }
-
-    protected NotificationPresenter getPresenter() {
-        return mPresenter;
     }
 
     @Override
