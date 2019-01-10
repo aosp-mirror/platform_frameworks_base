@@ -19,6 +19,7 @@ package android.app;
 import static android.app.ActivityThread.isSystem;
 import static android.app.WindowConfigurationProto.ACTIVITY_TYPE;
 import static android.app.WindowConfigurationProto.APP_BOUNDS;
+import static android.app.WindowConfigurationProto.BOUNDS;
 import static android.app.WindowConfigurationProto.WINDOWING_MODE;
 import static android.view.Surface.rotationToString;
 
@@ -585,6 +586,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         }
         protoOutputStream.write(WINDOWING_MODE, mWindowingMode);
         protoOutputStream.write(ACTIVITY_TYPE, mActivityType);
+        if (mBounds != null) {
+            mBounds.writeToProto(protoOutputStream, BOUNDS);
+        }
         protoOutputStream.end(token);
     }
 
@@ -605,6 +609,10 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
                     case (int) APP_BOUNDS:
                         mAppBounds = new Rect();
                         mAppBounds.readFromProto(proto, APP_BOUNDS);
+                        break;
+                    case (int) BOUNDS:
+                        mBounds = new Rect();
+                        mBounds.readFromProto(proto, BOUNDS);
                         break;
                     case (int) WINDOWING_MODE:
                         mWindowingMode = proto.readInt(WINDOWING_MODE);
