@@ -117,7 +117,7 @@ public class ActivityManagerInternalTest {
         thread2.assertWaiting("Unexpected state for " + record2);
         thread2.interrupt();
 
-        mAms.mActiveUids.clear();
+        mAms.mProcessList.mActiveUids.clear();
     }
 
     private UidRecord addActiveUidRecord(int uid, long curProcStateSeq,
@@ -126,7 +126,7 @@ public class ActivityManagerInternalTest {
         record.lastNetworkUpdatedProcStateSeq = lastNetworkUpdatedProcStateSeq;
         record.curProcStateSeq = curProcStateSeq;
         record.waitingForNetwork = true;
-        mAms.mActiveUids.put(uid, record);
+        mAms.mProcessList.mActiveUids.put(uid, record);
         return record;
     }
 

@@ -505,7 +505,7 @@ public final class ActiveServices {
                 }
                 // This app knows it is in the new model where this operation is not
                 // allowed, so tell it what has happened.
-                UidRecord uidRec = mAm.mActiveUids.get(r.appInfo.uid);
+                UidRecord uidRec = mAm.mProcessList.getUidRecordLocked(r.appInfo.uid);
                 return new ComponentName("?", "app is in background uid " + uidRec);
             }
         }
