@@ -3673,4 +3673,10 @@
     <!-- If device supports corner radius on windows.
          This should be turned off on low-end devices to improve animation performance. -->
     <bool name="config_supportsRoundedCornersOnWindows">true</bool>
+
+    <!-- If the sensor that skips media is available or not. -->
+    <bool name="config_skipSensorAvailable">false</bool>
+
+    <!-- If the sensor that silences alerts is available or not. -->
+    <bool name="config_silenceSensorAvailable">false</bool>
 </resources>

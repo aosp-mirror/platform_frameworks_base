@@ -525,7 +525,10 @@ message SecureSettingsProto {
     }
     optional Zen zen = 71;
 
+    optional SettingProto skip_gesture_enabled = 74 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto silence_gesture_enabled = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 74;
+    // Next tag = 76;
 }

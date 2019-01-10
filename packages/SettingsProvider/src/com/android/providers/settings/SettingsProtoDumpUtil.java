@@ -2363,6 +2363,14 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Zen.SETTINGS_SUGGESTION_VIEWED);
         p.end(zenToken);
 
+        dumpSetting(s, p,
+                Settings.Secure.SKIP_GESTURE,
+                SecureSettingsProto.SKIP_GESTURE_ENABLED);
+
+        dumpSetting(s, p,
+                Settings.Secure.SILENCE_GESTURE,
+                SecureSettingsProto.SILENCE_GESTURE_ENABLED);
+
         // Please insert new settings using the same order as in SecureSettingsProto.
         p.end(token);
 
