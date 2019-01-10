@@ -329,6 +329,11 @@ public abstract class ContentCaptureService extends Service {
                     mClientInterface.asBinder());
             return;
         }
+        if ((flags & ContentCaptureContext.FLAG_DISABLED_BY_APP) != 0) {
+            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_BY_APP,
+                    mClientInterface.asBinder());
+            return;
+        }
 
         setClientState(clientReceiver, ContentCaptureSession.STATE_ACTIVE,
                 mClientInterface.asBinder());

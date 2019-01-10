@@ -250,7 +250,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         // TODO(b/111276913): change the resultCode to use flags so there's just one flag for
         // disabled stuff
         if (resultCode == STATE_DISABLED_NO_SERVICE || resultCode == STATE_DISABLED_DUPLICATED_ID
-                || resultCode == STATE_DISABLED_BY_FLAG_SECURE) {
+                || resultCode == STATE_DISABLED_BY_FLAG_SECURE
+                || resultCode == STATE_DISABLED_BY_APP) {
             mDisabled.set(true);
             handleResetSession(/* resetState= */ false);
         } else {
