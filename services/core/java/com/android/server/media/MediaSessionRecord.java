@@ -116,7 +116,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private boolean mIsActive = false;
     private boolean mDestroyed = false;
 
-    private long mDuration;
+    private long mDuration = -1;
     private String mMetadataDescription;
 
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
