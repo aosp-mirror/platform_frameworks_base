@@ -102,7 +102,7 @@
     <item type="id" name="action_snooze_assistant_suggestion_1"/>
     <item type="id" name="action_snooze"/>
 
-    <!-- For StatusBarIconContainer to tag its icon views -->
+    <!-- For StatusIconContainer to tag its icon views -->
     <item type="id" name="status_bar_view_state_tag" />
 
     <item type="id" name="display_cutout" />
