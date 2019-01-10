@@ -705,14 +705,17 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GPU_DEBUG_LAYERS_GLES,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS_GLES);
         dumpSetting(s, p,
+                Settings.Global.GUP_DEV_ALL_APPS,
+                GlobalSettingsProto.Gpu.GUP_DEV_ALL_APPS);
+        dumpSetting(s, p,
                 Settings.Global.GUP_DEV_OPT_IN_APPS,
                 GlobalSettingsProto.Gpu.GUP_DEV_OPT_IN_APPS);
         dumpSetting(s, p,
                 Settings.Global.GUP_DEV_OPT_OUT_APPS,
                 GlobalSettingsProto.Gpu.GUP_DEV_OPT_OUT_APPS);
         dumpSetting(s, p,
-                Settings.Global.GUP_BLACK_LIST,
-                GlobalSettingsProto.Gpu.GUP_BLACK_LIST);
+                Settings.Global.GUP_BLACKLIST,
+                GlobalSettingsProto.Gpu.GUP_BLACKLIST);
         p.end(gpuToken);
 
         final long hdmiToken = p.start(GlobalSettingsProto.HDMI);

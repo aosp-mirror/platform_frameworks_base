@@ -436,12 +436,19 @@ message GlobalSettingsProto {
         // Ordered GPU debug layer list for GLES
         // i.e. <layer1>:<layer2>:...:<layerN>
         optional SettingProto debug_layers_gles = 7;
-        // GUP - List of Apps selected to use Game Update Packages
-        optional SettingProto gup_dev_opt_in_apps = 8;
-        // GUP - List of Apps selected not to use Game Update Packages
-        optional SettingProto gup_dev_opt_out_apps = 9;
-        // GUP - List of Apps that are forbidden to use Game Update Packages
-        optional SettingProto gup_black_list = 10;
+        // GUP - Game Update Package global preference for all Apps
+        // 0 = Default
+        // 1 = All Apps use Game Update Package
+        // 2 = All Apps use system graphics driver
+        optional SettingProto gup_dev_all_apps = 8;
+        // GUP - List of Apps selected to use Game Update Package
+        // i.e. <pkg1>,<pkg2>,...,<pkgN>
+        optional SettingProto gup_dev_opt_in_apps = 9;
+        // GUP - List of Apps selected not to use Game Update Package
+        // i.e. <pkg1>,<pkg2>,...,<pkgN>
+        optional SettingProto gup_dev_opt_out_apps = 10;
+        // GUP - List of Apps that are forbidden to use Game Update Package
+        optional SettingProto gup_blacklist = 11;
     }
     optional Gpu gpu = 59;
 

@@ -12000,22 +12000,33 @@ public final class Settings {
                 "angle_gl_driver_selection_values";
 
         /**
-         * List of Apps selected to use Game Update Packages.
+         * Game Update Package global preference for all Apps.
+         * 0 = Default
+         * 1 = All Apps use Game Update Package
+         * 2 = All Apps use system graphics driver
+         * @hide
+         */
+        public static final String GUP_DEV_ALL_APPS = "gup_dev_all_apps";
+
+        /**
+         * List of Apps selected to use Game Update Package.
+         * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
          */
         public static final String GUP_DEV_OPT_IN_APPS = "gup_dev_opt_in_apps";
 
         /**
-         * List of Apps selected not to use Game Update Packages.
+         * List of Apps selected not to use Game Update Package.
+         * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
          */
         public static final String GUP_DEV_OPT_OUT_APPS = "gup_dev_opt_out_apps";
 
         /**
-         * Apps on the black list that are forbidden to useGame Update Package.
+         * Apps on the blacklist that are forbidden to use Game Update Package.
          * @hide
          */
-        public static final String GUP_BLACK_LIST = "gup_black_list";
+        public static final String GUP_BLACKLIST = "gup_blacklist";
 
         /**
          * Ordered GPU debug layer list for Vulkan
