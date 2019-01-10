@@ -624,7 +624,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             }
 
             // Add Passpoint OSU Provider AccessPoints
-            // TODO(b/118705403): filter out OSU Providers which we already have credentials from.
             Map<OsuProvider, List<ScanResult>> providersAndScans =
                     mWifiManager.getMatchingOsuProviders(cachedScanResults);
             Set<OsuProvider> alreadyProvisioned = mWifiManager
@@ -632,13 +631,10 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                             providersAndScans.keySet()).keySet();
             for (OsuProvider provider : providersAndScans.keySet()) {
                 if (!alreadyProvisioned.contains(provider)) {
-                    // TODO(b/118705403): use real scan results for this provider
                     AccessPoint accessPointOsu =
-                            getCachedOrCreateOsu(null, cachedAccessPoints, provider);
-                    // TODO(b/118705403): Figure out if we would need to update an OSU AP (this will
-                    // be used if we need to display it at the top of the picker as the "active" AP)
-                    // Otherwise OSU APs should ignore attempts to update the active connection info
-                    // accessPointOsu.update(connectionConfig, mLastInfo, mLastNetworkInfo);
+                            getCachedOrCreateOsu(providersAndScans.get(provider),
+                                    cachedAccessPoints, provider);
+                    accessPointOsu.update(connectionConfig, mLastInfo, mLastNetworkInfo);
                     accessPoints.add(accessPointOsu);
                 }
             }
@@ -709,17 +705,21 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             List<ScanResult> scanResults,
             List<AccessPoint> cache,
             OsuProvider provider) {
+        AccessPoint matchedAccessPoint = null;
         ListIterator<AccessPoint> lit = cache.listIterator();
         while (lit.hasNext()) {
-            final AccessPoint ret = lit.next();
-            if (ret.getKey().equals(AccessPoint.getKey(provider))) {
+            AccessPoint currentAccessPoint = lit.next();
+            if (currentAccessPoint.getKey().equals(AccessPoint.getKey(provider))) {
                 lit.remove();
-                // TODO(b/118705403): Use real scan results for this.
-                // ret.setScanResults(scanResults);
-                return ret;
+                matchedAccessPoint = currentAccessPoint;
+                break;
             }
         }
-        return new AccessPoint(mContext, provider);
+        if (matchedAccessPoint == null) {
+            matchedAccessPoint = new AccessPoint(mContext, provider);
+        }
+        matchedAccessPoint.setScanResults(scanResults);
+        return matchedAccessPoint;
     }
 
     private void updateNetworkInfo(NetworkInfo networkInfo) {

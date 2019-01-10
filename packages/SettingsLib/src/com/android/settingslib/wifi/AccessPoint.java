@@ -321,9 +321,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public AccessPoint(Context context, OsuProvider provider) {
         mContext = context;
         mOsuProvider = provider;
-        mRssi = 1;
-        // TODO: This placeholder SSID is here to avoid null pointer exceptions.
-        ssid = "<OsuProvider AP SSID goes here>";
+        ssid = provider.getFriendlyName();
         updateKey();
     }
 
