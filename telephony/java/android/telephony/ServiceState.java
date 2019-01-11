@@ -170,7 +170,8 @@ public class ServiceState implements Parcelable {
                     RIL_RADIO_TECHNOLOGY_GSM,
                     RIL_RADIO_TECHNOLOGY_TD_SCDMA,
                     RIL_RADIO_TECHNOLOGY_IWLAN,
-                    RIL_RADIO_TECHNOLOGY_LTE_CA})
+                    RIL_RADIO_TECHNOLOGY_LTE_CA,
+                    RIL_RADIO_TECHNOLOGY_NR})
     public @interface RilRadioTechnology {}
     /**
      * Available radio technologies for GSM, UMTS and CDMA.
