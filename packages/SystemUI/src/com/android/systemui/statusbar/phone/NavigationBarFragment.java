@@ -243,6 +243,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             mDisabledFlags2 = savedInstanceState.getInt(EXTRA_DISABLE2_STATE, 0);
         }
         mAccessibilityManagerWrapper.addCallback(mAccessibilityListener);
+
+        // Respect the latest disabled-flags.
+        mCommandQueue.recomputeDisableFlags(mDisplayId, false);
     }
 
     @Override
