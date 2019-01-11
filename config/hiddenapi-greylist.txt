@@ -1419,11 +1419,6 @@ Landroid/service/euicc/IGetEuiccProfileInfoListCallback;->onComplete(Landroid/se
 Landroid/service/euicc/IRetainSubscriptionsForFactoryResetCallback;->onComplete(I)V
 Landroid/service/euicc/ISwitchToSubscriptionCallback;->onComplete(I)V
 Landroid/service/euicc/IUpdateSubscriptionNicknameCallback;->onComplete(I)V
-Landroid/service/media/IMediaBrowserServiceCallbacks$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/media/IMediaBrowserServiceCallbacks;
-Landroid/service/media/IMediaBrowserServiceCallbacks;->onConnect(Ljava/lang/String;Landroid/media/session/MediaSession$Token;Landroid/os/Bundle;)V
-Landroid/service/media/IMediaBrowserServiceCallbacks;->onConnectFailed()V
-Landroid/service/media/IMediaBrowserServiceCallbacks;->onLoadChildren(Ljava/lang/String;Landroid/content/pm/ParceledListSlice;)V
-Landroid/service/media/IMediaBrowserServiceCallbacks;->onLoadChildrenWithOptions(Ljava/lang/String;Landroid/content/pm/ParceledListSlice;Landroid/os/Bundle;)V
 Landroid/service/notification/INotificationListener$Stub;-><init>()V
 Landroid/service/persistentdata/IPersistentDataBlockService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/persistentdata/IPersistentDataBlockService;
 Landroid/service/vr/IVrManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/vr/IVrManager;
