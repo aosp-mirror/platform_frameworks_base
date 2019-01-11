@@ -5323,6 +5323,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         final int callingUserId = mInjector.userHandleGetCallingUserId();
+        ComponentName adminComponent = null;
         synchronized (getLockObject()) {
             // Make sure the caller has any active admin with the right policy or
             // the required permission.
@@ -5333,8 +5334,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     android.Manifest.permission.LOCK_DEVICE);
             final long ident = mInjector.binderClearCallingIdentity();
             try {
-                final ComponentName adminComponent = admin == null ?
-                        null : admin.info.getComponent();
+                adminComponent = admin == null ? null : admin.info.getComponent();
                 if (adminComponent != null) {
                     // For Profile Owners only, callers with only permission not allowed.
                     if ((flags & DevicePolicyManager.FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY) != 0) {
@@ -5386,6 +5386,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.LOCK_NOW)
+                .setAdmin(adminComponent)
                 .setInt(flags)
                 .write();
     }
