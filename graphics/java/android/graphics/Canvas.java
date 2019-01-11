@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1682,6 +1683,18 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color,
+     * using srcover porterduff mode.
+     *
+     * @param color the color to draw onto the canvas
+     * @throws IllegalArgumentException if the color space encoded in the long
+     *                                  is invalid or unknown.
+     */
+    public void drawColor(@ColorLong long color) {
+        super.drawColor(color, BlendMode.SRC_OVER);
+    }
+
+    /**
      * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color and
      * porter-duff xfermode.
      *
@@ -1703,6 +1716,19 @@ public class Canvas extends BaseCanvas {
      * @param mode the blendmode to apply to the color
      */
     public void drawColor(@ColorInt int color, @NonNull BlendMode mode) {
+        super.drawColor(color, mode);
+    }
+
+    /**
+     * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color and
+     * blendmode.
+     *
+     * @param color the color to draw with
+     * @param mode the blendmode to apply to the color
+     * @throws IllegalArgumentException if the color space encoded in the long
+     *                                  is invalid or unknown.
+     */
+    public void drawColor(@ColorLong long color, @NonNull BlendMode mode) {
         super.drawColor(color, mode);
     }
 
