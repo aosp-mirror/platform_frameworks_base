@@ -18,6 +18,7 @@ package android.service.autofill.augmented;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
 import android.view.autofill.AutofillId;
@@ -29,6 +30,9 @@ import android.view.autofill.AutofillValue;
  */
 @SystemApi
 // TODO(b/111330312): pass a requestId and/or sessionId
+@TestApi
+// TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+// in the same package as the test, and that module is compiled with SDK=test_current
 public final class FillRequest {
 
     final AutofillProxy mProxy;

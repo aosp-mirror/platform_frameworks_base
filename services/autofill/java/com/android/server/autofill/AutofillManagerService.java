@@ -19,6 +19,7 @@ package com.android.server.autofill;
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 import static android.util.DebugUtils.flagsToString;
+import static android.view.autofill.AutofillManager.MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS;
 
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
@@ -100,8 +101,6 @@ public final class AutofillManagerService
     private static final String TAG = "AutofillManagerService";
 
     private static final Object sLock = AutofillManagerService.class;
-
-    private static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
 
     /**
      * IME supports Smart Suggestions.

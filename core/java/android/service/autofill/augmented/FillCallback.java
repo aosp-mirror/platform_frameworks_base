@@ -20,6 +20,7 @@ import static android.service.autofill.augmented.AugmentedAutofillService.DEBUG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
 import android.util.Log;
 
@@ -29,6 +30,9 @@ import android.util.Log;
  * @hide
  */
 @SystemApi
+@TestApi
+//TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+//in the same package as the test, and that module is compiled with SDK=test_current
 public final class FillCallback {
 
     private static final String TAG = FillCallback.class.getSimpleName();
