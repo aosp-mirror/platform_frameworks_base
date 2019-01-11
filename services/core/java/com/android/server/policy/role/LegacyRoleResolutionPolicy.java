@@ -22,6 +22,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.Debug;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -101,6 +103,15 @@ public class LegacyRoleResolutionPolicy implements RoleManagerService.RoleHolder
                     return Collections.singletonList(
                             ComponentName.unflattenFromString(legacyAssistant).getPackageName());
                 }
+            }
+            case RoleManager.ROLE_DIALER: {
+                String setting = Settings.Secure.getStringForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.DIALER_DEFAULT_APPLICATION, userId);
+
+                return CollectionUtils.singletonOrEmpty(!TextUtils.isEmpty(setting)
+                        ? setting
+                        : mContext.getSystemService(TelecomManager.class).getSystemDialerPackage());
             }
             default: {
                 Slog.e(LOG_TAG, "Don't know how to find legacy role holders for " + roleName);

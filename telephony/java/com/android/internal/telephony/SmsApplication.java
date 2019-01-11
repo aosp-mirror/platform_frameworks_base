@@ -51,7 +51,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -635,20 +634,10 @@ public final class SmsApplication {
             }
 
             // Update the setting.
-            CompletableFuture<Void> res = new CompletableFuture<>();
+            RoleManagerCallback.Future res = new RoleManagerCallback.Future();
             context.getSystemService(RoleManager.class).addRoleHolderAsUser(
                     RoleManager.ROLE_SMS, applicationData.mPackageName, UserHandle.of(userId),
-                    AsyncTask.THREAD_POOL_EXECUTOR, new RoleManagerCallback() {
-                        @Override
-                        public void onSuccess() {
-                            res.complete(null);
-                        }
-
-                        @Override
-                        public void onFailure() {
-                            res.completeExceptionally(new RuntimeException());
-                        }
-                    });
+                    AsyncTask.THREAD_POOL_EXECUTOR, res);
             try {
                 res.get(5, TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
