@@ -274,7 +274,6 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
 
     private void updateClockVisibility() {
         boolean visible = shouldBeVisible();
-        Dependency.get(IconLogger.class).onIconVisibility("clock", visible);
         int visibility = visible ? View.VISIBLE : View.GONE;
         super.setVisibility(visibility);
     }

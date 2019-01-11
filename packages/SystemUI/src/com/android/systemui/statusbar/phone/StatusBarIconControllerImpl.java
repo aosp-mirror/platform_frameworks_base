@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconStat
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
-import com.android.systemui.statusbar.policy.IconLogger;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -61,7 +60,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     private final ArrayList<IconManager> mIconGroups = new ArrayList<>();
     private final ArraySet<String> mIconBlacklist = new ArraySet<>();
-    private final IconLogger mIconLogger = Dependency.get(IconLogger.class);
 
     // Points to light or dark context depending on the... context?
     private Context mContext;
@@ -147,7 +145,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         int viewIndex = getViewIndex(index, holder.getTag());
         boolean blocked = mIconBlacklist.contains(slot);
 
-        mIconLogger.onIconVisibility(getSlotName(index), holder.isVisible());
         mIconGroups.forEach(l -> l.onIconAdded(viewIndex, slot, blocked, holder));
     }
 
@@ -281,8 +278,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
             return;
         }
 
-        mIconLogger.onIconHidden(slotName);
-
         int slotIndex = getSlotIndex(slotName);
         List<StatusBarIconHolder> iconsToRemove = slot.getHolderListInViewOrder();
         for (StatusBarIconHolder holder : iconsToRemove) {
@@ -297,7 +292,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         if (getIcon(index, tag) == null) {
             return;
         }
-        mIconLogger.onIconHidden(getSlotName(index));
         super.removeIcon(index, tag);
         int viewIndex = getViewIndex(index, 0);
         mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
@@ -305,7 +299,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     private void handleSet(int index, StatusBarIconHolder holder) {
         int viewIndex = getViewIndex(index, holder.getTag());
-        mIconLogger.onIconVisibility(getSlotName(index), holder.isVisible());
         mIconGroups.forEach(l -> l.onSetIconHolder(viewIndex, holder));
     }
 
