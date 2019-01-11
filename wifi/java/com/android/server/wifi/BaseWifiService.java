@@ -89,7 +89,7 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
-    public Map<String, List<ScanResult>> getAllMatchingFqdnsForScanResults(
+    public Map<String, Map<Integer, List<ScanResult>>> getAllMatchingFqdnsForScanResults(
             List<ScanResult> scanResults) {
         throw new UnsupportedOperationException();
     }

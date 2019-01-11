@@ -234,6 +234,12 @@ public class WifiManager {
     @SystemApi
     public static final int WIFI_CREDENTIAL_FORGOT = 1;
 
+    /** @hide */
+    public static final int PASSPOINT_HOME_NETWORK = 0;
+
+    /** @hide */
+    public static final int PASSPOINT_ROAMING_NETWORK = 1;
+
     /**
      * Broadcast intent action indicating that a Passpoint provider icon has been received.
      *
@@ -1207,26 +1213,30 @@ public class WifiManager {
      * match the ScanResult.
      *
      * @param scanResults a list of scanResult that represents the BSSID
-     * @return List that consists of {@link WifiConfiguration} and corresponding scanResults.
+     * @return List that consists of {@link WifiConfiguration} and corresponding scanResults per
+     * network type({@link #PASSPOINT_HOME_NETWORK} and {@link #PASSPOINT_ROAMING_NETWORK}).
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public List<Pair<WifiConfiguration, List<ScanResult>>> getAllMatchingWifiConfigs(
+    public List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>> getAllMatchingWifiConfigs(
             @NonNull List<ScanResult> scanResults) {
-        List<Pair<WifiConfiguration, List<ScanResult>>> configs = new ArrayList<>();
+        List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>> configs = new ArrayList<>();
         try {
-            Map<String, List<ScanResult>> results = mService.getAllMatchingFqdnsForScanResults(
-                    scanResults);
+            Map<String, Map<Integer, List<ScanResult>>> results =
+                    mService.getAllMatchingFqdnsForScanResults(
+                            scanResults);
             if (results.isEmpty()) {
                 return configs;
             }
             List<WifiConfiguration> wifiConfigurations =
-                    mService.getWifiConfigsForPasspointProfiles(new ArrayList<>(results.keySet()));
+                    mService.getWifiConfigsForPasspointProfiles(
+                            new ArrayList<>(results.keySet()));
             for (WifiConfiguration configuration : wifiConfigurations) {
-                List<ScanResult> scanResultList = results.get(configuration.FQDN);
-                if (scanResultList != null) {
-                    configs.add(Pair.create(configuration, scanResultList));
+                Map<Integer, List<ScanResult>> scanResultsPerNetworkType = results.get(
+                        configuration.FQDN);
+                if (scanResultsPerNetworkType != null) {
+                    configs.add(Pair.create(configuration, scanResultsPerNetworkType));
                 }
             }
         } catch (RemoteException e) {
