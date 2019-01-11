@@ -13966,6 +13966,53 @@ public final class Settings {
          */
         public static final String NATIVE_FLAGS_HEALTH_CHECK_ENABLED =
                 "native_flags_health_check_enabled";
+
+        /**
+         * Parameter for {@link #APPOP_HISTORY_PARAMETERS} that controls the mode
+         * in which the historical registry operates.
+         *
+         * @hide
+         */
+        public static final String APPOP_HISTORY_MODE = "mode";
+
+        /**
+         * Parameter for {@link #APPOP_HISTORY_PARAMETERS} that controls how long
+         * is the interval between snapshots in the base case i.e. the most recent
+         * part of the history.
+         *
+         * @hide
+         */
+        public static final String APPOP_HISTORY_BASE_INTERVAL_MILLIS = "baseIntervalMillis";
+
+        /**
+         * Parameter for {@link #APPOP_HISTORY_PARAMETERS} that controls the base
+         * for the logarithmic step when building app op history.
+         *
+         * @hide
+         */
+        public static final String APPOP_HISTORY_INTERVAL_MULTIPLIER = "intervalMultiplier";
+
+        /**
+         * Appop history parameters. These parameters are represented by
+         * a comma-delimited key-value list.
+         *
+         * The following strings are supported as keys:
+         * <pre>
+         *     mode                  (int)
+         *     baseIntervalMillis    (long)
+         *     intervalMultiplier    (int)
+         * </pre>
+         *
+         * Ex: "enabled=true,baseIntervalMillis=1000,intervalMultiplier=10"
+         *
+         * @see #APPOP_HISTORY_MODE
+         * @see #APPOP_HISTORY_BASE_INTERVAL_MILLIS
+         * @see #APPOP_HISTORY_INTERVAL_MULTIPLIER
+         *
+         * @hide
+         */
+        public static final String APPOP_HISTORY_PARAMETERS =
+                "appop_history_parameters";
     }
 
     /**

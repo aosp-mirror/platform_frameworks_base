@@ -284,10 +284,11 @@ package android.app {
   }
 
   public class AppOpsManager {
-    method public java.util.List<android.app.AppOpsManager.HistoricalPackageOps> getAllHistoricPackagesOps(java.lang.String[], long, long);
-    method public android.app.AppOpsManager.HistoricalPackageOps getHistoricalPackagesOps(int, java.lang.String, java.lang.String[], long, long);
+    method public void getHistoricalOps(int, java.lang.String, java.lang.String[], long, long, java.util.concurrent.Executor, java.util.function.Consumer<android.app.AppOpsManager.HistoricalOps>);
     method public static java.lang.String[] getOpStrs();
-    method public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, java.lang.String, int[]);
+    method public deprecated java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, java.lang.String, int[]);
+    method public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, java.lang.String, java.lang.String...);
+    method public java.util.List<android.app.AppOpsManager.PackageOps> getPackagesForOps(java.lang.String[]);
     method public static int opToDefaultMode(java.lang.String);
     method public static java.lang.String opToPermission(java.lang.String);
     method public void setMode(java.lang.String, int, java.lang.String, int);
@@ -343,7 +344,7 @@ package android.app {
     field public static final int UID_STATE_TOP = 1; // 0x1
   }
 
-  public static final class AppOpsManager.HistoricalOpEntry implements android.os.Parcelable {
+  public static final class AppOpsManager.HistoricalOp implements android.os.Parcelable {
     method public int describeContents();
     method public long getAccessCount(int);
     method public long getAccessDuration(int);
@@ -353,21 +354,41 @@ package android.app {
     method public long getForegroundAccessCount();
     method public long getForegroundAccessDuration();
     method public long getForegroundRejectCount();
-    method public java.lang.String getOp();
+    method public java.lang.String getOpName();
     method public long getRejectCount(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOpEntry> CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOp> CREATOR;
+  }
+
+  public static final class AppOpsManager.HistoricalOps implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getBeginTimeMillis();
+    method public long getEndTimeMillis();
+    method public int getUidCount();
+    method public android.app.AppOpsManager.HistoricalUidOps getUidOps(int);
+    method public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOps> CREATOR;
   }
 
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
     method public int describeContents();
-    method public android.app.AppOpsManager.HistoricalOpEntry getEntry(java.lang.String);
-    method public android.app.AppOpsManager.HistoricalOpEntry getEntryAt(int);
-    method public int getEntryCount();
+    method public android.app.AppOpsManager.HistoricalOp getOp(java.lang.String);
+    method public android.app.AppOpsManager.HistoricalOp getOpAt(int);
+    method public int getOpCount();
     method public java.lang.String getPackageName();
-    method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalPackageOps> CREATOR;
+  }
+
+  public static final class AppOpsManager.HistoricalUidOps implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getPackageCount();
+    method public android.app.AppOpsManager.HistoricalPackageOps getPackageOps(java.lang.String);
+    method public android.app.AppOpsManager.HistoricalPackageOps getPackageOpsAt(int);
+    method public int getUid();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalUidOps> CREATOR;
   }
 
   public static final class AppOpsManager.OpEntry implements android.os.Parcelable {

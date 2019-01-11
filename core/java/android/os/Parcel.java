@@ -899,6 +899,33 @@ public final class Parcel {
     }
 
     /**
+     * Flatten an {@link ArrayMap} with string keys containing a particular object
+     * type into the parcel at the current dataPosition() and growing dataCapacity()
+     * if needed. The type of the objects in the array must be one that implements
+     * Parcelable. Only the raw data of the objects is written and not their type,
+     * so you must use the corresponding {@link #createTypedArrayMap(Parcelable.Creator)}
+     *
+     * @param val The map of objects to be written.
+     * @param parcelableFlags The parcelable flags to use.
+     *
+     * @see #createTypedArrayMap(Parcelable.Creator)
+     * @see Parcelable
+     */
+    public <T extends Parcelable> void writeTypedArrayMap(@Nullable ArrayMap<String, T> val,
+            int parcelableFlags) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+        final int count = val.size();
+        writeInt(count);
+        for (int i = 0; i < count; i++) {
+            writeString(val.keyAt(i));
+            writeTypedObject(val.valueAt(i), parcelableFlags);
+        }
+    }
+
+    /**
      * Write an array set to the parcel.
      *
      * @param val The array set to write.
@@ -1001,7 +1028,7 @@ public final class Parcel {
      * values are written using {@link #writeValue} and must follow the
      * specification there.
      */
-    public final void writeSparseArray(@Nullable SparseArray<Object> val) {
+    public final <T> void writeSparseArray(@Nullable SparseArray<T> val) {
         if (val == null) {
             writeInt(-1);
             return;
@@ -1397,6 +1424,34 @@ public final class Parcel {
      */
     public final <T extends Parcelable> void writeTypedList(@Nullable List<T> val) {
         writeTypedList(val, 0);
+    }
+
+    /**
+     * Flatten a {@link SparseArray} containing a particular object type into the parcel
+     * at the current dataPosition() and growing dataCapacity() if needed. The
+     * type of the objects in the array must be one that implements Parcelable.
+     * Unlike the generic {@link #writeSparseArray(SparseArray)} method, however, only
+     * the raw data of the objects is written and not their type, so you must use the
+     * corresponding {@link #createTypedSparseArray(Parcelable.Creator)}.
+     *
+     * @param val The list of objects to be written.
+     * @param parcelableFlags The parcelable flags to use.
+     *
+     * @see #createTypedSparseArray(Parcelable.Creator)
+     * @see Parcelable
+     */
+    public final <T extends Parcelable> void writeTypedSparseArray(@Nullable SparseArray<T> val,
+            int parcelableFlags) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+        final int count = val.size();
+        writeInt(count);
+        for (int i = 0; i < count; i++) {
+            writeInt(val.keyAt(i));
+            writeTypedObject(val.valueAt(i), parcelableFlags);
+        }
     }
 
     /**
@@ -2369,7 +2424,7 @@ public final class Parcel {
      * Parcelables.
      */
     @Nullable
-    public final SparseArray readSparseArray(@Nullable ClassLoader loader) {
+    public final <T> SparseArray<T> readSparseArray(@Nullable ClassLoader loader) {
         int N = readInt();
         if (N < 0) {
             return null;
@@ -2463,6 +2518,62 @@ public final class Parcel {
         for (; i<M; i++) {
             list.remove(N);
         }
+    }
+
+    /**
+     * Read into a new {@link SparseArray} items containing a particular object type
+     * that were written with {@link #writeTypedSparseArray(SparseArray, int)} at the
+     * current dataPosition().  The list <em>must</em> have previously been written
+     * via {@link #writeTypedSparseArray(SparseArray, int)} with the same object type.
+     *
+     * @param creator The creator to use when for instantiation.
+     *
+     * @return A newly created {@link SparseArray} containing objects with the same data
+     *         as those that were previously written.
+     *
+     * @see #writeTypedSparseArray(SparseArray, int)
+     */
+    public final @Nullable <T extends Parcelable> SparseArray<T> createTypedSparseArray(
+            @NonNull Parcelable.Creator<T> creator) {
+        final int count = readInt();
+        if (count < 0) {
+            return null;
+        }
+        final SparseArray<T> array = new SparseArray<>(count);
+        for (int i = 0; i < count; i++) {
+            final int index = readInt();
+            final T value = readTypedObject(creator);
+            array.append(index, value);
+        }
+        return array;
+    }
+
+    /**
+     * Read into a new {@link ArrayMap} with string keys items containing a particular
+     * object type that were written with {@link #writeTypedArrayMap(ArrayMap, int)} at the
+     * current dataPosition().  The list <em>must</em> have previously been written
+     * via {@link #writeTypedArrayMap(ArrayMap, int)} with the same object type.
+     *
+     * @param creator The creator to use when for instantiation.
+     *
+     * @return A newly created {@link ArrayMap} containing objects with the same data
+     *         as those that were previously written.
+     *
+     * @see #writeTypedArrayMap(ArrayMap, int)
+     */
+    public final @Nullable <T extends Parcelable> ArrayMap<String, T> createTypedArrayMap(
+            @NonNull Parcelable.Creator<T> creator) {
+        final int count = readInt();
+        if (count < 0) {
+            return null;
+        }
+        final ArrayMap<String, T> map = new ArrayMap<>(count);
+        for (int i = 0; i < count; i++) {
+            final String key = readString();
+            final T value = readTypedObject(creator);
+            map.append(key, value);
+        }
+        return map;
     }
 
     /**

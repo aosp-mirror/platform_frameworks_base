@@ -25,7 +25,7 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
-import com.android.server.AppOpsService;
+import com.android.server.appop.AppOpsService;
 
 import org.junit.Before;
 import org.junit.Test;
