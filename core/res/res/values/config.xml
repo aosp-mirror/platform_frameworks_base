@@ -3759,4 +3759,7 @@
 
     <!-- Whether cbrs is supported on the device or not -->
     <bool translatable="false" name="config_cbrs_supported">false</bool>
+
+    <!-- Whether or not aware is enabled by default -->
+    <bool name="config_awareSettingAvailable">false</bool>
 </resources>

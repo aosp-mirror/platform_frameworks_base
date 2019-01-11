@@ -2378,6 +2378,10 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                 SecureSettingsProto.THEME_CUSTOMIZATION_OVERLAY_PACKAGES);
 
+        dumpSetting(s, p,
+                Settings.Secure.AWARE_ENABLED,
+                SecureSettingsProto.AWARE_ENABLED);
+
         // Please insert new settings using the same order as in SecureSettingsProto.
         p.end(token);
 

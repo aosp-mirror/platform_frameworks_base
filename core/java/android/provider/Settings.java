@@ -8436,6 +8436,13 @@ public final class Settings {
                 new SettingsValidators.PackageNameListValidator(",");
 
         /**
+         * Controls whether aware is enabled.
+         * @hide
+         */
+        public static final String AWARE_ENABLED = "aware_enabled";
+
+        private static final Validator AWARE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -8559,6 +8566,7 @@ public final class Settings {
             SKIP_GESTURE,
             SILENCE_GESTURE,
             THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+            AWARE_ENABLED,
         };
 
         /**
@@ -8731,6 +8739,7 @@ public final class Settings {
             VALIDATORS.put(SILENCE_GESTURE, SILENCE_GESTURE_VALIDATOR);
             VALIDATORS.put(THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                     THEME_CUSTOMIZATION_OVERLAY_PACKAGES_VALIDATOR);
+            VALIDATORS.put(AWARE_ENABLED, AWARE_ENABLED_VALIDATOR);
         }
 
         /**
