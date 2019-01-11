@@ -110,10 +110,10 @@ public class ViewNodeTest {
     @Test
     public void testAutofillIdMethods_explicitIdsConstructor() {
         AutofillId initialParentId = new AutofillId(42);
-        ViewStructureImpl structure = new ViewStructureImpl(initialParentId, 108);
+        ViewStructureImpl structure = new ViewStructureImpl(initialParentId, 108, 666);
         ViewNode node = structure.getNode();
 
-        assertThat(node.getAutofillId()).isEqualTo(new AutofillId(initialParentId, 108));
+        assertThat(node.getAutofillId()).isEqualTo(new AutofillId(initialParentId, 108, 666));
         assertThat(node.getParentAutofillId()).isEqualTo(initialParentId);
 
         AutofillId newChildId = new AutofillId(108);
