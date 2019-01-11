@@ -11,10 +11,10 @@ java_library {
     ]
 }
 
-// TODO: move to networking module with IpNeighborMonitor/ConnectivityPacketTracker and remove lib
-java_library {
-    name: "frameworks-net-shared-utils",
+filegroup {
+    name: "services-networkstack-shared-srcs",
     srcs: [
-        "java/android/net/util/FdEventsReader.java",
+        "java/android/net/util/FdEventsReader.java", // TODO: move to NetworkStack with IpClient
+        "java/android/net/shared/*.java",
     ]
 }

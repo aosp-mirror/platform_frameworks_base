@@ -824,8 +824,11 @@ aidl_interface {
     name: "networkstack-aidl-interfaces",
     local_include_dir: "core/java",
     srcs: [
+        "core/java/android/net/INetworkMonitor.aidl",
+        "core/java/android/net/INetworkMonitorCallbacks.aidl",
         "core/java/android/net/INetworkStackConnector.aidl",
         "core/java/android/net/INetworkStackStatusCallback.aidl",
+        "core/java/android/net/PrivateDnsConfigParcel.aidl",
         "core/java/android/net/dhcp/DhcpServingParamsParcel.aidl",
         "core/java/android/net/dhcp/IDhcpServer.aidl",
         "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
