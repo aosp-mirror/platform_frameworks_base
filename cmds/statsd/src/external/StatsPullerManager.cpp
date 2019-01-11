@@ -28,7 +28,6 @@
 #include "../statscompanion_util.h"
 #include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
-#include "ResourceThermalManagerPuller.h"
 #include "StatsCompanionServicePuller.h"
 #include "StatsPullerManager.h"
 #include "SubsystemSleepStatePuller.h"
@@ -147,7 +146,8 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           .puller =
                   new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
         // temperature
-        {android::util::TEMPERATURE, {.puller = new ResourceThermalManagerPuller()}},
+        {android::util::TEMPERATURE,
+          {.puller = new StatsCompanionServicePuller(android::util::TEMPERATURE)}},
         // binder_calls
         {android::util::BINDER_CALLS,
          {.additiveFields = {4, 5, 6, 8, 12},

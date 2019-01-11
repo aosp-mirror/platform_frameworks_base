@@ -2744,8 +2744,8 @@ message DiskSpace {
 
 /**
  * Pulls battery coulomb counter, which is the remaining battery charge in uAh.
- * Pulled from:
- *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ *
+ * Pulled from StatsCompanionService.java
  */
 message RemainingBatteryCapacity {
     optional int32 charge_micro_ampere_hour = 1;
