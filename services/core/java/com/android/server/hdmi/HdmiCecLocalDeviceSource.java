@@ -32,6 +32,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
 
     private static final String TAG = "HdmiCecLocalDeviceSource";
 
+    // Indicate if current device is Active Source or not
     private boolean mIsActiveSource = false;
 
     protected HdmiCecLocalDeviceSource(HdmiControlService service, int deviceType) {
@@ -47,6 +48,16 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         if (mService.isPowerStandbyOrTransient()) {
             mService.wakeUp();
         }
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected void sendStandby(int deviceId) {
+        assertRunOnServiceThread();
+
+        // Send standby to TV only for now
+        int targetAddress = Constants.ADDR_TV;
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(mAddress, targetAddress));
     }
 
     @ServiceThreadOnly
@@ -84,11 +95,10 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         int logicalAddress = message.getSource();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
-        if (physicalAddress != mService.getPhysicalAddress()
-                || !mActiveSource.equals(activeSource)) {
+        if (!mActiveSource.equals(activeSource)) {
             setActiveSource(activeSource);
-            setActiveSource(false);
         }
+        setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
         return true;
     }
 
@@ -104,7 +114,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    void setActiveSource(boolean on) {
+    void setIsActiveSource(boolean on) {
         assertRunOnServiceThread();
         mIsActiveSource = on;
     }

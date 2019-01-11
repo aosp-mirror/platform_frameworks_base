@@ -77,8 +77,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         // TODO(amyjojo) make System Audio Control controllable by users
         /*mSystemAudioControlFeatureEnabled =
         mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);*/
-        // TODO(b/80297700): set read-only property in config instead of setting here
-        SystemProperties.set(Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, "false");
         mAutoDeviceOff = mService.readBooleanSetting(
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, true);
         mAutoTvOff = mService.readBooleanSetting(
@@ -460,6 +458,13 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                 mSystemAudioActivated = newSystemAudioMode;
                 mService.announceSystemAudioModeChange(newSystemAudioMode);
             }
+        }
+        // Init arc whenever System Audio Mode is on
+        // Since some TV like LG don't request ARC on with System Audio Mode on request
+        if (newSystemAudioMode
+                && SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
+                && !isArcEnabled() && isDirectConnectToTv()) {
+            addAndStartAction(new ArcInitiationActionFromAvr(this));
         }
     }
 

@@ -140,6 +140,10 @@ public class HdmiControlService extends SystemService {
     static final int STANDBY_SCREEN_OFF = 0;
     static final int STANDBY_SHUTDOWN = 1;
 
+    private static final boolean isHdmiCecNeverClaimPlaybackLogicAddr =
+            SystemProperties.getBoolean(
+                    Constants.PROPERTY_HDMI_CEC_NEVER_CLAIM_PLAYBACK_LOGICAL_ADDRESS, false);
+
     /**
      * Interface to report send result.
      */
@@ -639,6 +643,10 @@ public class HdmiControlService extends SystemService {
         // A container for [Device type, Local device info].
         ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
         for (int type : mLocalDevices) {
+            if (type == HdmiDeviceInfo.DEVICE_PLAYBACK
+                    && isHdmiCecNeverClaimPlaybackLogicAddr) {
+                continue;
+            }
             HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
             if (localDevice == null) {
                 localDevice = HdmiCecLocalDevice.create(this, type);
@@ -1003,6 +1011,10 @@ public class HdmiControlService extends SystemService {
         if (connected && !isTvDevice()) {
             ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
             for (int type : mLocalDevices) {
+                if (type == HdmiDeviceInfo.DEVICE_PLAYBACK
+                        && isHdmiCecNeverClaimPlaybackLogicAddr) {
+                    continue;
+                }
                 HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
                 if (localDevice == null) {
                     localDevice = HdmiCecLocalDevice.create(this, type);
@@ -1650,6 +1662,9 @@ public class HdmiControlService extends SystemService {
                         return;
                     }
                     HdmiCecLocalDevice device = mCecController.getLocalDevice(deviceType);
+                    if (device == null) {
+                        device = audioSystem();
+                    }
                     if (device == null) {
                         Slog.w(TAG, "Local device not available");
                         return;
