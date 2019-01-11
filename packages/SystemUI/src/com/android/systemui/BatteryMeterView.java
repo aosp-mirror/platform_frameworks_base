@@ -71,11 +71,12 @@ public class BatteryMeterView extends LinearLayout implements
 
 
     @Retention(SOURCE)
-    @IntDef({MODE_DEFAULT, MODE_ON, MODE_OFF})
+    @IntDef({MODE_DEFAULT, MODE_ON, MODE_OFF, MODE_ESTIMATE})
     public @interface BatteryPercentMode {}
     public static final int MODE_DEFAULT = 0;
     public static final int MODE_ON = 1;
     public static final int MODE_OFF = 2;
+    public static final int MODE_ESTIMATE = 3;
 
     private final BatteryMeterDrawableBase mDrawable;
     private final String mSlotBattery;
@@ -93,6 +94,7 @@ public class BatteryMeterView extends LinearLayout implements
     // Some places may need to show the battery conditionally, and not obey the tuner
     private boolean mIgnoreTunerUpdates;
     private boolean mIsSubscribedForTunerUpdates;
+    private boolean mCharging;
 
     private int mDarkModeBackgroundColor;
     private int mDarkModeFillColor;
@@ -308,6 +310,7 @@ public class BatteryMeterView extends LinearLayout implements
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
         mDrawable.setBatteryLevel(level);
         mDrawable.setCharging(pluggedIn);
+        mCharging = pluggedIn;
         mLevel = level;
         updatePercentText();
         setContentDescription(
@@ -337,9 +340,19 @@ public class BatteryMeterView extends LinearLayout implements
     }
 
     private void updatePercentText() {
+        if (mBatteryController == null) {
+            return;
+        }
+
         if (mBatteryPercentView != null) {
-            mBatteryPercentView.setText(
-                    NumberFormat.getPercentInstance().format(mLevel / 100f));
+            if (mShowPercentMode == MODE_ESTIMATE && !mCharging) {
+                mBatteryController.getEstimatedTimeRemainingString((String estimate) -> {
+                    mBatteryPercentView.setText(estimate);
+                });
+            } else {
+                mBatteryPercentView.setText(
+                        NumberFormat.getPercentInstance().format(mLevel / 100f));
+            }
         }
     }
 
@@ -350,7 +363,7 @@ public class BatteryMeterView extends LinearLayout implements
                 SHOW_BATTERY_PERCENT, 0, mUser);
 
         if ((mShowPercentAvailable && systemSetting && mShowPercentMode != MODE_OFF)
-                || mShowPercentMode == MODE_ON) {
+                || mShowPercentMode == MODE_ON || mShowPercentMode == MODE_ESTIMATE) {
             if (!showing) {
                 mBatteryPercentView = loadPercentView();
                 if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);

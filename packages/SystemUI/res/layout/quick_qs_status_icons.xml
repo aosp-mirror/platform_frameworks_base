@@ -51,11 +51,4 @@
         android:layout_width="wrap_content"
         android:paddingEnd="2dp" />
 
-    <TextView
-        android:id="@+id/batteryRemainingText"
-        android:textAppearance="@style/TextAppearance.QS.TileLabel"
-        android:layout_height="match_parent"
-        android:layout_width="wrap_content"
-        android:gravity="center_vertical" />
-
 </LinearLayout>

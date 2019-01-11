@@ -27,9 +27,12 @@ import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
+import com.android.systemui.Dependency;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.Estimate;
 
@@ -56,6 +59,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     private final EnhancedEstimates mEstimates;
     private final ArrayList<BatteryController.BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<>();
+    private final ArrayList<EstimateFetchCompletion> mFetchCallbacks = new ArrayList<>();
     private final PowerManager mPowerManager;
     private final Handler mHandler;
     private final Context mContext;
@@ -70,6 +74,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private boolean mHasReceivedBattery = false;
     private Estimate mEstimate;
     private long mLastEstimateTimestamp = -1;
+    private boolean mFetchingEstimate = false;
 
     @Inject
     public BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates) {
@@ -197,18 +202,59 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @Override
-    public String getEstimatedTimeRemainingString() {
-        if (mEstimate == null
-                || System.currentTimeMillis() > mLastEstimateTimestamp + UPDATE_GRANULARITY_MSEC) {
-            updateEstimate();
+    public void getEstimatedTimeRemainingString(EstimateFetchCompletion completion) {
+        if (mEstimate != null
+                && mLastEstimateTimestamp > System.currentTimeMillis() - UPDATE_GRANULARITY_MSEC) {
+            String percentage = generateTimeRemainingString();
+            completion.onBatteryRemainingEstimateRetrieved(percentage);
+            return;
         }
-        // Estimates may not exist yet even if we've checked
+
+        // Need to fetch or refresh the estimate, but it may involve binder calls so offload the
+        // work
+        synchronized (mFetchCallbacks) {
+            mFetchCallbacks.add(completion);
+        }
+        updateEstimateInBackground();
+    }
+
+    @Nullable
+    private String generateTimeRemainingString() {
         if (mEstimate == null) {
             return null;
         }
-        final String percentage = NumberFormat.getPercentInstance().format((double) mLevel / 100.0);
+
+        String percentage = NumberFormat.getPercentInstance().format((double) mLevel / 100.0);
         return PowerUtil.getBatteryRemainingShortStringFormatted(
                 mContext, mEstimate.estimateMillis);
+    }
+
+    private void updateEstimateInBackground() {
+        if (mFetchingEstimate) {
+            // Already dispatched a fetch. It will notify all listeners when finished
+            return;
+        }
+
+        mFetchingEstimate = true;
+        Dependency.get(Dependency.BG_HANDLER).post(() -> {
+            mEstimate = mEstimates.getEstimate();
+            mLastEstimateTimestamp = System.currentTimeMillis();
+            mFetchingEstimate = false;
+
+            Dependency.get(Dependency.MAIN_HANDLER).post(this::notifyEstimateFetchCallbacks);
+        });
+    }
+
+    private void notifyEstimateFetchCallbacks() {
+        String estimate = generateTimeRemainingString();
+
+        synchronized (mFetchCallbacks) {
+            for (EstimateFetchCompletion completion : mFetchCallbacks) {
+                completion.onBatteryRemainingEstimateRetrieved(estimate);
+            }
+
+            mFetchCallbacks.clear();
+        }
     }
 
     private void updateEstimate() {
