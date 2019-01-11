@@ -97,6 +97,7 @@ public class QuickStepControllerTest extends SysuiTestCase {
         doReturn(HIT_TARGET_NONE).when(mNavigationBarView).getDownHitTarget();
         doReturn(backButton).when(mNavigationBarView).getBackButton();
         doReturn(mResources).when(mNavigationBarView).getResources();
+        doReturn(mContext).when(mNavigationBarView).getContext();
 
         mController = new QuickStepController(mContext);
         mController.setComponents(mNavigationBarView);
