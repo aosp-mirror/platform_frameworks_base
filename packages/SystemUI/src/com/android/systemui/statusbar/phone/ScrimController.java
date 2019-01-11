@@ -275,9 +275,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             holdWakeLock();
         }
 
-        // AOD wallpapers should fade away after a while
-        if (mWallpaperSupportsAmbientMode && mDozeParameters.getAlwaysOn()
-                && mState == ScrimState.AOD) {
+        // AOD wallpapers should fade away after a while.
+        // Docking pulses may take a long time, wallpapers should also fade away after a while.
+        if (mWallpaperSupportsAmbientMode && (
+                mDozeParameters.getAlwaysOn() && mState == ScrimState.AOD
+                        || mState == ScrimState.PULSING && mCallback != null
+                        && mCallback.isFadeOutWallpaper())) {
             if (!mWallpaperVisibilityTimedOut) {
                 mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
                         AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
@@ -329,7 +332,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     @VisibleForTesting
     protected void onHideWallpaperTimeout() {
-        if (mState != ScrimState.AOD) {
+        if (mState != ScrimState.AOD && mState != ScrimState.PULSING) {
             return;
         }
 
@@ -504,7 +507,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         // We want to override the back scrim opacity for the AOD state
         // when it's time to fade the wallpaper away.
-        boolean aodWallpaperTimeout = mState == ScrimState.AOD && mWallpaperVisibilityTimedOut;
+        boolean aodWallpaperTimeout = (mState == ScrimState.AOD || mState == ScrimState.PULSING)
+                && mWallpaperVisibilityTimedOut;
         // We also want to hide FLAG_SHOW_WHEN_LOCKED activities under the scrim.
         boolean occludedKeyguard = (mState == ScrimState.PULSING || mState == ScrimState.AOD)
                 && mKeyguardOccluded;
@@ -916,6 +920,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         default void onFinished() {
         }
         default void onCancelled() {
+        }
+        default boolean isFadeOutWallpaper() {
+            return false;
         }
     }
 
