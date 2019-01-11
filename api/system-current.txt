@@ -5986,6 +5986,7 @@ package android.telephony.ims {
     field public static final int DIALSTRING_SS_CONF = 1; // 0x1
     field public static final int DIALSTRING_USSD = 2; // 0x2
     field public static final java.lang.String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
+    field public static final java.lang.String EXTRA_ADDITIONAL_SIP_INVITE_FIELDS = "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
     field public static final java.lang.String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
     field public static final java.lang.String EXTRA_CHILD_NUMBER = "ChildNum";
     field public static final java.lang.String EXTRA_CNA = "cna";
