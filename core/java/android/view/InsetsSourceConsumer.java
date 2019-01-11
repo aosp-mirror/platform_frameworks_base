@@ -17,8 +17,8 @@
 package android.view;
 
 import android.annotation.Nullable;
-import android.view.SurfaceControl.Transaction;
 import android.view.InsetsState.InternalInsetType;
+import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -87,6 +87,11 @@ public class InsetsSourceConsumer {
         }
         mState.getSource(mType).setVisible(mVisible);
         return true;
+    }
+
+    @VisibleForTesting
+    public boolean isVisible() {
+        return mVisible;
     }
 
     private void setVisible(boolean visible) {
