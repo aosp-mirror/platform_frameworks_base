@@ -124,6 +124,10 @@ public abstract class ClientTransactionHandler {
     /** Restart the activity after it was stopped. */
     public abstract void performRestartActivity(IBinder token, boolean start);
 
+    /** Set pending activity configuration in case it will be updated by other transaction item. */
+    public abstract void updatePendingActivityConfiguration(IBinder activityToken,
+            Configuration overrideConfig);
+
     /** Deliver activity (override) configuration change. */
     public abstract void handleActivityConfigurationChanged(IBinder activityToken,
             Configuration overrideConfig, int displayId);

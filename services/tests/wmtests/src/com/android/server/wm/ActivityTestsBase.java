@@ -264,6 +264,8 @@ class ActivityTestsBase {
                     .setOrientation(anyInt(), any(), any());
             doCallRealMethod().when(activity.mAppWindowToken).setOrientation(anyInt());
             doNothing().when(activity).removeWindowContainer();
+            doReturn(mock(Configuration.class)).when(activity.mAppWindowToken)
+                    .getRequestedOverrideConfiguration();
 
             if (mTaskRecord != null) {
                 mTaskRecord.addActivityToTop(activity);
