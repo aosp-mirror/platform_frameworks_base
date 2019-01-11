@@ -17,7 +17,6 @@
 package com.android.server.connectivity;
 
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
@@ -29,13 +28,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.RouteInfo;
+import android.net.shared.PrivateDnsConfig;
 import android.os.INetworkManagementService;
 import android.provider.Settings;
 import android.support.test.filters.SmallTest;
@@ -43,17 +42,15 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
 
 import com.android.internal.util.test.FakeSettingsProvider;
-import com.android.server.connectivity.DnsManager.PrivateDnsConfig;
-import com.android.server.connectivity.MockableSystemProperties;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.net.InetAddress;
 import java.util.Arrays;
-
-import org.junit.runner.RunWith;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 /**
  * Tests for {@link DnsManager}.
@@ -133,7 +130,7 @@ public class DnsManagerTest {
                 PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
         Settings.Global.putString(mContentResolver, PRIVATE_DNS_SPECIFIER, "strictmode.com");
         mDnsManager.updatePrivateDns(new Network(TEST_NETID),
-                new DnsManager.PrivateDnsConfig("strictmode.com", new InetAddress[] {
+                new PrivateDnsConfig("strictmode.com", new InetAddress[] {
                     InetAddress.parseNumericAddress("6.6.6.6"),
                     InetAddress.parseNumericAddress("2001:db8:66:66::1")
                     }));

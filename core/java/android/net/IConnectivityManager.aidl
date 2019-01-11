@@ -167,6 +167,8 @@ interface IConnectivityManager
 
     int getMultipathPreference(in Network Network);
 
+    NetworkRequest getDefaultRequest();
+
     int getRestoreDefaultNetworkDelay(int networkType);
 
     boolean addVpnAddress(String address, int prefixLength);

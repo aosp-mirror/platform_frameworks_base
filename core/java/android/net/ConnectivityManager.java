@@ -2051,6 +2051,16 @@ public class ConnectivityManager {
         return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
+    /** @hide */
+    public NetworkRequest getDefaultRequest() {
+        try {
+            // This is not racy as the default request is final in ConnectivityService.
+            return mService.getDefaultRequest();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /* TODO: These permissions checks don't belong in client-side code. Move them to
      * services.jar, possibly in com.android.server.net. */
 

@@ -38,9 +38,9 @@ public class Stopwatch {
         return (isStarted() && !isStopped());
     }
 
-    // Returning |this| makes possible the following usage pattern:
-    //
-    //     Stopwatch s = new Stopwatch().start();
+    /**
+     * Start the Stopwatch.
+     */
     public Stopwatch start() {
         if (!isStarted()) {
             mStartTimeMs = SystemClock.elapsedRealtime();
@@ -48,7 +48,10 @@ public class Stopwatch {
         return this;
     }
 
-    // Returns the total time recorded, in milliseconds, or 0 if not started.
+    /**
+     * Stop the Stopwatch.
+     * @return the total time recorded, in milliseconds, or 0 if not started.
+     */
     public long stop() {
         if (isRunning()) {
             mStopTimeMs = SystemClock.elapsedRealtime();
@@ -57,9 +60,11 @@ public class Stopwatch {
         return (mStopTimeMs - mStartTimeMs);
     }
 
-    // Returns the total time recorded to date, in milliseconds.
-    // If the Stopwatch is not running, returns the same value as stop(),
-    // i.e. either the total time recorded before stopping or 0.
+    /**
+     * Return the total time recorded to date, in milliseconds.
+     * If the Stopwatch is not running, returns the same value as stop(),
+     * i.e. either the total time recorded before stopping or 0.
+     */
     public long lap() {
         if (isRunning()) {
             return (SystemClock.elapsedRealtime() - mStartTimeMs);
@@ -68,6 +73,9 @@ public class Stopwatch {
         }
     }
 
+    /**
+     * Reset the Stopwatch. It will be stopped when this method returns.
+     */
     public void reset() {
         mStartTimeMs = 0;
         mStopTimeMs = 0;
