@@ -19,7 +19,7 @@ package android.media;
 import static android.media.MediaConstants.KEY_ALLOWED_COMMANDS;
 import static android.media.MediaConstants.KEY_PACKAGE_NAME;
 import static android.media.MediaConstants.KEY_PID;
-import static android.media.MediaConstants.KEY_SESSION2_STUB;
+import static android.media.MediaConstants.KEY_SESSION2LINK;
 import static android.media.Session2Command.RESULT_ERROR_UNKNOWN_ERROR;
 import static android.media.Session2Command.RESULT_INFO_SKIPPED;
 import static android.media.Session2Token.TYPE_SESSION;
@@ -41,15 +41,15 @@ import java.util.concurrent.Executor;
 
 /**
  * Allows an app to interact with an active {@link MediaSession2} or a
- * {@link MediaSession2Service} which would provide {@link MediaSession2}. Media buttons and other
+ * MediaSession2Service which would provide {@link MediaSession2}. Media buttons and other
  * commands can be sent to the session.
  * <p>
  * This API is not generally intended for third party application developers.
  * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
  * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
  * for consistent behavior across all devices.
- * @hide
  */
+// TODO: use @link for MediaSession2Service
 public class MediaController2 implements AutoCloseable {
     static final String TAG = "MediaController2";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -130,8 +130,8 @@ public class MediaController2 implements AutoCloseable {
         synchronized (mLock) {
             if (mSessionBinder != null) {
                 try {
-                    mSessionBinder.unlinkToDeath(mDeathRecipient, 0);
                     mSessionBinder.disconnect(mControllerStub, getNextSeqNumber());
+                    mSessionBinder.unlinkToDeath(mDeathRecipient, 0);
                 } catch (RuntimeException e) {
                     // No-op
                 }
@@ -153,6 +153,7 @@ public class MediaController2 implements AutoCloseable {
      * @return a token which will be sent together in {@link ControllerCallback#onCommandResult}
      *        when its result is received.
      */
+    @NonNull
     public Object sendSessionCommand(@NonNull Session2Command command, @Nullable Bundle args) {
         if (command == null) {
             throw new IllegalArgumentException("command shouldn't be null");
@@ -208,7 +209,7 @@ public class MediaController2 implements AutoCloseable {
     void onConnected(int seq, Bundle connectionResult) {
         final long token = Binder.clearCallingIdentity();
         try {
-            Session2Link sessionBinder = connectionResult.getParcelable(KEY_SESSION2_STUB);
+            Session2Link sessionBinder = connectionResult.getParcelable(KEY_SESSION2LINK);
             Session2CommandGroup allowedCommands =
                     connectionResult.getParcelable(KEY_ALLOWED_COMMANDS);
             if (DEBUG) {
@@ -349,7 +350,7 @@ public class MediaController2 implements AutoCloseable {
          * @return the result for the session command. A runtime exception will be thrown if null
          *         is returned.
          */
-        @NonNull
+        @Nullable
         public Session2Command.Result onSessionCommand(@NonNull MediaController2 controller,
                 @NonNull Session2Command command, @Nullable Bundle args) {
             return null;

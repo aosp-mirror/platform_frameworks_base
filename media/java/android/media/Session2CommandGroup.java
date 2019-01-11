@@ -59,6 +59,7 @@ public final class Session2CommandGroup implements Parcelable {
      *
      * @param commands The collection of commands to copy.
      */
+    @SuppressWarnings("WeakerAccess") /* synthetic access */
     Session2CommandGroup(@Nullable Collection<Session2Command> commands) {
         if (commands != null) {
             mCommands.addAll(commands);
