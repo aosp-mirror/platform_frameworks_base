@@ -1149,6 +1149,7 @@ package android.content {
 package android.content.pm {
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    method public boolean isEncryptionAware();
     method public boolean isInstantApp();
     field public java.lang.String credentialProtectedDataDir;
     field public int targetSandboxVersion;

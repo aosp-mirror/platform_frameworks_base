@@ -1866,7 +1866,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE) != 0;
     }
 
-    /** @hide */
+    /**
+     * Check whether the application is encryption aware.
+     *
+     * @see #isDirectBootAware()
+     * @see #isPartiallyDirectBootAware()
+     *
+     * @hide
+     */
+    @SystemApi
     public boolean isEncryptionAware() {
         return isDirectBootAware() || isPartiallyDirectBootAware();
     }
