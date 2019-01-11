@@ -39,6 +39,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.SyncResultReceiver;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
@@ -50,8 +51,9 @@ import java.util.ArrayList;
 /**
  * A service used to observe the contents of the screen.
  *
- * <p>The data collected by this service can be analyzed and combined with other sources to provide
- * contextual data in other areas of the system such as Autofill.
+ * <p>The data collected by this service can be analyzed on-device and combined
+ * with other sources to provide contextual data in other areas of the system
+ * such as Autofill.
  */
 public final class ContentCaptureManagerService extends
         AbstractMasterSystemService<ContentCaptureManagerService, ContentCapturePerUserService> {
@@ -192,6 +194,22 @@ public final class ContentCaptureManagerService extends
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
                 service.finishSessionLocked(sessionId);
+            }
+        }
+
+        @Override
+        public void getReceiverServiceComponentName(@UserIdInt int userId,
+                IResultReceiver receiver) {
+            ComponentName connectedServiceComponentName;
+            synchronized (mLock) {
+                final ContentCapturePerUserService service = getServiceForUserLocked(userId);
+                connectedServiceComponentName = service.getServiceComponentName();
+            }
+            try {
+                receiver.send(0, SyncResultReceiver.bundleFor(connectedServiceComponentName));
+            } catch (RemoteException e) {
+                // Ignore exception as we need to be resilient against app behavior.
+                Slog.w(TAG, "Unable to send service component name: " + e);
             }
         }
 
