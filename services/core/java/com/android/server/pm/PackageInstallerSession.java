@@ -2009,6 +2009,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mCallback.onSessionFinished(this, success);
     }
 
+    /** {@hide} */
     void setStagedSessionReady() {
         synchronized (mLock) {
             mStagedSessionReady = true;
@@ -2016,6 +2017,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionFailed = false;
             mStagedSessionErrorCode = SessionInfo.NO_ERROR;
         }
+        mCallback.onStagedSessionChanged(this);
     }
 
     /** {@hide} */
@@ -2026,6 +2028,33 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionFailed = true;
             mStagedSessionErrorCode = errorCode;
         }
+        mCallback.onStagedSessionChanged(this);
+    }
+
+    /** {@hide} */
+    void setStagedSessionApplied() {
+        synchronized (mLock) {
+            mStagedSessionReady = false;
+            mStagedSessionApplied = true;
+            mStagedSessionFailed = false;
+            mStagedSessionErrorCode = SessionInfo.NO_ERROR;
+        }
+        mCallback.onStagedSessionChanged(this);
+    }
+
+    /** {@hide} */
+    boolean isStagedSessionReady() {
+        return mStagedSessionReady;
+    }
+
+    /** {@hide} */
+    boolean isStagedSessionApplied() {
+        return mStagedSessionApplied;
+    }
+
+    /** {@hide} */
+    boolean isStagedSessionFailed() {
+        return mStagedSessionFailed;
     }
 
     private void destroyInternal() {
@@ -2221,6 +2250,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return permissionsArray;
     }
 
+    // Sanity check to be performed when the session is restored from an external file. Only one
+    // of the session states should be true, or none of them.
+    private static boolean isStagedSessionStateValid(boolean isReady, boolean isApplied,
+                                                     boolean isFailed) {
+        return (!isReady && !isApplied && !isFailed)
+                || (isReady && !isApplied && !isFailed)
+                || (!isReady && isApplied && !isFailed)
+                || (!isReady && !isApplied && isFailed);
+    }
+
     /**
      * Read new session from a {@link XmlPullParser xml description} and create it.
      *
@@ -2286,6 +2325,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isFailed = readBooleanAttribute(in, ATTR_IS_FAILED);
         final boolean isApplied = readBooleanAttribute(in, ATTR_IS_APPLIED);
         final int stagedSessionErrorCode = readIntAttribute(in, ATTR_STAGED_SESSION_ERROR_CODE);
+
+        if (!isStagedSessionStateValid(isReady, isApplied, isFailed)) {
+            throw new IllegalArgumentException("Can't restore staged session with invalid state.");
+        }
 
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 installerThread, stagingManager, sessionId, userId, installerPackageName,
