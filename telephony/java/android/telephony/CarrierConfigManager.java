@@ -2340,6 +2340,34 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORT_EMERGENCY_DIALER_SHORTCUT_BOOL =
             "support_emergency_dialer_shortcut_bool";
 
+    /**
+     * Controls RSRP threshold at which AlternativeNetworkService will decide whether
+     * the opportunistic network is good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT =
+            "opportunistic_network_entry_threshold_rsrp_int";
+
+    /**
+     * Controls RSSNR threshold at which AlternativeNetworkService will decide whether
+     * the opportunistic network is good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT =
+            "opportunistic_network_entry_threshold_rssnr_int";
+
+    /**
+     * Controls RSRP threshold below which AlternativeNetworkService will decide whether
+     * the opportunistic network available is not good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT =
+            "opportunistic_network_exit_threshold_rsrp_int";
+
+    /**
+     * Controls RSSNR threshold below which AlternativeNetworkService will decide whether
+     * the opportunistic network available is not good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT =
+            "opportunistic_network_exit_threshold_rssnr_int";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2696,6 +2724,14 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALL_WAITING_OVER_UT_WARNING_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_CLIR_NETWORK_DEFAULT_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_EMERGENCY_DIALER_SHORTCUT_BOOL, true);
+        /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT, -108);
+        /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_MODERATE */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT, -118);
+        /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_GOOD */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 45);
+        /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_MODERATE */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 10);
     }
 
     /**
