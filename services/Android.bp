@@ -24,6 +24,7 @@ java_library {
         "services.contentcapture",
         "services.coverage",
         "services.devicepolicy",
+        "services.ipmemorystore",
         "services.midi",
         "services.net",
         "services.print",

@@ -746,6 +746,7 @@ java_defaults {
         "android.hardware.radio-V1.3-java",
         "android.hardware.radio-V1.4-java",
         "android.hardware.usb.gadget-V1.0-java",
+        "networkstack-aidl-interfaces-java",
         "netd_aidl_interface-java",
         "devicepolicyprotosnano",
     ],
@@ -875,12 +876,14 @@ aidl_interface {
     srcs: [
         "core/java/android/net/INetworkMonitor.aidl",
         "core/java/android/net/INetworkMonitorCallbacks.aidl",
+        "core/java/android/net/IIpMemoryStore.aidl",
         "core/java/android/net/INetworkStackConnector.aidl",
         "core/java/android/net/INetworkStackStatusCallback.aidl",
         "core/java/android/net/PrivateDnsConfigParcel.aidl",
         "core/java/android/net/dhcp/DhcpServingParamsParcel.aidl",
         "core/java/android/net/dhcp/IDhcpServer.aidl",
         "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
+        "core/java/android/net/ipmemorystore/**/*.aidl",
     ],
     api_dir: "aidl/networkstack",
 }
