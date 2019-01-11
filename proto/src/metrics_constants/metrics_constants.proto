@@ -5325,7 +5325,7 @@ message MetricsEvent {
     // OS: P
     ACCESSIBILITY_VIBRATION = 1292;
 
-    // OPEN: Settings > Accessibility > Vibration > Ring & notification vibration
+    // OPEN: Settings > Accessibility > Vibration > Notification vibration
     // CATEGORY: SETTINGS
     // OS: P
     ACCESSIBILITY_VIBRATION_NOTIFICATION = 1293;
@@ -6762,6 +6762,11 @@ message MetricsEvent {
     // CATEGORY: CONVERSATION_ACTIONS
     // OS: Q
     ACTION_TEXT_CLASSIFIER_ACTIONS_GENERATED = 1619;
+
+    // OPEN: Settings > Accessibility > Vibration > Ring vibration
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACCESSIBILITY_VIBRATION_RING = 1620;
 
     // ---- End Q Constants, all Q constants go above this line ----
 
