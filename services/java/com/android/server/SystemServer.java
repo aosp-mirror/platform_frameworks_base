@@ -1020,6 +1020,18 @@ public final class SystemServer {
             Slog.e("System", "************ Failure starting core service", e);
         }
 
+        // Before things start rolling, be sure we have decided whether
+        // we are in safe mode.
+        final boolean safeMode = wm.detectSafeMode();
+        if (safeMode) {
+            // If yes, immediately turn on the global setting for airplane mode.
+            // Note that this does not send broadcasts at this stage because
+            // subsystems are not yet up. We will send broadcasts later to ensure
+            // all listeners have the chance to react with special handling.
+            Settings.Global.putInt(context.getContentResolver(),
+                    Settings.Global.AIRPLANE_MODE_ON, 1);
+        }
+
         StatusBarManagerService statusBar = null;
         INotificationManager notification = null;
         LocationManagerService location = null;
@@ -1786,9 +1798,6 @@ public final class SystemServer {
         mSystemServiceManager.startService(StatsCompanionService.Lifecycle.class);
         traceEnd();
 
-        // Before things start rolling, be sure we have decided whether
-        // we are in safe mode.
-        final boolean safeMode = wm.detectSafeMode();
         if (safeMode) {
             traceBeginAndSlog("EnterSafeModeAndDisableJitCompilation");
             mActivityManagerService.enterSafeMode();
@@ -1985,6 +1994,20 @@ public final class SystemServer {
                 reportWtf("starting System UI", e);
             }
             traceEnd();
+            // Enable airplane mode in safe mode. setAirplaneMode() cannot be called
+            // earlier as it sends broadcasts to other services.
+            // TODO: This may actually be too late if radio firmware already started leaking
+            // RF before the respective services start. However, fixing this requires changes
+            // to radio firmware and interfaces.
+            if (safeMode) {
+                traceBeginAndSlog("EnableAirplaneModeInSafeMode");
+                try {
+                    connectivityF.setAirplaneMode(true);
+                } catch (Throwable e) {
+                    reportWtf("enabling Airplane Mode during Safe Mode bootup", e);
+                }
+                traceEnd();
+            }
             traceBeginAndSlog("MakeNetworkManagementServiceReady");
             try {
                 if (networkManagementF != null) {
