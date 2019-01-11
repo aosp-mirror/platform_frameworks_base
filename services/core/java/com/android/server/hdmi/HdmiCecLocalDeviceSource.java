@@ -19,8 +19,12 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.hdmi.Constants.LocalActivePort;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 import java.util.List;
@@ -34,6 +38,20 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
 
     // Indicate if current device is Active Source or not
     private boolean mIsActiveSource = false;
+
+    // Device has cec switch functionality or not.
+    // Default is false.
+    protected boolean mIsSwitchDevice = SystemProperties.getBoolean(
+            Constants.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
+
+    // Local active port number used for Routing Control.
+    // This records the default active port or the previous valid active port.
+    // Default is HOME input.
+    // Note that we don't save active path here because for source device,
+    // new Active Source physical address might not match the local active path
+    @GuardedBy("mLock")
+    @LocalActivePort
+    private int mLocalActivePort = Constants.CEC_SWITCH_HOME;
 
     protected HdmiCecLocalDeviceSource(HdmiControlService service, int deviceType) {
         super(service, deviceType);
@@ -99,6 +117,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
             setActiveSource(activeSource);
         }
         setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
+        switchInputOnReceivingNewActivePath(physicalAddress);
         return true;
     }
 
@@ -106,16 +125,130 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleRequestActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (mIsActiveSource) {
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
-                    mAddress, mService.getPhysicalAddress()));
-        }
+        maySendActiveSource(message.getSource());
         return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleSetStreamPath(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        // If current device is the target path, set to Active Source.
+        // If the path is under the current device, should switch
+        if (physicalAddress == mService.getPhysicalAddress() && mService.isPlaybackDevice()) {
+            setAndBroadcastActiveSource(message, physicalAddress);
+        }
+        switchInputOnReceivingNewActivePath(physicalAddress);
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRoutingChange(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int newPath = HdmiUtils.twoBytesToInt(message.getParams(), 2);
+        // if the current device is a pure playback device
+        if (!mIsSwitchDevice
+                && newPath == mService.getPhysicalAddress()
+                && mService.isPlaybackDevice()) {
+            setAndBroadcastActiveSource(message, newPath);
+        }
+        handleRoutingChangeAndInformation(newPath, message);
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRoutingInformation(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        // if the current device is a pure playback device
+        if (!mIsSwitchDevice
+                && physicalAddress == mService.getPhysicalAddress()
+                && mService.isPlaybackDevice()) {
+            setAndBroadcastActiveSource(message, physicalAddress);
+        }
+        handleRoutingChangeAndInformation(physicalAddress, message);
+        return true;
+    }
+
+    // Method to switch Input with the new Active Path.
+    // All the devices with Switch functionality should implement this.
+    protected void switchInputOnReceivingNewActivePath(int physicalAddress) {
+        // do nothing
+    }
+
+    // Source device with Switch functionality should implement this method.
+    // TODO(): decide which type will handle the routing when multi device type is supported
+    protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
+        // do nothing
+    }
+
+    // Active source claiming needs to be handled in the parent class
+    // since we decide who will be the active source when the device supports
+    // multiple device types in this method.
+    // This method should only be called when the device can be the active source.
+    protected void setAndBroadcastActiveSource(HdmiCecMessage message, int physicalAddress) {
+        // If the device has both playback and audio system logical addresses,
+        // playback will claim active source. Otherwise audio system will.
+        HdmiCecLocalDevice deviceToBeActiveSource = mService.playback();
+        if (deviceToBeActiveSource == null) {
+            deviceToBeActiveSource = mService.audioSystem();
+        }
+        if (this == deviceToBeActiveSource) {
+            ActiveSource activeSource = ActiveSource.of(mAddress, physicalAddress);
+            setIsActiveSource(true);
+            setActiveSource(activeSource);
+            wakeUpIfActiveSource();
+            maySendActiveSource(message.getSource());
+        }
     }
 
     @ServiceThreadOnly
     void setIsActiveSource(boolean on) {
         assertRunOnServiceThread();
         mIsActiveSource = on;
+    }
+
+    @ServiceThreadOnly
+    // Check if current device is the Active Source
+    boolean isActiveSource() {
+        assertRunOnServiceThread();
+        return mIsActiveSource;
+    }
+
+    protected void wakeUpIfActiveSource() {
+        if (!mIsActiveSource) {
+            return;
+        }
+        // Wake up the device if the power is in standby mode
+        if (mService.isPowerStandbyOrTransient()) {
+            mService.wakeUp();
+        }
+        return;
+    }
+
+    protected void maySendActiveSource(int dest) {
+        if (mIsActiveSource) {
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
+                    mAddress, mService.getPhysicalAddress()));
+        }
+    }
+
+    @VisibleForTesting
+    protected void setLocalActivePort(@LocalActivePort int portId) {
+        synchronized (mLock) {
+            mLocalActivePort = portId;
+        }
+    }
+
+    // To get the local active port to switch to
+    // when receivng routing change or information.
+    @LocalActivePort
+    protected int getLocalActivePort() {
+        synchronized (mLock) {
+            return mLocalActivePort;
+        }
     }
 }

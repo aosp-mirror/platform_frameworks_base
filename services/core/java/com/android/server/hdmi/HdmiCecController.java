@@ -22,20 +22,25 @@ import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.SparseArray;
+
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.HdmiAnnotations.IoThreadOnly;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
+
+import libcore.util.EmptyArray;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.concurrent.ArrayBlockingQueue;
-import libcore.util.EmptyArray;
+import java.util.function.Predicate;
+
 import sun.util.locale.LanguageTag;
 
 /**
@@ -112,10 +117,18 @@ final class HdmiCecController {
 
     private final NativeWrapper mNativeWrapperImpl;
 
+    /** List of logical addresses that should not be assigned to the current device.
+     *
+     * <p>Parsed from {@link Constants#PROPERTY_HDMI_CEC_NEVER_ASSIGN_LOGICAL_ADDRESSES}
+     */
+    private final List<Integer> mNeverAssignLogicalAddresses;
+
     // Private constructor.  Use HdmiCecController.create().
     private HdmiCecController(HdmiControlService service, NativeWrapper nativeWrapper) {
         mService = service;
         mNativeWrapperImpl = nativeWrapper;
+        mNeverAssignLogicalAddresses = mService.getIntList(SystemProperties.get(
+            Constants.PROPERTY_HDMI_CEC_NEVER_ASSIGN_LOGICAL_ADDRESSES));
     }
 
     /**
@@ -208,7 +221,8 @@ final class HdmiCecController {
         for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
             int curAddress = (startAddress + i) % NUM_LOGICAL_ADDRESS;
             if (curAddress != Constants.ADDR_UNREGISTERED
-                    && deviceType == HdmiUtils.getTypeFromAddress(curAddress)) {
+                    && deviceType == HdmiUtils.getTypeFromAddress(curAddress)
+                    && !mNeverAssignLogicalAddresses.contains(curAddress)) {
                 boolean acked = false;
                 for (int j = 0; j < HdmiConfig.ADDRESS_ALLOCATION_RETRY; ++j) {
                     if (sendPollMessage(curAddress, curAddress, 1)) {

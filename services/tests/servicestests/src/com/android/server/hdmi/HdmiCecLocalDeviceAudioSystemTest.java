@@ -17,6 +17,7 @@ package com.android.server.hdmi;
 
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
+import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TUNER_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
@@ -53,6 +54,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDeviceAudioSystem mHdmiCecLocalDeviceAudioSystem;
+    private HdmiCecLocalDevicePlayback mHdmiCecLocalDevicePlayback;
     private FakeNativeWrapper mNativeWrapper;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
@@ -133,7 +135,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
         mMyLooper = mTestLooper.getLooper();
         mHdmiCecLocalDeviceAudioSystem = new HdmiCecLocalDeviceAudioSystem(mHdmiControlService);
+        mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService);
         mHdmiCecLocalDeviceAudioSystem.init();
+        mHdmiCecLocalDevicePlayback.init();
         mHdmiControlService.setIoLooper(mMyLooper);
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController =
@@ -142,6 +146,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDeviceAudioSystem);
+        mLocalDevices.add(mHdmiCecLocalDevicePlayback);
         mHdmiControlService.initPortInfo();
         // No TV device interacts with AVR so system audio control won't be turned on here
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
@@ -554,6 +559,65 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
 
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleSystemAudioModeRequest(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void handleActiveSource_activeSourceFromTV_swithToArc() {
+        mHdmiCecLocalDeviceAudioSystem.setArcStatus(true);
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+
+        ActiveSource expectedActiveSource = ActiveSource.of(ADDR_TV, 0x0000);
+
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleActiveSource(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActiveSource())
+            .isEqualTo(expectedActiveSource);
+    }
+
+    @Test
+    public void handleRoutingChange_currentActivePortIsHome() {
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x3000, mAvrPhysicalAddress);
+
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_AUDIO_SYSTEM, mAvrPhysicalAddress);
+        ActiveSource expectedActiveSource = ActiveSource.of(ADDR_AUDIO_SYSTEM, mAvrPhysicalAddress);
+        int expectedLocalActivePort = Constants.CEC_SWITCH_HOME;
+
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRoutingChange(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActiveSource())
+            .isEqualTo(expectedActiveSource);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getLocalActivePort())
+            .isEqualTo(expectedLocalActivePort);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void handleRoutingInformation_currentActivePortIsHDMI1() {
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingInformation(ADDR_TV, 0x2000);
+        mHdmiCecLocalDeviceAudioSystem.setLocalActivePort(Constants.CEC_SWITCH_HDMI1);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildRoutingInformation(ADDR_AUDIO_SYSTEM, 0x2100);
+
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRoutingInformation(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void handleRoutingChange_homeIsActive_playbackSendActiveSource() {
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x0000, 0x2000);
+
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1, 0x2000);
+
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRoutingChange(message)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
