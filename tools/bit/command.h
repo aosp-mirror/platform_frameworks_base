@@ -25,7 +25,7 @@ using namespace std;
 
 struct Command
 {
-    Command(const string& prog);
+    explicit Command(const string& prog);
     ~Command();
 
     void AddArg(const string& arg);
