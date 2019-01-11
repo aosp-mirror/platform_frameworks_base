@@ -48,6 +48,15 @@ public final class DeviceConfig {
      */
     public static final Uri CONTENT_URI = Uri.parse("content://" + Settings.AUTHORITY + "/config");
 
+    /**
+     * Namespace for all input-related features that are used at the native level.
+     * These features are applied at reboot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static Map<OnPropertyChangedListener, Pair<String, Executor>> sListeners =
