@@ -50,6 +50,7 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Process.BLUETOOTH_UID;
 import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.os.Process.NETWORK_STACK_UID;
 import static android.os.Process.NFC_UID;
 import static android.os.Process.PHONE_UID;
 import static android.os.Process.PROC_CHAR;
@@ -14343,6 +14344,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             case BLUETOOTH_UID:
             case NFC_UID:
             case SE_UID:
+            case NETWORK_STACK_UID:
                 isCallerSystem = true;
                 break;
             default:
