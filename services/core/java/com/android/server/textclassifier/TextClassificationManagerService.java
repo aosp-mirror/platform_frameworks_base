@@ -510,7 +510,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 Slog.d(LOG_TAG, "Binding to " + serviceIntent.getComponent());
                 willBind = mContext.bindServiceAsUser(
                         serviceIntent, mConnection,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE
+                                | Context.BIND_RESTRICT_ASSOCIATIONS,
                         UserHandle.of(mUserId));
                 mBinding = willBind;
             } finally {

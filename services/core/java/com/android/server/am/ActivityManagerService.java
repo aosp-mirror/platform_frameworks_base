@@ -2431,6 +2431,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
+     * Ensures that the given package name has an explicit set of allowed associations.
+     * If it does not, give it an empty set.
+     */
+    void requireAllowedAssociationsLocked(String packageName) {
+        if (mAllowedAssociations == null) {
+            mAllowedAssociations = new ArrayMap<>(
+                    SystemConfig.getInstance().getAllowedAssociations());
+        }
+        if (mAllowedAssociations.get(packageName) == null) {
+            mAllowedAssociations.put(packageName, new ArraySet<>());
+        }
+    }
+
+    /**
      * Returns true if the package {@code pkg1} running under user handle {@code uid1} is
      * allowed association with the package {@code pkg2} running under user handle {@code uid2}.
      * <p> If either of the packages are running as  part of the core system, then the
@@ -2438,7 +2452,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     boolean validateAssociationAllowedLocked(String pkg1, int uid1, String pkg2, int uid2) {
         if (mAllowedAssociations == null) {
-            mAllowedAssociations = SystemConfig.getInstance().getAllowedAssociations();
+            mAllowedAssociations = new ArrayMap<>(
+                    SystemConfig.getInstance().getAllowedAssociations());
         }
         // Interactions with the system uid are always allowed, since that is the core system
         // that everyone needs to be able to interact with. Also allow reflexive associations

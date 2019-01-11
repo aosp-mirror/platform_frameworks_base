@@ -337,6 +337,15 @@ public abstract class Context {
     public static final int BIND_ADJUST_BELOW_PERCEPTIBLE = 0x0100;
 
     /**
+     * @hide Flag for {@link #bindService}: the service being bound to represents a
+     * protected system component, so must have association restrictions applied to it.
+     * That is, a system config must have one or more allow-association tags limiting
+     * which packages it can interact with.  If it does not have any such association
+     * restrictions, a default empty set will be created.
+     */
+    public static final int BIND_RESTRICT_ASSOCIATIONS = 0x00200000;
+
+    /**
      * @hide Flag for {@link #bindService}: allows binding to a service provided
      * by an instant app. Note that the caller may not have access to the instant
      * app providing the service which is a violation of the instant app sandbox.
