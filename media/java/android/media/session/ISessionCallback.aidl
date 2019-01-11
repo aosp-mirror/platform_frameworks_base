@@ -17,7 +17,7 @@ package android.media.session;
 
 import android.content.Intent;
 import android.media.Rating;
-import android.media.session.ISessionControllerCallback;
+import android.media.session.ControllerCallbackLink;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -26,46 +26,46 @@ import android.os.ResultReceiver;
  * @hide
  */
 oneway interface ISessionCallback {
-    void onCommand(String packageName, int pid, int uid, ISessionControllerCallback caller,
+    void notifyCommand(String packageName, int pid, int uid, in ControllerCallbackLink caller,
             String command, in Bundle args, in ResultReceiver cb);
-    void onMediaButton(String packageName, int pid, int uid, in Intent mediaButtonIntent,
+    void notifyMediaButton(String packageName, int pid, int uid, in Intent mediaButtonIntent,
             int sequenceNumber, in ResultReceiver cb);
-    void onMediaButtonFromController(String packageName, int pid, int uid,
-            ISessionControllerCallback caller, in Intent mediaButtonIntent);
+    void notifyMediaButtonFromController(String packageName, int pid, int uid,
+            in ControllerCallbackLink caller, in Intent mediaButtonIntent);
 
     // These callbacks are for the TransportPerformer
-    void onPrepare(String packageName, int pid, int uid, ISessionControllerCallback caller);
-    void onPrepareFromMediaId(String packageName, int pid, int uid,
-            ISessionControllerCallback caller, String mediaId, in Bundle extras);
-    void onPrepareFromSearch(String packageName, int pid, int uid,
-            ISessionControllerCallback caller, String query, in Bundle extras);
-    void onPrepareFromUri(String packageName, int pid, int uid, ISessionControllerCallback caller,
+    void notifyPrepare(String packageName, int pid, int uid, in ControllerCallbackLink caller);
+    void notifyPrepareFromMediaId(String packageName, int pid, int uid,
+            in ControllerCallbackLink caller, String mediaId, in Bundle extras);
+    void notifyPrepareFromSearch(String packageName, int pid, int uid,
+            in ControllerCallbackLink caller, String query, in Bundle extras);
+    void notifyPrepareFromUri(String packageName, int pid, int uid,
+            in ControllerCallbackLink caller, in Uri uri, in Bundle extras);
+    void notifyPlay(String packageName, int pid, int uid, in ControllerCallbackLink caller);
+    void notifyPlayFromMediaId(String packageName, int pid, int uid,
+            in ControllerCallbackLink caller, String mediaId, in Bundle extras);
+    void notifyPlayFromSearch(String packageName, int pid, int uid,
+            in ControllerCallbackLink caller, String query, in Bundle extras);
+    void notifyPlayFromUri(String packageName, int pid, int uid, in ControllerCallbackLink caller,
             in Uri uri, in Bundle extras);
-    void onPlay(String packageName, int pid, int uid, ISessionControllerCallback caller);
-    void onPlayFromMediaId(String packageName, int pid, int uid, ISessionControllerCallback caller,
-            String mediaId, in Bundle extras);
-    void onPlayFromSearch(String packageName, int pid, int uid, ISessionControllerCallback caller,
-            String query, in Bundle extras);
-    void onPlayFromUri(String packageName, int pid, int uid, ISessionControllerCallback caller,
-            in Uri uri, in Bundle extras);
-    void onSkipToTrack(String packageName, int pid, int uid, ISessionControllerCallback caller,
+    void notifySkipToTrack(String packageName, int pid, int uid, in ControllerCallbackLink caller,
             long id);
-    void onPause(String packageName, int pid, int uid, ISessionControllerCallback caller);
-    void onStop(String packageName, int pid, int uid, ISessionControllerCallback caller);
-    void onNext(String packageName, int pid, int uid, ISessionControllerCallback caller);
-    void onPrevious(String packageName, int pid, int uid, ISessionControllerCallback caller);
-    void onFastForward(String packageName, int pid, int uid, ISessionControllerCallback caller);
-    void onRewind(String packageName, int pid, int uid, ISessionControllerCallback caller);
-    void onSeekTo(String packageName, int pid, int uid, ISessionControllerCallback caller,
+    void notifyPause(String packageName, int pid, int uid, in ControllerCallbackLink caller);
+    void notifyStop(String packageName, int pid, int uid, in ControllerCallbackLink caller);
+    void notifyNext(String packageName, int pid, int uid, in ControllerCallbackLink caller);
+    void notifyPrevious(String packageName, int pid, int uid, in ControllerCallbackLink caller);
+    void notifyFastForward(String packageName, int pid, int uid, in ControllerCallbackLink caller);
+    void notifyRewind(String packageName, int pid, int uid, in ControllerCallbackLink caller);
+    void notifySeekTo(String packageName, int pid, int uid, in ControllerCallbackLink caller,
             long pos);
-    void onRate(String packageName, int pid, int uid, ISessionControllerCallback caller,
+    void notifyRate(String packageName, int pid, int uid, in ControllerCallbackLink caller,
             in Rating rating);
-    void onCustomAction(String packageName, int pid, int uid, ISessionControllerCallback caller,
+    void notifyCustomAction(String packageName, int pid, int uid, in ControllerCallbackLink caller,
             String action, in Bundle args);
 
     // These callbacks are for volume handling
-    void onAdjustVolume(String packageName, int pid, int uid, ISessionControllerCallback caller,
+    void notifyAdjustVolume(String packageName, int pid, int uid, in ControllerCallbackLink caller,
             int direction);
-    void onSetVolumeTo(String packageName, int pid, int uid,
-            ISessionControllerCallback caller, int value);
+    void notifySetVolumeTo(String packageName, int pid, int uid,
+            in ControllerCallbackLink caller, int value);
 }
