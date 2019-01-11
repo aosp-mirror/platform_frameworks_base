@@ -421,6 +421,7 @@
   <java-symbol type="integer" name="config_wifi_framework_network_switch_tx_packet_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_network_switch_rx_packet_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_current_network_boost" />
+  <java-symbol type="integer" name="config_wifi_framework_recovery_timeout_delay" />
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
   <java-symbol type="integer" name="config_bluetooth_max_connected_audio_devices" />
