@@ -38,13 +38,13 @@ class EncodedBuffer
 {
 public:
     EncodedBuffer();
-    EncodedBuffer(size_t chunkSize);
+    explicit EncodedBuffer(size_t chunkSize);
     ~EncodedBuffer();
 
     class Pointer {
     public:
         Pointer();
-        Pointer(size_t chunkSize);
+        explicit Pointer(size_t chunkSize);
 
         size_t pos() const;
         size_t index() const;
@@ -161,7 +161,7 @@ public:
     friend class iterator;
     class iterator {
     public:
-        iterator(const EncodedBuffer& buffer);
+        explicit iterator(const EncodedBuffer& buffer);
 
         /**
          * Returns the number of bytes written in the buffer
