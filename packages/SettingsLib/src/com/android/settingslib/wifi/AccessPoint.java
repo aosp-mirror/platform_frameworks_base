@@ -632,7 +632,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public static String getKey(OsuProvider provider) {
         return new StringBuilder()
                 .append(KEY_PREFIX_OSU)
-                .append(provider.getOsuSsid())
+                .append(provider.getFriendlyName())
                 .append(',')
                 .append(provider.getServerUri()).toString();
     }

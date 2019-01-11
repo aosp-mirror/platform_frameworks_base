@@ -616,8 +616,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                         }
                     }
 
-                    AccessPoint accessPoint = new AccessPoint(mContext, config);
-                    accessPoint.setScanResults(scanResults);
+                    AccessPoint accessPoint =
+                            getCachedOrCreatePasspoint(scanResults, cachedAccessPoints, config);
                     accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
                     accessPoints.add(accessPoint);
                 }
@@ -689,15 +689,24 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     AccessPoint getCachedOrCreate(
             List<ScanResult> scanResults,
             List<AccessPoint> cache) {
-        final int N = cache.size();
-        for (int i = 0; i < N; i++) {
-            if (cache.get(i).getKey().equals(AccessPoint.getKey(scanResults.get(0)))) {
-                AccessPoint ret = cache.remove(i);
-                ret.setScanResults(scanResults);
-                return ret;
-            }
+        AccessPoint accessPoint = getCachedByKey(cache, AccessPoint.getKey(scanResults.get(0)));
+        if (accessPoint == null) {
+            accessPoint = new AccessPoint(mContext, scanResults);
+        } else {
+            accessPoint.setScanResults(scanResults);
         }
-        final AccessPoint accessPoint = new AccessPoint(mContext, scanResults);
+        return accessPoint;
+    }
+
+    private AccessPoint getCachedOrCreatePasspoint(
+            List<ScanResult> scanResults,
+            List<AccessPoint> cache,
+            WifiConfiguration config) {
+        AccessPoint accessPoint = getCachedByKey(cache, AccessPoint.getKey(config));
+        if (accessPoint == null) {
+            accessPoint = new AccessPoint(mContext, config);
+        }
+        accessPoint.setScanResults(scanResults);
         return accessPoint;
     }
 
@@ -705,21 +714,24 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             List<ScanResult> scanResults,
             List<AccessPoint> cache,
             OsuProvider provider) {
-        AccessPoint matchedAccessPoint = null;
+        AccessPoint accessPoint = getCachedByKey(cache, AccessPoint.getKey(provider));
+        if (accessPoint == null) {
+            accessPoint = new AccessPoint(mContext, provider);
+        }
+        accessPoint.setScanResults(scanResults);
+        return accessPoint;
+    }
+
+    private AccessPoint getCachedByKey(List<AccessPoint> cache, String key) {
         ListIterator<AccessPoint> lit = cache.listIterator();
         while (lit.hasNext()) {
             AccessPoint currentAccessPoint = lit.next();
-            if (currentAccessPoint.getKey().equals(AccessPoint.getKey(provider))) {
+            if (currentAccessPoint.getKey().equals(key)) {
                 lit.remove();
-                matchedAccessPoint = currentAccessPoint;
-                break;
+                return currentAccessPoint;
             }
         }
-        if (matchedAccessPoint == null) {
-            matchedAccessPoint = new AccessPoint(mContext, provider);
-        }
-        matchedAccessPoint.setScanResults(scanResults);
-        return matchedAccessPoint;
+        return null;
     }
 
     private void updateNetworkInfo(NetworkInfo networkInfo) {
