@@ -17,6 +17,7 @@
 package com.android.server.connectivity;
 
 import android.content.Context;
+import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -239,12 +240,15 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private static final String TAG = ConnectivityService.class.getSimpleName();
     private static final boolean VDBG = false;
     private final ConnectivityService mConnService;
+    private final INetd mNetd;
+    private final INetworkManagementService mNMS;
     private final Context mContext;
     private final Handler mHandler;
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
-            NetworkMisc misc, ConnectivityService connService) {
+            NetworkMisc misc, ConnectivityService connService, INetd netd,
+            INetworkManagementService nms) {
         this.messenger = messenger;
         asyncChannel = ac;
         network = net;
@@ -253,6 +257,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         networkCapabilities = nc;
         currentScore = score;
         mConnService = connService;
+        mNetd = netd;
+        mNMS = nms;
         mContext = context;
         mHandler = handler;
         networkMisc = misc;
@@ -587,18 +593,18 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     public void updateClat(INetworkManagementService netd) {
         if (Nat464Xlat.requiresClat(this)) {
-            maybeStartClat(netd);
+            maybeStartClat();
         } else {
             maybeStopClat();
         }
     }
 
     /** Ensure clat has started for this network. */
-    public void maybeStartClat(INetworkManagementService netd) {
+    public void maybeStartClat() {
         if (clatd != null && clatd.isStarted()) {
             return;
         }
-        clatd = new Nat464Xlat(netd, this);
+        clatd = new Nat464Xlat(this, mNetd, mNMS);
         clatd.start();
     }
 
