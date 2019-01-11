@@ -185,6 +185,18 @@ public class Surface implements Parcelable {
     }
 
     /**
+     * Create a Surface assosciated with a given {@link SurfaceControl}. Buffers submitted to this
+     * surface will be displayed by the system compositor according to the parameters
+     * specified by the control. Multiple surfaces may be constructed from one SurfaceControl,
+     * but only one can be connected (e.g. have an active EGL context) at a time.
+     *
+     * @param from The SurfaceControl to assosciate this Surface with
+     */
+    public Surface(SurfaceControl from) {
+        copyFrom(from);
+    }
+
+    /**
      * Create Surface from a {@link SurfaceTexture}.
      *
      * Images drawn to the Surface will be made available to the {@link
@@ -494,7 +506,6 @@ public class Surface implements Parcelable {
      * in to it.
      *
      * @param other {@link SurfaceControl} to copy from.
-     *
      * @hide
      */
     @UnsupportedAppUsage

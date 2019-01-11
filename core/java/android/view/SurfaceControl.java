@@ -27,6 +27,10 @@ import static android.view.Surface.ROTATION_90;
 import static android.view.SurfaceControlProto.HASH_CODE;
 import static android.view.SurfaceControlProto.NAME;
 
+import android.annotation.FloatRange;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
@@ -58,10 +62,16 @@ import libcore.util.NativeAllocationRegistry;
 import java.io.Closeable;
 
 /**
- * SurfaceControl
- * @hide
+ * Handle to an on-screen Surface managed by the system compositor. The SurfaceControl is
+ * a combination of a buffer source, and metadata about how to display the buffers.
+ * By constructing a {@link Surface} from this SurfaceControl you can submit buffers to be
+ * composited. Using {@link SurfaceControl.Transaction} you can manipulate various
+ * properties of how the buffer will be displayed on-screen. SurfaceControl's are
+ * arranged into a scene-graph like hierarchy, and as such any SurfaceControl may have
+ * a parent. Geometric properties like transform, crop, and Z-ordering will be inherited
+ * from the parent, as if the child were content in the parents buffer stream.
  */
-public class SurfaceControl implements Parcelable {
+public final class SurfaceControl implements Parcelable {
     private static final String TAG = "SurfaceControl";
 
     private static native long nativeCreate(SurfaceSession session, String name,
@@ -103,6 +113,8 @@ public class SurfaceControl implements Parcelable {
             float dtdy, float dsdy);
     private static native void nativeSetColorTransform(long transactionObj, long nativeObject,
             float[] matrix, float[] translation);
+    private static native void nativeSetGeometry(long transactionObj, long nativeObject,
+            Rect sourceCrop, Rect dest, long orientation);
     private static native void nativeSetColor(long transactionObj, long nativeObject, float[] color);
     private static native void nativeSetFlags(long transactionObj, long nativeObject,
             int flags, int mask);
@@ -331,8 +343,7 @@ public class SurfaceControl implements Parcelable {
      */
     public static final int BUILT_IN_DISPLAY_ID_HDMI = 1;
 
-    /* Display power modes * /
-
+    // Display power modes.
     /**
      * Display power mode off: used while blanking the screen.
      * Use only with {@link SurfaceControl#setDisplayPowerMode}.
@@ -403,7 +414,6 @@ public class SurfaceControl implements Parcelable {
 
     /**
      * Builder class for {@link SurfaceControl} objects.
-     * @hide
      */
     public static class Builder {
         private SurfaceSession mSession;
@@ -427,8 +437,14 @@ public class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Construct a new {@link SurfaceControl} with the set parameters.
-         * @hide
+         * Begin building a SurfaceControl.
+         */
+        public Builder() {
+        }
+
+        /**
+         * Construct a new {@link SurfaceControl} with the set parameters. The builder
+         * remains valid.
          */
         public SurfaceControl build() {
             if (mWidth < 0 || mHeight < 0) {
@@ -447,7 +463,6 @@ public class SurfaceControl implements Parcelable {
          * Set a debugging-name for the SurfaceControl.
          *
          * @param name A name to identify the Surface in debugging.
-         * @hide
          */
         public Builder setName(String name) {
             mName = name;
@@ -459,9 +474,9 @@ public class SurfaceControl implements Parcelable {
          *
          * @param width The buffer width in pixels.
          * @param height The buffer height in pixels.
-         * @hide
          */
-        public Builder setBufferSize(int width, int height) {
+        public Builder setBufferSize(@IntRange(from = 0) int width,
+                @IntRange(from = 0) int height) {
             if (width < 0 || height < 0) {
                 throw new IllegalArgumentException(
                         "width and height must be positive");
@@ -474,8 +489,8 @@ public class SurfaceControl implements Parcelable {
         /**
          * Set the pixel format of the controlled surface's buffers, using constants from
          * {@link android.graphics.PixelFormat}.
-         * @hide
          */
+        @NonNull
         public Builder setFormat(@PixelFormat.Format int format) {
             mFormat = format;
             return this;
@@ -490,6 +505,7 @@ public class SurfaceControl implements Parcelable {
          * @param protectedContent Whether to require a protected sink.
          * @hide
          */
+        @NonNull
         public Builder setProtected(boolean protectedContent) {
             if (protectedContent) {
                 mFlags |= PROTECTED_APP;
@@ -506,6 +522,7 @@ public class SurfaceControl implements Parcelable {
          * not a complete prevention of readback as {@link #setProtected}.
          * @hide
          */
+        @NonNull
         public Builder setSecure(boolean secure) {
             if (secure) {
                 mFlags |= SECURE;
@@ -537,8 +554,8 @@ public class SurfaceControl implements Parcelable {
          * If the underlying buffer lacks an alpha channel, it is as if setOpaque(true)
          * were set automatically.
          * @param opaque Whether the Surface is OPAQUE.
-         * @hide
          */
+        @NonNull
         public Builder setOpaque(boolean opaque) {
             if (opaque) {
                 mFlags |= OPAQUE;
@@ -556,9 +573,9 @@ public class SurfaceControl implements Parcelable {
          * of the parent.
          *
          * @param parent The parent control.
-         * @hide
          */
-        public Builder setParent(SurfaceControl parent) {
+        @NonNull
+        public Builder setParent(@Nullable SurfaceControl parent) {
             mParent = parent;
             return this;
         }
@@ -673,9 +690,6 @@ public class SurfaceControl implements Parcelable {
     private SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,
             SurfaceControl parent, int windowType, int ownerUid)
                     throws OutOfResourcesException, IllegalArgumentException {
-        if (session == null) {
-            throw new IllegalArgumentException("session must not be null");
-        }
         if (name == null) {
             throw new IllegalArgumentException("name must not be null");
         }
@@ -729,9 +743,6 @@ public class SurfaceControl implements Parcelable {
         mCloseGuard.open("release");
     }
 
-    /**
-     * @hide
-     */
     public void readFromParcel(Parcel in) {
         if (in == null) {
             throw new IllegalArgumentException("source must not be null");
@@ -748,17 +759,11 @@ public class SurfaceControl implements Parcelable {
         assignNativeObject(object);
     }
 
-    /**
-     * @hide
-     */
     @Override
     public int describeContents() {
         return 0;
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mName);
@@ -791,9 +796,6 @@ public class SurfaceControl implements Parcelable {
         proto.end(token);
     }
 
-    /**
-     * @hide
-     */
     public static final Creator<SurfaceControl> CREATOR
             = new Creator<SurfaceControl>() {
         public SurfaceControl createFromParcel(Parcel in) {
@@ -823,10 +825,12 @@ public class SurfaceControl implements Parcelable {
     }
 
     /**
-     * Release the local reference to the server-side surface.
-     * Always call release() when you're done with a Surface.
-     * This will make the surface invalid.
-     * @hide
+     * Release the local reference to the server-side surface. The surface
+     * may continue to exist on-screen as long as its parent continues
+     * to exist. To explicitly remove a surface from the screen use
+     * {@link Transaction#reparent} with a null-parent.
+     *
+     * Always call release() when you're done with a SurfaceControl.
      */
     public void release() {
         if (mNativeObject != 0) {
@@ -866,7 +870,10 @@ public class SurfaceControl implements Parcelable {
     }
 
     /**
-     * @hide
+     * Check whether this instance points to a valid layer with the system-compositor. For
+     * example this may be false if construction failed, or the layer was released.
+     *
+     * @return Whether this SurfaceControl is valid.
      */
     public boolean isValid() {
         return mNativeObject != 0;
@@ -1270,9 +1277,6 @@ public class SurfaceControl implements Parcelable {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public String toString() {
         return "Surface(name=" + mName + ")/@0x" +
@@ -1286,6 +1290,7 @@ public class SurfaceControl implements Parcelable {
 
     /**
      * Describes the properties of a physical display known to surface flinger.
+     * @hide
      */
     public static final class PhysicalDisplayInfo {
         /**
@@ -1777,9 +1782,12 @@ public class SurfaceControl implements Parcelable {
     }
 
     /**
-     * @hide
+     * An atomic set of changes to a set of SurfaceControl.
      */
     public static class Transaction implements Closeable {
+        /**
+         * @hide
+         */
         public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
                 Transaction.class.getClassLoader(),
                 nativeGetNativeTransactionFinalizer(), 512);
@@ -1789,9 +1797,12 @@ public class SurfaceControl implements Parcelable {
         Runnable mFreeNativeResources;
 
         /**
-         * @hide
+         * Open a new transaction object. The transaction may be filed with commands to
+         * manipulate {@link SurfaceControl} instances, and then applied atomically with
+         * {@link #apply}. Eventually the user should invoke {@link #close}, when the object
+         * is no longer required. Note however that re-using a transaction after a call to apply
+         * is allowed as a convenience.
          */
-        @UnsupportedAppUsage
         public Transaction() {
             mNativeObject = nativeCreateTransaction();
             mFreeNativeResources
@@ -1801,9 +1812,7 @@ public class SurfaceControl implements Parcelable {
         /**
          * Apply the transaction, clearing it's state, and making it usable
          * as a new transaction.
-         * @hide
          */
-        @UnsupportedAppUsage
         public void apply() {
             apply(false);
         }
@@ -1811,7 +1820,6 @@ public class SurfaceControl implements Parcelable {
         /**
          * Close the transaction, if the transaction was not already applied this will cancel the
          * transaction.
-         * @hide
          */
         @Override
         public void close() {
@@ -1841,6 +1849,27 @@ public class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Toggle the visibility of a given Layer and it's sub-tree.
+         *
+         * @param sc The SurfaceControl for which to set the visibility
+         * @param visible The new visibility
+         * @return This transaction object.
+         */
+        @NonNull
+        public Transaction setVisibility(@NonNull SurfaceControl sc, boolean visible) {
+            sc.checkNotReleased();
+            if (visible) {
+                return show(sc);
+            } else {
+                return hide(sc);
+            }
+        }
+
+        /**
+         * Request that a given surface and it's sub-tree be shown.
+         *
+         * @param sc The surface to show.
+         * @return This transaction.
          * @hide
          */
         @UnsupportedAppUsage
@@ -1851,6 +1880,10 @@ public class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Request that a given surface and it's sub-tree be hidden.
+         *
+         * @param sc The surface to hidden.
+         * @return This transaction.
          * @hide
          */
         @UnsupportedAppUsage
@@ -1871,10 +1904,17 @@ public class SurfaceControl implements Parcelable {
         }
 
         /**
-         * @hide
+         * Set the default buffer size for the SurfaceControl, if there is an
+         * {@link Surface} assosciated with the control, then
+         * this will be the default size for buffers dequeued from it.
+         * @param sc The surface to set the buffer size for.
+         * @param w The default width
+         * @param h The default height
+         * @return This Transaction
          */
-        @UnsupportedAppUsage
-        public Transaction setBufferSize(SurfaceControl sc, int w, int h) {
+        @NonNull
+        public Transaction setBufferSize(@NonNull SurfaceControl sc,
+                @IntRange(from = 0) int w, @IntRange(from = 0) int h) {
             sc.checkNotReleased();
             mResizedSurfaces.put(sc, new Point(w, h));
             nativeSetSize(mNativeObject, sc.mNativeObject, w, h);
@@ -1882,10 +1922,17 @@ public class SurfaceControl implements Parcelable {
         }
 
         /**
-         * @hide
+         * Set the Z-order for a given SurfaceControl, relative to it's siblings.
+         * If two siblings share the same Z order the ordering is undefined. Surfaces
+         * with a negative Z will be placed below the parent surface.
+         *
+         * @param sc The SurfaceControl to set the Z order on
+         * @param z The Z-order
+         * @return This Transaction.
          */
-        @UnsupportedAppUsage
-        public Transaction setLayer(SurfaceControl sc, int z) {
+        @NonNull
+        public Transaction setLayer(@NonNull SurfaceControl sc,
+                @IntRange(from = Integer.MIN_VALUE, to = Integer.MAX_VALUE) int z) {
             sc.checkNotReleased();
             nativeSetLayer(mNativeObject, sc.mNativeObject, z);
             return this;
@@ -1912,10 +1959,15 @@ public class SurfaceControl implements Parcelable {
         }
 
         /**
-         * @hide
+         * Set the alpha for a given surface. If the alpha is non-zero the SurfaceControl
+         * will be blended with the Surfaces under it according to the specified ratio.
+         *
+         * @param sc The given SurfaceControl.
+         * @param alpha The alpha to set.
          */
-        @UnsupportedAppUsage
-        public Transaction setAlpha(SurfaceControl sc, float alpha) {
+        @NonNull
+        public Transaction setAlpha(@NonNull SurfaceControl sc,
+                @FloatRange(from = 0.0, to = 1.0) float alpha) {
             sc.checkNotReleased();
             nativeSetAlpha(mNativeObject, sc.mNativeObject, alpha);
             return this;
@@ -1943,6 +1995,25 @@ public class SurfaceControl implements Parcelable {
          */
         public Transaction transferTouchFocus(IBinder fromToken, IBinder toToken) {
             nativeTransferTouchFocus(mNativeObject, fromToken, toToken);
+            return this;
+        }
+
+        /**
+         * Specify how the buffer assosciated with this Surface is mapped in to the
+         * parent coordinate space. The source frame will be scaled to fit the destination
+         * frame, after being rotated according to the orientation parameter.
+         *
+         * @param sc The SurfaceControl to specify the geometry of
+         * @param sourceCrop The source rectangle in buffer space. Or null for the entire buffer.
+         * @param destFrame The destination rectangle in parent space. Or null for the source frame.
+         * @param orientation The buffer rotation
+         * @return This transaction object.
+         */
+        @NonNull
+        public Transaction setGeometry(@NonNull SurfaceControl sc, @Nullable Rect sourceCrop,
+                @Nullable Rect destFrame, @Surface.Rotation int orientation) {
+            sc.checkNotReleased();
+            nativeSetGeometry(mNativeObject, sc.mNativeObject, sourceCrop, destFrame, orientation);
             return this;
         }
 
@@ -2023,20 +2094,20 @@ public class SurfaceControl implements Parcelable {
             return this;
         }
 
-        @UnsupportedAppUsage
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public Transaction setLayerStack(SurfaceControl sc, int layerStack) {
             sc.checkNotReleased();
             nativeSetLayerStack(mNativeObject, sc.mNativeObject, layerStack);
             return this;
         }
 
-        @UnsupportedAppUsage
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public Transaction deferTransactionUntil(SurfaceControl sc, IBinder handle,
                 long frameNumber) {
             if (frameNumber < 0) {
@@ -2047,10 +2118,10 @@ public class SurfaceControl implements Parcelable {
             return this;
         }
 
-        @UnsupportedAppUsage
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public Transaction deferTransactionUntilSurface(SurfaceControl sc, Surface barrierSurface,
                 long frameNumber) {
             if (frameNumber < 0) {
@@ -2080,7 +2151,9 @@ public class SurfaceControl implements Parcelable {
          * @param newParent The new parent for the given control.
          * @return This Transaction
          */
-        public Transaction reparent(SurfaceControl sc, SurfaceControl newParent) {
+        @NonNull
+        public Transaction reparent(@NonNull SurfaceControl sc,
+                @Nullable SurfaceControl newParent) {
             sc.checkNotReleased();
             long otherObject = 0;
             if (newParent != null) {
@@ -2255,9 +2328,12 @@ public class SurfaceControl implements Parcelable {
         /**
          * Merge the other transaction into this transaction, clearing the
          * other transaction as if it had been applied.
-         * @hide
+         *
+         * @param other The transaction to merge in to this one.
+         * @return This transaction.
          */
-        public Transaction merge(Transaction other) {
+        @NonNull
+        public Transaction merge(@NonNull Transaction other) {
             mResizedSurfaces.putAll(other.mResizedSurfaces);
             other.mResizedSurfaces.clear();
             nativeMergeTransaction(mNativeObject, other.mNativeObject);

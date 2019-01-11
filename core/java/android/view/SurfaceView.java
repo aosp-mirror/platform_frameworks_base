@@ -1171,7 +1171,10 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     };
 
     /**
-     * @hide
+     * Return a SurfaceControl which can be used for parenting Surfaces to
+     * this SurfaceView.
+     *
+     * @return The SurfaceControl for this SurfaceView.
      */
     public SurfaceControl getSurfaceControl() {
         return mSurfaceControl;
