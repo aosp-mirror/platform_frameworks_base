@@ -1312,6 +1312,7 @@ public class NetworkMonitor extends StateMachine {
             urlConnection.setInstanceFollowRedirects(probeType == ValidationProbeEvent.PROBE_PAC);
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
+            urlConnection.setRequestProperty("Connection", "close");
             urlConnection.setUseCaches(false);
             if (mCaptivePortalUserAgent != null) {
                 urlConnection.setRequestProperty("User-Agent", mCaptivePortalUserAgent);
