@@ -334,7 +334,7 @@ static void pointerPropertiesFromNative(JNIEnv* env, const PointerProperties* po
 static jlong android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz,
         jlong nativePtr,
         jint deviceId, jint source, jint displayId, jint action, jint flags, jint edgeFlags,
-        jint metaState, jint buttonState,
+        jint metaState, jint buttonState, jint classification,
         jfloat xOffset, jfloat yOffset, jfloat xPrecision, jfloat yPrecision,
         jlong downTimeNanos, jlong eventTimeNanos,
         jint pointerCount, jobjectArray pointerPropertiesObjArray,
@@ -373,7 +373,8 @@ static jlong android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz
     }
 
     event->initialize(deviceId, source, displayId, action, 0, flags, edgeFlags, metaState,
-            buttonState, xOffset, yOffset, xPrecision, yPrecision,
+            buttonState, static_cast<MotionClassification>(classification),
+            xOffset, yOffset, xPrecision, yPrecision,
             downTimeNanos, eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 
     return reinterpret_cast<jlong>(event);
@@ -668,6 +669,11 @@ static void android_view_MotionEvent_nativeSetButtonState(jlong nativePtr, jint 
     event->setButtonState(buttonState);
 }
 
+static jint android_view_MotionEvent_nativeGetClassification(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return static_cast<jint>(event->getClassification());
+}
+
 static void android_view_MotionEvent_nativeOffsetLocation(jlong nativePtr, jfloat deltaX,
         jfloat deltaY) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
@@ -747,7 +753,7 @@ static void android_view_MotionEvent_nativeTransform(jlong nativePtr, jlong matr
 static const JNINativeMethod gMotionEventMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInitialize",
-            "(JIIIIIIIIFFFFJJI[Landroid/view/MotionEvent$PointerProperties;"
+            "(JIIIIIIIIIFFFFJJI[Landroid/view/MotionEvent$PointerProperties;"
                     "[Landroid/view/MotionEvent$PointerCoords;)J",
             (void*)android_view_MotionEvent_nativeInitialize },
     { "nativeDispose",
@@ -846,6 +852,9 @@ static const JNINativeMethod gMotionEventMethods[] = {
     { "nativeSetButtonState",
             "(JI)V",
             (void*)android_view_MotionEvent_nativeSetButtonState },
+    { "nativeGetClassification",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetClassification },
     { "nativeOffsetLocation",
             "(JFF)V",
             (void*)android_view_MotionEvent_nativeOffsetLocation },
