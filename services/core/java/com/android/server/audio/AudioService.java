@@ -270,6 +270,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DISABLE_AUDIO_FOR_UID = 104;
     private static final int MSG_SET_HEARING_AID_CONNECTION_STATE = 105;
     private static final int MSG_BTA2DP_DOCK_TIMEOUT = 106;
+    private static final int MSG_A2DP_ACTIVE_DEVICE_CHANGE = 107;
     // end of messages handled under wakelock
 
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
@@ -4671,6 +4672,7 @@ public class AudioService extends IAudioService.Stub
                 msg == MSG_SET_HEARING_AID_CONNECTION_STATE ||
                 msg == MSG_SET_WIRED_DEVICE_CONNECTION_STATE ||
                 msg == MSG_A2DP_DEVICE_CONFIG_CHANGE ||
+                msg == MSG_A2DP_ACTIVE_DEVICE_CHANGE ||
                 msg == MSG_BTA2DP_DOCK_TIMEOUT) {
                 if (mLastDeviceConnectMsgTime >= time) {
                   // add a little delay to make sure messages are ordered as expected
@@ -4888,6 +4890,61 @@ public class AudioService extends IAudioService.Stub
                     new BluetoothA2dpDeviceInfo(device, -1, a2dpCodec),
                     0 /* delay */);
         }
+    }
+
+    /**
+     * @see AudioManager#handleBluetoothA2dpActiveDeviceChange(BluetoothDevice, int, int,
+     *                                                          boolean, int)
+     */
+    public int handleBluetoothA2dpActiveDeviceChange(
+            BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent,
+            int a2dpVolume) {
+        if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK) {
+            throw new IllegalArgumentException("invalid profile " + profile);
+        }
+
+        synchronized (mConnectedDevices) {
+            if (state == BluetoothA2dp.STATE_CONNECTED) {
+                for (int i = 0; i < mConnectedDevices.size(); i++) {
+                    DeviceListSpec deviceSpec = mConnectedDevices.valueAt(i);
+                    if (deviceSpec.mDeviceType != AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                        continue;
+                    }
+                    // If A2DP device exists, this is either an active device change or
+                    // device config change
+                    String existingDevicekey = mConnectedDevices.keyAt(i);
+                    String deviceName = device.getName();
+                    String address = device.getAddress();
+                    String newDeviceKey = makeDeviceListKey(
+                            AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address);
+                    int a2dpCodec = getA2dpCodec(device);
+                    // Device not equal to existing device, active device change
+                    if (!TextUtils.equals(existingDevicekey, newDeviceKey)) {
+                        mConnectedDevices.remove(existingDevicekey);
+                        mConnectedDevices.put(newDeviceKey, new DeviceListSpec(
+                                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, deviceName,
+                                address, a2dpCodec));
+                        queueMsgUnderWakeLock(mAudioHandler,
+                                MSG_A2DP_ACTIVE_DEVICE_CHANGE,
+                                0,
+                                0,
+                                new BluetoothA2dpDeviceInfo(
+                                        device, a2dpVolume, a2dpCodec),
+                                0 /* delay */);
+                        return 0;
+                    } else {
+                        // Device config change for existing device
+                        handleBluetoothA2dpDeviceConfigChange(device);
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        // New device connection or a device disconnect
+        return setBluetoothA2dpDeviceConnectionStateInt(
+                    device, state, profile, suppressNoisyIntent,
+                    AudioSystem.DEVICE_NONE, a2dpVolume);
     }
 
     private static final int DEVICE_MEDIA_UNMUTED_ON_PLUG =
@@ -5811,6 +5868,11 @@ public class AudioService extends IAudioService.Stub
                     mAudioEventWakeLock.release();
                     break;
 
+                case MSG_A2DP_ACTIVE_DEVICE_CHANGE:
+                    onBluetoothA2dpActiveDeviceChange((BluetoothA2dpDeviceInfo) msg.obj);
+                    mAudioEventWakeLock.release();
+                    break;
+
                 case MSG_DISABLE_AUDIO_FOR_UID:
                     mPlaybackMonitor.disableAudioForUid( msg.arg1 == 1 /* disable */,
                             msg.arg2 /* uid */);
@@ -6277,11 +6339,11 @@ public class AudioService extends IAudioService.Stub
         BluetoothDevice btDevice = btInfo.getBtDevice();
         int a2dpCodec = btInfo.getCodec();
 
-        if (DEBUG_DEVICES) {
-            Log.d(TAG, "onBluetoothA2dpDeviceConfigChange btDevice=" + btDevice);
-        }
         if (btDevice == null) {
             return;
+        }
+        if (DEBUG_DEVICES) {
+            Log.d(TAG, "onBluetoothA2dpDeviceConfigChange btDevice=" + btDevice);
         }
         String address = btDevice.getAddress();
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
@@ -6314,6 +6376,63 @@ public class AudioService extends IAudioService.Stub
             if (AudioSystem.handleDeviceConfigChange(device, address,
                        btDevice.getName(), deviceSpec.mDeviceCodecFormat)
                        != AudioSystem.AUDIO_STATUS_OK) {
+                int musicDevice = getDeviceForStream(AudioSystem.STREAM_MUSIC);
+                // force A2DP device disconnection in case of error so that AudioService state is
+                // consistent with audio policy manager state
+                setBluetoothA2dpDeviceConnectionStateInt(
+                        btDevice, BluetoothA2dp.STATE_DISCONNECTED, BluetoothProfile.A2DP,
+                        false /* suppressNoisyIntent */, musicDevice, -1 /* a2dpVolume */);
+            }
+        }
+    }
+
+    /** message handler for MSG_A2DP_ACTIVE_DEVICE_CHANGE */
+    public void onBluetoothA2dpActiveDeviceChange(BluetoothA2dpDeviceInfo btInfo) {
+        if (btInfo == null) {
+            return;
+        }
+        BluetoothDevice btDevice = btInfo.getBtDevice();
+        int a2dpVolume = btInfo.getVolume();
+        int a2dpCodec = btInfo.getCodec();
+
+        if (btDevice == null) {
+            return;
+        }
+        if (DEBUG_DEVICES) {
+            Log.d(TAG, "onBluetoothA2dpActiveDeviceChange btDevice=" + btDevice);
+        }
+        String address = btDevice.getAddress();
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+            address = "";
+        }
+        mDeviceLogger.log(new AudioEventLogger.StringEvent(
+                "onBluetoothA2dpActiveDeviceChange addr=" + address));
+
+        int device = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
+        synchronized (mConnectedDevices) {
+            if (mAudioHandler.hasMessages(MSG_SET_A2DP_SINK_CONNECTION_STATE, btDevice)) {
+                mDeviceLogger.log(new AudioEventLogger.StringEvent(
+                        "A2dp config change ignored"));
+                return;
+            }
+            final String key = makeDeviceListKey(device, address);
+            final DeviceListSpec deviceSpec = mConnectedDevices.get(key);
+            if (deviceSpec == null) {
+                return;
+            }
+
+            // Device is connected
+            if (a2dpVolume != -1) {
+                VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
+                // Convert index to internal representation in VolumeStreamState
+                a2dpVolume = a2dpVolume * 10;
+                streamState.setIndex(a2dpVolume, device,
+                        "onBluetoothA2dpActiveDeviceChange");
+                setDeviceVolume(streamState, device);
+            }
+
+            if (AudioSystem.handleDeviceConfigChange(device, address,
+                    btDevice.getName(), a2dpCodec) != AudioSystem.AUDIO_STATUS_OK) {
                 int musicDevice = getDeviceForStream(AudioSystem.STREAM_MUSIC);
                 // force A2DP device disconnection in case of error so that AudioService state is
                 // consistent with audio policy manager state
