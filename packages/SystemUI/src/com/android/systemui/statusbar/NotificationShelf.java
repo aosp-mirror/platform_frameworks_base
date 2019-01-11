@@ -538,6 +538,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     - getIntrinsicHeight());
         }
         float viewEnd = viewStart + fullHeight;
+        // TODO: fix this check for anchor scrolling.
         if (expandingAnimated && mAmbientState.getScrollY() == 0
                 && !mAmbientState.isOnKeyguard() && !iconState.isLastExpandIcon) {
             // We are expanding animated. Because we switch to a linear interpolation in this case,

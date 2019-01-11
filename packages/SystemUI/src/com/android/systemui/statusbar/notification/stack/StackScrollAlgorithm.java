@@ -41,6 +41,8 @@ import java.util.List;
  */
 public class StackScrollAlgorithm {
 
+    static final boolean ANCHOR_SCROLLING = false;
+
     private static final String LOG_TAG = "StackScrollAlgorithm";
     private final ViewGroup mHostView;
 
@@ -236,6 +238,10 @@ public class StackScrollAlgorithm {
         scrollY = Math.max(0, scrollY);
         state.scrollY = (int) (scrollY + bottomOverScroll);
 
+        if (ANCHOR_SCROLLING) {
+            state.anchorViewY = (int) (ambientState.getAnchorViewY() - bottomOverScroll);
+        }
+
         //now init the visible children and update paddings
         int childCount = hostView.getChildCount();
         state.visibleChildren.clear();
@@ -252,6 +258,11 @@ public class StackScrollAlgorithm {
         // iterating over it again, it's filled with the actual resolved value.
 
         for (int i = 0; i < childCount; i++) {
+            if (ANCHOR_SCROLLING) {
+                if (i == ambientState.getAnchorViewIndex()) {
+                    state.anchorViewIndex = state.visibleChildren.size();
+                }
+            }
             ExpandableView v = (ExpandableView) hostView.getChildAt(i);
             if (v.getVisibility() != View.GONE) {
                 if (v == ambientState.getShelf()) {
@@ -350,28 +361,74 @@ public class StackScrollAlgorithm {
     private void updatePositionsForState(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
 
-        // The y coordinate of the current child.
-        float currentYPosition = -algorithmState.scrollY;
-        int childCount = algorithmState.visibleChildren.size();
-        for (int i = 0; i < childCount; i++) {
-            currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition);
+        if (ANCHOR_SCROLLING) {
+            float currentYPosition = algorithmState.anchorViewY;
+            int childCount = algorithmState.visibleChildren.size();
+            for (int i = algorithmState.anchorViewIndex; i < childCount; i++) {
+                if (i > algorithmState.anchorViewIndex && ambientState.beginsNewSection(i)) {
+                    currentYPosition += mGapHeight;
+                }
+                currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition,
+                        false /* reverse */);
+            }
+            currentYPosition = algorithmState.anchorViewY;
+            for (int i = algorithmState.anchorViewIndex - 1; i >= 0; i--) {
+                if (ambientState.beginsNewSection(i + 1)) {
+                    currentYPosition -= mGapHeight;
+                }
+                currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition,
+                        true /* reverse */);
+            }
+        } else {
+            // The y coordinate of the current child.
+            float currentYPosition = -algorithmState.scrollY;
+            int childCount = algorithmState.visibleChildren.size();
+            for (int i = 0; i < childCount; i++) {
+                if (ambientState.beginsNewSection(i)) {
+                    currentYPosition += mGapHeight;
+                }
+                currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition,
+                        false /* reverse */);
+            }
         }
     }
 
+    /**
+     * Populates the {@link ExpandableViewState} for a single child.
+     *
+     * @param i                The index of the child in
+     * {@link StackScrollAlgorithmState#visibleChildren}.
+     * @param algorithmState   The overall output state of the algorithm.
+     * @param ambientState     The input state provided to the algorithm.
+     * @param currentYPosition The Y position of the current pass of the algorithm.  For a forward
+     *                         pass, this should be the top of the child; for a reverse pass, the
+     *                         bottom of the child.
+     * @param reverse          Whether we're laying out children in the reverse direction (Y
+     *                         positions
+     *                         decreasing) instead of the forward direction (Y positions
+     *                         increasing).
+     * @return The Y position after laying out the child.  This will be the {@code currentYPosition}
+     * for the next call to this method, after adjusting for any gaps between children.
+     */
     protected float updateChild(
             int i,
             StackScrollAlgorithmState algorithmState,
             AmbientState ambientState,
-            float currentYPosition) {
+            float currentYPosition,
+            boolean reverse) {
         ExpandableView child = algorithmState.visibleChildren.get(i);
         ExpandableViewState childViewState = child.getViewState();
         childViewState.location = ExpandableViewState.LOCATION_UNKNOWN;
         int paddingAfterChild = getPaddingAfterChild(algorithmState, child);
         int childHeight = getMaxAllowedChildHeight(child);
-        if (ambientState.beginsNewSection(i)) {
-            currentYPosition += mGapHeight;
+        if (reverse) {
+            childViewState.yTranslation = currentYPosition - (childHeight + paddingAfterChild);
+            if (currentYPosition <= 0) {
+                childViewState.location = ExpandableViewState.LOCATION_HIDDEN_TOP;
+            }
+        } else {
+            childViewState.yTranslation = currentYPosition;
         }
-        childViewState.yTranslation = currentYPosition;
         boolean isFooterView = child instanceof FooterView;
         boolean isEmptyShadeView = child instanceof EmptyShadeView;
 
@@ -396,9 +453,13 @@ public class StackScrollAlgorithm {
             clampPositionToShelf(child, childViewState, ambientState);
         }
 
-        currentYPosition = childViewState.yTranslation + childHeight + paddingAfterChild;
-        if (currentYPosition <= 0) {
-            childViewState.location = ExpandableViewState.LOCATION_HIDDEN_TOP;
+        if (reverse) {
+            currentYPosition = childViewState.yTranslation;
+        } else {
+            currentYPosition = childViewState.yTranslation + childHeight + paddingAfterChild;
+            if (currentYPosition <= 0) {
+                childViewState.location = ExpandableViewState.LOCATION_HIDDEN_TOP;
+            }
         }
         if (childViewState.location == ExpandableViewState.LOCATION_UNKNOWN) {
             Log.wtf(LOG_TAG, "Failed to assign location for child " + i);
@@ -464,6 +525,7 @@ public class StackScrollAlgorithm {
                 // To check if the row need to do translation according to scroll Y
                 // heads up show full of row's content and any scroll y indicate that the
                 // translationY need to move up the HUN.
+                // TODO: fix this check for anchor scrolling.
                 if (!mIsExpanded && isTopEntry && ambientState.getScrollY() > 0) {
                     childState.yTranslation -= ambientState.getScrollY();
                 }
@@ -607,9 +669,17 @@ public class StackScrollAlgorithm {
     public class StackScrollAlgorithmState {
 
         /**
-         * The scroll position of the algorithm
+         * The scroll position of the algorithm (absolute scrolling).
          */
         public int scrollY;
+
+        /** The index of the anchor view (anchor scrolling). */
+        public int anchorViewIndex;
+
+        /**
+         * The Y position, relative to the top of the screen, of the anchor view (anchor scrolling).
+         */
+        public int anchorViewY;
 
         /**
          * The children from the host view which are not gone.

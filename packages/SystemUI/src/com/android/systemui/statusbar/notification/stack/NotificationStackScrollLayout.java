@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.ANCHOR_SCROLLING;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.LOW_PRIORITY;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
@@ -176,6 +177,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     private float mExpandedHeight;
     private int mOwnScrollY;
+    private View mScrollAnchorView;
+    private int mScrollAnchorViewY;
     private int mMaxLayoutHeight;
 
     private VelocityTracker mVelocityTracker;
@@ -514,6 +517,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mDebugPaint.setColor(0xffff0000);
             mDebugPaint.setStrokeWidth(2);
             mDebugPaint.setStyle(Paint.Style.STROKE);
+            mDebugPaint.setTextSize(25f);
         }
         mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
 
@@ -674,6 +678,26 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             y = getHeight() - getEmptyBottomMargin();
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+        }
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+
+        if (DEBUG && ANCHOR_SCROLLING) {
+            if (mScrollAnchorView instanceof ExpandableNotificationRow) {
+                canvas.drawRect(0,
+                        mScrollAnchorView.getTranslationY(),
+                        getWidth(),
+                        mScrollAnchorView.getTranslationY()
+                                + ((ExpandableNotificationRow) mScrollAnchorView).getActualHeight(),
+                        mDebugPaint);
+                canvas.drawText(Integer.toString(mScrollAnchorViewY), getWidth() - 200,
+                        mScrollAnchorView.getTranslationY() + 30, mDebugPaint);
+                int y = (int) mShelf.getTranslationY();
+                canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+            }
         }
     }
 
@@ -975,7 +999,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mAmbientState.setCurrentScrollVelocity(mScroller.isFinished()
                 ? 0
                 : mScroller.getCurrVelocity());
-        mAmbientState.setScrollY(mOwnScrollY);
+        if (ANCHOR_SCROLLING) {
+            mAmbientState.setAnchorViewIndex(indexOfChild(mScrollAnchorView));
+            mAmbientState.setAnchorViewY(mScrollAnchorViewY);
+        } else {
+            mAmbientState.setScrollY(mOwnScrollY);
+        }
         mStackScrollAlgorithm.resetViewStates(mAmbientState);
         if (!isCurrentlyAnimating() && !mNeedsAnimation) {
             applyCurrentState();
@@ -1009,7 +1038,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             float end = start + child.getActualHeight();
             boolean clip = clipStart > start && clipStart < end
                     || clipEnd >= start && clipEnd <= end;
-            clip &= !(first && mOwnScrollY == 0);
+            clip &= !(first && isScrolledToTop());
             child.setDistanceToTopRoundness(clip ? Math.max(start - clipStart, 0)
                     : ExpandableView.NO_ROUNDNESS);
             first = false;
@@ -1021,19 +1050,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (mChildrenToAddAnimated.isEmpty()) {
             return;
         }
-        for (int i = 0; i < getChildCount(); i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
-            if (mChildrenToAddAnimated.contains(child)) {
-                int startingPosition = getPositionInLinearLayout(child);
-                float increasedPaddingAmount = child.getIncreasedPaddingAmount();
-                int padding = increasedPaddingAmount == 1.0f ? mIncreasedPaddingBetweenElements
-                        : increasedPaddingAmount == -1.0f ? 0 : mPaddingBetweenElements;
-                int childHeight = getIntrinsicHeight(child) + padding;
-                if (startingPosition < mOwnScrollY) {
-                    // This child starts off screen, so let's keep it offscreen to keep the
-                    // others visible
+        if (!ANCHOR_SCROLLING) {
+            for (int i = 0; i < getChildCount(); i++) {
+                ExpandableView child = (ExpandableView) getChildAt(i);
+                if (mChildrenToAddAnimated.contains(child)) {
+                    int startingPosition = getPositionInLinearLayout(child);
+                    float increasedPaddingAmount = child.getIncreasedPaddingAmount();
+                    int padding = increasedPaddingAmount == 1.0f ? mIncreasedPaddingBetweenElements
+                            : increasedPaddingAmount == -1.0f ? 0 : mPaddingBetweenElements;
+                    int childHeight = getIntrinsicHeight(child) + padding;
+                    if (startingPosition < mOwnScrollY) {
+                        // This child starts off screen, so let's keep it offscreen to keep the
+                        // others visible
 
-                    setOwnScrollY(mOwnScrollY + childHeight);
+                        setOwnScrollY(mOwnScrollY + childHeight);
+                    }
                 }
             }
         }
@@ -1052,12 +1083,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             int targetScroll = targetScrollForView(expandableView, positionInLinearLayout);
             int outOfViewScroll = positionInLinearLayout + expandableView.getIntrinsicHeight();
 
-            targetScroll = Math.max(0, Math.min(targetScroll, getScrollRange()));
+            if (ANCHOR_SCROLLING) {
+                // TODO
+            } else {
+                targetScroll = Math.max(0, Math.min(targetScroll, getScrollRange()));
 
-            // Only apply the scroll if we're scrolling the view upwards, or the view is so far up
-            // that it is not visible anymore.
-            if (mOwnScrollY < targetScroll || outOfViewScroll < mOwnScrollY) {
-                setOwnScrollY(targetScroll);
+                // Only apply the scroll if we're scrolling the view upwards, or the view is so
+                // far up that it is not visible anymore.
+                if (mOwnScrollY < targetScroll || outOfViewScroll < mOwnScrollY) {
+                    setOwnScrollY(targetScroll);
+                }
             }
         }
     }
@@ -1078,9 +1113,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void clampScrollPosition() {
-        int scrollRange = getScrollRange();
-        if (scrollRange < mOwnScrollY) {
-            setOwnScrollY(scrollRange);
+        if (ANCHOR_SCROLLING) {
+            // TODO
+        } else {
+            int scrollRange = getScrollRange();
+            if (scrollRange < mOwnScrollY) {
+                setOwnScrollY(scrollRange);
+            }
         }
     }
 
@@ -1460,17 +1499,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean scrollTo(View v) {
         ExpandableView expandableView = (ExpandableView) v;
-        int positionInLinearLayout = getPositionInLinearLayout(v);
-        int targetScroll = targetScrollForView(expandableView, positionInLinearLayout);
-        int outOfViewScroll = positionInLinearLayout + expandableView.getIntrinsicHeight();
+        if (ANCHOR_SCROLLING) {
+            // TODO
+        } else {
+            int positionInLinearLayout = getPositionInLinearLayout(v);
+            int targetScroll = targetScrollForView(expandableView, positionInLinearLayout);
+            int outOfViewScroll = positionInLinearLayout + expandableView.getIntrinsicHeight();
 
-        // Only apply the scroll if we're scrolling the view upwards, or the view is so far up
-        // that it is not visible anymore.
-        if (mOwnScrollY < targetScroll || outOfViewScroll < mOwnScrollY) {
-            mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScroll - mOwnScrollY);
-            mDontReportNextOverScroll = true;
-            animateScroll();
-            return true;
+            // Only apply the scroll if we're scrolling the view upwards, or the view is so far up
+            // that it is not visible anymore.
+            if (mOwnScrollY < targetScroll || outOfViewScroll < mOwnScrollY) {
+                mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScroll - mOwnScrollY);
+                mDontReportNextOverScroll = true;
+                animateScroll();
+                return true;
+            }
         }
         return false;
     }
@@ -1491,16 +1534,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         mBottomInset = insets.getSystemWindowInsetBottom();
 
-        int range = getScrollRange();
-        if (mOwnScrollY > range) {
-            // HACK: We're repeatedly getting staggered insets here while the IME is
-            // animating away. To work around that we'll wait until things have settled.
-            removeCallbacks(mReclamp);
-            postDelayed(mReclamp, 50);
-        } else if (mForcedScroll != null) {
-            // The scroll was requested before we got the actual inset - in case we need
-            // to scroll up some more do so now.
-            scrollTo(mForcedScroll);
+        if (ANCHOR_SCROLLING) {
+            // TODO
+        } else {
+            int range = getScrollRange();
+            if (mOwnScrollY > range) {
+                // HACK: We're repeatedly getting staggered insets here while the IME is
+                // animating away. To work around that we'll wait until things have settled.
+                removeCallbacks(mReclamp);
+                postDelayed(mReclamp, 50);
+            } else if (mForcedScroll != null) {
+                // The scroll was requested before we got the actual inset - in case we need
+                // to scroll up some more do so now.
+                scrollTo(mForcedScroll);
+            }
         }
         return insets;
     }
@@ -1509,8 +1556,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private Runnable mReclamp = new Runnable() {
         @Override
         public void run() {
-            int range = getScrollRange();
-            mScroller.startScroll(mScrollX, mOwnScrollY, 0, range - mOwnScrollY);
+            if (ANCHOR_SCROLLING) {
+                // TODO
+            } else {
+                int range = getScrollRange();
+                mScroller.startScroll(mScrollX, mOwnScrollY, 0, range - mOwnScrollY);
+            }
             mDontReportNextOverScroll = true;
             mDontClampNextScroll = true;
             animateScroll();
@@ -1588,20 +1639,41 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         // Top overScroll might not grab all scrolling motion,
         // we have to scroll as well.
-        float scrollAmount = newTopAmount < 0 ? -newTopAmount : 0.0f;
-        float newScrollY = mOwnScrollY + scrollAmount;
-        if (newScrollY > range) {
-            if (!mExpandedInThisMotion) {
-                float currentBottomPixels = getCurrentOverScrolledPixels(false);
-                // We overScroll on the top
-                setOverScrolledPixels(currentBottomPixels + newScrollY - range,
-                        false /* onTop */,
-                        false /* animate */);
+        if (ANCHOR_SCROLLING) {
+            float scrollAmount = newTopAmount < 0 ? -newTopAmount : 0.0f;
+            // TODO: once we're recycling this will need to check the adapter position of the child
+            ExpandableView lastRow = getLastRowNotGone();
+            if (!lastRow.isInShelf()) {
+                float distanceToMax =
+                        Math.max(0, lastRow.getTranslationY() + lastRow.getActualHeight()
+                                - (mMaxLayoutHeight - mFooterView.getActualHeight()));
+                if (distanceToMax < scrollAmount) {
+                    float currentBottomPixels = getCurrentOverScrolledPixels(false);
+                    // We overScroll on the bottom
+                    setOverScrolledPixels(currentBottomPixels + (scrollAmount - distanceToMax),
+                            false /* onTop */,
+                            false /* animate */);
+                    mScrollAnchorViewY -= distanceToMax;
+                    scrollAmount = 0f;
+                }
             }
-            setOwnScrollY(range);
-            scrollAmount = 0.0f;
+            return scrollAmount;
+        } else {
+            float scrollAmount = newTopAmount < 0 ? -newTopAmount : 0.0f;
+            float newScrollY = mOwnScrollY + scrollAmount;
+            if (newScrollY > range) {
+                if (!mExpandedInThisMotion) {
+                    float currentBottomPixels = getCurrentOverScrolledPixels(false);
+                    // We overScroll on the bottom
+                    setOverScrolledPixels(currentBottomPixels + newScrollY - range,
+                            false /* onTop */,
+                            false /* animate */);
+                }
+                setOwnScrollY(range);
+                scrollAmount = 0.0f;
+            }
+            return scrollAmount;
         }
-        return scrollAmount;
     }
 
     /**
@@ -1622,18 +1694,37 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         // Bottom overScroll might not grab all scrolling motion,
         // we have to scroll as well.
-        float scrollAmount = newBottomAmount < 0 ? newBottomAmount : 0.0f;
-        float newScrollY = mOwnScrollY + scrollAmount;
-        if (newScrollY < 0) {
-            float currentTopPixels = getCurrentOverScrolledPixels(true);
-            // We overScroll on the top
-            setOverScrolledPixels(currentTopPixels - newScrollY,
-                    true /* onTop */,
-                    false /* animate */);
-            setOwnScrollY(0);
-            scrollAmount = 0.0f;
+        if (ANCHOR_SCROLLING) {
+            float scrollAmount = newBottomAmount < 0 ? newBottomAmount : 0.0f;
+            // TODO: once we're recycling this will need to check the adapter position of the child
+            ExpandableView firstChild = getFirstChildNotGone();
+            float top = firstChild.getTranslationY();
+            float distanceToTop = mScrollAnchorView.getTranslationY() - top - mScrollAnchorViewY;
+            if (distanceToTop < -scrollAmount) {
+                float currentTopPixels = getCurrentOverScrolledPixels(true);
+                // We overScroll on the top
+                setOverScrolledPixels(currentTopPixels + (-scrollAmount - distanceToTop),
+                        true /* onTop */,
+                        false /* animate */);
+                mScrollAnchorView = firstChild;
+                mScrollAnchorViewY = 0;
+                scrollAmount = 0f;
+            }
+            return scrollAmount;
+        } else {
+            float scrollAmount = newBottomAmount < 0 ? newBottomAmount : 0.0f;
+            float newScrollY = mOwnScrollY + scrollAmount;
+            if (newScrollY < 0) {
+                float currentTopPixels = getCurrentOverScrolledPixels(true);
+                // We overScroll on the top
+                setOverScrolledPixels(currentTopPixels - newScrollY,
+                        true /* onTop */,
+                        false /* animate */);
+                setOwnScrollY(0);
+                scrollAmount = 0.0f;
+            }
+            return scrollAmount;
         }
-        return scrollAmount;
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -1668,23 +1759,27 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void animateScroll() {
         if (mScroller.computeScrollOffset()) {
-            int oldY = mOwnScrollY;
-            int y = mScroller.getCurrY();
+            if (ANCHOR_SCROLLING) {
+                // TODO
+            } else {
+                int oldY = mOwnScrollY;
+                int y = mScroller.getCurrY();
 
-            if (oldY != y) {
-                int range = getScrollRange();
-                if (y < 0 && oldY >= 0 || y > range && oldY <= range) {
-                    float currVelocity = mScroller.getCurrVelocity();
-                    if (currVelocity >= mMinimumVelocity) {
-                        mMaxOverScroll = Math.abs(currVelocity) / 1000 * mOverflingDistance;
+                if (oldY != y) {
+                    int range = getScrollRange();
+                    if (y < 0 && oldY >= 0 || y > range && oldY <= range) {
+                        float currVelocity = mScroller.getCurrVelocity();
+                        if (currVelocity >= mMinimumVelocity) {
+                            mMaxOverScroll = Math.abs(currVelocity) / 1000 * mOverflingDistance;
+                        }
                     }
-                }
 
-                if (mDontClampNextScroll) {
-                    range = Math.max(range, oldY);
+                    if (mDontClampNextScroll) {
+                        range = Math.max(range, oldY);
+                    }
+                    customOverScrollBy(y - oldY, oldY, range,
+                            (int) (mMaxOverScroll));
                 }
-                customOverScrollBy(y - oldY, oldY, range,
-                        (int) (mMaxOverScroll));
             }
 
             postOnAnimation(mAnimateScroll);
@@ -1699,23 +1794,28 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private boolean customOverScrollBy(int deltaY, int scrollY, int scrollRangeY,
             int maxOverScrollY) {
+        if (ANCHOR_SCROLLING) {
+            // TODO check clamped?
+            onCustomOverScrolledBy(deltaY);
+            return false;
+        } else {
+            int newScrollY = scrollY + deltaY;
+            final int top = -maxOverScrollY;
+            final int bottom = maxOverScrollY + scrollRangeY;
 
-        int newScrollY = scrollY + deltaY;
-        final int top = -maxOverScrollY;
-        final int bottom = maxOverScrollY + scrollRangeY;
+            boolean clampedY = false;
+            if (newScrollY > bottom) {
+                newScrollY = bottom;
+                clampedY = true;
+            } else if (newScrollY < top) {
+                newScrollY = top;
+                clampedY = true;
+            }
 
-        boolean clampedY = false;
-        if (newScrollY > bottom) {
-            newScrollY = bottom;
-            clampedY = true;
-        } else if (newScrollY < top) {
-            newScrollY = top;
-            clampedY = true;
+            onCustomOverScrolled(newScrollY, clampedY);
+
+            return clampedY;
         }
-
-        onCustomOverScrolled(newScrollY, clampedY);
-
-        return clampedY;
     }
 
     /**
@@ -1833,8 +1933,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
     }
 
+    private void onCustomOverScrolledBy(int deltaY) {
+        mScrollAnchorViewY -= deltaY;
+        // Treat animating scrolls differently; see #computeScroll() for why.
+        if (!mScroller.isFinished()) {
+            // TODO: springback/overscroll, see #onCustomOverScrolled()
+        }
+        updateScrollAnchor();
+        updateOnScrollChange();
+    }
+
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void onCustomOverScrolled(int scrollY, boolean clampedY) {
+        assert !ANCHOR_SCROLLING;
         // Treat animating scrolls differently; see #computeScroll() for why.
         if (!mScroller.isFinished()) {
             setOwnScrollY(scrollY);
@@ -1855,25 +1966,29 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void springBack() {
-        int scrollRange = getScrollRange();
-        boolean overScrolledTop = mOwnScrollY <= 0;
-        boolean overScrolledBottom = mOwnScrollY >= scrollRange;
-        if (overScrolledTop || overScrolledBottom) {
-            boolean onTop;
-            float newAmount;
-            if (overScrolledTop) {
-                onTop = true;
-                newAmount = -mOwnScrollY;
-                setOwnScrollY(0);
-                mDontReportNextOverScroll = true;
-            } else {
-                onTop = false;
-                newAmount = mOwnScrollY - scrollRange;
-                setOwnScrollY(scrollRange);
+        if (ANCHOR_SCROLLING) {
+            // TODO
+        } else {
+            int scrollRange = getScrollRange();
+            boolean overScrolledTop = mOwnScrollY <= 0;
+            boolean overScrolledBottom = mOwnScrollY >= scrollRange;
+            if (overScrolledTop || overScrolledBottom) {
+                boolean onTop;
+                float newAmount;
+                if (overScrolledTop) {
+                    onTop = true;
+                    newAmount = -mOwnScrollY;
+                    setOwnScrollY(0);
+                    mDontReportNextOverScroll = true;
+                } else {
+                    onTop = false;
+                    newAmount = mOwnScrollY - scrollRange;
+                    setOwnScrollY(scrollRange);
+                }
+                setOverScrollAmount(newAmount, onTop, false);
+                setOverScrollAmount(0.0f, onTop, true);
+                mScroller.forceFinished(true);
             }
-            setOverScrollAmount(newAmount, onTop, false);
-            setOverScrollAmount(0.0f, onTop, true);
-            mScroller.forceFinished(true);
         }
     }
 
@@ -1973,6 +2088,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE && child != mShelf) {
                 return (ExpandableView) child;
+            }
+        }
+        return null;
+    }
+
+    private ExpandableNotificationRow getLastRowNotGone() {
+        int childCount = getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            View child = getChildAt(i);
+            if (child instanceof ExpandableNotificationRow && child.getVisibility() != View.GONE) {
+                return (ExpandableNotificationRow) child;
             }
         }
         return null;
@@ -2091,8 +2217,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateForwardAndBackwardScrollability() {
-        boolean forwardScrollable = mScrollable && mOwnScrollY < getScrollRange();
-        boolean backwardsScrollable = mScrollable && mOwnScrollY > 0;
+        boolean forwardScrollable = mScrollable && !isScrolledToBottom();
+        boolean backwardsScrollable = mScrollable && !isScrolledToTop();
         boolean changed = forwardScrollable != mForwardScrollable
                 || backwardsScrollable != mBackwardScrollable;
         mForwardScrollable = forwardScrollable;
@@ -2410,18 +2536,24 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void fling(int velocityY) {
         if (getChildCount() > 0) {
-            int scrollRange = getScrollRange();
-
             float topAmount = getCurrentOverScrollAmount(true);
             float bottomAmount = getCurrentOverScrollAmount(false);
             if (velocityY < 0 && topAmount > 0) {
-                setOwnScrollY(mOwnScrollY - (int) topAmount);
+                if (ANCHOR_SCROLLING) {
+                    mScrollAnchorViewY += topAmount;
+                } else {
+                    setOwnScrollY(mOwnScrollY - (int) topAmount);
+                }
                 mDontReportNextOverScroll = true;
                 setOverScrollAmount(0, true, false);
                 mMaxOverScroll = Math.abs(velocityY) / 1000f * getRubberBandFactor(true /* onTop */)
                         * mOverflingDistance + topAmount;
             } else if (velocityY > 0 && bottomAmount > 0) {
-                setOwnScrollY((int) (mOwnScrollY + bottomAmount));
+                if (ANCHOR_SCROLLING) {
+                    mScrollAnchorViewY -= bottomAmount;
+                } else {
+                    setOwnScrollY((int) (mOwnScrollY + bottomAmount));
+                }
                 setOverScrollAmount(0, false, false);
                 mMaxOverScroll = Math.abs(velocityY) / 1000f
                         * getRubberBandFactor(false /* onTop */) * mOverflingDistance
@@ -2430,12 +2562,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 // it will be set once we reach the boundary
                 mMaxOverScroll = 0.0f;
             }
-            int minScrollY = Math.max(0, scrollRange);
-            if (mExpandedInThisMotion) {
-                minScrollY = Math.min(minScrollY, mMaxScrollAfterExpand);
+            if (ANCHOR_SCROLLING) {
+                // TODO
+            } else {
+                int scrollRange = getScrollRange();
+                int minScrollY = Math.max(0, scrollRange);
+                if (mExpandedInThisMotion) {
+                    minScrollY = Math.min(minScrollY, mMaxScrollAfterExpand);
+                }
+                mScroller.fling(mScrollX, mOwnScrollY, 1, velocityY, 0, 0, 0, minScrollY, 0,
+                        mExpandedInThisMotion && mOwnScrollY >= 0 ? 0 : Integer.MAX_VALUE / 2);
             }
-            mScroller.fling(mScrollX, mOwnScrollY, 1, velocityY, 0, 0, 0, minScrollY, 0,
-                    mExpandedInThisMotion && mOwnScrollY >= 0 ? 0 : Integer.MAX_VALUE / 2);
 
             animateScroll();
         }
@@ -2492,24 +2629,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public int getFirstChildIntrinsicHeight() {
-        final ExpandableView firstChild = getFirstChildNotGone();
-        int firstChildMinHeight = firstChild != null
-                ? firstChild.getIntrinsicHeight()
-                : mEmptyShadeView != null
-                        ? mEmptyShadeView.getIntrinsicHeight()
-                        : mCollapsedSize;
-        if (mOwnScrollY > 0) {
-            firstChildMinHeight = Math.max(firstChildMinHeight - mOwnScrollY, mCollapsedSize);
-        }
-        return firstChildMinHeight;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public float getTopPaddingOverflow() {
         return mTopPaddingOverflow;
     }
-
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public int getPeekHeight() {
@@ -2718,30 +2840,51 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateScrollStateForRemovedChild(ExpandableView removedChild) {
-        int startingPosition = getPositionInLinearLayout(removedChild);
-        float increasedPaddingAmount = removedChild.getIncreasedPaddingAmount();
-        int padding;
-        if (increasedPaddingAmount >= 0) {
-            padding = (int) NotificationUtils.interpolate(
-                    mPaddingBetweenElements,
-                    mIncreasedPaddingBetweenElements,
-                    increasedPaddingAmount);
+        if (ANCHOR_SCROLLING) {
+            if (removedChild == mScrollAnchorView) {
+                ExpandableView firstChild = getFirstChildNotGone();
+                if (firstChild != null) {
+                    mScrollAnchorView = firstChild;
+                } else {
+                    mScrollAnchorView = mShelf;
+                }
+                // Adjust anchor view Y by the distance between the old and new anchors
+                // so that there's no visible change.
+                mScrollAnchorViewY +=
+                        mScrollAnchorView.getTranslationY() - removedChild.getTranslationY();
+            }
+            updateScrollAnchor();
+            // TODO: once we're recycling this will need to check the adapter position of the child
+            if (mScrollAnchorView == getFirstChildNotGone() && mScrollAnchorViewY > 0) {
+                mScrollAnchorViewY = 0;
+            }
+            updateOnScrollChange();
         } else {
-            padding = (int) NotificationUtils.interpolate(
-                    0,
-                    mPaddingBetweenElements,
-                    1.0f + increasedPaddingAmount);
-        }
-        int childHeight = getIntrinsicHeight(removedChild) + padding;
-        int endPosition = startingPosition + childHeight;
-        if (endPosition <= mOwnScrollY) {
-            // This child is fully scrolled of the top, so we have to deduct its height from the
-            // scrollPosition
-            setOwnScrollY(mOwnScrollY - childHeight);
-        } else if (startingPosition < mOwnScrollY) {
-            // This child is currently being scrolled into, set the scroll position to the start of
-            // this child
-            setOwnScrollY(startingPosition);
+            int startingPosition = getPositionInLinearLayout(removedChild);
+            float increasedPaddingAmount = removedChild.getIncreasedPaddingAmount();
+            int padding;
+            if (increasedPaddingAmount >= 0) {
+                padding = (int) NotificationUtils.interpolate(
+                        mPaddingBetweenElements,
+                        mIncreasedPaddingBetweenElements,
+                        increasedPaddingAmount);
+            } else {
+                padding = (int) NotificationUtils.interpolate(
+                        0,
+                        mPaddingBetweenElements,
+                        1.0f + increasedPaddingAmount);
+            }
+            int childHeight = getIntrinsicHeight(removedChild) + padding;
+            int endPosition = startingPosition + childHeight;
+            if (endPosition <= mOwnScrollY) {
+                // This child is fully scrolled of the top, so we have to deduct its height from the
+                // scrollPosition
+                setOwnScrollY(mOwnScrollY - childHeight);
+            } else if (startingPosition < mOwnScrollY) {
+                // This child is currently being scrolled into, set the scroll position to the
+                // start of this child
+                setOwnScrollY(startingPosition);
+            }
         }
     }
 
@@ -2895,6 +3038,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
         updateChronometerForChild(child);
+        if (ANCHOR_SCROLLING) {
+            // TODO: once we're recycling this will need to check the adapter position of the child
+            if (child == getFirstChildNotGone() && (isScrolledToTop() || !mIsExpanded)) {
+                // New child was added at the top while we're scrolled to the top;
+                // make it the new anchor view so that we stay at the top.
+                mScrollAnchorView = child;
+            }
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -3388,17 +3539,24 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
                         if (vscroll != 0) {
                             final int delta = (int) (vscroll * getVerticalScrollFactor());
-                            final int range = getScrollRange();
-                            int oldScrollY = mOwnScrollY;
-                            int newScrollY = oldScrollY - delta;
-                            if (newScrollY < 0) {
-                                newScrollY = 0;
-                            } else if (newScrollY > range) {
-                                newScrollY = range;
-                            }
-                            if (newScrollY != oldScrollY) {
-                                setOwnScrollY(newScrollY);
-                                return true;
+                            if (ANCHOR_SCROLLING) {
+                                mScrollAnchorViewY -= delta;
+                                updateScrollAnchor();
+                                clampScrollPosition();
+                                updateOnScrollChange();
+                            } else {
+                                final int range = getScrollRange();
+                                int oldScrollY = mOwnScrollY;
+                                int newScrollY = oldScrollY - delta;
+                                if (newScrollY < 0) {
+                                    newScrollY = 0;
+                                } else if (newScrollY > range) {
+                                    newScrollY = range;
+                                }
+                                if (newScrollY != oldScrollY) {
+                                    setOwnScrollY(newScrollY);
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -3466,12 +3624,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 if (mIsBeingDragged) {
                     // Scroll to follow the motion event
                     mLastMotionY = y;
-                    int range = getScrollRange();
-                    if (mExpandedInThisMotion) {
-                        range = Math.min(range, mMaxScrollAfterExpand);
-                    }
-
                     float scrollAmount;
+                    int range;
+                    if (ANCHOR_SCROLLING) {
+                        range = 0;  // unused in the methods it's being passed to
+                    } else {
+                        range = getScrollRange();
+                        if (mExpandedInThisMotion) {
+                            range = Math.min(range, mMaxScrollAfterExpand);
+                        }
+                    }
                     if (deltaY < 0) {
                         scrollAmount = overScrollDown(deltaY);
                     } else {
@@ -3508,9 +3670,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                                     onOverScrollFling(false, initialVelocity);
                                 }
                             } else {
-                                if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0,
-                                        getScrollRange())) {
-                                    animateScroll();
+                                if (ANCHOR_SCROLLING) {
+                                    // TODO
+                                } else {
+                                    if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0,
+                                            getScrollRange())) {
+                                        animateScroll();
+                                    }
                                 }
                             }
                         }
@@ -3522,8 +3688,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 break;
             case MotionEvent.ACTION_CANCEL:
                 if (mIsBeingDragged && getChildCount() > 0) {
-                    if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0, getScrollRange())) {
-                        animateScroll();
+                    if (ANCHOR_SCROLLING) {
+                        // TODO
+                    } else {
+                        if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0,
+                                getScrollRange())) {
+                            animateScroll();
+                        }
                     }
                     mActivePointerId = INVALID_POINTER;
                     endDrag();
@@ -3590,12 +3761,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (getCurrentOverScrollAmount(false /* onTop */) > 0) {
             setOverScrollAmount(0, false /* onTop */, true /* animate */);
         }
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    private void transformTouchEvent(MotionEvent ev, View sourceView, View targetView) {
-        ev.offsetLocation(sourceView.getX(), sourceView.getY());
-        ev.offsetLocation(-targetView.getX(), -targetView.getY());
     }
 
     @Override
@@ -3770,8 +3935,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 setIsBeingDragged(false);
                 mActivePointerId = INVALID_POINTER;
                 recycleVelocityTracker();
-                if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0, getScrollRange())) {
-                    animateScroll();
+                if (ANCHOR_SCROLLING) {
+                    // TODO
+                } else {
+                    if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0, getScrollRange())) {
+                        animateScroll();
+                    }
                 }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
@@ -3846,14 +4015,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
                 // fall through
             case android.R.id.accessibilityActionScrollUp:
-                final int viewportHeight = getHeight() - mPaddingBottom - mTopPadding - mPaddingTop
-                        - mShelf.getIntrinsicHeight();
-                final int targetScrollY = Math.max(0,
-                        Math.min(mOwnScrollY + direction * viewportHeight, getScrollRange()));
-                if (targetScrollY != mOwnScrollY) {
-                    mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScrollY - mOwnScrollY);
-                    animateScroll();
-                    return true;
+                if (ANCHOR_SCROLLING) {
+                    // TODO
+                } else {
+                    final int viewportHeight =
+                            getHeight() - mPaddingBottom - mTopPadding - mPaddingTop
+                                    - mShelf.getIntrinsicHeight();
+                    final int targetScrollY = Math.max(0,
+                            Math.min(mOwnScrollY + direction * viewportHeight, getScrollRange()));
+                    if (targetScrollY != mOwnScrollY) {
+                        mScroller.startScroll(mScrollX, mOwnScrollY, 0,
+                                targetScrollY - mOwnScrollY);
+                        animateScroll();
+                        return true;
+                    }
                 }
                 break;
         }
@@ -3912,13 +4087,34 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @Override
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public boolean isScrolledToTop() {
-        return mOwnScrollY == 0;
+        if (ANCHOR_SCROLLING) {
+            updateScrollAnchor();
+            // TODO: once we're recycling this will need to check the adapter position of the child
+            return mScrollAnchorView == getFirstChildNotGone() && mScrollAnchorViewY >= 0;
+        } else {
+            return mOwnScrollY == 0;
+        }
     }
 
     @Override
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public boolean isScrolledToBottom() {
-        return mOwnScrollY >= getScrollRange();
+        if (ANCHOR_SCROLLING) {
+            // TODO: once we're recycling this will need to check the adapter position of the child
+            ExpandableView lastRow = getLastRowNotGone();
+            if (lastRow == null || mScrollAnchorView == null) {
+                return true;
+            }
+            if (lastRow.isInShelf()) {
+                return false;
+            }
+            float lastChildEnd = lastRow.getTranslationY() + lastRow.getActualHeight();
+            float lastChildEndDistanceFromTop =
+                    lastChildEnd - mScrollAnchorView.getTranslationY() + mScrollAnchorViewY;
+            return lastChildEndDistanceFromTop > mMaxLayoutHeight - mFooterView.getActualHeight();
+        } else {
+            return mOwnScrollY >= getScrollRange();
+        }
     }
 
     @Override
@@ -3960,7 +4156,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         resetCheckSnoozeLeavebehind();
         mAmbientState.setExpansionChanging(false);
         if (!mIsExpanded) {
-            setOwnScrollY(0);
+            resetScrollPosition();
             mStatusBar.resetUserExpandedStates();
             clearTemporaryViews();
             clearUserLockedViews();
@@ -4019,7 +4215,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void resetScrollPosition() {
         mScroller.abortAnimation();
-        setOwnScrollY(0);
+        if (ANCHOR_SCROLLING) {
+            // TODO: once we're recycling this will need to modify the adapter position instead
+            mScrollAnchorView = getFirstChildNotGone();
+            mScrollAnchorViewY = 0;
+            updateOnScrollChange();
+        } else {
+            setOwnScrollY(0);
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -4088,6 +4291,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
         if (view instanceof ExpandableNotificationRow && !onKeyguard()) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            // TODO: once we're recycling this will need to check the adapter position of the child
             if (row.isUserLocked() && row != getFirstChildNotGone()) {
                 if (row.isSummaryWithChildren()) {
                     return;
@@ -4105,7 +4309,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     layoutEnd -= mShelf.getIntrinsicHeight() + mPaddingBetweenElements;
                 }
                 if (endPosition > layoutEnd) {
-                    setOwnScrollY((int) (mOwnScrollY + endPosition - layoutEnd));
+                    if (ANCHOR_SCROLLING) {
+                        mScrollAnchorViewY -= (endPosition - layoutEnd);
+                        updateScrollAnchor();
+                        updateOnScrollChange();
+                    } else {
+                        setOwnScrollY((int) (mOwnScrollY + endPosition - layoutEnd));
+                    }
                     mDisallowScrollingInThisMotion = true;
                 }
             }
@@ -4670,9 +4880,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         super.onInitializeAccessibilityEventInternal(event);
         event.setScrollable(mScrollable);
         event.setScrollX(mScrollX);
-        event.setScrollY(mOwnScrollY);
         event.setMaxScrollX(mScrollX);
-        event.setMaxScrollY(getScrollRange());
+        if (ANCHOR_SCROLLING) {
+            // TODO
+        } else {
+            event.setScrollY(mOwnScrollY);
+            event.setMaxScrollY(getScrollRange());
+        }
     }
 
     @Override
@@ -4857,13 +5071,63 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public void setOwnScrollY(int ownScrollY) {
+    private void setOwnScrollY(int ownScrollY) {
+        assert !ANCHOR_SCROLLING;
         if (ownScrollY != mOwnScrollY) {
             // We still want to call the normal scrolled changed for accessibility reasons
             onScrollChanged(mScrollX, ownScrollY, mScrollX, mOwnScrollY);
             mOwnScrollY = ownScrollY;
-            updateForwardAndBackwardScrollability();
-            requestChildrenUpdate();
+            updateOnScrollChange();
+        }
+    }
+
+    private void updateOnScrollChange() {
+        updateForwardAndBackwardScrollability();
+        requestChildrenUpdate();
+    }
+
+    private void updateScrollAnchor() {
+        int anchorIndex = indexOfChild(mScrollAnchorView);
+        // If the anchor view has been scrolled off the top, move to the next view.
+        while (mScrollAnchorViewY < 0) {
+            View nextAnchor = null;
+            for (int i = anchorIndex + 1; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                if (child.getVisibility() != View.GONE
+                        && child instanceof ExpandableNotificationRow) {
+                    anchorIndex = i;
+                    nextAnchor = child;
+                    break;
+                }
+            }
+            if (nextAnchor == null) {
+                break;
+            }
+            mScrollAnchorViewY +=
+                    (int) (nextAnchor.getTranslationY() - mScrollAnchorView.getTranslationY());
+            mScrollAnchorView = nextAnchor;
+        }
+        // If the view above the anchor view is fully visible, make it the anchor view.
+        while (anchorIndex > 0 && mScrollAnchorViewY > 0) {
+            View prevAnchor = null;
+            for (int i = anchorIndex - 1; i >= 0; i--) {
+                View child = getChildAt(i);
+                if (child.getVisibility() != View.GONE
+                        && child instanceof ExpandableNotificationRow) {
+                    anchorIndex = i;
+                    prevAnchor = child;
+                    break;
+                }
+            }
+            if (prevAnchor == null) {
+                break;
+            }
+            float distanceToPreviousAnchor =
+                    mScrollAnchorView.getTranslationY() - prevAnchor.getTranslationY();
+            if (distanceToPreviousAnchor < mScrollAnchorViewY) {
+                mScrollAnchorViewY -= (int) distanceToPreviousAnchor;
+                mScrollAnchorView = prevAnchor;
+            }
         }
     }
 
@@ -4879,6 +5143,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mAmbientState.setShelf(shelf);
         mStateAnimator.setShelf(shelf);
         shelf.bind(mAmbientState, this);
+        if (ANCHOR_SCROLLING) {
+            mScrollAnchorView = mShelf;
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -6019,7 +6286,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         public void expansionStateChanged(boolean isExpanding) {
             mExpandingNotification = isExpanding;
             if (!mExpandedInThisMotion) {
-                mMaxScrollAfterExpand = mOwnScrollY;
+                if (ANCHOR_SCROLLING) {
+                    // TODO
+                } else {
+                    mMaxScrollAfterExpand = mOwnScrollY;
+                }
                 mExpandedInThisMotion = true;
             }
         }
