@@ -163,6 +163,18 @@ public final class MultiClientInputMethodManagerService {
                         public void startVrInputMethodNoCheck(ComponentName componentName) {
                             reportNotSupported();
                         }
+
+                        @Override
+                        public List<InputMethodInfo> getInputMethodListAsUser(
+                                @UserIdInt int userId) {
+                            return userIdToInputMethodInfoMapper.getAsList(userId);
+                        }
+
+                        @Override
+                        public List<InputMethodInfo> getEnabledInputMethodListAsUser(
+                                @UserIdInt int userId) {
+                            return userIdToInputMethodInfoMapper.getAsList(userId);
+                        }
                     });
         }
 

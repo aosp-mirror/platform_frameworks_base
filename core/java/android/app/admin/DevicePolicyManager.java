@@ -6815,8 +6815,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the list of input methods permitted by the device or profiles
-     * owners of the current user.  (*Not* calling user, due to a limitation in InputMethodManager.)
+     * Returns the list of input methods permitted by the device or profiles owners.
+     *
+     * <p>On {@link android.os.Build.VERSION_CODES#Q} and later devices, this method returns the
+     * result for the calling user.</p>
+     *
+     * <p>On Android P and prior devices, this method returns the result for the current user.</p>
      *
      * <p>Null means all input methods are allowed, if a non-null list is returned
      * it will contain the intersection of the permitted lists for any device or profile

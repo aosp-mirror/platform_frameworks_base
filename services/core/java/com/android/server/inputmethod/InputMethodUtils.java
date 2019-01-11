@@ -40,6 +40,7 @@ import android.util.Printer;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
+import android.view.inputmethod.InputMethodSystemProperty;
 import android.view.textservice.SpellCheckerInfo;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1295,7 +1296,8 @@ final class InputMethodUtils {
      * Converts a user ID, which can be a pseudo user ID such as {@link UserHandle#USER_ALL} to a
      * list of real user IDs.
      *
-     * <p>Currently this method also converts profile user ID to profile parent user ID.</p>
+     * <p>This method also converts profile user ID to profile parent user ID unless
+     * {@link InputMethodSystemProperty#PER_PROFILE_IME_ENABLED} is {@code true}.</p>
      *
      * @param userIdToBeResolved A user ID. Two pseudo user ID {@link UserHandle#USER_CURRENT} and
      *                           {@link UserHandle#USER_ALL} are also supported
@@ -1311,6 +1313,9 @@ final class InputMethodUtils {
                 LocalServices.getService(UserManagerInternal.class);
 
         if (userIdToBeResolved == UserHandle.USER_ALL) {
+            if (InputMethodSystemProperty.PER_PROFILE_IME_ENABLED) {
+                return userManagerInternal.getUserIds();
+            }
             final IntArray result = new IntArray();
             for (int userId : userManagerInternal.getUserIds()) {
                 final int parentUserId = userManagerInternal.getProfileParentId(userId);
@@ -1341,6 +1346,8 @@ final class InputMethodUtils {
             }
             return new int[]{};
         }
-        return new int[]{userManagerInternal.getProfileParentId(sourceUserId)};
+        final int resolvedUserId = InputMethodSystemProperty.PER_PROFILE_IME_ENABLED
+                ? sourceUserId : userManagerInternal.getProfileParentId(sourceUserId);
+        return new int[]{resolvedUserId};
     }
 }

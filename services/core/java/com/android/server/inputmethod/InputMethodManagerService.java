@@ -20,6 +20,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.inputmethod.InputMethodSystemProperty.PER_PROFILE_IME_ENABLED;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -1603,7 +1604,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // 1) it comes from the system process
     // 2) the calling process' user id is identical to the current user id IMMS thinks.
     @GuardedBy("mMethodMap")
-    private boolean calledFromValidUserLocked() {
+    private boolean calledFromValidUserLocked(boolean allowCrossProfileAccess) {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserId(uid);
         if (DEBUG) {
@@ -1613,7 +1614,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + mSettings.getCurrentUserId() + ", calling pid = " + Binder.getCallingPid()
                     + InputMethodUtils.getApiCallStack());
         }
-        if (uid == Process.SYSTEM_UID || mSettings.isCurrentProfile(userId)) {
+        if (uid == Process.SYSTEM_UID) {
+            return true;
+        }
+        if (userId == mSettings.getCurrentUserId()) {
+            return true;
+        }
+        if (allowCrossProfileAccess && mSettings.isCurrentProfile(userId)) {
             return true;
         }
 
@@ -2518,7 +2525,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void registerSuggestionSpansForNotification(SuggestionSpan[] spans) {
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
+            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
                 return;
             }
             final InputMethodInfo currentImi = mMethodMap.get(mCurMethodId);
@@ -2534,7 +2541,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public boolean notifySuggestionPicked(SuggestionSpan span, String originalString, int index) {
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
+            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
                 return false;
             }
             final InputMethodInfo targetImi = mSecureSuggestionSpans.get(span);
@@ -2701,7 +2708,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             ResultReceiver resultReceiver) {
         int uid = Binder.getCallingUid();
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
+            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
                 return false;
             }
             final long ident = Binder.clearCallingIdentity();
@@ -2786,7 +2793,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             ResultReceiver resultReceiver) {
         int uid = Binder.getCallingUid();
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
+            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
                 return false;
             }
             final long ident = Binder.clearCallingIdentity();
@@ -2893,10 +2900,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
             IInputContext inputContext, @MissingMethodFlags int missingMethods,
             int unverifiedTargetSdkVersion) {
+        final int userId = UserHandle.getUserId(Binder.getCallingUid());
         InputBindResult res = null;
         synchronized (mMethodMap) {
             // Needs to check the validity before clearing calling identity
-            final boolean calledFromValidUser = calledFromValidUserLocked();
+            // Note that cross-profile access is always allowed here to allow profile-switching.
+            final boolean calledFromValidUser = calledFromValidUserLocked(true);
             final int windowDisplayId =
                     mWindowManagerInternal.getDisplayIdForWindow(windowToken);
             final long ident = Binder.clearCallingIdentity();
@@ -2946,6 +2955,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + "android.permission.INTERACT_ACROSS_USERS_FULL");
                     hideCurrentInputLocked(0, null);
                     return InputBindResult.INVALID_USER;
+                }
+
+                if (PER_PROFILE_IME_ENABLED && userId != mSettings.getCurrentUserId()) {
+                    switchUserLocked(userId);
                 }
 
                 if (mCurFocusedWindow == windowToken) {
@@ -3116,7 +3129,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public void showInputMethodPickerFromClient(
             IInputMethodClient client, int auxiliarySubtypeMode) {
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
+            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
                 return;
             }
             if(!canShowInputMethodPickerLocked(client)) {
@@ -3187,7 +3200,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             IInputMethodClient client, String inputMethodId) {
         synchronized (mMethodMap) {
             // TODO(yukawa): Should we verify the display ID?
-            if (!calledFromValidUserLocked()) {
+            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
                 return;
             }
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageO(
@@ -3302,7 +3315,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public InputMethodSubtype getLastInputMethodSubtype() {
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
+            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
                 return null;
             }
             final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
@@ -3340,7 +3353,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
+            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
                 return;
             }
             if (!mSystemReady) {
@@ -4186,7 +4199,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public InputMethodSubtype getCurrentInputMethodSubtype() {
         synchronized (mMethodMap) {
             // TODO: Make this work even for non-current users?
-            if (!calledFromValidUserLocked()) {
+            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
                 return null;
             }
             return getCurrentInputMethodSubtypeLocked();
@@ -4236,7 +4249,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
         synchronized (mMethodMap) {
             // TODO: Make this work even for non-current users?
-            if (!calledFromValidUserLocked()) {
+            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
                 return false;
             }
             if (subtype != null && mCurMethodId != null) {
@@ -4248,6 +4261,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
             return false;
+        }
+    }
+
+    private List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
+        synchronized (mMethodMap) {
+            return getInputMethodListLocked(false, userId);
+        }
+    }
+
+    private List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId) {
+        synchronized (mMethodMap) {
+            return getEnabledInputMethodListLocked(userId);
         }
     }
 
@@ -4275,6 +4300,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void startVrInputMethodNoCheck(@Nullable ComponentName componentName) {
             mService.mHandler.obtainMessage(MSG_START_VR_INPUT, componentName).sendToTarget();
+        }
+
+        @Override
+        public List<InputMethodInfo> getInputMethodListAsUser(int userId) {
+            return mService.getInputMethodListAsUser(userId);
+        }
+
+        @Override
+        public List<InputMethodInfo> getEnabledInputMethodListAsUser(int userId) {
+            return mService.getEnabledInputMethodListAsUser(userId);
         }
     }
 
