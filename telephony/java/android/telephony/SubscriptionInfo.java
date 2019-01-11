@@ -174,6 +174,16 @@ public class SubscriptionInfo implements Parcelable {
     private boolean mIsGroupDisabled = false;
 
     /**
+     * Profile class, PROFILE_CLASS_TESTING, PROFILE_CLASS_OPERATIONAL
+     * PROFILE_CLASS_PROVISIONING, or PROFILE_CLASS_UNSET.
+     * A profile on the eUICC can be defined as test, operational, provisioning, or unset.
+     * The profile class will be populated from the profile metadata if present. Otherwise,
+     * the profile class defaults to unset if there is no profile metadata or the subscription
+     * is not on an eUICC ({@link #isEmbedded} returns false).
+     */
+    private int mProfileClass;
+
+    /**
      * @hide
      */
     public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
@@ -182,7 +192,8 @@ public class SubscriptionInfo implements Parcelable {
             @Nullable UiccAccessRule[] accessRules, String cardString) {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
                 roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, cardString,
-                false, null, true, TelephonyManager.UNKNOWN_CARRIER_ID);
+                false, null, true, TelephonyManager.UNKNOWN_CARRIER_ID,
+                SubscriptionManager.PROFILE_CLASS_DEFAULT);
     }
 
     /**
@@ -192,10 +203,10 @@ public class SubscriptionInfo implements Parcelable {
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
             Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
             @Nullable UiccAccessRule[] accessRules, String cardString, boolean isOpportunistic,
-            @Nullable String groupUUID, boolean isMetered, int carrierId) {
+            @Nullable String groupUUID, boolean isMetered, int carrierId, int profileClass) {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
                 roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, cardString, -1,
-                isOpportunistic, groupUUID, isMetered, false, carrierId);
+                isOpportunistic, groupUUID, isMetered, false, carrierId, profileClass);
     }
 
     /**
@@ -206,7 +217,7 @@ public class SubscriptionInfo implements Parcelable {
             Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
             @Nullable UiccAccessRule[] accessRules, String cardString, int cardId,
             boolean isOpportunistic, @Nullable String groupUUID, boolean isMetered,
-            boolean isGroupDisabled, int carrierid) {
+            boolean isGroupDisabled, int carrierid, int profileClass) {
         this.mId = id;
         this.mIccId = iccId;
         this.mSimSlotIndex = simSlotIndex;
@@ -229,6 +240,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mIsMetered = isMetered;
         this.mIsGroupDisabled = isGroupDisabled;
         this.mCarrierId = carrierid;
+        this.mProfileClass = profileClass;
     }
 
 
@@ -466,6 +478,15 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
+     * @return the profile class of this subscription.
+     * @hide
+     */
+    @SystemApi
+    public @SubscriptionManager.ProfileClass int getProfileClass() {
+        return this.mProfileClass;
+    }
+
+    /**
      * Checks whether the app with the given context is authorized to manage this subscription
      * according to its metadata. Only supported for embedded subscriptions (if {@link #isEmbedded}
      * returns true).
@@ -590,11 +611,12 @@ public class SubscriptionInfo implements Parcelable {
             boolean isMetered = source.readBoolean();
             boolean isGroupDisabled = source.readBoolean();
             int carrierid = source.readInt();
+            int profileClass = source.readInt();
 
             return new SubscriptionInfo(id, iccId, simSlotIndex, displayName, carrierName,
                     nameSource, iconTint, number, dataRoaming, iconBitmap, mcc, mnc, countryIso,
                     isEmbedded, accessRules, cardString, cardId, isOpportunistic, groupUUID,
-                    isMetered, isGroupDisabled, carrierid);
+                    isMetered, isGroupDisabled, carrierid, profileClass);
         }
 
         @Override
@@ -627,6 +649,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeBoolean(mIsMetered);
         dest.writeBoolean(mIsGroupDisabled);
         dest.writeInt(mCarrierId);
+        dest.writeInt(mProfileClass);
     }
 
     @Override
@@ -662,7 +685,8 @@ public class SubscriptionInfo implements Parcelable {
                 + " accessRules " + Arrays.toString(mAccessRules)
                 + " cardString=" + cardStringToPrint + " cardId=" + mCardId
                 + " isOpportunistic " + mIsOpportunistic + " mGroupUUID=" + mGroupUUID
-                + " isMetered=" + mIsMetered + " mIsGroupDisabled=" + mIsGroupDisabled + "}";
+                + " isMetered=" + mIsMetered + " mIsGroupDisabled=" + mIsGroupDisabled
+                + " profileClass=" + mProfileClass + "}";
     }
 
     @Override
@@ -670,7 +694,7 @@ public class SubscriptionInfo implements Parcelable {
         return Objects.hash(mId, mSimSlotIndex, mNameSource, mIconTint, mDataRoaming, mIsEmbedded,
                 mIsOpportunistic, mGroupUUID, mIsMetered, mIccId, mNumber, mMcc, mMnc,
                 mCountryIso, mCardString, mCardId, mDisplayName, mCarrierName, mAccessRules,
-                mIsGroupDisabled, mCarrierId);
+                mIsGroupDisabled, mCarrierId, mProfileClass);
     }
 
     @Override
@@ -705,6 +729,7 @@ public class SubscriptionInfo implements Parcelable {
                 && Objects.equals(mCardId, toCompare.mCardId)
                 && TextUtils.equals(mDisplayName, toCompare.mDisplayName)
                 && TextUtils.equals(mCarrierName, toCompare.mCarrierName)
-                && Arrays.equals(mAccessRules, toCompare.mAccessRules);
+                && Arrays.equals(mAccessRules, toCompare.mAccessRules)
+                && mProfileClass == toCompare.mProfileClass;
     }
 }
