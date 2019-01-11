@@ -48,14 +48,16 @@ import java.util.ArrayList;
 public class NetworkStack {
     private static final String TAG = NetworkStack.class.getSimpleName();
 
+    public static final String NETWORKSTACK_PACKAGE_NAME = "com.android.mainline.networkstack";
+
     @NonNull
     @GuardedBy("mPendingNetStackRequests")
-    private final ArrayList<NetworkStackRequest> mPendingNetStackRequests = new ArrayList<>();
+    private final ArrayList<NetworkStackCallback> mPendingNetStackRequests = new ArrayList<>();
     @Nullable
     @GuardedBy("mPendingNetStackRequests")
     private INetworkStackConnector mConnector;
 
-    private interface NetworkStackRequest {
+    private interface NetworkStackCallback {
         void onNetworkStackConnected(INetworkStackConnector connector);
     }
 
@@ -71,6 +73,21 @@ public class NetworkStack {
         requestConnector(connector -> {
             try {
                 connector.makeDhcpServer(ifName, params, cb);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        });
+    }
+
+    /**
+     * Create a NetworkMonitor.
+     *
+     * <p>The INetworkMonitor will be returned asynchronously through the provided callbacks.
+     */
+    public void makeNetworkMonitor(Network network, String name, INetworkMonitorCallbacks cb) {
+        requestConnector(connector -> {
+            try {
+                connector.makeNetworkMonitor(network.netId, name, cb);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
@@ -96,14 +113,14 @@ public class NetworkStack {
         ServiceManager.addService(Context.NETWORK_STACK_SERVICE, service, false /* allowIsolated */,
                 DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
 
-        final ArrayList<NetworkStackRequest> requests;
+        final ArrayList<NetworkStackCallback> requests;
         synchronized (mPendingNetStackRequests) {
             requests = new ArrayList<>(mPendingNetStackRequests);
             mPendingNetStackRequests.clear();
             mConnector = connector;
         }
 
-        for (NetworkStackRequest r : requests) {
+        for (NetworkStackCallback r : requests) {
             r.onNetworkStackConnected(connector);
         }
     }
@@ -124,7 +141,8 @@ public class NetworkStack {
                     "com.android.server.NetworkStackService",
                     true /* initialize */,
                     context.getClassLoader());
-            connector = (IBinder) service.getMethod("makeConnector").invoke(null);
+            connector = (IBinder) service.getMethod("makeConnector", Context.class)
+                    .invoke(null, context);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             Slog.wtf(TAG, "Could not create network stack connector from NetworkStackService");
             // TODO: crash/reboot system here ?
@@ -153,7 +171,7 @@ public class NetworkStack {
     }
 
     // TODO: use this method to obtain the connector when implementing network stack operations
-    private void requestConnector(@NonNull NetworkStackRequest request) {
+    private void requestConnector(@NonNull NetworkStackCallback request) {
         // TODO: PID check.
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             // Don't even attempt to obtain the connector and give a nice error message
