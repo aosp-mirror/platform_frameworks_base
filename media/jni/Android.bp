@@ -85,7 +85,7 @@ cc_library_shared {
 }
 
 cc_library_shared {
-    name: "libmedia2_jni",
+    name: "libmediaplayer2_jni",
 
     srcs: [
         "android_media_DataSourceCallback.cpp",
@@ -117,7 +117,10 @@ cc_library_shared {
         "libz",
     ],
 
-    header_libs: ["libhardware_headers"],
+    header_libs: [
+        "libhardware_headers",
+        "libnativewindow_headers",
+    ],
 
     static_libs: [
         "libbase",
