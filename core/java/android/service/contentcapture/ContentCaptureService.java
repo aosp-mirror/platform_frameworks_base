@@ -42,6 +42,7 @@ import android.view.contentcapture.ContentCaptureSession;
 import android.view.contentcapture.ContentCaptureSessionId;
 import android.view.contentcapture.IContentCaptureDirectManager;
 import android.view.contentcapture.MainContentCaptureSession;
+import android.view.contentcapture.UserDataRemovalRequest;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -255,6 +256,16 @@ public abstract class ContentCaptureService extends Service {
         if (VERBOSE) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
         onContentCaptureEventsRequest(sessionId, new ContentCaptureEventsRequest(event));
     }
+
+    /**
+     * Notifies the service that the app requested to remove data associated with the user.
+     *
+     * @param request the user data requested to be removed
+     */
+    public void onUserDataRemovalRequest(@NonNull UserDataRemovalRequest request) {
+        if (VERBOSE) Log.v(TAG, "onUserDataRemovalRequest()");
+    }
+
     /**
      * Notifies the service of {@link SnapshotData snapshot data} associated with a session.
      *
