@@ -60,6 +60,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
@@ -81,6 +82,7 @@ import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AlarmManagerServiceTest {
