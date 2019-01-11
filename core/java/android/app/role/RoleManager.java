@@ -68,57 +68,9 @@ public final class RoleManager {
     private static final String LOG_TAG = RoleManager.class.getSimpleName();
 
     /**
-     * The name of the proxy calling role.
-     * <p>
-     * A proxy calling app implements the {@link android.telecom.CallRedirectionService} API and
-     * provides a means to re-write the phone number for an outgoing call to place the call through
-     * a proxy calling service.
-     * <p>
-     * A single app may fill this role at any one time.
-     * @hide
-     */
-    public static final String ROLE_PROXY_CALLING_APP = "android.app.role.PROXY_CALLING_APP";
-
-    /**
-     * The name of the call screening and caller id role.
-     * <p>
-     * A call screening and caller id app implements the
-     * {@link android.telecom.CallScreeningService} API.
-     * <p>
-     * A single app may fill this role at any one time.
-     * @hide
-     */
-    public static final String ROLE_CALL_SCREENING_APP = "android.app.role.CALL_SCREENING_APP";
-
-    /**
-     * The name of the call companion app role.
-     * <p>
-     * A call companion app provides no user interface for calls, but will be bound to by Telecom
-     * when there are active calls on the device.  Companion apps for wearable devices are an
-     * acceptable use-case.  A call companion app implements the
-     * {@link android.telecom.InCallService} API.
-     * <p>
-     * Multiple apps app may fill this role at any one time.
-     * @hide
-     */
-    public static final String ROLE_CALL_COMPANION_APP = "android.app.role.CALL_COMPANION_APP";
-
-    /**
-     * The name of the car mode dialer app role.
-     * <p>
-     * Similar to the {@link #ROLE_DIALER} role, this role determines which app is responsible for
-     * showing the user interface for ongoing calls on the device.  This app filling this role is
-     * only used when the device is in car mode (see
-     * {@link android.app.UiModeManager#ACTION_ENTER_CAR_MODE} for more information).  An app
-     * filling this role must implement the {@link android.telecom.InCallService} API.
-     * <p>
-     * A single app may fill this role at any one time.
-     * @hide
-     */
-    public static final String ROLE_CAR_MODE_DIALER_APP = "android.app.role.CAR_MODE_DIALER_APP";
-
-    /**
      * The name of the dialer role.
+     *
+     * @see Intent#ACTION_DIAL
      */
     public static final String ROLE_DIALER = "android.app.role.DIALER";
 
@@ -149,6 +101,75 @@ public final class RoleManager {
      * @see Intent#CATEGORY_APP_MUSIC
      */
     public static final String ROLE_MUSIC = "android.app.role.MUSIC";
+
+    /**
+     * The name of the home role.
+     *
+     * @see Intent#CATEGORY_HOME
+     */
+    public static final String ROLE_HOME = "android.app.role.HOME";
+
+    /**
+     * The name of the emergency role
+     *
+     * @see android.telephony.TelephonyManager#ACTION_EMERGENCY_ASSISTANCE
+     */
+    public static final String ROLE_EMERGENCY = "android.app.role.EMERGENCY";
+
+    /**
+     * The name of the car mode dialer app role.
+     * <p>
+     * Similar to the {@link #ROLE_DIALER dialer} role, this role determines which app is
+     * responsible for showing the user interface for ongoing calls on the device. It is only used
+     * when the device is in car mode.
+     *
+     * @see #ROLE_DIALER
+     * @see android.app.UiModeManager#ACTION_ENTER_CAR_MODE
+     * @see android.telecom.InCallService
+     *
+     * TODO: STOPSHIP: Make name of required roles public API
+     * @hide
+     */
+    public static final String ROLE_CAR_MODE_DIALER_APP = "android.app.role.CAR_MODE_DIALER_APP";
+
+    /**
+     * The name of the proxy calling role.
+     * <p>
+     * A proxy calling app provides a means to re-write the phone number for an outgoing call to
+     * place the call through a proxy calling service.
+     *
+     * @see android.telecom.CallRedirectionService
+     *
+     * TODO: STOPSHIP: Make name of required roles public API
+     * @hide
+     */
+    public static final String ROLE_PROXY_CALLING_APP = "android.app.role.PROXY_CALLING_APP";
+
+    /**
+     * The name of the call screening and caller id role.
+     *
+     * @see android.telecom.CallScreeningService
+     *
+     * TODO: STOPSHIP: Make name of required roles public API
+     * @hide
+     */
+    public static final String ROLE_CALL_SCREENING_APP = "android.app.role.CALL_SCREENING_APP";
+
+    /**
+     * The name of the call companion app role.
+     * <p>
+     * A call companion app provides no user interface for calls, but will be bound to by Telecom
+     * when there are active calls on the device. Companion apps for wearable devices are an
+     * acceptable use-case.
+     * <p>
+     * Multiple apps may hold this role at the same time.
+     *
+     * @see android.telecom.InCallService
+     *
+     * TODO: STOPSHIP: Make name of required roles public API
+     * @hide
+     */
+    public static final String ROLE_CALL_COMPANION_APP = "android.app.role.CALL_COMPANION_APP";
 
     /**
      * The action used to request user approval of a role for an application.
