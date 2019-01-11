@@ -33,6 +33,8 @@ import com.android.internal.telephony.PhoneConstants;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Parcelable object to handle IMS call profile.
@@ -323,6 +325,15 @@ public final class ImsCallProfile implements Parcelable {
             EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED;
 
     /**
+     * The emergency Uniform Resource Names (URN), only valid if {@link #getServiceType} returns
+     * {@link #SERVICE_TYPE_EMERGENCY}.
+     *
+     * Reference: 3gpp 24.503, Section 5.1.6.8.1 - General;
+     *            3gpp 22.101, Section 10 - Emergency Calls.
+     */
+    private List<String> mEmergencyUrns = new ArrayList<>();
+
+    /**
      * The emergency call routing, only valid if {@link #getServiceType} returns
      * {@link #SERVICE_TYPE_EMERGENCY}
      *
@@ -524,6 +535,7 @@ public final class ImsCallProfile implements Parcelable {
                 + ", restrictCause=" + mRestrictCause
                 + ", mediaProfile=" + mMediaProfile.toString()
                 + ", emergencyServiceCategories=" + mEmergencyCallRouting
+                + ", emergencyUrns=" + mEmergencyUrns
                 + ", emergencyCallRouting=" + mEmergencyCallRouting + " }";
     }
 
@@ -540,6 +552,7 @@ public final class ImsCallProfile implements Parcelable {
         out.writeBundle(filteredExtras);
         out.writeParcelable(mMediaProfile, 0);
         out.writeInt(mEmergencyServiceCategories);
+        out.writeStringList(mEmergencyUrns);
         out.writeInt(mEmergencyCallRouting);
     }
 
@@ -549,6 +562,7 @@ public final class ImsCallProfile implements Parcelable {
         mCallExtras = in.readBundle();
         mMediaProfile = in.readParcelable(ImsStreamMediaProfile.class.getClassLoader());
         mEmergencyServiceCategories = in.readInt();
+        mEmergencyUrns = in.createStringArrayList();
         mEmergencyCallRouting = in.readInt();
     }
 
@@ -760,19 +774,20 @@ public final class ImsCallProfile implements Parcelable {
     }
 
     /**
-     * Set the emergency service categories and emergency call routing. The set value is valid
+     * Set the emergency number information. The set value is valid
      * only if {@link #getServiceType} returns {@link #SERVICE_TYPE_EMERGENCY}
      *
      * Reference: 3gpp 23.167, Section 6 - Functional description;
+     *            3gpp 24.503, Section 5.1.6.8.1 - General;
      *            3gpp 22.101, Section 10 - Emergency Calls.
      *
      * @hide
      */
     public void setEmergencyCallInfo(EmergencyNumber num) {
         setEmergencyServiceCategories(num.getEmergencyServiceCategoryBitmask());
+        setEmergencyUrns(num.getEmergencyUrns());
         setEmergencyCallRouting(num.getEmergencyCallRouting());
     }
-
 
     /**
      * Set the emergency service categories. The set value is valid only if
@@ -797,6 +812,18 @@ public final class ImsCallProfile implements Parcelable {
     public void setEmergencyServiceCategories(
             @EmergencyServiceCategories int emergencyServiceCategories) {
         mEmergencyServiceCategories = emergencyServiceCategories;
+    }
+
+    /**
+     * Set the emergency Uniform Resource Names (URN), only valid if {@link #getServiceType}
+     * returns {@link #SERVICE_TYPE_EMERGENCY}.
+     *
+     * Reference: 3gpp 24.503, Section 5.1.6.8.1 - General;
+     *            3gpp 22.101, Section 10 - Emergency Calls.
+     */
+    @VisibleForTesting
+    public void setEmergencyUrns(List<String> emergencyUrns) {
+        mEmergencyUrns = emergencyUrns;
     }
 
     /**
@@ -838,6 +865,17 @@ public final class ImsCallProfile implements Parcelable {
      */
     public @EmergencyServiceCategories int getEmergencyServiceCategories() {
         return mEmergencyServiceCategories;
+    }
+
+    /**
+     * Get the emergency Uniform Resource Names (URN), only valid if {@link #getServiceType}
+     * returns {@link #SERVICE_TYPE_EMERGENCY}.
+     *
+     * Reference: 3gpp 24.503, Section 5.1.6.8.1 - General;
+     *            3gpp 22.101, Section 10 - Emergency Calls.
+     */
+    public List<String> getEmergencyUrns() {
+        return mEmergencyUrns;
     }
 
     /**

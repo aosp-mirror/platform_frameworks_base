@@ -232,18 +232,21 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     private final String mCountryIso;
     private final String mMnc;
     private final int mEmergencyServiceCategoryBitmask;
+    private final List<String> mEmergencyUrns;
     private final int mEmergencyNumberSourceBitmask;
     private final int mEmergencyCallRouting;
 
     /** @hide */
     public EmergencyNumber(@NonNull String number, @NonNull String countryIso, @NonNull String mnc,
                            @EmergencyServiceCategories int emergencyServiceCategories,
+                           @NonNull List<String> emergencyUrns,
                            @EmergencyNumberSources int emergencyNumberSources,
                            @EmergencyCallRouting int emergencyCallRouting) {
         this.mNumber = number;
         this.mCountryIso = countryIso;
         this.mMnc = mnc;
         this.mEmergencyServiceCategoryBitmask = emergencyServiceCategories;
+        this.mEmergencyUrns = emergencyUrns;
         this.mEmergencyNumberSourceBitmask = emergencyNumberSources;
         this.mEmergencyCallRouting = emergencyCallRouting;
     }
@@ -254,6 +257,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         mCountryIso = source.readString();
         mMnc = source.readString();
         mEmergencyServiceCategoryBitmask = source.readInt();
+        mEmergencyUrns = source.createStringArrayList();
         mEmergencyNumberSourceBitmask = source.readInt();
         mEmergencyCallRouting = source.readInt();
     }
@@ -265,6 +269,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         dest.writeString(mCountryIso);
         dest.writeString(mMnc);
         dest.writeInt(mEmergencyServiceCategoryBitmask);
+        dest.writeStringList(mEmergencyUrns);
         dest.writeInt(mEmergencyNumberSourceBitmask);
         dest.writeInt(mEmergencyCallRouting);
     }
@@ -342,6 +347,22 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
             }
         }
         return categories;
+    }
+
+    /**
+     * Returns the list of emergency Uniform Resources Names (URN) of the emergency number.
+     *
+     * For example, {@code urn:service:sos} is the generic URN for contacting emergency services
+     * of all type.
+     *
+     * Reference: 3gpp 24.503, Section 5.1.6.8.1 - General;
+     *            RFC 5031
+     *
+     * @return list of emergency Uniform Resources Names (URN) or an empty list if the emergency
+     *         number does not have a specified emergency Uniform Resource Name.
+     */
+    public @NonNull List<String> getEmergencyUrns() {
+        return mEmergencyUrns;
     }
 
     /**
@@ -434,6 +455,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         return "EmergencyNumber:" + "Number-" + mNumber + "|CountryIso-" + mCountryIso
                 + "|Mnc-" + mMnc
                 + "|ServiceCategories-" + Integer.toBinaryString(mEmergencyServiceCategoryBitmask)
+                + "|Urns-" + mEmergencyUrns
                 + "|Sources-" + Integer.toBinaryString(mEmergencyNumberSourceBitmask)
                 + "|Routing-" + Integer.toBinaryString(mEmergencyCallRouting);
     }
@@ -448,6 +470,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
                 && mCountryIso.equals(other.mCountryIso)
                 && mMnc.equals(other.mMnc)
                 && mEmergencyServiceCategoryBitmask == other.mEmergencyServiceCategoryBitmask
+                && mEmergencyUrns.equals(other.mEmergencyUrns)
                 && mEmergencyNumberSourceBitmask == other.mEmergencyNumberSourceBitmask
                 && mEmergencyCallRouting == other.mEmergencyCallRouting;
     }
@@ -455,7 +478,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     @Override
     public int hashCode() {
         return Objects.hash(mNumber, mCountryIso, mMnc, mEmergencyServiceCategoryBitmask,
-                mEmergencyNumberSourceBitmask, mEmergencyCallRouting);
+                mEmergencyUrns, mEmergencyNumberSourceBitmask, mEmergencyCallRouting);
     }
 
     /**
@@ -584,6 +607,9 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
                 != second.getEmergencyServiceCategoryBitmask()) {
             return false;
         }
+        if (first.getEmergencyUrns().equals(second.getEmergencyUrns())) {
+            return false;
+        }
         if (first.getEmergencyCallRouting() != second.getEmergencyCallRouting()) {
             return false;
         }
@@ -605,6 +631,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         if (areSameEmergencyNumbers(first, second)) {
             return new EmergencyNumber(first.getNumber(), first.getCountryIso(), first.getMnc(),
                     first.getEmergencyServiceCategoryBitmask(),
+                    first.getEmergencyUrns(),
                     first.getEmergencyNumberSourceBitmask()
                             | second.getEmergencyNumberSourceBitmask(),
                     first.getEmergencyCallRouting());

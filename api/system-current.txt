@@ -6854,6 +6854,7 @@ package android.telephony.ims {
     method public static int getCallTypeFromVideoState(int);
     method public int getEmergencyCallRouting();
     method public int getEmergencyServiceCategories();
+    method public java.util.List<java.lang.String> getEmergencyUrns();
     method public android.telephony.ims.ImsStreamMediaProfile getMediaProfile();
     method public int getRestrictCause();
     method public int getServiceType();
@@ -6868,6 +6869,7 @@ package android.telephony.ims {
     method public void setCallRestrictCause(int);
     method public void setEmergencyCallRouting(int);
     method public void setEmergencyServiceCategories(int);
+    method public void setEmergencyUrns(java.util.List<java.lang.String>);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
     method public void updateCallType(android.telephony.ims.ImsCallProfile);
     method public void updateMediaProfile(android.telephony.ims.ImsCallProfile);
