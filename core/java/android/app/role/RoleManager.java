@@ -158,16 +158,6 @@ public final class RoleManager {
     public static final String ACTION_REQUEST_ROLE = "android.app.role.action.REQUEST_ROLE";
 
     /**
-     * The name of the requested role.
-     * <p>
-     * <strong>Type:</strong> String
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final String EXTRA_REQUEST_ROLE_NAME = "android.app.role.extra.REQUEST_ROLE_NAME";
-
-    /**
      * The permission required to manage records of role holders in {@link RoleManager} directly.
      *
      * @hide
@@ -215,7 +205,7 @@ public final class RoleManager {
         Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
         Intent intent = new Intent(ACTION_REQUEST_ROLE);
         intent.setPackage(mContext.getPackageManager().getPermissionControllerPackageName());
-        intent.putExtra(EXTRA_REQUEST_ROLE_NAME, roleName);
+        intent.putExtra(Intent.EXTRA_ROLE_NAME, roleName);
         return intent;
     }
 
