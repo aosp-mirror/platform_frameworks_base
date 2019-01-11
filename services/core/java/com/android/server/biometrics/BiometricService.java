@@ -132,10 +132,13 @@ public class BiometricService extends SystemService {
                 Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED);
         private final Uri FACE_UNLOCK_APP_ENABLED =
                 Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_APP_ENABLED);
+        private final Uri FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION =
+                Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION);
 
         private final ContentResolver mContentResolver;
         private boolean mFaceEnabledOnKeyguard;
         private boolean mFaceEnabledForApps;
+        private boolean mFaceAlwaysRequireConfirmation;
 
         /**
          * Creates a content observer.
@@ -158,10 +161,15 @@ public class BiometricService extends SystemService {
                     false /* notifyForDescendents */,
                     this /* observer */,
                     UserHandle.USER_CURRENT);
+            mContentResolver.registerContentObserver(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
+                    false /* notifyForDescendents */,
+                    this /* observer */,
+                    UserHandle.USER_CURRENT);
 
             // Update the value immediately
             onChange(true /* selfChange */, FACE_UNLOCK_KEYGUARD_ENABLED);
             onChange(true /* selfChange */, FACE_UNLOCK_APP_ENABLED);
+            onChange(true /* selfChange */, FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION);
         }
 
         @Override
@@ -185,6 +193,13 @@ public class BiometricService extends SystemService {
                                 Settings.Secure.FACE_UNLOCK_APP_ENABLED,
                                 1 /* default */,
                                 UserHandle.USER_CURRENT) != 0;
+            } else if (FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION.equals(uri)) {
+                mFaceAlwaysRequireConfirmation =
+                        Settings.Secure.getIntForUser(
+                                mContentResolver,
+                                Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
+                                0 /* default */,
+                                UserHandle.USER_CURRENT) != 0;
             }
         }
 
@@ -194,6 +209,10 @@ public class BiometricService extends SystemService {
 
         boolean getFaceEnabledForApps() {
             return mFaceEnabledForApps;
+        }
+
+        boolean getFaceAlwaysRequireConfirmation() {
+            return mFaceAlwaysRequireConfirmation;
         }
     }
 
@@ -731,7 +750,7 @@ public class BiometricService extends SystemService {
                 IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
                 int callingUid, int callingPid, int callingUserId, int modality) {
             try {
-                final boolean requireConfirmation = bundle.getBoolean(
+                boolean requireConfirmation = bundle.getBoolean(
                         BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true /* default */);
 
                 // Generate random cookies to pass to the services that should prepare to start
@@ -757,6 +776,9 @@ public class BiometricService extends SystemService {
                     Slog.w(TAG, "Iris unsupported");
                 }
                 if ((modality & TYPE_FACE) != 0) {
+                    // Check if the user has forced confirmation to be required in Settings.
+                    requireConfirmation = requireConfirmation
+                            || mSettingObserver.getFaceAlwaysRequireConfirmation();
                     mFaceService.prepareForAuthentication(requireConfirmation,
                             token, sessionId, userId, mInternalReceiver, opPackageName,
                             cookie, callingUid, callingPid, callingUserId);
