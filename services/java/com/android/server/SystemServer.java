@@ -101,6 +101,7 @@ import com.android.server.net.watchlist.NetworkWatchlistService;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.oemlock.OemLockService;
 import com.android.server.om.OverlayManagerService;
+import com.android.server.os.BugreportManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.pm.BackgroundDexOptService;
@@ -741,6 +742,11 @@ public final class SystemServer {
         // Tracks cpu time spent in binder calls
         traceBeginAndSlog("StartBinderCallsStatsService");
         BinderCallsStatsService.start();
+        traceEnd();
+
+        // Service to capture bugreports.
+        traceBeginAndSlog("StartBugreportManagerService");
+        mSystemServiceManager.startService(BugreportManagerService.class);
         traceEnd();
     }
 
