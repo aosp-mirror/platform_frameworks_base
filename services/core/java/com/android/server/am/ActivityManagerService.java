@@ -64,6 +64,7 @@ import static android.os.Process.SHELL_UID;
 import static android.os.Process.SIGNAL_USR1;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
+import static android.os.Process.ZYGOTE_PROCESS;
 import static android.os.Process.getTotalMemory;
 import static android.os.Process.isThreadInProcess;
 import static android.os.Process.killProcess;
@@ -75,7 +76,6 @@ import static android.os.Process.removeAllProcessGroups;
 import static android.os.Process.sendSignal;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
-import static android.os.Process.zygoteProcess;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
@@ -2162,7 +2162,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ? Collections.emptyList()
                             : Arrays.asList(exemptions.split(","));
                 }
-                if (!zygoteProcess.setApiBlacklistExemptions(mExemptions)) {
+                if (!ZYGOTE_PROCESS.setApiBlacklistExemptions(mExemptions)) {
                   Slog.e(TAG, "Failed to set API blacklist exemptions!");
                   // leave mExemptionsStr as is, so we don't try to send the same list again.
                   mExemptions = Collections.emptyList();
@@ -2175,7 +2175,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (logSampleRate != -1 && logSampleRate != mLogSampleRate) {
                 mLogSampleRate = logSampleRate;
-                zygoteProcess.setHiddenApiAccessLogSampleRate(mLogSampleRate);
+                ZYGOTE_PROCESS.setHiddenApiAccessLogSampleRate(mLogSampleRate);
             }
             mPolicy = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY);
         }
@@ -4880,7 +4880,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         ArraySet<String> completedIsas = new ArraySet<String>();
         for (String abi : Build.SUPPORTED_ABIS) {
-            zygoteProcess.establishZygoteConnectionForAbi(abi);
+            ZYGOTE_PROCESS.establishZygoteConnectionForAbi(abi);
             final String instructionSet = VMRuntime.getInstructionSet(abi);
             if (!completedIsas.contains(instructionSet)) {
                 try {

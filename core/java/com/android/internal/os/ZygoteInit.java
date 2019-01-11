@@ -21,7 +21,6 @@ import static android.system.OsConstants.S_IRWXO;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.opengl.EGL14;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IInstalld;
@@ -853,8 +852,8 @@ public class ZygoteInit {
     }
 
     private static void waitForSecondaryZygote(String socketName) {
-        String otherZygoteName = Process.ZYGOTE_SOCKET.equals(socketName) ?
-                Process.SECONDARY_ZYGOTE_SOCKET : Process.ZYGOTE_SOCKET;
+        String otherZygoteName = ZygoteProcess.ZYGOTE_SOCKET_NAME.equals(socketName)
+                ? ZygoteProcess.ZYGOTE_SECONDARY_SOCKET_NAME : ZygoteProcess.ZYGOTE_SOCKET_NAME;
         ZygoteProcess.waitForConnectionToZygote(otherZygoteName);
     }
 

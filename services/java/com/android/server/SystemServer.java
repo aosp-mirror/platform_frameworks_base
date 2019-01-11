@@ -862,7 +862,7 @@ public final class SystemServer {
                     TimingsTraceLog traceLog = new TimingsTraceLog(
                             SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
                     traceLog.traceBegin(SECONDARY_ZYGOTE_PRELOAD);
-                    if (!Process.zygoteProcess.preloadDefault(Build.SUPPORTED_32_BIT_ABIS[0])) {
+                    if (!Process.ZYGOTE_PROCESS.preloadDefault(Build.SUPPORTED_32_BIT_ABIS[0])) {
                         Slog.e(TAG, "Unable to preload default resources");
                     }
                     traceLog.traceEnd();
