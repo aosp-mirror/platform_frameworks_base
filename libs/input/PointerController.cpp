@@ -39,7 +39,7 @@ protected:
     virtual ~WeakLooperCallback() { }
 
 public:
-    WeakLooperCallback(const wp<LooperCallback>& callback) :
+    explicit WeakLooperCallback(const wp<LooperCallback>& callback) :
         mCallback(callback) {
     }
 
