@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.power;
+package com.android.server.power.batterysaver;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -36,21 +36,19 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ConcurrentUtils;
-import com.android.server.power.batterysaver.BatterySavingStats;
-import com.android.server.power.batterysaver.CpuFrequencies;
+import com.android.server.power.PowerManagerService;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class to decide whether to turn on battery saver mode for specific service
+ * Class to decide whether to turn on battery saver mode for specific services.
  *
  * IMPORTANT: This class shares the power manager lock, which is very low in the lock hierarchy.
  * Do not call out with the lock held, such as AccessibilityManager. (Settings provider is okay.)
  *
- * Test:
- atest ${ANDROID_BUILD_TOP}/frameworks/base/services/tests/servicestests/src/com/android/server/power/BatterySaverPolicyTest.java
+ * Test: atest com.android.server.power.batterysaver.BatterySaverPolicyTest.java
  */
 public class BatterySaverPolicy extends ContentObserver {
     private static final String TAG = "BatterySaverPolicy";
@@ -200,8 +198,10 @@ public class BatterySaverPolicy extends ContentObserver {
         onChange(true, null);
     }
 
+    @VisibleForTesting
     public void addListener(BatterySaverPolicyListener listener) {
         synchronized (mLock) {
+            // TODO: set this in the constructor instead
             mListeners.add(listener);
         }
     }
@@ -244,7 +244,7 @@ public class BatterySaverPolicy extends ContentObserver {
             // Update.
             updateConstantsLocked(setting, deviceSpecificSetting);
 
-            listeners = mListeners.toArray(new BatterySaverPolicyListener[mListeners.size()]);
+            listeners = mListeners.toArray(new BatterySaverPolicyListener[0]);
         }
 
         // Notify the listeners.

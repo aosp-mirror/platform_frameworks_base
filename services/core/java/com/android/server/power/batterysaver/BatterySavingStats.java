@@ -29,7 +29,6 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
-import com.android.server.power.BatterySaverPolicy;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;

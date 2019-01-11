@@ -35,13 +35,13 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
-import com.android.server.power.BatterySaverPolicy;
-import com.android.server.power.BatterySaverPolicy.BatterySaverPolicyListener;
 import com.android.server.power.PowerManagerService;
+import com.android.server.power.batterysaver.BatterySaverPolicy.BatterySaverPolicyListener;
 import com.android.server.power.batterysaver.BatterySavingStats.BatterySaverState;
 import com.android.server.power.batterysaver.BatterySavingStats.DozeState;
 import com.android.server.power.batterysaver.BatterySavingStats.InteractiveState;
@@ -158,10 +158,9 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         mBatterySavingStats = batterySavingStats;
 
         // Initialize plugins.
-        final ArrayList<Plugin> plugins = new ArrayList<>();
-        plugins.add(new BatterySaverLocationPlugin(mContext));
-
-        mPlugins = plugins.toArray(new Plugin[plugins.size()]);
+        mPlugins = new Plugin[] {
+                new BatterySaverLocationPlugin(mContext)
+        };
     }
 
     /**
@@ -217,7 +216,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
             super(looper);
         }
 
-        public void postStateChanged(boolean sendBroadcast, int reason) {
+        void postStateChanged(boolean sendBroadcast, int reason) {
             obtainMessage(MSG_STATE_CHANGED, sendBroadcast ?
                     ARG_SEND_BROADCAST : ARG_DONT_SEND_BROADCAST, reason).sendToTarget();
         }
@@ -244,9 +243,8 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         }
     }
 
-    /**
-     * Called by {@link PowerManagerService} to update the battery saver state.
-     */
+    /** Enable or disable full battery saver. */
+    @VisibleForTesting
     public void enableBatterySaver(boolean enable, int reason) {
         synchronized (mLock) {
             if (mEnabled == enable) {
@@ -311,7 +309,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
                     reason);
             mPreviouslyEnabled = mEnabled;
 
-            listeners = mListeners.toArray(new LowPowerModeListener[mListeners.size()]);
+            listeners = mListeners.toArray(new LowPowerModeListener[0]);
 
             enabled = mEnabled;
             mIsInteractive = isInteractive;
