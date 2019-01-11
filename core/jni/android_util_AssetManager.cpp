@@ -44,6 +44,8 @@
 #include "androidfw/MutexGuard.h"
 #include "androidfw/PosixUtils.h"
 #include "androidfw/ResourceTypes.h"
+#include "androidfw/ResourceUtils.h"
+
 #include "core_jni_helpers.h"
 #include "jni.h"
 #include "nativehelper/JNIHelp.h"
@@ -975,34 +977,7 @@ static jstring NativeGetResourceName(JNIEnv* env, jclass /*clazz*/, jlong ptr, j
     return nullptr;
   }
 
-  std::string result;
-  if (name.package != nullptr) {
-    result.append(name.package, name.package_len);
-  }
-
-  if (name.type != nullptr || name.type16 != nullptr) {
-    if (!result.empty()) {
-      result += ":";
-    }
-
-    if (name.type != nullptr) {
-      result.append(name.type, name.type_len);
-    } else {
-      result += util::Utf16ToUtf8(StringPiece16(name.type16, name.type_len));
-    }
-  }
-
-  if (name.entry != nullptr || name.entry16 != nullptr) {
-    if (!result.empty()) {
-      result += "/";
-    }
-
-    if (name.entry != nullptr) {
-      result.append(name.entry, name.entry_len);
-    } else {
-      result += util::Utf16ToUtf8(StringPiece16(name.entry16, name.entry_len));
-    }
-  }
+  std::string result = ToFormattedResourceString(&name);
   return env->NewStringUTF(result.c_str());
 }
 
@@ -1047,6 +1022,26 @@ static jstring NativeGetResourceEntryName(JNIEnv* env, jclass /*clazz*/, jlong p
     return env->NewString(reinterpret_cast<const jchar*>(name.entry16), name.entry_len);
   }
   return nullptr;
+}
+
+static void NativeSetResourceResolutionLoggingEnabled(JNIEnv* /*env*/,
+                                                      jclass /*clazz*/,
+                                                      jlong ptr,
+                                                      jboolean enabled) {
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  assetmanager->SetResourceResolutionLoggingEnabled(enabled);
+}
+
+static jstring NativeGetLastResourceResolution(JNIEnv* env,
+                                               jclass /*clazz*/,
+                                               jlong ptr) {
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  std::string resolution = assetmanager->GetLastResourceResolution();
+  if (resolution.empty()) {
+    return nullptr;
+  } else {
+    return env->NewStringUTF(resolution.c_str());
+  }
 }
 
 static jobjectArray NativeGetLocales(JNIEnv* env, jclass /*class*/, jlong ptr,
@@ -1452,6 +1447,10 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeGetResourcePackageName", "(JI)Ljava/lang/String;", (void*)NativeGetResourcePackageName},
     {"nativeGetResourceTypeName", "(JI)Ljava/lang/String;", (void*)NativeGetResourceTypeName},
     {"nativeGetResourceEntryName", "(JI)Ljava/lang/String;", (void*)NativeGetResourceEntryName},
+    {"nativeSetResourceResolutionLoggingEnabled", "(JZ)V",
+     (void*) NativeSetResourceResolutionLoggingEnabled},
+    {"nativeGetLastResourceResolution", "(J)Ljava/lang/String;",
+     (void*) NativeGetLastResourceResolution},
     {"nativeGetLocales", "(JZ)[Ljava/lang/String;", (void*)NativeGetLocales},
     {"nativeGetSizeConfigurations", "(J)[Landroid/content/res/Configuration;",
      (void*)NativeGetSizeConfigurations},
