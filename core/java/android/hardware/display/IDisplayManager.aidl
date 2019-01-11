@@ -66,9 +66,6 @@ interface IDisplayManager {
     // Requires CONFIGURE_DISPLAY_COLOR_MODE
     void requestColorMode(int displayId, int colorMode);
 
-    // Requires CONTROL_DISPLAY_SATURATION
-    void setSaturationLevel(float level);
-
     // Requires CAPTURE_VIDEO_OUTPUT, CAPTURE_SECURE_VIDEO_OUTPUT, or an appropriate
     // MediaProjection token for certain combinations of flags.
     int createVirtualDisplay(in IVirtualDisplayCallback callback,

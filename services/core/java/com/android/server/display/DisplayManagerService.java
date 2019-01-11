@@ -724,27 +724,6 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void setSaturationLevelInternal(float level) {
-        if (level < 0 || level > 1) {
-            throw new IllegalArgumentException("Saturation level must be between 0 and 1");
-        }
-        float[] matrix = (level == 1.0f ? null : computeSaturationMatrix(level));
-        DisplayTransformManager dtm = LocalServices.getService(DisplayTransformManager.class);
-        dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_SATURATION, matrix);
-    }
-
-    private static float[] computeSaturationMatrix(float saturation) {
-        float desaturation = 1.0f - saturation;
-        float[] luminance = {0.231f * desaturation, 0.715f * desaturation, 0.072f * desaturation};
-        float[] matrix = {
-            luminance[0] + saturation, luminance[0], luminance[0], 0,
-            luminance[1], luminance[1] + saturation, luminance[1], 0,
-            luminance[2], luminance[2], luminance[2] + saturation, 0,
-            0, 0, 0, 1
-        };
-        return matrix;
-    }
-
     private int createVirtualDisplayInternal(IVirtualDisplayCallback callback,
             IMediaProjection projection, int callingUid, String packageName, String name, int width,
             int height, int densityDpi, Surface surface, int flags, String uniqueId) {
@@ -1830,19 +1809,6 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 requestColorModeInternal(displayId, colorMode);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override // Binder call
-        public void setSaturationLevel(float level) {
-            mContext.enforceCallingOrSelfPermission(
-                   Manifest.permission.CONTROL_DISPLAY_SATURATION,
-                   "Permission required to set display saturation level");
-            final long token = Binder.clearCallingIdentity();
-            try {
-                setSaturationLevelInternal(level);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

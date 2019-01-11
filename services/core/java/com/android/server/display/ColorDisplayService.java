@@ -18,7 +18,9 @@ package com.android.server.display;
 
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
+import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_SATURATION;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TypeEvaluator;
@@ -31,6 +33,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.IColorDisplayManager;
@@ -39,6 +42,7 @@ import android.opengl.Matrix;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.provider.Settings.System;
@@ -61,6 +65,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 
 /**
  * Controls the display's color transforms.
@@ -82,6 +87,10 @@ public final class ColorDisplayService extends SystemService {
     static {
         Matrix.setIdentityM(MATRIX_IDENTITY, 0);
     }
+
+    private static final int MSG_APPLY_NIGHT_DISPLAY_IMMEDIATE = 0;
+    private static final int MSG_APPLY_NIGHT_DISPLAY_ANIMATED = 1;
+    private static final int MSG_APPLY_GLOBAL_SATURATION = 2;
 
     /**
      * Evaluator used to animate color matrix transitions.
@@ -161,6 +170,53 @@ public final class ColorDisplayService extends SystemService {
         }
     };
 
+    private final TintController mGlobalSaturationTintController = new TintController() {
+
+        private float[] mMatrixGlobalSaturation = new float[16];
+
+        @Override
+        public void setUp(Context context, boolean needsLinear) {
+        }
+
+        @Override
+        public float[] getMatrix() {
+            return Arrays.copyOf(mMatrixGlobalSaturation, mMatrixGlobalSaturation.length);
+        }
+
+        @Override
+        public void setMatrix(int saturationLevel) {
+            if (saturationLevel < 0) {
+                saturationLevel = 0;
+            } else if (saturationLevel > 100) {
+                saturationLevel = 100;
+            }
+            Slog.d(TAG, "Setting saturation level: " + saturationLevel);
+
+            if (saturationLevel == 100) {
+                Matrix.setIdentityM(mMatrixGlobalSaturation, 0);
+            } else {
+                float saturation = saturationLevel * 0.1f;
+                float desaturation = 1.0f - saturation;
+                float[] luminance = {0.231f * desaturation, 0.715f * desaturation,
+                    0.072f * desaturation};
+                mMatrixGlobalSaturation[0] = luminance[0] + saturation;
+                mMatrixGlobalSaturation[1] = luminance[0];
+                mMatrixGlobalSaturation[2] = luminance[0];
+                mMatrixGlobalSaturation[4] = luminance[1];
+                mMatrixGlobalSaturation[5] = luminance[1] + saturation;
+                mMatrixGlobalSaturation[6] = luminance[1];
+                mMatrixGlobalSaturation[8] = luminance[2];
+                mMatrixGlobalSaturation[9] = luminance[2];
+                mMatrixGlobalSaturation[10] = luminance[2] + saturation;
+            }
+        }
+
+        @Override
+        public int getLevel() {
+            return LEVEL_COLOR_MATRIX_SATURATION;
+        }
+    };
+
     private final Handler mHandler;
 
     private int mCurrentUser = UserHandle.USER_NULL;
@@ -178,7 +234,7 @@ public final class ColorDisplayService extends SystemService {
 
     public ColorDisplayService(Context context) {
         super(context);
-        mHandler = new Handler(Looper.getMainLooper());
+        mHandler = new TintHandler(Looper.getMainLooper());
     }
 
     @Override
@@ -904,6 +960,23 @@ public final class ColorDisplayService extends SystemService {
         void onDisplayWhiteBalanceStatusChanged(boolean enabled);
     }
 
+    private final class TintHandler extends Handler {
+
+        TintHandler(Looper looper) {
+            super(looper, null, true /* async */);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_APPLY_GLOBAL_SATURATION:
+                    mGlobalSaturationTintController.setMatrix(msg.arg1);
+                    applyTint(mGlobalSaturationTintController, false);
+                    break;
+            }
+        }
+    }
+
     private final class BinderService extends IColorDisplayManager.Stub {
 
         @Override
@@ -914,6 +987,28 @@ public final class ColorDisplayService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override
+        public boolean setSaturationLevel(int level) {
+            final boolean hasTransformsPermission = getContext()
+                    .checkCallingPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
+                    == PackageManager.PERMISSION_GRANTED;
+            final boolean hasLegacyPermission = getContext()
+                    .checkCallingPermission(Manifest.permission.CONTROL_DISPLAY_SATURATION)
+                    == PackageManager.PERMISSION_GRANTED;
+            if (!hasTransformsPermission && !hasLegacyPermission) {
+                throw new SecurityException("Permission required to set display saturation level");
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final Message message = mHandler.obtainMessage(MSG_APPLY_GLOBAL_SATURATION);
+                message.arg1 = level;
+                mHandler.sendMessage(message);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            return true;
         }
     }
 }
