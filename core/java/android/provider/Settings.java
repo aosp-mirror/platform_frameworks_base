@@ -6016,6 +6016,15 @@ public final class Settings {
                 "lock_screen_allow_remote_input";
 
         /**
+         * Indicates which clock face to show on lock screen and AOD.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_FACE = "lock_screen_custom_clock_face";
+
+        private static final Validator LOCK_SCREEN_CUSTOM_CLOCK_FACE_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
          * Set by the system to track if the user needs to see the call to action for
          * the lockscreen notification policy.
          * @hide
@@ -8459,6 +8468,7 @@ public final class Settings {
             HUSH_GESTURE_USED,
             IN_CALL_NOTIFICATION_ENABLED,
             LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
+            LOCK_SCREEN_CUSTOM_CLOCK_FACE,
             LOCK_SCREEN_SHOW_NOTIFICATIONS,
             ZEN_DURATION,
             SHOW_ZEN_UPGRADE_NOTIFICATION,
@@ -8637,6 +8647,7 @@ public final class Settings {
             VALIDATORS.put(ASSIST_GESTURE_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_NEW_INTERRUPTION_MODEL, BOOLEAN_VALIDATOR);
             VALIDATORS.put(TRUST_AGENTS_EXTEND_UNLOCK, TRUST_AGENTS_EXTEND_UNLOCK_VALIDATOR);
+            VALIDATORS.put(LOCK_SCREEN_CUSTOM_CLOCK_FACE, LOCK_SCREEN_CUSTOM_CLOCK_FACE_VALIDATOR);
             VALIDATORS.put(LOCK_SCREEN_WHEN_TRUST_LOST, LOCK_SCREEN_WHEN_TRUST_LOST_VALIDATOR);
         }
 
