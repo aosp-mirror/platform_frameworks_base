@@ -21,6 +21,8 @@ import android.app.ListActivity;
 import android.app.PendingIntent;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -49,6 +51,8 @@ public class UsageStatsActivity extends ListActivity {
     private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
     private static final String EXTRA_KEY_TIMEOUT = "com.android.tests.usagestats.extra.TIMEOUT";
     private UsageStatsManager mUsageStatsManager;
+    private ClipboardManager mClipboard;
+    private ClipData mClip;
     private Adapter mAdapter;
     private Comparator<UsageStats> mComparator = new Comparator<UsageStats>() {
         @Override
@@ -61,6 +65,7 @@ public class UsageStatsActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mUsageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+        mClipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         mAdapter = new Adapter();
         setListAdapter(mAdapter);
         Bundle extras = getIntent().getExtras();
@@ -98,6 +103,8 @@ public class UsageStatsActivity extends ListActivity {
             case R.id.set_app_limit:
                 callSetAppLimit();
                 return true;
+            case R.id.set_app_usage_limit:
+                callSetAppUsageLimit();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -155,6 +162,40 @@ public class UsageStatsActivity extends ListActivity {
                     intent.setPackage(getPackageName());
                     intent.putExtra(EXTRA_KEY_TIMEOUT, true);
                     mUsageStatsManager.registerAppUsageObserver(1, packages,
+                            60, TimeUnit.SECONDS, PendingIntent.getActivity(UsageStatsActivity.this,
+                                    1, intent, 0));
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    private void callSetAppUsageLimit() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter package name");
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setHint("com.android.tests.usagestats");
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final String packageName = input.getText().toString().trim();
+                if (!TextUtils.isEmpty(packageName)) {
+                    String[] packages = packageName.split(",");
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.setClass(UsageStatsActivity.this, UsageStatsActivity.class);
+                    intent.setPackage(getPackageName());
+                    intent.putExtra(EXTRA_KEY_TIMEOUT, true);
+                    mUsageStatsManager.registerAppUsageLimitObserver(1, packages,
                             60, TimeUnit.SECONDS, PendingIntent.getActivity(UsageStatsActivity.this,
                                     1, intent, 0));
                 }
@@ -232,6 +273,21 @@ public class UsageStatsActivity extends ListActivity {
             holder.packageName.setText(mStats.get(position).getPackageName());
             holder.usageTime.setText(DateUtils.formatDuration(
                     mStats.get(position).getTotalTimeInForeground()));
+
+            //copy package name to the clipboard for convenience
+            holder.packageName.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    String text = holder.packageName.getText().toString();
+                    mClip = ClipData.newPlainText("package_name", text);
+                    mClipboard.setPrimaryClip(mClip);
+
+                    Toast.makeText(getApplicationContext(), "package name copied to clipboard",
+                            Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
+
             return convertView;
         }
     }

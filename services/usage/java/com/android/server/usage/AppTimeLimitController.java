@@ -18,11 +18,14 @@ package com.android.server.usage;
 
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
+import android.app.usage.UsageStatsManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -163,6 +166,9 @@ public class AppTimeLimitController {
         /** Map of observerId to details of the time limit group */
         SparseArray<SessionUsageGroup> sessionUsageGroups = new SparseArray<>();
 
+        /** Map of observerId to details of the app usage limit group */
+        SparseArray<AppUsageLimitGroup> appUsageLimitGroups = new SparseArray<>();
+
         private ObserverAppData(int uid) {
             this.uid = uid;
         }
@@ -177,6 +183,10 @@ public class AppTimeLimitController {
             sessionUsageGroups.remove(observerId);
         }
 
+        @GuardedBy("mLock")
+        void removeAppUsageLimitGroup(int observerId) {
+            appUsageLimitGroups.remove(observerId);
+        }
 
         @GuardedBy("mLock")
         void dump(PrintWriter pw) {
@@ -192,6 +202,12 @@ public class AppTimeLimitController {
             final int nSessionUsageGroups = sessionUsageGroups.size();
             for (int i = 0; i < nSessionUsageGroups; i++) {
                 sessionUsageGroups.valueAt(i).dump(pw);
+                pw.println();
+            }
+            pw.println("    App Usage Limit Groups:");
+            final int nAppUsageLimitGroups = appUsageLimitGroups.size();
+            for (int i = 0; i < nAppUsageLimitGroups; i++) {
+                appUsageLimitGroups.valueAt(i).dump(pw);
                 pw.println();
             }
         }
@@ -493,6 +509,54 @@ public class AppTimeLimitController {
         }
     }
 
+    class AppUsageLimitGroup extends UsageGroup {
+        private boolean mGroupLimit;
+
+        public AppUsageLimitGroup(UserData user, ObserverAppData observerApp, int observerId,
+                String[] observed, long timeLimitMs, PendingIntent limitReachedCallback) {
+            super(user, observerApp, observerId, observed, timeLimitMs, limitReachedCallback);
+            mGroupLimit = observed.length > 1;
+        }
+
+        @Override
+        @GuardedBy("mLock")
+        public void remove() {
+            super.remove();
+            ObserverAppData observerApp = mObserverAppRef.get();
+            if (observerApp != null) {
+                observerApp.removeAppUsageLimitGroup(mObserverId);
+            }
+        }
+
+        @GuardedBy("mLock")
+        boolean isGroupLimit() {
+            return mGroupLimit;
+        }
+
+        @GuardedBy("mLock")
+        long getTotaUsageLimit() {
+            return mTimeLimitMs;
+        }
+
+        @GuardedBy("mLock")
+        long getUsageRemaining() {
+            // If there is currently an active session, account for its usage
+            if (mActives > 0) {
+                return mTimeLimitMs - mUsageTimeMs - (getUptimeMillis() - mLastKnownUsageTimeMs);
+            } else {
+                return mTimeLimitMs - mUsageTimeMs;
+            }
+        }
+
+        @Override
+        @GuardedBy("mLock")
+        void dump(PrintWriter pw) {
+            super.dump(pw);
+            pw.print(" groupLimit=");
+            pw.print(mGroupLimit);
+        }
+    }
+
 
     private class MyHandler extends Handler {
         static final int MSG_CHECK_TIMEOUT = 1;
@@ -553,6 +617,12 @@ public class AppTimeLimitController {
 
     /** Overrideable for testing purposes */
     @VisibleForTesting
+    protected long getAppUsageLimitObserverPerUidLimit() {
+        return MAX_OBSERVER_PER_UID;
+    }
+
+    /** Overrideable for testing purposes */
+    @VisibleForTesting
     protected long getMinTimeLimit() {
         return ONE_MINUTE;
     }
@@ -569,6 +639,61 @@ public class AppTimeLimitController {
         synchronized (mLock) {
             return getOrCreateObserverAppDataLocked(observerAppUid).sessionUsageGroups.get(
                     observerId);
+        }
+    }
+
+    @VisibleForTesting
+    AppUsageLimitGroup getAppUsageLimitGroup(int observerAppUid, int observerId) {
+        synchronized (mLock) {
+            return getOrCreateObserverAppDataLocked(observerAppUid).appUsageLimitGroups.get(
+                    observerId);
+        }
+    }
+
+    /**
+     * Returns an object describing the app usage limit for the given package which was set via
+     * {@link #addAppUsageLimitObserver).
+     * If there are multiple limits that apply to the package, the one with the smallest
+     * time remaining will be returned.
+     */
+    public UsageStatsManagerInternal.AppUsageLimitData getAppUsageLimit(
+            String packageName, UserHandle user) {
+        synchronized (mLock) {
+            final UserData userData = getOrCreateUserDataLocked(user.getIdentifier());
+            if (userData == null) {
+                return null;
+            }
+
+            final ArrayList<UsageGroup> usageGroups = userData.observedMap.get(packageName);
+            if (usageGroups == null || usageGroups.isEmpty()) {
+                return null;
+            }
+
+            final ArraySet<AppUsageLimitGroup> usageLimitGroups = new ArraySet<>();
+            for (int i = 0; i < usageGroups.size(); i++) {
+                if (usageGroups.get(i) instanceof AppUsageLimitGroup) {
+                    final AppUsageLimitGroup group = (AppUsageLimitGroup) usageGroups.get(i);
+                    for (int j = 0; j < group.mObserved.length; j++) {
+                        if (group.mObserved[j].equals(packageName)) {
+                            usageLimitGroups.add(group);
+                            break;
+                        }
+                    }
+                }
+            }
+            if (usageLimitGroups.isEmpty()) {
+                return null;
+            }
+
+            AppUsageLimitGroup smallestGroup = usageLimitGroups.valueAt(0);
+            for (int i = 1; i < usageLimitGroups.size(); i++) {
+                final AppUsageLimitGroup otherGroup = usageLimitGroups.valueAt(i);
+                if (otherGroup.getUsageRemaining() < smallestGroup.getUsageRemaining()) {
+                    smallestGroup = otherGroup;
+                }
+            }
+            return new UsageStatsManagerInternal.AppUsageLimitData(smallestGroup.isGroupLimit(),
+                    smallestGroup.getTotaUsageLimit(), smallestGroup.getUsageRemaining());
         }
     }
 
@@ -718,6 +843,61 @@ public class AppTimeLimitController {
         synchronized (mLock) {
             final ObserverAppData observerApp = getOrCreateObserverAppDataLocked(requestingUid);
             final SessionUsageGroup group = observerApp.sessionUsageGroups.get(observerId);
+            if (group != null) {
+                // Remove previous app usage group associated with observerId
+                group.remove();
+            }
+        }
+    }
+
+    /**
+     * Registers an app usage limit observer with the given details.
+     * Existing app usage limit observer with the same observerId will be removed.
+     */
+    public void addAppUsageLimitObserver(int requestingUid, int observerId, String[] observed,
+            long timeLimit, PendingIntent callbackIntent, @UserIdInt int userId) {
+        if (timeLimit < getMinTimeLimit()) {
+            throw new IllegalArgumentException("Time limit must be >= " + getMinTimeLimit());
+        }
+        synchronized (mLock) {
+            UserData user = getOrCreateUserDataLocked(userId);
+            ObserverAppData observerApp = getOrCreateObserverAppDataLocked(requestingUid);
+            AppUsageLimitGroup group = observerApp.appUsageLimitGroups.get(observerId);
+            if (group != null) {
+                // Remove previous app usage group associated with observerId
+                group.remove();
+            }
+
+            final int observerIdCount = observerApp.appUsageLimitGroups.size();
+            if (observerIdCount >= getAppUsageLimitObserverPerUidLimit()) {
+                throw new IllegalStateException(
+                        "Too many app usage observers added by uid " + requestingUid);
+            }
+            group = new AppUsageLimitGroup(user, observerApp, observerId, observed, timeLimit,
+                    callbackIntent);
+            observerApp.appUsageLimitGroups.append(observerId, group);
+
+            if (DEBUG) {
+                Slog.d(TAG, "addObserver " + observed + " for " + timeLimit);
+            }
+
+            user.addUsageGroup(group);
+            noteActiveLocked(user, group, getUptimeMillis());
+        }
+    }
+
+    /**
+     * Remove a registered observer by observerId and calling uid.
+     *
+     * @param requestingUid The calling uid
+     * @param observerId    The unique observer id for this user
+     * @param userId        The user id of the observer
+     */
+    public void removeAppUsageLimitObserver(int requestingUid, int observerId,
+            @UserIdInt int userId) {
+        synchronized (mLock) {
+            final ObserverAppData observerApp = getOrCreateObserverAppDataLocked(requestingUid);
+            final AppUsageLimitGroup group = observerApp.appUsageLimitGroups.get(observerId);
             if (group != null) {
                 // Remove previous app usage group associated with observerId
                 group.remove();
