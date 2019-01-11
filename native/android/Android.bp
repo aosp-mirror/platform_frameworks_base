@@ -78,6 +78,10 @@ cc_library_shared {
     include_dirs: ["bionic/libc/dns/include"],
 
     version_script: "libandroid.map.txt",
+    stubs: {
+        symbol_file: "libandroid.map.txt",
+        versions: ["29"],
+    },
 }
 
 // Network library.
