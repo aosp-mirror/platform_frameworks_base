@@ -309,6 +309,7 @@ public final class PermissionControllerManager {
         private final boolean mDoDryRun;
         private final int mReason;
         private final @NonNull String mCallingPackage;
+        private final @NonNull Executor mExecutor;
         private final @NonNull OnRevokeRuntimePermissionsCallback mCallback;
 
         private final @NonNull RemoteCallback mRemoteCallback;
@@ -324,6 +325,7 @@ public final class PermissionControllerManager {
             mDoDryRun = doDryRun;
             mReason = reason;
             mCallingPackage = callingPackage;
+            mExecutor = executor;
             mCallback = callback;
 
             mRemoteCallback = new RemoteCallback(result -> executor.execute(() -> {
@@ -358,7 +360,13 @@ public final class PermissionControllerManager {
 
         @Override
         protected void onTimeout(RemoteService remoteService) {
-            mCallback.onRevokeRuntimePermissions(Collections.emptyMap());
+            long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mCallback.onRevokeRuntimePermissions(Collections.emptyMap()));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
