@@ -94,7 +94,7 @@ public final class Zygote {
     private Zygote() {}
 
     /** Called for some security initialization before any fork. */
-    native static void nativeSecurityInit();
+    static native void nativeSecurityInit();
 
     /**
      * Forks a new VM instance.  The current VM must have been started
@@ -131,14 +131,14 @@ public final class Zygote {
      * if this is the parent, or -1 on error.
      */
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
-          int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-          int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir) {
+            int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
+            int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir) {
         VM_HOOKS.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
         int pid = nativeForkAndSpecialize(
-                  uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
-                  fdsToIgnore, startChildZygote, instructionSet, appDataDir);
+                uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
+                fdsToIgnore, startChildZygote, instructionSet, appDataDir);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
             Trace.setTracingEnabled(true, runtimeFlags);
@@ -150,14 +150,19 @@ public final class Zygote {
         return pid;
     }
 
-    native private static int nativeForkAndSpecialize(int uid, int gid, int[] gids,int runtimeFlags,
-          int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-          int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir);
+    private static native int nativeForkAndSpecialize(int uid, int gid, int[] gids,
+            int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
+            int[] fdsToClose, int[] fdsToIgnore, boolean startChildZygote, String instructionSet,
+            String appDataDir);
+
+    private static native void nativeSpecializeBlastula(int uid, int gid, int[] gids,
+            int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
+            boolean startChildZygote, String instructionSet, String appDataDir);
 
     /**
      * Called to do any initialization before starting an application.
      */
-    native static void nativePreApplicationInit();
+    static native void nativePreApplicationInit();
 
     /**
      * Special method to start the system server process. In addition to the
@@ -188,7 +193,8 @@ public final class Zygote {
         // Resets nice priority for zygote process.
         resetNicePriority();
         int pid = nativeForkSystemServer(
-                uid, gid, gids, runtimeFlags, rlimits, permittedCapabilities, effectiveCapabilities);
+                uid, gid, gids, runtimeFlags, rlimits,
+                permittedCapabilities, effectiveCapabilities);
         // Enable tracing as soon as we enter the system_server.
         if (pid == 0) {
             Trace.setTracingEnabled(true, runtimeFlags);
@@ -197,19 +203,34 @@ public final class Zygote {
         return pid;
     }
 
-    native private static int nativeForkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
+    private static native int nativeForkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities);
 
     /**
      * Lets children of the zygote inherit open file descriptors to this path.
      */
-    native protected static void nativeAllowFileAcrossFork(String path);
+    protected static native void nativeAllowFileAcrossFork(String path);
 
     /**
      * Zygote unmount storage space on initializing.
      * This method is called once.
      */
-    native protected static void nativeUnmountStorageOnInit();
+    protected static native void nativeUnmountStorageOnInit();
+
+    protected static native void nativeGetSocketFDs(boolean isPrimary);
+
+    private static native int nativeGetBlastulaPoolCount();
+
+    private static native int nativeGetBlastulaPoolEventFD();
+
+    private static native int nativeForkBlastula(int readPipeFD,
+                                                 int writePipeFD,
+                                                 int[] sessionSocketRawFDs);
+
+    private static native int[] nativeGetBlastulaPipeFDs();
+
+    private static native boolean nativeRemoveBlastulaTableEntry(int blastulaPID);
+
 
     private static void callPostForkSystemServerHooks() {
         // SystemServer specific post fork hooks run before child post fork hooks.
