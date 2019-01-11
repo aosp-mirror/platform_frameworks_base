@@ -70,7 +70,15 @@ function _bpfmt()
 function _cpplint()
 {
     local cpplint="${ANDROID_BUILD_TOP}/tools/repohooks/tools/cpplint.py"
-    $cpplint --quiet $cpp_files
+    local output="$($cpplint --quiet $cpp_files 2>&1 >/dev/null | grep -v \
+        -e 'Found C system header after C++ system header.' \
+        -e 'Unknown NOLINT error category: misc-non-private-member-variables-in-classes' \
+    )"
+    if [[ "$output" ]]; then
+        echo "$output"
+        return 1
+    fi
+    return 0
 }
 
 function _parse_args()
