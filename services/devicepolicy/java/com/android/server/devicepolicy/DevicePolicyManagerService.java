@@ -6103,7 +6103,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             delegates = getDelegatePackagesInternalLocked(scope, userId);
         }
-        if (delegates.size() != 1) {
+        if (delegates.size() == 0) {
+            return null;
+        } else if (delegates.size() > 1) {
             Slog.wtf(LOG_TAG, "More than one delegate holds " + scope);
             return null;
         }
