@@ -53,16 +53,16 @@ struct DrawVkInfo {
     VkFormat format;
 
     // Input: Color space transfer params
-    float G;
-    float A;
-    float B;
-    float C;
-    float D;
-    float E;
-    float F;
+    float g;
+    float a;
+    float b;
+    float c;
+    float d;
+    float e;
+    float f;
 
     // Input: Color space transformation from linear RGB to D50-adapted XYZ
-    float matrix[9];
+    float colorSpaceTransform[9];
 
     // Input: current clip rect
     int clipLeft;

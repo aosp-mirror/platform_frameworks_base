@@ -24,7 +24,6 @@ cc_library_shared {
     srcs: [
         "draw_functor.cpp",
         "draw_gl_functor.cpp",
-        "draw_vk_functor.cpp",
         "functor_utils.cpp",
         "jni_entry_point.cpp",
         "graphics_utils.cpp",
