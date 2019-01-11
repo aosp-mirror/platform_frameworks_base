@@ -68,6 +68,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final String TAG = "NotificationPrefHelper";
     private static final int XML_VERSION = 1;
     private static final int UNKNOWN_UID = UserHandle.USER_NULL;
+    private static final String NON_BLOCKABLE_CHANNEL_DELIM = ":";
 
     @VisibleForTesting
     static final String TAG_RANKING = "ranking";
@@ -94,6 +95,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final int DEFAULT_IMPORTANCE = NotificationManager.IMPORTANCE_UNSPECIFIED;
     private static final boolean DEFAULT_SHOW_BADGE = true;
     private static final boolean DEFAULT_ALLOW_APP_OVERLAY = true;
+    private static final boolean DEFAULT_OEM_LOCKED_IMPORTANCE  = false;
     /**
      * Default value for what fields are user locked. See {@link LockableAppFields} for all lockable
      * fields.
@@ -621,6 +623,12 @@ public class PreferencesHelper implements RankingConfig {
             channel.setLockscreenVisibility(r.visibility);
         }
         clearLockedFields(channel);
+        channel.setImportanceLockedByOEM(r.oemLockedImportance);
+        if (!channel.isImportanceLockedByOEM()) {
+            if (r.futureOemLockedChannels.remove(channel.getId())) {
+                channel.setImportanceLockedByOEM(true);
+            }
+        }
         if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
             channel.setLockscreenVisibility(
                     NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE);
@@ -664,6 +672,12 @@ public class PreferencesHelper implements RankingConfig {
         } else {
             updatedChannel.unlockFields(updatedChannel.getUserLockedFields());
         }
+        // no importance updates are allowed if OEM blocked it
+        updatedChannel.setImportanceLockedByOEM(channel.isImportanceLockedByOEM());
+        if (updatedChannel.isImportanceLockedByOEM()) {
+            updatedChannel.setImportance(channel.getImportance());
+        }
+
         r.channels.put(updatedChannel.getId(), updatedChannel);
 
         if (onlyHasDefaultChannel(pkg, uid)) {
@@ -749,6 +763,44 @@ public class PreferencesHelper implements RankingConfig {
             String key = r.channels.keyAt(i);
             if (!NotificationChannel.DEFAULT_CHANNEL_ID.equals(key)) {
                 r.channels.remove(key);
+            }
+        }
+    }
+
+    public void lockChannelsForOEM(String[] appOrChannelList) {
+        if (appOrChannelList == null) {
+            return;
+        }
+        for (String appOrChannel : appOrChannelList) {
+            if (!TextUtils.isEmpty(appOrChannel)) {
+                String[] appSplit = appOrChannel.split(NON_BLOCKABLE_CHANNEL_DELIM);
+                if (appSplit != null && appSplit.length > 0) {
+                    String appName = appSplit[0];
+                    String channelId = appSplit.length == 2 ? appSplit[1] : null;
+
+                    synchronized (mPackagePreferences) {
+                        for (PackagePreferences r : mPackagePreferences.values()) {
+                            if (r.pkg.equals(appName)) {
+                                if (channelId == null) {
+                                    // lock all channels for the app
+                                    r.oemLockedImportance = true;
+                                    for (NotificationChannel channel : r.channels.values()) {
+                                        channel.setImportanceLockedByOEM(true);
+                                    }
+                                } else {
+                                    NotificationChannel channel = r.channels.get(channelId);
+                                    if (channel != null) {
+                                        channel.setImportanceLockedByOEM(true);
+                                    } else {
+                                        // if this channel shows up in the future, make sure it'll
+                                        // be locked immediately
+                                        r.futureOemLockedChannels.add(channelId);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -1604,6 +1656,8 @@ public class PreferencesHelper implements RankingConfig {
         boolean showBadge = DEFAULT_SHOW_BADGE;
         boolean appOverlay = DEFAULT_ALLOW_APP_OVERLAY;
         int lockedAppFields = DEFAULT_LOCKED_APP_FIELDS;
+        boolean oemLockedImportance = DEFAULT_OEM_LOCKED_IMPORTANCE;
+        List<String> futureOemLockedChannels = new ArrayList<>();
 
         Delegate delegate = null;
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();

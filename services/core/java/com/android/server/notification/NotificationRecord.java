@@ -785,7 +785,8 @@ public final class NotificationRecord {
             mImportanceExplanation = "user";
         }
         if (!getChannel().hasUserSetImportance()
-                && mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
+                && mAssistantImportance != IMPORTANCE_UNSPECIFIED
+                && !getChannel().isImportanceLockedByOEM()) {
             mImportance = mAssistantImportance;
             mImportanceExplanation = "asst";
         }

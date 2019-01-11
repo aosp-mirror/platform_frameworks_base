@@ -1581,6 +1581,9 @@ public class NotificationManagerService extends SystemService {
 
         mIsAutomotive =
                 mPackageManagerClient.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0);
+
+        mPreferencesHelper.lockChannelsForOEM(getContext().getResources().getStringArray(
+                com.android.internal.R.array.config_nonBlockableNotificationPackages));
     }
 
     @Override

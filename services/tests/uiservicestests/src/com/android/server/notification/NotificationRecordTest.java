@@ -792,4 +792,52 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         assertFalse(record.isNewEnoughForAlerting(record.mUpdateTimeMs + (1000 * 60 * 60)));
     }
+
+    @Test
+    public void testIgnoreImportanceAdjustmentsForOemLockedChannels() {
+        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
+        channel.setImportanceLockedByOEM(true);
+
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+        Adjustment adjustment = new Adjustment(
+                PKG_O, record.getKey(), bundle, "", record.getUserId());
+
+        record.addAdjustment(adjustment);
+        record.applyAdjustments();
+        record.calculateImportance();
+
+        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
+    }
+
+    @Test
+    public void testApplyImportanceAdjustmentsForNonOemLockedChannels() {
+        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
+        channel.setImportanceLockedByOEM(false);
+
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+        Adjustment adjustment = new Adjustment(
+                PKG_O, record.getKey(), bundle, "", record.getUserId());
+
+        record.addAdjustment(adjustment);
+        record.applyAdjustments();
+        record.calculateImportance();
+
+        assertEquals(IMPORTANCE_LOW, record.getImportance());
+    }
 }

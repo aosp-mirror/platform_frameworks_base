@@ -219,6 +219,11 @@ package android.app {
     method public abstract void onOpActiveChanged(int, int, java.lang.String, boolean);
   }
 
+  public final class NotificationChannel implements android.os.Parcelable {
+    method public boolean isImportanceLockedByOEM();
+    method public void setImportanceLockedByOEM(boolean);
+  }
+
   public final class NotificationChannelGroup implements android.os.Parcelable {
     method public int getUserLockedFields();
     method public void lockFields(int);

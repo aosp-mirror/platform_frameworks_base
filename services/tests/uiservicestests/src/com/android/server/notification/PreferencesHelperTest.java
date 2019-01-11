@@ -2187,4 +2187,121 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_APP_OVERLAY,
                 mHelper.getAppLockedFields(PKG_O, UID_O));
     }
+
+    @Test
+    public void testLockChannelsForOEM_emptyList() {
+        mHelper.lockChannelsForOEM(null);
+        mHelper.lockChannelsForOEM(new String[0]);
+        // no exception
+    }
+
+    @Test
+    public void testLockChannelsForOEM_appWide() {
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
+        NotificationChannel c = new NotificationChannel("c", "c", IMPORTANCE_DEFAULT);
+        // different uids, same package
+        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
+        mHelper.createNotificationChannel(PKG_O, 3, b, false, false);
+        mHelper.createNotificationChannel(PKG_O, 30, c, true, true);
+
+        mHelper.lockChannelsForOEM(new String[] {PKG_O});
+
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
+                .isImportanceLockedByOEM());
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, b.getId(), false)
+                .isImportanceLockedByOEM());
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 30, c.getId(), false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
+    public void testLockChannelsForOEM_onlyGivenPkg() {
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, 30, b, false, false);
+
+        mHelper.lockChannelsForOEM(new String[] {PKG_O});
+
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
+                .isImportanceLockedByOEM());
+        assertFalse(mHelper.getNotificationChannel(PKG_N_MR1, 30, b.getId(), false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
+    public void testLockChannelsForOEM_channelSpecific() {
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
+        NotificationChannel c = new NotificationChannel("c", "c", IMPORTANCE_DEFAULT);
+        // different uids, same package
+        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
+        mHelper.createNotificationChannel(PKG_O, 3, b, false, false);
+        mHelper.createNotificationChannel(PKG_O, 30, c, true, true);
+
+        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":b", PKG_O + ":c"});
+
+        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
+                .isImportanceLockedByOEM());
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, b.getId(), false)
+                .isImportanceLockedByOEM());
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 30, c.getId(), false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
+    public void testLockChannelsForOEM_channelDoesNotExistYet_appWide() {
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
+
+        mHelper.lockChannelsForOEM(new String[] {PKG_O});
+
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
+                .isImportanceLockedByOEM());
+
+        mHelper.createNotificationChannel(PKG_O, 3, b, true, false);
+        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, b.getId(), false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
+    public void testLockChannelsForOEM_channelDoesNotExistYet_channelSpecific() {
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+
+        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":a", PKG_O + ":b"});
+
+        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
+                .isImportanceLockedByOEM());
+
+        mHelper.createNotificationChannel(PKG_O, UID_O, b, true, false);
+        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, b.getId(), false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
+    public void testUpdateNotificationChannel_oemLockedImportance() {
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+
+        mHelper.lockChannelsForOEM(new String[] {PKG_O});
+
+        NotificationChannel update = new NotificationChannel("a", "a", IMPORTANCE_NONE);
+        update.setAllowAppOverlay(false);
+
+        mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
+
+        assertEquals(IMPORTANCE_HIGH,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
+        assertEquals(false,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).canOverlayApps());
+
+        mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
+
+        assertEquals(IMPORTANCE_HIGH,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
+    }
 }

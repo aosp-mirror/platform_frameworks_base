@@ -19,6 +19,7 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager.Importance;
 import android.content.ContentResolver;
@@ -168,6 +169,7 @@ public final class NotificationChannel implements Parcelable {
     // If this is a blockable system notification channel.
     private boolean mBlockableSystem = false;
     private boolean mAllowAppOverlay = DEFAULT_ALLOW_APP_OVERLAY;
+    private boolean mImportanceLockedByOEM;
 
     /**
      * Creates a notification channel.
@@ -230,6 +232,7 @@ public final class NotificationChannel implements Parcelable {
         mLightColor = in.readInt();
         mBlockableSystem = in.readBoolean();
         mAllowAppOverlay = in.readBoolean();
+        mImportanceLockedByOEM = in.readBoolean();
     }
 
     @Override
@@ -283,6 +286,7 @@ public final class NotificationChannel implements Parcelable {
         dest.writeInt(mLightColor);
         dest.writeBoolean(mBlockableSystem);
         dest.writeBoolean(mAllowAppOverlay);
+        dest.writeBoolean(mImportanceLockedByOEM);
     }
 
     /**
@@ -649,6 +653,22 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    @TestApi
+    public void setImportanceLockedByOEM(boolean locked) {
+        mImportanceLockedByOEM = locked;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public boolean isImportanceLockedByOEM() {
+        return mImportanceLockedByOEM;
+    }
+
+    /**
      * Returns whether the user has chosen the importance of this channel, either to affirm the
      * initial selection from the app, or changed it to be higher or lower.
      * @see #getImportance()
@@ -952,25 +972,26 @@ public final class NotificationChannel implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NotificationChannel that = (NotificationChannel) o;
-        return getImportance() == that.getImportance() &&
-                mBypassDnd == that.mBypassDnd &&
-                getLockscreenVisibility() == that.getLockscreenVisibility() &&
-                mLights == that.mLights &&
-                getLightColor() == that.getLightColor() &&
-                getUserLockedFields() == that.getUserLockedFields() &&
-                isFgServiceShown() == that.isFgServiceShown() &&
-                mVibrationEnabled == that.mVibrationEnabled &&
-                mShowBadge == that.mShowBadge &&
-                isDeleted() == that.isDeleted() &&
-                isBlockableSystem() == that.isBlockableSystem() &&
-                mAllowAppOverlay == that.mAllowAppOverlay &&
-                Objects.equals(getId(), that.getId()) &&
-                Objects.equals(getName(), that.getName()) &&
-                Objects.equals(mDesc, that.mDesc) &&
-                Objects.equals(getSound(), that.getSound()) &&
-                Arrays.equals(mVibration, that.mVibration) &&
-                Objects.equals(getGroup(), that.getGroup()) &&
-                Objects.equals(getAudioAttributes(), that.getAudioAttributes());
+        return getImportance() == that.getImportance()
+                && mBypassDnd == that.mBypassDnd
+                && getLockscreenVisibility() == that.getLockscreenVisibility()
+                && mLights == that.mLights
+                && getLightColor() == that.getLightColor()
+                && getUserLockedFields() == that.getUserLockedFields()
+                && isFgServiceShown() == that.isFgServiceShown()
+                && mVibrationEnabled == that.mVibrationEnabled
+                && mShowBadge == that.mShowBadge
+                && isDeleted() == that.isDeleted()
+                && isBlockableSystem() == that.isBlockableSystem()
+                && mAllowAppOverlay == that.mAllowAppOverlay
+                && Objects.equals(getId(), that.getId())
+                && Objects.equals(getName(), that.getName())
+                && Objects.equals(mDesc, that.mDesc)
+                && Objects.equals(getSound(), that.getSound())
+                && Arrays.equals(mVibration, that.mVibration)
+                && Objects.equals(getGroup(), that.getGroup())
+                && Objects.equals(getAudioAttributes(), that.getAudioAttributes())
+                && mImportanceLockedByOEM == that.mImportanceLockedByOEM;
     }
 
     @Override
@@ -979,7 +1000,8 @@ public final class NotificationChannel implements Parcelable {
                 getLockscreenVisibility(), getSound(), mLights, getLightColor(),
                 getUserLockedFields(),
                 isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getGroup(),
-                getAudioAttributes(), isBlockableSystem(), mAllowAppOverlay);
+                getAudioAttributes(), isBlockableSystem(), mAllowAppOverlay,
+                mImportanceLockedByOEM);
         result = 31 * result + Arrays.hashCode(mVibration);
         return result;
     }
@@ -1007,6 +1029,7 @@ public final class NotificationChannel implements Parcelable {
                 + ", mAudioAttributes=" + mAudioAttributes
                 + ", mBlockableSystem=" + mBlockableSystem
                 + ", mAllowAppOverlay=" + mAllowAppOverlay
+                + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
                 + '}';
         pw.println(prefix + output);
     }
@@ -1033,6 +1056,7 @@ public final class NotificationChannel implements Parcelable {
                 + ", mAudioAttributes=" + mAudioAttributes
                 + ", mBlockableSystem=" + mBlockableSystem
                 + ", mAllowAppOverlay=" + mAllowAppOverlay
+                + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
                 + '}';
     }
 
