@@ -330,4 +330,18 @@ public class CollectionUtils {
     public static @NonNull <T> List<T> defeatNullable(@Nullable List<T> val) {
         return (val != null) ? val : Collections.emptyList();
     }
+
+    /**
+     * @return the first element if not empty/null, null otherwise
+     */
+    public static @Nullable <T> T firstOrNull(@Nullable List<T> cur) {
+        return isEmpty(cur) ? null : cur.get(0);
+    }
+
+    /**
+     * @return list of single given element if it's not null, empty list otherwise
+     */
+    public static @NonNull <T> List<T> singletonOrEmpty(@Nullable T item) {
+        return item == null ? Collections.emptyList() : Collections.singletonList(item);
+    }
 }

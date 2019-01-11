@@ -19,6 +19,7 @@ package android.app.role;
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -592,7 +593,6 @@ public final class RoleManager {
         }
     }
 
-
     /**
      * Returns the list of all roles that the given package is currently holding
      *
@@ -608,6 +608,22 @@ public final class RoleManager {
         Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
         try {
             return mService.getHeldRolesFromController(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allows getting the role holder for {@link #ROLE_SMS} without
+     * {@link Manifest.permission#OBSERVE_ROLE_HOLDERS}, as required by
+     * {@link android.provider.Telephony.Sms#getDefaultSmsPackage(Context)}
+     *
+     * @hide
+     */
+    @Nullable
+    public String getDefaultSmsPackage(@UserIdInt int userId) {
+        try {
+            return mService.getDefaultSmsPackage(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

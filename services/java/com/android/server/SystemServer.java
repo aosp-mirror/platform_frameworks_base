@@ -120,6 +120,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PhoneWindowManager;
+import com.android.server.policy.role.LegacyRoleResolutionPolicy;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.power.ThermalManagerService;
@@ -1991,7 +1992,8 @@ public final class SystemServer {
 
             // Grants default permissions and defines roles
             traceBeginAndSlog("StartRoleManagerService");
-            mSystemServiceManager.startService(RoleManagerService.class);
+            mSystemServiceManager.startService(new RoleManagerService(
+                    mSystemContext, new LegacyRoleResolutionPolicy(mSystemContext)));
             traceEnd();
 
             // No dependency on Webview preparation in system server. But this should
