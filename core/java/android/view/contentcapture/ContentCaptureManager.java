@@ -126,8 +126,8 @@ public final class ContentCaptureManager {
 
     /** @hide */
     public void onActivityStarted(@NonNull IBinder applicationToken,
-            @NonNull ComponentName activityComponent) {
-        getMainContentCaptureSession().start(applicationToken, activityComponent);
+            @NonNull ComponentName activityComponent, int flags) {
+        getMainContentCaptureSession().start(applicationToken, activityComponent, flags);
     }
 
     /** @hide */
