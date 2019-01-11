@@ -1172,17 +1172,33 @@ public class SubscriptionManager {
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public List<SubscriptionInfo> getActiveSubscriptionInfoList() {
-        List<SubscriptionInfo> result = null;
+        return getActiveSubscriptionInfoList(false);
+    }
+
+    /**
+     * This is similar to {@link #getActiveSubscriptionInfoList()}, but if userVisibleOnly
+     * is true, it will filter out the hidden subscriptions.
+     *
+     * @hide
+     */
+    public List<SubscriptionInfo> getActiveSubscriptionInfoList(boolean userVisibleOnly) {
+        List<SubscriptionInfo> activeList = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getActiveSubscriptionInfoList(mContext.getOpPackageName());
+                activeList = iSub.getActiveSubscriptionInfoList(mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
         }
-        return result;
+
+        if (!userVisibleOnly || activeList == null) {
+            return activeList;
+        } else {
+            return activeList.stream().filter(subInfo -> !shouldHideSubscription(subInfo))
+                    .collect(Collectors.toList());
+        }
     }
 
     /**
