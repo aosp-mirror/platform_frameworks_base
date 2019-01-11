@@ -3275,6 +3275,8 @@
   <java-symbol type="string" name="config_defaultWellbeingPackage" />
   <java-symbol type="string" name="config_defaultContentCaptureService" />
   <java-symbol type="string" name="config_defaultAugmentedAutofillService" />
+  <java-symbol type="string" name="config_defaultAppPredictionService" />
+  <java-symbol type="string" name="config_defaultContentSuggestionsService" />
 
   <java-symbol type="string" name="notification_channel_foreground_service" />
   <java-symbol type="string" name="foreground_service_app_in_background" />

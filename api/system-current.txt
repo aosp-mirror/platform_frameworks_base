@@ -86,11 +86,13 @@ package android {
     field public static final java.lang.String MANAGE_ACCESSIBILITY = "android.permission.MANAGE_ACCESSIBILITY";
     field public static final java.lang.String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final java.lang.String MANAGE_APP_OPS_RESTRICTIONS = "android.permission.MANAGE_APP_OPS_RESTRICTIONS";
+    field public static final java.lang.String MANAGE_APP_PREDICTIONS = "android.permission.MANAGE_APP_PREDICTIONS";
     field public static final java.lang.String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
     field public static final java.lang.String MANAGE_AUTO_FILL = "android.permission.MANAGE_AUTO_FILL";
     field public static final java.lang.String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final java.lang.String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
     field public static final java.lang.String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
+    field public static final java.lang.String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
     field public static final java.lang.String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final java.lang.String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
@@ -869,10 +871,158 @@ package android.app.backup {
 
 }
 
+package android.app.contentsuggestions {
+
+  public final class ClassificationsRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public java.util.List<android.app.contentsuggestions.ContentSelection> getSelections();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ClassificationsRequest> CREATOR;
+  }
+
+  public static final class ClassificationsRequest.Builder {
+    ctor public ClassificationsRequest.Builder(java.util.List<android.app.contentsuggestions.ContentSelection>);
+    method public android.app.contentsuggestions.ClassificationsRequest build();
+    method public android.app.contentsuggestions.ClassificationsRequest.Builder setExtras(android.os.Bundle);
+  }
+
+  public final class ContentClassification implements android.os.Parcelable {
+    ctor public ContentClassification(java.lang.String, android.os.Bundle);
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public java.lang.String getId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ContentClassification> CREATOR;
+  }
+
+  public final class ContentSelection implements android.os.Parcelable {
+    ctor public ContentSelection(java.lang.String, android.os.Bundle);
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public java.lang.String getId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ContentSelection> CREATOR;
+  }
+
+  public final class ContentSuggestionsManager {
+    method public void classifyContentSelections(android.app.contentsuggestions.ClassificationsRequest, java.util.concurrent.Executor, android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
+    method public void notifyInteraction(java.lang.String, android.os.Bundle);
+    method public void provideContextImage(int, android.os.Bundle);
+    method public void suggestContentSelections(android.app.contentsuggestions.SelectionsRequest, java.util.concurrent.Executor, android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
+  }
+
+  public static abstract interface ContentSuggestionsManager.ClassificationsCallback {
+    method public abstract void onContentClassificationsAvailable(int, java.util.List<android.app.contentsuggestions.ContentClassification>);
+  }
+
+  public static abstract interface ContentSuggestionsManager.SelectionsCallback {
+    method public abstract void onContentSelectionsAvailable(int, java.util.List<android.app.contentsuggestions.ContentSelection>);
+  }
+
+  public final class SelectionsRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public android.graphics.Point getInterestPoint();
+    method public int getTaskId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.SelectionsRequest> CREATOR;
+  }
+
+  public static final class SelectionsRequest.Builder {
+    ctor public SelectionsRequest.Builder(int);
+    method public android.app.contentsuggestions.SelectionsRequest build();
+    method public android.app.contentsuggestions.SelectionsRequest.Builder setExtras(android.os.Bundle);
+    method public android.app.contentsuggestions.SelectionsRequest.Builder setInterestPoint(android.graphics.Point);
+  }
+
+}
+
 package android.app.job {
 
   public abstract class JobScheduler {
     method public abstract int scheduleAsPackage(android.app.job.JobInfo, java.lang.String, int, java.lang.String);
+  }
+
+}
+
+package android.app.prediction {
+
+  public final class AppPredictionContext implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public java.lang.String getPackageName();
+    method public int getPredictedTargetCount();
+    method public java.lang.String getUiSurface();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionContext> CREATOR;
+  }
+
+  public static final class AppPredictionContext.Builder {
+    method public android.app.prediction.AppPredictionContext build();
+    method public android.app.prediction.AppPredictionContext.Builder setExtras(android.os.Bundle);
+    method public android.app.prediction.AppPredictionContext.Builder setPredictedTargetCount(int);
+    method public android.app.prediction.AppPredictionContext.Builder setUiSurface(java.lang.String);
+  }
+
+  public final class AppPredictionManager {
+    method public android.app.prediction.AppPredictor createAppPredictionSession(android.app.prediction.AppPredictionContext);
+  }
+
+  public final class AppPredictionSessionId implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionSessionId> CREATOR;
+  }
+
+  public final class AppPredictor {
+    method public void destroy();
+    method public void notifyAppTargetEvent(android.app.prediction.AppTargetEvent);
+    method public void notifyLocationShown(java.lang.String, java.util.List<android.app.prediction.AppTargetId>);
+    method public void registerPredictionUpdates(java.util.concurrent.Executor, android.app.prediction.AppPredictor.Callback);
+    method public void requestPredictionUpdate();
+    method public void sortTargets(java.util.List<android.app.prediction.AppTarget>, java.util.concurrent.Executor, java.util.function.Consumer<java.util.List<android.app.prediction.AppTarget>>);
+    method public void unregisterPredictionUpdates(android.app.prediction.AppPredictor.Callback);
+  }
+
+  public static abstract interface AppPredictor.Callback {
+    method public abstract void onTargetsAvailable(java.util.List<android.app.prediction.AppTarget>);
+  }
+
+  public final class AppTarget implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getClassName();
+    method public android.app.prediction.AppTargetId getId();
+    method public java.lang.String getPackageName();
+    method public int getRank();
+    method public android.content.pm.ShortcutInfo getShortcutInfo();
+    method public android.os.UserHandle getUser();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTarget> CREATOR;
+  }
+
+  public final class AppTargetEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAction();
+    method public java.lang.String getLaunchLocation();
+    method public android.app.prediction.AppTarget getTarget();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ACTION_DISMISS = 2; // 0x2
+    field public static final int ACTION_LAUNCH = 1; // 0x1
+    field public static final int ACTION_PIN = 3; // 0x3
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetEvent> CREATOR;
+  }
+
+  public static final class AppTargetEvent.Builder {
+    ctor public AppTargetEvent.Builder(android.app.prediction.AppTarget, int);
+    method public android.app.prediction.AppTargetEvent build();
+    method public android.app.prediction.AppTargetEvent.Builder setLaunchLocation(java.lang.String);
+  }
+
+  public final class AppTargetId implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetId> CREATOR;
   }
 
 }
@@ -1063,7 +1213,9 @@ package android.content {
     method public abstract void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.os.Bundle);
     method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.os.Bundle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void startActivityAsUser(android.content.Intent, android.os.UserHandle);
+    field public static final java.lang.String APP_PREDICTION_SERVICE = "app_prediction";
     field public static final java.lang.String BACKUP_SERVICE = "backup";
+    field public static final java.lang.String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
     field public static final java.lang.String CONTEXTHUB_SERVICE = "contexthub";
     field public static final java.lang.String EUICC_CARD_SERVICE = "euicc_card";
     field public static final java.lang.String HDMI_CONTROL_SERVICE = "hdmi_control";
@@ -5184,6 +5336,24 @@ package android.security.keystore.recovery {
 
 }
 
+package android.service.appprediction {
+
+  public abstract class AppPredictionService extends android.app.Service {
+    ctor public AppPredictionService();
+    method public abstract void onAppTargetEvent(android.app.prediction.AppPredictionSessionId, android.app.prediction.AppTargetEvent);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onCreatePredictionSession(android.app.prediction.AppPredictionContext, android.app.prediction.AppPredictionSessionId);
+    method public void onDestroyPredictionSession(android.app.prediction.AppPredictionSessionId);
+    method public abstract void onLocationShown(android.app.prediction.AppPredictionSessionId, java.lang.String, java.util.List<android.app.prediction.AppTargetId>);
+    method public abstract void onRequestPredictionUpdate(android.app.prediction.AppPredictionSessionId);
+    method public abstract void onSortAppTargets(android.app.prediction.AppPredictionSessionId, java.util.List<android.app.prediction.AppTarget>, android.os.CancellationSignal, java.util.function.Consumer<java.util.List<android.app.prediction.AppTarget>>);
+    method public void onStartPredictionUpdates();
+    method public void onStopPredictionUpdates();
+    method public final void updatePredictions(android.app.prediction.AppPredictionSessionId, java.util.List<android.app.prediction.AppTarget>);
+  }
+
+}
+
 package android.service.autofill {
 
   public abstract class AutofillFieldClassificationService extends android.app.Service {
@@ -5308,6 +5478,19 @@ package android.service.contentcapture {
     method public android.app.assist.AssistStructure getAssistStructure();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.contentcapture.SnapshotData> CREATOR;
+  }
+
+}
+
+package android.service.contentsuggestions {
+
+  public abstract class ContentSuggestionsService extends android.app.Service {
+    ctor public ContentSuggestionsService();
+    method public abstract void classifyContentSelections(android.app.contentsuggestions.ClassificationsRequest, android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
+    method public abstract void notifyInteraction(java.lang.String, android.os.Bundle);
+    method public abstract void processContextImage(int, android.graphics.Bitmap, android.os.Bundle);
+    method public abstract void suggestContentSelections(android.app.contentsuggestions.SelectionsRequest, android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.contentsuggestions.ContentSuggestionsService";
   }
 
 }

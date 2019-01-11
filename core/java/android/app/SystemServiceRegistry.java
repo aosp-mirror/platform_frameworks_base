@@ -21,8 +21,11 @@ import android.accounts.IAccountManager;
 import android.app.ContextImpl.ServiceInitializationState;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
+import android.app.contentsuggestions.ContentSuggestionsManager;
+import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
+import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleManager;
 import android.app.slice.SliceManager;
 import android.app.timedetector.TimeDetector;
@@ -1119,6 +1122,29 @@ final class SystemServiceRegistry {
                 }
                 return null;
             }});
+
+        registerService(Context.APP_PREDICTION_SERVICE, AppPredictionManager.class,
+                new CachedServiceFetcher<AppPredictionManager>() {
+            @Override
+            public AppPredictionManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                return new AppPredictionManager(ctx);
+            }
+        });
+
+        registerService(Context.CONTENT_SUGGESTIONS_SERVICE,
+                ContentSuggestionsManager.class,
+                new CachedServiceFetcher<ContentSuggestionsManager>() {
+                    @Override
+                    public ContentSuggestionsManager createService(ContextImpl ctx) {
+                        // No throw as this is an optional service
+                        IBinder b = ServiceManager.getService(
+                                Context.CONTENT_SUGGESTIONS_SERVICE);
+                        IContentSuggestionsManager service =
+                                IContentSuggestionsManager.Stub.asInterface(b);
+                        return new ContentSuggestionsManager(service);
+                    }
+                });
 
         registerService(Context.VR_SERVICE, VrManager.class, new CachedServiceFetcher<VrManager>() {
             @Override

@@ -3993,6 +3993,24 @@ public abstract class Context {
     public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
 
     /**
+     * Used for getting content selections and classifications for task snapshots.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
+
+    /**
+     * Official published name of the app prediction service.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String APP_PREDICTION_SERVICE = "app_prediction";
+
+    /**
      * Use with {@link #getSystemService(String)} to access the
      * {@link com.android.server.voiceinteraction.SoundTriggerService}.
      *
