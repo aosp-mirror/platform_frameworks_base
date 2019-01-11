@@ -5779,6 +5779,11 @@ package android.provider {
     field public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
   }
 
+  public static interface DeviceConfig.Rollback {
+    field public static final String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
+    field public static final String NAMESPACE = "rollback";
+  }
+
   public static interface DeviceConfig.Runtime {
     field public static final String NAMESPACE = "runtime";
     field public static final String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";

@@ -308,6 +308,21 @@ public final class DeviceConfig {
     }
 
     /**
+     * Namespace for Rollback.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface Rollback {
+        String NAMESPACE = "rollback";
+
+        /**
+         * Timeout in milliseconds for enabling package rollback.
+         */
+        String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
+    }
+
+    /**
      * Namespace for storage-related features.
      *
      * @hide
