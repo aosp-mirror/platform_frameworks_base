@@ -134,10 +134,14 @@ public class ThermalManagerService extends SystemService {
             if (!halConnected) {
                 mHalWrapper = new ThermalHal20Wrapper();
                 halConnected = mHalWrapper.connectToHal();
-                if (!halConnected) {
-                    mHalWrapper = new ThermalHal11Wrapper();
-                    halConnected = mHalWrapper.connectToHal();
-                }
+            }
+            if (!halConnected) {
+                mHalWrapper = new ThermalHal11Wrapper();
+                halConnected = mHalWrapper.connectToHal();
+            }
+            if (!halConnected) {
+                mHalWrapper = new ThermalHal10Wrapper();
+                halConnected = mHalWrapper.connectToHal();
             }
             mHalWrapper.setCallback(this::onTemperatureChangedCallback);
             if (!halConnected) {
@@ -612,6 +616,81 @@ public class ThermalManagerService extends SystemService {
                         resendCurrentTemperatures();
                     }
                 }
+            }
+        }
+    }
+
+
+    static class ThermalHal10Wrapper extends ThermalHalWrapper {
+        /** Proxy object for the Thermal HAL 1.0 service. */
+        @GuardedBy("mHalLock")
+        private android.hardware.thermal.V1_0.IThermal mThermalHal10 = null;
+
+        @Override
+        protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,
+                int type) {
+            synchronized (mHalLock) {
+                List<Temperature> ret = new ArrayList<>();
+                if (mThermalHal10 == null) {
+                    return ret;
+                }
+                try {
+                    mThermalHal10.getTemperatures(
+                            (ThermalStatus status,
+                                    ArrayList<android.hardware.thermal.V1_0.Temperature>
+                                            temperatures) -> {
+                                if (ThermalStatusCode.SUCCESS == status.code) {
+                                    for (android.hardware.thermal.V1_0.Temperature
+                                            temperature : temperatures) {
+                                        if (shouldFilter && type != temperature.type) {
+                                            continue;
+                                        }
+                                        // Thermal HAL 1.0 doesn't report current throttling status
+                                        ret.add(new Temperature(
+                                                temperature.currentValue, temperature.type,
+                                                temperature.name,
+                                                Temperature.THROTTLING_NONE));
+                                    }
+                                } else {
+                                    Slog.e(TAG,
+                                            "Couldn't get temperatures because of HAL error: "
+                                                    + status.debugMessage);
+                                }
+
+                            });
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Couldn't getCurrentTemperatures, reconnecting...", e);
+                    connectToHal();
+                }
+                return ret;
+            }
+        }
+
+        @Override
+        protected boolean connectToHal() {
+            synchronized (mHalLock) {
+                try {
+                    mThermalHal10 = android.hardware.thermal.V1_0.IThermal.getService();
+                    mThermalHal10.linkToDeath(new DeathRecipient(),
+                            THERMAL_HAL_DEATH_COOKIE);
+                    Slog.i(TAG,
+                            "Thermal HAL 1.0 service connected, no thermal call back will be "
+                                    + "called due to legacy API.");
+                } catch (NoSuchElementException | RemoteException e) {
+                    Slog.e(TAG,
+                            "Thermal HAL 1.0 service not connected.");
+                    mThermalHal10 = null;
+                }
+                return (mThermalHal10 != null);
+            }
+        }
+
+        @Override
+        protected void dump(PrintWriter pw, String prefix) {
+            synchronized (mHalLock) {
+                pw.print(prefix);
+                pw.println("ThermalHAL 1.0 connected: " + (mThermalHal10 != null ? "yes"
+                        : "no"));
             }
         }
     }
