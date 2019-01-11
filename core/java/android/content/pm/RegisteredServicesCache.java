@@ -475,6 +475,14 @@ public abstract class RegisteredServicesCache<V> {
         final List<ResolveInfo> resolveInfos = queryIntentServices(userId);
         for (ResolveInfo resolveInfo : resolveInfos) {
             try {
+                // if this package is not one of those changedUids, we don't need to scan it,
+                // since nothing in it changed, so save a call to parseServiceInfo, which
+                // can cause a large amount of the package apk to be loaded into memory.
+                // if this is the initial scan, changedUids will be null, and containsUid will
+                // trivially return true, and will call parseServiceInfo
+                if (!containsUid(changedUids, resolveInfo.serviceInfo.applicationInfo.uid)) {
+                    continue;
+                }
                 ServiceInfo<V> info = parseServiceInfo(resolveInfo);
                 if (info == null) {
                     Log.w(TAG, "Unable to load service info " + resolveInfo.toString());
