@@ -13562,7 +13562,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             Signature[] callerSignature;
-            Object obj = mSettings.getSettingLPr(callingUid);
+            final int appId = UserHandle.getAppId(callingUid);
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     callerSignature =
