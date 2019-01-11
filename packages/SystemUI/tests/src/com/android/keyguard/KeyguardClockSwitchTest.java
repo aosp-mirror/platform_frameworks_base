@@ -132,6 +132,17 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     }
 
     @Test
+    public void onPluginConnected_darkAmountInitialized() {
+        // GIVEN that the dark amount has already been set
+        mKeyguardClockSwitch.setDarkAmount(0.5f);
+        // WHEN a plugin is connected
+        ClockPlugin plugin = mock(ClockPlugin.class);
+        mKeyguardClockSwitch.getClockPluginConsumer().accept(plugin);
+        // THEN dark amount should be initalized on the plugin.
+        verify(plugin).setDarkAmount(0.5f);
+    }
+
+    @Test
     public void onPluginDisconnected_showDefaultClock() {
         ClockPlugin plugin = mock(ClockPlugin.class);
         TextClock pluginView = new TextClock(getContext());

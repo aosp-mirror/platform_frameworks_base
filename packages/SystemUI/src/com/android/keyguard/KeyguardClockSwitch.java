@@ -55,6 +55,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * Consumer that accepts the a new ClockPlugin implementation when the Extension reloads.
      */
     private final Consumer<ClockPlugin> mClockPluginConsumer = plugin -> setClockPlugin(plugin);
+    /**
+     * Maintain state so that a newly connected plugin can be initialized.
+     */
+    private float mDarkAmount;
 
     private final StatusBarStateController.StateListener mStateListener =
             new StatusBarStateController.StateListener() {
@@ -147,6 +151,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockPlugin = plugin;
         mClockPlugin.setStyle(getPaint().getStyle());
         mClockPlugin.setTextColor(getCurrentTextColor());
+        mClockPlugin.setDarkAmount(mDarkAmount);
     }
 
     /**
@@ -208,6 +213,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * @param darkAmount Amount of transition to doze: 1f for doze and 0f for awake.
      */
     public void setDarkAmount(float darkAmount) {
+        mDarkAmount = darkAmount;
         if (mClockPlugin != null) {
             mClockPlugin.setDarkAmount(darkAmount);
         }
