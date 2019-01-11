@@ -1075,6 +1075,11 @@ public class Typeface {
                 continue; // If alias and named family are conflict, use named family.
             }
             final Typeface base = systemFontMap.get(alias.getToName());
+            if (base == null) {
+                // The missing target is a valid thing, some configuration don't have font files,
+                // e.g. wear devices. Just skip this alias.
+                continue;
+            }
             final int weight = alias.getWeight();
             final Typeface newFace = weight == 400 ? base :
                     new Typeface(nativeCreateWeightAlias(base.native_instance, weight));
