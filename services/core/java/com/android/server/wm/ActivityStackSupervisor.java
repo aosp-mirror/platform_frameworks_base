@@ -2642,6 +2642,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 try {
                     mService.moveTaskToFrontLocked(task.taskId, 0, options,
                             true /* fromRecents */);
+                    // Apply options to prevent pendingOptions be taken by client to make sure
+                    // the override pending app transition will be applied immediately.
+                    targetActivity.applyOptionsLocked();
                 } finally {
                     mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT,
                             targetActivity);
