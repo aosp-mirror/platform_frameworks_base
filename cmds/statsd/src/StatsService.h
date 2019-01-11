@@ -205,6 +205,12 @@ public:
     virtual Return<void> reportUsbPortOverheatEvent(
             const UsbPortOverheatEvent& usbPortOverheatEvent) override;
 
+    /**
+     * Binder call to get Speech DSP state atom.
+     */
+    virtual Return<void> reportSpeechDspStat(
+            const SpeechDspStat& speechDspStat) override;
+
     /** IBinder::DeathRecipient */
     virtual void binderDied(const wp<IBinder>& who) override;
 
