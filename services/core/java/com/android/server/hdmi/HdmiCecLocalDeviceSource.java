@@ -18,7 +18,6 @@ package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Slog;
 
@@ -37,21 +36,32 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     private static final String TAG = "HdmiCecLocalDeviceSource";
 
     // Indicate if current device is Active Source or not
-    private boolean mIsActiveSource = false;
+    @VisibleForTesting
+    protected boolean mIsActiveSource = false;
 
     // Device has cec switch functionality or not.
     // Default is false.
     protected boolean mIsSwitchDevice = SystemProperties.getBoolean(
             Constants.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
 
-    // Local active port number used for Routing Control.
-    // This records the default active port or the previous valid active port.
+    // Routing port number used for Routing Control.
+    // This records the default routing port or the previous valid routing port.
     // Default is HOME input.
     // Note that we don't save active path here because for source device,
-    // new Active Source physical address might not match the local active path
+    // new Active Source physical address might not match the active path
     @GuardedBy("mLock")
     @LocalActivePort
-    private int mLocalActivePort = Constants.CEC_SWITCH_HOME;
+    private int mRoutingPort = Constants.CEC_SWITCH_HOME;
+
+    // This records the current input of the device.
+    // When device is switched to ARC input, mRoutingPort does not record it
+    // since it's not an HDMI port used for Routing Control.
+    // mLocalActivePort will record whichever input we switch to to keep tracking on
+    // the current input status of the device.
+    // This can help prevent duplicate switching and provide status information.
+    @GuardedBy("mLock")
+    @LocalActivePort
+    protected int mLocalActivePort = Constants.CEC_SWITCH_HOME;
 
     protected HdmiCecLocalDeviceSource(HdmiControlService service, int deviceType) {
         super(service, deviceType);
@@ -98,22 +108,12 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    private void invokeCallback(IHdmiControlCallback callback, int result) {
-        assertRunOnServiceThread();
-        try {
-            callback.onComplete(result);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Invoking callback failed:" + e);
-        }
-    }
-
-    @ServiceThreadOnly
     protected boolean handleActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int logicalAddress = message.getSource();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
-        if (!mActiveSource.equals(activeSource)) {
+        if (!getActiveSource().equals(activeSource)) {
             setActiveSource(activeSource);
         }
         setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
@@ -185,37 +185,19 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         // do nothing
     }
 
-    // Active source claiming needs to be handled in the parent class
-    // since we decide who will be the active source when the device supports
+    // Active source claiming needs to be handled in Service
+    // since service can decide who will be the active source when the device supports
     // multiple device types in this method.
     // This method should only be called when the device can be the active source.
     protected void setAndBroadcastActiveSource(HdmiCecMessage message, int physicalAddress) {
-        // If the device has both playback and audio system logical addresses,
-        // playback will claim active source. Otherwise audio system will.
-        HdmiCecLocalDevice deviceToBeActiveSource = mService.playback();
-        if (deviceToBeActiveSource == null) {
-            deviceToBeActiveSource = mService.audioSystem();
-        }
-        if (this == deviceToBeActiveSource) {
-            ActiveSource activeSource = ActiveSource.of(mAddress, physicalAddress);
-            setIsActiveSource(true);
-            setActiveSource(activeSource);
-            wakeUpIfActiveSource();
-            maySendActiveSource(message.getSource());
-        }
+        mService.setAndBroadcastActiveSource(
+                message, physicalAddress, getDeviceInfo().getDeviceType());
     }
 
     @ServiceThreadOnly
     void setIsActiveSource(boolean on) {
         assertRunOnServiceThread();
         mIsActiveSource = on;
-    }
-
-    @ServiceThreadOnly
-    // Check if current device is the Active Source
-    boolean isActiveSource() {
-        assertRunOnServiceThread();
-        return mIsActiveSource;
     }
 
     protected void wakeUpIfActiveSource() {
@@ -236,19 +218,59 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         }
     }
 
+    /**
+     * Set {@link #mRoutingPort} to a specific {@link LocalActivePort} to record the current active
+     * CEC Routing Control related port.
+     *
+     * @param portId The portId of the new routing port.
+     */
     @VisibleForTesting
-    protected void setLocalActivePort(@LocalActivePort int portId) {
+    protected void setRoutingPort(@LocalActivePort int portId) {
         synchronized (mLock) {
-            mLocalActivePort = portId;
+            mRoutingPort = portId;
         }
     }
 
-    // To get the local active port to switch to
-    // when receivng routing change or information.
+    /**
+     * Get {@link #mRoutingPort}. This is useful when the device needs to route to the last valid
+     * routing port.
+     */
+    @LocalActivePort
+    protected int getRoutingPort() {
+        synchronized (mLock) {
+            return mRoutingPort;
+        }
+    }
+
+    /**
+     * Get {@link #mLocalActivePort}. This is useful when device needs to know the current active
+     * port.
+     */
     @LocalActivePort
     protected int getLocalActivePort() {
         synchronized (mLock) {
             return mLocalActivePort;
         }
+    }
+
+    /**
+     * Set {@link #mLocalActivePort} to a specific {@link LocalActivePort} to record the current
+     * active port.
+     *
+     * <p>It does not have to be a Routing Control related port. For example it can be
+     * set to {@link Constants#CEC_SWITCH_ARC} but this port is System Audio related.
+     *
+     * @param activePort The portId of the new active port.
+     */
+    protected void setLocalActivePort(@LocalActivePort int activePort) {
+        synchronized (mLock) {
+            mLocalActivePort = activePort;
+        }
+    }
+
+    // Check if the device is trying to switch to the same input that is active right now.
+    // This can help avoid redundant port switching.
+    protected boolean isSwitchingToTheSameInput(@LocalActivePort int activePort) {
+        return activePort == getLocalActivePort();
     }
 }

@@ -26,8 +26,10 @@ import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +51,9 @@ public class SystemAudioInitiationActionFromAvrTest {
     private int mMsgRequestActiveSourceCount;
     private int mMsgSetSystemAudioModeCount;
     private int mQueryTvSystemAudioModeSupportCount;
+    private boolean mArcEnabled;
+    private boolean mIsPlaybackDevice;
+    private boolean mBroadcastActiveSource;
 
     @Before
     public void SetUp() {
@@ -79,6 +84,8 @@ public class SystemAudioInitiationActionFromAvrTest {
                                         && callback != null) {
                                     callback.onSendCompleted(SendMessageResult.NACK);
                                 }
+                                break;
+                            case Constants.MESSAGE_INITIATE_ARC:
                                 break;
                             default:
                                 throw new IllegalArgumentException("Unexpected message");
@@ -132,6 +139,17 @@ public class SystemAudioInitiationActionFromAvrTest {
                     int getPhysicalAddress() {
                         return 0;
                     }
+
+                    @Override
+                    boolean isPlaybackDevice() {
+                        return mIsPlaybackDevice;
+                    }
+
+                    @Override
+                    public void setAndBroadcastActiveSourceFromOneDeviceType(
+                            int sourceAddress, int physicalAddress) {
+                        mBroadcastActiveSource = true;
+                    }
                 };
         mHdmiCecLocalDeviceAudioSystem =
                 new HdmiCecLocalDeviceAudioSystem(hdmiControlService) {
@@ -148,6 +166,11 @@ public class SystemAudioInitiationActionFromAvrTest {
                     HdmiDeviceInfo getDeviceInfo() {
                         return mDeviceInfoForTests;
                     }
+
+                    @Override
+                    void setArcStatus(boolean enabled) {
+                        mArcEnabled = enabled;
+                    }
                 };
         mHdmiCecLocalDeviceAudioSystem.init();
         Looper looper = mTestLooper.getLooper();
@@ -159,7 +182,7 @@ public class SystemAudioInitiationActionFromAvrTest {
         resetTestVariables();
         mShouldDispatchActiveSource = false;
 
-        assertThat(mHdmiCecLocalDeviceAudioSystem.mActiveSource.physicalAddress)
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActiveSource().physicalAddress)
                 .isEqualTo(Constants.INVALID_PHYSICAL_ADDRESS);
 
         mHdmiCecLocalDeviceAudioSystem.addAndStartAction(
@@ -171,7 +194,7 @@ public class SystemAudioInitiationActionFromAvrTest {
         assertThat(mQueryTvSystemAudioModeSupportCount).isEqualTo(0);
         assertFalse(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated());
 
-        assertThat(mHdmiCecLocalDeviceAudioSystem.mActiveSource.physicalAddress)
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActiveSource().physicalAddress)
                 .isEqualTo(Constants.INVALID_PHYSICAL_ADDRESS);
     }
 
@@ -206,14 +229,15 @@ public class SystemAudioInitiationActionFromAvrTest {
         assertThat(mQueryTvSystemAudioModeSupportCount).isEqualTo(1);
         assertTrue(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated());
 
-        assertThat(mHdmiCecLocalDeviceAudioSystem.mActiveSource.physicalAddress).isEqualTo(1002);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActiveSource().physicalAddress)
+            .isEqualTo(1002);
     }
 
     @Test
     public void testKnownActiveSource() {
         resetTestVariables();
         mTvSystemAudioModeSupport = true;
-        mHdmiCecLocalDeviceAudioSystem.mActiveSource.physicalAddress = 1001;
+        mHdmiCecLocalDeviceAudioSystem.getActiveSource().physicalAddress = 1001;
 
         mHdmiCecLocalDeviceAudioSystem.addAndStartAction(
                 new SystemAudioInitiationActionFromAvr(mHdmiCecLocalDeviceAudioSystem));
@@ -233,7 +257,7 @@ public class SystemAudioInitiationActionFromAvrTest {
         mTryCountBeforeSucceed = 3;
         assertThat(mTryCountBeforeSucceed)
                 .isAtMost(SystemAudioInitiationActionFromAvr.MAX_RETRY_COUNT);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.mActiveSource.physicalAddress)
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActiveSource().physicalAddress)
                 .isEqualTo(Constants.INVALID_PHYSICAL_ADDRESS);
 
         mHdmiCecLocalDeviceAudioSystem.addAndStartAction(
@@ -246,12 +270,32 @@ public class SystemAudioInitiationActionFromAvrTest {
         assertTrue(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated());
     }
 
+    @Test
+    public void testIsPlaybackDevice_cannotReceiveActiveSource() {
+        resetTestVariables();
+        mIsPlaybackDevice = true;
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActiveSource().physicalAddress)
+            .isEqualTo(Constants.INVALID_PHYSICAL_ADDRESS);
+
+        mHdmiCecLocalDeviceAudioSystem.addAndStartAction(
+                new SystemAudioInitiationActionFromAvr(mHdmiCecLocalDeviceAudioSystem));
+        mTestLooper.dispatchAll();
+
+        assertThat(mMsgRequestActiveSourceCount).isEqualTo(1);
+        assertThat(mMsgSetSystemAudioModeCount).isEqualTo(1);
+        assertThat(mQueryTvSystemAudioModeSupportCount).isEqualTo(1);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated()).isTrue();
+        assertThat(mBroadcastActiveSource).isTrue();
+    }
+
     private void resetTestVariables() {
         mMsgRequestActiveSourceCount = 0;
         mMsgSetSystemAudioModeCount = 0;
         mQueryTvSystemAudioModeSupportCount = 0;
         mTryCountBeforeSucceed = 0;
-        mHdmiCecLocalDeviceAudioSystem.mActiveSource.physicalAddress =
+        mIsPlaybackDevice = false;
+        mBroadcastActiveSource = false;
+        mHdmiCecLocalDeviceAudioSystem.getActiveSource().physicalAddress =
                 Constants.INVALID_PHYSICAL_ADDRESS;
     }
 }

@@ -41,7 +41,7 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
 
     @Override
     boolean start() {
-        if (audioSystem().mActiveSource.physicalAddress == Constants.INVALID_PHYSICAL_ADDRESS) {
+        if (audioSystem().getActiveSource().physicalAddress == Constants.INVALID_PHYSICAL_ADDRESS) {
             mState = STATE_WAITING_FOR_ACTIVE_SOURCE;
             addTimer(mState, HdmiConfig.TIMEOUT_MS);
             sendRequestActiveSource();
@@ -60,10 +60,8 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
                     return false;
                 }
                 mActionTimer.clearTimerMessage();
-                int physicalAddress = HdmiUtils.twoBytesToInt(cmd.getParams());
-                if (physicalAddress != getSourcePath()) {
-                    audioSystem().setActiveSource(cmd.getSource(), physicalAddress);
-                }
+                // Broadcast message is also handled by other device types
+                audioSystem().handleActiveSource(cmd);
                 mState = STATE_WAITING_FOR_TV_SUPPORT;
                 queryTvSystemAudioModeSupport();
                 return true;
@@ -116,7 +114,16 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
 
     private void handleActiveSourceTimeout() {
         HdmiLogger.debug("Cannot get active source.");
-        audioSystem().checkSupportAndSetSystemAudioMode(false);
+        // If not able to find Active Source and the current device has playbcak functionality,
+        // claim Active Source and start to query TV system audio mode support.
+        if (audioSystem().mService.isPlaybackDevice()) {
+            audioSystem().mService.setAndBroadcastActiveSourceFromOneDeviceType(
+                    Constants.ADDR_BROADCAST, getSourcePath());
+            mState = STATE_WAITING_FOR_TV_SUPPORT;
+            queryTvSystemAudioModeSupport();
+        } else {
+            audioSystem().checkSupportAndSetSystemAudioMode(false);
+        }
         finish();
     }
 

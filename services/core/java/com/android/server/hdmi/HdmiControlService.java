@@ -140,6 +140,10 @@ public class HdmiControlService extends SystemService {
     static final int STANDBY_SCREEN_OFF = 0;
     static final int STANDBY_SHUTDOWN = 1;
 
+    // Logical address of the active source.
+    @GuardedBy("mLock")
+    protected final ActiveSource mActiveSource = new ActiveSource();
+
     private static final boolean isHdmiCecNeverClaimPlaybackLogicAddr =
             SystemProperties.getBoolean(
                     Constants.PROPERTY_HDMI_CEC_NEVER_CLAIM_PLAYBACK_LOGICAL_ADDRESS, false);
@@ -596,11 +600,6 @@ public class HdmiControlService extends SystemService {
                     }
                     // No need to propagate to HAL.
                     break;
-                case Global.HDMI_CONTROL_AUTO_TV_OFF_ENABLED:
-                    if (isAudioSystemDevice()) {
-                        audioSystem().setAutoTvOff(enabled);
-                    }
-                    break;
                 case Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED:
                     if (isTvDeviceEnabled()) {
                         tv().setSystemAudioControlFeatureEnabled(enabled);
@@ -1009,6 +1008,10 @@ public class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
 
         if (connected && !isTvDevice()) {
+            if (getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT && isSwitchDevice()) {
+                initPortInfo();
+                HdmiLogger.debug("initPortInfo for switch device when onHotplug from tx.");
+            }
             ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
             for (int type : mLocalDevices) {
                 if (type == HdmiDeviceInfo.DEVICE_PLAYBACK
@@ -1394,17 +1397,24 @@ public class HdmiControlService extends SystemService {
                         return;
                     }
                     HdmiCecLocalDeviceTv tv = tv();
-                    if (tv == null) {
-                        if (!mAddressAllocated) {
-                            mSelectRequestBuffer.set(SelectRequestBuffer.newPortSelect(
-                                    HdmiControlService.this, portId, callback));
-                            return;
-                        }
-                        Slog.w(TAG, "Local tv device not available");
-                        invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
+                    if (tv != null) {
+                        tv.doManualPortSwitching(portId, callback);
                         return;
                     }
-                    tv.doManualPortSwitching(portId, callback);
+                    HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
+                    if (audioSystem != null) {
+                        audioSystem.doManualPortSwitching(portId, callback);
+                        return;
+                    }
+
+                    if (!mAddressAllocated) {
+                        mSelectRequestBuffer.set(SelectRequestBuffer.newPortSelect(
+                                HdmiControlService.this, portId, callback));
+                        return;
+                    }
+                    Slog.w(TAG, "Local device not available");
+                    invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
+                    return;
                 }
             });
         }
@@ -2118,6 +2128,11 @@ public class HdmiControlService extends SystemService {
         return mLocalDevices.contains(HdmiDeviceInfo.DEVICE_PLAYBACK);
     }
 
+    boolean isSwitchDevice() {
+        return SystemProperties.getBoolean(
+            Constants.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
+    }
+
     boolean isTvDeviceEnabled() {
         return isTvDevice() && tv() != null;
     }
@@ -2491,6 +2506,77 @@ public class HdmiControlService extends SystemService {
         // Resets last input for MHL, which stays valid only after the MHL device was selected,
         // and no further switching is done.
         setLastInputForMhl(Constants.INVALID_PORT_ID);
+    }
+
+    ActiveSource getActiveSource() {
+        synchronized (mLock) {
+            return mActiveSource;
+        }
+    }
+
+    void setActiveSource(int logicalAddress, int physicalAddress) {
+        synchronized (mLock) {
+            mActiveSource.logicalAddress = logicalAddress;
+            mActiveSource.physicalAddress = physicalAddress;
+        }
+    }
+
+    // This method should only be called when the device can be the active source
+    // and all the device types call into this method.
+    // For example, when receiving broadcast messages, all the device types will call this
+    // method but only one of them will be the Active Source.
+    protected void setAndBroadcastActiveSource(
+            HdmiCecMessage message, int physicalAddress, int deviceType) {
+        // If the device has both playback and audio system logical addresses,
+        // playback will claim active source. Otherwise audio system will.
+        if (deviceType == HdmiDeviceInfo.DEVICE_PLAYBACK) {
+            HdmiCecLocalDevicePlayback playback = playback();
+            playback.setIsActiveSource(true);
+            playback.wakeUpIfActiveSource();
+            playback.maySendActiveSource(message.getSource());
+            setActiveSource(playback.mAddress, physicalAddress);
+        }
+
+        if (deviceType == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
+            HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
+            if (playback() != null) {
+                audioSystem.setIsActiveSource(false);
+            } else {
+                audioSystem.setIsActiveSource(true);
+                audioSystem.wakeUpIfActiveSource();
+                audioSystem.maySendActiveSource(message.getSource());
+                setActiveSource(audioSystem.mAddress, physicalAddress);
+            }
+        }
+    }
+
+    // This method should only be called when the device can be the active source
+    // and only one of the device types calls into this method.
+    // For example, when receiving One Touch Play, only playback device handles it
+    // and this method updates Active Source in all the device types sharing the same
+    // Physical Address.
+    protected void setAndBroadcastActiveSourceFromOneDeviceType(
+            int sourceAddress, int physicalAddress) {
+        // If the device has both playback and audio system logical addresses,
+        // playback will claim active source. Otherwise audio system will.
+        HdmiCecLocalDevicePlayback playback = playback();
+        HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
+        if (playback != null) {
+            playback.setIsActiveSource(true);
+            playback.wakeUpIfActiveSource();
+            playback.maySendActiveSource(sourceAddress);
+            if (audioSystem != null) {
+                audioSystem.setIsActiveSource(false);
+            }
+            setActiveSource(playback.mAddress, physicalAddress);
+        } else {
+            if (audioSystem != null) {
+                audioSystem.setIsActiveSource(true);
+                audioSystem.wakeUpIfActiveSource();
+                audioSystem.maySendActiveSource(sourceAddress);
+                setActiveSource(audioSystem.mAddress, physicalAddress);
+            }
+        }
     }
 
     @ServiceThreadOnly

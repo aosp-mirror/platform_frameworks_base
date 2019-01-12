@@ -18,10 +18,12 @@ package com.android.server.hdmi;
 
 import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.InputDevice;
@@ -133,9 +135,6 @@ abstract class HdmiCecLocalDevice {
             return s.toString();
         }
     }
-    // Logical address of the active source.
-    @GuardedBy("mLock")
-    protected final ActiveSource mActiveSource = new ActiveSource();
 
     // Active routing path. Physical address of the active source but not all the time, such as
     // when the new active source does not claim itself to be one. Note that we don't keep
@@ -867,9 +866,7 @@ abstract class HdmiCecLocalDevice {
     }
 
     ActiveSource getActiveSource() {
-        synchronized (mLock) {
-            return mActiveSource;
-        }
+        return mService.getActiveSource();
     }
 
     void setActiveSource(ActiveSource newActive) {
@@ -881,10 +878,7 @@ abstract class HdmiCecLocalDevice {
     }
 
     void setActiveSource(int logicalAddress, int physicalAddress) {
-        synchronized (mLock) {
-            mActiveSource.logicalAddress = logicalAddress;
-            mActiveSource.physicalAddress = physicalAddress;
-        }
+        mService.setActiveSource(logicalAddress, physicalAddress);
         mService.setLastInputForMhl(Constants.INVALID_PORT_ID);
     }
 
@@ -1029,6 +1023,19 @@ abstract class HdmiCecLocalDevice {
         return Constants.ADDR_INVALID;
     }
 
+    @ServiceThreadOnly
+    void invokeCallback(IHdmiControlCallback callback, int result) {
+        assertRunOnServiceThread();
+        if (callback == null) {
+            return;
+        }
+        try {
+            callback.onComplete(result);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Invoking callback failed:" + e);
+        }
+    }
+
     void sendUserControlPressedAndReleased(int targetAddress, int cecKeycode) {
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildUserControlPressed(mAddress, targetAddress, cecKeycode));
@@ -1042,7 +1049,7 @@ abstract class HdmiCecLocalDevice {
         pw.println("mAddress: " + mAddress);
         pw.println("mPreferredAddress: " + mPreferredAddress);
         pw.println("mDeviceInfo: " + mDeviceInfo);
-        pw.println("mActiveSource: " + mActiveSource);
+        pw.println("mActiveSource: " + getActiveSource());
         pw.println(String.format("mActiveRoutingPath: 0x%04x", mActiveRoutingPath));
     }
 
