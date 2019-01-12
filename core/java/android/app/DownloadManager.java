@@ -1067,7 +1067,12 @@ public class DownloadManager {
      * COLUMN_* constants.
      */
     public Cursor query(Query query) {
-        Cursor underlyingCursor = query.runQuery(mResolver, UNDERLYING_COLUMNS, mBaseUri);
+        return query(query, UNDERLYING_COLUMNS);
+    }
+
+    /** @hide */
+    public Cursor query(Query query, String[] projection) {
+        Cursor underlyingCursor = query.runQuery(mResolver, projection, mBaseUri);
         if (underlyingCursor == null) {
             return null;
         }

@@ -837,6 +837,14 @@ public final class Downloads {
         }
     }
 
+    /** @hide */
+    public static final String MEDIASTORE_DOWNLOADS_DELETED_CALL = "mediastore_downloads_deleted";
+
+    /** @hide */
+    public static final String EXTRA_IDS = "ids";
+    /** @hide */
+    public static final String EXTRA_MIME_TYPES = "mime_types";
+
     /**
      * Query where clause for general querying.
      */
