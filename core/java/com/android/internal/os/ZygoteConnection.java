@@ -24,16 +24,13 @@ import static android.system.OsConstants.STDIN_FILENO;
 import static android.system.OsConstants.STDOUT_FILENO;
 
 import static com.android.internal.os.ZygoteConnectionConstants.CONNECTION_TIMEOUT_MILLIS;
-import static com.android.internal.os.ZygoteConnectionConstants.MAX_ZYGOTE_ARGC;
 import static com.android.internal.os.ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
 
 import android.content.pm.ApplicationInfo;
 import android.net.Credentials;
 import android.net.LocalSocket;
-import android.os.FactoryTest;
 import android.os.Parcel;
 import android.os.Process;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -52,8 +49,6 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -61,9 +56,6 @@ import java.util.Base64;
  */
 class ZygoteConnection {
     private static final String TAG = "Zygote";
-
-    /** a prototype instance for a future List.toArray() */
-    private static final int[][] intArray2d = new int[0][0];
 
     /**
      * The command socket.
@@ -113,7 +105,7 @@ class ZygoteConnection {
      *
      * @return null-ok; file descriptor
      */
-    FileDescriptor getFileDesciptor() {
+    FileDescriptor getFileDescriptor() {
         return mSocket.getFileDescriptor();
     }
 
@@ -127,11 +119,13 @@ class ZygoteConnection {
      */
     Runnable processOneCommand(ZygoteServer zygoteServer) {
         String args[];
-        Arguments parsedArgs = null;
+        ZygoteArguments parsedArgs = null;
         FileDescriptor[] descriptors;
 
         try {
-            args = readArgumentList();
+            args = Zygote.readArgumentList(mSocketReader);
+
+            // TODO (chriswailes): Remove this and add an assert.
             descriptors = mSocket.getAncillaryFileDescriptors();
         } catch (IOException ex) {
             throw new IllegalStateException("IOException on command socket", ex);
@@ -148,26 +142,26 @@ class ZygoteConnection {
         FileDescriptor childPipeFd = null;
         FileDescriptor serverPipeFd = null;
 
-        parsedArgs = new Arguments(args);
+        parsedArgs = new ZygoteArguments(args);
 
-        if (parsedArgs.abiListQuery) {
+        if (parsedArgs.mAbiListQuery) {
             handleAbiListQuery();
             return null;
         }
 
-        if (parsedArgs.pidQuery) {
+        if (parsedArgs.mPidQuery) {
             handlePidQuery();
             return null;
         }
 
-        if (parsedArgs.preloadDefault) {
+        if (parsedArgs.mPreloadDefault) {
             handlePreload();
             return null;
         }
 
-        if (parsedArgs.preloadPackage != null) {
-            handlePreloadPackage(parsedArgs.preloadPackage, parsedArgs.preloadPackageLibs,
-                    parsedArgs.preloadPackageLibFileName, parsedArgs.preloadPackageCacheKey);
+        if (parsedArgs.mPreloadPackage != null) {
+            handlePreloadPackage(parsedArgs.mPreloadPackage, parsedArgs.mPreloadPackageLibs,
+                    parsedArgs.mPreloadPackageLibFileName, parsedArgs.mPreloadPackageCacheKey);
             return null;
         }
 
@@ -186,37 +180,37 @@ class ZygoteConnection {
             return null;
         }
 
-        if (parsedArgs.apiBlacklistExemptions != null) {
-            handleApiBlacklistExemptions(parsedArgs.apiBlacklistExemptions);
+        if (parsedArgs.mApiBlacklistExemptions != null) {
+            handleApiBlacklistExemptions(parsedArgs.mApiBlacklistExemptions);
             return null;
         }
 
-        if (parsedArgs.hiddenApiAccessLogSampleRate != -1) {
-            handleHiddenApiAccessLogSampleRate(parsedArgs.hiddenApiAccessLogSampleRate);
+        if (parsedArgs.mHiddenApiAccessLogSampleRate != -1) {
+            handleHiddenApiAccessLogSampleRate(parsedArgs.mHiddenApiAccessLogSampleRate);
             return null;
         }
 
-        if (parsedArgs.permittedCapabilities != 0 || parsedArgs.effectiveCapabilities != 0) {
-            throw new ZygoteSecurityException("Client may not specify capabilities: " +
-                    "permitted=0x" + Long.toHexString(parsedArgs.permittedCapabilities) +
-                    ", effective=0x" + Long.toHexString(parsedArgs.effectiveCapabilities));
+        if (parsedArgs.mPermittedCapabilities != 0 || parsedArgs.mEffectiveCapabilities != 0) {
+            throw new ZygoteSecurityException("Client may not specify capabilities: "
+                    + "permitted=0x" + Long.toHexString(parsedArgs.mPermittedCapabilities)
+                    + ", effective=0x" + Long.toHexString(parsedArgs.mEffectiveCapabilities));
         }
 
-        applyUidSecurityPolicy(parsedArgs, peer);
-        applyInvokeWithSecurityPolicy(parsedArgs, peer);
+        Zygote.applyUidSecurityPolicy(parsedArgs, peer);
+        Zygote.applyInvokeWithSecurityPolicy(parsedArgs, peer);
 
-        applyDebuggerSystemProperty(parsedArgs);
-        applyInvokeWithSystemProperty(parsedArgs);
+        Zygote.applyDebuggerSystemProperty(parsedArgs);
+        Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
         int[][] rlimits = null;
 
-        if (parsedArgs.rlimits != null) {
-            rlimits = parsedArgs.rlimits.toArray(intArray2d);
+        if (parsedArgs.mRLimits != null) {
+            rlimits = parsedArgs.mRLimits.toArray(Zygote.INT_ARRAY_2D);
         }
 
         int[] fdsToIgnore = null;
 
-        if (parsedArgs.invokeWith != null) {
+        if (parsedArgs.mInvokeWith != null) {
             try {
                 FileDescriptor[] pipeFds = Os.pipe2(O_CLOEXEC);
                 childPipeFd = pipeFds[1];
@@ -256,11 +250,11 @@ class ZygoteConnection {
 
         fd = null;
 
-        pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
-                parsedArgs.runtimeFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
-                parsedArgs.niceName, fdsToClose, fdsToIgnore, parsedArgs.startChildZygote,
-                parsedArgs.instructionSet, parsedArgs.appDataDir, parsedArgs.packageName,
-                parsedArgs.packagesForUid, parsedArgs.visibleVolIds);
+        pid = Zygote.forkAndSpecialize(parsedArgs.mUid, parsedArgs.mGid, parsedArgs.mGids,
+                parsedArgs.mRuntimeFlags, rlimits, parsedArgs.mMountExternal, parsedArgs.mSeInfo,
+                parsedArgs.mNiceName, fdsToClose, fdsToIgnore, parsedArgs.mStartChildZygote,
+                parsedArgs.mInstructionSet, parsedArgs.mAppDataDir, parsedArgs.mPackageName,
+                parsedArgs.mPackagesForUid, parsedArgs.mVisibleVolIds);
 
         try {
             if (pid == 0) {
@@ -272,7 +266,7 @@ class ZygoteConnection {
                 serverPipeFd = null;
 
                 return handleChildProc(parsedArgs, descriptors, childPipeFd,
-                        parsedArgs.startChildZygote);
+                        parsedArgs.mStartChildZygote);
             } else {
                 // In the parent. A pid < 0 indicates a failure and will be handled in
                 // handleParentProc.
@@ -387,541 +381,6 @@ class ZygoteConnection {
     }
 
     /**
-     * Handles argument parsing for args related to the zygote spawner.
-     *
-     * Current recognized args:
-     * <ul>
-     *   <li> --setuid=<i>uid of child process, defaults to 0</i>
-     *   <li> --setgid=<i>gid of child process, defaults to 0</i>
-     *   <li> --setgroups=<i>comma-separated list of supplimentary gid's</i>
-     *   <li> --capabilities=<i>a pair of comma-separated integer strings
-     * indicating Linux capabilities(2) set for child. The first string
-     * represents the <code>permitted</code> set, and the second the
-     * <code>effective</code> set. Precede each with 0 or
-     * 0x for octal or hexidecimal value. If unspecified, both default to 0.
-     * This parameter is only applied if the uid of the new process will
-     * be non-0. </i>
-     *   <li> --rlimit=r,c,m<i>tuple of values for setrlimit() call.
-     *    <code>r</code> is the resource, <code>c</code> and <code>m</code>
-     *    are the settings for current and max value.</i>
-     *   <li> --instruction-set=<i>instruction-set-string</i> which instruction set to use/emulate.
-     *   <li> --nice-name=<i>nice name to appear in ps</i>
-     *   <li> --package-name=<i>package name this process belongs to</i>
-     *   <li> --runtime-args indicates that the remaining arg list should
-     * be handed off to com.android.internal.os.RuntimeInit, rather than
-     * processed directly.
-     * Android runtime startup (eg, Binder initialization) is also eschewed.
-     *   <li> [--] &lt;args for RuntimeInit &gt;
-     * </ul>
-     */
-    static class Arguments {
-        /** from --setuid */
-        int uid = 0;
-        boolean uidSpecified;
-
-        /** from --setgid */
-        int gid = 0;
-        boolean gidSpecified;
-
-        /** from --setgroups */
-        int[] gids;
-
-        /**
-         * From --runtime-flags.
-         */
-        int runtimeFlags;
-
-        /** From --mount-external */
-        int mountExternal = Zygote.MOUNT_EXTERNAL_NONE;
-
-        /** from --target-sdk-version. */
-        int targetSdkVersion;
-        boolean targetSdkVersionSpecified;
-
-        /** from --nice-name */
-        String niceName;
-
-        /** from --capabilities */
-        boolean capabilitiesSpecified;
-        long permittedCapabilities;
-        long effectiveCapabilities;
-
-        /** from --seinfo */
-        boolean seInfoSpecified;
-        String seInfo;
-
-        /** from all --rlimit=r,c,m */
-        ArrayList<int[]> rlimits;
-
-        /** from --invoke-with */
-        String invokeWith;
-
-        /** from --package-name */
-        String packageName;
-
-        /** from --packages-for-uid */
-        String[] packagesForUid;
-
-        /** from --visible-vols */
-        String[] visibleVolIds;
-
-        /**
-         * Any args after and including the first non-option arg
-         * (or after a '--')
-         */
-        String remainingArgs[];
-
-        /**
-         * Whether the current arguments constitute an ABI list query.
-         */
-        boolean abiListQuery;
-
-        /**
-         * The instruction set to use, or null when not important.
-         */
-        String instructionSet;
-
-        /**
-         * The app data directory. May be null, e.g., for the system server. Note that this might
-         * not be reliable in the case of process-sharing apps.
-         */
-        String appDataDir;
-
-        /**
-         * The APK path of the package to preload, when using --preload-package.
-         */
-        String preloadPackage;
-
-        /**
-         * A Base64 string representing a serialize ApplicationInfo Parcel,
-           when using --preload-app.
-          */
-        String mPreloadApp;
-
-        /**
-         * The native library path of the package to preload, when using --preload-package.
-         */
-        String preloadPackageLibs;
-
-        /**
-         * The filename of the native library to preload, when using --preload-package.
-         */
-        String preloadPackageLibFileName;
-
-        /**
-         * The cache key under which to enter the preloaded package into the classloader cache,
-         * when using --preload-package.
-         */
-        String preloadPackageCacheKey;
-
-        /**
-         * Whether this is a request to start preloading the default resources and classes.
-         * This argument only makes sense when the zygote is in lazy preload mode (i.e, when
-         * it's started with --enable-lazy-preload).
-         */
-        boolean preloadDefault;
-
-        /**
-         * Whether this is a request to start a zygote process as a child of this zygote.
-         * Set with --start-child-zygote. The remaining arguments must include the
-         * CHILD_ZYGOTE_SOCKET_NAME_ARG flag to indicate the abstract socket name that
-         * should be used for communication.
-         */
-        boolean startChildZygote;
-
-        /**
-         * Whether the current arguments constitute a request for the zygote's PID.
-         */
-        boolean pidQuery;
-
-        /**
-         * Exemptions from API blacklisting. These are sent to the pre-forked zygote at boot time,
-         * or when they change, via --set-api-blacklist-exemptions.
-         */
-        String[] apiBlacklistExemptions;
-
-        /**
-         * Sampling rate for logging hidden API accesses to the event log. This is sent to the
-         * pre-forked zygote at boot time, or when it changes, via --hidden-api-log-sampling-rate.
-         */
-        int hiddenApiAccessLogSampleRate = -1;
-
-        /**
-         * Constructs instance and parses args
-         * @param args zygote command-line args
-         * @throws IllegalArgumentException
-         */
-        Arguments(String args[]) throws IllegalArgumentException {
-            parseArgs(args);
-        }
-
-        /**
-         * Parses the commandline arguments intended for the Zygote spawner
-         * (such as "--setuid=" and "--setgid=") and creates an array
-         * containing the remaining args.
-         *
-         * Per security review bug #1112214, duplicate args are disallowed in
-         * critical cases to make injection harder.
-         */
-        private void parseArgs(String args[])
-                throws IllegalArgumentException {
-            int curArg = 0;
-
-            boolean seenRuntimeArgs = false;
-
-            boolean expectRuntimeArgs = true;
-            for ( /* curArg */ ; curArg < args.length; curArg++) {
-                String arg = args[curArg];
-
-                if (arg.equals("--")) {
-                    curArg++;
-                    break;
-                } else if (arg.startsWith("--setuid=")) {
-                    if (uidSpecified) {
-                        throw new IllegalArgumentException(
-                                "Duplicate arg specified");
-                    }
-                    uidSpecified = true;
-                    uid = Integer.parseInt(
-                            arg.substring(arg.indexOf('=') + 1));
-                } else if (arg.startsWith("--setgid=")) {
-                    if (gidSpecified) {
-                        throw new IllegalArgumentException(
-                                "Duplicate arg specified");
-                    }
-                    gidSpecified = true;
-                    gid = Integer.parseInt(
-                            arg.substring(arg.indexOf('=') + 1));
-                } else if (arg.startsWith("--target-sdk-version=")) {
-                    if (targetSdkVersionSpecified) {
-                        throw new IllegalArgumentException(
-                                "Duplicate target-sdk-version specified");
-                    }
-                    targetSdkVersionSpecified = true;
-                    targetSdkVersion = Integer.parseInt(
-                            arg.substring(arg.indexOf('=') + 1));
-                } else if (arg.equals("--runtime-args")) {
-                    seenRuntimeArgs = true;
-                } else if (arg.startsWith("--runtime-flags=")) {
-                    runtimeFlags = Integer.parseInt(
-                            arg.substring(arg.indexOf('=') + 1));
-                } else if (arg.startsWith("--seinfo=")) {
-                    if (seInfoSpecified) {
-                        throw new IllegalArgumentException(
-                                "Duplicate arg specified");
-                    }
-                    seInfoSpecified = true;
-                    seInfo = arg.substring(arg.indexOf('=') + 1);
-                } else if (arg.startsWith("--capabilities=")) {
-                    if (capabilitiesSpecified) {
-                        throw new IllegalArgumentException(
-                                "Duplicate arg specified");
-                    }
-                    capabilitiesSpecified = true;
-                    String capString = arg.substring(arg.indexOf('=')+1);
-
-                    String[] capStrings = capString.split(",", 2);
-
-                    if (capStrings.length == 1) {
-                        effectiveCapabilities = Long.decode(capStrings[0]);
-                        permittedCapabilities = effectiveCapabilities;
-                    } else {
-                        permittedCapabilities = Long.decode(capStrings[0]);
-                        effectiveCapabilities = Long.decode(capStrings[1]);
-                    }
-                } else if (arg.startsWith("--rlimit=")) {
-                    // Duplicate --rlimit arguments are specifically allowed.
-                    String[] limitStrings
-                            = arg.substring(arg.indexOf('=')+1).split(",");
-
-                    if (limitStrings.length != 3) {
-                        throw new IllegalArgumentException(
-                                "--rlimit= should have 3 comma-delimited ints");
-                    }
-                    int[] rlimitTuple = new int[limitStrings.length];
-
-                    for(int i=0; i < limitStrings.length; i++) {
-                        rlimitTuple[i] = Integer.parseInt(limitStrings[i]);
-                    }
-
-                    if (rlimits == null) {
-                        rlimits = new ArrayList();
-                    }
-
-                    rlimits.add(rlimitTuple);
-                } else if (arg.startsWith("--setgroups=")) {
-                    if (gids != null) {
-                        throw new IllegalArgumentException(
-                                "Duplicate arg specified");
-                    }
-
-                    String[] params
-                            = arg.substring(arg.indexOf('=') + 1).split(",");
-
-                    gids = new int[params.length];
-
-                    for (int i = params.length - 1; i >= 0 ; i--) {
-                        gids[i] = Integer.parseInt(params[i]);
-                    }
-                } else if (arg.equals("--invoke-with")) {
-                    if (invokeWith != null) {
-                        throw new IllegalArgumentException(
-                                "Duplicate arg specified");
-                    }
-                    try {
-                        invokeWith = args[++curArg];
-                    } catch (IndexOutOfBoundsException ex) {
-                        throw new IllegalArgumentException(
-                                "--invoke-with requires argument");
-                    }
-                } else if (arg.startsWith("--nice-name=")) {
-                    if (niceName != null) {
-                        throw new IllegalArgumentException(
-                                "Duplicate arg specified");
-                    }
-                    niceName = arg.substring(arg.indexOf('=') + 1);
-                } else if (arg.equals("--mount-external-default")) {
-                    mountExternal = Zygote.MOUNT_EXTERNAL_DEFAULT;
-                } else if (arg.equals("--mount-external-read")) {
-                    mountExternal = Zygote.MOUNT_EXTERNAL_READ;
-                } else if (arg.equals("--mount-external-write")) {
-                    mountExternal = Zygote.MOUNT_EXTERNAL_WRITE;
-                } else if (arg.equals("--mount-external-full")) {
-                    mountExternal = Zygote.MOUNT_EXTERNAL_FULL;
-                } else if (arg.equals("--mount-external-installer")) {
-                    mountExternal = Zygote.MOUNT_EXTERNAL_INSTALLER;
-                } else if (arg.equals("--mount-external-legacy")) {
-                    mountExternal = Zygote.MOUNT_EXTERNAL_LEGACY;
-                } else if (arg.equals("--query-abi-list")) {
-                    abiListQuery = true;
-                } else if (arg.equals("--get-pid")) {
-                    pidQuery = true;
-                } else if (arg.startsWith("--instruction-set=")) {
-                    instructionSet = arg.substring(arg.indexOf('=') + 1);
-                } else if (arg.startsWith("--app-data-dir=")) {
-                    appDataDir = arg.substring(arg.indexOf('=') + 1);
-                } else if (arg.equals("--preload-app")) {
-                    mPreloadApp = args[++curArg];
-                } else if (arg.equals("--preload-package")) {
-                    preloadPackage = args[++curArg];
-                    preloadPackageLibs = args[++curArg];
-                    preloadPackageLibFileName = args[++curArg];
-                    preloadPackageCacheKey = args[++curArg];
-                } else if (arg.equals("--preload-default")) {
-                    preloadDefault = true;
-                    expectRuntimeArgs = false;
-                } else if (arg.equals("--start-child-zygote")) {
-                    startChildZygote = true;
-                } else if (arg.equals("--set-api-blacklist-exemptions")) {
-                    // consume all remaining args; this is a stand-alone command, never included
-                    // with the regular fork command.
-                    apiBlacklistExemptions = Arrays.copyOfRange(args, curArg + 1, args.length);
-                    curArg = args.length;
-                    expectRuntimeArgs = false;
-                } else if (arg.startsWith("--hidden-api-log-sampling-rate=")) {
-                    String rateStr = arg.substring(arg.indexOf('=') + 1);
-                    try {
-                        hiddenApiAccessLogSampleRate = Integer.parseInt(rateStr);
-                    } catch (NumberFormatException nfe) {
-                        throw new IllegalArgumentException(
-                                "Invalid log sampling rate: " + rateStr, nfe);
-                    }
-                    expectRuntimeArgs = false;
-                } else if (arg.startsWith("--package-name=")) {
-                    if (packageName != null) {
-                        throw new IllegalArgumentException("Duplicate arg specified");
-                    }
-                    packageName = arg.substring(arg.indexOf('=') + 1);
-                } else if (arg.startsWith("--packages-for-uid=")) {
-                    packagesForUid = arg.substring(arg.indexOf('=') + 1).split(",");
-                } else if (arg.startsWith("--visible-vols=")) {
-                    visibleVolIds = arg.substring(arg.indexOf('=') + 1).split(",");
-                } else {
-                    break;
-                }
-            }
-
-            if (abiListQuery || pidQuery) {
-                if (args.length - curArg > 0) {
-                    throw new IllegalArgumentException("Unexpected arguments after --query-abi-list.");
-                }
-            } else if (preloadPackage != null) {
-                if (args.length - curArg > 0) {
-                    throw new IllegalArgumentException(
-                            "Unexpected arguments after --preload-package.");
-                }
-            } else if (mPreloadApp != null) {
-                if (args.length - curArg > 0) {
-                    throw new IllegalArgumentException(
-                            "Unexpected arguments after --preload-app.");
-                }
-            } else if (expectRuntimeArgs) {
-                if (!seenRuntimeArgs) {
-                    throw new IllegalArgumentException("Unexpected argument : " + args[curArg]);
-                }
-
-                remainingArgs = new String[args.length - curArg];
-                System.arraycopy(args, curArg, remainingArgs, 0, remainingArgs.length);
-            }
-
-            if (startChildZygote) {
-                boolean seenChildSocketArg = false;
-                for (String arg : remainingArgs) {
-                    if (arg.startsWith(Zygote.CHILD_ZYGOTE_SOCKET_NAME_ARG)) {
-                        seenChildSocketArg = true;
-                        break;
-                    }
-                }
-                if (!seenChildSocketArg) {
-                    throw new IllegalArgumentException("--start-child-zygote specified " +
-                            "without " + Zygote.CHILD_ZYGOTE_SOCKET_NAME_ARG);
-                }
-            }
-        }
-    }
-
-    /**
-     * Reads an argument list from the command socket/
-     * @return Argument list or null if EOF is reached
-     * @throws IOException passed straight through
-     */
-    private String[] readArgumentList()
-            throws IOException {
-
-        /**
-         * See android.os.Process.zygoteSendArgsAndGetPid()
-         * Presently the wire format to the zygote process is:
-         * a) a count of arguments (argc, in essence)
-         * b) a number of newline-separated argument strings equal to count
-         *
-         * After the zygote process reads these it will write the pid of
-         * the child or -1 on failure.
-         */
-
-        int argc;
-
-        try {
-            String s = mSocketReader.readLine();
-
-            if (s == null) {
-                // EOF reached.
-                return null;
-            }
-            argc = Integer.parseInt(s);
-        } catch (NumberFormatException ex) {
-            Log.e(TAG, "invalid Zygote wire format: non-int at argc");
-            throw new IOException("invalid wire format");
-        }
-
-        // See bug 1092107: large argc can be used for a DOS attack
-        if (argc > MAX_ZYGOTE_ARGC) {
-            throw new IOException("max arg count exceeded");
-        }
-
-        String[] result = new String[argc];
-        for (int i = 0; i < argc; i++) {
-            result[i] = mSocketReader.readLine();
-            if (result[i] == null) {
-                // We got an unexpected EOF.
-                throw new IOException("truncated request");
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * uid 1000 (Process.SYSTEM_UID) may specify any uid &gt; 1000 in normal
-     * operation. It may also specify any gid and setgroups() list it chooses.
-     * In factory test mode, it may specify any UID.
-     *
-     * @param args non-null; zygote spawner arguments
-     * @param peer non-null; peer credentials
-     * @throws ZygoteSecurityException
-     */
-    private static void applyUidSecurityPolicy(Arguments args, Credentials peer)
-            throws ZygoteSecurityException {
-
-        if (peer.getUid() == Process.SYSTEM_UID) {
-            /* In normal operation, SYSTEM_UID can only specify a restricted
-             * set of UIDs. In factory test mode, SYSTEM_UID may specify any uid.
-             */
-            boolean uidRestricted = FactoryTest.getMode() == FactoryTest.FACTORY_TEST_OFF;
-
-            if (uidRestricted && args.uidSpecified && (args.uid < Process.SYSTEM_UID)) {
-                throw new ZygoteSecurityException(
-                        "System UID may not launch process with UID < "
-                        + Process.SYSTEM_UID);
-            }
-        }
-
-        // If not otherwise specified, uid and gid are inherited from peer
-        if (!args.uidSpecified) {
-            args.uid = peer.getUid();
-            args.uidSpecified = true;
-        }
-        if (!args.gidSpecified) {
-            args.gid = peer.getGid();
-            args.gidSpecified = true;
-        }
-    }
-
-    /**
-     * Applies debugger system properties to the zygote arguments.
-     *
-     * If "ro.debuggable" is "1", all apps are debuggable. Otherwise,
-     * the debugger state is specified via the "--enable-jdwp" flag
-     * in the spawn request.
-     *
-     * @param args non-null; zygote spawner args
-     */
-    public static void applyDebuggerSystemProperty(Arguments args) {
-        if (RoSystemProperties.DEBUGGABLE) {
-            args.runtimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
-        }
-    }
-
-    /**
-     * Applies zygote security policy.
-     * Based on the credentials of the process issuing a zygote command:
-     * <ol>
-     * <li> uid 0 (root) may specify --invoke-with to launch Zygote with a
-     * wrapper command.
-     * <li> Any other uid may not specify any invoke-with argument.
-     * </ul>
-     *
-     * @param args non-null; zygote spawner arguments
-     * @param peer non-null; peer credentials
-     * @throws ZygoteSecurityException
-     */
-    private static void applyInvokeWithSecurityPolicy(Arguments args, Credentials peer)
-            throws ZygoteSecurityException {
-        int peerUid = peer.getUid();
-
-        if (args.invokeWith != null && peerUid != 0 &&
-            (args.runtimeFlags & Zygote.DEBUG_ENABLE_JDWP) == 0) {
-            throw new ZygoteSecurityException("Peer is permitted to specify an"
-                    + "explicit invoke-with wrapper command only for debuggable"
-                    + "applications.");
-        }
-    }
-
-    /**
-     * Applies invoke-with system properties to the zygote arguments.
-     *
-     * @param args non-null; zygote args
-     */
-    public static void applyInvokeWithSystemProperty(Arguments args) {
-        if (args.invokeWith == null && args.niceName != null) {
-            String property = "wrap." + args.niceName;
-            args.invokeWith = SystemProperties.get(property);
-            if (args.invokeWith != null && args.invokeWith.length() == 0) {
-                args.invokeWith = null;
-            }
-        }
-    }
-
-    /**
      * Handles post-fork setup of child proc, closing sockets as appropriate,
      * reopen stdio as appropriate, and ultimately throwing MethodAndArgsCaller
      * if successful or returning if failed.
@@ -931,7 +390,7 @@ class ZygoteConnection {
      * @param pipeFd null-ok; pipe for communication back to Zygote.
      * @param isZygote whether this new child process is itself a new Zygote.
      */
-    private Runnable handleChildProc(Arguments parsedArgs, FileDescriptor[] descriptors,
+    private Runnable handleChildProc(ZygoteArguments parsedArgs, FileDescriptor[] descriptors,
             FileDescriptor pipeFd, boolean isZygote) {
         /**
          * By the time we get here, the native code has closed the two actual Zygote
@@ -954,27 +413,27 @@ class ZygoteConnection {
             }
         }
 
-        if (parsedArgs.niceName != null) {
-            Process.setArgV0(parsedArgs.niceName);
+        if (parsedArgs.mNiceName != null) {
+            Process.setArgV0(parsedArgs.mNiceName);
         }
 
         // End of the postFork event.
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-        if (parsedArgs.invokeWith != null) {
-            WrapperInit.execApplication(parsedArgs.invokeWith,
-                    parsedArgs.niceName, parsedArgs.targetSdkVersion,
+        if (parsedArgs.mInvokeWith != null) {
+            WrapperInit.execApplication(parsedArgs.mInvokeWith,
+                    parsedArgs.mNiceName, parsedArgs.mTargetSdkVersion,
                     VMRuntime.getCurrentInstructionSet(),
-                    pipeFd, parsedArgs.remainingArgs);
+                    pipeFd, parsedArgs.mRemainingArgs);
 
             // Should not get here.
             throw new IllegalStateException("WrapperInit.execApplication unexpectedly returned");
         } else {
             if (!isZygote) {
-                return ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs,
-                        null /* classLoader */);
+                return ZygoteInit.zygoteInit(parsedArgs.mTargetSdkVersion,
+                        parsedArgs.mRemainingArgs, null /* classLoader */);
             } else {
-                return ZygoteInit.childZygoteInit(parsedArgs.targetSdkVersion,
-                        parsedArgs.remainingArgs, null /* classLoader */);
+                return ZygoteInit.childZygoteInit(parsedArgs.mTargetSdkVersion,
+                        parsedArgs.mRemainingArgs, null /* classLoader */);
             }
         }
     }

@@ -16,12 +16,22 @@
 
 package com.android.internal.os;
 
+import static com.android.internal.os.ZygoteConnectionConstants.MAX_ZYGOTE_ARGC;
+
+import android.net.Credentials;
+import android.os.FactoryTest;
 import android.os.IVold;
+import android.os.Process;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.util.Log;
 
 import dalvik.system.ZygoteHooks;
+
+import java.io.BufferedReader;
+import java.io.IOException;
 
 /** @hide */
 public final class Zygote {
@@ -122,6 +132,9 @@ public final class Zygote {
      * will be enforced with a seccomp filter.
      */
     public static final String CHILD_ZYGOTE_UID_RANGE_END = "--uid-range-end=";
+
+    /** a prototype instance for a future List.toArray() */
+    protected static final int[][] INT_ARRAY_2D = new int[0][0];
 
     private Zygote() {}
 
@@ -272,6 +285,147 @@ public final class Zygote {
     private static native int[] nativeGetBlastulaPipeFDs();
 
     private static native boolean nativeRemoveBlastulaTableEntry(int blastulaPID);
+
+    /**
+     * uid 1000 (Process.SYSTEM_UID) may specify any uid &gt; 1000 in normal
+     * operation. It may also specify any gid and setgroups() list it chooses.
+     * In factory test mode, it may specify any UID.
+     *
+     * @param args non-null; zygote spawner arguments
+     * @param peer non-null; peer credentials
+     * @throws ZygoteSecurityException
+     */
+    protected static void applyUidSecurityPolicy(ZygoteArguments args, Credentials peer)
+            throws ZygoteSecurityException {
+
+        if (peer.getUid() == Process.SYSTEM_UID) {
+            /* In normal operation, SYSTEM_UID can only specify a restricted
+             * set of UIDs. In factory test mode, SYSTEM_UID may specify any uid.
+             */
+            boolean uidRestricted = FactoryTest.getMode() == FactoryTest.FACTORY_TEST_OFF;
+
+            if (uidRestricted && args.mUidSpecified && (args.mUid < Process.SYSTEM_UID)) {
+                throw new ZygoteSecurityException(
+                        "System UID may not launch process with UID < "
+                        + Process.SYSTEM_UID);
+            }
+        }
+
+        // If not otherwise specified, uid and gid are inherited from peer
+        if (!args.mUidSpecified) {
+            args.mUid = peer.getUid();
+            args.mUidSpecified = true;
+        }
+        if (!args.mGidSpecified) {
+            args.mGid = peer.getGid();
+            args.mGidSpecified = true;
+        }
+    }
+
+    /**
+     * Applies debugger system properties to the zygote arguments.
+     *
+     * If "ro.debuggable" is "1", all apps are debuggable. Otherwise,
+     * the debugger state is specified via the "--enable-jdwp" flag
+     * in the spawn request.
+     *
+     * @param args non-null; zygote spawner args
+     */
+    protected static void applyDebuggerSystemProperty(ZygoteArguments args) {
+        if (RoSystemProperties.DEBUGGABLE) {
+            args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
+        }
+    }
+
+    /**
+     * Applies zygote security policy.
+     * Based on the credentials of the process issuing a zygote command:
+     * <ol>
+     * <li> uid 0 (root) may specify --invoke-with to launch Zygote with a
+     * wrapper command.
+     * <li> Any other uid may not specify any invoke-with argument.
+     * </ul>
+     *
+     * @param args non-null; zygote spawner arguments
+     * @param peer non-null; peer credentials
+     * @throws ZygoteSecurityException
+     */
+    protected static void applyInvokeWithSecurityPolicy(ZygoteArguments args, Credentials peer)
+            throws ZygoteSecurityException {
+        int peerUid = peer.getUid();
+
+        if (args.mInvokeWith != null && peerUid != 0
+                && (args.mRuntimeFlags & Zygote.DEBUG_ENABLE_JDWP) == 0) {
+            throw new ZygoteSecurityException("Peer is permitted to specify an"
+                + "explicit invoke-with wrapper command only for debuggable"
+                + "applications.");
+        }
+    }
+
+    /**
+     * Applies invoke-with system properties to the zygote arguments.
+     *
+     * @param args non-null; zygote args
+     */
+    protected static void applyInvokeWithSystemProperty(ZygoteArguments args) {
+        if (args.mInvokeWith == null && args.mNiceName != null) {
+            String property = "wrap." + args.mNiceName;
+            args.mInvokeWith = SystemProperties.get(property);
+            if (args.mInvokeWith != null && args.mInvokeWith.length() == 0) {
+                args.mInvokeWith = null;
+            }
+        }
+    }
+
+    /**
+     * Reads an argument list from the provided socket
+     * @return Argument list or null if EOF is reached
+     * @throws IOException passed straight through
+     */
+    static String[] readArgumentList(BufferedReader socketReader) throws IOException {
+
+        /**
+         * See android.os.Process.zygoteSendArgsAndGetPid()
+         * Presently the wire format to the zygote process is:
+         * a) a count of arguments (argc, in essence)
+         * b) a number of newline-separated argument strings equal to count
+         *
+         * After the zygote process reads these it will write the pid of
+         * the child or -1 on failure.
+         */
+
+        int argc;
+
+        try {
+            String argc_string = socketReader.readLine();
+
+            if (argc_string == null) {
+                // EOF reached.
+                return null;
+            }
+            argc = Integer.parseInt(argc_string);
+
+        } catch (NumberFormatException ex) {
+            Log.e("Zygote", "Invalid Zygote wire format: non-int at argc");
+            throw new IOException("Invalid wire format");
+        }
+
+        // See bug 1092107: large argc can be used for a DOS attack
+        if (argc > MAX_ZYGOTE_ARGC) {
+            throw new IOException("Max arg count exceeded");
+        }
+
+        String[] args = new String[argc];
+        for (int arg_index = 0; arg_index < argc; arg_index++) {
+            args[arg_index] = socketReader.readLine();
+            if (args[arg_index] == null) {
+                // We got an unexpected EOF.
+                throw new IOException("Truncated request");
+            }
+        }
+
+        return args;
+    }
 
 
     private static void callPostForkSystemServerHooks() {
