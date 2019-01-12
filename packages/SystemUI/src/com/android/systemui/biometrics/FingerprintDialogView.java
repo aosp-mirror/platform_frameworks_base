@@ -32,6 +32,14 @@ public class FingerprintDialogView extends BiometricDialogView {
             DialogViewCallback callback) {
         super(context, callback);
     }
+
+    @Override
+    protected void handleClearMessage(boolean requireTryAgain) {
+        updateState(STATE_AUTHENTICATING);
+        mErrorText.setText(getHintStringResourceId());
+        mErrorText.setTextColor(mTextColor);
+    }
+
     @Override
     protected int getHintStringResourceId() {
         return R.string.fingerprint_dialog_touch_sensor;
