@@ -889,8 +889,6 @@
       <item quantity="one"><xliff:g id="NUM_APPS_0">%d</xliff:g> अन्य अनुप्रयोग</item>
     </plurals>
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"सेन्सरहरू निष्क्रिय छन्"</string>
-    <!-- no translation found for device_services (1191212554435440592) -->
-    <skip />
-    <!-- no translation found for music_controls_no_title (5236895307087002011) -->
-    <skip />
+    <string name="device_services" msgid="1191212554435440592">"यन्त्रका सेवाहरू"</string>
+    <string name="music_controls_no_title" msgid="5236895307087002011">"शीर्षक छैन"</string>
 </resources>
