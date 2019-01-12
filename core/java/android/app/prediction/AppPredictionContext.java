@@ -18,6 +18,7 @@ package android.app.prediction;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -29,6 +30,7 @@ import android.os.Parcelable;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class AppPredictionContext implements Parcelable {
 
     private final int mPredictedTargetCount;
@@ -73,6 +75,17 @@ public final class AppPredictionContext implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!getClass().equals(o != null ? o.getClass() : null)) return false;
+
+        AppPredictionContext other = (AppPredictionContext) o;
+        return mPredictedTargetCount == other.mPredictedTargetCount
+                && mUiSurface.equals(other.mUiSurface)
+                && mPackageName.equals(other.mPackageName);
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -104,6 +117,7 @@ public final class AppPredictionContext implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final class Builder {
 
         @NonNull
@@ -116,8 +130,12 @@ public final class AppPredictionContext implements Parcelable {
         private Bundle mExtras;
 
         /**
+         * TODO(b/123591863): Add java docs
+         *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public Builder(@NonNull Context context) {
             mPackageName = context.getPackageName();
         }

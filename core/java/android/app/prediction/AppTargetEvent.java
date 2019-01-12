@@ -19,6 +19,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -30,6 +31,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class AppTargetEvent implements Parcelable {
 
     /**
@@ -96,6 +98,16 @@ public final class AppTargetEvent implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (!getClass().equals(o != null ? o.getClass() : null)) return false;
+
+        AppTargetEvent other = (AppTargetEvent) o;
+        return mTarget.equals(other.mTarget)
+                && mLocation.equals(other.mLocation)
+                && mAction == other.mAction;
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -126,6 +138,7 @@ public final class AppTargetEvent implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final class Builder {
         private AppTarget mTarget;
         private String mLocation;

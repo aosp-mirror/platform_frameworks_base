@@ -969,6 +969,7 @@ package android.app.prediction {
   }
 
   public static final class AppPredictionContext.Builder {
+    ctor public AppPredictionContext.Builder(@NonNull android.content.Context);
     method public android.app.prediction.AppPredictionContext build();
     method public android.app.prediction.AppPredictionContext.Builder setExtras(@Nullable android.os.Bundle);
     method public android.app.prediction.AppPredictionContext.Builder setPredictedTargetCount(int);
@@ -1000,6 +1001,8 @@ package android.app.prediction {
   }
 
   public final class AppTarget implements android.os.Parcelable {
+    ctor public AppTarget(@NonNull android.app.prediction.AppTargetId, @NonNull String, @Nullable String, @NonNull android.os.UserHandle);
+    ctor public AppTarget(@NonNull android.app.prediction.AppTargetId, @NonNull android.content.pm.ShortcutInfo, @Nullable String);
     method public int describeContents();
     method @Nullable public String getClassName();
     method @NonNull public android.app.prediction.AppTargetId getId();
@@ -1030,6 +1033,7 @@ package android.app.prediction {
   }
 
   public final class AppTargetId implements android.os.Parcelable {
+    ctor public AppTargetId(@NonNull String);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetId> CREATOR;
