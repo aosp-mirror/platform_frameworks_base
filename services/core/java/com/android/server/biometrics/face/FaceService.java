@@ -133,10 +133,11 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void authenticate(final IBinder token, final long opId,
+        public void authenticate(final IBinder token, final long opId, int userId,
                 final IFaceServiceReceiver receiver, final int flags,
                 final String opPackageName) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
+            updateActiveGroup(userId, opPackageName);
             final boolean restricted = isRestricted();
             final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),

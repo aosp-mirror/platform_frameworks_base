@@ -819,8 +819,6 @@ public abstract class BiometricServiceBase extends SystemService
 
     // Should be done on a handler thread - not on the Binder's thread.
     private void startAuthentication(AuthenticationClientImpl client, String opPackageName) {
-        updateActiveGroup(client.getGroupId(), opPackageName);
-
         if (DEBUG) Slog.v(getTag(), "startAuthentication(" + opPackageName + ")");
 
         int lockoutMode = getLockoutMode();

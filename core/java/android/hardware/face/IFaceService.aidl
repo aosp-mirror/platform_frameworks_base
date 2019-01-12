@@ -27,7 +27,7 @@ import android.hardware.face.Face;
  */
 interface IFaceService {
     // Authenticate the given sessionId with a face
-    void authenticate(IBinder token, long sessionId,
+    void authenticate(IBinder token, long sessionId, int userid,
             IFaceServiceReceiver receiver, int flags, String opPackageName);
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
