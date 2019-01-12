@@ -39,6 +39,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Holder for state of system windows that cause window insets for all other windows in the system.
@@ -103,6 +104,11 @@ public class InsetsState implements Parcelable {
     static final int INSET_SIDE_UNKNWON = 4;
 
     private final ArrayMap<Integer, InsetsSource> mSources = new ArrayMap<>();
+
+    /**
+     * The frame of the display these sources are relative to.
+     */
+    private final Rect mDisplayFrame = new Rect();
 
     public InsetsState() {
     }
@@ -209,6 +215,14 @@ public class InsetsState implements Parcelable {
         return mSources.computeIfAbsent(type, InsetsSource::new);
     }
 
+    public void setDisplayFrame(Rect frame) {
+        mDisplayFrame.set(frame);
+    }
+
+    public Rect getDisplayFrame() {
+        return mDisplayFrame;
+    }
+
     /**
      * Modifies the state of this class to exclude a certain type to make it ready for dispatching
      * to the client.
@@ -224,6 +238,7 @@ public class InsetsState implements Parcelable {
     }
 
     public void set(InsetsState other, boolean copySources) {
+        mDisplayFrame.set(other.mDisplayFrame);
         mSources.clear();
         if (copySources) {
             for (int i = 0; i < other.mSources.size(); i++) {
@@ -323,6 +338,9 @@ public class InsetsState implements Parcelable {
 
         InsetsState state = (InsetsState) o;
 
+        if (!mDisplayFrame.equals(state.mDisplayFrame)) {
+            return false;
+        }
         if (mSources.size() != state.mSources.size()) {
             return false;
         }
@@ -341,7 +359,7 @@ public class InsetsState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return mSources.hashCode();
+        return Objects.hash(mDisplayFrame, mSources);
     }
 
     public InsetsState(Parcel in) {
@@ -355,9 +373,10 @@ public class InsetsState implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(mDisplayFrame, flags);
         dest.writeInt(mSources.size());
         for (int i = 0; i < mSources.size(); i++) {
-            dest.writeParcelable(mSources.valueAt(i), 0 /* flags */);
+            dest.writeParcelable(mSources.valueAt(i), flags);
         }
     }
 
@@ -374,6 +393,7 @@ public class InsetsState implements Parcelable {
 
     public void readFromParcel(Parcel in) {
         mSources.clear();
+        mDisplayFrame.set(in.readParcelable(null /* loader */));
         final int size = in.readInt();
         for (int i = 0; i < size; i++) {
             final InsetsSource source = in.readParcelable(null /* loader */);

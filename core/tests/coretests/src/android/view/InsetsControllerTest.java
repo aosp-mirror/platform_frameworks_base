@@ -24,6 +24,11 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.graphics.Insets;
@@ -92,6 +97,17 @@ public class InsetsControllerTest {
         mController.onControlsChanged(new InsetsSourceControl[] { control });
         mController.onControlsChanged(new InsetsSourceControl[0]);
         assertNull(mController.getSourceConsumer(TYPE_TOP_BAR).getControl());
+    }
+
+    @Test
+    public void testFrameDoesntMatchDisplay() {
+        mController.onFrameChanged(new Rect(0, 0, 100, 100));
+        mController.getState().setDisplayFrame(new Rect(0, 0, 200, 200));
+        WindowInsetsAnimationControlListener controlListener =
+                mock(WindowInsetsAnimationControlListener.class);
+        mController.controlWindowInsetsAnimation(0, controlListener);
+        verify(controlListener).onCancelled();
+        verify(controlListener, never()).onReady(any(), anyInt());
     }
 
     @Test

@@ -133,6 +133,10 @@ public class InsetsController implements WindowInsetsController {
     }
 
     void onFrameChanged(Rect frame) {
+        if (mFrame.equals(frame)) {
+            return;
+        }
+        mViewRoot.notifyInsetsChanged();
         mFrame.set(frame);
     }
 
@@ -257,11 +261,21 @@ public class InsetsController implements WindowInsetsController {
 
     private void controlWindowInsetsAnimation(@InsetType int types,
             WindowInsetsAnimationControlListener listener, boolean fromIme) {
+        // If the frame of our window doesn't span the entire display, the control API makes very
+        // little sense, as we don't deal with negative insets. So just cancel immediately.
+        if (!mState.getDisplayFrame().equals(mFrame)) {
+            listener.onCancelled();
+            return;
+        }
+        controlAnimationUnchecked(types, listener, mFrame, fromIme);
+    }
+
+    private void controlAnimationUnchecked(@InsetType int types,
+            WindowInsetsAnimationControlListener listener, Rect frame, boolean fromIme) {
         if (types == 0) {
             // nothing to animate.
             return;
         }
-
         // TODO: Check whether we already have a controller.
         final ArraySet<Integer> internalTypes = mState.toInternalType(types);
         final SparseArray<InsetsSourceConsumer> consumers = new SparseArray<>();
@@ -285,7 +299,7 @@ public class InsetsController implements WindowInsetsController {
         }
 
         final InsetsAnimationControlImpl controller = new InsetsAnimationControlImpl(consumers,
-                mFrame, mState, listener, typesReady,
+                frame, mState, listener, typesReady,
                 () -> new SyncRtSurfaceTransactionApplier(mViewRoot.mView), this);
         mAnimationControls.add(controller);
     }
@@ -436,6 +450,7 @@ public class InsetsController implements WindowInsetsController {
             // nothing to animate.
             return;
         }
+
         WindowInsetsAnimationControlListener listener = new WindowInsetsAnimationControlListener() {
             @Override
             public void onReady(WindowInsetsAnimationController controller, int types) {
@@ -479,7 +494,10 @@ public class InsetsController implements WindowInsetsController {
         // TODO: Instead of clearing this here, properly wire up
         // InsetsAnimationControlImpl.finish() to remove this from mAnimationControls.
         mAnimationControls.clear();
-        controlWindowInsetsAnimation(types, listener, fromIme);
+
+        // Show/hide animations always need to be relative to the display frame, in order that shown
+        // and hidden state insets are correct.
+        controlAnimationUnchecked(types, listener, mState.getDisplayFrame(), fromIme);
     }
 
     private void hideDirectly(@InsetType int types) {
