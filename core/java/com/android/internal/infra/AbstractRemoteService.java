@@ -39,6 +39,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 /**
  * Base class representing a remote service.
@@ -92,6 +93,9 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
 
     // Used just for debugging purposes (on dump)
     private long mNextUnbind;
+
+    /** Requests that have been scheduled, but that are not finished yet */
+    private final ArrayList<PendingRequest<S, I>> mUnfinishedRequests = new ArrayList<>();
 
     /**
      * Callback called when the service dies.
@@ -229,6 +233,8 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                 .append(mComponentName.flattenToString()).println();
         pw.append(prefix).append(tab).append("destroyed=")
                 .append(String.valueOf(mDestroyed)).println();
+        pw.append(prefix).append(tab).append("numUnfinishedRequests=")
+                .append(String.valueOf(mUnfinishedRequests.size()));
         final boolean bound = handleIsBound();
         pw.append(prefix).append(tab).append("bound=")
                 .append(String.valueOf(bound));
@@ -257,13 +263,28 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
      * <p>This request must be responded by the service somehow (typically using a callback),
      * othewise it will trigger a {@link PendingRequest#onTimeout(AbstractRemoteService)} if the
      * service doesn't respond.
-     *
-     * <p><b>NOTE: </b>this request is responsible for calling {@link #scheduleUnbind()}.
      */
     protected void scheduleRequest(@NonNull PendingRequest<S, I> pendingRequest) {
-        cancelScheduledUnbind();
         mHandler.sendMessage(obtainMessage(
                 AbstractRemoteService::handlePendingRequest, this, pendingRequest));
+    }
+
+    /**
+     * Marks a pendingRequest as finished.
+     *
+     * @param finshedRequest The request that is finished
+     */
+    void finishRequest(@NonNull PendingRequest<S, I> finshedRequest) {
+        mHandler.sendMessage(
+                obtainMessage(AbstractRemoteService::handleFinishRequest, this, finshedRequest));
+    }
+
+    private void handleFinishRequest(@NonNull PendingRequest<S, I> finshedRequest) {
+        mUnfinishedRequests.remove(finshedRequest);
+
+        if (mUnfinishedRequests.isEmpty()) {
+            scheduleUnbind();
+        }
     }
 
     /**
@@ -273,7 +294,6 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
      * a simple {@link Runnable}.
      */
     protected void scheduleAsyncRequest(@NonNull AsyncRequest<I> request) {
-        scheduleUnbind();
         // TODO(b/117779333): fix generics below
         @SuppressWarnings({"unchecked", "rawtypes"})
         final MyAsyncPendingRequest<S, I> asyncRequest = new MyAsyncPendingRequest(this, request);
@@ -341,6 +361,10 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
             handleEnsureBound();
         } else {
             if (mVerbose) Slog.v(mTag, "handlePendingRequest(): " + pendingRequest);
+
+            mUnfinishedRequests.add(pendingRequest);
+            cancelScheduledUnbind();
+
             pendingRequest.run();
             if (pendingRequest.isFinal()) {
                 mCompleted = true;
@@ -504,6 +528,12 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                 }
                 mCompleted = true;
             }
+
+            S service = mWeakService.get();
+            if (service != null) {
+                service.finishRequest(this);
+            }
+
             mServiceHandler.removeCallbacks(mTimeoutTrigger);
             return true;
         }
