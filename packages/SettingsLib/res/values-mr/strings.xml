@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"नवीन बॅक अप पासवर्ड सेट झाला"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"नवीन पासवर्ड आणि पुष्टीकरण जुळत नाही"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"बॅक अप पासवर्ड सेट करणे अयशस्वी"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"लोड करत आहे…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"सशक्त (डीफॉल्ट)"</item>
     <item msgid="8446070607501413455">"नैसर्गिक"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"प्रत्येक वेळी विचारा"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"तुम्ही बंद करेपर्यंत"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"आत्ताच"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"अपडेट केलेले ग्राफिक ड्राइव्हर डेव्हलमेंटमध्ये वापरण्यासाठी अ‍ॅप निवडा"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"फोनचा स्पीकर"</string>
 </resources>

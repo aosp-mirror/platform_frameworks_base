@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nytt passord for sikkerhetskopiering er angitt."</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Gjentakelsen av passordet er ikke identisk med det første du skrev inn"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Kunne ikke angi nytt passord for sikkerhetskopiering"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Laster inn …"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Krystallklar (standard)"</item>
     <item msgid="8446070607501413455">"Naturlig"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Spør hver gang"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Til du slår av"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Nå nettopp"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"Velg app for å bruke en oppdatert grafikkdriver som er under utvikling"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Telefonhøyttaler"</string>
 </resources>

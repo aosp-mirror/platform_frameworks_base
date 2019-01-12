@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"புதிய காப்புப் பிரதியின் கடவுச்சொல் அமைக்கப்பட்டது"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"புதிய கடவுச்சொல்லும், உறுதிப்படுத்தலுக்கான கடவுச்சொல்லும் பொருந்தவில்லை"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"காப்புப் பிரதி கடவுச்சொல்லை அமைப்பதில் தோல்வி"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"ஏற்றுகிறது…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"வைபிரன்ட் (இயல்பு)"</item>
     <item msgid="8446070607501413455">"இயற்கை வண்ணம்"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ஒவ்வொரு முறையும் கேள்"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"ஆஃப் செய்யும் வரை"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"சற்றுமுன்"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"உருவாக்கத்திலுள்ள புதுப்பிக்கப்பட்ட கிராஃபிக்ஸ் டிரைவரைப் பயன்படுத்த ஆப்ஸைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"மொபைல் ஸ்பீக்கர்"</string>
 </resources>

@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Novo contrasinal da copia de seguranza definido"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"O contrasinal novo e a confirmación non coinciden"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Erro ao definir un contrasinal da copia de seguranza"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Cargando…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Brillante (predeterminado)"</item>
     <item msgid="8446070607501413455">"Naturais"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Preguntar sempre"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Ata a desactivación"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Agora mesmo"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"Subscribirse á aplicación para utilizar o controlador de gráficos actualizado en desenvolvemento"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Altofalante do teléfono"</string>
 </resources>

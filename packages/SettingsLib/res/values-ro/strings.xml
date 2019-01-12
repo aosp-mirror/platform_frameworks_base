@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"A fost setată o parolă de rezervă nouă"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Parola nouă și confirmarea acesteia nu se potrivesc."</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Setarea parolei de rezervă a eșuat"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Se încarcă…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Vibrant (prestabilit)"</item>
     <item msgid="8446070607501413455">"Natural"</item>
@@ -450,6 +451,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Întreabă de fiecare dată"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Până când dezactivați"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Chiar acum"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"Aplicația pentru înscriere pentru a folosi driverul actualizat al plăcii grafice este în dezvoltare"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Difuzorul telefonului"</string>
 </resources>
