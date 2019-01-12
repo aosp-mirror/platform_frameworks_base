@@ -351,10 +351,7 @@ public class BiometricService extends SystemService {
                     if (!runningTasks.isEmpty()) {
                         final String topPackage = runningTasks.get(0).topActivity.getPackageName();
                         if (mCurrentAuthSession != null
-                                && !topPackage.contentEquals(mCurrentAuthSession.mOpPackageName)
-                                && mCurrentAuthSession.mState != STATE_AUTH_STARTED) {
-                            // We only care about this state, since <Biometric>Service will
-                            // cancel any client that's still in STATE_AUTH_STARTED
+                                && !topPackage.contentEquals(mCurrentAuthSession.mOpPackageName)) {
                             mStatusBarService.hideBiometricDialog();
                             mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
                             mCurrentAuthSession.mClientReceiver.onError(
@@ -464,8 +461,9 @@ public class BiometricService extends SystemService {
                     if (mCurrentAuthSession != null && mCurrentAuthSession.containsCookie(cookie)) {
                         if (mCurrentAuthSession.mState == STATE_AUTH_STARTED) {
                             mStatusBarService.onBiometricError(message);
-                            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
                             if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
+                                    mActivityTaskManager.unregisterTaskStackListener(
+                                            mTaskStackListener);
                                     mCurrentAuthSession.mClientReceiver.onError(error, message);
                                     mCurrentAuthSession.mState = STATE_AUTH_IDLE;
                                     mCurrentAuthSession = null;
@@ -475,6 +473,8 @@ public class BiometricService extends SystemService {
                                 mHandler.postDelayed(() -> {
                                     try {
                                         if (mCurrentAuthSession != null) {
+                                            mActivityTaskManager.unregisterTaskStackListener(
+                                                    mTaskStackListener);
                                             mCurrentAuthSession.mClientReceiver.onError(error,
                                                     message);
                                             mCurrentAuthSession.mState = STATE_AUTH_IDLE;
@@ -543,6 +543,11 @@ public class BiometricService extends SystemService {
 
             @Override
             public void onDialogDismissed(int reason) throws RemoteException {
+                if (mCurrentAuthSession == null) {
+                    Slog.e(TAG, "onDialogDismissed: " + reason + ", auth session null");
+                    return;
+                }
+
                 if (reason != BiometricPrompt.DISMISSED_REASON_POSITIVE) {
                     // Positive button is used by passive modalities as a "confirm" button,
                     // do not send to client

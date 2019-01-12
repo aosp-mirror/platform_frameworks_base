@@ -77,7 +77,6 @@ public abstract class BiometricDialogView extends LinearLayout {
     private final DevicePolicyManager mDevicePolicyManager;
     private final float mAnimationTranslationOffset;
     private final int mErrorColor;
-    private final int mTextColor;
     private final float mDialogWidth;
     private final DialogViewCallback mCallback;
 
@@ -91,6 +90,8 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected final Button mPositiveButton;
     protected final Button mNegativeButton;
     protected final Button mTryAgainButton;
+
+    protected final int mTextColor;
 
     private Bundle mBundle;
 
@@ -108,6 +109,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected abstract boolean shouldAnimateForTransition(int oldState, int newState);
     protected abstract int getDelayAfterAuthenticatedDurationMs();
     protected abstract boolean shouldGrayAreaDismissDialog();
+    protected abstract void handleClearMessage(boolean requireTryAgain);
 
     private final Runnable mShowAnimationRunnable = new Runnable() {
         @Override
@@ -421,20 +423,6 @@ public abstract class BiometricDialogView extends LinearLayout {
         return mLayout;
     }
 
-    // Clears the temporary message and shows the help message. If requireTryAgain is true,
-    // we will start the authenticating state again.
-    private void handleClearMessage(boolean requireTryAgain) {
-        if (!requireTryAgain) {
-            updateState(STATE_AUTHENTICATING);
-            mErrorText.setText(getHintStringResourceId());
-            mErrorText.setTextColor(mTextColor);
-            mErrorText.setVisibility(View.VISIBLE);
-        } else {
-            updateState(STATE_IDLE);
-            mErrorText.setVisibility(View.INVISIBLE);
-        }
-    }
-
     // Shows an error/help message
     private void showTemporaryMessage(String message, boolean requireTryAgain) {
         mHandler.removeMessages(MSG_CLEAR_MESSAGE);
@@ -475,11 +463,6 @@ public abstract class BiometricDialogView extends LinearLayout {
     }
 
     public void showTryAgainButton(boolean show) {
-        if (show) {
-            mTryAgainButton.setVisibility(View.VISIBLE);
-        } else {
-            mTryAgainButton.setVisibility(View.GONE);
-        }
     }
 
     public void restoreState(Bundle bundle) {

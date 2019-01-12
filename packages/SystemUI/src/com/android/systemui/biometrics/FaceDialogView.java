@@ -210,6 +210,22 @@ public class FaceDialogView extends BiometricDialogView {
         bundle.putInt(KEY_DIALOG_SIZE, mSize);
     }
 
+
+    @Override
+    protected void handleClearMessage(boolean requireTryAgain) {
+        // Clears the temporary message and shows the help message. If requireTryAgain is true,
+        // we will start the authenticating state again.
+        if (!requireTryAgain) {
+            updateState(STATE_AUTHENTICATING);
+            mErrorText.setText(getHintStringResourceId());
+            mErrorText.setTextColor(mTextColor);
+            mErrorText.setVisibility(View.VISIBLE);
+        } else {
+            updateState(STATE_IDLE);
+            mErrorText.setVisibility(View.INVISIBLE);
+        }
+    }
+
     @Override
     public void restoreState(Bundle bundle) {
         super.restoreState(bundle);
@@ -271,7 +287,11 @@ public class FaceDialogView extends BiometricDialogView {
             // of the elements in here.
             updateSize(SIZE_BIG);
         } else {
-            super.showTryAgainButton(show);
+            if (show) {
+                mTryAgainButton.setVisibility(View.VISIBLE);
+            } else {
+                mTryAgainButton.setVisibility(View.GONE);
+            }
         }
     }
 
