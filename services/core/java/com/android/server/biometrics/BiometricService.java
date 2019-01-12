@@ -474,9 +474,12 @@ public class BiometricService extends SystemService {
                                 // Send errors after the dialog is dismissed.
                                 mHandler.postDelayed(() -> {
                                     try {
-                                        mCurrentAuthSession.mClientReceiver.onError(error, message);
-                                        mCurrentAuthSession.mState = STATE_AUTH_IDLE;
-                                        mCurrentAuthSession = null;
+                                        if (mCurrentAuthSession != null) {
+                                            mCurrentAuthSession.mClientReceiver.onError(error,
+                                                    message);
+                                            mCurrentAuthSession.mState = STATE_AUTH_IDLE;
+                                            mCurrentAuthSession = null;
+                                        }
                                     } catch (RemoteException e) {
                                         Slog.e(TAG, "Remote exception", e);
                                     }
