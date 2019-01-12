@@ -1164,8 +1164,6 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
             current_policies |= OverlayableItem::Policy::kPublic;
           } else if (trimmed_part == "product") {
             current_policies |= OverlayableItem::Policy::kProduct;
-          } else if (trimmed_part == "product_services") {
-            current_policies |= OverlayableItem::Policy::kProductServices;
           } else if (trimmed_part == "system") {
             current_policies |= OverlayableItem::Policy::kSystem;
           } else if (trimmed_part == "vendor") {

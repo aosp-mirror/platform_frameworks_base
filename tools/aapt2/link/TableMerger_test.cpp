@@ -484,7 +484,7 @@ TEST_F(TableMergerTest, SetOverlayableLater) {
 
   OverlayableItem overlayable_item(overlayable);
   overlayable_item.policies |= OverlayableItem::Policy::kPublic;
-  overlayable_item.policies |= OverlayableItem::Policy::kProductServices;
+  overlayable_item.policies |= OverlayableItem::Policy::kSystem;
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
@@ -506,7 +506,7 @@ TEST_F(TableMergerTest, SetOverlayableLater) {
   EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("CustomizableResources"));
   EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://customization"));
   EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic
-                                                   | OverlayableItem::Policy::kProductServices));
+                                                   | OverlayableItem::Policy::kSystem));
 }
 
 TEST_F(TableMergerTest, SameResourceDifferentNameFail) {

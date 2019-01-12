@@ -248,7 +248,7 @@ TEST(ResourceTableTest, SetOverlayable) {
                                                    Source("res/values/overlayable.xml", 40));
   OverlayableItem overlayable_item(overlayable);
   overlayable_item.policies |= OverlayableItem::Policy::kProduct;
-  overlayable_item.policies |= OverlayableItem::Policy::kProductServices;
+  overlayable_item.policies |= OverlayableItem::Policy::kVendor;
   overlayable_item.comment = "comment";
   overlayable_item.source = Source("res/values/overlayable.xml", 42);
 
@@ -265,7 +265,7 @@ TEST(ResourceTableTest, SetOverlayable) {
   EXPECT_THAT(result_overlayable_item.overlayable->source.path, Eq("res/values/overlayable.xml"));
   EXPECT_THAT(result_overlayable_item.overlayable->source.line, 40);
   EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kProduct
-                                                   | OverlayableItem::Policy::kProductServices));
+                                                   | OverlayableItem::Policy::kVendor));
   ASSERT_THAT(result_overlayable_item.comment, StrEq("comment"));
   EXPECT_THAT(result_overlayable_item.source.path, Eq("res/values/overlayable.xml"));
   EXPECT_THAT(result_overlayable_item.source.line, 42);
