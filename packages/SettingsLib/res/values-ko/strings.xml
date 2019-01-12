@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"새 백업 비밀번호가 설정되었습니다."</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"새 비밀번호와 확인한 비밀번호가 일치하지 않습니다."</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"백업 비밀번호를 설정하지 못했습니다."</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"로드 중…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"생동감(기본값)"</item>
     <item msgid="8446070607501413455">"내츄럴"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"항상 확인"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"사용 중지할 때까지"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"조금 전"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"개발 중인 업데이트된 그래픽 드라이버를 사용할 앱을 선택하세요."</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"휴대전화 스피커"</string>
 </resources>

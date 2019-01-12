@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"ಹೊಸ ಬ್ಯಾಕಪ್ ಪಾಸ್‌ವರ್ಡ್‌ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"ಹೊಸ ಪಾಸ್‌ವರ್ಡ್‌ ಮತ್ತು ದೃಢೀಕರಣ ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ಬ್ಯಾಕಪ್‌ ಪಾಸ್‌ವರ್ಡ್‌ ಹೊಂದಿಕೆ ವಿಫಲಗೊಂಡಿದೆ"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"ಲೋಡ್ ಆಗುತ್ತಿದೆ…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"ಸ್ಪಂದನಾತ್ಮಕ (ಡೀಫಾಲ್ಟ್)"</item>
     <item msgid="8446070607501413455">"ಪ್ರಾಕೃತಿಕ"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ಪ್ರತಿ ಬಾರಿ ಕೇಳಿ"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"ನೀವು ಆಫ್ ಮಾಡುವವರೆಗೆ"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"ಇದೀಗ"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"ಅಭಿವೃದ್ಧಿಯಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾದ ಗ್ರಾಫಿಕ್‌ಗಳ ಡ್ರೈವರ್ ಬಳಸಲು ಆ್ಯಪ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"ಫೋನ್ ಸ್ಪೀಕರ್"</string>
 </resources>

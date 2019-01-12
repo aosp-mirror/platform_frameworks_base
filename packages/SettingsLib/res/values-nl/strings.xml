@@ -236,7 +236,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Opties weergeven voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Een willekeurig MAC-adres bij het maken van verbinding met wifi-netwerken"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Betaald"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Met datalimiet"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Gratis"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Logger-buffergrootten"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Kies Logger-grootten per logbuffer"</string>
@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nieuw back-upwachtwoord ingesteld"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nieuw wachtwoord en bevestiging komen niet overeen."</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Instellen van back-upwachtwoord is mislukt"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Laden…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Levendig (standaard)"</item>
     <item msgid="8446070607501413455">"Natuurlijk"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Altijd vragen"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Totdat je uitschakelt"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Zojuist"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"Meld een app aan om het geüpdatete grafische stuurprogramma in ontwikkeling te gebruiken"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Telefoonluidspreker"</string>
 </resources>

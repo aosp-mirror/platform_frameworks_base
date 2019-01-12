@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nueva contraseña de seguridad establecida"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"La nueva contraseña y la de confirmación no coinciden"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Error al establecer la contraseña de seguridad"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Cargando…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Vibrante (predeterminado)"</item>
     <item msgid="8446070607501413455">"Natural"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Preguntar siempre"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Hasta que se desactive"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Justo ahora"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"Habilitar aplicación para usar controlador de gráficos actualizado en desarrollo"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Altavoz del teléfono"</string>
 </resources>

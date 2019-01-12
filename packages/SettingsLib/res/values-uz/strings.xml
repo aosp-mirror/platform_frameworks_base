@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Yangi zaxira paroli o‘rnatildi"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Parollar bir-biriga mos kelmadi"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Zaxira parolini o‘rnatib bo‘lmadi"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Yuklanmoqda…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Yorqin (birlamchi)"</item>
     <item msgid="8446070607501413455">"Tabiiy"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Har safar so‘ralsin"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Bekor qilinmaguncha"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Hozir"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"Ilova yangilangan grafik drayverdan (hali ishlov jarayonida) foydalanadi"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Telefon karnayi"</string>
 </resources>

@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"नया बैकअप पासवर्ड सेट किया गया"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"नया पासवर्ड तथा पुष्टि मेल नही खाते"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"सुरक्षित पासवर्ड सेट करने में विफल रहा"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"लोड हो रहा है…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"चमकीला (डिफ़ॉल्ट)"</item>
     <item msgid="8446070607501413455">"स्वाभाविक"</item>
@@ -416,7 +417,7 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"कस्टम (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"मेन्यू"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"डेमो मोड में फ़ैक्टरी रीसेट के लिए पासवर्ड डालें"</string>
-    <string name="retail_demo_reset_next" msgid="8356731459226304963">"आगे"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"आगे बढ़ें"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"पासवर्ड आवश्यक"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"टाइप करने की सक्रीय पद्धतियां"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"सिस्टम की भाषाओं का उपयोग करें"</string>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"हर बार पूछें"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"जब तक आप इसे बंद नहीं करते"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"अभी-अभी"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"डेवलपमेंट में अपडेट किए गए ग्राफ़िक्स ड्राइवर का इस्तेमाल करने के लिए ऐप्लिकेशन में ऑप्ट इन करें"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"फ़ोन स्पीकर"</string>
 </resources>

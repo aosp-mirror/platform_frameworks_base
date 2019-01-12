@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nuova password di backup impostata"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Le password inserite non corrispondono"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Impossibile impostare la password di backup"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Caricamento…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Vivaci (opzione predefinita)"</item>
     <item msgid="8446070607501413455">"Naturali"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Chiedi ogni volta"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Fino alla disattivazione"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Adesso"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"Attiva l\'app per utilizzare il driver grafico aggiornato nella versione di sviluppo"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Altoparlante telefono"</string>
 </resources>

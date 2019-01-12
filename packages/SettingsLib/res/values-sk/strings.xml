@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nové heslo pre zálohy je nastavené"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nové heslo a potvrdenie sa nezhodujú"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Nastavenie hesla pre zálohy zlyhalo"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Načítava sa…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Sýty (predvolený)"</item>
     <item msgid="8446070607501413455">"Prirodzený"</item>
@@ -451,6 +452,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Vždy sa opýtať"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Dokiaľ túto funkciu nevypnete"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Teraz"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"Prihlásiť aplikáciu, ktorá má používať aktualizovaný ovládač grafickej karty vo vývoji"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Reproduktor telefónu"</string>
 </resources>

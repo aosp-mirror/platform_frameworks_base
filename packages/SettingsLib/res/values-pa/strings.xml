@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"ਨਵਾਂ ਬੈਕਅੱਪ ਪਾਸਵਰਡ ਸੈੱਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"ਨਵਾਂ ਪਾਸਵਰਡ ਅਤੇ ਪੁਸ਼ਟੀ ਮੇਲ ਨਹੀਂ ਖਾਂਦੀ"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ਬੈਕਅੱਪ ਪਾਸਵਰਡ ਸੈੱਟ ਕਰਨ ਵਿੱਚ ਅਸਫਲਤਾ"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"ਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"ਚਮਕੀਲਾ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
     <item msgid="8446070607501413455">"ਕੁਦਰਤੀ"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ਹਰ ਵਾਰ ਪੁੱਛੋ"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਬੰਦ ਨਹੀਂ ਕਰਦੇ"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"ਹੁਣੇ ਹੀ"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"ਅੱਪਡੇਟ ਕੀਤੇ ਵਿਕਾਸ-ਅਧੀਨ ਗ੍ਰਾਫਿਕਸ ਡਰਾਈਵਰ ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਐਪ ਦੀ ਚੋਣ ਕਰੋ"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"ਫ਼ੋਨ ਦਾ ਸਪੀਕਰ"</string>
 </resources>
