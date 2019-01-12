@@ -109,8 +109,15 @@ struct AwDrawFn_DrawVkParams {
   // Input: Format of the destination surface.
   VkFormat format;
 
-  // Input: Color space transformation from linear RGB to D50-adapted XYZ
-  float matrix[9];
+  // Input: Color space parameters.
+  float transfer_function_g;
+  float transfer_function_a;
+  float transfer_function_b;
+  float transfer_function_c;
+  float transfer_function_d;
+  float transfer_function_e;
+  float transfer_function_f;
+  float color_space_toXYZD50[9];
 
   // Input: current clip rect
   int clip_left;
