@@ -16,19 +16,19 @@
 
 package android.net.ip;
 
-import com.android.internal.util.HexDump;
-import com.android.internal.util.MessageUtils;
-import com.android.internal.util.WakeupMessage;
+import static android.net.shared.LinkPropertiesParcelableUtil.fromStableParcelable;
 
 import android.content.Context;
 import android.net.DhcpResults;
 import android.net.INetd;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
-import android.net.LinkProperties.ProvisioningChange;
 import android.net.LinkProperties;
+import android.net.LinkProperties.ProvisioningChange;
 import android.net.Network;
+import android.net.ProvisioningConfigurationParcelable;
 import android.net.ProxyInfo;
+import android.net.ProxyInfoParcelable;
 import android.net.RouteInfo;
 import android.net.StaticIpConfiguration;
 import android.net.apf.ApfCapabilities;
@@ -36,10 +36,10 @@ import android.net.apf.ApfFilter;
 import android.net.dhcp.DhcpClient;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
+import android.net.shared.InitialConfiguration;
 import android.net.util.InterfaceParams;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.NetdService;
-import android.net.util.NetworkConstants;
 import android.net.util.SharedLog;
 import android.os.ConditionVariable;
 import android.os.INetworkManagementService;
@@ -52,29 +52,24 @@ import android.util.LocalLog;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.IState;
+import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.internal.util.WakeupMessage;
 import com.android.server.net.NetlinkTracker;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
 import java.util.List;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Predicate;
@@ -134,83 +129,17 @@ public class IpClient extends StateMachine {
     }
 
     /**
-     * Callbacks for handling IpClient events.
-     *
-     * These methods are called by IpClient on its own thread. Implementations
-     * of this class MUST NOT carry out long-running computations or hold locks
-     * for which there might be contention with other code calling public
-     * methods of the same IpClient instance.
+     * TODO: remove after migrating clients to use IpClientCallbacks directly
+     * @see IpClientCallbacks
      */
-    public static class Callback {
-        // In order to receive onPreDhcpAction(), call #withPreDhcpAction()
-        // when constructing a ProvisioningConfiguration.
-        //
-        // Implementations of onPreDhcpAction() must call
-        // IpClient#completedPreDhcpAction() to indicate that DHCP is clear
-        // to proceed.
-        public void onPreDhcpAction() {}
-        public void onPostDhcpAction() {}
+    public static class Callback extends IpClientCallbacks {}
 
-        // This is purely advisory and not an indication of provisioning
-        // success or failure.  This is only here for callers that want to
-        // expose DHCPv4 results to other APIs (e.g., WifiInfo#setInetAddress).
-        // DHCPv4 or static IPv4 configuration failure or success can be
-        // determined by whether or not the passed-in DhcpResults object is
-        // null or not.
-        public void onNewDhcpResults(DhcpResults dhcpResults) {}
-
-        public void onProvisioningSuccess(LinkProperties newLp) {}
-        public void onProvisioningFailure(LinkProperties newLp) {}
-
-        // Invoked on LinkProperties changes.
-        public void onLinkPropertiesChange(LinkProperties newLp) {}
-
-        // Called when the internal IpReachabilityMonitor (if enabled) has
-        // detected the loss of a critical number of required neighbors.
-        public void onReachabilityLost(String logMsg) {}
-
-        // Called when the IpClient state machine terminates.
-        public void onQuit() {}
-
-        // Install an APF program to filter incoming packets.
-        public void installPacketFilter(byte[] filter) {}
-
-        // Asynchronously read back the APF program & data buffer from the wifi driver.
-        // Due to Wifi HAL limitations, the current implementation only supports dumping the entire
-        // buffer. In response to this request, the driver returns the data buffer asynchronously
-        // by sending an IpClient#EVENT_READ_PACKET_FILTER_COMPLETE message.
-        public void startReadPacketFilter() {}
-
-        // If multicast filtering cannot be accomplished with APF, this function will be called to
-        // actuate multicast filtering using another means.
-        public void setFallbackMulticastFilter(boolean enabled) {}
-
-        // Enabled/disable Neighbor Discover offload functionality. This is
-        // called, for example, whenever 464xlat is being started or stopped.
-        public void setNeighborDiscoveryOffload(boolean enable) {}
-    }
-
-    public static class WaitForProvisioningCallback extends Callback {
-        private final ConditionVariable mCV = new ConditionVariable();
-        private LinkProperties mCallbackLinkProperties;
-
-        public LinkProperties waitForProvisioning() {
-            mCV.block();
-            return mCallbackLinkProperties;
-        }
-
-        @Override
-        public void onProvisioningSuccess(LinkProperties newLp) {
-            mCallbackLinkProperties = newLp;
-            mCV.open();
-        }
-
-        @Override
-        public void onProvisioningFailure(LinkProperties newLp) {
-            mCallbackLinkProperties = null;
-            mCV.open();
-        }
-    }
+    /**
+     * TODO: remove once clients are migrated to IpClientUtil.WaitForProvisioningCallback
+     * @see IpClientUtil.WaitForProvisioningCallbacks
+     */
+    public static class WaitForProvisioningCallback
+            extends IpClientUtil.WaitForProvisioningCallbacks {}
 
     // Use a wrapper class to log in order to ensure complete and detailed
     // logging. This method is lighter weight than annotations/reflection
@@ -232,12 +161,12 @@ public class IpClient extends StateMachine {
     // once passed on to the callback they may be modified by another thread.
     //
     // TODO: Find an lighter weight approach.
-    private class LoggingCallbackWrapper extends Callback {
+    private class LoggingCallbackWrapper extends IpClientCallbacks {
         private static final String PREFIX = "INVOKE ";
-        private final Callback mCallback;
+        private final IpClientCallbacks mCallback;
 
-        public LoggingCallbackWrapper(Callback callback) {
-            mCallback = (callback != null) ? callback : new Callback();
+        LoggingCallbackWrapper(IpClientCallbacks callback) {
+            mCallback = (callback != null) ? callback : new IpClientCallbacks();
         }
 
         private void log(String msg) {
@@ -307,288 +236,102 @@ public class IpClient extends StateMachine {
     }
 
     /**
-     * This class encapsulates parameters to be passed to
-     * IpClient#startProvisioning(). A defensive copy is made by IpClient
-     * and the values specified herein are in force until IpClient#stop()
-     * is called.
-     *
-     * Example use:
-     *
-     *     final ProvisioningConfiguration config =
-     *             mIpClient.buildProvisioningConfiguration()
-     *                     .withPreDhcpAction()
-     *                     .withProvisioningTimeoutMs(36 * 1000)
-     *                     .build();
-     *     mIpClient.startProvisioning(config);
-     *     ...
-     *     mIpClient.stop();
-     *
-     * The specified provisioning configuration will only be active until
-     * IpClient#stop() is called. Future calls to IpClient#startProvisioning()
-     * must specify the configuration again.
+     * TODO: remove after migrating clients to use the shared configuration class directly.
+     * @see android.net.shared.ProvisioningConfiguration
      */
-    public static class ProvisioningConfiguration {
-        // TODO: Delete this default timeout once those callers that care are
-        // fixed to pass in their preferred timeout.
-        //
-        // We pick 36 seconds so we can send DHCP requests at
-        //
-        //     t=0, t=2, t=6, t=14, t=30
-        //
-        // allowing for 10% jitter.
-        private static final int DEFAULT_TIMEOUT_MS = 36 * 1000;
-
-        public static class Builder {
-            private ProvisioningConfiguration mConfig = new ProvisioningConfiguration();
-
-            public Builder withoutIPv4() {
-                mConfig.mEnableIPv4 = false;
-                return this;
-            }
-
-            public Builder withoutIPv6() {
-                mConfig.mEnableIPv6 = false;
-                return this;
-            }
-
-            public Builder withoutMultinetworkPolicyTracker() {
-                mConfig.mUsingMultinetworkPolicyTracker = false;
-                return this;
-            }
-
-            public Builder withoutIpReachabilityMonitor() {
-                mConfig.mUsingIpReachabilityMonitor = false;
-                return this;
-            }
-
-            public Builder withPreDhcpAction() {
-                mConfig.mRequestedPreDhcpActionMs = DEFAULT_TIMEOUT_MS;
-                return this;
-            }
-
-            public Builder withPreDhcpAction(int dhcpActionTimeoutMs) {
-                mConfig.mRequestedPreDhcpActionMs = dhcpActionTimeoutMs;
-                return this;
-            }
-
-            public Builder withInitialConfiguration(InitialConfiguration initialConfig) {
-                mConfig.mInitialConfig = initialConfig;
-                return this;
-            }
-
-            public Builder withStaticConfiguration(StaticIpConfiguration staticConfig) {
-                mConfig.mStaticIpConfig = staticConfig;
-                return this;
-            }
-
-            public Builder withApfCapabilities(ApfCapabilities apfCapabilities) {
-                mConfig.mApfCapabilities = apfCapabilities;
-                return this;
-            }
-
-            public Builder withProvisioningTimeoutMs(int timeoutMs) {
-                mConfig.mProvisioningTimeoutMs = timeoutMs;
-                return this;
-            }
-
-            public Builder withRandomMacAddress() {
-                mConfig.mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_EUI64;
-                return this;
-            }
-
-            public Builder withStableMacAddress() {
-                mConfig.mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_STABLE_PRIVACY;
-                return this;
-            }
-
-            public Builder withNetwork(Network network) {
-                mConfig.mNetwork = network;
-                return this;
-            }
-
-            public Builder withDisplayName(String displayName) {
-                mConfig.mDisplayName = displayName;
-                return this;
-            }
-
-            public ProvisioningConfiguration build() {
-                return new ProvisioningConfiguration(mConfig);
-            }
-        }
-
-        /* package */ boolean mEnableIPv4 = true;
-        /* package */ boolean mEnableIPv6 = true;
-        /* package */ boolean mUsingMultinetworkPolicyTracker = true;
-        /* package */ boolean mUsingIpReachabilityMonitor = true;
-        /* package */ int mRequestedPreDhcpActionMs;
-        /* package */ InitialConfiguration mInitialConfig;
-        /* package */ StaticIpConfiguration mStaticIpConfig;
-        /* package */ ApfCapabilities mApfCapabilities;
-        /* package */ int mProvisioningTimeoutMs = DEFAULT_TIMEOUT_MS;
-        /* package */ int mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_STABLE_PRIVACY;
-        /* package */ Network mNetwork = null;
-        /* package */ String mDisplayName = null;
-
-        public ProvisioningConfiguration() {} // used by Builder
-
-        public ProvisioningConfiguration(ProvisioningConfiguration other) {
-            mEnableIPv4 = other.mEnableIPv4;
-            mEnableIPv6 = other.mEnableIPv6;
-            mUsingMultinetworkPolicyTracker = other.mUsingMultinetworkPolicyTracker;
-            mUsingIpReachabilityMonitor = other.mUsingIpReachabilityMonitor;
-            mRequestedPreDhcpActionMs = other.mRequestedPreDhcpActionMs;
-            mInitialConfig = InitialConfiguration.copy(other.mInitialConfig);
-            mStaticIpConfig = other.mStaticIpConfig;
-            mApfCapabilities = other.mApfCapabilities;
-            mProvisioningTimeoutMs = other.mProvisioningTimeoutMs;
-            mIPv6AddrGenMode = other.mIPv6AddrGenMode;
-            mNetwork = other.mNetwork;
-            mDisplayName = other.mDisplayName;
-        }
-
-        @Override
-        public String toString() {
-            return new StringJoiner(", ", getClass().getSimpleName() + "{", "}")
-                    .add("mEnableIPv4: " + mEnableIPv4)
-                    .add("mEnableIPv6: " + mEnableIPv6)
-                    .add("mUsingMultinetworkPolicyTracker: " + mUsingMultinetworkPolicyTracker)
-                    .add("mUsingIpReachabilityMonitor: " + mUsingIpReachabilityMonitor)
-                    .add("mRequestedPreDhcpActionMs: " + mRequestedPreDhcpActionMs)
-                    .add("mInitialConfig: " + mInitialConfig)
-                    .add("mStaticIpConfig: " + mStaticIpConfig)
-                    .add("mApfCapabilities: " + mApfCapabilities)
-                    .add("mProvisioningTimeoutMs: " + mProvisioningTimeoutMs)
-                    .add("mIPv6AddrGenMode: " + mIPv6AddrGenMode)
-                    .add("mNetwork: " + mNetwork)
-                    .add("mDisplayName: " + mDisplayName)
-                    .toString();
-        }
-
-        public boolean isValid() {
-            return (mInitialConfig == null) || mInitialConfig.isValid();
-        }
-    }
-
-    public static class InitialConfiguration {
-        public final Set<LinkAddress> ipAddresses = new HashSet<>();
-        public final Set<IpPrefix> directlyConnectedRoutes = new HashSet<>();
-        public final Set<InetAddress> dnsServers = new HashSet<>();
-        public Inet4Address gateway; // WiFi legacy behavior with static ipv4 config
-
-        public static InitialConfiguration copy(InitialConfiguration config) {
-            if (config == null) {
-                return null;
-            }
-            InitialConfiguration configCopy = new InitialConfiguration();
-            configCopy.ipAddresses.addAll(config.ipAddresses);
-            configCopy.directlyConnectedRoutes.addAll(config.directlyConnectedRoutes);
-            configCopy.dnsServers.addAll(config.dnsServers);
-            return configCopy;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(
-                    "InitialConfiguration(IPs: {%s}, prefixes: {%s}, DNS: {%s}, v4 gateway: %s)",
-                    join(", ", ipAddresses), join(", ", directlyConnectedRoutes),
-                    join(", ", dnsServers), gateway);
-        }
-
-        public boolean isValid() {
-            if (ipAddresses.isEmpty()) {
-                return false;
-            }
-
-            // For every IP address, there must be at least one prefix containing that address.
-            for (LinkAddress addr : ipAddresses) {
-                if (!any(directlyConnectedRoutes, (p) -> p.contains(addr.getAddress()))) {
-                    return false;
-                }
-            }
-            // For every dns server, there must be at least one prefix containing that address.
-            for (InetAddress addr : dnsServers) {
-                if (!any(directlyConnectedRoutes, (p) -> p.contains(addr))) {
-                    return false;
-                }
-            }
-            // All IPv6 LinkAddresses have an RFC7421-suitable prefix length
-            // (read: compliant with RFC4291#section2.5.4).
-            if (any(ipAddresses, not(InitialConfiguration::isPrefixLengthCompliant))) {
-                return false;
-            }
-            // If directlyConnectedRoutes contains an IPv6 default route
-            // then ipAddresses MUST contain at least one non-ULA GUA.
-            if (any(directlyConnectedRoutes, InitialConfiguration::isIPv6DefaultRoute)
-                    && all(ipAddresses, not(InitialConfiguration::isIPv6GUA))) {
-                return false;
-            }
-            // The prefix length of routes in directlyConnectedRoutes be within reasonable
-            // bounds for IPv6: /48-/64 just as we’d accept in RIOs.
-            if (any(directlyConnectedRoutes, not(InitialConfiguration::isPrefixLengthCompliant))) {
-                return false;
-            }
-            // There no more than one IPv4 address
-            if (ipAddresses.stream().filter(LinkAddress::isIPv4).count() > 1) {
-                return false;
-            }
-
-            return true;
+    public static class ProvisioningConfiguration
+            extends android.net.shared.ProvisioningConfiguration {
+        public ProvisioningConfiguration(android.net.shared.ProvisioningConfiguration other) {
+            super(other);
         }
 
         /**
-         * @return true if the given list of addressess and routes satisfies provisioning for this
-         * InitialConfiguration. LinkAddresses and RouteInfo objects are not compared with equality
-         * because addresses and routes seen by Netlink will contain additional fields like flags,
-         * interfaces, and so on. If this InitialConfiguration has no IP address specified, the
-         * provisioning check always fails.
-         *
-         * If the given list of routes is null, only addresses are taken into considerations.
+         * @see android.net.shared.ProvisioningConfiguration.Builder
          */
-        public boolean isProvisionedBy(List<LinkAddress> addresses, List<RouteInfo> routes) {
-            if (ipAddresses.isEmpty()) {
-                return false;
+        public static class Builder extends android.net.shared.ProvisioningConfiguration.Builder {
+            // Override all methods to have a return type matching this Builder
+            @Override
+            public Builder withoutIPv4() {
+                super.withoutIPv4();
+                return this;
             }
 
-            for (LinkAddress addr : ipAddresses) {
-                if (!any(addresses, (addrSeen) -> addr.isSameAddressAs(addrSeen))) {
-                    return false;
-                }
+            @Override
+            public Builder withoutIPv6() {
+                super.withoutIPv6();
+                return this;
             }
 
-            if (routes != null) {
-                for (IpPrefix prefix : directlyConnectedRoutes) {
-                    if (!any(routes, (routeSeen) -> isDirectlyConnectedRoute(routeSeen, prefix))) {
-                        return false;
-                    }
-                }
+            @Override
+            public Builder withoutMultinetworkPolicyTracker() {
+                super.withoutMultinetworkPolicyTracker();
+                return this;
             }
 
-            return true;
-        }
+            @Override
+            public Builder withoutIpReachabilityMonitor() {
+                super.withoutIpReachabilityMonitor();
+                return this;
+            }
 
-        private static boolean isDirectlyConnectedRoute(RouteInfo route, IpPrefix prefix) {
-            return !route.hasGateway() && prefix.equals(route.getDestination());
-        }
+            @Override
+            public Builder withPreDhcpAction() {
+                super.withPreDhcpAction();
+                return this;
+            }
 
-        private static boolean isPrefixLengthCompliant(LinkAddress addr) {
-            return addr.isIPv4() || isCompliantIPv6PrefixLength(addr.getPrefixLength());
-        }
+            @Override
+            public Builder withPreDhcpAction(int dhcpActionTimeoutMs) {
+                super.withPreDhcpAction(dhcpActionTimeoutMs);
+                return this;
+            }
 
-        private static boolean isPrefixLengthCompliant(IpPrefix prefix) {
-            return prefix.isIPv4() || isCompliantIPv6PrefixLength(prefix.getPrefixLength());
-        }
+            @Override
+            public Builder withStaticConfiguration(StaticIpConfiguration staticConfig) {
+                super.withStaticConfiguration(staticConfig);
+                return this;
+            }
 
-        private static boolean isCompliantIPv6PrefixLength(int prefixLength) {
-            return (NetworkConstants.RFC6177_MIN_PREFIX_LENGTH <= prefixLength)
-                    && (prefixLength <= NetworkConstants.RFC7421_PREFIX_LENGTH);
-        }
+            @Override
+            public Builder withApfCapabilities(ApfCapabilities apfCapabilities) {
+                super.withApfCapabilities(apfCapabilities);
+                return this;
+            }
 
-        private static boolean isIPv6DefaultRoute(IpPrefix prefix) {
-            return prefix.getAddress().equals(Inet6Address.ANY);
-        }
+            @Override
+            public Builder withProvisioningTimeoutMs(int timeoutMs) {
+                super.withProvisioningTimeoutMs(timeoutMs);
+                return this;
+            }
 
-        private static boolean isIPv6GUA(LinkAddress addr) {
-            return addr.isIPv6() && addr.isGlobalPreferred();
+            @Override
+            public Builder withRandomMacAddress() {
+                super.withRandomMacAddress();
+                return this;
+            }
+
+            @Override
+            public Builder withStableMacAddress() {
+                super.withStableMacAddress();
+                return this;
+            }
+
+            @Override
+            public Builder withNetwork(Network network) {
+                super.withNetwork(network);
+                return this;
+            }
+
+            @Override
+            public Builder withDisplayName(String displayName) {
+                super.withDisplayName(displayName);
+                return this;
+            }
+
+            @Override
+            public ProvisioningConfiguration build() {
+                return new ProvisioningConfiguration(mConfig);
+            }
         }
     }
 
@@ -638,7 +381,7 @@ public class IpClient extends StateMachine {
     private final String mInterfaceName;
     private final String mClatInterfaceName;
     @VisibleForTesting
-    protected final Callback mCallback;
+    protected final IpClientCallbacks mCallback;
     private final Dependencies mDependencies;
     private final CountDownLatch mShutdownLatch;
     private final INetworkManagementService mNwService;
@@ -657,7 +400,7 @@ public class IpClient extends StateMachine {
      * Non-final member variables accessed only from within our StateMachine.
      */
     private LinkProperties mLinkProperties;
-    private ProvisioningConfiguration mConfiguration;
+    private android.net.shared.ProvisioningConfiguration mConfiguration;
     private MultinetworkPolicyTracker mMultinetworkPolicyTracker;
     private IpReachabilityMonitor mIpReachabilityMonitor;
     private DhcpClient mDhcpClient;
@@ -691,7 +434,7 @@ public class IpClient extends StateMachine {
         }
     }
 
-    public IpClient(Context context, String ifName, Callback callback) {
+    public IpClient(Context context, String ifName, IpClientCallbacks callback) {
         this(context, ifName, callback, new Dependencies());
     }
 
@@ -699,7 +442,7 @@ public class IpClient extends StateMachine {
      * An expanded constructor, useful for dependency injection.
      * TODO: migrate all test users to mock IpClient directly and remove this ctor.
      */
-    public IpClient(Context context, String ifName, Callback callback,
+    public IpClient(Context context, String ifName, IpClientCallbacks callback,
             INetworkManagementService nwService) {
         this(context, ifName, callback, new Dependencies() {
             @Override
@@ -708,7 +451,7 @@ public class IpClient extends StateMachine {
     }
 
     @VisibleForTesting
-    IpClient(Context context, String ifName, Callback callback, Dependencies deps) {
+    IpClient(Context context, String ifName, IpClientCallbacks callback, Dependencies deps) {
         super(IpClient.class.getSimpleName() + "." + ifName);
         Preconditions.checkNotNull(ifName);
         Preconditions.checkNotNull(callback);
@@ -795,6 +538,57 @@ public class IpClient extends StateMachine {
         startStateMachineUpdaters();
     }
 
+    /**
+     * Make a IIpClient connector to communicate with this IpClient.
+     */
+    public IIpClient makeConnector() {
+        return new IpClientConnector();
+    }
+
+    class IpClientConnector extends IIpClient.Stub {
+        @Override
+        public void completedPreDhcpAction() {
+            IpClient.this.completedPreDhcpAction();
+        }
+        @Override
+        public void confirmConfiguration() {
+            IpClient.this.confirmConfiguration();
+        }
+        @Override
+        public void readPacketFilterComplete(byte[] data) {
+            IpClient.this.readPacketFilterComplete(data);
+        }
+        @Override
+        public void shutdown() {
+            IpClient.this.shutdown();
+        }
+        @Override
+        public void startProvisioning(ProvisioningConfigurationParcelable req) {
+            IpClient.this.startProvisioning(
+                    android.net.shared.ProvisioningConfiguration.fromStableParcelable(req));
+        }
+        @Override
+        public void stop() {
+            IpClient.this.stop();
+        }
+        @Override
+        public void setTcpBufferSizes(String tcpBufferSizes) {
+            IpClient.this.setTcpBufferSizes(tcpBufferSizes);
+        }
+        @Override
+        public void setHttpProxy(ProxyInfoParcelable proxyInfo) {
+            IpClient.this.setHttpProxy(fromStableParcelable(proxyInfo));
+        }
+        @Override
+        public void setMulticastFilter(boolean enabled) {
+            IpClient.this.setMulticastFilter(enabled);
+        }
+        // TODO: remove and have IpClient logs dumped in NetworkStack dumpsys
+        public void dumpIpClientLogs(FileDescriptor fd, PrintWriter pw, String[] args) {
+            IpClient.this.dump(fd, pw, args);
+        }
+    }
+
     private void configureAndStartStateMachine() {
         addState(mStoppedState);
         addState(mStartedState);
@@ -828,7 +622,9 @@ public class IpClient extends StateMachine {
         mShutdownLatch.countDown();
     }
 
-    // Shut down this IpClient instance altogether.
+    /**
+     * Shut down this IpClient instance altogether.
+     */
     public void shutdown() {
         stop();
         sendMessage(CMD_TERMINATE_AFTER_STOP);
@@ -849,7 +645,10 @@ public class IpClient extends StateMachine {
         return new ProvisioningConfiguration.Builder();
     }
 
-    public void startProvisioning(ProvisioningConfiguration req) {
+    /**
+     * Start provisioning with the provided parameters.
+     */
+    public void startProvisioning(android.net.shared.ProvisioningConfiguration req) {
         if (!req.isValid()) {
             doImmediateProvisioningFailure(IpManagerEvent.ERROR_INVALID_PROVISIONING);
             return;
@@ -863,7 +662,7 @@ public class IpClient extends StateMachine {
         }
 
         mCallback.setNeighborDiscoveryOffload(true);
-        sendMessage(CMD_START, new ProvisioningConfiguration(req));
+        sendMessage(CMD_START, new android.net.shared.ProvisioningConfiguration(req));
     }
 
     // TODO: Delete this.
@@ -874,7 +673,7 @@ public class IpClient extends StateMachine {
     }
 
     public void startProvisioning() {
-        startProvisioning(new ProvisioningConfiguration());
+        startProvisioning(new android.net.shared.ProvisioningConfiguration());
     }
 
     public void stop() {
@@ -930,7 +729,7 @@ public class IpClient extends StateMachine {
 
         // Thread-unsafe access to mApfFilter but just used for debugging.
         final ApfFilter apfFilter = mApfFilter;
-        final ProvisioningConfiguration provisioningConfig = mConfiguration;
+        final android.net.shared.ProvisioningConfiguration provisioningConfig = mConfiguration;
         final ApfCapabilities apfCapabilities = (provisioningConfig != null)
                 ? provisioningConfig.mApfCapabilities : null;
 
@@ -1463,7 +1262,7 @@ public class IpClient extends StateMachine {
                     break;
 
                 case CMD_START:
-                    mConfiguration = (ProvisioningConfiguration) msg.obj;
+                    mConfiguration = (android.net.shared.ProvisioningConfiguration) msg.obj;
                     transitionTo(mStartedState);
                     break;
 
