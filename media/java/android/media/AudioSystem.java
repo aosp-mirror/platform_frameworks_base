@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
+import android.bluetooth.BluetoothCodecConfig;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.audiofx.AudioEffect;
@@ -149,20 +150,19 @@ public class AudioSystem
     public static final int AUDIO_FORMAT_APTX_HD        = 0x21000000;
     public static final int AUDIO_FORMAT_LDAC           = 0x23000000;
 
-    /** converts audio format enum to string */
-    public static String audioFormatToString(int audioFormat) {
+    /**
+     * Convert audio format enum values to Bluetooth codec values
+     */
+    public static int audioFormatToBluetoothSourceCodec(int audioFormat) {
         switch (audioFormat) {
-            case AUDIO_FORMAT_INVALID: return "AUDIO_FORMAT_INVALID";
-            case AUDIO_FORMAT_DEFAULT: return "AUDIO_FORMAT_DEFAULT";
-            case AUDIO_FORMAT_AAC: return "AUDIO_FORMAT_AAC";
-            case AUDIO_FORMAT_SBC: return "AUDIO_FORMAT_SBC";
-            case AUDIO_FORMAT_APTX: return "AUDIO_FORMAT_APTX";
-            case AUDIO_FORMAT_APTX_HD: return "AUDIO_FORMAT_APTX_HD";
-            case AUDIO_FORMAT_LDAC: return "AUDIO_FORMAT_LDAC";
-            default: return "unknown audio format (" + audioFormat + ")";
+            case AUDIO_FORMAT_AAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC;
+            case AUDIO_FORMAT_SBC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC;
+            case AUDIO_FORMAT_APTX: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX;
+            case AUDIO_FORMAT_APTX_HD: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD;
+            case AUDIO_FORMAT_LDAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC;
+            default: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID;
         }
     }
-
 
     /* Routing bits for the former setRouting/getRouting API */
     /** @deprecated */
@@ -975,6 +975,12 @@ public class AudioSystem
 
     public static native int getSurroundFormats(Map<Integer, Boolean> surroundFormats,
                                                 boolean reported);
+
+    /**
+     * Returns a list of audio formats (codec) supported on the A2DP offload path.
+     */
+    public static native int getHwOffloadEncodingFormatsSupportedForA2DP(
+            ArrayList<Integer> formatList);
 
     public static native int setSurroundFormatEnabled(int audioFormat, boolean enabled);
 

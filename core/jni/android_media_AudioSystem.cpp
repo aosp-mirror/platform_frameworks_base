@@ -2006,7 +2006,7 @@ android_media_AudioSystem_getMicrophones(JNIEnv *env, jobject thiz, jobject jMic
     std::vector<media::MicrophoneInfo> microphones;
     status_t status = AudioSystem::getMicrophones(&microphones);
     if (status != NO_ERROR) {
-        ALOGE_IF(status != NO_ERROR, "AudioSystem::getMicrophones error %d", status);
+        ALOGE("AudioSystem::getMicrophones error %d", status);
         jStatus = nativeToJavaStatus(status);
         return jStatus;
     }
@@ -2024,6 +2024,36 @@ android_media_AudioSystem_getMicrophones(JNIEnv *env, jobject thiz, jobject jMic
         env->DeleteLocalRef(jMicrophoneInfo);
     }
 
+    return jStatus;
+}
+
+static jint
+android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP(
+                        JNIEnv *env, jobject thiz, jobject jEncodingFormatList)
+{
+    ALOGV("%s", __FUNCTION__);
+    jint jStatus = AUDIO_JAVA_SUCCESS;
+    if (!env->IsInstanceOf(jEncodingFormatList, gArrayListClass)) {
+        ALOGE("%s: jEncodingFormatList not an ArrayList", __FUNCTION__);
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    std::vector<audio_format_t> encodingFormats;
+    //FIXME: enable when native implementaiton is merged
+    //status_t status = AudioSystem::getHwOffloadEncodingFormatsSupportedForA2DP(
+    //                      &encodingFormats);
+    status_t status = NO_ERROR;
+    if (status != NO_ERROR) {
+        ALOGE("%s: error %d", __FUNCTION__, status);
+        jStatus = nativeToJavaStatus(status);
+        return jStatus;
+    }
+
+    for (size_t i = 0; i < encodingFormats.size(); i++) {
+        ScopedLocalRef<jobject> jEncodingFormat(
+            env, env->NewObject(gIntegerClass, gIntegerCstor, encodingFormats[i]));
+        env->CallBooleanMethod(jEncodingFormatList, gArrayListMethods.add,
+                               jEncodingFormat.get());
+    }
     return jStatus;
 }
 
@@ -2199,6 +2229,8 @@ static const JNINativeMethod gMethods[] = {
     {"setAssistantUid", "(I)I", (void *)android_media_AudioSystem_setAssistantUid},
     {"setA11yServicesUids", "([I)I", (void *)android_media_AudioSystem_setA11yServicesUids},
     {"isHapticPlaybackSupported", "()Z", (void *)android_media_AudioSystem_isHapticPlaybackSupported},
+    {"getHwOffloadEncodingFormatsSupportedForA2DP", "(Ljava/util/ArrayList;)I",
+                    (void*)android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP},
 };
 
 static const JNINativeMethod gEventHandlerMethods[] = {
