@@ -105,7 +105,13 @@ public final class Zygote {
     /** Number of bytes sent to the Zygote over blastula pipes or the pool event FD */
     public static final int BLASTULA_MANAGEMENT_MESSAGE_BYTES = 8;
 
-    /** If the blastula pool should be created and used to start applications */
+    /**
+     * If the blastula pool should be created and used to start applications.
+     *
+     * Setting this value to false will disable the creation, maintenance, and use of the blastula
+     * pool.  When the blastula pool is disabled the application lifecycle will be identical to
+     * previous versions of Android.
+     */
     public static final boolean BLASTULA_POOL_ENABLED = false;
 
     /**
@@ -154,6 +160,11 @@ public final class Zygote {
      */
     // TODO (chriswailes): This must be updated at the same time as sBlastulaPoolMax.
     static int sBlastulaPoolRefillThreshold = (sBlastulaPoolMax / 2);
+
+    /**
+     * @hide for internal use only
+     */
+    public static final int SOCKET_BUFFER_SIZE = 256;
 
     private static LocalServerSocket sBlastulaPoolSocket = null;
 
