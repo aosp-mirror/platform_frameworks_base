@@ -1142,11 +1142,13 @@ final class ProcessRecord implements WindowProcessListener {
     }
 
     void addAllowBackgroundActivityStartsToken(Binder entity) {
+        if (entity == null) return;
         mAllowBackgroundActivityStartsTokens.add(entity);
         mWindowProcessController.setAllowBackgroundActivityStarts(true);
     }
 
     void removeAllowBackgroundActivityStartsToken(Binder entity) {
+        if (entity == null) return;
         mAllowBackgroundActivityStartsTokens.remove(entity);
         mWindowProcessController.setAllowBackgroundActivityStarts(
                 !mAllowBackgroundActivityStartsTokens.isEmpty());
