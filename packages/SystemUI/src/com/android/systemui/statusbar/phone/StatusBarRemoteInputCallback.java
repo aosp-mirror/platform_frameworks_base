@@ -53,7 +53,8 @@ import javax.inject.Singleton;
 /**
  */
 @Singleton
-public class StatusBarRemoteInputCallback implements Callback, Callbacks {
+public class StatusBarRemoteInputCallback implements Callback, Callbacks,
+        StatusBarStateController.StateListener {
 
     private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
     private final StatusBarStateController mStatusBarStateController
@@ -63,7 +64,6 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks {
     private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
     private final Context mContext;
     private View mPendingWorkRemoteInputView;
-    private final StatusBarStateController.StateListener mStateListener = this::setStatusBarState;
     private View mPendingRemoteInputView;
     private final ShadeController mShadeController = Dependency.get(ShadeController.class);
     private KeyguardManager mKeyguardManager;
@@ -78,13 +78,14 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks {
         mContext = context;
         mContext.registerReceiverAsUser(mChallengeReceiver, UserHandle.ALL,
                 new IntentFilter(ACTION_DEVICE_LOCKED_CHANGED), null, null);
-        mStatusBarStateController.addCallback(mStateListener);
+        mStatusBarStateController.addCallback(this);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mCommandQueue = getComponent(context, CommandQueue.class);
         mCommandQueue.addCallback(this);
     }
 
-    private void setStatusBarState(int state) {
+    @Override
+    public void onStateChanged(int state) {
         if (state == StatusBarState.SHADE && mStatusBarStateController.leaveOpenOnKeyguardHide()) {
             if (!mStatusBarStateController.isKeyguardRequested()) {
                 if (mPendingRemoteInputView != null

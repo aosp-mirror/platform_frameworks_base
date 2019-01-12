@@ -113,6 +113,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
@@ -458,6 +459,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     private final NotificationGutsManager
             mNotificationGutsManager = Dependency.get(NotificationGutsManager.class);
+    /**
+     * If the {@link NotificationShelf} should be visible when dark.
+     */
+    private boolean mShowDarkShelf;
 
     @Inject
     public NotificationStackScrollLayout(
@@ -1196,7 +1201,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mIsClipped = clipped;
         }
 
-        if (mPulsing) {
+        if (mPulsing || mAmbientState.isFullyDark() && mShowDarkShelf) {
             setClipBounds(null);
         } else if (mAmbientState.isDarkAtAll()) {
             setClipBounds(mBackgroundAnimationRect);
@@ -4361,6 +4366,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (mAmbientState.isDark() == dark) {
             return;
         }
+        if (!dark) {
+            mShowDarkShelf = false;
+        }
         mAmbientState.setDark(dark);
         if (animate && mAnimationsEnabled) {
             mDarkNeedsAnimation = true;
@@ -4422,9 +4430,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         boolean nowDarkAtAll = mAmbientState.isDarkAtAll();
         if (nowFullyDark != wasFullyDark) {
             updateContentHeight();
-        }
-        if (mIconAreaController != null) {
-            mIconAreaController.setDarkAmount(interpolatedDarkAmount);
+            if (nowFullyDark && mShowDarkShelf) {
+                updateDarkShelfVisibility();
+            }
         }
         if (!wasDarkAtAll && nowDarkAtAll) {
             resetExposedMenuView(true /* animate */, true /* animate */);
@@ -4433,6 +4441,22 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         updateBackgroundDimming();
         updatePanelTranslation();
         requestChildrenUpdate();
+    }
+
+    /**
+     * If the shelf should be visible when the device is in ambient mode (dozing.)
+     */
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
+    public void setShowDarkShelf(boolean showDarkShelf) {
+        mShowDarkShelf = showDarkShelf;
+    }
+
+    private void updateDarkShelfVisibility() {
+        DozeParameters dozeParameters = DozeParameters.getInstance(mContext);
+        if (dozeParameters.shouldControlScreenOff()) {
+            mShelf.fadeInTranslating();
+        }
+        updateClipping();
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)

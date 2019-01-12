@@ -215,7 +215,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             }
         }
 
-        if (mStatusBarStateController.isDozing()) {
+        // The shelf will be hidden when dozing with a custom clock, we must show notification
+        // icons in this occasion.
+        if (mStatusBarStateController.isDozing()
+                && mStatusBarComponent.getPanel().hasCustomClock()) {
             state |= DISABLE_CLOCK | DISABLE_SYSTEM_INFO;
             state &= ~DISABLE_NOTIFICATION_ICONS;
         }

@@ -23,6 +23,7 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -36,13 +37,15 @@ import java.util.function.Function;
  * A controller for the space in the status bar to the left of the system icons. This area is
  * normally reserved for notifications.
  */
-public class NotificationIconAreaController implements DarkReceiver {
+public class NotificationIconAreaController implements DarkReceiver,
+        StatusBarStateController.StateListener {
 
     public static final String LOW_PRIORITY = "low_priority";
 
     private final ContrastColorUtil mContrastColorUtil;
     private final NotificationEntryManager mEntryManager;
     private final Runnable mUpdateStatusBarIcons = this::updateStatusBarIcons;
+    private final StatusBarStateController mStatusBarStateController;
     private final TunerService.Tunable mTunable = new TunerService.Tunable() {
         @Override
         public void onTuningChanged(String key, String newValue) {
@@ -86,11 +89,14 @@ public class NotificationIconAreaController implements DarkReceiver {
     private final ViewClippingUtil.ClippingParameters mClippingParameters =
             view -> view instanceof StatusBarWindowView;
 
-    public NotificationIconAreaController(Context context, StatusBar statusBar) {
+    public NotificationIconAreaController(Context context, StatusBar statusBar,
+            StatusBarStateController statusBarStateController) {
         mStatusBar = statusBar;
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mEntryManager = Dependency.get(NotificationEntryManager.class);
+        mStatusBarStateController = statusBarStateController;
+        mStatusBarStateController.addCallback(this);
 
         Dependency.get(TunerService.class).addTunable(mTunable, LOW_PRIORITY);
 
@@ -373,24 +379,6 @@ public class NotificationIconAreaController implements DarkReceiver {
         v.setDecorColor(mIconTint);
     }
 
-    /**
-     * Dark amount, from 0 to 1, representing being awake or in AOD.
-     */
-    public void setDarkAmount(float darkAmount) {
-        mDarkAmount = darkAmount;
-        if (darkAmount == 0 || darkAmount == 1) {
-            ViewClippingUtil.setClippingDeactivated(mNotificationIcons, darkAmount != 0,
-                    mClippingParameters);
-        }
-        dozeTimeTick();
-
-        boolean fullyDark = darkAmount == 1f;
-        if (mFullyDark != fullyDark) {
-            mFullyDark = fullyDark;
-            updateShelfIcons();
-        }
-    }
-
     public void setDark(boolean dark) {
         mNotificationIcons.setDark(dark, false, 0);
         mShelfIcons.setDark(dark, false, 0);
@@ -408,10 +396,45 @@ public class NotificationIconAreaController implements DarkReceiver {
      * Moves icons whenever the device wakes up in AOD, to avoid burn in.
      */
     public void dozeTimeTick() {
+        if (mNotificationIcons.getVisibility() != View.VISIBLE) {
+            return;
+        }
+
+        if (mDarkAmount == 0 && !mStatusBarStateController.isDozing()) {
+            mNotificationIcons.setTranslationX(0);
+            mNotificationIcons.setTranslationY(0);
+            return;
+        }
+
         int yOffset = (mKeyguardStatusBarHeight - getHeight()) / 2;
         int translationX = getBurnInOffset(mBurnInOffset, true /* xAxis */);
         int translationY = getBurnInOffset(mBurnInOffset, false /* xAxis */) + yOffset;
-        mNotificationIcons.setTranslationX(translationX * mDarkAmount);
-        mNotificationIcons.setTranslationY(translationY * mDarkAmount);
+        mNotificationIcons.setTranslationX(translationX);
+        mNotificationIcons.setTranslationY(translationY);
+    }
+
+    @Override
+    public void onDozingChanged(boolean isDozing) {
+        dozeTimeTick();
+    }
+
+    @Override
+    public void onDozeAmountChanged(float linear, float eased) {
+        boolean wasOrIsAwake = mDarkAmount == 0 || linear == 0;
+        boolean wasOrIsDozing = mDarkAmount == 1 || linear == 1;
+        mDarkAmount = linear;
+        if (wasOrIsAwake) {
+            ViewClippingUtil.setClippingDeactivated(mNotificationIcons, mDarkAmount != 0,
+                    mClippingParameters);
+        }
+        if (wasOrIsAwake || wasOrIsDozing) {
+            dozeTimeTick();
+        }
+
+        boolean fullyDark = mDarkAmount == 1f;
+        if (mFullyDark != fullyDark) {
+            mFullyDark = fullyDark;
+            updateShelfIcons();
+        }
     }
 }

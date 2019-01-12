@@ -142,8 +142,8 @@ public abstract class PanelView extends FrameLayout {
     private boolean mIgnoreXTouchSlop;
     private boolean mExpandLatencyTracking;
     protected final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
-    protected final StatusBarStateController
-            mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+    protected final StatusBarStateController mStatusBarStateController =
+            Dependency.get(StatusBarStateController.class);
 
     protected void onExpandingFinished() {
         mBar.onExpandingFinished();
