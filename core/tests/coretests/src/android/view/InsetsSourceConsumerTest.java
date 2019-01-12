@@ -24,6 +24,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import android.graphics.Point;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl.Transaction;
 
@@ -56,7 +57,7 @@ public class InsetsSourceConsumerTest {
                 .build();
         mConsumer = new InsetsSourceConsumer(TYPE_TOP_BAR, new InsetsState(),
                 () -> mMockTransaction, mMockController);
-        mConsumer.setControl(new InsetsSourceControl(TYPE_TOP_BAR, mLeash));
+        mConsumer.setControl(new InsetsSourceControl(TYPE_TOP_BAR, mLeash, new Point()));
     }
 
     @Test
@@ -78,7 +79,7 @@ public class InsetsSourceConsumerTest {
         reset(mMockTransaction);
         mConsumer.hide();
         verifyZeroInteractions(mMockTransaction);
-        mConsumer.setControl(new InsetsSourceControl(TYPE_TOP_BAR, mLeash));
+        mConsumer.setControl(new InsetsSourceControl(TYPE_TOP_BAR, mLeash, new Point()));
         verify(mMockTransaction).hide(eq(mLeash));
     }
 }

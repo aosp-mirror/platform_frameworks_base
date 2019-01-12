@@ -27,6 +27,7 @@ import static junit.framework.Assert.assertTrue;
 
 import android.content.Context;
 import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowInsets.Type;
@@ -78,7 +79,7 @@ public class InsetsControllerTest {
 
     @Test
     public void testControlsChanged() {
-        InsetsSourceControl control = new InsetsSourceControl(TYPE_TOP_BAR, mLeash);
+        InsetsSourceControl control = new InsetsSourceControl(TYPE_TOP_BAR, mLeash, new Point());
         mController.onControlsChanged(new InsetsSourceControl[] { control });
         assertEquals(mLeash,
                 mController.getSourceConsumer(TYPE_TOP_BAR).getControl().getLeash());
@@ -86,7 +87,7 @@ public class InsetsControllerTest {
 
     @Test
     public void testControlsRevoked() {
-        InsetsSourceControl control = new InsetsSourceControl(TYPE_TOP_BAR, mLeash);
+        InsetsSourceControl control = new InsetsSourceControl(TYPE_TOP_BAR, mLeash, new Point());
         mController.onControlsChanged(new InsetsSourceControl[] { control });
         mController.onControlsChanged(new InsetsSourceControl[0]);
         assertNull(mController.getSourceConsumer(TYPE_TOP_BAR).getControl());
@@ -94,9 +95,11 @@ public class InsetsControllerTest {
 
     @Test
     public void testAnimationEndState() {
-        final InsetsSourceControl navBar = new InsetsSourceControl(TYPE_NAVIGATION_BAR, mLeash);
-        final InsetsSourceControl topBar = new InsetsSourceControl(TYPE_TOP_BAR, mLeash);
-        final InsetsSourceControl ime = new InsetsSourceControl(TYPE_IME, mLeash);
+        final InsetsSourceControl navBar = new InsetsSourceControl(TYPE_NAVIGATION_BAR, mLeash,
+                new Point());
+        final InsetsSourceControl topBar = new InsetsSourceControl(TYPE_TOP_BAR, mLeash,
+                new Point());
+        final InsetsSourceControl ime = new InsetsSourceControl(TYPE_IME, mLeash, new Point());
 
         InsetsSourceControl[] controls = new InsetsSourceControl[3];
         controls[0] = navBar;

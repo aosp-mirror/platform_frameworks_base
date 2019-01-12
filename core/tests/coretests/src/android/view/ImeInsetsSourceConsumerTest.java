@@ -24,6 +24,7 @@ import static junit.framework.Assert.assertTrue;
 
 import android.content.Context;
 import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.platform.test.annotations.Presubmit;
@@ -80,7 +81,7 @@ public class ImeInsetsSourceConsumerTest {
 
     @Test
     public void testImeVisibility() {
-        final InsetsSourceControl ime = new InsetsSourceControl(TYPE_IME, mLeash);
+        final InsetsSourceControl ime = new InsetsSourceControl(TYPE_IME, mLeash, new Point());
         mController.onControlsChanged(new InsetsSourceControl[] { ime });
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {

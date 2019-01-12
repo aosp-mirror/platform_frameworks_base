@@ -29,10 +29,13 @@ public class InsetsSourceControl implements Parcelable {
 
     private final @InternalInsetType int mType;
     private final SurfaceControl mLeash;
+    private final Point mSurfacePosition;
 
-    public InsetsSourceControl(@InternalInsetType int type, SurfaceControl leash) {
+    public InsetsSourceControl(@InternalInsetType int type, SurfaceControl leash,
+            Point surfacePosition) {
         mType = type;
         mLeash = leash;
+        mSurfacePosition = surfacePosition;
     }
 
     public int getType() {
@@ -46,6 +49,19 @@ public class InsetsSourceControl implements Parcelable {
     public InsetsSourceControl(Parcel in) {
         mType = in.readInt();
         mLeash = in.readParcelable(null /* loader */);
+        mSurfacePosition = in.readParcelable(null /* loader */);
+    }
+
+    public boolean setSurfacePosition(int left, int top) {
+        if (mSurfacePosition.equals(left, top)) {
+            return false;
+        }
+        mSurfacePosition.set(left, top);
+        return true;
+    }
+
+    public Point getSurfacePosition() {
+        return mSurfacePosition;
     }
 
     @Override
@@ -57,6 +73,7 @@ public class InsetsSourceControl implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
         dest.writeParcelable(mLeash, 0 /* flags*/);
+        dest.writeParcelable(mSurfacePosition, 0 /* flags*/);
     }
 
     public static final Creator<InsetsSourceControl> CREATOR
