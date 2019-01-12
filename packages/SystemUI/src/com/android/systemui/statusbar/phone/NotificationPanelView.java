@@ -1233,7 +1233,7 @@ public class NotificationPanelView extends PanelView implements
             updateDozingVisibilities(false /* animate */);
         }
 
-        resetVerticalPanelPosition();
+        resetHorizontalPanelPosition();
         updateQsState();
     }
 
@@ -2043,7 +2043,7 @@ public class NotificationPanelView extends PanelView implements
         super.onConfigurationChanged(newConfig);
         mAffordanceHelper.onConfigurationChanged();
         if (newConfig.orientation != mLastOrientation) {
-            resetVerticalPanelPosition();
+            resetHorizontalPanelPosition();
         }
         mLastOrientation = newConfig.orientation;
     }
@@ -2529,7 +2529,7 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void onClosingFinished() {
         super.onClosingFinished();
-        resetVerticalPanelPosition();
+        resetHorizontalPanelPosition();
         setClosingWithAlphaFadeout(false);
     }
 
@@ -2546,7 +2546,7 @@ public class NotificationPanelView extends PanelView implements
      */
     protected void updateVerticalPanelPosition(float x) {
         if (mNotificationStackScroller.getWidth() * 1.75f > getWidth()) {
-            resetVerticalPanelPosition();
+            resetHorizontalPanelPosition();
             return;
         }
         float leftMost = mPositionMinSideMargin + mNotificationStackScroller.getWidth() / 2;
@@ -2556,16 +2556,17 @@ public class NotificationPanelView extends PanelView implements
             x = getWidth() / 2;
         }
         x = Math.min(rightMost, Math.max(leftMost, x));
-        setVerticalPanelTranslation(x -
-                (mNotificationStackScroller.getLeft() + mNotificationStackScroller.getWidth() / 2));
+        float center =
+                mNotificationStackScroller.getLeft() + mNotificationStackScroller.getWidth() / 2;
+        setHorizontalPanelTranslation(x - center);
     }
 
-    private void resetVerticalPanelPosition() {
-        setVerticalPanelTranslation(0f);
+    private void resetHorizontalPanelPosition() {
+        setHorizontalPanelTranslation(0f);
     }
 
-    protected void setVerticalPanelTranslation(float translation) {
-        mNotificationStackScroller.setVerticalPanelTranslation(translation);
+    protected void setHorizontalPanelTranslation(float translation) {
+        mNotificationStackScroller.setHorizontalPanelTranslation(translation);
         mQsFrame.setTranslationX(translation);
         int size = mVerticalTranslationListener.size();
         for (int i = 0; i < size; i++) {

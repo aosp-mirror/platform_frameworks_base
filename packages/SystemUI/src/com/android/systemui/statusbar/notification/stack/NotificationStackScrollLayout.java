@@ -430,7 +430,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private int mHeadsUpInset;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private NotificationIconAreaController mIconAreaController;
-    private float mVerticalPanelTranslation;
+    private float mHorizontalPanelTranslation;
     private final NotificationLockscreenUserManager mLockscreenUserManager =
             Dependency.get(NotificationLockscreenUserManager.class);
     protected final NotificationGutsManager mGutsManager =
@@ -4377,12 +4377,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updatePanelTranslation() {
-        setTranslationX(mVerticalPanelTranslation + mAntiBurnInOffsetX * mInterpolatedDarkAmount);
+        setTranslationX(mHorizontalPanelTranslation + mAntiBurnInOffsetX * mInterpolatedDarkAmount);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setVerticalPanelTranslation(float verticalPanelTranslation) {
-        mVerticalPanelTranslation = verticalPanelTranslation;
+    public void setHorizontalPanelTranslation(float verticalPanelTranslation) {
+        mHorizontalPanelTranslation = verticalPanelTranslation;
         updatePanelTranslation();
     }
 
