@@ -42,6 +42,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.PowerManager;
@@ -54,6 +56,7 @@ import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.testing.shadows.ShadowAppBackupUtils;
+import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowBinder;
 import com.android.server.testing.shadows.ShadowKeyValueBackupJob;
 import com.android.server.testing.shadows.ShadowKeyValueBackupTask;
@@ -80,7 +83,7 @@ import java.util.List;
  * UserBackupManagerService} that performs operations for its target user.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ShadowAppBackupUtils.class})
+@Config(shadows = {ShadowAppBackupUtils.class, ShadowApplicationPackageManager.class})
 @Presubmit
 public class UserBackupManagerServiceTest {
     private static final String TAG = "BMSTest";
@@ -137,6 +140,7 @@ public class UserBackupManagerServiceTest {
     public void tearDown() throws Exception {
         mBackupThread.quit();
         ShadowAppBackupUtils.reset();
+        ShadowApplicationPackageManager.reset();
     }
 
     /**
@@ -195,6 +199,7 @@ public class UserBackupManagerServiceTest {
     public void testIsAppEligibleForBackup_whenAppNotEligible() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         setUpCurrentTransport(mTransportManager, mTransport);
+        registerPackages(PACKAGE_1);
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         boolean result = backupManagerService.isAppEligibleForBackup(PACKAGE_1);
@@ -210,6 +215,7 @@ public class UserBackupManagerServiceTest {
     public void testIsAppEligibleForBackup_whenAppEligible() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         TransportMock transportMock = setUpCurrentTransport(mTransportManager, backupTransport());
+        registerPackages(PACKAGE_1);
         ShadowAppBackupUtils.setAppRunningAndEligibleForBackupWithTransport(PACKAGE_1);
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
@@ -228,6 +234,7 @@ public class UserBackupManagerServiceTest {
     public void testIsAppEligibleForBackup_withoutPermission() throws Exception {
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
         setUpCurrentTransport(mTransportManager, mTransport);
+        registerPackages(PACKAGE_1);
         ShadowAppBackupUtils.setAppRunningAndEligibleForBackupWithTransport(PACKAGE_1);
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
@@ -245,6 +252,7 @@ public class UserBackupManagerServiceTest {
     public void testFilterAppsEligibleForBackup() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         TransportMock transportMock = setUpCurrentTransport(mTransportManager, mTransport);
+        registerPackages(PACKAGE_1, PACKAGE_2);
         ShadowAppBackupUtils.setAppRunningAndEligibleForBackupWithTransport(PACKAGE_1);
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
@@ -264,6 +272,7 @@ public class UserBackupManagerServiceTest {
     @Test
     public void testFilterAppsEligibleForBackup_whenNoneIsEligible() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        registerPackages(PACKAGE_1, PACKAGE_2);
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         String[] filtered =
@@ -281,6 +290,7 @@ public class UserBackupManagerServiceTest {
     public void testFilterAppsEligibleForBackup_withoutPermission() throws Exception {
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
         setUpCurrentTransport(mTransportManager, mTransport);
+        registerPackages(PACKAGE_1, PACKAGE_2);
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
@@ -749,7 +759,7 @@ public class UserBackupManagerServiceTest {
     private void setUpForRequestBackup(String... packages) throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         for (String packageName : packages) {
-            mShadowPackageManager.addPackage(packageName);
+            registerPackages(packageName);
             ShadowAppBackupUtils.setAppRunningAndEligibleForBackupWithTransport(packageName);
         }
         setUpCurrentTransport(mTransportManager, mTransport);
@@ -864,7 +874,7 @@ public class UserBackupManagerServiceTest {
     @Test
     public void testRequestBackup_whenAppNotEligibleForBackup() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        mShadowPackageManager.addPackage(PACKAGE_1);
+        registerPackages(PACKAGE_1);
         setUpCurrentTransport(mTransportManager, mTransport);
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setEnabled(true);
@@ -1125,6 +1135,22 @@ public class UserBackupManagerServiceTest {
         when(powerManagerMock.getPowerSaveState(anyInt()))
                 .thenReturn(new PowerSaveState.Builder().setBatterySaverEnabled(true).build());
         backupManagerService.setPowerManager(powerManagerMock);
+    }
+
+    private PackageInfo getPackageInfo(String packageName) {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = packageName;
+        packageInfo.applicationInfo = new ApplicationInfo();
+        packageInfo.applicationInfo.packageName = packageName;
+        return packageInfo;
+    }
+
+    private void registerPackages(String... packages) {
+        for (String packageName : packages) {
+            PackageInfo packageInfo = getPackageInfo(packageName);
+            mShadowPackageManager.installPackage(packageInfo);
+            ShadowApplicationPackageManager.addInstalledPackage(packageName, packageInfo);
+        }
     }
 
     /**

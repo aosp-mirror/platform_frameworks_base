@@ -272,7 +272,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                         instream, mBackupManagerService.getContext(),
                                         mDeleteObserver, mManifestSignatures,
                                         mPackagePolicies, info, installerPackageName,
-                                        bytesReadListener);
+                                        bytesReadListener, mBackupManagerService.getUserId());
                                 // good to go; promote to ACCEPT
                                 mPackagePolicies.put(pkg, isSuccessfullyInstalled
                                         ? RestorePolicy.ACCEPT

@@ -71,7 +71,6 @@ import static java.util.stream.Collectors.toList;
 
 import android.annotation.Nullable;
 import android.app.Application;
-import android.app.ApplicationPackageManager;
 import android.app.IBackupAgent;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
@@ -116,6 +115,7 @@ import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.testing.shadows.FrameworkShadowLooper;
+import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
 import com.android.server.testing.shadows.ShadowEventLog;
@@ -135,8 +135,6 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implements;
-import org.robolectric.annotation.Resetter;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowQueuedWork;
@@ -160,7 +158,7 @@ import java.util.stream.Stream;
 @Config(
         shadows = {
             FrameworkShadowLooper.class,
-            KeyValueBackupTaskTest.ShadowApplicationPackageManager.class,
+            ShadowApplicationPackageManager.class,
             ShadowBackupDataInput.class,
             ShadowBackupDataOutput.class,
             ShadowEventLog.class,
@@ -2437,11 +2435,12 @@ public class KeyValueBackupTaskTest {
 
     private AgentMock setUpAgent(PackageData packageData) {
         try {
+            String packageName = packageData.packageName;
             mPackageManager.setApplicationEnabledSetting(
-                    packageData.packageName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+                    packageName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
             PackageInfo packageInfo = getPackageInfo(packageData);
             mShadowPackageManager.installPackage(packageInfo);
-            ShadowApplicationPackageManager.setPackageInfo(packageInfo);
+            ShadowApplicationPackageManager.addInstalledPackage(packageName, packageInfo);
             mContext.sendBroadcast(getPackageAddedIntent(packageData));
             // Run the backup looper because on the receiver we post MSG_SCHEDULE_BACKUP_PACKAGE
             mShadowBackupLooper.runToEndOfTasks();
@@ -2537,7 +2536,7 @@ public class KeyValueBackupTaskTest {
 
     private PackageManagerBackupAgent createPmAgent() {
         PackageManagerBackupAgent pmAgent =
-                new PackageManagerBackupAgent(mApplication.getPackageManager());
+                new PackageManagerBackupAgent(mApplication.getPackageManager(), USER_ID);
         pmAgent.attach(mApplication);
         pmAgent.onCreate();
         return pmAgent;
@@ -2842,7 +2841,7 @@ public class KeyValueBackupTaskTest {
 
         ThrowingPackageManagerBackupAgent(
                 PackageManager packageManager, RuntimeException exception) {
-            super(packageManager);
+            super(packageManager, USER_ID);
             mException = exception;
         }
 
@@ -2852,31 +2851,6 @@ public class KeyValueBackupTaskTest {
                 BackupDataOutput data,
                 ParcelFileDescriptor newState) {
             throw mException;
-        }
-    }
-
-    /**
-     * Extends {@link org.robolectric.shadows.ShadowApplicationPackageManager} to return the correct
-     * package in user-specific invocations.
-     */
-    @Implements(value = ApplicationPackageManager.class)
-    public static class ShadowApplicationPackageManager
-            extends org.robolectric.shadows.ShadowApplicationPackageManager {
-        private static PackageInfo sPackageInfo;
-
-        static void setPackageInfo(PackageInfo packageInfo) {
-            sPackageInfo = packageInfo;
-        }
-
-        @Override
-        protected PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId) {
-            return sPackageInfo;
-        }
-
-        /** Clear {@link #sPackageInfo}. */
-        @Resetter
-        public static void reset() {
-            sPackageInfo = null;
         }
     }
 }
