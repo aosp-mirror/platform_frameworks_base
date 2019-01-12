@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"เปิดด้วย"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"เปิดด้วย %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"เปิด"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"ให้สิทธิ์ในการเปิดลิงก์ของ <xliff:g id="HOST">%1$s</xliff:g> โดยใช้"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"ให้สิทธิ์ในการเปิดลิงก์ของ <xliff:g id="HOST">%1$s</xliff:g> โดยใช้ <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"ให้สิทธิ์"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"แก้ไขด้วย"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"แก้ไขด้วย %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"แก้ไข"</string>
@@ -1566,6 +1569,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"รับสายหรือไม่"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ทุกครั้ง"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"เฉพาะครั้งนี้"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"การตั้งค่า"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ไม่สนับสนุนโปรไฟล์งาน"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"แท็บเล็ต"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"ทีวี"</string>
@@ -1645,7 +1649,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"การปรับแก้สี"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ทางลัดการเข้าถึงเปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ทางลัดการเข้าถึงปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"ใช้ทางลัดการช่วยเหลือพิเศษอีกครั้งเพื่อเริ่มฟีเจอร์การช่วยเหลือพิเศษปัจจุบัน"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้ 3 วินาทีเพื่อใช้ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"เลือกฟีเจอร์ที่จะใช้เมื่อคุณแตะปุ่ม \"การเข้าถึงพิเศษ\":"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"หากต้องการเปลี่ยนฟีเจอร์ ให้แตะปุ่ม \"การเข้าถึงพิเศษ\" ค้างไว้"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"การขยาย"</string>
@@ -1975,5 +1979,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"กล้อง"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ไมโครโฟน"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"แสดงทับแอปอื่นๆ บนหน้าจอ"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"กำลังโหลด"</string>
 </resources>

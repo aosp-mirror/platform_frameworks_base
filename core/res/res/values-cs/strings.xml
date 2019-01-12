@@ -1168,6 +1168,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Otevřít v aplikaci"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Otevřít v aplikaci %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Otevřít"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Udělte přístup k otevírání odkazů <xliff:g id="HOST">%1$s</xliff:g> pomocí aplikace"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Udělte přístup k otevírání odkazů <xliff:g id="HOST">%1$s</xliff:g> pomocí aplikace <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Udělit přístup"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Upravit v aplikaci"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Upravit v aplikaci %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Upravit"</string>
@@ -1612,6 +1615,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Přijmout hovor?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Vždy"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Pouze jednou"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Nastavení"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s pracovní profily nepodporuje."</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Televize"</string>
@@ -1693,7 +1697,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Oprava barev"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Zkratka přístupnosti zapnula službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Zkratka přístupnosti vypnula službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Znovu použijte zkratku přístupnosti, čímž spustíte aktuální funkci pro usnadnění přístupu"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Chcete-li používat službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tři sekundy podržte stisknutá obě tlačítka hlasitosti"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Určete, jakou funkci aktivujete klepnutím na tlačítko Přístupnost:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Chcete-li vybrat jinou funkci, podržte tlačítko Přístupnost."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Zvětšení"</string>
@@ -2045,5 +2049,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Fotoaparát"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"zobrazení přes ostatní aplikace na obrazovce"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Informační oznámení režimu sledu činností"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Baterie se možná vybije před obvyklým časem nabití"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Byl aktivován spořič baterie za účelem prodloužení výdrže"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Načítání"</string>
 </resources>

@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"దీనితో తెరువు"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$sతో తెరువు"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"తెరువు"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"<xliff:g id="HOST">%1$s</xliff:g> లింక్‌లను తెరవడానికి యాక్సెస్ ఇవ్వండి"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g>తో <xliff:g id="HOST">%1$s</xliff:g> లింక్‌లను తెరవడానికి యాక్సెస్ ఇవ్వండి"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"యాక్సెస్ ఇవ్వండి"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"దీనితో సవరించు"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$sతో సవరించు"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"సవరించు"</string>
@@ -1567,6 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"కాల్‌ను ఆమోదించాలా?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ఎల్లప్పుడూ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ఒకసారి"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"సెట్టింగ్‌లు"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s కార్యాలయ ప్రొఫైల్‌కు మద్దతు ఇవ్వదు"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"టాబ్లెట్"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"టీవీ"</string>
@@ -1646,7 +1650,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"రంగు సవరణ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"ప్రస్తుత యాక్సెస్ సౌలభ్య ఫీచర్‌ను ఉపయోగించడానికి యాక్సెసిబిలిటీ షార్ట్‌కట్‌ను మళ్లీ ప్రారంభించండి"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ని ఉపయోగించడానికి వాల్యూమ్ కీలు రెండింటినీ 3 సెకన్లు నొక్కి ఉంచండి"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"యాక్సెస్ సామర్థ్య బటన్‌ను మీరు నొక్కినప్పుడు ఉపయోగించాల్సిన ఒక ఫీచర్‌ను ఎంచుకోండి:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ఫీచర్లను మార్చడానికి, యాక్సెస్ సామర్థ్య బటన్‌ను నొక్కి &amp; పట్టుకోండి."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"మాగ్నిఫికేషన్"</string>
@@ -1976,5 +1980,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"కెమెరా"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"మైక్రోఫోన్"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"మీ స్క్రీన్‌పై ఇతర యాప్‌ల ద్వారా ప్రదర్శించబడుతోంది"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"లోడవుతోంది"</string>
 </resources>

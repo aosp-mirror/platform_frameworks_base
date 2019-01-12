@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Ireki honekin:"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Irekin %1$s aplikazioarekin"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Ireki"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Eman <xliff:g id="HOST">%1$s</xliff:g> estekak irekitzeko baimena aplikazio honi:"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Eman <xliff:g id="APPLICATION">%2$s</xliff:g> aplikazioari <xliff:g id="HOST">%1$s</xliff:g> irekitzeko baimena"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Eman sarbidea"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Editatu honekin:"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editatu %1$s aplikazioarekin"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Editatu"</string>
@@ -1567,6 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Deia onartu nahi duzu?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Beti"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Behin soilik"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Ezarpenak"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s abiarazleak ez du laneko profil hau onartzen"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tableta"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Telebista"</string>
@@ -1646,7 +1650,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Koloreen zuzenketa"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Erabilerraztasun-lasterbideak <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatu du"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Erabilerraztasun-lasterbideak <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desaktibatu du"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Uneko erabilerraztasun-eginbidea abiarazteko, erabili erabilerraztasun-lasterbidea berriro"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> erabiltzeko, eduki sakatuta bolumen-tekla biak hiru segundoz"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Aukeratu zein eginbide erabili nahi duzun Erabilerraztasuna botoia sakatzean:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Eginbideak aldatzeko, eduki sakatuta Erabilerraztasuna botoia."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Lupa"</string>
@@ -1976,5 +1980,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofonoa"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"pantailako beste aplikazioen gainean bistaratzen"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Ohitura moduaren informazio-jakinarazpena"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Baliteke bateria ohi baino lehenago agortzea"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Bateria-aurrezlea aktibatuta dago bateriaren iraupena luzatzeko"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Kargatzen"</string>
 </resources>

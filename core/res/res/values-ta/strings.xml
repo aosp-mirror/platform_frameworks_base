@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"இதன்மூலம் திற"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s மூலம் திற"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"திற"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"மூலம் <xliff:g id="HOST">%1$s</xliff:g> இணைப்புகளைத் திறப்பதற்கான அணுகலை வழங்குதல்"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g> மூலம் <xliff:g id="HOST">%1$s</xliff:g> இணைப்புகளைத் திறப்பதற்கான அணுகலை வழங்குதல்"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"அணுகலை வழங்கு"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"இதன் மூலம் திருத்து"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s மூலம் திருத்து"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"மாற்று"</string>
@@ -1567,6 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"அழைப்பை ஏற்கவா?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"எப்போதும்"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"இப்போது மட்டும்"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"அமைப்புகள்"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s பணி சுயவிவரத்தை ஆதரிக்காது"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"டேப்லெட்"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"டிவி"</string>
@@ -1646,7 +1650,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"வண்ணத் திருத்தம்"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"அணுகல்தன்மைக் குறுக்குவழியானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ இயக்கியது"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"அணுகல்தன்மைக் குறுக்குவழியானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ முடக்கியது"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"தற்போதுள்ள அணுகல்தன்மை அம்சத்தை மீண்டும் தொடங்க ’அணுகல்தன்மை ஷார்ட்கட்டைப்’ பயன்படுத்தவும்"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐப் பயன்படுத்த 3 விநாடிகளுக்கு இரண்டு ஒலியளவு பட்டன்களையும் அழுத்திப் பிடிக்கவும்"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"அணுகல்தன்மைப் பொத்தானைத் தட்டி, பயன்படுத்துவதற்கான அம்சத்தைத் தேர்ந்தெடுக்கவும்:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"அம்சங்களை மாற்ற, அணுகல்தன்மைப் பொத்தானைத் தொட்டுப் பிடித்திருக்கவும்."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"பெரிதாக்கல்"</string>
@@ -1976,5 +1980,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"கேமரா"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"மைக்ரோஃபோன்"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"உங்கள் திரையில் உள்ள பிற பயன்பாடுகளின் மேல் காட்டுகிறது"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ஏற்றுகிறது"</string>
 </resources>

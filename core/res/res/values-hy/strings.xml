@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Բացել հետևյալ ծրագրով՝"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Բացել ծրագրով՝ %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Բացել"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Թույլատրեք, որ <xliff:g id="HOST">%1$s</xliff:g> տիրույթը հղումները բացվեն հետևյալ հավելվածում՝"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Թույլատրեք, որ <xliff:g id="HOST">%1$s</xliff:g> տիրույթի հղումները բացվեն <xliff:g id="APPLICATION">%2$s</xliff:g> հավելվածում"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Թույլատրել"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Խմբագրել հետևյալ ծրագրով՝"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Խմբագրել հետևյալով՝ %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Փոփոխել"</string>
@@ -1566,6 +1569,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Ընդունե՞լ զանգը:"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Միշտ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Միայն մեկ անգամ"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Կարգավորումներ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s-ը չի աջակցում աշխատանքային պրոֆիլներ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Գրասալիկ"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Հեռուստացույց"</string>
@@ -1645,7 +1649,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Գունաշտկում"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Մատչելիության դյուրանցումն միացրել է <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Մատչելիության դյուրանցումն անջատել է <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Հատուկ գործառույթների դյուրանցումը գործարկելու համար նորից օգտագործեք համապատասխան դյուրանցումը"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"«<xliff:g id="SERVICE_NAME">%1$s</xliff:g>» ծառայությունն օգտագործելու համար սեղմեք և 3 վայրկյան պահեք ձայնի ուժգնության երկու կոճակները"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Ընտրեք որևէ գործառույթ, որը կօգտագործվի Հատուկ գործառույթներ կոճակին հպելու դեպքում՝"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Գործառույթները փոխելու համար հպեք և պահեք Հատուկ գործառույթներ կոճակը։"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Խոշորացում"</string>
@@ -1975,5 +1979,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Տեսախցիկ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Խոսափող"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"ցուցադրվում է մյուս հավելվածների վերևում"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"Բեռնում"</string>
 </resources>

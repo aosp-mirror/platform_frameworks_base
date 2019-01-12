@@ -1130,6 +1130,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"සමඟ විවෘත කරන්න"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s සමඟ විවෘත කරන්න"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"විවෘත කරන්න"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"මේවා මඟින් <xliff:g id="HOST">%1$s</xliff:g> සබැඳි විවෘත කිරීමට ප්‍රවේශය දෙන්න"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g> මඟින් <xliff:g id="HOST">%1$s</xliff:g> සබැඳි විවෘත කිරීමට ප්‍රවේශය දෙන්න"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"ප්‍රවේශය දෙන්න"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"සමඟ සංස්කරණය කරන්න"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s සමඟ සංස්කරණය කරන්න"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"සංස්කරණය"</string>
@@ -1568,6 +1571,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ඇමතුම පිළිගන්නවාද?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"සැම විටම"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"එක් වාරයයි"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"සැකසීම්"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s කාර්යාල පැතිකඩ සඳහා සහාය ලබනොදේ."</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ටැබ්ලට්ය"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"රූපවාහිනී"</string>
@@ -1647,7 +1651,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"වර්ණ නිවැරදි කිරීම"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ප්‍රවේශ්‍යතා කෙටි මග <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාත්මක කරන ලදී"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ප්‍රවේශ්‍යතා කෙටි මග <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාවිරහිත කරන ලදී"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"වර්තමාන ප්‍රවේශ්‍යතා විශේෂංගය ආරම්භ කිරීම සඳහා ප්‍රවේශ්‍යතා කෙටි මග භාවිතා කරන්න"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> භාවිත කිරීමට හඬ පරිමා යතුරු දෙකම තත්පර තුනකට ඔබාගෙන සිටින්න"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ඔබ ප්‍රවේශ්‍යතා බොත්තම තට්ටු කරන විට භාවිතා කිරීමට අංගයක් තෝරාගන්න:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"අංග වෙනස් කිරීමට ප්‍රවේශ්‍යතා බොත්තම ස්පර්ශ කර අල්ලා ගෙන සිටින්න."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"විශාලනය"</string>
@@ -1977,5 +1981,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"කැමරාව"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"මයික්‍රෆෝනය"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"ඔබගේ තිරය මත වෙනත් යෙදුම්වලට උඩින් සංදර්ශනය කරමින්"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"දිනචරියා ප්‍රකාර තතු දැනුම්දීම"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"බැටරිය සුපුරුදු ආරෝපණයට පෙර ඉවර විය හැක"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"බැටරි සුරැකුම බැටරි ආයු කාලය දීර්ඝ කිරීමට සක්‍රිය කෙරිණි"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"පූරණය කරමින්"</string>
 </resources>
