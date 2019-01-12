@@ -16,9 +16,13 @@
 
 package com.android.internal.os;
 
+import static android.system.OsConstants.O_CLOEXEC;
+
 import static com.android.internal.os.ZygoteConnectionConstants.MAX_ZYGOTE_ARGC;
 
 import android.net.Credentials;
+import android.net.LocalServerSocket;
+import android.net.LocalSocket;
 import android.os.FactoryTest;
 import android.os.IVold;
 import android.os.Process;
@@ -30,8 +34,14 @@ import android.util.Log;
 
 import dalvik.system.ZygoteHooks;
 
+import libcore.io.IoUtils;
+
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 /** @hide */
 public final class Zygote {
@@ -104,6 +114,18 @@ public final class Zygote {
     /** Read-write external storage should be mounted instead of package sandbox */
     public static final int MOUNT_EXTERNAL_FULL = IVold.REMOUNT_MODE_FULL;
 
+    /** Number of bytes sent to the Zygote over blastula pipes or the pool event FD */
+    public static final int BLASTULA_MANAGEMENT_MESSAGE_BYTES = 8;
+
+    /** If the blastula pool should be created and used to start applications */
+    public static final boolean BLASTULA_POOL_ENABLED = false;
+
+    /**
+     * File descriptor used for communication between the signal handler and the ZygoteServer poll
+     * loop.
+     * */
+    protected static FileDescriptor sBlastulaPoolEventFD;
+
     private static final ZygoteHooks VM_HOOKS = new ZygoteHooks();
 
     /**
@@ -132,6 +154,40 @@ public final class Zygote {
      * will be enforced with a seccomp filter.
      */
     public static final String CHILD_ZYGOTE_UID_RANGE_END = "--uid-range-end=";
+
+    /** Prefix prepended to socket names created by init */
+    private static final String ANDROID_SOCKET_PREFIX = "ANDROID_SOCKET_";
+
+    /**
+     * The maximum value that the sBlastulaPoolMax variable may take.  This value
+     * is a mirror of BLASTULA_POOL_MAX_LIMIT found in com_android_internal_os_Zygote.cpp.
+     */
+    static final int BLASTULA_POOL_MAX_LIMIT = 10;
+
+    /**
+     * The minimum value that the sBlastulaPoolMin variable may take.
+     */
+    static final int BLASTULA_POOL_MIN_LIMIT = 1;
+
+    /**
+     * The runtime-adjustable maximum Blastula pool size.
+     */
+    static int sBlastulaPoolMax = BLASTULA_POOL_MAX_LIMIT;
+
+    /**
+     * The runtime-adjustable minimum Blastula pool size.
+     */
+    static int sBlastulaPoolMin = BLASTULA_POOL_MIN_LIMIT;
+
+    /**
+     * The runtime-adjustable value used to determine when to re-fill the
+     * blastula pool.  The pool will be re-filled when
+     * (sBlastulaPoolMax - gBlastulaPoolCount) >= sBlastulaPoolRefillThreshold.
+     */
+    // TODO (chriswailes): This must be updated at the same time as sBlastulaPoolMax.
+    static int sBlastulaPoolRefillThreshold = (sBlastulaPoolMax / 2);
+
+    private static LocalServerSocket sBlastulaPoolSocket = null;
 
     /** a prototype instance for a future List.toArray() */
     protected static final int[][] INT_ARRAY_2D = new int[0][0];
@@ -201,6 +257,51 @@ public final class Zygote {
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             int[] fdsToClose, int[] fdsToIgnore, boolean startChildZygote, String instructionSet,
             String appDataDir, String packageName, String[] packagesForUid, String[] visibleVolIds);
+
+    /**
+     * Specialize a Blastula instance.  The current VM must have been started
+     * with the -Xzygote flag.
+     *
+     * @param uid  The UNIX uid that the new process should setuid() to before spawning any threads
+     * @param gid  The UNIX gid that the new process should setgid() to before spawning any threads
+     * @param gids null-ok;  A list of UNIX gids that the new process should
+     * setgroups() to before spawning any threads
+     * @param runtimeFlags  Bit flags that enable ART features
+     * @param rlimits null-ok  An array of rlimit tuples, with the second
+     * dimension having a length of 3 and representing
+     * (resource, rlim_cur, rlim_max). These are set via the posix
+     * setrlimit(2) call.
+     * @param seInfo null-ok  A string specifying SELinux information for
+     * the new process.
+     * @param niceName null-ok  A string specifying the process name.
+     * @param startChildZygote  If true, the new child process will itself be a
+     * new zygote process.
+     * @param instructionSet null-ok  The instruction set to use.
+     * @param appDataDir null-ok  The data directory of the app.
+     */
+    public static void specializeBlastula(int uid, int gid, int[] gids, int runtimeFlags,
+            int[][] rlimits, int mountExternal, String seInfo, String niceName,
+            boolean startChildZygote, String instructionSet, String appDataDir,
+            String packageName, String[] packagesForUid, String[] visibleVolIds) {
+
+        nativeSpecializeBlastula(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
+                                 niceName, startChildZygote, instructionSet, appDataDir,
+                                 packageName, packagesForUid, visibleVolIds);
+
+        // Enable tracing as soon as possible for the child process.
+        Trace.setTracingEnabled(true, runtimeFlags);
+
+        // Note that this event ends at the end of handleChildProc.
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
+
+        /*
+         * This is called here (instead of after the fork but before the specialize) to maintain
+         * consistancy with the code paths for forkAndSpecialize.
+         *
+         * TODO (chriswailes): Look into moving this to immediately after the fork.
+         */
+        VM_HOOKS.postForkCommon();
+    }
 
     private static native void nativeSpecializeBlastula(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
@@ -272,17 +373,297 @@ public final class Zygote {
      */
     protected static native void nativeUnmountStorageOnInit();
 
+    /**
+     * Get socket file descriptors (opened by init) from the environment and
+     * store them for access from native code later.
+     *
+     * @param isPrimary  True if this is the zygote process, false if it is zygote_secondary
+     */
+    public static void getSocketFDs(boolean isPrimary) {
+        nativeGetSocketFDs(isPrimary);
+    }
+
     protected static native void nativeGetSocketFDs(boolean isPrimary);
+
+    /**
+     * Initialize the blastula pool and fill it with the desired number of
+     * processes.
+     */
+    protected static Runnable initBlastulaPool() {
+        if (BLASTULA_POOL_ENABLED) {
+            sBlastulaPoolEventFD = getBlastulaPoolEventFD();
+
+            return fillBlastulaPool(null);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Checks to see if the current policy says that pool should be refilled, and spawns new
+     * blastulas if necessary.
+     *
+     * NOTE: This function doesn't need to be guarded with BLASTULA_POOL_ENABLED because it is
+     *       only called from contexts that are only valid if the pool is enabled.
+     *
+     * @param sessionSocketRawFDs  Anonymous session sockets that are currently open
+     * @return In the Zygote process this function will always return null; in blastula processes
+     *         this function will return a Runnable object representing the new application that is
+     *         passed up from blastulaMain.
+     */
+    protected static Runnable fillBlastulaPool(int[] sessionSocketRawFDs) {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Zygote:FillBlastulaPool");
+
+        int blastulaPoolCount = getBlastulaPoolCount();
+
+        int numBlastulasToSpawn = sBlastulaPoolMax - blastulaPoolCount;
+
+        if (blastulaPoolCount < sBlastulaPoolMin
+                || numBlastulasToSpawn >= sBlastulaPoolRefillThreshold) {
+
+            // Disable some VM functionality and reset some system values
+            // before forking.
+            VM_HOOKS.preFork();
+            resetNicePriority();
+
+            while (blastulaPoolCount++ < sBlastulaPoolMax) {
+                Runnable caller = forkBlastula(sessionSocketRawFDs);
+
+                if (caller != null) {
+                    return caller;
+                }
+            }
+
+            // Re-enable runtime services for the Zygote.  Blastula services
+            // are re-enabled in specializeBlastula.
+            VM_HOOKS.postForkCommon();
+
+            Log.i("zygote", "Filled the blastula pool. New blastulas: " + numBlastulasToSpawn);
+        }
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+        return null;
+    }
+
+    /**
+     * @return Number of blastulas currently in the pool
+     */
+    private static int getBlastulaPoolCount() {
+        return nativeGetBlastulaPoolCount();
+    }
 
     private static native int nativeGetBlastulaPoolCount();
 
+    /**
+     * @return The event FD used for communication between the signal handler and the ZygoteServer
+     *         poll loop
+     */
+    private static FileDescriptor getBlastulaPoolEventFD() {
+        FileDescriptor fd = new FileDescriptor();
+        fd.setInt$(nativeGetBlastulaPoolEventFD());
+
+        return fd;
+    }
+
     private static native int nativeGetBlastulaPoolEventFD();
+
+    /**
+     * Fork a new blastula process from the zygote
+     *
+     * @param sessionSocketRawFDs  Anonymous session sockets that are currently open
+     * @return In the Zygote process this function will always return null; in blastula processes
+     *         this function will return a Runnable object representing the new application that is
+     *         passed up from blastulaMain.
+     */
+    private static Runnable forkBlastula(int[] sessionSocketRawFDs) {
+        FileDescriptor[] pipeFDs = null;
+
+        try {
+            pipeFDs = Os.pipe2(O_CLOEXEC);
+        } catch (ErrnoException errnoEx) {
+            throw new IllegalStateException("Unable to create blastula pipe.", errnoEx);
+        }
+
+        int pid =
+                nativeForkBlastula(pipeFDs[0].getInt$(), pipeFDs[1].getInt$(), sessionSocketRawFDs);
+
+        if (pid == 0) {
+            IoUtils.closeQuietly(pipeFDs[0]);
+            return blastulaMain(pipeFDs[1]);
+        } else {
+            // The read-end of the pipe will be closed by the native code.
+            // See removeBlastulaTableEntry();
+            IoUtils.closeQuietly(pipeFDs[1]);
+            return null;
+        }
+    }
 
     private static native int nativeForkBlastula(int readPipeFD,
                                                  int writePipeFD,
                                                  int[] sessionSocketRawFDs);
 
+    /**
+     * This function is used by blastulas to wait for specialization requests from the system
+     * server.
+     *
+     * @param writePipe  The write end of the reporting pipe used to communicate with the poll loop
+     *                   of the ZygoteServer.
+     * @return A runnable oject representing the new application.
+     */
+    static Runnable blastulaMain(FileDescriptor writePipe) {
+        final int pid = Process.myPid();
+
+        LocalSocket sessionSocket = null;
+        DataOutputStream blastulaOutputStream = null;
+        Credentials peerCredentials = null;
+        String[] argStrings = null;
+
+        while (true) {
+            try {
+                sessionSocket = sBlastulaPoolSocket.accept();
+
+                BufferedReader blastulaReader =
+                        new BufferedReader(new InputStreamReader(sessionSocket.getInputStream()));
+                blastulaOutputStream =
+                        new DataOutputStream(sessionSocket.getOutputStream());
+
+                peerCredentials = sessionSocket.getPeerCredentials();
+
+                argStrings = readArgumentList(blastulaReader);
+
+                if (argStrings != null) {
+                    break;
+                } else {
+                    Log.e("Blastula", "Truncated command received.");
+                    IoUtils.closeQuietly(sessionSocket);
+                }
+            } catch (IOException ioEx) {
+                Log.e("Blastula", "Failed to read command: " + ioEx.getMessage());
+                IoUtils.closeQuietly(sessionSocket);
+            }
+        }
+
+        ZygoteArguments args = new ZygoteArguments(argStrings);
+
+        // TODO (chriswailes): Should this only be run for debug builds?
+        validateBlastulaCommand(args);
+
+        applyUidSecurityPolicy(args, peerCredentials);
+        applyDebuggerSystemProperty(args);
+
+        int[][] rlimits = null;
+
+        if (args.mRLimits != null) {
+            rlimits = args.mRLimits.toArray(INT_ARRAY_2D);
+        }
+
+        // This must happen before the SELinux policy for this process is
+        // changed when specializing.
+        try {
+            // Used by ZygoteProcess.zygoteSendArgsAndGetResult to fill in a
+            // Process.ProcessStartResult object.
+            blastulaOutputStream.writeInt(pid);
+        } catch (IOException ioEx) {
+            Log.e("Blastula", "Failed to write response to session socket: " + ioEx.getMessage());
+            System.exit(-1);
+        } finally {
+            IoUtils.closeQuietly(sessionSocket);
+            IoUtils.closeQuietly(sBlastulaPoolSocket);
+        }
+
+        try {
+            ByteArrayOutputStream buffer =
+                    new ByteArrayOutputStream(Zygote.BLASTULA_MANAGEMENT_MESSAGE_BYTES);
+            DataOutputStream outputStream = new DataOutputStream(buffer);
+
+            // This is written as a long so that the blastula reporting pipe and blastula pool
+            // event FD handlers in ZygoteServer.runSelectLoop can be unified.  These two cases
+            // should both send/receive 8 bytes.
+            outputStream.writeLong(pid);
+            outputStream.flush();
+
+            Os.write(writePipe, buffer.toByteArray(), 0, buffer.size());
+        } catch (Exception ex) {
+            Log.e("Blastula",
+                    String.format("Failed to write PID (%d) to pipe (%d): %s",
+                            pid, writePipe.getInt$(), ex.getMessage()));
+            System.exit(-1);
+        } finally {
+            IoUtils.closeQuietly(writePipe);
+        }
+
+        specializeBlastula(args.mUid, args.mGid, args.mGids,
+                           args.mRuntimeFlags, rlimits, args.mMountExternal,
+                           args.mSeInfo, args.mNiceName, args.mStartChildZygote,
+                           args.mInstructionSet, args.mAppDataDir, args.mPackageName,
+                           args.mPackagesForUid, args.mVisibleVolIds);
+
+        if (args.mNiceName != null) {
+            Process.setArgV0(args.mNiceName);
+        }
+
+        // End of the postFork event.
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+        return ZygoteInit.zygoteInit(args.mTargetSdkVersion,
+                                     args.mRemainingArgs,
+                                     null /* classLoader */);
+    }
+
+    private static final String BLASTULA_ERROR_PREFIX = "Invalid command to blastula: ";
+
+    /**
+     * Checks a set of zygote arguments to see if they can be handled by a blastula.  Throws an
+     * exception if an invalid arugment is encountered.
+     * @param args  The arguments to test
+     */
+    static void validateBlastulaCommand(ZygoteArguments args) {
+        if (args.mAbiListQuery) {
+            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--query-abi-list");
+        } else if (args.mPidQuery) {
+            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--get-pid");
+        } else if (args.mPreloadDefault) {
+            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--preload-default");
+        } else if (args.mPreloadPackage != null) {
+            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--preload-package");
+        } else if (args.mPreloadApp != null) {
+            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--preload-app");
+        } else if (args.mStartChildZygote) {
+            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--start-child-zygote");
+        } else if (args.mApiBlacklistExemptions != null) {
+            throw new IllegalArgumentException(
+                BLASTULA_ERROR_PREFIX + "--set-api-blacklist-exemptions");
+        } else if (args.mHiddenApiAccessLogSampleRate != -1) {
+            throw new IllegalArgumentException(
+                BLASTULA_ERROR_PREFIX + "--hidden-api-log-sampling-rate=");
+        } else if (args.mInvokeWith != null) {
+            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--invoke-with");
+        } else if (args.mPermittedCapabilities != 0 || args.mEffectiveCapabilities != 0) {
+            throw new ZygoteSecurityException("Client may not specify capabilities: "
+                + "permitted=0x" + Long.toHexString(args.mPermittedCapabilities)
+                + ", effective=0x" + Long.toHexString(args.mEffectiveCapabilities));
+        }
+    }
+
+    /**
+     * @return  Raw file descriptors for the read-end of blastula reporting pipes.
+     */
+    protected static int[] getBlastulaPipeFDs() {
+        return nativeGetBlastulaPipeFDs();
+    }
+
     private static native int[] nativeGetBlastulaPipeFDs();
+
+    /**
+     * Remove the blastula table entry for the provided process ID.
+     *
+     * @param blastulaPID  Process ID of the entry to remove
+     * @return True if the entry was removed; false if it doesn't exist
+     */
+    protected static boolean removeBlastulaTableEntry(int blastulaPID) {
+        return nativeRemoveBlastulaTableEntry(blastulaPID);
+    }
 
     private static native boolean nativeRemoveBlastulaTableEntry(int blastulaPID);
 
@@ -427,6 +808,48 @@ public final class Zygote {
         return args;
     }
 
+    /**
+     * Creates a managed object representing the Blastula pool socket that has
+     * already been initialized and bound by init.
+     *
+     * TODO (chriswailes): Move the name selection logic into this function.
+     *
+     * @throws RuntimeException when open fails
+     */
+    static void createBlastulaSocket(String socketName) {
+        if (BLASTULA_POOL_ENABLED && sBlastulaPoolSocket == null) {
+            sBlastulaPoolSocket = createManagedSocketFromInitSocket(socketName);
+        }
+    }
+
+    /**
+     * Creates a managed LocalServerSocket object using a file descriptor
+     * created by an init.rc script.  The init scripts that specify the
+     * sockets name can be found in system/core/rootdir.  The socket is bound
+     * to the file system in the /dev/sockets/ directory, and the file
+     * descriptor is shared via the ANDROID_SOCKET_<socketName> environment
+     * variable.
+     */
+    static LocalServerSocket createManagedSocketFromInitSocket(String socketName) {
+        int fileDesc;
+        final String fullSocketName = ANDROID_SOCKET_PREFIX + socketName;
+
+        try {
+            String env = System.getenv(fullSocketName);
+            fileDesc = Integer.parseInt(env);
+        } catch (RuntimeException ex) {
+            throw new RuntimeException("Socket unset or invalid: " + fullSocketName, ex);
+        }
+
+        try {
+            FileDescriptor fd = new FileDescriptor();
+            fd.setInt$(fileDesc);
+            return new LocalServerSocket(fd);
+        } catch (IOException ex) {
+            throw new RuntimeException(
+                "Error building socket from file descriptor: " + fileDesc, ex);
+        }
+    }
 
     private static void callPostForkSystemServerHooks() {
         // SystemServer specific post fork hooks run before child post fork hooks.
