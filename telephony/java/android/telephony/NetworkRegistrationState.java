@@ -219,12 +219,13 @@ public class NetworkRegistrationState implements Parcelable {
     public NetworkRegistrationState(int domain, int transportType, int regState,
             int accessNetworkTechnology, int rejectCause, boolean emergencyOnly,
             int[] availableServices, @Nullable CellIdentity cellIdentity, int maxDataCalls,
-            boolean isDcNrRestricted, boolean isNrAvailable, boolean isEndcAvailable) {
+            boolean isDcNrRestricted, boolean isNrAvailable, boolean isEndcAvailable,
+            LteVopsSupportInfo lteVopsSupportInfo) {
         this(domain, transportType, regState, accessNetworkTechnology, rejectCause, emergencyOnly,
                 availableServices, cellIdentity);
 
         mDataSpecificStates = new DataSpecificRegistrationStates(
-                maxDataCalls, isDcNrRestricted, isNrAvailable, isEndcAvailable);
+                maxDataCalls, isDcNrRestricted, isNrAvailable, isEndcAvailable, lteVopsSupportInfo);
         updateNrStatus(mDataSpecificStates);
     }
 
