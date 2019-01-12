@@ -269,7 +269,7 @@ public class ZygoteInit {
 
         try {
             BufferedReader br =
-                    new BufferedReader(new InputStreamReader(is), 256);
+                    new BufferedReader(new InputStreamReader(is), Zygote.SOCKET_BUFFER_SIZE);
 
             int count = 0;
             String line;
@@ -750,7 +750,7 @@ public class ZygoteInit {
             throw new RuntimeException("Failed to setpgid(0,0)", ex);
         }
 
-        final Runnable caller;
+        Runnable caller;
         try {
             // Report Zygote start time to tron unless it is a runtime restart
             if (!"1".equals(SystemProperties.get("sys.boot_completed"))) {
@@ -786,7 +786,17 @@ public class ZygoteInit {
                 throw new RuntimeException("No ABI list supplied.");
             }
 
-            zygoteServer.registerServerSocketFromEnv(socketName);
+            // TODO (chriswailes): Wrap these three calls in a helper function?
+            final String blastulaSocketName =
+                    socketName.equals(ZygoteProcess.ZYGOTE_SOCKET_NAME)
+                            ? ZygoteProcess.BLASTULA_POOL_SOCKET_NAME
+                            : ZygoteProcess.BLASTULA_POOL_SECONDARY_SOCKET_NAME;
+
+            zygoteServer.createZygoteSocket(socketName);
+            Zygote.createBlastulaSocket(blastulaSocketName);
+
+            Zygote.getSocketFDs(socketName.equals(ZygoteProcess.ZYGOTE_SOCKET_NAME));
+
             // In some configurations, we avoid preloading resources and classes eagerly.
             // In such cases, we will preload things prior to our first fork.
             if (!enableLazyPreload) {
@@ -829,11 +839,18 @@ public class ZygoteInit {
                 }
             }
 
-            Log.i(TAG, "Accepting command socket connections");
+            // If the return value is null then this is the zygote process
+            // returning to the normal control flow.  If it returns a Runnable
+            // object then this is a blastula that has finished specializing.
+            caller = Zygote.initBlastulaPool();
 
-            // The select loop returns early in the child process after a fork and
-            // loops forever in the zygote.
-            caller = zygoteServer.runSelectLoop(abiList);
+            if (caller == null) {
+                Log.i(TAG, "Accepting command socket connections");
+
+                // The select loop returns early in the child process after a fork and
+                // loops forever in the zygote.
+                caller = zygoteServer.runSelectLoop(abiList);
+            }
         } catch (Throwable ex) {
             Log.e(TAG, "System zygote died with exception", ex);
             throw ex;
