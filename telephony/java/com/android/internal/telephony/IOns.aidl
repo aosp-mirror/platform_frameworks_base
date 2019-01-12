@@ -18,13 +18,13 @@ package com.android.internal.telephony;
 
 import android.telephony.AvailableNetworkInfo;
 
-interface IAns {
+interface IOns {
 
     /**
-    * Enable or disable Alternative Network service.
+    * Enable or disable Opportunistic Network service.
     *
     * This method should be called to enable or disable
-    * AlternativeNetwork service on the device.
+    * OpportunisticNetwork service on the device.
     *
     * <p>
     * Requires Permission:
@@ -38,9 +38,9 @@ interface IAns {
     boolean setEnable(boolean enable, String callingPackage);
 
     /**
-     * is Alternative Network service enabled
+     * is Opportunistic Network service enabled
      *
-     * This method should be called to determine if the Alternative Network service is enabled
+     * This method should be called to determine if the Opportunistic Network service is enabled
     *
     * <p>
     * Requires Permission:
@@ -84,7 +84,7 @@ interface IAns {
      * Update availability of a list of networks in the current location.
      *
      * This api should be called if the caller is aware of the availability of a network
-     * at the current location. This information will be used by AlternativeNetwork service
+     * at the current location. This information will be used by OpportunisticNetwork service
      * to decide to attach to the network. If an empty list is passed,
      * it is assumed that no network is available.
      * Requires that the calling app has carrier privileges on both primary and
