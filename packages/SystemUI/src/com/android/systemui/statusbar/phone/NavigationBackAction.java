@@ -67,7 +67,7 @@ public class NavigationBackAction extends NavigationGestureAction {
 
     @Override
     public boolean isEnabled() {
-        return !getGlobalBoolean(NavigationPrototypeController.NAVBAR_EXPERIMENTS_DISABLED);
+        return true;
     }
 
     @Override
@@ -102,8 +102,7 @@ public class NavigationBackAction extends NavigationGestureAction {
     }
 
     private boolean shouldExecuteBackOnUp() {
-        return !getGlobalBoolean(NavigationPrototypeController.NAVBAR_EXPERIMENTS_DISABLED)
-                && getGlobalBoolean(BACK_AFTER_END_PROP);
+        return getGlobalBoolean(BACK_AFTER_END_PROP);
     }
 
     private void sendEvent(int action, int code) {
