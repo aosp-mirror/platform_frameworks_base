@@ -75,6 +75,23 @@ class JavaByteArrayHolder {
     jbyte* mElements;
 };
 
+int enableFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
+#if HAS_FSVERITY
+    const char* path = env->GetStringUTFChars(filePath, nullptr);
+    ::android::base::unique_fd rfd(open(path, O_RDONLY | O_CLOEXEC));
+    if (rfd.get() < 0) {
+      return errno;
+    }
+    if (ioctl(rfd.get(), FS_IOC_ENABLE_VERITY, nullptr) < 0) {
+      return errno;
+    }
+    return 0;
+#else
+    LOG_ALWAYS_FATAL("fs-verity is used while not enabled");
+    return ENOSYS;
+#endif  // HAS_FSVERITY
+}
+
 int measureFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
 #if HAS_FSVERITY
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_digest) + kSha256Bytes);
@@ -82,14 +99,17 @@ int measureFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
     data->digest_size = kSha256Bytes;  // the only input/output parameter
 
     const char* path = env->GetStringUTFChars(filePath, nullptr);
-    ::android::base::unique_fd rfd(open(path, O_RDONLY));
+    ::android::base::unique_fd rfd(open(path, O_RDONLY | O_CLOEXEC));
+    if (rfd.get() < 0) {
+      return errno;
+    }
     if (ioctl(rfd.get(), FS_IOC_MEASURE_VERITY, data) < 0) {
       return errno;
     }
     return 0;
 #else
     LOG_ALWAYS_FATAL("fs-verity is used while not enabled");
-    return -1;
+    return ENOSYS;
 #endif  // HAS_FSVERITY
 }
 
@@ -172,6 +192,7 @@ jbyteArray constructFsverityFooter(JNIEnv* env, jobject /* clazz */,
 }
 
 const JNINativeMethod sMethods[] = {
+    { "enableFsverityNative", "(Ljava/lang/String;)I", (void *)enableFsverity },
     { "measureFsverityNative", "(Ljava/lang/String;)I", (void *)measureFsverity },
     { "constructFsveritySignedDataNative", "([B)[B", (void *)constructFsveritySignedData },
     { "constructFsverityDescriptorNative", "(J)[B", (void *)constructFsverityDescriptor },
