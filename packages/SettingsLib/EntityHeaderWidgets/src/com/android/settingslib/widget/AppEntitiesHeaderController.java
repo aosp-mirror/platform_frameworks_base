@@ -18,7 +18,6 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -32,22 +31,8 @@ import androidx.annotation.StringRes;
 import androidx.annotation.VisibleForTesting;
 
 /**
- * This is used to initialize view which was inflated
+ * This class is used to initialize view which was inflated
  * from {@link R.xml.app_entities_header.xml}.
- *
- * <p>The view looks like below.
- *
- * <pre>
- * --------------------------------------------------------------
- * |                     Header title                           |
- * --------------------------------------------------------------
- * |    App1 icon       |   App2 icon        |   App3 icon      |
- * |    App1 title      |   App2 title       |   App3 title     |
- * |    App1 summary    |   App2 summary     |   App3 summary   |
- * |-------------------------------------------------------------
- * |                     Header details                         |
- * --------------------------------------------------------------
- * </pre>
  *
  * <p>How to use AppEntitiesHeaderController?
  *
@@ -66,13 +51,20 @@ import androidx.annotation.VisibleForTesting;
  * View headerView = ((LayoutPreference) screen.findPreference("app_entities_header"))
  *         .findViewById(R.id.app_entities_header);
  *
+ * final AppEntityInfo appEntityInfo = new AppEntityInfo.Builder()
+ *         .setIcon(icon)
+ *         .setTitle(title)
+ *         .setSummary(summary)
+ *         .setOnClickListener(view -> doSomething())
+ *         .build();
+ *
  * AppEntitiesHeaderController.newInstance(context, headerView)
  *         .setHeaderTitleRes(R.string.xxxxx)
  *         .setHeaderDetailsRes(R.string.xxxxx)
  *         .setHeaderDetailsClickListener(onClickListener)
- *         .setAppEntity(0, icon, "app title", "app summary")
- *         .setAppEntity(1, icon, "app title", "app summary")
- *         .setAppEntity(2, icon, "app title", "app summary")
+ *         .setAppEntity(0, appEntityInfo)
+ *         .setAppEntity(1, appEntityInfo)
+ *         .setAppEntity(2, appEntityInfo)
  *         .apply();
  * </pre>
  */
@@ -81,13 +73,13 @@ public class AppEntitiesHeaderController {
     private static final String TAG = "AppEntitiesHeaderCtl";
 
     @VisibleForTesting
-    static final int MAXIMUM_APPS = 3;
+    public static final int MAXIMUM_APPS = 3;
 
     private final Context mContext;
     private final TextView mHeaderTitleView;
     private final Button mHeaderDetailsView;
 
-    private final AppEntity[] mAppEntities;
+    private final AppEntityInfo[] mAppEntityInfos;
     private final View[] mAppEntityViews;
     private final ImageView[] mAppIconViews;
     private final TextView[] mAppTitleViews;
@@ -100,7 +92,7 @@ public class AppEntitiesHeaderController {
     /**
      * Creates a new instance of the controller.
      *
-     * @param context the Context the view is running in
+     * @param context               the Context the view is running in
      * @param appEntitiesHeaderView view was inflated from <code>app_entities_header</code>
      */
     public static AppEntitiesHeaderController newInstance(@NonNull Context context,
@@ -113,7 +105,7 @@ public class AppEntitiesHeaderController {
         mHeaderTitleView = appEntitiesHeaderView.findViewById(R.id.header_title);
         mHeaderDetailsView = appEntitiesHeaderView.findViewById(R.id.header_details);
 
-        mAppEntities = new AppEntity[MAXIMUM_APPS];
+        mAppEntityInfos = new AppEntityInfo[MAXIMUM_APPS];
         mAppIconViews = new ImageView[MAXIMUM_APPS];
         mAppTitleViews = new TextView[MAXIMUM_APPS];
         mAppSummaryViews = new TextView[MAXIMUM_APPS];
@@ -162,16 +154,13 @@ public class AppEntitiesHeaderController {
     /**
      * Set an app entity at a specified position view.
      *
-     * @param index the index at which the specified view is to be inserted
-     * @param icon the icon of app entity
-     * @param titleRes the title of app entity
-     * @param summaryRes the summary of app entity
+     * @param index         the index at which the specified view is to be inserted
+     * @param appEntityInfo the information of an app entity
      * @return this {@code AppEntitiesHeaderController} object
      */
-    public AppEntitiesHeaderController setAppEntity(int index, @NonNull Drawable icon,
-            @Nullable CharSequence titleRes, @Nullable CharSequence summaryRes) {
-        final AppEntity appEntity = new AppEntity(icon, titleRes, summaryRes);
-        mAppEntities[index] = appEntity;
+    public AppEntitiesHeaderController setAppEntity(int index,
+            @NonNull AppEntityInfo appEntityInfo) {
+        mAppEntityInfos[index] = appEntityInfo;
         return this;
     }
 
@@ -182,7 +171,7 @@ public class AppEntitiesHeaderController {
      * @return this {@code AppEntitiesHeaderController} object
      */
     public AppEntitiesHeaderController removeAppEntity(int index) {
-        mAppEntities[index] = null;
+        mAppEntityInfos[index] = null;
         return this;
     }
 
@@ -237,31 +226,23 @@ public class AppEntitiesHeaderController {
     }
 
     private void bindAppEntityView(int index) {
-        final AppEntity appEntity = mAppEntities[index];
-        mAppEntityViews[index].setVisibility(appEntity != null ? View.VISIBLE : View.GONE);
+        final AppEntityInfo appEntityInfo = mAppEntityInfos[index];
+        mAppEntityViews[index].setVisibility(appEntityInfo != null ? View.VISIBLE : View.GONE);
 
-        if (appEntity != null) {
-            mAppIconViews[index].setImageDrawable(appEntity.icon);
+        if (appEntityInfo != null) {
+            mAppEntityViews[index].setOnClickListener(appEntityInfo.getClickListener());
 
+            mAppIconViews[index].setImageDrawable(appEntityInfo.getIcon());
+
+            final CharSequence title = appEntityInfo.getTitle();
             mAppTitleViews[index].setVisibility(
-                    TextUtils.isEmpty(appEntity.title) ? View.INVISIBLE : View.VISIBLE);
-            mAppTitleViews[index].setText(appEntity.title);
+                    TextUtils.isEmpty(title) ? View.INVISIBLE : View.VISIBLE);
+            mAppTitleViews[index].setText(title);
 
+            final CharSequence summary = appEntityInfo.getSummary();
             mAppSummaryViews[index].setVisibility(
-                    TextUtils.isEmpty(appEntity.summary) ? View.INVISIBLE : View.VISIBLE);
-            mAppSummaryViews[index].setText(appEntity.summary);
-        }
-    }
-
-    private static class AppEntity {
-        public final Drawable icon;
-        public final CharSequence title;
-        public final CharSequence summary;
-
-        AppEntity(Drawable appIcon, CharSequence appTitle, CharSequence appSummary) {
-            icon = appIcon;
-            title = appTitle;
-            summary = appSummary;
+                    TextUtils.isEmpty(summary) ? View.INVISIBLE : View.VISIBLE);
+            mAppSummaryViews[index].setText(summary);
         }
     }
 }

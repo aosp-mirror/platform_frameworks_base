@@ -19,7 +19,6 @@ package com.android.settingslib.widget;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -43,18 +42,24 @@ public class AppEntitiesHeaderControllerTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     private Context mContext;
-    private Drawable mIcon;
     private View mAppEntitiesHeaderView;
     private AppEntitiesHeaderController mController;
+    private AppEntityInfo mAppEntityInfo;
 
     @Before
     public void setUp() {
         mContext = RuntimeEnvironment.application;
         mAppEntitiesHeaderView = LayoutInflater.from(mContext).inflate(
                 R.layout.app_entities_header, null /* root */);
-        mIcon = mContext.getDrawable(R.drawable.ic_menu);
         mController = AppEntitiesHeaderController.newInstance(mContext,
                 mAppEntitiesHeaderView);
+        mAppEntityInfo = new AppEntityInfo.Builder()
+                .setIcon(mContext.getDrawable(R.drawable.ic_menu))
+                .setTitle(TITLE)
+                .setSummary(SUMMARY)
+                .setOnClickListener(v -> {
+                })
+                .build();
     }
 
     @Test
@@ -91,26 +96,26 @@ public class AppEntitiesHeaderControllerTest {
     public void setAppEntity_indexLessThanZero_shouldThrowArrayIndexOutOfBoundsException() {
         thrown.expect(ArrayIndexOutOfBoundsException.class);
 
-        mController.setAppEntity(-1, mIcon, TITLE, SUMMARY);
+        mController.setAppEntity(-1, mAppEntityInfo);
     }
 
     @Test
     public void asetAppEntity_indexGreaterThanMaximum_shouldThrowArrayIndexOutOfBoundsException() {
         thrown.expect(ArrayIndexOutOfBoundsException.class);
 
-        mController.setAppEntity(AppEntitiesHeaderController.MAXIMUM_APPS + 1, mIcon, TITLE,
-                SUMMARY);
+        mController.setAppEntity(AppEntitiesHeaderController.MAXIMUM_APPS + 1, mAppEntityInfo);
     }
 
     @Test
     public void setAppEntity_addAppToIndex0_shouldShowAppView1() {
-        mController.setAppEntity(0, mIcon, TITLE, SUMMARY).apply();
+        mController.setAppEntity(0, mAppEntityInfo).apply();
         final View app1View = mAppEntitiesHeaderView.findViewById(R.id.app1_view);
         final ImageView appIconView = app1View.findViewById(R.id.app_icon);
         final TextView appTitle = app1View.findViewById(R.id.app_title);
         final TextView appSummary = app1View.findViewById(R.id.app_summary);
 
         assertThat(app1View.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(app1View.hasOnClickListeners()).isTrue();
         assertThat(appIconView.getDrawable()).isNotNull();
         assertThat(appTitle.getText()).isEqualTo(TITLE);
         assertThat(appSummary.getText()).isEqualTo(SUMMARY);
@@ -118,13 +123,14 @@ public class AppEntitiesHeaderControllerTest {
 
     @Test
     public void setAppEntity_addAppToIndex1_shouldShowAppView2() {
-        mController.setAppEntity(1, mIcon, TITLE, SUMMARY).apply();
+        mController.setAppEntity(1, mAppEntityInfo).apply();
         final View app2View = mAppEntitiesHeaderView.findViewById(R.id.app2_view);
         final ImageView appIconView = app2View.findViewById(R.id.app_icon);
         final TextView appTitle = app2View.findViewById(R.id.app_title);
         final TextView appSummary = app2View.findViewById(R.id.app_summary);
 
         assertThat(app2View.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(app2View.hasOnClickListeners()).isTrue();
         assertThat(appIconView.getDrawable()).isNotNull();
         assertThat(appTitle.getText()).isEqualTo(TITLE);
         assertThat(appSummary.getText()).isEqualTo(SUMMARY);
@@ -132,13 +138,14 @@ public class AppEntitiesHeaderControllerTest {
 
     @Test
     public void setAppEntity_addAppToIndex2_shouldShowAppView3() {
-        mController.setAppEntity(2, mIcon, TITLE, SUMMARY).apply();
+        mController.setAppEntity(2, mAppEntityInfo).apply();
         final View app3View = mAppEntitiesHeaderView.findViewById(R.id.app3_view);
         final ImageView appIconView = app3View.findViewById(R.id.app_icon);
         final TextView appTitle = app3View.findViewById(R.id.app_title);
         final TextView appSummary = app3View.findViewById(R.id.app_summary);
 
         assertThat(app3View.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(app3View.hasOnClickListeners()).isTrue();
         assertThat(appIconView.getDrawable()).isNotNull();
         assertThat(appTitle.getText()).isEqualTo(TITLE);
         assertThat(appSummary.getText()).isEqualTo(SUMMARY);
@@ -146,8 +153,8 @@ public class AppEntitiesHeaderControllerTest {
 
     @Test
     public void removeAppEntity_removeIndex0_shouldNotShowAppView1() {
-        mController.setAppEntity(0, mIcon, TITLE, SUMMARY)
-                .setAppEntity(1, mIcon, TITLE, SUMMARY).apply();
+        mController.setAppEntity(0, mAppEntityInfo)
+                .setAppEntity(1, mAppEntityInfo).apply();
         final View app1View = mAppEntitiesHeaderView.findViewById(R.id.app1_view);
         final View app2View = mAppEntitiesHeaderView.findViewById(R.id.app2_view);
 
@@ -162,9 +169,9 @@ public class AppEntitiesHeaderControllerTest {
 
     @Test
     public void clearAllAppEntities_shouldNotShowAllAppViews() {
-        mController.setAppEntity(0, mIcon, TITLE, SUMMARY)
-                .setAppEntity(1, mIcon, TITLE, SUMMARY)
-                .setAppEntity(2, mIcon, TITLE, SUMMARY).apply();
+        mController.setAppEntity(0, mAppEntityInfo)
+                .setAppEntity(1, mAppEntityInfo)
+                .setAppEntity(2, mAppEntityInfo).apply();
         final View app1View = mAppEntitiesHeaderView.findViewById(R.id.app1_view);
         final View app2View = mAppEntitiesHeaderView.findViewById(R.id.app2_view);
         final View app3View = mAppEntitiesHeaderView.findViewById(R.id.app3_view);
