@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.AppProtoEnums;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
@@ -479,4 +480,10 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void setProfilerInfo(ProfilerInfo profilerInfo);
 
     public abstract ActivityMetricsLaunchObserverRegistry getLaunchObserverRegistry();
+
+    /**
+     * Gets bitmap snapshot of the provided task id.
+     */
+    public abstract ActivityManager.TaskSnapshot getTaskSnapshot(int taskId,
+            boolean reducedResolution);
 }

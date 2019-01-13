@@ -121,6 +121,7 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.autofill.AutofillPopupWindow;
 import android.view.autofill.IAutofillWindowPresenter;
+import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureManager;
 import android.widget.AdapterView;
 import android.widget.Toast;
@@ -1045,14 +1046,19 @@ public class Activity extends ContextThemeWrapper
 
     private void notifyContentCaptureManagerIfNeeded(@ContentCaptureNotificationType int type) {
         final ContentCaptureManager cm = getContentCaptureManager();
-        if (cm == null || !cm.isContentCaptureEnabled()) {
+        if (cm == null) {
             return;
         }
         switch (type) {
             case CONTENT_CAPTURE_START:
                 //TODO(b/111276913): decide whether the InteractionSessionId should be
                 // saved / restored in the activity bundle - probably not
-                cm.onActivityStarted(mToken, getComponentName());
+                int flags = 0;
+                if ((getWindow().getAttributes().flags
+                        & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
+                    flags |= ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE;
+                }
+                cm.onActivityStarted(mToken, getComponentName(), flags);
                 break;
             case CONTENT_CAPTURE_FLUSH:
                 cm.flush();
@@ -2158,6 +2164,7 @@ public class Activity extends ContextThemeWrapper
      * for helping activities determine the proper time to cancel a notification.
      *
      * @see #onUserInteraction()
+     * @see android.content.Intent#FLAG_ACTIVITY_NO_USER_ACTION
      */
     protected void onUserLeaveHint() {
     }

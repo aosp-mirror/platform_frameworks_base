@@ -42,6 +42,7 @@ import android.content.pm.ServiceInfo;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Pair;
@@ -60,6 +61,7 @@ import java.util.Set;
 
 /** Resolves all Android component types [activities, services, providers and receivers]. */
 public class ComponentResolver {
+    private static final boolean DEBUG = false;
     private static final String TAG = "PackageManager";
     private static final boolean DEBUG_FILTERS = false;
     private static final boolean DEBUG_SHOW_INFO = false;
@@ -1198,22 +1200,48 @@ public class ComponentResolver {
             return packageName.equals(info.activity.owner.packageName);
         }
 
+        private void log(String reason, ActivityIntentInfo info, int match,
+                int userId) {
+            Slog.w(TAG, reason
+                    + "; match: "
+                    + DebugUtils.flagsToString(IntentFilter.class, "MATCH_", match)
+                    + "; userId: " + userId
+                    + "; intent info: " + info);
+        }
+
         @Override
         protected ResolveInfo newResult(PackageParser.ActivityIntentInfo info,
                 int match, int userId) {
-            if (!sUserManager.exists(userId)) return null;
+            if (!sUserManager.exists(userId)) {
+                if (DEBUG) {
+                    log("User doesn't exist", info, match, userId);
+                }
+                return null;
+            }
             if (!sPackageManagerInternal.isEnabledAndMatches(info.activity.info, mFlags, userId)) {
+                if (DEBUG) {
+                    log("!PackageManagerInternal.isEnabledAndMatches; mFlags="
+                            + DebugUtils.flagsToString(PackageManager.class, "MATCH_", mFlags),
+                            info, match, userId);
+                }
                 return null;
             }
             final PackageParser.Activity activity = info.activity;
             PackageSetting ps = (PackageSetting) activity.owner.mExtras;
             if (ps == null) {
+                if (DEBUG) {
+                    log("info.activity.owner.mExtras == null", info, match, userId);
+                }
                 return null;
             }
             final PackageUserState userState = ps.readUserState(userId);
             ActivityInfo ai =
                     PackageParser.generateActivityInfo(activity, mFlags, userState, userId);
             if (ai == null) {
+                if (DEBUG) {
+                    log("Failed to create ActivityInfo based on " + info.activity, info, match,
+                            userId);
+                }
                 return null;
             }
             final boolean matchExplicitlyVisibleOnly =
@@ -1227,15 +1255,31 @@ public class ComponentResolver {
             final boolean matchInstantApp = (mFlags & PackageManager.MATCH_INSTANT) != 0;
             // throw out filters that aren't visible to ephemeral apps
             if (matchVisibleToInstantApp && !(componentVisible || userState.instantApp)) {
+                if (DEBUG) {
+                    log("Filter(s) not visible to ephemeral apps"
+                            + "; matchVisibleToInstantApp=" + matchVisibleToInstantApp
+                            + "; matchInstantApp=" + matchInstantApp
+                            + "; info.isVisibleToInstantApp()=" + info.isVisibleToInstantApp()
+                            + "; matchExplicitlyVisibleOnly=" + matchExplicitlyVisibleOnly
+                            + "; info.isExplicitlyVisibleToInstantApp()="
+                                    + info.isExplicitlyVisibleToInstantApp(),
+                            info, match, userId);
+                }
                 return null;
             }
             // throw out instant app filters if we're not explicitly requesting them
             if (!matchInstantApp && userState.instantApp) {
+                if (DEBUG) {
+                    log("Instant app filter is not explicitly requested", info, match, userId);
+                }
                 return null;
             }
             // throw out instant app filters if updates are available; will trigger
             // instant app resolution
             if (userState.instantApp && ps.isUpdateAvailable()) {
+                if (DEBUG) {
+                    log("Instant app update is available", info, match, userId);
+                }
                 return null;
             }
             final ResolveInfo res = new ResolveInfo();

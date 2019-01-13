@@ -974,10 +974,11 @@ class TaskRecord extends ConfigurationContainer {
      */
     boolean isSameIntentFilter(ActivityRecord r) {
         final Intent intent = new Intent(r.intent);
-        // Correct the activity intent for aliasing. The task record intent will always be based on
-        // the real activity that will be launched not the alias, so we need to use an intent with
-        // the component name pointing to the real activity not the alias in the activity record.
-        intent.setComponent(r.mActivityComponent);
+        // Make sure the component are the same if the input activity has the same real activity
+        // as the one in the task because either one of them could be the alias activity.
+        if (Objects.equals(realActivity, r.mActivityComponent) && this.intent != null) {
+            intent.setComponent(this.intent.getComponent());
+        }
         return intent.filterEquals(this.intent);
     }
 

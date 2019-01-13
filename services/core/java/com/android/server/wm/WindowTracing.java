@@ -17,31 +17,23 @@
 package com.android.server.wm;
 
 import static android.os.Build.IS_USER;
+
 import static com.android.server.wm.WindowManagerTraceFileProto.ENTRY;
-import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER;
-import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER_H;
-import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER_L;
 import static com.android.server.wm.WindowManagerTraceProto.ELAPSED_REALTIME_NANOS;
 import static com.android.server.wm.WindowManagerTraceProto.WHERE;
 import static com.android.server.wm.WindowManagerTraceProto.WINDOW_MANAGER_SERVICE;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.annotation.Nullable;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * A class that allows window manager to dump its state continuously to a trace file, such that a
@@ -49,35 +41,42 @@ import java.util.concurrent.BlockingQueue;
  */
 class WindowTracing {
 
+    /**
+     * Maximum buffer size, currently defined as 512 KB
+     * Size was experimentally defined to fit between 100 to 150 elements.
+     */
+    private static final int WINDOW_TRACE_BUFFER_SIZE = 512 * 1024;
     private static final String TAG = "WindowTracing";
-    private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
 
     private final Object mLock = new Object();
-    private final File mTraceFile;
-    private final BlockingQueue<ProtoOutputStream> mWriteQueue = new ArrayBlockingQueue<>(200);
+    private final WindowTraceBuffer.Builder mBufferBuilder;
+
+    private WindowTraceBuffer mTraceBuffer;
 
     private boolean mEnabled;
     private volatile boolean mEnabledLockFree;
 
     WindowTracing(File file) {
-        mTraceFile = file;
+        mBufferBuilder = new WindowTraceBuffer.Builder()
+                .setTraceFile(file)
+                .setBufferCapacity(WINDOW_TRACE_BUFFER_SIZE);
     }
 
     void startTrace(@Nullable PrintWriter pw) throws IOException {
-        if (IS_USER){
+        if (IS_USER) {
             logAndPrintln(pw, "Error: Tracing is not supported on user builds.");
             return;
         }
         synchronized (mLock) {
-            logAndPrintln(pw, "Start tracing to " + mTraceFile + ".");
-            mWriteQueue.clear();
-            mTraceFile.delete();
-            try (OutputStream os = new FileOutputStream(mTraceFile)) {
-                mTraceFile.setReadable(true, false);
-                ProtoOutputStream proto = new ProtoOutputStream(os);
-                proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
-                proto.flush();
+            logAndPrintln(pw, "Start tracing to " + mBufferBuilder.getFile() + ".");
+            if (mTraceBuffer != null) {
+                try {
+                    mTraceBuffer.writeToDisk();
+                } catch (InterruptedException e) {
+                    logAndPrintln(pw, "Error: Unable to flush the previous buffer.");
+                }
             }
+            mTraceBuffer = mBufferBuilder.build();
             mEnabled = mEnabledLockFree = true;
         }
     }
@@ -91,67 +90,42 @@ class WindowTracing {
     }
 
     void stopTrace(@Nullable PrintWriter pw) {
-        if (IS_USER){
+        if (IS_USER) {
             logAndPrintln(pw, "Error: Tracing is not supported on user builds.");
             return;
         }
         synchronized (mLock) {
-            logAndPrintln(pw, "Stop tracing to " + mTraceFile + ". Waiting for traces to flush.");
+            logAndPrintln(pw, "Stop tracing to " + mBufferBuilder.getFile()
+                    + ". Waiting for traces to flush.");
             mEnabled = mEnabledLockFree = false;
-            while (!mWriteQueue.isEmpty()) {
+
+            synchronized (mLock) {
                 if (mEnabled) {
                     logAndPrintln(pw, "ERROR: tracing was re-enabled while waiting for flush.");
                     throw new IllegalStateException("tracing enabled while waiting for flush.");
                 }
                 try {
-                    mLock.wait();
-                    mLock.notify();
+                    mTraceBuffer.writeToDisk();
+                } catch (IOException e) {
+                    Log.e(TAG, "Unable to write buffer to file", e);
                 } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+                    Log.e(TAG, "Unable to interrupt window tracing file write thread", e);
                 }
             }
-            logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
+            logAndPrintln(pw, "Trace written to " + mBufferBuilder.getFile() + ".");
         }
     }
 
-    void appendTraceEntry(ProtoOutputStream proto) {
+    private void appendTraceEntry(ProtoOutputStream proto) {
         if (!mEnabledLockFree) {
             return;
         }
 
-        if (!mWriteQueue.offer(proto)) {
-            Log.e(TAG, "Dropping window trace entry, queue full");
-        }
-    }
-
-    void loop() {
-        for (;;) {
-            loopOnce();
-        }
-    }
-
-    @VisibleForTesting
-    void loopOnce() {
-        ProtoOutputStream proto;
         try {
-            proto = mWriteQueue.take();
+            mTraceBuffer.add(proto);
         } catch (InterruptedException e) {
+            Log.e(TAG, "Unable to add element to trace", e);
             Thread.currentThread().interrupt();
-            return;
-        }
-
-        synchronized (mLock) {
-            try {
-                Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "writeToFile");
-                try (OutputStream os = new FileOutputStream(mTraceFile, true /* append */)) {
-                    os.write(proto.getBytes());
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "Failed to write file " + mTraceFile, e);
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-            }
-            mLock.notify();
         }
     }
 
@@ -161,11 +135,7 @@ class WindowTracing {
 
     static WindowTracing createDefaultAndStartLooper(Context context) {
         File file = new File("/data/misc/wmtrace/wm_trace.pb");
-        WindowTracing windowTracing = new WindowTracing(file);
-        if (!IS_USER){
-            new Thread(windowTracing::loop, "window_tracing").start();
-        }
-        return windowTracing;
+        return new WindowTracing(file);
     }
 
     int onShellCommand(ShellCommand shell, String cmd) {

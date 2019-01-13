@@ -319,23 +319,12 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
         mOwner.notifyRestrictedCaptionAreaCallback(mMaximize.getLeft(), mMaximize.getTop(),
                 mClose.getRight(), mClose.getBottom());
     }
-    /**
-     * Determine if the workspace is entirely covered by the window.
-     * @return Returns true when the window is filling the entire screen/workspace.
-     **/
-    private boolean isFillingScreen() {
-        return (0 != ((getWindowSystemUiVisibility() | getSystemUiVisibility()) &
-                (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                        View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_LOW_PROFILE)));
-    }
 
     /**
      * Updates the visibility of the caption.
      **/
     private void updateCaptionVisibility() {
-        // Don't show the caption if the window has e.g. entered full screen.
-        boolean invisible = isFillingScreen() || !mShow;
-        mCaption.setVisibility(invisible ? GONE : VISIBLE);
+        mCaption.setVisibility(mShow ? VISIBLE : GONE);
         mCaption.setOnTouchListener(this);
     }
 

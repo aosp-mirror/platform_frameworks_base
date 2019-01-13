@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"အရန်သိမ်းဆည်းခြင်းအတွက် စကားဝှက်အသစ်ကို သတ်မှတ်ပြီးပြီ။"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"စကားဝှက်အသစ်နှင့် အတည်ပြုချက် ကွဲလွဲနေသည်။"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"အရန်သိမ်းဆည်းခြင်းအတွက် စကားဝှက်သတ်မှတ်ချက် မအောင်မြင်ပါ။"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"ဖွင့်နေသည်…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"တက်ကြွခြင်း (မူလ)"</item>
     <item msgid="8446070607501413455">"သဘာဝ"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"အမြဲမေးပါ"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"သင်ပိတ်လိုက်သည် အထိ"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"ယခုလေးတင်"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"ဆော့ဖ်ဝဲရေးဆွဲမှုအတွင်း အပ်ဒိတ်လုပ်ထားသော ဂရပ်ဖစ်ဒရိုင်ဗာကို အသုံးပြုရန် အက်ပ်ကို ရွေးချယ်ပါ"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"ဖုန်းစပီကာ"</string>
 </resources>

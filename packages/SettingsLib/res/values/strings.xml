@@ -1137,9 +1137,6 @@
     <!-- The notice header of Third-party licenses. not translatable -->
     <string name="notice_header" translatable="false"></string>
 
-    <!-- UI debug setting: opt in to use updated graphics driver? [CHAR LIMIT=100] -->
-    <string name="gup_dev_opt_in_app_summary">Opt in app to use Game Update Package in developement</string>
-
     <!-- Name of the phone device [CHAR LIMIT=NONE] -->
     <string name="media_transfer_phone_device_name">Phone speaker</string>
 </resources>

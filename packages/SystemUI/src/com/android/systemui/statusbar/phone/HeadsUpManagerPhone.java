@@ -58,7 +58,7 @@ import java.util.Stack;
  */
 public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         ViewTreeObserver.OnComputeInternalInsetsListener, VisualStabilityManager.Callback,
-        OnHeadsUpChangedListener, ConfigurationController.ConfigurationListener {
+        OnHeadsUpChangedListener, ConfigurationController.ConfigurationListener, StateListener {
     private static final String TAG = "HeadsUpManagerPhone";
 
     private final View mStatusBarWindowView;
@@ -83,7 +83,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private boolean mIsObserving;
     private int mStatusBarState;
 
-    private final StateListener mStateListener = this::setStatusBarState;
     private AnimationStateHandler mAnimationStateHandler;
     private BubbleController mBubbleController = Dependency.get(BubbleController.class);
 
@@ -129,7 +128,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                 updateTouchableRegionListener();
             }
         });
-        Dependency.get(StatusBarStateController.class).addCallback(mStateListener);
+        Dependency.get(StatusBarStateController.class).addCallback(this);
         mBubbleController.setBubbleStateChangeListener((hasBubbles) -> {
             if (!hasBubbles) {
                 mBubbleGoingAway = true;
@@ -143,7 +142,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     }
 
     public void destroy() {
-        Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
+        Dependency.get(StatusBarStateController.class).removeCallback(this);
     }
 
     private void initResources() {
@@ -225,11 +224,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         }
     }
 
-    /**
-     * Set the current state of the statusbar.
-     */
-    private void setStatusBarState(int statusBarState) {
-        mStatusBarState = statusBarState;
+    @Override
+    public void onStateChanged(int newState) {
+        mStatusBarState = newState;
     }
 
     /**

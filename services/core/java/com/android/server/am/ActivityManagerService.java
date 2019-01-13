@@ -50,6 +50,7 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Process.BLUETOOTH_UID;
 import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.os.Process.NETWORK_STACK_UID;
 import static android.os.Process.NFC_UID;
 import static android.os.Process.PHONE_UID;
 import static android.os.Process.PROC_CHAR;
@@ -328,7 +329,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
-import com.android.server.AppOpsService;
+import com.android.server.appop.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
 import com.android.server.DisplayThread;
@@ -2430,6 +2431,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
+     * Ensures that the given package name has an explicit set of allowed associations.
+     * If it does not, give it an empty set.
+     */
+    void requireAllowedAssociationsLocked(String packageName) {
+        if (mAllowedAssociations == null) {
+            mAllowedAssociations = new ArrayMap<>(
+                    SystemConfig.getInstance().getAllowedAssociations());
+        }
+        if (mAllowedAssociations.get(packageName) == null) {
+            mAllowedAssociations.put(packageName, new ArraySet<>());
+        }
+    }
+
+    /**
      * Returns true if the package {@code pkg1} running under user handle {@code uid1} is
      * allowed association with the package {@code pkg2} running under user handle {@code uid2}.
      * <p> If either of the packages are running as  part of the core system, then the
@@ -2437,7 +2452,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     boolean validateAssociationAllowedLocked(String pkg1, int uid1, String pkg2, int uid2) {
         if (mAllowedAssociations == null) {
-            mAllowedAssociations = SystemConfig.getInstance().getAllowedAssociations();
+            mAllowedAssociations = new ArrayMap<>(
+                    SystemConfig.getInstance().getAllowedAssociations());
         }
         // Interactions with the system uid are always allowed, since that is the core system
         // that everyone needs to be able to interact with. Also allow reflexive associations
@@ -14343,6 +14359,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             case BLUETOOTH_UID:
             case NFC_UID:
             case SE_UID:
+            case NETWORK_STACK_UID:
                 isCallerSystem = true;
                 break;
             default:
@@ -19478,8 +19495,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public ComponentName startServiceInPackage(int uid, Intent service, String resolvedType,
-                boolean fgRequired, String callingPackage, int userId)
-                throws TransactionTooLargeException {
+                boolean fgRequired, String callingPackage, int userId,
+                boolean allowBackgroundActivityStarts) throws TransactionTooLargeException {
             synchronized(ActivityManagerService.this) {
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
                         "startServiceInPackage: " + service + " type=" + resolvedType);
@@ -19487,7 +19504,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ComponentName res;
                 try {
                     res = mServices.startServiceLocked(null, service,
-                            resolvedType, -1, uid, fgRequired, callingPackage, userId);
+                            resolvedType, -1, uid, fgRequired, callingPackage, userId,
+                            allowBackgroundActivityStarts);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }

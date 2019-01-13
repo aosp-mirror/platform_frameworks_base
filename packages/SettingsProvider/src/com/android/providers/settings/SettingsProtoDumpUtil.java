@@ -708,6 +708,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GUP_DEV_OPT_IN_APPS,
                 GlobalSettingsProto.Gpu.GUP_DEV_OPT_IN_APPS);
         dumpSetting(s, p,
+                Settings.Global.GUP_DEV_OPT_OUT_APPS,
+                GlobalSettingsProto.Gpu.GUP_DEV_OPT_OUT_APPS);
+        dumpSetting(s, p,
                 Settings.Global.GUP_BLACK_LIST,
                 GlobalSettingsProto.Gpu.GUP_BLACK_LIST);
         p.end(gpuToken);
@@ -1553,6 +1556,10 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.ZRAM_ENABLED,
                 GlobalSettingsProto.ZRAM_ENABLED);
+
+        dumpSetting(s, p,
+                Global.APP_OPS_CONSTANTS,
+                GlobalSettingsProto.APP_OPS_CONSTANTS);
 
         p.end(token);
         // Please insert new settings using the same order as in GlobalSettingsProto.

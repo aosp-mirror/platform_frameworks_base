@@ -98,7 +98,7 @@ public final class MediaSessionManager {
      * @return The binder object from the system
      * @hide
      */
-    public @NonNull ISession createSession(@NonNull MediaSession.CallbackStub cbStub,
+    public @NonNull ISession createSession(@NonNull SessionCallbackLink cbStub,
             @NonNull String tag, int userId) throws RemoteException {
         return mService.createSession(mContext.getPackageName(), cbStub, tag, userId);
     }
@@ -176,6 +176,44 @@ public final class MediaSessionManager {
             Log.e(TAG, "Failed to get active sessions: ", e);
         }
         return controllers;
+    }
+
+    /**
+     * Gets a list of {@link Session2Token} with type {@link Session2Token#TYPE_SESSION} for the
+     * current user.
+     * <p>
+     * Although this API can be used without any restriction, each session owners can accept or
+     * reject your uses of {@link MediaSession2}.
+     *
+     * @return A list of {@link Session2Token}.
+     * @hide
+     */
+    // TODO: unhide
+    @NonNull
+    public List<Session2Token> getSession2Tokens() {
+        return getSession2Tokens(UserHandle.myUserId());
+    }
+
+    /**
+     * Gets a list of {@link Session2Token} with type {@link Session2Token#TYPE_SESSION} for the
+     * given user.
+     * <p>
+     * If you want to get tokens for another user, you must hold the
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
+     *
+     * @param userId The user id to fetch sessions for.
+     * @return A list of {@link Session2Token}
+     * @hide
+     */
+    // TODO: unhide
+    @NonNull
+    public List<Session2Token> getSession2Tokens(int userId) {
+        try {
+            return mService.getSession2Tokens(userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get session tokens", e);
+        }
+        return new ArrayList<>();
     }
 
     /**

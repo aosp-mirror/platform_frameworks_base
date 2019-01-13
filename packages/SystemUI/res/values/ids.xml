@@ -102,12 +102,17 @@
     <item type="id" name="action_snooze_assistant_suggestion_1"/>
     <item type="id" name="action_snooze"/>
 
-    <!-- For StatusBarIconContainer to tag its icon views -->
+    <!-- For StatusIconContainer to tag its icon views -->
     <item type="id" name="status_bar_view_state_tag" />
 
     <item type="id" name="display_cutout" />
 
     <!-- Optional cancel button on Keyguard -->
     <item type="id" name="cancel_button"/>
+
+    <!-- AodMaskView transition tag -->
+    <item type="id" name="aod_mask_transition_progress_tag" />
+    <item type="id" name="aod_mask_transition_progress_end_tag" />
+    <item type="id" name="aod_mask_transition_progress_start_tag" />
 </resources>
 

@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"പുതിയ ബാക്കപ്പ് പാസ്‌വേഡ് സജ്ജമാക്കി"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"പുതിയ പാസ്‌വേഡും സ്ഥിരീകരണവും പൊരുത്തപ്പെടുന്നില്ല"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ബാക്കപ്പ് പാസ്‌വേഡ് സജ്ജമാക്കുന്നതിൽ പരാജയപ്പെട്ടു"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"ലോഡ് ചെയ്യുന്നു…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"വൈബ്രന്റ് (സ്ഥിരമായത്)"</item>
     <item msgid="8446070607501413455">"സ്വാഭാവികം"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"എപ്പോഴും ചോദിക്കുക"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"നിങ്ങൾ ഓഫാക്കുന്നത് വരെ"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"ഇപ്പോൾ"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"വികസനത്തിൽ, അപ്ഡേറ്റ് ചെയ്‌ത ഗ്രാഫിക്‌സ് ഡ്രൈവർ ഉപയോഗിക്കാൻ ഓപ്റ്റ് ഇൻ ചെയ്യുക"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"ഫോൺ സ്‌പീക്കർ"</string>
 </resources>

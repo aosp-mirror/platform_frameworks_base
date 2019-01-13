@@ -132,10 +132,13 @@ public class BiometricService extends SystemService {
                 Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED);
         private final Uri FACE_UNLOCK_APP_ENABLED =
                 Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_APP_ENABLED);
+        private final Uri FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION =
+                Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION);
 
         private final ContentResolver mContentResolver;
         private boolean mFaceEnabledOnKeyguard;
         private boolean mFaceEnabledForApps;
+        private boolean mFaceAlwaysRequireConfirmation;
 
         /**
          * Creates a content observer.
@@ -158,10 +161,15 @@ public class BiometricService extends SystemService {
                     false /* notifyForDescendents */,
                     this /* observer */,
                     UserHandle.USER_CURRENT);
+            mContentResolver.registerContentObserver(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
+                    false /* notifyForDescendents */,
+                    this /* observer */,
+                    UserHandle.USER_CURRENT);
 
             // Update the value immediately
             onChange(true /* selfChange */, FACE_UNLOCK_KEYGUARD_ENABLED);
             onChange(true /* selfChange */, FACE_UNLOCK_APP_ENABLED);
+            onChange(true /* selfChange */, FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION);
         }
 
         @Override
@@ -185,6 +193,13 @@ public class BiometricService extends SystemService {
                                 Settings.Secure.FACE_UNLOCK_APP_ENABLED,
                                 1 /* default */,
                                 UserHandle.USER_CURRENT) != 0;
+            } else if (FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION.equals(uri)) {
+                mFaceAlwaysRequireConfirmation =
+                        Settings.Secure.getIntForUser(
+                                mContentResolver,
+                                Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
+                                0 /* default */,
+                                UserHandle.USER_CURRENT) != 0;
             }
         }
 
@@ -194,6 +209,10 @@ public class BiometricService extends SystemService {
 
         boolean getFaceEnabledForApps() {
             return mFaceEnabledForApps;
+        }
+
+        boolean getFaceAlwaysRequireConfirmation() {
+            return mFaceAlwaysRequireConfirmation;
         }
     }
 
@@ -332,10 +351,7 @@ public class BiometricService extends SystemService {
                     if (!runningTasks.isEmpty()) {
                         final String topPackage = runningTasks.get(0).topActivity.getPackageName();
                         if (mCurrentAuthSession != null
-                                && !topPackage.contentEquals(mCurrentAuthSession.mOpPackageName)
-                                && mCurrentAuthSession.mState != STATE_AUTH_STARTED) {
-                            // We only care about this state, since <Biometric>Service will
-                            // cancel any client that's still in STATE_AUTH_STARTED
+                                && !topPackage.contentEquals(mCurrentAuthSession.mOpPackageName)) {
                             mStatusBarService.hideBiometricDialog();
                             mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
                             mCurrentAuthSession.mClientReceiver.onError(
@@ -395,7 +411,7 @@ public class BiometricService extends SystemService {
 
                     // Notify SysUI that the biometric has been authenticated. SysUI already knows
                     // the implicit/explicit state and will react accordingly.
-                    mStatusBarService.onBiometricAuthenticated();
+                    mStatusBarService.onBiometricAuthenticated(true);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception", e);
                 }
@@ -412,17 +428,20 @@ public class BiometricService extends SystemService {
                         return;
                     }
 
-                    mStatusBarService.onBiometricHelp(getContext().getResources().getString(
-                            com.android.internal.R.string.biometric_not_recognized));
-                    if (requireConfirmation) {
+                    mStatusBarService.onBiometricAuthenticated(false);
+
+                    // TODO: This logic will need to be updated if BP is multi-modal
+                    if ((mCurrentAuthSession.mModality & TYPE_FACE) != 0) {
+                        // Pause authentication. onBiometricAuthenticated(false) causes the
+                        // dialog to show a "try again" button for passive modalities.
                         mCurrentAuthSession.mState = STATE_AUTH_PAUSED;
-                        mStatusBarService.showBiometricTryAgain();
                         // Cancel authentication. Skip the token/package check since we are
                         // cancelling from system server. The interface is permission protected so
                         // this is fine.
                         cancelInternal(null /* token */, null /* package */,
                                 false /* fromClient */);
                     }
+
                     mCurrentAuthSession.mClientReceiver.onAuthenticationFailed();
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception", e);
@@ -442,8 +461,9 @@ public class BiometricService extends SystemService {
                     if (mCurrentAuthSession != null && mCurrentAuthSession.containsCookie(cookie)) {
                         if (mCurrentAuthSession.mState == STATE_AUTH_STARTED) {
                             mStatusBarService.onBiometricError(message);
-                            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
                             if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
+                                    mActivityTaskManager.unregisterTaskStackListener(
+                                            mTaskStackListener);
                                     mCurrentAuthSession.mClientReceiver.onError(error, message);
                                     mCurrentAuthSession.mState = STATE_AUTH_IDLE;
                                     mCurrentAuthSession = null;
@@ -452,9 +472,14 @@ public class BiometricService extends SystemService {
                                 // Send errors after the dialog is dismissed.
                                 mHandler.postDelayed(() -> {
                                     try {
-                                        mCurrentAuthSession.mClientReceiver.onError(error, message);
-                                        mCurrentAuthSession.mState = STATE_AUTH_IDLE;
-                                        mCurrentAuthSession = null;
+                                        if (mCurrentAuthSession != null) {
+                                            mActivityTaskManager.unregisterTaskStackListener(
+                                                    mTaskStackListener);
+                                            mCurrentAuthSession.mClientReceiver.onError(error,
+                                                    message);
+                                            mCurrentAuthSession.mState = STATE_AUTH_IDLE;
+                                            mCurrentAuthSession = null;
+                                        }
                                     } catch (RemoteException e) {
                                         Slog.e(TAG, "Remote exception", e);
                                     }
@@ -518,6 +543,11 @@ public class BiometricService extends SystemService {
 
             @Override
             public void onDialogDismissed(int reason) throws RemoteException {
+                if (mCurrentAuthSession == null) {
+                    Slog.e(TAG, "onDialogDismissed: " + reason + ", auth session null");
+                    return;
+                }
+
                 if (reason != BiometricPrompt.DISMISSED_REASON_POSITIVE) {
                     // Positive button is used by passive modalities as a "confirm" button,
                     // do not send to client
@@ -579,8 +609,10 @@ public class BiometricService extends SystemService {
             }
 
             if (mPendingAuthSession.mModalitiesWaiting.isEmpty()) {
-                final boolean mContinuing = mCurrentAuthSession != null
-                        && mCurrentAuthSession.mState == STATE_AUTH_PAUSED;
+                final boolean continuing = mCurrentAuthSession != null &&
+                        (mCurrentAuthSession.mState == STATE_AUTH_PAUSED
+                                || mCurrentAuthSession.mState == STATE_AUTH_PAUSED_CANCELED);
+
                 mCurrentAuthSession = mPendingAuthSession;
                 mPendingAuthSession = null;
 
@@ -602,7 +634,7 @@ public class BiometricService extends SystemService {
                         modality |= pair.getKey();
                     }
 
-                    if (!mContinuing) {
+                    if (!continuing) {
                         mStatusBarService.showBiometricDialog(mCurrentAuthSession.mBundle,
                                 mInternalReceiver, modality, requireConfirmation, userId);
                         mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
@@ -706,7 +738,8 @@ public class BiometricService extends SystemService {
 
                 mCurrentModality = modality;
 
-                // Actually start authentication
+                // Start preparing for authentication. Authentication starts when
+                // all modalities requested have invoked onReadyForAuthentication.
                 authenticateInternal(token, sessionId, userId, receiver, opPackageName, bundle,
                         callingUid, callingPid, callingUserId, modality);
             });
@@ -725,6 +758,9 @@ public class BiometricService extends SystemService {
                 IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
                 int callingUid, int callingPid, int callingUserId, int modality) {
             try {
+                boolean requireConfirmation = bundle.getBoolean(
+                        BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true /* default */);
+
                 // Generate random cookies to pass to the services that should prepare to start
                 // authenticating. Store the cookie here and wait for all services to "ack"
                 // with the cookie. Once all cookies are received, we can show the prompt
@@ -748,7 +784,10 @@ public class BiometricService extends SystemService {
                     Slog.w(TAG, "Iris unsupported");
                 }
                 if ((modality & TYPE_FACE) != 0) {
-                    mFaceService.prepareForAuthentication(true /* requireConfirmation */,
+                    // Check if the user has forced confirmation to be required in Settings.
+                    requireConfirmation = requireConfirmation
+                            || mSettingObserver.getFaceAlwaysRequireConfirmation();
+                    mFaceService.prepareForAuthentication(requireConfirmation,
                             token, sessionId, userId, mInternalReceiver, opPackageName,
                             cookie, callingUid, callingPid, callingUserId);
                 }

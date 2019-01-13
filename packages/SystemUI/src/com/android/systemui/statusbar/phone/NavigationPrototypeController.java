@@ -22,7 +22,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -36,18 +35,20 @@ public class NavigationPrototypeController extends ContentObserver {
     private static final String HIDE_BACK_BUTTON_SETTING = "quickstepcontroller_hideback";
     private static final String HIDE_HOME_BUTTON_SETTING = "quickstepcontroller_hidehome";
 
-    static final String NAVBAR_EXPERIMENTS_DISABLED = "navbarexperiments_disabled";
     private final String GESTURE_MATCH_SETTING = "quickstepcontroller_gesture_match_map";
     public static final String NAV_COLOR_ADAPT_ENABLE_SETTING = "navbar_color_adapt_enable";
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ACTION_DEFAULT, ACTION_QUICKSTEP, ACTION_QUICKSCRUB, ACTION_BACK})
+    @IntDef({ACTION_DEFAULT, ACTION_QUICKSTEP, ACTION_QUICKSCRUB, ACTION_BACK,
+            ACTION_QUICKSWITCH, ACTION_NOTHING, ACTION_ASSISTANT})
     @interface GestureAction {}
     static final int ACTION_DEFAULT = 0;
     static final int ACTION_QUICKSTEP = 1;
     static final int ACTION_QUICKSCRUB = 2;
     static final int ACTION_BACK = 3;
     static final int ACTION_QUICKSWITCH = 4;
+    static final int ACTION_NOTHING = 5;
+    static final int ACTION_ASSISTANT = 6;
 
     private OnPrototypeChangedListener mListener;
 

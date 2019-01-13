@@ -82,6 +82,11 @@ public class TransactionCompat {
         return this;
     }
 
+    public TransactionCompat setCornerRadius(SurfaceControlCompat surfaceControl, float radius) {
+        mTransaction.setCornerRadius(surfaceControl.mSurfaceControl, radius);
+        return this;
+    }
+
     public TransactionCompat deferTransactionUntil(SurfaceControlCompat surfaceControl,
             IBinder handle, long frameNumber) {
         mTransaction.deferTransactionUntil(surfaceControl.mSurfaceControl, handle, frameNumber);

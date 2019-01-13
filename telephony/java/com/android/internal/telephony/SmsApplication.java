@@ -18,6 +18,8 @@ package com.android.internal.telephony;
 
 import android.Manifest.permission;
 import android.app.AppOpsManager;
+import android.app.role.RoleManager;
+import android.app.role.RoleManagerCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,13 +31,12 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.res.Resources;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Debug;
 import android.os.Process;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.Rlog;
@@ -50,6 +51,10 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Class for managing the primary application that we will deliver SMS/MMS messages to
@@ -67,6 +72,7 @@ public final class SmsApplication {
     private static final String SCHEME_SMSTO = "smsto";
     private static final String SCHEME_MMS = "mms";
     private static final String SCHEME_MMSTO = "mmsto";
+    private static final boolean DEBUG = false;
     private static final boolean DEBUG_MULTIUSER = false;
 
     private static final int[] DEFAULT_APP_EXCLUSIVE_APPOPS = {
@@ -240,7 +246,11 @@ public final class SmsApplication {
 
         // Get the list of apps registered for SMS
         Intent intent = new Intent(Intents.SMS_DELIVER_ACTION);
-        List<ResolveInfo> smsReceivers = packageManager.queryBroadcastReceiversAsUser(intent, 0,
+        if (DEBUG) {
+            intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
+        }
+        List<ResolveInfo> smsReceivers = packageManager.queryBroadcastReceiversAsUser(intent,
+                PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                 userId);
 
         HashMap<String, SmsApplicationData> receivers = new HashMap<String, SmsApplicationData>();
@@ -266,7 +276,8 @@ public final class SmsApplication {
         // Update any existing entries with mms receiver class
         intent = new Intent(Intents.WAP_PUSH_DELIVER_ACTION);
         intent.setDataAndType(null, "application/vnd.wap.mms-message");
-        List<ResolveInfo> mmsReceivers = packageManager.queryBroadcastReceiversAsUser(intent, 0,
+        List<ResolveInfo> mmsReceivers = packageManager.queryBroadcastReceiversAsUser(intent,
+                PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                 userId);
         for (ResolveInfo resolveInfo : mmsReceivers) {
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
@@ -286,7 +297,8 @@ public final class SmsApplication {
         // Update any existing entries with respond via message intent class.
         intent = new Intent(TelephonyManager.ACTION_RESPOND_VIA_MESSAGE,
                 Uri.fromParts(SCHEME_SMSTO, "", null));
-        List<ResolveInfo> respondServices = packageManager.queryIntentServicesAsUser(intent, 0,
+        List<ResolveInfo> respondServices = packageManager.queryIntentServicesAsUser(intent,
+                PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                 userId);
         for (ResolveInfo resolveInfo : respondServices) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
@@ -306,7 +318,8 @@ public final class SmsApplication {
         // Update any existing entries with supports send to.
         intent = new Intent(Intent.ACTION_SENDTO,
                 Uri.fromParts(SCHEME_SMSTO, "", null));
-        List<ResolveInfo> sendToActivities = packageManager.queryIntentActivitiesAsUser(intent, 0,
+        List<ResolveInfo> sendToActivities = packageManager.queryIntentActivitiesAsUser(intent,
+                PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                 userId);
         for (ResolveInfo resolveInfo : sendToActivities) {
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
@@ -323,7 +336,9 @@ public final class SmsApplication {
         // Update any existing entries with the default sms changed handler.
         intent = new Intent(Telephony.Sms.Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED);
         List<ResolveInfo> smsAppChangedReceivers =
-                packageManager.queryBroadcastReceiversAsUser(intent, 0, userId);
+                packageManager.queryBroadcastReceiversAsUser(intent,
+                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "getApplicationCollectionInternal smsAppChangedActivities=" +
                     smsAppChangedReceivers);
@@ -348,7 +363,9 @@ public final class SmsApplication {
         // Update any existing entries with the external provider changed handler.
         intent = new Intent(Telephony.Sms.Intents.ACTION_EXTERNAL_PROVIDER_CHANGE);
         List<ResolveInfo> providerChangedReceivers =
-                packageManager.queryBroadcastReceiversAsUser(intent, 0, userId);
+                packageManager.queryBroadcastReceiversAsUser(intent,
+                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "getApplicationCollectionInternal providerChangedActivities=" +
                     providerChangedReceivers);
@@ -373,7 +390,9 @@ public final class SmsApplication {
         // Update any existing entries with the sim full handler.
         intent = new Intent(Intents.SIM_FULL_ACTION);
         List<ResolveInfo> simFullReceivers =
-                packageManager.queryBroadcastReceiversAsUser(intent, 0, userId);
+                packageManager.queryBroadcastReceiversAsUser(intent,
+                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "getApplicationCollectionInternal simFullReceivers="
                     + simFullReceivers);
@@ -406,7 +425,8 @@ public final class SmsApplication {
             if (smsApplicationData != null) {
                 if (!smsApplicationData.isComplete()) {
                     Log.w(LOG_TAG, "Package " + packageName
-                            + " lacks required manifest declarations to be a default sms app");
+                            + " lacks required manifest declarations to be a default sms app: "
+                            + smsApplicationData);
                     receivers.remove(packageName);
                 }
             }
@@ -418,7 +438,7 @@ public final class SmsApplication {
      * Checks to see if we have a valid installed SMS application for the specified package name
      * @return Data for the specified package name or null if there isn't one
      */
-    private static SmsApplicationData getApplicationForPackage(
+    public static SmsApplicationData getApplicationForPackage(
             Collection<SmsApplicationData> applications, String packageName) {
         if (packageName == null) {
             return null;
@@ -456,8 +476,7 @@ public final class SmsApplication {
             Log.i(LOG_TAG, "getApplication userId=" + userId);
         }
         // Determine which application receives the broadcast
-        String defaultApplication = Settings.Secure.getStringForUser(context.getContentResolver(),
-                Settings.Secure.SMS_DEFAULT_APPLICATION, userId);
+        String defaultApplication = getDefaultSmsPackage(context, userId);
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "getApplication defaultApp=" + defaultApplication);
         }
@@ -468,27 +487,6 @@ public final class SmsApplication {
         }
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "getApplication appData=" + applicationData);
-        }
-        // Picking a new SMS app requires AppOps and Settings.Secure permissions, so we only do
-        // this if the caller asked us to.
-        if (updateIfNeeded && applicationData == null) {
-            // Try to find the default SMS package for this device
-            Resources r = context.getResources();
-            String defaultPackage =
-                    r.getString(com.android.internal.R.string.default_sms_application);
-            applicationData = getApplicationForPackage(applications, defaultPackage);
-
-            if (applicationData == null) {
-                // Are there any applications?
-                if (applications.size() != 0) {
-                    applicationData = (SmsApplicationData)applications.toArray()[0];
-                }
-            }
-
-            // If we found a new default app, update the setting
-            if (applicationData != null) {
-                setDefaultApplicationInternal(applicationData.mPackageName, context, userId);
-            }
         }
 
         // If we found a package, make sure AppOps permissions are set up correctly
@@ -513,7 +511,7 @@ public final class SmsApplication {
                 // current SMS app will already be the preferred activity - but checking whether or
                 // not this is true is just as expensive as reconfiguring the preferred activity so
                 // we just reconfigure every time.
-                updateDefaultSmsApp(context, userId, applicationData);
+                defaultSmsAppChanged(context);
             }
         }
         if (DEBUG_MULTIUSER) {
@@ -522,15 +520,16 @@ public final class SmsApplication {
         return applicationData;
     }
 
-    private static void updateDefaultSmsApp(Context context, int userId,
-            SmsApplicationData applicationData) {
+    private static String getDefaultSmsPackage(Context context, int userId) {
+        return context.getSystemService(RoleManager.class).getDefaultSmsPackage(userId);
+    }
+
+    /**
+     * Grants various permissions and appops on sms app change
+     */
+    private static void defaultSmsAppChanged(Context context) {
         PackageManager packageManager = context.getPackageManager();
         AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
-
-        // Configure this as the preferred activity for SENDTO sms/mms intents
-        configurePreferredActivity(packageManager, new ComponentName(
-                        applicationData.mPackageName, applicationData.mSendToClass),
-                userId);
 
         // Assign permission to special system apps
         assignExclusiveSmsPermissionsToSystemApp(context, packageManager, appOps,
@@ -603,8 +602,7 @@ public final class SmsApplication {
         final UserHandle userHandle = UserHandle.of(userId);
 
         // Get old package name
-        String oldPackageName = Settings.Secure.getStringForUser(context.getContentResolver(),
-                Settings.Secure.SMS_DEFAULT_APPLICATION, userId);
+        String oldPackageName = getDefaultSmsPackage(context, userId);
 
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "setDefaultApplicationInternal old=" + oldPackageName +
@@ -636,16 +634,29 @@ public final class SmsApplication {
                 }
             }
 
-            // Update the secure setting.
-            Settings.Secure.putStringForUser(context.getContentResolver(),
-                    Settings.Secure.SMS_DEFAULT_APPLICATION, applicationData.mPackageName,
-                    userId);
+            // Update the setting.
+            CompletableFuture<Void> res = new CompletableFuture<>();
+            context.getSystemService(RoleManager.class).addRoleHolderAsUser(
+                    RoleManager.ROLE_SMS, applicationData.mPackageName, UserHandle.of(userId),
+                    AsyncTask.THREAD_POOL_EXECUTOR, new RoleManagerCallback() {
+                        @Override
+                        public void onSuccess() {
+                            res.complete(null);
+                        }
 
-            // Allow relevant appops for the newly configured default SMS app.
-            setExclusiveAppops(applicationData.mPackageName, appOps, applicationData.mUid,
-                    AppOpsManager.MODE_ALLOWED);
+                        @Override
+                        public void onFailure() {
+                            res.completeExceptionally(new RuntimeException());
+                        }
+                    });
+            try {
+                res.get(5, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                Log.e(LOG_TAG, "Exception while adding sms role holder " + applicationData, e);
+                return;
+            }
 
-            updateDefaultSmsApp(context, userId, applicationData);
+            defaultSmsAppChanged(context);
 
             if (DEBUG_MULTIUSER) {
                 Log.i(LOG_TAG, "setDefaultApplicationInternal oldAppData=" + oldAppData);

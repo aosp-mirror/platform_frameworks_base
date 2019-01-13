@@ -268,19 +268,38 @@ public class TaskRecordTests extends ActivityTestsBase {
     /** Ensures that the alias intent won't have target component resolved. */
     @Test
     public void testTaskIntentActivityAlias() {
-        final String aliasActivity = DEFAULT_COMPONENT_PACKAGE_NAME + ".aliasActivity";
-        final String targetActivity = DEFAULT_COMPONENT_PACKAGE_NAME + ".targetActivity";
+        final String aliasClassName = DEFAULT_COMPONENT_PACKAGE_NAME + ".aliasActivity";
+        final String targetClassName = DEFAULT_COMPONENT_PACKAGE_NAME + ".targetActivity";
+        final ComponentName aliasComponent =
+                new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME, aliasClassName);
+        final ComponentName targetComponent =
+                new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME, targetClassName);
+
         final Intent intent = new Intent();
-        intent.setComponent(new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME, aliasActivity));
+        intent.setComponent(aliasComponent);
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
         info.packageName = DEFAULT_COMPONENT_PACKAGE_NAME;
-        info.targetActivity = targetActivity;
+        info.targetActivity = targetClassName;
 
         final TaskRecord task = TaskRecord.create(mService, 1 /* taskId */, info, intent,
                 null /* taskDescription */);
-        assertEquals("The alias activity component should be saved in task intent.", aliasActivity,
+        assertEquals("The alias activity component should be saved in task intent.", aliasClassName,
                 task.intent.getComponent().getClassName());
+
+        ActivityRecord aliasActivity = new ActivityBuilder(mService).setComponent(
+                aliasComponent).setTargetActivity(targetClassName).build();
+        assertEquals("Should be the same intent filter.", true,
+                task.isSameIntentFilter(aliasActivity));
+
+        ActivityRecord targetActivity = new ActivityBuilder(mService).setComponent(
+                targetComponent).build();
+        assertEquals("Should be the same intent filter.", true,
+                task.isSameIntentFilter(targetActivity));
+
+        ActivityRecord defaultActivity = new ActivityBuilder(mService).build();
+        assertEquals("Should not be the same intent filter.", false,
+                task.isSameIntentFilter(defaultActivity));
     }
 
     private void testStackBoundsConfiguration(int windowingMode, Rect parentBounds, Rect bounds,

@@ -51,6 +51,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
     public static final int FLAG_ACTIVITY_SENDER = 1 << 0;
     public static final int FLAG_BROADCAST_SENDER = 1 << 1;
+    public static final int FLAG_SERVICE_SENDER = 1 << 2;
 
     final PendingIntentController controller;
     final Key key;
@@ -62,6 +63,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     private RemoteCallbackList<IResultReceiver> mCancelCallbacks;
     private ArraySet<IBinder> mAllowBgActivityStartsForActivitySender = new ArraySet<>();
     private ArraySet<IBinder> mAllowBgActivityStartsForBroadcastSender = new ArraySet<>();
+    private ArraySet<IBinder> mAllowBgActivityStartsForServiceSender = new ArraySet<>();
 
     String stringName;
     String lastTagPrefix;
@@ -227,6 +229,9 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         }
         if ((flags & FLAG_BROADCAST_SENDER) != 0) {
             mAllowBgActivityStartsForBroadcastSender.add(token);
+        }
+        if ((flags & FLAG_SERVICE_SENDER) != 0) {
+            mAllowBgActivityStartsForServiceSender.add(token);
         }
     }
 
@@ -426,7 +431,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                     try {
                         controller.mAmInternal.startServiceInPackage(uid, finalIntent, resolvedType,
                                 key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE,
-                                key.packageName, userId);
+                                key.packageName, userId,
+                                mAllowBgActivityStartsForServiceSender.contains(whitelistToken));
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Unable to send startService intent", e);
                     } catch (TransactionTooLargeException e) {

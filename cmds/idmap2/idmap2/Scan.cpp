@@ -39,6 +39,17 @@ using android::idmap2::ZipFile;
 using android::idmap2::utils::FindFiles;
 
 namespace {
+
+struct InputOverlay {
+  bool operator<(InputOverlay const& rhs) const {
+    return priority < rhs.priority || (priority == rhs.priority && apk_path < rhs.apk_path);
+  }
+
+  std::string apk_path;    // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string idmap_path;  // NOLINT(misc-non-private-member-variables-in-classes)
+  int priority;            // NOLINT(misc-non-private-member-variables-in-classes)
+};
+
 std::unique_ptr<std::vector<std::string>> FindApkFiles(const std::vector<std::string>& dirs,
                                                        bool recursive, std::ostream& out_error) {
   const auto predicate = [](unsigned char type, const std::string& path) -> bool {
@@ -58,6 +69,7 @@ std::unique_ptr<std::vector<std::string>> FindApkFiles(const std::vector<std::st
   }
   return std::make_unique<std::vector<std::string>>(paths.cbegin(), paths.cend());
 }
+
 }  // namespace
 
 bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
@@ -87,7 +99,7 @@ bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
     return false;
   }
 
-  std::vector<std::string> interesting_apks;
+  std::vector<InputOverlay> interesting_apks;
   for (const std::string& path : *apk_paths) {
     std::unique_ptr<const ZipFile> zip = ZipFile::Open(path);
     if (!zip) {
@@ -132,27 +144,29 @@ bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
       continue;
     }
 
+    // Sort the static overlays in ascending priority order
+    std::string idmap_path = Idmap::CanonicalIdmapPathFor(output_directory, path);
+    InputOverlay input{path, idmap_path, priority};
     interesting_apks.insert(
-        std::lower_bound(interesting_apks.begin(), interesting_apks.end(), path), path);
+        std::lower_bound(interesting_apks.begin(), interesting_apks.end(), input), input);
   }
 
   std::stringstream stream;
-  for (const auto& apk : interesting_apks) {
-    const std::string idmap_path = Idmap::CanonicalIdmapPathFor(output_directory, apk);
+  for (const auto& overlay : interesting_apks) {
     std::stringstream dev_null;
-    if (!Verify(std::vector<std::string>({"--idmap-path", idmap_path}), dev_null) &&
+    if (!Verify(std::vector<std::string>({"--idmap-path", overlay.idmap_path}), dev_null) &&
         !Create(std::vector<std::string>({
                     "--target-apk-path",
                     target_apk_path,
                     "--overlay-apk-path",
-                    apk,
+                    overlay.apk_path,
                     "--idmap-path",
-                    idmap_path,
+                    overlay.idmap_path,
                 }),
                 out_error)) {
       return false;
     }
-    stream << idmap_path << std::endl;
+    stream <<  overlay.idmap_path << std::endl;
   }
 
   std::cout << stream.str();

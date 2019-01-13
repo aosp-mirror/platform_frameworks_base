@@ -86,7 +86,6 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -106,6 +105,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
@@ -122,6 +122,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private static final int MENU_VIEW_INDEX = 0;
     private static final String TAG = "ExpandableNotifRow";
     public static final float DEFAULT_HEADER_VISIBLE_AMOUNT = 1.0f;
+    private static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
     private boolean mUpdateBackgroundOnUpdate;
 
     /**
@@ -1693,15 +1694,29 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /** Sets the last time the notification being displayed audibly alerted the user. */
     public void setLastAudiblyAlertedMs(long lastAudiblyAlertedMs) {
         if (NotificationUtils.useNewInterruptionModel(mContext)) {
-            boolean recentlyAudiblyAlerted = System.currentTimeMillis() - lastAudiblyAlertedMs
-                    < NotificationEntryManager.RECENTLY_ALERTED_THRESHOLD_MS;
-            if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() != null) {
-                mChildrenContainer.getHeaderView().setRecentlyAudiblyAlerted(
-                        recentlyAudiblyAlerted);
+            long timeSinceAlertedAudibly = System.currentTimeMillis() - lastAudiblyAlertedMs;
+            boolean alertedRecently =
+                    timeSinceAlertedAudibly < RECENTLY_ALERTED_THRESHOLD_MS;
+
+            applyAudiblyAlertedRecently(alertedRecently);
+
+            removeCallbacks(mExpireRecentlyAlertedFlag);
+            if (alertedRecently) {
+                long timeUntilNoLongerRecent =
+                        RECENTLY_ALERTED_THRESHOLD_MS - timeSinceAlertedAudibly;
+                postDelayed(mExpireRecentlyAlertedFlag, timeUntilNoLongerRecent);
             }
-            mPrivateLayout.setRecentlyAudiblyAlerted(recentlyAudiblyAlerted);
-            mPublicLayout.setRecentlyAudiblyAlerted(recentlyAudiblyAlerted);
         }
+    }
+
+    private final Runnable mExpireRecentlyAlertedFlag = () -> applyAudiblyAlertedRecently(false);
+
+    private void applyAudiblyAlertedRecently(boolean audiblyAlertedRecently) {
+        if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() != null) {
+            mChildrenContainer.getHeaderView().setRecentlyAudiblyAlerted(audiblyAlertedRecently);
+        }
+        mPrivateLayout.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
+        mPublicLayout.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
     }
 
     public View.OnClickListener getAppOpsOnClickListener() {

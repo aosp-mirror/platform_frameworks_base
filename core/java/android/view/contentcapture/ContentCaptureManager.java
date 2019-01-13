@@ -15,6 +15,8 @@
  */
 package android.view.contentcapture;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
@@ -24,9 +26,12 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.SyncResultReceiver;
 
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,6 +52,11 @@ public final class ContentCaptureManager {
     private static final String TAG = ContentCaptureManager.class.getSimpleName();
 
     private static final String BG_THREAD_NAME = "intel_svc_streamer_thread";
+
+    /**
+     * Timeout for calls to system_server.
+     */
+    private static final int SYNC_CALLS_TIMEOUT_MS = 5000;
 
     // TODO(b/121044306): define a way to dynamically set them(for example, using settings?)
     static final boolean VERBOSE = false;
@@ -116,8 +126,8 @@ public final class ContentCaptureManager {
 
     /** @hide */
     public void onActivityStarted(@NonNull IBinder applicationToken,
-            @NonNull ComponentName activityComponent) {
-        getMainContentCaptureSession().start(applicationToken, activityComponent);
+            @NonNull ComponentName activityComponent, int flags) {
+        getMainContentCaptureSession().start(applicationToken, activityComponent, flags);
     }
 
     /** @hide */
@@ -142,8 +152,21 @@ public final class ContentCaptureManager {
      */
     @Nullable
     public ComponentName getServiceComponentName() {
-        //TODO(b/121047489): implement
-        return null;
+        if (!isContentCaptureEnabled()) {
+            return null;
+        }
+        // Wait for system server to return the component name.
+        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        mHandler.sendMessage(obtainMessage(
+                ContentCaptureManager::handleReceiverServiceComponentName,
+                this, mContext.getUserId(), resultReceiver));
+
+        try {
+            return resultReceiver.getParcelableResult();
+        } catch (RemoteException e) {
+            // Unable to retrieve component name in a reasonable amount of time.
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -189,6 +212,16 @@ public final class ContentCaptureManager {
             mMainSession.dump(prefix2, pw);
         } else {
             pw.print(prefix); pw.println("No sessions");
+        }
+    }
+
+
+    /** Retrieves the component name of the target content capture service through system_server. */
+    private void handleReceiverServiceComponentName(int userId, IResultReceiver resultReceiver) {
+        try {
+            mService.getReceiverServiceComponentName(userId, resultReceiver);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Unable to retrieve service component name: " + e);
         }
     }
 }

@@ -84,6 +84,7 @@ import android.service.wallpaper.WallpaperService;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.EventLog;
+import android.util.FeatureFlagUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -2219,8 +2220,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         synchronized (mLock) {
             mInAmbientMode = inAmbientMode;
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
-            if (data != null && data.connection != null && data.connection.mInfo != null
-                    && data.connection.mInfo.supportsAmbientMode()) {
+            final boolean hasConnection = data != null && data.connection != null;
+            final WallpaperInfo info = hasConnection ? data.connection.mInfo : null;
+
+            // The wallpaper info is null for image wallpaper, also use the engine in this case.
+            if (hasConnection && (info == null && isAodImageWallpaperEnabled()
+                    || info != null && info.supportsAmbientMode())) {
                 // TODO(multi-display) Extends this method with specific display.
                 engine = data.connection.getDisplayConnectorOrCreate(DEFAULT_DISPLAY).mEngine;
             } else {
@@ -2235,6 +2240,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 // Cannot talk to wallpaper engine.
             }
         }
+    }
+
+    private boolean isAodImageWallpaperEnabled() {
+        return FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.AOD_IMAGEWALLPAPER_ENABLED);
     }
 
     @Override

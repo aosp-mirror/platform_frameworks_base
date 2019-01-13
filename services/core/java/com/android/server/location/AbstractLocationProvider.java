@@ -29,7 +29,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 /**
- * Location Manager's interface for location providers.
+ * Location Manager's interface for location providers. Always starts as disabled.
  *
  * @hide
  */
@@ -39,12 +39,6 @@ public abstract class AbstractLocationProvider {
      * Interface for communicating from a location provider back to the location service.
      */
     public interface LocationProviderManager {
-
-        /**
-         * Called on location provider construction to make the location service aware of this
-         * provider and what it's initial enabled/disabled state should be.
-         */
-        void onAttachProvider(AbstractLocationProvider locationProvider, boolean initiallyEnabled);
 
         /**
          * May be called to inform the location service of a change in this location provider's
@@ -74,13 +68,7 @@ public abstract class AbstractLocationProvider {
     private final LocationProviderManager mLocationProviderManager;
 
     protected AbstractLocationProvider(LocationProviderManager locationProviderManager) {
-        this(locationProviderManager, true);
-    }
-
-    protected AbstractLocationProvider(LocationProviderManager locationProviderManager,
-            boolean initiallyEnabled) {
         mLocationProviderManager = locationProviderManager;
-        mLocationProviderManager.onAttachProvider(this, initiallyEnabled);
     }
 
     /**

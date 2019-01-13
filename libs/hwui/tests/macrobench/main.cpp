@@ -19,6 +19,8 @@
 
 #include "Properties.h"
 #include "hwui/Typeface.h"
+#include "HardwareBitmapUploader.h"
+#include "renderthread/RenderProxy.h"
 
 #include <benchmark/benchmark.h>
 #include <getopt.h>
@@ -352,6 +354,9 @@ int main(int argc, char* argv[]) {
     if (gBenchmarkReporter) {
         gBenchmarkReporter->Finalize();
     }
+
+    renderthread::RenderProxy::trimMemory(100);
+    HardwareBitmapUploader::terminate();
 
     LeakChecker::checkForLeaks();
     return 0;

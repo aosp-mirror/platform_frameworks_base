@@ -86,7 +86,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.IconLogger;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -217,7 +216,6 @@ public class Dependency extends SystemUI {
     @Inject Lazy<LeakDetector> mLeakDetector;
     @Inject Lazy<LeakReporter> mLeakReporter;
     @Inject Lazy<GarbageMonitor> mGarbageMonitor;
-    @Inject Lazy<IconLogger> mIconLogger;
     @Inject Lazy<TunerService> mTunerService;
     @Inject Lazy<StatusBarWindowController> mStatusBarWindowController;
     @Inject Lazy<DarkIconDispatcher> mDarkIconDispatcher;
@@ -391,8 +389,6 @@ public class Dependency extends SystemUI {
         mProviders.put(UiOffloadThread.class, mUiOffloadThread::get);
 
         mProviders.put(PowerUI.WarningsUI.class, mWarningsUI::get);
-
-        mProviders.put(IconLogger.class, mIconLogger::get);
 
         mProviders.put(LightBarController.class, mLightBarController::get);
 

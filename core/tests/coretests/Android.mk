@@ -43,7 +43,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     platform-test-annotations \
     compatibility-device-util \
     truth-prebuilt \
-    print-test-util-lib
+    print-test-util-lib \
+    testng # TODO: remove once Android migrates to JUnit 4.12, which provide assertThrows
 
 LOCAL_JAVA_LIBRARIES := \
     android.test.runner \

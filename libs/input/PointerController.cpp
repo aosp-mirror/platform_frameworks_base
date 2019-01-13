@@ -39,7 +39,7 @@ protected:
     virtual ~WeakLooperCallback() { }
 
 public:
-    WeakLooperCallback(const wp<LooperCallback>& callback) :
+    explicit WeakLooperCallback(const wp<LooperCallback>& callback) :
         mCallback(callback) {
     }
 
@@ -89,10 +89,6 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
 
     mLocked.animationPending = false;
 
-    mLocked.displayWidth = -1;
-    mLocked.displayHeight = -1;
-    mLocked.displayOrientation = DISPLAY_ORIENTATION_0;
-
     mLocked.presentation = PRESENTATION_POINTER;
     mLocked.presentationChanged = false;
 
@@ -110,15 +106,6 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
     mLocked.lastFrameUpdatedTime = 0;
 
     mLocked.buttonState = 0;
-
-    mPolicy->loadPointerIcon(&mLocked.pointerIcon);
-
-    loadResources();
-
-    if (mLocked.pointerIcon.isValid()) {
-        mLocked.pointerIconChanged = true;
-        updatePointerLocked();
-    }
 }
 
 PointerController::~PointerController() {
@@ -144,23 +131,15 @@ bool PointerController::getBounds(float* outMinX, float* outMinY,
 
 bool PointerController::getBoundsLocked(float* outMinX, float* outMinY,
         float* outMaxX, float* outMaxY) const {
-    if (mLocked.displayWidth <= 0 || mLocked.displayHeight <= 0) {
+
+    if (!mLocked.viewport.isValid()) {
         return false;
     }
 
-    *outMinX = 0;
-    *outMinY = 0;
-    switch (mLocked.displayOrientation) {
-    case DISPLAY_ORIENTATION_90:
-    case DISPLAY_ORIENTATION_270:
-        *outMaxX = mLocked.displayHeight - 1;
-        *outMaxY = mLocked.displayWidth - 1;
-        break;
-    default:
-        *outMaxX = mLocked.displayWidth - 1;
-        *outMaxY = mLocked.displayHeight - 1;
-        break;
-    }
+    *outMinX = mLocked.viewport.logicalLeft;
+    *outMinY = mLocked.viewport.logicalTop;
+    *outMaxX = mLocked.viewport.logicalRight - 1;
+    *outMaxY = mLocked.viewport.logicalBottom - 1;
     return true;
 }
 
@@ -229,6 +208,12 @@ void PointerController::getPosition(float* outX, float* outY) const {
 
     *outX = mLocked.pointerX;
     *outY = mLocked.pointerY;
+}
+
+int32_t PointerController::getDisplayId() const {
+    AutoMutex _l(mLock);
+
+    return mLocked.viewport.displayId;
 }
 
 void PointerController::fade(Transition transition) {
@@ -355,48 +340,56 @@ void PointerController::setInactivityTimeout(InactivityTimeout inactivityTimeout
 void PointerController::reloadPointerResources() {
     AutoMutex _l(mLock);
 
-    loadResources();
-
-    if (mLocked.presentation == PRESENTATION_POINTER) {
-        mLocked.additionalMouseResources.clear();
-        mLocked.animationResources.clear();
-        mPolicy->loadPointerIcon(&mLocked.pointerIcon);
-        mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
-                                              &mLocked.animationResources);
-    }
-
-    mLocked.presentationChanged = true;
+    loadResourcesLocked();
     updatePointerLocked();
 }
 
-void PointerController::setDisplayViewport(int32_t width, int32_t height, int32_t orientation) {
-    AutoMutex _l(mLock);
+/**
+ * The viewport values for deviceHeight and deviceWidth have already been adjusted for rotation,
+ * so here we are getting the dimensions in the original, unrotated orientation (orientation 0).
+ */
+static void getNonRotatedSize(const DisplayViewport& viewport, int32_t& width, int32_t& height) {
+    width = viewport.deviceWidth;
+    height = viewport.deviceHeight;
 
-    // Adjust to use the display's unrotated coordinate frame.
-    if (orientation == DISPLAY_ORIENTATION_90
-            || orientation == DISPLAY_ORIENTATION_270) {
-        int32_t temp = height;
-        height = width;
-        width = temp;
+    if (viewport.orientation == DISPLAY_ORIENTATION_90
+            || viewport.orientation == DISPLAY_ORIENTATION_270) {
+        std::swap(width, height);
+    }
+}
+
+void PointerController::setDisplayViewport(const DisplayViewport& viewport) {
+    AutoMutex _l(mLock);
+    if (viewport == mLocked.viewport) {
+        return;
     }
 
-    if (mLocked.displayWidth != width || mLocked.displayHeight != height) {
-        mLocked.displayWidth = width;
-        mLocked.displayHeight = height;
+    const DisplayViewport oldViewport = mLocked.viewport;
+    mLocked.viewport = viewport;
+
+    int32_t oldDisplayWidth, oldDisplayHeight;
+    getNonRotatedSize(oldViewport, oldDisplayWidth, oldDisplayHeight);
+    int32_t newDisplayWidth, newDisplayHeight;
+    getNonRotatedSize(viewport, newDisplayWidth, newDisplayHeight);
+
+    // Reset cursor position to center if size or display changed.
+    if (oldViewport.displayId != viewport.displayId
+            || oldDisplayWidth != newDisplayWidth
+            || oldDisplayHeight != newDisplayHeight) {
 
         float minX, minY, maxX, maxY;
         if (getBoundsLocked(&minX, &minY, &maxX, &maxY)) {
             mLocked.pointerX = (minX + maxX) * 0.5f;
             mLocked.pointerY = (minY + maxY) * 0.5f;
+            // Reload icon resources for density may be changed.
+            loadResourcesLocked();
         } else {
             mLocked.pointerX = 0;
             mLocked.pointerY = 0;
         }
 
         fadeOutAndReleaseAllSpotsLocked();
-    }
-
-    if (mLocked.displayOrientation != orientation) {
+    } else if (oldViewport.orientation != viewport.orientation) {
         // Apply offsets to convert from the pixel top-left corner position to the pixel center.
         // This creates an invariant frame of reference that we can easily rotate when
         // taking into account that the pointer may be located at fractional pixel offsets.
@@ -405,37 +398,37 @@ void PointerController::setDisplayViewport(int32_t width, int32_t height, int32_
         float temp;
 
         // Undo the previous rotation.
-        switch (mLocked.displayOrientation) {
+        switch (oldViewport.orientation) {
         case DISPLAY_ORIENTATION_90:
             temp = x;
-            x = mLocked.displayWidth - y;
+            x =  oldViewport.deviceHeight - y;
             y = temp;
             break;
         case DISPLAY_ORIENTATION_180:
-            x = mLocked.displayWidth - x;
-            y = mLocked.displayHeight - y;
+            x = oldViewport.deviceWidth - x;
+            y = oldViewport.deviceHeight - y;
             break;
         case DISPLAY_ORIENTATION_270:
             temp = x;
             x = y;
-            y = mLocked.displayHeight - temp;
+            y = oldViewport.deviceWidth - temp;
             break;
         }
 
         // Perform the new rotation.
-        switch (orientation) {
+        switch (viewport.orientation) {
         case DISPLAY_ORIENTATION_90:
             temp = x;
             x = y;
-            y = mLocked.displayWidth - temp;
+            y = viewport.deviceHeight - temp;
             break;
         case DISPLAY_ORIENTATION_180:
-            x = mLocked.displayWidth - x;
-            y = mLocked.displayHeight - y;
+            x = viewport.deviceWidth - x;
+            y = viewport.deviceHeight - y;
             break;
         case DISPLAY_ORIENTATION_270:
             temp = x;
-            x = mLocked.displayHeight - y;
+            x = viewport.deviceWidth - y;
             y = temp;
             break;
         }
@@ -444,7 +437,6 @@ void PointerController::setDisplayViewport(int32_t width, int32_t height, int32_
         // and save the results.
         mLocked.pointerX = x - 0.5f;
         mLocked.pointerY = y - 0.5f;
-        mLocked.displayOrientation = orientation;
     }
 
     updatePointerLocked();
@@ -614,11 +606,16 @@ void PointerController::removeInactivityTimeoutLocked() {
     mLooper->removeMessages(mHandler, MSG_INACTIVITY_TIMEOUT);
 }
 
-void PointerController::updatePointerLocked() {
+void PointerController::updatePointerLocked() REQUIRES(mLock) {
+    if (!mLocked.viewport.isValid()) {
+        return;
+    }
+
     mSpriteController->openTransaction();
 
     mLocked.pointerSprite->setLayer(Sprite::BASE_LAYER_POINTER);
     mLocked.pointerSprite->setPosition(mLocked.pointerX, mLocked.pointerY);
+    mLocked.pointerSprite->setDisplayId(mLocked.viewport.displayId);
 
     if (mLocked.pointerAlpha > 0) {
         mLocked.pointerSprite->setAlpha(mLocked.pointerAlpha);
@@ -729,8 +726,18 @@ void PointerController::fadeOutAndReleaseAllSpotsLocked() {
     }
 }
 
-void PointerController::loadResources() {
+void PointerController::loadResourcesLocked() REQUIRES(mLock) {
     mPolicy->loadPointerResources(&mResources);
+
+    if (mLocked.presentation == PRESENTATION_POINTER) {
+        mLocked.additionalMouseResources.clear();
+        mLocked.animationResources.clear();
+        mPolicy->loadPointerIcon(&mLocked.pointerIcon);
+        mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
+                                              &mLocked.animationResources);
+    }
+
+    mLocked.pointerIconChanged = true;
 }
 
 

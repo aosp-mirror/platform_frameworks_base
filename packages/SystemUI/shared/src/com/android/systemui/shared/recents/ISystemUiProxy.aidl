@@ -76,4 +76,10 @@ interface ISystemUiProxy {
      */
     float getWindowCornerRadius() = 10;
 
+    /**
+     * If device supports live rounded corners on windows.
+     * This might be turned off for performance reasons
+     */
+    boolean supportsRoundedCornersOnWindows() = 11;
+
 }

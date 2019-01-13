@@ -53,6 +53,8 @@ public class LinkPropertiesTest {
     private static InetAddress DNS1 = NetworkUtils.numericToInetAddress("75.208.7.1");
     private static InetAddress DNS2 = NetworkUtils.numericToInetAddress("69.78.7.1");
     private static InetAddress DNS6 = NetworkUtils.numericToInetAddress("2001:4860:4860::8888");
+    private static InetAddress PCSCFV6 =  NetworkUtils.numericToInetAddress(
+            "2001:0db8:85a3:0000:0000:8a2e:0370:1");
     private static InetAddress GATEWAY1 = NetworkUtils.numericToInetAddress("75.208.8.1");
     private static InetAddress GATEWAY2 = NetworkUtils.numericToInetAddress("69.78.8.1");
     private static InetAddress GATEWAY61 = NetworkUtils.numericToInetAddress("fe80::6:0000:613");
@@ -85,6 +87,9 @@ public class LinkPropertiesTest {
 
         assertTrue(source.isIdenticalValidatedPrivateDnses(target));
         assertTrue(target.isIdenticalValidatedPrivateDnses(source));
+
+        assertTrue(source.isIdenticalPcscfs(target));
+        assertTrue(target.isIdenticalPcscfs(source));
 
         assertTrue(source.isIdenticalRoutes(target));
         assertTrue(target.isIdenticalRoutes(source));
@@ -128,6 +133,8 @@ public class LinkPropertiesTest {
         // set 2 dnses
         source.addDnsServer(DNS1);
         source.addDnsServer(DNS2);
+        // set 1 pcscf
+        source.addPcscfServer(PCSCFV6);
         // set 2 gateways
         source.addRoute(new RouteInfo(GATEWAY1));
         source.addRoute(new RouteInfo(GATEWAY2));
@@ -141,6 +148,7 @@ public class LinkPropertiesTest {
         target.addLinkAddress(LINKADDRV6);
         target.addDnsServer(DNS1);
         target.addDnsServer(DNS2);
+        target.addPcscfServer(PCSCFV6);
         target.addRoute(new RouteInfo(GATEWAY1));
         target.addRoute(new RouteInfo(GATEWAY2));
         target.setMtu(MTU);
@@ -154,6 +162,7 @@ public class LinkPropertiesTest {
         target.addLinkAddress(LINKADDRV6);
         target.addDnsServer(DNS1);
         target.addDnsServer(DNS2);
+        target.addPcscfServer(PCSCFV6);
         target.addRoute(new RouteInfo(GATEWAY1));
         target.addRoute(new RouteInfo(GATEWAY2));
         target.setMtu(MTU);
@@ -167,6 +176,7 @@ public class LinkPropertiesTest {
         target.addLinkAddress(LINKADDRV6);
         target.addDnsServer(DNS1);
         target.addDnsServer(DNS2);
+        target.addPcscfServer(PCSCFV6);
         target.addRoute(new RouteInfo(GATEWAY1));
         target.addRoute(new RouteInfo(GATEWAY2));
         target.setMtu(MTU);
@@ -179,6 +189,21 @@ public class LinkPropertiesTest {
         // change dnses
         target.addDnsServer(NetworkUtils.numericToInetAddress("75.208.7.2"));
         target.addDnsServer(DNS2);
+        target.addPcscfServer(PCSCFV6);
+        target.addRoute(new RouteInfo(GATEWAY1));
+        target.addRoute(new RouteInfo(GATEWAY2));
+        target.setMtu(MTU);
+        assertFalse(source.equals(target));
+
+        target.clear();
+        target.setInterfaceName(NAME);
+        target.addLinkAddress(LINKADDRV4);
+        target.addLinkAddress(LINKADDRV6);
+        target.addDnsServer(NetworkUtils.numericToInetAddress("75.208.7.2"));
+        target.addDnsServer(DNS2);
+        // change pcscf
+        target.addPcscfServer(NetworkUtils.numericToInetAddress(
+            "2001::1"));
         target.addRoute(new RouteInfo(GATEWAY1));
         target.addRoute(new RouteInfo(GATEWAY2));
         target.setMtu(MTU);

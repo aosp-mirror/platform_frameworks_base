@@ -271,6 +271,13 @@ public final class ActivityThread extends ClientTransactionHandler {
     @UnsupportedAppUsage
     final H mH = new H();
     final Executor mExecutor = new HandlerExecutor(mH);
+    /**
+     * Maps from activity token to local record of running activities in this process.
+     *
+     * This variable is readable if the code is running in activity thread or holding {@link
+     * #mResourcesManager}. It's only writable if the code is running in activity thread and holding
+     * {@link #mResourcesManager}.
+     */
     @UnsupportedAppUsage
     final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
     /** The activities to be truly destroyed (not include relaunch). */
@@ -434,6 +441,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         Configuration newConfig;
         Configuration createdConfig;
         Configuration overrideConfig;
+        // Used to save the last reported configuration from server side so that activity
+        // configuration transactions can always use the latest configuration.
+        @GuardedBy("this")
+        private Configuration mPendingOverrideConfig;
         // Used for consolidating configs before sending on to Activity.
         private Configuration tmpConfig = new Configuration();
         // Callback used for updating activity override config.
@@ -3064,7 +3075,12 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
             r.setState(ON_CREATE);
 
-            mActivities.put(r.token, r);
+            // updatePendingActivityConfiguration() reads from mActivities to update
+            // ActivityClientRecord which runs in a different thread. Protect modifications to
+            // mActivities to avoid race.
+            synchronized (mResourcesManager) {
+                mActivities.put(r.token, r);
+            }
 
         } catch (SuperNotCalledException e) {
             throw e;
@@ -4639,7 +4655,12 @@ public final class ActivityThread extends ClientTransactionHandler {
             r.setState(ON_DESTROY);
         }
         schedulePurgeIdler();
-        mActivities.remove(token);
+        // updatePendingActivityConfiguration() reads from mActivities to update
+        // ActivityClientRecord which runs in a different thread. Protect modifications to
+        // mActivities to avoid race.
+        synchronized (mResourcesManager) {
+            mActivities.remove(token);
+        }
         StrictMode.decrementExpectedActivityCount(activityClass);
         return r;
     }
@@ -5382,6 +5403,26 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @Override
+    public void updatePendingActivityConfiguration(IBinder activityToken,
+            Configuration overrideConfig) {
+        final ActivityClientRecord r;
+        synchronized (mResourcesManager) {
+            r = mActivities.get(activityToken);
+        }
+
+        if (r == null) {
+            if (DEBUG_CONFIGURATION) {
+                Slog.w(TAG, "Not found target activity to update its pending config.");
+            }
+            return;
+        }
+
+        synchronized (r) {
+            r.mPendingOverrideConfig = overrideConfig;
+        }
+    }
+
     /**
      * Handle new activity configuration and/or move to a different display.
      * @param activityToken Target activity token.
@@ -5400,6 +5441,24 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
         final boolean movedToDifferentDisplay = displayId != INVALID_DISPLAY
                 && displayId != r.activity.getDisplayId();
+
+        synchronized (r) {
+            if (r.mPendingOverrideConfig != null
+                    && !r.mPendingOverrideConfig.isOtherSeqNewer(overrideConfig)) {
+                overrideConfig = r.mPendingOverrideConfig;
+            }
+            r.mPendingOverrideConfig = null;
+        }
+
+        if (r.overrideConfig != null && !r.overrideConfig.isOtherSeqNewer(overrideConfig)
+                && !movedToDifferentDisplay) {
+            if (DEBUG_CONFIGURATION) {
+                Slog.v(TAG, "Activity already handled newer configuration so drop this"
+                        + " transaction. overrideConfig=" + overrideConfig + " r.overrideConfig="
+                        + r.overrideConfig);
+            }
+            return;
+        }
 
         // Perform updates.
         r.overrideConfig = overrideConfig;

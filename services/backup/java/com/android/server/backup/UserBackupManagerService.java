@@ -850,19 +850,29 @@ public class UserBackupManagerService {
             mFullBackupQueue = readFullBackupSchedule();
         }
 
-        // Register for broadcasts about package install, etc., so we can
-        // update the provider list.
+        // Register for broadcasts about package changes.
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
-        mContext.registerReceiver(mBroadcastReceiver, filter);
+        mContext.registerReceiverAsUser(
+                mBroadcastReceiver,
+                UserHandle.of(mUserId),
+                filter,
+                /* broadcastPermission */ null,
+                /* scheduler */ null);
+
         // Register for events related to sdcard installation.
         IntentFilter sdFilter = new IntentFilter();
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        mContext.registerReceiver(mBroadcastReceiver, sdFilter);
+        mContext.registerReceiverAsUser(
+                mBroadcastReceiver,
+                UserHandle.of(mUserId),
+                sdFilter,
+                /* broadcastPermission */ null,
+                /* scheduler */ null);
     }
 
     private ArrayList<FullBackupEntry> readFullBackupSchedule() {
@@ -1127,17 +1137,23 @@ public class UserBackupManagerService {
         }
     }
 
-    // ----- Track installation/removal of packages -----
+    /**
+     * A {@link BroadcastReceiver} tracking changes to packages and sd cards in order to update our
+     * internal bookkeeping.
+     */
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            if (MORE_DEBUG) Slog.d(TAG, "Received broadcast " + intent);
+            if (MORE_DEBUG) {
+                Slog.d(TAG, "Received broadcast " + intent);
+            }
 
             String action = intent.getAction();
             boolean replacing = false;
             boolean added = false;
             boolean changed = false;
             Bundle extras = intent.getExtras();
-            String[] pkgList = null;
+            String[] packageList = null;
+
             if (Intent.ACTION_PACKAGE_ADDED.equals(action)
                     || Intent.ACTION_PACKAGE_REMOVED.equals(action)
                     || Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
@@ -1145,69 +1161,70 @@ public class UserBackupManagerService {
                 if (uri == null) {
                     return;
                 }
-                final String pkgName = uri.getSchemeSpecificPart();
-                if (pkgName != null) {
-                    pkgList = new String[]{pkgName};
-                }
-                changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
 
-                // At package-changed we only care about looking at new transport states
+                String packageName = uri.getSchemeSpecificPart();
+                if (packageName != null) {
+                    packageList = new String[]{packageName};
+                }
+
+                changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
                 if (changed) {
-                    final String[] components =
+                    // Look at new transport states for package changed events.
+                    String[] components =
                             intent.getStringArrayExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
 
                     if (MORE_DEBUG) {
-                        Slog.i(TAG, "Package " + pkgName + " changed; rechecking");
+                        Slog.i(TAG, "Package " + packageName + " changed");
                         for (int i = 0; i < components.length; i++) {
                             Slog.i(TAG, "   * " + components[i]);
                         }
                     }
 
                     mBackupHandler.post(
-                            () -> mTransportManager.onPackageChanged(pkgName, components));
-                    return; // nothing more to do in the PACKAGE_CHANGED case
+                            () -> mTransportManager.onPackageChanged(packageName, components));
+                    return;
                 }
 
                 added = Intent.ACTION_PACKAGE_ADDED.equals(action);
                 replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
             } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
                 added = true;
-                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                packageList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                 added = false;
-                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                packageList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             }
 
-            if (pkgList == null || pkgList.length == 0) {
+            if (packageList == null || packageList.length == 0) {
                 return;
             }
 
-            final int uid = extras.getInt(Intent.EXTRA_UID);
+            int uid = extras.getInt(Intent.EXTRA_UID);
             if (added) {
                 synchronized (mBackupParticipants) {
                     if (replacing) {
-                        // This is the package-replaced case; we just remove the entry
-                        // under the old uid and fall through to re-add.  If an app
-                        // just added key/value backup participation, this picks it up
-                        // as a known participant.
-                        removePackageParticipantsLocked(pkgList, uid);
+                        // Remove the entry under the old uid and fall through to re-add. If an app
+                        // just opted into key/value backup, add it as a known participant.
+                        removePackageParticipantsLocked(packageList, uid);
                     }
-                    addPackageParticipantsLocked(pkgList);
+                    addPackageParticipantsLocked(packageList);
                 }
-                // If they're full-backup candidates, add them there instead
-                final long now = System.currentTimeMillis();
-                for (final String packageName : pkgList) {
+
+                long now = System.currentTimeMillis();
+                for (String packageName : packageList) {
                     try {
-                        PackageInfo app = mPackageManager.getPackageInfo(packageName, 0);
+                        PackageInfo app =
+                                mPackageManager.getPackageInfoAsUser(
+                                        packageName, /* flags */ 0, mUserId);
                         if (AppBackupUtils.appGetsFullBackup(app)
                                 && AppBackupUtils.appIsEligibleForBackup(
                                 app.applicationInfo, mPackageManager)) {
                             enqueueFullBackup(packageName, now);
                             scheduleNextFullBackupJob(0);
                         } else {
-                            // The app might have just transitioned out of full-data into
-                            // doing key/value backups, or might have just disabled backups
-                            // entirely.  Make sure it is no longer in the full-data queue.
+                            // The app might have just transitioned out of full-data into doing
+                            // key/value backups, or might have just disabled backups entirely. Make
+                            // sure it is no longer in the full-data queue.
                             synchronized (mQueueLock) {
                                 dequeueFullBackupLocked(packageName);
                             }
@@ -1216,32 +1233,28 @@ public class UserBackupManagerService {
 
                         mBackupHandler.post(
                                 () -> mTransportManager.onPackageAdded(packageName));
-
                     } catch (NameNotFoundException e) {
-                        // doesn't really exist; ignore it
                         if (DEBUG) {
                             Slog.w(TAG, "Can't resolve new app " + packageName);
                         }
                     }
                 }
 
-                // Whenever a package is added or updated we need to update
-                // the package metadata bookkeeping.
+                // Whenever a package is added or updated we need to update the package metadata
+                // bookkeeping.
                 dataChangedImpl(PACKAGE_MANAGER_SENTINEL);
             } else {
-                if (replacing) {
-                    // The package is being updated.  We'll receive a PACKAGE_ADDED shortly.
-                } else {
-                    // Outright removal.  In the full-data case, the app will be dropped
-                    // from the queue when its (now obsolete) name comes up again for
-                    // backup.
+                if (!replacing) {
+                    // Outright removal. In the full-data case, the app will be dropped from the
+                    // queue when its (now obsolete) name comes up again for backup.
                     synchronized (mBackupParticipants) {
-                        removePackageParticipantsLocked(pkgList, uid);
+                        removePackageParticipantsLocked(packageList, uid);
                     }
                 }
-                for (final String pkgName : pkgList) {
+
+                for (String packageName : packageList) {
                     mBackupHandler.post(
-                            () -> mTransportManager.onPackageRemoved(pkgName));
+                            () -> mTransportManager.onPackageRemoved(packageName));
                 }
             }
         }

@@ -15,25 +15,24 @@
 
 package android.media.session;
 
-import android.content.pm.ParceledListSlice;
 import android.media.MediaMetadata;
-import android.media.session.PlaybackState;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
 
 /**
  * @hide
  */
 oneway interface ISessionControllerCallback {
-    void onEvent(String event, in Bundle extras);
-    void onSessionDestroyed();
+    void notifyEvent(String event, in Bundle extras);
+    void notifySessionDestroyed();
 
     // These callbacks are for the TransportController
-    void onPlaybackStateChanged(in PlaybackState state);
-    void onMetadataChanged(in MediaMetadata metadata);
-    void onQueueChanged(in ParceledListSlice queue);
-    void onQueueTitleChanged(CharSequence title);
-    void onExtrasChanged(in Bundle extras);
-    void onVolumeInfoChanged(in MediaController.PlaybackInfo info);
+    void notifyPlaybackStateChanged(in PlaybackState state);
+    void notifyMetadataChanged(in MediaMetadata metadata);
+    void notifyQueueChanged(in List<MediaSession.QueueItem> queue);
+    void notifyQueueTitleChanged(CharSequence title);
+    void notifyExtrasChanged(in Bundle extras);
+    void notifyVolumeInfoChanged(in MediaController.PlaybackInfo info);
 }

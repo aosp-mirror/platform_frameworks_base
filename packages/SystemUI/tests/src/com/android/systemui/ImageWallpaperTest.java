@@ -16,17 +16,12 @@
 
 package com.android.systemui;
 
-
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
@@ -58,13 +53,15 @@ public class ImageWallpaperTest extends SysuiTestCase {
     @Mock private SurfaceHolder mSurfaceHolder;
     @Mock private DisplayInfo mDisplayInfo;
 
-    CountDownLatch mEventCountdown;
+    private CountDownLatch mEventCountdown;
+    private CountDownLatch mAmbientEventCountdown;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         mEventCountdown = new CountDownLatch(1);
+        mAmbientEventCountdown = new CountDownLatch(2);
 
         mImageWallpaper = new ImageWallpaper() {
             @Override
@@ -85,6 +82,11 @@ public class ImageWallpaperTest extends SysuiTestCase {
                         super.setFixedSizeAllowed(allowed);
                         assertTrue("mFixedSizeAllowed should be true", allowed);
                         mEventCountdown.countDown();
+                    }
+
+                    @Override
+                    public void onAmbientModeChanged(boolean inAmbientMode, long duration) {
+                        mAmbientEventCountdown.countDown();
                     }
                 };
             }
@@ -132,4 +134,23 @@ public class ImageWallpaperTest extends SysuiTestCase {
         verify(mSurfaceHolder, times(1)).setFixedSize(ImageWallpaper.DrawableEngine.MIN_BACKGROUND_WIDTH, ImageWallpaper.DrawableEngine.MIN_BACKGROUND_HEIGHT);
     }
 
+    @Test
+    public void testDeliversAmbientModeChanged() {
+        ImageWallpaper.DrawableEngine wallpaperEngine =
+                (ImageWallpaper.DrawableEngine) mImageWallpaper.onCreateEngine();
+
+        assertEquals("setFixedSizeAllowed should have been called.",
+                0, mEventCountdown.getCount());
+
+        wallpaperEngine.setCreated(true);
+        wallpaperEngine.doAmbientModeChanged(false, 1000);
+        assertFalse("ambient mode should be false", wallpaperEngine.isInAmbientMode());
+        assertEquals("onAmbientModeChanged should have been called.",
+                1, mAmbientEventCountdown.getCount());
+
+        wallpaperEngine.doAmbientModeChanged(true, 1000);
+        assertTrue("ambient mode should be true", wallpaperEngine.isInAmbientMode());
+        assertEquals("onAmbientModeChanged should have been called.",
+                0, mAmbientEventCountdown.getCount());
+    }
 }

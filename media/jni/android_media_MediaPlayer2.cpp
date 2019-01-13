@@ -86,7 +86,8 @@ using media::VolumeShaper;
 // ----------------------------------------------------------------------------
 
 struct fields_t {
-    jfieldID    context;
+    jfieldID    context;               // passed from Java to native, used for creating JWakeLock
+    jfieldID    nativeContext;         // mNativeContext in MediaPlayer2.java
     jfieldID    surface_texture;
 
     jmethodID   post_event;
@@ -225,21 +226,21 @@ void JNIMediaPlayer2Listener::notify(int64_t srcId, int msg, int ext1, int ext2,
 static sp<MediaPlayer2> getMediaPlayer(JNIEnv* env, jobject thiz)
 {
     Mutex::Autolock l(sLock);
-    MediaPlayer2* const p = (MediaPlayer2*)env->GetLongField(thiz, fields.context);
+    MediaPlayer2* const p = (MediaPlayer2*)env->GetLongField(thiz, fields.nativeContext);
     return sp<MediaPlayer2>(p);
 }
 
 static sp<MediaPlayer2> setMediaPlayer(JNIEnv* env, jobject thiz, const sp<MediaPlayer2>& player)
 {
     Mutex::Autolock l(sLock);
-    sp<MediaPlayer2> old = (MediaPlayer2*)env->GetLongField(thiz, fields.context);
+    sp<MediaPlayer2> old = (MediaPlayer2*)env->GetLongField(thiz, fields.nativeContext);
     if (player.get()) {
         player->incStrong((void*)setMediaPlayer);
     }
     if (old != 0) {
         old->decStrong((void*)setMediaPlayer);
     }
-    env->SetLongField(thiz, fields.context, (jlong)player.get());
+    env->SetLongField(thiz, fields.nativeContext, (jlong)player.get());
     return old;
 }
 
@@ -955,8 +956,13 @@ android_media_MediaPlayer2_native_init(JNIEnv *env)
         return;
     }
 
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "J");
+    fields.context = env->GetFieldID(clazz, "mContext", "Landroid/content/Context;");
     if (fields.context == NULL) {
+        return;
+    }
+
+    fields.nativeContext = env->GetFieldID(clazz, "mNativeContext", "J");
+    if (fields.nativeContext == NULL) {
         return;
     }
 
@@ -1013,7 +1019,8 @@ android_media_MediaPlayer2_native_setup(JNIEnv *env, jobject thiz,
         jint sessionId, jobject weak_this)
 {
     ALOGV("native_setup");
-    sp<MediaPlayer2> mp = MediaPlayer2::Create(sessionId);
+    jobject context = env->GetObjectField(thiz, fields.context);
+    sp<MediaPlayer2> mp = MediaPlayer2::Create(sessionId, context);
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;

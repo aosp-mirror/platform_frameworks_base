@@ -372,6 +372,7 @@ public final class SoundTriggerManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @UnsupportedAppUsage
     public int getModelState(UUID soundModelId) {
         if (soundModelId == null) {
             return STATUS_ERROR;

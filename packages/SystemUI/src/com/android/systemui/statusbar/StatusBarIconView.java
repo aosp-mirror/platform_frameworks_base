@@ -206,6 +206,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mIconScale = SYSTEM_ICON_SCALE;
     }
 
+    public float getIconScaleFullyDark() {
+        return (float) mStatusBarIconDrawingSizeDark / mStatusBarIconDrawingSize;
+    }
+
     public float getIconScale() {
         return mIconScale;
     }

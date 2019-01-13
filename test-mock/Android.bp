@@ -25,7 +25,8 @@ java_sdk_library {
         "android.test.mock",
     ],
 
+    srcs_lib: "framework",
+    srcs_lib_whitelist_dirs: ["core/java"],
     srcs_lib_whitelist_pkgs: ["android"],
-    metalava_enabled: false,
     compile_dex: true,
 }

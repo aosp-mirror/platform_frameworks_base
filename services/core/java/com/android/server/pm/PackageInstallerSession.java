@@ -151,6 +151,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_MULTI_PACKAGE = "multiPackage";
     private static final String ATTR_PARENT_SESSION_ID = "parentSessionId";
     private static final String ATTR_STAGED_SESSION = "stagedSession";
+    private static final String ATTR_IS_READY = "isReady";
+    private static final String ATTR_IS_FAILED = "isFailed";
+    private static final String ATTR_IS_APPLIED = "isApplied";
+    private static final String ATTR_STAGED_SESSION_ERROR_CODE = "errorCode";
     private static final String ATTR_MODE = "mode";
     private static final String ATTR_INSTALL_FLAGS = "installFlags";
     private static final String ATTR_INSTALL_LOCATION = "installLocation";
@@ -408,7 +412,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             int sessionId, int userId,
             String installerPackageName, int installerUid, SessionParams params, long createdMillis,
             File stageDir, String stageCid, boolean prepared, boolean sealed,
-            @Nullable int[] childSessionIds, int parentSessionId) {
+            @Nullable int[] childSessionIds, int parentSessionId, boolean isReady,
+            boolean isFailed, boolean isApplied, int stagedSessionErrorCode) {
         mCallback = callback;
         mContext = context;
         mPm = pm;
@@ -438,7 +443,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         mPrepared = prepared;
-
+        mStagedSessionReady = isReady;
+        mStagedSessionFailed = isFailed;
+        mStagedSessionApplied = isApplied;
+        mStagedSessionErrorCode = stagedSessionErrorCode;
         if (sealed) {
             synchronized (mLock) {
                 try {
@@ -2023,8 +2031,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void destroyInternal() {
         synchronized (mLock) {
             mSealed = true;
-            mDestroyed = true;
-
+            if (!params.isStaged) {
+                mDestroyed = true;
+            }
             // Force shut down all bridges
             for (RevocableFileDescriptor fd : mFds) {
                 fd.revoke();
@@ -2131,6 +2140,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             writeBooleanAttribute(out, ATTR_MULTI_PACKAGE, params.isMultiPackage);
             writeBooleanAttribute(out, ATTR_STAGED_SESSION, params.isStaged);
+            writeBooleanAttribute(out, ATTR_IS_READY, mStagedSessionReady);
+            writeBooleanAttribute(out, ATTR_IS_FAILED, mStagedSessionFailed);
+            writeBooleanAttribute(out, ATTR_IS_APPLIED, mStagedSessionApplied);
+            writeIntAttribute(out, ATTR_STAGED_SESSION_ERROR_CODE, mStagedSessionErrorCode);
             // TODO(patb,109941548): avoid writing to xml and instead infer / validate this after
             //                       we've read all sessions.
             writeIntAttribute(out, ATTR_PARENT_SESSION_ID, mParentSessionId);
@@ -2269,10 +2282,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             params.appIcon = BitmapFactory.decodeFile(appIconFile.getAbsolutePath());
             params.appIconLastModified = appIconFile.lastModified();
         }
+        final boolean isReady = readBooleanAttribute(in, ATTR_IS_READY);
+        final boolean isFailed = readBooleanAttribute(in, ATTR_IS_FAILED);
+        final boolean isApplied = readBooleanAttribute(in, ATTR_IS_APPLIED);
+        final int stagedSessionErrorCode = readIntAttribute(in, ATTR_STAGED_SESSION_ERROR_CODE);
+
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 installerThread, stagingManager, sessionId, userId, installerPackageName,
                 installerUid, params, createdMillis, stageDir, stageCid, prepared, sealed,
-                EMPTY_CHILD_SESSION_ARRAY, parentSessionId);
+                EMPTY_CHILD_SESSION_ARRAY, parentSessionId, isReady, isFailed, isApplied,
+                stagedSessionErrorCode);
     }
 
     /**

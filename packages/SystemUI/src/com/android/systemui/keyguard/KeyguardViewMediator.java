@@ -1843,6 +1843,13 @@ public class KeyguardViewMediator extends SystemUI {
      */
     private void handleHide() {
         Trace.beginSection("KeyguardViewMediator#handleHide");
+
+        // It's possible that the device was unlocked in a dream state. It's time to wake up.
+        if (mAodShowing) {
+            PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+            pm.wakeUp(SystemClock.uptimeMillis(), "com.android.systemui:BOUNCER_DOZING");
+        }
+
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleHide");
 

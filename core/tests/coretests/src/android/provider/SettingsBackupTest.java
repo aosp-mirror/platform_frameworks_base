@@ -27,6 +27,7 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
 import android.platform.test.annotations.Presubmit;
+import android.provider.Settings.Global;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -270,7 +271,6 @@ public class SettingsBackupTest {
                     Settings.Global.GNSS_SATELLITE_BLACKLIST,
                     Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS,
                     Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
-                    Settings.Global.HDMI_CONTROL_AUTO_TV_OFF_ENABLED,
                     Settings.Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                     Settings.Global.HDMI_CONTROL_ENABLED,
                     Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
@@ -478,6 +478,7 @@ public class SettingsBackupTest {
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS,
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES,
                     Settings.Global.GUP_DEV_OPT_IN_APPS,
+                    Settings.Global.GUP_DEV_OPT_OUT_APPS,
                     Settings.Global.GUP_BLACK_LIST,
                     Settings.Global.GPU_DEBUG_LAYER_APP,
                     Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
@@ -549,7 +550,12 @@ public class SettingsBackupTest {
                     Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
                     Settings.Global.BACKUP_MULTI_USER_ENABLED,
                     Settings.Global.ISOLATED_STORAGE_LOCAL,
-                    Settings.Global.ISOLATED_STORAGE_REMOTE);
+                    Settings.Global.ISOLATED_STORAGE_REMOTE,
+                    Settings.Global.APPOP_HISTORY_PARAMETERS,
+                    Settings.Global.APPOP_HISTORY_MODE,
+                    Settings.Global.APPOP_HISTORY_INTERVAL_MULTIPLIER,
+                    Settings.Global.APPOP_HISTORY_BASE_INTERVAL_MILLIS);
+
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,

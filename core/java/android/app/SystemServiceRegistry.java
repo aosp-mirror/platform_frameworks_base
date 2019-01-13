@@ -21,8 +21,11 @@ import android.accounts.IAccountManager;
 import android.app.ContextImpl.ServiceInitializationState;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
+import android.app.contentsuggestions.ContentSuggestionsManager;
+import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
+import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleManager;
 import android.app.slice.SliceManager;
 import android.app.timedetector.TimeDetector;
@@ -95,8 +98,10 @@ import android.net.ConnectivityThread;
 import android.net.EthernetManager;
 import android.net.IConnectivityManager;
 import android.net.IEthernetManager;
+import android.net.IIpMemoryStore;
 import android.net.IIpSecService;
 import android.net.INetworkPolicyManager;
+import android.net.IpMemoryStore;
 import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
@@ -120,6 +125,7 @@ import android.net.wifi.rtt.WifiRttManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
+import android.os.BugreportManager;
 import android.os.Build;
 import android.os.DeviceIdleManager;
 import android.os.DropBoxManager;
@@ -127,6 +133,7 @@ import android.os.HardwarePropertiesManager;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
 import android.os.IDeviceIdleController;
+import android.os.IDumpstate;
 import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
 import android.os.IRecoverySystem;
@@ -321,10 +328,21 @@ final class SystemServiceRegistry {
 
         registerService(Context.NETWORK_STACK_SERVICE, NetworkStack.class,
                 new StaticServiceFetcher<NetworkStack>() {
-                @Override
-                public NetworkStack createService() {
-                    return new NetworkStack();
-                }});
+                    @Override
+                    public NetworkStack createService() {
+                        return new NetworkStack();
+                    }});
+
+        registerService(Context.IP_MEMORY_STORE_SERVICE, IpMemoryStore.class,
+                new CachedServiceFetcher<IpMemoryStore>() {
+                    @Override
+                    public IpMemoryStore createService(final ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.IP_MEMORY_STORE_SERVICE);
+                        IIpMemoryStore service = IIpMemoryStore.Stub.asInterface(b);
+                        return new IpMemoryStore(ctx, service);
+                    }});
 
         registerService(Context.IPSEC_SERVICE, IpSecManager.class,
                 new CachedServiceFetcher<IpSecManager>() {
@@ -1069,6 +1087,16 @@ final class SystemServiceRegistry {
                 return new IncidentManager(ctx);
             }});
 
+        registerService(Context.BUGREPORT_SERVICE, BugreportManager.class,
+                new CachedServiceFetcher<BugreportManager>() {
+                    @Override
+                    public BugreportManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(Context.BUGREPORT_SERVICE);
+                        return new BugreportManager(ctx.getOuterContext(),
+                                IDumpstate.Stub.asInterface(b));
+                    }});
+
         registerService(Context.AUTOFILL_MANAGER_SERVICE, AutofillManager.class,
                 new CachedServiceFetcher<AutofillManager>() {
             @Override
@@ -1094,6 +1122,29 @@ final class SystemServiceRegistry {
                 }
                 return null;
             }});
+
+        registerService(Context.APP_PREDICTION_SERVICE, AppPredictionManager.class,
+                new CachedServiceFetcher<AppPredictionManager>() {
+            @Override
+            public AppPredictionManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                return new AppPredictionManager(ctx);
+            }
+        });
+
+        registerService(Context.CONTENT_SUGGESTIONS_SERVICE,
+                ContentSuggestionsManager.class,
+                new CachedServiceFetcher<ContentSuggestionsManager>() {
+                    @Override
+                    public ContentSuggestionsManager createService(ContextImpl ctx) {
+                        // No throw as this is an optional service
+                        IBinder b = ServiceManager.getService(
+                                Context.CONTENT_SUGGESTIONS_SERVICE);
+                        IContentSuggestionsManager service =
+                                IContentSuggestionsManager.Stub.asInterface(b);
+                        return new ContentSuggestionsManager(service);
+                    }
+                });
 
         registerService(Context.VR_SERVICE, VrManager.class, new CachedServiceFetcher<VrManager>() {
             @Override

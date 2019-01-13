@@ -390,6 +390,11 @@ final class ActivityRecord extends ConfigurationContainer {
     private boolean mTurnScreenOn;
 
     /**
+     * Current sequencing integer of the configuration, for skipping old activity configurations.
+     */
+    private int mConfigurationSeq;
+
+    /**
      * Temp configs used in {@link #ensureActivityConfiguration(int, boolean)}
      */
     private final Configuration mTmpConfig = new Configuration();
@@ -2566,6 +2571,45 @@ final class ActivityRecord extends ConfigurationContainer {
         }
 
         onRequestedOverrideConfigurationChanged(mTmpConfig);
+    }
+
+    @Override
+    void resolveOverrideConfiguration(Configuration newParentConfiguration) {
+        super.resolveOverrideConfiguration(newParentConfiguration);
+
+        // Assign configuration sequence number into hierarchy because there is a different way than
+        // ensureActivityConfiguration() in this class that uses configuration in WindowState during
+        // layout traversals.
+        mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
+        getResolvedOverrideConfiguration().seq = mConfigurationSeq;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        super.onConfigurationChanged(newParentConfig);
+
+        // Configuration's equality doesn't consider seq so if only seq number changes in resolved
+        // override configuration. Therefore ConfigurationContainer doesn't change merged override
+        // configuration, but it's used to push configuration changes so explicitly update that.
+        if (getMergedOverrideConfiguration().seq != getResolvedOverrideConfiguration().seq) {
+            onMergedOverrideConfigurationChanged();
+        }
+
+        // TODO(b/80414790): Remove code below after unification.
+        // Same as above it doesn't notify configuration listeners, and consequently AppWindowToken
+        // can't get updated seq number. However WindowState's merged override configuration needs
+        // to have this seq number because that's also used for activity config pushes during layout
+        // traversal. Therefore explicitly update them here.
+        if (mAppWindowToken == null) {
+            return;
+        }
+        final Configuration appWindowTokenRequestedOverrideConfig =
+                mAppWindowToken.getRequestedOverrideConfiguration();
+        if (appWindowTokenRequestedOverrideConfig.seq != getResolvedOverrideConfiguration().seq) {
+            appWindowTokenRequestedOverrideConfig.seq =
+                    getResolvedOverrideConfiguration().seq;
+            mAppWindowToken.onMergedOverrideConfigurationChanged();
+        }
     }
 
     /** Returns true if the configuration is compatible with this activity. */

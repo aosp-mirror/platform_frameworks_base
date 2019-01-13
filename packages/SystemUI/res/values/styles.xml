@@ -125,7 +125,7 @@
 
     <style name="TextAppearance.StatusBar.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <item name="android:textSize">@dimen/status_bar_clock_size</item>
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
         <item name="android:textColor">@color/status_bar_clock_color</item>
     </style>
 
@@ -263,6 +263,10 @@
     <style name="TextAppearance.AppOpsDialog.Item">
         <item name="android:textSize">@dimen/ongoing_appops_dialog_item_size</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+    </style>
+
+    <style name="TextAppearance.DeviceManagementDialog.Title" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle">
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="BaseBrightnessDialogContainer" parent="@style/Theme.SystemUI">

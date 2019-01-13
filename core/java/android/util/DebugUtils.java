@@ -18,6 +18,7 @@ package android.util;
 
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
+
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -250,7 +251,7 @@ public class DebugUtils {
                     if (value == 0 && flagsWasZero) {
                         return constNameWithoutPrefix(prefix, field);
                     }
-                    if ((flags & value) != 0) {
+                    if ((flags & value) == value) {
                         flags &= ~value;
                         res.append(constNameWithoutPrefix(prefix, field)).append('|');
                     }

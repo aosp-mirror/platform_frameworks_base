@@ -102,10 +102,12 @@ import com.android.server.media.MediaUpdateService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
+import com.android.server.net.ipmemorystore.IpMemoryStoreService;
 import com.android.server.net.watchlist.NetworkWatchlistService;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.oemlock.OemLockService;
 import com.android.server.om.OverlayManagerService;
+import com.android.server.os.BugreportManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.pm.BackgroundDexOptService;
@@ -118,6 +120,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PhoneWindowManager;
+import com.android.server.policy.role.LegacyRoleResolutionPolicy;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.power.ThermalManagerService;
@@ -260,6 +263,10 @@ public final class SystemServer {
             "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
     private static final String ADB_SERVICE_CLASS =
             "com.android.server.adb.AdbService$Lifecycle";
+    private static final String APP_PREDICTION_MANAGER_SERVICE_CLASS =
+            "com.android.server.appprediction.AppPredictionManagerService";
+    private static final String CONTENT_SUGGESTIONS_SERVICE_CLASS =
+            "com.android.server.contentsuggestions.ContentSuggestionsManagerService";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -786,6 +793,11 @@ public final class SystemServer {
         traceBeginAndSlog("StartRollbackManagerService");
         mSystemServiceManager.startService(RollbackManagerService.class);
         traceEnd();
+
+        // Service to capture bugreports.
+        traceBeginAndSlog("StartBugreportManagerService");
+        mSystemServiceManager.startService(BugreportManagerService.class);
+        traceEnd();
     }
 
     /**
@@ -1020,6 +1032,18 @@ public final class SystemServer {
             Slog.e("System", "************ Failure starting core service", e);
         }
 
+        // Before things start rolling, be sure we have decided whether
+        // we are in safe mode.
+        final boolean safeMode = wm.detectSafeMode();
+        if (safeMode) {
+            // If yes, immediately turn on the global setting for airplane mode.
+            // Note that this does not send broadcasts at this stage because
+            // subsystems are not yet up. We will send broadcasts later to ensure
+            // all listeners have the chance to react with special handling.
+            Settings.Global.putInt(context.getContentResolver(),
+                    Settings.Global.AIRPLANE_MODE_ON, 1);
+        }
+
         StatusBarManagerService statusBar = null;
         INotificationManager notification = null;
         LocationManagerService location = null;
@@ -1153,6 +1177,16 @@ public final class SystemServer {
 
             startContentCaptureService(context);
 
+            // App prediction manager service
+            traceBeginAndSlog("StartAppPredictionService");
+            mSystemServiceManager.startService(APP_PREDICTION_MANAGER_SERVICE_CLASS);
+            traceEnd();
+
+            // Content suggestions manager service
+            traceBeginAndSlog("StartContentSuggestionsService");
+            mSystemServiceManager.startService(CONTENT_SUGGESTIONS_SERVICE_CLASS);
+            traceEnd();
+
             // NOTE: ClipboardService indirectly depends on IntelligenceService
             traceBeginAndSlog("StartClipboardService");
             mSystemServiceManager.startService(ClipboardService.class);
@@ -1164,6 +1198,15 @@ public final class SystemServer {
                 ServiceManager.addService(Context.NETWORKMANAGEMENT_SERVICE, networkManagement);
             } catch (Throwable e) {
                 reportWtf("starting NetworkManagement Service", e);
+            }
+            traceEnd();
+
+            traceBeginAndSlog("StartIpMemoryStoreService");
+            try {
+                ServiceManager.addService(Context.IP_MEMORY_STORE_SERVICE,
+                        new IpMemoryStoreService(context));
+            } catch (Throwable e) {
+                reportWtf("starting IP Memory Store Service", e);
             }
             traceEnd();
 
@@ -1786,9 +1829,6 @@ public final class SystemServer {
         mSystemServiceManager.startService(StatsCompanionService.Lifecycle.class);
         traceEnd();
 
-        // Before things start rolling, be sure we have decided whether
-        // we are in safe mode.
-        final boolean safeMode = wm.detectSafeMode();
         if (safeMode) {
             traceBeginAndSlog("EnterSafeModeAndDisableJitCompilation");
             mActivityManagerService.enterSafeMode();
@@ -1952,7 +1992,8 @@ public final class SystemServer {
 
             // Grants default permissions and defines roles
             traceBeginAndSlog("StartRoleManagerService");
-            mSystemServiceManager.startService(RoleManagerService.class);
+            mSystemServiceManager.startService(new RoleManagerService(
+                    mSystemContext, new LegacyRoleResolutionPolicy(mSystemContext)));
             traceEnd();
 
             // No dependency on Webview preparation in system server. But this should
@@ -1985,6 +2026,20 @@ public final class SystemServer {
                 reportWtf("starting System UI", e);
             }
             traceEnd();
+            // Enable airplane mode in safe mode. setAirplaneMode() cannot be called
+            // earlier as it sends broadcasts to other services.
+            // TODO: This may actually be too late if radio firmware already started leaking
+            // RF before the respective services start. However, fixing this requires changes
+            // to radio firmware and interfaces.
+            if (safeMode) {
+                traceBeginAndSlog("EnableAirplaneModeInSafeMode");
+                try {
+                    connectivityF.setAirplaneMode(true);
+                } catch (Throwable e) {
+                    reportWtf("enabling Airplane Mode during Safe Mode bootup", e);
+                }
+                traceEnd();
+            }
             traceBeginAndSlog("MakeNetworkManagementServiceReady");
             try {
                 if (networkManagementF != null) {
@@ -2179,7 +2234,7 @@ public final class SystemServer {
         windowManager.onSystemUiStarted();
     }
 
-    private static void traceBeginAndSlog(String name) {
+    private static void traceBeginAndSlog(@NonNull String name) {
         Slog.i(TAG, name);
         BOOT_TIMINGS_TRACE_LOG.traceBegin(name);
     }

@@ -82,13 +82,9 @@ int CreateFunctor(void* data, AwDrawFnFunctorCallbacks* functor_callbacks) {
       .onDestroyed = &onDestroyed,
   };
   if (!callbacks_initialized) {
-    switch (uirenderer::WebViewFunctor_queryPlatformRenderMode()) {
-      case uirenderer::RenderMode::OpenGL_ES:
-        webview_functor_callbacks.gles.draw = &draw_gl;
-        break;
-      case uirenderer::RenderMode::Vulkan:
-        break;
-    }
+    // Under uirenderer::RenderMode::Vulkan, whether gles or vk union should
+    // be populated should match whether the vk-gl interop is used.
+    webview_functor_callbacks.gles.draw = &draw_gl;
     callbacks_initialized = true;
   }
   SupportData* support = new SupportData{

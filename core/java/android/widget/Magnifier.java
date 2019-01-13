@@ -837,8 +837,8 @@ public final class Magnifier {
 
             mContentWidth = width;
             mContentHeight = height;
-            mOffsetX = (int) (0.1f * width);
-            mOffsetY = (int) (0.1f * height);
+            mOffsetX = (int) (1.05f * elevation);
+            mOffsetY = (int) (1.05f * elevation);
             // Setup the surface we will use for drawing the content and shadow.
             mSurfaceWidth = mContentWidth + 2 * mOffsetX;
             mSurfaceHeight = mContentHeight + 2 * mOffsetY;

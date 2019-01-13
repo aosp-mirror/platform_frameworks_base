@@ -3520,7 +3520,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setTextSelectHandle(@DrawableRes int textSelectHandle) {
-        Preconditions.checkArgumentPositive(textSelectHandle,
+        Preconditions.checkArgument(textSelectHandle != 0,
                 "The text select handle should be a valid drawable resource id.");
         setTextSelectHandle(mContext.getDrawable(textSelectHandle));
     }
@@ -3577,7 +3577,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setTextSelectHandleLeft(@DrawableRes int textSelectHandleLeft) {
-        Preconditions.checkArgumentPositive(textSelectHandleLeft,
+        Preconditions.checkArgument(textSelectHandleLeft != 0,
                 "The text select left handle should be a valid drawable resource id.");
         setTextSelectHandleLeft(mContext.getDrawable(textSelectHandleLeft));
     }
@@ -3634,7 +3634,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setTextSelectHandleRight(@DrawableRes int textSelectHandleRight) {
-        Preconditions.checkArgumentPositive(textSelectHandleRight,
+        Preconditions.checkArgument(textSelectHandleRight != 0,
                 "The text select right handle should be a valid drawable resource id.");
         setTextSelectHandleRight(mContext.getDrawable(textSelectHandleRight));
     }
@@ -3667,9 +3667,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see #setTextCursorDrawable(int)
      * @attr ref android.R.styleable#TextView_textCursorDrawable
      */
-    public void setTextCursorDrawable(@NonNull Drawable textCursorDrawable) {
-        Preconditions.checkNotNull(textCursorDrawable,
-                "The cursor drawable should not be null.");
+    public void setTextCursorDrawable(@Nullable Drawable textCursorDrawable) {
         mCursorDrawable = textCursorDrawable;
         mCursorDrawableRes = 0;
         if (mEditor != null) {
@@ -3687,8 +3685,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_textCursorDrawable
      */
     public void setTextCursorDrawable(@DrawableRes int textCursorDrawable) {
-        Preconditions.checkArgumentPositive(textCursorDrawable,
-                "The cursor drawable should be a valid drawable resource id.");
         setTextCursorDrawable(mContext.getDrawable(textCursorDrawable));
     }
 
@@ -8061,6 +8057,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
                 break;
+
+            case KeyEvent.KEYCODE_FORWARD_DEL:
+                if (event.hasModifiers(KeyEvent.META_SHIFT_ON) && canCut()) {
+                    if (onTextContextMenuItem(ID_CUT)) {
+                        return KEY_EVENT_HANDLED;
+                    }
+                }
+                break;
+
+            case KeyEvent.KEYCODE_INSERT:
+                if (event.hasModifiers(KeyEvent.META_CTRL_ON) && canCopy()) {
+                    if (onTextContextMenuItem(ID_COPY)) {
+                        return KEY_EVENT_HANDLED;
+                    }
+                } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON) && canPaste()) {
+                    if (onTextContextMenuItem(ID_PASTE)) {
+                        return KEY_EVENT_HANDLED;
+                    }
+                }
+                break;
         }
 
         if (mEditor != null && mEditor.mKeyListener != null) {
@@ -10827,25 +10843,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                     break;
                 case KeyEvent.KEYCODE_V:
-                    if (canPaste()) {
-                        return onTextContextMenuItem(ID_PASTE);
-                    }
-                    break;
-                case KeyEvent.KEYCODE_INSERT:
-                    if (canCopy()) {
-                        return onTextContextMenuItem(ID_COPY);
-                    }
-                    break;
-            }
-        } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-            // Handle Shift-only shortcuts.
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_FORWARD_DEL:
-                    if (canCut()) {
-                        return onTextContextMenuItem(ID_CUT);
-                    }
-                    break;
-                case KeyEvent.KEYCODE_INSERT:
                     if (canPaste()) {
                         return onTextContextMenuItem(ID_PASTE);
                     }

@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_PLAYBACK;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
+
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
@@ -25,16 +26,21 @@ import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_3;
 import static com.android.server.hdmi.Constants.ADDR_SPECIFIC_USE;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
+
 import static junit.framework.Assert.assertEquals;
 
 import android.content.Context;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
 import android.os.test.TestLooper;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
+
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -136,6 +142,7 @@ public class HdmiCecControllerTest {
         assertEquals(ADDR_UNREGISTERED, mLogicalAddress);
     }
 
+    @Ignore("b/110413065 Support multiple device types 4 and 5.")
     @Test
     public void testAllocatLogicalAddress_PlaybackPreferredNotOccupied() {
         mHdmiCecController.allocateLogicalAddress(DEVICE_PLAYBACK, ADDR_PLAYBACK_1, mCallback);
@@ -151,6 +158,7 @@ public class HdmiCecControllerTest {
         assertEquals(ADDR_PLAYBACK_2, mLogicalAddress);
     }
 
+    @Ignore("b/110413065 Support multiple device types 4 and 5.")
     @Test
     public void testAllocatLogicalAddress_PlaybackNoPreferredNotOcuppied() {
         mHdmiCecController.allocateLogicalAddress(DEVICE_PLAYBACK, ADDR_UNREGISTERED, mCallback);

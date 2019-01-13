@@ -46,8 +46,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     /**
      * Used on {@link #notifyViewTextChanged(AutofillId, CharSequence, int)} to indicate that the
-     *
-     * thext change was caused by user input (for example, through IME).
+     * text change was caused by user input (for example, through IME).
      */
     public static final int FLAG_USER_INPUT = 0x1;
 
@@ -85,6 +84,13 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * @hide
      */
     public static final int STATE_DISABLED_DUPLICATED_ID = 4;
+
+    /**
+     * Session is disabled by FLAG_SECURE
+     *
+     * @hide
+     */
+    public static final int STATE_DISABLED_BY_FLAG_SECURE = 5;
 
     private static final int INITIAL_CHILDREN_CAPACITY = 5;
 
@@ -178,7 +184,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
             mCloseGuard.close();
 
-            //TODO(b/111276913): check state (for example, how to handle if it's waiting for remote
+            // TODO(b/111276913): check state (for example, how to handle if it's waiting for remote
             // id) and send it to the cache of batched commands
             if (VERBOSE) {
                 Log.v(TAG, "destroy(): state=" + getStateAsString(mState) + ", mId=" + mId);
@@ -295,6 +301,26 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     }
 
     /**
+     * Creates a new {@link AutofillId} for a virtual child, so it can be used to uniquely identify
+     * the children in the session.
+     *
+     * @param parentId id of the virtual view parent (it can be obtained by calling
+     * {@link ViewStructure#getAutofillId()} on the parent).
+     * @param virtualChildId id of the virtual child, relative to the parent.
+     *
+     * @return if for the virtual child
+     *
+     * @throws IllegalArgumentException if the {@code parentId} is a virtual child id.
+     */
+    public @NonNull AutofillId newAutofillId(@NonNull AutofillId parentId, int virtualChildId) {
+        Preconditions.checkNotNull(parentId);
+        Preconditions.checkArgument(!parentId.isVirtual(), "virtual ids cannot have children");
+        // TODO(b/121197119): we need to add the session id to the AutofillId to make them unique
+        // per session
+        return new AutofillId(parentId, virtualChildId);
+    }
+
+    /**
      * Creates a {@link ViewStructure} for a "virtual" view, so it can be passed to
      * {@link #notifyViewAppeared(ViewStructure)} by the view managing the virtual view hierarchy.
      *
@@ -303,12 +329,11 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * @param virtualId id of the virtual child, relative to the parent.
      *
      * @return a new {@link ViewStructure} that can be used for Content Capture purposes.
-     *
-     * @hide
      */
     @NonNull
     public final ViewStructure newVirtualViewStructure(@NonNull AutofillId parentId,
             int virtualId) {
+        // TODO(b/121197119): use the constructor that takes a session id / assert on unit test.
         return new ViewNode.ViewStructureImpl(parentId, virtualId);
     }
 
@@ -356,6 +381,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 return "DISABLED_NO_SERVICE";
             case STATE_DISABLED_DUPLICATED_ID:
                 return "DISABLED_DUPLICATED_ID";
+            case STATE_DISABLED_BY_FLAG_SECURE:
+                return "DISABLED_FLAG_SECURE";
             default:
                 return "INVALID:" + state;
         }

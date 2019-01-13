@@ -329,6 +329,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
                         if (valid) {
                             mSessions.put(session.sessionId, session);
+                            if (session.isStaged()) {
+                                mStagingManager.restoreSession(session);
+                            }
                         } else {
                             // Since this is early during boot we don't send
                             // any observer events about the session, but we
@@ -533,7 +536,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mInstallThread.getLooper(), mStagingManager, sessionId, userId,
                 installerPackageName, callingUid, params, createdMillis, stageDir, stageCid, false,
-                false, null, SessionInfo.INVALID_ID);
+                false, null, SessionInfo.INVALID_ID, false, false, false, SessionInfo.NO_ERROR);
 
         synchronized (mSessions) {
             mSessions.put(sessionId, session);
@@ -1131,7 +1134,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         }
                     }
                     synchronized (mSessions) {
-                        mSessions.remove(session.sessionId);
+                        if (!session.isStaged() || !success) {
+                            mSessions.remove(session.sessionId);
+                        }
                         addHistoricalSessionLocked(session);
 
                         final File appIconFile = buildAppIconFile(session.sessionId);

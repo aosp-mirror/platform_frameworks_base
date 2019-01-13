@@ -29,21 +29,27 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.IntArray;
 import android.util.Pair;
 import android.util.Printer;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
+import android.view.inputmethod.InputMethodSystemProperty;
 import android.view.textservice.SpellCheckerInfo;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.StartInputFlags;
+import com.android.server.LocalServices;
 import com.android.server.textservices.TextServicesManagerInternal;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -1286,4 +1292,62 @@ final class InputMethodUtils {
         return true;
     }
 
+    /**
+     * Converts a user ID, which can be a pseudo user ID such as {@link UserHandle#USER_ALL} to a
+     * list of real user IDs.
+     *
+     * <p>This method also converts profile user ID to profile parent user ID unless
+     * {@link InputMethodSystemProperty#PER_PROFILE_IME_ENABLED} is {@code true}.</p>
+     *
+     * @param userIdToBeResolved A user ID. Two pseudo user ID {@link UserHandle#USER_CURRENT} and
+     *                           {@link UserHandle#USER_ALL} are also supported
+     * @param currentUserId A real user ID, which will be used when {@link UserHandle#USER_CURRENT}
+     *                      is specified in {@code userIdToBeResolved}.
+     * @param warningWriter A {@link PrintWriter} to output some debug messages. {@code null} if
+     *                      no debug message is required.
+     * @return An integer array that contain user IDs.
+     */
+    static int[] resolveUserId(@UserIdInt int userIdToBeResolved,
+            @UserIdInt int currentUserId, @Nullable PrintWriter warningWriter) {
+        final UserManagerInternal userManagerInternal =
+                LocalServices.getService(UserManagerInternal.class);
+
+        if (userIdToBeResolved == UserHandle.USER_ALL) {
+            if (InputMethodSystemProperty.PER_PROFILE_IME_ENABLED) {
+                return userManagerInternal.getUserIds();
+            }
+            final IntArray result = new IntArray();
+            for (int userId : userManagerInternal.getUserIds()) {
+                final int parentUserId = userManagerInternal.getProfileParentId(userId);
+                if (result.indexOf(parentUserId) < 0) {
+                    result.add(parentUserId);
+                }
+            }
+            return result.toArray();
+        }
+
+        final int sourceUserId;
+        if (userIdToBeResolved == UserHandle.USER_CURRENT) {
+            sourceUserId = currentUserId;
+        } else if (userIdToBeResolved < 0) {
+            if (warningWriter != null) {
+                warningWriter.print("Pseudo user ID ");
+                warningWriter.print(userIdToBeResolved);
+                warningWriter.println(" is not supported.");
+            }
+            return new int[]{};
+        } else if (userManagerInternal.exists(userIdToBeResolved)) {
+            sourceUserId = userIdToBeResolved;
+        } else {
+            if (warningWriter != null) {
+                warningWriter.print("User #");
+                warningWriter.print(userIdToBeResolved);
+                warningWriter.println(" does not exit.");
+            }
+            return new int[]{};
+        }
+        final int resolvedUserId = InputMethodSystemProperty.PER_PROFILE_IME_ENABLED
+                ? sourceUserId : userManagerInternal.getProfileParentId(sourceUserId);
+        return new int[]{resolvedUserId};
+    }
 }

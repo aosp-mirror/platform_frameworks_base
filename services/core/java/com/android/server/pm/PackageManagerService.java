@@ -13562,7 +13562,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             Signature[] callerSignature;
-            Object obj = mSettings.getSettingLPr(callingUid);
+            final int appId = UserHandle.getAppId(callingUid);
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     callerSignature =
@@ -16910,19 +16911,29 @@ public class PackageManagerService extends IPackageManager.Stub
             final String filePath = entry.getKey();
             final String signaturePath = entry.getValue();
 
-            final VerityUtils.SetupResult result = VerityUtils.generateApkVeritySetupData(
-                    filePath, signaturePath, legacyMode);
+            if (!legacyMode) {
+                // fs-verity is optional for now.  Only set up if signature is provided.
+                if (new File(signaturePath).exists()) {
+                    try {
+                        VerityUtils.setUpFsverity(filePath, signaturePath);
+                    } catch (IOException | DigestException | NoSuchAlgorithmException
+                            | SecurityException e) {
+                        throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
+                                "Failed to enable fs-verity: " + e);
+                    }
+                }
+                continue;
+            }
+
+            // In legacy mode, fs-verity can only be enabled by process with CAP_SYS_ADMIN.
+            final VerityUtils.SetupResult result = VerityUtils.generateApkVeritySetupData(filePath);
             if (result.isOk()) {
                 if (Build.IS_DEBUGGABLE) Slog.i(TAG, "Enabling verity to " + filePath);
                 final FileDescriptor fd = result.getUnownedFileDescriptor();
                 try {
                     mInstaller.installApkVerity(filePath, fd, result.getContentSize());
-
-                    // In legacy mode, fs-verity can only be enabled by process with CAP_SYS_ADMIN.
-                    if (legacyMode) {
-                        final byte[] rootHash = VerityUtils.generateApkVerityRootHash(filePath);
-                        mInstaller.assertFsverityRootHashMatches(filePath, rootHash);
-                    }
+                    final byte[] rootHash = VerityUtils.generateApkVerityRootHash(filePath);
+                    mInstaller.assertFsverityRootHashMatches(filePath, rootHash);
                 } finally {
                     IoUtils.closeQuietly(fd);
                 }

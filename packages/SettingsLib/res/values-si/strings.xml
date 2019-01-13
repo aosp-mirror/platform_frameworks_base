@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"නව උපස්ථ මුරපදය සකසන ලදි"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"නව මුරපදය සහ සත්‍යාපනය නොගැළපුනි"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"උපස්ථ මුරපදය පිහිටුවීම අසාර්ථකය"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"පූරණය වේ…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"දීප්තිමත් (පෙරනිමිය)"</item>
     <item msgid="8446070607501413455">"ස්වභාවික"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"සෑම විටම ඉල්ලන්න"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"ඔබ ක්‍රියාවිරහිත කරන තුරු"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"මේ දැන්"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"වැඩිදියුණු වෙමින් ඇති යාවත්කාලීන කළ චිත්‍රක ධාවකය භාවිත කිරීමට යෙදුමට ඇතුළු වන්න"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"දුරකථන ස්පීකරය"</string>
 </resources>

@@ -69,6 +69,7 @@ import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.phone.NavGesture;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
@@ -156,6 +157,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private QuickStepAction mQuickStepAction;
     private NavigationBackAction mBackAction;
     private QuickSwitchAction mQuickSwitchAction;
+    private NavigationAssistantAction mAssistantAction;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -366,8 +368,12 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return mBarTransitions.getLightTransitionsController();
     }
 
-    public void setComponents(NotificationPanelView panel) {
+    public void setComponents(NotificationPanelView panel, AssistManager assistManager) {
         mPanelView = panel;
+        if (mAssistantAction == null) {
+            mAssistantAction = new NavigationAssistantAction(this, mOverviewProxyService,
+                    assistManager);
+        }
         if (mGestureHelper instanceof QuickStepController) {
             ((QuickStepController) mGestureHelper).setComponents(this);
             updateNavigationGestures();
@@ -398,6 +404,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 return mBackAction;
             case NavigationPrototypeController.ACTION_QUICKSWITCH:
                 return mQuickSwitchAction;
+            case NavigationPrototypeController.ACTION_ASSISTANT:
+                return mAssistantAction;
+            case NavigationPrototypeController.ACTION_NOTHING:
+                return null;
             default:
                 return defaultAction;
         }

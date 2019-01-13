@@ -490,7 +490,6 @@ Landroid/location/ILocationManager$Stub;->asInterface(Landroid/os/IBinder;)Landr
 Landroid/location/ILocationManager$Stub;->TRANSACTION_getAllProviders:I
 Landroid/location/ILocationManager;->getAllProviders()Ljava/util/List;
 Landroid/location/ILocationManager;->getNetworkProviderPackage()Ljava/lang/String;
-Landroid/location/ILocationManager;->reportLocation(Landroid/location/Location;Z)V
 Landroid/location/INetInitiatedListener$Stub;-><init>()V
 Landroid/location/INetInitiatedListener;->sendNiResponse(II)Z
 Landroid/location/LocationManager$ListenerTransport;-><init>(Landroid/location/LocationManager;Landroid/location/LocationListener;Landroid/os/Looper;)V

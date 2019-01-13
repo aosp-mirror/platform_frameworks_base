@@ -19,12 +19,12 @@ package com.android.commands.media;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.pm.ParceledListSlice;
 import android.media.MediaMetadata;
+import android.media.session.ControllerCallbackLink;
 import android.media.session.ISessionController;
-import android.media.session.ISessionControllerCallback;
 import android.media.session.ISessionManager;
 import android.media.session.MediaController.PlaybackInfo;
+import android.media.session.MediaSession.QueueItem;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.HandlerThread;
@@ -178,13 +178,7 @@ public class Media extends BaseCommand {
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD));
     }
 
-    class ControllerMonitor extends ISessionControllerCallback.Stub {
-        private final ISessionController mController;
-
-        public ControllerMonitor(ISessionController controller) {
-            mController = controller;
-        }
-
+    class ControllerCallbackStub extends ControllerCallbackLink.CallbackStub {
         @Override
         public void onSessionDestroyed() {
             System.out.println("onSessionDestroyed. Enter q to quit.");
@@ -208,24 +202,34 @@ public class Media extends BaseCommand {
         }
 
         @Override
-        public void onQueueChanged(ParceledListSlice queue) throws RemoteException {
+        public void onQueueChanged(List<QueueItem> queue) {
             System.out.println("onQueueChanged, "
-                    + (queue == null ? "null queue" : " size=" + queue.getList().size()));
+                    + (queue == null ? "null queue" : " size=" + queue.size()));
         }
 
         @Override
-        public void onQueueTitleChanged(CharSequence title) throws RemoteException {
+        public void onQueueTitleChanged(CharSequence title) {
             System.out.println("onQueueTitleChange " + title);
         }
 
         @Override
-        public void onExtrasChanged(Bundle extras) throws RemoteException {
+        public void onExtrasChanged(Bundle extras) {
             System.out.println("onExtrasChanged " + extras);
         }
 
         @Override
-        public void onVolumeInfoChanged(PlaybackInfo info) throws RemoteException {
+        public void onVolumeInfoChanged(PlaybackInfo info) {
             System.out.println("onVolumeInfoChanged " + info);
+        }
+    }
+
+    private class ControllerMonitor {
+        private final ISessionController mController;
+        private final ControllerCallbackLink mControllerCallbackLink;
+
+        ControllerMonitor(ISessionController controller) {
+            mController = controller;
+            mControllerCallbackLink = new ControllerCallbackLink(new ControllerCallbackStub());
         }
 
         void printUsageMessage() {
@@ -244,7 +248,7 @@ public class Media extends BaseCommand {
                 @Override
                 protected void onLooperPrepared() {
                     try {
-                        mController.registerCallbackListener(PACKAGE_NAME, ControllerMonitor.this);
+                        mController.registerCallbackListener(PACKAGE_NAME, mControllerCallbackLink);
                     } catch (RemoteException e) {
                         System.out.println("Error registering monitor callback");
                     }
@@ -287,7 +291,7 @@ public class Media extends BaseCommand {
             } finally {
                 cbThread.getLooper().quit();
                 try {
-                    mController.unregisterCallbackListener(this);
+                    mController.unregisterCallbackListener(mControllerCallbackLink);
                 } catch (Exception e) {
                     // ignoring
                 }

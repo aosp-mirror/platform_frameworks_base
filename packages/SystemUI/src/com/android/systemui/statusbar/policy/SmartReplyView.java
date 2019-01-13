@@ -242,9 +242,8 @@ public class SmartReplyView extends ViewGroup {
         b.setText(choice);
 
         OnDismissAction action = () -> {
-            // TODO(b/111437455): Also for EDIT_CHOICES_BEFORE_SENDING_AUTO, depending on flags.
-            if (smartReplies.remoteInput.getEditChoicesBeforeSending()
-                    == RemoteInput.EDIT_CHOICES_BEFORE_SENDING_ENABLED) {
+            if (mConstants.getEffectiveEditChoicesBeforeSending(
+                    smartReplies.remoteInput.getEditChoicesBeforeSending())) {
                 entry.remoteInputText = choice;
                 mRemoteInputManager.activateRemoteInput(b,
                         new RemoteInput[] { smartReplies.remoteInput }, smartReplies.remoteInput,

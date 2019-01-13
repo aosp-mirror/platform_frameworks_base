@@ -128,6 +128,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
     }.setDuration(CONTENT_FADE_DURATION);
 
+    private static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
     public static final int MAX_STATIC_ICONS = 4;
     private static final int MAX_DOTS = 1;
 
@@ -371,7 +372,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         float translationX = getActualPaddingStart();
         int firstOverflowIndex = -1;
         int childCount = getChildCount();
-        int maxVisibleIcons = mIsStaticLayout ? MAX_STATIC_ICONS : childCount;
+        int maxVisibleIcons = mDark ? MAX_VISIBLE_ICONS_WHEN_DARK :
+                mIsStaticLayout ? MAX_STATIC_ICONS : childCount;
         float layoutEnd = getLayoutEnd();
         float overflowStart = getMaxOverflowStart();
         mVisualOverflowStart = 0;
@@ -387,6 +389,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             boolean forceOverflow = mSpeedBumpIndex != -1 && i >= mSpeedBumpIndex
                     && iconState.iconAppearAmount > 0.0f || i >= maxVisibleIcons;
             boolean noOverflowAfter = i == childCount - 1;
+            float drawingScale = mDark && view instanceof StatusBarIconView
+                    ? ((StatusBarIconView) view).getIconScaleFullyDark()
+                    : 1f;
             if (mOpenedAmount != 0.0f) {
                 noOverflowAfter = noOverflowAfter && !hasAmbient && !forceOverflow;
             }
@@ -402,7 +407,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     mVisualOverflowStart = Math.min(translationX, mVisualOverflowStart);
                 }
             }
-            translationX += iconState.iconAppearAmount * view.getWidth();
+            translationX += iconState.iconAppearAmount * view.getWidth() * drawingScale;
         }
         mNumDots = 0;
         if (firstOverflowIndex != -1) {
@@ -430,6 +435,32 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             View lastChild = getChildAt(childCount - 1);
             mLastVisibleIconState = mIconStates.get(lastChild);
             mFirstVisibleIconState = mIconStates.get(getChildAt(0));
+        }
+
+        boolean center = mDark;
+        if (center && translationX < getLayoutEnd()) {
+            float initialTranslation =
+                    mFirstVisibleIconState == null ? 0 : mFirstVisibleIconState.xTranslation;
+
+            float contentWidth = 0;
+            if (mLastVisibleIconState != null) {
+                contentWidth = mLastVisibleIconState.xTranslation + mIconSize;
+                contentWidth = Math.min(getWidth(), contentWidth) - initialTranslation;
+            }
+            float availableSpace = getLayoutEnd() - getActualPaddingStart();
+            float delta = (availableSpace - contentWidth) / 2;
+
+            if (firstOverflowIndex != -1) {
+                // If we have an overflow, only count those half for centering because the dots
+                // don't have a lot of visual weight.
+                float deltaIgnoringOverflow = (getLayoutEnd() - mVisualOverflowStart) / 2;
+                delta = (deltaIgnoringOverflow + delta) / 2;
+            }
+            for (int i = 0; i < childCount; i++) {
+                View view = getChildAt(i);
+                IconState iconState = mIconStates.get(view);
+                iconState.xTranslation += delta;
+            }
         }
 
         if (isLayoutRtl()) {

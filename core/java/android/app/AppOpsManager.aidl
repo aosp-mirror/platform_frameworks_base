@@ -19,5 +19,7 @@ package android.app;
 parcelable AppOpsManager.PackageOps;
 parcelable AppOpsManager.OpEntry;
 
+parcelable AppOpsManager.HistoricalOp;
+parcelable AppOpsManager.HistoricalOps;
 parcelable AppOpsManager.HistoricalPackageOps;
-parcelable AppOpsManager.HistoricalOpEntry;
+parcelable AppOpsManager.HistoricalUidOps;

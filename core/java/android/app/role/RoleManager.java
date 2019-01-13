@@ -19,6 +19,7 @@ package android.app.role;
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -68,6 +69,8 @@ public final class RoleManager {
 
     /**
      * The name of the dialer role.
+     *
+     * @see Intent#ACTION_DIAL
      */
     public static final String ROLE_DIALER = "android.app.role.DIALER";
 
@@ -98,6 +101,75 @@ public final class RoleManager {
      * @see Intent#CATEGORY_APP_MUSIC
      */
     public static final String ROLE_MUSIC = "android.app.role.MUSIC";
+
+    /**
+     * The name of the home role.
+     *
+     * @see Intent#CATEGORY_HOME
+     */
+    public static final String ROLE_HOME = "android.app.role.HOME";
+
+    /**
+     * The name of the emergency role
+     *
+     * @see android.telephony.TelephonyManager#ACTION_EMERGENCY_ASSISTANCE
+     */
+    public static final String ROLE_EMERGENCY = "android.app.role.EMERGENCY";
+
+    /**
+     * The name of the car mode dialer app role.
+     * <p>
+     * Similar to the {@link #ROLE_DIALER dialer} role, this role determines which app is
+     * responsible for showing the user interface for ongoing calls on the device. It is only used
+     * when the device is in car mode.
+     *
+     * @see #ROLE_DIALER
+     * @see android.app.UiModeManager#ACTION_ENTER_CAR_MODE
+     * @see android.telecom.InCallService
+     *
+     * TODO: STOPSHIP: Make name of required roles public API
+     * @hide
+     */
+    public static final String ROLE_CAR_MODE_DIALER_APP = "android.app.role.CAR_MODE_DIALER_APP";
+
+    /**
+     * The name of the proxy calling role.
+     * <p>
+     * A proxy calling app provides a means to re-write the phone number for an outgoing call to
+     * place the call through a proxy calling service.
+     *
+     * @see android.telecom.CallRedirectionService
+     *
+     * TODO: STOPSHIP: Make name of required roles public API
+     * @hide
+     */
+    public static final String ROLE_PROXY_CALLING_APP = "android.app.role.PROXY_CALLING_APP";
+
+    /**
+     * The name of the call screening and caller id role.
+     *
+     * @see android.telecom.CallScreeningService
+     *
+     * TODO: STOPSHIP: Make name of required roles public API
+     * @hide
+     */
+    public static final String ROLE_CALL_SCREENING_APP = "android.app.role.CALL_SCREENING_APP";
+
+    /**
+     * The name of the call companion app role.
+     * <p>
+     * A call companion app provides no user interface for calls, but will be bound to by Telecom
+     * when there are active calls on the device. Companion apps for wearable devices are an
+     * acceptable use-case.
+     * <p>
+     * Multiple apps may hold this role at the same time.
+     *
+     * @see android.telecom.InCallService
+     *
+     * TODO: STOPSHIP: Make name of required roles public API
+     * @hide
+     */
+    public static final String ROLE_CALL_COMPANION_APP = "android.app.role.CALL_COMPANION_APP";
 
     /**
      * The action used to request user approval of a role for an application.
@@ -542,7 +614,6 @@ public final class RoleManager {
         }
     }
 
-
     /**
      * Returns the list of all roles that the given package is currently holding
      *
@@ -558,6 +629,22 @@ public final class RoleManager {
         Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
         try {
             return mService.getHeldRolesFromController(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allows getting the role holder for {@link #ROLE_SMS} without
+     * {@link Manifest.permission#OBSERVE_ROLE_HOLDERS}, as required by
+     * {@link android.provider.Telephony.Sms#getDefaultSmsPackage(Context)}
+     *
+     * @hide
+     */
+    @Nullable
+    public String getDefaultSmsPackage(@UserIdInt int userId) {
+        try {
+            return mService.getDefaultSmsPackage(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

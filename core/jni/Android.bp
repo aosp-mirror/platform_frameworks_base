@@ -41,7 +41,7 @@ cc_library_shared {
         "com_google_android_gles_jni_EGLImpl.cpp",
         "com_google_android_gles_jni_GLImpl.cpp", // TODO: .arm
         "android_app_Activity.cpp",
-	"android_app_ActivityThread.cpp",
+        "android_app_ActivityThread.cpp",
         "android_app_NativeActivity.cpp",
         "android_app_admin_SecurityLog.cpp",
         "android_opengl_EGL14.cpp",
@@ -202,6 +202,7 @@ cc_library_shared {
         "android_animation_PropertyValuesHolder.cpp",
         "android_security_Scrypt.cpp",
         "com_android_internal_net_NetworkStatsFactory.cpp",
+        "com_android_internal_os_AtomicDirectory.cpp",
         "com_android_internal_os_ClassLoaderFactory.cpp",
         "com_android_internal_os_FuseAppLoop.cpp",
         "com_android_internal_os_Zygote.cpp",

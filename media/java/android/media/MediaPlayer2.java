@@ -1334,11 +1334,11 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_WAKE_LOCK, false) {
             @Override
             void process() {
-                boolean washeld = false;
+                boolean wasHeld = false;
 
                 if (mWakeLock != null) {
                     if (mWakeLock.isHeld()) {
-                        washeld = true;
+                        wasHeld = true;
                         mWakeLock.release();
                     }
                 }
@@ -1346,7 +1346,7 @@ public class MediaPlayer2 implements AutoCloseable
                 mWakeLock = wakeLock;
                 if (mWakeLock != null) {
                     mWakeLock.setReferenceCounted(false);
-                    if (washeld) {
+                    if (wasHeld) {
                         mWakeLock.acquire();
                     }
                 }

@@ -800,7 +800,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimera"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Stäng"</string>
     <string name="pip_phone_settings" msgid="8080777499521528521">"Inställningar"</string>
-    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Tryck och dra nedåt för att avvisa"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Tryck och dra nedåt för att ta bort"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Meny"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> visas i bild-i-bild"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Om du inte vill att den här funktionen används i <xliff:g id="NAME">%s</xliff:g> öppnar du inställningarna genom att trycka. Sedan inaktiverar du funktionen."</string>
@@ -890,6 +890,5 @@
     </plurals>
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensorer har inaktiverats"</string>
     <string name="device_services" msgid="1191212554435440592">"Enhetstjänster"</string>
-    <!-- no translation found for music_controls_no_title (5236895307087002011) -->
-    <skip />
+    <string name="music_controls_no_title" msgid="5236895307087002011">"Ingen titel"</string>
 </resources>

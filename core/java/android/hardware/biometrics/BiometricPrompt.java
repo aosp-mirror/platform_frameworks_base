@@ -73,6 +73,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @hide
      */
     public static final String KEY_NEGATIVE_TEXT = "negative_text";
+    /**
+     * @hide
+     */
+    public static final String KEY_REQUIRE_CONFIRMATION = "require_confirmation";
 
     /**
      * Error/help message will show for this amount of time.
@@ -211,6 +215,30 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             }
             mBundle.putCharSequence(KEY_NEGATIVE_TEXT, text);
             mNegativeButtonInfo = new ButtonInfo(executor, listener);
+            return this;
+        }
+
+        /**
+         * Optional: A hint to the system to require user confirmation after a biometric has been
+         * authenticated. For example, implicit modalities like Face and Iris authentication are
+         * passive, meaning they don't require an explicit user action to complete. When set to
+         * 'false', the user action (e.g. pressing a button) will not be required. BiometricPrompt
+         * will require confirmation by default.
+         *
+         * A typical use case for not requiring confirmation would be for low-risk transactions,
+         * such as re-authenticating a recently authenticated application. A typical use case for
+         * requiring confirmation would be for authorizing a purchase.
+         *
+         * Note that this is a hint to the system. The system may choose to ignore the flag. For
+         * example, if the user disables implicit authentication in Settings, or if it does not
+         * apply to a modality (e.g. Fingerprint). When ignored, the system will default to
+         * requiring confirmation.
+         *
+         * @param requireConfirmation
+         * @hide
+         */
+        public Builder setRequireConfirmation(boolean requireConfirmation) {
+            mBundle.putBoolean(KEY_REQUIRE_CONFIRMATION, requireConfirmation);
             return this;
         }
 

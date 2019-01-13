@@ -16,7 +16,9 @@
 
 package com.android.systemui.bubbles;
 
+import android.app.ActivityView;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -25,7 +27,9 @@ import android.graphics.drawable.Icon;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -37,7 +41,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 /**
  * A floating object on the screen that has a collapsed and expanded state.
  */
-public class BubbleView extends LinearLayout implements BubbleTouchHandler.FloatingView {
+class BubbleView extends LinearLayout implements BubbleTouchHandler.FloatingView {
     private static final String TAG = "BubbleView";
 
     private Context mContext;
@@ -46,6 +50,8 @@ public class BubbleView extends LinearLayout implements BubbleTouchHandler.Float
     private NotificationEntry mEntry;
     private int mBubbleSize;
     private int mIconSize;
+    private PendingIntent mAppOverlayIntent;
+    private ActivityView mActivityView;
 
     public BubbleView(Context context) {
         this(context, null);
@@ -117,10 +123,49 @@ public class BubbleView extends LinearLayout implements BubbleTouchHandler.Float
     }
 
     /**
-     * @return the view to display when the bubble is expanded.
+     * @return the view to display notification content when the bubble is expanded.
      */
     public ExpandableNotificationRow getRowView() {
         return mEntry.getRow();
+    }
+
+    /**
+     * @return a view used to display app overlay content when expanded.
+     */
+    public ActivityView getActivityView() {
+        if (mActivityView == null) {
+            mActivityView = new ActivityView(mContext);
+            Log.d(TAG, "[getActivityView] created: " + mActivityView);
+        }
+        return mActivityView;
+    }
+
+    /**
+     * Removes and releases an ActivityView if one was previously created for this bubble.
+     */
+    public void destroyActivityView(ViewGroup tmpParent) {
+        if (mActivityView == null) {
+            return;
+        }
+        // HACK: Only release if initialized. There's no way to know if the ActivityView has
+        // been initialized. Calling release() if it hasn't been initialized will crash.
+
+        if (!mActivityView.isAttachedToWindow()) {
+            // HACK: release() will crash if the view is not attached.
+
+            mActivityView.setVisibility(View.GONE);
+            tmpParent.addView(mActivityView, new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+        }
+        try {
+            mActivityView.release();
+        } catch (IllegalStateException ex) {
+            Log.e(TAG, "ActivityView either already released, or not yet initialized.", ex);
+        }
+
+        ((ViewGroup) mActivityView.getParent()).removeView(mActivityView);
+        mActivityView = null;
     }
 
     @Override
@@ -161,5 +206,21 @@ public class BubbleView extends LinearLayout implements BubbleTouchHandler.Float
         lp.width = mBubbleSize;
         lp.height = mBubbleSize;
         v.setLayoutParams(lp);
+    }
+
+    /**
+     * @return whether an ActivityView should be used to display the content of this Bubble
+     */
+    public boolean hasAppOverlayIntent() {
+        return mAppOverlayIntent != null;
+    }
+
+    public PendingIntent getAppOverlayIntent() {
+        return mAppOverlayIntent;
+
+    }
+
+    public void setAppOverlayIntent(PendingIntent intent) {
+        mAppOverlayIntent = intent;
     }
 }

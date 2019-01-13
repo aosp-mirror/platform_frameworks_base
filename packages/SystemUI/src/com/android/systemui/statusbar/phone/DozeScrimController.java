@@ -84,6 +84,14 @@ public class DozeScrimController implements StateListener {
         public void onCancelled() {
             pulseFinished();
         }
+
+        /**
+         * Whether to fade out wallpaper.
+         */
+        @Override
+        public  boolean isFadeOutWallpaper() {
+            return mPulseReason == DozeLog.PULSE_REASON_DOCKING;
+        }
     };
 
     public DozeScrimController(DozeParameters dozeParameters) {

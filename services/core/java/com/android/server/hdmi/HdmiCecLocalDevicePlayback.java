@@ -21,11 +21,11 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.Settings.Global;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocalePicker;
 import com.android.internal.app.LocalePicker.LocaleInfo;
 import com.android.internal.util.IndentingPrintWriter;
@@ -35,12 +35,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Locale;
 
-import java.util.List;
-
 /**
  * Represent a logical device of type Playback residing in Android system.
  */
-final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
+public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private static final String TAG = "HdmiCecLocalDevicePlayback";
 
     private static final boolean WAKE_ON_HOTPLUG =
@@ -48,8 +46,6 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
 
     private static final boolean SET_MENU_LANGUAGE =
             SystemProperties.getBoolean(Constants.PROPERTY_SET_MENU_LANGUAGE, false);
-
-    private boolean mIsActiveSource = false;
 
     // Used to keep the device awake while it is the active source. For devices that
     // cannot wake up via CEC commands, this address the inconvenience of having to
@@ -61,6 +57,11 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
 
     // If true, turn off TV upon standby. False by default.
     private boolean mAutoTvOff;
+
+    // Local active port number used for Routing Control.
+    // Default 0 means HOME is the current active path. Temp solution only.
+    // TODO(amyjojo): adding system constants for input ports to TIF mapping.
+    private int mLocalActivePath = 0;
 
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
@@ -100,25 +101,6 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    void oneTouchPlay(IHdmiControlCallback callback) {
-        assertRunOnServiceThread();
-        List<OneTouchPlayAction> actions = getActions(OneTouchPlayAction.class);
-        if (!actions.isEmpty()) {
-            Slog.i(TAG, "oneTouchPlay already in progress");
-            actions.get(0).addCallback(callback);
-            return;
-        }
-        OneTouchPlayAction action = OneTouchPlayAction.create(this, Constants.ADDR_TV,
-                callback);
-        if (action == null) {
-            Slog.w(TAG, "Cannot initiate oneTouchPlay");
-            invokeCallback(callback, HdmiControlManager.RESULT_EXCEPTION);
-            return;
-        }
-        addAndStartAction(action);
-    }
-
-    @ServiceThreadOnly
     void queryDisplayStatus(IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         List<DevicePowerStatusAction> actions = getActions(DevicePowerStatusAction.class);
@@ -135,16 +117,6 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
             return;
         }
         addAndStartAction(action);
-    }
-
-    @ServiceThreadOnly
-    private void invokeCallback(IHdmiControlCallback callback, int result) {
-        assertRunOnServiceThread();
-        try {
-            callback.onComplete(result);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Invoking callback failed:" + e);
-        }
     }
 
     @Override
@@ -189,7 +161,8 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    void setActiveSource(boolean on) {
+    @VisibleForTesting
+    void setIsActiveSource(boolean on) {
         assertRunOnServiceThread();
         mIsActiveSource = on;
         if (on) {
@@ -227,21 +200,6 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         return !getWakeLock().isHeld();
     }
 
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleActiveSource(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        mayResetActiveSource(physicalAddress);
-        return true;  // Broadcast message.
-    }
-
-    private void mayResetActiveSource(int physicalAddress) {
-        if (physicalAddress != mService.getPhysicalAddress()) {
-            setActiveSource(false);
-        }
-    }
-
     @ServiceThreadOnly
     protected boolean handleUserControlPressed(HdmiCecMessage message) {
         assertRunOnServiceThread();
@@ -250,42 +208,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     }
 
     @Override
-    @ServiceThreadOnly
-    protected boolean handleSetStreamPath(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        maySetActiveSource(physicalAddress);
-        maySendActiveSource(message.getSource());
-        wakeUpIfActiveSource();
-        return true;  // Broadcast message.
-    }
-
-    // Samsung model we tested sends <Routing Change> and <Request Active Source>
-    // in a row, and then changes the input to the internal source if there is no
-    // <Active Source> in response. To handle this, we'll set ActiveSource aggressively.
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleRoutingChange(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        int newPath = HdmiUtils.twoBytesToInt(message.getParams(), 2);
-        maySetActiveSource(newPath);
-        return true;  // Broadcast message.
-    }
-
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleRoutingInformation(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        maySetActiveSource(physicalAddress);
-        return true;  // Broadcast message.
-    }
-
-    private void maySetActiveSource(int physicalAddress) {
-        setActiveSource(physicalAddress == mService.getPhysicalAddress());
-    }
-
-    private void wakeUpIfActiveSource() {
+    protected void wakeUpIfActiveSource() {
         if (!mIsActiveSource) {
             return;
         }
@@ -296,7 +219,8 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         }
     }
 
-    private void maySendActiveSource(int dest) {
+    @Override
+    protected void maySendActiveSource(int dest) {
         if (mIsActiveSource) {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
                     mAddress, mService.getPhysicalAddress()));
@@ -304,14 +228,6 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildReportMenuStatus(
                     mAddress, dest, Constants.MENU_STATE_ACTIVATED));
         }
-    }
-
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleRequestActiveSource(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        maySendActiveSource(message.getSource());
-        return true;  // Broadcast message.
     }
 
     @ServiceThreadOnly
@@ -361,16 +277,6 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected void sendStandby(int deviceId) {
-        assertRunOnServiceThread();
-
-        // Playback device can send <Standby> to TV only. Ignore the parameter.
-        int targetAddress = Constants.ADDR_TV;
-        mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(mAddress, targetAddress));
-    }
-
-    @Override
-    @ServiceThreadOnly
     protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
         super.disableDevice(initiatedByCec, callback);
 
@@ -379,8 +285,18 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildInactiveSource(
                     mAddress, mService.getPhysicalAddress()));
         }
-        setActiveSource(false);
+        setIsActiveSource(false);
         checkIfPendingActionsCleared();
+    }
+
+    private void routeToPort(int portId) {
+        // TODO(AMYJOJO): route to specific input of the port
+        mLocalActivePath = portId;
+    }
+
+    @VisibleForTesting
+    protected int getLocalActivePath() {
+        return mLocalActivePath;
     }
 
     @Override

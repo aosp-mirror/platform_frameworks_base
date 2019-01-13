@@ -890,6 +890,5 @@
     </plurals>
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Andurid on välja lülitatud"</string>
     <string name="device_services" msgid="1191212554435440592">"Seadme teenused"</string>
-    <!-- no translation found for music_controls_no_title (5236895307087002011) -->
-    <skip />
+    <string name="music_controls_no_title" msgid="5236895307087002011">"Pealkiri puudub"</string>
 </resources>

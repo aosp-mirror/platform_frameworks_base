@@ -36,8 +36,6 @@ import java.util.Objects;
  * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
  * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
  * for consistent behavior across all devices.
- * </p>
- * @hide
  */
 public final class Session2Command implements Parcelable {
     /**
@@ -151,14 +149,17 @@ public final class Session2Command implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        if (dest == null) {
+            throw new IllegalArgumentException("parcel shouldn't be null");
+        }
         dest.writeInt(mCommandCode);
         dest.writeString(mCustomCommand);
         dest.writeBundle(mExtras);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof Session2Command)) {
             return false;
         }
@@ -185,7 +186,7 @@ public final class Session2Command implements Parcelable {
          * @param resultCode result code
          * @param resultData result data
          */
-        public Result(int resultCode, Bundle resultData) {
+        public Result(int resultCode, @Nullable Bundle resultData) {
             mResultCode = resultCode;
             mResultData = resultData;
         }
@@ -200,6 +201,7 @@ public final class Session2Command implements Parcelable {
         /**
          * Returns the result data.
          */
+        @Nullable
         public Bundle getResultData() {
             return mResultData;
         }

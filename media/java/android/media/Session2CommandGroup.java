@@ -130,7 +130,7 @@ public final class Session2CommandGroup implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelableArray((Session2Command[]) mCommands.toArray(), 0);
+        dest.writeParcelableArray(mCommands.toArray(new Session2Command[0]), 0);
     }
 
     /**

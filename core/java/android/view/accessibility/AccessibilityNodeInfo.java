@@ -43,6 +43,7 @@ import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
 import android.view.TouchDelegate;
@@ -90,6 +91,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AccessibilityNodeInfo implements Parcelable {
 
     private static final boolean DEBUG = false;
+
+    private static final String TAG = "AccessibilityNodeInfo";
 
     /** @hide */
     public static final int UNDEFINED_CONNECTION_ID = -1;
@@ -990,6 +993,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * <strong>Note:</strong> Cannot be called from an
      * {@link android.accessibilityservice.AccessibilityService}.
      * This class is made immutable before being delivered to an AccessibilityService.
+     * Note that a view cannot be made its own child.
      * </p>
      *
      * @param child The child.
@@ -1037,6 +1041,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * hierarchy for accessibility purposes. This enables custom views that draw complex
      * content to report them selves as a tree of virtual views, thus conveying their
      * logical structure.
+     * Note that a view cannot be made its own child.
      * </p>
      *
      * @param root The root of the virtual subtree.
@@ -1054,6 +1059,11 @@ public class AccessibilityNodeInfo implements Parcelable {
         final int rootAccessibilityViewId =
             (root != null) ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
         final long childNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
+        if (childNodeId == mSourceNodeId) {
+            Log.e(TAG, "Rejecting attempt to make a View its own child");
+            return;
+        }
+
         // If we're checking uniqueness and the ID already exists, abort.
         if (checked && mChildNodeIds.indexOf(childNodeId) >= 0) {
             return;

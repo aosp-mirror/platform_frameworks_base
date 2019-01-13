@@ -187,7 +187,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
         } else if (bouncerNeedsScrimming()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
-        } else if (mShowing && !mDozing) {
+        } else if (mShowing) {
             if (!isWakeAndUnlocking() && !mStatusBar.isInLaunchTransition()) {
                 mBouncer.setExpansion(expansion);
             }

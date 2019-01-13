@@ -43,6 +43,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.location.ProviderProperties;
@@ -1282,11 +1283,13 @@ public class LocationManager {
     @SystemApi
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public void setLocationEnabledForUser(boolean enabled, UserHandle userHandle) {
-        try {
-            mService.setLocationEnabledForUser(enabled, userHandle.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        Settings.Secure.putIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCATION_MODE,
+                enabled
+                        ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY
+                        : Settings.Secure.LOCATION_MODE_OFF,
+                userHandle.getIdentifier());
     }
 
     /**
@@ -1372,20 +1375,22 @@ public class LocationManager {
      * @return true if the value was set, false on database errors
      *
      * @throws IllegalArgumentException if provider is null
+     * @deprecated Do not manipulate providers individually, use
+     * {@link #setLocationEnabledForUser(boolean, UserHandle)} instead.
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public boolean setProviderEnabledForUser(
             String provider, boolean enabled, UserHandle userHandle) {
         checkProvider(provider);
 
-        try {
-            return mService.setProviderEnabledForUser(
-                    provider, enabled, userHandle.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return Settings.Secure.setLocationProviderEnabledForUser(
+                mContext.getContentResolver(),
+                provider,
+                enabled,
+                userHandle.getIdentifier());
     }
 
     /**
@@ -1578,7 +1583,7 @@ public class LocationManager {
      */
     @Deprecated
     public void clearTestProviderEnabled(String provider) {
-        setTestProviderEnabled(provider, true);
+        setTestProviderEnabled(provider, false);
     }
 
     /**

@@ -29,7 +29,10 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Dumpable;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +50,7 @@ import javax.inject.Singleton;
 @Singleton
 public class AppOpsControllerImpl implements AppOpsController,
         AppOpsManager.OnOpActiveChangedListener,
-        AppOpsManager.OnOpNotedListener {
+        AppOpsManager.OnOpNotedListener, Dumpable {
 
     private static final long NOTED_OP_TIME_DELAY_MS = 5000;
     private static final String TAG = "AppOpsControllerImpl";
@@ -269,6 +272,22 @@ public class AppOpsControllerImpl implements AppOpsController,
                 cb.onActiveStateChanged(code, uid, packageName, active);
             }
         }
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("AppOpsController state:");
+        pw.println("  Active Items:");
+        for (int i = 0; i < mActiveItems.size(); i++) {
+            final AppOpItem item = mActiveItems.get(i);
+            pw.print("    "); pw.println(item.toString());
+        }
+        pw.println("  Noted Items:");
+        for (int i = 0; i < mNotedItems.size(); i++) {
+            final AppOpItem item = mNotedItems.get(i);
+            pw.print("    "); pw.println(item.toString());
+        }
+
     }
 
     protected final class H extends Handler {

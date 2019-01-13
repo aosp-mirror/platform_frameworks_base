@@ -206,7 +206,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
             switch (event) {
             case AudioManager.RECORD_CONFIG_EVENT_STOP:
                 // return failure if an unknown recording session stopped
-                configChanged = (mRecordConfigs.remove(new Integer(session)) != null);
+                configChanged = (mRecordConfigs.remove(new Integer(portId)) != null);
                 if (configChanged) {
                     sEventLogger.log(new RecordingEvent(event, uid, session, source, null));
                 }

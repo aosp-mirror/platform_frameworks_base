@@ -66,7 +66,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 
 import com.android.internal.app.IVoiceInteractor;
-import com.android.server.AppOpsService;
+import com.android.server.appop.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.ServiceThread;
 import com.android.server.am.ActivityManagerService;
@@ -169,6 +169,7 @@ class ActivityTestsBase {
         private final ActivityTaskManagerService mService;
 
         private ComponentName mComponent;
+        private String mTargetActivity;
         private TaskRecord mTaskRecord;
         private int mUid;
         private boolean mCreateTask;
@@ -182,6 +183,11 @@ class ActivityTestsBase {
 
         ActivityBuilder setComponent(ComponentName component) {
             mComponent = component;
+            return this;
+        }
+
+        ActivityBuilder setTargetActivity(String targetActivity) {
+            mTargetActivity = targetActivity;
             return this;
         }
 
@@ -239,6 +245,10 @@ class ActivityTestsBase {
             aInfo.applicationInfo = new ApplicationInfo();
             aInfo.applicationInfo.packageName = mComponent.getPackageName();
             aInfo.applicationInfo.uid = mUid;
+            aInfo.packageName = mComponent.getPackageName();
+            if (mTargetActivity != null) {
+                aInfo.targetActivity = mTargetActivity;
+            }
             aInfo.flags |= mActivityFlags;
             aInfo.launchMode = mLaunchMode;
 
@@ -254,6 +264,8 @@ class ActivityTestsBase {
                     .setOrientation(anyInt(), any(), any());
             doCallRealMethod().when(activity.mAppWindowToken).setOrientation(anyInt());
             doNothing().when(activity).removeWindowContainer();
+            doReturn(mock(Configuration.class)).when(activity.mAppWindowToken)
+                    .getRequestedOverrideConfiguration();
 
             if (mTaskRecord != null) {
                 mTaskRecord.addActivityToTop(activity);

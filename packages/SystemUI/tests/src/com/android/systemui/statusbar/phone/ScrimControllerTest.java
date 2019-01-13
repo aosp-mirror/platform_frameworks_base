@@ -54,7 +54,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.function.Consumer;
 
@@ -94,6 +94,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 },
                 visible -> mScrimVisibility = visible, mDozeParamenters, mAlarmManager);
         mScrimController.setHasBackdrop(false);
+        mScrimController.setWallpaperSupportsAmbientMode(false);
     }
 
     @Test
@@ -474,12 +475,60 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testHoldsPulsingWallpaperAnimationLock() {
+        // Pre-conditions
+        mScrimController.transitionTo(ScrimState.PULSING, new ScrimController.Callback() {
+            @Override
+            public boolean isFadeOutWallpaper() {
+                return true;
+            }
+        });
+        mScrimController.finishAnimationsImmediately();
+        reset(mWakeLock);
+
+        mScrimController.onHideWallpaperTimeout();
+        verify(mWakeLock).acquire();
+        verify(mWakeLock, never()).release();
+        mScrimController.finishAnimationsImmediately();
+        verify(mWakeLock).release();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+    }
+
+    @Test
     public void testWillHideAodWallpaper() {
         mScrimController.setWallpaperSupportsAmbientMode(true);
         mScrimController.transitionTo(ScrimState.AOD);
         verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         verify(mAlarmManager).cancel(any(AlarmManager.OnAlarmListener.class));
+    }
+
+    @Test
+    public void testWillHidePulsingWallpaper_withRequestFadeOut() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mScrimController.transitionTo(ScrimState.PULSING, new ScrimController.Callback() {
+            @Override
+            public boolean isFadeOutWallpaper() {
+                return true;
+            }
+        });
+        verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        verify(mAlarmManager).cancel(any(AlarmManager.OnAlarmListener.class));
+    }
+
+    @Test
+    public void testDoesNotHidePulsingWallpaper_withoutRequestFadeOut() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mScrimController.transitionTo(ScrimState.PULSING, new ScrimController.Callback() {});
+        verify(mAlarmManager, never()).setExact(anyInt(), anyLong(), any(), any(), any());
+    }
+
+    @Test
+    public void testDoesNotHidePulsingWallpaper_withoutCallback() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mScrimController.transitionTo(ScrimState.PULSING);
+        verify(mAlarmManager, never()).setExact(anyInt(), anyLong(), any(), any(), any());
     }
 
     @Test
@@ -578,7 +627,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testEatsTouchEvent() {
         HashSet<ScrimState> eatsTouches =
-                new HashSet<>(Arrays.asList(ScrimState.AOD, ScrimState.PULSING));
+                new HashSet<>(Collections.singletonList(ScrimState.AOD));
         for (ScrimState state : ScrimState.values()) {
             if (state == ScrimState.UNINITIALIZED) {
                 continue;
@@ -738,5 +787,4 @@ public class ScrimControllerTest extends SysuiTestCase {
             callback.run();
         }
     }
-
 }

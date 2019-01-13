@@ -89,7 +89,6 @@ interface ILocationManager
     List<String> getAllProviders();
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
-    boolean providerMeetsCriteria(String provider, in Criteria criteria);
     ProviderProperties getProviderProperties(String provider);
     String getNetworkProviderPackage();
     void setLocationControllerExtraPackage(String packageName);
@@ -98,9 +97,7 @@ interface ILocationManager
     boolean isLocationControllerExtraPackageEnabled();
 
     boolean isProviderEnabledForUser(String provider, int userId);
-    boolean setProviderEnabledForUser(String provider, boolean enabled, int userId);
     boolean isLocationEnabledForUser(int userId);
-    void setLocationEnabledForUser(boolean enabled, int userId);
     void addTestProvider(String name, in ProviderProperties properties, String opPackageName);
     void removeTestProvider(String provider, String opPackageName);
     void setTestProviderLocation(String provider, in Location loc, String opPackageName);
@@ -113,10 +110,6 @@ interface ILocationManager
     boolean sendExtraCommand(String provider, String command, inout Bundle extras);
 
     // --- internal ---
-
-    // --- deprecated ---
-    void reportLocation(in Location location, boolean passive);
-    void reportLocationBatch(in List<Location> locations);
 
     // for reporting callback completion
     void locationCallbackFinished(ILocationListener listener);

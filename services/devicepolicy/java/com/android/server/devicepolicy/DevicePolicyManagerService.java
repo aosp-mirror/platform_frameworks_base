@@ -221,7 +221,7 @@ import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -245,6 +245,7 @@ import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserRestrictionsUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
@@ -5322,6 +5323,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         final int callingUserId = mInjector.userHandleGetCallingUserId();
+        ComponentName adminComponent = null;
         synchronized (getLockObject()) {
             // Make sure the caller has any active admin with the right policy or
             // the required permission.
@@ -5332,8 +5334,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     android.Manifest.permission.LOCK_DEVICE);
             final long ident = mInjector.binderClearCallingIdentity();
             try {
-                final ComponentName adminComponent = admin == null ?
-                        null : admin.info.getComponent();
+                adminComponent = admin == null ? null : admin.info.getComponent();
                 if (adminComponent != null) {
                     // For Profile Owners only, callers with only permission not allowed.
                     if ((flags & DevicePolicyManager.FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY) != 0) {
@@ -5385,6 +5386,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.LOCK_NOW)
+                .setAdmin(adminComponent)
                 .setInt(flags)
                 .write();
     }
@@ -6101,7 +6103,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             delegates = getDelegatePackagesInternalLocked(scope, userId);
         }
-        if (delegates.size() != 1) {
+        if (delegates.size() == 0) {
+            return null;
+        } else if (delegates.size() > 1) {
             Slog.wtf(LOG_TAG, "More than one delegate holds " + scope);
             return null;
         }
@@ -9188,21 +9192,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
 
-        // TODO When InputMethodManager supports per user calls remove
-        //      this restriction.
-        if (!checkCallerIsCurrentUserOrProfile()) {
+        // TODO When InputMethodManager supports per user calls remove this restriction.
+        if (!InputMethodSystemProperty.PER_PROFILE_IME_ENABLED
+                && !checkCallerIsCurrentUserOrProfile()) {
             return false;
         }
-
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         if (packageList != null) {
-            // InputMethodManager fetches input methods for current user.
-            // So this can only be set when calling user is the current user
-            // or parent is current user in case of managed profiles.
-            InputMethodManager inputMethodManager =
-                    mContext.getSystemService(InputMethodManager.class);
-            List<InputMethodInfo> enabledImes = inputMethodManager.getEnabledInputMethodList();
-
+            List<InputMethodInfo> enabledImes = InputMethodManagerInternal.get()
+                    .getEnabledInputMethodListAsUser(callingUserId);
             if (enabledImes != null) {
                 List<String> enabledPackages = new ArrayList<String>();
                 for (InputMethodInfo ime : enabledImes) {
@@ -9250,22 +9248,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public List getPermittedInputMethodsForCurrentUser() {
         enforceManageUsers();
-        UserInfo currentUser;
-        try {
-            currentUser = mInjector.getIActivityManager().getCurrentUser();
-        } catch (RemoteException e) {
-            Slog.e(LOG_TAG, "Failed to make remote calls to get current user", e);
-            // Activity managed is dead, just allow all IMEs
-            return null;
-        }
 
-        int userId = currentUser.id;
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
         synchronized (getLockObject()) {
             List<String> result = null;
             // If we have multiple profiles we return the intersection of the
             // permitted lists. This can happen in cases where we have a device
             // and profile owner.
-            int[] profileIds = mUserManager.getProfileIdsWithDisabled(userId);
+            int[] profileIds = InputMethodSystemProperty.PER_PROFILE_IME_ENABLED
+                    ? new int[]{callingUserId}
+                    : mUserManager.getProfileIdsWithDisabled(callingUserId);
             for (int profileId : profileIds) {
                 // Just loop though all admins, only device or profiles
                 // owners can have permitted lists set.
@@ -9286,9 +9278,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             // If we have a permitted list add all system input methods.
             if (result != null) {
-                InputMethodManager inputMethodManager =
-                        mContext.getSystemService(InputMethodManager.class);
-                List<InputMethodInfo> imes = inputMethodManager.getInputMethodList();
+                List<InputMethodInfo> imes =
+                        InputMethodManagerInternal.get().getInputMethodListAsUser(callingUserId);
                 if (imes != null) {
                     for (InputMethodInfo ime : imes) {
                         ServiceInfo serviceInfo = ime.getServiceInfo();

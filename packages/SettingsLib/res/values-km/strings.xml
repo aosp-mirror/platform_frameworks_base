@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"កំណត់​ពាក្យ​សម្ងាត់​បម្រុង​ទុក​ថ្មី"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"ពាក្យ​សម្ងាត់​ថ្មី និង​ការ​បញ្ជាក់​​មិន​ដូច​គ្នា"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"បរាជ័យ​ក្នុង​ការ​កំណត់​ពាក្យ​សម្ងាត់​បម្រុងទុក"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"កំពុងផ្ទុក…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"រស់រវើក (លំនាំដើម)"</item>
     <item msgid="8446070607501413455">"ធម្មជាតិ"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"សួរគ្រប់ពេល"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"រហូតទាល់តែ​អ្នកបិទ"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"អម្បាញ់មិញ"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"ភ្ជាប់កម្មវិធី​ ដើម្បី​ប្រើដ្រាយវើ​ក្រាហ្វិក​ដែលបាន​ដំឡើងជំនាន់​សម្រាប់​ការ​អភិវឌ្ឍ"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"ឧបករណ៍​បំពង​សំឡេង​ទូរសព្ទ"</string>
 </resources>

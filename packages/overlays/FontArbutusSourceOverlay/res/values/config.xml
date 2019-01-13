@@ -19,7 +19,7 @@
      <!-- Name of a font family to use for body text. -->
     <string name="config_bodyFontFamily" translatable="false">source-sans-pro</string>
     <!-- Name of a font family to use for medium body text. -->
-    <string name="config_bodyFontFamilyMedium" translatable="false">source-sans-pro-medium</string>
+    <string name="config_bodyFontFamilyMedium" translatable="false">source-sans-pro-semi-bold</string>
     <!-- Name of a font family to use for headlines. If empty, falls back to platform default -->
     <string name="config_headlineFontFamily" translatable="false">arbutus-slab</string>
     <!-- Name of the font family used for system surfaces where the font should use medium weight -->

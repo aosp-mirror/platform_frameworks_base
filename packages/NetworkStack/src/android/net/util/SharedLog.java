@@ -69,6 +69,10 @@ public class SharedLog {
         mComponent = component;
     }
 
+    public String getTag() {
+        return mTag;
+    }
+
     /**
      * Create a SharedLog based on this log with an additional component prefix on each logged line.
      */

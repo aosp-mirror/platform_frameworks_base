@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
@@ -49,6 +50,14 @@ public class HdmiCecMessageBuilderTest {
                         ADDR_AUDIO_SYSTEM,
                         new int[] {Constants.AUDIO_CODEC_AAC, Constants.AUDIO_CODEC_LPCM});
         assertThat(message).isEqualTo(buildMessage("05:A4:06:01"));
+    }
+
+    @Test
+    public void buildRoutingInformation() {
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingInformation(
+                        ADDR_AUDIO_SYSTEM, 0x2100);
+        assertThat(message).isEqualTo(buildMessage("5F:81:21:00"));
     }
 
     /**

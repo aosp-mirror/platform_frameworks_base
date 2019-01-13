@@ -245,7 +245,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.AppOpsService;
+import com.android.server.appop.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -7010,6 +7010,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public ActivityMetricsLaunchObserverRegistry getLaunchObserverRegistry() {
             synchronized (mGlobalLock) {
                 return mStackSupervisor.getActivityMetricsLogger().getLaunchObserverRegistry();
+            }
+        }
+
+        @Override
+        public ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution) {
+            synchronized (mGlobalLock) {
+                return ActivityTaskManagerService.this.getTaskSnapshot(taskId, reducedResolution);
             }
         }
     }

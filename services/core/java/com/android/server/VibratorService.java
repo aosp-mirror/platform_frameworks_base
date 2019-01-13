@@ -141,6 +141,7 @@ public class VibratorService extends IVibratorService.Stub
     private boolean mLowPowerMode;
     private int mHapticFeedbackIntensity;
     private int mNotificationIntensity;
+    private int mRingIntensity;
 
     native static boolean vibratorExists();
     native static void vibratorInit();
@@ -149,6 +150,8 @@ public class VibratorService extends IVibratorService.Stub
     native static boolean vibratorSupportsAmplitudeControl();
     native static void vibratorSetAmplitude(int amplitude);
     native static long vibratorPerformEffect(long effect, long strength);
+    static native boolean vibratorSupportsExternalControl();
+    static native void vibratorSetExternalControl(boolean enabled);
 
     private final IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
@@ -426,6 +429,10 @@ public class VibratorService extends IVibratorService.Stub
                     Settings.System.getUriFor(Settings.System.NOTIFICATION_VIBRATION_INTENSITY),
                     true, mSettingObserver, UserHandle.USER_ALL);
 
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.RING_VIBRATION_INTENSITY),
+                    true, mSettingObserver, UserHandle.USER_ALL);
+
             mContext.registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
@@ -532,12 +539,6 @@ public class VibratorService extends IVibratorService.Stub
                 return;
             }
             verifyIncomingUid(uid);
-            if (mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
-                    > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
-                Slog.e(TAG, "Ignoring incoming vibration as process with uid = "
-                        + uid + " is background");
-                return;
-            }
             if (!verifyVibrationEffect(effect)) {
                 return;
             }
@@ -575,6 +576,13 @@ public class VibratorService extends IVibratorService.Stub
                 }
 
                 Vibration vib = new Vibration(token, effect, usageHint, uid, opPkg, reason);
+                if (mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
+                        > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                        && vib.isHapticFeedback()) {
+                    Slog.e(TAG, "Ignoring incoming vibration as process with uid = "
+                            + uid + " is background");
+                    return;
+                }
                 linkVibration(vib);
                 long ident = Binder.clearCallingIdentity();
                 try {
@@ -745,7 +753,9 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private int getCurrentIntensityLocked(Vibration vib) {
-        if (vib.isNotification() || vib.isRingtone()){
+        if (vib.isRingtone()) {
+            return mRingIntensity;
+        } else if (vib.isNotification()) {
             return mNotificationIntensity;
         } else if (vib.isHapticFeedback()) {
             return mHapticFeedbackIntensity;
@@ -767,7 +777,9 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         final int defaultIntensity;
-        if (vib.isNotification() || vib.isRingtone()) {
+        if (vib.isRingtone()) {
+            defaultIntensity = mVibrator.getDefaultRingVibrationIntensity();
+        } else if (vib.isNotification()) {
             defaultIntensity = mVibrator.getDefaultNotificationVibrationIntensity();
         } else if (vib.isHapticFeedback()) {
             defaultIntensity = mVibrator.getDefaultHapticFeedbackIntensity();
@@ -930,6 +942,9 @@ public class VibratorService extends IVibratorService.Stub
         mNotificationIntensity = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 mVibrator.getDefaultNotificationVibrationIntensity(), UserHandle.USER_CURRENT);
+        mRingIntensity = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.RING_VIBRATION_INTENSITY,
+                mVibrator.getDefaultRingVibrationIntensity(), UserHandle.USER_CURRENT);
     }
 
     @Override
@@ -1278,6 +1293,7 @@ public class VibratorService extends IVibratorService.Stub
             pw.println("  mLowPowerMode=" + mLowPowerMode);
             pw.println("  mHapticFeedbackIntensity=" + mHapticFeedbackIntensity);
             pw.println("  mNotificationIntensity=" + mNotificationIntensity);
+            pw.println("  mRingIntensity=" + mRingIntensity);
             pw.println("");
             pw.println("  Previous vibrations:");
             for (VibrationInfo info : mPreviousVibrations) {

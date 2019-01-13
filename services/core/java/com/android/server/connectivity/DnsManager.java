@@ -18,10 +18,9 @@ package com.android.server.connectivity;
 
 import static android.net.ConnectivityManager.PRIVATE_DNS_DEFAULT_MODE_FALLBACK;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
-import static android.provider.Settings.Global.DNS_RESOLVER_MIN_SAMPLES;
 import static android.provider.Settings.Global.DNS_RESOLVER_MAX_SAMPLES;
+import static android.provider.Settings.Global.DNS_RESOLVER_MIN_SAMPLES;
 import static android.provider.Settings.Global.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS;
 import static android.provider.Settings.Global.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT;
 import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
@@ -35,6 +34,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkUtils;
 import android.net.Uri;
+import android.net.shared.PrivateDnsConfig;
 import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.UserHandle;
@@ -43,10 +43,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
 
-import com.android.server.connectivity.MockableSystemProperties;
-
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,10 +51,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.Set;
-import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 
 /**
@@ -122,43 +117,6 @@ public class DnsManager {
     private static final int DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT = 25;
     private static final int DNS_RESOLVER_DEFAULT_MIN_SAMPLES = 8;
     private static final int DNS_RESOLVER_DEFAULT_MAX_SAMPLES = 64;
-
-    public static class PrivateDnsConfig {
-        public final boolean useTls;
-        public final String hostname;
-        public final InetAddress[] ips;
-
-        public PrivateDnsConfig() {
-            this(false);
-        }
-
-        public PrivateDnsConfig(boolean useTls) {
-            this.useTls = useTls;
-            this.hostname = "";
-            this.ips = new InetAddress[0];
-        }
-
-        public PrivateDnsConfig(String hostname, InetAddress[] ips) {
-            this.useTls = !TextUtils.isEmpty(hostname);
-            this.hostname = useTls ? hostname : "";
-            this.ips = (ips != null) ? ips : new InetAddress[0];
-        }
-
-        public PrivateDnsConfig(PrivateDnsConfig cfg) {
-            useTls = cfg.useTls;
-            hostname = cfg.hostname;
-            ips = cfg.ips;
-        }
-
-        public boolean inStrictMode() {
-            return useTls && !TextUtils.isEmpty(hostname);
-        }
-
-        public String toString() {
-            return PrivateDnsConfig.class.getSimpleName() +
-                    "{" + useTls + ":" + hostname + "/" + Arrays.toString(ips) + "}";
-        }
-    }
 
     public static PrivateDnsConfig getPrivateDnsConfig(ContentResolver cr) {
         final String mode = getPrivateDnsMode(cr);

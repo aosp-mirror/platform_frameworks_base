@@ -1699,7 +1699,8 @@ public class AssistStructure implements Parcelable {
 
         @Override
         public void setVisibility(int visibility) {
-            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_VISIBILITY_MASK) | visibility;
+            mNode.mFlags = (mNode.mFlags & ~ViewNode.FLAGS_VISIBILITY_MASK)
+                    | (visibility & ViewNode.FLAGS_VISIBILITY_MASK);
         }
 
         @Override

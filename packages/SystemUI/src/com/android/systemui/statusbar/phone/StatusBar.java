@@ -70,6 +70,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -98,6 +99,7 @@ import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
@@ -478,8 +480,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             WallpaperInfo info = wallpaperManager.getWallpaperInfo(UserHandle.USER_CURRENT);
             final boolean deviceSupportsAodWallpaper = mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_dozeSupportsAodWallpaper);
+            final boolean aodImageWallpaperEnabled = FeatureFlagUtils.isEnabled(mContext,
+                    FeatureFlagUtils.AOD_IMAGEWALLPAPER_ENABLED);
+            updateAodMaskVisibility(deviceSupportsAodWallpaper && aodImageWallpaperEnabled);
+            // If WallpaperInfo is null, it must be ImageWallpaper.
             final boolean supportsAmbientMode = deviceSupportsAodWallpaper
-                    && info != null && info.supportsAmbientMode();
+                    && (info == null && aodImageWallpaperEnabled
+                        || info != null && info.supportsAmbientMode());
 
             mStatusBarWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
@@ -581,6 +588,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
     private boolean mPulsing;
+    private ContentObserver mFeatureFlagObserver;
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
@@ -697,6 +705,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mContext.registerReceiverAsUser(mWallpaperChangedReceiver, UserHandle.ALL,
                 wallpaperChangedFilter, null /* broadcastPermission */, null /* scheduler */);
         mWallpaperChangedReceiver.onReceive(mContext, null);
+        mFeatureFlagObserver = new FeatureFlagObserver(
+                FeatureFlagUtils.AOD_IMAGEWALLPAPER_ENABLED /* feature */,
+                () -> mWallpaperChangedReceiver.onReceive(mContext, null) /* callback */);
 
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
@@ -789,7 +800,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
         mNotificationIconAreaController = SystemUIFactory.getInstance()
-                .createNotificationIconAreaController(context, this);
+                .createNotificationIconAreaController(context, this, mStatusBarStateController);
         inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelf);
 
@@ -3573,10 +3584,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mVisualStabilityManager.setScreenOn(false);
             updateVisibleToUser();
 
-            // We need to disable touch events because these might
-            // collapse the panel after we expanded it, and thus we would end up with a blank
-            // Keyguard.
-            mNotificationPanel.setTouchAndAnimationDisabled(true);
+            updateNotificationPanelTouchState();
             mStatusBarWindow.cancelCurrentTouch();
             if (mLaunchCameraOnFinishedGoingToSleep) {
                 mLaunchCameraOnFinishedGoingToSleep = false;
@@ -3599,12 +3607,21 @@ public class StatusBar extends SystemUI implements DemoMode,
             mDeviceInteractive = true;
             mAmbientPulseManager.releaseAllImmediately();
             mVisualStabilityManager.setScreenOn(true);
-            mNotificationPanel.setTouchAndAnimationDisabled(false);
+            updateNotificationPanelTouchState();
             updateVisibleToUser();
             updateIsKeyguard();
             mDozeServiceHost.stopDozing();
         }
     };
+
+    /**
+     * We need to disable touch events because these might
+     * collapse the panel after we expanded it, and thus we would end up with a blank
+     * Keyguard.
+     */
+    private void updateNotificationPanelTouchState() {
+        mNotificationPanel.setTouchAndAnimationDisabled(!mDeviceInteractive && !mPulsing);
+    }
 
     final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
         @Override
@@ -3871,17 +3888,15 @@ public class StatusBar extends SystemUI implements DemoMode,
                 @Override
                 public void onPulseStarted() {
                     callback.onPulseStarted();
-                    if (mAmbientPulseManager.hasNotifications()) {
-                        // Only pulse the stack scroller if there's actually something to show.
-                        // Otherwise just show the always-on screen.
-                        setPulsing(true);
-                    }
+                    updateNotificationPanelTouchState();
+                    setPulsing(true);
                 }
 
                 @Override
                 public void onPulseFinished() {
                     mPulsing = false;
                     callback.onPulseFinished();
+                    updateNotificationPanelTouchState();
                     setPulsing(false);
                 }
 
@@ -4410,5 +4425,34 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public @TransitionMode int getStatusBarMode() {
         return mStatusBarMode;
+    }
+
+    private void updateAodMaskVisibility(boolean supportsAodWallpaper) {
+        View mask = mStatusBarWindow.findViewById(R.id.aod_mask);
+        if (mask != null) {
+            mask.setVisibility(supportsAodWallpaper ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
+    private final class FeatureFlagObserver extends ContentObserver {
+        private final Runnable mCallback;
+
+        FeatureFlagObserver(String feature, Runnable callback) {
+            this(null, feature, callback);
+        }
+
+        private FeatureFlagObserver(Handler handler, String feature, Runnable callback) {
+            super(handler);
+            mCallback = callback;
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(feature), false, this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            if (mCallback != null) {
+                mStatusBarWindow.post(mCallback);
+            }
+        }
     }
 }

@@ -52,7 +52,8 @@ class OngoingPrivacyDialog constructor(
 
                         @Suppress("DEPRECATION")
                         override fun onClick(dialog: DialogInterface?, which: Int) {
-                            Dependency.get(ActivityStarter::class.java).startActivity(intent, false)
+                            Dependency.get(ActivityStarter::class.java)
+                                    .postStartActivityDismissingKeyguard(intent, 0)
                         }
                     })
         }
@@ -118,12 +119,13 @@ class OngoingPrivacyDialog constructor(
 
         appName.text = app.applicationName
         if (showIcons) {
-            dialogBuilder.generateIconsForApp(types).forEach {
+            dialogBuilder.generateIconsForApp(types).forEachIndexed { index, it ->
                 it.setBounds(0, 0, iconSize, iconSize)
                 val image = ImageView(context).apply {
                     imageTintList = ColorStateList.valueOf(iconColor)
                     setImageDrawable(it)
                 }
+                image.contentDescription = types[index].getName(context)
                 icons.addView(image, lp)
             }
             icons.visibility = View.VISIBLE

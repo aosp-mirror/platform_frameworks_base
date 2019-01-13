@@ -436,11 +436,12 @@ message GlobalSettingsProto {
         // Ordered GPU debug layer list for GLES
         // i.e. <layer1>:<layer2>:...:<layerN>
         optional SettingProto debug_layers_gles = 7;
-        // Apps opt in to load graphics driver from Game Update Package
-        // instead of native graphcis driver through developer options.
+        // GUP - List of Apps selected to use Game Update Packages
         optional SettingProto gup_dev_opt_in_apps = 8;
-        // Apps on the black list that are forbidden to useGame Update Package.
-        optional SettingProto gup_black_list = 9;
+        // GUP - List of Apps selected not to use Game Update Packages
+        optional SettingProto gup_dev_opt_out_apps = 9;
+        // GUP - List of Apps that are forbidden to use Game Update Packages
+        optional SettingProto gup_black_list = 10;
     }
     optional Gpu gpu = 59;
 
@@ -1017,7 +1018,9 @@ message GlobalSettingsProto {
 
     optional SettingProto zram_enabled = 139 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    optional SettingProto app_ops_constants = 148 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 148;
+    // Next tag = 149;
 }

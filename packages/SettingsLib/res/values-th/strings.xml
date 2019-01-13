@@ -330,6 +330,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"ตั้งรหัสผ่านสำหรับการสำรองข้อมูลใหม่แล้ว"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"รหัสผ่านใหม่และการพิมพ์ยืนยันไม่ตรงกัน"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ไม่สามารถตั้งรหัสผ่านสำหรับการสำรองข้อมูล"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"กำลังโหลด…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"สด (ค่าเริ่มต้น)"</item>
     <item msgid="8446070607501413455">"ธรรมชาติ"</item>
@@ -449,6 +450,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ถามทุกครั้ง"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"จนกว่าคุณจะปิด"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"เมื่อสักครู่"</string>
-    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"เลือกใช้แอปเพื่อใช้ไดรเวอร์กราฟิกที่อัปเดตในการพัฒนา"</string>
     <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"ลำโพงโทรศัพท์"</string>
 </resources>

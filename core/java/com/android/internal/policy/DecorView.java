@@ -232,7 +232,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     // This is the caption view for the window, containing the caption and window control
     // buttons. The visibility of this decor depends on the workspace and the window type.
     // If the window type does not require such a view, this member might be null.
-    DecorCaptionView mDecorCaptionView;
+    private DecorCaptionView mDecorCaptionView;
 
     private boolean mWindowResizeCallbacksAdded = false;
     private Drawable.Callback mLastBackgroundDrawableCb = null;
@@ -977,6 +977,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     public void onWindowSystemUiVisibilityChanged(int visible) {
         updateColorViews(null /* insets */, true /* animate */);
+        updateDecorCaptionStatus(getResources().getConfiguration());
     }
 
     @Override
@@ -1855,8 +1856,27 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        final boolean displayWindowDecor =
-                newConfig.windowConfiguration.hasWindowDecorCaption();
+        updateDecorCaptionStatus(newConfig);
+
+        updateAvailableWidth();
+        initializeElevation();
+    }
+
+    /**
+     * Determines if the workspace is entirely covered by the window.
+     * @return {@code true} when the window is filling the entire screen/workspace.
+     **/
+    private boolean isFillingScreen(Configuration config) {
+        final boolean isFullscreen = config.windowConfiguration.getWindowingMode()
+                == WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+        return isFullscreen && (0 != ((getWindowSystemUiVisibility() | getSystemUiVisibility())
+                & (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_LOW_PROFILE)));
+    }
+
+    private void updateDecorCaptionStatus(Configuration config) {
+        final boolean displayWindowDecor = config.windowConfiguration.hasWindowDecorCaption()
+                && !isFillingScreen(config);
         if (mDecorCaptionView == null && displayWindowDecor) {
             // Configuration now requires a caption.
             final LayoutInflater inflater = mWindow.getLayoutInflater();
@@ -1875,9 +1895,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mDecorCaptionView.onConfigurationChanged(displayWindowDecor);
             enableCaption(displayWindowDecor);
         }
-
-        updateAvailableWidth();
-        initializeElevation();
     }
 
     void onResourcesLoaded(LayoutInflater inflater, int layoutResource) {

@@ -16,8 +16,6 @@
 
 package com.android.server.textservices;
 
-import static android.view.textservice.TextServicesManager.DISABLE_PER_PROFILE_SPELL_CHECKER;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -43,6 +41,7 @@ import android.service.textservice.SpellCheckerService;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.inputmethod.InputMethodSystemProperty;
 import android.view.textservice.SpellCheckerInfo;
 import android.view.textservice.SpellCheckerSubtype;
 
@@ -334,7 +333,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         mContext = context;
         mUserManager = mContext.getSystemService(UserManager.class);
         mSpellCheckerOwnerUserIdMap = new LazyIntToIntMap(callingUserId -> {
-            if (DISABLE_PER_PROFILE_SPELL_CHECKER) {
+            if (!InputMethodSystemProperty.PER_PROFILE_IME_ENABLED) {
                 final long token = Binder.clearCallingIdentity();
                 try {
                     final UserInfo parent = mUserManager.getProfileParent(callingUserId);
@@ -355,7 +354,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     private void initializeInternalStateLocked(@UserIdInt int userId) {
         // When DISABLE_PER_PROFILE_SPELL_CHECKER is true, we make sure here that work profile users
         // will never have non-null TextServicesData for their user ID.
-        if (DISABLE_PER_PROFILE_SPELL_CHECKER
+        if (!InputMethodSystemProperty.PER_PROFILE_IME_ENABLED
                 && userId != mSpellCheckerOwnerUserIdMap.get(userId)) {
             return;
         }
@@ -780,7 +779,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     private TextServicesData getDataFromCallingUserIdLocked(@UserIdInt int callingUserId) {
         final int spellCheckerOwnerUserId = mSpellCheckerOwnerUserIdMap.get(callingUserId);
         final TextServicesData data = mUserData.get(spellCheckerOwnerUserId);
-        if (DISABLE_PER_PROFILE_SPELL_CHECKER) {
+        if (!InputMethodSystemProperty.PER_PROFILE_IME_ENABLED) {
             if (spellCheckerOwnerUserId != callingUserId) {
                 // Calling process is running under child profile.
                 if (data == null) {

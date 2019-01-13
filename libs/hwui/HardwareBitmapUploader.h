@@ -23,6 +23,7 @@ namespace android::uirenderer {
 class HardwareBitmapUploader {
 public:
     static sk_sp<Bitmap> allocateHardwareBitmap(const SkBitmap& sourceBitmap);
+    static void terminate();
 };
 
 }  // namespace android::uirenderer

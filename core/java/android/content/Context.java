@@ -337,6 +337,15 @@ public abstract class Context {
     public static final int BIND_ADJUST_BELOW_PERCEPTIBLE = 0x0100;
 
     /**
+     * @hide Flag for {@link #bindService}: the service being bound to represents a
+     * protected system component, so must have association restrictions applied to it.
+     * That is, a system config must have one or more allow-association tags limiting
+     * which packages it can interact with.  If it does not have any such association
+     * restrictions, a default empty set will be created.
+     */
+    public static final int BIND_RESTRICT_ASSOCIATIONS = 0x00200000;
+
+    /**
      * @hide Flag for {@link #bindService}: allows binding to a service provided
      * by an instant app. Note that the caller may not have access to the instant
      * app providing the service which is a violation of the instant app sandbox.
@@ -3093,6 +3102,7 @@ public abstract class Context {
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
             CONNECTIVITY_SERVICE,
+            //@hide: IP_MEMORY_STORE_SERVICE,
             IPSEC_SERVICE,
             //@hide: UPDATE_LOCK_SERVICE,
             //@hide: NETWORKMANAGEMENT_SERVICE,
@@ -3630,6 +3640,14 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.net.IpMemoryStore} to store and read information about
+     * known networks.
+     * @hide
+     */
+    public static final String IP_MEMORY_STORE_SERVICE = "ipmemorystore";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.net.IpSecManager} for encrypting Sockets or Networks with
      * IPSec.
      *
@@ -3973,6 +3991,24 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
+
+    /**
+     * Used for getting content selections and classifications for task snapshots.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
+
+    /**
+     * Official published name of the app prediction service.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String APP_PREDICTION_SERVICE = "app_prediction";
 
     /**
      * Use with {@link #getSystemService(String)} to access the
@@ -4425,6 +4461,16 @@ public abstract class Context {
      */
     @SystemApi
     public static final String STATS_MANAGER = "stats";
+
+    /**
+     * Service to capture a bugreport.
+     * @see #getSystemService(String)
+     * @see android.os.BugreportManager
+     * @hide
+     */
+    // TODO: Expose API when the implementation is more complete.
+    // @SystemApi
+    public static final String BUGREPORT_SERVICE = "bugreport";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link

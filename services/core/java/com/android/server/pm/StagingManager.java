@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.apex.ApexInfo;
+import android.apex.ApexInfoList;
 import android.apex.IApexService;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -52,9 +53,6 @@ public class StagingManager {
     private final PackageManagerService mPm;
     private final Handler mBgHandler;
 
-    // STOPSHIP: This is a temporary mock implementation of staged sessions. This variable
-    //           shouldn't be needed at all.
-    // TODO(b/118865310): Implement staged sessions logic.
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
@@ -127,28 +125,55 @@ public class StagingManager {
         return false;
     }
 
-    void commitSession(@NonNull PackageInstallerSession sessionInfo) {
-        updateStoredSession(sessionInfo);
+    private static boolean submitSessionToApexService(int sessionId, ApexInfoList apexInfoList) {
+        final IApexService apex = IApexService.Stub.asInterface(
+                ServiceManager.getService("apexservice"));
+        boolean success;
+        try {
+            success = apex.submitStagedSession(sessionId, apexInfoList);
+        } catch (RemoteException re) {
+            Slog.e(TAG, "Unable to contact apexservice", re);
+            return false;
+        }
+        return success;
+    }
 
-        mBgHandler.post(() -> {
-            sessionInfo.setStagedSessionReady();
+    void preRebootVerification(@NonNull PackageInstallerSession session) {
+        boolean success = true;
+        if ((session.params.installFlags & PackageManager.INSTALL_APEX) != 0) {
 
-            SessionInfo session = sessionInfo.generateInfo(false);
-            // For APEXes, we validate the signature here before we write the package to the
-            // staging directory. For APKs, the signature verification will be done by the package
-            // manager at the point at which it applies the staged install.
-            //
-            // TODO: Decide whether we want to fail fast by detecting signature mismatches right
-            // away.
-            if ((sessionInfo.params.installFlags & PackageManager.INSTALL_APEX) != 0) {
-                if (!validateApexSignatureLocked(session.resolvedBaseCodePath,
-                        session.appPackageName)) {
-                    sessionInfo.setStagedSessionFailed(SessionInfo.VERIFICATION_FAILED);
+            final ApexInfoList apexInfoList = new ApexInfoList();
+
+            if (!submitSessionToApexService(session.sessionId, apexInfoList)) {
+                success = false;
+            } else {
+                // For APEXes, we validate the signature here before we mark the session as ready,
+                // so we fail the session early if there is a signature mismatch. For APKs, the
+                // signature verification will be done by the package manager at the point at which
+                // it applies the staged install.
+                //
+                // TODO: Decide whether we want to fail fast by detecting signature mismatches right
+                // away.
+                for (ApexInfo apexPackage : apexInfoList.apexInfos) {
+                    if (!validateApexSignatureLocked(apexPackage.packagePath,
+                            apexPackage.packageName)) {
+                        success = false;
+                        break;
+                    }
                 }
             }
+        }
+        if (success) {
+            session.setStagedSessionReady();
+        } else {
+            session.setStagedSessionFailed(SessionInfo.VERIFICATION_FAILED);
+        }
+        mPm.sendSessionUpdatedBroadcast(session.generateInfo(false), session.userId);
+    }
 
-            mPm.sendSessionUpdatedBroadcast(sessionInfo.generateInfo(false), sessionInfo.userId);
-        });
+    void commitSession(@NonNull PackageInstallerSession session) {
+        updateStoredSession(session);
+        mBgHandler.post(() -> preRebootVerification(session));
     }
 
     void createSession(@NonNull PackageInstallerSession sessionInfo) {
@@ -162,5 +187,12 @@ public class StagingManager {
         synchronized (mStagedSessions) {
             mStagedSessions.remove(sessionInfo.sessionId);
         }
+    }
+
+    void restoreSession(@NonNull PackageInstallerSession session) {
+        updateStoredSession(session);
+        // TODO(b/118865310): This method is called when PackageInstaller is re-instantiated, e.g.
+        // at reboot. Staging manager should at this point recover state from apexd and decide what
+        // to do with the session.
     }
 }

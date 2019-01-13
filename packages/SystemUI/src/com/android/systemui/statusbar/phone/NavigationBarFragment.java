@@ -269,7 +269,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             mIsOnDefaultDisplay = mDisplayId == Display.DEFAULT_DISPLAY;
         }
 
-        mNavigationBarView.setComponents(mStatusBar.getPanel());
+        mNavigationBarView.setComponents(mStatusBar.getPanel(), mAssistManager);
         mNavigationBarView.setDisabledFlags(mDisabledFlags1);
         mNavigationBarView.setOnVerticalChangedListener(this::onVerticalChanged);
         mNavigationBarView.setOnTouchListener(this::onNavigationTouch);

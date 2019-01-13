@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
@@ -57,10 +56,6 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
     public void setUp() throws Exception {
         assertNotNull(mWm.mTaskPositioningController);
         mTarget = mWm.mTaskPositioningController;
-
-        when(mWm.mInputManager.transferTouchFocus(
-                any(InputChannel.class),
-                any(InputChannel.class))).thenReturn(true);
 
         mWindow = createWindow(null, TYPE_BASE_APPLICATION, "window");
         mWindow.mInputChannel = new InputChannel();

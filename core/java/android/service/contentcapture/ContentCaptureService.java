@@ -42,6 +42,7 @@ import android.view.contentcapture.ContentCaptureSession;
 import android.view.contentcapture.ContentCaptureSessionId;
 import android.view.contentcapture.IContentCaptureDirectManager;
 import android.view.contentcapture.MainContentCaptureSession;
+import android.view.contentcapture.UserDataRemovalRequest;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -165,7 +166,7 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setContentCaptureWhitelist(@Nullable List<String> packages,
             @Nullable List<ComponentName> activities) {
-        //TODO(b/111276913): implement
+        //TODO(b/122595322): implement
     }
 
     /**
@@ -176,7 +177,7 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setActivityContentCaptureEnabled(@NonNull ComponentName activity,
             boolean enabled) {
-        //TODO(b/111276913): implement
+        //TODO(b/122595322): implement
     }
 
     /**
@@ -187,7 +188,7 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setPackageContentCaptureEnabled(@NonNull String packageName,
             boolean enabled) {
-        //TODO(b/111276913): implement
+        //TODO(b/122595322): implement
     }
 
     /**
@@ -196,7 +197,7 @@ public abstract class ContentCaptureService extends Service {
      */
     @NonNull
     public final Set<ComponentName> getContentCaptureDisabledActivities() {
-        //TODO(b/111276913): implement
+        //TODO(b/122595322): implement
         return null;
     }
 
@@ -206,7 +207,7 @@ public abstract class ContentCaptureService extends Service {
      */
     @NonNull
     public final Set<String> getContentCaptureDisabledPackages() {
-        //TODO(b/111276913): implement
+        //TODO(b/122595322): implement
         return null;
     }
 
@@ -255,6 +256,16 @@ public abstract class ContentCaptureService extends Service {
         if (VERBOSE) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
         onContentCaptureEventsRequest(sessionId, new ContentCaptureEventsRequest(event));
     }
+
+    /**
+     * Notifies the service that the app requested to remove data associated with the user.
+     *
+     * @param request the user data requested to be removed
+     */
+    public void onUserDataRemovalRequest(@NonNull UserDataRemovalRequest request) {
+        if (VERBOSE) Log.v(TAG, "onUserDataRemovalRequest()");
+    }
+
     /**
      * Notifies the service of {@link SnapshotData snapshot data} associated with a session.
      *
@@ -311,6 +322,14 @@ public abstract class ContentCaptureService extends Service {
             @NonNull String sessionId, int uid, IResultReceiver clientReceiver) {
         mSessionUids.put(sessionId, uid);
         onCreateContentCaptureSession(context, new ContentCaptureSessionId(sessionId));
+
+        final int flags = context.getFlags();
+        if ((flags & ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE) != 0) {
+            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_BY_FLAG_SECURE,
+                    mClientInterface.asBinder());
+            return;
+        }
+
         setClientState(clientReceiver, ContentCaptureSession.STATE_ACTIVE,
                 mClientInterface.asBinder());
     }
@@ -392,15 +411,16 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
-     * Sends the state of the {@link ContentCaptureManager} in the cleint app.
+     * Sends the state of the {@link ContentCaptureManager} in the client app.
      *
      * @param clientReceiver receiver in the client app.
+     * @param sessionState state of the session
      * @param binder handle to the {@code IContentCaptureDirectManager} object that resides in the
      * service.
      * @hide
      */
     public static void setClientState(@NonNull IResultReceiver clientReceiver,
-            int sessionStatus, @Nullable IBinder binder) {
+            int sessionState, @Nullable IBinder binder) {
         try {
             final Bundle extras;
             if (binder != null) {
@@ -409,7 +429,7 @@ public abstract class ContentCaptureService extends Service {
             } else {
                 extras = null;
             }
-            clientReceiver.send(sessionStatus, extras);
+            clientReceiver.send(sessionState, extras);
         } catch (RemoteException e) {
             Slog.w(TAG, "Error async reporting result to client: " + e);
         }
