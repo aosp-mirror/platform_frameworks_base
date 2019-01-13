@@ -45,6 +45,7 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.util.Preconditions;
@@ -67,6 +68,12 @@ import java.util.concurrent.Executor;
 @SystemService(Context.PERMISSION_CONTROLLER_SERVICE)
 public final class PermissionControllerManager {
     private static final String TAG = PermissionControllerManager.class.getSimpleName();
+
+    private static final Object sLock = new Object();
+
+    /** App global remote service used by all {@link PermissionControllerManager managers} */
+    @GuardedBy("sLock")
+    private static RemoteService sRemoteService;
 
     /**
      * The key for retrieving the result from the returned bundle.
@@ -140,17 +147,27 @@ public final class PermissionControllerManager {
     }
 
     private final @NonNull Context mContext;
-    private final RemoteService mRemoteService;
 
-    /** @hide */
+    /**
+     * Create a new {@link PermissionControllerManager}.
+     *
+     * @param context to create the manager for
+     *
+     * @hide
+     */
     public PermissionControllerManager(@NonNull Context context) {
-        Intent intent = new Intent(SERVICE_INTERFACE);
-        intent.setPackage(context.getPackageManager().getPermissionControllerPackageName());
-        ResolveInfo serviceInfo = context.getPackageManager().resolveService(intent, 0);
+        synchronized (sLock) {
+            if (sRemoteService == null) {
+                Intent intent = new Intent(SERVICE_INTERFACE);
+                intent.setPackage(context.getPackageManager().getPermissionControllerPackageName());
+                ResolveInfo serviceInfo = context.getPackageManager().resolveService(intent, 0);
+
+                sRemoteService = new RemoteService(context.getApplicationContext(),
+                        serviceInfo.getComponentInfo().getComponentName());
+            }
+        }
 
         mContext = context;
-        mRemoteService = new RemoteService(context,
-                serviceInfo.getComponentInfo().getComponentName());
     }
 
     /**
@@ -182,7 +199,7 @@ public final class PermissionControllerManager {
                     + " required");
         }
 
-        mRemoteService.scheduleRequest(new PendingRevokeRuntimePermissionRequest(mRemoteService,
+        sRemoteService.scheduleRequest(new PendingRevokeRuntimePermissionRequest(sRemoteService,
                 request, doDryRun, reason, mContext.getPackageName(), executor, callback));
     }
 
@@ -201,8 +218,8 @@ public final class PermissionControllerManager {
         checkNotNull(packageName);
         checkNotNull(callback);
 
-        mRemoteService.scheduleRequest(new PendingGetAppPermissionRequest(mRemoteService,
-                packageName, callback, handler == null ? mRemoteService.getHandler() : handler));
+        sRemoteService.scheduleRequest(new PendingGetAppPermissionRequest(sRemoteService,
+                packageName, callback, handler == null ? sRemoteService.getHandler() : handler));
     }
 
     /**
@@ -219,7 +236,7 @@ public final class PermissionControllerManager {
         checkNotNull(packageName);
         checkNotNull(permissionName);
 
-        mRemoteService.scheduleAsyncRequest(new PendingRevokeAppPermissionRequest(packageName,
+        sRemoteService.scheduleAsyncRequest(new PendingRevokeAppPermissionRequest(packageName,
                 permissionName));
     }
 
@@ -241,9 +258,9 @@ public final class PermissionControllerManager {
         checkCollectionElementsNotNull(permissionNames, "permissionNames");
         checkNotNull(callback);
 
-        mRemoteService.scheduleRequest(new PendingCountPermissionAppsRequest(mRemoteService,
+        sRemoteService.scheduleRequest(new PendingCountPermissionAppsRequest(sRemoteService,
                 permissionNames, countOnlyGranted, countSystem, callback,
-                handler == null ? mRemoteService.getHandler() : handler));
+                handler == null ? sRemoteService.getHandler() : handler));
     }
 
     /**
