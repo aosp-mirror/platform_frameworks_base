@@ -19819,6 +19819,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         .setPackage(launcherComponent.getPackageName());
                 mContext.sendBroadcastAsUser(launcherIntent, UserHandle.of(launcherUid));
             }
+            // TODO(b/122900055) Change/Remove this and replace with new permission role.
+            if (mAppPredictionServicePackage != null) {
+                Intent predictorIntent = new Intent(PackageInstaller.ACTION_SESSION_COMMITTED)
+                        .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
+                        .putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
+                        .setPackage(mAppPredictionServicePackage);
+                mContext.sendBroadcastAsUser(predictorIntent, UserHandle.of(launcherUid));
+            }
         }
     }
 
