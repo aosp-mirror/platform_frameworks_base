@@ -61,6 +61,7 @@ import android.util.ArraySet;
 import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -416,6 +417,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
+    @FlakyTest(bugId = 119774928)
     public void testEnabledState() throws Exception {
         TestParoleListener paroleListener = new TestParoleListener();
         mController.addListener(paroleListener);
