@@ -60,6 +60,7 @@ public class AppEntitiesHeaderControllerTest {
                 .setOnClickListener(v -> {
                 })
                 .build();
+        mController.setAppEntity(0, mAppEntityInfo);
     }
 
     @Test
@@ -172,6 +173,8 @@ public class AppEntitiesHeaderControllerTest {
         mController.setAppEntity(0, mAppEntityInfo)
                 .setAppEntity(1, mAppEntityInfo)
                 .setAppEntity(2, mAppEntityInfo).apply();
+        final View appViewsContainer = mAppEntitiesHeaderView.findViewById(
+                R.id.app_views_container);
         final View app1View = mAppEntitiesHeaderView.findViewById(R.id.app1_view);
         final View app2View = mAppEntitiesHeaderView.findViewById(R.id.app2_view);
         final View app3View = mAppEntitiesHeaderView.findViewById(R.id.app3_view);
@@ -181,8 +184,28 @@ public class AppEntitiesHeaderControllerTest {
         assertThat(app3View.getVisibility()).isEqualTo(View.VISIBLE);
 
         mController.clearAllAppEntities().apply();
-        assertThat(app1View.getVisibility()).isEqualTo(View.GONE);
-        assertThat(app2View.getVisibility()).isEqualTo(View.GONE);
-        assertThat(app3View.getVisibility()).isEqualTo(View.GONE);
+
+        assertThat(appViewsContainer.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void apply_noAppEntitySet_shouldOnlyShowTitleAndEmptyView() {
+        mController.setHeaderTitleRes(R.string.expand_button_title)
+                .setAppEntity(0, mAppEntityInfo)
+                .setAppEntity(1, mAppEntityInfo)
+                .setAppEntity(2, mAppEntityInfo).apply();
+        final View titleView = mAppEntitiesHeaderView.findViewById(R.id.header_title);
+        final View detailsView = mAppEntitiesHeaderView.findViewById(R.id.header_details);
+        final View emptyView = mAppEntitiesHeaderView.findViewById(R.id.empty_view);
+        final View appViewsContainer = mAppEntitiesHeaderView.findViewById(
+                R.id.app_views_container);
+
+        mController.clearAllAppEntities().apply();
+
+        assertThat(titleView.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(emptyView.getVisibility()).isEqualTo(View.VISIBLE);
+
+        assertThat(detailsView.getVisibility()).isEqualTo(View.GONE);
+        assertThat(appViewsContainer.getVisibility()).isEqualTo(View.GONE);
     }
 }
