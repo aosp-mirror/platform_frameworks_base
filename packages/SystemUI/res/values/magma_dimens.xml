@@ -20,4 +20,13 @@
 
     <!-- QS tile height -->	
     <dimen name="qs_tile_height_wo_label">48dp</dimen>
+	
+    <!-- Network traffic monitor -->
+    <dimen name="net_traffic_multi_text_size">8dp</dimen>
+    <dimen name="net_traffic_txt_img_padding">2dp</dimen>
+	
+    <!-- Burn-in protection -->
+    <dimen name="horizontal_max_swift">3.0dp</dimen>
+    <dimen name="vertical_max_swift">1.0dp</dimen>
+	
 </resources>
