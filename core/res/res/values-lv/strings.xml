@@ -1148,6 +1148,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Atvērt, izmantojot"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Atvērt, izmantojot %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Atvērt"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Piekļuves piešķiršana, lai atvērtu <xliff:g id="HOST">%1$s</xliff:g> saites lietojumprogrammā"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Piekļuves piešķiršana, lai atvērtu <xliff:g id="HOST">%1$s</xliff:g> saites lietojumprogrammā <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Atļaut piekļuvi"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Rediģēt, izmantojot"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Rediģēt, izmantojot %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Rediģēt"</string>
@@ -1589,6 +1592,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vai atbildēt uz zvanu?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Vienmēr"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Tikai vienreiz"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Iestatījumi"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"Programma %1$s neatbalsta darba profilus"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Planšetdators"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
@@ -1669,7 +1673,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Krāsu korekcija"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Pieejamības saīsne aktivizēja lietotni <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Pieejamības saīsne deaktivizēja lietotni <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Lai sāktu izmantot pašreizējo pieejamības funkciju, vēlreiz izmantojiet pieejamības saīsni."</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Lai izmantotu pakalpojumu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, nospiediet abus skaļuma taustiņus un turiet tos trīs sekundes."</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Izvēlieties funkciju, ko izmantot, kad pieskaraties pogai Pieejamība."</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Lai mainītu funkcijas, pieskarieties pogai Pieejamība un turiet to."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Palielinājums"</string>
@@ -2010,5 +2014,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofons"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"rāda pāri citām lietotnēm jūsu ekrānā"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"Ielāde"</string>
 </resources>

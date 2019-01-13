@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Vula nge-"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Vula nge-%1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Kuvuliwe"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Nika ukufinyelela kuzixhumanisi ezivulekile ze-<xliff:g id="HOST">%1$s</xliff:g> nge-"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Nika ukufinyelela kuzixhumanisi ze-<xliff:g id="HOST">%1$s</xliff:g> ezivulekile nge-<xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Nikeza ukufinyel"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Hlela nge-"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Hlela nge-%1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Hlela"</string>
@@ -1566,6 +1569,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Amukela ucingo?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Njalo"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Kanye nje"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Izilungiselelo"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ayisekeli iphrofayela yomsebenzi"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Ithebulethi"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"I-TV"</string>
@@ -1645,7 +1649,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Ukulungiswa kombala"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Isinqamuleli sokufinyelela sivule i-<xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Isinqamuleli sokufinyelela sivale i-<xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Sebenzisa isinqamuleli sokufinyelela futhi ukuze uqale isici samanje sokufinyelela"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Cindezela uphinde ubambe bobabili okhiye bevolumu ngamasekhondi amathathu ukuze usebenzise i-<xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Khetha isici ozosisebenzisa uma uthepha inkinobho yokufinyelela:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Ukuze ushintshe izici, thinta uphinde ubambe inkinobho yokufinyelela."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ukukhuliswa"</string>
@@ -1975,5 +1979,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Ikhamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Imakrofoni"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"iboniswa ngaphezulu kwezinye izinhlelo zokusebenza kusikrini sakho"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Isaziso solwazi lwe-Routine Mode"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Ibhethri lingaphela ngaphambi kokushaja okuvamile"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Isilondolozi sebhethri siyasebenza ngaphandle kwempilo yebhethri"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Iyalayisha"</string>
 </resources>

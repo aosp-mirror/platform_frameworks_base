@@ -1148,6 +1148,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Otvaranje pomoću aplikacije"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Otvaranje pomoću aplikacije %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Otvori"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Omogućite pristup za otvaranje <xliff:g id="HOST">%1$s</xliff:g> veza pomoću aplikacije"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Omogućite pristup za otvaranje <xliff:g id="HOST">%1$s</xliff:g> veza pomoću aplikacije <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Omogući pristup"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Uređivanje pomoću aplikacije"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Uređivanje pomoću aplikacije %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Uredi"</string>
@@ -1589,6 +1592,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Prihvatiti poziv?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Uvijek"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Samo jednom"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Postavke"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ne podržava radni profil"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tabletno računalo"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Televizor"</string>
@@ -1669,7 +1673,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Korekcija boje"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Prečac pristupačnosti uključio je uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Prečac pristupačnosti isključio je uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Ponovo upotrijebite prečac pristupačnosti da biste pokrenuli trenutačnu značajku pristupačnosti"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Pritisnite i zadržite tipke za glasnoću na tri sekunde da biste koristili uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Odaberite značajku koju ćete upotrebljavati kada dodirnete gumb Pristupačnost:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Da biste promijenili značajke, dodirnite i zadržite gumb Pristupačnost."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Povećavanje"</string>
@@ -2010,5 +2014,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Fotoaparat"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"prikazuje se preko drugih aplikacija na zaslonu"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"Učitavanje"</string>
 </resources>

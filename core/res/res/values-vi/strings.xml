@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Mở bằng"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Mở bằng %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Mở"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Cấp quyền truy cập để mở đường dẫn liên kết <xliff:g id="HOST">%1$s</xliff:g> bằng"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Cấp quyền truy cập để mở đường dẫn liên kết <xliff:g id="HOST">%1$s</xliff:g> bằng <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Cấp quyền truy cập"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Chỉnh sửa bằng"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Chỉnh sửa bằng %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Chỉnh sửa"</string>
@@ -1566,6 +1569,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Chấp nhận cuộc gọi?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Luôn chọn"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Chỉ một lần"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Cài đặt"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s không hỗ trợ hồ sơ công việc"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Máy tính bảng"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
@@ -1645,7 +1649,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Sửa màu"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Đã bật phím tắt trợ năng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Đã tắt phím tắt trợ năng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Sử dụng lại Phím tắt hỗ trợ tiếp cận để bắt đầu tính năng hỗ trợ tiếp cận hiện tại"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Nhấn và giữ đồng thời cả hai phím âm lượng trong 3 giây để sử dụng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Chọn tính năng sẽ sử dụng khi bạn nhấn nút Trợ năng:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Để thay đổi các tính năng, hãy chạm và giữ nút Trợ năng."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Phóng to"</string>
@@ -1975,5 +1979,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Máy ảnh"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Micrô"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"hiển thị qua các ứng dụng khác trên màn hình của bạn"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"Đang tải"</string>
 </resources>

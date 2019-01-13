@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"باز کردن با"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"‏باز کردن با %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"باز کردن"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"ارائه دسترسی برای باز کردن پیوندهای <xliff:g id="HOST">%1$s</xliff:g> با"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"ارائه دسترسی برای باز کردن پیوندهای <xliff:g id="HOST">%1$s</xliff:g> با<xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"ارائه دسترسی"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ویرایش با"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"‏ویرایش با %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ویرایش"</string>
@@ -1566,6 +1569,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"تماس را می‌پذیرید؟"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"همیشه"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"فقط این بار"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"تنظیمات"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"‏%1$s از نمایه کاری پشتیبانی نمی‌کند"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"رایانهٔ لوحی"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"تلویزیون"</string>
@@ -1645,7 +1649,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"تصحیح رنگ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را روشن کرد"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را خاموش کرد"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"برای راه‌اندازی ویژگی دسترس‌پذیری کنونی، دوباره از «میان‌بر دسترس‌پذیری» استفاده کنید"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"برای استفاده از <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید صدا را فشار دهید و سه ثانیه نگه دارید"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"قابلیتی را انتخاب کنید که هنگام ضربه زدن روی دکمه «دسترس‌پذیری» استفاده می‌شود:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"برای تغییر دادن قابلیت‌ها، دکمه «دسترس‌پذیری» را لمس کنید و نگه‌دارید."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"درشت‌نمایی"</string>
@@ -1975,5 +1979,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"دوربین"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"میکروفون"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"نمایش روی برنامه‌های دیگر در صفحه‌نمایش"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"درحال بارگیری"</string>
 </resources>

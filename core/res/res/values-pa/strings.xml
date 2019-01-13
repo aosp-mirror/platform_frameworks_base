@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"ਨਾਲ ਖੋਲ੍ਹੋ"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s ਨਾਲ ਖੋਲ੍ਹੋ"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"ਖੋਲ੍ਹੋ"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"ਇਸ ਨਾਲ <xliff:g id="HOST">%1$s</xliff:g> ਲਿੰਕਾਂ ਨੂੰ ਖੋਲ੍ਹਣ ਦੀ ਪਹੁੰਚ ਦਿਓ"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g> ਨਾਲ <xliff:g id="HOST">%1$s</xliff:g> ਲਿੰਕਾਂ ਨੂੰ ਖੋਲ੍ਹਣ ਦੀ ਪਹੁੰਚ ਦਿਓ"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"ਪਹੁੰਚ ਦਿਓ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ਇਸ ਨਾਲ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s ਨਾਲ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ਸੰਪਾਦਨ ਕਰੋ"</string>
@@ -1567,6 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ਕੀ ਕਾਲ ਸਵੀਕਾਰ ਕਰਨੀ ਹੈ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ਹਮੇਸ਼ਾਂ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ਕੇਵਲ ਇੱਕ ਵਾਰ"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ਟੈਬਲੈੱਟ"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
@@ -1646,7 +1650,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"ਰੰਗ ਸੁਧਾਈ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਨੇ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕੀਤਾ"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਨੇ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"ਮੌਜੂਦਾ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ \'ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ\' ਦੀ ਦੁਬਾਰਾ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ 3 ਸਕਿੰਟਾਂ ਲਈ ਦਬਾਈ ਰੱਖੋ"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨੂੰ ਟੈਪ ਕੀਤੇ ਜਾਣ \'ਤੇ ਵਰਤਣ ਲਈ ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬਦਲਣ ਲਈ, ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
@@ -1976,5 +1980,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"ਕੈਮਰਾ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਹੋਰਾਂ ਐਪਾਂ ਉੱਪਰ ਦਿਖਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"ਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
 </resources>

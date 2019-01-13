@@ -1148,6 +1148,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Отворите помоћу"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Отворите помоћу апликације %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Отвори"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Дозволите да се линкови <xliff:g id="HOST">%1$s</xliff:g> отварају помоћу"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Дозволите да <xliff:g id="APPLICATION">%2$s</xliff:g> отвара линикове <xliff:g id="HOST">%1$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Дозволи приступ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Измените помоћу"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Измените помоћу апликације %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Измени"</string>
@@ -1589,6 +1592,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Желите ли да прихватите позив?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Увек"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Само једном"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Подешавања"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s не подржава пословни профил"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Таблет"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"ТВ"</string>
@@ -1669,7 +1673,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Корекција боја"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Пречица за приступачност је укључила услугу <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Пречица за приступачност је искључила услугу <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Употребите поново пречицу за приступачност да бисте покренули актуелну функцију приступачности"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Притисните и задржите оба тастера за јачину звука три секунде да бисте користили <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Изаберите функцију која ће се користити када додирнете дугме за приступачност:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Притисните и задржите дугме за приступачност да бисте мењали функције."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Увећање"</string>
@@ -2010,5 +2014,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"приказује се на екрану док користите друге апликације"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Обавештење о информацијама Рутинског режима"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Батерија ће се можда испразнити пре уобичајеног пуњења"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Уштеда батерије је активирана да би се продужило трајање батерије"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Учитава се"</string>
 </resources>

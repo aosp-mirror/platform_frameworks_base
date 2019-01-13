@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"ಇದರ ಮೂಲಕ ತೆರೆಯಿರಿ"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s ಜೊತೆಗೆ ತೆರೆಯಿರಿ"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"ತೆರೆ"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"ಮೂಲಕ <xliff:g id="HOST">%1$s</xliff:g> ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಲು ಪ್ರವೇಶವನ್ನು ನೀಡಿ"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g> ಮೂಲಕ <xliff:g id="HOST">%1$s</xliff:g> ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಲು ಪ್ರವೇಶವನ್ನು ನೀಡಿ"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"ಪ್ರವೇಶ ಅನುಮತಿಸಿ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ಇವರ ಜೊತೆಗೆ ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s ಜೊತೆಗೆ ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ಎಡಿಟ್"</string>
@@ -1567,6 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ಕರೆ ಸ್ವೀಕರಿಸುವುದೇ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ಯಾವಾಗಲೂ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ಒಮ್ಮೆ ಮಾತ್ರ"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ಟ್ಯಾಬ್ಲೆಟ್‌‌"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"ಟಿವಿ"</string>
@@ -1646,7 +1650,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"ಬಣ್ಣ ತಿದ್ದುಪಡಿ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ಪ್ರವೇಶಿಸುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್‌, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಆನ್ ಮಾಡಿದೆ"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ಪ್ರವೇಶಿಸುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್‌, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಆಫ್ ಮಾಡಿದೆ"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"ಪ್ರಸ್ತುತ ಪ್ರವೇಶದ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಪ್ರಾರಂಭಿಸಲು ಪ್ರವೇಶಿಸುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್‌ ಅನ್ನು ಪುನಃ ಬಳಸಿ"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಬಳಸಲು ಎರಡೂ ಧ್ವನಿ ಕೀಗಳನ್ನು ಮೂರು ಸೆಕೆಂಡ್‌ಗಳ ಕಾಲ ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ನೀವು ಪ್ರವೇಶಿಸುವಿಕೆ ಬಟನ್ ಟ್ಯಾಪ್ ಮಾಡಿದಾಗ ಬಳಸುವುದಕ್ಕಾಗಿ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಆರಿಸಿ:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಬದಲಾಯಿಸಲು, ಪ್ರವೇಶಿಸುವಿಕೆ ಬಟನ್ ಒತ್ತಿಹಿಡಿದುಕೊಳ್ಳಿ."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ಹಿಗ್ಗಿಸುವಿಕೆ"</string>
@@ -1976,5 +1980,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"ಕ್ಯಾಮರಾ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ಮೈಕ್ರೋಫೋನ್‌"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಮೂಲಕ ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"ಲೋಡ್ ಆಗುತ್ತಿದೆ"</string>
 </resources>

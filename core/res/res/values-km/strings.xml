@@ -1130,6 +1130,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"បើក​ជា​មួយ"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"បើក​ជាមួយ %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"បើក"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"ផ្ដល់​សិទ្ធិ​ចូលប្រើ ដើម្បី​បើកតំណ <xliff:g id="HOST">%1$s</xliff:g> តាមរយៈ"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"ផ្ដល់​សិទ្ធិ​ចូល​ប្រើ ដើម្បី​បើកតំណ <xliff:g id="HOST">%1$s</xliff:g> តាមរយៈ <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"ផ្តល់​សិទ្ធិ​ចូល​ប្រើ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"កែសម្រួល​ជាមួយ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"កែសម្រួល​ជាមួយ​ %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"កែសម្រួល"</string>
@@ -1568,6 +1571,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ទទួល​ការ​ហៅ​?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ជា​និច្ច"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"តែ​ម្ដង"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"ការកំណត់"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s មិន​គាំទ្រ​ប្រវត្តិរូប​ការងារ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"ទូរទស្សន៍"</string>
@@ -1647,7 +1651,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"ការ​កែ​ពណ៌"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ផ្លូវកាត់​ភាព​ងាយ​ស្រួល​បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ផ្លូវកាត់​ភាព​ងាយ​ស្រួល​បាន​បិទ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"ប្រើផ្លូវកាត់​ភាពងាយស្រួល​ម្ដងទៀត ដើម្បី​ចាប់ផ្ដើម​មុខងារ​ភាពងាយប្រើ​បច្ចុប្បន្ន"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"ចុចគ្រាប់ចុច​កម្រិត​សំឡេងទាំងពីរ​ឱ្យជាប់រយៈពេលបីវិនាទី ដើម្បីប្រើ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ជ្រើសរើស​មុខងារ​ដែលត្រូវ​ប្រើ នៅពេល​ដែល​អ្នកចុច​ប៊ូតុង​ភាពងាយស្រួល៖"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ដើម្បី​ផ្លាស់ប្តូរ​មុខងារ សូម​ចុច​ប៊ូតុង​ភាព​ងាយស្រួល​ឲ្យ​ជាប់។"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ការ​ពង្រីក"</string>
@@ -1977,5 +1981,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"កាមេរ៉ា"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"មីក្រូហ្វូន"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"កំពុងបង្ហាញ​ពីលើកម្មវិធីផ្សេងទៀត​នៅលើអេក្រង់​របស់អ្នក"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"កំពុងផ្ទុក"</string>
 </resources>
