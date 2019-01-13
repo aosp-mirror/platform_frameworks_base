@@ -518,7 +518,7 @@ public class WifiNetworkConfigBuilderTest {
                 .get(WifiConfiguration.KeyMgmt.SUITE_B_192));
         assertTrue(suggestion.wifiConfiguration.allowedGroupCiphers
                 .get(WifiConfiguration.GroupCipher.GCMP_256));
-        assertTrue(suggestion.wifiConfiguration.allowedGroupMgmtCiphers
+        assertTrue(suggestion.wifiConfiguration.allowedGroupManagementCiphers
                 .get(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256));
         assertTrue(suggestion.wifiConfiguration.allowedSuiteBCiphers
                 .get(WifiConfiguration.SuiteBCipher.ECDHE_ECDSA));

@@ -412,7 +412,7 @@ public class WifiNetworkConfigBuilder {
             configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SUITE_B_192);
             configuration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
             // TODO (b/113878056): Verify these params once we verify SuiteB configuration.
-            configuration.allowedGroupMgmtCiphers.set(
+            configuration.allowedGroupManagementCiphers.set(
                     WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256);
             configuration.allowedSuiteBCiphers.set(
                     WifiConfiguration.SuiteBCipher.ECDHE_ECDSA);
