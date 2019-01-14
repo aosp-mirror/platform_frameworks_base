@@ -22,20 +22,22 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.systemui.bubbles.BubbleMovementHelper.EDGE_OVERLAP;
 
+import android.annotation.Nullable;
+import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-
-import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
@@ -88,6 +90,8 @@ public class BubbleController {
     // Bubbles get added to the status bar view
     private final StatusBarWindowController mStatusBarWindowController;
 
+    private INotificationManager mNotificationManagerService;
+
     // Used for determining view rect for touch interaction
     private Rect mTempRect = new Rect();
 
@@ -124,6 +128,13 @@ public class BubbleController {
         mStatusBarWindowController = statusBarWindowController;
 
         mNotificationEntryManager.addNotificationEntryListener(mEntryListener);
+
+        try {
+            mNotificationManagerService = INotificationManager.Stub.asInterface(
+                    ServiceManager.getServiceOrThrow(Context.NOTIFICATION_SERVICE));
+        } catch (ServiceManager.ServiceNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -268,7 +279,7 @@ public class BubbleController {
     private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
         @Override
         public void onPendingEntryAdded(NotificationEntry entry) {
-            if (shouldAutoBubble(mContext, entry)) {
+            if (shouldAutoBubble(mContext, entry) || shouldBubble(entry)) {
                 entry.setIsBubble(true);
             }
         }
@@ -368,18 +379,37 @@ public class BubbleController {
     }
 
     /**
+     * Whether the notification has been developer configured to bubble and is allowed by the user.
+     */
+    private boolean shouldBubble(NotificationEntry entry) {
+        StatusBarNotification n = entry.notification;
+        boolean canAppOverlay = false;
+        try {
+            canAppOverlay = mNotificationManagerService.areAppOverlaysAllowedForPackage(
+                    n.getPackageName(), n.getUid());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error calling NoMan to determine if app can overlay", e);
+        }
+
+        boolean canChannelOverlay = mNotificationEntryManager.getNotificationData().getChannel(
+                entry.key).canOverlayApps();
+        boolean hasOverlayIntent = n.getNotification().getAppOverlayIntent() != null;
+        return hasOverlayIntent && canChannelOverlay && canAppOverlay;
+    }
+
+    /**
      * Whether the notification should bubble or not.
      */
-    private static boolean shouldAutoBubble(Context context, NotificationEntry entry) {
+    private boolean shouldAutoBubble(Context context, NotificationEntry entry) {
         if (entry.isBubbleDismissed()) {
             return false;
         }
+        StatusBarNotification n = entry.notification;
 
         boolean autoBubbleMessages = shouldAutoBubbleMessages(context) || DEBUG_ENABLE_AUTO_BUBBLE;
         boolean autoBubbleOngoing = shouldAutoBubbleOngoing(context) || DEBUG_ENABLE_AUTO_BUBBLE;
         boolean autoBubbleAll = shouldAutoBubbleAll(context) || DEBUG_ENABLE_AUTO_BUBBLE;
 
-        StatusBarNotification n = entry.notification;
         boolean hasRemoteInput = false;
         if (n.getNotification().actions != null) {
             for (Notification.Action action : n.getNotification().actions) {

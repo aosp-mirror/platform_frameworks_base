@@ -2317,8 +2317,8 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean areAppOverlaysAllowedForPackage(String pkg, int uid) {
-            checkCallerIsSystemOrSameApp(pkg);
-
+            enforceSystemOrSystemUIOrSamePackage("Caller not system or systemui or same package",
+                    pkg);
             return mPreferencesHelper.areAppOverlaysAllowed(pkg, uid);
         }
 
