@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
@@ -159,7 +161,7 @@ class InsetsSourceProvider {
     }
 
     boolean isClientVisible() {
-        return !ViewRootImpl.USE_NEW_INSETS || mClientVisible;
+        return ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE || mClientVisible;
     }
 
     private class ControlAdapter implements AnimationAdapter {
