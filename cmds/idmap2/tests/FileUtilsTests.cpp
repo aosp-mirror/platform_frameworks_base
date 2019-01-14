@@ -22,6 +22,8 @@
 #include "gtest/gtest.h"
 
 #include "android-base/macros.h"
+#include "android-base/stringprintf.h"
+#include "private/android_filesystem_config.h"
 
 #include "idmap2/FileUtils.h"
 
@@ -70,5 +72,26 @@ TEST(FileUtilsTests, ReadFile) {
   ASSERT_EQ(*data, "foobar");
   close(pipefd[0]);
 }
+
+#ifdef __ANDROID__
+TEST(FileUtilsTests, UidHasWriteAccessToPath) {
+  constexpr const char* tmp_path = "/data/local/tmp/test@idmap";
+  const std::string cache_path(base::StringPrintf("%s/test@idmap", kIdmapCacheDir));
+  const std::string sneaky_cache_path(base::StringPrintf("/data/../%s/test@idmap", kIdmapCacheDir));
+
+  ASSERT_TRUE(UidHasWriteAccessToPath(AID_ROOT, tmp_path));
+  ASSERT_TRUE(UidHasWriteAccessToPath(AID_ROOT, cache_path));
+  ASSERT_TRUE(UidHasWriteAccessToPath(AID_ROOT, sneaky_cache_path));
+
+  ASSERT_TRUE(UidHasWriteAccessToPath(AID_SYSTEM, tmp_path));
+  ASSERT_TRUE(UidHasWriteAccessToPath(AID_SYSTEM, cache_path));
+  ASSERT_TRUE(UidHasWriteAccessToPath(AID_SYSTEM, sneaky_cache_path));
+
+  constexpr const uid_t AID_SOME_APP = AID_SYSTEM + 1;
+  ASSERT_TRUE(UidHasWriteAccessToPath(AID_SOME_APP, tmp_path));
+  ASSERT_FALSE(UidHasWriteAccessToPath(AID_SOME_APP, cache_path));
+  ASSERT_FALSE(UidHasWriteAccessToPath(AID_SOME_APP, sneaky_cache_path));
+}
+#endif
 
 }  // namespace android::idmap2::utils
