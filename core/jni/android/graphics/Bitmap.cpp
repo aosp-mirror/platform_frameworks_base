@@ -8,7 +8,6 @@
 #include "SkImageInfo.h"
 #include "SkColor.h"
 #include "SkColorSpace.h"
-#include "SkMatrix44.h"
 #include "GraphicsJNI.h"
 #include "SkStream.h"
 
@@ -356,8 +355,8 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     if (xyzD50 == nullptr || transferParameters == nullptr) {
         colorSpace = SkColorSpace::MakeSRGB();
     } else {
-        SkColorSpaceTransferFn p = GraphicsJNI::getNativeTransferParameters(env, transferParameters);
-        SkMatrix44 xyzMatrix = GraphicsJNI::getNativeXYZMatrix(env, xyzD50);
+        skcms_TransferFunction p = GraphicsJNI::getNativeTransferParameters(env, transferParameters);
+        skcms_Matrix3x3 xyzMatrix = GraphicsJNI::getNativeXYZMatrix(env, xyzD50);
         colorSpace = SkColorSpace::MakeRGB(p, xyzMatrix);
     }
 
@@ -549,8 +548,7 @@ static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
     if (skbitmap.colorType() == kRGBA_F16_SkColorType) {
         // Convert to P3 before encoding. This matches SkAndroidCodec::computeOutputColorSpace
         // for wide gamuts.
-        auto cs = SkColorSpace::MakeRGB(SkColorSpace::kSRGB_RenderTargetGamma,
-                                        SkColorSpace::kDCIP3_D65_Gamut);
+        auto cs = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
         auto info = skbitmap.info().makeColorType(kRGBA_8888_SkColorType)
                                    .makeColorSpace(std::move(cs));
         SkBitmap p3;
@@ -910,32 +908,32 @@ static jboolean Bitmap_getColorSpace(JNIEnv* env, jobject, jlong bitmapHandle,
     SkColorSpace* colorSpace = bitmapHolder->info().colorSpace();
     if (colorSpace == nullptr) return JNI_FALSE;
 
-    SkMatrix44 xyzMatrix(SkMatrix44::kUninitialized_Constructor);
+    skcms_Matrix3x3 xyzMatrix;
     if (!colorSpace->toXYZD50(&xyzMatrix)) return JNI_FALSE;
 
     jfloat* xyz = env->GetFloatArrayElements(xyzArray, NULL);
-    xyz[0] = xyzMatrix.getFloat(0, 0);
-    xyz[1] = xyzMatrix.getFloat(1, 0);
-    xyz[2] = xyzMatrix.getFloat(2, 0);
-    xyz[3] = xyzMatrix.getFloat(0, 1);
-    xyz[4] = xyzMatrix.getFloat(1, 1);
-    xyz[5] = xyzMatrix.getFloat(2, 1);
-    xyz[6] = xyzMatrix.getFloat(0, 2);
-    xyz[7] = xyzMatrix.getFloat(1, 2);
-    xyz[8] = xyzMatrix.getFloat(2, 2);
+    xyz[0] = xyzMatrix.vals[0][0];
+    xyz[1] = xyzMatrix.vals[1][0];
+    xyz[2] = xyzMatrix.vals[2][0];
+    xyz[3] = xyzMatrix.vals[0][1];
+    xyz[4] = xyzMatrix.vals[1][1];
+    xyz[5] = xyzMatrix.vals[2][1];
+    xyz[6] = xyzMatrix.vals[0][2];
+    xyz[7] = xyzMatrix.vals[1][2];
+    xyz[8] = xyzMatrix.vals[2][2];
     env->ReleaseFloatArrayElements(xyzArray, xyz, 0);
 
-    SkColorSpaceTransferFn transferParams;
+    skcms_TransferFunction transferParams;
     if (!colorSpace->isNumericalTransferFn(&transferParams)) return JNI_FALSE;
 
     jfloat* params = env->GetFloatArrayElements(paramsArray, NULL);
-    params[0] = transferParams.fA;
-    params[1] = transferParams.fB;
-    params[2] = transferParams.fC;
-    params[3] = transferParams.fD;
-    params[4] = transferParams.fE;
-    params[5] = transferParams.fF;
-    params[6] = transferParams.fG;
+    params[0] = transferParams.a;
+    params[1] = transferParams.b;
+    params[2] = transferParams.c;
+    params[3] = transferParams.d;
+    params[4] = transferParams.e;
+    params[5] = transferParams.f;
+    params[6] = transferParams.g;
     env->ReleaseFloatArrayElements(paramsArray, params, 0);
 
     return JNI_TRUE;
@@ -1121,8 +1119,8 @@ static jobject Bitmap_createHardwareBitmap(JNIEnv* env, jobject, jobject graphic
 
 static jobject Bitmap_wrapHardwareBufferBitmap(JNIEnv* env, jobject, jobject hardwareBuffer,
                                                jfloatArray xyzD50, jobject transferParameters) {
-    SkColorSpaceTransferFn p = GraphicsJNI::getNativeTransferParameters(env, transferParameters);
-    SkMatrix44 xyzMatrix = GraphicsJNI::getNativeXYZMatrix(env, xyzD50);
+    skcms_TransferFunction p = GraphicsJNI::getNativeTransferParameters(env, transferParameters);
+    skcms_Matrix3x3 xyzMatrix = GraphicsJNI::getNativeXYZMatrix(env, xyzD50);
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeRGB(p, xyzMatrix);
     AHardwareBuffer* hwBuf = android_hardware_HardwareBuffer_getNativeHardwareBuffer(env,
         hardwareBuffer);

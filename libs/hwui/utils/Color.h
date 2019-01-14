@@ -111,11 +111,6 @@ static constexpr float EOCF(float srgb) {
 #endif
 }
 
-// Returns whether the specified color space's transfer function can be
-// approximated with the native sRGB transfer function. This method
-// returns true for sRGB, gamma 2.2 and Display P3 for instance
-bool transferFunctionCloseToSRGB(const SkColorSpace* colorSpace);
-
 android::PixelFormat ColorTypeToPixelFormat(SkColorType colorType);
 
 ANDROID_API sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace);

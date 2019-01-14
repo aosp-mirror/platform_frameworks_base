@@ -44,8 +44,8 @@ TEST(SkiaCanvas, drawShadowLayer) {
 }
 
 TEST(SkiaCanvas, colorSpaceXform) {
-    sk_sp<SkColorSpace> adobe = SkColorSpace::MakeRGB(SkColorSpace::kSRGB_RenderTargetGamma,
-                                                      SkColorSpace::kAdobeRGB_Gamut);
+    sk_sp<SkColorSpace> adobe = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                                      SkNamedGamut::kAdobeRGB);
 
     SkImageInfo adobeInfo = SkImageInfo::Make(1, 1, kN32_SkColorType, kOpaque_SkAlphaType, adobe);
     sk_sp<Bitmap> adobeBitmap = Bitmap::allocateHeapBitmap(adobeInfo);

@@ -79,8 +79,7 @@ static void queryWideColorGamutPreference(SkColorSpace::Gamut* colorGamut,
     switch (wcgDataspace) {
         case ui::Dataspace::DISPLAY_P3:
             *colorGamut = SkColorSpace::Gamut::kDCIP3_D65_Gamut;
-            *colorSpace = SkColorSpace::MakeRGB(SkColorSpace::kSRGB_RenderTargetGamma,
-                                                SkColorSpace::Gamut::kDCIP3_D65_Gamut);
+            *colorSpace = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
             break;
         case ui::Dataspace::V0_SCRGB:
             *colorGamut = SkColorSpace::Gamut::kSRGB_Gamut;
