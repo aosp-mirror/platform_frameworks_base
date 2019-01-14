@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Отваряне чрез"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Отваряне чрез %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Отваряне"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Предоставяне на достъп за отваряне на връзките от <xliff:g id="HOST">%1$s</xliff:g> с(ъс)"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Предоставяне на достъп за отваряне на връзките от <xliff:g id="HOST">%1$s</xliff:g> с(ъс) <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Даване на достъп"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Редактиране чрез"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Редактиране чрез %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Редактиране"</string>
@@ -1566,6 +1569,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Да се приеме ли обаждането?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Винаги"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Само веднъж"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Настройки"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s не поддържа служебен потребителски профил"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Таблет"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Телевизор"</string>
@@ -1645,7 +1649,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Коригиране на цветовете"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Прекият път за достъпност включи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Прекият път за достъпност изключи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Използвайте отново прекия път към функцията за достъпност, за да стартирате текущата"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"За да използвате <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, натиснете двата бутона за силата на звука и ги задръжте за 3 секунди"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Изберете функция, която да използвате, когато докоснете бутона за достъпност:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"За да промените функции, докоснете и задръжте бутона за достъпност."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ниво на мащаба"</string>
@@ -1975,5 +1979,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"се показва върху други приложения на екрана"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"Зарежда се"</string>
 </resources>

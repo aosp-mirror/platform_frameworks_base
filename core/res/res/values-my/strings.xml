@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"...ဖြင့် ဖွင့်မည်"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s ဖြင့် ဖွင့်မည်"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"ဖွင့်ပါ"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"<xliff:g id="HOST">%1$s</xliff:g> လင့်ခ်များကို အ​ောက်ပါဖြင့် ဖွင့်ခွင့်ပေးပါ-"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="HOST">%1$s</xliff:g> လင့်ခ်များကို <xliff:g id="APPLICATION">%2$s</xliff:g> ဖြင့် ဖွင့်ခွင့်ပေးပါ"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"ဖွင့်ခွင့်ပေးရန်"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"...နှင့် တည်းဖြတ်ရန်"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s နှင့် တည်းဖြတ်ရန်"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"တည်းဖြတ်ပါ"</string>
@@ -1567,6 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ဖုန်းခေါ်ဆိုမှုကို လက်ခံမလား?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"အမြဲတမ်း"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"တစ်ခါတည်း"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"ဆက်တင်များ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s က အလုပ်ပရိုဖိုင်ကို မပံ့ပိုးပါ။"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"တက်ဘလက်"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"တီဗွီ"</string>
@@ -1646,7 +1650,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"အရောင်ပြင်ဆင်ခြင်း"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ဖွင့်လိုက်ပါသည်"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ပိတ်လိုက်ပါသည်"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"လက်ရှိ အသုံးလွယ်ရေး ဝန်ဆောင်မှုကို စတင်ရန် အသုံးလွယ်ရေး ဖြတ်လမ်းလင့်ခ်ကို သုံးပါ"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို သုံးရန် အသံအတိုးအလျှော့ ခလုတ်နှစ်ခုလုံးကို သုံးစက္ကန့်ကြာ ဖိထားပါ"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"အများသုံးစွဲနိုင်မှု ခလုတ်ကို တို့သည့်အခါ အသုံးပြုမည့် ဝန်ဆောင်မှုကို ရွေးချယ်ပါ−"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ဝန်ဆောင်မှုများကို ပြောင်းလဲရန် အများသုံးစွဲနိုင်မှု ခလုတ်ကို တို့၍ ထိထားပါ။"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ချဲ့ခြင်း"</string>
@@ -1976,5 +1980,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"ကင်မရာ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"မိုက်ခရိုဖုန်း"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"သင့်မျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များပေါ်တွင် ပြသခြင်း"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"ပုံမှန်မုဒ်အတွက် အချက်အလက်ပြသည့် အကြောင်းကြားချက်"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ပုံမှန်အားသွင်းမှုမပြုလုပ်မီ ဘက်ထရီကုန်သွားနိုင်သည်"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ဘက်ထရီသက်တမ်းကို တိုးမြှင့်ရန် \'ဘက်ထရီအားထိန်း\' စတင်ပြီးပါပြီ"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"တင်နေသည်"</string>
 </resources>

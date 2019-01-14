@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Maak oop met"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Maak oop met %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Maak oop"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Gee toegang tot oop <xliff:g id="HOST">%1$s</xliff:g>-skakels met"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Gee toegang tot oop <xliff:g id="HOST">%1$s</xliff:g>-skakels met <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Verleen toegang"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Redigeer met"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Redigeer met %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Wysig"</string>
@@ -1566,6 +1569,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Aanvaar oproep?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Altyd"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Net een keer"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Instellings"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s steun nie werkprofiel nie"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
@@ -1645,7 +1649,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Kleurkorreksie"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Toeganklikheidskortpad het <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aangeskakel"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Toeganklikheidskortpad het <xliff:g id="SERVICE_NAME">%1$s</xliff:g> afgeskakel"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Gebruik weer toeganklikheidskortpad om die huidige toeganklikheidskenmerk te begin"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Druk en hou albei volumesleutels drie sekondes lank om <xliff:g id="SERVICE_NAME">%1$s</xliff:g> te gebruik"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Kies \'n kenmerk om te gebruik wanneer jy op die Toeganklikheid-knoppie tik:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Raak en hou die Toeganklikheid-knoppie om kenmerke te verander."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Vergroting"</string>
@@ -1975,5 +1979,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofoon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"wys tans bo-oor ander programme op jou skerm"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Roetinemodus-inligtingkennisgewing"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Battery kan afloop voordat dit normaalweg gelaai word"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Batterybespaarder is geaktiveer om batterylewe te verleng"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Laai tans"</string>
 </resources>

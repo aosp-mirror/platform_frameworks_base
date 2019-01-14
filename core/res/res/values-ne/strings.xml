@@ -1132,6 +1132,9 @@
     <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
     <skip />
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"खोल्नुहोस्"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"निम्नमार्फत <xliff:g id="HOST">%1$s</xliff:g>का लिंकहरू खोल्न पहुँच दिनुहोस्‌"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g>मार्फत <xliff:g id="HOST">%1$s</xliff:g>का लिंकहरू खोल्न पहुँच दिनुहोस्‌"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"पहुँच दिनुहोस्"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"सँग सम्पादन गर्नुहोस्"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
@@ -1572,6 +1575,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"कल स्वीकार गर्नुहुन्छ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"सधैँ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"एक पटक मात्र"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"सेटिङहरू"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s  कार्य प्रोफाइल समर्थन गर्दैन"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ट्याब्लेट"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
@@ -1651,7 +1655,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"रङ सच्याउने सुविधा"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"पहुँचको सर्टकटले <xliff:g id="SERVICE_NAME">%1$s</xliff:g> लाई सक्रिय पार्‍यो"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"पहुँचको सर्टकटले <xliff:g id="SERVICE_NAME">%1$s</xliff:g> लाई निष्क्रिय पार्‍यो"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"हालको पहुँचसम्बन्धी सुविधा प्रयोग गर्न फेरि पहुँचसम्बन्धी सर्टकट प्रयोग गर्नुहोस्"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> प्रयोग गर्न दुवै भोल्युम कुञ्जीहरूलाई तीन सेकेन्डसम्म थिचिराख्नुहोस्"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"तपाईंले पहुँच सम्बन्धी बटनलाई ट्याप गर्दा प्रयोग गर्नुपर्ने सुविधा रोज्नुहोस्:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"सुविधाहरूलाई बदल्न, पहुँच सम्बन्धी बटनलाई छोएर थिची राख्नुहोस्।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"म्याग्निफिकेसन"</string>
@@ -1981,5 +1985,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"क्यामेरा"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"माइक्रोफोन"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमा प्रदर्शन गरिँदै छ"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"लोड गर्दै"</string>
 </resources>

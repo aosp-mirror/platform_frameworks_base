@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"इसमें खोलें"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s में खोलें"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"खोलें"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"इससे <xliff:g id="HOST">%1$s</xliff:g> लिंक खोलने का एक्सेस दें"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g> से <xliff:g id="HOST">%1$s</xliff:g> लिंक खोलने का एक्सेस दें"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"एक्सेस दें"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"इसके ज़रिये बदलाव करें"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s की मदद से बदलाव करें"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"बदलाव करें"</string>
@@ -1566,6 +1569,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"कॉल स्वीकार करें?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"हमेशा"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"केवल एक बार"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"सेटिंग"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s कार्य प्रोफ़ाइल का समर्थन नहीं करता"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"टैबलेट"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"टीवी"</string>
@@ -1645,7 +1649,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"रंग में सुधार करने की सुविधा"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"सुलभता शॉर्टकट ने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को चालू किया"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"सुलभता शॉर्टकट ने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को बंद किया"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"मौजूदा सुलभता सुविधा शुरू करने के लिए \'सुलभता शॉर्टकट\' का फिर से इस्तेमाल करें"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> इस्तेमाल करने के लिए आवाज़ वाले दोनों बटन तीन सेकंड तक दबाकर रखें"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"सुलभता बटन पर टैप करते समय इस्तेमाल की जाने वाली सुविधा चुनें:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"सुविधाओं में बदलाव करने के लिए, सुलभता बटन को दबाकर रखें."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"बड़ा करना"</string>
@@ -1975,5 +1979,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"कैमरा"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"माइक्रोफ़ोन"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"आपकी स्क्रीन पर, इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"प्राेफ़ाइल लोड हो रही है"</string>
 </resources>

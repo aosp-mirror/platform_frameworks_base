@@ -1148,6 +1148,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Otvori koristeći"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Otvori koristeći %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Otvori"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Dozvolite pristup za otvaranje linkova hosta <xliff:g id="HOST">%1$s</xliff:g> pomoću"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Dozvolite pristup za otvaranje linkova hosta <xliff:g id="HOST">%1$s</xliff:g> pomoću aplikacije <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Dozvoli pristup"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Uredi koristeći"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Uredi koristeći %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Uredi"</string>
@@ -1591,6 +1594,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Prihvatiti poziv?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Uvijek"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Samo ovaj put"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Postavke"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ne podržava poslovni profil"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
@@ -1671,7 +1675,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Ispravka boja"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Prečica za pristupačnost je uključila uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Prečica za pristupačnost je isključila uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Ponovo koristite Prečicu za pristupačnost da započnete trenutnu funkciju pristupačnosti"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Pritisnite obje tipke za podešavanje jačine zvuka i držite ih pritisnutim tri sekunde da koristite uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Odaberite funkciju koja će se koristiti kada dodirnete dugme Pristupačnost:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Da promijenite funkcije, dodirnite i držite dugme Pristupačnost."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Uvećanje"</string>
@@ -2012,5 +2016,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"prikazivanje preko drugih aplikacija na ekranu"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Obavještenje za informacije Rutinskog načina"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Moguće je da će se baterija isprazniti prije uobičajenog punjenja"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Ušteda baterije je aktivirana da bi se produžio vijek trajanja baterije"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Učitavanje"</string>
 </resources>

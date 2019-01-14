@@ -27,7 +27,6 @@ import android.net.NetworkSpecifier;
 import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
 import android.net.Uri;
-import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -491,7 +490,7 @@ public class WifiConfiguration implements Parcelable {
      * The set of group management ciphers supported by this configuration.
      * See {@link GroupMgmtCipher} for descriptions of the values.
      */
-    public BitSet allowedGroupMgmtCiphers;
+    public BitSet allowedGroupManagementCiphers;
     /**
      * The set of SuiteB ciphers supported by this configuration.
      * To be used for WPA3-Enterprise mode.
@@ -1642,7 +1641,7 @@ public class WifiConfiguration implements Parcelable {
         allowedAuthAlgorithms = new BitSet();
         allowedPairwiseCiphers = new BitSet();
         allowedGroupCiphers = new BitSet();
-        allowedGroupMgmtCiphers = new BitSet();
+        allowedGroupManagementCiphers = new BitSet();
         allowedSuiteBCiphers = new BitSet();
         wepKeys = new String[4];
         for (int i = 0; i < wepKeys.length; i++) {
@@ -1835,8 +1834,8 @@ public class WifiConfiguration implements Parcelable {
         }
         sbuf.append('\n');
         sbuf.append(" GroupMgmtCiphers:");
-        for (int gmc = 0; gmc < this.allowedGroupMgmtCiphers.size(); gmc++) {
-            if (this.allowedGroupMgmtCiphers.get(gmc)) {
+        for (int gmc = 0; gmc < this.allowedGroupManagementCiphers.size(); gmc++) {
+            if (this.allowedGroupManagementCiphers.get(gmc)) {
                 sbuf.append(" ");
                 if (gmc < GroupMgmtCipher.strings.length) {
                     sbuf.append(GroupMgmtCipher.strings[gmc]);
@@ -2235,7 +2234,7 @@ public class WifiConfiguration implements Parcelable {
             allowedAuthAlgorithms  = (BitSet) source.allowedAuthAlgorithms.clone();
             allowedPairwiseCiphers = (BitSet) source.allowedPairwiseCiphers.clone();
             allowedGroupCiphers    = (BitSet) source.allowedGroupCiphers.clone();
-            allowedGroupMgmtCiphers    = (BitSet) source.allowedGroupMgmtCiphers.clone();
+            allowedGroupManagementCiphers = (BitSet) source.allowedGroupManagementCiphers.clone();
             allowedSuiteBCiphers    = (BitSet) source.allowedSuiteBCiphers.clone();
             enterpriseConfig = new WifiEnterpriseConfig(source.enterpriseConfig);
 
@@ -2317,7 +2316,7 @@ public class WifiConfiguration implements Parcelable {
         writeBitSet(dest, allowedAuthAlgorithms);
         writeBitSet(dest, allowedPairwiseCiphers);
         writeBitSet(dest, allowedGroupCiphers);
-        writeBitSet(dest, allowedGroupMgmtCiphers);
+        writeBitSet(dest, allowedGroupManagementCiphers);
         writeBitSet(dest, allowedSuiteBCiphers);
 
         dest.writeParcelable(enterpriseConfig, flags);
@@ -2389,7 +2388,7 @@ public class WifiConfiguration implements Parcelable {
                 config.allowedAuthAlgorithms  = readBitSet(in);
                 config.allowedPairwiseCiphers = readBitSet(in);
                 config.allowedGroupCiphers    = readBitSet(in);
-                config.allowedGroupMgmtCiphers = readBitSet(in);
+                config.allowedGroupManagementCiphers = readBitSet(in);
                 config.allowedSuiteBCiphers   = readBitSet(in);
 
                 config.enterpriseConfig = in.readParcelable(null);

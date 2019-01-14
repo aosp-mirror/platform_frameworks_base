@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"ክፈት በ"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"ክፈት በ%1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"ክፈት"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"የ<xliff:g id="HOST">%1$s</xliff:g> አገናኞችን በዚህ ለመክፈት መዳረሻ ይስጡ፦"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"የ<xliff:g id="HOST">%1$s</xliff:g> አገናኞችን በ<xliff:g id="APPLICATION">%2$s</xliff:g> ለመክፈት መዳረሻ ይስጡ"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"መዳረሻ ስጥ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ያርትዑ በ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"ያርትዑ በ%1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ያርትዑ"</string>
@@ -1566,6 +1569,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ጥሪ ተቀበል?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ዘወትር"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"አንዴ ብቻ"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"ቅንብሮች"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s የስራ መገለጫ አይደግፍም"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ጡባዊ ተኮ"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"ቴሌቪዥን"</string>
@@ -1645,7 +1649,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"የቀለም ማስተካከያ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"የተደራሽነት አቋራጭ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ን አብርቶታል"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"የተደራሽነት አቋራጭ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ን አጥፍቶታል"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"አሁን ያለውን የተደራሽነት ባህሪ ለመጀመር እንደገና የተደራሽነት አቋራጭን ይጠቀሙ"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ን ለመጠቀም ለሦስት ሰከንዶች ሁለቱንም የድምፅ ቁልፎች ተጭነው ይያዙ"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"የተደራሽነት አዝራርን መታ በሚያደርጉበት ጊዜ ጥቅም ላይ የሚውለውን ባህሪ ይምረጡ፦"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ባህሪያትን ለመለወጥ የተደራሽነት አዝራሩን ይንኩ እና ይያዙት።"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ማጉላት"</string>
@@ -1975,5 +1979,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"ካሜራ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ማይክሮፎን"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"በማያዎ ላይ በሌሎች መተግበሪያዎች ላይ በማሳየት ላይ"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"በመጫን ላይ"</string>
 </resources>

@@ -3565,11 +3565,9 @@ Lcom/android/internal/telephony/SubscriptionInfoUpdater;->logd(Ljava/lang/String
 Lcom/android/internal/telephony/SubscriptionInfoUpdater;->mContext:Landroid/content/Context;
 Lcom/android/internal/telephony/SubscriptionInfoUpdater;->mCurrentlyActiveUserId:I
 Lcom/android/internal/telephony/SubscriptionInfoUpdater;->mIccId:[Ljava/lang/String;
-Lcom/android/internal/telephony/SubscriptionInfoUpdater;->mInsertSimState:[I
 Lcom/android/internal/telephony/SubscriptionInfoUpdater;->mPackageManager:Landroid/content/pm/IPackageManager;
 Lcom/android/internal/telephony/SubscriptionInfoUpdater;->mPhone:[Lcom/android/internal/telephony/Phone;
 Lcom/android/internal/telephony/SubscriptionInfoUpdater;->PROJECT_SIM_NUM:I
-Lcom/android/internal/telephony/SubscriptionInfoUpdater;->updateSubscriptionInfoByIccId()V
 Lcom/android/internal/telephony/TelephonyCapabilities;->supportsAdn(I)Z
 Lcom/android/internal/telephony/TelephonyProperties;->PROPERTY_ICC_OPERATOR_NUMERIC:Ljava/lang/String;
 Lcom/android/internal/telephony/test/InterpreterEx;-><init>(Ljava/lang/String;)V

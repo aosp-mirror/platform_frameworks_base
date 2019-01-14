@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Төмөнкү менен ачуу"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s менен ачуу"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Ачуу"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Төмөнкү колдонмо менен <xliff:g id="HOST">%1$s</xliff:g> шилтемелерин  ачууга уруксат берүү"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g> колдонмосу менен <xliff:g id="HOST">%1$s</xliff:g> шилтемелерин  ачууга уруксат берүү"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Мүмкүнчүлүк берүү"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Төмөнкү менен түзөтүү"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s менен түзөтүү"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Түзөтүү"</string>
@@ -1568,6 +1571,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Чалуу кабыл алынсынбы?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Дайыма"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Бир жолу гана"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Жөндөөлөр"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s жумуш профилин колдоого албайт"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Планшет"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Сыналгы"</string>
@@ -1647,7 +1651,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Түсүн тууралоо"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Атайын мүмкүнчүлүктөр кыска жолу <xliff:g id="SERVICE_NAME">%1$s</xliff:g> кызматын күйгүздү"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Атайын мүмкүнчүлүктөр кыска жолу <xliff:g id="SERVICE_NAME">%1$s</xliff:g> кызматын өчүрдү"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Учурдагы атайын мүмкүнчүлүктөр функциясын иштетүү үчүн кыска жолду кайра колдонуңуз"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> кызматын колдонуу үчүн үнүн чоңойтуп/кичирейтүү баскычтарын үч секунд коё бербей басып туруңуз"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Атайын мүмкүнчүлүктөр баскычын таптаганыңызда иштетиле турган функцияны тандаңыз:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Функцияларды өзгөртүү үчүн Атайын мүмкүнчүлүктөр баскычын басып, кармап туруңуз."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Чоңойтуу"</string>
@@ -1977,5 +1981,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"экрандагы башка терезелердин үстүнөн көрсөтүлүүдө"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"Жүктөлүүдө"</string>
 </resources>

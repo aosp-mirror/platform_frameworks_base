@@ -79,7 +79,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Налады ідэнтыфікатару АВН па змаўчанні: не абмяжавана. Наступны выклік: не абмежавана"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Служба не прадастаўляецца."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Вы не можаце змяніць налады ідэнтыфікатара абанента, якi тэлефануе."</string>
-    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Мабільны інтэрнэт недаступны"</string>
+    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Мабільная перадача даных недаступная"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Экстранныя выклікі недаступныя"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Няма сэрвісу галасавых выклікаў"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Галасавыя або экстранныя выклікі недаступныя"</string>
@@ -435,7 +435,7 @@
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Акрамя доступу да прыкладнага ці дакладнага месцазнаходжання праграма можа мець доступ да вызначэння геалакацыі ў фонавым рэжыме працы. На гэта патрабуецца дазвол."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"змяняць налады аудыё"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Дазваляе прыкладанням змяняць глабальныя налады гуку, такія як моц і тое, што дынамік выкарыстоўваецца для выхаду."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"запісваць аўдыё"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"запіс аўдыя"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Гэта праграма можа у любы час запісваць аўдыя, выкарыстоўваючы мікрафон."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"адпраўляць каманды на SIM-карту"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Дазваляе праграме адпраўляць каманды SIM-карце. Гэта вельмі небяспечна."</string>
@@ -1168,6 +1168,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Адкрыць з дапамогай"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Адкрыць з дапамогай %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Адкрыць"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Адкрываць спасылкі на сэрвіс <xliff:g id="HOST">%1$s</xliff:g> з дапамогай"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Адкрываць спасылкі на сэрвіс <xliff:g id="HOST">%1$s</xliff:g> з дапамогай праграмы \"<xliff:g id="APPLICATION">%2$s</xliff:g>\""</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Даць доступ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Рэдагаваць з дапамогай"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Рэдагаваць з дапамогай %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Рэдагаваць"</string>
@@ -1612,6 +1615,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Прыняць выклік?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Заўсёды"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Толькі адзін раз"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Налады"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s не падтрымлівае працоўны профіль"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Планшэт"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"ТБ"</string>
@@ -1693,7 +1697,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Карэкцыя колеру"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> быў уключаны з дапамогай камбінацыі хуткага доступу для спецыяльных магчымасцей"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> быў адключаны з дапамогай камбінацыі хуткага доступу для спецыяльных магчымасцей"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Каб запусціць функцыю спецыяльных магчымасцей, паўторна скарыстайце ярлык спецыяльных магчымасцей"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Каб карыстацца сэрвісам \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\", націсніце і ўтрымлівайце на працягу трох секунд абедзве клавішы гучнасці"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Выберыце функцыю для выкарыстання пры націску кнопкі \"Спецыяльныя магчымасці\":"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Каб змяняць функцыі, краніце і ўтрымлівайце кнопку \"Спецыяльныя магчымасці\"."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Павелічэнне"</string>
@@ -2045,5 +2049,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Мікрафон"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"паказваецца паверх іншых праграм на экране"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"Загрузка"</string>
 </resources>

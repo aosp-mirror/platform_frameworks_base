@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Abrir con"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Abrir con %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Abrir"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Otorgar acceso para abrir vínculos de <xliff:g id="HOST">%1$s</xliff:g> con"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Otorgar acceso para abrir vínculos de <xliff:g id="HOST">%1$s</xliff:g> con <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Otorgar acceso"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Editar con"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editar con %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Editar"</string>
@@ -1566,6 +1569,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"¿Aceptar la llamada?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Siempre"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Solo una vez"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Configuración"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s no admite perfiles de trabajo."</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
@@ -1645,7 +1649,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Corrección de color"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"El acceso directo de accesibilidad activó <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"El acceso directo de accesibilidad desactivó <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Vuelve a usar el acceso directo de accesibilidad para iniciar la función de accesibilidad actual"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Mantén presionadas ambas teclas de volumen durante tres segundos para usar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Elige una función para usar cuando presionas el botón Accesibilidad:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Para cambiar funciones, mantén presionado el botón Accesibilidad."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ampliación"</string>
@@ -1975,5 +1979,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Cámara"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Micrófono"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"se superpone a otras apps en tu pantalla"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Notificación de información del modo de Rutinas"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Es posible que la batería se agote antes de la carga habitual"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Se activó el Ahorro de batería para extender la duración de la batería"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Cargando"</string>
 </resources>

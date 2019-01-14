@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"اس کے ساتھ کھولیں"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"‏%1$s کے ساتھ کھولیں"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"کھولیں"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"اس کے ساتھ <xliff:g id="HOST">%1$s</xliff:g> لنکس کو کھولنے کے لیے رسائی ديں"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g> کے ساتھ <xliff:g id="HOST">%1$s</xliff:g> لنکس کو کھولنے کے لیے رسائی ديں"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"رسائی دیں"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"اس کے ساتھ ترمیم کریں"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"‏%1$s کے ساتھ ترمیم کریں"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ترمیم کریں"</string>
@@ -1567,6 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"کال قبول کریں؟"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ہمیشہ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"بس ایک مرتبہ"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"ترتیبات"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"‏%1$s دفتری پروفائل کا تعاون نہیں کرتا ہے"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ٹیبلیٹ"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
@@ -1646,7 +1650,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"رنگ کی تصحیح"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ایکسیسبیلٹی شارٹ کٹ نے <xliff:g id="SERVICE_NAME">%1$s</xliff:g> کو آن کر دیا"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ایکسیسبیلٹی شارٹ کٹ نے <xliff:g id="SERVICE_NAME">%1$s</xliff:g> کو آف کر دیا"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"موجودہ ایکسیسبیلٹی خصوصیت کو شروع کرنے کیلئے دوبارہ ایکسیسبیلٹی شارٹ کٹ استعمال کریں"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> کا استعمال کرنے کے لیے 3 سیکنڈ تک والیوم کی دونوں کلیدوں کو چھوئیں اور دبائے رکھیں"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ایکسیسبیلٹی بٹن پر تھپتھپانے وقت استعمال کرنے کیلئے ایک خصوصیت چنیں:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"خصوصیات تبدیل کرنے کیلئے، ایکسیسبیلٹی بٹن ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"میگنیفکیشن"</string>
@@ -1976,5 +1980,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"کیمرا"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"مائیکروفون"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"آپ کی اسکرین پر دیگر ایپس پر دکھایا جا رہا ہے"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"لوڈ ہو رہا ہے"</string>
 </resources>

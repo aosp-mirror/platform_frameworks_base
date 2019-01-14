@@ -1128,6 +1128,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"ইয়াৰ জৰিয়তে খোলক"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$sৰ জৰিয়তে খোলক"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"খোলক"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"ইয়াৰ দ্বাৰা <xliff:g id="HOST">%1$s</xliff:g> লিংক খুলিবলৈ এক্সেছ দিয়ক"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g>ৰ দ্বাৰা <xliff:g id="HOST">%1$s</xliff:g> লিংক খুলিবলৈ এক্সেছ দিয়ক"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"এক্সেছ দিয়ক"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ইয়াৰ দ্বাৰা সম্পাদনা কৰক"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$sৰদ্বাৰা সম্পাদনা কৰক"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"সম্পাদনা কৰক"</string>
@@ -1257,7 +1260,7 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"নেটৱৰ্কত ছাইন ইন কৰক"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"ৱাই-ফাইত ইন্টাৰনেট নাই"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"ৱাই-ফাইত ইণ্টাৰনেট নাই"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"অধিক বিকল্পৰ বাবে টিপক"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"আপোনাৰ হটস্পট ছেটিংসমূহত কৰা সালসলনি"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"আপোনাৰ হটস্পটৰ বেণ্ড সলনি কৰা হ’ল।"</string>
@@ -1567,6 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"কল স্বীকাৰ কৰিবনে?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"সদায়"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"মাত্ৰ এবাৰ"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"ছেটিংসমূহ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$sএ কৰ্মস্থানৰ প্ৰ\'ফাইল সমৰ্থন নকৰে।"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"টেবলেট"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"টিভি"</string>
@@ -1646,7 +1650,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"ৰং শুধৰণী"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"দিব্যাংগসকলৰ সুবিধাৰ শ্বৰ্টকাটটোৱে <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ক অন কৰিছে"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"দিব্যাংগসকলৰ সুবিধাৰ শ্বৰ্টকাটটোৱে <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ক অফ কৰিছে"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"বর্তমানৰ সাধ্য সুবিধাসমূহৰ আৰম্ভ কৰিবলৈ সাধ্য সুবিধাসমূহৰ শ্বৰ্টকাট পুনৰ ব্যৱহাৰ কৰক"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ব্যৱহাৰ কৰিবলৈ দুয়োটা ভলিউম বুটাম তিনি ছেকেণ্ডৰ বাবে হেঁচি ৰাখক"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"আপুনি দিব্যাংগসকলৰ সুবিধাৰ বুটামটো টিপিলে ব্যৱহাৰ কৰিবলগীয়া কোনো সুবিধা বাছক:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"সুবিধাসমূহ সলনি কৰিবলৈ দিব্যাংগসকলৰ সুবিধাৰ বুটামটো স্পৰ্শ কৰি থাকক।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"বিবৰ্ধন"</string>
@@ -1976,5 +1980,11 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"কেমেৰা"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"মাইক্ৰ\'ফ\'ন"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"স্ক্ৰীণত অইন এপৰ ওপৰত দেখুৱাওক"</string>
+    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"ল’ড হৈ আছে"</string>
 </resources>
