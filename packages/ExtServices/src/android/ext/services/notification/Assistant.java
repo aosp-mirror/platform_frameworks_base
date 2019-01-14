@@ -286,6 +286,9 @@ public class Assistant extends NotificationAssistantService {
             if (!isForCurrentUser(sbn)) {
                 return;
             }
+
+            mAgingHelper.onNotificationRemoved(sbn.getKey());
+
             boolean updatedImpressions = false;
             String channelId = mLiveNotifications.remove(sbn.getKey()).getChannel().getId();
             String key = getKey(sbn.getPackageName(), sbn.getUserId(), channelId);
