@@ -4646,6 +4646,9 @@ public class PackageParser {
                 a.info.flags |= ActivityInfo.FLAG_TURN_SCREEN_ON;
             }
 
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_inheritShowWhenLocked, false)) {
+                a.info.privateFlags |= ActivityInfo.FLAG_INHERIT_SHOW_WHEN_LOCKED;
+            }
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
@@ -5025,6 +5028,7 @@ public class PackageParser {
         info.targetActivity = targetActivity;
         info.configChanges = target.info.configChanges;
         info.flags = target.info.flags;
+        info.privateFlags = target.info.privateFlags;
         info.icon = target.info.icon;
         info.logo = target.info.logo;
         info.banner = target.info.banner;

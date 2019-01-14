@@ -54,6 +54,7 @@ import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_IMMERSIVE;
+import static android.content.pm.ActivityInfo.FLAG_INHERIT_SHOW_WHEN_LOCKED;
 import static android.content.pm.ActivityInfo.FLAG_MULTIPROCESS;
 import static android.content.pm.ActivityInfo.FLAG_NO_HISTORY;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
@@ -142,6 +143,7 @@ import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
@@ -387,6 +389,7 @@ final class ActivityRecord extends ConfigurationContainer {
     int mRotationAnimationHint = -1;
 
     private boolean mShowWhenLocked;
+    private boolean mInheritShownWhenLocked;
     private boolean mTurnScreenOn;
 
     /**
@@ -1002,6 +1005,7 @@ final class ActivityRecord extends ConfigurationContainer {
                 null : ComponentName.unflattenFromString(aInfo.requestedVrComponent);
 
         mShowWhenLocked = (aInfo.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
+        mInheritShownWhenLocked = (aInfo.privateFlags & FLAG_INHERIT_SHOW_WHEN_LOCKED) != 0;
         mTurnScreenOn = (aInfo.flags & FLAG_TURN_SCREEN_ON) != 0;
 
         mRotationAnimationHint = aInfo.rotationAnimation;
@@ -1485,14 +1489,6 @@ final class ActivityRecord extends ConfigurationContainer {
             mAtmService.setResumedActivityUncheckLocked(this, reason);
         }
         return true;
-    }
-
-    /**
-     * @return true if the activity contains windows that have
-     *         {@link LayoutParams#FLAG_DISMISS_KEYGUARD} set
-     */
-    boolean hasDismissKeyguardWindows() {
-        return mAtmService.mWindowManager.containsDismissKeyguardWindow(appToken);
     }
 
     void makeFinishingLocked() {
@@ -3224,16 +3220,45 @@ final class ActivityRecord extends ConfigurationContainer {
                 false /* preserveWindows */);
     }
 
+    void setInheritShowWhenLocked(boolean inheritShowWhenLocked) {
+        mInheritShownWhenLocked = inheritShowWhenLocked;
+        mRootActivityContainer.ensureActivitiesVisible(null, 0, false);
+    }
+
     /**
      * @return true if the activity windowing mode is not
-     *         {@link android.app.WindowConfiguration#WINDOWING_MODE_PINNED} and activity contains
-     *         windows that have {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set or if the activity
-     *         has set {@link #mShowWhenLocked}.
+     *         {@link android.app.WindowConfiguration#WINDOWING_MODE_PINNED} and a) activity
+     *         contains windows that have {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set or if the
+     *         activity has set {@link #mShowWhenLocked}, or b) if the activity has set
+     *         {@link #mInheritShownWhenLocked} and the activity behind this satisfies the
+     *         conditions a) above.
      *         Multi-windowing mode will be exited if true is returned.
      */
     boolean canShowWhenLocked() {
-        return !inPinnedWindowingMode() && (mShowWhenLocked
-                || mAtmService.mWindowManager.containsShowWhenLockedWindow(appToken));
+        if (!inPinnedWindowingMode() && (mShowWhenLocked
+                || (mAppWindowToken != null && mAppWindowToken.containsShowWhenLockedWindow()))) {
+            return true;
+        } else if (mInheritShownWhenLocked) {
+            ActivityRecord r = getActivityBelow();
+            return r != null && !r.inPinnedWindowingMode() && (r.mShowWhenLocked
+                    || (r.mAppWindowToken != null
+                        && r.mAppWindowToken.containsShowWhenLockedWindow()));
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @return an {@link ActivityRecord} of the activity below this activity, or {@code null} if no
+     * such activity exists.
+     */
+    @Nullable
+    private ActivityRecord getActivityBelow() {
+        final int pos = task.mActivities.indexOf(this);
+        if (pos == -1) {
+            throw new IllegalStateException("Activity not found in its task");
+        }
+        return pos == 0 ? null : task.getChildAt(pos - 1);
     }
 
     void setTurnScreenOn(boolean turnScreenOn) {

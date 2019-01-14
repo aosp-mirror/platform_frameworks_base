@@ -2204,7 +2204,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 .isKeyguardOrAodShowing(displayId);
         final boolean keyguardLocked = mStackSupervisor.getKeyguardController().isKeyguardLocked();
         final boolean showWhenLocked = r.canShowWhenLocked();
-        final boolean dismissKeyguard = r.hasDismissKeyguardWindows();
+        final boolean dismissKeyguard = r.mAppWindowToken != null
+                && r.mAppWindowToken.containsDismissKeyguardWindow();
         if (shouldBeVisible) {
             if (dismissKeyguard && mTopDismissingKeyguardActivity == null) {
                 mTopDismissingKeyguardActivity = r;
@@ -2561,7 +2562,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 final boolean canShowWhenLocked = !mTopActivityOccludesKeyguard
                         && next.canShowWhenLocked();
                 final boolean mayDismissKeyguard = mTopDismissingKeyguardActivity != next
-                        && next.hasDismissKeyguardWindows();
+                        && next.mAppWindowToken != null
+                        && next.mAppWindowToken.containsDismissKeyguardWindow();
+
                 if (canShowWhenLocked || mayDismissKeyguard) {
                     ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
                             !PRESERVE_WINDOWS);

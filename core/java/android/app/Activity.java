@@ -8289,6 +8289,33 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Specifies whether this {@link Activity} should be shown on top of the lock screen whenever
+     * the lockscreen is up and this activity has another activity behind it with the showWhenLock
+     * attribute set. That is, this activity is only visible on the lock screen if there is another
+     * activity with the showWhenLock attribute visible at the same time on the lock screen. A use
+     * case for this is permission dialogs, that should only be visible on the lock screen if their
+     * requesting activity is also visible. This value can be set as a manifest attribute using
+     * android.R.attr#inheritShowWhenLocked.
+     *
+     * @param inheritShowWhenLocked {@code true} to show the {@link Activity} on top of the lock
+     *                              screen when this activity has another activity behind it with
+     *                              the showWhenLock attribute set; {@code false} otherwise.
+     * @see #setShowWhenLocked(boolean)
+     * See android.R.attr#inheritShowWhenLocked
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public void setInheritShowWhenLocked(boolean inheritShowWhenLocked) {
+        try {
+            ActivityTaskManager.getService().setInheritShowWhenLocked(
+                    mToken, inheritShowWhenLocked);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to call setInheritShowWhenLocked", e);
+        }
+    }
+
+    /**
      * Specifies whether the screen should be turned on when the {@link Activity} is resumed.
      * Normally an activity will be transitioned to the stopped state if it is started while the
      * screen if off, but with this flag set the activity will cause the screen to turn on if the
