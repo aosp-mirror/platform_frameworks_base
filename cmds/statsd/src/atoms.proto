@@ -3791,7 +3791,7 @@ message NetworkDnsEventReported {
     //bionic/libc/include/netdb.h
     //system/netd/resolv/include/netd_resolv/resolv.h
     enum ReturnCode {
-        EAI_NO_ERR = 0;
+        EAI_NO_ERROR = 0;
         EAI_ADDRFAMILY = 1;
         EAI_AGAIN = 2;
         EAI_BADFLAGS = 3;
