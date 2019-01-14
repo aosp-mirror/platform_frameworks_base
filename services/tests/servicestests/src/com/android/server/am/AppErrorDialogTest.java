@@ -26,6 +26,7 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.appop.AppOpsService;
+import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,13 +63,15 @@ public class AppErrorDialogTest {
                 return false;
             }
         });
+        mService.mActivityTaskManager = new ActivityTaskManagerService(mContext);
+        mService.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
     }
 
     @Test
     @UiThreadTest
     public void testCreateWorks() {
         AppErrorDialog.Data data = new AppErrorDialog.Data();
-        data.proc = new ProcessRecord(null, mContext.getApplicationInfo(), "name", 12345);
+        data.proc = new ProcessRecord(mService, mContext.getApplicationInfo(), "name", 12345);
         data.result = new AppErrorResult();
 
         AppErrorDialog dialog = new AppErrorDialog(mContext, mService, data);
