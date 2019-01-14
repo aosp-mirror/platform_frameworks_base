@@ -20,6 +20,7 @@ import static com.android.server.backup.transport.TransportUtils.formatMessage;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -34,7 +35,6 @@ import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.EventLog;
-import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -79,6 +79,7 @@ public class TransportClient {
     @VisibleForTesting static final String TAG = "TransportClient";
     private static final int LOG_BUFFER_SIZE = 5;
 
+    private final @UserIdInt int mUserId;
     private final Context mContext;
     private final TransportStats mTransportStats;
     private final Intent mBindIntent;
@@ -106,6 +107,7 @@ public class TransportClient {
     private volatile IBackupTransport mTransport;
 
     TransportClient(
+            @UserIdInt int userId,
             Context context,
             TransportStats transportStats,
             Intent bindIntent,
@@ -113,6 +115,7 @@ public class TransportClient {
             String identifier,
             String caller) {
         this(
+                userId,
                 context,
                 transportStats,
                 bindIntent,
@@ -124,6 +127,7 @@ public class TransportClient {
 
     @VisibleForTesting
     TransportClient(
+            @UserIdInt int userId,
             Context context,
             TransportStats transportStats,
             Intent bindIntent,
@@ -131,6 +135,7 @@ public class TransportClient {
             String identifier,
             String caller,
             Handler listenerHandler) {
+        mUserId = userId;
         mContext = context;
         mTransportStats = transportStats;
         mTransportComponent = transportComponent;
@@ -213,7 +218,7 @@ public class TransportClient {
                                     mBindIntent,
                                     mConnection,
                                     Context.BIND_AUTO_CREATE,
-                                    UserHandle.SYSTEM);
+                                    UserHandle.of(mUserId));
                     if (hasBound) {
                         // We don't need to set a time-out because we are guaranteed to get a call
                         // back in ServiceConnection, either an onServiceConnected() or

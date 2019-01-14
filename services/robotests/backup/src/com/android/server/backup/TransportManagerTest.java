@@ -41,6 +41,7 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupTransport;
 import android.content.ComponentName;
@@ -48,6 +49,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.server.backup.testing.TransportData;
@@ -84,12 +86,14 @@ public class TransportManagerTest {
     private TransportData mTransportA2;
     private TransportData mTransportB1;
     private ShadowPackageManager mShadowPackageManager;
+    private @UserIdInt int mUserId;
     private Context mContext;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mUserId = UserHandle.USER_SYSTEM;
         mContext = RuntimeEnvironment.application;
         mShadowPackageManager = shadowOf(mContext.getPackageManager());
 
@@ -684,6 +688,7 @@ public class TransportManagerTest {
             @Nullable TransportData selectedTransport, TransportData... transports) {
         TransportManager transportManager =
                 new TransportManager(
+                        mUserId,
                         mContext,
                         merge(selectedTransport, transports)
                                 .stream()

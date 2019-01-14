@@ -384,7 +384,7 @@ public class UserBackupManagerService {
             Slog.v(TAG, "Starting with transport " + currentTransport);
         }
         TransportManager transportManager =
-                new TransportManager(context, transportWhitelist, currentTransport);
+                new TransportManager(userId, context, transportWhitelist, currentTransport);
 
         File baseStateDir = UserBackupManagerFiles.getBaseStateDir(userId);
         File dataDir = UserBackupManagerFiles.getDataDir(userId);
