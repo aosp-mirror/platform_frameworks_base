@@ -392,6 +392,14 @@ public abstract class PackageSettingBase extends SettingBase {
         modifyUserState(userId).hidden = hidden;
     }
 
+    int getDistractionFlags(int userId) {
+        return readUserState(userId).distractionFlags;
+    }
+
+    void setDistractionFlags(int distractionFlags, int userId) {
+        modifyUserState(userId).distractionFlags = distractionFlags;
+    }
+
     boolean getSuspended(int userId) {
         return readUserState(userId).suspended;
     }
@@ -423,7 +431,8 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
-            boolean notLaunched, boolean hidden, boolean suspended, String suspendingPackage,
+            boolean notLaunched, boolean hidden, int distractionFlags, boolean suspended,
+            String suspendingPackage,
             SuspendDialogInfo dialogInfo, PersistableBundle suspendedAppExtras,
             PersistableBundle suspendedLauncherExtras, boolean instantApp,
             boolean virtualPreload, String lastDisableAppCaller,
@@ -437,6 +446,7 @@ public abstract class PackageSettingBase extends SettingBase {
         state.stopped = stopped;
         state.notLaunched = notLaunched;
         state.hidden = hidden;
+        state.distractionFlags = distractionFlags;
         state.suspended = suspended;
         state.suspendingPackage = suspendingPackage;
         state.dialogInfo = dialogInfo;
@@ -607,6 +617,7 @@ public abstract class PackageSettingBase extends SettingBase {
             }
             proto.write(PackageProto.UserInfoProto.INSTALL_TYPE, installType);
             proto.write(PackageProto.UserInfoProto.IS_HIDDEN, state.hidden);
+            proto.write(PackageProto.UserInfoProto.DISTRACTION_FLAGS, state.distractionFlags);
             proto.write(PackageProto.UserInfoProto.IS_SUSPENDED, state.suspended);
             if (state.suspended) {
                 proto.write(PackageProto.UserInfoProto.SUSPENDING_PACKAGE, state.suspendingPackage);

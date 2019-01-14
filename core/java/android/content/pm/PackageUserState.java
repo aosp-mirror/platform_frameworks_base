@@ -54,6 +54,7 @@ public class PackageUserState {
     public boolean stopped;
     public boolean notLaunched;
     public boolean hidden; // Is the app restricted by owner / admin
+    public int distractionFlags;
     public boolean suspended;
     public String suspendingPackage;
     public SuspendDialogInfo dialogInfo;
@@ -92,6 +93,7 @@ public class PackageUserState {
         stopped = o.stopped;
         notLaunched = o.notLaunched;
         hidden = o.hidden;
+        distractionFlags = o.distractionFlags;
         suspended = o.suspended;
         suspendingPackage = o.suspendingPackage;
         dialogInfo = o.dialogInfo;
@@ -220,6 +222,9 @@ public class PackageUserState {
             return false;
         }
         if (hidden != oldState.hidden) {
+            return false;
+        }
+        if (distractionFlags != oldState.distractionFlags) {
             return false;
         }
         if (suspended != oldState.suspended) {

@@ -22,6 +22,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import android.content.pm.PackageManager;
 import android.content.pm.PackageUserState;
 import android.content.pm.SuspendDialogInfo;
 import android.os.PersistableBundle;
@@ -225,6 +226,21 @@ public class PackageUserStateTest {
         testUserState2.suspendedAppExtras = appExtras2;
         testUserState2.suspendedLauncherExtras = launcherExtras2;
         assertThat(testUserState1.equals(testUserState2), is(true));
+    }
+
+    @Test
+    public void testPackageUserState06() {
+        final PackageUserState userState1 = new PackageUserState();
+        assertThat(userState1.distractionFlags, is(PackageManager.RESTRICTION_NONE));
+        userState1.distractionFlags = PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
+
+        final PackageUserState copyOfUserState1 = new PackageUserState(userState1);
+        assertThat(userState1.distractionFlags, is(copyOfUserState1.distractionFlags));
+        assertThat(userState1.equals(copyOfUserState1), is(true));
+
+        final PackageUserState userState2 = new PackageUserState(userState1);
+        userState2.distractionFlags = PackageManager.RESTRICTION_HIDE_NOTIFICATIONS;
+        assertThat(userState1.equals(userState2), is(false));
     }
 
 }

@@ -84,6 +84,7 @@ import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
 import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.pm.PackageManager.RESTRICTION_NONE;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
@@ -12657,22 +12658,30 @@ public class PackageManagerService extends IPackageManager.Stub
         info.sendPackageRemovedBroadcasts(true /*killApp*/);
     }
 
+    private void sendDistractingPackagesChanged(String[] pkgList, int[] uidList, int userId,
+            int distractionFlags) {
+        final Bundle extras = new Bundle(3);
+        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
+        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
+        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, distractionFlags);
+        sendPackageBroadcast(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null, extras,
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null, new int[]{userId}, null);
+    }
+
     private void sendPackagesSuspendedForUser(String[] pkgList, int[] uidList, int userId,
             boolean suspended, PersistableBundle launcherExtras) {
-        if (pkgList.length > 0) {
-            Bundle extras = new Bundle(1);
-            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-            extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
-            if (launcherExtras != null) {
-                extras.putBundle(Intent.EXTRA_LAUNCHER_EXTRAS,
-                        new Bundle(launcherExtras.deepCopy()));
-            }
-            sendPackageBroadcast(
-                    suspended ? Intent.ACTION_PACKAGES_SUSPENDED
-                            : Intent.ACTION_PACKAGES_UNSUSPENDED,
-                    null, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
-                    new int[] {userId}, null);
+        final Bundle extras = new Bundle(3);
+        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
+        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
+        if (launcherExtras != null) {
+            extras.putBundle(Intent.EXTRA_LAUNCHER_EXTRAS,
+                    new Bundle(launcherExtras.deepCopy()));
         }
+        sendPackageBroadcast(
+                suspended ? Intent.ACTION_PACKAGES_SUSPENDED
+                        : Intent.ACTION_PACKAGES_UNSUSPENDED,
+                null, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
+                new int[] {userId}, null);
     }
 
     /**
@@ -12822,6 +12831,62 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
+    public String[] setDistractingPackageRestrictionsAsUser(String[] packageNames,
+            int restrictionFlags, int userId) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
+                "setPackagesSuspendedAsUser");
+
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
+                && UserHandle.getUserId(callingUid) != userId) {
+            throw new SecurityException("Calling uid " + callingUid + " cannot call for user "
+                    + userId);
+        }
+        Preconditions.checkNotNull(packageNames, "packageNames cannot be null");
+
+        final List<String> changedPackagesList = new ArrayList<>(packageNames.length);
+        final IntArray changedUids = new IntArray(packageNames.length);
+        final List<String> unactionedPackages = new ArrayList<>(packageNames.length);
+
+        for (int i = 0; i < packageNames.length; i++) {
+            final String packageName = packageNames[i];
+            final PackageSetting pkgSetting;
+            synchronized (mPackages) {
+                pkgSetting = mSettings.mPackages.get(packageName);
+                if (pkgSetting == null || filterAppAccessLPr(pkgSetting, callingUid, userId)) {
+                    Slog.w(TAG, "Could not find package setting for package: " + packageName
+                            + ". Skipping...");
+                    unactionedPackages.add(packageName);
+                    continue;
+                }
+            }
+            if (restrictionFlags != 0 && !canSuspendPackageForUserInternal(packageName, userId)) {
+                unactionedPackages.add(packageName);
+                continue;
+            }
+            synchronized (mPackages) {
+                final int oldDistractionFlags = pkgSetting.getDistractionFlags(userId);
+                if (restrictionFlags != oldDistractionFlags) {
+                    pkgSetting.setDistractionFlags(restrictionFlags, userId);
+                    changedPackagesList.add(packageName);
+                    changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
+                }
+            }
+        }
+
+        if (!changedPackagesList.isEmpty()) {
+            final String[] changedPackages = changedPackagesList.toArray(
+                    new String[changedPackagesList.size()]);
+            sendDistractingPackagesChanged(changedPackages, changedUids.toArray(), userId,
+                    restrictionFlags);
+            synchronized (mPackages) {
+                scheduleWritePackageRestrictionsLocked(userId);
+            }
+        }
+        return unactionedPackages.toArray(new String[0]);
+    }
+
+    @Override
     public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
             PersistableBundle appExtras, PersistableBundle launcherExtras,
             SuspendDialogInfo dialogInfo, String callingPackage, int userId) {
@@ -12846,44 +12911,37 @@ public class PackageManagerService extends IPackageManager.Stub
         final List<String> changedPackagesList = new ArrayList<>(packageNames.length);
         final IntArray changedUids = new IntArray(packageNames.length);
         final List<String> unactionedPackages = new ArrayList<>(packageNames.length);
-        final long callingId = Binder.clearCallingIdentity();
-        try {
-            for (int i = 0; i < packageNames.length; i++) {
-                final String packageName = packageNames[i];
-                if (callingPackage.equals(packageName)) {
-                    Slog.w(TAG, "Calling package: " + callingPackage + " trying to "
-                            + (suspended ? "" : "un") + "suspend itself. Ignoring");
-                    unactionedPackages.add(packageName);
-                    continue;
-                }
-                PackageSetting pkgSetting;
-                synchronized (mPackages) {
-                    pkgSetting = mSettings.mPackages.get(packageName);
-                    if (pkgSetting == null
-                            || filterAppAccessLPr(pkgSetting, callingUid, userId)) {
-                        Slog.w(TAG, "Could not find package setting for package: " + packageName
-                                + ". Skipping suspending/un-suspending.");
-                        unactionedPackages.add(packageName);
-                        continue;
-                    }
-                }
-                if (suspended && !canSuspendPackageForUserInternal(packageName, userId)) {
-                    unactionedPackages.add(packageName);
-                    continue;
-                }
-                synchronized (mPackages) {
-                    pkgSetting = mSettings.mPackages.get(packageName);
-                    if (pkgSetting != null) {
-                        pkgSetting.setSuspended(suspended, callingPackage, dialogInfo, appExtras,
-                                launcherExtras, userId);
-                    }
-                }
-                changedPackagesList.add(packageName);
-                changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
+
+        for (int i = 0; i < packageNames.length; i++) {
+            final String packageName = packageNames[i];
+            if (callingPackage.equals(packageName)) {
+                Slog.w(TAG, "Calling package: " + callingPackage + " trying to "
+                        + (suspended ? "" : "un") + "suspend itself. Ignoring");
+                unactionedPackages.add(packageName);
+                continue;
             }
-        } finally {
-            Binder.restoreCallingIdentity(callingId);
+            final PackageSetting pkgSetting;
+            synchronized (mPackages) {
+                pkgSetting = mSettings.mPackages.get(packageName);
+                if (pkgSetting == null || filterAppAccessLPr(pkgSetting, callingUid, userId)) {
+                    Slog.w(TAG, "Could not find package setting for package: " + packageName
+                            + ". Skipping suspending/un-suspending.");
+                    unactionedPackages.add(packageName);
+                    continue;
+                }
+            }
+            if (suspended && !canSuspendPackageForUserInternal(packageName, userId)) {
+                unactionedPackages.add(packageName);
+                continue;
+            }
+            synchronized (mPackages) {
+                pkgSetting.setSuspended(suspended, callingPackage, dialogInfo, appExtras,
+                        launcherExtras, userId);
+            }
+            changedPackagesList.add(packageName);
+            changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
         }
+
         if (!changedPackagesList.isEmpty()) {
             final String[] changedPackages = changedPackagesList.toArray(
                     new String[changedPackagesList.size()]);
@@ -13035,88 +13093,87 @@ public class PackageManagerService extends IPackageManager.Stub
                     + " cannot query getUnsuspendablePackagesForUser for user " + userId);
         }
         final ArraySet<String> unactionablePackages = new ArraySet<>();
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            for (String packageName : packageNames) {
-                if (!canSuspendPackageForUserInternal(packageName, userId)) {
-                    unactionablePackages.add(packageName);
-                }
+        for (String packageName : packageNames) {
+            if (!canSuspendPackageForUserInternal(packageName, userId)) {
+                unactionablePackages.add(packageName);
             }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
         }
         return unactionablePackages.toArray(new String[unactionablePackages.size()]);
     }
 
     private boolean canSuspendPackageForUserInternal(String packageName, int userId) {
-        if (isPackageDeviceAdmin(packageName, userId)) {
-            Slog.w(TAG, "Cannot suspend package \"" + packageName
-                    + "\": has an active device admin");
-            return false;
-        }
-
-        String activeLauncherPackageName = getActiveLauncherPackageName(userId);
-        if (packageName.equals(activeLauncherPackageName)) {
-            Slog.w(TAG, "Cannot suspend package \"" + packageName
-                    + "\": contains the active launcher");
-            return false;
-        }
-
-        if (packageName.equals(mRequiredInstallerPackage)) {
-            Slog.w(TAG, "Cannot suspend package \"" + packageName
-                    + "\": required for package installation");
-            return false;
-        }
-
-        if (packageName.equals(mRequiredUninstallerPackage)) {
-            Slog.w(TAG, "Cannot suspend package \"" + packageName
-                    + "\": required for package uninstallation");
-            return false;
-        }
-
-        if (packageName.equals(mRequiredVerifierPackage)) {
-            Slog.w(TAG, "Cannot suspend package \"" + packageName
-                    + "\": required for package verification");
-            return false;
-        }
-
-        if (packageName.equals(getDefaultDialerPackageName(userId))) {
-            Slog.w(TAG, "Cannot suspend package \"" + packageName
-                    + "\": is the default dialer");
-            return false;
-        }
-
-        if (packageName.equals(mRequiredPermissionControllerPackage)) {
-            Slog.w(TAG, "Cannot suspend package \"" + packageName
-                    + "\": required for permissions management");
-            return false;
-        }
-
-        synchronized (mPackages) {
-            if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            if (isPackageDeviceAdmin(packageName, userId)) {
                 Slog.w(TAG, "Cannot suspend package \"" + packageName
-                        + "\": protected package");
+                        + "\": has an active device admin");
                 return false;
             }
 
-            // Cannot suspend static shared libs as they are considered
-            // a part of the using app (emulating static linking). Also
-            // static libs are installed always on internal storage.
-            PackageParser.Package pkg = mPackages.get(packageName);
-            if (pkg != null && pkg.applicationInfo.isStaticSharedLibrary()) {
-                Slog.w(TAG, "Cannot suspend package: " + packageName
-                        + " providing static shared library: "
-                        + pkg.staticSharedLibName);
+            String activeLauncherPackageName = getActiveLauncherPackageName(userId);
+            if (packageName.equals(activeLauncherPackageName)) {
+                Slog.w(TAG, "Cannot suspend package \"" + packageName
+                        + "\": contains the active launcher");
                 return false;
             }
-        }
 
-        if (PLATFORM_PACKAGE_NAME.equals(packageName)) {
-            Slog.w(TAG, "Cannot suspend the platform package: " + packageName);
-            return false;
-        }
+            if (packageName.equals(mRequiredInstallerPackage)) {
+                Slog.w(TAG, "Cannot suspend package \"" + packageName
+                        + "\": required for package installation");
+                return false;
+            }
 
-        return true;
+            if (packageName.equals(mRequiredUninstallerPackage)) {
+                Slog.w(TAG, "Cannot suspend package \"" + packageName
+                        + "\": required for package uninstallation");
+                return false;
+            }
+
+            if (packageName.equals(mRequiredVerifierPackage)) {
+                Slog.w(TAG, "Cannot suspend package \"" + packageName
+                        + "\": required for package verification");
+                return false;
+            }
+
+            if (packageName.equals(getDefaultDialerPackageName(userId))) {
+                Slog.w(TAG, "Cannot suspend package \"" + packageName
+                        + "\": is the default dialer");
+                return false;
+            }
+
+            if (packageName.equals(mRequiredPermissionControllerPackage)) {
+                Slog.w(TAG, "Cannot suspend package \"" + packageName
+                        + "\": required for permissions management");
+                return false;
+            }
+
+            synchronized (mPackages) {
+                if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+                    Slog.w(TAG, "Cannot suspend package \"" + packageName
+                            + "\": protected package");
+                    return false;
+                }
+
+                // Cannot suspend static shared libs as they are considered
+                // a part of the using app (emulating static linking). Also
+                // static libs are installed always on internal storage.
+                PackageParser.Package pkg = mPackages.get(packageName);
+                if (pkg != null && pkg.applicationInfo.isStaticSharedLibrary()) {
+                    Slog.w(TAG, "Cannot suspend package: " + packageName
+                            + " providing static shared library: "
+                            + pkg.staticSharedLibName);
+                    return false;
+                }
+            }
+
+            if (PLATFORM_PACKAGE_NAME.equals(packageName)) {
+                Slog.w(TAG, "Cannot suspend the platform package: " + packageName);
+                return false;
+            }
+            return true;
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
     }
 
     private String getActiveLauncherPackageName(int userId) {
@@ -18425,6 +18482,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     true /*stopped*/,
                     true /*notLaunched*/,
                     false /*hidden*/,
+                    0 /*distractionFlags*/,
                     false /*suspended*/,
                     null /*suspendingPackage*/,
                     null /*dialogInfo*/,
@@ -23236,6 +23294,14 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mPackages) {
                 final PackageSetting ps = mSettings.mPackages.get(suspendedPackage);
                 return (ps != null) ? ps.readUserState(userId).dialogInfo : null;
+            }
+        }
+
+        @Override
+        public int getDistractingPackageRestrictions(String packageName, int userId) {
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                return (ps != null) ? ps.getDistractionFlags(userId) : RESTRICTION_NONE;
             }
         }
 

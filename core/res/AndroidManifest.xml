@@ -51,6 +51,7 @@
     <protected-broadcast android:name="android.intent.action.PACKAGE_VERIFIED" />
     <protected-broadcast android:name="android.intent.action.PACKAGES_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.PACKAGES_UNSUSPENDED" />
+    <protected-broadcast android:name="android.intent.action.DISTRACTING_PACKAGES_CHANGED" />
     <protected-broadcast android:name="android.intent.action.ACTION_PREFERRED_ACTIVITY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.UID_REMOVED" />
     <protected-broadcast android:name="android.intent.action.QUERY_PACKAGE_RESTART" />
