@@ -32,7 +32,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.MathUtils;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.view.Display;
 import android.view.MagnificationSpec;
 import android.view.View;
@@ -40,8 +39,6 @@ import android.view.animation.DecelerateInterpolator;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.SomeArgs;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerInternal;
@@ -63,7 +60,7 @@ public class MagnificationController {
     private static final String LOG_TAG = "MagnificationController";
 
     public static final float MIN_SCALE = 1.0f;
-    public static final float MAX_SCALE = 5.0f;
+    public static final float MAX_SCALE = 8.0f;
 
     private static final boolean DEBUG_SET_MAGNIFICATION_SPEC = false;
 
