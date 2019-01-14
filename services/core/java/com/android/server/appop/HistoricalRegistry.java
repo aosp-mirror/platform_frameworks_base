@@ -1454,8 +1454,8 @@ final class HistoricalRegistry {
                 if (accessCount > 0) {
                     if (!printedUidState) {
                         mWriter.print(mUidStatePrefix);
-                        mWriter.print(AppOpsManager.uidStateToString(uidState));
-                        mWriter.print("[");
+                        mWriter.print(AppOpsService.UID_STATE_NAMES[uidState]);
+                        mWriter.print(" = ");
                         printedUidState = true;
                     }
                     mWriter.print("access=");
@@ -1465,11 +1465,11 @@ final class HistoricalRegistry {
                 if (rejectCount > 0) {
                     if (!printedUidState) {
                         mWriter.print(mUidStatePrefix);
-                        mWriter.print(AppOpsManager.uidStateToString(uidState));
-                        mWriter.print("[");
+                        mWriter.print(AppOpsService.UID_STATE_NAMES[uidState]);
+                        mWriter.print(" = ");
                         printedUidState = true;
                     } else {
-                        mWriter.print(",");
+                        mWriter.print(", ");
                     }
                     mWriter.print("reject=");
                     mWriter.print(rejectCount);
@@ -1478,16 +1478,17 @@ final class HistoricalRegistry {
                 if (accessDuration > 0) {
                     if (!printedUidState) {
                         mWriter.print(mUidStatePrefix);
-                        mWriter.print(AppOpsManager.uidStateToString(uidState));
+                        mWriter.print(AppOpsService.UID_STATE_NAMES[uidState]);
+                        mWriter.print(" = ");
                         printedUidState = true;
                     } else {
-                        mWriter.print(",");
+                        mWriter.print(", ");
                     }
                     mWriter.print("duration=");
-                    mWriter.print(accessDuration);
+                    TimeUtils.formatDuration(accessDuration, mWriter);
                 }
                 if (printedUidState) {
-                    mWriter.println("]");
+                    mWriter.println("");
                 }
             }
         }
