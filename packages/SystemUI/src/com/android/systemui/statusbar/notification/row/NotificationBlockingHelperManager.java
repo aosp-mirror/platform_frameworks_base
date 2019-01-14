@@ -20,11 +20,13 @@ import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_NEGATIVE;
 
 import android.content.Context;
+import android.metrics.LogMaker;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -57,6 +59,8 @@ public class NotificationBlockingHelperManager {
      * eligibility.
      */
     private boolean mIsShadeExpanded;
+
+    private MetricsLogger mMetricsLogger = new MetricsLogger();
 
     @Inject
     public NotificationBlockingHelperManager(Context context) {
@@ -99,6 +103,11 @@ public class NotificationBlockingHelperManager {
             // correctly prepped.
             mBlockingHelperRow = row;
             mBlockingHelperRow.setBlockingHelperShowing(true);
+
+            // Log triggering of blocking helper by the system. This log line
+            // should be emitted before the "display" log line.
+            mMetricsLogger.write(
+                    getLogMaker().setSubtype(MetricsEvent.BLOCKING_HELPER_TRIGGERED_BY_SYSTEM));
 
             // We don't care about the touch origin (x, y) since we're opening guts without any
             // explicit user interaction.
@@ -151,6 +160,13 @@ public class NotificationBlockingHelperManager {
     public boolean isNonblockable(String packageName, String channelName) {
         return mNonBlockablePkgs.contains(packageName)
                 || mNonBlockablePkgs.contains(makeChannelKey(packageName, channelName));
+    }
+
+    private LogMaker getLogMaker() {
+        return mBlockingHelperRow.getStatusBarNotification()
+            .getLogMaker()
+            .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+            .setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER);
     }
 
     // Format must stay in sync with frameworks/base/core/res/res/values/config.xml

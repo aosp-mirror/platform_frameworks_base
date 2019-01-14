@@ -213,6 +213,25 @@ message MetricsEvent {
         IOOP_SYNC = 4;
     }
 
+  // Subtypes of notifications blocking helper view
+  // (NOTIFICATION_BLOCKING_HELPER).
+  enum NotificationBlockingHelper {
+    BLOCKING_HELPER_UNKNOWN = 0;
+    BLOCKING_HELPER_DISPLAY = 1;
+    BLOCKING_HELPER_DISMISS = 2;
+    // When the view of the notification blocking helper was triggered by
+    // system.
+    BLOCKING_HELPER_TRIGGERED_BY_SYSTEM = 3;
+    // "block" was clicked.
+    BLOCKING_HELPER_CLICK_BLOCKED = 4;
+    // "stay silent" was clicked.
+    BLOCKING_HELPER_CLICK_STAY_SILENT = 5;
+    // "alert me" was clicked.
+    BLOCKING_HELPER_CLICK_ALERT_ME = 6;
+    // "undo" was clicked (enables the user to undo "stop notification" action).
+    BLOCKING_HELPER_CLICK_UNDO = 7;
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -6767,6 +6786,13 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: Q
     ACCESSIBILITY_VIBRATION_RING = 1620;
+
+    // ACTION: Notification blocking helper view, which helps the user to block
+    // application or channel from showing notifications.
+    // SUBTYPE: NotificationBlockingHelper enum.
+    // CATEGORY: NOTIFICATION
+    // OS: Q
+    NOTIFICATION_BLOCKING_HELPER = 1621;
 
     // ---- End Q Constants, all Q constants go above this line ----
 
