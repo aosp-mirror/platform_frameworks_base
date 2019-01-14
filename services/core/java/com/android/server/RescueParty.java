@@ -34,9 +34,9 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsLog;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.PackageManagerService;
 
 import java.io.File;
 
@@ -179,6 +179,7 @@ public class RescueParty {
     }
 
     private static void executeRescueLevelInternal(Context context, int level) throws Exception {
+        StatsLog.write(StatsLog.RESCUE_PARTY_RESET_REPORTED, level);
         switch (level) {
             case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
                 resetAllSettings(context, Settings.RESET_MODE_UNTRUSTED_DEFAULTS);

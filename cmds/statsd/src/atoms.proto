@@ -180,6 +180,7 @@ message Atom {
         DocsUISearchModeReported docs_ui_search_mode_reported = 119;
         DocsUISearchTypeReported docs_ui_search_type_reported = 120;
         DataStallEvent data_stall_event = 121;
+        RescuePartyResetReported rescue_party_reset_reported = 122;
     }
 
     // Pulled events will start at field 10000.
@@ -3846,4 +3847,15 @@ message DataStallEvent {
     optional com.android.server.connectivity.CellularData cell_info = 5 [(log_mode) = MODE_BYTES];
     // See definition in data_stall_event.proto.
     optional com.android.server.connectivity.DnsEvent dns_event = 6 [(log_mode) = MODE_BYTES];
+}
+
+/*
+ * Logs when RescueParty resets some set of experiment flags.
+ *
+ * Logged from:
+ *     frameworks/base/services/core/java/com/android/server/RescueParty.java
+ */
+message RescuePartyResetReported {
+    // The rescue level of this reset. A value of 0 indicates missing or unknown level information.
+    optional int32 rescue_level = 1;
 }
