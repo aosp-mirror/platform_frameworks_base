@@ -233,6 +233,9 @@ public final class DisplayCutout {
     /**
      * Creates a DisplayCutout instance.
      *
+     * <p>Note that this is only useful for tests. For production code, developers should always
+     * use a {@link DisplayCutout} obtained from the system.</p>
+     *
      * @param safeInsets the insets from each edge which avoid the display cutout as returned by
      *                   {@link #getSafeInsetTop()} etc.
      * @param boundLeft the left bounding rect of the display cutout in pixels. If null is passed,
@@ -252,6 +255,9 @@ public final class DisplayCutout {
 
     /**
      * Creates a DisplayCutout instance.
+     *
+     * <p>Note that this is only useful for tests. For production code, developers should always
+     * use a {@link DisplayCutout} obtained from the system.</p>
      *
      * @param safeInsets the insets from each edge which avoid the display cutout as returned by
      *                   {@link #getSafeInsetTop()} etc.
