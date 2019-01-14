@@ -18,6 +18,7 @@ package android.permission;
 
 import static android.permission.PermissionControllerService.SERVICE_INTERFACE;
 
+import static com.android.internal.util.Preconditions.checkArgumentNonnegative;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
@@ -146,6 +147,20 @@ public final class PermissionControllerManager {
         void onCountPermissionApps(int numApps);
     }
 
+    /**
+     * Callback for delivering the result of {@link #getPermissionUsages}.
+     *
+     * @hide
+     */
+    public interface OnPermissionUsageResultCallback {
+        /**
+         * The result for {@link #getPermissionUsages}.
+         *
+         * @param users The users list.
+         */
+        void onPermissionUsageResult(@NonNull List<RuntimePermissionUsageInfo> users);
+    }
+
     private final @NonNull Context mContext;
 
     /**
@@ -261,6 +276,28 @@ public final class PermissionControllerManager {
         sRemoteService.scheduleRequest(new PendingCountPermissionAppsRequest(sRemoteService,
                 permissionNames, countOnlyGranted, countSystem, callback,
                 handler == null ? sRemoteService.getHandler() : handler));
+    }
+
+    /**
+     * Count how many apps have used permissions.
+     *
+     * @param countSystem Also count system apps
+     * @param numMillis The number of milliseconds in the past to check for uses
+     * @param executor Executor on which to invoke the callback
+     * @param callback Callback to receive the result
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS)
+    public void getPermissionUsages(boolean countSystem, long numMillis,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnPermissionUsageResultCallback callback) {
+        checkArgumentNonnegative(numMillis);
+        checkNotNull(executor);
+        checkNotNull(callback);
+
+        sRemoteService.scheduleRequest(new PendingGetPermissionUsagesRequest(sRemoteService,
+                countSystem, numMillis, executor, callback));
     }
 
     /**
@@ -518,6 +555,63 @@ public final class PermissionControllerManager {
                         mCountOnlyGranted, mCountSystem, mRemoteCallback);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error counting permission apps", e);
+            }
+        }
+    }
+
+    /**
+     * Request for {@link #getPermissionUsages}
+     */
+    private static final class PendingGetPermissionUsagesRequest extends
+            AbstractRemoteService.PendingRequest<RemoteService, IPermissionController> {
+        private final @NonNull OnPermissionUsageResultCallback mCallback;
+        private final boolean mCountSystem;
+        private final long mNumMillis;
+
+        private final @NonNull RemoteCallback mRemoteCallback;
+
+        private PendingGetPermissionUsagesRequest(@NonNull RemoteService service,
+                boolean countSystem, long numMillis, @NonNull @CallbackExecutor Executor executor,
+                @NonNull OnPermissionUsageResultCallback callback) {
+            super(service);
+
+            mCountSystem = countSystem;
+            mNumMillis = numMillis;
+            mCallback = callback;
+
+            mRemoteCallback = new RemoteCallback(result -> executor.execute(() -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    final List<RuntimePermissionUsageInfo> reportedUsers;
+                    List<RuntimePermissionUsageInfo> users = null;
+                    if (result != null) {
+                        users = result.getParcelableArrayList(KEY_RESULT);
+                    } else {
+                        users = Collections.emptyList();
+                    }
+                    reportedUsers = users;
+
+                    callback.onPermissionUsageResult(reportedUsers);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+
+                    finish();
+                }
+            }), null);
+        }
+
+        @Override
+        protected void onTimeout(RemoteService remoteService) {
+            mCallback.onPermissionUsageResult(Collections.emptyList());
+        }
+
+        @Override
+        public void run() {
+            try {
+                getService().getServiceInterface().getPermissionUsages(mCountSystem, mNumMillis,
+                        mRemoteCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error counting permission users", e);
             }
         }
     }
