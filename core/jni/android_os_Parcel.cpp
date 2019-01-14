@@ -473,7 +473,7 @@ static jobject android_os_Parcel_readFileDescriptor(JNIEnv* env, jclass clazz, j
     if (parcel != NULL) {
         int fd = parcel->readFileDescriptor();
         if (fd < 0) return NULL;
-        fd = dup(fd);
+        fd = fcntl(fd, F_DUPFD_CLOEXEC, 0);
         if (fd < 0) return NULL;
         return jniCreateFileDescriptor(env, fd);
     }
