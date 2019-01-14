@@ -93,6 +93,11 @@ public:
         mBitmap->setAlphaType(alphaType);
     }
 
+    void setColorSpace(sk_sp<SkColorSpace> colorSpace) {
+        assertValid();
+        mBitmap->setColorSpace(colorSpace);
+    }
+
     const SkImageInfo& info() {
         if (mBitmap) {
             return mBitmap->info();
@@ -959,6 +964,12 @@ static jboolean Bitmap_getColorSpace(JNIEnv* env, jobject, jlong bitmapHandle,
     return JNI_TRUE;
 }
 
+static void Bitmap_setColorSpace(JNIEnv* env, jobject, jlong bitmapHandle, jlong colorSpacePtr) {
+    LocalScopedBitmap bitmapHolder(bitmapHandle);
+    sk_sp<SkColorSpace> cs = GraphicsJNI::getNativeColorSpace(colorSpacePtr);
+    bitmapHolder->setColorSpace(cs);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static jint Bitmap_getPixel(JNIEnv* env, jobject, jlong bitmapHandle,
@@ -1239,6 +1250,7 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeCreateGraphicBufferHandle", "(J)Landroid/graphics/GraphicBuffer;",
         (void*) Bitmap_createGraphicBufferHandle },
     {   "nativeGetColorSpace",      "(J[F[F)Z", (void*)Bitmap_getColorSpace },
+    {   "nativeSetColorSpace",      "(JJ)V", (void*)Bitmap_setColorSpace },
     {   "nativeIsSRGB",             "(J)Z", (void*)Bitmap_isSRGB },
     {   "nativeIsSRGBLinear",       "(J)Z", (void*)Bitmap_isSRGBLinear},
     {   "nativeCopyColorSpace",     "(JJ)V",

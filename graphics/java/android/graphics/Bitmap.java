@@ -1751,6 +1751,50 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * <p>Modifies the bitmap to have the specified {@link ColorSpace}, without
+     * affecting the underlying allocation backing the bitmap.</p>
+     *
+     * @throws IllegalArgumentException If the specified color space is {@code null}, not
+     *         {@link ColorSpace.Model#RGB RGB}, has a transfer function that is not an
+     *         {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}, or whose
+     *         components min/max values reduce the numerical range compared to the
+     *         previously assigned color space.
+     *
+     * @param colorSpace to assign to the bitmap
+     * @hide
+     */
+    @TestApi
+    public void setColorSpace(@NonNull ColorSpace colorSpace) {
+        checkRecycled("setColorSpace called on a recycled bitmap");
+        if (colorSpace == null) {
+            throw new IllegalArgumentException("The colorSpace cannot be set to null");
+        }
+        if (getColorSpace() != null) {
+            if (mColorSpace.getComponentCount() != colorSpace.getComponentCount()) {
+                throw new IllegalArgumentException("The new ColorSpace must have the same "
+                        + "component count as the current ColorSpace");
+            }
+            for (int i = 0; i < mColorSpace.getComponentCount(); i++) {
+                if (mColorSpace.getMinValue(i) < colorSpace.getMinValue(i)) {
+                    throw new IllegalArgumentException("The new ColorSpace cannot increase the "
+                            + "minimum value for any of the components compared to the current "
+                            + "ColorSpace. To perform this type of conversion create a new Bitmap "
+                            + "in the desired ColorSpace and draw this Bitmap into it.");
+                }
+                if (mColorSpace.getMaxValue(i) > colorSpace.getMaxValue(i)) {
+                    throw new IllegalArgumentException("The new ColorSpace cannot decrease the "
+                            + "maximum value for any of the components compared to the current "
+                            + "ColorSpace/ To perform this type of conversion create a new Bitmap"
+                            + "in the desired ColorSpace and draw this Bitmap into it.");
+                }
+            }
+        }
+
+        nativeSetColorSpace(mNativePtr, colorSpace.getNativeInstance());
+        mColorSpace = colorSpace;
+    }
+
+    /**
      * Fills the bitmap's pixels with the specified {@link Color}.
      *
      * @throws IllegalStateException if the bitmap is not mutable.
@@ -2174,6 +2218,7 @@ public final class Bitmap implements Parcelable {
                                                                 long nativeColorSpace);
     private static native GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap);
     private static native boolean nativeGetColorSpace(long nativePtr, float[] xyz, float[] params);
+    private static native void nativeSetColorSpace(long nativePtr, long nativeColorSpace);
     private static native boolean nativeIsSRGB(long nativePtr);
     private static native boolean nativeIsSRGBLinear(long nativePtr);
     private static native void nativeCopyColorSpace(long srcBitmap, long dstBitmap);
