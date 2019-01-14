@@ -11061,6 +11061,31 @@ public final class Settings {
         /** {@hide} */
         public static final String
                 BLUETOOTH_HEARING_AID_PRIORITY_PREFIX = "bluetooth_hearing_aid_priority_";
+        /**
+         * Enable/disable radio bug detection
+         *
+         * {@hide}
+         */
+        public static final String
+                ENABLE_RADIO_BUG_DETECTION = "enable_radio_bug_detection";
+
+        /**
+         * Count threshold of RIL wakelock timeout for radio bug detection
+         *
+         * {@hide}
+         */
+        public static final String
+                RADIO_BUG_WAKELOCK_TIMEOUT_COUNT_THRESHOLD =
+                "radio_bug_wakelock_timeout_count_threshold";
+
+        /**
+         * Count threshold of RIL system error for radio bug detection
+         *
+         * {@hide}
+         */
+        public static final String
+                RADIO_BUG_SYSTEM_ERROR_COUNT_THRESHOLD =
+                "radio_bug_system_error_count_threshold";
 
         /**
          * Activity manager specific settings.
