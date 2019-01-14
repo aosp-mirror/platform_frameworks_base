@@ -82,7 +82,7 @@ struct ConfigDescription : public ResTable_config {
   static void ApplyVersionForCompatibility(ConfigDescription* config);
 
   ConfigDescription();
-  ConfigDescription(const android::ResTable_config& o);  // NOLINT(implicit)
+  ConfigDescription(const android::ResTable_config& o);  // NOLINT(google-explicit-constructor)
   ConfigDescription(const ConfigDescription& o);
   ConfigDescription(ConfigDescription&& o) noexcept;
 

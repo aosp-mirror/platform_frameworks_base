@@ -37,7 +37,7 @@ using namespace android;
 // TODO: This can go away once the only remaining usage in aapt goes away.
 class FileReader : public zip_archive::Reader {
   public:
-    FileReader(FILE* fp) : Reader(), mFp(fp), mCurrentOffset(0) {
+    explicit FileReader(FILE* fp) : Reader(), mFp(fp), mCurrentOffset(0) {
     }
 
     bool ReadAtOffset(uint8_t* buf, size_t len, uint32_t offset) const {
