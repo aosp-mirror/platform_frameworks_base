@@ -29,7 +29,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <atomic>
 #include <iomanip>
 #include <string>
 #include <vector>
@@ -42,6 +41,7 @@
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
+#include <meminfo/procmeminfo.h>
 #include <meminfo/sysmeminfo.h>
 #include <memtrack/memtrack.h>
 #include <memunreachable/memunreachable.h>
@@ -149,14 +149,6 @@ struct stats_t {
     int swappedOut;
     int swappedOutPss;
 };
-
-enum pss_rollup_support {
-  PSS_ROLLUP_UNTRIED,
-  PSS_ROLLUP_SUPPORTED,
-  PSS_ROLLUP_UNSUPPORTED
-};
-
-static std::atomic<pss_rollup_support> g_pss_rollup_support;
 
 #define BINDER_STATS "/proc/binder/stats"
 
@@ -555,37 +547,9 @@ static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject o
     android_os_Debug_getDirtyPagesPid(env, clazz, getpid(), object);
 }
 
-UniqueFile OpenSmapsOrRollup(int pid)
-{
-    enum pss_rollup_support rollup_support =
-            g_pss_rollup_support.load(std::memory_order_relaxed);
-    if (rollup_support != PSS_ROLLUP_UNSUPPORTED) {
-        std::string smaps_rollup_path =
-                base::StringPrintf("/proc/%d/smaps_rollup", pid);
-        UniqueFile fp_rollup = MakeUniqueFile(smaps_rollup_path.c_str(), "re");
-        if (fp_rollup == nullptr && errno != ENOENT) {
-            return fp_rollup;  // Actual error, not just old kernel.
-        }
-        if (fp_rollup != nullptr) {
-            if (rollup_support == PSS_ROLLUP_UNTRIED) {
-                ALOGI("using rollup pss collection");
-                g_pss_rollup_support.store(PSS_ROLLUP_SUPPORTED,
-                                           std::memory_order_relaxed);
-            }
-            return fp_rollup;
-        }
-        g_pss_rollup_support.store(PSS_ROLLUP_UNSUPPORTED,
-                                   std::memory_order_relaxed);
-    }
-
-    std::string smaps_path = base::StringPrintf("/proc/%d/smaps", pid);
-    return MakeUniqueFile(smaps_path.c_str(), "re");
-}
-
 static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
         jlongArray outUssSwapPssRss, jlongArray outMemtrack)
 {
-    char lineBuffer[1024];
     jlong pss = 0;
     jlong rss = 0;
     jlong swapPss = 0;
@@ -597,59 +561,14 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
         pss = uss = rss = memtrack = graphics_mem.graphics + graphics_mem.gl + graphics_mem.other;
     }
 
-    {
-        UniqueFile fp = OpenSmapsOrRollup(pid);
-
-        if (fp != nullptr) {
-            char* line;
-
-            while (true) {
-                if (fgets(lineBuffer, sizeof (lineBuffer), fp.get()) == NULL) {
-                    break;
-                }
-                line = lineBuffer;
-
-                switch (line[0]) {
-                    case 'P':
-                        if (strncmp(line, "Pss:", 4) == 0) {
-                            char* c = line + 4;
-                            while (*c != 0 && (*c < '0' || *c > '9')) {
-                                c++;
-                            }
-                            pss += atoi(c);
-                        } else if (strncmp(line, "Private_Clean:", 14) == 0
-                                    || strncmp(line, "Private_Dirty:", 14) == 0) {
-                            char* c = line + 14;
-                            while (*c != 0 && (*c < '0' || *c > '9')) {
-                                c++;
-                            }
-                            uss += atoi(c);
-                        }
-                        break;
-                    case 'R':
-                        if (strncmp(line, "Rss:", 4) == 0) {
-                            char* c = line + 4;
-                            while (*c != 0 && (*c < '0' || *c > '9')) {
-                                c++;
-                            }
-                            rss += atoi(c);
-                        }
-                        break;
-                    case 'S':
-                        if (strncmp(line, "SwapPss:", 8) == 0) {
-                            char* c = line + 8;
-                            jlong lSwapPss;
-                            while (*c != 0 && (*c < '0' || *c > '9')) {
-                                c++;
-                            }
-                            lSwapPss = atoi(c);
-                            swapPss += lSwapPss;
-                            pss += lSwapPss; // Also in swap, those pages would be accounted as Pss without SWAP
-                        }
-                        break;
-                }
-            }
-        }
+    ::android::meminfo::ProcMemInfo proc_mem(pid);
+    ::android::meminfo::MemUsage stats;
+    if (proc_mem.SmapsOrRollup(&stats)) {
+        pss += stats.pss;
+        uss += stats.uss;
+        rss += stats.rss;
+        swapPss = stats.swap_pss;
+        pss += swapPss; // Also in swap, those pages would be accounted as Pss without SWAP
     }
 
     if (outUssSwapPssRss != NULL) {
@@ -684,34 +603,6 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
 static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
 {
     return android_os_Debug_getPssPid(env, clazz, getpid(), NULL, NULL);
-}
-
-static long get_allocated_vmalloc_memory() {
-    char line[1024];
-
-    long vmalloc_allocated_size = 0;
-
-    UniqueFile fp = MakeUniqueFile("/proc/vmallocinfo", "re");
-    if (fp == nullptr) {
-        return 0;
-    }
-
-    while (true) {
-        if (fgets(line, 1024, fp.get()) == NULL) {
-            break;
-        }
-
-        // check to see if there are pages mapped in vmalloc area
-        if (!strstr(line, "pages=")) {
-            continue;
-        }
-
-        long nr_pages;
-        if (sscanf(line, "%*x-%*x %*ld %*s pages=%ld", &nr_pages) == 1) {
-            vmalloc_allocated_size += (nr_pages * getpagesize());
-        }
-    }
-    return vmalloc_allocated_size;
 }
 
 // The 1:1 mapping of MEMINFO_* enums here must match with the constants from
@@ -763,9 +654,8 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
     if (outArray != NULL) {
         outLen = MEMINFO_COUNT;
         for (int i = 0; i < outLen; i++) {
-            // TODO: move get_allocated_vmalloc_memory() to libmeminfo
             if (i == MEMINFO_VMALLOC_USED) {
-                outArray[i] = get_allocated_vmalloc_memory() / 1024;
+                outArray[i] = smi.ReadVmallocInfo() / 1024;
                 continue;
             }
             outArray[i] = mem[i];
@@ -774,7 +664,6 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
 
     env->ReleaseLongArrayElements(out, outArray, 0);
 }
-
 
 static jint read_binder_stat(const char* stat)
 {
