@@ -20,17 +20,21 @@ import android.content.rollback.PackageRollbackInfo;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Information about a rollback available for a particular package.
- * This is similar to {@link PackageRollbackInfo}, but extended with
- * additional information for internal bookkeeping.
+ * Information about a rollback available for a set of atomically installed
+ * packages.
  */
-class PackageRollbackData {
-    public final PackageRollbackInfo info;
+class RollbackData {
+    /**
+     * The per-package rollback information.
+     */
+    public final List<PackageRollbackInfo> packages = new ArrayList<>();
 
     /**
-     * The directory where the apk backup is stored.
+     * The directory where the rollback data is stored.
      */
     public final File backupDir;
 
@@ -38,12 +42,9 @@ class PackageRollbackData {
      * The time when the upgrade occurred, for purposes of expiring
      * rollback data.
      */
-    public final Instant timestamp;
+    public Instant timestamp;
 
-    PackageRollbackData(PackageRollbackInfo info,
-            File backupDir, Instant timestamp) {
-        this.info = info;
+    RollbackData(File backupDir) {
         this.backupDir = backupDir;
-        this.timestamp = timestamp;
     }
 }

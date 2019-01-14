@@ -108,6 +108,10 @@ public class RollbackTest {
             }
 
             // The app should not be available for rollback.
+            // TODO: See if there is a way to remove this race condition
+            // between when the app is uninstalled and when the previously
+            // available rollback, if any, is removed.
+            Thread.sleep(1000);
             assertNull(rm.getAvailableRollback(TEST_APP_A));
             assertFalse(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
 
@@ -125,6 +129,10 @@ public class RollbackTest {
             assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // The app should now be available for rollback.
+            // TODO: See if there is a way to remove this race condition
+            // between when the app is installed and when the rollback
+            // is made available.
+            Thread.sleep(1000);
             assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
             RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
             assertNotNull(rollback);
@@ -182,6 +190,8 @@ public class RollbackTest {
 
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
+            // TODO: Test this with multi-package rollback, not just single
+            // package rollback.
             // Prep installation of TEST_APP_A
             RollbackTestUtils.uninstall(TEST_APP_A);
             RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
@@ -189,6 +199,10 @@ public class RollbackTest {
             assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // The app should now be available for rollback.
+            // TODO: See if there is a way to remove this race condition
+            // between when the app is installed and when the rollback
+            // is made available.
+            Thread.sleep(1000);
             assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
             RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
             assertNotNull(rollback);
@@ -263,6 +277,10 @@ public class RollbackTest {
             assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // The app should now be available for rollback.
+            // TODO: See if there is a way to remove this race condition
+            // between when the app is installed and when the rollback
+            // is made available.
+            Thread.sleep(1000);
             assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
             RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
             assertNotNull(rollback);
@@ -405,6 +423,10 @@ public class RollbackTest {
 
             // Both test apps should now be available for rollback, and the
             // targetPackage returned for rollback should be correct.
+            // TODO: See if there is a way to remove this race condition
+            // between when the app is installed and when the rollback
+            // is made available.
+            Thread.sleep(1000);
             RollbackInfo rollbackA = rm.getAvailableRollback(TEST_APP_A);
             assertNotNull(rollbackA);
             assertEquals(TEST_APP_A, rollbackA.targetPackage.packageName);
@@ -491,7 +513,7 @@ public class RollbackTest {
      * TODO: Stop ignoring this test once support for multi-package rollback
      * is implemented.
      */
-    @Ignore @Test
+    @Test
     public void testMultiPackage() throws Exception {
         try {
             RollbackTestUtils.adoptShellPermissionIdentity(

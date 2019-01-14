@@ -63,9 +63,11 @@ import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -86,10 +88,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     // mLock is held when they are called.
     private final Object mLock = new Object();
 
+    // Package rollback data for rollback-enabled installs that have not yet
+    // been committed. Maps from sessionId to rollback data.
+    @GuardedBy("mLock")
+    private final Map<Integer, RollbackData> mPendingRollbacks = new HashMap<>();
+
+    // Map from child session id's for enabled rollbacks to their
+    // corresponding parent session ids.
+    @GuardedBy("mLock")
+    private final Map<Integer, Integer> mChildSessions = new HashMap<>();
+
     // Package rollback data available to be used for rolling back a package.
     // This list is null until the rollback data has been loaded.
     @GuardedBy("mLock")
-    private List<PackageRollbackData> mAvailableRollbacks;
+    private List<RollbackData> mAvailableRollbacks;
 
     // The list of recently executed rollbacks.
     // This list is null until the rollback data has been loaded.
@@ -102,14 +114,25 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     // to store this data:
     //   /data/rollback/
     //      available/
-    //          com.package.A-XXX/
-    //              base.apk
-    //              rollback.json
-    //          com.package.B-YYY/
-    //              base.apk
-    //              rollback.json
+    //          XXX/
+    //              com.package.A/
+    //                  base.apk
+    //                  info.json
+    //              enabled.txt
+    //          YYY/
+    //              com.package.B/
+    //                  base.apk
+    //                  info.json
+    //              enabled.txt
     //      recently_executed.json
-    // TODO: Use AtomicFile for rollback.json and recently_executed.json.
+    //
+    // * XXX, YYY are random strings from Files.createTempDirectory
+    // * info.json contains the package version to roll back from/to.
+    // * enabled.txt contains a timestamp for when the rollback was first
+    //   made available. This file is not written until the rollback is made
+    //   available.
+    //
+    // TODO: Use AtomicFile for all the .json files?
     private final File mRollbackDataDir;
     private final File mAvailableRollbacksDir;
     private final File mRecentlyExecutedRollbacksFile;
@@ -134,6 +157,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // TODO: Test that this kicks off initial scheduling of rollback
         // expiration.
         getHandler().post(() -> ensureRollbackDataLoaded());
+
+        PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
+        installer.registerSessionCallback(new SessionCallback(), getHandler());
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
@@ -199,27 +225,23 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 android.Manifest.permission.MANAGE_ROLLBACKS,
                 "getAvailableRollback");
 
-        PackageRollbackInfo.PackageVersion installedVersion =
-                getInstalledPackageVersion(packageName);
-        if (installedVersion == null) {
+        RollbackData data = getRollbackForPackage(packageName);
+        if (data == null) {
             return null;
         }
 
-        synchronized (mLock) {
-            // TODO: Have ensureRollbackDataLoadedLocked return the list of
-            // available rollbacks, to hopefully avoid forgetting to call it?
-            ensureRollbackDataLoadedLocked();
-            for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
-                PackageRollbackData data = mAvailableRollbacks.get(i);
-                if (data.info.packageName.equals(packageName)
-                        && data.info.higherVersion.equals(installedVersion)) {
-                    // TODO: For atomic installs, check all dependent packages
-                    // for available rollbacks and include that info here.
-                    return new RollbackInfo(data.info);
-                }
+        // Note: The rollback for the package ought to be for the currently
+        // installed version, otherwise the rollback data is out of date. In
+        // that rare case, we'll check when we execute the rollback whether
+        // it's out of date or not, so no need to check package versions here.
+
+        for (PackageRollbackInfo info : data.packages) {
+            if (info.packageName.equals(packageName)) {
+                // TODO: Once the RollbackInfo API supports info about
+                // dependant packages, add that info here.
+                return new RollbackInfo(info);
             }
         }
-
         return null;
     }
 
@@ -229,16 +251,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 android.Manifest.permission.MANAGE_ROLLBACKS,
                 "getPackagesWithAvailableRollbacks");
 
-        // TODO: This may return packages whose rollback is out of date or
-        // expired.  Presumably that's okay because the package rollback could
-        // be expired anyway between when the caller calls this method and
-        // when the caller calls getAvailableRollback for more details.
         final Set<String> packageNames = new HashSet<>();
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
-                PackageRollbackData data = mAvailableRollbacks.get(i);
-                packageNames.add(data.info.packageName);
+                RollbackData data = mAvailableRollbacks.get(i);
+                for (PackageRollbackInfo info : data.packages) {
+                    packageNames.add(info.packageName);
+                }
             }
         }
         return new StringParceledListSlice(new ArrayList<>(packageNames));
@@ -279,47 +299,49 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private void executeRollbackInternal(RollbackInfo rollback,
             String callerPackageName, IntentSender statusReceiver) {
-        String packageName = rollback.targetPackage.packageName;
-        Log.i(TAG, "Initiating rollback of " + packageName);
+        String targetPackageName = rollback.targetPackage.packageName;
+        Log.i(TAG, "Initiating rollback of " + targetPackageName);
 
-        PackageRollbackInfo.PackageVersion installedVersion =
-                getInstalledPackageVersion(packageName);
-        if (installedVersion == null) {
-            // TODO: Test this case
-            sendFailure(statusReceiver, "Target package to roll back is not installed");
+        // Get the latest RollbackData for the target package.
+        RollbackData data = getRollbackForPackage(targetPackageName);
+        if (data == null) {
+            sendFailure(statusReceiver, "No rollback available for package.");
             return;
         }
 
-        if (!rollback.targetPackage.higherVersion.equals(installedVersion)) {
-            // TODO: Test this case
-            sendFailure(statusReceiver, "Target package version to roll back not installed.");
-            return;
+        // Verify the latest rollback matches the version requested.
+        // TODO: Check dependant packages too once RollbackInfo includes that
+        // information.
+        for (PackageRollbackInfo info : data.packages) {
+            if (info.packageName.equals(targetPackageName)
+                    && !rollback.targetPackage.higherVersion.equals(info.higherVersion)) {
+                sendFailure(statusReceiver, "Rollback is out of date.");
+                return;
+            }
         }
 
+        // Verify the RollbackData is up to date with what's installed on
+        // device.
         // TODO: We assume that between now and the time we commit the
         // downgrade install, the currently installed package version does not
         // change. This is not safe to assume, particularly in the case of a
         // rollback racing with a roll-forward fix of a buggy package.
         // Figure out how to ensure we don't commit the rollback if
         // roll forward happens at the same time.
-        PackageRollbackData data = null;
-        synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
-            for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
-                PackageRollbackData available = mAvailableRollbacks.get(i);
-                // TODO: Check if available.info.lowerVersion matches
-                // rollback.targetPackage.lowerVersion?
-                if (available.info.packageName.equals(packageName)
-                        && available.info.higherVersion.equals(installedVersion)) {
-                    data = available;
-                    break;
-                }
+        for (PackageRollbackInfo info : data.packages) {
+            PackageRollbackInfo.PackageVersion installedVersion =
+                    getInstalledPackageVersion(info.packageName);
+            if (installedVersion == null) {
+                // TODO: Test this case
+                sendFailure(statusReceiver, "Package to roll back is not installed");
+                return;
             }
-        }
 
-        if (data == null) {
-            sendFailure(statusReceiver, "Rollback not available");
-            return;
+            if (!info.higherVersion.equals(installedVersion)) {
+                // TODO: Test this case
+                sendFailure(statusReceiver, "Package version to roll back not installed.");
+                return;
+            }
         }
 
         // Get a context for the caller to use to install the downgraded
@@ -334,29 +356,39 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         PackageManager pm = context.getPackageManager();
         try {
-            PackageInstaller.Session session = null;
-
             PackageInstaller packageInstaller = pm.getPackageInstaller();
-            PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+            PackageInstaller.SessionParams parentParams = new PackageInstaller.SessionParams(
                     PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-            params.setAllowDowngrade(true);
-            int sessionId = packageInstaller.createSession(params);
-            session = packageInstaller.openSession(sessionId);
+            parentParams.setAllowDowngrade(true);
+            parentParams.setMultiPackage();
+            int parentSessionId = packageInstaller.createSession(parentParams);
+            PackageInstaller.Session parentSession = packageInstaller.openSession(parentSessionId);
 
-            // TODO: Will it always be called "base.apk"? What about splits?
-            File baseApk = new File(data.backupDir, "base.apk");
-            try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(baseApk,
-                    ParcelFileDescriptor.MODE_READ_ONLY)) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    session.write("base.apk", 0, baseApk.length(), fd);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
+            for (PackageRollbackInfo info : data.packages) {
+                PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+                        PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+                params.setAllowDowngrade(true);
+                int sessionId = packageInstaller.createSession(params);
+                PackageInstaller.Session session = packageInstaller.openSession(sessionId);
+
+                // TODO: Will it always be called "base.apk"? What about splits?
+                // What about apex?
+                File packageDir = new File(data.backupDir, info.packageName);
+                File baseApk = new File(packageDir, "base.apk");
+                try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(baseApk,
+                        ParcelFileDescriptor.MODE_READ_ONLY)) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        session.write("base.apk", 0, baseApk.length(), fd);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                 }
+                parentSession.addChildSessionId(sessionId);
             }
 
             final LocalIntentReceiver receiver = new LocalIntentReceiver();
-            session.commit(receiver.getIntentSender());
+            parentSession.commit(receiver.getIntentSender());
 
             Intent result = receiver.getResult();
             int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
@@ -371,13 +403,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             sendSuccess(statusReceiver);
 
             Intent broadcast = new Intent(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED,
-                    Uri.fromParts("package", packageName, Manifest.permission.MANAGE_ROLLBACKS));
+                    Uri.fromParts("package", targetPackageName,
+                        Manifest.permission.MANAGE_ROLLBACKS));
 
             // TODO: This call emits the warning "Calling a method in the
             // system process without a qualified user". Fix that.
             mContext.sendBroadcast(broadcast);
         } catch (IOException e) {
-            Log.e(TAG, "Unable to roll back " + packageName, e);
+            Log.e(TAG, "Unable to roll back " + targetPackageName, e);
             sendFailure(statusReceiver, "IOException: " + e.toString());
             return;
         }
@@ -408,12 +441,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // testing anyway.
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
-            Iterator<PackageRollbackData> iter = mAvailableRollbacks.iterator();
+            Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
             while (iter.hasNext()) {
-                PackageRollbackData data = iter.next();
-                if (data.info.packageName.equals(packageName)) {
-                    iter.remove();
-                    removeFile(data.backupDir);
+                RollbackData data = iter.next();
+                for (PackageRollbackInfo info : data.packages) {
+                    if (info.packageName.equals(packageName)) {
+                        iter.remove();
+                        removeFile(data.backupDir);
+                        break;
+                    }
                 }
             }
         }
@@ -453,27 +489,41 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mAvailableRollbacksDir.mkdirs();
         mAvailableRollbacks = new ArrayList<>();
         for (File rollbackDir : mAvailableRollbacksDir.listFiles()) {
-            if (rollbackDir.isDirectory()) {
-                // TODO: How to detect and clean up an invalid rollback
-                // directory? We don't know if it's invalid because something
-                // went wrong, or if it's only temporarily invalid because
-                // it's in the process of being created.
+            File enabledFile = new File(rollbackDir, "enabled.txt");
+            // TODO: Delete any directories without an enabled.txt? That could
+            // potentially delete pending rollback data if reloadPersistedData
+            // is called, though there's no reason besides testing for that to
+            // be called.
+            if (rollbackDir.isDirectory() && enabledFile.isFile()) {
+                RollbackData data = new RollbackData(rollbackDir);
                 try {
-                    File jsonFile = new File(rollbackDir, "rollback.json");
-                    String jsonString = IoUtils.readFileAsString(jsonFile.getAbsolutePath());
-                    JSONObject jsonObject = new JSONObject(jsonString);
-                    String packageName = jsonObject.getString("packageName");
-                    long higherVersionCode = jsonObject.getLong("higherVersionCode");
-                    long lowerVersionCode = jsonObject.getLong("lowerVersionCode");
-                    Instant timestamp = Instant.parse(jsonObject.getString("timestamp"));
-                    PackageRollbackData data = new PackageRollbackData(
-                            new PackageRollbackInfo(packageName,
-                                new PackageRollbackInfo.PackageVersion(higherVersionCode),
-                                new PackageRollbackInfo.PackageVersion(lowerVersionCode)),
-                            rollbackDir, timestamp);
+                    PackageRollbackInfo info = null;
+                    for (File packageDir : rollbackDir.listFiles()) {
+                        if (packageDir.isDirectory()) {
+                            File jsonFile = new File(packageDir, "info.json");
+                            String jsonString = IoUtils.readFileAsString(
+                                    jsonFile.getAbsolutePath());
+                            JSONObject jsonObject = new JSONObject(jsonString);
+                            String packageName = jsonObject.getString("packageName");
+                            long higherVersionCode = jsonObject.getLong("higherVersionCode");
+                            long lowerVersionCode = jsonObject.getLong("lowerVersionCode");
+
+                            data.packages.add(new PackageRollbackInfo(packageName,
+                                        new PackageRollbackInfo.PackageVersion(higherVersionCode),
+                                        new PackageRollbackInfo.PackageVersion(lowerVersionCode)));
+                        }
+                    }
+
+                    if (data.packages.isEmpty()) {
+                        throw new IOException("No package rollback info found");
+                    }
+
+                    String enabledString = IoUtils.readFileAsString(enabledFile.getAbsolutePath());
+                    data.timestamp = Instant.parse(enabledString.trim());
                     mAvailableRollbacks.add(data);
                 } catch (IOException | JSONException | DateTimeParseException e) {
                     Log.e(TAG, "Unable to read rollback data at " + rollbackDir, e);
+                    removeFile(rollbackDir);
                 }
             }
         }
@@ -521,13 +571,16 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
-            Iterator<PackageRollbackData> iter = mAvailableRollbacks.iterator();
+            Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
             while (iter.hasNext()) {
-                PackageRollbackData data = iter.next();
-                if (data.info.packageName.equals(packageName)
-                        && !data.info.higherVersion.equals(installedVersion)) {
-                    iter.remove();
-                    removeFile(data.backupDir);
+                RollbackData data = iter.next();
+                for (PackageRollbackInfo info : data.packages) {
+                    if (info.packageName.equals(packageName)
+                            && !info.higherVersion.equals(installedVersion)) {
+                        iter.remove();
+                        removeFile(data.backupDir);
+                        break;
+                    }
                 }
             }
         }
@@ -643,9 +696,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
 
-            Iterator<PackageRollbackData> iter = mAvailableRollbacks.iterator();
+            Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
             while (iter.hasNext()) {
-                PackageRollbackData data = iter.next();
+                RollbackData data = iter.next();
                 if (!now.isBefore(data.timestamp.plusMillis(ROLLBACK_LIFETIME_DURATION_MILLIS))) {
                     iter.remove();
                     removeFile(data.backupDir);
@@ -671,6 +724,23 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     private Handler getHandler() {
         return mHandlerThread.getThreadHandler();
+    }
+
+    // Returns true if <code>session</code> has installFlags and code path
+    // matching the installFlags and new package code path given to
+    // enableRollback.
+    private boolean sessionMatchesForEnableRollback(PackageInstaller.SessionInfo session,
+            int installFlags, File newPackageCodePath) {
+        if (session == null || session.resolvedBaseCodePath == null) {
+            return false;
+        }
+
+        File packageCodePath = new File(session.resolvedBaseCodePath).getParentFile();
+        if (newPackageCodePath.equals(packageCodePath) && installFlags == session.installFlags) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -705,6 +775,34 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         String packageName = newPackage.packageName;
         Log.i(TAG, "Enabling rollback for install of " + packageName);
 
+        // Figure out the session id associated with this install.
+        int parentSessionId = PackageInstaller.SessionInfo.INVALID_ID;
+        int childSessionId = PackageInstaller.SessionInfo.INVALID_ID;
+        PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
+        for (PackageInstaller.SessionInfo info : installer.getAllSessions()) {
+            if (info.isMultiPackage()) {
+                for (int childId : info.getChildSessionIds()) {
+                    PackageInstaller.SessionInfo child = installer.getSessionInfo(childId);
+                    if (sessionMatchesForEnableRollback(child, installFlags, newPackageCodePath)) {
+                        // TODO: Check we only have one matching session?
+                        parentSessionId = info.getSessionId();
+                        childSessionId = childId;
+                    }
+                }
+            } else {
+                if (sessionMatchesForEnableRollback(info, installFlags, newPackageCodePath)) {
+                    // TODO: Check we only have one matching session?
+                    parentSessionId = info.getSessionId();
+                    childSessionId = parentSessionId;
+                }
+            }
+        }
+
+        if (parentSessionId == PackageInstaller.SessionInfo.INVALID_ID) {
+            Log.e(TAG, "Unable to find session id for enabled rollback.");
+            return false;
+        }
+
         PackageRollbackInfo.PackageVersion newVersion =
                 new PackageRollbackInfo.PackageVersion(newPackage.versionCode);
 
@@ -720,50 +818,51 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageRollbackInfo.PackageVersion installedVersion =
                 new PackageRollbackInfo.PackageVersion(installedPackage.getLongVersionCode());
 
-        File backupDir;
+        PackageRollbackInfo info = new PackageRollbackInfo(
+                packageName, newVersion, installedVersion);
+
+        RollbackData data;
         try {
-            backupDir = Files.createTempDirectory(
-                mAvailableRollbacksDir.toPath(), packageName + "-").toFile();
+            synchronized (mLock) {
+                mChildSessions.put(childSessionId, parentSessionId);
+                data = mPendingRollbacks.get(parentSessionId);
+                if (data == null) {
+                    File backupDir = Files.createTempDirectory(
+                            mAvailableRollbacksDir.toPath(), null).toFile();
+                    data = new RollbackData(backupDir);
+                    mPendingRollbacks.put(parentSessionId, data);
+                }
+                data.packages.add(info);
+            }
         } catch (IOException e) {
             Log.e(TAG, "Unable to create rollback for " + packageName, e);
             return false;
         }
 
-        // TODO: Should the timestamp be for when we commit the install, not
-        // when we create the pending one?
-        Instant timestamp = Instant.now();
+        File packageDir = new File(data.backupDir, packageName);
+        packageDir.mkdirs();
         try {
             JSONObject json = new JSONObject();
             json.put("packageName", packageName);
             json.put("higherVersionCode", newVersion.versionCode);
             json.put("lowerVersionCode", installedVersion.versionCode);
-            json.put("timestamp", timestamp.toString());
 
-            File jsonFile = new File(backupDir, "rollback.json");
+            File jsonFile = new File(packageDir, "info.json");
             PrintWriter pw = new PrintWriter(jsonFile);
             pw.println(json.toString());
             pw.close();
         } catch (IOException | JSONException e) {
             Log.e(TAG, "Unable to create rollback for " + packageName, e);
-            removeFile(backupDir);
+            removeFile(packageDir);
             return false;
         }
 
         // TODO: Copy by hard link instead to save on cpu and storage space?
-        int status = PackageManagerServiceUtils.copyPackage(installedPackage.codePath, backupDir);
+        int status = PackageManagerServiceUtils.copyPackage(installedPackage.codePath, packageDir);
         if (status != PackageManager.INSTALL_SUCCEEDED) {
             Log.e(TAG, "Unable to copy package for rollback for " + packageName);
-            removeFile(backupDir);
+            removeFile(packageDir);
             return false;
-        }
-
-        PackageRollbackData data = new PackageRollbackData(
-                new PackageRollbackInfo(packageName, newVersion, installedVersion),
-                backupDir, timestamp);
-
-        synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
-            mAvailableRollbacks.add(data);
         }
 
         return true;
@@ -828,5 +927,88 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         return new PackageRollbackInfo.PackageVersion(pkgInfo.getLongVersionCode());
+    }
+
+    private class SessionCallback extends PackageInstaller.SessionCallback {
+
+        @Override
+        public void onCreated(int sessionId) { }
+
+        @Override
+        public void onBadgingChanged(int sessionId) { }
+
+        @Override
+        public void onActiveChanged(int sessionId, boolean active) { }
+
+        @Override
+        public void onProgressChanged(int sessionId, float progress) { }
+
+        @Override
+        public void onFinished(int sessionId, boolean success) {
+            RollbackData data = null;
+            synchronized (mLock) {
+                Integer parentSessionId = mChildSessions.remove(sessionId);
+                if (parentSessionId != null) {
+                    sessionId = parentSessionId;
+                }
+                data = mPendingRollbacks.remove(sessionId);
+            }
+
+            if (data != null) {
+                if (success) {
+                    try {
+                        data.timestamp = Instant.now();
+                        File enabledFile = new File(data.backupDir, "enabled.txt");
+                        PrintWriter pw = new PrintWriter(enabledFile);
+                        pw.println(data.timestamp.toString());
+                        pw.close();
+
+                        synchronized (mLock) {
+                            // Note: There is a small window of time between when
+                            // the session has been committed by the package
+                            // manager and when we make the rollback available
+                            // here. Presumably the window is small enough that
+                            // nobody will want to roll back the newly installed
+                            // package before we make the rollback available.
+                            // TODO: We'll lose the rollback data if the
+                            // device reboots between when the session is
+                            // committed and this point. Revisit this after
+                            // adding support for rollback of staged installs.
+                            ensureRollbackDataLoadedLocked();
+                            mAvailableRollbacks.add(data);
+                        }
+                    } catch (IOException e) {
+                        Log.e(TAG, "Unable to enable rollback", e);
+                        removeFile(data.backupDir);
+                    }
+                } else {
+                    // The install session was aborted, clean up the pending
+                    // install.
+                    removeFile(data.backupDir);
+                }
+            }
+        }
+    }
+
+    /*
+     * Returns the RollbackData, if any, for an available rollback that would
+     * roll back the given package. Note: This assumes we have at most one
+     * available rollback for a given package at any one time.
+     */
+    private RollbackData getRollbackForPackage(String packageName) {
+        synchronized (mLock) {
+            // TODO: Have ensureRollbackDataLoadedLocked return the list of
+            // available rollbacks, to hopefully avoid forgetting to call it?
+            ensureRollbackDataLoadedLocked();
+            for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
+                RollbackData data = mAvailableRollbacks.get(i);
+                for (PackageRollbackInfo info : data.packages) {
+                    if (info.packageName.equals(packageName)) {
+                        return data;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
