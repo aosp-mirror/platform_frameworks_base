@@ -80,6 +80,7 @@ android_app {
     ],
 
     platform_apis: true,
+    product_specific: true,
     certificate: "platform",
     privileged: true,
 

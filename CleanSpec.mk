@@ -249,6 +249,7 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/framework/com.android.locati
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/framework/com.android.future.usb.accessory.jar)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/framework/com.android.media.remotedisplay.jar)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/priv-app/SystemUI)
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
 # ******************************************************************
