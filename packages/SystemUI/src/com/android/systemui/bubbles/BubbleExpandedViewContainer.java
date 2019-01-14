@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ShapeDrawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -88,6 +89,7 @@ public class BubbleExpandedViewContainer extends LinearLayout {
      */
     public void setHeaderText(CharSequence text) {
         mHeaderView.setText(text);
+        mHeaderView.setVisibility(TextUtils.isEmpty(text) ? GONE : VISIBLE);
     }
 
     /**

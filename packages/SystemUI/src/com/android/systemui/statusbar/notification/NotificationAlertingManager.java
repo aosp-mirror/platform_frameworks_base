@@ -150,7 +150,14 @@ public class NotificationAlertingManager {
         }
     }
 
-    private static boolean alertAgain(
+    /**
+     * Checks whether an update for a notification warrants an alert for the user.
+     *
+     * @param oldEntry the entry for this notification.
+     * @param newNotification the new notification for this entry.
+     * @return whether this notification should alert the user.
+     */
+    public static boolean alertAgain(
             NotificationEntry oldEntry, Notification newNotification) {
         return oldEntry == null || !oldEntry.hasInterrupted()
                 || (newNotification.flags & Notification.FLAG_ONLY_ALERT_ONCE) == 0;

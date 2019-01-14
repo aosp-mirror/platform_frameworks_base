@@ -141,6 +141,14 @@ public final class NotificationEntry {
     private boolean mIsBubble;
 
     /**
+     * Whether this notification should be shown in the shade when it is also displayed as a bubble.
+     *
+     * <p>When a notification is a bubble we don't show it in the shade once the bubble has been
+     * expanded</p>
+     */
+    private boolean mShowInShadeWhenBubble;
+
+    /**
      * Whether the user has dismissed this notification when it was in bubble form.
      */
     private boolean mUserDismissedBubble;
@@ -197,6 +205,23 @@ public final class NotificationEntry {
 
     public boolean isBubbleDismissed() {
         return mUserDismissedBubble;
+    }
+
+    /**
+     * Sets whether this notification should be shown in the shade when it is also displayed as a
+     * bubble.
+     */
+    public void setShowInShadeWhenBubble(boolean showInShade) {
+        mShowInShadeWhenBubble = showInShade;
+    }
+
+    /**
+     * Whether this notification should be shown in the shade when it is also displayed as a
+     * bubble.
+     */
+    public boolean showInShadeWhenBubble() {
+        // We always show it in the shade if non-clearable
+        return !isClearable() || mShowInShadeWhenBubble;
     }
 
     /**

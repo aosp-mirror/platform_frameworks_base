@@ -586,7 +586,7 @@ public class ContrastColorUtil {
      *
      * @param color the base color to use
      * @param amount the amount from 1 to 100 how much to modify the color
-     * @return the now color that was modified
+     * @return the new color that was modified
      */
     public static int getShiftedColor(int color, int amount) {
         final double[] result = ColorUtilsFromCompat.getTempDouble3Array();
@@ -597,6 +597,19 @@ public class ContrastColorUtil {
             result[0] = Math.min(100, result[0] + amount);
         }
         return ColorUtilsFromCompat.LABToColor(result[0], result[1], result[2]);
+    }
+
+    /**
+     * Blends the provided color with white to create a muted version.
+     *
+     * @param color the color to mute
+     * @param alpha the amount from 0 to 1 to set the alpha component of the white scrim
+     * @return the new color that was modified
+     */
+    public static int getMutedColor(int color, float alpha) {
+        int whiteScrim = ColorUtilsFromCompat.setAlphaComponent(
+                Color.WHITE, (int) (255 * alpha));
+        return compositeColors(whiteScrim, color);
     }
 
     private static boolean shouldUseDark(int backgroundColor, boolean defaultBackgroundIsDark) {
@@ -672,6 +685,18 @@ public class ContrastColorUtil {
         private static int compositeComponent(int fgC, int fgA, int bgC, int bgA, int a) {
             if (a == 0) return 0;
             return ((0xFF * fgC * fgA) + (bgC * bgA * (0xFF - fgA))) / (a * 0xFF);
+        }
+
+        /**
+         * Set the alpha component of {@code color} to be {@code alpha}.
+         */
+        @ColorInt
+        public static int setAlphaComponent(@ColorInt int color,
+                @IntRange(from = 0x0, to = 0xFF) int alpha) {
+            if (alpha < 0 || alpha > 255) {
+                throw new IllegalArgumentException("alpha must be between 0 and 255.");
+            }
+            return (color & 0x00ffffff) | (alpha << 24);
         }
 
         /**

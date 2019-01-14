@@ -19,7 +19,6 @@ package com.android.systemui.bubbles;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -106,20 +105,20 @@ public class BubbleControllerTest extends SysuiTestCase {
 
     @Test
     public void testAddBubble() {
-        mBubbleController.addBubble(mRow.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
         assertTrue(mBubbleController.hasBubbles());
     }
 
     @Test
     public void testHasBubbles() {
         assertFalse(mBubbleController.hasBubbles());
-        mBubbleController.addBubble(mRow.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
         assertTrue(mBubbleController.hasBubbles());
     }
 
     @Test
     public void testRemoveBubble() {
-        mBubbleController.addBubble(mRow.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
         assertTrue(mBubbleController.hasBubbles());
 
         mBubbleController.removeBubble(mRow.getEntry().key);
@@ -130,35 +129,35 @@ public class BubbleControllerTest extends SysuiTestCase {
 
     @Test
     public void testDismissStack() {
-        mBubbleController.addBubble(mRow.getEntry());
-        mBubbleController.addBubble(mRow2.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow2.getEntry(), true /* updatePosition */);
         assertTrue(mBubbleController.hasBubbles());
 
         mBubbleController.dismissStack();
         assertFalse(mStatusBarWindowController.getBubblesShowing());
-        verify(mNotificationEntryManager, times(3)).updateNotifications();
+        verify(mNotificationEntryManager).updateNotifications();
     }
 
     @Test
     public void testIsStackExpanded() {
         assertFalse(mBubbleController.isStackExpanded());
-        mBubbleController.addBubble(mRow.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
 
         BubbleStackView stackView = mBubbleController.getStackView();
-        stackView.animateExpansion(true /* expanded */);
+        stackView.expandStack();
         assertTrue(mBubbleController.isStackExpanded());
 
-        stackView.animateExpansion(false /* expanded */);
+        stackView.collapseStack();
         assertFalse(mBubbleController.isStackExpanded());
     }
 
     @Test
     public void testCollapseStack() {
-        mBubbleController.addBubble(mRow.getEntry());
-        mBubbleController.addBubble(mRow2.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow2.getEntry(), true /* updatePosition */);
 
         BubbleStackView stackView = mBubbleController.getStackView();
-        stackView.animateExpansion(true /* expanded */);
+        stackView.expandStack();
         assertTrue(mBubbleController.isStackExpanded());
 
         mBubbleController.collapseStack();
@@ -169,6 +168,12 @@ public class BubbleControllerTest extends SysuiTestCase {
     public void testMarkNewNotificationAsBubble() {
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
         assertTrue(mRow.getEntry().isBubble());
+    }
+
+    @Test
+    public void testMarkNewNotificationAsShowInShade() {
+        mEntryListener.onPendingEntryAdded(mRow.getEntry());
+        assertTrue(mRow.getEntry().showInShadeWhenBubble());
     }
 
     static class TestableBubbleController extends BubbleController {

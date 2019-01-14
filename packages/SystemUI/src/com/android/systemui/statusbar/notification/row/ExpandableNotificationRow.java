@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
@@ -2322,7 +2321,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private boolean isShownAsBubble() {
-        return mEntry.isBubble() && (mStatusBarState == SHADE || mStatusBarState == -1);
+        return mEntry.isBubble() && !mEntry.showInShadeWhenBubble() && !mEntry.isBubbleDismissed();
     }
 
     /**
