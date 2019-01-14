@@ -26,4 +26,20 @@
      * Called when a voice session is hidden.
      */
     void onVoiceSessionHidden();
+
+    /**
+     * Called when voice assistant transcription has been updated to the given string.
+     */
+    void onTranscriptionUpdate(in String transcription);
+
+    /**
+     * Called when voice transcription is completed.
+     */
+    void onTranscriptionComplete(in boolean immediate);
+
+    /**
+     * Called when the voice assistant's state has changed. Values are from
+     * VoiceInteractionService's VOICE_STATE* constants.
+     */
+    void onVoiceStateChange(in int state);
  }

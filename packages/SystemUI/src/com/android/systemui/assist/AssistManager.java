@@ -47,6 +47,10 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 public class AssistManager implements ConfigurationChangedReceiver {
 
     private static final String TAG = "AssistManager";
+
+    // Note that VERBOSE logging may leak PII (e.g. transcription contents).
+    private static final boolean VERBOSE = false;
+
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
 
@@ -103,16 +107,41 @@ public class AssistManager implements ConfigurationChangedReceiver {
     protected void registerVoiceInteractionSessionListener() {
         mAssistUtils.registerVoiceInteractionSessionListener(
                 new IVoiceInteractionSessionListener.Stub() {
-            @Override
-            public void onVoiceSessionShown() throws RemoteException {
-                Log.v(TAG, "Voice open");
-            }
+                    @Override
+                    public void onVoiceSessionShown() throws RemoteException {
+                        if (VERBOSE) {
+                            Log.v(TAG, "Voice open");
+                        }
+                    }
 
-            @Override
-            public void onVoiceSessionHidden() throws RemoteException {
-                Log.v(TAG, "Voice closed");
-            }
-        });
+                    @Override
+                    public void onVoiceSessionHidden() throws RemoteException {
+                        if (VERBOSE) {
+                            Log.v(TAG, "Voice closed");
+                        }
+                    }
+
+                    @Override
+                    public void onTranscriptionUpdate(String transcription) {
+                        if (VERBOSE) {
+                            Log.v(TAG, "Transcription Updated: \"" + transcription + "\"");
+                        }
+                    }
+
+                    @Override
+                    public void onTranscriptionComplete(boolean immediate) {
+                        if (VERBOSE) {
+                            Log.v(TAG, "Transcription complete (immediate=" + immediate + ")");
+                        }
+                    }
+
+                    @Override
+                    public void onVoiceStateChange(int state) {
+                        if (VERBOSE) {
+                            Log.v(TAG, "Voice state is now " + state);
+                        }
+                    }
+                });
     }
 
     public void onConfigurationChanged(Configuration newConfiguration) {
@@ -291,8 +320,10 @@ public class AssistManager implements ConfigurationChangedReceiver {
                     }
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                Log.v(TAG, "Assistant component "
-                        + component.flattenToShortString() + " not found");
+                if (VERBOSE) {
+                    Log.v(TAG, "Assistant component "
+                            + component.flattenToShortString() + " not found");
+                }
             } catch (Resources.NotFoundException nfe) {
                 Log.w(TAG, "Failed to swap drawable from "
                         + component.flattenToShortString(), nfe);

@@ -151,4 +151,19 @@ interface IVoiceInteractionManagerService {
      */
     void getActiveServiceSupportedActions(in List<String> voiceActions,
      in IVoiceActionCheckCallback callback);
+
+    /**
+     * Sets the transcribed voice to the given string.
+     */
+    void setTranscription(String transcription);
+
+    /**
+     * Indicates that the transcription session is finished.
+     */
+    void clearTranscription(boolean immediate);
+
+    /**
+     * Sets the voice state indication based upon the given value.
+     */
+    void setVoiceState(int state);
 }
