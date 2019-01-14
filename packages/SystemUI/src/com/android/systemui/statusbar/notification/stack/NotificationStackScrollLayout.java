@@ -183,6 +183,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     private VelocityTracker mVelocityTracker;
     private OverScroller mScroller;
+    /** Last Y position reported by {@link #mScroller}, used to calculate scroll delta. */
+    private int mLastScrollerY;
+    /**
+     * True if the max position was set to a known position on the last call to {@link #mScroller}.
+     */
+    private boolean mIsScrollerBoundSet;
     private Runnable mFinishScrollingCallback;
     private int mTouchSlop;
     private int mMinimumVelocity;
@@ -425,7 +431,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private int mStatusBarState;
     private int mCachedBackgroundColor;
     private boolean mHeadsUpGoingAwayAnimationsAllowed = true;
-    private Runnable mAnimateScroll = this::animateScroll;
+    private Runnable mReflingAndAnimateScroll = () -> {
+        if (ANCHOR_SCROLLING) {
+            maybeReflingScroller();
+        }
+        animateScroll();
+    };
     private int mCornerRadius;
     private int mSidePaddings;
     private final Rect mBackgroundAnimationRect = new Rect();
@@ -698,6 +709,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 int y = (int) mShelf.getTranslationY();
                 canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             }
+            canvas.drawText(Integer.toString(getMaxNegativeScrollAmount()), getWidth() - 100,
+                    getIntrinsicPadding() + 30, mDebugPaint);
+            canvas.drawText(Integer.toString(getMaxPositiveScrollAmount()), getWidth() - 100,
+                    getHeight() - 30, mDebugPaint);
         }
     }
 
@@ -1643,11 +1658,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             float scrollAmount = newTopAmount < 0 ? -newTopAmount : 0.0f;
             // TODO: once we're recycling this will need to check the adapter position of the child
             ExpandableView lastRow = getLastRowNotGone();
-            if (!lastRow.isInShelf()) {
-                float distanceToMax =
-                        Math.max(0, lastRow.getTranslationY() + lastRow.getActualHeight()
-                                - (mMaxLayoutHeight - mFooterView.getActualHeight()));
-                if (distanceToMax < scrollAmount) {
+            if (lastRow != null && !lastRow.isInShelf()) {
+                float distanceToMax = Math.max(0, getMaxPositiveScrollAmount());
+                if (scrollAmount > distanceToMax) {
                     float currentBottomPixels = getCurrentOverScrolledPixels(false);
                     // We overScroll on the bottom
                     setOverScrolledPixels(currentBottomPixels + (scrollAmount - distanceToMax),
@@ -1760,7 +1773,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private void animateScroll() {
         if (mScroller.computeScrollOffset()) {
             if (ANCHOR_SCROLLING) {
-                // TODO
+                int oldY = mLastScrollerY;
+                int y = mScroller.getCurrY();
+                int deltaY = y - oldY;
+                if (deltaY != 0) {
+                    int maxNegativeScrollAmount = getMaxNegativeScrollAmount();
+                    int maxPositiveScrollAmount = getMaxPositiveScrollAmount();
+                    if ((maxNegativeScrollAmount < 0 && deltaY < maxNegativeScrollAmount)
+                            || (maxPositiveScrollAmount > 0 && deltaY > maxPositiveScrollAmount)) {
+                        // This frame takes us into overscroll, so set the max overscroll based on
+                        // the current velocity
+                        setMaxOverScrollFromCurrentVelocity();
+                    }
+                    customOverScrollBy(deltaY, oldY, 0, (int) mMaxOverScroll);
+                    mLastScrollerY = y;
+                }
             } else {
                 int oldY = mOwnScrollY;
                 int y = mScroller.getCurrY();
@@ -1768,10 +1795,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 if (oldY != y) {
                     int range = getScrollRange();
                     if (y < 0 && oldY >= 0 || y > range && oldY <= range) {
-                        float currVelocity = mScroller.getCurrVelocity();
-                        if (currVelocity >= mMinimumVelocity) {
-                            mMaxOverScroll = Math.abs(currVelocity) / 1000 * mOverflingDistance;
-                        }
+                        // This frame takes us into overscroll, so set the max overscroll based on
+                        // the current velocity
+                        setMaxOverScrollFromCurrentVelocity();
                     }
 
                     if (mDontClampNextScroll) {
@@ -1782,7 +1808,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 }
             }
 
-            postOnAnimation(mAnimateScroll);
+            postOnAnimation(mReflingAndAnimateScroll);
         } else {
             mDontClampNextScroll = false;
             if (mFinishScrollingCallback != null) {
@@ -1791,13 +1817,51 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
     }
 
+    private void setMaxOverScrollFromCurrentVelocity() {
+        float currVelocity = mScroller.getCurrVelocity();
+        if (currVelocity >= mMinimumVelocity) {
+            mMaxOverScroll = Math.abs(currVelocity) / 1000 * mOverflingDistance;
+        }
+    }
+
+    /**
+     * Scrolls by the given delta, overscrolling if needed.  If called during a fling and the delta
+     * would cause us to exceed the provided maximum overscroll, springs back instead.
+     *
+     * This method performs the determination of whether we're exceeding the overscroll and clamps
+     * the scroll amount if so.  The actual scrolling/overscrolling happens in
+     * {@link #onCustomOverScrolled(int, boolean)} (absolute scrolling) or
+     * {@link #onCustomOverScrolledBy(int, boolean)} (anchor scrolling).
+     *
+     * @param deltaY         The (signed) number of pixels to scroll.
+     * @param scrollY        The current scroll position (absolute scrolling only).
+     * @param scrollRangeY   The maximum allowable scroll position (absolute scrolling only).
+     * @param maxOverScrollY The current (unsigned) limit on number of pixels to overscroll by.
+     */
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    private boolean customOverScrollBy(int deltaY, int scrollY, int scrollRangeY,
-            int maxOverScrollY) {
+    private void customOverScrollBy(int deltaY, int scrollY, int scrollRangeY, int maxOverScrollY) {
         if (ANCHOR_SCROLLING) {
-            // TODO check clamped?
-            onCustomOverScrolledBy(deltaY);
-            return false;
+            boolean clampedY = false;
+            if (deltaY < 0) {
+                int maxScrollAmount = getMaxNegativeScrollAmount();
+                if (maxScrollAmount > Integer.MIN_VALUE) {
+                    maxScrollAmount -= maxOverScrollY;
+                    if (deltaY < maxScrollAmount) {
+                        deltaY = maxScrollAmount;
+                        clampedY = true;
+                    }
+                }
+            } else {
+                int maxScrollAmount = getMaxPositiveScrollAmount();
+                if (maxScrollAmount < Integer.MAX_VALUE) {
+                    maxScrollAmount += maxOverScrollY;
+                    if (deltaY > maxScrollAmount) {
+                        deltaY = maxScrollAmount;
+                        clampedY = true;
+                    }
+                }
+            }
+            onCustomOverScrolledBy(deltaY, clampedY);
         } else {
             int newScrollY = scrollY + deltaY;
             final int top = -maxOverScrollY;
@@ -1813,8 +1877,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
 
             onCustomOverScrolled(newScrollY, clampedY);
-
-            return clampedY;
         }
     }
 
@@ -1933,16 +1995,43 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
     }
 
-    private void onCustomOverScrolledBy(int deltaY) {
+    /**
+     * Scrolls by the given delta, overscrolling if needed.  If called during a fling and the delta
+     * would cause us to exceed the provided maximum overscroll, springs back instead.
+     *
+     * @param deltaY   The (signed) number of pixels to scroll.
+     * @param clampedY Whether this value was clamped by the calling method, meaning we've reached
+     *                 the overscroll limit.
+     */
+    private void onCustomOverScrolledBy(int deltaY, boolean clampedY) {
+        assert ANCHOR_SCROLLING;
         mScrollAnchorViewY -= deltaY;
         // Treat animating scrolls differently; see #computeScroll() for why.
         if (!mScroller.isFinished()) {
-            // TODO: springback/overscroll, see #onCustomOverScrolled()
+            if (clampedY) {
+                springBack();
+            } else {
+                float overScrollTop = getCurrentOverScrollAmount(true /* top */);
+                if (isScrolledToTop() && mScrollAnchorViewY > 0) {
+                    notifyOverscrollTopListener(mScrollAnchorViewY,
+                            isRubberbanded(true /* onTop */));
+                } else {
+                    notifyOverscrollTopListener(overScrollTop, isRubberbanded(true /* onTop */));
+                }
+            }
         }
         updateScrollAnchor();
         updateOnScrollChange();
     }
 
+    /**
+     * Scrolls to the given position, overscrolling if needed.  If called during a fling and the
+     * position exceeds the provided maximum overscroll, springs back instead.
+     *
+     * @param scrollY The target scroll position.
+     * @param clampedY Whether this value was clamped by the calling method, meaning we've reached
+     *                 the overscroll limit.
+     */
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void onCustomOverScrolled(int scrollY, boolean clampedY) {
         assert !ANCHOR_SCROLLING;
@@ -1964,10 +2053,30 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
     }
 
+    /**
+     * Springs back from an overscroll by stopping the {@link #mScroller} and animating the
+     * overscroll amount back to zero.
+     */
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void springBack() {
         if (ANCHOR_SCROLLING) {
-            // TODO
+            boolean overScrolledTop = isScrolledToTop() && mScrollAnchorViewY > 0;
+            int maxPositiveScrollAmount = getMaxPositiveScrollAmount();
+            boolean overscrolledBottom = maxPositiveScrollAmount < 0;
+            if (overScrolledTop || overscrolledBottom) {
+                float newAmount;
+                if (overScrolledTop) {
+                    newAmount = mScrollAnchorViewY;
+                    mScrollAnchorViewY = 0;
+                    mDontReportNextOverScroll = true;
+                } else {
+                    newAmount = -maxPositiveScrollAmount;
+                    mScrollAnchorViewY -= maxPositiveScrollAmount;
+                }
+                setOverScrollAmount(newAmount, overScrolledTop, false);
+                setOverScrollAmount(0.0f, overScrolledTop, true);
+                mScroller.forceFinished(true);
+            }
         } else {
             int scrollRange = getScrollRange();
             boolean overScrolledTop = mOwnScrollY <= 0;
@@ -2563,7 +2672,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 mMaxOverScroll = 0.0f;
             }
             if (ANCHOR_SCROLLING) {
-                // TODO
+                flingScroller(velocityY);
             } else {
                 int scrollRange = getScrollRange();
                 int minScrollY = Math.max(0, scrollRange);
@@ -2575,6 +2684,121 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
 
             animateScroll();
+        }
+    }
+
+    /**
+     * Flings the overscroller with the given velocity (anchor-based scrolling).
+     *
+     * Because anchor-based scrolling can't track the current scroll position, the overscroller is
+     * always started at startY = 0, and we interpret the positions it computes as relative to the
+     * start of the scroll.
+     */
+    private void flingScroller(int velocityY) {
+        assert ANCHOR_SCROLLING;
+        mIsScrollerBoundSet = false;
+        maybeFlingScroller(velocityY, true /* always fling */);
+    }
+
+    private void maybeFlingScroller(int velocityY, boolean alwaysFling) {
+        assert ANCHOR_SCROLLING;
+        // Attempt to determine the maximum amount to scroll before we reach the end.
+        // If the first view is not materialized (for an upwards scroll) or the last view is either
+        // not materialized or is pinned to the shade (for a downwards scroll), we don't know this
+        // amount, so we do an unbounded fling and rely on {@link #maybeReflingScroller()} to update
+        // the scroller once we approach the start/end of the list.
+        int minY = Integer.MIN_VALUE;
+        int maxY = Integer.MAX_VALUE;
+        if (velocityY < 0) {
+            minY = getMaxNegativeScrollAmount();
+            if (minY > Integer.MIN_VALUE) {
+                mIsScrollerBoundSet = true;
+            }
+        } else {
+            maxY = getMaxPositiveScrollAmount();
+            if (maxY < Integer.MAX_VALUE) {
+                mIsScrollerBoundSet = true;
+            }
+        }
+        if (mIsScrollerBoundSet || alwaysFling) {
+            mLastScrollerY = 0;
+            // x velocity is set to 1 to avoid overscroller bug
+            mScroller.fling(0, 0, 1, velocityY, 0, 0, minY, maxY, 0,
+                    mExpandedInThisMotion && !isScrolledToTop() ? 0 : Integer.MAX_VALUE / 2);
+        }
+    }
+
+    /**
+     * Returns the maximum number of pixels we can scroll in the positive direction (downwards)
+     * before reaching the bottom of the list (discounting overscroll).
+     *
+     * If the return value is negative then we have overscrolled; this is a transient state which
+     * should immediately be handled by adjusting the anchor position and adding the extra space to
+     * the bottom overscroll amount.
+     *
+     * If we don't know how many pixels we have left to scroll (because the last row has not been
+     * materialized, or it's in the shelf so it doesn't have its "natural" position), we return
+     * {@link Integer#MAX_VALUE}.
+     */
+    private int getMaxPositiveScrollAmount() {
+        assert ANCHOR_SCROLLING;
+        // TODO: once we're recycling we need to check the adapter position of the last child.
+        ExpandableNotificationRow lastRow = getLastRowNotGone();
+        if (mScrollAnchorView != null && lastRow != null && !lastRow.isInShelf()) {
+            // distance from bottom of last child to bottom of notifications area is:
+            // distance from bottom of last child
+            return (int) (lastRow.getTranslationY() + lastRow.getActualHeight()
+                    // to top of anchor view
+                    - mScrollAnchorView.getTranslationY()
+                    // plus distance from anchor view to top of notifications area
+                    + mScrollAnchorViewY
+                    // minus height of notifications area.
+                    - (mMaxLayoutHeight - getIntrinsicPadding() - mFooterView.getActualHeight()));
+        } else {
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    /**
+     * Returns the maximum number of pixels (as a negative number) we can scroll in the negative
+     * direction (upwards) before reaching the top of the list (discounting overscroll).
+     *
+     * If the return value is positive then we have overscrolled; this is a transient state which
+     * should immediately be handled by adjusting the anchor position and adding the extra space to
+     * the top overscroll amount.
+     *
+     * If we don't know how many pixels we have left to scroll (because the first row has not been
+     * materialized), we return {@link Integer#MIN_VALUE}.
+     */
+    private int getMaxNegativeScrollAmount() {
+        assert ANCHOR_SCROLLING;
+        // TODO: once we're recycling we need to check the adapter position of the first child.
+        ExpandableView firstChild = getFirstChildNotGone();
+        if (mScrollAnchorView != null && firstChild != null) {
+            // distance from top of first child to top of notifications area is:
+            // distance from top of anchor view
+            return (int) -(mScrollAnchorView.getTranslationY()
+                    // to top of first child
+                    - firstChild.getTranslationY()
+                    // minus distance from top of anchor view to top of notifications area.
+                    - mScrollAnchorViewY);
+        } else {
+            return Integer.MIN_VALUE;
+        }
+    }
+
+    /**
+     * During a fling, if we were unable to set the bounds of the fling due to the top/bottom view
+     * not being materialized or being pinned to the shelf, we need to check on every frame if we're
+     * able to set the bounds.  If we are, we fling the scroller again with the newly computed
+     * bounds.
+     */
+    private void maybeReflingScroller() {
+        if (!mIsScrollerBoundSet) {
+            // Because mScroller is a flywheel scroller, we fling with the minimum possible
+            // velocity to establish direction, so as not to perceptibly affect the velocity.
+            maybeFlingScroller((int) Math.signum(mScroller.getCurrVelocity()),
+                    false /* alwaysFling */);
         }
     }
 
@@ -4100,18 +4324,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public boolean isScrolledToBottom() {
         if (ANCHOR_SCROLLING) {
-            // TODO: once we're recycling this will need to check the adapter position of the child
-            ExpandableView lastRow = getLastRowNotGone();
-            if (lastRow == null || mScrollAnchorView == null) {
-                return true;
-            }
-            if (lastRow.isInShelf()) {
-                return false;
-            }
-            float lastChildEnd = lastRow.getTranslationY() + lastRow.getActualHeight();
-            float lastChildEndDistanceFromTop =
-                    lastChildEnd - mScrollAnchorView.getTranslationY() + mScrollAnchorViewY;
-            return lastChildEndDistanceFromTop > mMaxLayoutHeight - mFooterView.getActualHeight();
+            return getMaxPositiveScrollAmount() <= 0;
         } else {
             return mOwnScrollY >= getScrollRange();
         }
