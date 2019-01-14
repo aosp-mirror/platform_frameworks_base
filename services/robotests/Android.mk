@@ -26,9 +26,6 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    bmgrlib \
-    bu \
-    services.backup \
     services.core \
     services.net
 
@@ -41,8 +38,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := FrameworksServicesRoboTests
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src) \
-    $(call all-java-files-under, backup/src)
+LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_RESOURCE_DIR := \
     $(LOCAL_PATH)/res
@@ -82,8 +78,7 @@ LOCAL_JAVA_LIBRARIES := \
 
 LOCAL_TEST_PACKAGE := FrameworksServicesLib
 
-LOCAL_ROBOTEST_FILES := $(call find-files-in-subdirs,$(LOCAL_PATH)/src,*Test.java,.) \
-    $(call find-files-in-subdirs,$(LOCAL_PATH)/backup/src,*Test.java,.)
+LOCAL_ROBOTEST_FILES := $(call find-files-in-subdirs,$(LOCAL_PATH)/src,*Test.java,.)
 
 include external/robolectric-shadows/run_robotests.mk
 
