@@ -15,6 +15,7 @@
  */
 package android.view.autofill;
 
+import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -25,32 +26,46 @@ import android.view.View;
  */
 public final class AutofillId implements Parcelable {
 
+    /** @hide */
+    public static final int NO_SESSION = 0;
+
+    private static final int FLAG_IS_VIRTUAL = 0x1;
+    private static final int FLAG_HAS_SESSION = 0x2;
+
     private final int mViewId;
-    private final boolean mVirtual;
+    private final int mFlags;
     private final int mVirtualId;
+    private final int mSessionId;
 
     /** @hide */
     @TestApi
     public AutofillId(int id) {
-        mVirtual = false;
-        mViewId = id;
-        mVirtualId = View.NO_ID;
+        this(/* flags= */ 0, id, View.NO_ID, NO_SESSION);
     }
 
     /** @hide */
     @TestApi
-    public AutofillId(AutofillId parent, int virtualChildId) {
-        mVirtual = true;
-        mViewId = parent.mViewId;
-        mVirtualId = virtualChildId;
+    public AutofillId(@NonNull AutofillId parent, int virtualChildId) {
+        this(FLAG_IS_VIRTUAL, parent.mViewId, virtualChildId, NO_SESSION);
     }
 
     /** @hide */
     public AutofillId(int parentId, int virtualChildId) {
-        mVirtual = true;
+        this(FLAG_IS_VIRTUAL, parentId, virtualChildId, NO_SESSION);
+    }
+
+    /** @hide */
+    public AutofillId(@NonNull AutofillId parent, int virtualChildId, int sessionId) {
+        this(FLAG_IS_VIRTUAL | FLAG_HAS_SESSION, parent.mViewId, virtualChildId, sessionId);
+    }
+
+    private AutofillId(int flags, int parentId, int virtualChildId, int sessionId) {
+        mFlags = flags;
         mViewId = parentId;
         mVirtualId = virtualChildId;
+        mSessionId = sessionId;
     }
+
 
     /** @hide */
     public int getViewId() {
@@ -64,7 +79,16 @@ public final class AutofillId implements Parcelable {
 
     /** @hide */
     public boolean isVirtual() {
-        return mVirtual;
+        return (mFlags & FLAG_IS_VIRTUAL) != 0;
+    }
+
+    private boolean hasSession() {
+        return (mFlags & FLAG_HAS_SESSION) != 0;
+    }
+
+    /** @hide */
+    public int getSessionId() {
+        return mSessionId;
     }
 
     /////////////////////////////////
@@ -77,6 +101,7 @@ public final class AutofillId implements Parcelable {
         int result = 1;
         result = prime * result + mViewId;
         result = prime * result + mVirtualId;
+        result = prime * result + mSessionId;
         return result;
     }
 
@@ -88,14 +113,18 @@ public final class AutofillId implements Parcelable {
         final AutofillId other = (AutofillId) obj;
         if (mViewId != other.mViewId) return false;
         if (mVirtualId != other.mVirtualId) return false;
+        if (mSessionId != other.mSessionId) return false;
         return true;
     }
 
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder().append(mViewId);
-        if (mVirtual) {
+        if (isVirtual()) {
             builder.append(':').append(mVirtualId);
+        }
+        if (hasSession()) {
+            builder.append('@').append(mSessionId);
         }
         return builder.toString();
     }
@@ -108,21 +137,24 @@ public final class AutofillId implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mViewId);
-        parcel.writeInt(mVirtual ? 1 : 0);
-        parcel.writeInt(mVirtualId);
-    }
-
-    private AutofillId(Parcel parcel) {
-        mViewId = parcel.readInt();
-        mVirtual = parcel.readInt() == 1;
-        mVirtualId = parcel.readInt();
+        parcel.writeInt(mFlags);
+        if (isVirtual()) {
+            parcel.writeInt(mVirtualId);
+        }
+        if (hasSession()) {
+            parcel.writeInt(mSessionId);
+        }
     }
 
     public static final Parcelable.Creator<AutofillId> CREATOR =
             new Parcelable.Creator<AutofillId>() {
         @Override
         public AutofillId createFromParcel(Parcel source) {
-            return new AutofillId(source);
+            final int viewId = source.readInt();
+            final int flags = source.readInt();
+            final int virtualId = (flags & FLAG_IS_VIRTUAL) != 0 ? source.readInt() : View.NO_ID;
+            final int sessionId = (flags & FLAG_HAS_SESSION) != 0 ? source.readInt() : NO_SESSION;
+            return new AutofillId(flags, viewId, virtualId, sessionId);
         }
 
         @Override

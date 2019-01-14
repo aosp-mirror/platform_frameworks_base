@@ -19,11 +19,14 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.assertThrows;
 
+import android.view.View;
+import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
+import android.view.contentcapture.ViewNode.ViewStructureImpl;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Spy;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
@@ -35,34 +38,104 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ContentCaptureSessionTest {
 
-    /**
-     * Uses a spy as ContentCaptureSession is abstract but (so far) we're testing its concrete
-     * methods.
-     */
-    @Spy
-    private ContentCaptureSession mMockSession;
+    private ContentCaptureSession mSession1 = new MyContentCaptureSession("111");
+
+    private ContentCaptureSession mSession2 = new MyContentCaptureSession("2222");
+
+    @Mock
+    private View mMockView;
 
     @Test
     public void testNewAutofillId_invalid() {
-        assertThrows(NullPointerException.class, () -> mMockSession.newAutofillId(null, 42));
+        assertThrows(NullPointerException.class, () -> mSession1.newAutofillId(null, 42));
         assertThrows(IllegalArgumentException.class,
-                () -> mMockSession.newAutofillId(new AutofillId(42, 42), 42));
+                () -> mSession1.newAutofillId(new AutofillId(42, 42), 42));
     }
 
     @Test
     public void testNewAutofillId_valid() {
         final AutofillId parentId = new AutofillId(42);
-        final AutofillId childId = mMockSession.newAutofillId(parentId, 108);
+        final AutofillId childId = mSession1.newAutofillId(parentId, 108);
         assertThat(childId.getViewId()).isEqualTo(42);
         assertThat(childId.getVirtualChildId()).isEqualTo(108);
-        // TODO(b/121197119): assert session id
+        assertThat(childId.getSessionId()).isEqualTo(mSession1.getIdAsInt());
+    }
+
+    @Test
+    public void testNewAutofillId_differentSessions() {
+        assertThat(mSession1.getIdAsInt()).isNotSameAs(mSession2.getIdAsInt()); //sanity check
+        final AutofillId parentId = new AutofillId(42);
+        final AutofillId childId1 = mSession1.newAutofillId(parentId, 108);
+        final AutofillId childId2 = mSession2.newAutofillId(parentId, 108);
+        assertThat(childId1).isNotEqualTo(childId2);
+        assertThat(childId2).isNotEqualTo(childId1);
     }
 
     @Test
     public void testNotifyXXX_null() {
-        assertThrows(NullPointerException.class, () -> mMockSession.notifyViewAppeared(null));
-        assertThrows(NullPointerException.class, () -> mMockSession.notifyViewDisappeared(null));
+        assertThrows(NullPointerException.class, () -> mSession1.notifyViewAppeared(null));
+        assertThrows(NullPointerException.class, () -> mSession1.notifyViewDisappeared(null));
         assertThrows(NullPointerException.class,
-                () -> mMockSession.notifyViewTextChanged(null, "whatever", 0));
+                () -> mSession1.notifyViewTextChanged(null, "whatever", 0));
+    }
+
+    @Test
+    public void testNewViewStructure() {
+        assertThat(mMockView.getAutofillId()).isNotNull(); // sanity check
+        final ViewStructure structure = mSession1.newViewStructure(mMockView);
+        assertThat(structure).isNotNull();
+        assertThat(structure.getAutofillId()).isEqualTo(mMockView.getAutofillId());
+    }
+
+    @Test
+    public void testNewVirtualViewStructure() {
+        final AutofillId parentId = new AutofillId(42);
+        final ViewStructure structure = mSession1.newVirtualViewStructure(parentId, 108);
+        assertThat(structure).isNotNull();
+        final AutofillId childId = mSession1.newAutofillId(parentId, 108);
+        assertThat(structure.getAutofillId()).isEqualTo(childId);
+    }
+
+    // Cannot use @Spy because we need to pass the session id on constructor
+    private class MyContentCaptureSession extends ContentCaptureSession {
+
+        private MyContentCaptureSession(String id) {
+            super(id);
+        }
+
+        @Override
+        MainContentCaptureSession getMainCaptureSession() {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        ContentCaptureSession newChild(ContentCaptureContext context) {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        void flush() {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        void onDestroy() {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        void internalNotifyViewAppeared(ViewStructureImpl node) {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        void internalNotifyViewDisappeared(AutofillId id) {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        void internalNotifyViewTextChanged(AutofillId id, CharSequence text, int flags) {
+            throw new UnsupportedOperationException("should not have been called");
+        }
     }
 }

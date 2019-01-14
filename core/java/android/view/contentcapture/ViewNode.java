@@ -672,9 +672,9 @@ public final class ViewNode extends AssistStructure.ViewNode {
         }
 
         @VisibleForTesting // Must be public to be accessed from FrameworkCoreTests' apk.
-        public ViewStructureImpl(@NonNull AutofillId parentId, int virtualId) {
+        public ViewStructureImpl(@NonNull AutofillId parentId, int virtualId, int sessionId) {
             mNode.mParentAutofillId = Preconditions.checkNotNull(parentId);
-            mNode.mAutofillId = new AutofillId(parentId, virtualId);
+            mNode.mAutofillId = new AutofillId(parentId, virtualId, sessionId);
         }
 
         @VisibleForTesting // Must be public to be accessed from FrameworkCoreTests' apk.
