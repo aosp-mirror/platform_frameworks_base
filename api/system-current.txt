@@ -4981,6 +4981,7 @@ package android.provider {
     method public static void removeOnPropertyChangedListener(android.provider.DeviceConfig.OnPropertyChangedListener);
     method public static void resetToDefaults(int, java.lang.String);
     method public static boolean setProperty(java.lang.String, java.lang.String, java.lang.String, boolean);
+    field public static final java.lang.String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
   }
 
   public static abstract interface DeviceConfig.OnPropertyChangedListener {
