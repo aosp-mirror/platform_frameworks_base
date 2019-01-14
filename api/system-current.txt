@@ -5054,6 +5054,40 @@ package android.telephony {
     field public static final int WWAN = 1; // 0x1
   }
 
+  public class CallAttributes implements android.os.Parcelable {
+    ctor public CallAttributes(android.telephony.PreciseCallState, int, android.telephony.CallQuality);
+    method public int describeContents();
+    method public android.telephony.CallQuality getCallQuality();
+    method public int getNetworkType();
+    method public android.telephony.PreciseCallState getPreciseCallState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
+  }
+
+  public final class CallQuality implements android.os.Parcelable {
+    ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int);
+    method public int describeContents();
+    method public int getAverageRelativeJitter();
+    method public int getAverageRoundTripTime();
+    method public int getCallDuration();
+    method public int getCodecType();
+    method public int getDownlinkCallQualityLevel();
+    method public int getMaxRelativeJitter();
+    method public int getNumRtpPacketsNotReceived();
+    method public int getNumRtpPacketsReceived();
+    method public int getNumRtpPacketsTransmitted();
+    method public int getNumRtpPacketsTransmittedLost();
+    method public int getUplinkCallQualityLevel();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CALL_QUALITY_BAD = 4; // 0x4
+    field public static final int CALL_QUALITY_EXCELLENT = 0; // 0x0
+    field public static final int CALL_QUALITY_FAIR = 2; // 0x2
+    field public static final int CALL_QUALITY_GOOD = 1; // 0x1
+    field public static final int CALL_QUALITY_NOT_AVAILABLE = 5; // 0x5
+    field public static final int CALL_QUALITY_POOR = 3; // 0x3
+    field public static final android.os.Parcelable.Creator<android.telephony.CallQuality> CREATOR;
+  }
+
   public class CarrierConfigManager {
     method public static android.os.PersistableBundle getDefaultConfig();
     method public void overrideConfig(int, android.os.PersistableBundle);
@@ -5319,12 +5353,14 @@ package android.telephony {
   }
 
   public class PhoneStateListener {
+    method public void onCallAttributesChanged(android.telephony.CallAttributes);
     method public void onCallDisconnectCauseChanged(int, int);
     method public void onPreciseCallStateChanged(android.telephony.PreciseCallState);
     method public void onPreciseDataConnectionStateChanged(android.telephony.PreciseDataConnectionState);
     method public void onRadioPowerStateChanged(int);
     method public void onSrvccStateChanged(int);
     method public void onVoiceActivationStateChanged(int);
+    field public static final int LISTEN_CALL_ATTRIBUTES_CHANGED = 67108864; // 0x4000000
     field public static final int LISTEN_CALL_DISCONNECT_CAUSES = 33554432; // 0x2000000
     field public static final int LISTEN_PRECISE_CALL_STATE = 2048; // 0x800
     field public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
