@@ -1275,7 +1275,7 @@ package android.service.notification {
     ctor public NotificationAssistantService();
     method public final void adjustNotification(android.service.notification.Adjustment);
     method public final void adjustNotifications(java.util.List<android.service.notification.Adjustment>);
-    method public void onActionClicked(java.lang.String, android.app.Notification.Action, int);
+    method public void onActionInvoked(java.lang.String, android.app.Notification.Action, int);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public void onNotificationDirectReplied(java.lang.String);
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification);
