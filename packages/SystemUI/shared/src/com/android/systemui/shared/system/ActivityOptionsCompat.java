@@ -20,6 +20,7 @@ import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -31,11 +32,20 @@ import android.os.Handler;
 public abstract class ActivityOptionsCompat {
 
     /**
-     * @return ActivityOptions for starting a task in split screen.
+     * @return ActivityOptions for starting a task in split screen as the primary window.
      */
     public static ActivityOptions makeSplitScreenOptions(boolean dockTopLeft) {
+        return makeSplitScreenOptions(dockTopLeft, true);
+    }
+
+    /**
+     * @return ActivityOptions for starting a task in split screen.
+     */
+    public static ActivityOptions makeSplitScreenOptions(boolean dockTopLeft, boolean isPrimary) {
         final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        options.setLaunchWindowingMode(isPrimary
+                ? WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                : WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
         options.setSplitScreenCreateMode(dockTopLeft
                 ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
                 : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT);
