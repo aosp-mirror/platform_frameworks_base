@@ -97,6 +97,13 @@ public final class CapabilityChangeRequest implements Parcelable {
         public @ImsRegistrationImplBase.ImsRegistrationTech int getRadioTech() {
             return radioTech;
         }
+
+        @Override
+        public String toString() {
+            return "CapabilityPair{"
+                    + "mCapability=" + mCapability
+                    + ", radioTech=" + radioTech + '}';
+        }
     }
 
     // Pair contains <radio tech, mCapability>
@@ -210,6 +217,13 @@ public final class CapabilityChangeRequest implements Parcelable {
             dest.writeInt(pair.getCapability());
             dest.writeInt(pair.getRadioTech());
         }
+    }
+
+    @Override
+    public String toString() {
+        return "CapabilityChangeRequest{"
+                + "mCapabilitiesToEnable=" + mCapabilitiesToEnable
+                + ", mCapabilitiesToDisable=" + mCapabilitiesToDisable + '}';
     }
 
     /**
