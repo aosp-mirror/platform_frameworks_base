@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.os.ParcelableException;
 import android.telephony.CellInfo;
 
 import java.util.List;
@@ -27,4 +28,5 @@ import java.util.List;
 oneway interface ICellInfoCallback
 {
     void onCellInfo(in List<CellInfo> state);
+    void onError(in int errorCode, in ParcelableException detail);
 }

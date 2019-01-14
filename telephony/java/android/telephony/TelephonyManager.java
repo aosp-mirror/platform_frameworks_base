@@ -4898,19 +4898,53 @@ public class TelephonyManager {
     /** Callback for providing asynchronous {@link CellInfo} on request */
     public abstract static class CellInfoCallback {
         /**
-         * Response to
+         * Success response to
          * {@link android.telephony.TelephonyManager#requestCellInfoUpdate requestCellInfoUpdate()}.
          *
-         * <p>Invoked when there is a response to
+         * Invoked when there is a response to
          * {@link android.telephony.TelephonyManager#requestCellInfoUpdate requestCellInfoUpdate()}
          * to provide a list of {@link CellInfo}. If no {@link CellInfo} is available then an empty
-         * list will be provided. If an error occurs, null will be provided.
+         * list will be provided. If an error occurs, null will be provided unless the onError
+         * callback is overridden.
          *
          * @param cellInfo a list of {@link CellInfo}, an empty list, or null.
          *
          * {@see android.telephony.TelephonyManager#getAllCellInfo getAllCellInfo()}
          */
-        public abstract void onCellInfo(List<CellInfo> cellInfo);
+        public abstract void onCellInfo(@NonNull List<CellInfo> cellInfo);
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = {"ERROR_"}, value = {ERROR_TIMEOUT, ERROR_MODEM_ERROR})
+        public @interface CellInfoCallbackError {}
+
+        /**
+         * The system timed out waiting for a response from the Radio.
+         */
+        public static final int ERROR_TIMEOUT = 1;
+
+        /**
+         * The modem returned a failure.
+         */
+        public static final int ERROR_MODEM_ERROR = 2;
+
+        /**
+         * Error response to
+         * {@link android.telephony.TelephonyManager#requestCellInfoUpdate requestCellInfoUpdate()}.
+         *
+         * Invoked when an error condition prevents updated {@link CellInfo} from being fetched
+         * and returned from the modem. Callers of requestCellInfoUpdate() should override this
+         * function to receive detailed status information in the event of an error. By default,
+         * this function will invoke onCellInfo() with null.
+         *
+         * @param errorCode an error code indicating the type of failure.
+         * @param detail a Throwable object with additional detail regarding the failure if
+         *     available, otherwise null.
+         */
+        public void onError(@CellInfoCallbackError int errorCode, @Nullable Throwable detail) {
+            // By default, simply invoke the success callback with an empty list.
+            onCellInfo(new ArrayList<CellInfo>());
+        }
     };
 
     /**
@@ -4936,6 +4970,12 @@ public class TelephonyManager {
                         public void onCellInfo(List<CellInfo> cellInfo) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onCellInfo(cellInfo)));
+                        }
+
+                        public void onError(int errorCode, android.os.ParcelableException detail) {
+                            Binder.withCleanCallingIdentity(() ->
+                                    executor.execute(() -> callback.onError(
+                                            errorCode, detail.getCause())));
                         }
                     }, getOpPackageName());
 
@@ -4970,6 +5010,12 @@ public class TelephonyManager {
                         public void onCellInfo(List<CellInfo> cellInfo) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onCellInfo(cellInfo)));
+                        }
+
+                        public void onError(int errorCode, android.os.ParcelableException detail) {
+                            Binder.withCleanCallingIdentity(() ->
+                                    executor.execute(() -> callback.onError(
+                                            errorCode, detail.getCause())));
                         }
                     }, getOpPackageName(), workSource);
         } catch (RemoteException ex) {
