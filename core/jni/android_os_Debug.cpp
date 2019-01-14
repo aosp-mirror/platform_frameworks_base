@@ -605,34 +605,6 @@ static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
     return android_os_Debug_getPssPid(env, clazz, getpid(), NULL, NULL);
 }
 
-static long get_allocated_vmalloc_memory() {
-    char line[1024];
-
-    long vmalloc_allocated_size = 0;
-
-    UniqueFile fp = MakeUniqueFile("/proc/vmallocinfo", "re");
-    if (fp == nullptr) {
-        return 0;
-    }
-
-    while (true) {
-        if (fgets(line, 1024, fp.get()) == NULL) {
-            break;
-        }
-
-        // check to see if there are pages mapped in vmalloc area
-        if (!strstr(line, "pages=")) {
-            continue;
-        }
-
-        long nr_pages;
-        if (sscanf(line, "%*x-%*x %*ld %*s pages=%ld", &nr_pages) == 1) {
-            vmalloc_allocated_size += (nr_pages * getpagesize());
-        }
-    }
-    return vmalloc_allocated_size;
-}
-
 // The 1:1 mapping of MEMINFO_* enums here must match with the constants from
 // Debug.java.
 enum {
@@ -682,9 +654,8 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
     if (outArray != NULL) {
         outLen = MEMINFO_COUNT;
         for (int i = 0; i < outLen; i++) {
-            // TODO: move get_allocated_vmalloc_memory() to libmeminfo
             if (i == MEMINFO_VMALLOC_USED) {
-                outArray[i] = get_allocated_vmalloc_memory() / 1024;
+                outArray[i] = smi.ReadVmallocInfo() / 1024;
                 continue;
             }
             outArray[i] = mem[i];
@@ -693,7 +664,6 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
 
     env->ReleaseLongArrayElements(out, outArray, 0);
 }
-
 
 static jint read_binder_stat(const char* stat)
 {
