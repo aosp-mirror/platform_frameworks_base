@@ -1341,6 +1341,38 @@ public class TelephonyManager {
     @SystemApi
     public static final long MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS = 60000;
 
+    /**
+     * Intent sent when an error occurs that debug tools should log and possibly take further
+     * action such as capturing vendor-specific logs.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public static final String ACTION_DEBUG_EVENT = "android.telephony.action.DEBUG_EVENT";
+
+    /**
+     * An arbitrary ParcelUuid which should be consistent for each occurrence of the same event.
+     *
+     * This field must be included in all events.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DEBUG_EVENT_ID = "android.telephony.extra.DEBUG_EVENT_ID";
+
+    /**
+     * A freeform string description of the event.
+     *
+     * This field is optional for all events and as a guideline should not exceed 80 characters
+     * and should be as short as possible to convey the essence of the event.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DEBUG_EVENT_DESCRIPTION =
+            "android.telephony.extra.DEBUG_EVENT_DESCRIPTION";
+
     //
     //
     // Device Info
