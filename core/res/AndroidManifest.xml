@@ -3906,7 +3906,8 @@
     <permission android:name="android.permission.ACCESS_NOTIFICATIONS"
         android:protectionLevel="signature|privileged|appop" />
 
-    <!-- Marker permission for applications that wish to access notification policy.
+    <!-- Marker permission for applications that wish to access notification policy. This permission
+        is not supported on managed profiles.
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"
