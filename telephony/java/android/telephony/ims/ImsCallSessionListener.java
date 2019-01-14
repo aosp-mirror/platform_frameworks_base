@@ -599,5 +599,18 @@ public class ImsCallSessionListener {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * While in call, there has been a change in RTT audio indicator.
+     *
+     * @param profile updated ImsStreamMediaProfile
+     */
+    public void callSessionRttAudioIndicatorChanged(ImsStreamMediaProfile profile) {
+        try {
+            mListener.callSessionRttAudioIndicatorChanged(profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
 
