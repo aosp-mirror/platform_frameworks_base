@@ -225,6 +225,17 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 Slog.w(TAG, "Deleting orphan icon " + icon);
                 icon.delete();
             }
+
+            // Invalid sessions might have been marked while parsing. Re-write the database with
+            // the updated information.
+            writeSessionsLocked();
+
+            for (int i = 0; i < mSessions.size(); i++) {
+                final PackageInstallerSession session = mSessions.valueAt(i);
+                if (session.isStaged()) {
+                    mStagingManager.restoreSession(session);
+                }
+            }
         }
     }
 
@@ -329,9 +340,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
                         if (valid) {
                             mSessions.put(session.sessionId, session);
-                            if (session.isStaged()) {
-                                mStagingManager.restoreSession(session);
-                            }
                         } else {
                             // Since this is early during boot we don't send
                             // any observer events about the session, but we
@@ -1120,6 +1128,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         public void onSessionProgressChanged(PackageInstallerSession session, float progress) {
             mCallbacks.notifySessionProgressChanged(session.sessionId, session.userId, progress);
+        }
+
+        public void onStagedSessionChanged(PackageInstallerSession session) {
+            writeSessionsAsync();
+            mPm.sendSessionUpdatedBroadcast(session.generateInfo(false), session.userId);
         }
 
         public void onSessionFinished(final PackageInstallerSession session, boolean success) {

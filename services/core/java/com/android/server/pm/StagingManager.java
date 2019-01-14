@@ -168,7 +168,6 @@ public class StagingManager {
         } else {
             session.setStagedSessionFailed(SessionInfo.VERIFICATION_FAILED);
         }
-        mPm.sendSessionUpdatedBroadcast(session.generateInfo(false), session.userId);
     }
 
     void commitSession(@NonNull PackageInstallerSession session) {
