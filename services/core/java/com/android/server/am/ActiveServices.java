@@ -739,7 +739,7 @@ public final class ActiveServices {
 
     private void stopServiceLocked(ServiceRecord service) {
         if (service.delayed) {
-            // If service isn't actually running, but is is being held in the
+            // If service isn't actually running, but is being held in the
             // delayed list, then we need to keep it started but note that it
             // should be stopped once no longer delayed.
             if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "Delaying stop of pending: " + service);
