@@ -89,6 +89,7 @@ void RawPrintVisitor::visit(const IdmapData::TypeEntry& type_entry) {
   }
 }
 
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 void RawPrintVisitor::print(uint16_t value, const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -101,6 +102,7 @@ void RawPrintVisitor::print(uint16_t value, const char* fmt, ...) {
   offset_ += sizeof(uint16_t);
 }
 
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 void RawPrintVisitor::print(uint32_t value, const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -113,6 +115,7 @@ void RawPrintVisitor::print(uint32_t value, const char* fmt, ...) {
   offset_ += sizeof(uint32_t);
 }
 
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 void RawPrintVisitor::print(const std::string& value, const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
