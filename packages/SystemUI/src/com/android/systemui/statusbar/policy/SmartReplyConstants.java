@@ -45,16 +45,19 @@ public final class SmartReplyConstants extends ContentObserver {
             "max_squeeze_remeasure_attempts";
     private static final String KEY_EDIT_CHOICES_BEFORE_SENDING =
             "edit_choices_before_sending";
+    private static final String KEY_SHOW_IN_HEADS_UP = "show_in_heads_up";
 
     private final boolean mDefaultEnabled;
     private final boolean mDefaultRequiresP;
     private final int mDefaultMaxSqueezeRemeasureAttempts;
     private final boolean mDefaultEditChoicesBeforeSending;
+    private final boolean mDefaultShowInHeadsUp;
 
     private boolean mEnabled;
     private boolean mRequiresTargetingP;
     private int mMaxSqueezeRemeasureAttempts;
     private boolean mEditChoicesBeforeSending;
+    private boolean mShowInHeadsUp;
 
     private final Context mContext;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -73,6 +76,8 @@ public final class SmartReplyConstants extends ContentObserver {
                 R.integer.config_smart_replies_in_notifications_max_squeeze_remeasure_attempts);
         mDefaultEditChoicesBeforeSending = resources.getBoolean(
                 R.bool.config_smart_replies_in_notifications_edit_choices_before_sending);
+        mDefaultShowInHeadsUp = resources.getBoolean(
+                R.bool.config_smart_replies_in_notifications_show_in_heads_up);
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS),
@@ -99,6 +104,7 @@ public final class SmartReplyConstants extends ContentObserver {
                     KEY_MAX_SQUEEZE_REMEASURE_ATTEMPTS, mDefaultMaxSqueezeRemeasureAttempts);
             mEditChoicesBeforeSending = mParser.getBoolean(
                     KEY_EDIT_CHOICES_BEFORE_SENDING, mDefaultEditChoicesBeforeSending);
+            mShowInHeadsUp = mParser.getBoolean(KEY_SHOW_IN_HEADS_UP, mDefaultShowInHeadsUp);
         }
     }
 
@@ -141,5 +147,12 @@ public final class SmartReplyConstants extends ContentObserver {
             default:
                 return mEditChoicesBeforeSending;
         }
+    }
+
+    /**
+     * Returns whether smart suggestions should be enabled in heads-up notifications.
+     */
+    public boolean getShowInHeadsUp() {
+        return mShowInHeadsUp;
     }
 }

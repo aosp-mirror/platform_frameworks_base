@@ -13772,6 +13772,7 @@ public final class Settings {
          * requires_targeting_p            (boolean)
          * max_squeeze_remeasure_attempts  (int)
          * edit_choices_before_sending     (boolean)
+         * show_in_heads_up                (boolean)
          * </pre>
          * @see com.android.systemui.statusbar.policy.SmartReplyConstants
          * @hide
