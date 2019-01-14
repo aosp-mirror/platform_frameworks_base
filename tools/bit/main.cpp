@@ -623,12 +623,13 @@ run_phases(vector<Target*> targets, const Options& options)
     const string buildProduct = get_required_env("TARGET_PRODUCT", false);
     const string buildVariant = get_required_env("TARGET_BUILD_VARIANT", false);
     const string buildType = get_required_env("TARGET_BUILD_TYPE", false);
-
+    const string buildOut = get_out_dir();
     chdir_or_exit(buildTop.c_str());
 
-    const string buildDevice = get_build_var("TARGET_DEVICE", false);
-    const string buildId = get_build_var("BUILD_ID", false);
-    const string buildOut = get_out_dir();
+    BuildVars buildVars(buildOut, buildProduct, buildVariant, buildType);
+
+    const string buildDevice = buildVars.GetBuildVar("TARGET_DEVICE", false);
+    const string buildId = buildVars.GetBuildVar("BUILD_ID", false);
 
     // Get the modules for the targets
     map<string,Module> modules;
@@ -1004,13 +1005,16 @@ run_phases(vector<Target*> targets, const Options& options)
 void
 run_tab_completion(const string& word)
 {
-    const string buildTop = get_required_env("ANDROID_BUILD_TOP", true);
+    const string buildTop = get_required_env("ANDROID_BUILD_TOP", false);
     const string buildProduct = get_required_env("TARGET_PRODUCT", false);
+    const string buildVariant = get_required_env("TARGET_BUILD_VARIANT", false);
+    const string buildType = get_required_env("TARGET_BUILD_TYPE", false);
     const string buildOut = get_out_dir();
-
     chdir_or_exit(buildTop.c_str());
 
-    string buildDevice = sniff_device_name(buildOut, buildProduct);
+    BuildVars buildVars(buildOut, buildProduct, buildVariant, buildType);
+
+    string buildDevice = buildVars.GetBuildVar("TARGET_DEVICE", false);
 
     map<string,Module> modules;
     read_modules(buildOut, buildDevice, &modules, true);
