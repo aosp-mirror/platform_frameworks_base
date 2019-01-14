@@ -3685,7 +3685,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_textCursorDrawable
      */
     public void setTextCursorDrawable(@DrawableRes int textCursorDrawable) {
-        setTextCursorDrawable(mContext.getDrawable(textCursorDrawable));
+        setTextCursorDrawable(
+                textCursorDrawable != 0 ? mContext.getDrawable(textCursorDrawable) : null);
     }
 
     /**
