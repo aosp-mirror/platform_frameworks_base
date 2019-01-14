@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -58,6 +59,9 @@ import java.util.List;
  * @hide
  */
 @SystemApi
+@TestApi
+// TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+// in the same package as the test, and that module is compiled with SDK=test_current
 public abstract class AugmentedAutofillService extends Service {
 
     private static final String TAG = AugmentedAutofillService.class.getSimpleName();
@@ -268,7 +272,6 @@ public abstract class AugmentedAutofillService extends Service {
          *
          * <p>Used to make sure the SmartSuggestionsParams is updated when a new fields is focused.
          */
-        // TODO(b/111330312): might not be needed when using IME
         @GuardedBy("mLock")
         private AutofillId mLastShownId;
 

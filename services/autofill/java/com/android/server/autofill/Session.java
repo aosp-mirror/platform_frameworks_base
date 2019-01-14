@@ -2581,7 +2581,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         final RemoteAugmentedAutofillService remoteService = mService
                 .getRemoteAugmentedAutofillServiceLocked();
-        if (remoteService == null) return null;
+        if (remoteService == null) {
+            if (sVerbose) Slog.v(TAG, "triggerAugmentedAutofillLocked(): no service for user");
+            return null;
+        }
 
         // Define which mode will be used
         final int mode;

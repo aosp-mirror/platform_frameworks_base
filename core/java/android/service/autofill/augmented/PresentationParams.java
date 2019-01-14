@@ -19,6 +19,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.graphics.Rect;
 import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
 import android.util.DebugUtils;
@@ -48,6 +49,9 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
+@TestApi
+//TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+//in the same package as the test, and that module is compiled with SDK=test_current
 public abstract class PresentationParams {
 
     /**
@@ -147,8 +151,11 @@ public abstract class PresentationParams {
      * Area associated with a {@link PresentationParams Smart Suggestions} provider.
      *
      * @hide
-     * */
+     */
     @SystemApi
+    @TestApi
+    //TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+    //in the same package as the test, and that module is compiled with SDK=test_current
     public abstract static class Area {
 
         /** @hide */

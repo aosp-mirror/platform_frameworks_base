@@ -20,6 +20,7 @@ import static android.service.autofill.augmented.AugmentedAutofillService.DEBUG;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Dialog;
 import android.graphics.Rect;
 import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
@@ -61,6 +62,9 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
+@TestApi
+//TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+//in the same package as the test, and that module is compiled with SDK=test_current
 public final class FillWindow implements AutoCloseable {
     private static final String TAG = "FillWindow";
 
