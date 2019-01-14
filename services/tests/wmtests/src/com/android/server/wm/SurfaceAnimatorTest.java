@@ -90,7 +90,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
                 OnAnimationFinishedCallback.class);
         assertAnimating(mAnimatable);
-        verify(mTransaction).reparent(eq(mAnimatable.mSurface), eq(mAnimatable.mLeash.getHandle()));
+        verify(mTransaction).reparent(eq(mAnimatable.mSurface), eq(mAnimatable.mLeash));
         verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
 
         callbackCaptor.getValue().onAnimationFinished(mSpec);

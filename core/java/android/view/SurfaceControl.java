@@ -156,7 +156,7 @@ public class SurfaceControl implements Parcelable {
     private static native void nativeReparentChildren(long transactionObj, long nativeObject,
             IBinder handle);
     private static native void nativeReparent(long transactionObj, long nativeObject,
-            IBinder parentHandle);
+            long newParentNativeObject);
     private static native void nativeSeverChildren(long transactionObj, long nativeObject);
     private static native void nativeSetOverrideScalingMode(long transactionObj, long nativeObject,
             int scalingMode);
@@ -962,9 +962,9 @@ public class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public void reparent(IBinder newParentHandle) {
+    public void reparent(SurfaceControl newParent) {
         synchronized(SurfaceControl.class) {
-            sGlobalTransaction.reparent(this, newParentHandle);
+            sGlobalTransaction.reparent(this, newParent);
         }
     }
 
@@ -2071,13 +2071,23 @@ public class SurfaceControl implements Parcelable {
             return this;
         }
 
-        /** Re-parents a specific child layer to a new parent 
-         * @hide
+        /**
+         * Re-parents a given layer to a new parent. Children inherit transform (position, scaling)
+         * crop, visibility, and Z-ordering from their parents, as if the children were pixels within the
+         * parent Surface.
+         *
+         * @param sc The SurfaceControl to reparent
+         * @param newParent The new parent for the given control.
+         * @return This Transaction
          */
-        public Transaction reparent(SurfaceControl sc, IBinder newParentHandle) {
+        public Transaction reparent(SurfaceControl sc, SurfaceControl newParent) {
             sc.checkNotReleased();
-            nativeReparent(mNativeObject, sc.mNativeObject,
-                    newParentHandle);
+            long otherObject = 0;
+            if (newParent != null) {
+                newParent.checkNotReleased();
+                otherObject = newParent.mNativeObject;
+            }
+            nativeReparent(mNativeObject, sc.mNativeObject, otherObject);
             return this;
         }
 

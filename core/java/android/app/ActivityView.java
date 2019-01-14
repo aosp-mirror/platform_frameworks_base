@@ -328,7 +328,7 @@ public class ActivityView extends ViewGroup {
                 }
             } else {
                 mTmpTransaction.reparent(mRootSurfaceControl,
-                        mSurfaceView.getSurfaceControl().getHandle()).apply();
+                        mSurfaceView.getSurfaceControl()).apply();
             }
 
             if (mVirtualDisplay != null) {
@@ -390,7 +390,7 @@ public class ActivityView extends ViewGroup {
                 .build();
 
         try {
-            wm.reparentDisplayContent(displayId, mRootSurfaceControl.getHandle());
+            wm.reparentDisplayContent(displayId, mRootSurfaceControl);
             wm.dontOverrideDisplayInfo(displayId);
             if (mSingleTaskInstance) {
                 mActivityTaskManager.setDisplayToSingleTaskInstance(displayId);

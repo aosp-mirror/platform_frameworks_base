@@ -868,13 +868,13 @@ static void nativeReparentChildren(JNIEnv* env, jclass clazz, jlong transactionO
 
 static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject,
-        jobject newParentObject) {
+        jlong newParentObject) {
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    sp<IBinder> parentHandle = ibinderForJavaObject(env, newParentObject);
+    auto newParent = reinterpret_cast<SurfaceControl *>(newParentObject);
 
     {
         auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-        transaction->reparent(ctrl, parentHandle);
+        transaction->reparent(ctrl, newParent != NULL ? newParent->getHandle() : NULL);
     }
 }
 
@@ -1063,7 +1063,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeDeferTransactionUntilSurface },
     {"nativeReparentChildren", "(JJLandroid/os/IBinder;)V",
             (void*)nativeReparentChildren } ,
-    {"nativeReparent", "(JJLandroid/os/IBinder;)V",
+    {"nativeReparent", "(JJJ)V",
             (void*)nativeReparent },
     {"nativeSeverChildren", "(JJ)V",
             (void*)nativeSeverChildren } ,

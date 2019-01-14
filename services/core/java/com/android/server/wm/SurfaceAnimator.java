@@ -199,7 +199,7 @@ class SurfaceAnimator {
      * @see #setLayer
      */
     void reparent(Transaction t, SurfaceControl newParent) {
-        t.reparent(mLeash != null ? mLeash : mAnimatable.getSurfaceControl(), newParent.getHandle());
+        t.reparent(mLeash != null ? mLeash : mAnimatable.getSurfaceControl(), newParent);
     }
 
     /**
@@ -228,8 +228,8 @@ class SurfaceAnimator {
 
         // Cancel source animation, but don't let animation runner cancel the animation.
         from.cancelAnimation(t, false /* restarting */, false /* forwardCancel */);
-        t.reparent(surface, mLeash.getHandle());
-        t.reparent(mLeash, parent.getHandle());
+        t.reparent(surface, mLeash);
+        t.reparent(mLeash, parent);
         mAnimatable.onAnimationLeashCreated(t, mLeash);
         mService.mAnimationTransferMap.put(mAnimation, this);
     }
@@ -275,7 +275,7 @@ class SurfaceAnimator {
         final boolean destroy = mLeash != null && surface != null && parent != null;
         if (destroy) {
             if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to original parent");
-            t.reparent(surface, parent.getHandle());
+            t.reparent(surface, parent);
             scheduleAnim = true;
         }
         mService.mAnimationTransferMap.remove(mAnimation);
@@ -308,7 +308,7 @@ class SurfaceAnimator {
         if (!hidden) {
             t.show(leash);
         }
-        t.reparent(surface, leash.getHandle());
+        t.reparent(surface, leash);
         return leash;
     }
 
