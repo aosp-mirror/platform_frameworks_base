@@ -115,6 +115,7 @@ ASensorEventQueue* ASensorManager_createEventQueue(ASensorManager* manager,
     if (queue != 0) {
         ALooper_addFd(looper, queue->getFd(), ident, ALOOPER_EVENT_INPUT, callback, data);
         queue->looper = looper;
+        queue->requestAdditionalInfo = false;
         queue->incStrong(manager);
     }
     return static_cast<ASensorEventQueue*>(queue.get());
@@ -274,11 +275,19 @@ ssize_t ASensorEventQueue_getEvents(ASensorEventQueue* queue, ASensorEvent* even
         return android::BAD_VALUE;
     }
 
-    ssize_t actual = static_cast<SensorEventQueue*>(queue)->read(events, count);
+    SensorEventQueue* sensorQueue = static_cast<SensorEventQueue*>(queue);
+    ssize_t actual = sensorQueue->read(events, count);
     if (actual > 0) {
-        static_cast<SensorEventQueue*>(queue)->sendAck(events, actual);
+        sensorQueue->sendAck(events, actual);
     }
-    return actual;
+
+    return sensorQueue->filterEvents(events, actual);
+}
+
+int ASensorEventQueue_requestAdditionalInfoEvents(ASensorEventQueue* queue, bool enable) {
+    RETURN_IF_QUEUE_IS_NULL(android::BAD_VALUE);
+    queue->requestAdditionalInfo = enable;
+    return android::OK;
 }
 
 /*****************************************************************************/
