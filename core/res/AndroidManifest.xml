@@ -3861,7 +3861,7 @@
 
     <!-- @SystemApi @hide Allows managing apk level rollbacks. -->
     <permission android:name="android.permission.MANAGE_ROLLBACKS"
-        android:protectionLevel="signature|installer" />
+        android:protectionLevel="signature|verifier" />
 
     <!-- @SystemApi @hide Allows an application to mark other applications as harmful -->
     <permission android:name="android.permission.SET_HARMFUL_APP_WARNINGS"
