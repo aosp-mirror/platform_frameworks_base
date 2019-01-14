@@ -23,9 +23,6 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Overall information about the contents of a package.  This corresponds
  * to all of the information collected from AndroidManifest.xml.
@@ -372,6 +369,14 @@ public class PackageInfo implements Parcelable {
      */
     @UnsupportedAppUsage
     public String overlayTarget;
+
+    /**
+     * What overlayable set of elements package, if any, this package will overlay.
+     *
+     * Overlayable name defined within the target package, or null.
+     * @hide
+     */
+    public String overlayTargetName;
 
     /**
      * The overlay category, if any, of this package

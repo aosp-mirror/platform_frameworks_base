@@ -29,6 +29,7 @@
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
+#include "idmap2/ResourceUtils.h"
 #include "idmap2/Xml.h"
 #include "idmap2/ZipFile.h"
 
@@ -36,14 +37,13 @@
 
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Idmap;
-using android::idmap2::MemoryChunk;
 using android::idmap2::PoliciesToBitmask;
 using android::idmap2::PolicyBitmask;
 using android::idmap2::PolicyFlags;
 using android::idmap2::Result;
-using android::idmap2::Xml;
-using android::idmap2::ZipFile;
+using android::idmap2::utils::ExtractOverlayManifestInfo;
 using android::idmap2::utils::FindFiles;
+using android::idmap2::utils::OverlayManifestInfo;
 
 namespace {
 
@@ -138,46 +138,23 @@ bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
 
   std::vector<InputOverlay> interesting_apks;
   for (const std::string& path : *apk_paths) {
-    std::unique_ptr<const ZipFile> zip = ZipFile::Open(path);
-    if (!zip) {
-      out_error << "error: failed to open " << path << " as a zip file" << std::endl;
+    Result<OverlayManifestInfo> overlay_info =
+        ExtractOverlayManifestInfo(path, out_error,
+                                   /* assert_overlay */ false);
+    if (!overlay_info) {
       return false;
     }
 
-    std::unique_ptr<const MemoryChunk> entry = zip->Uncompress("AndroidManifest.xml");
-    if (!entry) {
-      out_error << "error: failed to uncompress AndroidManifest.xml from " << path << std::endl;
-      return false;
-    }
-
-    std::unique_ptr<const Xml> xml = Xml::Create(entry->buf, entry->size);
-    if (!xml) {
-      out_error << "error: failed to parse AndroidManifest.xml from " << path << std::endl;
+    if (!overlay_info->is_static) {
       continue;
     }
 
-    const auto tag = xml->FindTag("overlay");
-    if (!tag) {
+    if (overlay_info->target_package.empty() ||
+        overlay_info->target_package != target_package_name) {
       continue;
     }
 
-    auto iter = tag->find("isStatic");
-    if (iter == tag->end() || std::stoul(iter->second) == 0U) {
-      continue;
-    }
-
-    iter = tag->find("targetPackage");
-    if (iter == tag->end() || iter->second != target_package_name) {
-      continue;
-    }
-
-    iter = tag->find("priority");
-    if (iter == tag->end()) {
-      continue;
-    }
-
-    const int priority = std::stoi(iter->second);
-    if (priority < 0) {
+    if (overlay_info->priority < 0) {
       continue;
     }
 
@@ -203,7 +180,8 @@ bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
     std::string idmap_path = Idmap::CanonicalIdmapPathFor(output_directory, path);
 
     // Sort the static overlays in ascending priority order
-    InputOverlay input{path, idmap_path, priority, override_policies, ignore_overlayable};
+    InputOverlay input{path, idmap_path, overlay_info->priority, override_policies,
+                       ignore_overlayable};
     interesting_apks.insert(
         std::lower_bound(interesting_apks.begin(), interesting_apks.end(), input), input);
   }

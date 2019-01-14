@@ -2797,6 +2797,9 @@
         <attr name="requiredSystemPropertyName" format="string" />
         <!-- @hide This shouldn't be public. -->
         <attr name="requiredSystemPropertyValue" format="string" />
+
+        <!-- The name of the overlayable whose resources will be overlaid. -->
+        <attr name="targetName" />
     </declare-styleable>
 
     <!-- Declaration of an {@link android.content.Intent} object in XML.  May

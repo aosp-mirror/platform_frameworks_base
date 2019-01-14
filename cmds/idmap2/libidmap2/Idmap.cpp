@@ -274,17 +274,24 @@ std::unique_ptr<const Idmap> Idmap::FromBinaryStream(std::istream& stream,
   return std::move(idmap);
 }
 
-bool CheckOverlayable(const LoadedPackage& target_package, PolicyBitmask fulfilled_polices,
-                      ResourceId resid) {
-  const OverlayableInfo* info = target_package.GetOverlayableInfo(resid);
-  if (info == nullptr) {
+bool CheckOverlayable(const LoadedPackage& target_package,
+                      const utils::OverlayManifestInfo& overlay_info,
+                      const PolicyBitmask& fulfilled_polices, const ResourceId& resid) {
+  const OverlayableInfo* overlayable_info = target_package.GetOverlayableInfo(resid);
+  if (overlayable_info == nullptr) {
     // If the resource does not have an overlayable definition, allow the resource to be overlaid.
     // Once overlayable enforcement is turned on, this check will return false.
     return true;
   }
 
+  if (!overlay_info.target_name.empty() && overlay_info.target_name != overlayable_info->name) {
+    // If the overlay supplies a target overlayable name, the resource must belong to the
+    // overlayable defined with the specified name to be overlaid.
+    return false;
+  }
+
   // Enforce policy restrictions if the resource is declared as overlayable.
-  return (info->policy_flags & fulfilled_polices) != 0;
+  return (overlayable_info->policy_flags & fulfilled_polices) != 0;
 }
 
 std::unique_ptr<const Idmap> Idmap::FromApkAssets(
@@ -336,6 +343,12 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(
   const std::unique_ptr<const ZipFile> overlay_zip = ZipFile::Open(overlay_apk_path);
   if (!overlay_zip) {
     out_error << "error: failed to open overlay as zip" << std::endl;
+    return nullptr;
+  }
+
+  Result<utils::OverlayManifestInfo> overlay_info =
+      utils::ExtractOverlayManifestInfo(overlay_apk_path, out_error);
+  if (!overlay_info) {
     return nullptr;
   }
 
@@ -393,9 +406,8 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(
       continue;
     }
 
-    if (enforce_overlayable && !CheckOverlayable(*target_pkg, fulfilled_policies, target_resid)) {
-      // The resources must be defined as overlayable and the overlay must fulfill at least one
-      // policy enforced on the overlayable resource
+    if (enforce_overlayable &&
+        !CheckOverlayable(*target_pkg, *overlay_info, fulfilled_policies, target_resid)) {
       LOG(WARNING) << "overlay \"" << overlay_apk_path << "\" is not allowed to overlay resource \""
                    << full_name << "\"" << std::endl;
       continue;
