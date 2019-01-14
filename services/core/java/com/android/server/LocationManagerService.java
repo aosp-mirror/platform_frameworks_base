@@ -257,6 +257,9 @@ public class LocationManagerService extends ILocationManager.Stub {
         packageManagerInternal.setLocationPackagesProvider(
                 userId -> mContext.getResources().getStringArray(
                         com.android.internal.R.array.config_locationProviderPackageNames));
+        packageManagerInternal.setLocationExtraPackagesProvider(
+                userId -> mContext.getResources().getStringArray(
+                      com.android.internal.R.array.config_locationExtraPackageNames));
 
         // most startup is deferred until systemRunning()
     }
