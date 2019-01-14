@@ -91,10 +91,13 @@ public class AppBackupUtils {
      * </ol>
      */
     public static boolean appIsRunningAndEligibleForBackupWithTransport(
-            @Nullable TransportClient transportClient, String packageName, PackageManager pm) {
+            @Nullable TransportClient transportClient,
+            String packageName,
+            PackageManager pm,
+            int userId) {
         try {
-            PackageInfo packageInfo = pm.getPackageInfo(packageName,
-                    PackageManager.GET_SIGNING_CERTIFICATES);
+            PackageInfo packageInfo = pm.getPackageInfoAsUser(packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES, userId);
             ApplicationInfo applicationInfo = packageInfo.applicationInfo;
             if (!appIsEligibleForBackup(applicationInfo, pm)
                     || appIsStopped(applicationInfo)

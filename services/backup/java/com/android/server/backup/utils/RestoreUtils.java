@@ -72,7 +72,9 @@ public class RestoreUtils {
             HashMap<String, Signature[]> manifestSignatures,
             HashMap<String, RestorePolicy> packagePolicies,
             FileMetadata info,
-            String installerPackageName, BytesReadListener bytesReadListener) {
+            String installerPackageName,
+            BytesReadListener bytesReadListener,
+            int userId) {
         boolean okay = true;
 
         if (DEBUG) {
@@ -144,8 +146,8 @@ public class RestoreUtils {
                     uninstall = true;
                 } else {
                     try {
-                        PackageInfo pkg = packageManager.getPackageInfo(info.packageName,
-                                PackageManager.GET_SIGNING_CERTIFICATES);
+                        PackageInfo pkg = packageManager.getPackageInfoAsUser(info.packageName,
+                                PackageManager.GET_SIGNING_CERTIFICATES, userId);
                         if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP)
                                 == 0) {
                             Slog.w(TAG, "Restore stream contains apk of package "

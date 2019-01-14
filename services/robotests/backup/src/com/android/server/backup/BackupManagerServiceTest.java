@@ -46,6 +46,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
 import com.android.server.backup.testing.TransportData;
+import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowBinder;
 
 import org.junit.After;
@@ -65,7 +66,7 @@ import java.io.PrintWriter;
 
 /** Tests for the user-aware backup/restore system service {@link BackupManagerService}. */
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ShadowBinder.class})
+@Config(shadows = {ShadowApplicationPackageManager.class, ShadowBinder.class})
 @Presubmit
 public class BackupManagerServiceTest {
     private static final String TEST_PACKAGE = "package";

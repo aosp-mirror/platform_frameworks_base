@@ -57,6 +57,7 @@ import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
+import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowEventLog;
 import com.android.server.testing.shadows.ShadowPerformUnifiedRestoreTask;
 
@@ -77,7 +78,13 @@ import org.robolectric.shadows.ShadowPackageManager;
 import java.util.ArrayDeque;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ShadowEventLog.class, ShadowPerformUnifiedRestoreTask.class, ShadowBinder.class})
+@Config(
+        shadows = {
+            ShadowApplicationPackageManager.class,
+            ShadowBinder.class,
+            ShadowEventLog.class,
+            ShadowPerformUnifiedRestoreTask.class
+        })
 @Presubmit
 public class ActiveRestoreSessionTest {
     private static final String PACKAGE_1 = "com.example.package1";
@@ -140,6 +147,7 @@ public class ActiveRestoreSessionTest {
 
     @After
     public void tearDown() throws Exception {
+        ShadowApplicationPackageManager.reset();
         ShadowPerformUnifiedRestoreTask.reset();
     }
 
@@ -561,7 +569,8 @@ public class ActiveRestoreSessionTest {
         packageInfo.packageName = packageName;
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.uid = uid;
-        mShadowPackageManager.addPackage(packageInfo);
+        mShadowPackageManager.installPackage(packageInfo);
+        ShadowApplicationPackageManager.addInstalledPackage(packageName, packageInfo);
     }
 
     private IRestoreSession createActiveRestoreSession(
