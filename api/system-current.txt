@@ -7243,6 +7243,7 @@ package android.telephony.ims {
     method public void callSessionInviteParticipantsRequestDelivered();
     method public void callSessionInviteParticipantsRequestFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMayHandover(int, int);
+    method public void callSessionRttAudioIndicatorChanged(android.telephony.ims.ImsStreamMediaProfile);
     method public void callSessionMergeComplete(android.telephony.ims.stub.ImsCallSessionImplBase);
     method public void callSessionMergeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMergeStarted(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
@@ -7660,10 +7661,12 @@ package android.telephony.ims {
     method public int describeContents();
     method public int getAudioDirection();
     method public int getAudioQuality();
+    method public boolean getRttAudioSpeech();
     method public int getRttMode();
     method public int getVideoDirection();
     method public int getVideoQuality();
     method public boolean isRttCall();
+    method public void setRttAudioSpeech(boolean);
     method public void setRttMode(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int AUDIO_QUALITY_AMR = 1; // 0x1
