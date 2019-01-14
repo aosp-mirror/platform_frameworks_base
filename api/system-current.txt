@@ -3900,24 +3900,24 @@ package android.net {
 
 package android.net.wifi {
 
-  public abstract class DppStatusCallback {
-    ctor public DppStatusCallback();
+  public abstract class EasyConnectStatusCallback {
+    ctor public EasyConnectStatusCallback();
     method public abstract void onConfiguratorSuccess(int);
     method public abstract void onEnrolleeSuccess(int);
     method public abstract void onFailure(int);
     method public abstract void onProgress(int);
-    field public static final int DPP_EVENT_FAILURE = -7; // 0xfffffff9
-    field public static final int DPP_EVENT_FAILURE_AUTHENTICATION = -2; // 0xfffffffe
-    field public static final int DPP_EVENT_FAILURE_BUSY = -5; // 0xfffffffb
-    field public static final int DPP_EVENT_FAILURE_CONFIGURATION = -4; // 0xfffffffc
-    field public static final int DPP_EVENT_FAILURE_INVALID_NETWORK = -9; // 0xfffffff7
-    field public static final int DPP_EVENT_FAILURE_INVALID_URI = -1; // 0xffffffff
-    field public static final int DPP_EVENT_FAILURE_NOT_COMPATIBLE = -3; // 0xfffffffd
-    field public static final int DPP_EVENT_FAILURE_NOT_SUPPORTED = -8; // 0xfffffff8
-    field public static final int DPP_EVENT_FAILURE_TIMEOUT = -6; // 0xfffffffa
-    field public static final int DPP_EVENT_PROGRESS_AUTHENTICATION_SUCCESS = 0; // 0x0
-    field public static final int DPP_EVENT_PROGRESS_RESPONSE_PENDING = 1; // 0x1
-    field public static final int DPP_EVENT_SUCCESS_CONFIGURATION_SENT = 0; // 0x0
+    field public static final int EASY_CONNECT_EVENT_FAILURE = -7; // 0xfffffff9
+    field public static final int EASY_CONNECT_EVENT_FAILURE_AUTHENTICATION = -2; // 0xfffffffe
+    field public static final int EASY_CONNECT_EVENT_FAILURE_BUSY = -5; // 0xfffffffb
+    field public static final int EASY_CONNECT_EVENT_FAILURE_CONFIGURATION = -4; // 0xfffffffc
+    field public static final int EASY_CONNECT_EVENT_FAILURE_INVALID_NETWORK = -9; // 0xfffffff7
+    field public static final int EASY_CONNECT_EVENT_FAILURE_INVALID_URI = -1; // 0xffffffff
+    field public static final int EASY_CONNECT_EVENT_FAILURE_NOT_COMPATIBLE = -3; // 0xfffffffd
+    field public static final int EASY_CONNECT_EVENT_FAILURE_NOT_SUPPORTED = -8; // 0xfffffff8
+    field public static final int EASY_CONNECT_EVENT_FAILURE_TIMEOUT = -6; // 0xfffffffa
+    field public static final int EASY_CONNECT_EVENT_PROGRESS_AUTHENTICATION_SUCCESS = 0; // 0x0
+    field public static final int EASY_CONNECT_EVENT_PROGRESS_RESPONSE_PENDING = 1; // 0x1
+    field public static final int EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_SENT = 0; // 0x0
   }
 
   public deprecated class RttManager {
@@ -4148,10 +4148,10 @@ package android.net.wifi {
     method public void save(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
     method public void setDeviceMobilityState(int);
     method public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
-    method public void startDppAsConfiguratorInitiator(java.lang.String, int, int, android.os.Handler, android.net.wifi.DppStatusCallback);
-    method public void startDppAsEnrolleeInitiator(java.lang.String, android.os.Handler, android.net.wifi.DppStatusCallback);
+    method public void startEasyConnectAsConfiguratorInitiator(java.lang.String, int, int, android.os.Handler, android.net.wifi.EasyConnectStatusCallback);
+    method public void startEasyConnectAsEnrolleeInitiator(java.lang.String, android.os.Handler, android.net.wifi.EasyConnectStatusCallback);
     method public boolean startScan(android.os.WorkSource);
-    method public void stopDppSession();
+    method public void stopEasyConnectSession();
     method public void unregisterNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback);
     field public static final int CHANGE_REASON_ADDED = 0; // 0x0
     field public static final int CHANGE_REASON_CONFIG_CHANGE = 2; // 0x2
@@ -4161,8 +4161,8 @@ package android.net.wifi {
     field public static final int DEVICE_MOBILITY_STATE_LOW_MVMT = 2; // 0x2
     field public static final int DEVICE_MOBILITY_STATE_STATIONARY = 3; // 0x3
     field public static final int DEVICE_MOBILITY_STATE_UNKNOWN = 0; // 0x0
-    field public static final int DPP_NETWORK_ROLE_AP = 1; // 0x1
-    field public static final int DPP_NETWORK_ROLE_STA = 0; // 0x0
+    field public static final int EASY_CONNECT_NETWORK_ROLE_AP = 1; // 0x1
+    field public static final int EASY_CONNECT_NETWORK_ROLE_STA = 0; // 0x0
     field public static final java.lang.String EXTRA_CHANGE_REASON = "changeReason";
     field public static final java.lang.String EXTRA_MULTIPLE_NETWORKS_CHANGED = "multipleChanges";
     field public static final java.lang.String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
