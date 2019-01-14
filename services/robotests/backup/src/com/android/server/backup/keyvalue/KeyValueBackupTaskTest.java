@@ -2727,7 +2727,7 @@ public class KeyValueBackupTaskTest {
             throws RemoteException, IOException {
         verify(transportMock.transport).requestBackupTime();
         assertBackupPendingFor(packages);
-        assertThat(KeyValueBackupJob.isScheduled()).isTrue();
+        assertThat(KeyValueBackupJob.isScheduled(mBackupManagerService.getUserId())).isTrue();
     }
 
     private void assertBackupPendingFor(PackageData... packages) throws IOException {

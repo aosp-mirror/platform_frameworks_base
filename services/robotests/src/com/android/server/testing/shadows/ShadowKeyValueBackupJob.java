@@ -34,7 +34,8 @@ public class ShadowKeyValueBackupJob {
     }
 
     @Implementation
-    protected static void schedule(Context ctx, long delay, BackupManagerConstants constants) {
+    protected static void schedule(int userId, Context ctx, long delay,
+            BackupManagerConstants constants) {
         callingUid = Binder.getCallingUid();
     }
 }

@@ -25,8 +25,14 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
+import android.util.SparseLongArray;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Random;
 
@@ -38,7 +44,8 @@ public class KeyValueBackupJob extends JobService {
     private static final String TAG = "KeyValueBackupJob";
     private static ComponentName sKeyValueJobService =
             new ComponentName("android", KeyValueBackupJob.class.getName());
-    private static final int JOB_ID = 0x5039;
+
+    private static final String USER_ID_EXTRA_KEY = "userId";
 
     // Once someone asks for a backup, this is how long we hold off until we find
     // an on-charging opportunity.  If we hit this max latency we will run the operation
@@ -46,16 +53,22 @@ public class KeyValueBackupJob extends JobService {
     // BackupManager.backupNow().
     private static final long MAX_DEFERRAL = AlarmManager.INTERVAL_DAY;
 
-    private static boolean sScheduled = false;
-    private static long sNextScheduled = 0;
+    @GuardedBy("KeyValueBackupJob.class")
+    private static final SparseBooleanArray sScheduledForUserId = new SparseBooleanArray();
+    @GuardedBy("KeyValueBackupJob.class")
+    private static final SparseLongArray sNextScheduledForUserId = new SparseLongArray();
 
-    public static void schedule(Context ctx, BackupManagerConstants constants) {
-        schedule(ctx, 0, constants);
+    private static final int MIN_JOB_ID = 52417896;
+    private static final int MAX_JOB_ID = 52418896;
+
+    public static void schedule(int userId, Context ctx, BackupManagerConstants constants) {
+        schedule(userId, ctx, 0, constants);
     }
 
-    public static void schedule(Context ctx, long delay, BackupManagerConstants constants) {
+    public static void schedule(int userId, Context ctx, long delay,
+            BackupManagerConstants constants) {
         synchronized (KeyValueBackupJob.class) {
-            if (sScheduled) {
+            if (sScheduledForUserId.get(userId)) {
                 return;
             }
 
@@ -76,51 +89,61 @@ public class KeyValueBackupJob extends JobService {
             if (DEBUG_SCHEDULING) {
                 Slog.v(TAG, "Scheduling k/v pass in " + (delay / 1000 / 60) + " minutes");
             }
-            JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, sKeyValueJobService)
+
+            JobInfo.Builder builder = new JobInfo.Builder(getJobIdForUserId(userId),
+                    sKeyValueJobService)
                     .setMinimumLatency(delay)
                     .setRequiredNetworkType(networkType)
                     .setRequiresCharging(needsCharging)
                     .setOverrideDeadline(MAX_DEFERRAL);
+
+            Bundle extraInfo = new Bundle();
+            extraInfo.putInt(USER_ID_EXTRA_KEY, userId);
+            builder.setTransientExtras(extraInfo);
+
             JobScheduler js = (JobScheduler) ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE);
             js.schedule(builder.build());
 
-            sNextScheduled = System.currentTimeMillis() + delay;
-            sScheduled = true;
+            sScheduledForUserId.put(userId, true);
+            sNextScheduledForUserId.put(userId, System.currentTimeMillis() + delay);
         }
     }
 
-    public static void cancel(Context ctx) {
+    public static void cancel(int userId, Context ctx) {
         synchronized (KeyValueBackupJob.class) {
-            JobScheduler js = (JobScheduler) ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-            js.cancel(JOB_ID);
-            sNextScheduled = 0;
-            sScheduled = false;
+            JobScheduler js = (JobScheduler) ctx.getSystemService(
+                    Context.JOB_SCHEDULER_SERVICE);
+            js.cancel(getJobIdForUserId(userId));
+
+            clearScheduledForUserId(userId);
         }
     }
 
-    public static long nextScheduled() {
+    public static long nextScheduled(int userId) {
         synchronized (KeyValueBackupJob.class) {
-            return sNextScheduled;
+            return sNextScheduledForUserId.get(userId);
         }
     }
 
-    public static boolean isScheduled() {
+    @VisibleForTesting
+    public static boolean isScheduled(int userId) {
         synchronized (KeyValueBackupJob.class) {
-            return sScheduled;
+            return sScheduledForUserId.get(userId);
         }
     }
 
     @Override
     public boolean onStartJob(JobParameters params) {
+        int userId = params.getTransientExtras().getInt(USER_ID_EXTRA_KEY);
+
         synchronized (KeyValueBackupJob.class) {
-            sNextScheduled = 0;
-            sScheduled = false;
+            clearScheduledForUserId(userId);
         }
 
         // Time to run a key/value backup!
         Trampoline service = BackupManagerService.getInstance();
         try {
-            service.backupNow();
+            service.backupNowForUser(userId);
         } catch (RemoteException e) {}
 
         // This was just a trigger; ongoing wakelock management is done by the
@@ -134,4 +157,13 @@ public class KeyValueBackupJob extends JobService {
         return false;
     }
 
+    @GuardedBy("KeyValueBackupJob.class")
+    private static void clearScheduledForUserId(int userId) {
+        sScheduledForUserId.delete(userId);
+        sNextScheduledForUserId.delete(userId);
+    }
+
+    private static int getJobIdForUserId(int userId) {
+        return JobIdManager.getJobIdForUserId(MIN_JOB_ID, MAX_JOB_ID, userId);
+    }
 }

@@ -1075,7 +1075,7 @@ public class BackupManagerServiceTest {
                 createServiceAndRegisterUser(UserHandle.USER_SYSTEM, mUserOneService);
         FullBackupJob job = new FullBackupJob();
 
-        backupManagerService.beginFullBackup(job);
+        backupManagerService.beginFullBackup(UserHandle.USER_SYSTEM, job);
 
         verify(mUserOneService).beginFullBackup(job);
     }
@@ -1086,7 +1086,7 @@ public class BackupManagerServiceTest {
         BackupManagerService backupManagerService = createService();
         FullBackupJob job = new FullBackupJob();
 
-        backupManagerService.beginFullBackup(job);
+        backupManagerService.beginFullBackup(UserHandle.USER_SYSTEM, job);
 
         verify(mUserOneService, never()).beginFullBackup(job);
     }
@@ -1097,7 +1097,7 @@ public class BackupManagerServiceTest {
         BackupManagerService backupManagerService =
                 createServiceAndRegisterUser(UserHandle.USER_SYSTEM, mUserOneService);
 
-        backupManagerService.endFullBackup();
+        backupManagerService.endFullBackup(UserHandle.USER_SYSTEM);
 
         verify(mUserOneService).endFullBackup();
     }
@@ -1107,7 +1107,7 @@ public class BackupManagerServiceTest {
     public void testEndFullBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
         BackupManagerService backupManagerService = createService();
 
-        backupManagerService.endFullBackup();
+        backupManagerService.endFullBackup(UserHandle.USER_SYSTEM);
 
         verify(mUserOneService, never()).endFullBackup();
     }

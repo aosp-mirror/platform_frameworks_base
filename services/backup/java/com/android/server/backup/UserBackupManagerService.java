@@ -1674,8 +1674,8 @@ public class UserBackupManagerService {
             }
             // We don't want the backup jobs to kick in any time soon.
             // Reschedules them to run in the distant future.
-            KeyValueBackupJob.schedule(mContext, BUSY_BACKOFF_MIN_MILLIS, mConstants);
-            FullBackupJob.schedule(mContext, 2 * BUSY_BACKOFF_MIN_MILLIS, mConstants);
+            KeyValueBackupJob.schedule(mUserId, mContext, BUSY_BACKOFF_MIN_MILLIS, mConstants);
+            FullBackupJob.schedule(mUserId, mContext, 2 * BUSY_BACKOFF_MIN_MILLIS, mConstants);
         } finally {
             Binder.restoreCallingIdentity(oldToken);
         }
@@ -1910,7 +1910,7 @@ public class UserBackupManagerService {
                 Runnable r = new Runnable() {
                     @Override
                     public void run() {
-                        FullBackupJob.schedule(mContext, latency, mConstants);
+                        FullBackupJob.schedule(mUserId, mContext, latency, mConstants);
                     }
                 };
                 mBackupHandler.postDelayed(r, 2500);
@@ -2033,7 +2033,7 @@ public class UserBackupManagerService {
                 mPowerManager.getPowerSaveState(ServiceType.FULL_BACKUP);
         if (result.batterySaverEnabled) {
             if (DEBUG) Slog.i(TAG, "Deferring scheduled full backups in battery saver mode");
-            FullBackupJob.schedule(mContext, keyValueBackupInterval, mConstants);
+            FullBackupJob.schedule(mUserId, mContext, keyValueBackupInterval, mConstants);
             return false;
         }
 
@@ -2147,7 +2147,7 @@ public class UserBackupManagerService {
                 mBackupHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        FullBackupJob.schedule(mContext, deferTime, mConstants);
+                        FullBackupJob.schedule(mUserId, mContext, deferTime, mConstants);
                     }
                 });
                 return false;
@@ -2251,7 +2251,7 @@ public class UserBackupManagerService {
         }
 
         // ...and schedule a backup pass if necessary
-        KeyValueBackupJob.schedule(mContext, mConstants);
+        KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
     }
 
     // Note: packageName is currently unused, but may be in the future
@@ -2401,7 +2401,8 @@ public class UserBackupManagerService {
                     mPowerManager.getPowerSaveState(ServiceType.KEYVALUE_BACKUP);
             if (result.batterySaverEnabled) {
                 if (DEBUG) Slog.v(TAG, "Not running backup while in battery save mode");
-                KeyValueBackupJob.schedule(mContext, mConstants);   // try again in several hours
+                // Try again in several hours.
+                KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
             } else {
                 if (DEBUG) Slog.v(TAG, "Scheduling immediate backup pass");
                 synchronized (mQueueLock) {
@@ -2414,7 +2415,7 @@ public class UserBackupManagerService {
                     }
 
                     // ...and cancel any pending scheduled job, because we've just superseded it
-                    KeyValueBackupJob.cancel(mContext);
+                    KeyValueBackupJob.cancel(mUserId, mContext);
                 }
             }
         } finally {
@@ -2737,13 +2738,13 @@ public class UserBackupManagerService {
             synchronized (mQueueLock) {
                 if (enable && !wasEnabled && mSetupComplete) {
                     // if we've just been enabled, start scheduling backup passes
-                    KeyValueBackupJob.schedule(mContext, mConstants);
+                    KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
                     scheduleNextFullBackupJob(0);
                 } else if (!enable) {
                     // No longer enabled, so stop running backups
                     if (MORE_DEBUG) Slog.i(TAG, "Opting out of backup");
 
-                    KeyValueBackupJob.cancel(mContext);
+                    KeyValueBackupJob.cancel(mUserId, mContext);
 
                     // This also constitutes an opt-out, so we wipe any data for
                     // this device from the backend.  We start that process with
@@ -3451,7 +3452,7 @@ public class UserBackupManagerService {
             pw.println(isBackupOperationInProgress() ? "Backup in progress" : "No backups running");
             pw.println("Last backup pass started: " + mLastBackupPass
                     + " (now = " + System.currentTimeMillis() + ')');
-            pw.println("  next scheduled: " + KeyValueBackupJob.nextScheduled());
+            pw.println("  next scheduled: " + KeyValueBackupJob.nextScheduled(mUserId));
 
             pw.println("Transport whitelist:");
             for (ComponentName transport : mTransportManager.getTransportWhitelist()) {

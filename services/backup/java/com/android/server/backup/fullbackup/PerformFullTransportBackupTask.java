@@ -633,7 +633,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             unregisterTask();
 
             if (mJob != null) {
-                mJob.finishBackupPass();
+                mJob.finishBackupPass(backupManagerService.getUserId());
             }
 
             synchronized (backupManagerService.getQueueLock()) {
