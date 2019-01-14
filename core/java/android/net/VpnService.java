@@ -791,6 +791,27 @@ public class VpnService extends Service {
         }
 
         /**
+         * Marks the VPN network as metered. A VPN network is classified as metered when the user is
+         * sensitive to heavy data usage due to monetary costs and/or data limitations. In such
+         * cases, you should set this to {@code true} so that apps on the system can avoid doing
+         * large data transfers. Otherwise, set this to {@code false}. Doing so would cause VPN
+         * network to inherit its meteredness from its underlying networks.
+         *
+         * <p>VPN apps targeting {@link android.os.Build.VERSION_CODES#Q} or above will be
+         * considered metered by default.
+         *
+         * @param isMetered {@code true} if VPN network should be treated as metered regardless of
+         *     underlying network meteredness
+         * @return this {@link Builder} object to facilitate chaining method calls
+         * @see #setUnderlyingNetworks(Networks[])
+         * @see ConnectivityManager#isActiveNetworkMetered()
+         */
+        public Builder setMetered(boolean isMetered) {
+            mConfig.isMetered = isMetered;
+            return this;
+        }
+
+        /**
          * Create a VPN interface using the parameters supplied to this
          * builder. The interface works on IP packets, and a file descriptor
          * is returned for the application to access them. Each read

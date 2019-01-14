@@ -104,6 +104,7 @@ public class VpnConfig implements Parcelable {
     public boolean allowBypass;
     public boolean allowIPv4;
     public boolean allowIPv6;
+    public boolean isMetered = true;
     public Network[] underlyingNetworks;
     public ProxyInfo proxyInfo;
 
@@ -165,6 +166,7 @@ public class VpnConfig implements Parcelable {
         out.writeInt(allowBypass ? 1 : 0);
         out.writeInt(allowIPv4 ? 1 : 0);
         out.writeInt(allowIPv6 ? 1 : 0);
+        out.writeInt(isMetered ? 1 : 0);
         out.writeTypedArray(underlyingNetworks, flags);
         out.writeParcelable(proxyInfo, flags);
     }
@@ -191,6 +193,7 @@ public class VpnConfig implements Parcelable {
             config.allowBypass = in.readInt() != 0;
             config.allowIPv4 = in.readInt() != 0;
             config.allowIPv6 = in.readInt() != 0;
+            config.isMetered = in.readInt() != 0;
             config.underlyingNetworks = in.createTypedArray(Network.CREATOR);
             config.proxyInfo = in.readParcelable(null);
             return config;
