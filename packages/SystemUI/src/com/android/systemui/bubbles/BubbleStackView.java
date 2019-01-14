@@ -472,7 +472,8 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
 
                 @Override
                 public void onActivityViewDestroyed(ActivityView view) {
-                    NotificationEntry entry = mExpandedBubble.getEntry();
+                    NotificationEntry entry = mExpandedBubble != null
+                            ? mExpandedBubble.getEntry() : null;
                     Log.d(TAG, "onActivityViewDestroyed(key="
                             + ((entry != null) ? entry.key : "(none)") + "): " + view);
                 }
