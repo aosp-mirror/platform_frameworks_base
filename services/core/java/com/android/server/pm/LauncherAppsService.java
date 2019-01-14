@@ -313,6 +313,10 @@ public class LauncherAppsService extends SystemService {
                     Settings.Global.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED, 1) == 0) {
                 return launcherActivities;
             }
+            if (launcherActivities == null) {
+                // Cannot access profile, so we don't even return any hidden apps.
+                return null;
+            }
 
             final int callingUid = injectBinderCallingUid();
             final ArrayList<ResolveInfo> result = new ArrayList<>(launcherActivities.getList());
