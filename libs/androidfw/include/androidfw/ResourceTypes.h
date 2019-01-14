@@ -691,7 +691,7 @@ class ResXMLTree;
 class ResXMLParser
 {
 public:
-    ResXMLParser(const ResXMLTree& tree);
+    explicit ResXMLParser(const ResXMLTree& tree);
 
     enum event_code_t {
         BAD_DOCUMENT = -1,
@@ -804,7 +804,7 @@ public:
      * The tree stores a clone of the specified DynamicRefTable, so any changes to the original
      * DynamicRefTable will not affect this tree after instantiation.
      **/
-    ResXMLTree(const DynamicRefTable* dynamicRefTable);
+    explicit ResXMLTree(const DynamicRefTable* dynamicRefTable);
     ResXMLTree();
     ~ResXMLTree();
 
@@ -1803,7 +1803,7 @@ public:
 
     class Theme {
     public:
-        Theme(const ResTable& table);
+        explicit Theme(const ResTable& table);
         ~Theme();
 
         inline const ResTable& getResTable() const { return mTable; }
