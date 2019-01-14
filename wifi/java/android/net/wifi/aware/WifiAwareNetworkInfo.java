@@ -38,15 +38,28 @@ import java.util.Objects;
  * android.net.NetworkCapabilities)} callback.
  * <p>
  * The Wi-Fi Aware-specific network information include the peer's scoped link-local IPv6 address
- * for the Wi-Fi Aware link. The scoped link-local IPv6 can then be used to create a
+ * for the Wi-Fi Aware link, as well as (optionally) the port and transport protocol specified by
+ * the peer.
+ * The scoped link-local IPv6, port, and transport protocol can then be used to create a
  * {@link java.net.Socket} connection to the peer.
+ * <p>
+ * Note: these are the peer's IPv6 and port information - not the local device's!
  */
 public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
     private Inet6Address mIpv6Addr;
+    private int mPort = 0; // a value of 0 is considered invalid
+    private int mTransportProtocol = -1; // a value of -1 is considered invalid
 
     /** @hide */
     public WifiAwareNetworkInfo(Inet6Address ipv6Addr) {
         mIpv6Addr = ipv6Addr;
+    }
+
+    /** @hide */
+    public WifiAwareNetworkInfo(Inet6Address ipv6Addr, int port, int transportProtocol) {
+        mIpv6Addr = ipv6Addr;
+        mPort = port;
+        mTransportProtocol = transportProtocol;
     }
 
     /**
@@ -57,6 +70,34 @@ public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
     @Nullable
     public Inet6Address getPeerIpv6Addr() {
         return mIpv6Addr;
+    }
+
+    /**
+     * Get the port number to be used to create a network connection to the Wi-Fi Aware peer.
+     * The port information is provided by the app running on the peer which requested the
+     * connection, using the {@link WifiAwareManager.NetworkSpecifierBuilder#setPort(int)}.
+     *
+     * @return A port number on the peer. A value of 0 indicates that no port was specified by the
+     *         peer.
+     */
+    public int getPort() {
+        return mPort;
+    }
+
+    /**
+     * Get the transport protocol to be used to communicate over a network connection to the Wi-Fi
+     * Aware peer. The transport protocol is provided by the app running on the peer which requested
+     * the connection, using the
+     * {@link WifiAwareManager.NetworkSpecifierBuilder#setTransportProtocol(int)}.
+     * <p>
+     * The transport protocol number is assigned by the Internet Assigned Numbers Authority
+     * (IANA) https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml.
+     *
+     * @return A transport protocol id. A value of -1 indicates that no transport protocol was
+     *         specified by the peer.
+     */
+    public int getTransportProtocol() {
+        return mTransportProtocol;
     }
 
     // parcelable methods
@@ -71,6 +112,8 @@ public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
         dest.writeByteArray(mIpv6Addr.getAddress());
         NetworkInterface ni = mIpv6Addr.getScopedInterface();
         dest.writeString(ni == null ? null : ni.getName());
+        dest.writeInt(mPort);
+        dest.writeInt(mTransportProtocol);
     }
 
     public static final Creator<WifiAwareNetworkInfo> CREATOR =
@@ -94,8 +137,10 @@ public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
                         e.printStackTrace();
                         return null;
                     }
+                    int port = in.readInt();
+                    int transportProtocol = in.readInt();
 
-                    return new WifiAwareNetworkInfo(ipv6Addr);
+                    return new WifiAwareNetworkInfo(ipv6Addr, port, transportProtocol);
                 }
 
                 @Override
@@ -109,7 +154,9 @@ public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
 
     @Override
     public String toString() {
-        return new StringBuilder("AwareNetworkInfo: IPv6=").append(mIpv6Addr).toString();
+        return new StringBuilder("AwareNetworkInfo: IPv6=").append(mIpv6Addr).append(
+                ", port=").append(mPort).append(", transportProtocol=").append(
+                mTransportProtocol).toString();
     }
 
     /** @hide */
@@ -124,12 +171,13 @@ public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
         }
 
         WifiAwareNetworkInfo lhs = (WifiAwareNetworkInfo) obj;
-        return Objects.equals(mIpv6Addr, lhs.mIpv6Addr);
+        return Objects.equals(mIpv6Addr, lhs.mIpv6Addr) && mPort == lhs.mPort
+                && mTransportProtocol == lhs.mTransportProtocol;
     }
 
     /** @hide */
     @Override
     public int hashCode() {
-        return Objects.hash(mIpv6Addr);
+        return Objects.hash(mIpv6Addr, mPort, mTransportProtocol);
     }
 }
