@@ -8122,6 +8122,10 @@ public class Notification implements Parcelable
                     big.setViewVisibility(MEDIA_BUTTON_IDS[i], View.GONE);
                 }
             }
+            bindMediaActionButton(big, R.id.media_seamless, new Action(R.drawable.ic_media_seamless,
+                    mBuilder.mContext.getString(
+                            com.android.internal.R.string.ext_media_seamless_action), null), p);
+            big.setViewVisibility(R.id.media_seamless, View.GONE);
             handleImage(big);
             return big;
         }

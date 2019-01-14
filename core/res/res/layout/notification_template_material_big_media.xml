@@ -79,6 +79,10 @@
                 layout="@layout/notification_material_media_action"
                 android:id="@+id/action4"
             />
+            <include
+                layout="@layout/notification_material_media_action"
+                android:id="@+id/media_seamless"
+            />
         </LinearLayout>
     </LinearLayout>
 </com.android.internal.widget.MediaNotificationView>
