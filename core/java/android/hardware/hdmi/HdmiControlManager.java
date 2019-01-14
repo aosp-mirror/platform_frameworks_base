@@ -16,6 +16,8 @@
 
 package android.hardware.hdmi;
 
+import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
+
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
@@ -27,6 +29,7 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -264,6 +267,10 @@ public final class HdmiControlManager {
     private final boolean mHasTvDevice;
     // True if we have a logical device of type audio system hosted in the system.
     private final boolean mHasAudioSystemDevice;
+    // True if we have a logical device of type audio system hosted in the system.
+    private final boolean mHasSwitchDevice;
+    // True if it's a switch device.
+    private final boolean mIsSwitchDevice;
 
     /**
      * {@hide} - hide this constructor because it has a parameter of type IHdmiControlService,
@@ -283,6 +290,9 @@ public final class HdmiControlManager {
         mHasTvDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_TV);
         mHasPlaybackDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PLAYBACK);
         mHasAudioSystemDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mHasSwitchDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH);
+        mIsSwitchDevice = SystemProperties.getBoolean(
+            PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
     }
 
     private static boolean hasDeviceType(int[] types, int type) {
@@ -319,6 +329,9 @@ public final class HdmiControlManager {
                 return mHasPlaybackDevice ? new HdmiPlaybackClient(mService) : null;
             case HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM:
                 return mHasAudioSystemDevice ? new HdmiAudioSystemClient(mService) : null;
+            case HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH:
+                return (mHasSwitchDevice || mIsSwitchDevice)
+                    ? new HdmiSwitchClient(mService) : null;
             default:
                 return null;
         }
@@ -370,6 +383,24 @@ public final class HdmiControlManager {
     @SuppressLint("Doclava125")
     public HdmiAudioSystemClient getAudioSystemClient() {
         return (HdmiAudioSystemClient) getClient(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+    }
+
+    /**
+     * Gets an object that represents an HDMI-CEC logical device of type switch on the system.
+     *
+     * <p>Used to send HDMI control messages to other devices like TV through HDMI bus. It is also
+     * possible to communicate with other logical devices hosted in the same system if the system is
+     * configured to host more than one type of HDMI-CEC logical devices.
+     *
+     * @return {@link HdmiSwitchClient} instance. {@code null} on failure.
+     *
+     * TODO(b/110094868): unhide for Q
+     * @hide
+     */
+    @Nullable
+    @SuppressLint("Doclava125")
+    public HdmiSwitchClient getSwitchClient() {
+        return (HdmiSwitchClient) getClient(HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH);
     }
 
     /**

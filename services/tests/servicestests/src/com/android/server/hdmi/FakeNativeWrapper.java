@@ -50,6 +50,7 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     private final List<HdmiCecMessage> mResultMessages = new ArrayList<>();
     private int mMyPhysicalAddress = 0;
+    private HdmiPortInfo[] mHdmiPortInfo = null;
 
     @Override
     public long nativeInit(HdmiCecController handler, MessageQueue messageQueue) {
@@ -92,9 +93,11 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     @Override
     public HdmiPortInfo[] nativeGetPortInfos(long controllerPtr) {
-        HdmiPortInfo[] hdmiPortInfo = new HdmiPortInfo[1];
-        hdmiPortInfo[0] = new HdmiPortInfo(1, 1, 0x1000, true, true, true);
-        return hdmiPortInfo;
+        if (mHdmiPortInfo == null) {
+            mHdmiPortInfo = new HdmiPortInfo[1];
+            mHdmiPortInfo[0] = new HdmiPortInfo(1, 1, 0x1000, true, true, true);
+        }
+        return mHdmiPortInfo;
     }
 
     @Override
@@ -130,5 +133,11 @@ final class FakeNativeWrapper implements NativeWrapper {
     @VisibleForTesting
     protected void setPhysicalAddress(int physicalAddress) {
         mMyPhysicalAddress = physicalAddress;
+    }
+
+    @VisibleForTesting
+    protected void setPortInfo(HdmiPortInfo[] hdmiPortInfo) {
+        mHdmiPortInfo = new HdmiPortInfo[hdmiPortInfo.length];
+        System.arraycopy(hdmiPortInfo, 0, mHdmiPortInfo, 0, hdmiPortInfo.length);
     }
 }

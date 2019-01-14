@@ -28,7 +28,7 @@ import java.util.List;
 
 /**
  * Feature action that handles device discovery sequences.
- * Device discovery is launched when TV device is woken from "Standby" state
+ * Device discovery is launched when device is woken from "Standby" state
  * or enabled "Control for Hdmi" from disabled state.
  *
  * <p>Device discovery goes through the following steps.
@@ -89,6 +89,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
     private final DeviceDiscoveryCallback mCallback;
     private int mProcessedDeviceCount = 0;
     private int mTimeoutRetry = 0;
+    private boolean mIsTvDevice = source().mService.isTvDevice();
 
     /**
      * Constructor.
@@ -266,15 +267,19 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         current.mPortId = getPortId(current.mPhysicalAddress);
         current.mDeviceType = params[2] & 0xFF;
 
-        tv().updateCecSwitchInfo(current.mLogicalAddress, current.mDeviceType,
+        // TODO(amyjojo): check if non-TV device needs to update cec switch info.
+        // This is to manager CEC device separately in case they don't have address.
+        if (mIsTvDevice) {
+            tv().updateCecSwitchInfo(current.mLogicalAddress, current.mDeviceType,
                     current.mPhysicalAddress);
-
+        }
         increaseProcessedDeviceCount();
         checkAndProceedStage();
     }
 
     private int getPortId(int physicalAddress) {
-        return tv().getPortId(physicalAddress);
+        return mIsTvDevice ? tv().getPortId(physicalAddress)
+            : source().getPortId(physicalAddress);
     }
 
     private void handleSetOsdName(HdmiCecMessage cmd) {
@@ -345,7 +350,9 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         mCallback.onDeviceDiscoveryDone(result);
         finish();
         // Process any commands buffered while device discovery action was in progress.
-        tv().processAllDelayedMessages();
+        if (mIsTvDevice) {
+            tv().processAllDelayedMessages();
+        }
     }
 
     private void checkAndProceedStage() {

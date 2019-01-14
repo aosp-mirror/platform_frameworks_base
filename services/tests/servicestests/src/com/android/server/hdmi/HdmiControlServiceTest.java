@@ -20,13 +20,18 @@ import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_PLAYBACK;
 
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import android.hardware.hdmi.HdmiPortInfo;
 import android.os.Looper;
 import android.os.test.TestLooper;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -102,6 +107,7 @@ public class HdmiControlServiceTest {
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private boolean mStandbyMessageReceived;
+    private HdmiPortInfo[] mHdmiPortInfo;
 
     @Before
     public void SetUp() {
@@ -131,6 +137,16 @@ public class HdmiControlServiceTest {
 
         mLocalDevices.add(mMyAudioSystemDevice);
         mLocalDevices.add(mMyPlaybackDevice);
+        mHdmiPortInfo = new HdmiPortInfo[4];
+        mHdmiPortInfo[0] =
+            new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x2100, true, false, false);
+        mHdmiPortInfo[1] =
+            new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2200, true, false, false);
+        mHdmiPortInfo[2] =
+            new HdmiPortInfo(3, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, false);
+        mHdmiPortInfo[3] =
+            new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false);
+        mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlService.initPortInfo();
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
 
@@ -158,5 +174,25 @@ public class HdmiControlServiceTest {
         assertTrue(mMyAudioSystemDevice.isStandby());
         assertTrue(mMyPlaybackDevice.isDisabled());
         assertTrue(mMyAudioSystemDevice.isDisabled());
+    }
+
+    @Test
+    public void pathToPort_pathExists_weAreNonTv() {
+        mNativeWrapper.setPhysicalAddress(0x2000);
+        assertThat(mHdmiControlService.pathToPortId(0x2120)).isEqualTo(1);
+        assertThat(mHdmiControlService.pathToPortId(0x2234)).isEqualTo(2);
+    }
+
+    @Test
+    public void pathToPort_pathExists_weAreTv() {
+        mNativeWrapper.setPhysicalAddress(0x0000);
+        assertThat(mHdmiControlService.pathToPortId(0x2120)).isEqualTo(3);
+        assertThat(mHdmiControlService.pathToPortId(0x3234)).isEqualTo(4);
+    }
+
+    @Test
+    public void pathToPort_pathInvalid() {
+        mNativeWrapper.setPhysicalAddress(0x2000);
+        assertThat(mHdmiControlService.pathToPortId(0x1000)).isEqualTo(Constants.INVALID_PORT_ID);
     }
 }

@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
 
+import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
 import static com.android.server.hdmi.Constants.DISABLED;
 import static com.android.server.hdmi.Constants.ENABLED;
 import static com.android.server.hdmi.Constants.OPTION_MHL_ENABLE;
@@ -754,6 +755,9 @@ public class HdmiControlService extends SystemService {
         mPortInfoMap = new UnmodifiableSparseArray<>(portInfoMap);
         mPortDeviceMap = new UnmodifiableSparseArray<>(portDeviceMap);
 
+        if (mMhlController == null) {
+            return;
+        }
         HdmiPortInfo[] mhlPortInfo = mMhlController.getPortInfos();
         ArraySet<Integer> mhlSupportedPorts = new ArraySet<Integer>(mhlPortInfo.length);
         for (HdmiPortInfo info : mhlPortInfo) {
@@ -808,13 +812,31 @@ public class HdmiControlService extends SystemService {
     }
 
     /**
-     * Returns the id of HDMI port located at the top of the hierarchy of
-     * the specified routing path. For the routing path 0x1220 (1.2.2.0), for instance,
-     * the port id to be returned is the ID associated with the port address
-     * 0x1000 (1.0.0.0) which is the topmost path of the given routing path.
+     * Returns the id of HDMI port located at the current device that runs this method.
+     *
+     * For TV with physical address 0x0000, target device 0x1120, we want port physical address
+     * 0x1000 to get the correct port id from {@link #mPortIdMap}. For device with Physical Address
+     * 0x2000, target device 0x2420, we want port address 0x24000 to get the port id.
+     *
+     * <p>Return {@link Constants#INVALID_PORT_ID} if target device does not connect to.
+     *
+     * @param path the target device's physical address.
+     * @return the id of the port that the target device eventually connects to
+     * on the current device.
      */
     int pathToPortId(int path) {
-        int portAddress = path & Constants.ROUTING_PATH_TOP_MASK;
+        int mask = 0xF000;
+        int finalMask = 0xF000;
+        int physicalAddress = getPhysicalAddress();
+        int maskedAddress = physicalAddress;
+
+        while (maskedAddress != 0) {
+            maskedAddress = physicalAddress & mask;
+            finalMask |= mask;
+            mask >>= 4;
+        }
+
+        int portAddress = path & finalMask;
         return mPortIdMap.get(portAddress, Constants.INVALID_PORT_ID);
     }
 
@@ -1007,8 +1029,9 @@ public class HdmiControlService extends SystemService {
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
 
-        if (connected && !isTvDevice()) {
-            if (getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT && isSwitchDevice()) {
+        if (connected && !isTvDevice()
+                && getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
+            if (isSwitchDevice()) {
                 initPortInfo();
                 HdmiLogger.debug("initPortInfo for switch device when onHotplug from tx.");
             }
@@ -2130,7 +2153,7 @@ public class HdmiControlService extends SystemService {
 
     boolean isSwitchDevice() {
         return SystemProperties.getBoolean(
-            Constants.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
+            PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
     }
 
     boolean isTvDeviceEnabled() {
