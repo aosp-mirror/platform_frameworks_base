@@ -96,6 +96,7 @@ import android.view.AccessibilityIterators.ParagraphTextSegmentIterator;
 import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.AccessibilityIterators.WordTextSegmentIterator;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.WindowInsetsAnimationListener.InsetsAnimation;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -4547,6 +4548,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         OnCapturedPointerListener mOnCapturedPointerListener;
 
         private ArrayList<OnUnhandledKeyEventListener> mUnhandledKeyListeners;
+
+        private WindowInsetsAnimationListener mWindowInsetsAnimationListener;
     }
 
     @UnsupportedAppUsage
@@ -10484,6 +10487,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         } finally {
             mPrivateFlags3 &= ~PFLAG3_APPLYING_INSETS;
+        }
+    }
+
+    /**
+     * Sets a {@link WindowInsetsAnimationListener} to be notified about animations of windows that
+     * cause insets.
+     *
+     * @param listener The listener to set.
+     * @hide pending unhide
+     */
+    public void setWindowInsetsAnimationListener(WindowInsetsAnimationListener listener) {
+        getListenerInfo().mWindowInsetsAnimationListener = listener;
+    }
+
+    void dispatchWindowInsetsAnimationStarted(InsetsAnimation animation) {
+        if (mListenerInfo != null && mListenerInfo.mWindowInsetsAnimationListener != null) {
+            mListenerInfo.mWindowInsetsAnimationListener.onStarted(animation);
+        }
+    }
+
+    WindowInsets dispatchWindowInsetsAnimationProgress(WindowInsets insets) {
+        if (mListenerInfo != null && mListenerInfo.mWindowInsetsAnimationListener != null) {
+            return mListenerInfo.mWindowInsetsAnimationListener.onProgress(insets);
+        } else {
+            return insets;
+        }
+    }
+
+    void dispatchWindowInsetsAnimationFinished(InsetsAnimation animation) {
+        if (mListenerInfo != null && mListenerInfo.mOnApplyWindowInsetsListener != null) {
+            mListenerInfo.mWindowInsetsAnimationListener.onFinished(animation);
         }
     }
 

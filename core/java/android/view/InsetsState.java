@@ -107,6 +107,10 @@ public class InsetsState implements Parcelable {
         set(copy);
     }
 
+    public InsetsState(InsetsState copy, boolean copySources) {
+        set(copy, copySources);
+    }
+
     /**
      * Calculates {@link WindowInsets} based on the current source configuration.
      *
