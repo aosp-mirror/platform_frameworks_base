@@ -46,7 +46,7 @@ class unique_cptr {
   using pointer = typename std::add_pointer<T>::type;
 
   constexpr unique_cptr() : ptr_(nullptr) {}
-  constexpr unique_cptr(std::nullptr_t) : ptr_(nullptr) {}
+  constexpr explicit unique_cptr(std::nullptr_t) : ptr_(nullptr) {}
   explicit unique_cptr(pointer ptr) : ptr_(ptr) {}
   unique_cptr(unique_cptr&& o) noexcept : ptr_(o.ptr_) { o.ptr_ = nullptr; }
 
