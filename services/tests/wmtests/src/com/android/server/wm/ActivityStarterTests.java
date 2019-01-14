@@ -643,10 +643,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
             boolean hasForegroundActivities, boolean callerIsRecents,
             boolean callerIsTempWhitelisted) {
         // window visibility
-        doReturn(callingUidHasVisibleWindow).when(mService.mWindowManager).isAnyWindowVisibleForUid(
-                callingUid);
-        doReturn(realCallingUidHasVisibleWindow).when(mService.mWindowManager)
-                .isAnyWindowVisibleForUid(realCallingUid);
+        doReturn(callingUidHasVisibleWindow).when(mService.mWindowManager.mRoot)
+                .isAnyNonToastWindowVisibleForUid(callingUid);
+        doReturn(realCallingUidHasVisibleWindow).when(mService.mWindowManager.mRoot)
+                .isAnyNonToastWindowVisibleForUid(realCallingUid);
         // process importance
         doReturn(callingUidProcState).when(mService).getUidStateLocked(callingUid);
         doReturn(realCallingUidProcState).when(mService).getUidStateLocked(realCallingUid);

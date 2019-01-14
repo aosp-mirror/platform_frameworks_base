@@ -257,6 +257,14 @@ class WindowTestsBase {
         }
     }
 
+    WindowState createWindow(WindowState parent, int type, String name, int ownerId) {
+        synchronized (mWm.mGlobalLock) {
+            return (parent == null)
+                    ? createWindow(parent, type, mDisplayContent, name, ownerId)
+                    : createWindow(parent, type, parent.mToken, name, ownerId);
+        }
+    }
+
     WindowState createWindowOnStack(WindowState parent, int windowingMode, int activityType,
             int type, DisplayContent dc, String name) {
         synchronized (mWm.mGlobalLock) {
@@ -277,7 +285,16 @@ class WindowTestsBase {
         synchronized (mWm.mGlobalLock) {
             final WindowToken token = createWindowToken(
                     dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
-            return createWindow(parent, type, token, name);
+            return createWindow(parent, type, token, name, 0 /* ownerId */);
+        }
+    }
+
+    WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
+            int ownerId) {
+        synchronized (mWm.mGlobalLock) {
+            final WindowToken token = createWindowToken(
+                    dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
+            return createWindow(parent, type, token, name, ownerId);
         }
     }
 
@@ -294,6 +311,14 @@ class WindowTestsBase {
     WindowState createWindow(WindowState parent, int type, WindowToken token, String name) {
         synchronized (mWm.mGlobalLock) {
             return createWindow(parent, type, token, name, 0 /* ownerId */,
+                    false /* ownerCanAddInternalSystemWindow */);
+        }
+    }
+
+    WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
+            int ownerId) {
+        synchronized (mWm.mGlobalLock) {
+            return createWindow(parent, type, token, name, ownerId,
                     false /* ownerCanAddInternalSystemWindow */);
         }
     }

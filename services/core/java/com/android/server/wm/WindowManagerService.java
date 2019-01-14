@@ -5716,17 +5716,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Returns true if the callingUid has any window currently visible to the user.
-     */
-    public boolean isAnyWindowVisibleForUid(int callingUid) {
-        synchronized (mGlobalLock) {
-            return mRoot.forAllWindows(w -> {
-                return w.getOwningUid() == callingUid && w.isVisible();
-            }, true /* traverseTopToBottom */);
-        }
-    }
-
-    /**
      * Called when a task has been removed from the recent tasks list.
      * <p>
      * Note: This doesn't go through {@link TaskWindowContainerController} yet as the window

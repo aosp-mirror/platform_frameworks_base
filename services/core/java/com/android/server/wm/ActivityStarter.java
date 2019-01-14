@@ -945,7 +945,7 @@ class ActivityStarter {
     /** Returns true if uid has a visible window or its process is in a top state. */
     private boolean isUidForeground(int uid) {
         return (mService.getUidStateLocked(uid) == ActivityManager.PROCESS_STATE_TOP)
-            || mService.mWindowManager.isAnyWindowVisibleForUid(uid);
+            || mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
     }
 
     /** Returns true if uid is in a persistent state. */
@@ -968,18 +968,19 @@ class ActivityStarter {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "logActivityStart");
             final int callingUidProcState = mService.getUidStateLocked(callingUid);
             final boolean callingUidHasAnyVisibleWindow =
-                    mService.mWindowManager.isAnyWindowVisibleForUid(callingUid);
+                    mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(callingUid);
             final int realCallingUidProcState = (callingUid == realCallingUid)
                     ? callingUidProcState
                     : mService.getUidStateLocked(realCallingUid);
             final boolean realCallingUidHasAnyVisibleWindow = (callingUid == realCallingUid)
                     ? callingUidHasAnyVisibleWindow
-                    : mService.mWindowManager.isAnyWindowVisibleForUid(realCallingUid);
+                    : mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(
+                            realCallingUid);
             final String targetPackage = (r != null) ? r.packageName : null;
             final int targetUid = (r!= null) ? ((r.appInfo != null) ? r.appInfo.uid : -1) : -1;
             final int targetUidProcState = mService.getUidStateLocked(targetUid);
             final boolean targetUidHasAnyVisibleWindow = (targetUid != -1)
-                    ? mService.mWindowManager.isAnyWindowVisibleForUid(targetUid)
+                    ? mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(targetUid)
                     : false;
             final String targetWhitelistTag = (targetUid != -1)
                     ? mService.getPendingTempWhitelistTagForUidLocked(targetUid)
