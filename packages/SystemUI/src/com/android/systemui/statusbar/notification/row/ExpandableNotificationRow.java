@@ -3092,6 +3092,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    /** Sets whether dismiss gestures are right-to-left (instead of left-to-right). */
+    public void setDismissRtl(boolean dismissRtl) {
+        mMenuRow.setDismissRtl(dismissRtl);
+    }
+
     private static class NotificationViewState extends ExpandableViewState {
 
         @Override

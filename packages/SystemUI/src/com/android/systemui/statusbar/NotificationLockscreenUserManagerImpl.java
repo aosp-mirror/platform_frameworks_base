@@ -54,6 +54,8 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Handles keeping track of the current user, profiles, and various things related to hiding
@@ -77,6 +79,7 @@ public class NotificationLockscreenUserManagerImpl implements
     private final SparseBooleanArray mUsersAllowingNotifications = new SparseBooleanArray();
     private final UserManager mUserManager;
     private final IStatusBarService mBarService;
+    private final List<UserChangedListener> mListeners = new ArrayList<>();
 
     private boolean mShowLockscreenNotifications;
     private boolean mAllowLockscreenRemoteInput;
@@ -111,6 +114,10 @@ public class NotificationLockscreenUserManagerImpl implements
                 updatePublicMode();
                 mPresenter.onUserSwitched(mCurrentUserId);
                 getEntryManager().getNotificationData().filterAndSort();
+
+                for (UserChangedListener listener : mListeners) {
+                    listener.onUserChanged(mCurrentUserId);
+                }
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 updateCurrentProfilesCache();
             } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
@@ -498,6 +505,10 @@ public class NotificationLockscreenUserManagerImpl implements
         }
     }
 
+    @Override
+    public void addUserChangedListener(UserChangedListener listener) {
+        mListeners.add(listener);
+    }
 
 //    public void updatePublicMode() {
 //        //TODO: I think there may be a race condition where mKeyguardViewManager.isShowing() returns
@@ -537,6 +548,7 @@ public class NotificationLockscreenUserManagerImpl implements
     public void destroy() {
         mContext.unregisterReceiver(mBaseBroadcastReceiver);
         mContext.unregisterReceiver(mAllUsersReceiver);
+        mListeners.clear();
     }
 
     @Override
