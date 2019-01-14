@@ -27,7 +27,9 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.Person;
 import android.app.RemoteInput;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.AudioSystem;
 import android.os.Build;
@@ -67,8 +69,12 @@ public class NotificationEntry {
 
     private boolean isPreChannelsNotification() {
         try {
-            mTargetSdkVersion = mPackageManager.getApplicationInfo(
-                    mSbn.getPackageName(), 0, mSbn.getUserId()).targetSdkVersion;
+            ApplicationInfo info = mPackageManager.getApplicationInfo(
+                    mSbn.getPackageName(), PackageManager.MATCH_ALL,
+                    mSbn.getUserId());
+            if (info != null) {
+                mTargetSdkVersion = info.targetSdkVersion;
+            }
         } catch (RemoteException e) {
             Log.w(TAG, "Couldn't look up " + mSbn.getPackageName());
         }
