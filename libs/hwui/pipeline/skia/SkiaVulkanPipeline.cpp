@@ -23,6 +23,7 @@
 #include "VkInteropFunctorDrawable.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/Frame.h"
+#include "ShaderCache.h"
 
 #include <SkSurface.h>
 #include <SkTypes.h>
@@ -73,6 +74,7 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
     }
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, backBuffer);
+    ShaderCache::get().onVkFrameFlushed(mRenderThread.getGrContext());
     layerUpdateQueue->clear();
 
     // Draw visual debugging features

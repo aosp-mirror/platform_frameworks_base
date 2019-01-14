@@ -75,6 +75,13 @@ public:
      */
     void store(const SkData& key, const SkData& data) override;
 
+    /**
+     * "onVkFrameFlushed" tries to store Vulkan pipeline cache state.
+     * Pipeline cache is saved on disk only if the size of the data has changed or there was
+     * a new shader compiled.
+     */
+    void onVkFrameFlushed(GrContext* context);
+
 private:
     // Creation and (the lack of) destruction is handled internally.
     ShaderCache();
@@ -165,6 +172,33 @@ private:
      * variables. It must be locked whenever the member variables are accessed.
      */
     mutable std::mutex mMutex;
+
+    /**
+     *  If set to "true", the next call to onVkFrameFlushed, will invoke
+     * GrCanvas::storeVkPipelineCacheData. This does not guarantee that data will be stored on disk.
+     */
+    bool mTryToStorePipelineCache = true;
+
+    /**
+     * This flag is used by "ShaderCache::store" to distinguish between shader data and
+     * Vulkan pipeline data.
+     */
+    bool mInStoreVkPipelineInProgress = false;
+
+    /**
+     *  "mNewPipelineCacheSize" has the size of the new Vulkan pipeline cache data. It is used
+     *  to prevent unnecessary disk writes, if the pipeline cache size has not changed.
+     */
+    size_t mNewPipelineCacheSize = -1;
+    /**
+     *  "mOldPipelineCacheSize" has the size of the Vulkan pipeline cache data stored on disk.
+     */
+    size_t mOldPipelineCacheSize = -1;
+
+    /**
+     *  "mCacheDirty" is true when there is new shader cache data, which is not saved to disk.
+     */
+    bool mCacheDirty = false;
 
     /**
      * "sCache" is the singleton ShaderCache object.
