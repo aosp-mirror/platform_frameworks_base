@@ -54,6 +54,7 @@ LOCAL_MODULE := privapp_whitelist_com.android.settings
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_RELATIVE_PATH := permissions
 LOCAL_MODULE_STEM := com.android.settings.xml
+LOCAL_PRODUCT_MODULE := true
 LOCAL_SRC_FILES := com.android.settings.xml
 include $(BUILD_PREBUILT)
 
