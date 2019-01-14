@@ -213,6 +213,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         }
         mService = null;
         mServiceDied = true;
+        cancelScheduledUnbind();
         @SuppressWarnings("unchecked") // TODO(b/117779333): fix this warning
         final S castService = (S) this;
         mVultureCallback.onServiceDied(castService);
