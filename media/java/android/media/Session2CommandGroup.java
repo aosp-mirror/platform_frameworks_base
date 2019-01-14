@@ -35,7 +35,6 @@ import java.util.Set;
  * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
  * for consistent behavior across all devices.
  * </p>
- * @hide
  */
 public final class Session2CommandGroup implements Parcelable {
     private static final String TAG = "Session2CommandGroup";
@@ -56,16 +55,11 @@ public final class Session2CommandGroup implements Parcelable {
     Set<Session2Command> mCommands = new HashSet<>();
 
     /**
-     * Default Constructor.
-     */
-    public Session2CommandGroup() {}
-
-    /**
      * Creates a new Session2CommandGroup with commands copied from another object.
      *
      * @param commands The collection of commands to copy.
      */
-    public Session2CommandGroup(@Nullable Collection<Session2Command> commands) {
+    Session2CommandGroup(@Nullable Collection<Session2Command> commands) {
         if (commands != null) {
             mCommands.addAll(commands);
         }
@@ -129,7 +123,10 @@ public final class Session2CommandGroup implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        if (dest == null) {
+            throw new IllegalArgumentException("parcel shouldn't be null");
+        }
         dest.writeParcelableArray(mCommands.toArray(new Session2Command[0]), 0);
     }
 
@@ -149,6 +146,9 @@ public final class Session2CommandGroup implements Parcelable {
          * @param commandGroup
          */
         public Builder(@NonNull Session2CommandGroup commandGroup) {
+            if (commandGroup == null) {
+                throw new IllegalArgumentException("command group shouldn't be null");
+            }
             mCommands = commandGroup.getCommands();
         }
 
