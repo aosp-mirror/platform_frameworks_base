@@ -1,0 +1,64 @@
+// Copyright (C} 2018 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License"};
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+
+// Sysconfig files
+
+prebuilt_etc {
+    name: "framework-sysconfig.xml",
+    sub_dir: "sysconfig",
+    src: "framework-sysconfig.xml",
+}
+
+prebuilt_etc {
+    name: "hiddenapi-package-whitelist.xml",
+    sub_dir: "sysconfig",
+    src: "hiddenapi-package-whitelist.xml",
+}
+
+// Privapp permission whitelist files
+
+prebuilt_etc {
+    name: "platform.xml",
+    sub_dir: "permissions",
+    src: "platform.xml",
+}
+
+prebuilt_etc {
+    name: "privapp-permissions-platform.xml",
+    sub_dir: "permissions",
+    src: "privapp-permissions-platform.xml",
+}
+
+prebuilt_etc {
+    name: "privapp_whitelist_com.android.settings",
+    product_specific: true,
+    sub_dir: "permissions",
+    src: "com.android.settings.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "privapp_whitelist_com.android.systemui",
+    product_specific: true,
+    sub_dir: "permissions",
+    src: "com.android.systemui.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "com.android.timezone.updater.xml",
+    sub_dir: "permissions",
+    src: "com.android.timezone.updater.xml",
+}
