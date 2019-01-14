@@ -253,7 +253,7 @@ public class ActivityManagerServiceTest {
         final UidRecord uidRec = new UidRecord(uid, null /* atmInternal */);
         uidRec.waitingForNetwork = true;
         uidRec.hasInternetPermission = true;
-        mAms.mActiveUids.put(uid, uidRec);
+        mAms.mProcessList.mActiveUids.put(uid, uidRec);
 
         final ProcessRecord appRec = new ProcessRecord(mAms, new ApplicationInfo(), TAG, uid);
         appRec.thread = Mockito.mock(IApplicationThread.class);
@@ -715,7 +715,8 @@ public class ActivityManagerServiceTest {
 
         // Verify that when uid state changes to CHANGE_GONE or CHANGE_GONE_IDLE, then it
         // will be removed from validateUids.
-        assertNotEquals("validateUids should not be empty", 0, mAms.mValidateUids.size());
+        assertNotEquals("validateUids should not be empty", 0,
+                mAms.mValidateUids.size());
         for (int i = 0; i < pendingItemsForUids.size(); ++i) {
             final UidRecord.ChangeItem item = pendingItemsForUids.get(i);
             // Assign CHANGE_GONE_IDLE to some items and CHANGE_GONE to the others, using even/odd
@@ -853,7 +854,7 @@ public class ActivityManagerServiceTest {
         record.curProcStateSeq = curProcStateSeq;
         record.lastDispatchedProcStateSeq = lastDispatchedProcStateSeq;
         record.lastNetworkUpdatedProcStateSeq = lastNetworkUpdatedProcStateSeq;
-        mAms.mActiveUids.put(Process.myUid(), record);
+        mAms.mProcessList.mActiveUids.put(Process.myUid(), record);
 
         CustomThread thread = new CustomThread(record.networkStateLock, new Runnable() {
             @Override
@@ -876,7 +877,7 @@ public class ActivityManagerServiceTest {
             thread.assertTerminated(errMsg);
         }
 
-        mAms.mActiveUids.clear();
+        mAms.mProcessList.mActiveUids.clear();
     }
 
     private static class TestHandler extends Handler {

@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
 import static android.os.Process.SYSTEM_UID;
@@ -123,7 +124,7 @@ import java.util.List;
  * </ul>
  */
 public final class ProcessList {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
+    static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
 
     // The minimum time we allow between crashes, for us to consider this
     // application to be bad and stop and its services and reject broadcasts.
@@ -352,6 +353,8 @@ public final class ProcessList {
      */
     int mLruSeq = 0;
 
+    ActiveUids mActiveUids;
+
     /**
      * The currently running isolated processes.
      */
@@ -549,8 +552,10 @@ public final class ProcessList {
         updateOomLevels(0, 0, false);
     }
 
-    void init(ActivityManagerService service) {
+    void init(ActivityManagerService service, ActiveUids activeUids) {
         mService = service;
+        mActiveUids = activeUids;
+
         if (sKillHandler == null) {
             sKillThread = new ServiceThread(TAG + ":kill",
                     THREAD_PRIORITY_BACKGROUND, true /* allowIo */);
@@ -2176,7 +2181,7 @@ public final class ProcessList {
         } else if (old != null) {
             Slog.wtf(TAG, "Already have existing proc " + old + " when adding " + proc);
         }
-        UidRecord uidRec = mService.mActiveUids.get(proc.uid);
+        UidRecord uidRec = mActiveUids.get(proc.uid);
         if (uidRec == null) {
             uidRec = new UidRecord(proc.uid, mService.mAtmInternal);
             // This is the first appearance of the uid, report it now!
@@ -2188,7 +2193,7 @@ public final class ProcessList {
                 uidRec.setWhitelist = uidRec.curWhitelist = true;
             }
             uidRec.updateHasInternetPermission();
-            mService.mActiveUids.put(proc.uid, uidRec);
+            mActiveUids.put(proc.uid, uidRec);
             EventLogTags.writeAmUidRunning(uidRec.uid);
             mService.noteUidProcessState(uidRec.uid, uidRec.getCurProcState());
         }
@@ -2290,7 +2295,7 @@ public final class ProcessList {
                         "No more processes in " + old.uidRecord);
                 mService.enqueueUidChangeLocked(old.uidRecord, -1, UidRecord.CHANGE_GONE);
                 EventLogTags.writeAmUidStopped(uid);
-                mService.mActiveUids.remove(uid);
+                mActiveUids.remove(uid);
                 mService.noteUidProcessState(uid, ActivityManager.PROCESS_STATE_NONEXISTENT);
             }
             old.uidRecord = null;
@@ -3048,6 +3053,39 @@ public final class ProcessList {
                 } catch (RemoteException ex) {
                 }
             }
+        }
+    }
+
+    /** Returns the uid's process state or PROCESS_STATE_NONEXISTENT if not running */
+    @GuardedBy("mService")
+    int getUidProcStateLocked(int uid) {
+        UidRecord uidRec = mActiveUids.get(uid);
+        return uidRec == null ? PROCESS_STATE_NONEXISTENT : uidRec.getCurProcState();
+    }
+
+    /** Returns the UidRecord for the given uid, if it exists. */
+    @GuardedBy("mService")
+    UidRecord getUidRecordLocked(int uid) {
+        return mActiveUids.get(uid);
+    }
+
+    /**
+     * Call {@link ActivityManagerService#doStopUidLocked}
+     * (which will also stop background services) for all idle UIDs.
+     */
+    @GuardedBy("mService")
+    void doStopUidForIdleUidsLocked() {
+        final int size = mActiveUids.size();
+        for (int i = 0; i < size; i++) {
+            final int uid = mActiveUids.keyAt(i);
+            if (UserHandle.isCore(uid)) {
+                continue;
+            }
+            final UidRecord uidRec = mActiveUids.valueAt(i);
+            if (!uidRec.idle) {
+                continue;
+            }
+            mService.doStopUidLocked(uidRec.uid, uidRec);
         }
     }
 }
