@@ -13774,14 +13774,15 @@ public class PackageManagerService extends IPackageManager.Stub
             IBackupManager bm = IBackupManager.Stub.asInterface(
                     ServiceManager.getService(Context.BACKUP_SERVICE));
             if (bm != null) {
+                int userId = args.user.getIdentifier();
                 if (DEBUG_INSTALL) {
-                    Log.v(TAG, "token " + token + " to BM for possible restore");
+                    Log.v(TAG, "token " + token + " to BM for possible restore for user " + userId);
                 }
                 Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
                 try {
-                    // TODO: http://b/22388012
-                    if (bm.isBackupServiceActive(UserHandle.USER_SYSTEM)) {
-                        bm.restoreAtInstall(res.pkg.applicationInfo.packageName, token);
+                    if (bm.isBackupServiceActive(userId)) {
+                        bm.restoreAtInstallForUser(
+                                userId, res.pkg.applicationInfo.packageName, token);
                     } else {
                         doRestore = false;
                     }
