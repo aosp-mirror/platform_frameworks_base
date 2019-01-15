@@ -20,6 +20,7 @@
           package="com.android.mainline.networkstack"
           android:sharedUserId="android.uid.networkstack">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
