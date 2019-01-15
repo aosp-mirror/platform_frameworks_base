@@ -294,22 +294,30 @@ TEST(LoadedArscTest, LoadOverlayable) {
 
   info = package->GetOverlayableInfo(overlayable::R::string::overlayable1);
   ASSERT_THAT(info, NotNull());
+  EXPECT_THAT(info->name, Eq("OverlayableResources1"));
+  EXPECT_THAT(info->actor, Eq("overlay://theme"));
   EXPECT_THAT(info->policy_flags, Eq(ResTable_overlayable_policy_header::POLICY_PUBLIC));
 
   info = package->GetOverlayableInfo(overlayable::R::string::overlayable2);
   ASSERT_THAT(info, NotNull());
+  EXPECT_THAT(info->name, Eq("OverlayableResources1"));
+  EXPECT_THAT(info->actor, Eq("overlay://theme"));
   EXPECT_THAT(info->policy_flags,
               Eq(ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION
                  | ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION));
 
   info = package->GetOverlayableInfo(overlayable::R::string::overlayable3);
   ASSERT_THAT(info, NotNull());
+  EXPECT_THAT(info->name, Eq("OverlayableResources2"));
+  EXPECT_THAT(info->actor, Eq("overlay://com.android.overlayable"));
   EXPECT_THAT(info->policy_flags,
               Eq(ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION
                  | ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION
                  | ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION));
 
   info = package->GetOverlayableInfo(overlayable::R::string::overlayable4);
+  EXPECT_THAT(info->name, Eq("OverlayableResources1"));
+  EXPECT_THAT(info->actor, Eq("overlay://theme"));
   ASSERT_THAT(info, NotNull());
   EXPECT_THAT(info->policy_flags, Eq(ResTable_overlayable_policy_header::POLICY_PUBLIC));
 }

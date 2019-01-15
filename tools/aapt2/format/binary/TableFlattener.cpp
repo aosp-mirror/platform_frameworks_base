@@ -217,9 +217,10 @@ class MapFlattenVisitor : public ValueVisitor {
   size_t entry_count_ = 0;
 };
 
-struct PolicyChunk {
-  uint32_t policy_flags;
-  std::set<ResourceId> ids;
+struct OverlayableChunk {
+  std::string actor;
+  Source source;
+  std::map<OverlayableItem::PolicyFlags, std::set<ResourceId>> policy_ids;
 };
 
 class PackageFlattener {
@@ -421,8 +422,9 @@ class PackageFlattener {
     return sorted_entries;
   }
 
-  void FlattenOverlayable(BigBuffer* buffer) {
-    std::vector<PolicyChunk> policies;
+  bool FlattenOverlayable(BigBuffer* buffer) {
+    std::set<ResourceId> seen_ids;
+    std::map<std::string, OverlayableChunk> overlayable_chunks;
 
     CHECK(bool(package_->id)) << "package must have an ID set when flattening <overlayable>";
     for (auto& type : package_->types) {
@@ -433,79 +435,119 @@ class PackageFlattener {
           continue;
         }
 
-        OverlayableItem& overlayable = entry->overlayable_item.value();
-        uint32_t policy_flags = OverlayableItem::Policy::kNone;
-        if (overlayable.policies & OverlayableItem::Policy::kPublic) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
-        }
-        if (overlayable.policies & OverlayableItem::Policy::kSystem) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION;
-        }
-        if (overlayable.policies & OverlayableItem::Policy::kVendor) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION;
-        }
-        if (overlayable.policies & OverlayableItem::Policy::kProduct) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION;
-        }
-        if (overlayable.policies & OverlayableItem::Policy::kProductServices) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION;
+        OverlayableItem& item = entry->overlayable_item.value();
+
+        // Resource ids should only appear once in the resource table
+        ResourceId id = android::make_resid(package_->id.value(), type->id.value(),
+                                            entry->id.value());
+        CHECK(seen_ids.find(id) == seen_ids.end())
+            << "multiple overlayable definitions found for resource "
+            << ResourceName(package_->name, type->type, entry->name).to_string();
+        seen_ids.insert(id);
+
+        // Find the overlayable chunk with the specified name
+        OverlayableChunk* overlayable_chunk = nullptr;
+        auto iter = overlayable_chunks.find(item.overlayable->name);
+        if (iter == overlayable_chunks.end()) {
+          OverlayableChunk chunk{item.overlayable->actor, item.overlayable->source};
+          overlayable_chunk =
+              &overlayable_chunks.insert({item.overlayable->name, chunk}).first->second;
+        } else {
+          OverlayableChunk& chunk = iter->second;
+          if (!(chunk.source == item.overlayable->source)) {
+            // The name of an overlayable set of resources must be unique
+            context_->GetDiagnostics()->Error(DiagMessage(item.overlayable->source)
+                                                  << "duplicate overlayable name"
+                                                  << item.overlayable->name << "'");
+            context_->GetDiagnostics()->Error(DiagMessage(chunk.source)
+                                                  << "previous declaration here");
+            return false;
+          }
+
+          CHECK(chunk.actor == item.overlayable->actor);
+          overlayable_chunk = &chunk;
         }
 
-        if (overlayable.policies == OverlayableItem::Policy::kNone) {
+        uint32_t policy_flags = 0;
+        if (item.policies == OverlayableItem::Policy::kNone) {
           // Encode overlayable entries defined without a policy as publicly overlayable
           policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
-        }
-
-        // Find the overlayable policy chunk with the same policies as the entry
-        PolicyChunk* policy_chunk = nullptr;
-        for (PolicyChunk& policy : policies) {
-          if (policy.policy_flags == policy_flags) {
-            policy_chunk = &policy;
-            break;
+        } else {
+          if (item.policies & OverlayableItem::Policy::kPublic) {
+            policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
+          }
+          if (item.policies & OverlayableItem::Policy::kSystem) {
+            policy_flags |= ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION;
+          }
+          if (item.policies & OverlayableItem::Policy::kVendor) {
+            policy_flags |= ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION;
+          }
+          if (item.policies & OverlayableItem::Policy::kProduct) {
+            policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION;
+          }
+          if (item.policies & OverlayableItem::Policy::kProductServices) {
+            policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION;
           }
         }
 
-        // Create a new policy chunk if an existing one with the same policy cannot be found
-        if (policy_chunk == nullptr) {
-          PolicyChunk p;
-          p.policy_flags = policy_flags;
-          policies.push_back(p);
-          policy_chunk = &policies.back();
+        auto policy = overlayable_chunk->policy_ids.find(policy_flags);
+        if (policy != overlayable_chunk->policy_ids.end()) {
+          policy->second.insert(id);
+        } else {
+          overlayable_chunk->policy_ids.insert(
+              std::make_pair(policy_flags, std::set<ResourceId>{id}));
         }
-
-        policy_chunk->ids.insert(android::make_resid(package_->id.value(), type->id.value(),
-                                                     entry->id.value()));
       }
     }
 
-    if (policies.empty()) {
-      // Only write the overlayable chunk if the APK has overlayable entries
-      return;
-    }
+    for (auto& overlayable_pair : overlayable_chunks) {
+      std::string name = overlayable_pair.first;
+      OverlayableChunk& overlayable = overlayable_pair.second;
 
-    ChunkWriter writer(buffer);
-    writer.StartChunk<ResTable_overlayable_header>(RES_TABLE_OVERLAYABLE_TYPE);
-
-    // Write each policy block for the overlayable
-    for (PolicyChunk& policy : policies) {
-      ChunkWriter policy_writer(buffer);
-      ResTable_overlayable_policy_header* policy_type =
-          policy_writer.StartChunk<ResTable_overlayable_policy_header>(
-              RES_TABLE_OVERLAYABLE_POLICY_TYPE);
-      policy_type->policy_flags = util::HostToDevice32(policy.policy_flags);
-      policy_type->entry_count = util::HostToDevice32(static_cast<uint32_t>(policy.ids.size()));
-
-      // Write the ids after the policy header
-      ResTable_ref* id_block = policy_writer.NextBlock<ResTable_ref>(policy.ids.size());
-      for (const ResourceId& id : policy.ids) {
-        id_block->ident = util::HostToDevice32(id.id);
-        id_block++;
+      // Write the header of the overlayable chunk
+      ChunkWriter overlayable_writer(buffer);
+      auto* overlayable_type =
+          overlayable_writer.StartChunk<ResTable_overlayable_header>(RES_TABLE_OVERLAYABLE_TYPE);
+      if (name.size() >= arraysize(overlayable_type->name)) {
+        diag_->Error(DiagMessage() << "overlayable name '" << name
+                                   << "' exceeds maximum length ("
+                                   << arraysize(overlayable_type->name)
+                                   << " utf16 characters)");
+        return false;
       }
+      strcpy16_htod(overlayable_type->name, arraysize(overlayable_type->name),
+                    util::Utf8ToUtf16(name));
 
-      policy_writer.Finish();
+      if (overlayable.actor.size() >= arraysize(overlayable_type->actor)) {
+        diag_->Error(DiagMessage() << "overlayable name '" << overlayable.actor
+                                   << "' exceeds maximum length ("
+                                   << arraysize(overlayable_type->actor)
+                                   << " utf16 characters)");
+        return false;
+      }
+      strcpy16_htod(overlayable_type->actor, arraysize(overlayable_type->actor),
+                    util::Utf8ToUtf16(overlayable.actor));
+
+      // Write each policy block for the overlayable
+      for (auto& policy_ids : overlayable.policy_ids) {
+        ChunkWriter policy_writer(buffer);
+        auto* policy_type = policy_writer.StartChunk<ResTable_overlayable_policy_header>(
+            RES_TABLE_OVERLAYABLE_POLICY_TYPE);
+        policy_type->policy_flags = util::HostToDevice32(static_cast<uint32_t>(policy_ids.first));
+        policy_type->entry_count = util::HostToDevice32(static_cast<uint32_t>(
+                                                            policy_ids.second.size()));
+        // Write the ids after the policy header
+        auto* id_block = policy_writer.NextBlock<ResTable_ref>(policy_ids.second.size());
+        for (const ResourceId& id : policy_ids.second) {
+          id_block->ident = util::HostToDevice32(id.id);
+          id_block++;
+        }
+        policy_writer.Finish();
+      }
+      overlayable_writer.Finish();
     }
 
-    writer.Finish();
+    return true;
   }
 
   bool FlattenTypeSpec(ResourceTableType* type, std::vector<ResourceEntry*>* sorted_entries,
