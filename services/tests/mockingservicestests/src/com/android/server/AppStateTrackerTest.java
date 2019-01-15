@@ -85,7 +85,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -794,7 +793,6 @@ public class AppStateTrackerTest {
     }
 
     @Test
-    @FlakyTest(bugId = 114098433)
     public void testAllListeners() throws Exception {
         final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
