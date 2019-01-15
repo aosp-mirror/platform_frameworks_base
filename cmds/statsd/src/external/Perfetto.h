@@ -32,6 +32,7 @@ class PerfettoDetails;  // Declared in statsd_config.pb.h
 // This method returns immediately after passing the config and does NOT wait
 // for the full duration of the trace.
 bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config,
+                                            int64_t subscription_id,
                                             int64_t alert_id,
                                             const ConfigKey& configKey);
 
