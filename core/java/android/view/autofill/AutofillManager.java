@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -327,6 +328,12 @@ public final class AutofillManager {
      * Timeout for calls to system_server.
      */
     private static final int SYNC_CALLS_TIMEOUT_MS = 5000;
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
 
     /**
      * Makes an authentication id from a request id and a dataset id.

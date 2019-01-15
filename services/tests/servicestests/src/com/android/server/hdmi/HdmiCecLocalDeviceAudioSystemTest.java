@@ -15,6 +15,9 @@
  */
 package com.android.server.hdmi;
 
+import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
+import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE;
+
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
@@ -25,6 +28,7 @@ import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioManager;
 import android.os.Looper;
 import android.os.SystemProperties;
@@ -64,6 +68,8 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private int mMusicMaxVolume;
     private boolean mMusicMute;
     private int mAvrPhysicalAddress;
+    private int mInvokeDeviceEventState;
+    private HdmiDeviceInfo mDeviceInfo;
 
     @Before
     public void setUp() {
@@ -127,6 +133,18 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
                 @Override
                 void wakeUp() {}
+
+                @Override
+                void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
+                    mDeviceInfo = device;
+                    mInvokeDeviceEventState = status;
+                }
+
+                @Override
+                int pathToPortId(int path) {
+                    // port id is not useful for the test right now
+                    return 1;
+                }
             };
 
         mMyLooper = mTestLooper.getLooper();
@@ -157,6 +175,8 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mNativeWrapper.setPhysicalAddress(mAvrPhysicalAddress);
         SystemProperties.set(Constants.PROPERTY_ARC_SUPPORT, "true");
         SystemProperties.set(Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, "true");
+        mInvokeDeviceEventState = 0;
+        mDeviceInfo = null;
     }
 
     @Test
@@ -610,5 +630,74 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleRoutingChange(message)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+    }
+
+    @Test
+    public void updateCecDevice_deviceNotExists_addDevice() {
+        assertThat(mInvokeDeviceEventState).isNotEqualTo(DEVICE_EVENT_ADD_DEVICE);
+        HdmiDeviceInfo newDevice = new HdmiDeviceInfo(
+                ADDR_PLAYBACK_1, 0x2100, 2, HdmiDeviceInfo.DEVICE_PLAYBACK,
+                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_1));
+
+        mHdmiCecLocalDeviceAudioSystem.updateCecDevice(newDevice);
+        assertThat(mDeviceInfo).isEqualTo(newDevice);
+        assertThat(mHdmiCecLocalDeviceAudioSystem
+            .getCecDeviceInfo(newDevice.getLogicalAddress())).isEqualTo(newDevice);
+        assertThat(mInvokeDeviceEventState).isEqualTo(DEVICE_EVENT_ADD_DEVICE);
+    }
+
+    @Test
+    public void updateCecDevice_deviceExists_doNothing() {
+        mInvokeDeviceEventState = 0;
+        HdmiDeviceInfo oldDevice = new HdmiDeviceInfo(
+                ADDR_PLAYBACK_1, 0x2100, 2, HdmiDeviceInfo.DEVICE_PLAYBACK,
+                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_1));
+        mHdmiCecLocalDeviceAudioSystem.addDeviceInfo(oldDevice);
+
+        mHdmiCecLocalDeviceAudioSystem.updateCecDevice(oldDevice);
+        assertThat(mInvokeDeviceEventState).isEqualTo(0);
+    }
+
+    @Test
+    public void updateCecDevice_deviceInfoDifferent_updateDevice() {
+        assertThat(mInvokeDeviceEventState).isNotEqualTo(DEVICE_EVENT_UPDATE_DEVICE);
+        HdmiDeviceInfo oldDevice = new HdmiDeviceInfo(
+                ADDR_PLAYBACK_1, 0x2100, 2, HdmiDeviceInfo.DEVICE_PLAYBACK,
+                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_1));
+        mHdmiCecLocalDeviceAudioSystem.addDeviceInfo(oldDevice);
+
+        HdmiDeviceInfo differentDevice = new HdmiDeviceInfo(
+                ADDR_PLAYBACK_1, 0x2100, 4, HdmiDeviceInfo.DEVICE_PLAYBACK,
+                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_1));
+
+        mHdmiCecLocalDeviceAudioSystem.updateCecDevice(differentDevice);
+        assertThat(mDeviceInfo).isEqualTo(differentDevice);
+        assertThat(mHdmiCecLocalDeviceAudioSystem
+            .getCecDeviceInfo(differentDevice.getLogicalAddress())).isEqualTo(differentDevice);
+        assertThat(mInvokeDeviceEventState).isEqualTo(DEVICE_EVENT_UPDATE_DEVICE);
+    }
+
+    @Test
+    public void handleReportPhysicalAddress_differentPath_addDevice() {
+        assertThat(mInvokeDeviceEventState).isNotEqualTo(DEVICE_EVENT_ADD_DEVICE);
+        HdmiDeviceInfo oldDevice = new HdmiDeviceInfo(
+                ADDR_PLAYBACK_1, 0x2100, 2, HdmiDeviceInfo.DEVICE_PLAYBACK,
+                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_1));
+        mHdmiCecLocalDeviceAudioSystem.addDeviceInfo(oldDevice);
+
+        HdmiDeviceInfo differentDevice = new HdmiDeviceInfo(
+                ADDR_PLAYBACK_1, 0x2200, 1, HdmiDeviceInfo.DEVICE_PLAYBACK,
+                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_1));
+        HdmiCecMessage reportPhysicalAddress = HdmiCecMessageBuilder
+                .buildReportPhysicalAddressCommand(
+                        ADDR_PLAYBACK_1, 0x2200, HdmiDeviceInfo.DEVICE_PLAYBACK);
+        mHdmiCecLocalDeviceAudioSystem.handleReportPhysicalAddress(reportPhysicalAddress);
+
+        mHdmiCecLocalDeviceAudioSystem.addDeviceInfo(oldDevice);
+        mTestLooper.dispatchAll();
+        assertThat(mDeviceInfo).isEqualTo(differentDevice);
+        assertThat(mHdmiCecLocalDeviceAudioSystem
+            .getCecDeviceInfo(differentDevice.getLogicalAddress())).isEqualTo(differentDevice);
+        assertThat(mInvokeDeviceEventState).isEqualTo(DEVICE_EVENT_ADD_DEVICE);
     }
 }

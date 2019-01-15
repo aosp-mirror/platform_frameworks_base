@@ -54,7 +54,10 @@ public class ShadowAppBackupUtils {
 
     @Implementation
     protected static boolean appIsRunningAndEligibleForBackupWithTransport(
-            @Nullable TransportClient transportClient, String packageName, PackageManager pm) {
+            @Nullable TransportClient transportClient,
+            String packageName,
+            PackageManager pm,
+            int userId) {
         return sAppsRunningAndEligibleForBackupWithTransport.contains(packageName);
     }
 

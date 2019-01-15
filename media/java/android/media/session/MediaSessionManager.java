@@ -41,6 +41,8 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -69,9 +71,13 @@ public final class MediaSessionManager {
      */
     public static final int RESULT_MEDIA_KEY_HANDLED = 1;
 
+    private final Object mLock = new Object();
+    @GuardedBy("mLock")
     private final ArrayMap<OnActiveSessionsChangedListener, SessionsChangedWrapper> mListeners
             = new ArrayMap<OnActiveSessionsChangedListener, SessionsChangedWrapper>();
-    private final Object mLock = new Object();
+    @GuardedBy("mLock")
+    private final ArrayMap<OnSession2TokensChangedListener, Session2TokensChangedWrapper>
+            mSession2TokensListeners = new ArrayMap<>();
     private final ISessionManager mService;
 
     private Context mContext;
@@ -319,6 +325,87 @@ public final class MediaSessionManager {
                 } finally {
                     wrapper.release();
                 }
+            }
+        }
+    }
+
+    /**
+     * Adds a listener to be notified when the {@link #getSession2Tokens()} changes.
+     * <p>
+     * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
+     * for consistent behavior across all devices.
+     *
+     * @param listener The listener to add
+     * @param handler The handler to call listener on. If {@code null}, calling thread's looper will
+     *                be used.
+     * @hide
+     */
+    // TODO(jaewan): Unhide
+    public void addOnSession2TokensChangedListener(
+            @NonNull OnSession2TokensChangedListener listener, @Nullable Handler handler) {
+        addOnSession2TokensChangedListener(UserHandle.myUserId(), listener, handler);
+    }
+
+    /**
+     * Adds a listener to be notified when the {@link #getSession2Tokens()} changes.
+     * <p>
+     * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
+     * for consistent behavior across all devices.
+     *
+     * @param userId The userId to listen for changes on
+     * @param listener The listener to add
+     * @param handler The handler to call listener on. If {@code null}, calling thread's looper will
+     *                be used.
+     * @hide
+     */
+    public void addOnSession2TokensChangedListener(int userId,
+            @NonNull OnSession2TokensChangedListener listener, @Nullable Handler handler) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener shouldn't be null");
+        }
+        synchronized (mLock) {
+            if (mSession2TokensListeners.get(listener) != null) {
+                Log.w(TAG, "Attempted to add session listener twice, ignoring.");
+                return;
+            }
+            Session2TokensChangedWrapper wrapper =
+                    new Session2TokensChangedWrapper(listener, handler);
+            try {
+                mService.addSession2TokensListener(wrapper.getStub(), userId);
+                mSession2TokensListeners.put(listener, wrapper);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error in addSessionTokensListener.", e);
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Removes the {@link OnSession2TokensChangedListener} to stop receiving session token updates.
+     *
+     * @param listener The listener to remove.
+     * @hide
+     */
+    // TODO(jaewan): Unhide
+    public void removeOnSession2TokensChangedListener(
+            @NonNull OnSession2TokensChangedListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener may not be null");
+        }
+        final Session2TokensChangedWrapper wrapper;
+        synchronized (mLock) {
+            wrapper = mSession2TokensListeners.remove(listener);
+        }
+        if (wrapper != null) {
+            try {
+                mService.removeSession2TokensListener(wrapper.getStub());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error in removeSessionTokensListener.", e);
+                e.rethrowFromSystemServer();
             }
         }
     }
@@ -590,6 +677,26 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Listens for changes to the {@link #getSession2Tokens()}. This can be added
+     * using {@link #addOnSession2TokensChangedListener(OnSession2TokensChangedListener, Handler)}.
+     * <p>
+     * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
+     * for consistent behavior across all devices.
+     *
+     * @hide
+     */
+    public interface OnSession2TokensChangedListener {
+        /**
+         * Called when the {@link #getSession2Tokens()} is changed.
+         *
+         * @param tokens list of {@link Session2Token}
+         */
+        void onSession2TokensChanged(@NonNull List<Session2Token> tokens);
+    }
+
+    /**
      * Listens the volume key long-presses.
      * @hide
      */
@@ -804,6 +911,27 @@ public final class MediaSessionManager {
             mListener = null;
             mContext = null;
             mHandler = null;
+        }
+    }
+
+    private static final class Session2TokensChangedWrapper {
+        private final OnSession2TokensChangedListener mListener;
+        private final Handler mHandler;
+        private final ISession2TokensListener.Stub mStub =
+                new ISession2TokensListener.Stub() {
+                    @Override
+                    public void onSession2TokensChanged(final List<Session2Token> tokens) {
+                        mHandler.post(() -> mListener.onSession2TokensChanged(tokens));
+                    }
+                };
+
+        Session2TokensChangedWrapper(OnSession2TokensChangedListener listener, Handler handler) {
+            mListener = listener;
+            mHandler = (handler == null) ? new Handler() : new Handler(handler.getLooper());
+        }
+
+        public ISession2TokensListener.Stub getStub() {
+            return mStub;
         }
     }
 

@@ -54,6 +54,7 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
                 R.integer.config_smart_replies_in_notifications_max_squeeze_remeasure_attempts, 7);
         resources.addOverride(
                 R.bool.config_smart_replies_in_notifications_edit_choices_before_sending, false);
+        resources.addOverride(R.bool.config_smart_replies_in_notifications_show_in_heads_up, true);
         mConstants = new SmartReplyConstants(Handler.createAsync(Looper.myLooper()), mContext);
     }
 
@@ -150,6 +151,26 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
         assertFalse(
                 mConstants.getEffectiveEditChoicesBeforeSending(
                         RemoteInput.EDIT_CHOICES_BEFORE_SENDING_DISABLED));
+    }
+
+    @Test
+    public void testShowInHeadsUpWithNoConfig() {
+        assertTrue(mConstants.isEnabled());
+        assertTrue(mConstants.getShowInHeadsUp());
+    }
+
+    @Test
+    public void testShowInHeadsUpEnabled() {
+        overrideSetting("enabled=true,show_in_heads_up=true");
+        triggerConstantsOnChange();
+        assertTrue(mConstants.getShowInHeadsUp());
+    }
+
+    @Test
+    public void testShowInHeadsUpDisabled() {
+        overrideSetting("enabled=true,show_in_heads_up=false");
+        triggerConstantsOnChange();
+        assertFalse(mConstants.getShowInHeadsUp());
     }
 
     private void overrideSetting(String flags) {

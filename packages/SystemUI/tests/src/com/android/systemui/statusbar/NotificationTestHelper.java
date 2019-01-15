@@ -17,13 +17,16 @@
 package com.android.systemui.statusbar;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
@@ -86,8 +89,7 @@ public class NotificationTestHelper {
      * @throws Exception
      */
     public ExpandableNotificationRow createRow(String pkg, int uid) throws Exception {
-        return createRow(pkg, uid, false /* isGroupSummary */, null /* groupKey */,
-                false /* isBubble */);
+        return createRow(pkg, uid, false /* isGroupSummary */, null /* groupKey */);
     }
 
     /**
@@ -98,8 +100,7 @@ public class NotificationTestHelper {
      * @throws Exception
      */
     public ExpandableNotificationRow createRow(Notification notification) throws Exception {
-        return generateRow(notification, PKG, UID, 0 /* extraInflationFlags */,
-                false /* isBubble */);
+        return generateRow(notification, PKG, UID, 0 /* extraInflationFlags */);
     }
 
     /**
@@ -112,8 +113,7 @@ public class NotificationTestHelper {
      */
     public ExpandableNotificationRow createRow(@InflationFlag int extraInflationFlags)
             throws Exception {
-        return generateRow(createNotification(), PKG, UID, extraInflationFlags,
-                false /* isBubble */);
+        return generateRow(createNotification(), PKG, UID, extraInflationFlags);
     }
 
     /**
@@ -134,20 +134,21 @@ public class NotificationTestHelper {
         return createGroup(2);
     }
 
-    /**
-     * Retursn an {@link ExpandableNotificationRow} that should be a bubble.
-     */
-    public ExpandableNotificationRow createBubble() throws Exception {
-        return createRow(PKG, UID, false /* isGroupSummary */, null /* groupKey */,
-                true /* isBubble */);
-    }
-
     private ExpandableNotificationRow createGroupSummary(String groupkey) throws Exception {
-        return createRow(PKG, UID, true /* isGroupSummary */, groupkey, false);
+        return createRow(PKG, UID, true /* isGroupSummary */, groupkey);
     }
 
     private ExpandableNotificationRow createGroupChild(String groupkey) throws Exception {
-        return createRow(PKG, UID, false /* isGroupSummary */, groupkey, false);
+        return createRow(PKG, UID, false /* isGroupSummary */, groupkey);
+    }
+
+    /**
+     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
+     */
+    public ExpandableNotificationRow createBubble() throws Exception {
+        Notification n = createNotification(false /* isGroupSummary */,
+                null /* groupKey */, true /* isBubble */);
+        return generateRow(n, PKG, UID, 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
     }
 
     /**
@@ -157,7 +158,6 @@ public class NotificationTestHelper {
      * @param uid uid used for creating a {@link StatusBarNotification}
      * @param isGroupSummary whether the notification row is a group summary
      * @param groupKey the group key for the notification group used across notifications
-     * @param isBubble
      * @return a row with that's either a standalone notification or a group notification if the
      *         groupKey is non-null
      * @throws Exception
@@ -166,10 +166,10 @@ public class NotificationTestHelper {
             String pkg,
             int uid,
             boolean isGroupSummary,
-            @Nullable String groupKey, boolean isBubble)
+            @Nullable String groupKey)
             throws Exception {
         Notification notif = createNotification(isGroupSummary, groupKey);
-        return generateRow(notif, pkg, uid, 0 /* inflationFlags */, isBubble);
+        return generateRow(notif, pkg, uid, 0 /* inflationFlags */);
     }
 
     /**
@@ -188,8 +188,20 @@ public class NotificationTestHelper {
      * @param groupKey the group key for the notification group used across notifications
      * @return a notification that is in the group specified or standalone if unspecified
      */
+    private Notification createNotification(boolean isGroupSummary, @Nullable String groupKey) {
+        return createNotification(isGroupSummary, groupKey, false /* isBubble */);
+    }
+
+    /**
+     * Creates a notification with the given parameters.
+     *
+     * @param isGroupSummary whether the notification is a group summary
+     * @param groupKey the group key for the notification group used across notifications
+     * @param isBubble whether this notification should bubble
+     * @return a notification that is in the group specified or standalone if unspecified
+     */
     private Notification createNotification(boolean isGroupSummary,
-            @Nullable String groupKey) {
+            @Nullable String groupKey, boolean isBubble) {
         Notification publicVersion = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setCustomContentView(new RemoteViews(mContext.getPackageName(),
@@ -207,6 +219,10 @@ public class NotificationTestHelper {
         if (!TextUtils.isEmpty(groupKey)) {
             notificationBuilder.setGroup(groupKey);
         }
+        if (isBubble) {
+            PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, new Intent(), 0);
+            notificationBuilder.setAppOverlayIntent(bubbleIntent);
+        }
         return notificationBuilder.build();
     }
 
@@ -214,7 +230,17 @@ public class NotificationTestHelper {
             Notification notification,
             String pkg,
             int uid,
-            @InflationFlag int extraInflationFlags, boolean isBubble)
+            @InflationFlag int extraInflationFlags)
+            throws Exception {
+        return generateRow(notification, pkg, uid, extraInflationFlags, IMPORTANCE_DEFAULT);
+    }
+
+    private ExpandableNotificationRow generateRow(
+            Notification notification,
+            String pkg,
+            int uid,
+            @InflationFlag int extraInflationFlags,
+            int importance)
             throws Exception {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 mContext.LAYOUT_INFLATER_SERVICE);
@@ -242,9 +268,8 @@ public class NotificationTestHelper {
         entry.setRow(row);
         entry.createIcons(mContext, sbn);
         entry.channel = new NotificationChannel(
-                notification.getChannelId(), notification.getChannelId(), IMPORTANCE_DEFAULT);
+                notification.getChannelId(), notification.getChannelId(), importance);
         entry.channel.setBlockableSystem(true);
-        entry.setIsBubble(isBubble);
         row.setEntry(entry);
         row.getNotificationInflater().addInflationFlags(extraInflationFlags);
         NotificationInflaterTest.runThenWaitForInflation(

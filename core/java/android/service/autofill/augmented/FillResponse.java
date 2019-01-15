@@ -18,6 +18,7 @@ package android.service.autofill.augmented;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.autofill.AutofillId;
@@ -30,6 +31,9 @@ import java.util.List;
  * @hide
  */
 @SystemApi
+@TestApi
+//TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+//in the same package as the test, and that module is compiled with SDK=test_current
 public final class FillResponse implements Parcelable {
 
     private final FillWindow mFillWindow;
@@ -50,6 +54,9 @@ public final class FillResponse implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
+    //TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+    //in the same package as the test, and that module is compiled with SDK=test_current
     public static final class Builder {
 
         private FillWindow mFillWindow;

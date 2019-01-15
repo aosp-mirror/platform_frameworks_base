@@ -110,7 +110,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 : stack.getTargetView(event);
         boolean isFloating = targetView instanceof FloatingView;
         if (!isFloating || targetView == null || action == MotionEvent.ACTION_OUTSIDE) {
-            stack.animateExpansion(false /* shouldExpand */);
+            stack.collapseStack();
             cleanUpDismissTarget();
             resetTouches();
             return false;
@@ -196,9 +196,13 @@ class BubbleTouchHandler implements View.OnTouchListener {
                         mMovementHelper.getTranslateAnim(floatingView, toGoTo, 100, 0).start();
                     }
                 } else if (floatingView.equals(stack.getExpandedBubble())) {
-                    stack.animateExpansion(false /* shouldExpand */);
+                    stack.collapseStack();
                 } else if (isBubbleStack) {
-                    stack.animateExpansion(!stack.isExpanded() /* shouldExpand */);
+                    if (stack.isExpanded()) {
+                        stack.collapseStack();
+                    } else {
+                        stack.expandStack();
+                    }
                 } else {
                     stack.setExpandedBubble((BubbleView) floatingView);
                 }

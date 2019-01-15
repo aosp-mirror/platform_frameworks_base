@@ -28,6 +28,7 @@ package android.app {
 
   public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public void onMovedToDisplay(int, android.content.res.Configuration);
+    method public void setInheritShowWhenLocked(boolean);
   }
 
   public class ActivityManager {
@@ -217,6 +218,11 @@ package android.app {
 
   public static abstract interface AppOpsManager.OnOpActiveChangedListener {
     method public abstract void onOpActiveChanged(int, int, java.lang.String, boolean);
+  }
+
+  public final class NotificationChannel implements android.os.Parcelable {
+    method public boolean isImportanceLockedByOEM();
+    method public void setImportanceLockedByOEM(boolean);
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {
@@ -1246,6 +1252,71 @@ package android.service.autofill {
 
 }
 
+package android.service.autofill.augmented {
+
+  public abstract class AugmentedAutofillService extends android.app.Service {
+    ctor public AugmentedAutofillService();
+    method protected final void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
+    method protected void dump(java.io.PrintWriter, java.lang.String[]);
+    method public void onFillRequest(android.service.autofill.augmented.FillRequest, android.os.CancellationSignal, android.service.autofill.augmented.FillController, android.service.autofill.augmented.FillCallback);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.augmented.AugmentedAutofillService";
+  }
+
+  public final class FillCallback {
+    method public void onSuccess(android.service.autofill.augmented.FillResponse);
+  }
+
+  public final class FillController {
+    method public void autofill(java.util.List<android.util.Pair<android.view.autofill.AutofillId, android.view.autofill.AutofillValue>>);
+  }
+
+  public final class FillRequest {
+    method public android.content.ComponentName getActivityComponent();
+    method public android.view.autofill.AutofillId getFocusedId();
+    method public android.view.autofill.AutofillValue getFocusedValue();
+    method public android.service.autofill.augmented.PresentationParams getPresentationParams();
+    method public int getTaskId();
+  }
+
+  public final class FillResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.autofill.augmented.FillResponse> CREATOR;
+  }
+
+  public static final class FillResponse.Builder {
+    ctor public FillResponse.Builder();
+    method public android.service.autofill.augmented.FillResponse build();
+    method public android.service.autofill.augmented.FillResponse.Builder setFillWindow(android.service.autofill.augmented.FillWindow);
+    method public android.service.autofill.augmented.FillResponse.Builder setIgnoredIds(java.util.List<android.view.autofill.AutofillId>);
+  }
+
+  public final class FillWindow implements java.lang.AutoCloseable {
+    ctor public FillWindow();
+    method public void destroy();
+    method public boolean update(android.service.autofill.augmented.PresentationParams.Area, android.view.View, long);
+    field public static final long FLAG_METADATA_ADDRESS = 1L; // 0x1L
+  }
+
+  public abstract class PresentationParams {
+    method public int getFlags();
+    method public android.service.autofill.augmented.PresentationParams.Area getFullArea();
+    method public android.service.autofill.augmented.PresentationParams.Area getSuggestionArea();
+    field public static final int FLAG_HINT_GRAVITY_BOTTOM = 2; // 0x2
+    field public static final int FLAG_HINT_GRAVITY_LEFT = 4; // 0x4
+    field public static final int FLAG_HINT_GRAVITY_RIGHT = 8; // 0x8
+    field public static final int FLAG_HINT_GRAVITY_TOP = 1; // 0x1
+    field public static final int FLAG_HOST_IME = 16; // 0x10
+    field public static final int FLAG_HOST_SYSTEM = 32; // 0x20
+  }
+
+  public static abstract class PresentationParams.Area {
+    method public android.graphics.Rect getBounds();
+    method public android.service.autofill.augmented.PresentationParams.Area getSubArea(android.graphics.Rect);
+  }
+
+}
+
 package android.service.notification {
 
   public final class Adjustment implements android.os.Parcelable {
@@ -1275,7 +1346,7 @@ package android.service.notification {
     ctor public NotificationAssistantService();
     method public final void adjustNotification(android.service.notification.Adjustment);
     method public final void adjustNotifications(java.util.List<android.service.notification.Adjustment>);
-    method public void onActionClicked(java.lang.String, android.app.Notification.Action, int);
+    method public void onActionInvoked(java.lang.String, android.app.Notification.Action, int);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public void onNotificationDirectReplied(java.lang.String);
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification);
@@ -1845,6 +1916,10 @@ package android.view.autofill {
   public final class AutofillId implements android.os.Parcelable {
     ctor public AutofillId(int);
     ctor public AutofillId(android.view.autofill.AutofillId, int);
+  }
+
+  public final class AutofillManager {
+    field public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 120000; // 0x1d4c0
   }
 
 }

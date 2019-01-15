@@ -28,8 +28,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.media.AudioSystem;
 import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Environment;
@@ -1104,9 +1104,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 77) {
-            // Introduce "vibrate when ringing" setting
-            loadVibrateWhenRingingSetting(db);
-
+            // "vibrate when ringing" setting moved to SettingsProvider version 168
             upgradeVersion = 78;
         }
 
@@ -2223,8 +2221,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (stmt != null) stmt.close();
         }
-
-        loadVibrateWhenRingingSetting(db);
     }
 
     private void loadVibrateSetting(SQLiteDatabase db, boolean deleteOld) {
@@ -2245,24 +2241,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
             vibrate |= AudioSystem.getValueForVibrateSetting(vibrate,
                     AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_ONLY_SILENT);
             loadSetting(stmt, Settings.System.VIBRATE_ON, vibrate);
-        } finally {
-            if (stmt != null) stmt.close();
-        }
-    }
-
-    private void loadVibrateWhenRingingSetting(SQLiteDatabase db) {
-        // The default should be off. VIBRATE_SETTING_ONLY_SILENT should also be ignored here.
-        // Phone app should separately check whether AudioManager#getRingerMode() returns
-        // RINGER_MODE_VIBRATE, with which the device should vibrate anyway.
-        int vibrateSetting = getIntValueFromSystem(db, Settings.System.VIBRATE_ON,
-                AudioManager.VIBRATE_SETTING_OFF);
-        boolean vibrateWhenRinging = ((vibrateSetting & 3) == AudioManager.VIBRATE_SETTING_ON);
-
-        SQLiteStatement stmt = null;
-        try {
-            stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
-                    + " VALUES(?,?);");
-            loadSetting(stmt, Settings.System.VIBRATE_WHEN_RINGING, vibrateWhenRinging ? 1 : 0);
         } finally {
             if (stmt != null) stmt.close();
         }

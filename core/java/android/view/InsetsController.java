@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.ArraySet;
@@ -49,9 +50,29 @@ public class InsetsController implements WindowInsetsController {
 
     private final SparseArray<InsetsSourceControl> mTmpControlArray = new SparseArray<>();
     private final ArrayList<InsetsAnimationControlImpl> mAnimationControls = new ArrayList<>();
+    private WindowInsets mLastInsets;
+
+    private boolean mAnimCallbackScheduled;
+
+    private final Runnable mAnimCallback;
 
     public InsetsController(ViewRootImpl viewRoot) {
         mViewRoot = viewRoot;
+        mAnimCallback = () -> {
+            mAnimCallbackScheduled = false;
+            if (mAnimationControls.isEmpty()) {
+                return;
+            }
+
+            InsetsState state = new InsetsState(mState, true /* copySources */);
+            for (int i = mAnimationControls.size() - 1; i >= 0; i--) {
+                mAnimationControls.get(i).applyChangeInsets(state);
+            }
+            WindowInsets insets = state.calculateInsets(mFrame, mLastInsets.isRound(),
+                    mLastInsets.shouldAlwaysConsumeNavBar(), mLastInsets.getDisplayCutout(),
+                    null /* typeSideMap */);
+            mViewRoot.mView.dispatchWindowInsetsAnimationProgress(insets);
+        };
     }
 
     void onFrameChanged(Rect frame) {
@@ -82,8 +103,9 @@ public class InsetsController implements WindowInsetsController {
     @VisibleForTesting
     public WindowInsets calculateInsets(boolean isScreenRound,
             boolean alwaysConsumeNavBar, DisplayCutout cutout) {
-        return mState.calculateInsets(mFrame, isScreenRound, alwaysConsumeNavBar, cutout,
+        mLastInsets = mState.calculateInsets(mFrame, isScreenRound, alwaysConsumeNavBar, cutout,
                 null /* typeSideMap */);
+        return mLastInsets;
     }
 
     /**
@@ -148,7 +170,7 @@ public class InsetsController implements WindowInsetsController {
         }
         final InsetsAnimationControlImpl controller = new InsetsAnimationControlImpl(consumers,
                 mFrame, mState, listener, types,
-                () -> new SyncRtSurfaceTransactionApplier(mViewRoot.mView));
+                () -> new SyncRtSurfaceTransactionApplier(mViewRoot.mView), this);
         mAnimationControls.add(controller);
     }
 
@@ -199,5 +221,21 @@ public class InsetsController implements WindowInsetsController {
     void dump(String prefix, PrintWriter pw) {
         pw.println(prefix); pw.println("InsetsController:");
         mState.dump(prefix + "  ", pw);
+    }
+
+    void dispatchAnimationStarted(WindowInsetsAnimationListener.InsetsAnimation animation) {
+        mViewRoot.mView.dispatchWindowInsetsAnimationStarted(animation);
+    }
+
+    void dispatchAnimationFinished(WindowInsetsAnimationListener.InsetsAnimation animation) {
+        mViewRoot.mView.dispatchWindowInsetsAnimationFinished(animation);
+    }
+
+    void scheduleApplyChangeInsets() {
+        if (!mAnimCallbackScheduled) {
+            mViewRoot.mChoreographer.postCallback(Choreographer.CALLBACK_INSETS_ANIMATION,
+                    mAnimCallback, null /* token*/);
+            mAnimCallbackScheduled = true;
+        }
     }
 }

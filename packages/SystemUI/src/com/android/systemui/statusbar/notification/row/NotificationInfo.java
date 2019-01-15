@@ -123,11 +123,15 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnKeepShowing = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
         closeControls(v);
+        mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_STAY_SILENT));
     };
 
     private OnClickListener mOnToggleSilent = v -> {
         Runnable saveImportance = () -> {
             swapContent(ACTION_TOGGLE_SILENT, true /* animate */);
+            mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                    .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_ALERT_ME));
         };
         if (mCheckSaveListener != null) {
             mCheckSaveListener.checkSave(saveImportance, mSbn);
@@ -139,6 +143,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnStopOrMinimizeNotifications = v -> {
         Runnable saveImportance = () -> {
             swapContent(ACTION_BLOCK, true /* animate */);
+            mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                    .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_BLOCKED));
         };
         if (mCheckSaveListener != null) {
             mCheckSaveListener.checkSave(saveImportance, mSbn);
@@ -153,6 +159,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_UNDO);
         mMetricsLogger.write(importanceChangeLogMaker().setType(MetricsEvent.TYPE_DISMISS));
         swapContent(ACTION_UNDO, true /* animate */);
+        mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_UNDO));
     };
 
     public NotificationInfo(Context context, AttributeSet attrs) {
@@ -251,6 +259,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         bindHeader();
         bindPrompt();
         bindButtons();
+
+        mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                .setSubtype(MetricsEvent.BLOCKING_HELPER_DISPLAY));
     }
 
     private void bindHeader() throws RemoteException {
@@ -588,6 +599,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         confirmation.setAlpha(1f);
         header.setVisibility(VISIBLE);
         header.setAlpha(1f);
+        mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                .setSubtype(MetricsEvent.BLOCKING_HELPER_DISMISS));
     }
 
     @Override
@@ -732,5 +745,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 Log.e(TAG, "Unable to update notification importance", e);
             }
         }
+    }
+
+    private LogMaker getLogMaker() {
+        return mSbn.getLogMaker().setCategory(MetricsEvent.NOTIFICATION_ITEM);
     }
 }

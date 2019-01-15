@@ -17,6 +17,7 @@
 package android.permission;
 
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.internal.util.Preconditions.checkArgumentNonnegative;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
@@ -112,6 +113,17 @@ public abstract class PermissionControllerService extends Service {
     public abstract int onCountPermissionApps(@NonNull List<String> permissionNames,
             boolean countOnlyGranted, boolean countSystem);
 
+    /**
+     * Count how many apps have used permissions.
+     *
+     * @param countSystem Also count system apps
+     * @param numMillis The number of milliseconds in the past to check for uses
+     *
+     * @return descriptions of the users of permissions
+     */
+    public abstract @NonNull List<RuntimePermissionUsageInfo>
+            onPermissionUsageResult(boolean countSystem, long numMillis);
+
     @Override
     public final IBinder onBind(Intent intent) {
         return new IPermissionController.Stub() {
@@ -187,6 +199,20 @@ public abstract class PermissionControllerService extends Service {
                                 PermissionControllerService.this, permissionNames, countOnlyGranted,
                                 countSystem, callback));
             }
+
+            @Override
+            public void getPermissionUsages(boolean countSystem, long numMillis,
+                    RemoteCallback callback) {
+                checkArgumentNonnegative(numMillis);
+                checkNotNull(callback, "callback");
+
+                enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
+
+                mHandler.sendMessage(
+                        obtainMessage(PermissionControllerService::getPermissionUsages,
+                                PermissionControllerService.this, countSystem, numMillis,
+                                callback));
+            }
         };
     }
 
@@ -229,5 +255,18 @@ public abstract class PermissionControllerService extends Service {
         Bundle result = new Bundle();
         result.putInt(PermissionControllerManager.KEY_RESULT, numApps);
         callback.sendResult(result);
+    }
+
+    private void getPermissionUsages(boolean countSystem, long numMillis,
+            @NonNull RemoteCallback callback) {
+        List<RuntimePermissionUsageInfo> users =
+                onPermissionUsageResult(countSystem, numMillis);
+        if (users != null && !users.isEmpty()) {
+            Bundle result = new Bundle();
+            result.putParcelableList(PermissionControllerManager.KEY_RESULT, users);
+            callback.sendResult(result);
+        } else {
+            callback.sendResult(null);
+        }
     }
 }

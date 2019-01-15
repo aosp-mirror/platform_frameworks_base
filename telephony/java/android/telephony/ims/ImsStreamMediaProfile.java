@@ -97,6 +97,9 @@ public final class ImsStreamMediaProfile implements Parcelable {
     // Rtt related information
     /** @hide */
     public int mRttMode;
+    // RTT Audio Speech Indicator
+    /** @hide */
+    public boolean mHasRttAudioSpeech = false;
 
     /** @hide */
     public ImsStreamMediaProfile(Parcel in) {
@@ -197,7 +200,8 @@ public final class ImsStreamMediaProfile implements Parcelable {
                 ", audioDirection=" + mAudioDirection +
                 ", videoQuality=" + mVideoQuality +
                 ", videoDirection=" + mVideoDirection +
-                ", rttMode=" + mRttMode + " }";
+                ", rttMode=" + mRttMode +
+                ", hasRttAudioSpeech=" + mHasRttAudioSpeech + " }";
     }
 
     @Override
@@ -212,6 +216,7 @@ public final class ImsStreamMediaProfile implements Parcelable {
         out.writeInt(mVideoQuality);
         out.writeInt(mVideoDirection);
         out.writeInt(mRttMode);
+        out.writeBoolean(mHasRttAudioSpeech);
     }
 
     private void readFromParcel(Parcel in) {
@@ -220,6 +225,7 @@ public final class ImsStreamMediaProfile implements Parcelable {
         mVideoQuality = in.readInt();
         mVideoDirection = in.readInt();
         mRttMode = in.readInt();
+        mHasRttAudioSpeech = in.readBoolean();
     }
 
     public static final Creator<ImsStreamMediaProfile> CREATOR =
@@ -250,6 +256,10 @@ public final class ImsStreamMediaProfile implements Parcelable {
         mRttMode = rttMode;
     }
 
+    public void setRttAudioSpeech(boolean audioOn) {
+        mHasRttAudioSpeech = audioOn;
+    }
+
     public int getAudioQuality() {
         return mAudioQuality;
     }
@@ -268,5 +278,9 @@ public final class ImsStreamMediaProfile implements Parcelable {
 
     public int getRttMode() {
         return mRttMode;
+    }
+
+    public boolean getRttAudioSpeech() {
+        return mHasRttAudioSpeech;
     }
 }

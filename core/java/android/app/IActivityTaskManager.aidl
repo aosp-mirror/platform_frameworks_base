@@ -419,6 +419,7 @@ interface IActivityTaskManager {
     void updateLockTaskFeatures(int userId, int flags);
 
     void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
+    void setInheritShowWhenLocked(in IBinder token, boolean setInheritShownWhenLocked);
     void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
 
     /**

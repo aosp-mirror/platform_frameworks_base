@@ -54,6 +54,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     private final TransportManager mTransportManager;
     private final String mTransportName;
     private final UserBackupManagerService mBackupManagerService;
+    private final int mUserId;
     @Nullable private final String mPackageName;
     public RestoreSet[] mRestoreSets = null;
     boolean mEnded = false;
@@ -67,6 +68,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         mPackageName = packageName;
         mTransportManager = backupManagerService.getTransportManager();
         mTransportName = transportName;
+        mUserId = backupManagerService.getUserId();
     }
 
     public void markTimedOut() {
@@ -304,7 +306,8 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
         final PackageInfo app;
         try {
-            app = mBackupManagerService.getPackageManager().getPackageInfo(packageName, 0);
+            app = mBackupManagerService.getPackageManager().getPackageInfoAsUser(
+                    packageName, 0, mUserId);
         } catch (NameNotFoundException nnf) {
             Slog.w(TAG, "Asked to restore nonexistent pkg " + packageName);
             return -1;

@@ -25,7 +25,9 @@ import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/app/settings_enums.proto";
 import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
+import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
+import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
@@ -172,11 +174,13 @@ message Atom {
         WifiEnabledStateChanged wifi_enabled_state_changed = 113;
         WifiRunningStateChanged wifi_running_state_changed = 114;
         AppCompacted app_compacted = 115;
-        NetworkDnsEventReported network_dns_event_Reported = 116;
+        NetworkDnsEventReported network_dns_event_reported = 116;
         DocsUIPickerLaunchedFromReported docs_ui_picker_launched_from_reported = 117;
         DocsUIPickResultReported docs_ui_pick_result_reported = 118;
         DocsUISearchModeReported docs_ui_search_mode_reported = 119;
         DocsUISearchTypeReported docs_ui_search_type_reported = 120;
+        DataStallEvent data_stall_event = 121;
+        RescuePartyResetReported rescue_party_reset_reported = 122;
     }
 
     // Pulled events will start at field 10000.
@@ -3798,7 +3802,7 @@ message NetworkDnsEventReported {
     //bionic/libc/include/netdb.h
     //system/netd/resolv/include/netd_resolv/resolv.h
     enum ReturnCode {
-        EAI_NOERR = 0;
+        EAI_NO_ERR = 0;
         EAI_ADDRFAMILY = 1;
         EAI_AGAIN = 2;
         EAI_BADFLAGS = 3;
@@ -3820,4 +3824,38 @@ message NetworkDnsEventReported {
 
     // The latency period(in microseconds) it took for this DNS lookup to complete.
     optional int32 latency_micros = 3;
+}
+
+/**
+ * Logs when a data stall event occurs.
+ *
+ * Log from:
+ *     frameworks/base/services/core/java/com/android/server/connectivity/NetworkMonitor.java
+ */
+message DataStallEvent {
+    // Data stall evaluation type.
+    // See frameworks/base/services/core/java/com/android/server/connectivity/NetworkMonitor.java
+    // Refer to the definition of DATA_STALL_EVALUATION_TYPE_*.
+    optional int32 evaluation_type = 1;
+    // See definition in data_stall_event.proto.
+    optional com.android.server.connectivity.ProbeResult validation_result = 2;
+    // See definition in data_stall_event.proto.
+    optional android.net.NetworkCapabilitiesProto.Transport network_type = 3;
+    // See definition in data_stall_event.proto.
+    optional com.android.server.connectivity.WifiData wifi_info = 4 [(log_mode) = MODE_BYTES];
+    // See definition in data_stall_event.proto.
+    optional com.android.server.connectivity.CellularData cell_info = 5 [(log_mode) = MODE_BYTES];
+    // See definition in data_stall_event.proto.
+    optional com.android.server.connectivity.DnsEvent dns_event = 6 [(log_mode) = MODE_BYTES];
+}
+
+/*
+ * Logs when RescueParty resets some set of experiment flags.
+ *
+ * Logged from:
+ *     frameworks/base/services/core/java/com/android/server/RescueParty.java
+ */
+message RescuePartyResetReported {
+    // The rescue level of this reset. A value of 0 indicates missing or unknown level information.
+    optional int32 rescue_level = 1;
 }

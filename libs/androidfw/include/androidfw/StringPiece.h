@@ -52,8 +52,8 @@ class BasicStringPiece {
 
   BasicStringPiece();
   BasicStringPiece(const BasicStringPiece<TChar>& str);
-  BasicStringPiece(const std::basic_string<TChar>& str);  // NOLINT(implicit)
-  BasicStringPiece(const TChar* str);                     // NOLINT(implicit)
+  BasicStringPiece(const std::basic_string<TChar>& str);  // NOLINT(google-explicit-constructor)
+  BasicStringPiece(const TChar* str);                     // NOLINT(google-explicit-constructor)
   BasicStringPiece(const TChar* str, size_t len);
 
   BasicStringPiece<TChar>& operator=(const BasicStringPiece<TChar>& rhs);

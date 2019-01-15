@@ -17,6 +17,7 @@
 package com.android.server.backup;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupTransport;
@@ -29,7 +30,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -61,7 +61,7 @@ public class TransportManager {
     public static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
 
     private final Intent mTransportServiceIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST);
-    private final Context mContext;
+    private final @UserIdInt int mUserId;
     private final PackageManager mPackageManager;
     private final Set<ComponentName> mTransportWhitelist;
     private final TransportClientManager mTransportClientManager;
@@ -86,22 +86,24 @@ public class TransportManager {
     @Nullable
     private volatile String mCurrentTransportName;
 
-    TransportManager(Context context, Set<ComponentName> whitelist, String selectedTransport) {
-        mContext = context;
+    TransportManager(@UserIdInt int userId, Context context, Set<ComponentName> whitelist,
+            String selectedTransport) {
+        mUserId = userId;
         mPackageManager = context.getPackageManager();
         mTransportWhitelist = Preconditions.checkNotNull(whitelist);
         mCurrentTransportName = selectedTransport;
         mTransportStats = new TransportStats();
-        mTransportClientManager = new TransportClientManager(context, mTransportStats);
+        mTransportClientManager = new TransportClientManager(mUserId, context, mTransportStats);
     }
 
     @VisibleForTesting
     TransportManager(
+            @UserIdInt int userId,
             Context context,
             Set<ComponentName> whitelist,
             String selectedTransport,
             TransportClientManager transportClientManager) {
-        mContext = context;
+        mUserId = userId;
         mPackageManager = context.getPackageManager();
         mTransportWhitelist = Preconditions.checkNotNull(whitelist);
         mCurrentTransportName = selectedTransport;
@@ -575,7 +577,7 @@ public class TransportManager {
     private void registerTransportsForIntent(
             Intent intent, Predicate<ComponentName> transportComponentFilter) {
         List<ResolveInfo> hosts =
-                mPackageManager.queryIntentServicesAsUser(intent, 0, UserHandle.USER_SYSTEM);
+                mPackageManager.queryIntentServicesAsUser(intent, 0, mUserId);
         if (hosts == null) {
             return;
         }

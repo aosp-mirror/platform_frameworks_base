@@ -28,6 +28,7 @@ import android.view.autofill.AutofillId;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
@@ -107,7 +108,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     /** @hide */
     @Nullable
-    protected final String mId = UUID.randomUUID().toString();
+    protected final String mId;
 
     private int mState = STATE_UNKNOWN;
 
@@ -123,6 +124,13 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     /** @hide */
     protected ContentCaptureSession() {
+        this(UUID.randomUUID().toString());
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public ContentCaptureSession(@NonNull String id) {
+        mId = Preconditions.checkNotNull(id);
         mCloseGuard.open("destroy");
     }
 
@@ -138,6 +146,13 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             mContentCaptureSessionId = new ContentCaptureSessionId(mId);
         }
         return mContentCaptureSessionId;
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public int getIdAsInt() {
+        // TODO(b/121197119): use sessionId instead of hashcode once it's changed to int
+        return mId.hashCode();
     }
 
     /**
@@ -315,9 +330,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public @NonNull AutofillId newAutofillId(@NonNull AutofillId parentId, int virtualChildId) {
         Preconditions.checkNotNull(parentId);
         Preconditions.checkArgument(!parentId.isVirtual(), "virtual ids cannot have children");
-        // TODO(b/121197119): we need to add the session id to the AutofillId to make them unique
-        // per session
-        return new AutofillId(parentId, virtualChildId);
+        return new AutofillId(parentId, virtualChildId, getIdAsInt());
     }
 
     /**
@@ -333,8 +346,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     @NonNull
     public final ViewStructure newVirtualViewStructure(@NonNull AutofillId parentId,
             int virtualId) {
-        // TODO(b/121197119): use the constructor that takes a session id / assert on unit test.
-        return new ViewNode.ViewStructureImpl(parentId, virtualId);
+        return new ViewNode.ViewStructureImpl(parentId, virtualId, getIdAsInt());
     }
 
     boolean isContentCaptureEnabled() {

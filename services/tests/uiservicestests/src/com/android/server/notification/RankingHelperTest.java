@@ -15,7 +15,10 @@
  */
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+
+import static junit.framework.TestCase.assertEquals;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -153,7 +156,7 @@ public class RankingHelperTest extends UiServiceTestCase {
                 .build();
         mRecordGroupGSortA = new NotificationRecord(mContext, new StatusBarNotification(
                 PKG, PKG, 1, null, 0, 0, mNotiGroupGSortA, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
+                null, System.currentTimeMillis()), getLowChannel());
 
         mNotiGroupGSortB = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentTitle("B")
@@ -163,7 +166,7 @@ public class RankingHelperTest extends UiServiceTestCase {
                 .build();
         mRecordGroupGSortB = new NotificationRecord(mContext, new StatusBarNotification(
                 PKG, PKG, 1, null, 0, 0, mNotiGroupGSortB, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
+                null, System.currentTimeMillis()), getLowChannel());
 
         mNotiNoGroup = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentTitle("C")
@@ -171,7 +174,7 @@ public class RankingHelperTest extends UiServiceTestCase {
                 .build();
         mRecordNoGroup = new NotificationRecord(mContext, new StatusBarNotification(
                 PKG, PKG, 1, null, 0, 0, mNotiNoGroup, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
+                null, System.currentTimeMillis()), getLowChannel());
 
         mNotiNoGroup2 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentTitle("D")
@@ -179,7 +182,7 @@ public class RankingHelperTest extends UiServiceTestCase {
                 .build();
         mRecordNoGroup2 = new NotificationRecord(mContext, new StatusBarNotification(
                 PKG, PKG, 1, null, 0, 0, mNotiNoGroup2, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
+                null, System.currentTimeMillis()), getLowChannel());
 
         mNotiNoGroupSortA = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentTitle("E")
@@ -188,7 +191,7 @@ public class RankingHelperTest extends UiServiceTestCase {
                 .build();
         mRecordNoGroupSortA = new NotificationRecord(mContext, new StatusBarNotification(
                 PKG, PKG, 1, null, 0, 0, mNotiNoGroupSortA, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
+                null, System.currentTimeMillis()), getLowChannel());
 
         mAudioAttributes = new AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
@@ -197,9 +200,14 @@ public class RankingHelperTest extends UiServiceTestCase {
                 .build();
     }
 
-    private NotificationChannel getDefaultChannel() {
+    private NotificationChannel getLowChannel() {
         return new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "name",
                 IMPORTANCE_LOW);
+    }
+
+    private NotificationChannel getDefaultChannel() {
+        return new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "name",
+                IMPORTANCE_DEFAULT);
     }
 
     @Test
@@ -284,5 +292,41 @@ public class RankingHelperTest extends UiServiceTestCase {
     public void testSortShouldNotThrowOnEmptyList() throws Exception {
         ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>();
         mHelper.sort(notificationList);
+    }
+    
+    @Test
+    public void testGroupNotifications_highestIsProxy() {
+        ArrayList<NotificationRecord> notificationList = new ArrayList<>();
+        // this should be the last in the list, except it's in a group with a high child
+        Notification lowSummaryN = new Notification.Builder(mContext, "")
+                .setGroup("group")
+                .setGroupSummary(true)
+                .build();
+        NotificationRecord lowSummary = new NotificationRecord(mContext, new StatusBarNotification(
+                PKG, PKG, 1, "summary", 0, 0, lowSummaryN, USER,
+                null, System.currentTimeMillis()), getLowChannel());
+        notificationList.add(lowSummary);
+
+        Notification lowN = new Notification.Builder(mContext, "").build();
+        NotificationRecord low = new NotificationRecord(mContext, new StatusBarNotification(
+                PKG, PKG, 1, "low", 0, 0, lowN, USER,
+                null, System.currentTimeMillis()), getLowChannel());
+        low.setContactAffinity(0.5f);
+        notificationList.add(low);
+
+        Notification highChildN = new Notification.Builder(mContext, "")
+                .setGroup("group")
+                .setGroupSummary(false)
+                .build();
+        NotificationRecord highChild = new NotificationRecord(mContext, new StatusBarNotification(
+                PKG, PKG, 1, "child", 0, 0, highChildN, USER,
+                null, System.currentTimeMillis()), getDefaultChannel());
+        notificationList.add(highChild);
+
+        mHelper.sort(notificationList);
+
+        assertEquals(lowSummary, notificationList.get(0));
+        assertEquals(highChild, notificationList.get(1));
+        assertEquals(low, notificationList.get(2));
     }
 }

@@ -45,7 +45,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SELinux;
-import android.os.UserHandle;
 import android.os.WorkSource;
 
 import com.android.internal.annotations.GuardedBy;
@@ -241,6 +240,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     private final boolean mUserInitiated;
     private final boolean mNonIncremental;
     private final int mCurrentOpToken;
+    private final int mUserId;
     private final File mStateDirectory;
     private final File mDataDirectory;
     private final File mBlankStateFile;
@@ -320,6 +320,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         mCurrentOpToken = backupManagerService.generateRandomIntegerToken();
         mQueueLock = mBackupManagerService.getQueueLock();
         mBlankStateFile = new File(mStateDirectory, BLANK_STATE_FILE_NAME);
+        mUserId = backupManagerService.getUserId();
     }
 
     private void registerTask() {
@@ -480,8 +481,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         final PackageInfo packageInfo;
         try {
             packageInfo =
-                    mPackageManager.getPackageInfo(
-                            packageName, PackageManager.GET_SIGNING_CERTIFICATES);
+                    mPackageManager.getPackageInfoAsUser(
+                            packageName, PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
         } catch (PackageManager.NameNotFoundException e) {
             mReporter.onAgentUnknown(packageName);
             throw AgentException.permanent(e);
@@ -770,8 +771,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
     private void writeWidgetPayloadIfAppropriate(FileDescriptor fd, String pkgName)
             throws IOException {
-        // TODO: http://b/22388012
-        byte[] widgetState = AppWidgetBackupBridge.getWidgetState(pkgName, UserHandle.USER_SYSTEM);
+        byte[] widgetState = AppWidgetBackupBridge.getWidgetState(pkgName, mUserId);
         File widgetFile = new File(mStateDirectory, pkgName + "_widget");
         boolean priorStateExists = widgetFile.exists();
         if (!priorStateExists && widgetState == null) {
@@ -1003,7 +1003,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             // Use the scheduler's default.
             delay = 0;
         }
-        KeyValueBackupJob.schedule(
+        KeyValueBackupJob.schedule(mBackupManagerService.getUserId(),
                 mBackupManagerService.getContext(), delay, mBackupManagerService.getConstants());
 
         for (String packageName : mOriginalQueue) {

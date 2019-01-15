@@ -2651,28 +2651,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * @return true if the activity contains windows that have
-     *         {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set
-     */
-    public boolean containsShowWhenLockedWindow(IBinder token) {
-        synchronized (mGlobalLock) {
-            final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
-            return wtoken != null && wtoken.containsShowWhenLockedWindow();
-        }
-    }
-
-    /**
-     * @return true if the activity contains windows that have
-     *         {@link LayoutParams#FLAG_DISMISS_KEYGUARD} set
-     */
-    public boolean containsDismissKeyguardWindow(IBinder token) {
-        synchronized (mGlobalLock) {
-            final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
-            return wtoken != null && wtoken.containsDismissKeyguardWindow();
-        }
-    }
-
-    /**
      * Notifies activity manager that some Keyguard flags have changed and that it needs to
      * reevaluate the visibilities of the activities.
      * @param callback Runnable to be called when activity manager is done reevaluating visibilities
@@ -5734,17 +5712,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 appWindow.getDisplayContent().mUnknownAppVisibilityController
                         .notifyAppResumedFinished(appWindow);
             }
-        }
-    }
-
-    /**
-     * Returns true if the callingUid has any window currently visible to the user.
-     */
-    public boolean isAnyWindowVisibleForUid(int callingUid) {
-        synchronized (mGlobalLock) {
-            return mRoot.forAllWindows(w -> {
-                return w.getOwningUid() == callingUid && w.isVisible();
-            }, true /* traverseTopToBottom */);
         }
     }
 

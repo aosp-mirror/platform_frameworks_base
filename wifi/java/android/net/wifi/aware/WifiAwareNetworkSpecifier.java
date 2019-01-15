@@ -19,7 +19,6 @@ package android.net.wifi.aware;
 import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -117,6 +116,32 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
     public final String passphrase;
 
     /**
+     * The port information to be used for this link. This information will be communicated to the
+     * peer as part of the layer 2 link setup.
+     *
+     * Information only allowed on secure links since a single layer-2 link is set up for all
+     * requestors. Therefore if multiple apps on a single device request links to the same peer
+     * device they all get the same link. However, the link is only set up on the first request -
+     * hence only the first can transmit the port information. But we don't want to expose that
+     * information to other apps. Limiting to secure links would (usually) imply single app usage.
+     *
+     * @hide
+     */
+    public final int port;
+
+    /**
+     * The transport protocol information to be used for this link. This information will be
+     * communicated to the peer as part of the layer 2 link setup.
+     *
+     * Information only allowed on secure links since a single layer-2 link is set up for all
+     * requestors. Therefore if multiple apps on a single device request links to the same peer
+     * device they all get the same link. However, the link is only set up on the first request -
+     * hence only the first can transmit the port information. But we don't want to expose that
+     * information to other apps. Limiting to secure links would (usually) imply single app usage.
+     */
+    public final int transportProtocol;
+
+    /**
      * The UID of the process initializing this network specifier. Validated by receiver using
      * checkUidIfNecessary() and is used by satisfiedBy() to determine whether matches the
      * offered network.
@@ -127,7 +152,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
 
     /** @hide */
     public WifiAwareNetworkSpecifier(int type, int role, int clientId, int sessionId, int peerId,
-            byte[] peerMac, byte[] pmk, String passphrase, int requestorUid) {
+            byte[] peerMac, byte[] pmk, String passphrase, int port, int transportProtocol,
+            int requestorUid) {
         this.type = type;
         this.role = role;
         this.clientId = clientId;
@@ -136,6 +162,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         this.peerMac = peerMac;
         this.pmk = pmk;
         this.passphrase = passphrase;
+        this.port = port;
+        this.transportProtocol = transportProtocol;
         this.requestorUid = requestorUid;
     }
 
@@ -152,6 +180,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                         in.createByteArray(), // peerMac
                         in.createByteArray(), // pmk
                         in.readString(), // passphrase
+                        in.readInt(), // port
+                        in.readInt(), // transportProtocol
                         in.readInt()); // requestorUid
                 }
 
@@ -186,6 +216,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         dest.writeByteArray(peerMac);
         dest.writeByteArray(pmk);
         dest.writeString(passphrase);
+        dest.writeInt(port);
+        dest.writeInt(transportProtocol);
         dest.writeInt(requestorUid);
     }
 
@@ -202,19 +234,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
     /** @hide */
     @Override
     public int hashCode() {
-        int result = 17;
-
-        result = 31 * result + type;
-        result = 31 * result + role;
-        result = 31 * result + clientId;
-        result = 31 * result + sessionId;
-        result = 31 * result + peerId;
-        result = 31 * result + Arrays.hashCode(peerMac);
-        result = 31 * result + Arrays.hashCode(pmk);
-        result = 31 * result + Objects.hashCode(passphrase);
-        result = 31 * result + requestorUid;
-
-        return result;
+        return Objects.hash(type, role, clientId, sessionId, peerId, Arrays.hashCode(peerMac),
+                Arrays.hashCode(pmk), passphrase, port, transportProtocol, requestorUid);
     }
 
     /** @hide */
@@ -238,6 +259,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                 && Arrays.equals(peerMac, lhs.peerMac)
                 && Arrays.equals(pmk, lhs.pmk)
                 && Objects.equals(passphrase, lhs.passphrase)
+                && port == lhs.port
+                && transportProtocol == lhs.transportProtocol
                 && requestorUid == lhs.requestorUid;
     }
 
@@ -256,7 +279,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                 .append(", pmk=").append((pmk == null) ? "<null>" : "<non-null>")
                 // masking PII
                 .append(", passphrase=").append((passphrase == null) ? "<null>" : "<non-null>")
-                .append(", requestorUid=").append(requestorUid)
+                .append(", port=").append(port).append(", transportProtocol=")
+                .append(transportProtocol).append(", requestorUid=").append(requestorUid)
                 .append("]");
         return sb.toString();
     }

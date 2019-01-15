@@ -46,7 +46,7 @@ cc_defaults {
     },
 }
 
-cc_library_host_static {
+cc_library_static {
     name: "libviewcompiler",
     defaults: ["viewcompiler_defaults"],
     srcs: [
@@ -58,9 +58,10 @@ cc_library_host_static {
         "util.cc",
         "layout_validation.cc",
     ],
+    host_supported: true,
 }
 
-cc_binary_host {
+cc_binary {
     name: "viewcompiler",
     defaults: ["viewcompiler_defaults"],
     srcs: [
@@ -70,6 +71,7 @@ cc_binary_host {
         "libgflags",
         "libviewcompiler",
     ],
+    host_supported: true
 }
 
 cc_test_host {

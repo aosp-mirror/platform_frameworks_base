@@ -4334,6 +4334,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
+    public void setInheritShowWhenLocked(IBinder token, boolean inheritShowWhenLocked) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return;
+            }
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                r.setInheritShowWhenLocked(inheritShowWhenLocked);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    @Override
     public void setTurnScreenOn(IBinder token, boolean turnScreenOn) {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInStackLocked(token);

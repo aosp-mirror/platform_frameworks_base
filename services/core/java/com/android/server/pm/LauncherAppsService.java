@@ -24,6 +24,7 @@ import android.app.AppDetailsActivity;
 import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -115,6 +116,7 @@ public class LauncherAppsService extends SystemService {
         private final ShortcutServiceInternal mShortcutServiceInternal;
         private final PackageCallbackList<IOnAppsChangedListener> mListeners
                 = new PackageCallbackList<IOnAppsChangedListener>();
+        private final DevicePolicyManager mDpm;
 
         private final MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
 
@@ -133,6 +135,7 @@ public class LauncherAppsService extends SystemService {
                     LocalServices.getService(ShortcutServiceInternal.class));
             mShortcutServiceInternal.addListener(mPackageMonitor);
             mCallbackHandler = BackgroundThread.getHandler();
+            mDpm = (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
         }
 
         @VisibleForTesting
@@ -313,30 +316,42 @@ public class LauncherAppsService extends SystemService {
                     Settings.Global.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED, 1) == 0) {
                 return launcherActivities;
             }
-
-            final int callingUid = injectBinderCallingUid();
-            final ArrayList<ResolveInfo> result = new ArrayList<>(launcherActivities.getList());
-            final PackageManagerInternal pmInt =
-                    LocalServices.getService(PackageManagerInternal.class);
-            if (packageName != null) {
-                // If this hidden app should not be shown, return the original list.
-                // Otherwise, inject hidden activity that forwards user to app details page.
-                if (result.size() > 0) {
-                    return launcherActivities;
-                }
-                ApplicationInfo appInfo = pmInt.getApplicationInfo(packageName, /*flags*/ 0,
-                        callingUid, user.getIdentifier());
-                if (shouldShowHiddenApp(appInfo)) {
-                    ResolveInfo info = getHiddenAppActivityInfo(packageName, callingUid, user);
-                    if (info != null) {
-                        result.add(info);
-                    }
-                }
-                return new ParceledListSlice<>(result);
+            if (launcherActivities == null) {
+                // Cannot access profile, so we don't even return any hidden apps.
+                return null;
             }
 
-            long ident = injectClearCallingIdentity();
+            final int callingUid = injectBinderCallingUid();
+            final long ident = injectClearCallingIdentity();
             try {
+                if (mUm.getUserInfo(user.getIdentifier()).isManagedProfile()) {
+                    // Managed profile should not show hidden apps
+                    return launcherActivities;
+                }
+                if (mDpm.getDeviceOwnerComponentOnAnyUser() != null) {
+                    // Device owner devices should not show hidden apps
+                    return launcherActivities;
+                }
+
+                final ArrayList<ResolveInfo> result = new ArrayList<>(launcherActivities.getList());
+                final PackageManagerInternal pmInt =
+                        LocalServices.getService(PackageManagerInternal.class);
+                if (packageName != null) {
+                    // If this hidden app should not be shown, return the original list.
+                    // Otherwise, inject hidden activity that forwards user to app details page.
+                    if (result.size() > 0) {
+                        return launcherActivities;
+                    }
+                    ApplicationInfo appInfo = pmInt.getApplicationInfo(packageName, /*flags*/ 0,
+                            callingUid, user.getIdentifier());
+                    if (shouldShowHiddenApp(appInfo)) {
+                        ResolveInfo info = getHiddenAppActivityInfo(packageName, callingUid, user);
+                        if (info != null) {
+                            result.add(info);
+                        }
+                    }
+                    return new ParceledListSlice<>(result);
+                }
                 final HashSet<String> visiblePackages = new HashSet<>();
                 for (ResolveInfo info : result) {
                     visiblePackages.add(info.activityInfo.packageName);

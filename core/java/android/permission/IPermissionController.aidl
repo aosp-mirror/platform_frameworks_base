@@ -31,4 +31,5 @@ oneway interface IPermissionController {
     void revokeRuntimePermission(String packageName, String permissionName);
     void countPermissionApps(in List<String> permissionNames, boolean countOnlyGranted,
             boolean countSystem, in RemoteCallback callback);
+    void getPermissionUsages(boolean countSystem, long numMillis, in RemoteCallback callback);
 }

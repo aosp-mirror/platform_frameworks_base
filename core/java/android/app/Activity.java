@@ -1023,7 +1023,9 @@ public class Activity extends ContextThemeWrapper
      *
      * @return The content capture manager
      */
-    @NonNull private ContentCaptureManager getContentCaptureManager() {
+    @Nullable private ContentCaptureManager getContentCaptureManager() {
+        // ContextCapture disabled for system apps
+        if (getApplicationInfo().isSystemApp()) return null;
         if (mContentCaptureManager == null) {
             mContentCaptureManager = getSystemService(ContentCaptureManager.class);
         }
@@ -8285,6 +8287,33 @@ public class Activity extends ContextThemeWrapper
             ActivityTaskManager.getService().setShowWhenLocked(mToken, showWhenLocked);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call setShowWhenLocked", e);
+        }
+    }
+
+    /**
+     * Specifies whether this {@link Activity} should be shown on top of the lock screen whenever
+     * the lockscreen is up and this activity has another activity behind it with the showWhenLock
+     * attribute set. That is, this activity is only visible on the lock screen if there is another
+     * activity with the showWhenLock attribute visible at the same time on the lock screen. A use
+     * case for this is permission dialogs, that should only be visible on the lock screen if their
+     * requesting activity is also visible. This value can be set as a manifest attribute using
+     * android.R.attr#inheritShowWhenLocked.
+     *
+     * @param inheritShowWhenLocked {@code true} to show the {@link Activity} on top of the lock
+     *                              screen when this activity has another activity behind it with
+     *                              the showWhenLock attribute set; {@code false} otherwise.
+     * @see #setShowWhenLocked(boolean)
+     * See android.R.attr#inheritShowWhenLocked
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public void setInheritShowWhenLocked(boolean inheritShowWhenLocked) {
+        try {
+            ActivityTaskManager.getService().setInheritShowWhenLocked(
+                    mToken, inheritShowWhenLocked);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to call setInheritShowWhenLocked", e);
         }
     }
 

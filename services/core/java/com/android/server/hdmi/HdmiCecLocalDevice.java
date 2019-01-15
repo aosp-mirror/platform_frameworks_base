@@ -916,6 +916,11 @@ abstract class HdmiCecLocalDevice {
         setActivePath(mService.portIdToPath(portId));
     }
 
+    // Returns the id of the port that the target device is connected to.
+    int getPortId(int physicalAddress) {
+        return mService.pathToPortId(physicalAddress);
+    }
+
     @ServiceThreadOnly
     HdmiCecMessageCache getCecMessageCache() {
         assertRunOnServiceThread();

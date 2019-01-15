@@ -36,6 +36,7 @@ import static org.robolectric.shadow.api.Shadow.extract;
 import static org.testng.Assert.expectThrows;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -83,6 +84,7 @@ public class TransportClientTest {
     @Mock private TransportConnectionListener mTransportConnectionListener;
     @Mock private TransportConnectionListener mTransportConnectionListener2;
     @Mock private IBackupTransport.Stub mTransportBinder;
+    @UserIdInt private int mUserId;
     private TransportStats mTransportStats;
     private TransportClient mTransportClient;
     private ComponentName mTransportComponent;
@@ -96,6 +98,7 @@ public class TransportClientTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mUserId = UserHandle.USER_SYSTEM;
         Looper mainLooper = Looper.getMainLooper();
         mShadowMainLooper = extract(mainLooper);
         mTransportComponent =
@@ -105,6 +108,7 @@ public class TransportClientTest {
         mBindIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST).setComponent(mTransportComponent);
         mTransportClient =
                 new TransportClient(
+                        mUserId,
                         mContext,
                         mTransportStats,
                         mBindIntent,

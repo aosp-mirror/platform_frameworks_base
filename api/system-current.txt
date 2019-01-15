@@ -199,6 +199,7 @@ package android {
   }
 
   public static final class R.attr {
+    field public static final int inheritShowWhenLocked = 16844194; // 0x10105a2
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
@@ -258,6 +259,7 @@ package android.app {
     method public boolean convertToTranslucent(android.app.Activity.TranslucentConversionListener, android.app.ActivityOptions);
     method public deprecated boolean isBackgroundVisibleBehind();
     method public deprecated void onBackgroundVisibleBehindChanged(boolean);
+    method public void setInheritShowWhenLocked(boolean);
   }
 
   public static abstract interface Activity.TranslucentConversionListener {
@@ -1295,6 +1297,26 @@ package android.content {
   public class IntentFilter implements android.os.Parcelable {
     method public final int getOrder();
     method public final void setOrder(int);
+  }
+
+}
+
+package android.content.om {
+
+  public final class OverlayInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isEnabled();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.content.om.OverlayInfo> CREATOR;
+    field public final java.lang.String category;
+    field public final java.lang.String packageName;
+    field public final java.lang.String targetPackageName;
+    field public final int userId;
+  }
+
+  public class OverlayManager {
+    method public java.util.List<android.content.om.OverlayInfo> getOverlayInfosForTarget(java.lang.String, int);
+    method public boolean setEnabledExclusiveInCategory(java.lang.String, int);
   }
 
 }
@@ -4858,6 +4880,14 @@ package android.permission {
     field public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionPresentationInfo> CREATOR;
   }
 
+  public final class RuntimePermissionUsageInfo implements android.os.Parcelable {
+    ctor public RuntimePermissionUsageInfo(java.lang.CharSequence, int);
+    method public int describeContents();
+    method public java.lang.CharSequence getName();
+    method public int getAppAccessCount();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionUsageInfo> CREATOR;
+  }
 }
 
 package android.permissionpresenterservice {
@@ -4979,6 +5009,7 @@ package android.provider {
     method public static void removeOnPropertyChangedListener(android.provider.DeviceConfig.OnPropertyChangedListener);
     method public static void resetToDefaults(int, java.lang.String);
     method public static boolean setProperty(java.lang.String, java.lang.String, java.lang.String, boolean);
+    field public static final java.lang.String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
   }
 
   public static abstract interface DeviceConfig.OnPropertyChangedListener {
@@ -5662,7 +5693,7 @@ package android.service.notification {
     ctor public NotificationAssistantService();
     method public final void adjustNotification(android.service.notification.Adjustment);
     method public final void adjustNotifications(java.util.List<android.service.notification.Adjustment>);
-    method public void onActionClicked(java.lang.String, android.app.Notification.Action, int);
+    method public void onActionInvoked(java.lang.String, android.app.Notification.Action, int);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public void onNotificationDirectReplied(java.lang.String);
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification);
@@ -6179,6 +6210,40 @@ package android.telephony {
     field public static final int WWAN = 1; // 0x1
   }
 
+  public class CallAttributes implements android.os.Parcelable {
+    ctor public CallAttributes(android.telephony.PreciseCallState, int, android.telephony.CallQuality);
+    method public int describeContents();
+    method public android.telephony.CallQuality getCallQuality();
+    method public int getNetworkType();
+    method public android.telephony.PreciseCallState getPreciseCallState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
+  }
+
+  public final class CallQuality implements android.os.Parcelable {
+    ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int);
+    method public int describeContents();
+    method public int getAverageRelativeJitter();
+    method public int getAverageRoundTripTime();
+    method public int getCallDuration();
+    method public int getCodecType();
+    method public int getDownlinkCallQualityLevel();
+    method public int getMaxRelativeJitter();
+    method public int getNumRtpPacketsNotReceived();
+    method public int getNumRtpPacketsReceived();
+    method public int getNumRtpPacketsTransmitted();
+    method public int getNumRtpPacketsTransmittedLost();
+    method public int getUplinkCallQualityLevel();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CALL_QUALITY_BAD = 4; // 0x4
+    field public static final int CALL_QUALITY_EXCELLENT = 0; // 0x0
+    field public static final int CALL_QUALITY_FAIR = 2; // 0x2
+    field public static final int CALL_QUALITY_GOOD = 1; // 0x1
+    field public static final int CALL_QUALITY_NOT_AVAILABLE = 5; // 0x5
+    field public static final int CALL_QUALITY_POOR = 3; // 0x3
+    field public static final android.os.Parcelable.Creator<android.telephony.CallQuality> CREATOR;
+  }
+
   public class CarrierConfigManager {
     method public static android.os.PersistableBundle getDefaultConfig();
     method public void overrideConfig(int, android.os.PersistableBundle);
@@ -6444,12 +6509,14 @@ package android.telephony {
   }
 
   public class PhoneStateListener {
+    method public void onCallAttributesChanged(android.telephony.CallAttributes);
     method public void onCallDisconnectCauseChanged(int, int);
     method public void onPreciseCallStateChanged(android.telephony.PreciseCallState);
     method public void onPreciseDataConnectionStateChanged(android.telephony.PreciseDataConnectionState);
     method public void onRadioPowerStateChanged(int);
     method public void onSrvccStateChanged(int);
     method public void onVoiceActivationStateChanged(int);
+    field public static final int LISTEN_CALL_ATTRIBUTES_CHANGED = 67108864; // 0x4000000
     field public static final int LISTEN_CALL_DISCONNECT_CAUSES = 33554432; // 0x2000000
     field public static final int LISTEN_PRECISE_CALL_STATE = 2048; // 0x800
     field public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
@@ -7176,6 +7243,7 @@ package android.telephony.ims {
     method public void callSessionInviteParticipantsRequestDelivered();
     method public void callSessionInviteParticipantsRequestFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMayHandover(int, int);
+    method public void callSessionRttAudioIndicatorChanged(android.telephony.ims.ImsStreamMediaProfile);
     method public void callSessionMergeComplete(android.telephony.ims.stub.ImsCallSessionImplBase);
     method public void callSessionMergeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMergeStarted(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
@@ -7593,10 +7661,12 @@ package android.telephony.ims {
     method public int describeContents();
     method public int getAudioDirection();
     method public int getAudioQuality();
+    method public boolean getRttAudioSpeech();
     method public int getRttMode();
     method public int getVideoDirection();
     method public int getVideoQuality();
     method public boolean isRttCall();
+    method public void setRttAudioSpeech(boolean);
     method public void setRttMode(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int AUDIO_QUALITY_AMR = 1; // 0x1

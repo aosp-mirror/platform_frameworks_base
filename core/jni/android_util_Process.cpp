@@ -25,6 +25,7 @@
 #include <cutils/sched_policy.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
+#include <meminfo/procmeminfo.h>
 #include <meminfo/sysmeminfo.h>
 #include <processgroup/processgroup.h>
 
@@ -1083,19 +1084,10 @@ static jlong android_os_Process_getElapsedCpuTime(JNIEnv* env, jobject clazz)
 
 static jlong android_os_Process_getPss(JNIEnv* env, jobject clazz, jint pid)
 {
-    UniqueFile file = OpenSmapsOrRollup(pid);
-    if (file == nullptr) {
+    ::android::meminfo::ProcMemInfo proc_mem(pid);
+    uint64_t pss;
+    if (!proc_mem.SmapsOrRollupPss(&pss)) {
         return (jlong) -1;
-    }
-
-    // Tally up all of the Pss from the various maps
-    char line[256];
-    jlong pss = 0;
-    while (fgets(line, sizeof(line), file.get())) {
-        jlong v;
-        if (sscanf(line, "Pss: %" SCNd64 " kB", &v) == 1) {
-            pss += v;
-        }
     }
 
     // Return the Pss value in bytes, not kilobytes

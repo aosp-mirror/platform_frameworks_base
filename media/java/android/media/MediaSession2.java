@@ -250,7 +250,8 @@ public class MediaSession2 implements AutoCloseable {
                     if (controllerInfo.mAllowedCommands == null) {
                         // For trusted apps, send non-null allowed commands to keep
                         // connection.
-                        controllerInfo.mAllowedCommands = new Session2CommandGroup();
+                        controllerInfo.mAllowedCommands =
+                                new Session2CommandGroup.Builder().build();
                     }
                     if (DEBUG) {
                         Log.d(TAG, "Accepting connection: " + controllerInfo);

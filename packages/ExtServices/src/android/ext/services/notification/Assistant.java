@@ -286,6 +286,9 @@ public class Assistant extends NotificationAssistantService {
             if (!isForCurrentUser(sbn)) {
                 return;
             }
+
+            mAgingHelper.onNotificationRemoved(sbn.getKey());
+
             boolean updatedImpressions = false;
             String channelId = mLiveNotifications.remove(sbn.getKey()).getChannel().getId();
             String key = getKey(sbn.getPackageName(), sbn.getUserId(), channelId);
@@ -382,11 +385,11 @@ public class Assistant extends NotificationAssistantService {
     }
 
     @Override
-    public void onActionClicked(@NonNull String key, @NonNull Notification.Action action,
+    public void onActionInvoked(@NonNull String key, @NonNull Notification.Action action,
             @Source int source) {
         if (DEBUG) {
             Log.d(TAG,
-                    "onActionClicked() called with: key = [" + key + "], action = [" + action.title
+                    "onActionInvoked() called with: key = [" + key + "], action = [" + action.title
                             + "], source = [" + source + "]");
         }
         mSmartActionsHelper.onActionClicked(key, action, source);

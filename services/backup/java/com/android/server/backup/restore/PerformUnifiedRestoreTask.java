@@ -48,7 +48,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
 
@@ -81,6 +80,7 @@ import java.util.List;
 public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     private UserBackupManagerService backupManagerService;
+    private final int mUserId;
     private final TransportManager mTransportManager;
     // Transport client we're working with to do the restore
     private final TransportClient mTransportClient;
@@ -175,6 +175,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             @Nullable String[] filterSet,
             OnTaskFinishedListener listener) {
         this.backupManagerService = backupManagerService;
+        mUserId = backupManagerService.getUserId();
         mTransportManager = backupManagerService.getTransportManager();
         mEphemeralOpToken = backupManagerService.generateRandomIntegerToken();
         mState = UnifiedRestoreState.INITIAL;
@@ -204,7 +205,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 // We want everything and a pony
                 List<PackageInfo> apps =
                         PackageManagerBackupAgent.getStorableApplications(
-                                backupManagerService.getPackageManager());
+                                backupManagerService.getPackageManager(), mUserId);
                 filterSet = packagesToNames(apps);
                 if (DEBUG) {
                     Slog.i(TAG, "Full restore; asking about " + filterSet.length + " apps");
@@ -221,7 +222,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             for (int i = 0; i < filterSet.length; i++) {
                 try {
                     PackageManager pm = backupManagerService.getPackageManager();
-                    PackageInfo info = pm.getPackageInfo(filterSet[i], 0);
+                    PackageInfo info = pm.getPackageInfoAsUser(filterSet[i], 0, mUserId);
                     if ("android".equals(info.packageName)) {
                         hasSystem = true;
                         continue;
@@ -240,16 +241,16 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             }
             if (hasSystem) {
                 try {
-                    mAcceptSet.add(0,
-                            backupManagerService.getPackageManager().getPackageInfo("android", 0));
+                    mAcceptSet.add(0, backupManagerService.getPackageManager().getPackageInfoAsUser(
+                                    "android", 0, mUserId));
                 } catch (NameNotFoundException e) {
                     // won't happen; we know a priori that it's valid
                 }
             }
             if (hasSettings) {
                 try {
-                    mAcceptSet.add(backupManagerService.getPackageManager().getPackageInfo(
-                            SETTINGS_PACKAGE, 0));
+                    mAcceptSet.add(backupManagerService.getPackageManager().getPackageInfoAsUser(
+                            SETTINGS_PACKAGE, 0, mUserId));
                 } catch (NameNotFoundException e) {
                     // this one is always valid too
                 }
@@ -360,7 +361,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // If we're starting a full-system restore, set up to begin widget ID remapping
         if (mIsSystemRestore) {
             // TODO: http://b/22388012
-            AppWidgetBackupBridge.restoreStarting(UserHandle.USER_SYSTEM);
+            AppWidgetBackupBridge.restoreStarting(mUserId);
         }
 
         try {
@@ -508,8 +509,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             }
 
             try {
-                mCurrentPackage = backupManagerService.getPackageManager().getPackageInfo(
-                        pkgName, PackageManager.GET_SIGNING_CERTIFICATES);
+                mCurrentPackage = backupManagerService.getPackageManager().getPackageInfoAsUser(
+                        pkgName, PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
             } catch (NameNotFoundException e) {
                 // Whoops, we thought we could restore this package but it
                 // turns out not to be present.  Skip it.
@@ -1079,7 +1080,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         // Kick off any work that may be needed regarding app widget restores
         // TODO: http://b/22388012
-        AppWidgetBackupBridge.restoreFinished(UserHandle.USER_SYSTEM);
+        AppWidgetBackupBridge.restoreFinished(mUserId);
 
         // If this was a full-system restore, record the ancestral
         // dataset information

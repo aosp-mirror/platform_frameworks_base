@@ -332,9 +332,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         ssid = (config.SSID == null ? "" : removeDoubleQuotes(config.SSID));
         bssid = config.BSSID;
         security = getSecurity(config);
-        updateKey();
         networkId = config.networkId;
         mConfig = config;
+        updateKey();
     }
 
     /** Updates {@link #mKey} and should only called upon object creation/initialization. */
@@ -343,7 +343,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
         StringBuilder builder = new StringBuilder();
 
-        if (TextUtils.isEmpty(getSsidStr())) {
+        if (isPasspoint()) {
+            builder.append(mConfig.FQDN);
+        } else if (TextUtils.isEmpty(getSsidStr())) {
             builder.append(getBssid());
         } else {
             builder.append(getSsidStr());
@@ -606,7 +608,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public static String getKey(WifiConfiguration config) {
         StringBuilder builder = new StringBuilder();
 
-        if (TextUtils.isEmpty(config.SSID)) {
+        if (config.isPasspoint()) {
+            builder.append(config.FQDN);
+        } else if (TextUtils.isEmpty(config.SSID)) {
             builder.append(config.BSSID);
         } else {
             builder.append(removeDoubleQuotes(config.SSID));
@@ -621,9 +625,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public boolean matches(WifiConfiguration config) {
-        if (config.isPasspoint() && mConfig != null && mConfig.isPasspoint()) {
-            return ssid.equals(removeDoubleQuotes(config.SSID)) && config.FQDN.equals(mConfig.FQDN);
+        if (config.isPasspoint()) {
+            return (isPasspoint() && config.FQDN.equals(mConfig.FQDN));
         } else {
+            // Normal non-Passpoint network
             return ssid.equals(removeDoubleQuotes(config.SSID))
                     && security == getSecurity(config)
                     && (mConfig == null || mConfig.shared == config.shared);
@@ -826,6 +831,17 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         }
         return "";
+    }
+
+    /**
+     * Returns the display title for the AccessPoint, such as for an AccessPointPreference's title.
+     */
+    public String getTitle() {
+        if (isPasspoint()) {
+            return mConfig.providerFriendlyName;
+        } else {
+            return getSsidStr();
+        }
     }
 
     public String getSummary() {
@@ -1048,17 +1064,20 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     void setScanResults(Collection<ScanResult> scanResults) {
 
-        // Validate scan results are for current AP only
-        String key = getKey();
-        for (ScanResult result : scanResults) {
-            String scanResultKey = AccessPoint.getKey(result);
-            if (!mKey.equals(scanResultKey)) {
-                throw new IllegalArgumentException(
-                        String.format("ScanResult %s\nkey of %s did not match current AP key %s",
-                                      result, scanResultKey, key));
+        // Validate scan results are for current AP only by matching SSID/BSSID
+        // Passpoint R1 networks are not bound to a specific SSID/BSSID, so skip this for passpoint.
+        if (!isPasspoint()) {
+            String key = getKey();
+            for (ScanResult result : scanResults) {
+                String scanResultKey = AccessPoint.getKey(result);
+                if (!mKey.equals(scanResultKey)) {
+                    throw new IllegalArgumentException(
+                            String.format(
+                                    "ScanResult %s\nkey of %s did not match current AP key %s",
+                                    result, scanResultKey, key));
+                }
             }
         }
-
 
         int oldLevel = getLevel();
         mScanResults.clear();
@@ -1149,6 +1168,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     void update(@Nullable WifiConfiguration config) {
         mConfig = config;
+        if (mConfig != null) {
+            ssid = removeDoubleQuotes(mConfig.SSID);
+        }
         networkId = config != null ? config.networkId : WifiConfiguration.INVALID_NETWORK_ID;
         ThreadUtils.postOnMainThread(() -> {
             if (mAccessPointListener != null) {

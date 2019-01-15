@@ -51,7 +51,7 @@ class XmlAttributeFinder
 class BagAttributeFinder
     : public BackTrackingAttributeFinder<BagAttributeFinder, const ResolvedBag::Entry*> {
  public:
-  BagAttributeFinder(const ResolvedBag* bag)
+  explicit BagAttributeFinder(const ResolvedBag* bag)
       : BackTrackingAttributeFinder(bag != nullptr ? bag->entries : nullptr,
                                     bag != nullptr ? bag->entries + bag->entry_count : nullptr) {
   }

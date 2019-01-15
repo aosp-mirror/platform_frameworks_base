@@ -77,7 +77,8 @@ public class SetupObserver extends ContentObserver {
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Setup complete so starting backups");
                 }
-                KeyValueBackupJob.schedule(mContext, mUserBackupManagerService.getConstants());
+                KeyValueBackupJob.schedule(mUserBackupManagerService.getUserId(), mContext,
+                        mUserBackupManagerService.getConstants());
                 mUserBackupManagerService.scheduleNextFullBackupJob(0);
             }
         }

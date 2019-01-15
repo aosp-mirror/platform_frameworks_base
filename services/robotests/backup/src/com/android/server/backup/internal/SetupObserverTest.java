@@ -29,6 +29,7 @@ import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.testing.BackupManagerServiceTestUtils;
 import com.android.server.backup.testing.TestUtils;
+import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
 
 import java.io.File;
 
@@ -45,6 +47,7 @@ import java.io.File;
  * UserBackupManagerService}.
  */
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowApplicationPackageManager.class})
 @Presubmit
 public class SetupObserverTest {
     private static final String TAG = "SetupObserverTest";
@@ -125,7 +128,7 @@ public class SetupObserverTest {
 
         setupObserver.onChange(true);
 
-        assertThat(KeyValueBackupJob.isScheduled()).isTrue();
+        assertThat(KeyValueBackupJob.isScheduled(mUserBackupManagerService.getUserId())).isTrue();
         // Verifies that the full backup job is scheduled. The job is scheduled via a posted message
         // on the backup handler so we verify that a message exists.
         assertThat(mUserBackupManagerService.getBackupHandler().hasMessagesOrCallbacks()).isTrue();

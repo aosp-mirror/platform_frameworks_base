@@ -23,6 +23,7 @@
 #include "FileBlobCache.h"
 #include "Properties.h"
 #include "utils/TraceUtils.h"
+#include <GrContext.h>
 
 namespace android {
 namespace uirenderer {
@@ -168,6 +169,24 @@ void ShaderCache::store(const SkData& key, const SkData& data) {
     const void* value = data.data();
 
     BlobCache* bc = getBlobCacheLocked();
+    if (mInStoreVkPipelineInProgress) {
+        if (mOldPipelineCacheSize == -1) {
+            // Record the initial pipeline cache size stored in the file.
+            mOldPipelineCacheSize = bc->get(key.data(), keySize, nullptr, 0);
+        }
+        if (mNewPipelineCacheSize != -1 && mNewPipelineCacheSize == valueSize) {
+            // There has not been change in pipeline cache size. Stop trying to save.
+            mTryToStorePipelineCache = false;
+            return;
+        }
+        mNewPipelineCacheSize = valueSize;
+    } else {
+        mCacheDirty = true;
+        // If there are new shaders compiled, we probably have new pipeline state too.
+        // Store pipeline cache on the next flush.
+        mNewPipelineCacheSize = -1;
+        mTryToStorePipelineCache = true;
+    }
     bc->set(key.data(), keySize, value, valueSize);
 
     if (!mSavePending && mDeferredSaveDelay > 0) {
@@ -175,10 +194,29 @@ void ShaderCache::store(const SkData& key, const SkData& data) {
         std::thread deferredSaveThread([this]() {
             sleep(mDeferredSaveDelay);
             std::lock_guard<std::mutex> lock(mMutex);
-            saveToDiskLocked();
+            // Store file on disk if there a new shader or Vulkan pipeline cache size changed.
+            if (mCacheDirty || mNewPipelineCacheSize != mOldPipelineCacheSize) {
+                saveToDiskLocked();
+                mOldPipelineCacheSize = mNewPipelineCacheSize;
+                mTryToStorePipelineCache = false;
+                mCacheDirty = false;
+            }
         });
         deferredSaveThread.detach();
     }
+}
+
+void ShaderCache::onVkFrameFlushed(GrContext* context) {
+    {
+        std::lock_guard<std::mutex> lock(mMutex);
+
+        if (!mInitialized || !mTryToStorePipelineCache) {
+            return;
+        }
+    }
+    mInStoreVkPipelineInProgress = true;
+    context->storeVkPipelineCacheData();
+    mInStoreVkPipelineInProgress = false;
 }
 
 } /* namespace skiapipeline */

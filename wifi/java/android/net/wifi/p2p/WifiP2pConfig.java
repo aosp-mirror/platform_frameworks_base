@@ -223,7 +223,8 @@ public class WifiP2pConfig implements Parcelable {
         private MacAddress mDeviceAddress = MAC_ANY_ADDRESS;
         private String mNetworkName = "";
         private String mPassphrase = "";
-        private int mGroupOwnerBand = GROUP_OWNER_BAND_AUTO;
+        private int mGroupOperatingBand = GROUP_OWNER_BAND_AUTO;
+        private int mGroupOperatingFrequency = GROUP_OWNER_BAND_AUTO;
         private int mNetId = WifiP2pGroup.TEMPORARY_NET_ID;
 
         /**
@@ -285,22 +286,84 @@ public class WifiP2pConfig implements Parcelable {
         }
 
         /**
-         * Specify the band to use for creating the group. This method only applies when
-         * creating a group as Group Owner using {@link WifiP2pManager#createGroup}.
-         * The band should be {@link #GROUP_OWNER_BAND_2GHZ} or {@link #GROUP_OWNER_BAND_5GHZ},
-         * or allow the system to pick the band by specifying {@link #GROUP_OWNER_BAND_AUTO}.
+         * Specify the band to use for creating the group or joining the group. The band should
+         * be {@link #GROUP_OWNER_BAND_2GHZ}, {@link #GROUP_OWNER_BAND_5GHZ} or
+         * {@link #GROUP_OWNER_BAND_AUTO}.
+         * <p>
+         * When creating a group as Group Owner using {@link
+         * WifiP2pManager#createGroup(WifiP2pManager.Channel,
+         * WifiP2pConfig, WifiP2pManager.ActionListener)},
+         * specifying {@link #GROUP_OWNER_BAND_AUTO} allows the system to pick the operating
+         * frequency from all supported bands.
+         * Specifying {@link #GROUP_OWNER_BAND_2GHZ} or {@link #GROUP_OWNER_BAND_5GHZ}
+         * only allows the system to pick the operating frequency in the specified band.
          * If the Group Owner cannot create a group in the specified band, the operation will fail.
+         * <p>
+         * When joining a group as Group Client using {@link
+         * WifiP2pManager#connect(WifiP2pManager.Channel, WifiP2pConfig,
+         * WifiP2pManager.ActionListener)},
+         * specifying {@link #GROUP_OWNER_BAND_AUTO} allows the system to scan all supported
+         * frequencies to find the desired group. Specifying {@link #GROUP_OWNER_BAND_2GHZ} or
+         * {@link #GROUP_OWNER_BAND_5GHZ} only allows the system to scan the specified band.
+         * <p>
+         *     {@link #setGroupOperatingBand(int)} and {@link #setGroupOperatingFrequency(int)} are
+         *     mutually exclusive. Setting operating band and frequency both is invalid.
          * <p>
          *     Optional. {@link #GROUP_OWNER_BAND_AUTO} by default.
          *
-         * @param band the required band of group owner.
+         * @param band the operating band of the group.
          *             This should be one of {@link #GROUP_OWNER_BAND_AUTO},
          *             {@link #GROUP_OWNER_BAND_2GHZ}, {@link #GROUP_OWNER_BAND_5GHZ}.
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setGroupOwnerBand(int band) {
-            mGroupOwnerBand = band;
+        public Builder setGroupOperatingBand(@GroupOwnerBandType int band) {
+            switch (band) {
+                case GROUP_OWNER_BAND_AUTO:
+                case GROUP_OWNER_BAND_2GHZ:
+                case GROUP_OWNER_BAND_5GHZ:
+                    mGroupOperatingBand = band;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                        "Invalid constant for the group operating band!");
+            }
+            return this;
+        }
+
+        /**
+         * Specify the frequency to use for creating the group or joining the group.
+         * <p>
+         * When creating a group as Group Owner using {@link WifiP2pManager#createGroup(
+         * WifiP2pManager.Channel, WifiP2pConfig, WifiP2pManager.ActionListener)},
+         * specifying a frequency only allows the system to pick the specified frequency.
+         * If the Group Owner cannot create a group at the specified frequency,
+         * the operation will fail.
+         * When not specifying a frequency, it allows the system to pick operating frequency
+         * from all supported bands.
+         * <p>
+         * When joining a group as Group Client using {@link WifiP2pManager#connect(
+         * WifiP2pManager.Channel, WifiP2pConfig, WifiP2pManager.ActionListener)},
+         * specifying a frequency only allows the system to scan the specified frequency.
+         * If the frequency is not supported or invalid, the operation will fail.
+         * When not specifying a frequency, it allows the system to scan all supported
+         * frequencies to find the desired group.
+         * <p>
+         *     {@link #setGroupOperatingBand(int)} and {@link #setGroupOperatingFrequency(int)} are
+         *     mutually exclusive. Setting operating band and frequency both is invalid.
+         * <p>
+         *     Optional. 0 by default.
+         *
+         * @param frequency the operating frequency of the group.
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setGroupOperatingFrequency(int frequency) {
+            if (frequency < 0) {
+                throw new IllegalArgumentException(
+                    "Invalid group operating frequency!");
+            }
+            mGroupOperatingFrequency = frequency;
             return this;
         }
 
@@ -337,11 +400,21 @@ public class WifiP2pConfig implements Parcelable {
                         "passphrase must be non-empty.");
             }
 
+            if (mGroupOperatingFrequency > 0 && mGroupOperatingBand > 0) {
+                throw new IllegalStateException(
+                        "Preferred frequency and band are mutually exclusive.");
+            }
+
             WifiP2pConfig config = new WifiP2pConfig();
             config.deviceAddress = mDeviceAddress.toString();
             config.networkName = mNetworkName;
             config.passphrase = mPassphrase;
-            config.groupOwnerBand = mGroupOwnerBand;
+            config.groupOwnerBand = GROUP_OWNER_BAND_AUTO;
+            if (mGroupOperatingFrequency > 0) {
+                config.groupOwnerBand = mGroupOperatingFrequency;
+            } else if (mGroupOperatingBand > 0) {
+                config.groupOwnerBand = mGroupOperatingBand;
+            }
             config.netId = mNetId;
             return config;
         }

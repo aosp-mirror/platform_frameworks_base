@@ -23,19 +23,25 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.tv.TvContract;
 import android.os.SystemProperties;
+import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.Constants.AudioCodec;
+import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Represent a logical device of type {@link HdmiDeviceInfo#DEVICE_AUDIO_SYSTEM} residing in Android
@@ -71,6 +77,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     // processing.
     private final HashMap<Integer, String> mTvInputs = new HashMap<>();
 
+    // Map-like container of all cec devices.
+    // device id is used as key of container.
+    private final SparseArray<HdmiDeviceInfo> mDeviceInfos = new SparseArray<>();
+
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mSystemAudioControlFeatureEnabled = true;
@@ -84,6 +94,132 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                 "com.droidlogic.tvinput/.services.Hdmi2InputService/HW6");
         mTvInputs.put(Constants.CEC_SWITCH_HDMI3,
                 "com.droidlogic.tvinput/.services.Hdmi3InputService/HW7");
+    }
+
+    /**
+     * Called when a device is newly added or a new device is detected or
+     * an existing device is updated.
+     *
+     * @param info device info of a new device.
+     */
+    @ServiceThreadOnly
+    final void addCecDevice(HdmiDeviceInfo info) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo old = addDeviceInfo(info);
+        if (info.getPhysicalAddress() == mService.getPhysicalAddress()) {
+            // The addition of the device itself should not be notified.
+            // Note that different logical address could still be the same local device.
+            return;
+        }
+        if (old == null) {
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+        } else if (!old.equals(info)) {
+            invokeDeviceEventListener(old, HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+        }
+    }
+
+    /**
+     * Called when a device is removed or removal of device is detected.
+     *
+     * @param address a logical address of a device to be removed
+     */
+    @ServiceThreadOnly
+    final void removeCecDevice(int address) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo info = removeDeviceInfo(HdmiDeviceInfo.idForCecDevice(address));
+
+        mCecMessageCache.flushMessagesFrom(address);
+        invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
+    }
+
+    /**
+     * Called when a device is updated.
+     *
+     * @param info device info of the updating device.
+     */
+    @ServiceThreadOnly
+    final void updateCecDevice(HdmiDeviceInfo info) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo old = addDeviceInfo(info);
+
+        if (old == null) {
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+        } else if (!old.equals(info)) {
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
+        }
+    }
+
+    /**
+    * Add a new {@link HdmiDeviceInfo}. It returns old device info which has the same
+     * logical address as new device info's.
+     *
+     * @param deviceInfo a new {@link HdmiDeviceInfo} to be added.
+     * @return {@code null} if it is new device. Otherwise, returns old {@HdmiDeviceInfo}
+     *         that has the same logical address as new one has.
+     */
+    @ServiceThreadOnly
+    @VisibleForTesting
+    protected HdmiDeviceInfo addDeviceInfo(HdmiDeviceInfo deviceInfo) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo oldDeviceInfo = getCecDeviceInfo(deviceInfo.getLogicalAddress());
+        if (oldDeviceInfo != null) {
+            removeDeviceInfo(deviceInfo.getId());
+        }
+        mDeviceInfos.append(deviceInfo.getId(), deviceInfo);
+        return oldDeviceInfo;
+    }
+
+    /**
+     * Remove a device info corresponding to the given {@code logicalAddress}.
+     * It returns removed {@link HdmiDeviceInfo} if exists.
+     *
+     * @param id id of device to be removed
+     * @return removed {@link HdmiDeviceInfo} it exists. Otherwise, returns {@code null}
+     */
+    @ServiceThreadOnly
+    private HdmiDeviceInfo removeDeviceInfo(int id) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo deviceInfo = mDeviceInfos.get(id);
+        if (deviceInfo != null) {
+            mDeviceInfos.remove(id);
+        }
+        return deviceInfo;
+    }
+
+    /**
+     * Return a {@link HdmiDeviceInfo} corresponding to the given {@code logicalAddress}.
+     *
+     * @param logicalAddress logical address of the device to be retrieved
+     * @return {@link HdmiDeviceInfo} matched with the given {@code logicalAddress}.
+     *         Returns null if no logical address matched
+     */
+    @ServiceThreadOnly
+    HdmiDeviceInfo getCecDeviceInfo(int logicalAddress) {
+        assertRunOnServiceThread();
+        return mDeviceInfos.get(HdmiDeviceInfo.idForCecDevice(logicalAddress));
+    }
+
+    private void invokeDeviceEventListener(HdmiDeviceInfo info, int status) {
+        mService.invokeDeviceEventListeners(info, status);
+    }
+
+    @Override
+    @ServiceThreadOnly
+    void onHotplug(int portId, boolean connected) {
+        assertRunOnServiceThread();
+        if (connected) {
+            mService.wakeUp();
+        }
+        if (mService.getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
+            mCecMessageCache.flushAll();
+        } else {
+            if (connected) {
+                launchDeviceDiscovery();
+            } else {
+                // TODO(amyjojo): remove device from mDeviceInfo
+            }
+        }
     }
 
     @Override
@@ -116,6 +252,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         boolean lastSystemAudioControlStatus =
                 SystemProperties.getBoolean(Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL, true);
         systemAudioControlOnPowerOn(systemAudioControlOnPowerOnProp, lastSystemAudioControlStatus);
+        clearDeviceInfoList();
+        launchDeviceDiscovery();
         startQueuedActions();
     }
 
@@ -148,6 +286,78 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         assertRunOnServiceThread();
         SystemProperties.set(
                 Constants.PROPERTY_PREFERRED_ADDRESS_AUDIO_SYSTEM, String.valueOf(addr));
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleReportPhysicalAddress(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int path = HdmiUtils.twoBytesToInt(message.getParams());
+        int address = message.getSource();
+        int type = message.getParams()[2];
+
+        // Ignore if [Device Discovery Action] is going on.
+        if (hasAction(DeviceDiscoveryAction.class)) {
+            Slog.i(TAG, "Ignored while Device Discovery Action is in progress: " + message);
+            return true;
+        }
+
+        // Update the device info with TIF, note that the same device info could have added in
+        // device discovery and we do not want to override it with default OSD name. Therefore we
+        // need the following check to skip redundant device info updating.
+        HdmiDeviceInfo oldDevice = getCecDeviceInfo(address);
+        if (oldDevice == null || oldDevice.getPhysicalAddress() != path) {
+            addCecDevice(new HdmiDeviceInfo(
+                    address, path, mService.pathToPortId(path), type,
+                    Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(address)));
+            // if we are adding a new device info, send out a give osd name command
+            // to update the name of the device in TIF
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildGiveOsdNameCommand(mAddress, address));
+            return true;
+        }
+
+        Slog.w(TAG, "Device info exists. Not updating on Physical Address.");
+        return true;
+    }
+
+    @Override
+    protected boolean handleReportPowerStatus(HdmiCecMessage command) {
+        int newStatus = command.getParams()[0] & 0xFF;
+        updateDevicePowerStatus(command.getSource(), newStatus);
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleSetOsdName(HdmiCecMessage message) {
+        int source = message.getSource();
+        String osdName;
+        HdmiDeviceInfo deviceInfo = getCecDeviceInfo(source);
+        // If the device is not in device list, ignore it.
+        if (deviceInfo == null) {
+            Slog.i(TAG, "No source device info for <Set Osd Name>." + message);
+            return true;
+        }
+        try {
+            osdName = new String(message.getParams(), "US-ASCII");
+        } catch (UnsupportedEncodingException e) {
+            Slog.e(TAG, "Invalid <Set Osd Name> request:" + message, e);
+            return true;
+        }
+
+        if (deviceInfo.getDisplayName().equals(osdName)) {
+            Slog.d(TAG, "Ignore incoming <Set Osd Name> having same osd name:" + message);
+            return true;
+        }
+
+        Slog.d(TAG, "Updating device OSD name from "
+                + deviceInfo.getDisplayName()
+                + " to " + osdName);
+        updateCecDevice(new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
+                deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(),
+                deviceInfo.getDeviceType(), deviceInfo.getVendorId(), osdName));
+        return true;
     }
 
     @Override
@@ -407,8 +617,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         HdmiLogger.debug(
                 "System Audio Mode change[old:%b new:%b]",
                 mSystemAudioActivated, newSystemAudioMode);
-        // Wake up device if System Audio Control is turned on but device is still on standby
-        if (newSystemAudioMode && mService.isPowerStandbyOrTransient()) {
+        // Wake up device if System Audio Control is turned on
+        if (newSystemAudioMode) {
             mService.wakeUp();
         }
         setSystemAudioMode(newSystemAudioMode);
@@ -494,19 +704,20 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
-        getActiveSource().invalidate();
         if (!mService.isControlEnabled()) {
+            setRoutingPort(portId);
             setLocalActivePort(portId);
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
-        int oldPath = getLocalActivePort() != Constants.CEC_SWITCH_HOME
-                ? getActivePathOnSwitchFromActivePortId(getLocalActivePort())
+        int oldPath = getRoutingPort() != Constants.CEC_SWITCH_HOME
+                ? mService.portIdToPath(getRoutingPort())
                 : getDeviceInfo().getPhysicalAddress();
-        int newPath = getActivePathOnSwitchFromActivePortId(portId);
+        int newPath = mService.portIdToPath(portId);
         if (oldPath == newPath) {
             return;
         }
+        setRoutingPort(portId);
         setLocalActivePort(portId);
         HdmiCecMessage routingChange =
                 HdmiCecMessageBuilder.buildRoutingChange(mAddress, oldPath, newPath);
@@ -575,10 +786,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             return;
         }
-        // Wake up device if it is still on standby
-        if (mService.isPowerStandbyOrTransient()) {
-            mService.wakeUp();
-        }
+        // Wake up device
+        mService.wakeUp();
         // Check if TV supports System Audio Control.
         // Handle broadcasting setSystemAudioMode on or aborting message on callback.
         queryTvSystemAudioModeSupport(new TvSystemAudioModeSupportedCallback() {
@@ -635,9 +844,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             return;
         }
         // Wake up if the current device if ready to route.
-        if (mService.isPowerStandbyOrTransient()) {
-            mService.wakeUp();
-        }
+        mService.wakeUp();
         if (portId == Constants.CEC_SWITCH_HOME && mService.isPlaybackDevice()) {
             switchToHomeTvInput();
         } else if (portId == Constants.CEC_SWITCH_ARC) {
@@ -724,5 +931,51 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         mService.sendCecCommand(HdmiCecMessageBuilder.buildRoutingInformation(
                 mAddress, routingInformationPath));
         routeToInputFromPortId(getRoutingPort());
+    }
+
+    protected void updateDevicePowerStatus(int logicalAddress, int newPowerStatus) {
+        HdmiDeviceInfo info = getCecDeviceInfo(logicalAddress);
+        if (info == null) {
+            Slog.w(TAG, "Can not update power status of non-existing device:" + logicalAddress);
+            return;
+        }
+
+        if (info.getDevicePowerStatus() == newPowerStatus) {
+            return;
+        }
+
+        HdmiDeviceInfo newInfo = HdmiUtils.cloneHdmiDeviceInfo(info, newPowerStatus);
+        // addDeviceInfo replaces old device info with new one if exists.
+        addDeviceInfo(newInfo);
+
+        invokeDeviceEventListener(newInfo, HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
+    }
+
+    @ServiceThreadOnly
+    private void launchDeviceDiscovery() {
+        assertRunOnServiceThread();
+        DeviceDiscoveryAction action = new DeviceDiscoveryAction(this,
+                new DeviceDiscoveryCallback() {
+                    @Override
+                    public void onDeviceDiscoveryDone(List<HdmiDeviceInfo> deviceInfos) {
+                        for (HdmiDeviceInfo info : deviceInfos) {
+                            addCecDevice(info);
+                        }
+                    }
+                });
+        addAndStartAction(action);
+    }
+
+    // Clear all device info.
+    @ServiceThreadOnly
+    private void clearDeviceInfoList() {
+        assertRunOnServiceThread();
+        for (HdmiDeviceInfo info : HdmiUtils.sparseArrayToList(mDeviceInfos)) {
+            if (info.getPhysicalAddress() == mService.getPhysicalAddress()) {
+                continue;
+            }
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
+        }
+        mDeviceInfos.clear();
     }
 }

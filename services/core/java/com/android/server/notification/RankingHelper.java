@@ -106,9 +106,7 @@ public class RankingHelper {
 
         synchronized (mProxyByGroupTmp) {
             // record individual ranking result and nominate proxies for each group
-            // Note: iteration is done backwards such that the index can be used as a sort key
-            // in a string compare below
-            for (int i = N - 1; i >= 0; i--) {
+            for (int i = 0; i < N; i++) {
                 final NotificationRecord record = notificationList.get(i);
                 record.setAuthoritativeRank(i);
                 final String groupKey = record.getGroupKey();

@@ -1190,7 +1190,8 @@ public final class Settings {
     /**
      * Activity Action: Show Do Not Disturb access settings.
      * <p>
-     * Users can grant and deny access to Do Not Disturb configuration from here.
+     * Users can grant and deny access to Do Not Disturb configuration from here. Managed
+     * profiles cannot grant Do Not Disturb access.
      * See {@link android.app.NotificationManager#isNotificationPolicyAccessGranted()} for more
      * details.
      * <p>
@@ -13772,6 +13773,7 @@ public final class Settings {
          * requires_targeting_p            (boolean)
          * max_squeeze_remeasure_attempts  (int)
          * edit_choices_before_sending     (boolean)
+         * show_in_heads_up                (boolean)
          * </pre>
          * @see com.android.systemui.statusbar.policy.SmartReplyConstants
          * @hide

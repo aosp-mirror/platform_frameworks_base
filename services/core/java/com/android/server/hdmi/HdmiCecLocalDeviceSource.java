@@ -16,7 +16,10 @@
 
 package com.android.server.hdmi;
 
+import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
+
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.SystemProperties;
 import android.util.Slog;
@@ -42,7 +45,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     // Device has cec switch functionality or not.
     // Default is false.
     protected boolean mIsSwitchDevice = SystemProperties.getBoolean(
-            Constants.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
+            PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
 
     // Routing port number used for Routing Control.
     // This records the default routing port or the previous valid routing port.
@@ -71,9 +74,11 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
-        mCecMessageCache.flushAll();
+        if (mService.getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
+            mCecMessageCache.flushAll();
+        }
         // We'll not clear mIsActiveSource on the hotplug event to pass CETC 11.2.2-2 ~ 3.
-        if (mService.isPowerStandbyOrTransient()) {
+        if (connected) {
             mService.wakeUp();
         }
     }
@@ -117,6 +122,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
             setActiveSource(activeSource);
         }
         setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
+        updateDevicePowerStatus(logicalAddress, HdmiControlManager.POWER_STATUS_ON);
         switchInputOnReceivingNewActivePath(physicalAddress);
         return true;
     }
@@ -185,6 +191,13 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         // do nothing
     }
 
+    // Update the power status of the devices connected to the current device.
+    // This only works if the current device is a switch and keeps tracking the device info
+    // of the device connected to it.
+    protected void updateDevicePowerStatus(int logicalAddress, int newPowerStatus) {
+        // do nothing
+    }
+
     // Active source claiming needs to be handled in Service
     // since service can decide who will be the active source when the device supports
     // multiple device types in this method.
@@ -204,10 +217,8 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         if (!mIsActiveSource) {
             return;
         }
-        // Wake up the device if the power is in standby mode
-        if (mService.isPowerStandbyOrTransient()) {
-            mService.wakeUp();
-        }
+        // Wake up the device
+        mService.wakeUp();
         return;
     }
 

@@ -384,7 +384,7 @@ public class UserBackupManagerService {
             Slog.v(TAG, "Starting with transport " + currentTransport);
         }
         TransportManager transportManager =
-                new TransportManager(context, transportWhitelist, currentTransport);
+                new TransportManager(userId, context, transportWhitelist, currentTransport);
 
         File baseStateDir = UserBackupManagerFiles.getBaseStateDir(userId);
         File dataDir = UserBackupManagerFiles.getDataDir(userId);
@@ -496,11 +496,18 @@ public class UserBackupManagerService {
         mBaseStateDir = checkNotNull(baseStateDir, "baseStateDir cannot be null");
         mBaseStateDir.mkdirs();
         if (!SELinux.restorecon(mBaseStateDir)) {
-            Slog.e(TAG, "SELinux restorecon failed on " + mBaseStateDir);
+            Slog.w(TAG, "SELinux restorecon failed on " + mBaseStateDir);
         }
 
         mDataDir = checkNotNull(dataDir, "dataDir cannot be null");
-
+        // TODO(b/120424138): Remove when the system user moves out of the cache dir. The cache dir
+        // is managed by init.rc so we don't have to create it below.
+        if (userId != UserHandle.USER_SYSTEM) {
+            mDataDir.mkdirs();
+            if (!SELinux.restorecon(mDataDir)) {
+                Slog.w(TAG, "SELinux restorecon failed on " + mDataDir);
+            }
+        }
         mBackupPasswordManager = new BackupPasswordManager(mContext, mBaseStateDir, mRng);
 
         // Receivers for scheduled backups and transport initialization operations.
@@ -797,7 +804,7 @@ public class UserBackupManagerService {
      * non-lifecycle agent instance, so we manually set up the context topology for it.
      */
     public BackupAgent makeMetadataAgent() {
-        PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(mPackageManager);
+        PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(mPackageManager, mUserId);
         pmAgent.attach(mContext);
         pmAgent.onCreate();
         return pmAgent;
@@ -808,7 +815,7 @@ public class UserBackupManagerService {
      */
     public PackageManagerBackupAgent makeMetadataAgent(List<PackageInfo> packages) {
         PackageManagerBackupAgent pmAgent =
-                new PackageManagerBackupAgent(mPackageManager, packages);
+                new PackageManagerBackupAgent(mPackageManager, packages, mUserId);
         pmAgent.attach(mContext);
         pmAgent.onCreate();
         return pmAgent;
@@ -879,7 +886,7 @@ public class UserBackupManagerService {
         boolean changed = false;
         ArrayList<FullBackupEntry> schedule = null;
         List<PackageInfo> apps =
-                PackageManagerBackupAgent.getStorableApplications(mPackageManager);
+                PackageManagerBackupAgent.getStorableApplications(mPackageManager, mUserId);
 
         if (mFullBackupScheduleFile.exists()) {
             try (FileInputStream fstream = new FileInputStream(mFullBackupScheduleFile);
@@ -1428,8 +1435,7 @@ public class UserBackupManagerService {
             mConnecting = true;
             mConnectedAgent = null;
             try {
-                if (mActivityManager.bindBackupAgent(app.packageName, mode,
-                        UserHandle.USER_OWNER)) {
+                if (mActivityManager.bindBackupAgent(app.packageName, mode, mUserId)) {
                     Slog.d(TAG, "awaiting agent for " + app);
 
                     // success; wait for the agent to arrive
@@ -1488,7 +1494,7 @@ public class UserBackupManagerService {
     public void clearApplicationDataSynchronous(String packageName, boolean keepSystemState) {
         // Don't wipe packages marked allowClearUserData=false
         try {
-            PackageInfo info = mPackageManager.getPackageInfo(packageName, 0);
+            PackageInfo info = mPackageManager.getPackageInfoAsUser(packageName, 0, mUserId);
             if ((info.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA) == 0) {
                 if (MORE_DEBUG) {
                     Slog.i(TAG, "allowClearUserData=false so not wiping "
@@ -1507,7 +1513,7 @@ public class UserBackupManagerService {
             mClearingData = true;
             try {
                 mActivityManager.clearApplicationUserData(
-                        packageName, keepSystemState, observer, 0);
+                        packageName, keepSystemState, observer, mUserId);
             } catch (RemoteException e) {
                 // can't happen because the activity manager is in this process
             }
@@ -1616,8 +1622,8 @@ public class UserBackupManagerService {
                 continue;
             }
             try {
-                PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
-                        PackageManager.GET_SIGNING_CERTIFICATES);
+                PackageInfo packageInfo = mPackageManager.getPackageInfoAsUser(packageName,
+                        PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
                 if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo,
                         mPackageManager)) {
                     BackupObserverUtils.sendBackupOnPackageResult(observer, packageName,
@@ -1674,8 +1680,8 @@ public class UserBackupManagerService {
             }
             // We don't want the backup jobs to kick in any time soon.
             // Reschedules them to run in the distant future.
-            KeyValueBackupJob.schedule(mContext, BUSY_BACKOFF_MIN_MILLIS, mConstants);
-            FullBackupJob.schedule(mContext, 2 * BUSY_BACKOFF_MIN_MILLIS, mConstants);
+            KeyValueBackupJob.schedule(mUserId, mContext, BUSY_BACKOFF_MIN_MILLIS, mConstants);
+            FullBackupJob.schedule(mUserId, mContext, 2 * BUSY_BACKOFF_MIN_MILLIS, mConstants);
         } finally {
             Binder.restoreCallingIdentity(oldToken);
         }
@@ -1910,7 +1916,7 @@ public class UserBackupManagerService {
                 Runnable r = new Runnable() {
                     @Override
                     public void run() {
-                        FullBackupJob.schedule(mContext, latency, mConstants);
+                        FullBackupJob.schedule(mUserId, mContext, latency, mConstants);
                     }
                 };
                 mBackupHandler.postDelayed(r, 2500);
@@ -2033,7 +2039,7 @@ public class UserBackupManagerService {
                 mPowerManager.getPowerSaveState(ServiceType.FULL_BACKUP);
         if (result.batterySaverEnabled) {
             if (DEBUG) Slog.i(TAG, "Deferring scheduled full backups in battery saver mode");
-            FullBackupJob.schedule(mContext, keyValueBackupInterval, mConstants);
+            FullBackupJob.schedule(mUserId, mContext, keyValueBackupInterval, mConstants);
             return false;
         }
 
@@ -2147,7 +2153,7 @@ public class UserBackupManagerService {
                 mBackupHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        FullBackupJob.schedule(mContext, deferTime, mConstants);
+                        FullBackupJob.schedule(mUserId, mContext, deferTime, mConstants);
                     }
                 });
                 return false;
@@ -2251,7 +2257,7 @@ public class UserBackupManagerService {
         }
 
         // ...and schedule a backup pass if necessary
-        KeyValueBackupJob.schedule(mContext, mConstants);
+        KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
     }
 
     // Note: packageName is currently unused, but may be in the future
@@ -2339,8 +2345,8 @@ public class UserBackupManagerService {
         if (DEBUG) Slog.v(TAG, "clearBackupData() of " + packageName + " on " + transportName);
         PackageInfo info;
         try {
-            info = mPackageManager.getPackageInfo(packageName,
-                    PackageManager.GET_SIGNING_CERTIFICATES);
+            info = mPackageManager.getPackageInfoAsUser(packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
         } catch (NameNotFoundException e) {
             Slog.d(TAG, "No such package '" + packageName + "' - not clearing backup data");
             return;
@@ -2401,7 +2407,8 @@ public class UserBackupManagerService {
                     mPowerManager.getPowerSaveState(ServiceType.KEYVALUE_BACKUP);
             if (result.batterySaverEnabled) {
                 if (DEBUG) Slog.v(TAG, "Not running backup while in battery save mode");
-                KeyValueBackupJob.schedule(mContext, mConstants);   // try again in several hours
+                // Try again in several hours.
+                KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
             } else {
                 if (DEBUG) Slog.v(TAG, "Scheduling immediate backup pass");
                 synchronized (mQueueLock) {
@@ -2414,7 +2421,7 @@ public class UserBackupManagerService {
                     }
 
                     // ...and cancel any pending scheduled job, because we've just superseded it
-                    KeyValueBackupJob.cancel(mContext);
+                    KeyValueBackupJob.cancel(mUserId, mContext);
                 }
             }
         } finally {
@@ -2737,13 +2744,13 @@ public class UserBackupManagerService {
             synchronized (mQueueLock) {
                 if (enable && !wasEnabled && mSetupComplete) {
                     // if we've just been enabled, start scheduling backup passes
-                    KeyValueBackupJob.schedule(mContext, mConstants);
+                    KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
                     scheduleNextFullBackupJob(0);
                 } else if (!enable) {
                     // No longer enabled, so stop running backups
                     if (MORE_DEBUG) Slog.i(TAG, "Opting out of backup");
 
-                    KeyValueBackupJob.cancel(mContext);
+                    KeyValueBackupJob.cancel(mUserId, mContext);
 
                     // This also constitutes an opt-out, so we wipe any data for
                     // this device from the backend.  We start that process with
@@ -3257,7 +3264,7 @@ public class UserBackupManagerService {
             if (packageName != null) {
                 PackageInfo app = null;
                 try {
-                    app = mPackageManager.getPackageInfo(packageName, 0);
+                    app = mPackageManager.getPackageInfoAsUser(packageName, 0, mUserId);
                 } catch (NameNotFoundException nnf) {
                     Slog.w(TAG, "Asked to restore nonexistent pkg " + packageName);
                     throw new IllegalArgumentException("Package " + packageName + " not found");
@@ -3361,7 +3368,7 @@ public class UserBackupManagerService {
                     mTransportManager.getCurrentTransportClient(callerLogString);
             boolean eligible =
                     AppBackupUtils.appIsRunningAndEligibleForBackupWithTransport(
-                            transportClient, packageName, mPackageManager);
+                            transportClient, packageName, mPackageManager, mUserId);
             if (transportClient != null) {
                 mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
             }
@@ -3385,7 +3392,7 @@ public class UserBackupManagerService {
             for (String packageName : packages) {
                 if (AppBackupUtils
                         .appIsRunningAndEligibleForBackupWithTransport(
-                                transportClient, packageName, mPackageManager)) {
+                                transportClient, packageName, mPackageManager, mUserId)) {
                     eligibleApps.add(packageName);
                 }
             }
@@ -3451,7 +3458,7 @@ public class UserBackupManagerService {
             pw.println(isBackupOperationInProgress() ? "Backup in progress" : "No backups running");
             pw.println("Last backup pass started: " + mLastBackupPass
                     + " (now = " + System.currentTimeMillis() + ')');
-            pw.println("  next scheduled: " + KeyValueBackupJob.nextScheduled());
+            pw.println("  next scheduled: " + KeyValueBackupJob.nextScheduled(mUserId));
 
             pw.println("Transport whitelist:");
             for (ComponentName transport : mTransportManager.getTransportWhitelist()) {

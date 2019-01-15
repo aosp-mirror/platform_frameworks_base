@@ -19,6 +19,7 @@ import static android.service.autofill.augmented.AugmentedAutofillService.DEBUG;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.RemoteException;
 import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
 import android.util.Log;
@@ -36,6 +37,9 @@ import java.util.List;
  * @hide
  */
 @SystemApi
+@TestApi
+//TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+//in the same package as the test, and that module is compiled with SDK=test_current
 public final class FillController {
     private static final String TAG = "FillController";
 
