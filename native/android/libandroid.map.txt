@@ -172,6 +172,7 @@ LIBANDROID {
     ASensorEventQueue_hasEvents;
     ASensorEventQueue_registerSensor; # introduced=26
     ASensorEventQueue_setEventRate;
+    ASensorEventQueue_requestAdditionalInfoEvents; # introduced=29
     ASensorManager_configureDirectReport; # introduced=26
     ASensorManager_createEventQueue;
     ASensorManager_createHardwareBufferDirectChannel; # introduced=26
