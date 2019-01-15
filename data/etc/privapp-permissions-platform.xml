@@ -267,12 +267,6 @@ applications that come with the platform
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.settings.intelligence">
-        <permission name="android.permission.MANAGE_FINGERPRINT"/>
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.READ_SEARCH_INDEXABLES"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.sharedstoragebackup">
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
     </privapp-permissions>
