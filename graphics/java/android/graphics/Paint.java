@@ -68,26 +68,27 @@ public class Paint {
                 Paint.class.getClassLoader(), nGetNativeFinalizer(), NATIVE_PAINT_SIZE);
     }
 
-    private ColorFilter mColorFilter;
-    private MaskFilter  mMaskFilter;
-    private PathEffect  mPathEffect;
-    private Shader      mShader;
+    @ColorLong private long mColor;
+    private ColorFilter     mColorFilter;
+    private MaskFilter      mMaskFilter;
+    private PathEffect      mPathEffect;
+    private Shader          mShader;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private Typeface    mTypeface;
-    private Xfermode    mXfermode;
+    private Typeface        mTypeface;
+    private Xfermode        mXfermode;
 
-    private boolean     mHasCompatScaling;
-    private float       mCompatScaling;
-    private float       mInvCompatScaling;
+    private boolean         mHasCompatScaling;
+    private float           mCompatScaling;
+    private float           mInvCompatScaling;
 
-    private LocaleList  mLocales;
-    private String      mFontFeatureSettings;
-    private String      mFontVariationSettings;
+    private LocaleList      mLocales;
+    private String          mFontFeatureSettings;
+    private String          mFontVariationSettings;
 
-    private float mShadowLayerRadius;
-    private float mShadowLayerDx;
-    private float mShadowLayerDy;
-    private int mShadowLayerColor;
+    private float           mShadowLayerRadius;
+    private float           mShadowLayerDx;
+    private float           mShadowLayerDy;
+    @ColorLong private long mShadowLayerColor;
 
     private static final Object sCacheLock = new Object();
 
@@ -505,6 +506,7 @@ public class Paint {
         //        ? HINTING_OFF : HINTING_ON);
         mCompatScaling = mInvCompatScaling = 1;
         setTextLocales(LocaleList.getAdjustedDefault());
+        mColor = Color.pack(Color.BLACK);
     }
 
     /**
@@ -530,6 +532,7 @@ public class Paint {
         // setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
         //        ? HINTING_OFF : HINTING_ON);
 
+        mColor = Color.pack(Color.BLACK);
         mColorFilter = null;
         mMaskFilter = null;
         mPathEffect = null;
@@ -551,7 +554,7 @@ public class Paint {
         mShadowLayerRadius = 0.0f;
         mShadowLayerDx = 0.0f;
         mShadowLayerDy = 0.0f;
-        mShadowLayerColor = 0;
+        mShadowLayerColor = Color.pack(0);
     }
 
     /**
@@ -572,6 +575,7 @@ public class Paint {
      * {@link Paint}.
      */
     private void setClassVariablesFrom(Paint paint) {
+        mColor = paint.mColor;
         mColorFilter = paint.mColorFilter;
         mMaskFilter = paint.mMaskFilter;
         mPathEffect = paint.mPathEffect;
@@ -949,7 +953,7 @@ public class Paint {
     }
 
     /**
-     * Return the paint's color. Note that the color is a 32bit value
+     * Return the paint's color in sRGB. Note that the color is a 32bit value
      * containing alpha as well as r,g,b. This 32bit value is not premultiplied,
      * meaning that its alpha can be any value, regardless of the values of
      * r,g,b. See the Color class for more details.
@@ -958,7 +962,25 @@ public class Paint {
      */
     @ColorInt
     public int getColor() {
-        return nGetColor(mNativePaint);
+        return Color.toArgb(mColor);
+    }
+
+    /**
+     * Return the paint's color. Note that the color is a long with an encoded
+     * {@link ColorSpace} as well as alpha and r,g,b. These values are not
+     * premultiplied, meaning that alpha can be any value, regardless of the
+     * values of r,g,b. See the {@link Color} class for more details.
+     *
+     * @see Color for APIs that help manipulate a color long.
+     *
+     * @return the paint's color (and alpha).
+     *
+     * @hide pending API approval
+     */
+    @TestApi
+    @ColorLong
+    public long getColorLong() {
+        return mColor;
     }
 
     /**
@@ -970,7 +992,7 @@ public class Paint {
      * @param color The new color (including alpha) to set in the paint.
      */
     public void setColor(@ColorInt int color) {
-        nSetColor(mNativePaint, color);
+        setColor(Color.pack(color));
     }
 
     /**
@@ -996,6 +1018,7 @@ public class Paint {
         float a = Color.alpha(color);
 
         nSetColor(mNativePaint, cs, r, g, b, a);
+        mColor = color;
     }
 
     /**
@@ -1006,7 +1029,7 @@ public class Paint {
      * @return the alpha component of the paint's color.
      */
     public int getAlpha() {
-        return nGetAlpha(mNativePaint);
+        return Math.round(Color.alpha(mColor) * 255.0f);
     }
 
     /**
@@ -1017,6 +1040,13 @@ public class Paint {
      * @param a set the alpha component [0..255] of the paint's color.
      */
     public void setAlpha(int a) {
+        // FIXME: No need to unpack this. Instead, just update the alpha bits.
+        // b/122959599
+        ColorSpace cs = Color.colorSpace(mColor);
+        float r = Color.red(mColor);
+        float g = Color.green(mColor);
+        float b = Color.blue(mColor);
+        mColor = Color.pack(r, g, b, a * (1.0f / 255), cs);
         nSetAlpha(mNativePaint, a);
     }
 
@@ -1398,12 +1428,7 @@ public class Paint {
      * opaque, or the alpha from the shadow color if not.
      */
     public void setShadowLayer(float radius, float dx, float dy, @ColorInt int shadowColor) {
-        mShadowLayerRadius = radius;
-        mShadowLayerDx = dx;
-        mShadowLayerDy = dy;
-        mShadowLayerColor = shadowColor;
-        // FIXME: Share a single native method with the ColorLong version.
-        nSetShadowLayer(mNativePaint, radius, dx, dy, shadowColor);
+        setShadowLayer(radius, dx, dy, Color.pack(shadowColor));
     }
 
     /**
@@ -1435,7 +1460,7 @@ public class Paint {
         mShadowLayerRadius = radius;
         mShadowLayerDx = dx;
         mShadowLayerDy = dy;
-        mShadowLayerColor = Color.toArgb(shadowColor);
+        mShadowLayerColor = shadowColor;
     }
 
     /**
@@ -1482,8 +1507,20 @@ public class Paint {
     /**
      * Returns the color of the shadow layer.
      * @see #setShadowLayer(float,float,float,int)
+     * @see #setShadowLayer(float,float,float,long)
      */
     public @ColorInt int getShadowLayerColor() {
+        return Color.toArgb(mShadowLayerColor);
+    }
+
+    /**
+     * Returns the color of the shadow layer.
+     * @see #setShadowLayer(float,float,float,int)
+     * @see #setShadowLayer(float,float,float,long)
+     * @hide pending API approval
+     */
+    @TestApi
+    public @ColorLong long getShadowLayerColorLong() {
         return mShadowLayerColor;
     }
 
@@ -3073,12 +3110,6 @@ public class Paint {
     private static native void nSetFakeBoldText(long paintPtr, boolean fakeBoldText);
     @CriticalNative
     private static native void nSetFilterBitmap(long paintPtr, boolean filter);
-    @CriticalNative
-    private static native int nGetColor(long paintPtr);
-    @CriticalNative
-    private static native void nSetColor(long paintPtr, @ColorInt int color);
-    @CriticalNative
-    private static native int nGetAlpha(long paintPtr);
     @CriticalNative
     private static native void nSetStrikeThruText(long paintPtr, boolean strikeThruText);
     @CriticalNative

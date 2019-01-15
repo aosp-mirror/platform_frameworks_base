@@ -510,6 +510,8 @@ package android.graphics {
   }
 
   public class Paint {
+    method public long getColorLong();
+    method public long getShadowLayerColorLong();
     method public void setColor(long);
     method public void setShadowLayer(float, float, float, long);
   }
