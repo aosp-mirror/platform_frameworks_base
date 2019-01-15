@@ -155,7 +155,7 @@ public class EuiccCardManager {
      * Requests all the profiles on eUicc.
      *
      * @param cardId The Id of the eUICC.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and all the profiles.
      */
     public void requestAllProfiles(String cardId, @CallbackExecutor Executor executor,
@@ -179,7 +179,7 @@ public class EuiccCardManager {
      *
      * @param cardId The Id of the eUICC.
      * @param iccid The iccid of the profile.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and profile.
      */
     public void requestProfile(String cardId, String iccid, @CallbackExecutor Executor executor,
@@ -204,7 +204,7 @@ public class EuiccCardManager {
      * @param cardId The Id of the eUICC.
      * @param iccid The iccid of the profile.
      * @param refresh Whether sending the REFRESH command to modem.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
      */
     public void disableProfile(String cardId, String iccid, boolean refresh,
@@ -230,7 +230,7 @@ public class EuiccCardManager {
      * @param cardId The Id of the eUICC.
      * @param iccid The iccid of the profile to switch to.
      * @param refresh Whether sending the REFRESH command to modem.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and the EuiccProfileInfo enabled.
      */
     public void switchToProfile(String cardId, String iccid, boolean refresh,
@@ -255,7 +255,7 @@ public class EuiccCardManager {
      * @param cardId The Id of the eUICC.
      * @param iccid The iccid of the profile.
      * @param nickname The nickname of the profile.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
      */
     public void setNickname(String cardId, String iccid, String nickname,
@@ -279,7 +279,7 @@ public class EuiccCardManager {
      *
      * @param cardId The Id of the eUICC.
      * @param iccid The iccid of the profile.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
      */
     public void deleteProfile(String cardId, String iccid, @CallbackExecutor Executor executor,
@@ -304,7 +304,7 @@ public class EuiccCardManager {
      * @param cardId The Id of the eUICC.
      * @param options Bits of the options of resetting which parts of the eUICC memory. See
      *     EuiccCard for details.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
      */
     public void resetMemory(String cardId, @ResetOption int options,
@@ -327,7 +327,7 @@ public class EuiccCardManager {
      * Requests the default SM-DP+ address from eUICC.
      *
      * @param cardId The Id of the eUICC.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and the default SM-DP+ address.
      */
     public void requestDefaultSmdpAddress(String cardId, @CallbackExecutor Executor executor,
@@ -350,7 +350,7 @@ public class EuiccCardManager {
      * Requests the SM-DS address from eUICC.
      *
      * @param cardId The Id of the eUICC.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and the SM-DS address.
      */
     public void requestSmdsAddress(String cardId, @CallbackExecutor Executor executor,
@@ -374,7 +374,7 @@ public class EuiccCardManager {
      *
      * @param cardId The Id of the eUICC.
      * @param defaultSmdpAddress The default SM-DP+ address to set.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
      */
     public void setDefaultSmdpAddress(String cardId, String defaultSmdpAddress,
@@ -398,7 +398,7 @@ public class EuiccCardManager {
      * Requests Rules Authorisation Table.
      *
      * @param cardId The Id of the eUICC.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the rule authorisation table.
      */
     public void requestRulesAuthTable(String cardId, @CallbackExecutor Executor executor,
@@ -421,7 +421,7 @@ public class EuiccCardManager {
      * Requests the eUICC challenge for new profile downloading.
      *
      * @param cardId The Id of the eUICC.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the challenge.
      */
     public void requestEuiccChallenge(String cardId, @CallbackExecutor Executor executor,
@@ -444,7 +444,7 @@ public class EuiccCardManager {
      * Requests the eUICC info1 defined in GSMA RSP v2.0+ for new profile downloading.
      *
      * @param cardId The Id of the eUICC.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the info1.
      */
     public void requestEuiccInfo1(String cardId, @CallbackExecutor Executor executor,
@@ -467,7 +467,7 @@ public class EuiccCardManager {
      * Gets the eUICC info2 defined in GSMA RSP v2.0+ for new profile downloading.
      *
      * @param cardId The Id of the eUICC.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the info2.
      */
     public void requestEuiccInfo2(String cardId, @CallbackExecutor Executor executor,
@@ -500,7 +500,7 @@ public class EuiccCardManager {
      *     GSMA RSP v2.0+.
      * @param serverCertificate ASN.1 data in byte array indicating SM-DP+ Certificate returned by
      *     SM-DP+ server.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and a byte array which represents a
      *     {@code AuthenticateServerResponse} defined in GSMA RSP v2.0+.
      */
@@ -540,7 +540,7 @@ public class EuiccCardManager {
      *     SM-DP+ server.
      * @param smdpCertificate ASN.1 data in byte array indicating the SM-DP+ Certificate returned
      *     by SM-DP+ server.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and a byte array which represents a
      *     {@code PrepareDownloadResponse} defined in GSMA RSP v2.0+
      */
@@ -572,7 +572,7 @@ public class EuiccCardManager {
      *
      * @param cardId The Id of the eUICC.
      * @param boundProfilePackage the Bound Profile Package data returned by SM-DP+ server.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and a byte array which represents a
      *     {@code LoadBoundProfilePackageResponse} defined in GSMA RSP v2.0+.
      */
@@ -601,7 +601,7 @@ public class EuiccCardManager {
      * @param cardId The Id of the eUICC.
      * @param transactionId the transaction ID returned by SM-DP+ server.
      * @param reason the cancel reason.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and an byte[] which represents a
      *     {@code CancelSessionResponse} defined in GSMA RSP v2.0+.
      */
@@ -630,7 +630,7 @@ public class EuiccCardManager {
      *
      * @param cardId The Id of the eUICC.
      * @param events bits of the event types ({@link EuiccNotification.Event}) to list.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the list of notifications.
      */
     public void listNotifications(String cardId, @EuiccNotification.Event int events,
@@ -654,7 +654,7 @@ public class EuiccCardManager {
      *
      * @param cardId The Id of the eUICC.
      * @param events bits of the event types ({@link EuiccNotification.Event}) to list.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the list of notifications.
      */
     public void retrieveNotificationList(String cardId, @EuiccNotification.Event int events,
@@ -678,7 +678,7 @@ public class EuiccCardManager {
      *
      * @param cardId The Id of the eUICC.
      * @param seqNumber the sequence number of the notification.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the notification.
      */
     public void retrieveNotification(String cardId, int seqNumber,
@@ -702,7 +702,7 @@ public class EuiccCardManager {
      *
      * @param cardId The Id of the eUICC.
      * @param seqNumber the sequence number of the notification.
-     * @param executor The executor through which the callback should be invoke.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code.
      */
     public void removeNotificationFromList(String cardId, int seqNumber,
