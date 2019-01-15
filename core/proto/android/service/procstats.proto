@@ -43,7 +43,7 @@ message ProcessStatsServiceDumpProto {
  * Data model from /frameworks/base/core/java/com/android/internal/app/procstats/ProcessStats.java
  * This proto is defined based on the writeToParcel method.
  *
- * Next Tag: 10
+ * Next Tag: 11
  */
 message ProcessStatsSectionProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -76,11 +76,32 @@ message ProcessStatsSectionProto {
     }
     repeated Status status = 7;
 
+    // Number of pages available of various types and sizes, representation fragmentation.
+    repeated ProcessStatsAvailablePagesProto available_pages = 10;
+
     // Stats for each process.
     repeated ProcessStatsProto process_stats = 8;
 
     // Stats for each package.
     repeated ProcessStatsPackageProto package_stats = 9;
+}
+
+// Next Tag: 5
+message ProcessStatsAvailablePagesProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Node these pages are in (as per /proc/pagetypeinfo)
+    optional int32 node = 1;
+
+    // Zone these pages are in (as per /proc/pagetypeinfo)
+    optional string zone = 2;
+
+    // Label for the type of these pages (as per /proc/pagetypeinfo)
+    optional string label = 3;
+
+    // Distribution of number of pages available by order size.  First entry in array is
+    // order 0, second is order 1, etc.  Each order increase is a doubling of page size.
+    repeated int32 pages_per_order = 4;
 }
 
 // Next Tag: 10
