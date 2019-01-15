@@ -2269,6 +2269,11 @@
     <permission android:name="android.permission.START_ANY_ACTIVITY"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to start activities from background
+         @hide -->
+    <permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"
+        android:protectionLevel="signature|privileged|vendorPrivileged|oem" />
+
     <!-- @SystemApi Must be required by activities that handle the intent action
          {@link Intent#ACTION_SEND_SHOW_SUSPENDED_APP_DETAILS}. This is for use by apps that
          hold {@link Manifest.permission#SUSPEND_APPS} to interact with the system.
