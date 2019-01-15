@@ -116,6 +116,13 @@ public abstract class ContentCaptureService extends Service {
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleFinishSession,
                     ContentCaptureService.this, sessionId));
         }
+
+        @Override
+        public void onUserDataRemovalRequest(UserDataRemovalRequest request) {
+            mHandler.sendMessage(
+                    obtainMessage(ContentCaptureService::handleOnUserDataRemovalRequest,
+                            ContentCaptureService.this, request));
+        }
     };
 
     /**
@@ -429,6 +436,10 @@ public abstract class ContentCaptureService extends Service {
     private void handleFinishSession(@NonNull String sessionId) {
         mSessionUids.remove(sessionId);
         onDestroyContentCaptureSession(new ContentCaptureSessionId(sessionId));
+    }
+
+    private void handleOnUserDataRemovalRequest(@NonNull UserDataRemovalRequest request) {
+        onUserDataRemovalRequest(request);
     }
 
     /**
