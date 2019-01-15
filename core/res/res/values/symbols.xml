@@ -3031,6 +3031,7 @@
   <java-symbol type="drawable" name="ic_doc_generic" />
 
   <java-symbol type="bool" name="config_setColorTransformAccelerated" />
+  <java-symbol type="bool" name="config_setColorTransformAcceleratedPerLayer" />
   <java-symbol type="bool" name="config_displayWhiteBalanceAvailable" />
   <java-symbol type="bool" name="config_nightDisplayAvailable" />
   <java-symbol type="bool" name="config_allowDisablingAssistDisclosure" />

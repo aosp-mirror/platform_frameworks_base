@@ -1776,8 +1776,13 @@ package android.hardware.display {
   }
 
   public final class ColorDisplayManager {
+    method @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS) public int getTransformCapabilities();
     method @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS) public boolean setAppSaturationLevel(@NonNull String, @IntRange(from=0, to=100) int);
     method @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS) public boolean setSaturationLevel(@IntRange(from=0, to=100) int);
+    field public static final int CAPABILITY_HARDWARE_ACCELERATION_GLOBAL = 2; // 0x2
+    field public static final int CAPABILITY_HARDWARE_ACCELERATION_PER_APP = 4; // 0x4
+    field public static final int CAPABILITY_NONE = 0; // 0x0
+    field public static final int CAPABILITY_PROTECTED_CONTENT = 1; // 0x1
   }
 
   public final class DisplayManager {
