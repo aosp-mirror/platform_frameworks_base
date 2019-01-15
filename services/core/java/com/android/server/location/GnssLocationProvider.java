@@ -64,6 +64,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.StatsLog;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
@@ -1704,6 +1705,24 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                         ", response: " + userResponse);
             }
             native_send_ni_response(notificationId, userResponse);
+
+            StatsLog.write(StatsLog.GNSS_NI_EVENT_REPORTED,
+                    StatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_RESPONSE,
+                    notificationId,
+                    /* niType= */ 0,
+                    /* needNotify= */ false,
+                    /* needVerify= */ false,
+                    /* privacyOverride= */ false,
+                    /* timeout= */ 0,
+                    /* defaultResponse= */ 0,
+                    /* requestorId= */ null,
+                    /* text= */ null,
+                    /* requestorIdEncoding= */ 0,
+                    /* textEncoding= */ 0,
+                    mSuplEsEnabled,
+                    mEnabled,
+                    userResponse);
+
             return true;
         }
     };
@@ -1753,6 +1772,22 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         notification.textEncoding = textEncoding;
 
         mNIHandler.handleNiNotification(notification);
+        StatsLog.write(StatsLog.GNSS_NI_EVENT_REPORTED,
+                StatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_REQUEST,
+                notification.notificationId,
+                notification.niType,
+                notification.needNotify,
+                notification.needVerify,
+                notification.privacyOverride,
+                notification.timeout,
+                notification.defaultResponse,
+                notification.requestorId,
+                notification.text,
+                notification.requestorIdEncoding,
+                notification.textEncoding,
+                mSuplEsEnabled,
+                mEnabled,
+                /* userResponse= */ 0);
     }
 
     /**
