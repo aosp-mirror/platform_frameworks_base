@@ -38,6 +38,7 @@ public class ShadowApplicationPackageManager
         extends org.robolectric.shadows.ShadowApplicationPackageManager {
     private static final Map<String, PackageInfo> sPackageInfos = new ArrayMap<>();
     private static final List<PackageInfo> sInstalledPackages = new ArrayList<>();
+    private static final Map<String, Integer> sPackageUids = new ArrayMap<>();
 
     /**
      * Registers the package {@code packageName} to be returned when invoking {@link
@@ -47,6 +48,14 @@ public class ShadowApplicationPackageManager
     public static void addInstalledPackage(String packageName, PackageInfo packageInfo) {
         sPackageInfos.put(packageName, packageInfo);
         sInstalledPackages.add(packageInfo);
+    }
+
+    /**
+     * Sets the package uid {@code packageUid} for the package {@code packageName} to be returned
+     * when invoking {@link ApplicationPackageManager#getPackageUidAsUser(String, int, int)}.
+     */
+    public static void setPackageUid(String packageName, int packageUid) {
+        sPackageUids.put(packageName, packageUid);
     }
 
     @Override
@@ -61,6 +70,15 @@ public class ShadowApplicationPackageManager
     @Override
     protected List<PackageInfo> getInstalledPackagesAsUser(int flags, int userId) {
         return sInstalledPackages;
+    }
+
+    @Override
+    protected int getPackageUidAsUser(String packageName, int flags, int userId)
+            throws NameNotFoundException {
+        if (!sPackageUids.containsKey(packageName)) {
+            throw new NameNotFoundException(packageName);
+        }
+        return sPackageUids.get(packageName);
     }
 
     /** Clear package state. */

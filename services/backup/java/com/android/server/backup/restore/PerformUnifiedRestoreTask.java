@@ -360,7 +360,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         // If we're starting a full-system restore, set up to begin widget ID remapping
         if (mIsSystemRestore) {
-            // TODO: http://b/22388012
             AppWidgetBackupBridge.restoreStarting(mUserId);
         }
 
@@ -1079,7 +1078,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         }
 
         // Kick off any work that may be needed regarding app widget restores
-        // TODO: http://b/22388012
         AppWidgetBackupBridge.restoreFinished(mUserId);
 
         // If this was a full-system restore, record the ancestral
