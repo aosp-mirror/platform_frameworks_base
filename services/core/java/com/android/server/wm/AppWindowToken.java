@@ -2340,11 +2340,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return transit == TRANSIT_TASK_CHANGE_WINDOWING_MODE;
     }
 
-    private int getDefaultChangeTransitionDuration() {
-        return (int) (AppTransition.DEFAULT_APP_TRANSITION_DURATION
-                        * mWmService.getTransitionAnimationScaleLocked());
-    }
-
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
             boolean isVoiceInteraction) {
 
@@ -2378,17 +2373,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 adapter = adapters.mAdapter;
                 thumbnailAdapter = adapters.mThumbnailAdapter;
             } else if (isChanging) {
-                int duration = getDefaultChangeTransitionDuration();
+                final float durationScale = mWmService.getTransitionAnimationScaleLocked();
                 mTmpRect.offsetTo(mTmpPoint.x, mTmpPoint.y);
                 adapter = new LocalAnimationAdapter(
                         new WindowChangeAnimationSpec(mTransitStartRect, mTmpRect,
-                                getDisplayContent().getDisplayInfo(), duration,
+                                getDisplayContent().getDisplayInfo(), durationScale,
                                 true /* isAppAnimation */, false /* isThumbnail */),
                         mWmService.mSurfaceAnimationRunner);
                 if (mThumbnail != null) {
                     thumbnailAdapter = new LocalAnimationAdapter(
                             new WindowChangeAnimationSpec(mTransitStartRect, mTmpRect,
-                                    getDisplayContent().getDisplayInfo(), duration,
+                                    getDisplayContent().getDisplayInfo(), durationScale,
                                     true /* isAppAnimation */, true /* isThumbnail */),
                             mWmService.mSurfaceAnimationRunner);
                 }

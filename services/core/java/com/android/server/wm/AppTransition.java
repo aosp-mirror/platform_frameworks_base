@@ -29,6 +29,7 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPE
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
@@ -1662,6 +1663,15 @@ public class AppTransition implements Dump {
                     "applyAnimation NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS:"
                             + " anim=" + a + " transit=" + appTransitionToString(transit)
                             + " isEntrance=true" + " Callers=" + Debug.getCallers(3));
+        } else if (transit == TRANSIT_TASK_CHANGE_WINDOWING_MODE) {
+            // In the absence of a specific adapter, we just want to keep everything stationary.
+            a = new AlphaAnimation(1.f, 1.f);
+            a.setDuration(WindowChangeAnimationSpec.ANIMATION_DURATION);
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
+                Slog.v(TAG, "applyAnimation:"
+                        + " anim=" + a + " transit=" + appTransitionToString(transit)
+                        + " isEntrance=" + enter + " Callers=" + Debug.getCallers(3));
+            }
         } else {
             int animAttr = 0;
             switch (transit) {
