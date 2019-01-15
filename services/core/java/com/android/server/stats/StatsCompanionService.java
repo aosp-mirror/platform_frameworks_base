@@ -2058,6 +2058,17 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         mContext.unregisterReceiver(mShutdownEventReceiver);
         cancelAnomalyAlarm();
         cancelPullingAlarm();
+
+        BinderCallsStatsService.Internal binderStats =
+                LocalServices.getService(BinderCallsStatsService.Internal.class);
+        if (binderStats != null) {
+            binderStats.reset();
+        }
+
+        LooperStats looperStats = LocalServices.getService(LooperStats.class);
+        if (looperStats != null) {
+            looperStats.reset();
+        }
     }
 
     @Override
