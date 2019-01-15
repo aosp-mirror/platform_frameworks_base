@@ -977,6 +977,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             ensureRollbackDataLoadedLocked();
                             mAvailableRollbacks.add(data);
                         }
+
+                        scheduleExpiration(ROLLBACK_LIFETIME_DURATION_MILLIS);
                     } catch (IOException e) {
                         Log.e(TAG, "Unable to enable rollback", e);
                         removeFile(data.backupDir);
