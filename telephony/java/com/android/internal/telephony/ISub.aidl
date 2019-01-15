@@ -162,7 +162,7 @@ interface ISub {
      * @param subId the unique SubscriptionInfo index in database
      * @return the number of records updated
      */
-    int setOpportunistic(boolean opportunistic, int subId);
+    int setOpportunistic(boolean opportunistic, int subId, String callingPackage);
 
     /**
      * Inform SubscriptionManager that subscriptions in the list are bundled
@@ -190,7 +190,7 @@ interface ISub {
      * @param subId the unique SubscriptionInfo index in database
      * @return the number of records updated
      */
-    int setMetered(boolean isMetered, int subId);
+    int setMetered(boolean isMetered, int subId, String callingPackage);
 
     /**
      * Set which subscription is preferred for cellular data. It's

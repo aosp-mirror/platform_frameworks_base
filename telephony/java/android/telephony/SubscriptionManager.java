@@ -583,7 +583,6 @@ public class SubscriptionManager {
      * TelephonyProvider column name for whether a subscription is opportunistic, that is,
      * whether the network it connects to is limited in functionality or coverage.
      * For example, CBRS.
-     * IS_EMBEDDED should always be true.
      * <p>Type: INTEGER (int), 1 for opportunistic or 0 for non-opportunistic.
      * @hide
      */
@@ -2521,18 +2520,32 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set opportunistic by simInfo index
+     * Set whether a subscription is opportunistic, that is, whether the network it connects
+     * to has limited coverage. For example, CBRS. Setting a subscription opportunistic has
+     * following impacts:
+     *  1) Even if it's active, it will be dormant most of the time. The modem will not try
+     *     to scan or camp until it knows an available network is nearby to save power.
+     *  2) Telephony relies on system app or carrier input to notify nearby available networks.
+     *     See {@link TelephonyManager#updateAvailableNetworks(List)} for more information.
+     *  3) In multi-SIM devices, when the network is nearby and camped, system may automatically
+     *     switch internet data between it and default data subscription, based on carrier
+     *     recommendation and its signal strength and metered-ness, etc.
+     *
+     *
+     * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE} or carrier
+     * privilege permission of the subscription.
      *
      * @param opportunistic whether it’s opportunistic subscription.
      * @param subId the unique SubscriptionInfo index in database
-     * @return the number of records updated
-     * @hide
+     * @return {@code true} if the operation is succeed, {@code false} otherwise.
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public int setOpportunistic(boolean opportunistic, int subId) {
+    public boolean setOpportunistic(boolean opportunistic, int subId) {
         if (VDBG) logd("[setOpportunistic]+ opportunistic:" + opportunistic + " subId:" + subId);
         return setSubscriptionPropertyHelper(subId, "setOpportunistic",
-                (iSub)-> iSub.setOpportunistic(opportunistic, subId));
+                (iSub)-> iSub.setOpportunistic(
+                        opportunistic, subId, mContext.getOpPackageName())) == 1;
     }
 
     /**
@@ -2652,18 +2665,26 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set metered by simInfo index
+     * Set if a subscription is metered or not. Similar to Wi-Fi, metered means
+     * user may be charged more if more data is used.
+     *
+     * By default all Cellular networks are considered metered. System or carrier privileged apps
+     * can set a subscription un-metered which will be considered when system switches data between
+     * primary subscription and opportunistic subscription.
+     *
+     * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE} or carrier
+     * privilege permission of the subscription.
      *
      * @param isMetered whether it’s a metered subscription.
      * @param subId the unique SubscriptionInfo index in database
-     * @return the number of records updated
-     * @hide
+     * @return {@code true} if the operation is succeed, {@code false} otherwise.
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public int setMetered(boolean isMetered, int subId) {
+    public boolean setMetered(boolean isMetered, int subId) {
         if (VDBG) logd("[setIsMetered]+ isMetered:" + isMetered + " subId:" + subId);
         return setSubscriptionPropertyHelper(subId, "setIsMetered",
-                (iSub)-> iSub.setMetered(isMetered, subId));
+                (iSub)-> iSub.setMetered(isMetered, subId, mContext.getOpPackageName())) == 1;
     }
 
     /**
