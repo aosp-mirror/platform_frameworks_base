@@ -1833,6 +1833,37 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.REVIEW_PERMISSIONS";
 
     /**
+     * Activity action: Launch UI to manage a default app.
+     * <p>
+     * Input: {@link #EXTRA_ROLE_NAME} specifies the role of the default app which will be managed
+     * by the launched UI.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_MANAGE_DEFAULT_APP =
+            "android.intent.action.MANAGE_DEFAULT_APP";
+
+    /**
+     * Intent extra: A role name.
+     * <p>
+     * Type: String
+     * </p>
+     *
+     * @see android.app.role.RoleManager
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
+
+    /**
      * Activity action: Launch UI to manage special app accesses.
      * <p>
      * Input: Nothing.
