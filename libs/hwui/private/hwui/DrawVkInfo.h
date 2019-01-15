@@ -52,17 +52,8 @@ struct DrawVkInfo {
     // Input: Format of the destination surface.
     VkFormat format;
 
-    // Input: Color space transfer params
-    float g;
-    float a;
-    float b;
-    float c;
-    float d;
-    float e;
-    float f;
-
-    // Input: Color space transformation from linear RGB to D50-adapted XYZ
-    float colorSpaceTransform[9];
+    // Input: Color space
+    const SkColorSpace* colorSpaceInfo;
 
     // Input: current clip rect
     int clipLeft;
