@@ -7407,6 +7407,22 @@ public final class Settings {
         private static final Validator DOZE_WAKE_SCREEN_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Gesture that skips media.
+         * @hide
+         */
+        public static final String SKIP_GESTURE = "skip_gesture";
+
+        private static final Validator SKIP_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
+         * Gesture that silences sound (alarms, notification, calls).
+         * @hide
+         */
+        public static final String SILENCE_GESTURE = "silence_gesture";
+
+        private static final Validator SILENCE_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * The current night mode that has been selected by the user.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
@@ -8483,6 +8499,8 @@ public final class Settings {
             NOTIFICATION_NEW_INTERRUPTION_MODEL,
             TRUST_AGENTS_EXTEND_UNLOCK,
             LOCK_SCREEN_WHEN_TRUST_LOST,
+            SKIP_GESTURE,
+            SILENCE_GESTURE,
         };
 
         /**
@@ -8650,6 +8668,8 @@ public final class Settings {
             VALIDATORS.put(TRUST_AGENTS_EXTEND_UNLOCK, TRUST_AGENTS_EXTEND_UNLOCK_VALIDATOR);
             VALIDATORS.put(LOCK_SCREEN_CUSTOM_CLOCK_FACE, LOCK_SCREEN_CUSTOM_CLOCK_FACE_VALIDATOR);
             VALIDATORS.put(LOCK_SCREEN_WHEN_TRUST_LOST, LOCK_SCREEN_WHEN_TRUST_LOST_VALIDATOR);
+            VALIDATORS.put(SKIP_GESTURE, SKIP_GESTURE_VALIDATOR);
+            VALIDATORS.put(SILENCE_GESTURE, SILENCE_GESTURE_VALIDATOR);
         }
 
         /**
