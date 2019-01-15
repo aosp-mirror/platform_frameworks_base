@@ -929,9 +929,6 @@
          in hardware. -->
     <bool name="config_setColorTransformAccelerated">false</bool>
 
-    <!-- Boolean indicating whether display white balance is supported. -->
-    <bool name="config_displayWhiteBalanceAvailable">false</bool>
-
     <!-- Control whether Night display is available. This should only be enabled on devices
          that have a HWC implementation that can apply the matrix passed to setColorTransform
          without impacting power, performance, and app compatibility (e.g. protected content). -->
@@ -985,6 +982,44 @@
         <!-- B a-coefficient --> <item>-0.0000000189359041</item>
         <!-- B b-coefficient --> <item>0.000302412211</item>
         <!-- B y-intercept --> <item>-0.198650895</item>
+    </string-array>
+
+    <!-- Boolean indicating whether display white balance is supported. -->
+    <bool name="config_displayWhiteBalanceAvailable">false</bool>
+
+    <!-- Minimum color temperature, in Kelvin, supported by display white balance. -->
+    <integer name="config_displayWhiteBalanceColorTemperatureMin">4000</integer>
+
+    <!-- Maximum color temperature, in Kelvin, supported by display white balance. -->
+    <integer name="config_displayWhiteBalanceColorTemperatureMax">8000</integer>
+
+    <!-- Default color temperature, in Kelvin, used by display white balance. -->
+    <integer name="config_displayWhiteBalanceColorTemperatureDefault">6500</integer>
+
+    <!-- The display primaries, in CIE1931 XYZ color space, for display
+         white balance to use in its calculations. -->
+    <string-array name="config_displayWhiteBalanceDisplayPrimaries">
+        <!-- Red X -->   <item>0.412315</item>
+        <!-- Red Y -->   <item>0.212600</item>
+        <!-- Red Z -->   <item>0.019327</item>
+        <!-- Green X --> <item>0.357600</item>
+        <!-- Green Y --> <item>0.715200</item>
+        <!-- Green Z --> <item>0.119200</item>
+        <!-- Blue X -->  <item>0.180500</item>
+        <!-- Blue Y -->  <item>0.072200</item>
+        <!-- Blue Z -->  <item>0.950633</item>
+        <!-- White X --> <item>0.950456</item>
+        <!-- White Y --> <item>1.000000</item>
+        <!-- White Z --> <item>1.089058</item>
+    </string-array>
+
+    <!-- The nominal white coordinates, in CIE1931 XYZ color space, for Display White Balance to
+         use in its calculations. AWB will adapt this white point to the target ambient white
+         point. -->
+    <string-array name="config_displayWhiteBalanceDisplayNominalWhite">
+        <!-- Nominal White X --> <item>0.950456</item>
+        <!-- Nominal White Y --> <item>1.000000</item>
+        <!-- Nominal White Z --> <item>1.089058</item>
     </string-array>
 
 
