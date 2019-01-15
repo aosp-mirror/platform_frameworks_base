@@ -79,9 +79,9 @@ bool CanCompileLayout(ResXMLParser* parser) {
   return visitor.can_compile();
 }
 
-void CompileApkLayouts(const std::string& filename, CompilationTarget target,
-                       std::ostream& target_out) {
-  auto assets = android::ApkAssets::Load(filename);
+namespace {
+void CompileApkAssetsLayouts(const std::unique_ptr<const android::ApkAssets>& assets,
+                             CompilationTarget target, std::ostream& target_out) {
   android::AssetManager2 resources;
   resources.SetApkAssets({assets.get()});
 
@@ -154,6 +154,21 @@ void CompileApkLayouts(const std::string& filename, CompilationTarget target,
     slicer::MemView image{dex_file.CreateImage()};
     target_out.write(image.ptr<const char>(), image.size());
   }
+}
+}  // namespace
+
+void CompileApkLayouts(const std::string& filename, CompilationTarget target,
+                       std::ostream& target_out) {
+  auto assets = android::ApkAssets::Load(filename);
+  CompileApkAssetsLayouts(assets, target, target_out);
+}
+
+void CompileApkLayoutsFd(android::base::unique_fd fd, CompilationTarget target,
+                         std::ostream& target_out) {
+  constexpr const char* friendly_name{"viewcompiler assets"};
+  auto assets = android::ApkAssets::LoadFromFd(
+      std::move(fd), friendly_name, /*system=*/false, /*force_shared_lib=*/false);
+  CompileApkAssetsLayouts(assets, target, target_out);
 }
 
 }  // namespace startop

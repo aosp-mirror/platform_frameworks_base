@@ -19,12 +19,16 @@
 
 #include <string>
 
+#include "android-base/unique_fd.h"
+
 namespace startop {
 
 enum class CompilationTarget { kJavaLanguage, kDex };
 
 void CompileApkLayouts(const std::string& filename, CompilationTarget target,
                        std::ostream& target_out);
+void CompileApkLayoutsFd(android::base::unique_fd fd, CompilationTarget target,
+                         std::ostream& target_out);
 
 }  // namespace startop
 
