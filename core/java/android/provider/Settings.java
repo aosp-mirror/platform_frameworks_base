@@ -12138,6 +12138,13 @@ public final class Settings {
                 "angle_gl_driver_selection_values";
 
         /**
+         * List of package names that should check ANGLE rules
+         * @hide
+         */
+        public static final String GLOBAL_SETTINGS_ANGLE_WHITELIST =
+                "angle_whitelist";
+
+        /**
          * Game Update Package global preference for all Apps.
          * 0 = Default
          * 1 = All Apps use Game Update Package
