@@ -24,7 +24,7 @@ class MediaConstants {
     static final String KEY_PACKAGE_NAME = "android.media.key.PACKAGE_NAME";
 
     // Bundle key for Parcelable
-    static final String KEY_SESSION2_STUB = "android.media.key.SESSION2_STUB";
+    static final String KEY_SESSION2LINK = "android.media.key.SESSION2LINK";
     static final String KEY_ALLOWED_COMMANDS = "android.media.key.ALLOWED_COMMANDS";
 
     private MediaConstants() {
