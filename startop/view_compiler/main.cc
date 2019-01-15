@@ -49,6 +49,7 @@ constexpr char kStdoutFilename[]{"stdout"};
 
 DEFINE_bool(apk, false, "Compile layouts in an APK");
 DEFINE_bool(dex, false, "Generate a DEX file instead of Java");
+DEFINE_int32(infd, -1, "Read input from the given file descriptor");
 DEFINE_string(out, kStdoutFilename, "Where to write the generated class");
 DEFINE_string(package, "", "The package name for the generated class (required)");
 
@@ -95,7 +96,7 @@ void CompileLayout(XMLDocument* xml, Builder* builder) {
 int main(int argc, char** argv) {
   constexpr size_t kProgramName = 0;
   constexpr size_t kFileNameParam = 1;
-  constexpr size_t kNumRequiredArgs = 2;
+  constexpr size_t kNumRequiredArgs = 1;
 
   gflags::SetUsageMessage(
       "Compile XML layout files into equivalent Java language code\n"
@@ -104,12 +105,11 @@ int main(int argc, char** argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, /*remove_flags*/ true);
 
   gflags::CommandLineFlagInfo cmd = gflags::GetCommandLineFlagInfoOrDie("package");
-  if (argc != kNumRequiredArgs || cmd.is_default) {
+  if (argc < kNumRequiredArgs || cmd.is_default) {
     gflags::ShowUsageWithFlags(argv[kProgramName]);
     return 1;
   }
 
-  const char* const filename = argv[kFileNameParam];
   const bool is_stdout = FLAGS_out == kStdoutFilename;
 
   std::ofstream outfile;
@@ -118,13 +118,23 @@ int main(int argc, char** argv) {
   }
 
   if (FLAGS_apk) {
-    startop::CompileApkLayouts(
-        filename,
-        FLAGS_dex ? startop::CompilationTarget::kDex : startop::CompilationTarget::kJavaLanguage,
-        is_stdout ? std::cout : outfile);
+    const startop::CompilationTarget target =
+        FLAGS_dex ? startop::CompilationTarget::kDex : startop::CompilationTarget::kJavaLanguage;
+    if (FLAGS_infd >= 0) {
+      startop::CompileApkLayoutsFd(
+          android::base::unique_fd{FLAGS_infd}, target, is_stdout ? std::cout : outfile);
+    } else {
+      if (argc < 2) {
+        gflags::ShowUsageWithFlags(argv[kProgramName]);
+        return 1;
+      }
+      const char* const filename = argv[kFileNameParam];
+      startop::CompileApkLayouts(filename, target, is_stdout ? std::cout : outfile);
+    }
     return 0;
   }
 
+  const char* const filename = argv[kFileNameParam];
   const string layout_name = startop::util::FindLayoutNameFromFilename(filename);
 
   XMLDocument xml;
