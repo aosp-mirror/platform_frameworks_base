@@ -792,6 +792,16 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    private void setVirtualDisplayStateInternal(IBinder appToken, boolean isOn) {
+        synchronized (mSyncRoot) {
+            if (mVirtualDisplayAdapter == null) {
+                return;
+            }
+
+            mVirtualDisplayAdapter.setVirtualDisplayStateLocked(appToken, isOn);
+        }
+    }
+
     private void registerDefaultDisplayAdapters() {
         // Register default display adapters.
         synchronized (mSyncRoot) {
@@ -1924,6 +1934,16 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 releaseVirtualDisplayInternal(callback.asBinder());
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setVirtualDisplayState(IVirtualDisplayCallback callback, boolean isOn) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setVirtualDisplayStateInternal(callback.asBinder(), isOn);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

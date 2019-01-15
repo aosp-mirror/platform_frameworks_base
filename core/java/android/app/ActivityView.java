@@ -16,6 +16,10 @@
 
 package android.app;
 
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager.StackInfo;
@@ -32,7 +36,6 @@ import android.util.Log;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceSession;
@@ -82,7 +85,6 @@ public class ActivityView extends ViewGroup {
     private boolean mOpened; // Protected by mGuard.
 
     private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
-    private Surface mTmpSurface = new Surface();
 
     /** The ActivityView is only allowed to contain one task. */
     private final boolean mSingleTaskInstance;
@@ -319,20 +321,20 @@ public class ActivityView extends ViewGroup {
     private class SurfaceCallback implements SurfaceHolder.Callback {
         @Override
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
-            mTmpSurface = new Surface();
             if (mVirtualDisplay == null) {
                 initVirtualDisplay(new SurfaceSession());
                 if (mVirtualDisplay != null && mActivityViewCallback != null) {
                     mActivityViewCallback.onActivityViewReady(ActivityView.this);
                 }
             } else {
-                // TODO (b/119209373): DisplayManager determines if a VirtualDisplay is on by
-                // whether it has a surface. Setting a fake surface here so DisplayManager will
-                // consider this display on.
-                mVirtualDisplay.setSurface(mTmpSurface);
                 mTmpTransaction.reparent(mRootSurfaceControl,
                         mSurfaceView.getSurfaceControl().getHandle()).apply();
             }
+
+            if (mVirtualDisplay != null) {
+                mVirtualDisplay.setDisplayState(true);
+            }
+
             updateLocation();
         }
 
@@ -346,10 +348,8 @@ public class ActivityView extends ViewGroup {
 
         @Override
         public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-            mTmpSurface.release();
-            mTmpSurface = null;
             if (mVirtualDisplay != null) {
-                mVirtualDisplay.setSurface(null);
+                mVirtualDisplay.setDisplayState(false);
             }
             cleanTapExcludeRegion();
         }
@@ -370,15 +370,11 @@ public class ActivityView extends ViewGroup {
         final int height = mSurfaceView.getHeight();
         final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
 
-        // TODO (b/119209373): DisplayManager determines if a VirtualDisplay is on by
-        // whether it has a surface. Setting a fake surface here so DisplayManager will consider
-        // this display on.
         mVirtualDisplay = displayManager.createVirtualDisplay(
-                DISPLAY_NAME + "@" + System.identityHashCode(this),
-                width, height, getBaseDisplayDensity(), mTmpSurface,
-                DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
-                        | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
-                        | DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL);
+                DISPLAY_NAME + "@" + System.identityHashCode(this), width, height,
+                getBaseDisplayDensity(), null,
+                VIRTUAL_DISPLAY_FLAG_PUBLIC | VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+                        | VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL);
         if (mVirtualDisplay == null) {
             Log.e(TAG, "Failed to initialize ActivityView");
             return;
@@ -441,11 +437,6 @@ public class ActivityView extends ViewGroup {
             displayReleased = true;
         } else {
             displayReleased = false;
-        }
-
-        if (mTmpSurface != null) {
-            mTmpSurface.release();
-            mTmpSurface = null;
         }
 
         if (displayReleased && mActivityViewCallback != null) {

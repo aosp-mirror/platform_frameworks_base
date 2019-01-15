@@ -147,6 +147,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         return device;
     }
 
+    void setVirtualDisplayStateLocked(IBinder appToken, boolean isOn) {
+        VirtualDisplayDevice device = mVirtualDisplayDevices.get(appToken);
+        if (device != null) {
+            device.setDisplayState(isOn);
+        }
+    }
+
     /**
      * Returns the next unique index for the uniqueIdPrefix
      */
@@ -206,6 +213,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private int mPendingChanges;
         private int mUniqueIndex;
         private Display.Mode mMode;
+        private boolean mIsDisplayOn;
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName,
@@ -226,6 +234,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mDisplayState = Display.STATE_UNKNOWN;
             mPendingChanges |= PENDING_SURFACE_CHANGE;
             mUniqueIndex = uniqueIndex;
+            mIsDisplayOn = surface != null;
         }
 
         @Override
@@ -304,6 +313,14 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             }
         }
 
+        void setDisplayState(boolean isOn) {
+            if (mIsDisplayOn != isOn) {
+                mIsDisplayOn = isOn;
+                mInfo = null;
+                sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
+            }
+        }
+
         public void stopLocked() {
             setSurfaceLocked(null);
             mStopped = true;
@@ -375,7 +392,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.type = Display.TYPE_VIRTUAL;
                 mInfo.touch = ((mFlags & VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH) == 0) ?
                         DisplayDeviceInfo.TOUCH_NONE : DisplayDeviceInfo.TOUCH_VIRTUAL;
-                mInfo.state = mSurface != null ? Display.STATE_ON : Display.STATE_OFF;
+
+                mInfo.state = mIsDisplayOn ? Display.STATE_ON : Display.STATE_OFF;
+
                 mInfo.ownerUid = mOwnerUid;
                 mInfo.ownerPackageName = mOwnerPackageName;
             }
