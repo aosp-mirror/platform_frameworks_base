@@ -335,7 +335,7 @@ public class EuiccManager {
         }
         try {
             getIEuiccController().downloadSubscription(subscription, switchAfterDownload,
-                    mContext.getOpPackageName(), callbackIntent);
+                    mContext.getOpPackageName(), null /* resolvedBundle */, callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

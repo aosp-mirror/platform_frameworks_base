@@ -4435,6 +4435,16 @@ package android.service.carrier {
 
 package android.service.euicc {
 
+  public final class DownloadSubscriptionResult implements android.os.Parcelable {
+    ctor public DownloadSubscriptionResult(int, int, int);
+    method public int describeContents();
+    method public int getCardId();
+    method public int getResolvableErrors();
+    method public int getResult();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.euicc.DownloadSubscriptionResult> CREATOR;
+  }
+
   public final class EuiccProfileInfo implements android.os.Parcelable {
     method public int describeContents();
     method public android.service.carrier.CarrierIdentifier getCarrierIdentifier();
@@ -4488,7 +4498,8 @@ package android.service.euicc {
     ctor public EuiccService();
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract int onDeleteSubscription(int, java.lang.String);
-    method public abstract int onDownloadSubscription(int, android.telephony.euicc.DownloadableSubscription, boolean, boolean);
+    method public abstract android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, android.telephony.euicc.DownloadableSubscription, boolean, boolean, android.os.Bundle);
+    method public deprecated int onDownloadSubscription(int, android.telephony.euicc.DownloadableSubscription, boolean, boolean);
     method public abstract int onEraseSubscriptions(int);
     method public abstract android.service.euicc.GetDefaultDownloadableSubscriptionListResult onGetDefaultDownloadableSubscriptionList(int, boolean);
     method public abstract android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, android.telephony.euicc.DownloadableSubscription, boolean);
@@ -4502,19 +4513,25 @@ package android.service.euicc {
     method public abstract int onUpdateSubscriptionNickname(int, java.lang.String, java.lang.String);
     field public static final java.lang.String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS = "android.service.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
     field public static final java.lang.String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION = "android.service.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
-    field public static final java.lang.String ACTION_RESOLVE_CONFIRMATION_CODE = "android.service.euicc.action.RESOLVE_CONFIRMATION_CODE";
+    field public static final deprecated java.lang.String ACTION_RESOLVE_CONFIRMATION_CODE = "android.service.euicc.action.RESOLVE_CONFIRMATION_CODE";
     field public static final java.lang.String ACTION_RESOLVE_DEACTIVATE_SIM = "android.service.euicc.action.RESOLVE_DEACTIVATE_SIM";
     field public static final java.lang.String ACTION_RESOLVE_NO_PRIVILEGES = "android.service.euicc.action.RESOLVE_NO_PRIVILEGES";
+    field public static final java.lang.String ACTION_RESOLVE_RESOLVABLE_ERRORS = "android.service.euicc.action.RESOLVE_RESOLVABLE_ERRORS";
     field public static final java.lang.String CATEGORY_EUICC_UI = "android.service.euicc.category.EUICC_UI";
     field public static final java.lang.String EUICC_SERVICE_INTERFACE = "android.service.euicc.EuiccService";
+    field public static final java.lang.String EXTRA_RESOLUTION_ALLOW_POLICY_RULES = "android.service.euicc.extra.RESOLUTION_ALLOW_POLICY_RULES";
     field public static final java.lang.String EXTRA_RESOLUTION_CALLING_PACKAGE = "android.service.euicc.extra.RESOLUTION_CALLING_PACKAGE";
     field public static final java.lang.String EXTRA_RESOLUTION_CONFIRMATION_CODE = "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE";
     field public static final java.lang.String EXTRA_RESOLUTION_CONFIRMATION_CODE_RETRIED = "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE_RETRIED";
     field public static final java.lang.String EXTRA_RESOLUTION_CONSENT = "android.service.euicc.extra.RESOLUTION_CONSENT";
+    field public static final java.lang.String EXTRA_RESOLVABLE_ERRORS = "android.service.euicc.extra.RESOLVABLE_ERRORS";
+    field public static final int RESOLVABLE_ERROR_CONFIRMATION_CODE = 1; // 0x1
+    field public static final int RESOLVABLE_ERROR_POLICY_RULES = 2; // 0x2
     field public static final int RESULT_FIRST_USER = 1; // 0x1
     field public static final int RESULT_MUST_DEACTIVATE_SIM = -1; // 0xffffffff
-    field public static final int RESULT_NEED_CONFIRMATION_CODE = -2; // 0xfffffffe
+    field public static final deprecated int RESULT_NEED_CONFIRMATION_CODE = -2; // 0xfffffffe
     field public static final int RESULT_OK = 0; // 0x0
+    field public static final int RESULT_RESOLVABLE_ERRORS = -2; // 0xfffffffe
   }
 
   public static abstract class EuiccService.OtaStatusChangedCallback {

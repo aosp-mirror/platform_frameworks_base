@@ -1499,7 +1499,6 @@ Landroid/service/dreams/IDreamManager;->getDreamComponents()[Landroid/content/Co
 Landroid/service/dreams/IDreamManager;->isDreaming()Z
 Landroid/service/dreams/IDreamManager;->setDreamComponents([Landroid/content/ComponentName;)V
 Landroid/service/euicc/IDeleteSubscriptionCallback;->onComplete(I)V
-Landroid/service/euicc/IDownloadSubscriptionCallback;->onComplete(I)V
 Landroid/service/euicc/IEraseSubscriptionsCallback;->onComplete(I)V
 Landroid/service/euicc/IEuiccService$Stub;-><init>()V
 Landroid/service/euicc/IGetDefaultDownloadableSubscriptionListCallback;->onComplete(Landroid/service/euicc/GetDefaultDownloadableSubscriptionListResult;)V
