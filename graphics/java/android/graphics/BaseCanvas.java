@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas.VertexMode;
+import android.graphics.text.MeasuredText;
 import android.text.GraphicsOperations;
 import android.text.MeasuredParagraph;
 import android.text.PrecomputedText;
@@ -554,14 +555,12 @@ public abstract class BaseCanvas {
                     final int paraStart = pt.getParagraphStart(paraIndex);
                     final MeasuredParagraph mp = pt.getMeasuredParagraph(paraIndex);
                     // Only support the text in the same paragraph.
-                    nDrawTextRun(mNativeCanvasWrapper,
-                            mp.getChars(),
-                            start - paraStart,
-                            end - start,
-                            contextStart - paraStart,
-                            contextEnd - contextStart,
-                            x, y, isRtl, paint.getNativeInstance(),
-                            mp.getMeasuredText().getNativePtr());
+                    drawTextRun(mp.getMeasuredText(),
+                                start - paraStart,
+                                end - paraStart,
+                                contextStart - paraStart,
+                                contextEnd - paraStart,
+                                x, y, isRtl, paint);
                     return;
                 }
             }
@@ -574,6 +573,14 @@ public abstract class BaseCanvas {
                     0 /* measured paragraph pointer */);
             TemporaryBuffer.recycle(buf);
         }
+    }
+
+    public void drawTextRun(@NonNull MeasuredText measuredText, int start, int end,
+            int contextStart, int contextEnd, float x, float y, boolean isRtl,
+            @NonNull Paint paint) {
+        nDrawTextRun(mNativeCanvasWrapper, measuredText.getChars(), start, end - start,
+                contextStart, contextEnd - contextStart, x, y, isRtl, paint.getNativeInstance(),
+                measuredText.getNativePtr());
     }
 
     public void drawVertices(@NonNull VertexMode mode, int vertexCount, @NonNull float[] verts,
