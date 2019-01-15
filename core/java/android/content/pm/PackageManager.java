@@ -5555,26 +5555,24 @@ public abstract class PackageManager {
     }
 
     /**
-     * @deprecated This function no longer does anything; it was an old
-     * approach to managing preferred activities, which has been superseded
-     * by (and conflicts with) the modern activity-based preferences.
+     * @deprecated This function no longer does anything. It is the platform's
+     * responsibility to assign preferred activities and this cannot be modified
+     * directly. To determine the activities resolved by the platform, use
+     * {@link #resolveActivity} or {@link #queryIntentActivities}.
      */
     @Deprecated
     public abstract void addPackageToPreferred(String packageName);
 
     /**
-     * @deprecated This function no longer does anything; it was an old
-     * approach to managing preferred activities, which has been superseded
-     * by (and conflicts with) the modern activity-based preferences.
+     * @deprecated This function no longer does anything. It is the platform's
+     * responsibility to assign preferred activities and this cannot be modified
+     * directly. To determine the activities resolved by the platform, use
+     * {@link #resolveActivity} or {@link #queryIntentActivities}.
      */
     @Deprecated
     public abstract void removePackageFromPreferred(String packageName);
 
     /**
-     * @deprecated This function no longer does anything; it was an old
-     * approach to managing preferred activities, which has been superseded
-     * by (and conflicts with) the modern activity-based preferences.
-     *
      * Retrieve the list of all currently configured preferred packages. The
      * first package on the list is the most preferred, the last is the least
      * preferred.
@@ -5582,15 +5580,16 @@ public abstract class PackageManager {
      * @param flags Additional option flags to modify the data returned.
      * @return A List of PackageInfo objects, one for each preferred
      *         application, in order of preference.
+     *
+     * @deprecated This function no longer does anything. It is the platform's
+     * responsibility to assign preferred activities and this cannot be modified
+     * directly. To determine the activities resolved by the platform, use
+     * {@link #resolveActivity} or {@link #queryIntentActivities}.
      */
     @Deprecated
     public abstract List<PackageInfo> getPreferredPackages(@PackageInfoFlags int flags);
 
     /**
-     * @deprecated This is a protected API that should not have been available
-     * to third party applications.  It is the platform's responsibility for
-     * assigning preferred activities and this cannot be directly modified.
-     *
      * Add a new preferred activity mapping to the system.  This will be used
      * to automatically select the given activity component when
      * {@link Context#startActivity(Intent) Context.startActivity()} finds
@@ -5604,20 +5603,26 @@ public abstract class PackageManager {
      * this preference was made.
      * @param activity The component name of the activity that is to be
      * preferred.
+     *
+     * @deprecated This function no longer does anything. It is the platform's
+     * responsibility to assign preferred activities and this cannot be modified
+     * directly. To determine the activities resolved by the platform, use
+     * {@link #resolveActivity} or {@link #queryIntentActivities}.
      */
     @Deprecated
     public abstract void addPreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity);
 
     /**
-     * @deprecated This is a protected API that should not have been available
-     * to third party applications.  It is the platform's responsibility for
-     * assigning preferred activities and this cannot be directly modified.
-     *
      * Same as {@link #addPreferredActivity(IntentFilter, int,
             ComponentName[], ComponentName)}, but with a specific userId to apply the preference
             to.
      * @hide
+     *
+     * @deprecated This function no longer does anything. It is the platform's
+     * responsibility to assign preferred activities and this cannot be modified
+     * directly. To determine the activities resolved by the platform, use
+     * {@link #resolveActivity} or {@link #queryIntentActivities}.
      */
     @Deprecated
     @UnsupportedAppUsage
@@ -5627,10 +5632,6 @@ public abstract class PackageManager {
     }
 
     /**
-     * @deprecated This is a protected API that should not have been available
-     * to third party applications.  It is the platform's responsibility for
-     * assigning preferred activities and this cannot be directly modified.
-     *
      * Replaces an existing preferred activity mapping to the system, and if that were not present
      * adds a new preferred activity.  This will be used
      * to automatically select the given activity component when
@@ -5645,7 +5646,13 @@ public abstract class PackageManager {
      * this preference was made.
      * @param activity The component name of the activity that is to be
      * preferred.
+     *
      * @hide
+     *
+     * @deprecated This function no longer does anything. It is the platform's
+     * responsibility to assign preferred activities and this cannot be modified
+     * directly. To determine the activities resolved by the platform, use
+     * {@link #resolveActivity} or {@link #queryIntentActivities}.
      */
     @Deprecated
     @UnsupportedAppUsage
@@ -5653,10 +5660,6 @@ public abstract class PackageManager {
             ComponentName[] set, ComponentName activity);
 
     /**
-     * @deprecated This is a protected API that should not have been available
-     * to third party applications.  It is the platform's responsibility for
-     * assigning preferred activities and this cannot be directly modified.
-     *
      * Replaces an existing preferred activity mapping to the system, and if that were not present
      * adds a new preferred activity.  This will be used to automatically select the given activity
      * component when {@link Context#startActivity(Intent) Context.startActivity()} finds multiple
@@ -5671,6 +5674,11 @@ public abstract class PackageManager {
      * @param activity The component name of the activity that is to be preferred.
      *
      * @hide
+     *
+     * @deprecated This function no longer does anything. It is the platform's
+     * responsibility to assign preferred activities and this cannot be modified
+     * directly. To determine the activities resolved by the platform, use
+     * {@link #resolveActivity} or {@link #queryIntentActivities}.
      */
     @Deprecated
     @SystemApi
@@ -5681,6 +5689,11 @@ public abstract class PackageManager {
 
     /**
      * @hide
+     *
+     * @deprecated This function no longer does anything. It is the platform's
+     * responsibility to assign preferred activities and this cannot be modified
+     * directly. To determine the activities resolved by the platform, use
+     * {@link #resolveActivity} or {@link #queryIntentActivities}.
      */
     @Deprecated
     @UnsupportedAppUsage
@@ -5690,10 +5703,6 @@ public abstract class PackageManager {
     }
 
     /**
-     * @deprecated This function no longer does anything; it was an old
-     * approach to managing preferred activities, which has been superseded
-     * by (and conflicts with) the modern activity-based preferences.
-     *
      * Remove all preferred activity mappings, previously added with
      * {@link #addPreferredActivity}, from the
      * system whose activities are implemented in the given package name.
@@ -5701,15 +5710,16 @@ public abstract class PackageManager {
      *
      * @param packageName The name of the package whose preferred activity
      * mappings are to be removed.
+     *
+     * @deprecated This function no longer does anything. It is the platform's
+     * responsibility to assign preferred activities and this cannot be modified
+     * directly. To determine the activities resolved by the platform, use
+     * {@link #resolveActivity} or {@link #queryIntentActivities}.
      */
     @Deprecated
     public abstract void clearPackagePreferredActivities(String packageName);
 
     /**
-     * @deprecated This function no longer does anything; it was an old
-     * approach to managing preferred activities, which has been superseded
-     * by (and conflicts with) the modern activity-based preferences.
-     *
      * Retrieve all preferred activities, previously added with
      * {@link #addPreferredActivity}, that are
      * currently registered with the system.
@@ -5725,6 +5735,11 @@ public abstract class PackageManager {
      * @return Returns the total number of registered preferred activities
      * (the number of distinct IntentFilter records, not the number of unique
      * activity components) that were found.
+     *
+     * @deprecated This function no longer does anything. It is the platform's
+     * responsibility to assign preferred activities and this cannot be modified
+     * directly. To determine the activities resolved by the platform, use
+     * {@link #resolveActivity} or {@link #queryIntentActivities}.
      */
     @Deprecated
     public abstract int getPreferredActivities(@NonNull List<IntentFilter> outFilters,
