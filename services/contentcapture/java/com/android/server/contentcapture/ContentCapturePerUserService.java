@@ -17,6 +17,9 @@
 package com.android.server.contentcapture;
 
 import static android.service.contentcapture.ContentCaptureService.setClientState;
+import static android.view.contentcapture.ContentCaptureSession.STATE_DISABLED;
+import static android.view.contentcapture.ContentCaptureSession.STATE_DUPLICATED_ID;
+import static android.view.contentcapture.ContentCaptureSession.STATE_NO_SERVICE;
 
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
@@ -39,7 +42,6 @@ import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
 import android.util.Slog;
-import android.view.contentcapture.ContentCaptureSession;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -165,7 +167,7 @@ final class ContentCapturePerUserService
         if (!isEnabledLocked()) {
             // TODO: it would be better to split in differet reasons, like
             // STATE_DISABLED_NO_SERVICE and STATE_DISABLED_BY_DEVICE_POLICY
-            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_NO_SERVICE,
+            setClientState(clientReceiver, STATE_DISABLED | STATE_NO_SERVICE,
                     /* binder= */ null);
             return;
         }
@@ -184,7 +186,7 @@ final class ContentCapturePerUserService
         if (existingSession != null) {
             Slog.w(TAG, "startSession(id=" + existingSession + ", token=" + activityToken
                     + ": ignoring because it already exists for " + existingSession.mActivityToken);
-            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_DUPLICATED_ID,
+            setClientState(clientReceiver, STATE_DISABLED | STATE_DUPLICATED_ID,
                     /* binder=*/ null);
             return;
         }
@@ -197,8 +199,7 @@ final class ContentCapturePerUserService
             // TODO(b/119613670): log metrics
             Slog.w(TAG, "startSession(id=" + existingSession + ", token=" + activityToken
                     + ": ignoring because service is not set");
-            // TODO(b/111276913): use a new disabled state?
-            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_NO_SERVICE,
+            setClientState(clientReceiver, STATE_DISABLED | STATE_NO_SERVICE,
                     /* binder= */ null);
             return;
         }

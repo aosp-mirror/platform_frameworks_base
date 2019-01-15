@@ -323,20 +323,21 @@ public abstract class ContentCaptureService extends Service {
         mSessionUids.put(sessionId, uid);
         onCreateContentCaptureSession(context, new ContentCaptureSessionId(sessionId));
 
-        final int flags = context.getFlags();
-        if ((flags & ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE) != 0) {
-            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_BY_FLAG_SECURE,
-                    mClientInterface.asBinder());
-            return;
+        final int clientFlags = context.getFlags();
+        int stateFlags = 0;
+        if ((clientFlags & ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE) != 0) {
+            stateFlags |= ContentCaptureSession.STATE_FLAG_SECURE;
         }
-        if ((flags & ContentCaptureContext.FLAG_DISABLED_BY_APP) != 0) {
-            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_BY_APP,
-                    mClientInterface.asBinder());
-            return;
+        if ((clientFlags & ContentCaptureContext.FLAG_DISABLED_BY_APP) != 0) {
+            stateFlags |= ContentCaptureSession.STATE_BY_APP;
         }
+        if (stateFlags == 0) {
+            stateFlags = ContentCaptureSession.STATE_ACTIVE;
+        } else {
+            stateFlags |= ContentCaptureSession.STATE_DISABLED;
 
-        setClientState(clientReceiver, ContentCaptureSession.STATE_ACTIVE,
-                mClientInterface.asBinder());
+        }
+        setClientState(clientReceiver, stateFlags, mClientInterface.asBinder());
     }
 
     private void handleSendEvents(int uid,
