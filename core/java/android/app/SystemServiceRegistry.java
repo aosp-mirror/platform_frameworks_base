@@ -82,11 +82,14 @@ import android.net.ConnectivityThread;
 import android.net.EthernetManager;
 import android.net.IConnectivityManager;
 import android.net.IEthernetManager;
+import android.net.IIpMemoryStore;
 import android.net.IIpSecService;
 import android.net.INetworkPolicyManager;
+import android.net.IpMemoryStore;
 import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
+import android.net.NetworkStack;
 import android.net.NetworkWatchlistManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
@@ -106,6 +109,7 @@ import android.net.wifi.rtt.WifiRttManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
+import android.os.BugreportManager;
 import android.os.Build;
 import android.os.DeviceIdleManager;
 import android.os.DropBoxManager;
@@ -113,6 +117,7 @@ import android.os.HardwarePropertiesManager;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
 import android.os.IDeviceIdleController;
+import android.os.IDumpstate;
 import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
 import android.os.IRecoverySystem;
@@ -143,6 +148,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
+import android.telephony.ims.RcsManager;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -281,6 +287,24 @@ final class SystemServiceRegistry {
                 IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
                 return new ConnectivityManager(context, service);
             }});
+
+        registerService(Context.NETWORK_STACK_SERVICE, NetworkStack.class,
+                new StaticServiceFetcher<NetworkStack>() {
+                    @Override
+                    public NetworkStack createService() {
+                        return new NetworkStack();
+                    }});
+
+        registerService(Context.IP_MEMORY_STORE_SERVICE, IpMemoryStore.class,
+                new CachedServiceFetcher<IpMemoryStore>() {
+                    @Override
+                    public IpMemoryStore createService(final ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.IP_MEMORY_STORE_SERVICE);
+                        IIpMemoryStore service = IIpMemoryStore.Stub.asInterface(b);
+                        return new IpMemoryStore(ctx, service);
+                    }});
 
         registerService(Context.IPSEC_SERVICE, IpSecManager.class,
                 new CachedServiceFetcher<IpSecManager>() {
@@ -513,6 +537,14 @@ final class SystemServiceRegistry {
             public SubscriptionManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 return new SubscriptionManager(ctx.getOuterContext());
             }});
+
+        registerService(Context.TELEPHONY_RCS_SERVICE, RcsManager.class,
+                new CachedServiceFetcher<RcsManager>() {
+                    @Override
+                    public RcsManager createService(ContextImpl ctx) {
+                        return new RcsManager();
+                    }
+                });
 
         registerService(Context.CARRIER_CONFIG_SERVICE, CarrierConfigManager.class,
                 new CachedServiceFetcher<CarrierConfigManager>() {
@@ -941,6 +973,16 @@ final class SystemServiceRegistry {
             public IncidentManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 return new IncidentManager(ctx);
             }});
+
+        registerService(Context.BUGREPORT_SERVICE, BugreportManager.class,
+                new CachedServiceFetcher<BugreportManager>() {
+                    @Override
+                    public BugreportManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(Context.BUGREPORT_SERVICE);
+                        return new BugreportManager(ctx.getOuterContext(),
+                                IDumpstate.Stub.asInterface(b));
+                    }});
 
         registerService(Context.AUTOFILL_MANAGER_SERVICE, AutofillManager.class,
                 new CachedServiceFetcher<AutofillManager>() {

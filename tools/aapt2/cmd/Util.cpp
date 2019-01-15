@@ -19,15 +19,17 @@
 #include <vector>
 
 #include "android-base/logging.h"
+#include "androidfw/ConfigDescription.h"
+#include "androidfw/Locale.h"
 
-#include "ConfigDescription.h"
-#include "Locale.h"
 #include "ResourceUtils.h"
 #include "ValueVisitor.h"
 #include "split/TableSplitter.h"
 #include "util/Maybe.h"
 #include "util/Util.h"
 
+using ::android::ConfigDescription;
+using ::android::LocaleValue;
 using ::android::StringPiece;
 
 namespace aapt {

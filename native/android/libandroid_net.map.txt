@@ -1,10 +1,15 @@
-# These functions have been part of the NDK since API 24.
 # They are also all available to vendor code.
 LIBANDROID_NET {
   global:
+    # These functions have been part of the NDK since API 24.
+    android_getaddrinfofornetwork; # vndk
     android_setsocknetwork; # vndk
     android_setprocnetwork; # vndk
-    android_getaddrinfofornetwork; # vndk
+    # These functions have been part of the NDK since API 29.
+    android_res_cancel; # vndk
+    android_res_nquery; # vndk
+    android_res_nresult; # vndk
+    android_res_nsend; # vndk
   local:
     *;
 };

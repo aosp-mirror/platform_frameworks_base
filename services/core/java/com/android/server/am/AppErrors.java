@@ -484,7 +484,8 @@ class AppErrors {
                                     task.intent, null, null, null, 0, 0,
                                     new SafeActivityOptions(ActivityOptions.makeBasic()),
                                     task.userId, null,
-                                    "AppErrors", false /*validateIncomingUser*/);
+                                    "AppErrors", false /*validateIncomingUser*/,
+                                    null /* originatingPendingIntent */);
                         }
                     }
                 }

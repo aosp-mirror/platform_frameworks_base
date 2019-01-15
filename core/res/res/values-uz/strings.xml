@@ -128,13 +128,17 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Aloqa operatoringiz orqali Wi-Fi chaqiruv funksiyasinini ulashda xato: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Wi-Fi qo‘ng‘iroqlar"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi chaqiruv"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN chaqiruv"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN chaqiruv"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi chaqiruv | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"O‘chiq"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi afzal ko‘rilsin"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobil internet ustivorligi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi afzalligi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobil internet afzalligi"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Faqat Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yo‘naltirilmadi"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -284,7 +288,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun SMS xabarlarni yuborish va ko‘rishga ruxsat berilsinmi?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Xotira"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"qurilmangizdagi surat, multimedia va fayllarga kirish"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun qurilmangizdagi surat, multimedia va fayllarga ruxsat berilsinmi?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ilovasiga qurilmangizdagi surat, multimedia va fayllarga kirish uchun ruxsat berilsinmi?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ovoz yozib olish"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun audio yozib olishga ruxsat berilsinmi?"</string>
@@ -1128,7 +1132,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> jarayoni o‘zi uchun ajratilgan <xliff:g id="SIZE">%2$s</xliff:g> xotira chegarasidan o‘tib ketdi. Ilova dasturchisi bilan ulashishingiz uchun hip-damp ma’lumotlari yig‘ilib qoldi. Ehtiyot bo\'ling: ushbu hip-dampda ilova uchun foydalanishga ruxsat berilgan shaxsiy ma’lumotlaringiz bo‘lishi mumkin."</string>
     <string name="sendText" msgid="5209874571959469142">"Matn uchun amalni tanlash"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Jiringlaganda tovush balandligi"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Multimedia ovozi"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Multimedia tovushi"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth orqali ijro etilmoqda"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Ovozsiz rejim tanlandi"</string>
     <string name="volume_call" msgid="3941680041282788711">"Suhbat vaqtidagi tovush balandligi"</string>
@@ -1139,7 +1143,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth tovushi"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Rington balandligi"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Qo‘ng‘iroq tovushi balandligi"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Multimedia ovozi"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Multimedia tovushi"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Eslatma tovushi"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standart rington"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Standart (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tarmoqda internet aloqasi yo‘q"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Variantlarni ko‘rsatish uchun bosing"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Hotspot sozlamalari o‘zgartirildi"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Hotspot chastotasi o‘zgartirildi."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Qurilma faqat 5 GGs chastotada ishlay olmaydi. Bu chastotadan imkoniyatga qarab foydalaniladi."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> tarmog‘iga ulanildi"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Agar <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> tarmoqda internet uzilsa, qurilma <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ga ulanadi. Sarflangan trafik uchun haq olinishi mumkin."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> tarmog‘idan <xliff:g id="NEW_NETWORK">%2$s</xliff:g> tarmog‘iga o‘tildi"</string>

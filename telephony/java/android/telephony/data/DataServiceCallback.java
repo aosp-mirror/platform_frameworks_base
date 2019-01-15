@@ -125,7 +125,6 @@ public class DataServiceCallback {
      *
      * @param result The result code. Must be one of the {@link ResultCode}.
      */
-    @SystemApi
     public void onSetDataProfileComplete(@ResultCode int result) {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {

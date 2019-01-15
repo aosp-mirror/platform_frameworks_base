@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -84,6 +85,7 @@ public class TimePicker extends FrameLayout {
     @Retention(RetentionPolicy.SOURCE)
     public @interface TimePickerMode {}
 
+    @UnsupportedAppUsage
     private final TimePickerDelegate mDelegate;
 
     @TimePickerMode

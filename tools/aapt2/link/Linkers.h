@@ -21,6 +21,7 @@
 #include <unordered_set>
 
 #include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 
 #include "Resource.h"
@@ -32,7 +33,6 @@ namespace aapt {
 
 class ResourceTable;
 class ResourceEntry;
-struct ConfigDescription;
 
 // Defines the context in which a resource value is defined. Most resources are defined with the
 // implicit package name of their compilation context. Understanding the package name of a resource
@@ -43,12 +43,14 @@ struct CallSite {
 
 // Determines whether a versioned resource should be created. If a versioned resource already
 // exists, it takes precedence.
-bool ShouldGenerateVersionedResource(const ResourceEntry* entry, const ConfigDescription& config,
+bool ShouldGenerateVersionedResource(const ResourceEntry* entry,
+                                     const android::ConfigDescription& config,
                                      const ApiVersion sdk_version_to_generate);
 
 // Finds the next largest ApiVersion of the config which is identical to the given config except
 // for sdkVersion.
-ApiVersion FindNextApiVersionForConfig(const ResourceEntry* entry, const ConfigDescription& config);
+ApiVersion FindNextApiVersionForConfig(const ResourceEntry* entry,
+                                       const android::ConfigDescription& config);
 
 class AutoVersioner : public IResourceTableConsumer {
  public:

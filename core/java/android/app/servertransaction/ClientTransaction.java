@@ -17,6 +17,7 @@
 package android.app.servertransaction;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ClientTransactionHandler;
 import android.app.IApplicationThread;
 import android.os.IBinder;
@@ -42,6 +43,7 @@ import java.util.Objects;
 public class ClientTransaction implements Parcelable, ObjectPoolItem {
 
     /** A list of individual callbacks to a client. */
+    @UnsupportedAppUsage
     private List<ClientTransactionItem> mActivityCallbacks;
 
     /**
@@ -74,18 +76,21 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
 
     /** Get the list of callbacks. */
     @Nullable
+    @UnsupportedAppUsage
     List<ClientTransactionItem> getCallbacks() {
         return mActivityCallbacks;
     }
 
     /** Get the target activity. */
     @Nullable
+    @UnsupportedAppUsage
     public IBinder getActivityToken() {
         return mActivityToken;
     }
 
     /** Get the target state lifecycle request. */
     @VisibleForTesting
+    @UnsupportedAppUsage
     public ActivityLifecycleItem getLifecycleStateRequest() {
         return mLifecycleStateRequest;
     }

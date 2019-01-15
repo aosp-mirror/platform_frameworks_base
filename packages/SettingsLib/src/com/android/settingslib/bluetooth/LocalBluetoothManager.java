@@ -19,6 +19,8 @@ package com.android.settingslib.bluetooth;
 import android.content.Context;
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
+
 /**
  * LocalBluetoothManager provides a simplified interface on top of a subset of
  * the Bluetooth API. Note that {@link #getInstance} will return null
@@ -34,7 +36,7 @@ public class LocalBluetoothManager {
     private final Context mContext;
 
     /** If a BT-related activity is in the foreground, this will be it. */
-    private Context mForegroundActivity;
+    private WeakReference<Context> mForegroundActivity;
 
     private final LocalBluetoothAdapter mLocalAdapter;
 
@@ -85,17 +87,19 @@ public class LocalBluetoothManager {
     }
 
     public Context getForegroundActivity() {
-        return mForegroundActivity;
+        return mForegroundActivity == null
+                ? null
+                : mForegroundActivity.get();
     }
 
     public boolean isForegroundActivity() {
-        return mForegroundActivity != null;
+        return mForegroundActivity != null && mForegroundActivity.get() != null;
     }
 
     public synchronized void setForegroundActivity(Context context) {
         if (context != null) {
             Log.d(TAG, "setting foreground activity to non-null context");
-            mForegroundActivity = context;
+            mForegroundActivity = new WeakReference<>(context);
         } else {
             if (mForegroundActivity != null) {
                 Log.d(TAG, "setting foreground activity to null");

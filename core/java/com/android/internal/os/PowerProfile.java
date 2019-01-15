@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -57,22 +58,27 @@ public class PowerProfile {
      *               + core_power.cluster1 * num running cores in cluster 1
      */
     public static final String POWER_CPU_SUSPEND = "cpu.suspend";
+    @UnsupportedAppUsage
     public static final String POWER_CPU_IDLE = "cpu.idle";
+    @UnsupportedAppUsage
     public static final String POWER_CPU_ACTIVE = "cpu.active";
 
     /**
      * Power consumption when WiFi driver is scanning for networks.
      */
+    @UnsupportedAppUsage
     public static final String POWER_WIFI_SCAN = "wifi.scan";
 
     /**
      * Power consumption when WiFi driver is on.
      */
+    @UnsupportedAppUsage
     public static final String POWER_WIFI_ON = "wifi.on";
 
     /**
      * Power consumption when WiFi driver is transmitting/receiving.
      */
+    @UnsupportedAppUsage
     public static final String POWER_WIFI_ACTIVE = "wifi.active";
 
     //
@@ -101,6 +107,7 @@ public class PowerProfile {
     /**
      * Power consumption when GPS is on.
      */
+    @UnsupportedAppUsage
     public static final String POWER_GPS_ON = "gps.on";
 
     /**
@@ -115,6 +122,7 @@ public class PowerProfile {
      * @deprecated
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final String POWER_BLUETOOTH_ON = "bluetooth.on";
 
     /**
@@ -131,6 +139,7 @@ public class PowerProfile {
      * @deprecated
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final String POWER_BLUETOOTH_AT_CMD = "bluetooth.at";
 
     /**
@@ -141,27 +150,32 @@ public class PowerProfile {
     /**
      * Power consumption when screen is on, not including the backlight power.
      */
+    @UnsupportedAppUsage
     public static final String POWER_SCREEN_ON = "screen.on";
 
     /**
      * Power consumption when cell radio is on but not on a call.
      */
+    @UnsupportedAppUsage
     public static final String POWER_RADIO_ON = "radio.on";
 
     /**
      * Power consumption when cell radio is hunting for a signal.
      */
+    @UnsupportedAppUsage
     public static final String POWER_RADIO_SCANNING = "radio.scanning";
 
     /**
      * Power consumption when talking on the phone.
      */
+    @UnsupportedAppUsage
     public static final String POWER_RADIO_ACTIVE = "radio.active";
 
     /**
      * Power consumption at full backlight brightness. If the backlight is at
      * 50% brightness, then this should be multiplied by 0.5
      */
+    @UnsupportedAppUsage
     public static final String POWER_SCREEN_FULL = "screen.full";
 
     /**
@@ -224,6 +238,7 @@ public class PowerProfile {
     private static final Object sLock = new Object();
 
     @VisibleForTesting
+    @UnsupportedAppUsage
     public PowerProfile(Context context) {
         this(context, false);
     }
@@ -371,6 +386,7 @@ public class PowerProfile {
         }
     }
 
+    @UnsupportedAppUsage
     public int getNumCpuClusters() {
         return mCpuClusters.length;
     }
@@ -379,6 +395,7 @@ public class PowerProfile {
         return mCpuClusters[cluster].numCpus;
     }
 
+    @UnsupportedAppUsage
     public int getNumSpeedStepsInCpuCluster(int cluster) {
         if (cluster < 0 || cluster >= mCpuClusters.length) {
             return 0; // index out of bound
@@ -442,6 +459,7 @@ public class PowerProfile {
      * @param type the subsystem type
      * @return the average current in milliAmps.
      */
+    @UnsupportedAppUsage
     public double getAveragePower(String type) {
         return getAveragePowerOrDefault(type, 0);
     }
@@ -455,6 +473,7 @@ public class PowerProfile {
      *              If there is no data for multiple levels, the level is ignored.
      * @return the average current in milliAmps.
      */
+    @UnsupportedAppUsage
     public double getAveragePower(String type, int level) {
         if (sPowerItemMap.containsKey(type)) {
             return sPowerItemMap.get(type);
@@ -478,6 +497,7 @@ public class PowerProfile {
      *
      * @return the battery capacity in mAh
      */
+    @UnsupportedAppUsage
     public double getBatteryCapacity() {
         return getAveragePower(POWER_BATTERY_CAPACITY);
     }

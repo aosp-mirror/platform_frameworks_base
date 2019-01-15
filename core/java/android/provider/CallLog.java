@@ -28,12 +28,14 @@ import android.database.Cursor;
 import android.location.Country;
 import android.location.CountryDetector;
 import android.net.Uri;
+import android.os.Build;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.CommonDataKinds.Callable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.DataUsageFeedback;
+import android.telecom.CallIdentification;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -509,6 +511,163 @@ public class CallLog {
         private static final int MIN_DURATION_FOR_NORMALIZED_NUMBER_UPDATE_MS = 1000 * 10;
 
         /**
+         * Value for {@link CallLog.Calls#BLOCK_REASON}, set as the default value when a call was
+         * not blocked by a CallScreeningService or any other system call blocking method.
+         */
+        public static final int BLOCK_REASON_NOT_BLOCKED = 0;
+
+        /**
+         * Value for {@link CallLog.Calls#BLOCK_REASON}, set when {@link CallLog.Calls#TYPE} is
+         * {@link CallLog.Calls#BLOCKED_TYPE} to indicate that a call was blocked by a
+         * CallScreeningService. The {@link CallLog.Calls#CALL_SCREENING_COMPONENT_NAME} and
+         * {@link CallLog.Calls#CALL_SCREENING_APP_NAME} columns will indicate which call screening
+         * service was responsible for blocking the call.
+         */
+        public static final int BLOCK_REASON_CALL_SCREENING_SERVICE = 1;
+
+        /**
+         * Value for {@link CallLog.Calls#BLOCK_REASON}, set when {@link CallLog.Calls#TYPE} is
+         * {@link CallLog.Calls#BLOCKED_TYPE} to indicate that a call was blocked because the user
+         * configured a contact to be sent directly to voicemail.
+         */
+        public static final int BLOCK_REASON_DIRECT_TO_VOICEMAIL = 2;
+
+        /**
+         * Value for {@link CallLog.Calls#BLOCK_REASON}, set when {@link CallLog.Calls#TYPE} is
+         * {@link CallLog.Calls#BLOCKED_TYPE} to indicate that a call was blocked because it is
+         * in the BlockedNumbers provider.
+         */
+        public static final int BLOCK_REASON_BLOCKED_NUMBER = 3;
+
+        /**
+         * Value for {@link CallLog.Calls#BLOCK_REASON}, set when {@link CallLog.Calls#TYPE} is
+         * {@link CallLog.Calls#BLOCKED_TYPE} to indicate that a call was blocked because the user
+         * has chosen to block all calls from unknown numbers.
+         */
+        public static final int BLOCK_REASON_UNKNOWN_NUMBER = 4;
+
+        /**
+         * Value for {@link CallLog.Calls#BLOCK_REASON}, set when {@link CallLog.Calls#TYPE} is
+         * {@link CallLog.Calls#BLOCKED_TYPE} to indicate that a call was blocked because the user
+         * has chosen to block all calls from restricted numbers.
+         */
+        public static final int BLOCK_REASON_RESTRICTED_NUMBER = 5;
+
+        /**
+         * Value for {@link CallLog.Calls#BLOCK_REASON}, set when {@link CallLog.Calls#TYPE} is
+         * {@link CallLog.Calls#BLOCKED_TYPE} to indicate that a call was blocked because the user
+         * has chosen to block all calls from pay phones.
+         */
+        public static final int BLOCK_REASON_PAY_PHONE = 6;
+
+        /**
+         * Value for {@link CallLog.Calls#BLOCK_REASON}, set when {@link CallLog.Calls#TYPE} is
+         * {@link CallLog.Calls#BLOCKED_TYPE} to indicate that a call was blocked because the user
+         * has chosen to block all calls from numbers not in their contacts.
+         */
+        public static final int BLOCK_REASON_NOT_IN_CONTACTS = 7;
+
+        /**
+         * The ComponentName of the CallScreeningService which blocked this call. Will be
+         * populated when the {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#BLOCKED_TYPE}.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_SCREENING_COMPONENT_NAME = "call_screening_component_name";
+
+        /**
+         * The name of the app which blocked a call. Will be populated when the
+         * {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#BLOCKED_TYPE}. Provided as a
+         * convenience so that the call log can still indicate which app blocked a call, even if
+         * that app is no longer installed.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_SCREENING_APP_NAME = "call_screening_app_name";
+
+        /**
+         * Where the {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#BLOCKED_TYPE},
+         * indicates the reason why a call is blocked.
+         * <P>Type: INTEGER</P>
+         *
+         * <p>
+         * Allowed values:
+         * <ul>
+         * <li>{@link CallLog.Calls#BLOCK_REASON_NOT_BLOCKED}</li>
+         * <li>{@link CallLog.Calls#BLOCK_REASON_CALL_SCREENING_SERVICE}</li>
+         * <li>{@link CallLog.Calls#BLOCK_REASON_DIRECT_TO_VOICEMAIL}</li>
+         * <li>{@link CallLog.Calls#BLOCK_REASON_BLOCKED_NUMBER}</li>
+         * <li>{@link CallLog.Calls#BLOCK_REASON_UNKNOWN_NUMBER}</li>
+         * <li>{@link CallLog.Calls#BLOCK_REASON_RESTRICTED_NUMBER}</li>
+         * <li>{@link CallLog.Calls#BLOCK_REASON_PAY_PHONE}</li>
+         * <li>{@link CallLog.Calls#BLOCK_REASON_NOT_IN_CONTACTS}</li>
+         * </ul>
+         * </p>
+         */
+        public static final String BLOCK_REASON = "block_reason";
+
+        /**
+         * The package name of the {@link android.telecom.CallScreeningService} which provided
+         * {@link android.telecom.CallIdentification} for this call.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_ID_PACKAGE_NAME = "call_id_package_name";
+
+        /**
+         * The app name of the {@link android.telecom.CallScreeningService} which provided
+         * {@link android.telecom.CallIdentification} for this call.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_ID_APP_NAME = "call_id_app_name";
+
+        /**
+         * The {@link CallIdentification#getName() name} of a call, as provided by the
+         * {@link android.telecom.CallScreeningService}.
+         * <p>
+         * The name is provided by the app identified by {@link #CALL_ID_PACKAGE_NAME} and
+         * {@link #CALL_ID_APP_NAME}.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_ID_NAME = "call_id_name";
+
+        /**
+         * The {@link CallIdentification#getDescription() description} of a call, as provided by the
+         * {@link android.telecom.CallScreeningService}.
+         * <p>
+         * The description is provided by the app identified by {@link #CALL_ID_PACKAGE_NAME} and
+         * {@link #CALL_ID_APP_NAME}.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_ID_DESCRIPTION = "call_id_description";
+
+        /**
+         * The {@link CallIdentification#getDetails() details} of a call, as provided by the
+         * {@link android.telecom.CallScreeningService}.
+         * <p>
+         * The details field is provided by the app identified by {@link #CALL_ID_PACKAGE_NAME} and
+         * {@link #CALL_ID_APP_NAME}.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_ID_DETAILS = "call_id_details";
+
+        /**
+         * The {@link CallIdentification#getNuisanceConfidence() nuisance confidence} of a call, as
+         * provided by the {@link android.telecom.CallScreeningService}.
+         * <p>
+         * Valid values are defined in {@link CallIdentification}, and include:
+         * <ul>
+         *     <li>{@link CallIdentification#CONFIDENCE_NOT_NUISANCE}</li>
+         *     <li>{@link CallIdentification#CONFIDENCE_LIKELY_NOT_NUISANCE}</li>
+         *     <li>{@link CallIdentification#CONFIDENCE_UNKNOWN}</li>
+         *     <li>{@link CallIdentification#CONFIDENCE_LIKELY_NUISANCE}</li>
+         *     <li>{@link CallIdentification#CONFIDENCE_NUISANCE}</li>
+         * </ul>
+         * <p>
+         * The nuisance confidence is provided by the app identified by
+         * {@link #CALL_ID_PACKAGE_NAME} and {@link #CALL_ID_APP_NAME}.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String CALL_ID_NUISANCE_CONFIDENCE = "call_id_nuisance_confidence";
+
+        /**
          * Adds a call to the call log.
          *
          * @param ci the CallerInfo object to get the target contact from.  Can be null
@@ -530,12 +689,15 @@ public class CallLog {
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
-                int presentation, int callType, int features, PhoneAccountHandle accountHandle,
+                int presentation, int callType, int features,
+                PhoneAccountHandle accountHandle,
                 long start, int duration, Long dataUsage) {
-            return addCall(ci, context, number, /* postDialDigits =*/ "", /* viaNumber =*/ "",
-                    presentation, callType, features, accountHandle, start, duration,
-                    dataUsage, /* addForAllUsers =*/ false, /* userToBeInsertedTo =*/ null,
-                    /* is_read =*/ false);
+            return addCall(ci, context, number, "" /* postDialDigits */, "" /* viaNumber */,
+                presentation, callType, features, accountHandle, start, duration,
+                dataUsage, false /* addForAllUsers */, null /* userToBeInsertedTo */,
+                false /* isRead */, Calls.BLOCK_REASON_NOT_BLOCKED /* callBlockReason */,
+                null /* callScreeningAppName */, null /* callScreeningComponentName */,
+                null /* callIdentification */);
         }
 
 
@@ -572,8 +734,11 @@ public class CallLog {
                 int features, PhoneAccountHandle accountHandle, long start, int duration,
                 Long dataUsage, boolean addForAllUsers, UserHandle userToBeInsertedTo) {
             return addCall(ci, context, number, postDialDigits, viaNumber, presentation, callType,
-                    features, accountHandle, start, duration, dataUsage, addForAllUsers,
-                    userToBeInsertedTo, /* is_read =*/ false);
+                features, accountHandle, start, duration, dataUsage, addForAllUsers,
+                userToBeInsertedTo, false /* isRead */ , Calls.BLOCK_REASON_NOT_BLOCKED
+                /* callBlockReason */, null /* callScreeningAppName */,
+                null /* callScreeningComponentName */,
+                null /* callIdentification */);
         }
 
         /**
@@ -602,20 +767,37 @@ public class CallLog {
          * @param userToBeInsertedTo {@link UserHandle} of user that the call is going to be
          *                           inserted to. null if it is inserted to the current user. The
          *                           value is ignored if @{link addForAllUsers} is true.
-         * @param is_read Flag to show if the missed call log has been read by the user or not.
+         * @param isRead Flag to show if the missed call log has been read by the user or not.
          *                Used for call log restore of missed calls.
+         * @param callBlockReason The reason why the call is blocked.
+         * @param callScreeningAppName The call screening application name which block the call.
+         * @param callScreeningComponentName The call screening component name which block the call.
+         * @param callIdPackageName The package name of the
+         *      {@link android.telecom.CallScreeningService} which provided
+         *      {@link CallIdentification}.
+         * @param callIdAppName The app name of the {@link android.telecom.CallScreeningService}
+         *                      which provided {@link CallIdentification}.
+         * @param callIdName The caller name provided by the
+         *      {@link android.telecom.CallScreeningService}.
+         * @param callIdDescription The caller description provided by the
+         *      {@link android.telecom.CallScreeningService}.
+         * @param callIdDetails The caller details provided by the
+         *      {@link android.telecom.CallScreeningService}.
+         * @param callIdCallType The caller type provided by the
+         *      {@link android.telecom.CallScreeningService}.
          *
          * @result The URI of the call log entry belonging to the user that made or received this
          *        call.  This could be of the shadow provider.  Do not return it to non-system apps,
          *        as they don't have permissions.
          * {@hide}
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 String postDialDigits, String viaNumber, int presentation, int callType,
                 int features, PhoneAccountHandle accountHandle, long start, int duration,
                 Long dataUsage, boolean addForAllUsers, UserHandle userToBeInsertedTo,
-                boolean is_read) {
+                boolean isRead, int callBlockReason, String callScreeningAppName,
+                String callScreeningComponentName, CallIdentification callIdentification) {
             if (VERBOSE_LOG) {
                 Log.v(LOG_TAG, String.format("Add call: number=%s, user=%s, for all=%s",
                         number, userToBeInsertedTo, addForAllUsers));
@@ -684,10 +866,33 @@ public class CallLog {
             values.put(PHONE_ACCOUNT_ID, accountId);
             values.put(PHONE_ACCOUNT_ADDRESS, accountAddress);
             values.put(NEW, Integer.valueOf(1));
+            if ((ci != null) && (ci.name != null)) {
+                values.put(CACHED_NAME, ci.name);
+            }
             values.put(ADD_FOR_ALL_USERS, addForAllUsers ? 1 : 0);
 
             if (callType == MISSED_TYPE) {
-                values.put(IS_READ, Integer.valueOf(is_read ? 1 : 0));
+                values.put(IS_READ, Integer.valueOf(isRead ? 1 : 0));
+            }
+
+            values.put(BLOCK_REASON, callBlockReason);
+            values.put(CALL_SCREENING_APP_NAME, callScreeningAppName);
+            values.put(CALL_SCREENING_COMPONENT_NAME, callScreeningComponentName);
+
+            if (callIdentification != null) {
+                values.put(CALL_ID_PACKAGE_NAME, callIdentification.getCallScreeningPackageName());
+                values.put(CALL_ID_APP_NAME, callIdentification.getCallScreeningAppName());
+                values.put(CALL_ID_NAME, callIdentification.getName());
+                values.put(CALL_ID_DESCRIPTION, callIdentification.getDescription());
+                values.put(CALL_ID_DETAILS, callIdentification.getDetails());
+                values.put(CALL_ID_NUISANCE_CONFIDENCE, callIdentification.getNuisanceConfidence());
+            } else {
+                values.putNull(CALL_ID_PACKAGE_NAME);
+                values.putNull(CALL_ID_APP_NAME);
+                values.putNull(CALL_ID_NAME);
+                values.putNull(CALL_ID_DESCRIPTION);
+                values.putNull(CALL_ID_DETAILS);
+                values.putNull(CALL_ID_NUISANCE_CONFIDENCE);
             }
 
             if ((ci != null) && (ci.contactIdOrZero > 0)) {

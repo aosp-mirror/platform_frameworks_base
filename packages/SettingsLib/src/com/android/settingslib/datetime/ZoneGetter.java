@@ -20,9 +20,9 @@ import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.icu.text.TimeZoneFormat;
 import android.icu.text.TimeZoneNames;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.text.BidiFormatter;
-import android.support.v4.text.TextDirectionHeuristicsCompat;
+import androidx.annotation.VisibleForTesting;
+import androidx.core.text.BidiFormatter;
+import androidx.core.text.TextDirectionHeuristicsCompat;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -33,7 +33,7 @@ import android.view.View;
 
 import com.android.settingslib.R;
 
-import libcore.util.TimeZoneFinder;
+import libcore.timezone.TimeZoneFinder;
 
 import org.xmlpull.v1.XmlPullParserException;
 

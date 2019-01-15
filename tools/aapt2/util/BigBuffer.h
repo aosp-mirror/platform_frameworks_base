@@ -68,7 +68,7 @@ class BigBuffer {
    */
   explicit BigBuffer(size_t block_size);
 
-  BigBuffer(BigBuffer&& rhs);
+  BigBuffer(BigBuffer&& rhs) noexcept;
 
   /**
    * Number of occupied bytes in all the allocated blocks.
@@ -136,7 +136,7 @@ class BigBuffer {
 inline BigBuffer::BigBuffer(size_t block_size)
     : block_size_(block_size), size_(0) {}
 
-inline BigBuffer::BigBuffer(BigBuffer&& rhs)
+inline BigBuffer::BigBuffer(BigBuffer&& rhs) noexcept
     : block_size_(rhs.block_size_),
       size_(rhs.size_),
       blocks_(std::move(rhs.blocks_)) {}

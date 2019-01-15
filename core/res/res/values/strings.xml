@@ -240,10 +240,43 @@
         <item>Issue registering Wi\u2011Fi calling with your carrier: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g></item>
     </string-array>
     <!-- Template for showing mobile network operator name while WFC is active -->
-    <string-array name="wfcSpnFormats">
-        <item>%s</item>
-        <item>%s Wi-Fi Calling</item>
+    <string-array name="wfcSpnFormats" translatable="false">
+        <item>@string/wfcSpnFormat_spn</item>
+        <item>@string/wfcSpnFormat_spn_wifi_calling</item>
+        <item>@string/wfcSpnFormat_wlan_call</item>
+        <item>@string/wfcSpnFormat_spn_wlan_call</item>
+        <item>@string/wfcSpnFormat_spn_wifi</item>
+        <item>@string/wfcSpnFormat_wifi_calling_bar_spn</item>
+        <item>@string/wfcSpnFormat_spn_vowifi</item>
+        <item>@string/wfcSpnFormat_wifi_calling</item>
+        <item>@string/wfcSpnFormat_wifi</item>
+        <item>@string/wfcSpnFormat_wifi_calling_wo_hyphen</item>
+        <item>@string/wfcSpnFormat_vowifi</item>
     </string-array>
+
+    <!-- Spn during Wi-Fi Calling: "<operator>" -->
+    <string name="wfcSpnFormat_spn"><xliff:g id="spn" example="Operator">%s</xliff:g></string>
+    <!-- Spn during Wi-Fi Calling: "<operator> Wi-Fi Calling" -->
+    <string name="wfcSpnFormat_spn_wifi_calling"><xliff:g id="spn" example="Operator">%s</xliff:g> Wi-Fi Calling</string>
+    <!-- Spn during Wi-Fi Calling: "WLAN Call" -->
+    <string name="wfcSpnFormat_wlan_call">WLAN Call</string>
+    <!-- Spn during Wi-Fi Calling: "<operator> WLAN Call" -->
+    <string name="wfcSpnFormat_spn_wlan_call"><xliff:g id="spn" example="Operator">%s</xliff:g> WLAN Call</string>
+    <!-- Spn during Wi-Fi Calling: "<operator> Wi-Fi" -->
+    <string name="wfcSpnFormat_spn_wifi"><xliff:g id="spn" example="Operator">%s</xliff:g> Wi-Fi</string>
+    <!-- Spn during Wi-Fi Calling: "WiFi Calling | <operator>" -->
+    <string name="wfcSpnFormat_wifi_calling_bar_spn">WiFi Calling | <xliff:g id="spn" example="Operator">%s</xliff:g></string>
+    <!-- Spn during Wi-Fi Calling: "<operator> VoWifi" -->
+    <string name="wfcSpnFormat_spn_vowifi"><xliff:g id="spn" example="Operator">%s</xliff:g> VoWifi</string>
+    <!-- Spn during Wi-Fi Calling: "Wi-Fi Calling" -->
+    <string name="wfcSpnFormat_wifi_calling">Wi-Fi Calling</string>
+    <!-- Spn during Wi-Fi Calling: "Wi-Fi" -->
+    <string name="wfcSpnFormat_wifi">Wi-Fi</string>
+    <!-- Spn during Wi-Fi Calling: "WiFi Calling" (without hyphen) -->
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen">WiFi Calling</string>
+    <!-- Spn during Wi-Fi Calling: "VoWifi" -->
+    <string name="wfcSpnFormat_vowifi">VoWifi</string>
+
     <!-- WFC, summary for Disabled -->
     <string name="wifi_calling_off_summary">Off</string>
     <!-- WFC, summary for Wi-Fi Preferred -->
@@ -3168,6 +3201,21 @@
 
     <!-- A notification is shown when the user connects to a Wi-Fi network and the system detects that that network has no Internet access. This is the notification's message. -->
     <string name="wifi_no_internet_detailed">Tap for options</string>
+
+    <!-- A notification is shown when the user's softap config has been changed due to underlying
+         hardware restrictions. This is the notifications's title.
+         [CHAR_LIMIT=NONE] -->
+    <string name="wifi_softap_config_change">Changes to your hotspot settings</string>
+
+    <!-- A notification is shown when the user's softap config has been changed due to underlying
+         hardware restrictions. This is the notification's summary message.
+         [CHAR_LIMIT=NONE] -->
+    <string name="wifi_softap_config_change_summary">Your hotspot band has changed.</string>
+
+    <!-- A notification is shown when the user's softap config has been changed due to underlying
+         hardware restrictions. This is the notification's full message.
+         [CHAR_LIMIT=NONE] -->
+    <string name="wifi_softap_config_change_detailed">This device doesn\u2019t support your preference for 5GHz only. Instead, this device will use the 5GHz band when available.</string>
 
     <!-- A notification might be shown if the device switches to another network type (e.g., mobile data) because it detects that the network it was using (e.g., Wi-Fi) has lost Internet connectivity. This is the notification's title. %1$s is the network type that the device switched to, e.g., cellular data. It is one of the strings in the network_switch_type_name array. -->
     <string name="network_switch_metered">Switched to <xliff:g id="network_type">%1$s</xliff:g></string>

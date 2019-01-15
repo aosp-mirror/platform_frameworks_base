@@ -16,9 +16,10 @@
 
 #include "filter/ConfigFilter.h"
 
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/ResourceTypes.h"
 
-#include "ConfigDescription.h"
+using ::android::ConfigDescription;
 
 namespace aapt {
 

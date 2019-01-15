@@ -17,6 +17,7 @@
 package android.transition;
 
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -73,9 +74,11 @@ public class TransitionManager {
     ArrayMap<Scene, Transition> mSceneTransitions = new ArrayMap<Scene, Transition>();
     ArrayMap<Scene, ArrayMap<Scene, Transition>> mScenePairTransitions =
             new ArrayMap<Scene, ArrayMap<Scene, Transition>>();
+    @UnsupportedAppUsage
     private static ThreadLocal<WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>>>
             sRunningTransitions =
             new ThreadLocal<WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>>>();
+    @UnsupportedAppUsage
     private static ArrayList<ViewGroup> sPendingTransitions = new ArrayList<ViewGroup>();
 
 
@@ -207,6 +210,7 @@ public class TransitionManager {
         }
     }
 
+    @UnsupportedAppUsage
     private static ArrayMap<ViewGroup, ArrayList<Transition>> getRunningTransitions() {
         WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>> runningTransitions =
                 sRunningTransitions.get();

@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaFile.MediaFileType;
 import android.net.Uri;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore.Images;
 import android.util.Log;
@@ -255,7 +256,7 @@ public class ThumbnailUtils {
      * For example, BitmapFactory downsamples an image by 2 even though the
      * request is 3. So we round up the sample size to avoid OOM.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static int computeSampleSize(BitmapFactory.Options options,
             int minSideLength, int maxNumOfPixels) {
         int initialSize = computeInitialSampleSize(options, minSideLength,
@@ -274,7 +275,7 @@ public class ThumbnailUtils {
         return roundedSize;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static int computeInitialSampleSize(BitmapFactory.Options options,
             int minSideLength, int maxNumOfPixels) {
         double w = options.outWidth;
@@ -342,7 +343,7 @@ public class ThumbnailUtils {
         return b;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static void closeSilently(ParcelFileDescriptor c) {
       if (c == null) return;
       try {
@@ -352,7 +353,7 @@ public class ThumbnailUtils {
       }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static ParcelFileDescriptor makeInputStream(
             Uri uri, ContentResolver cr) {
         try {
@@ -365,7 +366,7 @@ public class ThumbnailUtils {
     /**
      * Transform source Bitmap to targeted width and height.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static Bitmap transform(Matrix scaler,
             Bitmap source,
             int targetWidth,
@@ -482,7 +483,7 @@ public class ThumbnailUtils {
      * The functions returns a SizedThumbnailBitmap,
      * which contains a downsampled bitmap and the thumbnail data in EXIF if exists.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static void createThumbnailFromEXIF(String filePath, int targetSize,
             int maxPixels, SizedThumbnailBitmap sizedThumbBitmap) {
         if (filePath == null) return;

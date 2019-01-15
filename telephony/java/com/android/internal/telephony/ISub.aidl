@@ -16,7 +16,6 @@
 
 package com.android.internal.telephony;
 
-import android.app.PendingIntent;
 import android.telephony.SubscriptionInfo;
 
 interface ISub {
@@ -105,7 +104,7 @@ interface ISub {
     /**
      * @see android.telephony.SubscriptionManager#requestEmbeddedSubscriptionInfoListRefresh
      */
-    oneway void requestEmbeddedSubscriptionInfoListRefresh();
+    oneway void requestEmbeddedSubscriptionInfoListRefresh(int cardId);
 
     /**
      * Add a new SubscriptionInfo to subinfo database if needed
@@ -166,31 +165,62 @@ interface ISub {
     int setOpportunistic(boolean opportunistic, int subId);
 
     /**
-     * Set parent subId by simInfo index
+     * Inform SubscriptionManager that subscriptions in the list are bundled
+     * as a group. Typically it's a primary subscription and an opportunistic
+     * subscription. It should only affect multi-SIM scenarios where primary
+     * and opportunistic subscriptions can be activated together.
+     * Being in the same group means they might be activated or deactivated
+     * together, some of them may be invisible to the users, etc.
      *
-     * @param parentSubId: subId of its parent subscription.
+     * Caller will either have {@link android.Manifest.permission.MODIFY_PHONE_STATE}
+     * permission or can manage all subscriptions in the list, according to their
+     * acess rules.
+     *
+     * @param subIdList list of subId that will be in the same group
+     * @return groupUUID a UUID assigned to the subscription group. It returns
+     * null if fails.
+     *
+     */
+    String setSubscriptionGroup(in int[] subIdList, String callingPackage);
+
+    /**
+     * Set whether a subscription is metered
+     *
+     * @param isMetered whether it’s a metered subscription.
      * @param subId the unique SubscriptionInfo index in database
      * @return the number of records updated
      */
-    int setParentSubId(int parentSubId, int subId);
+    int setMetered(boolean isMetered, int subId);
 
     /**
-     * Set preferred default data.
-     * Set on which slot default data will be on.
+     * Set which subscription is preferred for cellular data. It's
+     * designed to overwrite default data subscription temporarily.
      *
-     * @param slotId which slot is preferred to for cellular data.
+     * @param subId which subscription is preferred to for cellular data.
      * @hide
      *
      */
-    int setPreferredData(int slotId);
+    int setPreferredDataSubscriptionId(int subId);
+
+    /**
+     * Get which subscription is preferred for cellular data.
+     *
+     * @hide
+     *
+     */
+    int getPreferredDataSubscriptionId();
 
     /**
      * Get User downloaded Profiles.
      *
-     *  Provide all available user downloaded profile on the phone.
-     *  @param slotId on which phone the switch will operate on
+     * Return opportunistic subscriptions that can be visible to the caller.
+     * @return the list of opportunistic subscription info. If none exists, an empty list.
      */
-    List<SubscriptionInfo> getOpportunisticSubscriptions(int slotId, String callingPackage);
+    List<SubscriptionInfo> getOpportunisticSubscriptions(String callingPackage);
+
+    boolean removeSubscriptionsFromGroup(in int[] subIdList, String callingPackage);
+
+    List<SubscriptionInfo> getSubscriptionsInGroup(int subId, String callingPackage);
 
     int getSlotIndex(int subId);
 
@@ -232,5 +262,5 @@ interface ISub {
      */
     int getSimStateForSlotIndex(int slotIndex);
 
-    boolean isActiveSubId(int subId);
+    boolean isActiveSubId(int subId, String callingPackage);
 }

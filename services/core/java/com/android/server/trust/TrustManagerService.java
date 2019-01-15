@@ -46,7 +46,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.trust.TrustAgentService;
 import android.text.TextUtils;
@@ -60,7 +59,6 @@ import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
@@ -431,13 +429,20 @@ public class TrustManagerService extends SystemService {
         for (int i = 0; i < userInfos.size(); i++) {
             UserInfo info = userInfos.get(i);
 
-            if (info == null || info.partial || !info.isEnabled() || info.guestToRemove
-                    || !info.supportsSwitchToByUser()) {
+            if (info == null || info.partial || !info.isEnabled() || info.guestToRemove) {
                 continue;
             }
 
             int id = info.id;
             boolean secure = mLockPatternUtils.isSecure(id);
+
+            if (!info.supportsSwitchToByUser()) {
+                if (info.isManagedProfile() && !secure) {
+                    setDeviceLockedForUser(id, false);
+                }
+                continue;
+            }
+
             boolean trusted = aggregateIsTrusted(id);
             boolean showingKeyguard = true;
             boolean fingerprintAuthenticated = false;
@@ -992,7 +997,8 @@ public class TrustManagerService extends SystemService {
             enforceReportPermission();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
+                        && mLockPatternUtils.isSecure(userId)) {
                     synchronized (mDeviceLockedForUser) {
                         mDeviceLockedForUser.put(userId, locked);
                     }

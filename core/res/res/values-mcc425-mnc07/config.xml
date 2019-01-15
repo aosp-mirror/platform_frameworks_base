@@ -30,13 +30,4 @@
       <item>7</item>
       <item>9</item>
     </integer-array>
-
-    <!-- String containing the apn value for tethering.  May be overriden by secure settings
-         TETHER_DUN_APN.  Value is a comma separated series of strings:
-         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type",
-         Or string format of ApnSettingV3.
-         note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string-array translatable="false" name="config_tether_apndata">
-      <item>PC HOT mobile,pc.hotm,,,,,,,,,425,07,,DUN</item>
-    </string-array>
 </resources>

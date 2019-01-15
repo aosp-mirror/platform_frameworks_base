@@ -18,10 +18,13 @@ package com.android.server.display;
 
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.SystemProperties;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
+
+import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -55,6 +58,8 @@ import java.util.Objects;
  * </p>
  */
 final class LogicalDisplay {
+    private static final String PROP_MASKING_INSET_TOP = "persist.sys.displayinset.top";
+
     private final DisplayInfo mBaseDisplayInfo = new DisplayInfo();
 
     // The layer stack we use when the display has been blanked to prevent any
@@ -251,14 +256,18 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
             }
+            Rect maskingInsets = getMaskingInsets(deviceInfo);
+            int maskedWidth = deviceInfo.width - maskingInsets.left - maskingInsets.right;
+            int maskedHeight = deviceInfo.height - maskingInsets.top - maskingInsets.bottom;
+
             mBaseDisplayInfo.type = deviceInfo.type;
             mBaseDisplayInfo.address = deviceInfo.address;
             mBaseDisplayInfo.name = deviceInfo.name;
             mBaseDisplayInfo.uniqueId = deviceInfo.uniqueId;
-            mBaseDisplayInfo.appWidth = deviceInfo.width;
-            mBaseDisplayInfo.appHeight = deviceInfo.height;
-            mBaseDisplayInfo.logicalWidth = deviceInfo.width;
-            mBaseDisplayInfo.logicalHeight = deviceInfo.height;
+            mBaseDisplayInfo.appWidth = maskedWidth;
+            mBaseDisplayInfo.appHeight = maskedHeight;
+            mBaseDisplayInfo.logicalWidth = maskedWidth;
+            mBaseDisplayInfo.logicalHeight = maskedHeight;
             mBaseDisplayInfo.rotation = Surface.ROTATION_0;
             mBaseDisplayInfo.modeId = deviceInfo.modeId;
             mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
@@ -275,16 +284,41 @@ final class LogicalDisplay {
             mBaseDisplayInfo.appVsyncOffsetNanos = deviceInfo.appVsyncOffsetNanos;
             mBaseDisplayInfo.presentationDeadlineNanos = deviceInfo.presentationDeadlineNanos;
             mBaseDisplayInfo.state = deviceInfo.state;
-            mBaseDisplayInfo.smallestNominalAppWidth = deviceInfo.width;
-            mBaseDisplayInfo.smallestNominalAppHeight = deviceInfo.height;
-            mBaseDisplayInfo.largestNominalAppWidth = deviceInfo.width;
-            mBaseDisplayInfo.largestNominalAppHeight = deviceInfo.height;
+            mBaseDisplayInfo.smallestNominalAppWidth = maskedWidth;
+            mBaseDisplayInfo.smallestNominalAppHeight = maskedHeight;
+            mBaseDisplayInfo.largestNominalAppWidth = maskedWidth;
+            mBaseDisplayInfo.largestNominalAppHeight = maskedHeight;
             mBaseDisplayInfo.ownerUid = deviceInfo.ownerUid;
             mBaseDisplayInfo.ownerPackageName = deviceInfo.ownerPackageName;
-            mBaseDisplayInfo.displayCutout = deviceInfo.displayCutout;
+            boolean maskCutout =
+                    (deviceInfo.flags & DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT) != 0;
+            mBaseDisplayInfo.displayCutout = maskCutout ? null : deviceInfo.displayCutout;
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo = null;
+        }
+    }
+
+    /**
+     * Return the insets currently applied to the display.
+     *
+     * Note that the base DisplayInfo already takes these insets into account, so if you want to
+     * find out the <b>true</b> size of the display, you need to add them back to the logical
+     * dimensions.
+     */
+    public Rect getInsets() {
+        return getMaskingInsets(mPrimaryDisplayDeviceInfo);
+    }
+
+    /**
+     * Returns insets in ROTATION_0 for areas that are masked.
+     */
+    private static Rect getMaskingInsets(DisplayDeviceInfo deviceInfo) {
+        boolean maskCutout = (deviceInfo.flags & DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT) != 0;
+        if (maskCutout && deviceInfo.displayCutout != null) {
+            return deviceInfo.displayCutout.getSafeInsets();
+        } else {
+            return new Rect();
         }
     }
 
@@ -349,6 +383,12 @@ final class LogicalDisplay {
         int physWidth = rotated ? displayDeviceInfo.height : displayDeviceInfo.width;
         int physHeight = rotated ? displayDeviceInfo.width : displayDeviceInfo.height;
 
+        Rect maskingInsets = getMaskingInsets(displayDeviceInfo);
+        InsetUtils.rotateInsets(maskingInsets, orientation);
+        // Don't consider the masked area as available when calculating the scaling below.
+        physWidth -= maskingInsets.left + maskingInsets.right;
+        physHeight -= maskingInsets.top + maskingInsets.bottom;
+
         // Determine whether the width or height is more constrained to be scaled.
         //    physWidth / displayInfo.logicalWidth    => letter box
         // or physHeight / displayInfo.logicalHeight  => pillar box
@@ -374,6 +414,9 @@ final class LogicalDisplay {
         int displayRectLeft = (physWidth - displayRectWidth) / 2;
         mTempDisplayRect.set(displayRectLeft, displayRectTop,
                 displayRectLeft + displayRectWidth, displayRectTop + displayRectHeight);
+
+        // Now add back the offset for the masked area.
+        mTempDisplayRect.offset(maskingInsets.left, maskingInsets.top);
 
         mTempDisplayRect.left += mDisplayOffsetX;
         mTempDisplayRect.right += mDisplayOffsetX;

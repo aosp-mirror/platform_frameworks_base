@@ -180,7 +180,7 @@ public class EventManager {
             }
         }
 
-        private final List<Event> mEvents = new LinkedList<>();
+        private final List<Event> mEvents = Collections.synchronizedList(new LinkedList<>());
         private final Loggable mRecordEntry;
 
         public EventRecord(Loggable recordEntry) {
@@ -197,7 +197,7 @@ public class EventManager {
         }
 
         public List<Event> getEvents() {
-            return mEvents;
+            return new LinkedList<>(mEvents);
         }
 
         public List<EventTiming> extractEventTimings() {
@@ -207,21 +207,24 @@ public class EventManager {
 
             LinkedList<EventTiming> result = new LinkedList<>();
             Map<String, PendingResponse> pendingResponses = new HashMap<>();
-            for (Event event : mEvents) {
-                if (requestResponsePairs.containsKey(event.eventId)) {
-                    // This event expects a response, so add that expected response to the maps
-                    // of pending events.
-                    for (EventManager.TimedEventPair p : requestResponsePairs.get(event.eventId)) {
-                        pendingResponses.put(p.mResponse, new PendingResponse(event.eventId,
-                                event.time, p.mTimeoutMillis, p.mName));
+            synchronized (mEvents) {
+                for (Event event : mEvents) {
+                    if (requestResponsePairs.containsKey(event.eventId)) {
+                        // This event expects a response, so add that expected response to the maps
+                        // of pending events.
+                        for (EventManager.TimedEventPair p : requestResponsePairs.get(
+                                event.eventId)) {
+                            pendingResponses.put(p.mResponse, new PendingResponse(event.eventId,
+                                    event.time, p.mTimeoutMillis, p.mName));
+                        }
                     }
-                }
 
-                PendingResponse pendingResponse = pendingResponses.remove(event.eventId);
-                if (pendingResponse != null) {
-                    long elapsedTime = event.time - pendingResponse.requestEventTimeMillis;
-                    if (elapsedTime < pendingResponse.timeoutMillis) {
-                        result.add(new EventTiming(pendingResponse.name, elapsedTime));
+                    PendingResponse pendingResponse = pendingResponses.remove(event.eventId);
+                    if (pendingResponse != null) {
+                        long elapsedTime = event.time - pendingResponse.requestEventTimeMillis;
+                        if (elapsedTime < pendingResponse.timeoutMillis) {
+                            result.add(new EventTiming(pendingResponse.name, elapsedTime));
+                        }
                     }
                 }
             }
@@ -233,7 +236,8 @@ public class EventManager {
             pw.print(mRecordEntry.getDescription());
 
             pw.increaseIndent();
-            for (Event event : mEvents) {
+            // Iterate over copy of events so that this doesn't hold the lock for too long.
+            for (Event event : getEvents()) {
                 pw.print(event.timestampString);
                 pw.print(" - ");
                 pw.print(event.eventId);

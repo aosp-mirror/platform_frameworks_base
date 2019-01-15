@@ -2381,7 +2381,6 @@ android.os.-$$Lambda$StrictMode$lu9ekkHJ2HMz0jd3F8K8MnhenxQ
 android.os.-$$Lambda$StrictMode$yZJXPvy2veRNA-xL_SWdXzX_OLg
 android.os.-$$Lambda$Trace$2zLZ-Lc2kAXsVjw_nLYeNhqmGq0
 android.os.AsyncResult
-android.os.AsyncTask
 android.os.AsyncTask$1
 android.os.AsyncTask$2
 android.os.AsyncTask$3
@@ -6125,12 +6124,6 @@ libcore.io.BufferIterator
 libcore.io.ClassPathURLStreamHandler
 libcore.io.ClassPathURLStreamHandler$ClassPathURLConnection
 libcore.io.ClassPathURLStreamHandler$ClassPathURLConnection$1
-libcore.io.DropBox
-libcore.io.DropBox$DefaultReporter
-libcore.io.DropBox$Reporter
-libcore.io.EventLogger
-libcore.io.EventLogger$DefaultReporter
-libcore.io.EventLogger$Reporter
 libcore.io.ForwardingOs
 libcore.io.IoBridge
 libcore.io.IoTracker
@@ -6163,6 +6156,10 @@ libcore.reflect.ParameterizedTypeImpl
 libcore.reflect.TypeVariableImpl
 libcore.reflect.Types
 libcore.reflect.WildcardTypeImpl
+libcore.timezone.TimeZoneDataFiles
+libcore.timezone.ZoneInfoDB
+libcore.timezone.ZoneInfoDB$TzData
+libcore.timezone.ZoneInfoDB$TzData$1
 libcore.util.BasicLruCache
 libcore.util.CharsetUtils
 libcore.util.CollectionUtils
@@ -6172,13 +6169,9 @@ libcore.util.NativeAllocationRegistry$CleanerRunner
 libcore.util.NativeAllocationRegistry$CleanerThunk
 libcore.util.Objects
 libcore.util.SneakyThrow
-libcore.util.TimeZoneDataFiles
 libcore.util.ZoneInfo
 libcore.util.ZoneInfo$CheckedArithmeticException
 libcore.util.ZoneInfo$WallTime
-libcore.util.ZoneInfoDB
-libcore.util.ZoneInfoDB$TzData
-libcore.util.ZoneInfoDB$TzData$1
 org.apache.harmony.dalvik.NativeTestTarget
 org.apache.harmony.dalvik.ddmc.Chunk
 org.apache.harmony.dalvik.ddmc.ChunkHandler

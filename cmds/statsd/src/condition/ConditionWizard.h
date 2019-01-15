@@ -29,7 +29,7 @@ namespace statsd {
 class ConditionWizard : public virtual android::RefBase {
 public:
     ConditionWizard(){};  // for testing
-    ConditionWizard(std::vector<sp<ConditionTracker>>& conditionTrackers)
+    explicit ConditionWizard(std::vector<sp<ConditionTracker>>& conditionTrackers)
         : mAllConditions(conditionTrackers){};
 
     virtual ~ConditionWizard(){};

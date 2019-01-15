@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -98,6 +99,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The number of items show in the selector wheel.
      */
+    @UnsupportedAppUsage
     private static final int SELECTOR_WHEEL_ITEM_COUNT = 3;
 
     /**
@@ -108,6 +110,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The index of the middle selector item.
      */
+    @UnsupportedAppUsage
     private static final int SELECTOR_MIDDLE_ITEM_INDEX = SELECTOR_WHEEL_ITEM_COUNT / 2;
 
     /**
@@ -204,6 +207,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public static final Formatter getTwoDigitFormatter() {
         return sTwoDigitFormatter;
     }
@@ -221,6 +225,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The text for showing the current value.
      */
+    @UnsupportedAppUsage
     private final EditText mInputText;
 
     /**
@@ -231,6 +236,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The min height of this widget.
      */
+    @UnsupportedAppUsage
     private final int mMinHeight;
 
     /**
@@ -241,6 +247,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The max width of this widget.
      */
+    @UnsupportedAppUsage
     private final int mMinWidth;
 
     /**
@@ -256,6 +263,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The height of the text.
      */
+    @UnsupportedAppUsage
     private final int mTextSize;
 
     /**
@@ -276,6 +284,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * Upper value of the range of numbers allowed for the NumberPicker
      */
+    @UnsupportedAppUsage
     private int mMaxValue;
 
     /**
@@ -286,6 +295,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * Listener to be notified upon current value change.
      */
+    @UnsupportedAppUsage
     private OnValueChangeListener mOnValueChangeListener;
 
     /**
@@ -311,11 +321,13 @@ public class NumberPicker extends LinearLayout {
     /**
      * The selector indices whose value are show by the selector.
      */
+    @UnsupportedAppUsage
     private final int[] mSelectorIndices = new int[SELECTOR_WHEEL_ITEM_COUNT];
 
     /**
      * The {@link Paint} for drawing the selector.
      */
+    @UnsupportedAppUsage
     private final Paint mSelectorWheelPaint;
 
     /**
@@ -341,6 +353,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The {@link Scroller} responsible for flinging the selector.
      */
+    @UnsupportedAppUsage
     private final Scroller mFlingScroller;
 
     /**
@@ -402,6 +415,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * @see ViewConfiguration#getScaledMaximumFlingVelocity()
      */
+    @UnsupportedAppUsage
     private int mMaximumFlingVelocity;
 
     /**
@@ -422,11 +436,13 @@ public class NumberPicker extends LinearLayout {
     /**
      * Divider for showing item to be selected while scrolling
      */
+    @UnsupportedAppUsage
     private final Drawable mSelectionDivider;
 
     /**
      * The height of the selection divider.
      */
+    @UnsupportedAppUsage
     private final int mSelectionDividerHeight;
 
     /**
@@ -1715,6 +1731,7 @@ public class NumberPicker extends LinearLayout {
      * Resets the selector indices and clear the cached string representation of
      * these indices.
      */
+    @UnsupportedAppUsage
     private void initializeSelectorWheelIndices() {
         mSelectorIndexToStringCache.clear();
         int[] selectorIndices = mSelectorIndices;
@@ -1766,6 +1783,7 @@ public class NumberPicker extends LinearLayout {
      *
      * @param increment True to increment, false to decrement.
      */
+     @UnsupportedAppUsage
      private void changeValueByOne(boolean increment) {
         if (mHasSelectorWheel) {
             hideSoftInput();

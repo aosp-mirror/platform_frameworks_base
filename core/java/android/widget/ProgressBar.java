@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.InterpolatorRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -167,9 +168,12 @@ public class ProgressBar extends View {
     /** Duration of smooth progress animations. */
     private static final int PROGRESS_ANIM_DURATION = 80;
 
+    @UnsupportedAppUsage
     int mMinWidth;
     int mMaxWidth;
+    @UnsupportedAppUsage
     int mMinHeight;
+    @UnsupportedAppUsage
     int mMaxHeight;
 
     private int mProgress;
@@ -180,8 +184,11 @@ public class ProgressBar extends View {
     private boolean mMaxInitialized;
 
     private int mBehavior;
+    @UnsupportedAppUsage
     private int mDuration;
+    @UnsupportedAppUsage
     private boolean mIndeterminate;
+    @UnsupportedAppUsage
     private boolean mOnlyIndeterminate;
     private Transformation mTransformation;
     private AlphaAnimation mAnimation;
@@ -189,6 +196,7 @@ public class ProgressBar extends View {
 
     private Drawable mIndeterminateDrawable;
     private Drawable mProgressDrawable;
+    @UnsupportedAppUsage
     private Drawable mCurrentDrawable;
     private ProgressTintInfo mProgressTintInfo;
 
@@ -206,6 +214,7 @@ public class ProgressBar extends View {
     /** Value used to track progress animation, in the range [0...1]. */
     private float mVisualProgress;
 
+    @UnsupportedAppUsage
     boolean mMirrorForRtl = false;
 
     private boolean mAggregatedIsVisible;
@@ -424,6 +433,7 @@ public class ProgressBar extends View {
      * Converts a drawable to a tiled version of itself. It will recursively
      * traverse layer and state list drawables.
      */
+    @UnsupportedAppUsage
     private Drawable tileify(Drawable drawable, boolean clip) {
         // TODO: This is a terrible idea that potentially destroys any drawable
         // that extends any of these classes. We *really* need to remove this.
@@ -1347,6 +1357,7 @@ public class ProgressBar extends View {
         // Stub method.
     }
 
+    @UnsupportedAppUsage
     private synchronized void refreshProgress(int id, int progress, boolean fromUser,
             boolean animate) {
         if (mUiThreadId == Thread.currentThread().getId()) {
@@ -1401,6 +1412,7 @@ public class ProgressBar extends View {
     }
 
     @android.view.RemotableViewMethod
+    @UnsupportedAppUsage
     synchronized boolean setProgressInternal(int progress, boolean fromUser, boolean animate) {
         if (mIndeterminate) {
             // Not applicable.
@@ -1599,6 +1611,7 @@ public class ProgressBar extends View {
     /**
      * <p>Start the indeterminate progress animation.</p>
      */
+    @UnsupportedAppUsage
     void startAnimation() {
         if (getVisibility() != VISIBLE || getWindowVisibility() != VISIBLE) {
             return;
@@ -1638,6 +1651,7 @@ public class ProgressBar extends View {
     /**
      * <p>Stop the indeterminate progress animation.</p>
      */
+    @UnsupportedAppUsage
     void stopAnimation() {
         mHasAnimation = false;
         if (mIndeterminateDrawable instanceof Animatable) {

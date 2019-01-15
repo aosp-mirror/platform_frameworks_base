@@ -41,7 +41,8 @@
 #include <unistd.h>
 #include <time.h>
 
-typedef void* ZipArchiveHandle;
+struct ZipArchive;
+typedef ZipArchive* ZipArchiveHandle;
 
 namespace android {
 

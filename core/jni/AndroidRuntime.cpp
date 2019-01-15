@@ -1052,10 +1052,16 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
     if (rootDir == NULL) {
         rootDir = "/system";
         if (!hasDir("/system")) {
-            LOG_FATAL("No root directory specified, and /android does not exist.");
+            LOG_FATAL("No root directory specified, and /system does not exist.");
             return;
         }
         setenv("ANDROID_ROOT", rootDir, 1);
+    }
+
+    const char* runtimeRootDir = getenv("ANDROID_RUNTIME_ROOT");
+    if (runtimeRootDir == NULL) {
+        LOG_FATAL("No runtime directory specified with ANDROID_RUNTIME_ROOT environment variable.");
+        return;
     }
 
     //const char* kernelHack = getenv("LD_ASSUME_KERNEL");

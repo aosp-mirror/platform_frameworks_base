@@ -32,8 +32,8 @@ class ImmutableMap {
   using const_iterator =
       typename std::vector<std::pair<TKey, TValue>>::const_iterator;
 
-  ImmutableMap(ImmutableMap&&) = default;
-  ImmutableMap& operator=(ImmutableMap&&) = default;
+  ImmutableMap(ImmutableMap&&) noexcept = default;
+  ImmutableMap& operator=(ImmutableMap&&) noexcept = default;
 
   static ImmutableMap<TKey, TValue> CreatePreSorted(
       std::initializer_list<std::pair<TKey, TValue>> list) {

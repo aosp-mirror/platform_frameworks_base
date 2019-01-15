@@ -23,6 +23,8 @@
 #include "test/Test.h"
 #include "util/Util.h"
 
+using ::android::ConfigDescription;
+
 namespace aapt {
 
 namespace {

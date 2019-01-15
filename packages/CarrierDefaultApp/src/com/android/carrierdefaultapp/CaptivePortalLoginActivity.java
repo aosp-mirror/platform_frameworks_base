@@ -32,7 +32,6 @@ import android.net.NetworkRequest;
 import android.net.Proxy;
 import android.net.TrafficStats;
 import android.net.Uri;
-import android.net.dns.ResolvUtil;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.telephony.CarrierConfigManager;
@@ -159,9 +158,9 @@ public class CaptivePortalLoginActivity extends Activity {
 
     private void setNetwork(Network network) {
         if (network != null) {
+            network = network.getPrivateDnsBypassingCopy();
             mCm.bindProcessToNetwork(network);
-            mCm.setProcessDefaultNetworkForHostResolution(
-                    ResolvUtil.getNetworkWithUseLocalNameserversFlag(network));
+            mCm.setProcessDefaultNetworkForHostResolution(network);
         }
         mNetwork = network;
     }
@@ -242,7 +241,6 @@ public class CaptivePortalLoginActivity extends Activity {
     private void testForCaptivePortal() {
         mTestingThread = new Thread(new Runnable() {
             public void run() {
-                final Network network = ResolvUtil.makeNetworkWithPrivateDnsBypass(mNetwork);
                 // Give time for captive portal to open.
                 try {
                     Thread.sleep(1000);
@@ -253,7 +251,7 @@ public class CaptivePortalLoginActivity extends Activity {
                 int httpResponseCode = 500;
                 int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_PROBE);
                 try {
-                    urlConnection = (HttpURLConnection) network.openConnection(
+                    urlConnection = (HttpURLConnection) mNetwork.openConnection(
                             new URL(mCm.getCaptivePortalServerUrl()));
                     urlConnection.setInstanceFollowRedirects(false);
                     urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);

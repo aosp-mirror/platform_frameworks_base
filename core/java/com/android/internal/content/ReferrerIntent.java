@@ -16,6 +16,7 @@
 
 package com.android.internal.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Parcel;
 
@@ -25,8 +26,10 @@ import java.util.Objects;
  * Subclass of Intent that also contains referrer (as a package name) information.
  */
 public class ReferrerIntent extends Intent {
+    @UnsupportedAppUsage
     public final String mReferrer;
 
+    @UnsupportedAppUsage
     public ReferrerIntent(Intent baseIntent, String referrer) {
         super(baseIntent);
         mReferrer = referrer;

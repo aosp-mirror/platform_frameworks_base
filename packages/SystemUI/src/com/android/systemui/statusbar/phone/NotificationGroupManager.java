@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.app.Notification;
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.android.systemui.statusbar.ExpandableNotificationRow;

@@ -30,7 +30,7 @@ import android.net.NetworkInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;

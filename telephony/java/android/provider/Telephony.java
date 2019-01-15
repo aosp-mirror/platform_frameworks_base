@@ -16,8 +16,11 @@
 
 package android.provider;
 
+import android.annotation.IntDef;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.job.JobService;
@@ -26,10 +29,11 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.ContentObserver;
+import android.database.Cursor;
 import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
+import android.os.Build;
 import android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.SmsMessage;
@@ -41,7 +45,8 @@ import android.util.Patterns;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.SmsApplication;
 
-
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -311,7 +316,7 @@ public final class Telephony {
          * Return cursor for table query.
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public static Cursor query(ContentResolver cr, String[] projection,
                 String where, String orderBy) {
             return cr.query(CONTENT_URI, projection, where,
@@ -1127,7 +1132,10 @@ public final class Telephony {
              *
              * <p>Requires {@code android.Manifest.permission#CONTROL_INCALL_EXPERIENCE} to
              * send and receive.</p>
+             * @deprecated it is no longer supported, use {@link
+             * TelephonyManager#ACTION_SECRET_CODE} instead
              */
+            @Deprecated
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String SECRET_CODE_ACTION =
                     "android.provider.Telephony.SECRET_CODE";
@@ -1164,6 +1172,69 @@ public final class Telephony {
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String ACTION_EXTERNAL_PROVIDER_CHANGE =
                           "android.provider.action.EXTERNAL_PROVIDER_CHANGE";
+
+            /**
+             * Same as {@link #ACTION_DEFAULT_SMS_PACKAGE_CHANGED} but it's implicit (e.g. sent to
+             * all apps) and requires
+             * {@link android.Manifest.permission#MONITOR_DEFAULT_SMS_PACKAGE} to receive.
+             *
+             * @hide
+             */
+            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+            public static final String ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL =
+                    "android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL";
+
+            /**
+             * Broadcast action: When SMS-MMS db is being created. If file-based encryption is
+             * supported, this broadcast indicates creation of the db in credential-encrypted
+             * storage. A boolean is specified in {@link #EXTRA_IS_INITIAL_CREATE} to indicate if
+             * this is the initial create of the db. Requires
+             * {@link android.Manifest.permission#READ_SMS} to receive.
+             *
+             * @see #EXTRA_IS_INITIAL_CREATE
+             *
+             * @hide
+             */
+            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+            public static final String ACTION_SMS_MMS_DB_CREATED =
+                    "android.provider.action.SMS_MMS_DB_CREATED";
+
+            /**
+             * Boolean flag passed as an extra with {@link #ACTION_SMS_MMS_DB_CREATED} to indicate
+             * whether the DB creation is the initial creation on the device, that is it is after a
+             * factory-data reset or a new device. Any subsequent creations of the DB (which
+             * happens only in error scenarios) will have this flag set to false.
+             *
+             * @see #ACTION_SMS_MMS_DB_CREATED
+             *
+             * @hide
+             */
+            public static final String EXTRA_IS_INITIAL_CREATE =
+                    "android.provider.extra.IS_INITIAL_CREATE";
+
+            /**
+             * Broadcast intent action indicating that the telephony provider SMS MMS database is
+             * corrupted. A boolean is specified in {@link #EXTRA_IS_CORRUPTED} to indicate if the
+             * database is corrupted. Requires the
+             * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE permission.
+             *
+             * @hide
+             */
+            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+            @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+            public static final String ACTION_SMS_MMS_DB_LOST =
+                    "android.provider.action.SMS_MMS_DB_LOST";
+
+            /**
+             * Boolean flag passed as an extra with {@link #ACTION_SMS_MMS_DB_LOST} to indicate
+             * whether the DB got corrupted or not.
+             *
+             * @see #ACTION_SMS_MMS_DB_LOST
+             *
+             * @hide
+             */
+            public static final String EXTRA_IS_CORRUPTED =
+                    "android.provider.extra.IS_CORRUPTED";
 
             /**
              * Read the PDUs out of an {@link #SMS_RECEIVED_ACTION} or a
@@ -2597,8 +2668,24 @@ public final class Telephony {
 
         /**
          * The {@code content://} style URL for this table.
+         * For MSIM, this will return APNs for the default subscription
+         * {@link SubscriptionManager#getDefaultSubscriptionId()}. To specify subId for MSIM,
+         * use {@link Uri#withAppendedPath(Uri, String)} to append with subscription id.
          */
         public static final Uri CONTENT_URI = Uri.parse("content://telephony/carriers");
+
+        /**
+         * The {@code content://} style URL for this table. Used for APN query based on current
+         * subscription. Instead of specifying carrier matching information in the selection,
+         * this API will return all matching APNs from current subscription carrier and queries
+         * will be applied on top of that. If there is no match for MVNO (Mobile Virtual Network
+         * Operator) APNs, return APNs from its MNO (based on mccmnc) instead. For MSIM, this will
+         * return APNs for the default subscription
+         * {@link SubscriptionManager#getDefaultSubscriptionId()}. To specify subId for MSIM,
+         * use {@link Uri#withAppendedPath(Uri, String)} to append with subscription id.
+         */
+        public static final Uri SIM_APN_URI = Uri.parse(
+                "content://telephony/carriers/sim_apn_list");
 
         /**
          * The {@code content://} style URL to be called from DevicePolicyManagerService,
@@ -2610,7 +2697,9 @@ public final class Telephony {
         /**
          * The {@code content://} style URL to be called from Telephony to query APNs.
          * When DPC-owned APNs are enforced, only DPC-owned APNs are returned, otherwise only
-         * non-DPC-owned APNs are returned.
+         * non-DPC-owned APNs are returned. For MSIM, this will return APNs for the default
+         * subscription {@link SubscriptionManager#getDefaultSubscriptionId()}. To specify subId
+         * for MSIM, use {@link Uri#withAppendedPath(Uri, String)} to append with subscription id.
          * @hide
          */
         public static final Uri FILTERED_URI = Uri.parse("content://telephony/carriers/filtered");
@@ -2697,18 +2786,30 @@ public final class Telephony {
         /**
          * Mobile Country Code (MCC).
          * <P>Type: TEXT</P>
+         * @deprecated Use {@link #SIM_APN_URI} to query APN instead, this API will return
+         * matching APNs based on current subscription carrier, thus no need to specify MCC and
+         * other carrier matching information. In the future, Android will not support MCC for
+         * APN query.
          */
         public static final String MCC = "mcc";
 
         /**
          * Mobile Network Code (MNC).
          * <P>Type: TEXT</P>
+         * @deprecated Use {@link #SIM_APN_URI} to query APN instead, this API will return
+         * matching APNs based on current subscription carrier, thus no need to specify MNC and
+         * other carrier matching information. In the future, Android will not support MNC for
+         * APN query.
          */
         public static final String MNC = "mnc";
 
         /**
          * Numeric operator ID (as String). Usually {@code MCC + MNC}.
          * <P>Type: TEXT</P>
+         * @deprecated Use {@link #SIM_APN_URI} to query APN instead, this API will return
+         * matching APNs based on current subscription carrier, thus no need to specify Numeric
+         * and other carrier matching information. In the future, Android will not support Numeric
+         * for APN query.
          */
         public static final String NUMERIC = "numeric";
 
@@ -2789,6 +2890,10 @@ public final class Telephony {
          * MVNO type:
          * {@code SPN (Service Provider Name), IMSI, GID (Group Identifier Level 1)}.
          * <P>Type: TEXT</P>
+         * @deprecated Use {@link #SIM_APN_URI} to query APN instead, this API will return
+         * matching APNs based on current subscription carrier, thus no need to specify MVNO_TYPE
+         * and other carrier matching information. In the future, Android will not support MVNO_TYPE
+         * for APN query.
          */
         public static final String MVNO_TYPE = "mvno_type";
 
@@ -2801,6 +2906,10 @@ public final class Telephony {
          *     <li>GID: 4E, 33, ...</li>
          * </ul>
          * <P>Type: TEXT</P>
+         * @deprecated Use {@link #SIM_APN_URI} to query APN instead, this API will return
+         * matching APNs based on current subscription carrier, thus no need to specify
+         * MVNO_MATCH_DATA and other carrier matching information. In the future, Android will not
+         * support MVNO_MATCH_DATA for APN query.
          */
         public static final String MVNO_MATCH_DATA = "mvno_match_data";
 
@@ -2811,100 +2920,143 @@ public final class Telephony {
         public static final String SUBSCRIPTION_ID = "sub_id";
 
         /**
-         * The profile_id to which the APN saved in modem
+         * The profile_id to which the APN saved in modem.
          * <p>Type: INTEGER</p>
          *@hide
          */
         public static final String PROFILE_ID = "profile_id";
 
         /**
-         * Is the apn setting to be set in modem
-         * <P>Type: INTEGER (boolean)</P>
+         * If set to {@code true}, then the APN setting will persist to the modem.
+         * <p>Type: INTEGER (boolean)</p>
          *@hide
          */
-        public static final String MODEM_COGNITIVE = "modem_cognitive";
+        @SystemApi
+        public static final String MODEM_PERSIST = "modem_cognitive";
 
         /**
-         * The max connections of this apn
+         * The max number of connections of this APN.
          * <p>Type: INTEGER</p>
          *@hide
          */
-        public static final String MAX_CONNS = "max_conns";
+        @SystemApi
+        public static final String MAX_CONNECTIONS = "max_conns";
 
         /**
-         * The wait time for retry of the apn
+         * The wait time for retrying the APN, in milliseconds.
          * <p>Type: INTEGER</p>
          *@hide
          */
-        public static final String WAIT_TIME = "wait_time";
+        @SystemApi
+        public static final String WAIT_TIME_RETRY = "wait_time";
 
         /**
-         * The time to limit max connection for the apn
+         * The max number of seconds this APN will support its maximum number of connections
+         * as defined in {@link #MAX_CONNECTIONS}.
          * <p>Type: INTEGER</p>
          *@hide
          */
-        public static final String MAX_CONNS_TIME = "max_conns_time";
+        @SystemApi
+        public static final String TIME_LIMIT_FOR_MAX_CONNECTIONS = "max_conns_time";
 
         /**
-         * The MTU size of the mobile interface to  which the APN connected
+         * The MTU (maximum transmit unit) size of the mobile interface to which the APN is
+         * connected, in bytes.
          * <p>Type: INTEGER </p>
          * @hide
          */
+        @SystemApi
         public static final String MTU = "mtu";
 
         /**
-         * Is this APN added/edited/deleted by a user or carrier?
+         * APN edit status. APN could be added/edited/deleted by a user or carrier.
+         * see all possible returned APN edit status.
+         * <ul>
+         *     <li>{@link #UNEDITED}</li>
+         *     <li>{@link #USER_EDITED}</li>
+         *     <li>{@link #USER_DELETED}</li>
+         *     <li>{@link #CARRIER_EDITED}</li>
+         *     <li>{@link #CARRIER_DELETED}</li>
+         * </ul>
          * <p>Type: INTEGER </p>
          * @hide
          */
-        public static final String EDITED = "edited";
+        @SystemApi
+        public static final String EDITED_STATUS = "edited";
 
         /**
-         * Is this APN visible to the user?
-         * <p>Type: INTEGER (boolean) </p>
+         * {@code true} if this APN visible to the user, {@code false} otherwise.
+         * <p>Type: INTEGER (boolean)</p>
          * @hide
          */
+        @SystemApi
         public static final String USER_VISIBLE = "user_visible";
 
         /**
-         * Is the user allowed to edit this APN?
-         * <p>Type: INTEGER (boolean) </p>
+         * {@code true} if the user allowed to edit this APN, {@code false} otherwise.
+         * <p>Type: INTEGER (boolean)</p>
          * @hide
          */
+        @SystemApi
         public static final String USER_EDITABLE = "user_editable";
 
         /**
-         * Following are possible values for the EDITED field
+         * {@link #EDITED_STATUS APN edit status} indicates that this APN has not been edited or
+         * fails to edit.
+         * <p>Type: INTEGER </p>
          * @hide
          */
-        public static final int UNEDITED = 0;
+        @SystemApi
+        public static final @EditStatus int UNEDITED = 0;
+
         /**
-         *  @hide
+         * {@link #EDITED_STATUS APN edit status} indicates that this APN has been edited by users.
+         * <p>Type: INTEGER </p>
+         * @hide
          */
-        public static final int USER_EDITED = 1;
+        @SystemApi
+        public static final @EditStatus int USER_EDITED = 1;
+
         /**
-         *  @hide
+         * {@link #EDITED_STATUS APN edit status} indicates that this APN has been deleted by users.
+         * <p>Type: INTEGER </p>
+         * @hide
          */
-        public static final int USER_DELETED = 2;
+        @SystemApi
+        public static final @EditStatus int USER_DELETED = 2;
+
         /**
-         * DELETED_BUT_PRESENT is an intermediate value used to indicate that an entry deleted
-         * by the user is still present in the new APN database and therefore must remain tagged
-         * as user deleted rather than completely removed from the database
+         * {@link #EDITED_STATUS APN edit status} is an intermediate value used to indicate that an
+         * entry deleted by the user is still present in the new APN database and therefore must
+         * remain tagged as user deleted rather than completely removed from the database.
          * @hide
          */
         public static final int USER_DELETED_BUT_PRESENT_IN_XML = 3;
+
         /**
-         *  @hide
-         */
-        public static final int CARRIER_EDITED = 4;
-        /**
-         * CARRIER_DELETED values are currently not used as there is no usecase. If they are used,
-         * delete() will have to change accordingly. Currently it is hardcoded to USER_DELETED.
+         * {@link #EDITED_STATUS APN edit status} indicates that this APN has been edited by
+         * carriers.
+         * <p>Type: INTEGER </p>
          * @hide
          */
-        public static final int CARRIER_DELETED = 5;
+        @SystemApi
+        public static final @EditStatus int CARRIER_EDITED = 4;
+
         /**
-         *  @hide
+         * {@link #EDITED_STATUS APN edit status} indicates that this APN has been deleted by
+         * carriers. CARRIER_DELETED values are currently not used as there is no use case.
+         * If they are used, delete() will have to change accordingly. Currently it is hardcoded to
+         * USER_DELETED.
+         * <p>Type: INTEGER </p>
+         * @hide
+         */
+        public static final @EditStatus int CARRIER_DELETED = 5;
+
+        /**
+         * {@link #EDITED_STATUS APN edit status} is an intermediate value used to indicate that an
+         * entry deleted by the carrier is still present in the new APN database and therefore must
+         * remain tagged as user deleted rather than completely removed from the database.
+         * @hide
          */
         public static final int CARRIER_DELETED_BUT_PRESENT_IN_XML = 6;
 
@@ -2933,18 +3085,39 @@ public final class Telephony {
          * The APN set id. When the user manually selects an APN or the framework sets an APN as
          * preferred, all APNs with the same set id as the selected APN should be prioritized over
          * APNs in other sets.
+         * <p>Type: INTEGER</p>
          * @hide
          */
+        @SystemApi
         public static final String APN_SET_ID = "apn_set_id";
 
         /**
-         * Possible value for the APN_SET_ID field. By default APNs will not belong to a set. If the
-         * user manually selects an APN with no set set, there is no need to prioritize any specific
-         * APN set ids.
+         * Possible value for the {@link #APN_SET_ID} field. By default APNs will not belong to a
+         * set. If the user manually selects an APN without apn set id, there is no need to
+         * prioritize any specific APN set ids.
+         * <p>Type: INTEGER</p>
          * @hide
          */
-        public static final int NO_SET_SET = 0;
+        @SystemApi
+        public static final int NO_APN_SET_ID = 0;
 
+        /**
+         * A unique carrier id associated with this APN
+         * {@see TelephonyManager#getSimCarrierId()}
+         * <p>Type: STRING</p>
+         */
+        public static final String CARRIER_ID = "carrier_id";
+
+        /** @hide */
+        @IntDef({
+                UNEDITED,
+                USER_EDITED,
+                USER_DELETED,
+                CARRIER_DELETED,
+                CARRIER_EDITED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface EditStatus {}
     }
 
     /**
@@ -3211,7 +3384,6 @@ public final class Telephony {
             values.put(CDMA_ERI_ICON_INDEX, state.getCdmaEriIconIndex());
             values.put(CDMA_ERI_ICON_MODE, state.getCdmaEriIconMode());
             values.put(IS_EMERGENCY_ONLY, state.isEmergencyOnly());
-            values.put(IS_DATA_ROAMING_FROM_REGISTRATION, state.getDataRoamingFromRegistration());
             values.put(IS_USING_CARRIER_AGGREGATION, state.isUsingCarrierAggregation());
             return values;
         }
@@ -3434,6 +3606,27 @@ public final class Telephony {
         }
 
         /**
+         * Generates a content {@link Uri} used to receive updates on precise carrier identity
+         * change on the given subscriptionId returned by
+         * {@link TelephonyManager#getSimPreciseCarrierId()}.
+         * @see TelephonyManager#ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED
+         * <p>
+         * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
+         * precise carrier identity {@link TelephonyManager#getSimPreciseCarrierId()}
+         * while your app is running. You can also use a {@link JobService} to ensure your app
+         * is notified of changes to the {@link Uri} even when it is not running.
+         * Note, however, that using a {@link JobService} does not guarantee timely delivery of
+         * updates to the {@link Uri}.
+         *
+         * @param subscriptionId the subscriptionId to receive updates on
+         * @return the Uri used to observe precise carrier identity changes
+         */
+        public static Uri getPreciseCarrierIdUriForSubscriptionId(int subscriptionId) {
+            return Uri.withAppendedPath(Uri.withAppendedPath(CONTENT_URI, "precise"),
+                    String.valueOf(subscriptionId));
+        }
+
+        /**
          * A user facing carrier name.
          * @see TelephonyManager#getSimCarrierIdName()
          * <P>Type: TEXT </P>
@@ -3446,6 +3639,33 @@ public final class Telephony {
          * <P>Type: INTEGER </P>
          */
         public static final String CARRIER_ID = "carrier_id";
+
+        /**
+         * A fine-grained carrier id.
+         * @see TelephonyManager#getSimPreciseCarrierId()
+         * This is not a database column, only used to notify content observers for
+         * {@link #getPreciseCarrierIdUriForSubscriptionId(int)}
+         */
+        public static final String PRECISE_CARRIER_ID = "precise_carrier_id";
+
+        /**
+         * A user facing carrier name for precise carrier id {@link #PRECISE_CARRIER_ID}.
+         * @see TelephonyManager#getSimPreciseCarrierIdName()
+         * This is not a database column, only used to notify content observers for
+         * {@link #getPreciseCarrierIdUriForSubscriptionId(int)}
+         */
+        public static final String PRECISE_CARRIER_ID_NAME = "precise_carrier_id_name";
+
+        /**
+         * A unique parent carrier id. The parent-child
+         * relationship can be used to further differentiate a single carrier by different networks,
+         * by prepaid v.s. postpaid or even by 4G v.s. 3G plan. It's an optional field.
+         * A carrier id with a valid parent_carrier_id is considered fine-grained carrier id, will
+         * not be returned as {@link #CARRIER_ID} but {@link #PRECISE_CARRIER_ID}.
+         * <P>Type: INTEGER </P>
+         * @hide
+         */
+        public static final String PARENT_CARRIER_ID = "parent_carrier_id";
 
         /**
          * Contains mappings between matching rules with carrier id for all carriers.
@@ -3499,6 +3719,12 @@ public final class Telephony {
              * <P>Type: TEXT </P>
              */
             public static final String ICCID_PREFIX = "iccid_prefix";
+
+            /**
+             * Certificate for carrier privilege access rules.
+             * <P>Type: TEXT in hex string </P>
+             */
+            public static final String PRIVILEGE_ACCESS_RULE = "privilege_access_rule";
 
             /**
              * The {@code content://} URI for this table.

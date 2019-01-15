@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+#include "androidfw/Locale.h"
+
 #include "link/NoDefaultResourceRemover.h"
 
 #include <algorithm>
 
 #include "ResourceTable.h"
+
+using android::ConfigDescription;
 
 namespace aapt {
 

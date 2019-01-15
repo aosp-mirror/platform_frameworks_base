@@ -242,7 +242,7 @@
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Elige el tamaño del Logger por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"¿Borrar almacenamiento continuo del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Cuando ya no supervisamos la actividad con el registrador de forma continua, estamos obligados a borrar los datos del registrador almacenados en el dispositivo."</string>
-    <string name="select_logpersist_title" msgid="7530031344550073166">"Guardar datos de forma continua"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Guardar datos de registro de forma continua"</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Seleccionar búferes de registro para guardarlos de forma continua en dispositivo"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Seleccionar configuración de USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Seleccionar configuración de USB"</string>
@@ -398,7 +398,7 @@
     <string name="battery_info_status_full" msgid="2824614753861462808">"Completa"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Controlada por el administrador"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Habilitada por el administrador"</string>
-    <string name="disabled_by_admin" msgid="8505398946020816620">"Inhabilitada por el administrador"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"Inhabilitado por el administrador"</string>
     <string name="disabled" msgid="9206776641295849915">"Inhabilitada"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Autorizadas"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"No autorizadas"</string>

@@ -25,7 +25,9 @@ import static android.system.OsConstants.RT_SCOPE_LINK;
 import static android.system.OsConstants.RT_SCOPE_SITE;
 import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
@@ -55,13 +57,13 @@ public class LinkAddress implements Parcelable {
     /**
      * IPv4 or IPv6 address.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private InetAddress address;
 
     /**
      * Prefix length.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int prefixLength;
 
     /**
@@ -167,7 +169,7 @@ public class LinkAddress implements Parcelable {
      * @param prefixLength The prefix length.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public LinkAddress(InetAddress address, int prefixLength) {
         this(address, prefixLength, 0, 0);
         this.scope = scopeForUnicastAddress(address);
@@ -190,7 +192,7 @@ public class LinkAddress implements Parcelable {
      * @param string The string to parse.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public LinkAddress(String address) {
         this(address, 0, 0);
         this.scope = scopeForUnicastAddress(this.address);

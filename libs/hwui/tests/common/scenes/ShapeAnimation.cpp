@@ -76,7 +76,7 @@ public:
                             paint.setStrokeWidth(strokeWidth);
                             // fill column with each op
                             int middleCount = canvas.save(SaveFlags::MatrixClip);
-                            for (auto op : ops) {
+                            for (const auto& op : ops) {
                                 int innerCount = canvas.save(SaveFlags::MatrixClip);
                                 canvas.clipRect(0, 0, cellSize, cellSize, SkClipOp::kIntersect);
                                 canvas.drawColor(Color::White, SkBlendMode::kSrcOver);

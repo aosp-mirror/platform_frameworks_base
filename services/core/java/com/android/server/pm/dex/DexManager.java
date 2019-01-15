@@ -30,17 +30,18 @@ import android.os.storage.StorageManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
+import android.util.Log;
 import android.util.Slog;
 import android.util.jar.StrictJarFile;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageDexOptimizer;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceUtils;
-import com.android.server.pm.PackageManagerServiceCompilerMapping;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,7 +75,7 @@ public class DexManager {
     private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST =
             "pm.dexopt.priv-apps-oob-list";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
 
@@ -152,7 +153,7 @@ public class DexManager {
      * @param classPaths the class paths corresponding to the class loaders names from
      *     {@param classLoadersNames}. The the first element corresponds to the first class loader
      *     and so on. A classpath is represented as a list of dex files separated by
-     *     {@code File.pathSeparator}.
+     *     {@code File.pathSeparator}, or null if the class loader's classpath is not known.
      *     The dex files found in the first class path will be recorded in the usage file.
      * @param loaderIsa the ISA of the app loading the dex files
      * @param loaderUserId the user id which runs the code loading the dex files
@@ -168,7 +169,8 @@ public class DexManager {
         }
     }
 
-    private void notifyDexLoadInternal(ApplicationInfo loadingAppInfo,
+    @VisibleForTesting
+    /*package*/ void notifyDexLoadInternal(ApplicationInfo loadingAppInfo,
             List<String> classLoaderNames, List<String> classPaths, String loaderIsa,
             int loaderUserId) {
         if (classLoaderNames.size() != classPaths.size()) {
@@ -185,12 +187,28 @@ public class DexManager {
             return;
         }
 
+        // The first classpath should never be null because the first classloader
+        // should always be an instance of BaseDexClassLoader.
+        String firstClassPath = classPaths.get(0);
+        if (firstClassPath == null) {
+            return;
+        }
         // The classpath is represented as a list of dex files separated by File.pathSeparator.
-        String[] dexPathsToRegister = classPaths.get(0).split(File.pathSeparator);
+        String[] dexPathsToRegister = firstClassPath.split(File.pathSeparator);
 
         // Encode the class loader contexts for the dexPathsToRegister.
         String[] classLoaderContexts = DexoptUtils.processContextForDexLoad(
                 classLoaderNames, classPaths);
+
+        // A null classLoaderContexts means that there are unsupported class loaders in the
+        // chain.
+        if (classLoaderContexts == null) {
+            if (DEBUG) {
+                Slog.i(TAG, loadingAppInfo.packageName +
+                        " uses unsupported class loader in " + classLoaderNames);
+            }
+            return;
+        }
 
         int dexPathIndex = 0;
         for (String dexPath : dexPathsToRegister) {
@@ -219,14 +237,10 @@ public class DexManager {
                 }
 
                 // Record dex file usage. If the current usage is a new pattern (e.g. new secondary,
-                // or UsedBytOtherApps), record will return true and we trigger an async write
+                // or UsedByOtherApps), record will return true and we trigger an async write
                 // to disk to make sure we don't loose the data in case of a reboot.
 
-                // A null classLoaderContexts means that there are unsupported class loaders in the
-                // chain.
-                String classLoaderContext = classLoaderContexts == null
-                        ? PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT
-                        : classLoaderContexts[dexPathIndex];
+                String classLoaderContext = classLoaderContexts[dexPathIndex];
                 if (mPackageDexUsage.record(searchResult.mOwningPackageName,
                         dexPath, loaderUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit,
                         loadingAppInfo.packageName, classLoaderContext)) {

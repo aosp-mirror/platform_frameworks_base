@@ -58,6 +58,11 @@ socket_connect_local(JNIEnv *env, jobject object,
     int ret;
     int fd;
 
+    if (name == NULL) {
+        jniThrowNullPointerException(env, NULL);
+        return;
+    }
+
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
     if (env->ExceptionCheck()) {

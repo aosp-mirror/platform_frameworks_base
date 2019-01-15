@@ -81,7 +81,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
-import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.GraphicsEnvironment;
 import android.os.Handler;
@@ -147,18 +146,16 @@ import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.am.MemInfoDumpProto;
 
-import dalvik.system.BaseDexClassLoader;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
 import dalvik.system.VMRuntime;
 
-import libcore.io.DropBox;
-import libcore.io.EventLogger;
 import libcore.io.IoUtils;
 import libcore.net.event.NetworkEventDispatcher;
 
@@ -333,7 +330,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     // An executor that performs multi-step transactions.
     private final TransactionExecutor mTransactionExecutor = new TransactionExecutor(this);
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final ResourcesManager mResourcesManager;
 
     private static final class ProviderKey {
@@ -367,7 +364,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     @UnsupportedAppUsage
     final ArrayMap<IBinder, ProviderRefCount> mProviderRefCountMap
         = new ArrayMap<IBinder, ProviderRefCount>();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final ArrayMap<IBinder, ProviderClientRecord> mLocalProviders
         = new ArrayMap<IBinder, ProviderClientRecord>();
     @UnsupportedAppUsage
@@ -385,9 +382,12 @@ public final class ActivityThread extends ClientTransactionHandler {
         = new ArrayMap<Activity, ArrayList<OnActivityPausedListener>>();
 
     final GcIdler mGcIdler = new GcIdler();
+    final PurgeIdler mPurgeIdler = new PurgeIdler();
+
+    boolean mPurgeIdlerScheduled = false;
     boolean mGcIdlerScheduled = false;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     static volatile Handler sMainThreadHandler;  // set once in main()
 
     Bundle mCoreSettings = null;
@@ -449,7 +449,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         private int mLifecycleState = PRE_ON_CREATE;
 
         @VisibleForTesting
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public ActivityClientRecord() {
             this.isForward = false;
             init();
@@ -697,7 +697,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         @UnsupportedAppUsage
         boolean persistent;
         Configuration config;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         CompatibilityInfo compatInfo;
         String buildSerial;
 
@@ -1667,6 +1667,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int RUN_ISOLATED_ENTRY_POINT = 158;
         public static final int EXECUTE_TRANSACTION = 159;
         public static final int RELAUNCH_ACTIVITY = 160;
+        public static final int PURGE_RESOURCES = 161;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1710,6 +1711,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     case RUN_ISOLATED_ENTRY_POINT: return "RUN_ISOLATED_ENTRY_POINT";
                     case EXECUTE_TRANSACTION: return "EXECUTE_TRANSACTION";
                     case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
+                    case PURGE_RESOURCES: return "PURGE_RESOURCES";
                 }
             }
             return Integer.toString(code);
@@ -1747,6 +1749,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 case UNBIND_SERVICE:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceUnbind");
                     handleUnbindService((BindServiceData)msg.obj);
+                    schedulePurgeIdler();
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case SERVICE_ARGS:
@@ -1757,6 +1760,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 case STOP_SERVICE:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceStop");
                     handleStopService((IBinder)msg.obj);
+                    schedulePurgeIdler();
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case CONFIGURATION_CHANGED:
@@ -1890,6 +1894,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                 case RELAUNCH_ACTIVITY:
                     handleRelaunchActivityLocally((IBinder) msg.obj);
                     break;
+                case PURGE_RESOURCES:
+                    schedulePurgeIdler();
+                    break;
             }
             Object obj = msg.obj;
             if (obj instanceof SomeArgs) {
@@ -1942,6 +1949,17 @@ public final class ActivityThread extends ClientTransactionHandler {
         @Override
         public final boolean queueIdle() {
             doGcIfNeeded();
+            nPurgePendingResources();
+            return false;
+        }
+    }
+
+    final class PurgeIdler implements MessageQueue.IdleHandler {
+        @Override
+        public boolean queueIdle() {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "purgePendingResources");
+            nPurgePendingResources();
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             return false;
         }
     }
@@ -2024,7 +2042,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return mH;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
             int flags) {
         return getPackageInfo(packageName, compatInfo, flags, UserHandle.myUserId());
@@ -2113,7 +2131,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return getPackageInfo(ai, compatInfo, null, false, true, false);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final LoadedApk peekPackageInfo(String packageName, boolean includeCode) {
         synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
@@ -2269,6 +2287,22 @@ public final class ActivityThread extends ClientTransactionHandler {
             Looper.myQueue().removeIdleHandler(mGcIdler);
         }
         mH.removeMessages(H.GC_WHEN_IDLE);
+    }
+
+    void schedulePurgeIdler() {
+        if (!mPurgeIdlerScheduled) {
+            mPurgeIdlerScheduled = true;
+            Looper.myQueue().addIdleHandler(mPurgeIdler);
+        }
+        mH.removeMessages(H.PURGE_RESOURCES);
+    }
+
+    void unschedulePurgeIdler() {
+        if (mPurgeIdlerScheduled) {
+            mPurgeIdlerScheduled = false;
+            Looper.myQueue().removeIdleHandler(mPurgeIdler);
+        }
+        mH.removeMessages(H.PURGE_RESOURCES);
     }
 
     void doGcIfNeeded() {
@@ -2786,7 +2820,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return aInfo;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final Activity startActivityNow(Activity parent, String id,
         Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state,
         Activity.NonConfigurationInstances lastNonConfigurationInstances) {
@@ -3426,7 +3460,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return sCurrentBroadcastIntent.get();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private void handleReceiver(ReceiverData data) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
@@ -4560,6 +4594,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
             r.setState(ON_DESTROY);
         }
+        schedulePurgeIdler();
         mActivities.remove(token);
         StrictMode.decrementExpectedActivityCount(activityClass);
         return r;
@@ -5244,6 +5279,16 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    /**
+     * Updates the application info.
+     *
+     * This only works in the system process. Must be called on the main thread.
+     */
+    public void handleSystemApplicationInfoChanged(@NonNull ApplicationInfo ai) {
+        Preconditions.checkState(mSystemThread, "Must only be called in the system process");
+        handleApplicationInfoChanged(ai);
+    }
+
     void handleApplicationInfoChanged(@NonNull final ApplicationInfo ai) {
         // Updates triggered by package installation go through a package update
         // receiver. Here we try to capture ApplicationInfo changes that are
@@ -5860,16 +5905,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         } else {
             ThreadedRenderer.setIsolatedProcess(true);
-        }
-
-        // If we use profiles, setup the dex reporter to notify package manager
-        // of any relevant dex loads. The idle maintenance job will use the information
-        // reported to optimize the loaded dex files.
-        // Note that we only need one global reporter per app.
-        // Make sure we do this before calling onCreate so that we can capture the
-        // complete application startup.
-        if (SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
-            BaseDexClassLoader.setReporter(DexLoadReporter.getInstance());
         }
 
         // Install the Network Security Config Provider. This must happen before the application
@@ -6642,9 +6677,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
 
-        // add dropbox logging to libcore
-        DropBox.setReporter(new DropBoxReporter());
-
         ViewRootImpl.ConfigChangedCallback configChangedCallback
                 = (Configuration globalConfig) -> {
             synchronized (mResourcesManager) {
@@ -6698,38 +6730,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    private static class EventLoggingReporter implements EventLogger.Reporter {
-        @Override
-        public void report (int code, Object... list) {
-            EventLog.writeEvent(code, list);
-        }
-    }
-
-    private class DropBoxReporter implements DropBox.Reporter {
-
-        private DropBoxManager dropBox;
-
-        public DropBoxReporter() {}
-
-        @Override
-        public void addData(String tag, byte[] data, int flags) {
-            ensureInitialized();
-            dropBox.addData(tag, data, flags);
-        }
-
-        @Override
-        public void addText(String tag, String data) {
-            ensureInitialized();
-            dropBox.addText(tag, data);
-        }
-
-        private synchronized void ensureInitialized() {
-            if (dropBox == null) {
-                dropBox = (DropBoxManager) getSystemContext().getSystemService(Context.DROPBOX_SERVICE);
-            }
-        }
-    }
-
     public static void main(String[] args) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ActivityThreadMain");
 
@@ -6739,9 +6739,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         CloseGuard.setEnabled(false);
 
         Environment.initForCurrentUser();
-
-        // Set the reporter for event logging in libcore
-        EventLogger.setReporter(new EventLoggingReporter());
 
         // Make sure TrustedCertificateStore looks in the right place for CA certificates
         final File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
@@ -6782,6 +6779,6 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     // ------------------ Regular JNI ------------------------
-
+    private native void nPurgePendingResources();
     private native void nDumpGraphicsInfo(FileDescriptor fd);
 }

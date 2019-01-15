@@ -151,6 +151,8 @@ public final class DisplayManagerService extends SystemService {
     // Otherwise WFD is enabled according to the value of config_enableWifiDisplay.
     private static final String FORCE_WIFI_DISPLAY_ENABLE = "persist.debug.wfd.enable";
 
+    private static final String PROP_DEFAULT_DISPLAY_TOP_INSET = "persist.sys.displayinset.top";
+
     private static final long WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT = 10000;
 
     private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS = 1;
@@ -243,6 +245,15 @@ public final class DisplayManagerService extends SystemService {
     // device).
     private Point mStableDisplaySize = new Point();
 
+    // Whether the system has finished booting or not.
+    private boolean mSystemReady;
+
+    // The top inset of the default display.
+    // This gets persisted so that the boot animation knows how to transition from the display's
+    // full size to the size configured by the user. Right now we only persist and animate the top
+    // inset, but theoretically we could do it for all of them.
+    private int mDefaultDisplayTopInset;
+
     // Viewports of the default display and the display that should receive touch
     // input from an external source.  Used by the input system.
     private final DisplayViewport mDefaultViewport = new DisplayViewport();
@@ -301,6 +312,7 @@ public final class DisplayManagerService extends SystemService {
         Resources resources = mContext.getResources();
         mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultDisplayDefaultColorMode);
+        mDefaultDisplayTopInset = SystemProperties.getInt(PROP_DEFAULT_DISPLAY_TOP_INSET, -1);
         float[] lux = getFloatArray(resources.obtainTypedArray(
                 com.android.internal.R.array.config_minimumBrightnessCurveLux));
         float[] nits = getFloatArray(resources.obtainTypedArray(
@@ -311,6 +323,8 @@ public final class DisplayManagerService extends SystemService {
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
         mCurrentUserId = UserHandle.USER_SYSTEM;
+
+        mSystemReady = false;
     }
 
     public void setupSchedulerPolicies() {
@@ -400,6 +414,10 @@ public final class DisplayManagerService extends SystemService {
         synchronized (mSyncRoot) {
             mSafeMode = safeMode;
             mOnlyCore = onlyCore;
+            mSystemReady = true;
+            // Just in case the top inset changed before the system was ready. At this point, any
+            // relevant configuration should be in place.
+            recordTopInsetLocked(mLogicalDisplays.get(Display.DEFAULT_DISPLAY));
         }
 
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
@@ -457,7 +475,7 @@ public final class DisplayManagerService extends SystemService {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
             if (display != null) {
                 if (display.setDisplayInfoOverrideFromWindowManagerLocked(info)) {
-                    sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+                    handleLogicalDisplayChanged(displayId, display);
                     scheduleTraversalLocked(false);
                 }
             }
@@ -938,6 +956,13 @@ public final class DisplayManagerService extends SystemService {
         scheduleTraversalLocked(false);
     }
 
+    private void handleLogicalDisplayChanged(int displayId, @NonNull LogicalDisplay display) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            recordTopInsetLocked(display);
+        }
+        sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+    }
+
     private void applyGlobalDisplayStateLocked(List<Runnable> workQueue) {
         final int count = mDisplayDevices.size();
         for (int i = 0; i < count; i++) {
@@ -991,6 +1016,7 @@ public final class DisplayManagerService extends SystemService {
         configureColorModeLocked(display, device);
         if (isDefault) {
             recordStableDisplayStatsIfNeededLocked(display);
+            recordTopInsetLocked(display);
         }
 
         mLogicalDisplays.put(displayId, display);
@@ -1037,6 +1063,21 @@ public final class DisplayManagerService extends SystemService {
             DisplayInfo info = d.getDisplayInfoLocked();
             setStableDisplaySizeLocked(info.getNaturalWidth(), info.getNaturalHeight());
         }
+    }
+
+    private void recordTopInsetLocked(@Nullable LogicalDisplay d) {
+        // We must only persist the inset after boot has completed, otherwise we will end up
+        // overwriting the persisted value before the masking flag has been loaded from the
+        // resource overlay.
+        if (!mSystemReady || d == null) {
+            return;
+        }
+        int topInset = d.getInsets().top;
+        if (topInset == mDefaultDisplayTopInset) {
+            return;
+        }
+        mDefaultDisplayTopInset = topInset;
+        SystemProperties.set(PROP_DEFAULT_DISPLAY_TOP_INSET, Integer.toString(topInset));
     }
 
     private void setStableDisplaySizeLocked(int width, int height) {
@@ -1118,7 +1159,7 @@ public final class DisplayManagerService extends SystemService {
                 sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
                 changed = true;
             } else if (!mTempDisplayInfo.equals(display.getDisplayInfoLocked())) {
-                sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+                handleLogicalDisplayChanged(displayId, display);
                 changed = true;
             }
         }

@@ -16,6 +16,7 @@
 
 package com.android.internal.util;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.Log;
 import android.util.Printer;
 
@@ -77,6 +78,7 @@ public class FastPrintWriter extends PrintWriter {
      * @throws NullPointerException
      *             if {@code out} is {@code null}.
      */
+    @UnsupportedAppUsage
     public FastPrintWriter(OutputStream out) {
         this(out, false, 8192);
     }

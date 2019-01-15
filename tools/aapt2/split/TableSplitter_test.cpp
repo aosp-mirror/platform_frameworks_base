@@ -18,6 +18,8 @@
 
 #include "test/Test.h"
 
+using ::android::ConfigDescription;
+
 namespace aapt {
 
 TEST(TableSplitterTest, NoSplitPreferredDensity) {

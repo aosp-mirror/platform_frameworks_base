@@ -79,8 +79,6 @@ public class PhoneConstants {
     public static final int SIM_ACTIVATION_TYPE_DATA = 1;
 
     public static final String PHONE_NAME_KEY = "phoneName";
-    public static final String FAILURE_REASON_KEY = "reason";
-    public static final String STATE_CHANGE_REASON_KEY = "reason";
     public static final String DATA_NETWORK_TYPE_KEY = "networkType";
     public static final String DATA_FAILURE_CAUSE_KEY = "failCause";
     public static final String DATA_APN_TYPE_KEY = "apnType";
@@ -176,6 +174,10 @@ public class PhoneConstants {
 
     // FIXME: This is used to pass a subId via intents, we need to look at its usage, which is
     // FIXME: extensive, and see if this should be an array of all active subId's or ...?
+    /**
+     * @Deprecated use {@link android.telephony.SubscriptionManager#EXTRA_SUBSCRIPTION_INDEX}
+     * instead.
+     */
     public static final String SUBSCRIPTION_KEY  = "subscription";
 
     public static final String SUB_SETTING  = "subSettings";

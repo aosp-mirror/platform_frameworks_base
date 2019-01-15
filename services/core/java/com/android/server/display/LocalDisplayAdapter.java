@@ -31,8 +31,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.Trace;
-import android.text.TextUtils;
-import android.util.PathParser;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -404,8 +402,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
                     }
-                    mInfo.displayCutout = DisplayCutout.fromResources(res, mInfo.width,
-                            mInfo.height);
+                    if (res.getBoolean(
+                            com.android.internal.R.bool.config_maskMainBuiltInDisplayCutout)) {
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT;
+                    }
+                    mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
+                            mInfo.width, mInfo.height);
                     mInfo.type = Display.TYPE_BUILT_IN;
                     mInfo.densityDpi = (int)(phys.density * 160 + 0.5f);
                     mInfo.xDpi = phys.xDpi;

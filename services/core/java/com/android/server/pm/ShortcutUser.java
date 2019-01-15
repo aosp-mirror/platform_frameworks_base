@@ -294,13 +294,14 @@ class ShortcutUser {
      */
     public void detectLocaleChange() {
         final String currentLocales = mService.injectGetLocaleTagsForUser(mUserId);
-        if (getKnownLocales().equals(currentLocales)) {
+        if (!TextUtils.isEmpty(mKnownLocales) && mKnownLocales.equals(currentLocales)) {
             return;
         }
         if (ShortcutService.DEBUG) {
-            Slog.d(TAG, "Locale changed from " + currentLocales + " to " + mKnownLocales
+            Slog.d(TAG, "Locale changed from " + mKnownLocales + " to " + currentLocales
                     + " for user " + mUserId);
         }
+
         mKnownLocales = currentLocales;
 
         forAllPackages(pkg -> {

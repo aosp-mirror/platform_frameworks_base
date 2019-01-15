@@ -52,6 +52,7 @@ public class FontFamily {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public long mNativePtr;
 
     // Points native font family builder. Must be zero after freezing this family.

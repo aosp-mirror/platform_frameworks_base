@@ -27,7 +27,6 @@ import java.util.Collection;
 public class NotificationVisibility implements Parcelable {
     private static final String TAG = "NoViz";
     private static final int MAX_POOL_SIZE = 25;
-    private static ArrayDeque<NotificationVisibility> sPool = new ArrayDeque<>(MAX_POOL_SIZE);
     private static int sNexrId = 0;
 
     public String key;
@@ -119,11 +118,6 @@ public class NotificationVisibility implements Parcelable {
     }
 
     private static NotificationVisibility obtain() {
-        synchronized (sPool) {
-            if (!sPool.isEmpty()) {
-                return sPool.poll();
-            }
-        }
         return new NotificationVisibility();
     }
 
@@ -135,16 +129,7 @@ public class NotificationVisibility implements Parcelable {
      * </p>
      */
     public void recycle() {
-        if (key == null) {
-            // do nothing on multiple recycles
-            return;
-        }
-        key = null;
-        if (sPool.size() < MAX_POOL_SIZE) {
-            synchronized (sPool) {
-                sPool.offer(this);
-            }
-        }
+        // With a modern GC, this is no longer useful for objects this small.
     }
 
     /**

@@ -68,6 +68,8 @@ cpp_type_name(java_type_t type)
             return "double";
         case JAVA_TYPE_STRING:
             return "char const*";
+        case JAVA_TYPE_BYTE_ARRAY:
+            return "const BytesField&";
         default:
             return "UNKNOWN";
     }
@@ -90,6 +92,8 @@ java_type_name(java_type_t type)
             return "double";
         case JAVA_TYPE_STRING:
             return "java.lang.String";
+        case JAVA_TYPE_BYTE_ARRAY:
+            return "byte[]";
         default:
             return "UNKNOWN";
     }
@@ -104,7 +108,9 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
     fprintf(out, "#include <mutex>\n");
     fprintf(out, "#include <chrono>\n");
     fprintf(out, "#include <thread>\n");
+    fprintf(out, "#ifdef __ANDROID__\n");
     fprintf(out, "#include <cutils/properties.h>\n");
+    fprintf(out, "#endif\n");
     fprintf(out, "#include <stats_event_list.h>\n");
     fprintf(out, "#include <log/log.h>\n");
     fprintf(out, "#include <statslog.h>\n");
@@ -115,7 +121,11 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
     fprintf(out, "namespace util {\n");
     fprintf(out, "// the single event tag id for all stats logs\n");
     fprintf(out, "const static int kStatsEventTag = 1937006964;\n");
+    fprintf(out, "#ifdef __ANDROID__\n");
     fprintf(out, "const static bool kStatsdEnabled = property_get_bool(\"ro.statsd.enable\", true);\n");
+    fprintf(out, "#else\n");
+    fprintf(out, "const static bool kStatsdEnabled = false;\n");
+    fprintf(out, "#endif\n");
 
     std::set<string> kTruncatingAtomNames = {"mobile_radio_power_state_changed",
                                              "audio_state_changed",
@@ -200,13 +210,40 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
     }
 
     fprintf(out, "    return options;\n");
-    fprintf(out, "  }\n");
+    fprintf(out, "}\n");
 
     fprintf(out,
             "const std::map<int, StateAtomFieldOptions> "
             "AtomsInfo::kStateAtomsFieldOptions = "
             "getStateAtomFieldOptions();\n");
 
+    fprintf(out,
+            "static std::map<int, std::vector<int>> "
+            "getBinaryFieldAtoms() {\n");
+    fprintf(out, "    std::map<int, std::vector<int>> options;\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+         atom != atoms.decls.end(); atom++) {
+        if (atom->binaryFields.size() == 0) {
+            continue;
+        }
+        fprintf(out,
+                "\n    // Adding binary fields for atom "
+                "(%d)%s\n",
+                atom->code, atom->name.c_str());
+
+        for (const auto& field : atom->binaryFields) {
+            fprintf(out, "    options[static_cast<int>(%s)].push_back(%d);\n",
+                    make_constant_name(atom->name).c_str(), field);
+        }
+    }
+
+    fprintf(out, "    return options;\n");
+    fprintf(out, "}\n");
+
+    fprintf(out,
+            "const std::map<int, std::vector<int>> "
+            "AtomsInfo::kBytesFieldAtoms = "
+            "getBinaryFieldAtoms();\n");
 
     fprintf(out, "int64_t lastRetryTimestampNs = -1;\n");
     fprintf(out, "const int64_t kMinRetryIntervalNs = NS_PER_SEC * 60 * 20; // 20 minutes\n");
@@ -277,6 +314,11 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                 fprintf(out, "        event.end();\n");
                 fprintf(out, "    }\n");
                 fprintf(out, "    event.end();\n\n");
+            } else if (*arg == JAVA_TYPE_BYTE_ARRAY) {
+                fprintf(out,
+                        "    event.AppendCharArray(arg%d.arg, "
+                        "arg%d.arg_length);\n",
+                        argIndex, argIndex);
             } else {
                 if (*arg == JAVA_TYPE_STRING) {
                     fprintf(out, "    if (arg%d == NULL) {\n", argIndex);
@@ -396,7 +438,14 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                 fprintf(out, "        arg%d = \"\";\n", argIndex);
                 fprintf(out, "    }\n");
             }
-            fprintf(out, "    event << arg%d;\n", argIndex);
+            if (*arg == JAVA_TYPE_BYTE_ARRAY) {
+                fprintf(out,
+                        "    event.AppendCharArray(arg%d.arg, "
+                        "arg%d.arg_length);",
+                        argIndex, argIndex);
+            } else {
+                fprintf(out, "    event << arg%d;\n", argIndex);
+            }
             if (argIndex == 2) {
                 fprintf(out, "    event.end();\n\n");
                 fprintf(out, "    event.end();\n\n");
@@ -476,7 +525,9 @@ void build_non_chained_decl_map(const Atoms& atoms,
 static void write_cpp_usage(
     FILE* out, const string& method_name, const string& atom_code_name,
     const AtomDecl& atom, const AtomDecl &attributionDecl) {
-    fprintf(out, "     * Usage: %s(StatsLog.%s", method_name.c_str(), atom_code_name.c_str());
+    fprintf(out, "     * Usage: %s(StatsLog.%s", method_name.c_str(),
+            atom_code_name.c_str());
+
     for (vector<AtomField>::const_iterator field = atom.fields.begin();
             field != atom.fields.end(); field++) {
         if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
@@ -584,6 +635,15 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out, "};\n");
     fprintf(out, "\n");
 
+    fprintf(out, "struct BytesField {\n");
+    fprintf(out,
+            "  BytesField(char const* array, size_t len) : arg(array), "
+            "arg_length(len) {}\n");
+    fprintf(out, "  char const* arg;\n");
+    fprintf(out, "  size_t arg_length;\n");
+    fprintf(out, "};\n");
+    fprintf(out, "\n");
+
     fprintf(out, "struct StateAtomFieldOptions {\n");
     fprintf(out, "  std::vector<int> primaryFields;\n");
     fprintf(out, "  int exclusiveField;\n");
@@ -600,6 +660,9 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out,
             "  const static std::map<int, StateAtomFieldOptions> "
             "kStateAtomsFieldOptions;\n");
+    fprintf(out,
+            "  const static std::map<int, std::vector<int>> "
+            "kBytesFieldAtoms;");
     fprintf(out, "};\n");
 
     fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n",
@@ -632,6 +695,8 @@ static void write_java_usage(FILE* out, const string& method_name, const string&
         field != atom.fields.end(); field++) {
         if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
             fprintf(out, ", android.os.WorkSource workSource");
+        } else if (field->javaType == JAVA_TYPE_BYTE_ARRAY) {
+            fprintf(out, ", byte[] %s", field->name.c_str());
         } else {
             fprintf(out, ", %s %s", java_type_name(field->javaType), field->name.c_str());
         }
@@ -644,6 +709,7 @@ static void write_java_method(
     const AtomDecl &attributionDecl) {
     for (set<vector<java_type_t>>::const_iterator signature = signatures.begin();
         signature != signatures.end(); signature++) {
+        fprintf(out, "    /** @hide */\n");
         fprintf(out, "    public static native int %s(int code", method_name.c_str());
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature->begin();
@@ -687,6 +753,7 @@ static void write_java_work_source_method(FILE* out, const set<vector<java_type_
         }
 
         // Method header (signature)
+        fprintf(out, "    /** @hide */\n");
         fprintf(out, "    public static void write(int code");
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature->begin();
@@ -766,6 +833,7 @@ write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionD
         if (non_chained_decl != atom_code_to_non_chained_decl_map.end()) {
             write_java_usage(out, "write_non_chained", constant, *non_chained_decl->second);
         }
+        fprintf(out, "     * @hide\n");
         fprintf(out, "     */\n");
         fprintf(out, "    public static final int %s = %d;\n", constant.c_str(), atom->code);
     }
@@ -782,6 +850,7 @@ write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionD
                     field->name.c_str());
                 for (map<int, string>::const_iterator value = field->enumValues.begin();
                     value != field->enumValues.end(); value++) {
+                    fprintf(out, "    /** @hide */\n");
                     fprintf(out, "    public static final int %s__%s__%s = %d;\n",
                         make_constant_name(atom->message).c_str(),
                         make_constant_name(field->name).c_str(),
@@ -821,6 +890,8 @@ jni_type_name(java_type_t type)
             return "jdouble";
         case JAVA_TYPE_STRING:
             return "jstring";
+        case JAVA_TYPE_BYTE_ARRAY:
+            return "jbyteArray";
         default:
             return "UNKNOWN";
     }
@@ -868,6 +939,9 @@ jni_function_name(const string& method_name, const vector<java_type_t>& signatur
             case JAVA_TYPE_ATTRIBUTION_CHAIN:
               result += "_AttributionChain";
               break;
+            case JAVA_TYPE_BYTE_ARRAY:
+                result += "_bytes";
+                break;
             default:
                 result += "_UNKNOWN";
                 break;
@@ -893,6 +967,8 @@ java_type_signature(java_type_t type)
             return "D";
         case JAVA_TYPE_STRING:
             return "Ljava/lang/String;";
+        case JAVA_TYPE_BYTE_ARRAY:
+            return "[B";
         default:
             return "UNKNOWN";
     }
@@ -960,6 +1036,37 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
                 fprintf(out, "    } else {\n");
                 fprintf(out, "        str%d = NULL;\n", argIndex);
                 fprintf(out, "    }\n");
+            } else if (*arg == JAVA_TYPE_BYTE_ARRAY) {
+                hadStringOrChain = true;
+                fprintf(out, "    jbyte* jbyte_array%d;\n", argIndex);
+                fprintf(out, "    const char* str%d;\n", argIndex);
+                fprintf(out, "    int str%d_length = 0;\n", argIndex);
+                fprintf(out,
+                        "    if (arg%d != NULL && env->GetArrayLength(arg%d) > "
+                        "0) {\n",
+                        argIndex, argIndex);
+                fprintf(out,
+                        "        jbyte_array%d = "
+                        "env->GetByteArrayElements(arg%d, NULL);\n",
+                        argIndex, argIndex);
+                fprintf(out,
+                        "        str%d_length = env->GetArrayLength(arg%d);\n",
+                        argIndex, argIndex);
+                fprintf(out,
+                        "        str%d = "
+                        "reinterpret_cast<char*>(env->GetByteArrayElements(arg%"
+                        "d, NULL));\n",
+                        argIndex, argIndex);
+                fprintf(out, "    } else {\n");
+                fprintf(out, "        jbyte_array%d = NULL;\n", argIndex);
+                fprintf(out, "        str%d = NULL;\n", argIndex);
+                fprintf(out, "    }\n");
+
+                fprintf(out,
+                        "    android::util::BytesField bytesField%d(str%d, "
+                        "str%d_length);",
+                        argIndex, argIndex, argIndex);
+
             } else if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
                 hadStringOrChain = true;
                 for (auto chainField : attributionDecl.fields) {
@@ -1012,7 +1119,8 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
 
         // stats_write call
         argIndex = 1;
-        fprintf(out, "   int ret =  android::util::%s(code", cpp_method_name.c_str());
+        fprintf(out, "\n    int ret =  android::util::%s(code",
+                cpp_method_name.c_str());
         for (vector<java_type_t>::const_iterator arg = signature->begin();
                 arg != signature->end(); arg++) {
             if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
@@ -1025,8 +1133,11 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
                         fprintf(out, ", %s_vec", chainField.name.c_str());
                     }
                 }
+            } else if (*arg == JAVA_TYPE_BYTE_ARRAY) {
+                fprintf(out, ", bytesField%d", argIndex);
             } else {
-                const char *argName = (*arg == JAVA_TYPE_STRING) ? "str" : "arg";
+                const char* argName =
+                        (*arg == JAVA_TYPE_STRING) ? "str" : "arg";
                 fprintf(out, ", (%s)%s%d", cpp_type_name(*arg), argName, argIndex);
             }
             argIndex++;
@@ -1041,6 +1152,13 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
             if (*arg == JAVA_TYPE_STRING) {
                 fprintf(out, "    if (str%d != NULL) {\n", argIndex);
                 fprintf(out, "        env->ReleaseStringUTFChars(arg%d, str%d);\n",
+                        argIndex, argIndex);
+                fprintf(out, "    }\n");
+            } else if (*arg == JAVA_TYPE_BYTE_ARRAY) {
+                fprintf(out, "    if (str%d != NULL) { \n", argIndex);
+                fprintf(out,
+                        "        env->ReleaseByteArrayElements(arg%d, "
+                        "jbyte_array%d, 0);\n",
                         argIndex, argIndex);
                 fprintf(out, "    }\n");
             } else if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {

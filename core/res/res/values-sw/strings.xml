@@ -128,8 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Tatizo limetokea wakati wa kuisajili huduma ya kupiga simu kupitia Wi‑Fi kwa mtoa huduma wako: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for wfcSpnFormats:0 (6830082633573257149) -->
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Kupiga Simu Kupitia Wi-Fi ya <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Simu ya WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Simu ya WLAN ya <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ya <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Kupiga Simu kupitia WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi ya <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Imezimwa"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi inapedelewa"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mtandao wa simu unapendelewa"</string>
@@ -282,7 +288,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; itume na ione ujumbe wa SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hifadhi"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ifikie picha, maudhui na faili kwenye kifaa chako"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie picha, maudhui na faili kwenye kifaa chako?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Ungependa &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie picha, maudhui na faili kwenye kifaa chako?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Kipokea sauti"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"irekodi sauti"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; irekodi sauti?"</string>
@@ -451,7 +457,7 @@
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Huruhusu programu kupata orodha ya akaunti zinazojulikana na runinga. Hii inaweza kujumuisha akaunti zozote zilizofunguliwa na programu ambazo umesakinisha."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Inaruhusu programu kupata orodha ya akaunti zinazojulikana kwa simu. Hii inaweza kujumuisha akaunti zozote zilizoundwa na programu ambazo umesakinisha."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"kuona mitandao"</string>
-    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Inaruhusu programu kuona taarifa kuhusu miunganisho ya mtandao kama vile mitandao ipi iliyopo na imeunganishwa."</string>
+    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Huruhusu programu kuona taarifa kuhusu miunganisho ya mtandao kama vile mitandao iliyopo na iliyounganishwa."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"pata ufikiaji kamili wa mtandao"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Inaruhusu programu kuunda soketi za mtandao na kutumia itifaki za mtandao maalum. Kivinajri na programu nyingine zilizotolewa zinamaanisha kutuma data kwenye mtandao, kwa hivyo kibali hiki hakihitajiki kutuma data kwenye mtandao."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"kubadilisha muunganisho wa mtandao"</string>
@@ -459,7 +465,7 @@
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"Badilisha muunganisho uliofunganishwa"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Inaruhusu programu kubadilisha hali ya muunganisho wa mtandao uliofungwa."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Kuona miunganisho ya Wi-Fi"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Inaruhusu programu kuona taarifa kuhusu mtandao wa Wi-Fi, kama vile ikiwa Wi-Fi imewezeshwa mna jina la vifaa vya Wi-Fi vilivyounganishwa."</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Huruhusu programu kuona taarifa kuhusu mtandao wa Wi-Fi, kama vile ikiwa Wi-Fi imewashwa na majina ya vifaa vya Wi-Fi vilivyounganishwa."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"unganisha na utenganishe kutoka kwa Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Inaruhusu programu kuunganisha kwenye au kukata kutoka pointi za ufikivu wa Wi-Fi na kufanya mabadiliko kwenye usanidi wa kifaa cha mitandao ya Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"ruhusu upokeaji wa Wi-Fi Multicast"</string>
@@ -477,9 +483,9 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Huruhusu programu kuunganisha runinga kwenye na kuondoa runinga kutoka mitandao ya WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Inaruhusu programu kuunganisha simu kwenye, na kukata simu kutoka mitandao ya WiMAX."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"oanisha na vifaa vya Bluetooth"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Inaruhusu programu kuona usanidi wa Bluetooth kwenye kompyuta kibao, na kuunda na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Huruhusu programu kuona usanidi wa Bluetooth kwenye kompyuta kibao, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Huruhusu programu kuona usanidi wa Bluetooth kwenye runinga, na kuomba na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Inaruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kuunda na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Huruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"zima kufuli la skrini yako"</string>
@@ -1173,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi haina muunganisho wa intaneti"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Gusa ili upate chaguo"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Mabadiliko kwenye mipangilio ya mtandao pepe"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Bendi ya mtandao pepe wako imebadilika."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Kifaa hiki hakitumii mapendeleo yako ya GHz 5 pekee. Badala yake, kifaa hiki kitatumia bendi ya GHz 5 itakapopatikana."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Sasa inatumia <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Kifaa hutumia <xliff:g id="NEW_NETWORK">%1$s</xliff:g> wakati <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> haina intaneti. Huenda ukalipishwa."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Imebadilisha mtandao kutoka <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na sasa inatumia <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -93,7 +93,11 @@ public abstract class CarrierService extends Service {
      * </p>
      *
      * @param id contains details about the current carrier that can be used do decide what
-     *            configuration values to return.
+     *           configuration values to return. Instead of using details like MCCMNC to decide
+     *           current carrier, it also contains subscription carrier id
+     *           {@link android.telephony.TelephonyManager#getSimCarrierId()}, a platform-wide
+     *           unique identifier for each carrier, CarrierConfigService can directly use carrier
+     *           id as the key to look up the carrier info.
      * @return a {@link PersistableBundle} object containing the configuration or null if default
      *         values should be used.
      */

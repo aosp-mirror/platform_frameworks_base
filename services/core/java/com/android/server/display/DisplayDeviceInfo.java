@@ -104,6 +104,12 @@ final class DisplayDeviceInfo {
     public static final int FLAG_DESTROY_CONTENT_ON_REMOVAL = 1 << 10;
 
     /**
+     * Flag: The display cutout of this display is masked.
+     * @hide
+     */
+    public static final int FLAG_MASK_DISPLAY_CUTOUT = 1 << 11;
+
+    /**
      * Touch attachment: Display does not receive touch.
      */
     public static final int TOUCH_NONE = 0;
@@ -452,6 +458,9 @@ final class DisplayDeviceInfo {
         }
         if ((flags & FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0) {
             msg.append(", FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD");
+        }
+        if ((flags & FLAG_MASK_DISPLAY_CUTOUT) != 0) {
+            msg.append(", FLAG_MASK_DISPLAY_CUTOUT");
         }
         return msg.toString();
     }

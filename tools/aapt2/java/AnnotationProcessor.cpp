@@ -113,7 +113,7 @@ void AnnotationProcessor::AppendNewLine() {
 void AnnotationProcessor::Print(Printer* printer) const {
   if (has_comments_) {
     std::string result = comment_.str();
-    for (StringPiece line : util::Tokenize(result, '\n')) {
+    for (const StringPiece& line : util::Tokenize(result, '\n')) {
       printer->Println(line);
     }
     printer->Println(" */");

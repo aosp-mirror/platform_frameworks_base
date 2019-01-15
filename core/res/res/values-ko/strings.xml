@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"이동통신사를 통해 Wi‑Fi 통화를 등록하는 중에 문제가 발생했습니다. 오류 코드: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Wi-Fi 통화"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi 통화"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN 통화"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN 통화"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi 통화 | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"꺼짐"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi를 기본으로 설정"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"모바일에 최적화됨"</string>
@@ -284,7 +288,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 SMS 메시지를 전송하고 보도록 허용하시겠습니까?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"저장용량"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"기기 사진, 미디어, 파일 액세스"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 기기의 사진, 미디어, 파일에 액세스하도록 허용하시겠습니까.?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 기기의 사진, 미디어, 파일에 액세스하도록 허용하시겠습니까?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"마이크"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"오디오 녹음"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 오디오를 녹음하도록 허용하시겠습니까?"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi가 인터넷에 연결되어 있지 않습니다"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"탭하여 옵션 보기"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"핫스팟 설정 변경"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"핫스팟 대역이 변경되었습니다."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"이 기기에서는 5GHz 전용 환경설정이 지원되지 않습니다. 대신 가능할 때만 기기에서 5GHz 대역이 사용됩니다."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>(으)로 전환"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>(으)로 인터넷에 연결할 수 없는 경우 기기에서 <xliff:g id="NEW_NETWORK">%1$s</xliff:g>이(가) 사용됩니다. 요금이 부과될 수 있습니다."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>에서 <xliff:g id="NEW_NETWORK">%2$s</xliff:g>(으)로 전환"</string>

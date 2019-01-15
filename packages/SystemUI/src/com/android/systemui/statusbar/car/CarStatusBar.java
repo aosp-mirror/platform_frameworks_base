@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.car;
 import android.app.ActivityManager;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
-import android.os.SystemProperties;
+import android.sysprop.CarProperties;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -56,7 +56,7 @@ public class CarStatusBar extends StatusBar implements
         CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
     public static final boolean ENABLE_HVAC_CONNECTION
-            = !SystemProperties.getBoolean("android.car.hvac.demo", true);
+            = !CarProperties.hvac_demo().orElse(true);
 
     private TaskStackListenerImpl mTaskStackListener;
 

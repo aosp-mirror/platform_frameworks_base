@@ -16,47 +16,60 @@
 
 package com.android.internal.telephony;
 
+import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * {@hide}
+ * @hide
  */
 public class OperatorInfo implements Parcelable {
     public enum State {
         UNKNOWN,
         AVAILABLE,
+        @UnsupportedAppUsage
         CURRENT,
+        @UnsupportedAppUsage
         FORBIDDEN;
     }
 
+    @UnsupportedAppUsage
     private String mOperatorAlphaLong;
+    @UnsupportedAppUsage
     private String mOperatorAlphaShort;
+    @UnsupportedAppUsage
     private String mOperatorNumeric;
 
+    @UnsupportedAppUsage
     private State mState = State.UNKNOWN;
 
 
+    @UnsupportedAppUsage
     public String
     getOperatorAlphaLong() {
         return mOperatorAlphaLong;
     }
 
+    @UnsupportedAppUsage
     public String
     getOperatorAlphaShort() {
         return mOperatorAlphaShort;
     }
 
+    @UnsupportedAppUsage
     public String
     getOperatorNumeric() {
         return mOperatorNumeric;
     }
 
+    @UnsupportedAppUsage
     public State
     getState() {
         return mState;
     }
 
+    @UnsupportedAppUsage
     OperatorInfo(String operatorAlphaLong,
                 String operatorAlphaShort,
                 String operatorNumeric,
@@ -70,6 +83,7 @@ public class OperatorInfo implements Parcelable {
     }
 
 
+    @UnsupportedAppUsage
     public OperatorInfo(String operatorAlphaLong,
                 String operatorAlphaShort,
                 String operatorNumeric,
@@ -78,6 +92,7 @@ public class OperatorInfo implements Parcelable {
                 operatorNumeric, rilStateToState(stateString));
     }
 
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public OperatorInfo(String operatorAlphaLong,
             String operatorAlphaShort,
             String operatorNumeric) {
@@ -87,6 +102,7 @@ public class OperatorInfo implements Parcelable {
     /**
      * See state strings defined in ril.h RIL_REQUEST_QUERY_AVAILABLE_NETWORKS
      */
+    @UnsupportedAppUsage
     private static State rilStateToState(String s) {
         if (s.equals("unknown")) {
             return State.UNKNOWN;
@@ -140,6 +156,7 @@ public class OperatorInfo implements Parcelable {
      * Implement the Parcelable interface
      * Method to deserialize a OperatorInfo object, or an array thereof.
      */
+    @UnsupportedAppUsage
     public static final Creator<OperatorInfo> CREATOR =
         new Creator<OperatorInfo>() {
             @Override

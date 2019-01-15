@@ -19,8 +19,9 @@
 #include <algorithm>
 
 #include "android-base/logging.h"
+#include "androidfw/ConfigDescription.h"
 
-#include "ConfigDescription.h"
+using ::android::ConfigDescription;
 
 namespace aapt {
 

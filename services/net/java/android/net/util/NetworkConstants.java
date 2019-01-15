@@ -16,9 +16,6 @@
 
 package android.net.util;
 
-import java.nio.ByteBuffer;
-
-
 /**
  * Networking protocol constants.
  *
@@ -77,7 +74,7 @@ public final class NetworkConstants {
     /**
      * IPv4 constants.
      *
-     * See als:
+     * See also:
      *     - https://tools.ietf.org/html/rfc791
      */
     public static final int IPV4_HEADER_MIN_LEN = 20;

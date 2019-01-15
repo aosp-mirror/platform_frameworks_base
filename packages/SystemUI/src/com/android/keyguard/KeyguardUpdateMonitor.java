@@ -209,9 +209,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     // Battery status
     private BatteryStatus mBatteryStatus;
 
-    // Password attempts
-    private SparseIntArray mFailedAttempts = new SparseIntArray();
-
     private final StrongAuthTracker mStrongAuthTracker;
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
@@ -1589,6 +1586,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    public boolean isKeyguardVisible() {
+        return mKeyguardIsVisible;
+    }
+
     /**
      * Notifies that the visibility state of Keyguard has changed.
      *
@@ -1796,20 +1797,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return mDeviceProvisioned;
     }
 
-    public void clearFailedUnlockAttempts() {
-        mFailedAttempts.delete(sCurrentUser);
-    }
-
     public ServiceState getServiceState(int subId) {
         return mServiceStates.get(subId);
-    }
-
-    public int getFailedUnlockAttempts(int userId) {
-        return mFailedAttempts.get(userId, 0);
-    }
-
-    public void reportFailedStrongAuthUnlockAttempt(int userId) {
-        mFailedAttempts.put(userId, getFailedUnlockAttempts(userId) + 1);
     }
 
     public void clearFingerprintRecognized() {

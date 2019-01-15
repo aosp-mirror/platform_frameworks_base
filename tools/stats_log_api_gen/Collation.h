@@ -86,6 +86,8 @@ struct AtomDecl {
 
     int uidField = 0;
 
+    vector<int> binaryFields;
+
     AtomDecl();
     AtomDecl(const AtomDecl& that);
     AtomDecl(int code, const string& name, const string& message);

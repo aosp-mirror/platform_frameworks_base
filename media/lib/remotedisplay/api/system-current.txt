@@ -1,0 +1,52 @@
+package com.android.media.remotedisplay {
+
+  public class RemoteDisplay {
+    ctor public RemoteDisplay(java.lang.String, java.lang.String);
+    method public java.lang.String getDescription();
+    method public java.lang.String getId();
+    method public java.lang.String getName();
+    method public int getPresentationDisplayId();
+    method public int getStatus();
+    method public int getVolume();
+    method public int getVolumeHandling();
+    method public int getVolumeMax();
+    method public void setDescription(java.lang.String);
+    method public void setName(java.lang.String);
+    method public void setPresentationDisplayId(int);
+    method public void setStatus(int);
+    method public void setVolume(int);
+    method public void setVolumeHandling(int);
+    method public void setVolumeMax(int);
+    field public static final int PLAYBACK_VOLUME_FIXED = 0; // 0x0
+    field public static final int PLAYBACK_VOLUME_VARIABLE = 1; // 0x1
+    field public static final int STATUS_AVAILABLE = 2; // 0x2
+    field public static final int STATUS_CONNECTED = 4; // 0x4
+    field public static final int STATUS_CONNECTING = 3; // 0x3
+    field public static final int STATUS_IN_USE = 1; // 0x1
+    field public static final int STATUS_NOT_AVAILABLE = 0; // 0x0
+  }
+
+  public abstract class RemoteDisplayProvider {
+    ctor public RemoteDisplayProvider(android.content.Context);
+    method public void addDisplay(com.android.media.remotedisplay.RemoteDisplay);
+    method public com.android.media.remotedisplay.RemoteDisplay findRemoteDisplay(java.lang.String);
+    method public android.os.IBinder getBinder();
+    method public final android.content.Context getContext();
+    method public int getDiscoveryMode();
+    method public java.util.Collection<com.android.media.remotedisplay.RemoteDisplay> getDisplays();
+    method public android.app.PendingIntent getSettingsPendingIntent();
+    method public void onAdjustVolume(com.android.media.remotedisplay.RemoteDisplay, int);
+    method public void onConnect(com.android.media.remotedisplay.RemoteDisplay);
+    method public void onDisconnect(com.android.media.remotedisplay.RemoteDisplay);
+    method public void onDiscoveryModeChanged(int);
+    method public void onSetVolume(com.android.media.remotedisplay.RemoteDisplay, int);
+    method public void removeDisplay(com.android.media.remotedisplay.RemoteDisplay);
+    method public void updateDisplay(com.android.media.remotedisplay.RemoteDisplay);
+    field public static final int DISCOVERY_MODE_ACTIVE = 2; // 0x2
+    field public static final int DISCOVERY_MODE_NONE = 0; // 0x0
+    field public static final int DISCOVERY_MODE_PASSIVE = 1; // 0x1
+    field public static final java.lang.String SERVICE_INTERFACE = "com.android.media.remotedisplay.RemoteDisplayProvider";
+  }
+
+}
+

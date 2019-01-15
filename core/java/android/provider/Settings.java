@@ -7299,6 +7299,23 @@ public final class Settings {
         public static final String DIALER_DEFAULT_APPLICATION = "dialer_default_application";
 
         /**
+         * Specifies the component name currently configured to be the default call screening
+         * application
+         * @hide
+         */
+        public static final String CALL_SCREENING_DEFAULT_COMPONENT =
+                "call_screening_default_component";
+
+        /**
+         * Specifies the component name currently configured to be the default application to
+         * perform the user-defined call redirection service with Telecom.
+         * @hide
+         */
+        @UnsupportedAppUsage
+        public static final String CALL_REDIRECTION_DEFAULT_APPLICATION =
+                "call_redirection_default_application";
+
+        /**
          * Specifies the package name currently configured to be the emergency assistance application
          *
          * @see android.telephony.TelephonyManager#ACTION_EMERGENCY_ASSISTANCE
@@ -7618,9 +7635,6 @@ public final class Settings {
          */
         public static final String ASSIST_GESTURE_SENSITIVITY = "assist_gesture_sensitivity";
 
-        private static final Validator ASSIST_GESTURE_SENSITIVITY_VALIDATOR =
-                new SettingsValidators.InclusiveFloatRangeValidator(0.0f, 1.0f);
-
         /**
          * Whether the assist gesture should silence alerts.
          *
@@ -7649,8 +7663,6 @@ public final class Settings {
          * @hide
          */
         public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
-
-        private static final Validator ASSIST_GESTURE_SETUP_COMPLETE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Control whether Night display is currently activated.
@@ -8108,8 +8120,6 @@ public final class Settings {
             NFC_PAYMENT_DEFAULT_COMPONENT,
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             ASSIST_GESTURE_ENABLED,
-            ASSIST_GESTURE_SENSITIVITY,
-            ASSIST_GESTURE_SETUP_COMPLETE,
             ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
             ASSIST_GESTURE_WAKE_ENABLED,
             VR_DISPLAY_MODE,
@@ -8248,8 +8258,6 @@ public final class Settings {
             VALIDATORS.put(AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
                     AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_ENABLED, ASSIST_GESTURE_ENABLED_VALIDATOR);
-            VALIDATORS.put(ASSIST_GESTURE_SENSITIVITY, ASSIST_GESTURE_SENSITIVITY_VALIDATOR);
-            VALIDATORS.put(ASSIST_GESTURE_SETUP_COMPLETE, ASSIST_GESTURE_SETUP_COMPLETE_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
                     ASSIST_GESTURE_SILENCE_ALERTS_ENABLED_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_WAKE_ENABLED, ASSIST_GESTURE_WAKE_ENABLED_VALIDATOR);
@@ -9131,6 +9139,19 @@ public final class Settings {
        public static final String MOBILE_DATA_ALWAYS_ON = "mobile_data_always_on";
 
         /**
+         * Whether the wifi data connection should remain active even when higher
+         * priority networks like Ethernet are active, to keep both networks.
+         * In the case where higher priority networks are connected, wifi will be
+         * unused unless an application explicitly requests to use it.
+         *
+         * See ConnectivityService for more info.
+         *
+         * (0 = disabled, 1 = enabled)
+         * @hide
+         */
+        public static final String WIFI_ALWAYS_REQUESTED = "wifi_always_requested";
+
+        /**
          * Size of the event buffer for IP connectivity metrics.
          * @hide
          */
@@ -9464,6 +9485,16 @@ public final class Settings {
          * @hide
          */
         public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
+
+        /**
+         * Use the old dnsmasq DHCP server for tethering instead of the framework implementation.
+         *
+         * Integer values are interpreted as boolean, and the absence of an explicit setting
+         * is interpreted as |false|.
+         * @hide
+         */
+        public static final String TETHER_ENABLE_LEGACY_DHCP_SERVER =
+                "tether_enable_legacy_dhcp_server";
 
         /**
          * List of certificate (hex string representation of the application's certificate - SHA-1
@@ -10405,6 +10436,41 @@ public final class Settings {
         public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
 
         /**
+         * The threshold value for the number of consecutive dns timeout events received to be a
+         * signal of data stall. Set the value to 0 or less than 0 to disable. Note that the value
+         * should be larger than 0 if the DNS data stall detection is enabled.
+         *
+         * @hide
+         */
+        public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD =
+                "data_stall_consecutive_dns_timeout_threshold";
+
+        /**
+         * The minimal time interval in milliseconds for data stall reevaluation.
+         *
+         * @hide
+         */
+        public static final String DATA_STALL_MIN_EVALUATE_INTERVAL =
+                "data_stall_min_evaluate_interval";
+
+        /**
+         * DNS timeouts older than this timeout (in milliseconds) are not considered for detecting
+         * a data stall.
+         *
+         * @hide
+         */
+        public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD =
+                "data_stall_valid_dns_time_threshold";
+
+        /**
+         * Which data stall detection signal to use. Possible values are a union of the powers of 2
+         * of DATA_STALL_EVALUATION_TYPE_*.
+         *
+         * @hide
+         */
+        public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
+
+        /**
          * Whether network service discovery is enabled.
          *
          * @hide
@@ -10614,6 +10680,15 @@ public final class Settings {
          * @see com.android.server.am.ActivityManagerConstants
          */
         public static final String ACTIVITY_MANAGER_CONSTANTS = "activity_manager_constants";
+
+        /**
+         * Feature flag to enable or disable the activity starts logging feature.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String ACTIVITY_STARTS_LOGGING_ENABLED
+                = "activity_starts_logging_enabled";
 
         /**
          * App ops specific settings.
@@ -11327,14 +11402,6 @@ public final class Settings {
          * @hide
          */
         public static final String EMERGENCY_AFFORDANCE_NEEDED = "emergency_affordance_needed";
-
-        /**
-         * Enable faster emergency phone call feature.
-         * The value is a boolean (1 or 0).
-         * @hide
-         */
-        public static final String FASTER_EMERGENCY_PHONE_CALL_ENABLED =
-                "faster_emergency_phone_call_enabled";
 
         /**
          * See RIL_PreferredNetworkType in ril.h
@@ -12143,27 +12210,14 @@ public final class Settings {
                 "hidden_api_access_log_sampling_rate";
 
         /**
-         * Hidden API enforcement policy for apps targeting SDK versions prior to the latest
-         * version.
+         * Hidden API enforcement policy for apps.
          *
          * Values correspond to @{@link
          * android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy}
          *
          * @hide
          */
-        public static final String HIDDEN_API_POLICY_PRE_P_APPS =
-                "hidden_api_policy_pre_p_apps";
-
-        /**
-         * Hidden API enforcement policy for apps targeting the current SDK version.
-         *
-         * Values correspond to @{@link
-         * android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy}
-         *
-         * @hide
-         */
-        public static final String HIDDEN_API_POLICY_P_APPS =
-                "hidden_api_policy_p_apps";
+        public static final String HIDDEN_API_POLICY = "hidden_api_policy";
 
         /**
          * Timeout for a single {@link android.media.soundtrigger.SoundTriggerDetectionService}

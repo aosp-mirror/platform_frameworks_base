@@ -59,6 +59,10 @@ public class OperationResult implements Parcelable {
         this.outParams = outParams;
     }
 
+    public OperationResult(int resultCode) {
+        this(resultCode, null, 0, 0, null, null);
+    }
+
     protected OperationResult(Parcel in) {
         resultCode = in.readInt();
         token = in.readStrongBinder();

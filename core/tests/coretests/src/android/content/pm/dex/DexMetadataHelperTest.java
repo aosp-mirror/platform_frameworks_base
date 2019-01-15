@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import libcore.io.IoUtils;
+import libcore.testing.io.TestIoUtils;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -63,7 +63,7 @@ public class DexMetadataHelperTest {
 
     @Before
     public void setUp() {
-        mTmpDir = IoUtils.createTemporaryDirectory("DexMetadataHelperTest");
+        mTmpDir = TestIoUtils.createTemporaryDirectory("DexMetadataHelperTest");
     }
 
     @After

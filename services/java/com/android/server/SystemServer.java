@@ -16,6 +16,13 @@
 
 package com.android.server;
 
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
+import static android.os.IServiceManager.DUMP_FLAG_PROTO;
+import static android.view.Display.DEFAULT_DISPLAY;
+
+import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.app.INotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -29,6 +36,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -48,6 +56,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.IStorageManager;
+import android.sysprop.VoldProperties;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
@@ -82,15 +91,17 @@ import com.android.server.job.JobSchedulerService;
 import com.android.server.lights.LightsService;
 import com.android.server.media.MediaResourceMonitorService;
 import com.android.server.media.MediaRouterService;
-import com.android.server.media.MediaUpdateService;
 import com.android.server.media.MediaSessionService;
+import com.android.server.media.MediaUpdateService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
+import com.android.server.net.ipmemorystore.IpMemoryStoreService;
 import com.android.server.net.watchlist.NetworkWatchlistService;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.oemlock.OemLockService;
 import com.android.server.om.OverlayManagerService;
+import com.android.server.os.BugreportManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.pm.BackgroundDexOptService;
@@ -130,12 +141,6 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
-
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
-import static android.os.IServiceManager.DUMP_FLAG_PROTO;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 public final class SystemServer {
     private static final String TAG = "SystemServer";
@@ -459,6 +464,12 @@ public final class SystemServer {
             }
         }
 
+        // Diagnostic to ensure that the system is in a base healthy state. Done here as a common
+        // non-zygote process.
+        if (!VMRuntime.hasBootImageSpaces()) {
+            Slog.wtf(TAG, "Runtime is not running with a boot image!");
+        }
+
         // Loop forever.
         Looper.loop();
         throw new RuntimeException("Main thread loop unexpectedly exited");
@@ -619,7 +630,7 @@ public final class SystemServer {
         traceEnd();
 
         // Only run "core" apps if we're encrypting the device.
-        String cryptState = SystemProperties.get("vold.decrypt");
+        String cryptState = VoldProperties.decrypt().orElse("");
         if (ENCRYPTING_STATE.equals(cryptState)) {
             Slog.w(TAG, "Detected encryption in progress - only parsing core apps");
             mOnlyCore = true;
@@ -681,8 +692,16 @@ public final class SystemServer {
 
         // Manages Overlay packages
         traceBeginAndSlog("StartOverlayManagerService");
-        mSystemServiceManager.startService(new OverlayManagerService(mSystemContext, installer));
+        OverlayManagerService overlayManagerService = new OverlayManagerService(
+                mSystemContext, installer);
+        mSystemServiceManager.startService(overlayManagerService);
         traceEnd();
+
+        if (SystemProperties.getInt("persist.sys.displayinset.top", 0) > 0) {
+            // DisplayManager needs the overlay immediately.
+            overlayManagerService.updateSystemUiContext();
+            LocalServices.getService(DisplayManagerInternal.class).onOverlayChanged();
+        }
 
         // The sensor service needs access to package manager service, app ops
         // service, and permissions service, therefore we start it after them.
@@ -723,6 +742,11 @@ public final class SystemServer {
         // Tracks cpu time spent in binder calls
         traceBeginAndSlog("StartBinderCallsStatsService");
         BinderCallsStatsService.start();
+        traceEnd();
+
+        // Service to capture bugreports.
+        traceBeginAndSlog("StartBugreportManagerService");
+        mSystemServiceManager.startService(BugreportManagerService.class);
         traceEnd();
     }
 
@@ -1082,6 +1106,15 @@ public final class SystemServer {
             }
             traceEnd();
 
+            traceBeginAndSlog("StartIpMemoryStoreService");
+            try {
+                ServiceManager.addService(Context.IP_MEMORY_STORE_SERVICE,
+                        new IpMemoryStoreService(context));
+            } catch (Throwable e) {
+                reportWtf("starting IP Memory Store Service", e);
+            }
+            traceEnd();
+
             traceBeginAndSlog("StartIpSecService");
             try {
                 ipSecService = IpSecService.create(context);
@@ -1185,6 +1218,16 @@ public final class SystemServer {
                 networkPolicy.bindConnectivityManager(connectivity);
             } catch (Throwable e) {
                 reportWtf("starting Connectivity Service", e);
+            }
+            traceEnd();
+
+            traceBeginAndSlog("StartNetworkStack");
+            try {
+                final android.net.NetworkStack networkStack =
+                        context.getSystemService(android.net.NetworkStack.class);
+                networkStack.start(context);
+            } catch (Throwable e) {
+                reportWtf("starting Network Stack", e);
             }
             traceEnd();
 
@@ -1410,6 +1453,14 @@ public final class SystemServer {
                 ServiceManager.addService("diskstats", new DiskStatsService(context));
             } catch (Throwable e) {
                 reportWtf("starting DiskStats Service", e);
+            }
+            traceEnd();
+
+            traceBeginAndSlog("RuntimeService");
+            try {
+                ServiceManager.addService("runtime", new RuntimeService(context));
+            } catch (Throwable e) {
+                reportWtf("starting RuntimeService", e);
             }
             traceEnd();
 
@@ -1947,7 +1998,7 @@ public final class SystemServer {
         windowManager.onSystemUiStarted();
     }
 
-    private static void traceBeginAndSlog(String name) {
+    private static void traceBeginAndSlog(@NonNull String name) {
         Slog.i(TAG, name);
         BOOT_TIMINGS_TRACE_LOG.traceBegin(name);
     }

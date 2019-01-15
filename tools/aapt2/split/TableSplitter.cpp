@@ -24,10 +24,12 @@
 #include <vector>
 
 #include "android-base/logging.h"
+#include "androidfw/ConfigDescription.h"
 
-#include "ConfigDescription.h"
 #include "ResourceTable.h"
 #include "util/Util.h"
+
+using ::android::ConfigDescription;
 
 namespace aapt {
 

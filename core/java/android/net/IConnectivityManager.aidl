@@ -17,6 +17,7 @@
 package android.net;
 
 import android.app.PendingIntent;
+import android.net.ConnectionInfo;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -166,6 +167,8 @@ interface IConnectivityManager
 
     int getMultipathPreference(in Network Network);
 
+    NetworkRequest getDefaultRequest();
+
     int getRestoreDefaultNetworkDelay(int networkType);
 
     boolean addVpnAddress(String address, int prefixLength);
@@ -182,4 +185,6 @@ interface IConnectivityManager
     String getCaptivePortalServerUrl();
 
     byte[] getNetworkWatchlistConfigHash();
+
+    int getConnectionOwnerUid(in ConnectionInfo connectionInfo);
 }

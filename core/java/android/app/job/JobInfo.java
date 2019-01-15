@@ -36,6 +36,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.Uri;
 import android.os.BaseBundle;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -311,7 +312,7 @@ public class JobInfo implements Parcelable {
     private final long initialBackoffMillis;
     private final int backoffPolicy;
     private final int priority;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int flags;
 
     /**

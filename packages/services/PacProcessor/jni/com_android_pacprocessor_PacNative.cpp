@@ -16,6 +16,9 @@
 
 #define LOG_TAG "PacProcessor"
 
+#include <stdlib.h>
+#include <string>
+
 #include <utils/Log.h>
 #include <utils/Mutex.h>
 #include "android_runtime/AndroidRuntime.h"
@@ -23,40 +26,24 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
-#include "proxy_resolver_v8.h"
+#include "proxy_resolver_v8_wrapper.h"
 
 namespace android {
 
-class ProxyErrorLogger : public net::ProxyErrorListener {
-public:
-    ~ProxyErrorLogger() {
-
-    }
-    void AlertMessage(String16 message) {
-        String8 str(message);
-        ALOGD("Alert: %s", str.string());
-    }
-    void ErrorMessage(String16 message) {
-        String8 str(message);
-        ALOGE("Error: %s", str.string());
-    }
-};
-
-net::ProxyResolverV8* proxyResolver = NULL;
-ProxyErrorLogger* logger = NULL;
+ProxyResolverV8Handle* proxyResolver = NULL;
 bool pacSet = false;
 
-String16 jstringToString16(JNIEnv* env, jstring jstr) {
+std::u16string jstringToString16(JNIEnv* env, jstring jstr) {
     const jchar* str = env->GetStringCritical(jstr, 0);
-    String16 str16(reinterpret_cast<const char16_t*>(str),
+    std::u16string str16(reinterpret_cast<const char16_t*>(str),
                    env->GetStringLength(jstr));
     env->ReleaseStringCritical(jstr, str);
     return str16;
 }
 
-jstring string16ToJstring(JNIEnv* env, String16 string) {
-    const char16_t* str = string.string();
-    size_t len = string.size();
+jstring string16ToJstring(JNIEnv* env, std::u16string string) {
+    const char16_t* str = string.data();
+    size_t len = string.length();
 
     return env->NewString(reinterpret_cast<const jchar*>(str), len);
 }
@@ -64,9 +51,7 @@ jstring string16ToJstring(JNIEnv* env, String16 string) {
 static jboolean com_android_pacprocessor_PacNative_createV8ParserNativeLocked(JNIEnv* /* env */,
         jobject) {
     if (proxyResolver == NULL) {
-        logger = new ProxyErrorLogger();
-        proxyResolver = new net::ProxyResolverV8(net::ProxyResolverJSBindings::CreateDefault(),
-                logger);
+        proxyResolver = ProxyResolverV8Handle_new();
         pacSet = false;
         return JNI_FALSE;
     }
@@ -76,9 +61,7 @@ static jboolean com_android_pacprocessor_PacNative_createV8ParserNativeLocked(JN
 static jboolean com_android_pacprocessor_PacNative_destroyV8ParserNativeLocked(JNIEnv* /* env */,
         jobject) {
     if (proxyResolver != NULL) {
-        delete logger;
-        delete proxyResolver;
-        logger = NULL;
+        ProxyResolverV8Handle_delete(proxyResolver);
         proxyResolver = NULL;
         return JNI_FALSE;
     }
@@ -87,14 +70,14 @@ static jboolean com_android_pacprocessor_PacNative_destroyV8ParserNativeLocked(J
 
 static jboolean com_android_pacprocessor_PacNative_setProxyScriptNativeLocked(JNIEnv* env, jobject,
         jstring script) {
-    String16 script16 = jstringToString16(env, script);
+    std::u16string script16 = jstringToString16(env, script);
 
     if (proxyResolver == NULL) {
         ALOGE("V8 Parser not started when setting PAC script");
         return JNI_TRUE;
     }
 
-    if (proxyResolver->SetPacScript(script16) != OK) {
+    if (ProxyResolverV8Handle_SetPacScript(proxyResolver, script16.data()) != OK) {
         ALOGE("Unable to set PAC script");
         return JNI_TRUE;
     }
@@ -105,9 +88,8 @@ static jboolean com_android_pacprocessor_PacNative_setProxyScriptNativeLocked(JN
 
 static jstring com_android_pacprocessor_PacNative_makeProxyRequestNativeLocked(JNIEnv* env, jobject,
         jstring url, jstring host) {
-    String16 url16 = jstringToString16(env, url);
-    String16 host16 = jstringToString16(env, host);
-    String16 ret;
+    std::u16string url16 = jstringToString16(env, url);
+    std::u16string host16 = jstringToString16(env, host);
 
     if (proxyResolver == NULL) {
         ALOGE("V8 Parser not initialized when running PAC script");
@@ -119,12 +101,14 @@ static jstring com_android_pacprocessor_PacNative_makeProxyRequestNativeLocked(J
         return NULL;
     }
 
-    if (proxyResolver->GetProxyForURL(url16, host16, &ret) != OK) {
-        String8 ret8(ret);
-        ALOGE("Error Running PAC: %s", ret8.string());
+    std::unique_ptr<char16_t, decltype(&free)> result = std::unique_ptr<char16_t, decltype(&free)>(
+        ProxyResolverV8Handle_GetProxyForURL(proxyResolver, url16.data(), host16.data()), &free);
+    if (result.get() == NULL) {
+        ALOGE("Error Running PAC");
         return NULL;
     }
 
+    std::u16string ret(result.get());
     jstring jret = string16ToJstring(env, ret);
 
     return jret;

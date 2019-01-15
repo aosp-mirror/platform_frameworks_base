@@ -278,4 +278,52 @@ TEST(LoadedArscTest, LoadOverlay) {
 // sizeof(Res_value) might not be backwards compatible.
 TEST(LoadedArscTest, LoadingShouldBeForwardsAndBackwardsCompatible) { ASSERT_TRUE(false); }
 
+TEST(LoadedArscTest, ResourceIdentifierIterator) {
+  std::string contents;
+  ASSERT_TRUE(
+      ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk", "resources.arsc", &contents));
+
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
+  ASSERT_NE(nullptr, loaded_arsc);
+
+  const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc->GetPackages();
+  ASSERT_EQ(1u, packages.size());
+  EXPECT_EQ(std::string("com.android.basic"), packages[0]->GetPackageName());
+
+  const auto& loaded_package = packages[0];
+  auto iter = loaded_package->begin();
+  auto end = loaded_package->end();
+
+  ASSERT_NE(end, iter);
+  ASSERT_EQ(0x7f010000u, *iter++);
+  ASSERT_EQ(0x7f010001u, *iter++);
+  ASSERT_EQ(0x7f020000u, *iter++);
+  ASSERT_EQ(0x7f020001u, *iter++);
+  ASSERT_EQ(0x7f030000u, *iter++);
+  ASSERT_EQ(0x7f030001u, *iter++);
+  ASSERT_EQ(0x7f030002u, *iter++);  // note: string without default, excluded by aapt2 dump
+  ASSERT_EQ(0x7f040000u, *iter++);
+  ASSERT_EQ(0x7f040001u, *iter++);
+  ASSERT_EQ(0x7f040002u, *iter++);
+  ASSERT_EQ(0x7f040003u, *iter++);
+  ASSERT_EQ(0x7f040004u, *iter++);
+  ASSERT_EQ(0x7f040005u, *iter++);
+  ASSERT_EQ(0x7f040006u, *iter++);
+  ASSERT_EQ(0x7f040007u, *iter++);
+  ASSERT_EQ(0x7f040008u, *iter++);
+  ASSERT_EQ(0x7f040009u, *iter++);
+  ASSERT_EQ(0x7f04000au, *iter++);
+  ASSERT_EQ(0x7f04000bu, *iter++);
+  ASSERT_EQ(0x7f04000cu, *iter++);
+  ASSERT_EQ(0x7f04000du, *iter++);
+  ASSERT_EQ(0x7f050000u, *iter++);
+  ASSERT_EQ(0x7f050001u, *iter++);
+  ASSERT_EQ(0x7f060000u, *iter++);
+  ASSERT_EQ(0x7f070000u, *iter++);
+  ASSERT_EQ(0x7f070001u, *iter++);
+  ASSERT_EQ(0x7f070002u, *iter++);
+  ASSERT_EQ(0x7f070003u, *iter++);
+  ASSERT_EQ(end, iter);
+}
+
 }  // namespace android

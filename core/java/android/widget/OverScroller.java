@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.util.Log;
@@ -32,8 +33,10 @@ public class OverScroller {
     private int mMode;
 
     private final SplineOverScroller mScrollerX;
+    @UnsupportedAppUsage
     private final SplineOverScroller mScrollerY;
 
+    @UnsupportedAppUsage
     private Interpolator mInterpolator;
 
     private final boolean mFlywheel;
@@ -68,6 +71,7 @@ public class OverScroller {
      * @param flywheel If true, successive fling motions will keep on increasing scroll speed.
      * @hide
      */
+    @UnsupportedAppUsage
     public OverScroller(Context context, Interpolator interpolator, boolean flywheel) {
         if (interpolator == null) {
             mInterpolator = new Scroller.ViscousFluidInterpolator();
@@ -116,6 +120,7 @@ public class OverScroller {
         this(context, interpolator, flywheel);
     }
 
+    @UnsupportedAppUsage
     void setInterpolator(Interpolator interpolator) {
         if (interpolator == null) {
             mInterpolator = new Scroller.ViscousFluidInterpolator();
@@ -250,6 +255,7 @@ public class OverScroller {
      *             to begin a new animation.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void extendDuration(int extend) {
         mScrollerX.extendDuration(extend);
         mScrollerY.extendDuration(extend);
@@ -530,6 +536,7 @@ public class OverScroller {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isScrollingInDirection(float xvel, float yvel) {
         final int dx = mScrollerX.mFinal - mScrollerX.mStart;
         final int dy = mScrollerY.mFinal - mScrollerY.mStart;
@@ -551,6 +558,7 @@ public class OverScroller {
         private int mVelocity;
 
         // Current velocity
+        @UnsupportedAppUsage
         private float mCurrVelocity;
 
         // Constant current deceleration

@@ -21,6 +21,7 @@
 #include "test/Test.h"
 
 using ::aapt::io::StringOutputStream;
+using ::android::ConfigDescription;
 using ::testing::HasSubstr;
 using ::testing::Not;
 

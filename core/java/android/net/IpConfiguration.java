@@ -35,7 +35,7 @@ public class IpConfiguration implements Parcelable {
          * with staticIpConfiguration */
         @UnsupportedAppUsage
         STATIC,
-        /* Use dynamically configured IP settigns */
+        /* Use dynamically configured IP settings */
         DHCP,
         /* no IP details are assigned, this is used to indicate
          * that any existing IP settings should be retained */

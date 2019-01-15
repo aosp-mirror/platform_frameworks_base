@@ -58,6 +58,11 @@ public final class ScanFilter implements Parcelable {
     private final ParcelUuid mServiceUuidMask;
 
     @Nullable
+    private final ParcelUuid mServiceSolicitationUuid;
+    @Nullable
+    private final ParcelUuid mServiceSolicitationUuidMask;
+
+    @Nullable
     private final ParcelUuid mServiceDataUuid;
     @Nullable
     private final byte[] mServiceData;
@@ -75,12 +80,15 @@ public final class ScanFilter implements Parcelable {
 
 
     private ScanFilter(String name, String deviceAddress, ParcelUuid uuid,
-            ParcelUuid uuidMask, ParcelUuid serviceDataUuid,
+            ParcelUuid uuidMask, ParcelUuid solicitationUuid,
+            ParcelUuid solicitationUuidMask, ParcelUuid serviceDataUuid,
             byte[] serviceData, byte[] serviceDataMask,
             int manufacturerId, byte[] manufacturerData, byte[] manufacturerDataMask) {
         mDeviceName = name;
         mServiceUuid = uuid;
         mServiceUuidMask = uuidMask;
+        mServiceSolicitationUuid = solicitationUuid;
+        mServiceSolicitationUuidMask = solicitationUuidMask;
         mDeviceAddress = deviceAddress;
         mServiceDataUuid = serviceDataUuid;
         mServiceData = serviceData;
@@ -111,6 +119,14 @@ public final class ScanFilter implements Parcelable {
             dest.writeInt(mServiceUuidMask == null ? 0 : 1);
             if (mServiceUuidMask != null) {
                 dest.writeParcelable(mServiceUuidMask, flags);
+            }
+        }
+        dest.writeInt(mServiceSolicitationUuid == null ? 0 : 1);
+        if (mServiceSolicitationUuid != null) {
+            dest.writeParcelable(mServiceSolicitationUuid, flags);
+            dest.writeInt(mServiceSolicitationUuidMask == null ? 0 : 1);
+            if (mServiceSolicitationUuidMask != null) {
+                dest.writeParcelable(mServiceSolicitationUuidMask, flags);
             }
         }
         dest.writeInt(mServiceDataUuid == null ? 0 : 1);
@@ -169,6 +185,17 @@ public final class ScanFilter implements Parcelable {
                     ParcelUuid uuidMask = in.readParcelable(
                             ParcelUuid.class.getClassLoader());
                     builder.setServiceUuid(uuid, uuidMask);
+                }
+            }
+            if (in.readInt() == 1) {
+                ParcelUuid solicitationUuid = in.readParcelable(
+                        ParcelUuid.class.getClassLoader());
+                builder.setServiceSolicitationUuid(solicitationUuid);
+                if (in.readInt() == 1) {
+                    ParcelUuid solicitationUuidMask = in.readParcelable(
+                            ParcelUuid.class.getClassLoader());
+                    builder.setServiceSolicitationUuid(solicitationUuid,
+                            solicitationUuidMask);
                 }
             }
             if (in.readInt() == 1) {
@@ -231,6 +258,22 @@ public final class ScanFilter implements Parcelable {
         return mServiceUuidMask;
     }
 
+    /**
+     * Returns the filter set on the service Solicitation uuid.
+     */
+    @Nullable
+    public ParcelUuid getServiceSolicitationUuid() {
+        return mServiceSolicitationUuid;
+    }
+
+    /**
+     * Returns the filter set on the service Solicitation uuid mask.
+     */
+    @Nullable
+    public ParcelUuid getServiceSolicitationUuidMask() {
+        return mServiceSolicitationUuidMask;
+    }
+
     @Nullable
     public String getDeviceAddress() {
         return mDeviceAddress;
@@ -288,7 +331,7 @@ public final class ScanFilter implements Parcelable {
         // Scan record is null but there exist filters on it.
         if (scanRecord == null
                 && (mDeviceName != null || mServiceUuid != null || mManufacturerData != null
-                || mServiceData != null)) {
+                || mServiceData != null || mServiceSolicitationUuid != null)) {
             return false;
         }
 
@@ -300,6 +343,13 @@ public final class ScanFilter implements Parcelable {
         // UUID match.
         if (mServiceUuid != null && !matchesServiceUuids(mServiceUuid, mServiceUuidMask,
                 scanRecord.getServiceUuids())) {
+            return false;
+        }
+
+        // solicitation UUID match.
+        if (mServiceSolicitationUuid != null && !matchesServiceSolicitationUuids(
+                mServiceSolicitationUuid, mServiceSolicitationUuidMask,
+                scanRecord.getServiceSolicitationUuids())) {
             return false;
         }
 
@@ -350,6 +400,36 @@ public final class ScanFilter implements Parcelable {
         return BitUtils.maskedEquals(data, uuid, mask);
     }
 
+    /**
+     * Check if the solicitation uuid pattern is contained in a list of parcel uuids.
+     *
+     */
+    private static boolean matchesServiceSolicitationUuids(ParcelUuid solicitationUuid,
+            ParcelUuid parcelSolicitationUuidMask, List<ParcelUuid> solicitationUuids) {
+        if (solicitationUuid == null) {
+            return true;
+        }
+        if (solicitationUuids == null) {
+            return false;
+        }
+
+        for (ParcelUuid parcelSolicitationUuid : solicitationUuids) {
+            UUID solicitationUuidMask = parcelSolicitationUuidMask == null
+                    ? null : parcelSolicitationUuidMask.getUuid();
+            if (matchesServiceUuid(solicitationUuid.getUuid(), solicitationUuidMask,
+                    parcelSolicitationUuid.getUuid())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Check if the solicitation uuid pattern matches the particular service solicitation uuid.
+    private static boolean matchesServiceSolicitationUuid(UUID solicitationUuid,
+            UUID solicitationUuidMask, UUID data) {
+        return BitUtils.maskedEquals(data, solicitationUuid, solicitationUuidMask);
+    }
+
     // Check whether the data pattern matches the parsed data.
     private boolean matchesPartialData(byte[] data, byte[] dataMask, byte[] parsedData) {
         if (parsedData == null || parsedData.length < data.length) {
@@ -376,6 +456,8 @@ public final class ScanFilter implements Parcelable {
         return "BluetoothLeScanFilter [mDeviceName=" + mDeviceName + ", mDeviceAddress="
                 + mDeviceAddress
                 + ", mUuid=" + mServiceUuid + ", mUuidMask=" + mServiceUuidMask
+                + ", mServiceSolicitationUuid=" + mServiceSolicitationUuid
+                + ", mServiceSolicitationUuidMask=" + mServiceSolicitationUuidMask
                 + ", mServiceDataUuid=" + Objects.toString(mServiceDataUuid) + ", mServiceData="
                 + Arrays.toString(mServiceData) + ", mServiceDataMask="
                 + Arrays.toString(mServiceDataMask) + ", mManufacturerId=" + mManufacturerId
@@ -391,7 +473,8 @@ public final class ScanFilter implements Parcelable {
                 mServiceDataUuid,
                 Arrays.hashCode(mServiceData),
                 Arrays.hashCode(mServiceDataMask),
-                mServiceUuid, mServiceUuidMask);
+                mServiceUuid, mServiceUuidMask,
+                mServiceSolicitationUuid, mServiceSolicitationUuidMask);
     }
 
     @Override
@@ -412,7 +495,10 @@ public final class ScanFilter implements Parcelable {
                 && Objects.deepEquals(mServiceData, other.mServiceData)
                 && Objects.deepEquals(mServiceDataMask, other.mServiceDataMask)
                 && Objects.equals(mServiceUuid, other.mServiceUuid)
-                && Objects.equals(mServiceUuidMask, other.mServiceUuidMask);
+                && Objects.equals(mServiceUuidMask, other.mServiceUuidMask)
+                && Objects.equals(mServiceSolicitationUuid, other.mServiceSolicitationUuid)
+                && Objects.equals(mServiceSolicitationUuidMask,
+                        other.mServiceSolicitationUuidMask);
     }
 
     /**
@@ -434,6 +520,9 @@ public final class ScanFilter implements Parcelable {
 
         private ParcelUuid mServiceUuid;
         private ParcelUuid mUuidMask;
+
+        private ParcelUuid mServiceSolicitationUuid;
+        private ParcelUuid mServiceSolicitationUuidMask;
 
         private ParcelUuid mServiceDataUuid;
         private byte[] mServiceData;
@@ -490,6 +579,36 @@ public final class ScanFilter implements Parcelable {
             }
             mServiceUuid = serviceUuid;
             mUuidMask = uuidMask;
+            return this;
+        }
+
+
+        /**
+         * Set filter on service solicitation uuid.
+         */
+        public Builder setServiceSolicitationUuid(ParcelUuid serviceSolicitationUuid) {
+            mServiceSolicitationUuid = serviceSolicitationUuid;
+            return this;
+        }
+
+
+        /**
+         * Set filter on partial service Solicitation uuid. The {@code SolicitationUuidMask} is the
+         * bit mask for the {@code serviceSolicitationUuid}. Set any bit in the mask to 1 to
+         * indicate a match is needed for the bit in {@code serviceSolicitationUuid}, and 0 to
+         * ignore that bit.
+         *
+         * @throws IllegalArgumentException If {@code serviceSolicitationUuid} is {@code null} but
+         *             {@code serviceSolicitationUuidMask} is not {@code null}.
+         */
+        public Builder setServiceSolicitationUuid(ParcelUuid serviceSolicitationUuid,
+                ParcelUuid solicitationUuidMask) {
+            if (mServiceSolicitationUuidMask != null && mServiceSolicitationUuid == null) {
+                throw new IllegalArgumentException(
+                        "SolicitationUuid is null while SolicitationUuidMask is not null!");
+            }
+            mServiceSolicitationUuid = serviceSolicitationUuid;
+            mServiceSolicitationUuidMask = solicitationUuidMask;
             return this;
         }
 
@@ -598,7 +717,8 @@ public final class ScanFilter implements Parcelable {
          */
         public ScanFilter build() {
             return new ScanFilter(mDeviceName, mDeviceAddress,
-                    mServiceUuid, mUuidMask,
+                    mServiceUuid, mUuidMask, mServiceSolicitationUuid,
+                    mServiceSolicitationUuidMask,
                     mServiceDataUuid, mServiceData, mServiceDataMask,
                     mManufacturerId, mManufacturerData, mManufacturerDataMask);
         }

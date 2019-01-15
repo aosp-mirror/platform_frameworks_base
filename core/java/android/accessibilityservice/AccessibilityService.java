@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -411,7 +412,7 @@ public abstract class AccessibilityService extends Service {
     @UnsupportedAppUsage
     private AccessibilityServiceInfo mInfo;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private IBinder mWindowToken;
 
     private WindowManager mWindowManager;

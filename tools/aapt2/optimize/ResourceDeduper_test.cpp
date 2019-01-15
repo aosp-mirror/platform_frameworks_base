@@ -20,6 +20,7 @@
 #include "test/Test.h"
 
 using ::aapt::test::HasValue;
+using ::android::ConfigDescription;
 using ::testing::Not;
 
 namespace aapt {

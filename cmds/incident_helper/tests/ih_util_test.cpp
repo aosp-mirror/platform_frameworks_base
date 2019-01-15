@@ -17,7 +17,6 @@
 #include "ih_util.h"
 
 #include <android-base/file.h>
-#include <android-base/test_utils.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <string>

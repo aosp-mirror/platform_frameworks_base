@@ -16,14 +16,21 @@
 
 package android.inputmethodservice;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Debug;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+
+import java.lang.annotation.Retention;
 
 /**
  * A SoftInputWindow is a Dialog that is intended to be used for a top-level input
@@ -33,6 +40,9 @@ import android.view.WindowManager;
  * @hide
  */
 public class SoftInputWindow extends Dialog {
+    private static final boolean DEBUG = false;
+    private static final String TAG = "SoftInputWindow";
+
     final String mName;
     final Callback mCallback;
     final KeyEvent.Callback mKeyEventCallback;
@@ -42,16 +52,65 @@ public class SoftInputWindow extends Dialog {
     final boolean mTakesFocus;
     private final Rect mBounds = new Rect();
 
+    @Retention(SOURCE)
+    @IntDef(value = {SoftInputWindowState.TOKEN_PENDING, SoftInputWindowState.TOKEN_SET,
+            SoftInputWindowState.SHOWN_AT_LEAST_ONCE, SoftInputWindowState.REJECTED_AT_LEAST_ONCE})
+    private @interface SoftInputWindowState {
+        /**
+         * The window token is not set yet.
+         */
+        int TOKEN_PENDING = 0;
+        /**
+         * The window token was set, but the window is not shown yet.
+         */
+        int TOKEN_SET = 1;
+        /**
+         * The window was shown at least once.
+         */
+        int SHOWN_AT_LEAST_ONCE = 2;
+        /**
+         * {@link android.view.WindowManager.BadTokenException} was sent when calling
+         * {@link Dialog#show()} at least once.
+         */
+        int REJECTED_AT_LEAST_ONCE = 3;
+        /**
+         * The window is considered destroyed.  Any incoming request should be ignored.
+         */
+        int DESTROYED = 4;
+    }
+
+    @SoftInputWindowState
+    private int mWindowState = SoftInputWindowState.TOKEN_PENDING;
+
     public interface Callback {
         public void onBackPressed();
     }
 
     public void setToken(IBinder token) {
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.token = token;
-        getWindow().setAttributes(lp);
+        switch (mWindowState) {
+            case SoftInputWindowState.TOKEN_PENDING:
+                // Normal scenario.  Nothing to worry about.
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.token = token;
+                getWindow().setAttributes(lp);
+                updateWindowState(SoftInputWindowState.TOKEN_SET);
+                return;
+            case SoftInputWindowState.TOKEN_SET:
+            case SoftInputWindowState.SHOWN_AT_LEAST_ONCE:
+            case SoftInputWindowState.REJECTED_AT_LEAST_ONCE:
+                throw new IllegalStateException("setToken can be called only once");
+            case SoftInputWindowState.DESTROYED:
+                // Just ignore.  Since there are multiple event queues from the token is issued
+                // in the system server to the timing when it arrives here, it can be delivered
+                // after the is already destroyed.  No one should be blamed because of such an
+                // unfortunate but possible scenario.
+                Log.i(TAG, "Ignoring setToken() because window is already destroyed.");
+                return;
+            default:
+                throw new IllegalStateException("Unexpected state=" + mWindowState);
+        }
     }
-    
+
     /**
      * Create a SoftInputWindow that uses a custom style.
      * 
@@ -189,5 +248,110 @@ public class SoftInputWindow extends Dialog {
         }
 
         getWindow().setFlags(windowSetFlags, windowModFlags);
+    }
+
+    @Override
+    public final void show() {
+        switch (mWindowState) {
+            case SoftInputWindowState.TOKEN_PENDING:
+                throw new IllegalStateException("Window token is not set yet.");
+            case SoftInputWindowState.TOKEN_SET:
+            case SoftInputWindowState.SHOWN_AT_LEAST_ONCE:
+                // Normal scenario.  Nothing to worry about.
+                try {
+                    super.show();
+                    updateWindowState(SoftInputWindowState.SHOWN_AT_LEAST_ONCE);
+                } catch (WindowManager.BadTokenException e) {
+                    // Just ignore this exception.  Since show() can be requested from other
+                    // components such as the system and there could be multiple event queues before
+                    // the request finally arrives here, the system may have already invalidated the
+                    // window token attached to our window.  In such a scenario, receiving
+                    // BadTokenException here is an expected behavior.  We just ignore it and update
+                    // the state so that we do not touch this window later.
+                    Log.i(TAG, "Probably the IME window token is already invalidated."
+                            + " show() does nothing.");
+                    updateWindowState(SoftInputWindowState.REJECTED_AT_LEAST_ONCE);
+                }
+                return;
+            case SoftInputWindowState.REJECTED_AT_LEAST_ONCE:
+                // Just ignore.  In general we cannot completely avoid this kind of race condition.
+                Log.i(TAG, "Not trying to call show() because it was already rejected once.");
+                return;
+            case SoftInputWindowState.DESTROYED:
+                // Just ignore.  In general we cannot completely avoid this kind of race condition.
+                Log.i(TAG, "Ignoring show() because the window is already destroyed.");
+                return;
+            default:
+                throw new IllegalStateException("Unexpected state=" + mWindowState);
+        }
+    }
+
+    final void dismissForDestroyIfNecessary() {
+        switch (mWindowState) {
+            case SoftInputWindowState.TOKEN_PENDING:
+            case SoftInputWindowState.TOKEN_SET:
+                // nothing to do because the window has never been shown.
+                updateWindowState(SoftInputWindowState.DESTROYED);
+                return;
+            case SoftInputWindowState.SHOWN_AT_LEAST_ONCE:
+                // Disable exit animation for the current IME window
+                // to avoid the race condition between the exit and enter animations
+                // when the current IME is being switched to another one.
+                try {
+                    getWindow().setWindowAnimations(0);
+                    dismiss();
+                } catch (WindowManager.BadTokenException e) {
+                    // Just ignore this exception.  Since show() can be requested from other
+                    // components such as the system and there could be multiple event queues before
+                    // the request finally arrives here, the system may have already invalidated the
+                    // window token attached to our window.  In such a scenario, receiving
+                    // BadTokenException here is an expected behavior.  We just ignore it and update
+                    // the state so that we do not touch this window later.
+                    Log.i(TAG, "Probably the IME window token is already invalidated. "
+                            + "No need to dismiss it.");
+                }
+                // Either way, consider that the window is destroyed.
+                updateWindowState(SoftInputWindowState.DESTROYED);
+                return;
+            case SoftInputWindowState.REJECTED_AT_LEAST_ONCE:
+                // Just ignore.  In general we cannot completely avoid this kind of race condition.
+                Log.i(TAG,
+                        "Not trying to dismiss the window because it is most likely unnecessary.");
+                // Anyway, consider that the window is destroyed.
+                updateWindowState(SoftInputWindowState.DESTROYED);
+                return;
+            case SoftInputWindowState.DESTROYED:
+                throw new IllegalStateException(
+                        "dismissForDestroyIfNecessary can be called only once");
+            default:
+                throw new IllegalStateException("Unexpected state=" + mWindowState);
+        }
+    }
+
+    private void updateWindowState(@SoftInputWindowState int newState) {
+        if (DEBUG) {
+            if (mWindowState != newState) {
+                Log.d(TAG, "WindowState: " + stateToString(mWindowState) + " -> "
+                        + stateToString(newState) + " @ " + Debug.getCaller());
+            }
+        }
+        mWindowState = newState;
+    }
+
+    private static String stateToString(@SoftInputWindowState int state) {
+        switch (state) {
+            case SoftInputWindowState.TOKEN_PENDING:
+                return "TOKEN_PENDING";
+            case SoftInputWindowState.TOKEN_SET:
+                return "TOKEN_SET";
+            case SoftInputWindowState.SHOWN_AT_LEAST_ONCE:
+                return "SHOWN_AT_LEAST_ONCE";
+            case SoftInputWindowState.REJECTED_AT_LEAST_ONCE:
+                return "REJECTED_AT_LEAST_ONCE";
+            case SoftInputWindowState.DESTROYED:
+                return "DESTROYED";
+            default:
+                throw new IllegalStateException("Unknown state=" + state);
+        }
     }
 }

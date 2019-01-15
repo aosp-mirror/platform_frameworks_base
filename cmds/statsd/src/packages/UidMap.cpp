@@ -141,7 +141,7 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
     // listener removes itself before we call it. It's then the listener's job to handle it (expect
     // the callback to be called after listener is removed, and the listener should properly
     // ignore it).
-    for (auto weakPtr : broadcastList) {
+    for (const auto& weakPtr : broadcastList) {
         auto strongPtr = weakPtr.promote();
         if (strongPtr != NULL) {
             strongPtr->onUidMapReceived(timestamp);
@@ -181,7 +181,7 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
         StatsdStats::getInstance().setUidMapChanges(mChanges.size());
     }
 
-    for (auto weakPtr : broadcastList) {
+    for (const auto& weakPtr : broadcastList) {
         auto strongPtr = weakPtr.promote();
         if (strongPtr != NULL) {
             strongPtr->notifyAppUpgrade(timestamp, appName, uid, versionCode);
@@ -248,7 +248,7 @@ void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const i
         getListenerListCopyLocked(&broadcastList);
     }
 
-    for (auto weakPtr : broadcastList) {
+    for (const auto& weakPtr : broadcastList) {
         auto strongPtr = weakPtr.promote();
         if (strongPtr != NULL) {
             strongPtr->notifyAppRemoved(timestamp, app, uid);
@@ -489,6 +489,10 @@ const std::map<string, uint32_t> UidMap::sAidToUidMapping = {{"AID_ROOT", 0},
                                                              {"AID_RESERVED_DISK", 1065},
                                                              {"AID_STATSD", 1066},
                                                              {"AID_INCIDENTD", 1067},
+                                                             {"AID_SECURE_ELEMENT", 1068},
+                                                             {"AID_LMKD", 1069},
+                                                             {"AID_LLKD", 1070},
+                                                             {"AID_IORAPD", 1071},
                                                              {"AID_SHELL", 2000},
                                                              {"AID_CACHE", 2001},
                                                              {"AID_DIAG", 2002}};

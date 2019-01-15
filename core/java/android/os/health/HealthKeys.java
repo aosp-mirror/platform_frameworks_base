@@ -16,6 +16,7 @@
 
 package android.os.health;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -89,6 +90,7 @@ public class HealthKeys {
          * Pass in a class to gather the public static final int fields that are
          * tagged with the @Constant annotation.
          */
+        @UnsupportedAppUsage
         public Constants(Class clazz) {
             // Save the class name for debugging
             mDataType = clazz.getSimpleName();

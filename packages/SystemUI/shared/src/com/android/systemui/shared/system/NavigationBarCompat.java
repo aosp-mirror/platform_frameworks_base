@@ -24,8 +24,6 @@ import android.util.DisplayMetrics;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import sun.misc.Resource;
-
 public class NavigationBarCompat {
     /**
      * Touch slopes and thresholds for quick step operations. Drag slop is the point where the
@@ -54,6 +52,7 @@ public class NavigationBarCompat {
     public static final int HIT_TARGET_HOME = 2;
     public static final int HIT_TARGET_OVERVIEW = 3;
     public static final int HIT_TARGET_ROTATION = 4;
+    public static final int HIT_TARGET_DEAD_ZONE = 5;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({FLAG_DISABLE_SWIPE_UP,

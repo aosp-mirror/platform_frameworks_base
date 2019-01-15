@@ -23,6 +23,7 @@ import android.content.ServiceConnection;
 import android.content.pm.*;
 import android.content.pm.ServiceInfo;
 import android.telephony.MbmsDownloadSession;
+import android.telephony.MbmsGroupCallSession;
 import android.telephony.MbmsStreamingSession;
 import android.util.Log;
 
@@ -58,6 +59,9 @@ public class MbmsUtils {
                 break;
             case MbmsStreamingSession.MBMS_STREAMING_SERVICE_ACTION:
                 metaDataKey = MbmsStreamingSession.MBMS_STREAMING_SERVICE_OVERRIDE_METADATA;
+                break;
+            case MbmsGroupCallSession.MBMS_GROUP_CALL_SERVICE_ACTION:
+                metaDataKey = MbmsGroupCallSession.MBMS_GROUP_CALL_SERVICE_OVERRIDE_METADATA;
                 break;
         }
         if (metaDataKey == null) {

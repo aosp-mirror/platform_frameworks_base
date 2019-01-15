@@ -16,6 +16,8 @@
 
 package android.net.dhcp;
 
+import static android.net.NetworkUtils.getBroadcastAddress;
+import static android.net.NetworkUtils.getPrefixMaskAsInet4Address;
 import static android.net.dhcp.DhcpPacket.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -23,20 +25,23 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.annotation.Nullable;
 import android.net.DhcpResults;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
 import android.net.metrics.DhcpErrorEvent;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.SmallTest;
-import android.system.OsConstants;
 
 import com.android.internal.util.HexDump;
 
+import java.io.ByteArrayOutputStream;
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 
 import org.junit.Before;
@@ -47,13 +52,19 @@ import org.junit.runner.RunWith;
 @SmallTest
 public class DhcpPacketTest {
 
-    private static Inet4Address SERVER_ADDR = v4Address("192.0.2.1");
-    private static Inet4Address CLIENT_ADDR = v4Address("192.0.2.234");
+    private static final Inet4Address SERVER_ADDR = v4Address("192.0.2.1");
+    private static final Inet4Address CLIENT_ADDR = v4Address("192.0.2.234");
+    private static final int PREFIX_LENGTH = 22;
+    private static final Inet4Address NETMASK = getPrefixMaskAsInet4Address(PREFIX_LENGTH);
+    private static final Inet4Address BROADCAST_ADDR = getBroadcastAddress(
+            SERVER_ADDR, PREFIX_LENGTH);
+    private static final String HOSTNAME = "testhostname";
+    private static final short MTU = 1500;
     // Use our own empty address instead of Inet4Address.ANY or INADDR_ANY to ensure that the code
     // doesn't use == instead of equals when comparing addresses.
-    private static Inet4Address ANY = (Inet4Address) v4Address("0.0.0.0");
+    private static final Inet4Address ANY = (Inet4Address) v4Address("0.0.0.0");
 
-    private static byte[] CLIENT_MAC = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
+    private static final byte[] CLIENT_MAC = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
 
     private static final Inet4Address v4Address(String addrString) throws IllegalArgumentException {
         return (Inet4Address) NetworkUtils.numericToInetAddress(addrString);
@@ -951,5 +962,114 @@ public class DhcpPacketTest {
                 "Expected:\n  " + Arrays.toString(expected) +
                 "\nActual:\n  " + Arrays.toString(actual);
         assertTrue(msg, Arrays.equals(expected, actual));
+    }
+
+    public void checkBuildOfferPacket(int leaseTimeSecs, @Nullable String hostname)
+            throws Exception {
+        final int renewalTime = (int) (Integer.toUnsignedLong(leaseTimeSecs) / 2);
+        final int rebindingTime = (int) (Integer.toUnsignedLong(leaseTimeSecs) * 875 / 1000);
+        final int transactionId = 0xdeadbeef;
+
+        final ByteBuffer packet = DhcpPacket.buildOfferPacket(
+                DhcpPacket.ENCAP_BOOTP, transactionId, false /* broadcast */,
+                SERVER_ADDR, INADDR_ANY /* relayIp */, CLIENT_ADDR /* yourIp */,
+                CLIENT_MAC, leaseTimeSecs, NETMASK /* netMask */,
+                BROADCAST_ADDR /* bcAddr */, Collections.singletonList(SERVER_ADDR) /* gateways */,
+                Collections.singletonList(SERVER_ADDR) /* dnsServers */,
+                SERVER_ADDR /* dhcpServerIdentifier */, null /* domainName */, hostname,
+                false /* metered */, MTU);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        // BOOTP headers
+        bos.write(new byte[] {
+                (byte) 0x02, (byte) 0x01, (byte) 0x06, (byte) 0x00,
+                (byte) 0xde, (byte) 0xad, (byte) 0xbe, (byte) 0xef,
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                // ciaddr
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+        });
+        // yiaddr
+        bos.write(CLIENT_ADDR.getAddress());
+        // siaddr
+        bos.write(SERVER_ADDR.getAddress());
+        // giaddr
+        bos.write(INADDR_ANY.getAddress());
+        // chaddr
+        bos.write(CLIENT_MAC);
+
+        // Padding
+        bos.write(new byte[202]);
+
+        // Options
+        bos.write(new byte[]{
+                // Magic cookie 0x63825363.
+                (byte) 0x63, (byte) 0x82, (byte) 0x53, (byte) 0x63,
+                // Message type OFFER.
+                (byte) 0x35, (byte) 0x01, (byte) 0x02,
+        });
+        // Server ID
+        bos.write(new byte[] { (byte) 0x36, (byte) 0x04 });
+        bos.write(SERVER_ADDR.getAddress());
+        // Lease time
+        bos.write(new byte[] { (byte) 0x33, (byte) 0x04 });
+        bos.write(intToByteArray(leaseTimeSecs));
+        if (leaseTimeSecs != INFINITE_LEASE) {
+            // Renewal time
+            bos.write(new byte[]{(byte) 0x3a, (byte) 0x04});
+            bos.write(intToByteArray(renewalTime));
+            // Rebinding time
+            bos.write(new byte[]{(byte) 0x3b, (byte) 0x04});
+            bos.write(intToByteArray(rebindingTime));
+        }
+        // Subnet mask
+        bos.write(new byte[] { (byte) 0x01, (byte) 0x04 });
+        bos.write(NETMASK.getAddress());
+        // Broadcast address
+        bos.write(new byte[] { (byte) 0x1c, (byte) 0x04 });
+        bos.write(BROADCAST_ADDR.getAddress());
+        // Router
+        bos.write(new byte[] { (byte) 0x03, (byte) 0x04 });
+        bos.write(SERVER_ADDR.getAddress());
+        // Nameserver
+        bos.write(new byte[] { (byte) 0x06, (byte) 0x04 });
+        bos.write(SERVER_ADDR.getAddress());
+        // Hostname
+        if (hostname != null) {
+            bos.write(new byte[]{(byte) 0x0c, (byte) hostname.length()});
+            bos.write(hostname.getBytes(Charset.forName("US-ASCII")));
+        }
+        // MTU
+        bos.write(new byte[] { (byte) 0x1a, (byte) 0x02 });
+        bos.write(shortToByteArray(MTU));
+        // End options.
+        bos.write(0xff);
+
+        if ((bos.size() & 1) != 0) {
+            bos.write(0x00);
+        }
+
+        final byte[] expected = bos.toByteArray();
+        final byte[] actual = new byte[packet.limit()];
+        packet.get(actual);
+        final String msg = "Expected:\n  " + HexDump.dumpHexString(expected) +
+                "\nActual:\n  " + HexDump.dumpHexString(actual);
+        assertTrue(msg, Arrays.equals(expected, actual));
+    }
+
+    @Test
+    public void testOfferPacket() throws Exception {
+        checkBuildOfferPacket(3600, HOSTNAME);
+        checkBuildOfferPacket(Integer.MAX_VALUE, HOSTNAME);
+        checkBuildOfferPacket(0x80000000, HOSTNAME);
+        checkBuildOfferPacket(INFINITE_LEASE, HOSTNAME);
+        checkBuildOfferPacket(3600, null);
+    }
+
+    private static byte[] intToByteArray(int val) {
+        return ByteBuffer.allocate(4).putInt(val).array();
+    }
+
+    private static byte[] shortToByteArray(short val) {
+        return ByteBuffer.allocate(2).putShort(val).array();
     }
 }

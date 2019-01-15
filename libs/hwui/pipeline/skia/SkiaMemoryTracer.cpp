@@ -106,8 +106,9 @@ void SkiaMemoryTracer::processElement() {
                 resourceValues.insert({key, sizeResult->second});
             }
         } else {
+            TraceValue sizeValue = sizeResult->second;
             mCurrentValues.clear();
-            mCurrentValues.insert({key, sizeResult->second});
+            mCurrentValues.insert({key, sizeValue});
             mResults.insert({resourceName, mCurrentValues});
         }
     }

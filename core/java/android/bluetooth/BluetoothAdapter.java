@@ -81,7 +81,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * {@link #getBondedDevices()}; start device discovery with
  * {@link #startDiscovery()}; or create a {@link BluetoothServerSocket} to
  * listen for incoming RFComm connection requests with {@link
- * #listenUsingRfcommWithServiceRecord(String, UUID)}; or start a scan for
+ * #listenUsingRfcommWithServiceRecord(String, UUID)}; listen for incoming L2CAP Connection-oriented
+ * Channels (CoC) connection requests with {@link #listenUsingL2capChannel()}; or start a scan for
  * Bluetooth LE devices with {@link #startLeScan(LeScanCallback callback)}.
  * </p>
  * <p>This class is thread safe.</p>
@@ -642,6 +643,7 @@ public final class BluetoothAdapter {
     private final IBluetoothManager mManagerService;
     @UnsupportedAppUsage
     private IBluetooth mService;
+    private Context mContext;
     private final ReentrantReadWriteLock mServiceLock = new ReentrantReadWriteLock();
 
     private final Object mLock = new Object();
@@ -1540,6 +1542,23 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Set the context for this BluetoothAdapter (only called from BluetoothManager)
+     * @hide
+     */
+    public void setContext(Context context) {
+        mContext = context;
+    }
+
+    private String getOpPackageName() {
+        // Workaround for legacy API for getting a BluetoothAdapter not
+        // passing a context
+        if (mContext != null) {
+            return mContext.getOpPackageName();
+        }
+        return ActivityThread.currentOpPackageName();
+    }
+
+    /**
      * Start the remote device discovery process.
      * <p>The discovery process usually involves an inquiry scan of about 12
      * seconds, followed by a page scan of each new device to retrieve its
@@ -1576,7 +1595,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.startDiscovery();
+                return mService.startDiscovery(getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -2047,8 +2066,7 @@ public final class BluetoothAdapter {
      * Get the current connection state of a profile.
      * This function can be used to check whether the local Bluetooth adapter
      * is connected to any remote device for a specific profile.
-     * Profile can be one of {@link BluetoothProfile#HEALTH}, {@link BluetoothProfile#HEADSET},
-     * {@link BluetoothProfile#A2DP}.
+     * Profile can be one of {@link BluetoothProfile#HEADSET}, {@link BluetoothProfile#A2DP}.
      *
      * <p> Return value can be one of
      * {@link BluetoothProfile#STATE_DISCONNECTED},
@@ -2422,16 +2440,15 @@ public final class BluetoothAdapter {
     /**
      * Get the profile proxy object associated with the profile.
      *
-     * <p>Profile can be one of {@link BluetoothProfile#HEALTH}, {@link BluetoothProfile#HEADSET},
-     * {@link BluetoothProfile#A2DP}, {@link BluetoothProfile#GATT}, or
-     * {@link BluetoothProfile#GATT_SERVER}. Clients must implement
-     * {@link BluetoothProfile.ServiceListener} to get notified of
-     * the connection status and to get the proxy object.
+     * <p>Profile can be one of {@link BluetoothProfile#HEADSET}, {@link BluetoothProfile#A2DP},
+     * {@link BluetoothProfile#GATT}, or {@link BluetoothProfile#GATT_SERVER}. Clients must
+     * implement {@link BluetoothProfile.ServiceListener} to get notified of the connection status
+     * and to get the proxy object.
      *
      * @param context Context of the application
      * @param listener The service Listener for connection callbacks.
-     * @param profile The Bluetooth profile; either {@link BluetoothProfile#HEALTH}, {@link
-     * BluetoothProfile#HEADSET}, {@link BluetoothProfile#A2DP}. {@link BluetoothProfile#GATT} or
+     * @param profile The Bluetooth profile; either {@link BluetoothProfile#HEADSET},
+     * {@link BluetoothProfile#A2DP}. {@link BluetoothProfile#GATT} or
      * {@link BluetoothProfile#GATT_SERVER}.
      * @return true on success, false on error
      */
@@ -2460,8 +2477,8 @@ public final class BluetoothAdapter {
             BluetoothPan pan = new BluetoothPan(context, listener);
             return true;
         } else if (profile == BluetoothProfile.HEALTH) {
-            BluetoothHealth health = new BluetoothHealth(context, listener);
-            return true;
+            Log.e(TAG, "getProfileProxy(): BluetoothHealth is deprecated");
+            return false;
         } else if (profile == BluetoothProfile.MAP) {
             BluetoothMap map = new BluetoothMap(context, listener);
             return true;
@@ -2493,8 +2510,7 @@ public final class BluetoothAdapter {
      *
      * <p> Clients should call this when they are no longer using
      * the proxy obtained from {@link #getProfileProxy}.
-     * Profile can be one of  {@link BluetoothProfile#HEALTH}, {@link BluetoothProfile#HEADSET} or
-     * {@link BluetoothProfile#A2DP}
+     * Profile can be one of  {@link BluetoothProfile#HEADSET} or {@link BluetoothProfile#A2DP}
      *
      * @param profile
      * @param proxy Profile proxy object
@@ -2528,10 +2544,6 @@ public final class BluetoothAdapter {
             case BluetoothProfile.PAN:
                 BluetoothPan pan = (BluetoothPan) proxy;
                 pan.close();
-                break;
-            case BluetoothProfile.HEALTH:
-                BluetoothHealth health = (BluetoothHealth) proxy;
-                health.close();
                 break;
             case BluetoothProfile.GATT:
                 BluetoothGatt gatt = (BluetoothGatt) proxy;
@@ -2967,7 +2979,7 @@ public final class BluetoothAdapter {
     /**
      * Create a secure L2CAP Connection-oriented Channel (CoC) {@link BluetoothServerSocket} and
      * assign a dynamic protocol/service multiplexer (PSM) value. This socket can be used to listen
-     * for incoming connections.
+     * for incoming connections. The supported Bluetooth transport is LE only.
      * <p>A remote device connecting to this socket will be authenticated and communication on this
      * socket will be encrypted.
      * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming connections from a listening
@@ -2977,21 +2989,16 @@ public final class BluetoothAdapter {
      * closed, Bluetooth is turned off, or the application exits unexpectedly.
      * <p>The mechanism of disclosing the assigned dynamic PSM value to the initiating peer is
      * defined and performed by the application.
-     * <p>Use {@link BluetoothDevice#createL2capCocSocket(int, int)} to connect to this server
+     * <p>Use {@link BluetoothDevice#createL2capChannel(int)} to connect to this server
      * socket from another Android device that is given the PSM value.
      *
-     * @param transport Bluetooth transport to use, must be {@link BluetoothDevice#TRANSPORT_LE}
      * @return an L2CAP CoC BluetoothServerSocket
      * @throws IOException on error, for example Bluetooth not available, or insufficient
      * permissions, or unable to start this CoC
-     * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothServerSocket listenUsingL2capCoc(int transport)
+    public BluetoothServerSocket listenUsingL2capChannel()
             throws IOException {
-        if (transport != BluetoothDevice.TRANSPORT_LE) {
-            throw new IllegalArgumentException("Unsupported transport: " + transport);
-        }
         BluetoothServerSocket socket =
                             new BluetoothServerSocket(BluetoothSocket.TYPE_L2CAP_LE, true, true,
                                       SOCKET_CHANNEL_AUTO_STATIC_NO_SDP, false, false);
@@ -3005,7 +3012,7 @@ public final class BluetoothAdapter {
             throw new IOException("Error: Unable to assign PSM value");
         }
         if (DBG) {
-            Log.d(TAG, "listenUsingL2capCoc: set assigned PSM to "
+            Log.d(TAG, "listenUsingL2capChannel: set assigned PSM to "
                     + assignedPsm);
         }
         socket.setChannel(assignedPsm);
@@ -3014,10 +3021,23 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * TODO: Remove this hidden method once all the SL4A and other tests are updated to use the new
+     * API name, listenUsingL2capChannel.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    public BluetoothServerSocket listenUsingL2capCoc(int transport)
+            throws IOException {
+        Log.e(TAG, "listenUsingL2capCoc: PLEASE USE THE OFFICIAL API, listenUsingL2capChannel");
+        return listenUsingL2capChannel();
+    }
+
+    /**
      * Create an insecure L2CAP Connection-oriented Channel (CoC) {@link BluetoothServerSocket} and
-     * assign a dynamic PSM value. This socket can be used to listen for incoming connections.
+     * assign a dynamic PSM value. This socket can be used to listen for incoming connections. The
+     * supported Bluetooth transport is LE only.
      * <p>The link key is not required to be authenticated, i.e the communication may be vulnerable
-     * to man-in-the-middle attacks. Use {@link #listenUsingL2capCoc}, if an encrypted and
+     * to man-in-the-middle attacks. Use {@link #listenUsingL2capChannel}, if an encrypted and
      * authenticated communication channel is desired.
      * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming connections from a listening
      * {@link BluetoothServerSocket}.
@@ -3027,21 +3047,16 @@ public final class BluetoothAdapter {
      * unexpectedly.
      * <p>The mechanism of disclosing the assigned dynamic PSM value to the initiating peer is
      * defined and performed by the application.
-     * <p>Use {@link BluetoothDevice#createInsecureL2capCocSocket(int, int)} to connect to this
-     * server socket from another Android device that is given the PSM value.
+     * <p>Use {@link BluetoothDevice#createInsecureL2capChannel(int)} to connect to this server
+     * socket from another Android device that is given the PSM value.
      *
-     * @param transport Bluetooth transport to use, must be {@link BluetoothDevice#TRANSPORT_LE}
      * @return an L2CAP CoC BluetoothServerSocket
      * @throws IOException on error, for example Bluetooth not available, or insufficient
      * permissions, or unable to start this CoC
-     * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothServerSocket listenUsingInsecureL2capCoc(int transport)
+    public BluetoothServerSocket listenUsingInsecureL2capChannel()
             throws IOException {
-        if (transport != BluetoothDevice.TRANSPORT_LE) {
-            throw new IllegalArgumentException("Unsupported transport: " + transport);
-        }
         BluetoothServerSocket socket =
                             new BluetoothServerSocket(BluetoothSocket.TYPE_L2CAP_LE, false, false,
                                       SOCKET_CHANNEL_AUTO_STATIC_NO_SDP, false, false);
@@ -3055,11 +3070,24 @@ public final class BluetoothAdapter {
             throw new IOException("Error: Unable to assign PSM value");
         }
         if (DBG) {
-            Log.d(TAG, "listenUsingInsecureL2capOn: set assigned PSM to "
+            Log.d(TAG, "listenUsingInsecureL2capChannel: set assigned PSM to "
                     + assignedPsm);
         }
         socket.setChannel(assignedPsm);
 
         return socket;
+    }
+
+    /**
+     * TODO: Remove this hidden method once all the SL4A and other tests are updated to use the new
+     * API name, listenUsingInsecureL2capChannel.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    public BluetoothServerSocket listenUsingInsecureL2capCoc(int transport)
+            throws IOException {
+        Log.e(TAG, "listenUsingInsecureL2capCoc: PLEASE USE THE OFFICIAL API, "
+                    + "listenUsingInsecureL2capChannel");
+        return listenUsingInsecureL2capChannel();
     }
 }

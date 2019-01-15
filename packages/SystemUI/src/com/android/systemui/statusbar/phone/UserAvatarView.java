@@ -45,25 +45,18 @@ public class UserAvatarView extends View {
         final int N = a.getIndexCount();
         for (int i = 0; i < N; i++) {
             int attr = a.getIndex(i);
-            switch (attr) {
-                case R.styleable.UserAvatarView_avatarPadding:
-                    setAvatarPadding(a.getDimension(attr, 0));
-                    break;
-                case R.styleable.UserAvatarView_frameWidth:
-                    setFrameWidth(a.getDimension(attr, 0));
-                    break;
-                case R.styleable.UserAvatarView_framePadding:
-                    setFramePadding(a.getDimension(attr, 0));
-                    break;
-                case R.styleable.UserAvatarView_frameColor:
-                    setFrameColor(a.getColorStateList(attr));
-                    break;
-                case R.styleable.UserAvatarView_badgeDiameter:
-                    setBadgeDiameter(a.getDimension(attr, 0));
-                    break;
-                case R.styleable.UserAvatarView_badgeMargin:
-                    setBadgeMargin(a.getDimension(attr, 0));
-                    break;
+            if (attr == R.styleable.UserAvatarView_avatarPadding) {
+                setAvatarPadding(a.getDimension(attr, 0));
+            } else if (attr == R.styleable.UserAvatarView_frameWidth) {
+                setFrameWidth(a.getDimension(attr, 0));
+            } else if (attr == R.styleable.UserAvatarView_framePadding) {
+                setFramePadding(a.getDimension(attr, 0));
+            } else if (attr == R.styleable.UserAvatarView_frameColor) {
+                setFrameColor(a.getColorStateList(attr));
+            } else if (attr == R.styleable.UserAvatarView_badgeDiameter) {
+                setBadgeDiameter(a.getDimension(attr, 0));
+            } else if (attr == R.styleable.UserAvatarView_badgeMargin) {
+                setBadgeMargin(a.getDimension(attr, 0));
             }
         }
         a.recycle();

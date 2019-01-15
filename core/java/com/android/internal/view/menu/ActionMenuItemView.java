@@ -16,6 +16,7 @@
 
 package com.android.internal.view.menu;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -224,6 +225,7 @@ public class ActionMenuItemView extends TextView
         updateTextButtonVisibility();
     }
 
+    @UnsupportedAppUsage
     public boolean hasText() {
         return !TextUtils.isEmpty(getText());
     }

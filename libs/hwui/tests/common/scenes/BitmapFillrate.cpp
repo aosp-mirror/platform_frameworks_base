@@ -31,7 +31,7 @@ static bool _BitmapFillrate(
 
 class BitmapFillrate : public TestScene {
 public:
-    BitmapFillrate(BitmapAllocationTestUtils::BitmapAllocator allocator)
+    explicit BitmapFillrate(BitmapAllocationTestUtils::BitmapAllocator allocator)
             : TestScene(), mAllocator(allocator) {}
 
     void createContent(int width, int height, Canvas& canvas) override {

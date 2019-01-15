@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,11 +32,14 @@ import java.util.ArrayList;
  */
 public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
 
+    @UnsupportedAppUsage
     private final ListAdapter mAdapter;
 
     // These two ArrayList are assumed to NOT be null.
     // They are indeed created when declared in ListView and then shared.
+    @UnsupportedAppUsage
     ArrayList<ListView.FixedViewInfo> mHeaderViewInfos;
+    @UnsupportedAppUsage
     ArrayList<ListView.FixedViewInfo> mFooterViewInfos;
 
     // Used as a placeholder in case the provided info views are indeed null.

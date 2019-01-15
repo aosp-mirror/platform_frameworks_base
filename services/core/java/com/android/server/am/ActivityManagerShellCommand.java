@@ -2069,8 +2069,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         FeatureInfo[] features = pm.getSystemAvailableFeatures();
-        Arrays.sort(features, (o1, o2) ->
-                (o1.name == o2.name ? 0 : (o1.name == null ? -1 : o1.name.compareTo(o2.name))));
+        Arrays.sort(features, (o1, o2) -> {
+            if (o1.name == o2.name) return 0;
+            if (o1.name == null) return -1;
+            if (o2.name == null) return 1;
+            return o1.name.compareTo(o2.name);
+        });
+
         for (int i = 0; i < features.length; i++) {
             if (features[i].name != null) {
                 if (protoOutputStream != null) {
@@ -2844,6 +2849,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  --checkin: output checkin format, resetting data.");
             pw.println("  --C: output checkin format, not resetting data.");
             pw.println("  --proto: output dump in protocol buffer format.");
+            pw.println("  --autofill: dump just the autofill-related state of an activity");
         } else {
             pw.println("Activity manager (activity) commands:");
             pw.println("  help");

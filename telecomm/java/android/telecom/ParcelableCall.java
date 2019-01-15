@@ -16,8 +16,10 @@
 
 package android.telecom;
 
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -61,6 +63,7 @@ public final class ParcelableCall implements Parcelable {
     private final Bundle mIntentExtras;
     private final Bundle mExtras;
     private final long mCreationTimeMillis;
+    private final CallIdentification mCallIdentification;
 
     public ParcelableCall(
             String id,
@@ -88,7 +91,8 @@ public final class ParcelableCall implements Parcelable {
             List<String> conferenceableCallIds,
             Bundle intentExtras,
             Bundle extras,
-            long creationTimeMillis) {
+            long creationTimeMillis,
+            CallIdentification callIdentification) {
         mId = id;
         mState = state;
         mDisconnectCause = disconnectCause;
@@ -115,10 +119,11 @@ public final class ParcelableCall implements Parcelable {
         mIntentExtras = intentExtras;
         mExtras = extras;
         mCreationTimeMillis = creationTimeMillis;
+        mCallIdentification = callIdentification;
     }
 
     /** The unique ID of the call. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public String getId() {
         return mId;
     }
@@ -132,7 +137,7 @@ public final class ParcelableCall implements Parcelable {
      * Reason for disconnection, as described by {@link android.telecomm.DisconnectCause}. Valid
      * when call state is {@link CallState#DISCONNECTED}.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public DisconnectCause getDisconnectCause() {
         return mDisconnectCause;
     }
@@ -158,13 +163,13 @@ public final class ParcelableCall implements Parcelable {
     }
 
     /** The time that the call switched to the active state. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public long getConnectTimeMillis() {
         return mConnectTimeMillis;
     }
 
     /** The endpoint to which the call is connected. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public Uri getHandle() {
         return mHandle;
     }
@@ -304,8 +309,17 @@ public final class ParcelableCall implements Parcelable {
         return mCreationTimeMillis;
     }
 
+    /**
+     * Contains call identification information returned by a {@link CallScreeningService}.
+     * @return The {@link CallIdentification} for this call, or {@code null} if a
+     * {@link CallScreeningService} did not provide information.
+     */
+    public @Nullable CallIdentification getCallIdentification() {
+        return mCallIdentification;
+    }
+
     /** Responsible for creating ParcelableCall objects for deserialized Parcels. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final Parcelable.Creator<ParcelableCall> CREATOR =
             new Parcelable.Creator<ParcelableCall> () {
         @Override
@@ -341,6 +355,7 @@ public final class ParcelableCall implements Parcelable {
             boolean isRttCallChanged = source.readByte() == 1;
             ParcelableRttCall rttCall = source.readParcelable(classLoader);
             long creationTimeMillis = source.readLong();
+            CallIdentification callIdentification = source.readParcelable(classLoader);
             return new ParcelableCall(
                     id,
                     state,
@@ -367,7 +382,8 @@ public final class ParcelableCall implements Parcelable {
                     conferenceableCallIds,
                     intentExtras,
                     extras,
-                    creationTimeMillis);
+                    creationTimeMillis,
+                    callIdentification);
         }
 
         @Override
@@ -412,6 +428,7 @@ public final class ParcelableCall implements Parcelable {
         destination.writeByte((byte) (mIsRttCallChanged ? 1 : 0));
         destination.writeParcelable(mRttCall, 0);
         destination.writeLong(mCreationTimeMillis);
+        destination.writeParcelable(mCallIdentification, 0);
     }
 
     @Override

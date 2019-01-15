@@ -113,7 +113,7 @@ public:
         virtual void shutdown() {}
     };
 
-    BootAnimation(sp<Callbacks> callbacks);
+    explicit BootAnimation(sp<Callbacks> callbacks);
 
     sp<SurfaceComposerClient> session() const;
 
@@ -127,7 +127,7 @@ private:
 
     class TimeCheckThread : public Thread {
     public:
-        TimeCheckThread(BootAnimation* bootAnimation);
+        explicit TimeCheckThread(BootAnimation* bootAnimation);
         virtual ~TimeCheckThread();
     private:
         virtual status_t    readyToRun();
@@ -157,11 +157,15 @@ private:
 
     void checkExit();
 
+    void handleViewport(nsecs_t timestep);
+
     sp<SurfaceComposerClient>       mSession;
     AssetManager mAssets;
     Texture     mAndroid[2];
     int         mWidth;
     int         mHeight;
+    int         mCurrentInset;
+    int         mTargetInset;
     bool        mUseNpotTextures = false;
     EGLDisplay  mDisplay;
     EGLDisplay  mContext;

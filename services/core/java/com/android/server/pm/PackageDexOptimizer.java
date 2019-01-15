@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.os.FileUtils;
@@ -34,6 +35,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
@@ -48,7 +50,7 @@ import java.util.Map;
 
 import dalvik.system.DexFile;
 
-import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_NONE;
+import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DISABLED;
 
 import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
 import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
@@ -84,9 +86,6 @@ public class PackageDexOptimizer {
     public static final int DEX_OPT_FAILED = -1;
     // One minute over PM WATCHDOG_TIMEOUT
     private static final long WAKELOCK_TIMEOUT_MS = WATCHDOG_TIMEOUT + 1000 * 60;
-
-    /** Special library name that skips shared libraries check during compilation. */
-    public static final String SKIP_SHARED_LIBRARY_CHECK = "&";
 
     @GuardedBy("mInstallLock")
     private final Installer mInstaller;
@@ -128,7 +127,7 @@ public class PackageDexOptimizer {
      * <p>Calls to {@link com.android.server.pm.Installer#dexopt} on {@link #mInstaller} are
      * synchronized on {@link #mInstallLock}.
      */
-    int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
+    int performDexOpt(PackageParser.Package pkg, List<SharedLibraryInfo> sharedLibraries,
             String[] instructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
         if (pkg.applicationInfo.uid == -1) {
@@ -154,7 +153,8 @@ public class PackageDexOptimizer {
      * It assumes the install lock is held.
      */
     @GuardedBy("mInstallLock")
-    private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
+    private int performDexOptLI(PackageParser.Package pkg,
+            List<SharedLibraryInfo> sharedLibraries,
             String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
         final String[] instructionSets = targetInstructionSets != null ?
@@ -289,7 +289,8 @@ public class PackageDexOptimizer {
             mInstaller.dexopt(path, uid, pkg.packageName, isa, dexoptNeeded, oatDir, dexoptFlags,
                     compilerFilter, pkg.volumeUuid, classLoaderContext, pkg.applicationInfo.seInfo,
                     false /* downgrade*/, pkg.applicationInfo.targetSdkVersion,
-                    profileName, dexMetadataPath, getReasonName(compilationReason));
+                    profileName, dexMetadataPath,
+                    getAugmentedReasonName(compilationReason, dexMetadataPath != null));
 
             if (packageStats != null) {
                 long endTime = System.currentTimeMillis();
@@ -300,6 +301,12 @@ public class PackageDexOptimizer {
             Slog.w(TAG, "Failed to dexopt", e);
             return DEX_OPT_FAILED;
         }
+    }
+
+    private String getAugmentedReasonName(int compilationReason, boolean useDexMetadata) {
+        String annotation = useDexMetadata
+                ? ArtManagerService.DEXOPT_REASON_WITH_DEX_METADATA_ANNOTATION : "";
+        return getReasonName(compilationReason) + annotation;
     }
 
     /**
@@ -389,18 +396,23 @@ public class PackageDexOptimizer {
             Slog.e(TAG, "Could not infer CE/DE storage for package " + info.packageName);
             return DEX_OPT_FAILED;
         }
+        String classLoaderContext = null;
+        if (dexUseInfo.isUnknownClassLoaderContext() || dexUseInfo.isVariableClassLoaderContext()) {
+            // If we have an unknown (not yet set), or a variable class loader chain. Just extract
+            // the dex file.
+            compilerFilter = "extract";
+        } else {
+            classLoaderContext = dexUseInfo.getClassLoaderContext();
+        }
+
+        int reason = options.getCompilationReason();
         Log.d(TAG, "Running dexopt on: " + path
                 + " pkg=" + info.packageName + " isa=" + dexUseInfo.getLoaderIsas()
+                + " reason=" + getReasonName(reason)
                 + " dexoptFlags=" + printDexoptFlags(dexoptFlags)
-                + " target-filter=" + compilerFilter);
+                + " target-filter=" + compilerFilter
+                + " class-loader-context=" + classLoaderContext);
 
-        // TODO(calin): b/64530081 b/66984396. Use SKIP_SHARED_LIBRARY_CHECK for the context
-        // (instead of dexUseInfo.getClassLoaderContext()) in order to compile secondary dex files
-        // in isolation (and avoid to extract/verify the main apk if it's in the class path).
-        // Note this trades correctness for performance since the resulting slow down is
-        // unacceptable in some cases until b/64530081 is fixed.
-        String classLoaderContext = SKIP_SHARED_LIBRARY_CHECK;
-        int reason = options.getCompilationReason();
         try {
             for (String isa : dexUseInfo.getLoaderIsas()) {
                 // Reuse the same dexopt path as for the primary apks. We don't need all the
@@ -540,7 +552,7 @@ public class PackageDexOptimizer {
         // Some apps are executed with restrictions on hidden API usage. If this app is one
         // of them, pass a flag to dexopt to enable the same restrictions during compilation.
         // TODO we should pass the actual flag value to dexopt, rather than assuming blacklist
-        int hiddenApiFlag = info.getHiddenApiEnforcementPolicy() == HIDDEN_API_ENFORCEMENT_NONE
+        int hiddenApiFlag = info.getHiddenApiEnforcementPolicy() == HIDDEN_API_ENFORCEMENT_DISABLED
                 ? 0
                 : DEXOPT_ENABLE_HIDDEN_API_CHECKS;
         // Avoid generating CompactDex for modes that are latency critical.

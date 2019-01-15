@@ -54,7 +54,6 @@ public class AudioMixingRule {
      * {@link Builder#addMixRule(int, Object)} where the Object parameter is an instance of
      * {@link AudioAttributes}.
      */
-    @SystemApi
     public static final int RULE_MATCH_ATTRIBUTE_USAGE = 0x1;
     /**
      * A rule requiring the capture preset information of the {@link AudioAttributes} to match.
@@ -62,14 +61,12 @@ public class AudioMixingRule {
      * {@link Builder#addMixRule(int, Object)} where the Object parameter is an instance of
      * {@link AudioAttributes}.
      */
-    @SystemApi
     public static final int RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET = 0x1 << 1;
     /**
      * A rule requiring the UID of the audio stream to match that specified.
      * This mixing rule can be added with {@link Builder#addMixRule(int, Object)} where the Object
      * parameter is an instance of {@link java.lang.Integer}.
      */
-    @SystemApi
     public static final int RULE_MATCH_UID = 0x1 << 2;
 
     private final static int RULE_EXCLUSION_MASK = 0x8000;
@@ -239,7 +236,6 @@ public class AudioMixingRule {
     /**
      * Builder class for {@link AudioMixingRule} objects
      */
-    @SystemApi
     public static class Builder {
         private ArrayList<AudioMixMatchCriterion> mCriteria;
         private int mTargetMixType = AudioMix.MIX_TYPE_INVALID;
@@ -247,7 +243,6 @@ public class AudioMixingRule {
         /**
          * Constructs a new Builder with no rules.
          */
-        @SystemApi
         public Builder() {
             mCriteria = new ArrayList<AudioMixMatchCriterion>();
         }
@@ -262,7 +257,6 @@ public class AudioMixingRule {
          * @throws IllegalArgumentException
          * @see #excludeRule(AudioAttributes, int)
          */
-        @SystemApi
         public Builder addRule(AudioAttributes attrToMatch, int rule)
                 throws IllegalArgumentException {
             if (!isValidAttributesSystemApiRule(rule)) {
@@ -291,7 +285,6 @@ public class AudioMixingRule {
          * @throws IllegalArgumentException
          * @see #addRule(AudioAttributes, int)
          */
-        @SystemApi
         public Builder excludeRule(AudioAttributes attrToMatch, int rule)
                 throws IllegalArgumentException {
             if (!isValidAttributesSystemApiRule(rule)) {
@@ -313,7 +306,6 @@ public class AudioMixingRule {
          * @throws IllegalArgumentException
          * @see #excludeMixRule(int, Object)
          */
-        @SystemApi
         public Builder addMixRule(int rule, Object property) throws IllegalArgumentException {
             if (!isValidSystemApiRule(rule)) {
                 throw new IllegalArgumentException("Illegal rule value " + rule);
@@ -343,7 +335,6 @@ public class AudioMixingRule {
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        @SystemApi
         public Builder excludeMixRule(int rule, Object property) throws IllegalArgumentException {
             if (!isValidSystemApiRule(rule)) {
                 throw new IllegalArgumentException("Illegal rule value " + rule);

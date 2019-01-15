@@ -836,6 +836,11 @@ public class LockPatternUtils {
                     + "of length " + MIN_LOCK_PASSWORD_SIZE);
         }
 
+        if (requestedQuality < PASSWORD_QUALITY_NUMERIC) {
+            throw new IllegalArgumentException("quality must be at least NUMERIC, but was "
+                    + requestedQuality);
+        }
+
         final int currentQuality = getKeyguardStoredPasswordQuality(userHandle);
         setKeyguardStoredPasswordQuality(
                 computePasswordQuality(CREDENTIAL_TYPE_PASSWORD, password, requestedQuality),

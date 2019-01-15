@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Produciuse un problema ao rexistrar as chamadas por wifi co teu operador: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Chamadas wifi de %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Chamadas por wifi de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Chamada por WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Chamada por WLAN de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wifi de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Chamadas por wifi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi de <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wifi preferida"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Datos móbiles preferidos"</string>
@@ -298,8 +302,8 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"facer e xestionar chamadas telefónicas"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Queres permitir que a aplicación &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; realice e xestione chamadas telefónicas?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporais"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceder aos datos do sensor sobre as túas constantes vitais"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Queres permitir que a aplicación &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda aos datos do sensor sobre as túas constantes vitais?"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceder aos datos dos sensores sobre as túas constantes vitais"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Queres permitir que a aplicación &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda aos datos dos sensores sobre as túas constantes vitais?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar contido da ventá"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona o contido dunha ventá coa que estás interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar a exploración táctil"</string>
@@ -880,7 +884,7 @@
     <string name="menu_ctrl_shortcut_label" msgid="3917070091228880941">"Ctrl +"</string>
     <string name="menu_alt_shortcut_label" msgid="6249849492641218944">"Alt +"</string>
     <string name="menu_shift_shortcut_label" msgid="6773890288720306380">"Maiús +"</string>
-    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sim +"</string>
+    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sym +"</string>
     <string name="menu_function_shortcut_label" msgid="1984053777418162618">"Función +"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"espazo"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"intro"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"A wifi non ten acceso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toca para ver opcións."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Cambios na configuración da zona wifi"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Modificouse a banda da zona wifi."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Este dispositivo non admite a opción de conectarse só a bandas de 5 GHz, pero usaraas se están dispoñibles."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Cambiouse a: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"O dispositivo utiliza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> cando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> non ten acceso a Internet. Pódense aplicar cargos."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Cambiouse de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> a <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1835,8 +1842,8 @@
     </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"Queres gardar o contido en: &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Queres gardar <xliff:g id="TYPE">%1$s</xliff:g> en: &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Queres gardar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> en: &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Queres gardar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> en: &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Queres gardar estes datos (<xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g>) en &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Queres gardar estes datos (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g>) en &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Gardar"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Non, grazas"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"contrasinal"</string>

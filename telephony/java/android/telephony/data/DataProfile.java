@@ -68,17 +68,15 @@ public final class DataProfile implements Parcelable {
 
     private final int mMtu;
 
-    private final String mMvnoType;
+    private final boolean mPersistent;
 
-    private final String mMvnoMatchData;
+    private final boolean mPreferred;
 
-    private final boolean mModemCognitive;
-
-    public DataProfile(int profileId, String apn, String protocol, int authType,
-                String userName, String password, int type, int maxConnsTime, int maxConns,
-                int waitTime, boolean enabled, int supportedApnTypesBitmap, String roamingProtocol,
-                int bearerBitmap, int mtu, String mvnoType, String mvnoMatchData,
-                boolean modemCognitive) {
+    /** @hide */
+    public DataProfile(int profileId, String apn, String protocol, int authType, String userName,
+                       String password, int type, int maxConnsTime, int maxConns, int waitTime,
+                       boolean enabled, int supportedApnTypesBitmap, String roamingProtocol,
+                       int bearerBitmap, int mtu, boolean persistent, boolean preferred) {
 
         this.mProfileId = profileId;
         this.mApn = apn;
@@ -100,11 +98,11 @@ public final class DataProfile implements Parcelable {
         this.mRoamingProtocol = roamingProtocol;
         this.mBearerBitmap = bearerBitmap;
         this.mMtu = mtu;
-        this.mMvnoType = mvnoType;
-        this.mMvnoMatchData = mvnoMatchData;
-        this.mModemCognitive = modemCognitive;
+        this.mPersistent = persistent;
+        this.mPreferred = preferred;
     }
 
+    /** @hide */
     public DataProfile(Parcel source) {
         mProfileId = source.readInt();
         mApn = source.readString();
@@ -121,9 +119,8 @@ public final class DataProfile implements Parcelable {
         mRoamingProtocol = source.readString();
         mBearerBitmap = source.readInt();
         mMtu = source.readInt();
-        mMvnoType = source.readString();
-        mMvnoMatchData = source.readString();
-        mModemCognitive = source.readBoolean();
+        mPersistent = source.readBoolean();
+        mPreferred = source.readBoolean();
     }
 
     /**
@@ -207,23 +204,17 @@ public final class DataProfile implements Parcelable {
     public int getMtu() { return mMtu; }
 
     /**
-     * @return The MVNO type: possible values are "imsi", "gid", "spn".
+     * @return {@code true} if modem must persist this data profile.
      */
-    public String getMvnoType() { return mMvnoType; }
+    public boolean isPersistent() { return mPersistent; }
 
     /**
-     * @return The MVNO match data. For example,
-     * SPN: A MOBILE, BEN NL, ...
-     * IMSI: 302720x94, 2060188, ...
-     * GID: 4E, 33, ...
+     * @return {@code true} if this data profile was used to bring up the last default
+     * (i.e internet) data connection successfully.
      */
-    public String getMvnoMatchData() { return mMvnoMatchData; }
+    public boolean isPreferred() { return  mPreferred; }
 
-    /**
-     * @return True if the data profile was sent to the modem through setDataProfile earlier.
-     */
-    public boolean isModemCognitive() { return mModemCognitive; }
-
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
@@ -233,11 +224,11 @@ public final class DataProfile implements Parcelable {
     public String toString() {
         return "DataProfile=" + mProfileId + "/" + mProtocol + "/" + mAuthType
                 + "/" + (Build.IS_USER ? "***/***/***" :
-                         (mApn + "/" + mUserName + "/" + mPassword))
-                + "/" + mType + "/" + mMaxConnsTime
-                + "/" + mMaxConns + "/" + mWaitTime + "/" + mEnabled + "/"
-                + mSupportedApnTypesBitmap + "/" + mRoamingProtocol + "/" + mBearerBitmap + "/"
-                + mMtu + "/" + mMvnoType + "/" + mMvnoMatchData + "/" + mModemCognitive;
+                         (mApn + "/" + mUserName + "/" + mPassword)) + "/" + mType + "/"
+                + mMaxConnsTime + "/" + mMaxConns + "/"
+                + mWaitTime + "/" + mEnabled + "/" + mSupportedApnTypesBitmap + "/"
+                + mRoamingProtocol + "/" + mBearerBitmap + "/" + mMtu + "/" + mPersistent + "/"
+                + mPreferred;
     }
 
     @Override
@@ -246,6 +237,7 @@ public final class DataProfile implements Parcelable {
         return (o == this || toString().equals(o.toString()));
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mProfileId);
@@ -263,11 +255,11 @@ public final class DataProfile implements Parcelable {
         dest.writeString(mRoamingProtocol);
         dest.writeInt(mBearerBitmap);
         dest.writeInt(mMtu);
-        dest.writeString(mMvnoType);
-        dest.writeString(mMvnoMatchData);
-        dest.writeBoolean(mModemCognitive);
+        dest.writeBoolean(mPersistent);
+        dest.writeBoolean(mPreferred);
     }
 
+    /** @hide */
     public static final Parcelable.Creator<DataProfile> CREATOR =
             new Parcelable.Creator<DataProfile>() {
         @Override

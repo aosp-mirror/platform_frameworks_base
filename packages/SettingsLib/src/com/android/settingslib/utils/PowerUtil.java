@@ -22,7 +22,7 @@ import android.icu.text.MeasureFormat;
 import android.icu.text.MeasureFormat.FormatWidth;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.android.settingslib.R;

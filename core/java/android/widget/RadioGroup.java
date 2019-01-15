@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.IdRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -60,9 +61,11 @@ public class RadioGroup extends LinearLayout {
     // holds the checked id; the selection is empty by default
     private int mCheckedId = -1;
     // tracks children radio buttons checked state
+    @UnsupportedAppUsage
     private CompoundButton.OnCheckedChangeListener mChildOnCheckedChangeListener;
     // when true, mOnCheckedChangeListener discards events
     private boolean mProtectFromCheckedChange = false;
+    @UnsupportedAppUsage
     private OnCheckedChangeListener mOnCheckedChangeListener;
     private PassThroughHierarchyChangeListener mPassThroughListener;
 

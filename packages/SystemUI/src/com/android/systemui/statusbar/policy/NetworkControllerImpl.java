@@ -458,6 +458,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     MobileSignalController controller = mMobileSignalControllers.valueAt(i);
                     controller.handleBroadcast(intent);
                 }
+                mConfig = Config.readConfig(mContext);
+                mReceiverHandler.post(this::handleConfigurationChanged);
                 break;
             case TelephonyIntents.ACTION_SIM_STATE_CHANGED:
                 // Avoid rebroadcast because SysUI is direct boot aware.
@@ -1038,18 +1040,23 @@ public class NetworkControllerImpl extends BroadcastReceiver
             config.showAtLeast3G = res.getBoolean(R.bool.config_showMin3G);
             config.alwaysShowCdmaRssi =
                     res.getBoolean(com.android.internal.R.bool.config_alwaysUseCdmaRssi);
-            config.show4gForLte = res.getBoolean(R.bool.config_show4GForLTE);
             config.hspaDataDistinguishable =
                     res.getBoolean(R.bool.config_hspa_data_distinguishable);
-            config.hideLtePlus = res.getBoolean(R.bool.config_hideLtePlus);
             config.inflateSignalStrengths = res.getBoolean(R.bool.config_inflateSignalStrength);
 
             CarrierConfigManager configMgr = (CarrierConfigManager)
                     context.getSystemService(Context.CARRIER_CONFIG_SERVICE);
-            PersistableBundle b = configMgr.getConfig();
+            // Handle specific carrier config values for the default data SIM
+            int defaultDataSubId = SubscriptionManager.from(context)
+                    .getDefaultDataSubscriptionId();
+            PersistableBundle b = configMgr.getConfigForSubId(defaultDataSubId);
             if (b != null) {
                 config.alwaysShowDataRatIcon = b.getBoolean(
                         CarrierConfigManager.KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL);
+                config.show4gForLte = b.getBoolean(
+                        CarrierConfigManager.KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL);
+                config.hideLtePlus = b.getBoolean(
+                        CarrierConfigManager.KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL);
             }
             return config;
         }

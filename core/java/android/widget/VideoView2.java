@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -202,6 +203,7 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
      * @throws IllegalStateException if interal MediaSession is not created yet.
      * @hide  TODO: remove
      */
+    @UnsupportedAppUsage
     public MediaController getMediaController() {
         return mProvider.getMediaController_impl();
     }
@@ -285,6 +287,7 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
      *
      * @hide TODO remove
      */
+    @UnsupportedAppUsage
     public void setVideoPath(String path) {
         mProvider.setVideoPath_impl(path);
     }
@@ -380,6 +383,7 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
      * @hide
      */
     @VisibleForTesting
+    @UnsupportedAppUsage
     public void setOnViewTypeChangedListener(OnViewTypeChangedListener l) {
         mProvider.setOnViewTypeChangedListener_impl(l);
     }
@@ -410,6 +414,7 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
          * <li>{@link #VIEW_TYPE_TEXTUREVIEW}
          * </ul>
          */
+        @UnsupportedAppUsage
         void onViewTypeChanged(View view, @ViewType int viewType);
     }
 

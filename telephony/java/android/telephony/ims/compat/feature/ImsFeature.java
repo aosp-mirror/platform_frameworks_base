@@ -17,6 +17,7 @@
 package android.telephony.ims.compat.feature;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IInterface;
@@ -104,10 +105,12 @@ public abstract class ImsFeature {
         mSlotId = slotId;
     }
 
+    @UnsupportedAppUsage
     public int getFeatureState() {
         return mState;
     }
 
+    @UnsupportedAppUsage
     protected final void setFeatureState(@ImsState int state) {
         if (mState != state) {
             mState = state;

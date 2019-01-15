@@ -25,6 +25,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -232,10 +233,10 @@ public final class UsageStatsManager {
     @SystemApi
     public static final String EXTRA_TIME_USED = "android.app.usage.extra.TIME_USED";
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static final UsageEvents sEmptyResults = new UsageEvents();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final Context mContext;
     @UnsupportedAppUsage
     private final IUsageStatsManager mService;

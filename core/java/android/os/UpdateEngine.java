@@ -54,7 +54,6 @@ public class UpdateEngine {
      * Error code from the update engine. Values must agree with the ones in
      * system/update_engine/common/error_code.h.
      */
-    @SystemApi
     public static final class ErrorCodeConstants {
         public static final int SUCCESS = 0;
         public static final int ERROR = 1;
@@ -74,7 +73,6 @@ public class UpdateEngine {
      * Update status code from the update engine. Values must agree with the
      * ones in system/update_engine/client_library/include/update_engine/update_status.h.
      */
-    @SystemApi
     public static final class UpdateStatusConstants {
         public static final int IDLE = 0;
         public static final int CHECKING_FOR_UPDATE = 1;
@@ -95,7 +93,6 @@ public class UpdateEngine {
     /**
      * Creates a new instance.
      */
-    @SystemApi
     public UpdateEngine() {
         mUpdateEngine = IUpdateEngine.Stub.asInterface(
                 ServiceManager.getService(UPDATE_ENGINE_SERVICE));
@@ -106,7 +103,6 @@ public class UpdateEngine {
      * status change, and when the update completes. A handler can be supplied
      * to control which thread runs the callback, or null.
      */
-    @SystemApi
     public boolean bind(final UpdateEngineCallback callback, final Handler handler) {
         synchronized (mUpdateEngineCallbackLock) {
             mUpdateEngineCallback = new IUpdateEngineCallback.Stub() {
@@ -150,7 +146,6 @@ public class UpdateEngine {
     /**
      * Equivalent to {@code bind(callback, null)}.
      */
-    @SystemApi
     public boolean bind(final UpdateEngineCallback callback) {
         return bind(callback, null);
     }
@@ -183,7 +178,6 @@ public class UpdateEngine {
      * };
      * </pre>
      */
-    @SystemApi
     public void applyPayload(String url, long offset, long size, String[] headerKeyValuePairs) {
         try {
             mUpdateEngine.applyPayload(url, offset, size, headerKeyValuePairs);
@@ -201,7 +195,6 @@ public class UpdateEngine {
      * <p>See {@link #suspend} for a way to temporarily stop an in-progress
      * update with the ability to resume it later.
      */
-    @SystemApi
     public void cancel() {
         try {
             mUpdateEngine.cancel();
@@ -214,7 +207,6 @@ public class UpdateEngine {
      * Suspends an in-progress update. This can be undone by calling
      * {@link #resume}.
      */
-    @SystemApi
     public void suspend() {
         try {
             mUpdateEngine.suspend();
@@ -226,7 +218,6 @@ public class UpdateEngine {
     /**
      * Resumes a suspended update.
      */
-    @SystemApi
     public void resume() {
         try {
             mUpdateEngine.resume();
@@ -244,7 +235,6 @@ public class UpdateEngine {
      * {@code UPDATED_NEED_REBOOT}, so your callback can remove any outstanding
      * notification that rebooting into the new system is possible.
      */
-    @SystemApi
     public void resetStatus() {
         try {
             mUpdateEngine.resetStatus();
@@ -256,7 +246,6 @@ public class UpdateEngine {
     /**
      * Unbinds the last bound callback function.
      */
-    @SystemApi
     public boolean unbind() {
         synchronized (mUpdateEngineCallbackLock) {
             if (mUpdateEngineCallback == null) {
@@ -281,7 +270,6 @@ public class UpdateEngine {
      * @param payloadMetadataFilename the location of the metadata without the
      * {@code file://} prefix.
      */
-    @SystemApi
     public boolean verifyPayloadMetadata(String payloadMetadataFilename) {
         try {
             return mUpdateEngine.verifyPayloadApplicable(payloadMetadataFilename);

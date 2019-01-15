@@ -1096,7 +1096,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         protoOutputStream.write(FONT_SCALE, fontScale);
         protoOutputStream.write(MCC, mcc);
         protoOutputStream.write(MNC, mnc);
-        mLocaleList.writeToProto(protoOutputStream, LOCALES);
+        if (mLocaleList != null) {
+            mLocaleList.writeToProto(protoOutputStream, LOCALES);
+        }
         protoOutputStream.write(SCREEN_LAYOUT, screenLayout);
         protoOutputStream.write(COLOR_MODE, colorMode);
         protoOutputStream.write(TOUCHSCREEN, touchscreen);
@@ -1111,7 +1113,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         protoOutputStream.write(SCREEN_HEIGHT_DP, screenHeightDp);
         protoOutputStream.write(SMALLEST_SCREEN_WIDTH_DP, smallestScreenWidthDp);
         protoOutputStream.write(DENSITY_DPI, densityDpi);
-        windowConfiguration.writeToProto(protoOutputStream, WINDOW_CONFIGURATION);
+        if (windowConfiguration != null) {
+            windowConfiguration.writeToProto(protoOutputStream, WINDOW_CONFIGURATION);
+        }
         protoOutputStream.end(token);
     }
 

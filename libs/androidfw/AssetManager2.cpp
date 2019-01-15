@@ -67,10 +67,10 @@ AssetManager2::AssetManager2() {
 }
 
 bool AssetManager2::SetApkAssets(const std::vector<const ApkAssets*>& apk_assets,
-                                 bool invalidate_caches) {
+                                 bool invalidate_caches, bool filter_incompatible_configs) {
   apk_assets_ = apk_assets;
   BuildDynamicRefTable();
-  RebuildFilterList();
+  RebuildFilterList(filter_incompatible_configs);
   if (invalidate_caches) {
     InvalidateCaches(static_cast<uint32_t>(-1));
   }
@@ -825,7 +825,7 @@ uint32_t AssetManager2::GetResourceId(const std::string& resource_name,
   return 0u;
 }
 
-void AssetManager2::RebuildFilterList() {
+void AssetManager2::RebuildFilterList(bool filter_incompatible_configs) {
   for (PackageGroup& group : package_groups_) {
     for (ConfiguredPackage& impl : group.packages_) {
       // Destroy it.
@@ -841,7 +841,7 @@ void AssetManager2::RebuildFilterList() {
         for (auto iter = spec->types; iter != iter_end; ++iter) {
           ResTable_config this_config;
           this_config.copyFromDtoH((*iter)->config);
-          if (this_config.match(configuration_)) {
+          if (!filter_incompatible_configs || this_config.match(configuration_)) {
             group.configurations.push_back(this_config);
             group.types.push_back(*iter);
           }

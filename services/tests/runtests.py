@@ -22,8 +22,7 @@ INSTRUMENTED_PACKAGE_RUNNER = ('com.android.frameworks.servicestests/'
                                'android.support.test.runner.AndroidJUnitRunner')
 
 PACKAGE_WHITELIST = (
-    'android.net',
-    'com.android.server.connectivity',
+    "com.android.server",
 )
 
 COLOR_RED = '\033[0;31m'
@@ -37,14 +36,27 @@ def run(shell_command, echo=True):
                 COLOR_NONE)
     return subprocess.check_call(shell_command, shell=True)
 
-
+# usage:
+#   ${ANDROID_BUILD_TOP}/frameworks/base/services/tests/runtests.py : run tests in com.android.server
+#   ${ANDROID_BUILD_TOP}/frameworks/base/services/tests/runtests.py -e package [package name, e.g. com.android.server]
+#   ${ANDROID_BUILD_TOP}/frameworks/base/services/tests/runtests.py -e class [class name, e.g. com.android.server.MountServiceTests]
+#
+#   The available INSTRUMENTED_PACKAGE_RUNNER may differ in different environments.
+#   In this case, use "adb shell pm list instrumentation" to query available runners
+#   and use the environment variable INSTRUMENTED_PACKAGE_RUNNER to overwrite
+#   the default one, e.g.,
+#   INSTRUMENTED_PACKAGE_RUNNER=com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner \
+#       ${ANDROID_BUILD_TOP}/frameworks/base/services/tests/runtests.py
+#
 def main():
     build_top = os.environ.get('ANDROID_BUILD_TOP', None)
     out_dir = os.environ.get('OUT', None)
+    runner = os.environ.get('INSTRUMENTED_PACKAGE_RUNNER', None)
     if build_top is None or out_dir is None:
         print 'You need to source and lunch before you can use this script'
         return 1
-
+    if runner is None:
+        runner = INSTRUMENTED_PACKAGE_RUNNER
     print 'Building tests...'
     run('make -j32 -C %s -f build/core/main.mk '
         'MODULES-IN-frameworks-base-services-tests-servicestests' % build_top,
@@ -57,19 +69,19 @@ def main():
     apk_path = (
             '%s/data/app/FrameworksServicesTests/FrameworksServicesTests.apk' %
             out_dir)
-    run('adb install -r -g "%s"' % apk_path)
+    run('adb install -t -r -g "%s"' % apk_path)
 
     print 'Running tests...'
     if len(sys.argv) != 1:
         run('adb shell am instrument -w %s "%s"' %
-            (' '.join(sys.argv[1:]), INSTRUMENTED_PACKAGE_RUNNER))
+            (' '.join(sys.argv[1:]), runner))
         return 0
 
     # It would be nice if the activity manager accepted a list of packages, but
     # in lieu of that...
     for package in PACKAGE_WHITELIST:
         run('adb shell am instrument -w -e package %s %s' %
-            (package, INSTRUMENTED_PACKAGE_RUNNER))
+            (package, runner))
 
     return 0
 

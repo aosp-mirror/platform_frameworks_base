@@ -16,6 +16,7 @@
 package android.telephony.euicc;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -43,6 +44,7 @@ public final class EuiccInfo implements Parcelable {
             };
 
     @Nullable
+    @UnsupportedAppUsage
     private final String osVersion;
 
     /**

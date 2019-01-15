@@ -189,8 +189,7 @@ public class HomeSpTest {
         Map<String, Long> homeNetworkIds = new HashMap<>();
         byte[] rawSsidBytes = new byte[33];
         Arrays.fill(rawSsidBytes, (byte) 'a');
-        homeNetworkIds.put(
-                StringFactory.newStringFromBytes(rawSsidBytes, StandardCharsets.UTF_8), 0x1234L);
+        homeNetworkIds.put(new String(rawSsidBytes, StandardCharsets.UTF_8), 0x1234L);
         homeSp.setHomeNetworkIds(homeNetworkIds);
         assertFalse(homeSp.validate());
     }

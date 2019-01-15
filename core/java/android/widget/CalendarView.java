@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -72,6 +73,7 @@ public class CalendarView extends FrameLayout {
     private static final int MODE_HOLO = 0;
     private static final int MODE_MATERIAL = 1;
 
+    @UnsupportedAppUsage
     private final CalendarViewDelegate mDelegate;
 
     /**

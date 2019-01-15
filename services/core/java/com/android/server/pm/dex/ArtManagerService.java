@@ -16,6 +16,8 @@
 
 package com.android.server.pm.dex;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -57,8 +59,6 @@ import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
-import libcore.util.NonNull;
-import libcore.util.Nullable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -389,7 +389,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      *   - create the current primary profile to save time at app startup time.
      *   - copy the profiles from the associated dex metadata file to the reference profile.
      */
-    public void prepareAppProfiles(PackageParser.Package pkg, @UserIdInt int user) {
+    public void prepareAppProfiles(PackageParser.Package pkg, @UserIdInt int user,
+            boolean updateReferenceProfileContent) {
         final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
         if (user < 0) {
             Slog.wtf(TAG, "Invalid user id: " + user);
@@ -404,8 +405,14 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             for (int i = codePathsProfileNames.size() - 1; i >= 0; i--) {
                 String codePath = codePathsProfileNames.keyAt(i);
                 String profileName = codePathsProfileNames.valueAt(i);
-                File dexMetadata = DexMetadataHelper.findDexMetadataForFile(new File(codePath));
-                String dexMetadataPath = dexMetadata == null ? null : dexMetadata.getAbsolutePath();
+                String dexMetadataPath = null;
+                // Passing the dex metadata file to the prepare method will update the reference
+                // profile content. As such, we look for the dex metadata file only if we need to
+                // perform an update.
+                if (updateReferenceProfileContent) {
+                    File dexMetadata = DexMetadataHelper.findDexMetadataForFile(new File(codePath));
+                    dexMetadataPath = dexMetadata == null ? null : dexMetadata.getAbsolutePath();
+                }
                 synchronized (mInstaller) {
                     boolean result = mInstaller.prepareAppProfile(pkg.packageName, user, appId,
                             profileName, codePath, dexMetadataPath);
@@ -423,9 +430,10 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Prepares the app profiles for a set of users. {@see ArtManagerService#prepareAppProfiles}.
      */
-    public void prepareAppProfiles(PackageParser.Package pkg, int[] user) {
+    public void prepareAppProfiles(PackageParser.Package pkg, int[] user,
+            boolean updateReferenceProfileContent) {
         for (int i = 0; i < user.length; i++) {
-            prepareAppProfiles(pkg, user[i]);
+            prepareAppProfiles(pkg, user[i], updateReferenceProfileContent);
         }
     }
 
@@ -519,6 +527,11 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private static final int TRON_COMPILATION_REASON_AB_OTA = 6;
     private static final int TRON_COMPILATION_REASON_INACTIVE = 7;
     private static final int TRON_COMPILATION_REASON_SHARED = 8;
+    private static final int TRON_COMPILATION_REASON_INSTALL_WITH_DEX_METADATA = 9;
+
+    // The annotation to add as a suffix to the compilation reason when dexopt was
+    // performed with dex metadata.
+    public static final String DEXOPT_REASON_WITH_DEX_METADATA_ANNOTATION = "-dm";
 
     /**
      * Convert the compilation reason to an int suitable to be logged to TRON.
@@ -534,6 +547,10 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             case "ab-ota" : return TRON_COMPILATION_REASON_AB_OTA;
             case "inactive" : return TRON_COMPILATION_REASON_INACTIVE;
             case "shared" : return TRON_COMPILATION_REASON_SHARED;
+            // This is a special marker for dex metadata installation that does not
+            // have an equivalent as a system property.
+            case "install" + DEXOPT_REASON_WITH_DEX_METADATA_ANNOTATION :
+                return TRON_COMPILATION_REASON_INSTALL_WITH_DEX_METADATA;
             default: return TRON_COMPILATION_REASON_UNKNOWN;
         }
     }

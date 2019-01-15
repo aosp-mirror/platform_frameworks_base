@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.ResultReceiver;
+import android.os.WorkSource;
 import android.net.NetworkStats;
 import android.net.Uri;
 import android.service.carrier.CarrierIdentifier;
@@ -30,24 +31,32 @@ import android.telecom.PhoneAccountHandle;
 import android.telephony.CellInfo;
 import android.telephony.ClientRequestStats;
 import android.telephony.IccOpenLogicalChannelResponse;
+import android.telephony.ICellInfoCallback;
 import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.NetworkScanRequest;
+import android.telephony.PhoneNumberRange;
 import android.telephony.RadioAccessFamily;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
+import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsConfig;
+import android.telephony.ims.aidl.IImsConfigCallback;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
+import android.telephony.ims.aidl.IImsRegistrationCallback;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
+import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.OperatorInfo;
 
 import java.util.List;
+import java.util.Map;
 
+import android.telephony.UiccCardInfo;
 import android.telephony.UiccSlotInfo;
 
 /**
@@ -73,116 +82,6 @@ interface ITelephony {
      * @param number the number to be called.
      */
     void call(String callingPackage, String number);
-
-    /**
-     * End call if there is a call in progress, otherwise does nothing.
-     *
-     * @return whether it hung up
-     */
-    boolean endCall();
-
-    /**
-     * End call on particular subId or go to the Home screen
-     * @param subId user preferred subId.
-     * @return whether it hung up
-     */
-    boolean endCallForSubscriber(int subId);
-
-    /**
-     * Answer the currently-ringing call.
-     *
-     * If there's already a current active call, that call will be
-     * automatically put on hold.  If both lines are currently in use, the
-     * current active call will be ended.
-     *
-     * TODO: provide a flag to let the caller specify what policy to use
-     * if both lines are in use.  (The current behavior is hardwired to
-     * "answer incoming, end ongoing", which is how the CALL button
-     * is specced to behave.)
-     *
-     * TODO: this should be a oneway call (especially since it's called
-     * directly from the key queue thread).
-     */
-    void answerRingingCall();
-
-    /**
-     * Answer the currently-ringing call on particular subId .
-     *
-     * If there's already a current active call, that call will be
-     * automatically put on hold.  If both lines are currently in use, the
-     * current active call will be ended.
-     *
-     * TODO: provide a flag to let the caller specify what policy to use
-     * if both lines are in use.  (The current behavior is hardwired to
-     * "answer incoming, end ongoing", which is how the CALL button
-     * is specced to behave.)
-     *
-     * TODO: this should be a oneway call (especially since it's called
-     * directly from the key queue thread).
-     */
-    void answerRingingCallForSubscriber(int subId);
-
-    /**
-     * Silence the ringer if an incoming call is currently ringing.
-     * (If vibrating, stop the vibrator also.)
-     *
-     * It's safe to call this if the ringer has already been silenced, or
-     * even if there's no incoming call.  (If so, this method will do nothing.)
-     *
-     * TODO: this should be a oneway call too (see above).
-     *       (Actually *all* the methods here that return void can
-     *       probably be oneway.)
-     */
-    void silenceRinger();
-
-    /**
-     * Check if we are in either an active or holding call
-     * @param callingPackage the name of the package making the call.
-     * @return true if the phone state is OFFHOOK.
-     */
-    boolean isOffhook(String callingPackage);
-
-    /**
-     * Check if a particular subId has an active or holding call
-     *
-     * @param subId user preferred subId.
-     * @param callingPackage the name of the package making the call.
-     * @return true if the phone state is OFFHOOK.
-     */
-    boolean isOffhookForSubscriber(int subId, String callingPackage);
-
-    /**
-     * Check if an incoming phone call is ringing or call waiting
-     * on a particular subId.
-     *
-     * @param subId user preferred subId.
-     * @param callingPackage the name of the package making the call.
-     * @return true if the phone state is RINGING.
-     */
-    boolean isRingingForSubscriber(int subId, String callingPackage);
-
-    /**
-     * Check if an incoming phone call is ringing or call waiting.
-     * @param callingPackage the name of the package making the call.
-     * @return true if the phone state is RINGING.
-     */
-    boolean isRinging(String callingPackage);
-
-    /**
-     * Check if the phone is idle.
-     * @param callingPackage the name of the package making the call.
-     * @return true if the phone state is IDLE.
-     */
-    boolean isIdle(String callingPackage);
-
-    /**
-     * Check if the phone is idle on a particular subId.
-     *
-     * @param subId user preferred subId.
-     * @param callingPackage the name of the package making the call.
-     * @return true if the phone state is IDLE.
-     */
-    boolean isIdleForSubscriber(int subId, String callingPackage);
 
     /**
      * Check to see if the radio is on or not.
@@ -390,7 +289,7 @@ interface ITelephony {
     /**
      * Returns the neighboring cell information of the device.
      */
-    List<NeighboringCellInfo> getNeighboringCellInfo(String callingPkg, int targetSdk);
+    List<NeighboringCellInfo> getNeighboringCellInfo(String callingPkg);
 
      int getCallState();
 
@@ -497,16 +396,11 @@ interface ITelephony {
     int getDataActivationState(int subId, String callingPackage);
 
     /**
-      * Returns the unread count of voicemails
-      */
-    int getVoiceMessageCount();
-
-    /**
      * Returns the unread count of voicemails for a subId.
      * @param subId user preferred subId.
      * Returns the unread count of voicemails
      */
-    int getVoiceMessageCountForSubscriber(int subId);
+    int getVoiceMessageCountForSubscriber(int subId, String callingPackage);
 
     /**
       * Returns true if current state supports both voice and data
@@ -613,9 +507,24 @@ interface ITelephony {
     int getLteOnCdmaModeForSubscriber(int subId, String callingPackage);
 
     /**
-     * Returns the all observed cell information of the device.
+     * Returns all observed cell information of the device.
      */
     List<CellInfo> getAllCellInfo(String callingPkg);
+
+    /**
+     * Request a cell information update for the specified subscription,
+     * reported via the CellInfoCallback.
+     */
+    void requestCellInfoUpdate(int subId, in ICellInfoCallback cb, String callingPkg);
+
+    /**
+     * Request a cell information update for the specified subscription,
+     * reported via the CellInfoCallback.
+     *
+     * @param workSource the requestor to whom the power consumption for this should be attributed.
+     */
+    void requestCellInfoUpdateWithWorkSource(
+            int subId, in ICellInfoCallback cb, in String callingPkg, in WorkSource ws);
 
     /**
      * Sets minimum time in milli-seconds between onCellInfoChanged
@@ -746,15 +655,30 @@ interface ITelephony {
     boolean nvWriteCdmaPrl(in byte[] preferredRoamingList);
 
     /**
-     * Perform the specified type of NV config reset. The radio will be taken offline
-     * and the device must be rebooted after the operation. Used for device
-     * configuration by some CDMA operators.
+     * Rollback modem configurations to factory default except some config which are in whitelist.
+     * Used for device configuration by some CDMA operators.
      *
-     * @param resetType the type of reset to perform (1 == factory reset; 2 == NV-only reset).
-     * @return true on success; false on any failure.
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @param slotIndex - device slot.
+     * @return {@code true} on success; {@code false} on any failure.
      */
-    boolean nvResetConfig(int resetType);
+    boolean resetModemConfig(int slotIndex);
 
+    /**
+     * Generate a radio modem reset. Used for device configuration by some CDMA operators.
+     * Different than {@link #setRadioPower(boolean)}, modem reboot will power down sim card.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @param slotIndex - device slot.
+     * @return {@code true} on success; {@code false} on any failure.
+     */
+    boolean rebootModem(int slotIndex);
     /*
      * Get the calculated preferred network type.
      * Used for device configuration by some CDMA operators.
@@ -775,7 +699,7 @@ interface ITelephony {
 
     /**
      * Check TETHER_DUN_REQUIRED and TETHER_DUN_APN settings, net.tethering.noprovisioning
-     * SystemProperty, and config_tether_apndata to decide whether DUN APN is required for
+     * SystemProperty to decide whether DUN APN is required for
      * tethering.
      *
      * @return 0: Not required. 1: required. 2: Not set.
@@ -815,12 +739,6 @@ interface ITelephony {
     * Returns the IImsConfig associated with the slot and feature specified.
     */
     IImsConfig getImsConfig(int slotId, int feature);
-
-    /**
-     * @return true if the IMS resolver is busy resolving a binding and should not be considered
-     * available, false if the IMS resolver is idle.
-     */
-    boolean isResolvingImsBinding();
 
     /**
     *  @return true if the ImsService to bind to for the slot id specified was set, false otherwise.
@@ -871,14 +789,15 @@ interface ITelephony {
      * Ask the radio to connect to the input network and change selection mode to manual.
      *
      * @param subId the id of the subscription.
-     * @param operatorNumeric the PLMN of the operator to attach to.
-     * @param persistSelection Whether the selection will persist until reboot. If true, only allows
+     * @param operatorInfo the operator inforamtion, included the PLMN, long name and short name of
+     * the operator to attach to.
+     * @param persistSelection whether the selection will persist until reboot. If true, only allows
      * attaching to the selected PLMN until reboot; otherwise, attach to the chosen PLMN and resume
      * normal network selection next time.
-     * @return true if the request suceeded.
+     * @return {@code true} on success; {@code true} on any failure.
      */
-    boolean setNetworkSelectionModeManual(int subId, in String operatorNumeric,
-            boolean persistSelection);
+    boolean setNetworkSelectionModeManual(
+            int subId, in OperatorInfo operatorInfo, boolean persisSelection);
 
     /**
      * Set the preferred network type.
@@ -923,6 +842,13 @@ interface ITelephony {
      */
     boolean isDataEnabled(int subId);
 
+     /**
+     * Checks if manual network selection is allowed.
+     *
+     * @return {@code true} if manual network selection is allowed, otherwise return {@code false}.
+     */
+     boolean isManualNetworkSelectionAllowed(int subId);
+
     /**
      * Get P-CSCF address from PCO after data connection is established or modified.
      * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
@@ -946,6 +872,17 @@ interface ITelephony {
      * @param subId user preferred subId.
      */
     String getCdmaMin(int subId);
+
+    /**
+     * Request that the next incoming call from a number matching {@code range} be intercepted.
+     * @param range The range of phone numbers the caller expects a phone call from.
+     * @param timeoutMillis The amount of time to wait for such a call, or
+     *                      {@link #MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS}, whichever is lesser.
+     * @param callback the callback aidl
+     * @param callingPackage the calling package name.
+     */
+    void requestNumberVerification(in PhoneNumberRange range, long timeoutMillis,
+            in INumberVerificationCallback callback, String callingPackage);
 
     /**
      * Has the calling application been granted special privileges by the carrier.
@@ -1144,6 +1081,8 @@ interface ITelephony {
      */
     boolean isTtyModeSupported();
 
+    boolean isRttSupported(int subscriptionId);
+
     /**
      * Whether the phone supports hearing aid compatibility.
      *
@@ -1164,11 +1103,6 @@ interface ITelephony {
      * Returns the Status of Wi-Fi Calling for the subscription id specified.
      */
     boolean isWifiCallingAvailable(int subId);
-
-    /**
-     * Returns the Status of VoLTE for the subscription ID specified.
-     */
-    boolean isVolteAvailable(int subId);
 
      /**
      * Returns the Status of VT (video telephony) for the subscription ID specified.
@@ -1404,6 +1338,49 @@ interface ITelephony {
     String getSubscriptionCarrierName(int subId);
 
     /**
+     * Returns fine-grained carrier id of the current subscription.
+     *
+     * <p>The precise carrier id can be used to further differentiate a carrier by different
+     * networks, by prepaid v.s.postpaid or even by 4G v.s.3G plan. Each carrier has a unique
+     * carrier id {@link #getSimCarrierId()} but can have multiple precise carrier id. e.g,
+     * {@link #getSimCarrierId()} will always return Tracfone (id 2022) for a Tracfone SIM, while
+     * {@link #getSimPreciseCarrierId()} can return Tracfone AT&T or Tracfone T-Mobile based on the
+     * current underlying network.
+     *
+     * <p>For carriers without any fine-grained carrier ids, return {@link #getSimCarrierId()}
+     *
+     * @return Returns fine-grained carrier id of the current subscription.
+     * Return {@link #UNKNOWN_CARRIER_ID} if the subscription is unavailable or the carrier cannot
+     * be identified.
+     * @hide
+     */
+    int getSubscriptionPreciseCarrierId(int subId);
+
+    /**
+     * Similar like {@link #getSimCarrierIdName()}, returns user-facing name of the
+     * precise carrier id {@link #getSimPreciseCarrierId()}
+     *
+     * <p>The returned name is unlocalized.
+     *
+     * @return user-facing name of the subscription precise carrier id. Return {@code null} if the
+     * subscription is unavailable or the carrier cannot be identified.
+     * @hide
+     */
+    String getSubscriptionPreciseCarrierName(int subId);
+
+    /**
+     * Returns carrier id based on MCCMNC only. This will return a MNO carrier id used for fallback
+     * check when exact carrier id {@link #getSimCarrierId()} configurations are not found
+     *
+     * @param isSubscriptionMccMnc. If {@true} it means this is a query for subscription mccmnc
+     * {@false} otherwise.
+     *
+     * @return carrier id from passing mccmnc.
+     * @hide
+     */
+    int getCarrierIdFromMccMnc(int slotIndex, String mccmnc, boolean isSubscriptionMccMnc);
+
+    /**
      * Action set from carrier signalling broadcast receivers to enable/disable metered apns
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
      * @param subId the subscription ID that this action applies to.
@@ -1497,6 +1474,30 @@ interface ITelephony {
     SignalStrength getSignalStrength(int subId);
 
     /**
+     * Get the card ID of the default eUICC card. If there is no eUICC, returns
+     * {@link #INVALID_CARD_ID}.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param subId subscription ID used for authentication
+     * @param callingPackage package making the call
+     * @return card ID of the default eUICC card.
+     * @hide
+     */
+    int getCardIdForDefaultEuicc(int subId, String callingPackage); 
+
+    /**
+     * Gets information about currently inserted UICCs and eUICCs. See {@link UiccCardInfo} for more
+     * details on the kind of information available.
+     *
+     * @return UiccCardInfo an array of UiccCardInfo objects, representing information on the
+     * currently inserted UICCs and eUICCs.
+     *
+     * @hide
+     */
+    UiccCardInfo[] getUiccCardsInfo();
+
+    /**
      * Get slot info for all the UICC slots.
      * @return UiccSlotInfo array.
      * @hide
@@ -1520,6 +1521,50 @@ interface ITelephony {
     void setRadioIndicationUpdateMode(int subId, int filters, int mode);
 
     /**
+     * Returns whether mobile data roaming is enabled on the subscription with id {@code subId}.
+     *
+     * @param subId the subscription id
+     * @return {@code true} if the data roaming is enabled on this subscription.
+     */
+    boolean isDataRoamingEnabled(int subId);
+
+    /**
+     * Enables/Disables the data roaming on the subscription with id {@code subId}.
+     *
+     * @param subId the subscription id
+     * @param isEnabled {@code true} to enable mobile data roaming, otherwise disable it.
+     */
+    void setDataRoamingEnabled(int subId, boolean isEnabled);
+
+    /**
+     * Gets the roaming mode for the CDMA phone with the subscription id {@code subId}.
+     *
+     * @param the subscription id.
+     * @return the roaming mode for CDMA phone.
+     */
+    int getCdmaRoamingMode(int subId);
+
+    /**
+     * Sets the roaming mode on the CDMA phone with the subscription {@code subId} to the given
+     * roaming mode {@code mode}.
+     *
+     * @param subId the subscription id.
+     * @param mode the roaming mode should be set.
+     * @return {@code true} if successed.
+     */
+    boolean setCdmaRoamingMode(int subId, int mode);
+
+    /**
+     * Sets the subscription mode for CDMA phone with the subscription {@code subId} to the given
+     * subscription mode {@code mode}.
+     *
+     * @param subId the subscription id.
+     * @param mode the subscription mode should be set.
+     * @return {@code true} if successed.
+     */
+    boolean setCdmaSubscriptionMode(int subId, int mode);
+
+    /**
      * A test API to override carrier information including mccmnc, imsi, iccid, gid1, gid2,
      * plmn and spn. This would be handy for, eg, forcing a particular carrier id, carrier's config
      * (also any country or carrier overlays) to be loaded when using a test SIM with a call box.
@@ -1537,4 +1582,190 @@ interface ITelephony {
      * @hide
      */
     void refreshUiccProfile(int subId);
+
+    /**
+     * How many modems can have simultaneous data connections.
+     * @hide
+     */
+    int getNumberOfModemsWithSimultaneousDataConnections(int subId, String callingPackage);
+
+    /**
+     * Return the network selection mode on the subscription with id {@code subId}.
+     */
+     int getNetworkSelectionMode(int subId);
+
+    /**
+     * Get a list of SMS apps on a user.
+     */
+    String[] getSmsApps(int userId);
+
+    /**
+     * Get the default SMS app on a given user.
+     */
+    String getDefaultSmsApp(int userId);
+
+    /**
+     * Set the default SMS app to a given package on a given user.
+     */
+    void setDefaultSmsApp(int userId, String packageName);
+
+     /**
+      * Return the modem radio power state for slot index.
+      *
+      */
+     int getRadioPowerState(int slotIdex, String callingPackage);
+
+    // IMS specific AIDL commands, see ImsMmTelManager.java
+
+    /**
+     * Adds an IMS registration status callback for the subscription id specified.
+     */
+    void registerImsRegistrationCallback(int subId, IImsRegistrationCallback c);
+     /**
+      * Removes an existing IMS registration status callback for the subscription specified.
+      */
+    void unregisterImsRegistrationCallback(int subId, IImsRegistrationCallback c);
+
+    /**
+     * Adds an IMS MmTel capabilities callback for the subscription specified.
+     */
+    void registerMmTelCapabilityCallback(int subId, IImsCapabilityCallback c);
+
+    /**
+     * Removes an existing IMS MmTel capabilities callback for the subscription specified.
+     */
+    void unregisterMmTelCapabilityCallback(int subId, IImsCapabilityCallback c);
+
+    /**
+     * return true if the IMS MmTel capability for the given registration tech is capable.
+     */
+    boolean isCapable(int subId, int capability, int regTech);
+
+    /**
+     * return true if the IMS MmTel capability for the given registration tech is available.
+     */
+    boolean isAvailable(int subId, int capability, int regTech);
+
+    /**
+     * Returns true if the user's setting for 4G LTE is enabled, for the subscription specified.
+     */
+    boolean isAdvancedCallingSettingEnabled(int subId);
+
+    /**
+     * Modify the user's setting for whether or not 4G LTE is enabled.
+     */
+    void setAdvancedCallingSetting(int subId, boolean isEnabled);
+
+    /**
+     * return true if the user's setting for VT is enabled for the subscription.
+     */
+    boolean isVtSettingEnabled(int subId);
+
+    /**
+     * Modify the user's setting for whether or not VT is available for the subscrption specified.
+     */
+    void setVtSetting(int subId, boolean isEnabled);
+
+    /**
+     * return true if the user's setting for whether or not Voice over WiFi is currently enabled.
+     */
+    boolean isVoWiFiSettingEnabled(int subId);
+
+    /**
+     * sets the user's setting for Voice over WiFi enabled state.
+     */
+    void setVoWiFiSetting(int subId, boolean isEnabled);
+
+    /**
+     * return true if the user's setting for Voice over WiFi while roaming is enabled.
+     */
+    boolean isVoWiFiRoamingSettingEnabled(int subId);
+
+    /**
+     * Sets the user's preference for whether or not Voice over WiFi is enabled for the current
+     * subscription while roaming.
+     */
+    void setVoWiFiRoamingSetting(int subId, boolean isEnabled);
+
+    /**
+     * Set the Voice over WiFi enabled state, but do not persist the setting.
+     */
+    void setVoWiFiNonPersistent(int subId, boolean isCapable, int mode);
+
+    /**
+     * return the Voice over WiFi mode preference set by the user for the subscription specified.
+     */
+    int getVoWiFiModeSetting(int subId);
+
+    /**
+     * sets the user's preference for the Voice over WiFi mode for the subscription specified.
+     */
+    void setVoWiFiModeSetting(int subId, int mode);
+
+    /**
+     * return the Voice over WiFi mode preference set by the user for the subscription specified
+     * while roaming.
+     */
+    int getVoWiFiRoamingModeSetting(int subId);
+
+    /**
+     * sets the user's preference for the Voice over WiFi mode for the subscription specified
+     * while roaming.
+     */
+    void setVoWiFiRoamingModeSetting(int subId, int mode);
+
+    /**
+     * Modify the user's setting for whether or not RTT is enabled for the subscrption specified.
+     */
+    void setRttCapabilitySetting(int subId, boolean isEnabled);
+
+    /**
+     * return true if TTY over VoLTE is enabled for the subscription specified.
+     */
+    boolean isTtyOverVolteEnabled(int subId);
+
+    /**
+     * Return the emergency number list from all the active subscriptions.
+     */
+    Map getCurrentEmergencyNumberList(String callingPackage);
+
+    /**
+     * Identify if the number is emergency number, based on all the active subscriptions.
+     */
+    boolean isCurrentEmergencyNumber(String number, boolean exactMatch);
+
+    /**
+     * Return a list of certs in hex string from loaded carrier privileges access rules.
+     */
+    List<String> getCertsFromCarrierPrivilegeAccessRules(int subId);
+
+    /**
+     * Register an IMS provisioning change callback with Telephony.
+     */
+    void registerImsProvisioningChangedCallback(int subId, IImsConfigCallback callback);
+
+    /**
+     * unregister an existing IMS provisioning change callback.
+     */
+    void unregisterImsProvisioningChangedCallback(int subId, IImsConfigCallback callback);
+
+    /**
+     * Return an integer containing the provisioning value for the specified provisioning key.
+     */
+    int getImsProvisioningInt(int subId, int key);
+
+    /**
+     * return a String containing the provisioning value for the provisioning key specified.
+     */
+    String getImsProvisioningString(int subId, int key);
+
+    /**
+     * Set the integer provisioning value for the provisioning key specified.
+     */
+    int setImsProvisioningInt(int subId, int key, int value);
+
+    /**
+     * Set the String provisioning value for the provisioning key specified.
+     */
+    int setImsProvisioningString(int subId, int key, String value);
 }

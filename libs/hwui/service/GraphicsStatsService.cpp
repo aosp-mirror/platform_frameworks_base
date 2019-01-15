@@ -48,7 +48,7 @@ static void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int outFd);
 
 class FileDescriptor {
 public:
-    FileDescriptor(int fd) : mFd(fd) {}
+    explicit FileDescriptor(int fd) : mFd(fd) {}
     ~FileDescriptor() {
         if (mFd != -1) {
             close(mFd);
@@ -56,7 +56,7 @@ public:
         }
     }
     bool valid() { return mFd != -1; }
-    operator int() { return mFd; }
+    operator int() { return mFd; } // NOLINT(google-explicit-constructor)
 
 private:
     int mFd;
@@ -64,7 +64,7 @@ private:
 
 class FileOutputStreamLite : public io::ZeroCopyOutputStream {
 public:
-    FileOutputStreamLite(int fd) : mCopyAdapter(fd), mImpl(&mCopyAdapter) {}
+    explicit FileOutputStreamLite(int fd) : mCopyAdapter(fd), mImpl(&mCopyAdapter) {}
     virtual ~FileOutputStreamLite() {}
 
     int GetErrno() { return mCopyAdapter.mErrno; }
@@ -82,7 +82,7 @@ private:
         int mFd;
         int mErrno = 0;
 
-        FDAdapter(int fd) : mFd(fd) {}
+        explicit FDAdapter(int fd) : mFd(fd) {}
         virtual ~FDAdapter() {}
 
         virtual bool Write(const void* buffer, int size) override {
@@ -139,6 +139,7 @@ bool GraphicsStatsService::parseFromFile(const std::string& path,
     uint32_t file_version = *reinterpret_cast<uint32_t*>(addr);
     if (file_version != sCurrentFileVersion) {
         ALOGW("file_version mismatch! expected %d got %d", sCurrentFileVersion, file_version);
+        munmap(addr, sb.st_size);
         return false;
     }
 
@@ -150,6 +151,7 @@ bool GraphicsStatsService::parseFromFile(const std::string& path,
         ALOGW("Parse failed on '%s' error='%s'", path.c_str(),
               output->InitializationErrorString().c_str());
     }
+    munmap(addr, sb.st_size);
     return success;
 }
 

@@ -130,10 +130,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Ошибка подключения функции \"Звонки по Wi-Fi\" через вашего оператора: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Звонки по Wi-Fi (%s)"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Звонки по Wi-Fi"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Вызов WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> Вызов WLAN"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Звонки по Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Отключено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Приоритет Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Приоритет мобильного Интернета"</string>
@@ -290,7 +294,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; отправлять и просматривать SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Хранилище"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фото, мультимедиа и файлам на вашем устройстве"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; доступ к фото, мультимедиа и файлам на устройстве?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к фото, мультимедиа и файлам на устройстве?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"записывать аудио"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; записывать аудио?"</string>
@@ -305,7 +309,7 @@
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; совершать звонки и управлять ими?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Нательные датчики"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"доступ к данным датчиков о состоянии организма"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; доступ к данным датчиков о состоянии организма?"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным датчиков о состоянии организма?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Получать содержимое окна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Анализировать содержимое активного окна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать Изучение касанием"</string>
@@ -1219,6 +1223,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Сеть Wi-Fi не подключена к Интернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Нажмите, чтобы показать варианты."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Изменения в настройках точки доступа"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Частота точки доступа изменена."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Устройство не может работать только на частоте 5 ГГц. Эта частота будет использоваться, когда это возможно."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Новое подключение: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Устройство использует <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, если подключение к сети <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> недоступно. Может взиматься плата за передачу данных."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Устройство отключено от сети <xliff:g id="NEW_NETWORK">%2$s</xliff:g> и теперь использует <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>"</string>

@@ -32,7 +32,20 @@ public final class AccessNetworkConstants {
         public static final int IWLAN = 5;
 
         /** @hide */
-        private AccessNetworkType() {};
+        private AccessNetworkType() {}
+
+        /** @hide */
+        public static String toString(int type) {
+            switch (type) {
+                case UNKNOWN: return "UNKNOWN";
+                case GERAN: return "GERAN";
+                case UTRAN: return "UTRAN";
+                case EUTRAN: return "EUTRAN";
+                case CDMA2000: return "CDMA2000";
+                case IWLAN: return "IWLAN";
+                default: return Integer.toString(type);
+            }
+        }
     }
 
     /**
@@ -47,7 +60,16 @@ public final class AccessNetworkConstants {
         public static final int WLAN = 2;
 
         /** @hide */
-        private TransportType() {};
+        private TransportType() {}
+
+        /** @hide */
+        public static String toString(int type) {
+            switch (type) {
+                case WWAN: return "WWAN";
+                case WLAN: return "WLAN";
+                default: return Integer.toString(type);
+            }
+        }
     }
 
     /**

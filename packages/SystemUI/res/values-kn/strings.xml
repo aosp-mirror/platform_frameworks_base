@@ -172,7 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"ವಾಹಕ ನೆಟ್‌ವರ್ಕ್ ಬದಲಾಯಿಸುವಿಕೆ"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ಬ್ಯಾಟರಿ ವಿವರಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ಬ್ಯಾಟರಿ <xliff:g id="NUMBER">%d</xliff:g> ಪ್ರತಿಶತ."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ಬ್ಯಾಟರಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ಪ್ರತಿಶತ."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ಬ್ಯಾಟರಿ <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ಪ್ರತಿಶತ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ಅಧಿಸೂಚನೆಗಳು."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ನೋಡಿ"</string>
@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ಮರೆಮಾಡುವುದೇ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"ನೀವು ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅದನ್ನು ಆನ್ ಮಾಡಿದಾಗ ಅದು ಮರುಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ಮರೆಮಾಡಿ"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ನೀವು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"ಕರೆಮಾಡಿ"</string>
     <string name="stream_system" msgid="7493299064422163147">"ಸಿಸ್ಟಂ"</string>
     <string name="stream_ring" msgid="8213049469184048338">"ರಿಂಗ್"</string>

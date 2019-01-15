@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
@@ -35,6 +36,7 @@ import com.android.internal.widget.ScrollBarUtils;
 public class ScrollBarDrawable extends Drawable implements Drawable.Callback {
     private Drawable mVerticalTrack;
     private Drawable mHorizontalTrack;
+    @UnsupportedAppUsage
     private Drawable mVerticalThumb;
     private Drawable mHorizontalThumb;
 
@@ -224,6 +226,7 @@ public class ScrollBarDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
+    @UnsupportedAppUsage
     public void setVerticalThumbDrawable(Drawable thumb) {
         if (mVerticalThumb != null) {
             mVerticalThumb.setCallback(null);
@@ -242,6 +245,7 @@ public class ScrollBarDrawable extends Drawable implements Drawable.Callback {
         mVerticalTrack = track;
     }
 
+    @UnsupportedAppUsage
     public void setHorizontalThumbDrawable(Drawable thumb) {
         if (mHorizontalThumb != null) {
             mHorizontalThumb.setCallback(null);

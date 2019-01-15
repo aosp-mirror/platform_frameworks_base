@@ -24,6 +24,8 @@ import static android.telephony.TelephonyManager.NETWORK_TYPE_HSUPA;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_UMTS;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
+import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,7 +33,12 @@ import android.os.Parcelable;
 /**
  * Represents the neighboring cell information, including
  * Received Signal Strength and Cell ID location.
+ *
+ * @deprecated This class should not be used by any app targeting
+ *     {@link android.os.Build.VERSION_CODES#Q Android Q} or higher. Instead callers should use
+ *     {@link android.telephony.CellInfo CellInfo}.
  */
+@Deprecated
 public class NeighboringCellInfo implements Parcelable
 {
     /**
@@ -47,24 +54,29 @@ public class NeighboringCellInfo implements Parcelable
      * In GSM, mRssi is the Received RSSI;
      * In UMTS, mRssi is the Level index of CPICH Received Signal Code Power
      */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mRssi;
     /**
      * CID in 16 bits format in GSM. Return UNKNOWN_CID in UMTS and CMDA.
      */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mCid;
     /**
      * LAC in 16 bits format in GSM. Return UNKNOWN_CID in UMTS and CMDA.
      */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mLac;
     /**
      * Primary Scrambling Code in 9 bits format in UMTS
      * Return UNKNOWN_CID in GSM and CMDA.
      */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mPsc;
     /**
      * Radio network type, value is one of following
      * TelephonyManager.NETWORK_TYPE_XXXXXX.
      */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mNetworkType;
 
     /**

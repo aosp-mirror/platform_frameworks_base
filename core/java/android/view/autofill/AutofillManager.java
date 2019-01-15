@@ -77,11 +77,16 @@ import java.util.Objects;
 import sun.misc.Cleaner;
 
 /**
- * The {@link AutofillManager} provides ways for apps and custom views to integrate with the
- * Autofill Framework lifecycle.
+ * <p>The {@link AutofillManager} class provides ways for apps and custom views to
+ * integrate with the Autofill Framework lifecycle.
+ *
+ * <p>To learn about using Autofill in your app, read
+ * the <a href="/guide/topics/text/autofill">Autofill Framework</a> guides.
+ *
+ * <h3 id="autofill-lifecycle">Autofill lifecycle</h3>
  *
  * <p>The autofill lifecycle starts with the creation of an autofill context associated with an
- * activity context; the autofill context is created when one of the following methods is called for
+ * activity context. The autofill context is created when one of the following methods is called for
  * the first time in an activity context, and the current user has an enabled autofill service:
  *
  * <ul>
@@ -90,7 +95,7 @@ import sun.misc.Cleaner;
  *   <li>{@link #requestAutofill(View)}
  * </ul>
  *
- * <p>Tipically, the context is automatically created when the first view of the activity is
+ * <p>Typically, the context is automatically created when the first view of the activity is
  * focused because {@code View.onFocusChanged()} indirectly calls
  * {@link #notifyViewEntered(View)}. App developers can call {@link #requestAutofill(View)} to
  * explicitly create it (for example, a custom view developer could offer a contextual menu action
@@ -134,7 +139,9 @@ import sun.misc.Cleaner;
  * shows an autofill save UI if the value of savable views have changed. If the user selects the
  * option to Save, the current value of the views is then sent to the autofill service.
  *
- * <p>It is safe to call into its methods from any thread.
+ * <h3 id="additional-notes">Additional notes</h3>
+ *
+ * <p>It is safe to call <code>AutofillManager</code> methods from any thread.
  */
 @SystemService(Context.AUTOFILL_MANAGER_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_AUTOFILL)
@@ -2138,7 +2145,11 @@ public final class AutofillManager {
         pw.print(pfx); pw.print("sessionId: "); pw.println(mSessionId);
         pw.print(pfx); pw.print("state: "); pw.println(getStateAsStringLocked());
         pw.print(pfx); pw.print("context: "); pw.println(mContext);
-        pw.print(pfx); pw.print("client: "); pw.println(getClient());
+        final AutofillClient client = getClient();
+        if (client != null) {
+            pw.print(pfx); pw.print("client: "); pw.print(client);
+            pw.print(" ("); pw.print(client.autofillClientGetActivityToken()); pw.println(')');
+        }
         pw.print(pfx); pw.print("enabled: "); pw.println(mEnabled);
         pw.print(pfx); pw.print("hasService: "); pw.println(mService != null);
         pw.print(pfx); pw.print("hasCallback: "); pw.println(mCallback != null);
@@ -2157,8 +2168,24 @@ public final class AutofillManager {
         pw.print(pfx); pw.print("entered ids: "); pw.println(mEnteredIds);
         pw.print(pfx); pw.print("save trigger id: "); pw.println(mSaveTriggerId);
         pw.print(pfx); pw.print("save on finish(): "); pw.println(mSaveOnFinish);
-        pw.print(pfx); pw.print("compat mode enabled: "); pw.println(
-                isCompatibilityModeEnabledLocked());
+        pw.print(pfx); pw.print("compat mode enabled: ");
+        synchronized (mLock) {
+            if (mCompatibilityBridge != null) {
+                final String pfx2 = pfx + "  ";
+                pw.println("true");
+                pw.print(pfx2); pw.print("windowId: ");
+                pw.println(mCompatibilityBridge.mFocusedWindowId);
+                pw.print(pfx2); pw.print("nodeId: ");
+                pw.println(mCompatibilityBridge.mFocusedNodeId);
+                pw.print(pfx2); pw.print("virtualId: ");
+                pw.println(AccessibilityNodeInfo
+                        .getVirtualDescendantId(mCompatibilityBridge.mFocusedNodeId));
+                pw.print(pfx2); pw.print("focusedBounds: ");
+                pw.println(mCompatibilityBridge.mFocusedBounds);
+            } else {
+                pw.println("false");
+            }
+        }
         pw.print(pfx); pw.print("debug: "); pw.print(sDebug);
         pw.print(" verbose: "); pw.println(sVerbose);
     }
@@ -2292,7 +2319,15 @@ public final class AutofillManager {
         @Override
         public AccessibilityEvent onAccessibilityEvent(AccessibilityEvent event,
                 boolean accessibilityEnabled, int relevantEventTypes) {
-            switch (event.getEventType()) {
+            final int type = event.getEventType();
+            if (sVerbose) {
+                // NOTE: this is waaay spammy, but that's life.
+                Log.v(TAG, "onAccessibilityEvent(" + AccessibilityEvent.eventTypeToString(type)
+                        + "): virtualId="
+                        + AccessibilityNodeInfo.getVirtualDescendantId(event.getSourceNodeId())
+                        + ", client=" + getClient());
+            }
+            switch (type) {
                 case AccessibilityEvent.TYPE_VIEW_FOCUSED: {
                     synchronized (mLock) {
                         if (mFocusedWindowId == event.getWindowId()

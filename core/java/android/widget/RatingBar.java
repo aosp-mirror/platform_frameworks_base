@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.shapes.RectShape;
@@ -79,6 +80,7 @@ public class RatingBar extends AbsSeekBar {
 
     private int mProgressOnStartTracking;
 
+    @UnsupportedAppUsage
     private OnRatingBarChangeListener mOnRatingBarChangeListener;
 
     public RatingBar(Context context, AttributeSet attrs, int defStyleAttr) {

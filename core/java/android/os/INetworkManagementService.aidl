@@ -18,7 +18,6 @@
 package android.os;
 
 import android.net.InterfaceConfiguration;
-import android.net.INetd;
 import android.net.INetworkManagementEventObserver;
 import android.net.ITetheringStatsProvider;
 import android.net.Network;
@@ -45,11 +44,6 @@ interface INetworkManagementService
      * Unregister an observer from receiving events.
      */
     void unregisterObserver(INetworkManagementEventObserver obs);
-
-    /**
-     * Retrieve an INetd to talk to netd.
-     */
-    INetd getNetdService();
 
     /**
      * Returns a list of currently known network interfaces
@@ -388,15 +382,15 @@ interface INetworkManagementService
 
     /**
      * Setup a new physical network.
-     * @param permission null if no permissions required to access this network.  PERMISSION_NETWORK
-     *                   or PERMISSION_SYSTEM to set respective permission.
+     * @param permission PERMISSION_NONE if no permissions required to access this network.
+     *                   PERMISSION_NETWORK or PERMISSION_SYSTEM to set respective permission.
      */
-    void createPhysicalNetwork(int netId, String permission);
+    void createPhysicalNetwork(int netId, int permission);
 
     /**
      * Setup a new VPN.
      */
-    void createVirtualNetwork(int netId, boolean hasDNS, boolean secure);
+    void createVirtualNetwork(int netId, boolean secure);
 
     /**
      * Remove a network.
@@ -420,10 +414,10 @@ interface INetworkManagementService
 
     /**
      * Set permission for a network.
-     * @param permission null to clear permissions. PERMISSION_NETWORK or PERMISSION_SYSTEM to set
-     *                   permission.
+     * @param permission PERMISSION_NONE to clear permissions.
+     *                   PERMISSION_NETWORK or PERMISSION_SYSTEM to set permission.
      */
-    void setNetworkPermission(int netId, String permission);
+    void setNetworkPermission(int netId, int permission);
 
     void setPermission(String permission, in int[] uids);
     void clearPermission(in int[] uids);

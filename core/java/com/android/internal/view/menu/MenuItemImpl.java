@@ -19,6 +19,7 @@ package com.android.internal.view.menu;
 import com.android.internal.view.menu.MenuView.ItemView;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -67,6 +68,7 @@ public final class MenuItemImpl implements MenuItem {
      * needed (if the Drawable isn't already obtained--only one of the two is
      * needed).
      */
+    @UnsupportedAppUsage
     private int mIconResId = NO_ICON;
 
     private ColorStateList mIconTintList = null;
@@ -139,6 +141,7 @@ public final class MenuItemImpl implements MenuItem {
      *
      * @return true if the invocation was handled, false otherwise
      */
+    @UnsupportedAppUsage
     public boolean invoke() {
         if (mClickListener != null &&
             mClickListener.onMenuItemClick(this)) {
@@ -565,6 +568,7 @@ public final class MenuItemImpl implements MenuItem {
         return this;
     }
 
+    @UnsupportedAppUsage
     public void setExclusiveCheckable(boolean exclusive) {
         mFlags = (mFlags & ~EXCLUSIVE) | (exclusive ? EXCLUSIVE : 0);
     }
@@ -638,6 +642,7 @@ public final class MenuItemImpl implements MenuItem {
         return mTitle != null ? mTitle.toString() : null;
     }
 
+    @UnsupportedAppUsage
     void setMenuInfo(ContextMenuInfo menuInfo) {
         mMenuInfo = menuInfo;
     }
@@ -657,14 +662,17 @@ public final class MenuItemImpl implements MenuItem {
         return mMenu.getOptionalIconsVisible();
     }
 
+    @UnsupportedAppUsage
     public boolean isActionButton() {
         return (mFlags & IS_ACTION) == IS_ACTION;
     }
 
+    @UnsupportedAppUsage
     public boolean requestsActionButton() {
         return (mShowAsAction & SHOW_AS_ACTION_IF_ROOM) == SHOW_AS_ACTION_IF_ROOM;
     }
 
+    @UnsupportedAppUsage
     public boolean requiresActionButton() {
         return (mShowAsAction & SHOW_AS_ACTION_ALWAYS) == SHOW_AS_ACTION_ALWAYS;
     }
@@ -806,6 +814,7 @@ public final class MenuItemImpl implements MenuItem {
         return false;
     }
 
+    @UnsupportedAppUsage
     public void setActionViewExpanded(boolean isExpanded) {
         mIsActionViewExpanded = isExpanded;
         mMenu.onItemsChanged(false);

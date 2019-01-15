@@ -352,7 +352,7 @@ public class NetworkStatsRecorder {
 
         // Clear UID from current stats snapshot
         if (mLastSnapshot != null) {
-            mLastSnapshot = mLastSnapshot.withoutUids(uids);
+            mLastSnapshot.removeUids(uids);
         }
 
         final NetworkStatsCollection complete = mComplete != null ? mComplete.get() : null;

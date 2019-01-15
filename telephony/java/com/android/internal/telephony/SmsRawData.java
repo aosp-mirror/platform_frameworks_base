@@ -17,6 +17,7 @@
 
 package com.android.internal.telephony;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,6 +28,7 @@ public class SmsRawData implements Parcelable {
     byte[] data;
 
     //Static Methods
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<SmsRawData> CREATOR
             = new Parcelable.Creator<SmsRawData> (){
         public SmsRawData createFromParcel(Parcel source) {
@@ -43,10 +45,12 @@ public class SmsRawData implements Parcelable {
     };
 
     // Constructor
+    @UnsupportedAppUsage
     public SmsRawData(byte[] data) {
         this.data = data;
     }
 
+    @UnsupportedAppUsage
     public byte[] getBytes() {
         return data;
     }

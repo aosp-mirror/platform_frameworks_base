@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * {@hide}
  */
@@ -24,10 +26,12 @@ public class EncodeException extends Exception {
         super();
     }
 
+    @UnsupportedAppUsage
     public EncodeException(String s) {
         super(s);
     }
 
+    @UnsupportedAppUsage
     public EncodeException(char c) {
         super("Unencodable char: '" + c + "'");
     }

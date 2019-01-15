@@ -4120,7 +4120,8 @@ public final class Settings {
                     continue;
                 }
                 final boolean shouldInstall = ps.isSystem() &&
-                        !ArrayUtils.contains(disallowedPackages, ps.name);
+                        !ArrayUtils.contains(disallowedPackages, ps.name) &&
+                        !ps.pkg.applicationInfo.hiddenUntilInstalled;
                 // Only system apps are initially installed.
                 ps.setInstalled(shouldInstall, userHandle);
                 if (!shouldInstall) {

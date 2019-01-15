@@ -18,6 +18,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     mockito-target-minus-junit4 \
     platform-test-annotations \
     services.core \
+    services.ipmemorystore \
     services.net
 
 LOCAL_JAVA_LIBRARIES := \
@@ -38,6 +39,7 @@ LOCAL_JNI_SHARED_LIBRARIES := \
     libbacktrace \
     libbase \
     libbinder \
+    libbinderthreadstate \
     libc++ \
     libcrypto \
     libcutils \
@@ -50,7 +52,6 @@ LOCAL_JNI_SHARED_LIBRARIES := \
     liblog \
     liblzma \
     libnativehelper \
-    libnetdaidl \
     libpackagelistparser \
     libpcre2 \
     libselinux \
@@ -62,7 +63,8 @@ LOCAL_JNI_SHARED_LIBRARIES := \
     libunwindstack \
     libutilscallstack \
     libziparchive \
-    libz
+    libz \
+    netd_aidl_interface-cpp
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
@@ -91,7 +93,7 @@ LOCAL_SHARED_LIBRARIES := \
   liblog \
   libcutils \
   libnativehelper \
-  libnetdaidl
+  netd_aidl_interface-cpp
 
 LOCAL_STATIC_LIBRARIES := \
   libpcap \

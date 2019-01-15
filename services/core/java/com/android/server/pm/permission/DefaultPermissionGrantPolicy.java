@@ -833,11 +833,11 @@ public final class DefaultPermissionGrantPolicy {
                     getSystemPackage(textClassifierPackageName);
             if (textClassifierPackage != null
                     && doesPackageSupportRuntimePermissions(textClassifierPackage)) {
-                grantRuntimePermissions(textClassifierPackage, PHONE_PERMISSIONS, true, userId);
-                grantRuntimePermissions(textClassifierPackage, SMS_PERMISSIONS, true, userId);
-                grantRuntimePermissions(textClassifierPackage, CALENDAR_PERMISSIONS, true, userId);
-                grantRuntimePermissions(textClassifierPackage, LOCATION_PERMISSIONS, true, userId);
-                grantRuntimePermissions(textClassifierPackage, CONTACTS_PERMISSIONS, true, userId);
+                grantRuntimePermissions(textClassifierPackage, PHONE_PERMISSIONS, false, userId);
+                grantRuntimePermissions(textClassifierPackage, SMS_PERMISSIONS, false, userId);
+                grantRuntimePermissions(textClassifierPackage, CALENDAR_PERMISSIONS, false, userId);
+                grantRuntimePermissions(textClassifierPackage, LOCATION_PERMISSIONS, false, userId);
+                grantRuntimePermissions(textClassifierPackage, CONTACTS_PERMISSIONS, false, userId);
             }
         }
 

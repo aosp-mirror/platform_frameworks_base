@@ -231,7 +231,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
     }
 
     if (isMutable && isHardware) {
-        doThrowIAE(env, "Bitmaps with Config.HARWARE are always immutable");
+        doThrowIAE(env, "Bitmaps with Config.HARDWARE are always immutable");
         return nullObjectReturn("Cannot create mutable hardware bitmap");
     }
 

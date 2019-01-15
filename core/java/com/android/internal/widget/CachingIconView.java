@@ -18,6 +18,7 @@ package com.android.internal.widget;
 
 import android.annotation.DrawableRes;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -44,6 +45,7 @@ public class CachingIconView extends ImageView {
     private boolean mForceHidden;
     private int mDesiredVisibility;
 
+    @UnsupportedAppUsage
     public CachingIconView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }

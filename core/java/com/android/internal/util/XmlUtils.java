@@ -16,6 +16,7 @@
 
 package com.android.internal.util;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
@@ -48,6 +49,7 @@ public class XmlUtils {
 
     private static final String STRING_ARRAY_SEPARATOR = ":";
 
+    @UnsupportedAppUsage
     public static void skipCurrentTag(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
@@ -71,6 +73,7 @@ public class XmlUtils {
         return defaultValue;
     }
 
+    @UnsupportedAppUsage
     public static final boolean
     convertValueToBoolean(CharSequence value, boolean defaultValue)
     {
@@ -87,6 +90,7 @@ public class XmlUtils {
         return result;
     }
 
+    @UnsupportedAppUsage
     public static final int
     convertValueToInt(CharSequence charSeq, int defaultValue)
     {
@@ -183,6 +187,7 @@ public class XmlUtils {
      * @see #writeValueXml
      * @see #readMapXml
      */
+    @UnsupportedAppUsage
     public static final void writeMapXml(Map val, OutputStream out)
             throws XmlPullParserException, java.io.IOException {
         XmlSerializer serializer = new FastXmlSerializer();
@@ -732,6 +737,7 @@ public class XmlUtils {
      * #see #writeMapXml
      */
     @SuppressWarnings("unchecked")
+    @UnsupportedAppUsage
     public static final HashMap<String, ?> readMapXml(InputStream in)
     throws XmlPullParserException, java.io.IOException
     {
@@ -1550,6 +1556,7 @@ public class XmlUtils {
         }
     }
 
+    @UnsupportedAppUsage
     public static final void beginDocument(XmlPullParser parser, String firstElementName) throws XmlPullParserException, IOException
     {
         int type;
@@ -1568,6 +1575,7 @@ public class XmlUtils {
         }
     }
 
+    @UnsupportedAppUsage
     public static final void nextElement(XmlPullParser parser) throws XmlPullParserException, IOException
     {
         int type;

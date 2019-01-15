@@ -225,10 +225,11 @@ public final class BinderProxy implements IBinder {
             }
         }
 
-        /**
-         * Dump a histogram to the logcat. Used to diagnose abnormally large proxy maps.
-         */
-        private void dumpProxyInterfaceCounts() {
+        private InterfaceCount[] getSortedInterfaceCounts(int maxToReturn) {
+            if (maxToReturn < 0) {
+                throw new IllegalArgumentException("negative interface count");
+            }
+
             Map<String, Integer> counts = new HashMap<>();
             for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
                 if (a != null) {
@@ -258,13 +259,30 @@ public final class BinderProxy implements IBinder {
             }
             Map.Entry<String, Integer>[] sorted = counts.entrySet().toArray(
                     new Map.Entry[counts.size()]);
+
             Arrays.sort(sorted, (Map.Entry<String, Integer> a, Map.Entry<String, Integer> b)
                     -> b.getValue().compareTo(a.getValue()));
-            Log.v(Binder.TAG, "BinderProxy descriptor histogram (top ten):");
-            int printLength = Math.min(10, sorted.length);
-            for (int i = 0; i < printLength; i++) {
-                Log.v(Binder.TAG, " #" + (i + 1) + ": " + sorted[i].getKey() + " x"
-                        + sorted[i].getValue());
+
+            int returnCount = Math.min(maxToReturn, sorted.length);
+            InterfaceCount[] ifaceCounts = new InterfaceCount[returnCount];
+            for (int i = 0; i < returnCount; i++) {
+                ifaceCounts[i] = new InterfaceCount(sorted[i].getKey(), sorted[i].getValue());
+            }
+            return ifaceCounts;
+        }
+
+        static final int MAX_NUM_INTERFACES_TO_DUMP = 10;
+
+        /**
+         * Dump a histogram to the logcat. Used to diagnose abnormally large proxy maps.
+         */
+        private void dumpProxyInterfaceCounts() {
+            final InterfaceCount[] sorted = getSortedInterfaceCounts(MAX_NUM_INTERFACES_TO_DUMP);
+
+            Log.v(Binder.TAG, "BinderProxy descriptor histogram "
+                    + "(top " + Integer.toString(MAX_NUM_INTERFACES_TO_DUMP) + "):");
+            for (int i = 0; i < sorted.length; i++) {
+                Log.v(Binder.TAG, " #" + (i + 1) + ": " + sorted[i]);
             }
         }
 
@@ -296,30 +314,57 @@ public final class BinderProxy implements IBinder {
                 new ArrayList[MAIN_INDEX_SIZE];
     }
 
-    private static ProxyMap sProxyMap = new ProxyMap();
+    @GuardedBy("sProxyMap")
+    private static final ProxyMap sProxyMap = new ProxyMap();
 
     /**
-      * Dump proxy debug information.
-      *
-      * Note: this method is not thread-safe; callers must serialize with other
-      * accesses to sProxyMap, in particular {@link #getInstance(long, long)}.
-      *
-      * @hide
-      */
-    private static void dumpProxyDebugInfo() {
+     * Simple pair-value class to store number of binder proxy interfaces live in this process.
+     */
+    public static final class InterfaceCount {
+        private final String mInterfaceName;
+        private final int mCount;
+
+        InterfaceCount(String interfaceName, int count) {
+            mInterfaceName = interfaceName;
+            mCount = count;
+        }
+
+        @Override
+        public String toString() {
+            return mInterfaceName + " x" + Integer.toString(mCount);
+        }
+    }
+
+    /**
+     * Get a sorted array with entries mapping proxy interface names to the number
+     * of live proxies with those names.
+     *
+     * @param num maximum number of proxy interface counts to return. Use
+     *            Integer.MAX_VALUE to retrieve all
+     * @hide
+     */
+    public static InterfaceCount[] getSortedInterfaceCounts(int num) {
+        synchronized (sProxyMap) {
+            return sProxyMap.getSortedInterfaceCounts(num);
+        }
+    }
+
+    /**
+     * Dump proxy debug information.
+     *
+     * @hide
+     */
+    public static void dumpProxyDebugInfo() {
         if (Build.IS_DEBUGGABLE) {
-            sProxyMap.dumpProxyInterfaceCounts();
-            // Note that we don't call dumpPerUidProxyCounts(); this is because this
-            // method may be called as part of the uid limit being hit, and calling
-            // back into the UID tracking code would cause us to try to acquire a mutex
-            // that is held during that callback.
+            synchronized (sProxyMap) {
+                sProxyMap.dumpProxyInterfaceCounts();
+                sProxyMap.dumpPerUidProxyCounts();
+            }
         }
     }
 
     /**
      * Return a BinderProxy for IBinder.
-     * This method is thread-hostile!  The (native) caller serializes getInstance() calls using
-     * gProxyLock.
      * If we previously returned a BinderProxy bp for the same iBinder, and bp is still
      * in use, then we return the same bp.
      *
@@ -331,21 +376,23 @@ public final class BinderProxy implements IBinder {
      */
     private static BinderProxy getInstance(long nativeData, long iBinder) {
         BinderProxy result;
-        try {
-            result = sProxyMap.get(iBinder);
-            if (result != null) {
-                return result;
+        synchronized (sProxyMap) {
+            try {
+                result = sProxyMap.get(iBinder);
+                if (result != null) {
+                    return result;
+                }
+                result = new BinderProxy(nativeData);
+            } catch (Throwable e) {
+                // We're throwing an exception (probably OOME); don't drop nativeData.
+                NativeAllocationRegistry.applyFreeFunction(NoImagePreloadHolder.sNativeFinalizer,
+                        nativeData);
+                throw e;
             }
-            result = new BinderProxy(nativeData);
-        } catch (Throwable e) {
-            // We're throwing an exception (probably OOME); don't drop nativeData.
-            NativeAllocationRegistry.applyFreeFunction(NoImagePreloadHolder.sNativeFinalizer,
-                    nativeData);
-            throw e;
+            NoImagePreloadHolder.sRegistry.registerNativeAllocation(result, nativeData);
+            // The registry now owns nativeData, even if registration threw an exception.
+            sProxyMap.set(iBinder, result);
         }
-        NoImagePreloadHolder.sRegistry.registerNativeAllocation(result, nativeData);
-        // The registry now owns nativeData, even if registration threw an exception.
-        sProxyMap.set(iBinder, result);
         return result;
     }
 
@@ -526,12 +573,11 @@ public final class BinderProxy implements IBinder {
         }
     }
 
-    private static final void sendDeathNotice(DeathRecipient recipient) {
+    private static void sendDeathNotice(DeathRecipient recipient) {
         if (false) Log.v("JavaBinder", "sendDeathNotice to " + recipient);
         try {
             recipient.binderDied();
-        }
-        catch (RuntimeException exc) {
+        } catch (RuntimeException exc) {
             Log.w("BinderNative", "Uncaught exception from death notification",
                     exc);
         }

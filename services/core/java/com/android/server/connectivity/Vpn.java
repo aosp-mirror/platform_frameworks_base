@@ -163,8 +163,8 @@ public class Vpn {
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
 
-    private Context mContext;
-    private NetworkInfo mNetworkInfo;
+    private final Context mContext;
+    private final NetworkInfo mNetworkInfo;
     private String mPackage;
     private int mOwnerUID;
     private String mInterface;
@@ -205,45 +205,6 @@ public class Vpn {
 
     // Handle of the user initiating VPN.
     private final int mUserHandle;
-
-    // Listen to package removal and change events (update/uninstall) for this user
-    private final BroadcastReceiver mPackageIntentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final Uri data = intent.getData();
-            final String packageName = data == null ? null : data.getSchemeSpecificPart();
-            if (packageName == null) {
-                return;
-            }
-
-            synchronized (Vpn.this) {
-                // Avoid race where always-on package has been unset
-                if (!packageName.equals(getAlwaysOnPackage())) {
-                    return;
-                }
-
-                final String action = intent.getAction();
-                Log.i(TAG, "Received broadcast " + action + " for always-on VPN package "
-                        + packageName + " in user " + mUserHandle);
-
-                switch(action) {
-                    case Intent.ACTION_PACKAGE_REPLACED:
-                        // Start vpn after app upgrade
-                        startAlwaysOnVpn();
-                        break;
-                    case Intent.ACTION_PACKAGE_REMOVED:
-                        final boolean isPackageRemoved = !intent.getBooleanExtra(
-                                Intent.EXTRA_REPLACING, false);
-                        if (isPackageRemoved) {
-                            setAlwaysOnPackage(null, false);
-                        }
-                        break;
-                }
-            }
-        }
-    };
-
-    private boolean mIsPackageIntentReceiverRegistered = false;
 
     public Vpn(Looper looper, Context context, INetworkManagementService netService,
             @UserIdInt int userHandle) {
@@ -381,6 +342,15 @@ public class Vpn {
     }
 
     /**
+     * Check whether to prevent all traffic outside of a VPN even when the VPN is not connected.
+     *
+     * @return {@code true} if VPN lockdown is enabled.
+     */
+    public boolean getLockdown() {
+        return mLockdown;
+    }
+
+    /**
      * Checks if a VPN app supports always-on mode.
      *
      * In order to support the always-on feature, an app has to
@@ -491,38 +461,12 @@ public class Vpn {
             // Prepare this app. The notification will update as a side-effect of updateState().
             prepareInternal(packageName);
         }
-        maybeRegisterPackageChangeReceiverLocked(packageName);
         setVpnForcedLocked(mLockdown);
         return true;
     }
 
     private static boolean isNullOrLegacyVpn(String packageName) {
         return packageName == null || VpnConfig.LEGACY_VPN.equals(packageName);
-    }
-
-    private void unregisterPackageChangeReceiverLocked() {
-        if (mIsPackageIntentReceiverRegistered) {
-            mContext.unregisterReceiver(mPackageIntentReceiver);
-            mIsPackageIntentReceiverRegistered = false;
-        }
-    }
-
-    private void maybeRegisterPackageChangeReceiverLocked(String packageName) {
-        // Unregister IntentFilter listening for previous always-on package change
-        unregisterPackageChangeReceiverLocked();
-
-        if (!isNullOrLegacyVpn(packageName)) {
-            mIsPackageIntentReceiverRegistered = true;
-
-            IntentFilter intentFilter = new IntentFilter();
-            // Protected intent can only be sent by system. No permission required in register.
-            intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-            intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-            intentFilter.addDataScheme("package");
-            intentFilter.addDataSchemeSpecificPart(packageName, PatternMatcher.PATTERN_LITERAL);
-            mContext.registerReceiverAsUser(
-                    mPackageIntentReceiver, UserHandle.of(mUserHandle), intentFilter, null, null);
-        }
     }
 
     /**
@@ -1293,7 +1237,6 @@ public class Vpn {
         setLockdown(false);
         mAlwaysOn = false;
 
-        unregisterPackageChangeReceiverLocked();
         // Quit any active connections
         agentDisconnect();
     }
@@ -1533,17 +1476,15 @@ public class Vpn {
     }
 
     /**
-     * @return {@code true} if {@param uid} is blocked by an always-on VPN.
-     *         A UID is blocked if it's included in one of the mBlockedUsers ranges and the VPN is
-     *         not connected, or if the VPN is connected but does not apply to the UID.
+     * @param uid The target uid.
      *
+     * @return {@code true} if {@code uid} is included in one of the mBlockedUsers ranges and the
+     * VPN is not connected, or if the VPN is connected but does not apply to the {@code uid}.
+     *
+     * @apiNote This method don't check VPN lockdown status.
      * @see #mBlockedUsers
      */
     public synchronized boolean isBlockingUid(int uid) {
-        if (!mLockdown) {
-            return false;
-        }
-
         if (mNetworkInfo.isConnected()) {
             return !appliesToUid(uid);
         } else {

@@ -21,6 +21,7 @@ import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import java.util.List;
 
@@ -71,7 +72,13 @@ public interface BluetoothProfile {
 
     /**
      * Health Profile
+     *
+     * @deprecated Health Device Profile (HDP) and MCAP protocol are no longer used. New
+     * apps should use Bluetooth Low Energy based solutions such as {@link BluetoothGatt},
+     * {@link BluetoothAdapter#listenUsingL2capChannel()}, or
+     * {@link BluetoothDevice#createL2capChannel(int)}
      */
+    @Deprecated
     int HEALTH = 3;
 
     /**
@@ -86,7 +93,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int PAN = 5;
 
     /**
@@ -268,9 +275,8 @@ public interface BluetoothProfile {
          * Called to notify the client when the proxy object has been
          * connected to the service.
          *
-         * @param profile - One of {@link #HEALTH}, {@link #HEADSET} or {@link #A2DP}
-         * @param proxy - One of {@link BluetoothHealth}, {@link BluetoothHeadset} or {@link
-         * BluetoothA2dp}
+         * @param profile - One of {@link #HEADSET} or {@link #A2DP}
+         * @param proxy - One of {@link BluetoothHeadset} or {@link BluetoothA2dp}
          */
         public void onServiceConnected(int profile, BluetoothProfile proxy);
 
@@ -278,7 +284,7 @@ public interface BluetoothProfile {
          * Called to notify the client that this proxy object has been
          * disconnected from the service.
          *
-         * @param profile - One of {@link #HEALTH}, {@link #HEADSET} or {@link #A2DP}
+         * @param profile - One of {@link #HEADSET} or {@link #A2DP}
          */
         public void onServiceDisconnected(int profile);
     }

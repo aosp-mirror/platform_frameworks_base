@@ -307,7 +307,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                             } else if (finalIntent.getComponent() != null) {
                                 finalIntent.getComponent().appendShortString(tag);
                             } else if (finalIntent.getData() != null) {
-                                tag.append(finalIntent.getData());
+                                tag.append(finalIntent.getData().toSafeString());
                             }
                             owner.tempWhitelistForPendingIntentLocked(callingPid,
                                     callingUid, uid, duration, tag.toString());
@@ -346,13 +346,15 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                                 res = owner.getActivityStartController().startActivitiesInPackage(
                                         uid, key.packageName, allIntents, allResolvedTypes,
                                         resultTo, mergedOptions, userId,
-                                        false /* validateIncomingUser */);
+                                        false /* validateIncomingUser */,
+                                        this /* originatingPendingIntent */);
                             } else {
                                 res = owner.getActivityStartController().startActivityInPackage(uid,
                                         callingPid, callingUid, key.packageName, finalIntent,
                                         resolvedType, resultTo, resultWho, requestCode, 0,
                                         mergedOptions, userId, null, "PendingIntentRecord",
-                                        false /* validateIncomingUser */);
+                                        false /* validateIncomingUser */,
+                                        this /* originatingPendingIntent */);
                             }
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Unable to send startActivity intent", e);

@@ -1444,18 +1444,6 @@ public final class MediaStore {
         }
 
         public static final class Media implements AudioColumns {
-
-            private static final String[] EXTERNAL_PATHS;
-
-            static {
-                String secondary_storage = System.getenv("SECONDARY_STORAGE");
-                if (secondary_storage != null) {
-                    EXTERNAL_PATHS = secondary_storage.split(":");
-                } else {
-                    EXTERNAL_PATHS = new String[0];
-                }
-            }
-
             /**
              * Get the content:// style URI for the audio media table on the
              * given volume.
@@ -1469,14 +1457,9 @@ public final class MediaStore {
             }
 
             public static Uri getContentUriForPath(String path) {
-                for (String ep : EXTERNAL_PATHS) {
-                    if (path.startsWith(ep)) {
-                        return EXTERNAL_CONTENT_URI;
-                    }
-                }
-
-                return (path.startsWith(Environment.getExternalStorageDirectory().getPath()) ?
-                        EXTERNAL_CONTENT_URI : INTERNAL_CONTENT_URI);
+                return (path.startsWith(
+                        Environment.getStorageDirectory().getAbsolutePath() + "/")
+                        ? EXTERNAL_CONTENT_URI : INTERNAL_CONTENT_URI);
             }
 
             /**
@@ -2107,6 +2090,27 @@ public final class MediaStore {
              * <P>Type: INTEGER</P>
              */
             public static final String BOOKMARK = "bookmark";
+
+            /**
+             * The standard of color aspects
+             * <P>Type: INTEGER</P>
+             * @hide
+             */
+            public static final String COLOR_STANDARD = "color_standard";
+
+            /**
+             * The transfer of color aspects
+             * <P>Type: INTEGER</P>
+             * @hide
+             */
+            public static final String COLOR_TRANSFER = "color_transfer";
+
+            /**
+             * The range of color aspects
+             * <P>Type: INTEGER</P>
+             * @hide
+             */
+            public static final String COLOR_RANGE = "color_range";
         }
 
         public static final class Media implements VideoColumns {

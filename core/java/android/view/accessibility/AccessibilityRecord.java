@@ -628,7 +628,7 @@ public class AccessibilityRecord {
     }
 
     /**
-     * Sets the text before a change.
+     * Gets the text before a change.
      *
      * @return The text before the change.
      */

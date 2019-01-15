@@ -119,7 +119,7 @@ public class Hid {
         }
         int id = e.getId();
         Device d = new Device(id, e.getName(), e.getVendorId(), e.getProductId(),
-                e.getDescriptor(), e.getReport());
+                e.getDescriptor(), e.getReport(), e.getFeatureReports());
         mDevices.append(id, d);
     }
 

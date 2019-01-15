@@ -21,10 +21,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources.NotFoundException;
 import android.media.AudioManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.WindowManager;
+
 
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
@@ -40,12 +42,18 @@ abstract public class SafetyWarningDialog extends SystemUIDialog
 
     private long mShowTime;
     private boolean mNewVolumeUp;
+    private boolean mDisableOnVolumeUp;
 
     public SafetyWarningDialog(Context context, AudioManager audioManager) {
         super(context);
         mContext = context;
         mAudioManager = audioManager;
-
+        try {
+            mDisableOnVolumeUp = mContext.getResources().getBoolean(
+                  com.android.internal.R.bool.config_safe_media_disable_on_volume_up);
+        } catch (NotFoundException e) {
+            mDisableOnVolumeUp = true;
+        }
         getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
         setShowForAllUsers(true);
         setMessage(mContext.getString(com.android.internal.R.string.safe_media_volume_warning));
@@ -63,7 +71,8 @@ abstract public class SafetyWarningDialog extends SystemUIDialog
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP && event.getRepeatCount() == 0) {
+        if (mDisableOnVolumeUp && keyCode == KeyEvent.KEYCODE_VOLUME_UP
+            && event.getRepeatCount() == 0) {
             mNewVolumeUp = true;
         }
         return super.onKeyDown(keyCode, event);

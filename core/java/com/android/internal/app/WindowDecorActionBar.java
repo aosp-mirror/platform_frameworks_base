@@ -33,6 +33,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
@@ -79,6 +80,7 @@ public class WindowDecorActionBar extends ActionBar implements
     private ActionBarOverlayLayout mOverlayLayout;
     private ActionBarContainer mContainerView;
     private DecorToolbar mDecorToolbar;
+    @UnsupportedAppUsage
     private ActionBarContextView mContextView;
     private ActionBarContainer mSplitView;
     private View mContentView;

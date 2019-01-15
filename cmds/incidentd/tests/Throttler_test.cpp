@@ -16,7 +16,6 @@
 
 #include "Throttler.h"
 
-#include <android-base/test_utils.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 

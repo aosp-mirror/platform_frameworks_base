@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -53,6 +54,7 @@ public class CheckedTextView extends TextView implements Checkable {
     private boolean mChecked;
 
     private int mCheckMarkResource;
+    @UnsupportedAppUsage
     private Drawable mCheckMarkDrawable;
     private ColorStateList mCheckMarkTintList = null;
     private PorterDuff.Mode mCheckMarkTintMode = null;
@@ -61,6 +63,7 @@ public class CheckedTextView extends TextView implements Checkable {
 
     private int mBasePadding;
     private int mCheckMarkWidth;
+    @UnsupportedAppUsage
     private int mCheckMarkGravity = Gravity.END;
 
     private boolean mNeedRequestlayout;

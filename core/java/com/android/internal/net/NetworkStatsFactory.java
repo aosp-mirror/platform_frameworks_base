@@ -20,6 +20,7 @@ import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 
 import android.annotation.Nullable;
@@ -33,10 +34,8 @@ import com.android.internal.util.ProcFileReader;
 
 import libcore.io.IoUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.ProtocolException;
 import java.util.Arrays;
@@ -113,11 +112,12 @@ public class NetworkStatsFactory {
 
     /**
      * Applies 464xlat adjustments with ifaces noted with {@link #noteStackedIface(String, String)}.
-     * @see NetworkStats#apply464xlatAdjustments(NetworkStats, NetworkStats, Map)
+     * @see NetworkStats#apply464xlatAdjustments(NetworkStats, NetworkStats, Map, boolean)
      */
     public static void apply464xlatAdjustments(NetworkStats baseTraffic,
-            NetworkStats stackedTraffic) {
-        NetworkStats.apply464xlatAdjustments(baseTraffic, stackedTraffic, sStackedIfaces);
+            NetworkStats stackedTraffic, boolean useBpfStats) {
+        NetworkStats.apply464xlatAdjustments(baseTraffic, stackedTraffic, sStackedIfaces,
+                useBpfStats);
     }
 
     @VisibleForTesting
@@ -126,7 +126,7 @@ public class NetworkStatsFactory {
     }
 
     public NetworkStatsFactory() {
-        this(new File("/proc/"), new File("/sys/fs/bpf/traffic_uid_stats_map").exists());
+        this(new File("/proc/"), new File("/sys/fs/bpf/map_netd_app_uid_stats_map").exists());
     }
 
     @VisibleForTesting
@@ -263,7 +263,7 @@ public class NetworkStatsFactory {
 
         // No locking here: apply464xlatAdjustments behaves fine with an add-only ConcurrentHashMap.
         // TODO: remove this and only apply adjustments in NetworkStatsService.
-        stats.apply464xlatAdjustments(sStackedIfaces);
+        stats.apply464xlatAdjustments(sStackedIfaces, mUseBpfStats);
 
         return stats;
     }

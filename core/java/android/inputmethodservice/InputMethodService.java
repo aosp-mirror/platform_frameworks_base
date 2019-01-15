@@ -39,6 +39,7 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -62,7 +63,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManager.BadTokenException;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
@@ -344,7 +344,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     InputMethodManager mImm;
     
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int mTheme = 0;
     
     LayoutInflater mInflater;
@@ -354,7 +354,6 @@ public class InputMethodService extends AbstractInputMethodService {
     SoftInputWindow mWindow;
     boolean mInitialized;
     boolean mWindowCreated;
-    boolean mWindowAdded;
     boolean mWindowVisible;
     boolean mWindowWasVisible;
     boolean mInShowWindow;
@@ -420,7 +419,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     boolean mShouldClearInsetOfPreviousIme;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
 
@@ -572,16 +571,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (DEBUG) Log.v(TAG, "showSoftInput()");
             boolean wasVis = isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
-                try {
-                    showWindow(true);
-                } catch (BadTokenException e) {
-                    // We have ignored BadTokenException here since Jelly Bean MR-2 (API Level 18).
-                    // We could ignore BadTokenException in InputMethodService#showWindow() instead,
-                    // but it may break assumptions for those who override #showWindow() that we can
-                    // detect errors in #showWindow() by checking BadTokenException.
-                    // TODO: Investigate its feasibility.  Update JavaDoc of #showWindow() of
-                    // whether it's OK to override #showWindow() or not.
-                }
+                showWindow(true);
             }
             clearInsetOfPreviousIme();
             // If user uses hard keyboard, IME button should always be shown.
@@ -999,13 +989,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mInsetsComputer);
         doFinishInput();
-        if (mWindowAdded) {
-            // Disable exit animation for the current IME window
-            // to avoid the race condition between the exit and enter animations
-            // when the current IME is being switched to another one.
-            mWindow.getWindow().setWindowAnimations(0);
-            mWindow.dismiss();
-        }
+        mWindow.dismissForDestroyIfNecessary();
         if (mSettingsObserver != null) {
             mSettingsObserver.unregister();
             mSettingsObserver = null;
@@ -1792,7 +1776,6 @@ public class InputMethodService extends AbstractInputMethodService {
     public void showWindow(boolean showInput) {
         if (DEBUG) Log.v(TAG, "Showing window: showInput=" + showInput
                 + " mShowInputRequested=" + mShowInputRequested
-                + " mWindowAdded=" + mWindowAdded
                 + " mWindowCreated=" + mWindowCreated
                 + " mWindowVisible=" + mWindowVisible
                 + " mInputStarted=" + mInputStarted
@@ -1802,27 +1785,12 @@ public class InputMethodService extends AbstractInputMethodService {
             Log.w(TAG, "Re-entrance in to showWindow");
             return;
         }
-        
-        try {
-            mWindowWasVisible = mWindowVisible;
-            mInShowWindow = true;
-            showWindowInner(showInput);
-        } catch (BadTokenException e) {
-            // BadTokenException is a normal consequence in certain situations, e.g., swapping IMEs
-            // while there is a DO_SHOW_SOFT_INPUT message in the IIMethodWrapper queue.
-            if (DEBUG) Log.v(TAG, "BadTokenException: IME is done.");
-            mWindowVisible = false;
-            mWindowAdded = false;
-            // Rethrow the exception to preserve the existing behavior.  Some IMEs may have directly
-            // called this method and relied on this exception for some clean-up tasks.
-            // TODO: Give developers a clear guideline of whether it's OK to call this method or
-            // InputMethodService#requestShowSelf(int) should always be used instead.
-            throw e;
-        } finally {
-            // TODO: Is it OK to set true when we get BadTokenException?
-            mWindowWasVisible = true;
-            mInShowWindow = false;
-        }
+
+        mWindowWasVisible = mWindowVisible;
+        mInShowWindow = true;
+        showWindowInner(showInput);
+        mWindowWasVisible = true;
+        mInShowWindow = false;
     }
 
     void showWindowInner(boolean showInput) {
@@ -1839,9 +1807,8 @@ public class InputMethodService extends AbstractInputMethodService {
         initialize();
         updateFullscreenMode();
         updateInputViewShown();
-        
-        if (!mWindowAdded || !mWindowCreated) {
-            mWindowAdded = true;
+
+        if (!mWindowCreated) {
             mWindowCreated = true;
             initialize();
             if (DEBUG) Log.v(TAG, "CALL: onCreateCandidatesView");
@@ -2867,8 +2834,7 @@ public class InputMethodService extends AbstractInputMethodService {
     @Override protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         final Printer p = new PrintWriterPrinter(fout);
         p.println("Input method service state for " + this + ":");
-        p.println("  mWindowCreated=" + mWindowCreated
-                + " mWindowAdded=" + mWindowAdded);
+        p.println("  mWindowCreated=" + mWindowCreated);
         p.println("  mWindowVisible=" + mWindowVisible
                 + " mWindowWasVisible=" + mWindowWasVisible
                 + " mInShowWindow=" + mInShowWindow);

@@ -80,7 +80,6 @@ public abstract class TextClassifierService extends Service {
      * {@link android.Manifest.permission#BIND_TEXTCLASSIFIER_SERVICE} permission so
      * that other applications can not abuse it.
      */
-    @SystemApi
     public static final String SERVICE_INTERFACE =
             "android.service.textclassifier.TextClassifierService";
 
@@ -371,9 +370,7 @@ public abstract class TextClassifierService extends Service {
      * Callbacks for TextClassifierService results.
      *
      * @param <T> the type of the result
-     * @hide
      */
-    @SystemApi
     public interface Callback<T> {
         /**
          * Returns the result.

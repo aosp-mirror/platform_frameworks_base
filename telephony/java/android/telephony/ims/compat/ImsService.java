@@ -17,6 +17,7 @@
 package android.telephony.ims.compat;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
@@ -86,6 +87,7 @@ public class ImsService extends Service {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     protected final IBinder mImsServiceController = new IImsServiceController.Stub() {
 
         @Override

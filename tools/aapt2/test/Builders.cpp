@@ -28,6 +28,7 @@ using ::aapt::configuration::AndroidSdk;
 using ::aapt::configuration::ConfiguredArtifact;
 using ::aapt::configuration::GetOrCreateGroup;
 using ::aapt::io::StringInputStream;
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 
 namespace aapt {

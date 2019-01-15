@@ -17,7 +17,7 @@ package com.android.settingslib.drawer;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;

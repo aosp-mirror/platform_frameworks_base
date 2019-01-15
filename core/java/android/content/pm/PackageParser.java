@@ -649,11 +649,19 @@ public class PackageParser {
      */
     private static boolean checkUseInstalledOrHidden(int flags, PackageUserState state,
             ApplicationInfo appInfo) {
+        // Returns false if the package is hidden system app until installed.
+        if ((flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) == 0
+                && !state.installed
+                && appInfo != null && appInfo.hiddenUntilInstalled) {
+            return false;
+        }
+
         // If available for the target user, or trying to match uninstalled packages and it's
         // a system app.
         return state.isAvailable(flags)
                 || (appInfo != null && appInfo.isSystemApp()
-                        && (flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0);
+                        && ((flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0
+                        || (flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) != 0));
     }
 
     public static boolean isAvailable(PackageUserState state) {
@@ -1887,7 +1895,7 @@ public class PackageParser {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Package parseBaseApk(String apkPath, Resources res, XmlResourceParser parser, int flags,
             String[] outError) throws XmlPullParserException, IOException {
         final String splitName;
@@ -3578,6 +3586,11 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestApplication_appComponentFactory);
         if (factory != null) {
             ai.appComponentFactory = buildClassName(ai.packageName, factory, outError);
+        }
+
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_usesNonSdkApi, false)) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_USES_NON_SDK_API;
         }
 
         if (outError[0] == null) {
@@ -6304,6 +6317,7 @@ public class PackageParser {
         public ArrayList<String> usesOptionalLibraries = null;
         @UnsupportedAppUsage
         public String[] usesLibraryFiles = null;
+        public ArrayList<SharedLibraryInfo> usesLibraryInfos = null;
 
         public ArrayList<ActivityIntentInfo> preferredActivityFilters = null;
 
@@ -6833,6 +6847,8 @@ public class PackageParser {
             internStringArrayList(usesOptionalLibraries);
             usesLibraryFiles = dest.readStringArray();
 
+            usesLibraryInfos = dest.createTypedArrayList(SharedLibraryInfo.CREATOR);
+
             final int libCount = dest.readInt();
             if (libCount > 0) {
                 usesStaticLibraries = new ArrayList<>(libCount);
@@ -6983,6 +6999,7 @@ public class PackageParser {
             dest.writeStringList(usesLibraries);
             dest.writeStringList(usesOptionalLibraries);
             dest.writeStringArray(usesLibraryFiles);
+            dest.writeTypedList(usesLibraryInfos);
 
             if (ArrayUtils.isEmpty(usesStaticLibraries)) {
                 dest.writeInt(-1);
@@ -7443,6 +7460,10 @@ public class PackageParser {
                 && p.usesLibraryFiles != null) {
             return true;
         }
+        if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0
+                && p.usesLibraryInfos != null) {
+            return true;
+        }
         if (p.staticSharedLibName != null) {
             return true;
         }
@@ -7534,6 +7555,7 @@ public class PackageParser {
         }
         if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0) {
             ai.sharedLibraryFiles = p.usesLibraryFiles;
+            ai.sharedLibraryInfos = p.usesLibraryInfos;
         }
         if (state.stopped) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;

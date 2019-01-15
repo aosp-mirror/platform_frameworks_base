@@ -17,9 +17,9 @@
 package com.android.settingslib.widget;
 
 import android.content.Context;
-import android.support.v4.content.res.TypedArrayUtils;
-import android.support.v7.preference.Preference;
-import android.support.v7.preference.PreferenceViewHolder;
+import androidx.core.content.res.TypedArrayUtils;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
 import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
 import android.widget.TextView;

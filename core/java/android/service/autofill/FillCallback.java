@@ -21,8 +21,11 @@ import android.app.Activity;
 import android.os.RemoteException;
 
 /**
- * Handles autofill requests from the {@link AutofillService} into the {@link Activity} being
- * autofilled.
+ * <p><code>FillCallback</code> handles autofill requests from the {@link AutofillService} into
+ * the {@link Activity} being autofilled.
+ *
+ * <p>To learn about using Autofill services in your app, read
+ * <a href="/guide/topics/text/autofill-services">Build autofill services</a>.
  */
 public final class FillCallback {
     private final IFillCallback mCallback;

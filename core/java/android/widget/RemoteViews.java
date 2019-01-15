@@ -22,6 +22,7 @@ import android.annotation.ColorInt;
 import android.annotation.DimenRes;
 import android.annotation.NonNull;
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
@@ -159,22 +160,26 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public ApplicationInfo mApplication;
 
     /**
      * The resource ID of the layout file. (Added to the parcel)
      */
+    @UnsupportedAppUsage
     private final int mLayoutId;
 
     /**
      * An array of actions to perform on the view tree once it has been
      * inflated
      */
+    @UnsupportedAppUsage
     private ArrayList<Action> mActions;
 
     /**
      * Maps bitmaps to unique indicies to avoid Bitmap duplication.
      */
+    @UnsupportedAppUsage
     private BitmapCache mBitmapCache;
 
     /**
@@ -208,6 +213,7 @@ public class RemoteViews implements Parcelable, Filter {
      * RemoteViews.
      */
     private RemoteViews mLandscape = null;
+    @UnsupportedAppUsage
     private RemoteViews mPortrait = null;
 
     /**
@@ -360,6 +366,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         private int mEnterAnimationId;
 
+        @UnsupportedAppUsage
         public boolean onClickHandler(View view, PendingIntent pendingIntent,
                 Intent fillInIntent) {
             return onClickHandler(view, pendingIntent, fillInIntent, WINDOWING_MODE_UNDEFINED);
@@ -422,6 +429,7 @@ public class RemoteViews implements Parcelable, Filter {
             // Do nothing
         }
 
+        @UnsupportedAppUsage
         public int mergeBehavior() {
             return MERGE_REPLACE;
         }
@@ -457,6 +465,7 @@ public class RemoteViews implements Parcelable, Filter {
             // Nothing to visit by default
         }
 
+        @UnsupportedAppUsage
         int viewId;
     }
 
@@ -489,6 +498,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void mergeRemoteViews(RemoteViews newRv) {
         if (newRv == null) return;
         // We first copy the new RemoteViews, as the process of merging modifies the way the actions
@@ -764,6 +774,7 @@ public class RemoteViews implements Parcelable, Filter {
             return SET_PENDING_INTENT_TEMPLATE_TAG;
         }
 
+        @UnsupportedAppUsage
         PendingIntent pendingIntentTemplate;
     }
 
@@ -963,6 +974,7 @@ public class RemoteViews implements Parcelable, Filter {
             return SET_ON_CLICK_PENDING_INTENT_TAG;
         }
 
+        @UnsupportedAppUsage
         PendingIntent pendingIntent;
     }
 
@@ -1154,6 +1166,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     private static class BitmapCache {
 
+        @UnsupportedAppUsage
         ArrayList<Bitmap> mBitmaps;
         int mBitmapMemory = -1;
 
@@ -1205,7 +1218,9 @@ public class RemoteViews implements Parcelable, Filter {
 
     private class BitmapReflectionAction extends Action {
         int bitmapId;
+        @UnsupportedAppUsage
         Bitmap bitmap;
+        @UnsupportedAppUsage
         String methodName;
 
         BitmapReflectionAction(int viewId, String methodName, Bitmap bitmap) {
@@ -1271,8 +1286,10 @@ public class RemoteViews implements Parcelable, Filter {
         static final int COLOR_STATE_LIST = 15;
         static final int ICON = 16;
 
+        @UnsupportedAppUsage
         String methodName;
         int type;
+        @UnsupportedAppUsage
         Object value;
 
         ReflectionAction(int viewId, String methodName, int type, Object value) {
@@ -1565,6 +1582,7 @@ public class RemoteViews implements Parcelable, Filter {
      * ViewGroup methods that are related to adding Views.
      */
     private class ViewGroupActionAdd extends Action {
+        @UnsupportedAppUsage
         private RemoteViews mNestedViews;
         private int mIndex;
 
@@ -2421,6 +2439,7 @@ public class RemoteViews implements Parcelable, Filter {
      * setting on click extras and setting on click pending intents. The former is enabled,
      * and the latter disabled when this flag is true.
      */
+    @UnsupportedAppUsage
     void setIsWidgetCollectionChild(boolean isWidgetCollectionChild) {
         mIsWidgetCollectionChild = isWidgetCollectionChild;
     }
@@ -2447,6 +2466,7 @@ public class RemoteViews implements Parcelable, Filter {
      * Returns an estimate of the bitmap heap memory usage for this RemoteViews.
      */
     /** @hide */
+    @UnsupportedAppUsage
     public int estimateMemoryUsage() {
         return mBitmapCache.getBitmapMemory();
     }
@@ -2494,6 +2514,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void addView(int viewId, RemoteViews nestedView, int index) {
         addAction(new ViewGroupActionAdd(viewId, nestedView, index));
     }
@@ -2941,6 +2962,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setRemoteAdapter(int viewId, ArrayList<RemoteViews> list, int viewTypeCount) {
         addAction(new SetRemoteViewsAdapterList(viewId, list, viewTypeCount));
     }

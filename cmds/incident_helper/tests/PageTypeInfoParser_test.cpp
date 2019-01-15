@@ -54,8 +54,8 @@ TEST_F(PageTypeInfoParserTest, Success) {
     PageTypeInfoParser parser;
     PageTypeInfoProto expected;
 
-    expected.set_page_block_order(10);
-    expected.set_pages_per_block(1024);
+    expected.set_page_block_order(9);
+    expected.set_pages_per_block(512);
 
     PageTypeInfoProto::MigrateType* mt1 = expected.add_migrate_types();
     mt1->set_node(0);

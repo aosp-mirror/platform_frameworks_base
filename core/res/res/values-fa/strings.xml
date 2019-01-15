@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"‏مشکل هنگام ثبت تماس ازطریق Wi‑Fi با شرکت مخابراتی: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"‏تماس ‪%s Wi-Fi"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"‏تماس ازطریق Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"‏تماس ازطریق WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"‏تماس ازطریق WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"‏درحال تماس ازطریق WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"خاموش"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi ترجیحی"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"داده شبکه تلفن همراه ارجح است"</string>
@@ -836,7 +840,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"ماندن در این صفحه"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nمطمئنید می‌خواهید این صفحه را ترک کنید؟"</string>
     <string name="save_password_label" msgid="6860261758665825069">"تأیید"</string>
-    <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای بزرگ‌نمایی و کوچک‌نمایی، دو بار ضربه بزنید."</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای نزدیک‌نمایی و دورنمایی، دو بار ضربه بزنید."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"تکمیل خودکار"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"راه‌اندازی تکمیل خودکار"</string>
     <string name="autofill_window_title" msgid="4107745526909284887">"تکمیل خودکار با <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
@@ -1131,7 +1135,7 @@
     <string name="volume_music" msgid="5421651157138628171">"میزان صدای رسانه"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"پخش از طریق بلوتوث"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"آهنگ زنگ روی بی‌صدا تنظیم شد"</string>
-    <string name="volume_call" msgid="3941680041282788711">"میزان صدای هنگام تماس"</string>
+    <string name="volume_call" msgid="3941680041282788711">"صدا حینِ تماس"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"میزان صدای تماس بلوتوث"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"میزان صدای هشدار"</string>
     <string name="volume_notification" msgid="2422265656744276715">"میزان صدای اعلان"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"‏Wi-Fi به اینترنت دسترسی ندارد"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"برای گزینه‌ها ضربه بزنید"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"تغییرات در تنظیمات نقطه اتصال"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"نوار نقطه اتصال شما تغییر کرد."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"این دستگاه از اولویت فقط ۵ گیگاهرتز شما پشتیبانی نمی‌کند. هرزمان نوار ۵ گیگاهرتزی دردسترس باشد این دستگاه از آن استفاده خواهد کرد."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"به <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> تغییر کرد"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"وقتی <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> به اینترنت دسترسی نداشته باشد، دستگاه از <xliff:g id="NEW_NETWORK">%1$s</xliff:g> استفاده می‌کند. ممکن است هزینه‌هایی اعمال شود."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"از <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> به <xliff:g id="NEW_NETWORK">%2$s</xliff:g> تغییر کرد"</string>
@@ -1374,7 +1381,7 @@
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"برای جزئیات، با سرپرستتان تماس بگیرید"</string>
     <string name="back_button_label" msgid="2300470004503343439">"برگشت"</string>
     <string name="next_button_label" msgid="1080555104677992408">"بعدی"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"پرش"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"رد شدن"</string>
     <string name="no_matches" msgid="8129421908915840737">"مورد منطبقی موجود نیست"</string>
     <string name="find_on_page" msgid="1946799233822820384">"یافتن در صفحه"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">

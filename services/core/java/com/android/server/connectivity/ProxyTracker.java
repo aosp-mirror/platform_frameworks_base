@@ -16,6 +16,12 @@
 
 package com.android.server.connectivity;
 
+import static android.provider.Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST;
+import static android.provider.Settings.Global.GLOBAL_HTTP_PROXY_HOST;
+import static android.provider.Settings.Global.GLOBAL_HTTP_PROXY_PAC;
+import static android.provider.Settings.Global.GLOBAL_HTTP_PROXY_PORT;
+import static android.provider.Settings.Global.HTTP_PROXY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
@@ -47,16 +53,14 @@ public class ProxyTracker {
     @NonNull
     private final Context mContext;
 
-    // TODO : make this private and import as much managing logic from ConnectivityService as
-    // possible
     @NonNull
-    public final Object mProxyLock = new Object();
+    private final Object mProxyLock = new Object();
     // The global proxy is the proxy that is set device-wide, overriding any network-specific
     // proxy. Note however that proxies are hints ; the system does not enforce their use. Hence
     // this value is only for querying.
     @Nullable
     @GuardedBy("mProxyLock")
-    public ProxyInfo mGlobalProxy = null;
+    private ProxyInfo mGlobalProxy = null;
     // The default proxy is the proxy that applies to no particular network if the global proxy
     // is not set. Individual networks have their own settings that override this. This member
     // is set through setDefaultProxy, which is called when the default network changes proxies
@@ -64,10 +68,10 @@ public class ProxyTracker {
     // when PacManager resolves the proxy.
     @Nullable
     @GuardedBy("mProxyLock")
-    public volatile ProxyInfo mDefaultProxy = null;
-    // Whether the default proxy is disabled. TODO : make this mDefaultProxyEnabled
+    private volatile ProxyInfo mDefaultProxy = null;
+    // Whether the default proxy is enabled.
     @GuardedBy("mProxyLock")
-    public boolean mDefaultProxyDisabled = false;
+    private boolean mDefaultProxyEnabled = true;
 
     // The object responsible for Proxy Auto Configuration (PAC).
     @NonNull
@@ -85,7 +89,7 @@ public class ProxyTracker {
     @Nullable
     private static ProxyInfo canonicalizeProxyInfo(@Nullable final ProxyInfo proxy) {
         if (proxy != null && TextUtils.isEmpty(proxy.getHost())
-                && (proxy.getPacFileUrl() == null || Uri.EMPTY.equals(proxy.getPacFileUrl()))) {
+                && Uri.EMPTY.equals(proxy.getPacFileUrl())) {
             return null;
         }
         return proxy;
@@ -122,9 +126,9 @@ public class ProxyTracker {
     public ProxyInfo getDefaultProxy() {
         // This information is already available as a world read/writable jvm property.
         synchronized (mProxyLock) {
-            final ProxyInfo ret = mGlobalProxy;
-            if ((ret == null) && !mDefaultProxyDisabled) return mDefaultProxy;
-            return ret;
+            if (mGlobalProxy != null) return mGlobalProxy;
+            if (mDefaultProxyEnabled) return mDefaultProxy;
+            return null;
         }
     }
 
@@ -142,16 +146,72 @@ public class ProxyTracker {
     }
 
     /**
+     * Read the global proxy settings and cache them in memory.
+     */
+    public void loadGlobalProxy() {
+        ContentResolver res = mContext.getContentResolver();
+        String host = Settings.Global.getString(res, GLOBAL_HTTP_PROXY_HOST);
+        int port = Settings.Global.getInt(res, GLOBAL_HTTP_PROXY_PORT, 0);
+        String exclList = Settings.Global.getString(res, GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
+        String pacFileUrl = Settings.Global.getString(res, GLOBAL_HTTP_PROXY_PAC);
+        if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(pacFileUrl)) {
+            ProxyInfo proxyProperties;
+            if (!TextUtils.isEmpty(pacFileUrl)) {
+                proxyProperties = new ProxyInfo(pacFileUrl);
+            } else {
+                proxyProperties = new ProxyInfo(host, port, exclList);
+            }
+            if (!proxyProperties.isValid()) {
+                if (DBG) Slog.d(TAG, "Invalid proxy properties, ignoring: " + proxyProperties);
+                return;
+            }
+
+            synchronized (mProxyLock) {
+                mGlobalProxy = proxyProperties;
+            }
+        }
+        loadDeprecatedGlobalHttpProxy();
+        // TODO : shouldn't this function call mPacManager.setCurrentProxyScriptUrl ?
+    }
+
+    /**
+     * Read the global proxy from the deprecated Settings.Global.HTTP_PROXY setting and apply it.
+     */
+    public void loadDeprecatedGlobalHttpProxy() {
+        final String proxy = Settings.Global.getString(mContext.getContentResolver(), HTTP_PROXY);
+        if (!TextUtils.isEmpty(proxy)) {
+            String data[] = proxy.split(":");
+            if (data.length == 0) {
+                return;
+            }
+
+            final String proxyHost = data[0];
+            int proxyPort = 8080;
+            if (data.length > 1) {
+                try {
+                    proxyPort = Integer.parseInt(data[1]);
+                } catch (NumberFormatException e) {
+                    return;
+                }
+            }
+            final ProxyInfo p = new ProxyInfo(proxyHost, proxyPort, "");
+            setGlobalProxy(p);
+        }
+    }
+
+    /**
      * Sends the system broadcast informing apps about a new proxy configuration.
      *
      * Confusingly this method also sets the PAC file URL. TODO : separate this, it has nothing
      * to do in a "sendProxyBroadcast" method.
-     * @param proxyInfo the proxy spec, or null for no proxy.
      */
-    // TODO : make the argument NonNull final and the method private
-    public void sendProxyBroadcast(@Nullable ProxyInfo proxyInfo) {
-        if (proxyInfo == null) proxyInfo = new ProxyInfo("", 0, "");
-        if (mPacManager.setCurrentProxyScriptUrl(proxyInfo)) return;
+    public void sendProxyBroadcast() {
+        final ProxyInfo defaultProxy = getDefaultProxy();
+        final ProxyInfo proxyInfo = null != defaultProxy ? defaultProxy : new ProxyInfo("", 0, "");
+        if (mPacManager.setCurrentProxyScriptUrl(proxyInfo)
+                == PacManager.ToSendOrNotToSendBroadcast.DONT_SEND_BROADCAST) {
+            return;
+        }
         if (DBG) Slog.d(TAG, "sending Proxy Broadcast for " + proxyInfo);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
@@ -203,16 +263,15 @@ public class ProxyTracker {
             final ContentResolver res = mContext.getContentResolver();
             final long token = Binder.clearCallingIdentity();
             try {
-                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST, host);
-                Settings.Global.putInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, port);
-                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
-                        exclList);
-                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_PAC, pacFileUrl);
+                Settings.Global.putString(res, GLOBAL_HTTP_PROXY_HOST, host);
+                Settings.Global.putInt(res, GLOBAL_HTTP_PROXY_PORT, port);
+                Settings.Global.putString(res, GLOBAL_HTTP_PROXY_EXCLUSION_LIST, exclList);
+                Settings.Global.putString(res, GLOBAL_HTTP_PROXY_PAC, pacFileUrl);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
 
-            sendProxyBroadcast(mGlobalProxy == null ? mDefaultProxy : proxyInfo);
+            sendProxyBroadcast();
         }
     }
 
@@ -224,10 +283,7 @@ public class ProxyTracker {
      */
     public void setDefaultProxy(@Nullable ProxyInfo proxyInfo) {
         synchronized (mProxyLock) {
-            if (mDefaultProxy != null && mDefaultProxy.equals(proxyInfo)) {
-                return;
-            }
-            if (mDefaultProxy == proxyInfo) return; // catches repeated nulls
+            if (Objects.equals(mDefaultProxy, proxyInfo)) return;
             if (proxyInfo != null &&  !proxyInfo.isValid()) {
                 if (DBG) Slog.d(TAG, "Invalid proxy properties, ignoring: " + proxyInfo);
                 return;
@@ -242,14 +298,32 @@ public class ProxyTracker {
                     && (!Uri.EMPTY.equals(proxyInfo.getPacFileUrl()))
                     && proxyInfo.getPacFileUrl().equals(mGlobalProxy.getPacFileUrl())) {
                 mGlobalProxy = proxyInfo;
-                sendProxyBroadcast(mGlobalProxy);
+                sendProxyBroadcast();
                 return;
             }
             mDefaultProxy = proxyInfo;
 
             if (mGlobalProxy != null) return;
-            if (!mDefaultProxyDisabled) {
-                sendProxyBroadcast(proxyInfo);
+            if (mDefaultProxyEnabled) {
+                sendProxyBroadcast();
+            }
+        }
+    }
+
+    /**
+     * Enable or disable the default proxy.
+     *
+     * This sets the flag for enabling/disabling the default proxy and sends the broadcast
+     * if applicable.
+     * @param enabled whether the default proxy should be enabled.
+     */
+    public void setDefaultProxyEnabled(final boolean enabled) {
+        synchronized (mProxyLock) {
+            if (mDefaultProxyEnabled != enabled) {
+                mDefaultProxyEnabled = enabled;
+                if (mGlobalProxy == null && mDefaultProxy != null) {
+                    sendProxyBroadcast();
+                }
             }
         }
     }

@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -375,11 +376,11 @@ public final class AudioAttributes implements Parcelable {
 
     @UnsupportedAppUsage
     private int mUsage = USAGE_UNKNOWN;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mContentType = CONTENT_TYPE_UNKNOWN;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mFlags = 0x0;
     private HashSet<String> mTags;
     @UnsupportedAppUsage
@@ -715,6 +716,7 @@ public final class AudioAttributes implements Parcelable {
                     break;
                 case AudioSystem.STREAM_TTS:
                     mContentType = CONTENT_TYPE_SONIFICATION;
+                    mFlags |= FLAG_BEACON;
                     break;
                 case AudioSystem.STREAM_ACCESSIBILITY:
                     mContentType = CONTENT_TYPE_SPEECH;
@@ -1038,6 +1040,10 @@ public final class AudioAttributes implements Parcelable {
         if ((aa.getFlags() & FLAG_SCO) == FLAG_SCO) {
             return fromGetVolumeControlStream ?
                     AudioSystem.STREAM_VOICE_CALL : AudioSystem.STREAM_BLUETOOTH_SCO;
+        }
+        if ((aa.getAllFlags() & FLAG_BEACON) == FLAG_BEACON) {
+            return fromGetVolumeControlStream ?
+                    AudioSystem.STREAM_MUSIC : AudioSystem.STREAM_TTS;
         }
 
         // usage to stream type mapping

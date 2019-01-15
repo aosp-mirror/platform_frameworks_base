@@ -129,6 +129,12 @@ public abstract class CellIdentity implements Parcelable {
         return mAlphaShort;
     }
 
+    /**
+     * @return a CellLocation object for this CellIdentity
+     * @hide
+     */
+    public abstract CellLocation asCellLocation();
+
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof CellIdentity)) {
@@ -184,6 +190,7 @@ public abstract class CellIdentity implements Parcelable {
                         case CellInfo.TYPE_LTE: return CellIdentityLte.createFromParcelBody(in);
                         case CellInfo.TYPE_TDSCDMA:
                             return CellIdentityTdscdma.createFromParcelBody(in);
+                        case CellInfo.TYPE_NR: return CellIdentityNr.createFromParcelBody(in);
                         default: throw new IllegalArgumentException("Bad Cell identity Parcel");
                     }
                 }

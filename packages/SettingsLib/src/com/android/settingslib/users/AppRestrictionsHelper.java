@@ -31,7 +31,7 @@ import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;

@@ -16,6 +16,18 @@
 
 package android.os;
 
+import static android.os.ParcelFileDescriptor.MODE_APPEND;
+import static android.os.ParcelFileDescriptor.MODE_CREATE;
+import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
+import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
+import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
+import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
+import static android.system.OsConstants.O_APPEND;
+import static android.system.OsConstants.O_CREAT;
+import static android.system.OsConstants.O_RDONLY;
+import static android.system.OsConstants.O_RDWR;
+import static android.system.OsConstants.O_TRUNC;
+import static android.system.OsConstants.O_WRONLY;
 import static android.system.OsConstants.SPLICE_F_MORE;
 import static android.system.OsConstants.SPLICE_F_MOVE;
 import static android.system.OsConstants.S_ISFIFO;
@@ -1050,6 +1062,30 @@ public class FileUtils {
         return val * pow;
     }
 
+    /** {@hide} */
+    public static int translateModePfdToPosix(int mode) {
+        int res = 0;
+        if ((mode & MODE_READ_WRITE) == MODE_READ_WRITE) {
+            res |= O_RDWR;
+        } else if ((mode & MODE_WRITE_ONLY) == MODE_WRITE_ONLY) {
+            res |= O_WRONLY;
+        } else if ((mode & MODE_READ_ONLY) == MODE_READ_ONLY) {
+            res |= O_RDONLY;
+        } else {
+            throw new IllegalArgumentException("Bad mode: " + mode);
+        }
+        if ((mode & MODE_CREATE) == MODE_CREATE) {
+            res |= O_CREAT;
+        }
+        if ((mode & MODE_TRUNCATE) == MODE_TRUNCATE) {
+            res |= O_TRUNC;
+        }
+        if ((mode & MODE_APPEND) == MODE_APPEND) {
+            res |= O_APPEND;
+        }
+        return res;
+    }
+
     @VisibleForTesting
     public static class MemoryPipe extends Thread implements AutoCloseable {
         private final FileDescriptor[] pipe;
@@ -1115,3 +1151,4 @@ public class FileUtils {
         }
     }
 }
+

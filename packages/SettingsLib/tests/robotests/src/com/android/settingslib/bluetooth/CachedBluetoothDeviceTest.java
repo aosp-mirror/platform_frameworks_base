@@ -28,6 +28,7 @@ import static org.robolectric.Shadows.shadowOf;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.media.AudioManager;
@@ -571,5 +572,17 @@ public class CachedBluetoothDeviceTest {
                 thenReturn(BluetoothProfile.STATE_DISCONNECTING);
 
         assertThat(mCachedDevice.isHfpDevice()).isFalse();
+    }
+
+    @Test
+    public void testIsHearingAidDevice_isHearingAidDevice() {
+        mCachedDevice.setHiSyncId(0x1234);
+        assertThat(mCachedDevice.isHearingAidDevice()).isTrue();
+    }
+
+    @Test
+    public void testIsHearingAidDevice_isNotHearingAidDevice() {
+        mCachedDevice.setHiSyncId(BluetoothHearingAid.HI_SYNC_ID_INVALID);
+        assertThat(mCachedDevice.isHearingAidDevice()).isFalse();
     }
 }

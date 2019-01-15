@@ -691,13 +691,11 @@ public final class SystemUpdatePolicy implements Parcelable {
                 mFreezePeriods.stream().map(n -> n.toString()).collect(Collectors.joining(",")));
     }
 
-    @SystemApi
     @Override
     public int describeContents() {
         return 0;
     }
 
-    @SystemApi
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mPolicyType);
@@ -714,7 +712,6 @@ public final class SystemUpdatePolicy implements Parcelable {
         }
     }
 
-    @SystemApi
     public static final Parcelable.Creator<SystemUpdatePolicy> CREATOR =
             new Parcelable.Creator<SystemUpdatePolicy>() {
 

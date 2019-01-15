@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -40,6 +41,7 @@ public class ButtonBarLayout extends LinearLayout {
 
     private int mMinimumHeight = 0;
 
+    @UnsupportedAppUsage
     public ButtonBarLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
 

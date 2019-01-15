@@ -16,11 +16,10 @@
 
 package android.telephony;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.annotation.IntDef;
-import android.util.Log;
 
 import com.android.internal.telephony.ITelephony;
 
@@ -113,6 +112,8 @@ public class NetworkScan {
         }
         try {
             telephony.stopNetworkScan(mSubId, mScanId);
+        } catch (IllegalArgumentException ex) {
+            Rlog.d(TAG,  "stopNetworkScan - no active scan for ScanID=" + mScanId);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "stopNetworkScan  RemoteException", ex);
         } catch (RuntimeException ex) {

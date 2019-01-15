@@ -17,10 +17,12 @@
 package android.net;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -78,6 +80,7 @@ public final class NetworkCapabilities implements Parcelable {
         mNetworkCapabilities = mTransportTypes = mUnwantedNetworkCapabilities = 0;
         mLinkUpBandwidthKbps = mLinkDownBandwidthKbps = LINK_BANDWIDTH_UNSPECIFIED;
         mNetworkSpecifier = null;
+        mTransportInfo = null;
         mSignalStrength = SIGNAL_STRENGTH_UNSPECIFIED;
         mUids = null;
         mEstablishingVpnAppUid = INVALID_UID;
@@ -94,6 +97,7 @@ public final class NetworkCapabilities implements Parcelable {
         mLinkUpBandwidthKbps = nc.mLinkUpBandwidthKbps;
         mLinkDownBandwidthKbps = nc.mLinkDownBandwidthKbps;
         mNetworkSpecifier = nc.mNetworkSpecifier;
+        mTransportInfo = nc.mTransportInfo;
         mSignalStrength = nc.mSignalStrength;
         setUids(nc.mUids); // Will make the defensive copy
         mEstablishingVpnAppUid = nc.mEstablishingVpnAppUid;
@@ -873,6 +877,7 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     private NetworkSpecifier mNetworkSpecifier = null;
+    private TransportInfo mTransportInfo = null;
 
     /**
      * Sets the optional bearer specific network specifier.
@@ -898,15 +903,41 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
+     * Sets the optional transport specific information.
+     *
+     * @param transportInfo A concrete, parcelable framework class that extends
+     * {@link TransportInfo}.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
+     * @hide
+     */
+    public NetworkCapabilities setTransportInfo(TransportInfo transportInfo) {
+        mTransportInfo = transportInfo;
+        return this;
+    }
+
+    /**
      * Gets the optional bearer specific network specifier.
      *
      * @return The optional {@link NetworkSpecifier} specifying the bearer specific network
      *         specifier. See {@link #setNetworkSpecifier}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public NetworkSpecifier getNetworkSpecifier() {
         return mNetworkSpecifier;
+    }
+
+    /**
+     * Returns a transport-specific information container. The application may cast this
+     * container to a concrete sub-class based on its knowledge of the network request. The
+     * application should be able to deal with a {@code null} return value or an invalid case,
+     * e.g. use {@code instanceof} operator to verify expected type.
+     *
+     * @return A concrete implementation of the {@link TransportInfo} class or null if not
+     * available for the network.
+     */
+    @Nullable public TransportInfo getTransportInfo() {
+        return mTransportInfo;
     }
 
     private void combineSpecifiers(NetworkCapabilities nc) {
@@ -923,6 +954,17 @@ public final class NetworkCapabilities implements Parcelable {
 
     private boolean equalsSpecifier(NetworkCapabilities nc) {
         return Objects.equals(mNetworkSpecifier, nc.mNetworkSpecifier);
+    }
+
+    private void combineTransportInfos(NetworkCapabilities nc) {
+        if (mTransportInfo != null && !mTransportInfo.equals(nc.mTransportInfo)) {
+            throw new IllegalStateException("Can't combine two TransportInfos");
+        }
+        setTransportInfo(nc.mTransportInfo);
+    }
+
+    private boolean equalsTransportInfo(NetworkCapabilities nc) {
+        return Objects.equals(mTransportInfo, nc.mTransportInfo);
     }
 
     /**
@@ -975,7 +1017,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @return The bearer-specific signal strength.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public int getSignalStrength() {
         return mSignalStrength;
     }
@@ -1237,6 +1279,7 @@ public final class NetworkCapabilities implements Parcelable {
         combineTransportTypes(nc);
         combineLinkBandwidths(nc);
         combineSpecifiers(nc);
+        combineTransportInfos(nc);
         combineSignalStrength(nc);
         combineUids(nc);
         combineSSIDs(nc);
@@ -1346,6 +1389,7 @@ public final class NetworkCapabilities implements Parcelable {
                 && equalsLinkBandwidths(that)
                 && equalsSignalStrength(that)
                 && equalsSpecifier(that)
+                && equalsTransportInfo(that)
                 && equalsUids(that)
                 && equalsSSID(that));
     }
@@ -1363,7 +1407,8 @@ public final class NetworkCapabilities implements Parcelable {
                 + Objects.hashCode(mNetworkSpecifier) * 23
                 + (mSignalStrength * 29)
                 + Objects.hashCode(mUids) * 31
-                + Objects.hashCode(mSSID) * 37;
+                + Objects.hashCode(mSSID) * 37
+                + Objects.hashCode(mTransportInfo) * 41;
     }
 
     @Override
@@ -1378,6 +1423,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeInt(mLinkUpBandwidthKbps);
         dest.writeInt(mLinkDownBandwidthKbps);
         dest.writeParcelable((Parcelable) mNetworkSpecifier, flags);
+        dest.writeParcelable((Parcelable) mTransportInfo, flags);
         dest.writeInt(mSignalStrength);
         dest.writeArraySet(mUids);
         dest.writeString(mSSID);
@@ -1395,6 +1441,7 @@ public final class NetworkCapabilities implements Parcelable {
                 netCap.mLinkUpBandwidthKbps = in.readInt();
                 netCap.mLinkDownBandwidthKbps = in.readInt();
                 netCap.mNetworkSpecifier = in.readParcelable(null);
+                netCap.mTransportInfo = in.readParcelable(null);
                 netCap.mSignalStrength = in.readInt();
                 netCap.mUids = (ArraySet<UidRange>) in.readArraySet(
                         null /* ClassLoader, null for default */);
@@ -1420,7 +1467,7 @@ public final class NetworkCapabilities implements Parcelable {
             appendStringRepresentationOfBitMaskToStringBuilder(sb, mNetworkCapabilities,
                     NetworkCapabilities::capabilityNameOf, "&");
         }
-        if (0 != mNetworkCapabilities) {
+        if (0 != mUnwantedNetworkCapabilities) {
             sb.append(" Unwanted: ");
             appendStringRepresentationOfBitMaskToStringBuilder(sb, mUnwantedNetworkCapabilities,
                     NetworkCapabilities::capabilityNameOf, "&");
@@ -1433,6 +1480,9 @@ public final class NetworkCapabilities implements Parcelable {
         }
         if (mNetworkSpecifier != null) {
             sb.append(" Specifier: <").append(mNetworkSpecifier).append(">");
+        }
+        if (mTransportInfo != null) {
+            sb.append(" TransportInfo: <").append(mTransportInfo).append(">");
         }
         if (hasSignalStrength()) {
             sb.append(" SignalStrength: ").append(mSignalStrength);
@@ -1499,6 +1549,9 @@ public final class NetworkCapabilities implements Parcelable {
 
         if (mNetworkSpecifier != null) {
             proto.write(NetworkCapabilitiesProto.NETWORK_SPECIFIER, mNetworkSpecifier.toString());
+        }
+        if (mTransportInfo != null) {
+            // TODO b/120653863: write transport-specific info to proto?
         }
 
         proto.write(NetworkCapabilitiesProto.CAN_REPORT_SIGNAL_STRENGTH, hasSignalStrength());
@@ -1588,5 +1641,15 @@ public final class NetworkCapabilities implements Parcelable {
     private static void checkValidCapability(@NetworkCapabilities.NetCapability int capability) {
         Preconditions.checkArgument(isValidCapability(capability),
                 "NetworkCapability " + capability + "out of range");
+    }
+
+    /**
+     * Check if this {@code NetworkCapability} instance is metered.
+     *
+     * @return {@code true} if {@code NET_CAPABILITY_NOT_METERED} is not set on this instance.
+     * @hide
+     */
+    public boolean isMetered() {
+        return !hasCapability(NET_CAPABILITY_NOT_METERED);
     }
 }

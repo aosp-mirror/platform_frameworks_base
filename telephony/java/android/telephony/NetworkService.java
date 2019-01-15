@@ -16,7 +16,6 @@
 
 package android.telephony;
 
-import android.annotation.CallSuper;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -53,7 +52,6 @@ public abstract class NetworkService extends Service {
     private final String TAG = NetworkService.class.getSimpleName();
 
     public static final String NETWORK_SERVICE_INTERFACE = "android.telephony.NetworkService";
-    public static final String NETWORK_SERVICE_EXTRA_SLOT_ID = "android.telephony.extra.SLOT_ID";
 
     private static final int NETWORK_SERVICE_CREATE_NETWORK_SERVICE_PROVIDER                 = 1;
     private static final int NETWORK_SERVICE_REMOVE_NETWORK_SERVICE_PROVIDER                 = 2;
@@ -81,7 +79,7 @@ public abstract class NetworkService extends Service {
      * must extend this class to support network connection. Note that each instance of network
      * service is associated with one physical SIM slot.
      */
-    public class NetworkServiceProvider {
+    public abstract class NetworkServiceProvider implements AutoCloseable {
         private final int mSlotId;
 
         private final List<INetworkServiceCallback>
@@ -137,12 +135,12 @@ public abstract class NetworkService extends Service {
         }
 
         /**
-         * Called when the instance of network service is destroyed (e.g. got unbind or binder died).
+         * Called when the instance of network service is destroyed (e.g. got unbind or binder died)
+         * or when the network service provider is removed. The extended class should implement this
+         * method to perform cleanup works.
          */
-        @CallSuper
-        protected void onDestroy() {
-            mNetworkRegistrationStateChangedCallbacks.clear();
-        }
+        @Override
+        public abstract void close();
     }
 
     private class NetworkServiceHandler extends Handler {
@@ -168,7 +166,7 @@ public abstract class NetworkService extends Service {
                 case NETWORK_SERVICE_REMOVE_NETWORK_SERVICE_PROVIDER:
                     // If the service provider doesn't exist yet, we try to create it.
                     if (serviceProvider != null) {
-                        serviceProvider.onDestroy();
+                        serviceProvider.close();
                         mServiceMap.remove(slotId);
                     }
                     break;
@@ -176,7 +174,7 @@ public abstract class NetworkService extends Service {
                     for (int i = 0; i < mServiceMap.size(); i++) {
                         serviceProvider = mServiceMap.get(i);
                         if (serviceProvider != null) {
-                            serviceProvider.onDestroy();
+                            serviceProvider.close();
                         }
                     }
                     mServiceMap.clear();

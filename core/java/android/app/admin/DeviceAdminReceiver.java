@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -755,7 +754,6 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @deprecated Do not use
      */
     @Deprecated
-    @SystemApi
     public void onReadyForUserInitialization(Context context, Intent intent) {
     }
 

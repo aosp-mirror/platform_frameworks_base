@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.FontVariationAxis;
 import android.text.FontConfig;
 import android.util.Xml;
@@ -37,6 +38,7 @@ import java.util.regex.Pattern;
 public class FontListParser {
 
     /* Parse fallback list (no names) */
+    @UnsupportedAppUsage
     public static FontConfig parse(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();

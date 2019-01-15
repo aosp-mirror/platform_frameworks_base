@@ -19,13 +19,15 @@
 #include "android-base/logging.h"
 #include "android-base/macros.h"
 #include "androidfw/ResourceTypes.h"
+#include "androidfw/Locale.h"
 
-#include "Locale.h"
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
 
+using ::android::ConfigDescription;
+using ::android::LocaleValue;
 using ::android::ResStringPool;
 
 namespace aapt {

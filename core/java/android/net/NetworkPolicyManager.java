@@ -28,6 +28,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.DebugUtils;
@@ -91,16 +92,16 @@ public class NetworkPolicyManager {
     public static final int MASK_ALL_NETWORKS     = 0b11110000;
 
     public static final int FIREWALL_RULE_DEFAULT = 0;
-    public static final int FIREWALL_RULE_ALLOW = 1;
-    public static final int FIREWALL_RULE_DENY = 2;
+    public static final int FIREWALL_RULE_ALLOW = INetd.FIREWALL_RULE_ALLOW;
+    public static final int FIREWALL_RULE_DENY = INetd.FIREWALL_RULE_DENY;
 
-    public static final int FIREWALL_TYPE_WHITELIST = 0;
-    public static final int FIREWALL_TYPE_BLACKLIST = 1;
+    public static final int FIREWALL_TYPE_WHITELIST = INetd.FIREWALL_WHITELIST;
+    public static final int FIREWALL_TYPE_BLACKLIST = INetd.FIREWALL_BLACKLIST;
 
-    public static final int FIREWALL_CHAIN_NONE = 0;
-    public static final int FIREWALL_CHAIN_DOZABLE = 1;
-    public static final int FIREWALL_CHAIN_STANDBY = 2;
-    public static final int FIREWALL_CHAIN_POWERSAVE = 3;
+    public static final int FIREWALL_CHAIN_NONE = INetd.FIREWALL_CHAIN_NONE;
+    public static final int FIREWALL_CHAIN_DOZABLE = INetd.FIREWALL_CHAIN_DOZABLE;
+    public static final int FIREWALL_CHAIN_STANDBY = INetd.FIREWALL_CHAIN_STANDBY;
+    public static final int FIREWALL_CHAIN_POWERSAVE = INetd.FIREWALL_CHAIN_POWERSAVE;
 
     public static final String FIREWALL_CHAIN_NAME_NONE = "none";
     public static final String FIREWALL_CHAIN_NAME_DOZABLE = "dozable";
@@ -203,7 +204,7 @@ public class NetworkPolicyManager {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void registerListener(INetworkPolicyListener listener) {
         try {
             mService.registerListener(listener);
@@ -212,7 +213,7 @@ public class NetworkPolicyManager {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void unregisterListener(INetworkPolicyListener listener) {
         try {
             mService.unregisterListener(listener);

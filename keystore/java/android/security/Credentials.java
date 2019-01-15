@@ -282,8 +282,11 @@ public class Credentials {
      * Returns {@code true} if the entry no longer exists.
      */
     public static boolean deleteUserKeyTypeForAlias(KeyStore keystore, String alias, int uid) {
-        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias, uid) ||
-                keystore.delete(Credentials.USER_SECRET_KEY + alias, uid);
+        int ret = keystore.delete2(Credentials.USER_PRIVATE_KEY + alias, uid);
+        if (ret == KeyStore.KEY_NOT_FOUND) {
+            return keystore.delete(Credentials.USER_SECRET_KEY + alias, uid);
+        }
+        return ret == KeyStore.NO_ERROR;
     }
 
     /**

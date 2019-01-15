@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"เกิดปัญหาในการลงทะเบียนการโทรผ่าน Wi‑Fi กับผู้ให้บริการของคุณ: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"กำลังเรียก Wi-Fi ของ %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"การโทรผ่าน Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"การโทรผ่าน WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"การโทรผ่าน WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"การโทรผ่าน Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ปิด"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ต้องการใช้ Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ต้องการใช้อินเทอร์เน็ตมือถือ"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi เชื่อมต่ออินเทอร์เน็ตไม่ได้"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"แตะเพื่อดูตัวเลือก"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"มีการเปลี่ยนแปลงการตั้งค่าฮอตสปอต"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ย่านความถี่ฮอตสปอตมีการเปลี่ยนแปลง"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"อุปกรณ์นี้ไม่รองรับค่ากำหนดของคุณเฉพาะสำหรับ 5 GHz เท่านั้น และจะใช้ย่านความถี่ 5 GHz แทน เมื่อใช้ได้"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"เปลี่ยนเป็น <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"อุปกรณ์จะใช้ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> เมื่อ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> เข้าถึงอินเทอร์เน็ตไม่ได้ โดยอาจมีค่าบริการ"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"เปลี่ยนจาก <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> เป็น <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1453,7 +1460,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"เกินปริมาณเน็ตมือถือที่กำหนดไว้"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"เกินขีดจำกัดของข้อมูล Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"คุณใช้อินเทอร์เน็ตเกินไป <xliff:g id="SIZE">%s</xliff:g> จากปริมาณที่กำหนดไว้"</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"จำกัดข้อมูลแบ็กกราวด์"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"จำกัดอินเทอร์เน็ตที่ใช้งานอยู่เบื้องหลัง"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"แตะเพื่อนำข้อจำกัดออก"</string>
     <string name="data_usage_rapid_title" msgid="1809795402975261331">"ปริมาณการใช้เน็ตมือถือสูง"</string>
     <string name="data_usage_rapid_body" msgid="6897825788682442715">"แอปของคุณใช้อินเทอร์เน็ตมากกว่าปกติ"</string>

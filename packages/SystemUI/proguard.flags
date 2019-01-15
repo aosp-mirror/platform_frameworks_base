@@ -36,9 +36,9 @@
     public <init>(android.content.Context, android.util.AttributeSet);
 }
 
--keep class ** extends android.support.v14.preference.PreferenceFragment
+-keep class ** extends androidx.preference.PreferenceFragment
 -keep class com.android.systemui.tuner.*
 -keep class com.android.systemui.plugins.** {
     public protected *;
 }
--keep class android.support.v4.app.CoreComponentFactory
+-keep class androidx.core.app.CoreComponentFactory

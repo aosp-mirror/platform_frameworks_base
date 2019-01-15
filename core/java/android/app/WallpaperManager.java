@@ -1276,7 +1276,7 @@ public class WallpaperManager {
      * requires permission {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public int setBitmap(Bitmap fullImage, Rect visibleCropHint,
             boolean allowBackup, @SetWallpaperFlags int which, int userId)
             throws IOException {
@@ -1885,23 +1885,33 @@ public class WallpaperManager {
      * @hide
      */
     public static ComponentName getDefaultWallpaperComponent(Context context) {
+        ComponentName cn = null;
+
         String flat = SystemProperties.get(PROP_WALLPAPER_COMPONENT);
         if (!TextUtils.isEmpty(flat)) {
-            final ComponentName cn = ComponentName.unflattenFromString(flat);
-            if (cn != null) {
-                return cn;
+            cn = ComponentName.unflattenFromString(flat);
+        }
+
+        if (cn == null) {
+            flat = context.getString(com.android.internal.R.string.default_wallpaper_component);
+            if (!TextUtils.isEmpty(flat)) {
+                cn = ComponentName.unflattenFromString(flat);
             }
         }
 
-        flat = context.getString(com.android.internal.R.string.default_wallpaper_component);
-        if (!TextUtils.isEmpty(flat)) {
-            final ComponentName cn = ComponentName.unflattenFromString(flat);
-            if (cn != null) {
-                return cn;
+        // Check if the package exists
+        if (cn != null) {
+            try {
+                final PackageManager packageManager = context.getPackageManager();
+                packageManager.getPackageInfo(cn.getPackageName(),
+                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+            } catch (PackageManager.NameNotFoundException e) {
+                cn = null;
             }
         }
 
-        return null;
+        return cn;
     }
 
     /**

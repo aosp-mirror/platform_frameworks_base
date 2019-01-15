@@ -973,11 +973,11 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     @UnsupportedAppUsage
     public void phoneStateChanged(int numActive, int numHeld, int callState, String number,
-            int type) {
+            int type, String name) {
         final IBluetoothHeadset service = mService;
         if (service != null && isEnabled()) {
             try {
-                service.phoneStateChanged(numActive, numHeld, callState, number, type);
+                service.phoneStateChanged(numActive, numHeld, callState, number, type, name);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }

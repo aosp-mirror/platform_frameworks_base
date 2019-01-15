@@ -26,7 +26,7 @@ static bool _BitmapShaders(BitmapAllocationTestUtils::registerBitmapAllocationSc
 
 class BitmapShaders : public TestScene {
 public:
-    BitmapShaders(BitmapAllocationTestUtils::BitmapAllocator allocator)
+    explicit BitmapShaders(BitmapAllocationTestUtils::BitmapAllocator allocator)
             : TestScene(), mAllocator(allocator) {}
 
     sp<RenderNode> card;
