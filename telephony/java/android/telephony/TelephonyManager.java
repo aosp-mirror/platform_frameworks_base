@@ -9796,7 +9796,7 @@ public class TelephonyManager {
         boolean ret = false;
         try {
             IOns iOpportunisticNetworkService = getIOns();
-            if (iOpportunisticNetworkService != null) {
+            if (iOpportunisticNetworkService != null && availableNetworks != null) {
                 ret = iOpportunisticNetworkService.updateAvailableNetworks(availableNetworks,
                         pkgForDebug);
             }
