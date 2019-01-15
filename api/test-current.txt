@@ -628,6 +628,7 @@ package android.location {
     method public void resetCarrierFrequencyHz();
     method public deprecated void resetCarrierPhase();
     method public deprecated void resetCarrierPhaseUncertainty();
+    method public void resetCodeType();
     method public void resetSnrInDb();
     method public void set(android.location.GnssMeasurement);
     method public void setAccumulatedDeltaRangeMeters(double);
@@ -639,6 +640,7 @@ package android.location {
     method public deprecated void setCarrierPhase(double);
     method public deprecated void setCarrierPhaseUncertainty(double);
     method public void setCn0DbHz(double);
+    method public void setCodeType(int);
     method public void setConstellationType(int);
     method public void setMultipathIndicator(int);
     method public void setPseudorangeRateMetersPerSecond(double);
