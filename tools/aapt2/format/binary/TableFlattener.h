@@ -46,6 +46,9 @@ struct TableFlattenerOptions {
 
   // When true, sort the entries in the values string pool by priority and configuration.
   bool sort_stringpool_entries = true;
+
+  // Map from original resource paths to shortened resource paths.
+  std::map<std::string, std::string> shortened_path_map;
 };
 
 class TableFlattener : public IResourceTableConsumer {

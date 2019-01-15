@@ -55,6 +55,12 @@ struct OptimizeOptions {
   // Set of artifacts to keep when generating multi-APK splits. If the list is empty, all artifacts
   // are kept and will be written as output.
   std::unordered_set<std::string> kept_artifacts;
+
+  // Whether or not to shorten resource paths in the APK.
+  bool shorten_resource_paths;
+
+  // Path to the output map of original resource paths to shortened paths.
+  Maybe<std::string> shortened_paths_map_path;
 };
 
 class OptimizeCommand : public Command {
@@ -101,6 +107,12 @@ class OptimizeCommand : public Command {
     AddOptionalSwitch("--enable-resource-obfuscation",
         "Enables obfuscation of key string pool to single value",
         &options_.table_flattener_options.collapse_key_stringpool);
+    AddOptionalSwitch("--enable-resource-path-shortening",
+        "Enables shortening of the path of the resources inside the APK.",
+        &options_.shorten_resource_paths);
+    AddOptionalFlag("--resource-path-shortening-map",
+        "Path to output the map of old resource paths to shortened paths.",
+        &options_.shortened_paths_map_path);
     AddOptionalSwitch("-v", "Enables verbose logging", &verbose_);
   }
 
@@ -108,6 +120,9 @@ class OptimizeCommand : public Command {
 
  private:
   OptimizeOptions options_;
+
+  bool WriteObfuscatedPathsMap(const std::map<std::string, std::string> &path_map,
+                               const std::string &file_path);
 
   Maybe<std::string> config_path_;
   Maybe<std::string> whitelist_path_;
