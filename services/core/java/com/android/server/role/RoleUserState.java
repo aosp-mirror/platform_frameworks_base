@@ -193,14 +193,18 @@ public class RoleUserState {
      *
      * @param roleName the name of the role to query for
      *
-     * @return the set of role holders. {@code null} should not be returned and indicates an issue.
+     * @return the set of role holders, or {@code null} if and only if the role is not found
      */
     @Nullable
     public ArraySet<String> getRoleHolders(@NonNull String roleName) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
 
-            return new ArraySet<>(mRoles.get(roleName));
+            ArraySet<String> packageNames = mRoles.get(roleName);
+            if (packageNames == null) {
+                return null;
+            }
+            return new ArraySet<>(packageNames);
         }
     }
 
@@ -268,8 +272,7 @@ public class RoleUserState {
      * @param roleName the name of the role to add the holder to
      * @param packageName the package name of the new holder
      *
-     * @return {@code false} only if the set of role holders is null, which should not happen and
-     *         indicates an issue.
+     * @return {@code false} if and only if the role is not found
      */
     @CheckResult
     public boolean addRoleHolder(@NonNull String roleName, @NonNull String packageName) {
@@ -302,8 +305,7 @@ public class RoleUserState {
      * @param roleName the name of the role to remove the holder from
      * @param packageName the package name of the holder to remove
      *
-     * @return {@code false} only if the set of role holders is null, which should not happen and
-     *         indicates an issue.
+     * @return {@code false} if and only if the role is not found
      */
     @CheckResult
     public boolean removeRoleHolder(@NonNull String roleName, @NonNull String packageName) {
