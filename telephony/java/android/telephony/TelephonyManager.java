@@ -5877,9 +5877,14 @@ public class TelephonyManager {
 
     /**
      * Returns the IMS Service Table (IST) that was loaded from the ISIM.
+     *
+     * See 3GPP TS 31.103 (Section 4.2.7) for the definition and more information on this table.
+     *
      * @return IMS Service Table or null if not present or not loaded
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getIsimIst() {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
