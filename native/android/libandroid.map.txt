@@ -205,6 +205,9 @@ LIBANDROID {
     AStorageManager_mountObb;
     AStorageManager_new;
     AStorageManager_unmountObb;
+    ASurfaceControl_create; # introduced=29
+    ASurfaceControl_createFromWindow; # introduced=29
+    ASurfaceControl_destroy; # introduced=29
     ASurfaceTexture_acquireANativeWindow; # introduced=28
     ASurfaceTexture_attachToGLContext; # introduced=28
     ASurfaceTexture_detachFromGLContext; # introduced=28
@@ -213,6 +216,16 @@ LIBANDROID {
     ASurfaceTexture_getTransformMatrix; # introduced=28
     ASurfaceTexture_release; # introduced=28
     ASurfaceTexture_updateTexImage; # introduced=28
+    ASurfaceTransaction_apply; # introduced=29
+    ASurfaceTransaction_create; # introduced=29
+    ASurfaceTransaction_delete; # introduced=29
+    ASurfaceTransaction_setBuffer; # introduced=29
+    ASurfaceTransaction_setBufferTransparency; # introduced=29
+    ASurfaceTransaction_setDamageRegion; # introduced=29
+    ASurfaceTransaction_setGeometry; # introduced=29
+    ASurfaceTransaction_setOnComplete; # introduced=29
+    ASurfaceTransaction_setVisibility; # introduced=29
+    ASurfaceTransaction_setZOrder; # introduced=29
     ASystemFontIterator_open; # introduced=29
     ASystemFontIterator_close; # introduced=29
     ASystemFontIterator_next; # introduced=29
