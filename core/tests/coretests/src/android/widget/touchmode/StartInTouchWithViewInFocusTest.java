@@ -16,14 +16,15 @@
 
 package android.widget.touchmode;
 
-import android.widget.layout.linear.LLEditTextThenButton;
 import static android.util.TouchModeFlexibleAsserts.assertNotInTouchModeAfterKey;
 
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.layout.linear.LLEditTextThenButton;
+
+import androidx.test.filters.MediumTest;
 
 public class StartInTouchWithViewInFocusTest extends 
         ActivityInstrumentationTestCase2<LLEditTextThenButton> {

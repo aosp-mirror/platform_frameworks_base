@@ -17,18 +17,18 @@
 package android.view;
 
 import static android.view.WindowInsets.Type.ime;
-import static android.view.WindowInsets.Type.indexOf;
 import static android.view.WindowInsets.Type.sideBars;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.WindowInsets.Builder;
-import android.view.WindowInsets.Type;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.android.internal.os;
 
 import static android.os.BatteryStats.STATS_CURRENT;
@@ -20,21 +21,20 @@ import static android.os.BatteryStats.STATS_SINCE_CHARGED;
 import static android.os.BatteryStats.WAKE_TYPE_PARTIAL;
 
 import android.app.ActivityManager;
-import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.Uid.Sensor;
 import android.os.WorkSource;
-import android.support.test.filters.SmallTest;
 import android.view.Display;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.os.BatteryStatsImpl.DualTimer;
 import com.android.internal.os.BatteryStatsImpl.Uid;
+
 import junit.framework.TestCase;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,7 +47,7 @@ import java.util.Map;
  * Install: adb install -r \
  *      ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
  * Run: adb shell am instrument -e class com.android.internal.os.BatteryStatsNoteTest -w \
- *      com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
+ *      com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
  */
 public class BatteryStatsNoteTest extends TestCase {
 

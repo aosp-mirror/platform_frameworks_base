@@ -30,8 +30,6 @@ import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.action.Swiper;
 import android.support.test.espresso.util.HumanReadables;
-import android.view.MotionEvent;
-import android.view.View;
 
 import org.hamcrest.Matcher;
 

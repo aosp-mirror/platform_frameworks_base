@@ -22,10 +22,11 @@ import static org.junit.Assert.assertTrue;
 import android.os.Binder;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.ArrayMap;
 import android.util.SparseArray;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BinderInternal.CallSession;
 

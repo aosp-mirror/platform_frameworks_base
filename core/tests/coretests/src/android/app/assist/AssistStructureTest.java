@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.app.assist;
 
 import static android.view.View.AUTOFILL_TYPE_TEXT;
@@ -22,13 +23,9 @@ import static android.view.View.IMPORTANT_FOR_AUTOFILL_YES;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.assist.AssistStructure.ViewNode;
-import android.content.ComponentName;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.SystemClock;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.InputFilter;
 import android.util.Log;
 import android.view.autofill.AutofillId;
@@ -36,6 +33,10 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

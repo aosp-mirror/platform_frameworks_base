@@ -29,9 +29,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.SystemProperties;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 

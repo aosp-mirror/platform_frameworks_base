@@ -18,13 +18,14 @@ package android.view.menu;
 
 import android.content.Context;
 import android.graphics.Point;
-import android.support.test.filters.MediumTest;
 import android.test.ActivityInstrumentationTestCase;
 import android.util.PollingCheck;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.espresso.ContextMenuUtils;
+
+import androidx.test.filters.MediumTest;
 
 @MediumTest
 public class ContextMenuTest extends ActivityInstrumentationTestCase<ContextMenuActivity> {

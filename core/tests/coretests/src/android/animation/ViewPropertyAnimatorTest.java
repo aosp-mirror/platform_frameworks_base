@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.animation;
 
 import android.os.Handler;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.UiThreadTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.view.ViewPropertyAnimator;
 import android.widget.Button;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
+
 import com.android.frameworks.coretests.R;
 
 import java.util.concurrent.TimeUnit;

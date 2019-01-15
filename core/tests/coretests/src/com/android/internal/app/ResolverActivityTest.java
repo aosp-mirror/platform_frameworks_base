@@ -16,6 +16,29 @@
 
 package com.android.internal.app;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
+
+import static com.android.internal.app.ResolverWrapperActivity.sOverrides;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
+
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
+import android.view.View;
+import android.widget.RelativeLayout;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.widget.ResolverDrawerLayout;
@@ -26,37 +49,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
-import android.content.Intent;
-import android.content.pm.ResolveInfo;
-import android.os.UserHandle;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
-import android.view.View;
-import android.widget.RelativeLayout;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import static android.os.SystemClock.sleep;
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static com.android.internal.app.ResolverWrapperActivity.sOverrides;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Resolver activity instrumentation tests

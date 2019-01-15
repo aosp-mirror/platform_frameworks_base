@@ -16,14 +16,13 @@
 
 package android.app.timezone;
 
-import static junit.framework.Assert.fail;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
-import android.support.test.filters.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 import org.junit.Test;
 

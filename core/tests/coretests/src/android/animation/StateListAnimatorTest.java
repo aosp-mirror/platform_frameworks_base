@@ -14,15 +14,15 @@
 * limitations under the License.
 */
 
-
 package android.animation;
 
-import android.support.test.filters.LargeTest;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.UiThreadTest;
 import android.util.StateSet;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.LargeTest;
 
 import com.android.frameworks.coretests.R;
 

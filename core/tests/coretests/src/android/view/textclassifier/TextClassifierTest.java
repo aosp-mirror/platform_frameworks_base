@@ -24,10 +24,11 @@ import static org.junit.Assert.assertTrue;
 import android.content.Context;
 import android.content.Intent;
 import android.os.LocaleList;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
 import android.text.Spannable;
 import android.text.SpannableString;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;

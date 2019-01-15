@@ -51,8 +51,9 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.os.FileUtils.MemoryPipe;
 import android.provider.DocumentsContract.Document;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import libcore.io.Streams;
 

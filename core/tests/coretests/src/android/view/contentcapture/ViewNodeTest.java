@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.view.contentcapture;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -24,13 +25,14 @@ import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
-import android.support.test.InstrumentationRegistry;
 import android.view.View;
 import android.view.ViewStructure.HtmlInfo;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
 import android.widget.FrameLayout;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -26,14 +26,15 @@ import static org.junit.Assert.fail;
 
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.LargeTest;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.MoreAsserts;
 import android.text.style.StyleSpan;
 import android.text.util.Rfc822Token;
 import android.text.util.Rfc822Tokenizer;
 import android.view.View;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.google.android.collect.Lists;
 

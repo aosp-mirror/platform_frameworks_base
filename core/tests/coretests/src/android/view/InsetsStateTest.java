@@ -24,19 +24,22 @@ import static android.view.InsetsState.TYPE_SIDE_BAR_1;
 import static android.view.InsetsState.TYPE_SIDE_BAR_2;
 import static android.view.InsetsState.TYPE_SIDE_BAR_3;
 import static android.view.InsetsState.TYPE_TOP_BAR;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+
 import static org.junit.Assert.assertNotEquals;
 
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.FlakyTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

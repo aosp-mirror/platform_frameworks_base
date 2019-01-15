@@ -16,9 +16,8 @@
 
 package android.widget.listview;
 
-import android.util.ListScenario;
-
 import android.os.Bundle;
+import android.util.ListScenario;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;

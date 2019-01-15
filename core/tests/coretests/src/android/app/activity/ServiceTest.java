@@ -22,13 +22,12 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Parcel;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
-import android.util.Log;
+import android.os.RemoteException;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
 
 // These test binders purport to support an interface whose canonical
 // interface name is ServiceTest.SERVICE_LOCAL

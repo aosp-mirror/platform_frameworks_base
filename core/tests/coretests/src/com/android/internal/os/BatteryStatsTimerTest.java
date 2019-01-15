@@ -18,15 +18,16 @@ package com.android.internal.os;
 
 import android.os.BatteryStats;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
 import android.util.StringBuilderPrinter;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.os.BatteryStatsImpl.Clocks;
 import com.android.internal.os.BatteryStatsImpl.TimeBase;
 import com.android.internal.os.BatteryStatsImpl.Timer;
+
+import junit.framework.Assert;
+import junit.framework.TestCase;
 
 /**
  * Provides test cases for android.os.BatteryStats.

@@ -16,13 +16,12 @@
 
 package android.widget.focus;
 
-import android.widget.focus.ListWithFooterViewAndNewLabels;
-import com.android.frameworks.coretests.R;
-
 import android.test.ActivityInstrumentationTestCase;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+
+import com.android.frameworks.coretests.R;
 
 public class ListWithFooterViewAndNewLabelsTest
         extends ActivityInstrumentationTestCase<ListWithFooterViewAndNewLabels> {

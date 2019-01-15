@@ -17,13 +17,14 @@
 package android.widget.listview.arrowscroll;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.listview.ListItemFocusablesFarApart;
+
+import androidx.test.filters.MediumTest;
 
 public class ListItemFocusablesFarApartTest extends ActivityInstrumentationTestCase<ListItemFocusablesFarApart> {
     private ListView mListView;

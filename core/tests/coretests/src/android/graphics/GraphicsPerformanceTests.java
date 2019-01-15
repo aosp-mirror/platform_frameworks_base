@@ -20,7 +20,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
-import android.test.suitebuilder.annotation.Suppress;
+
+import androidx.test.filters.Suppress;
 
 import com.android.frameworks.coretests.R;
 

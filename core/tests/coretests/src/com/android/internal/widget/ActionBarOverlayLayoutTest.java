@@ -29,9 +29,6 @@ import static org.junit.Assert.assertThat;
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.View.OnApplyWindowInsetsListener;
@@ -39,6 +36,10 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.Toolbar;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

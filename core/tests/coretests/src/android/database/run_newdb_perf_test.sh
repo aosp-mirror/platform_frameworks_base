@@ -23,7 +23,7 @@ echo "Running benchmark $RUN_N times"
 
 for (( i=0; i<$RUN_N; i++ ))
 do
-    adb  shell am instrument -e class 'android.database.NewDatabasePerformanceTestSuite' -w 'com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner'
+    adb  shell am instrument -e class 'android.database.NewDatabasePerformanceTestSuite' -w 'com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner'
 done
 
 adb logcat -d > /tmp/testlogcat.txt

@@ -27,11 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.filters.MediumTest;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.GetChars;
 import android.text.Layout;
 import android.text.PrecomputedText;
@@ -39,6 +34,12 @@ import android.text.Selection;
 import android.text.Spannable;
 import android.view.View;
 import android.widget.TextView.BufferType;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Rule;

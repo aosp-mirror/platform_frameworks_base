@@ -19,7 +19,8 @@ package android.graphics;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.coretests.R;
 

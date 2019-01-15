@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.InsetsState.TYPE_TOP_BAR;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.reset;
@@ -24,9 +25,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.FlakyTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.SurfaceControl.Transaction;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

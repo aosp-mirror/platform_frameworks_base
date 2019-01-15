@@ -34,9 +34,10 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
 
 import java.util.HashMap;
 import java.util.List;

@@ -27,8 +27,9 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.collect.Lists;
 import com.android.frameworks.coretests.R;
+
+import com.google.android.collect.Lists;
 
 import java.util.List;
 

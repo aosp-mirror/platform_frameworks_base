@@ -21,10 +21,11 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 
 import org.junit.After;
 import org.junit.Test;

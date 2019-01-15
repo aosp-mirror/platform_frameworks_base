@@ -17,13 +17,13 @@
 package android.content;
 
 import android.net.Uri;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-
 
 public class UriMatcherTest extends TestCase {
 

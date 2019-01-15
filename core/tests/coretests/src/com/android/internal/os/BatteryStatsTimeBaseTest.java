@@ -16,18 +16,19 @@
 
 package com.android.internal.os;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import android.os.BatteryStats;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
 import android.util.Log;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.mockito.Mockito;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Provides test cases for android.os.BatteryStats.

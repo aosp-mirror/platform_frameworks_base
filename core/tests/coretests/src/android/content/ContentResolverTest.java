@@ -31,9 +31,10 @@ import android.graphics.Paint;
 import android.net.Uri;
 import android.os.MemoryFile;
 import android.os.ParcelFileDescriptor;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Size;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package android.os;
 
 import static org.junit.Assert.assertEquals;
@@ -25,11 +24,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.aidl.IBpcCallbackObserver;
 import com.android.frameworks.coretests.aidl.IBpcTestAppCmdService;
@@ -63,7 +63,7 @@ import java.util.function.Consumer;
  * Install: adb install -r \
  * ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
  * Run: adb shell am instrument -e class android.os.BinderProxyCountingTest -w \
- * com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
+ * com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
  *
  * or
  *

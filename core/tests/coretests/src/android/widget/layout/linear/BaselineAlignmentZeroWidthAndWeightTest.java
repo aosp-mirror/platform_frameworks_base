@@ -16,15 +16,14 @@
 
 package android.widget.layout.linear;
 
-import com.android.frameworks.coretests.R;
-import android.widget.layout.linear.BaselineAlignmentZeroWidthAndWeight;
-import android.widget.layout.linear.ExceptionTextView;
-
 import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.widget.Button;
+
+import androidx.test.filters.MediumTest;
+
+import com.android.frameworks.coretests.R;
 
 public class BaselineAlignmentZeroWidthAndWeightTest extends ActivityInstrumentationTestCase<BaselineAlignmentZeroWidthAndWeight> {
     private Button mShowButton;

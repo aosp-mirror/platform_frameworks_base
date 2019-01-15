@@ -23,7 +23,8 @@ import static org.mockito.Mockito.withSettings;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -21,10 +21,11 @@ import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
-import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+
+import androidx.test.filters.LargeTest;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
