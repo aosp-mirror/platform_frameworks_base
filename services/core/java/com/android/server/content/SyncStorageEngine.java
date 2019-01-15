@@ -16,6 +16,8 @@
 
 package com.android.server.content;
 
+import static com.android.server.content.SyncLogger.logSafe;
+
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
@@ -220,6 +222,15 @@ public class SyncStorageEngine {
         public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append(account == null ? "ALL ACCS" : account.name)
+                    .append("/")
+                    .append(provider == null ? "ALL PDRS" : provider);
+            sb.append(":u" + userId);
+            return sb.toString();
+        }
+
+        public String toSafeString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(account == null ? "ALL ACCS" : logSafe(account))
                     .append("/")
                     .append(provider == null ? "ALL PDRS" : provider);
             sb.append(":u" + userId);
@@ -1861,8 +1872,8 @@ public class SyncStorageEngine {
 
                 }
             } else {
-                Slog.w(TAG, "Failure adding authority: account="
-                        + accountName + " auth=" + authorityName
+                Slog.w(TAG, "Failure adding authority:"
+                        + " auth=" + authorityName
                         + " enabled=" + enabled
                         + " syncable=" + syncable);
             }
