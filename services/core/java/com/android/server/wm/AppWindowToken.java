@@ -105,6 +105,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.IApplicationToken;
 import android.view.InputApplicationHandle;
+import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -1621,6 +1622,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         t.reparent(getSurfaceControl(), mTransitChangeLeash);
         onAnimationLeashCreated(t, mTransitChangeLeash);
 
+        // Skip creating snapshot if this transition is controlled by a remote animator which
+        // doesn't need it.
+        ArraySet<Integer> activityTypes = new ArraySet<>();
+        activityTypes.add(getActivityType());
+        RemoteAnimationAdapter adapter =
+                mDisplayContent.mAppTransitionController.getRemoteAnimationOverride(
+                        this, TRANSIT_TASK_CHANGE_WINDOWING_MODE, activityTypes);
+        if (adapter != null && !adapter.getChangeNeedsSnapshot()) {
+            return;
+        }
+
         if (mThumbnail == null && getTask() != null) {
             final TaskSnapshotController snapshotCtrl = mWmService.mTaskSnapshotController;
             final ArraySet<Task> tasks = new ArraySet<>();
@@ -1637,6 +1649,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     boolean isInChangeTransition() {
         return mTransitChangeLeash != null || isChangeTransition(mTransit);
+    }
+
+    @VisibleForTesting
+    AppWindowThumbnail getThumbnail() {
+        return mThumbnail;
     }
 
     @Override
@@ -2349,7 +2366,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             AnimationAdapter thumbnailAdapter = null;
             getAnimationBounds(mTmpPoint, mTmpRect);
 
-            boolean isChanging = isChangeTransition(transit) && mThumbnail != null;
+            boolean isChanging = isChangeTransition(transit) && enter;
 
             // Delaying animation start isn't compatible with remote animations at all.
             if (getDisplayContent().mAppTransition.getRemoteAnimationController() != null
@@ -2368,11 +2385,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                                 getDisplayContent().getDisplayInfo(), duration,
                                 true /* isAppAnimation */, false /* isThumbnail */),
                         mWmService.mSurfaceAnimationRunner);
-                thumbnailAdapter = new LocalAnimationAdapter(
-                        new WindowChangeAnimationSpec(mTransitStartRect, mTmpRect,
-                                getDisplayContent().getDisplayInfo(), duration,
-                                true /* isAppAnimation */, true /* isThumbnail */),
-                        mWmService.mSurfaceAnimationRunner);
+                if (mThumbnail != null) {
+                    thumbnailAdapter = new LocalAnimationAdapter(
+                            new WindowChangeAnimationSpec(mTransitStartRect, mTmpRect,
+                                    getDisplayContent().getDisplayInfo(), duration,
+                                    true /* isAppAnimation */, true /* isThumbnail */),
+                            mWmService.mSurfaceAnimationRunner);
+                }
                 mTransit = transit;
                 mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();
             } else {

@@ -322,8 +322,10 @@ class RemoteAnimationController implements DeathRecipient {
                 mStartBounds = new Rect(startBounds);
                 mTmpRect.set(startBounds);
                 mTmpRect.offsetTo(0, 0);
-                mThumbnailAdapter =
-                        new RemoteAnimationAdapterWrapper(this, new Point(0, 0), mTmpRect);
+                if (mRemoteAnimationAdapter.getChangeNeedsSnapshot()) {
+                    mThumbnailAdapter =
+                            new RemoteAnimationAdapterWrapper(this, new Point(0, 0), mTmpRect);
+                }
             } else {
                 mStartBounds = null;
             }

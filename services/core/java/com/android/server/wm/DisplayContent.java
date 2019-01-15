@@ -162,6 +162,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InsetsState.InternalInsetType;
 import android.view.MagnificationSpec;
+import android.view.RemoteAnimationDefinition;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -1089,6 +1090,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     int getLastWindowForcedOrientation() {
         return mLastWindowForcedOrientation;
+    }
+
+    void registerRemoteAnimations(RemoteAnimationDefinition definition) {
+        mAppTransitionController.registerRemoteAnimations(definition);
     }
 
     /**

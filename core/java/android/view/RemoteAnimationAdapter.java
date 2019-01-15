@@ -18,7 +18,6 @@ package android.view;
 
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityOptions;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -52,6 +51,7 @@ public class RemoteAnimationAdapter implements Parcelable {
     private final IRemoteAnimationRunner mRunner;
     private final long mDuration;
     private final long mStatusBarTransitionDelay;
+    private final boolean mChangeNeedsSnapshot;
 
     /** @see #getCallingPid */
     private int mCallingPid;
@@ -59,21 +59,31 @@ public class RemoteAnimationAdapter implements Parcelable {
     /**
      * @param runner The interface that gets notified when we actually need to start the animation.
      * @param duration The duration of the animation.
+     * @param changeNeedsSnapshot For change transitions, whether this should create a snapshot by
+     *                            screenshotting the task.
      * @param statusBarTransitionDelay The desired delay for all visual animations in the
      *        status bar caused by this app animation in millis.
      */
     @UnsupportedAppUsage
     public RemoteAnimationAdapter(IRemoteAnimationRunner runner, long duration,
-            long statusBarTransitionDelay) {
+            long statusBarTransitionDelay, boolean changeNeedsSnapshot) {
         mRunner = runner;
         mDuration = duration;
+        mChangeNeedsSnapshot = changeNeedsSnapshot;
         mStatusBarTransitionDelay = statusBarTransitionDelay;
+    }
+
+    @UnsupportedAppUsage
+    public RemoteAnimationAdapter(IRemoteAnimationRunner runner, long duration,
+            long statusBarTransitionDelay) {
+        this(runner, duration, statusBarTransitionDelay, false /* changeNeedsSnapshot */);
     }
 
     public RemoteAnimationAdapter(Parcel in) {
         mRunner = IRemoteAnimationRunner.Stub.asInterface(in.readStrongBinder());
         mDuration = in.readLong();
         mStatusBarTransitionDelay = in.readLong();
+        mChangeNeedsSnapshot = in.readBoolean();
     }
 
     public IRemoteAnimationRunner getRunner() {
@@ -86,6 +96,10 @@ public class RemoteAnimationAdapter implements Parcelable {
 
     public long getStatusBarTransitionDelay() {
         return mStatusBarTransitionDelay;
+    }
+
+    public boolean getChangeNeedsSnapshot() {
+        return mChangeNeedsSnapshot;
     }
 
     /**
@@ -112,6 +126,7 @@ public class RemoteAnimationAdapter implements Parcelable {
         dest.writeStrongInterface(mRunner);
         dest.writeLong(mDuration);
         dest.writeLong(mStatusBarTransitionDelay);
+        dest.writeBoolean(mChangeNeedsSnapshot);
     }
 
     public static final Creator<RemoteAnimationAdapter> CREATOR

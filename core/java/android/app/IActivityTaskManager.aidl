@@ -434,6 +434,11 @@ interface IActivityTaskManager {
     void registerRemoteAnimationForNextActivityStart(in String packageName,
            in RemoteAnimationAdapter adapter);
 
+    /**
+     * Registers remote animations for a display.
+     */
+    void registerRemoteAnimationsForDisplay(int displayId, in RemoteAnimationDefinition definition);
+
     /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
     void alwaysShowUnsupportedCompileSdkWarning(in ComponentName activity);
 

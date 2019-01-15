@@ -152,6 +152,7 @@ public class WindowTestUtils {
     public static class TestAppWindowToken extends AppWindowToken {
         boolean mOnTop = false;
         private Transaction mPendingTransactionOverride;
+        boolean mSkipOnParentSet = true;
 
         private TestAppWindowToken(DisplayContent dc) {
             super(dc.mWmService, new IApplicationToken.Stub() {
@@ -200,7 +201,9 @@ public class WindowTestUtils {
 
         @Override
         void onParentSet() {
-            // Do nothing.
+            if (!mSkipOnParentSet) {
+                super.onParentSet();
+            }
         }
 
         @Override
