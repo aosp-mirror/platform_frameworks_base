@@ -1886,6 +1886,7 @@ public class WifiConfiguration implements Parcelable {
         if (creatorName != null) sbuf.append(" cname=" + creatorName);
         if (lastUpdateUid != 0) sbuf.append(" luid=" + lastUpdateUid);
         if (lastUpdateName != null) sbuf.append(" lname=" + lastUpdateName);
+        if (updateIdentifier != null) sbuf.append(" updateIdentifier=" + updateIdentifier);
         sbuf.append(" lcuid=" + lastConnectUid);
         sbuf.append(" userApproved=" + userApprovedAsString(userApproved));
         sbuf.append(" noInternetAccessExpected=" + noInternetAccessExpected);
@@ -2281,6 +2282,7 @@ public class WifiConfiguration implements Parcelable {
             mRandomizedMacAddress = source.mRandomizedMacAddress;
             macRandomizationSetting = source.macRandomizationSetting;
             requirePMF = source.requirePMF;
+            updateIdentifier = source.updateIdentifier;
         }
     }
 
