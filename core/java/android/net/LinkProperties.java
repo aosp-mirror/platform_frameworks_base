@@ -66,6 +66,7 @@ public final class LinkProperties implements Parcelable {
     private int mMtu;
     // in the format "rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max"
     private String mTcpBufferSizes;
+    private IpPrefix mNat64Prefix;
 
     private static final int MIN_MTU    = 68;
     private static final int MIN_MTU_V6 = 1280;
@@ -760,6 +761,32 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Returns the NAT64 prefix in use on this link, if any.
+     *
+     * @return the NAT64 prefix.
+     * @hide
+     */
+    public @Nullable IpPrefix getNat64Prefix() {
+        return mNat64Prefix;
+    }
+
+    /**
+     * Sets the NAT64 prefix in use on this link.
+     *
+     * Currently, only 96-bit prefixes (i.e., where the 32-bit IPv4 address is at the end of the
+     * 128-bit IPv6 address) are supported.
+     *
+     * @param prefix the NAT64 prefix.
+     * @hide
+     */
+    public void setNat64Prefix(IpPrefix prefix) {
+        if (prefix != null && prefix.getPrefixLength() != 96) {
+            throw new IllegalArgumentException("Only 96-bit prefixes are supported: " + prefix);
+        }
+        mNat64Prefix = prefix;  // IpPrefix objects are immutable.
+    }
+
+    /**
      * Adds a stacked link.
      *
      * If there is already a stacked link with the same interface name as link,
@@ -831,6 +858,7 @@ public final class LinkProperties implements Parcelable {
         mStackedLinks.clear();
         mMtu = 0;
         mTcpBufferSizes = null;
+        mNat64Prefix = null;
     }
 
     /**
@@ -906,6 +934,11 @@ public final class LinkProperties implements Parcelable {
         if (mHttpProxy != null) {
             resultJoiner.add("HttpProxy:");
             resultJoiner.add(mHttpProxy.toString());
+        }
+
+        if (mNat64Prefix != null) {
+            resultJoiner.add("Nat64Prefix:");
+            resultJoiner.add(mNat64Prefix.toString());
         }
 
         final Collection<LinkProperties> stackedLinksValues = mStackedLinks.values();
@@ -1295,6 +1328,17 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Compares this {@code LinkProperties} NAT64 prefix against the target.
+     *
+     * @param target LinkProperties to compare.
+     * @return {@code true} if both are identical, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isIdenticalNat64Prefix(LinkProperties target) {
+        return Objects.equals(mNat64Prefix, target.mNat64Prefix);
+    }
+
+    /**
      * Compares this {@code LinkProperties} instance against the target
      * LinkProperties in {@code obj}. Two LinkPropertieses are equal if
      * all their fields are equal in values.
@@ -1330,7 +1374,8 @@ public final class LinkProperties implements Parcelable {
                 && isIdenticalHttpProxy(target)
                 && isIdenticalStackedLinks(target)
                 && isIdenticalMtu(target)
-                && isIdenticalTcpBufferSizes(target);
+                && isIdenticalTcpBufferSizes(target)
+                && isIdenticalNat64Prefix(target);
     }
 
     /**
@@ -1443,7 +1488,8 @@ public final class LinkProperties implements Parcelable {
                 + ((null == mTcpBufferSizes) ? 0 : mTcpBufferSizes.hashCode())
                 + (mUsePrivateDns ? 57 : 0)
                 + mPcscfs.size() * 67
-                + ((null == mPrivateDnsServerName) ? 0 : mPrivateDnsServerName.hashCode());
+                + ((null == mPrivateDnsServerName) ? 0 : mPrivateDnsServerName.hashCode())
+                + Objects.hash(mNat64Prefix);
     }
 
     /**
@@ -1484,6 +1530,8 @@ public final class LinkProperties implements Parcelable {
         } else {
             dest.writeByte((byte)0);
         }
+        dest.writeParcelable(mNat64Prefix, 0);
+
         ArrayList<LinkProperties> stackedLinks = new ArrayList<>(mStackedLinks.values());
         dest.writeList(stackedLinks);
     }
@@ -1535,6 +1583,7 @@ public final class LinkProperties implements Parcelable {
                 if (in.readByte() == 1) {
                     netProp.setHttpProxy(in.readParcelable(null));
                 }
+                netProp.setNat64Prefix(in.readParcelable(null));
                 ArrayList<LinkProperties> stackedLinks = new ArrayList<LinkProperties>();
                 in.readList(stackedLinks, LinkProperties.class.getClassLoader());
                 for (LinkProperties stackedLink: stackedLinks) {
