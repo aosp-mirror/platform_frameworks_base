@@ -40,17 +40,13 @@ prebuilt_etc {
     sub_dir: "permissions",
     src: "privapp-permissions-platform.xml",
     required: [
-        "privapp_whitelist_com.android.carrierconfig",
-        "privapp_whitelist_com.android.contacts",
-        "privapp_whitelist_com.android.launcher3",
-        "privapp_whitelist_com.android.provision",
         "privapp_whitelist_com.android.settings.intelligence",
-        "privapp_whitelist_com.android.storagemanager",
     ],
 }
 
 prebuilt_etc {
     name: "privapp_whitelist_com.android.carrierconfig",
+    product_specific: true,
     sub_dir: "permissions",
     src: "com.android.carrierconfig.xml",
     filename_from_src: true,
@@ -58,6 +54,7 @@ prebuilt_etc {
 
 prebuilt_etc {
     name: "privapp_whitelist_com.android.contacts",
+    product_specific: true,
     sub_dir: "permissions",
     src: "com.android.contacts.xml",
     filename_from_src: true,
@@ -65,6 +62,7 @@ prebuilt_etc {
 
 prebuilt_etc {
     name: "privapp_whitelist_com.android.launcher3",
+    product_specific: true,
     sub_dir: "permissions",
     src: "com.android.launcher3.xml",
     filename_from_src: true,
@@ -72,6 +70,7 @@ prebuilt_etc {
 
 prebuilt_etc {
     name: "privapp_whitelist_com.android.provision",
+    product_specific: true,
     sub_dir: "permissions",
     src: "com.android.provision.xml",
     filename_from_src: true,
@@ -94,6 +93,7 @@ prebuilt_etc {
 
 prebuilt_etc {
     name: "privapp_whitelist_com.android.storagemanager",
+    product_specific: true,
     sub_dir: "permissions",
     src: "com.android.storagemanager.xml",
     filename_from_src: true,
