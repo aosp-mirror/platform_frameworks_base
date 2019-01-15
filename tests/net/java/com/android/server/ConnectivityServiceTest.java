@@ -3778,6 +3778,7 @@ public class ConnectivityServiceTest {
         // TODO: 1. Move this outside of ConnectivityServiceTest.
         //       2. Add helper function to test against newSingleThreadExecutor as well as inline
         //          executor.
+        //       3. Make test to verify that Nat-T keepalive socket is created by IpSecService.
         final int srcPort = 12345;
         final InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
         final InetAddress notMyIPv4 = InetAddress.getByName("192.0.2.35");

@@ -73,6 +73,7 @@ import android.net.INetworkStatsService;
 import android.net.LinkProperties;
 import android.net.LinkProperties.CompareResult;
 import android.net.MatchAllNetworkSpecifier;
+import android.net.NattSocketKeepalive;
 import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
@@ -6182,6 +6183,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 getNetworkAgentInfoForNetwork(network),
                 intervalSeconds, messenger, binder,
                 srcAddr, srcPort, dstAddr, ConnectivityManager.PacketKeepalive.NATT_PORT);
+    }
+
+    @Override
+    public void startNattKeepaliveWithFd(Network network, FileDescriptor fd, int resourceId,
+            int intervalSeconds, Messenger messenger, IBinder binder, String srcAddr,
+            String dstAddr) {
+        enforceKeepalivePermission();
+        mKeepaliveTracker.startNattKeepalive(
+                getNetworkAgentInfoForNetwork(network), fd, resourceId,
+                intervalSeconds, messenger, binder,
+                srcAddr, dstAddr, NattSocketKeepalive.NATT_PORT);
     }
 
     @Override

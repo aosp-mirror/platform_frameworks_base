@@ -17,11 +17,11 @@
 package android.net;
 
 import android.annotation.NonNull;
-import android.net.IpSecManager.UdpEncapsulationSocket;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.util.concurrent.Executor;
 
@@ -32,11 +32,13 @@ public final class NattSocketKeepalive extends SocketKeepalive {
 
     @NonNull private final InetAddress mSource;
     @NonNull private final InetAddress mDestination;
-    @NonNull private final UdpEncapsulationSocket mSocket;
+    @NonNull private final FileDescriptor mFd;
+    private final int mResourceId;
 
     NattSocketKeepalive(@NonNull IConnectivityManager service,
             @NonNull Network network,
-            @NonNull UdpEncapsulationSocket socket,
+            @NonNull FileDescriptor fd,
+            int resourceId,
             @NonNull InetAddress source,
             @NonNull InetAddress destination,
             @NonNull Executor executor,
@@ -44,15 +46,15 @@ public final class NattSocketKeepalive extends SocketKeepalive {
         super(service, network, executor, callback);
         mSource = source;
         mDestination = destination;
-        mSocket = socket;
+        mFd = fd;
+        mResourceId = resourceId;
     }
 
     @Override
     void startImpl(int intervalSec) {
         try {
-            // TODO: Create new interface in ConnectivityService and pass fd to it.
-            mService.startNattKeepalive(mNetwork, intervalSec, mMessenger, new Binder(),
-                    mSource.getHostAddress(), mSocket.getPort(), mDestination.getHostAddress());
+            mService.startNattKeepaliveWithFd(mNetwork, mFd, mResourceId, intervalSec, mMessenger,
+                    new Binder(), mSource.getHostAddress(), mDestination.getHostAddress());
         } catch (RemoteException e) {
             Log.e(TAG, "Error starting packet keepalive: ", e);
             stopLooper();
