@@ -749,7 +749,7 @@ class ActivityStarter {
         if (!abort) {
             abort |= shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage,
                     realCallingUid, callerApp, originatingPendingIntent,
-                    allowBackgroundActivityStart);
+                    allowBackgroundActivityStart, intent);
         }
 
         // Merge the two options bundles, while realCallerOptions takes precedence.
@@ -898,7 +898,8 @@ class ActivityStarter {
 
     private boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
             final String callingPackage, int realCallingUid, WindowProcessController callerApp,
-            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart,
+            Intent intent) {
         if (mService.isBackgroundActivityStartsEnabled()) {
             return false;
         }
@@ -911,19 +912,24 @@ class ActivityStarter {
             return false;
         }
         // don't abort if the callingUid is in the foreground or is a persistent system process
-        if (isUidForeground(callingUid) || isUidPersistentSystemProcess(callingUid)) {
+        final boolean isCallingUidForeground = isUidForeground(callingUid);
+        final boolean isCallingUidPersistentSystemProcess = isUidPersistentSystemProcess(
+                callingUid);
+        if (isCallingUidForeground || isCallingUidPersistentSystemProcess) {
             return false;
         }
         // take realCallingUid into consideration
+        final boolean isRealCallingUidForeground = isUidForeground(realCallingUid);
+        final boolean isRealCallingUidPersistentSystemProcess = isUidPersistentSystemProcess(
+                realCallingUid);
         if (realCallingUid != callingUid) {
             // don't abort if the realCallingUid is in the foreground and callingUid isn't
-            if (isUidForeground(realCallingUid)) {
+            if (isRealCallingUidForeground) {
                 return false;
             }
             // if the realCallingUid is a persistent system process, abort if the IntentSender
             // wasn't whitelisted to start an activity
-            if (isUidPersistentSystemProcess(realCallingUid) && (originatingPendingIntent != null)
-                    && allowBackgroundActivityStart) {
+            if (isRealCallingUidPersistentSystemProcess && allowBackgroundActivityStart) {
                 return false;
             }
         }
@@ -941,6 +947,18 @@ class ActivityStarter {
             return false;
         }
         // anything that has fallen through will currently be aborted
+        Slog.w(TAG, "Blocking background activity start [callingPackage: " + callingPackage
+                + "; callingUid: " + callingUid
+                + "; isCallingUidForeground: " + isCallingUidForeground
+                + "; isCallingUidPersistentSystemProcess: " + isCallingUidPersistentSystemProcess
+                + "; realCallingUid: " + realCallingUid
+                + "; isRealCallingUidForeground: " + isRealCallingUidForeground
+                + "; isRealCallingUidPersistentSystemProcess: "
+                        + isRealCallingUidPersistentSystemProcess
+                + "; originatingPendingIntent: " + originatingPendingIntent
+                + "; isBgStartWhitelisted: " + allowBackgroundActivityStart
+                + "; intent: " + intent
+                + "]");
         // TODO: remove this toast after feature development is done
         mService.mUiHandler.post(() -> {
             Toast.makeText(mService.mContext,
