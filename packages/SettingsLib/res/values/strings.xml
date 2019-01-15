@@ -99,6 +99,8 @@
     <string name="connected_via_network_scorer_default">Automatically connected via network rating provider</string>
     <!-- Status message of Wi-Fi when it is connected by Passpoint configuration. [CHAR LIMIT=NONE] -->
     <string name="connected_via_passpoint">Connected via %1$s</string>
+    <!-- Status message of Wi-Fi when it is connected by Passpoint configuration. [CHAR LIMIT=NONE] -->
+    <string name="ssid_by_passpoint_provider"><xliff:g id="ssid" example="Cafe Wifi">%1$s</xliff:g> by <xliff:g id="passpointProvider" example="Passpoint Provider">%2$s</xliff:g></string>
     <!-- Status message of Wi-Fi when network has matching passpoint credentials. [CHAR LIMIT=NONE] -->
     <string name="available_via_passpoint">Available via %1$s</string>
     <!-- Package name for Settings app-->
