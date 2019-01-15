@@ -131,8 +131,6 @@ import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
 import com.android.internal.policy.PhoneWindow;
 
-import dalvik.system.VMRuntime;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -842,12 +840,12 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage
     /*package*/ boolean mWindowAdded = false;
     /*package*/ boolean mVisibleFromServer = false;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     /*package*/ boolean mVisibleFromClient = true;
     /*package*/ ActionBar mActionBar = null;
     private boolean mEnableDefaultActionBarUp;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private VoiceInteractor mVoiceInteractor;
 
     @UnsupportedAppUsage
@@ -6377,6 +6375,10 @@ public class Activity extends ContextThemeWrapper
     }
 
     void dumpInner(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        if (args != null && args.length > 0 && args[0].equals("--autofill")) {
+            dumpAutofillManager(prefix, writer);
+            return;
+        }
         writer.print(prefix); writer.print("Local Activity ");
                 writer.print(Integer.toHexString(System.identityHashCode(this)));
                 writer.println(" State:");
@@ -6404,16 +6406,20 @@ public class Activity extends ContextThemeWrapper
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
 
+        dumpAutofillManager(prefix, writer);
+
+        ResourcesManager.getInstance().dump(prefix, writer);
+    }
+
+    void dumpAutofillManager(String prefix, PrintWriter writer) {
         final AutofillManager afm = getAutofillManager();
         if (afm != null) {
+            afm.dump(prefix, writer);
             writer.print(prefix); writer.print("Autofill Compat Mode: ");
             writer.println(isAutofillCompatibilityEnabled());
-            afm.dump(prefix, writer);
         } else {
             writer.print(prefix); writer.println("No AutofillManager");
         }
-
-        ResourcesManager.getInstance().dump(prefix, writer);
     }
 
     /**
@@ -7077,7 +7083,7 @@ public class Activity extends ContextThemeWrapper
 
     // ------------------ Internal API ------------------
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final void setParent(Activity parent) {
         mParent = parent;
     }
@@ -7229,31 +7235,6 @@ public class Activity extends ContextThemeWrapper
                           setPositiveButton(android.R.string.ok, null).
                           setCancelable(false).
                           show();
-                } else {
-                    Toast.makeText(this, appName + "\n" + warning, Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-
-        // This property is set for all non-user builds except final release
-        boolean isApiWarningEnabled = SystemProperties.getInt("ro.art.hiddenapi.warning", 0) == 1;
-
-        if (isAppDebuggable || isApiWarningEnabled) {
-            if (!mMainThread.mHiddenApiWarningShown && VMRuntime.getRuntime().hasUsedHiddenApi()) {
-                // Only show the warning once per process.
-                mMainThread.mHiddenApiWarningShown = true;
-
-                String appName = getApplicationInfo().loadLabel(getPackageManager())
-                        .toString();
-                String warning = "Detected problems with API compatibility\n"
-                                 + "(visit g.co/dev/appcompat for more info)";
-                if (isAppDebuggable) {
-                    new AlertDialog.Builder(this)
-                        .setTitle(appName)
-                        .setMessage(warning)
-                        .setPositiveButton(android.R.string.ok, null)
-                        .setCancelable(false)
-                        .show();
                 } else {
                     Toast.makeText(this, appName + "\n" + warning, Toast.LENGTH_LONG).show();
                 }

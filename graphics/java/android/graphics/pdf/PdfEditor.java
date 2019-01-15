@@ -27,7 +27,6 @@ import android.system.Os;
 import android.system.OsConstants;
 import dalvik.system.CloseGuard;
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 
 import java.io.IOException;
 

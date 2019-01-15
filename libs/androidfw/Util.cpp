@@ -16,6 +16,7 @@
 
 #include "androidfw/Util.h"
 
+#include <algorithm>
 #include <string>
 
 #include "utils/ByteOrder.h"
@@ -66,6 +67,29 @@ std::string Utf16ToUtf8(const StringPiece16& utf16) {
   utf16_to_utf8(utf16.data(), utf16.length(), &*utf8.begin(), utf8_length + 1);
   return utf8;
 }
+
+static std::vector<std::string> SplitAndTransform(
+    const StringPiece& str, char sep, const std::function<char(char)>& f) {
+  std::vector<std::string> parts;
+  const StringPiece::const_iterator end = std::end(str);
+  StringPiece::const_iterator start = std::begin(str);
+  StringPiece::const_iterator current;
+  do {
+    current = std::find(start, end, sep);
+    parts.emplace_back(str.substr(start, current).to_string());
+    if (f) {
+      std::string& part = parts.back();
+      std::transform(part.begin(), part.end(), part.begin(), f);
+    }
+    start = current + 1;
+  } while (current != end);
+  return parts;
+}
+
+std::vector<std::string> SplitAndLowercase(const StringPiece& str, char sep) {
+  return SplitAndTransform(str, sep, ::tolower);
+}
+
 
 } // namespace util
 } // namespace android

@@ -1,5 +1,6 @@
 package android.net.dhcp;
 
+import android.annotation.Nullable;
 import android.net.DhcpResults;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
@@ -8,6 +9,7 @@ import android.os.Build;
 import android.os.SystemProperties;
 import android.system.OsConstants;
 import android.text.TextUtils;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.UnsupportedEncodingException;
@@ -31,6 +33,9 @@ import java.util.List;
  */
 public abstract class DhcpPacket {
     protected static final String TAG = "DhcpPacket";
+
+    // TODO: use NetworkStackConstants.IPV4_MIN_MTU once this class is moved to the network stack.
+    private static final int IPV4_MIN_MTU = 68;
 
     // dhcpcd has a minimum lease of 20 seconds, but DhcpStateMachine would refuse to wake up the
     // CPU for anything shorter than 5 minutes. For sanity's sake, this must be higher than the
@@ -182,6 +187,11 @@ public abstract class DhcpPacket {
     protected String mVendorInfo;
 
     /**
+     * Value of the vendor specific option used to indicate that the network is metered
+     */
+    public static final String VENDOR_INFO_ANDROID_METERED = "ANDROID_METERED";
+
+    /**
      * DHCP Optional Type: DHCP Requested IP Address
      */
     protected static final byte DHCP_REQUESTED_IP = 50;
@@ -204,6 +214,7 @@ public abstract class DhcpPacket {
     protected static final byte DHCP_MESSAGE_TYPE_DECLINE = 4;
     protected static final byte DHCP_MESSAGE_TYPE_ACK = 5;
     protected static final byte DHCP_MESSAGE_TYPE_NAK = 6;
+    protected static final byte DHCP_MESSAGE_TYPE_RELEASE = 7;
     protected static final byte DHCP_MESSAGE_TYPE_INFORM = 8;
 
     /**
@@ -252,6 +263,7 @@ public abstract class DhcpPacket {
      * DHCP Optional Type: DHCP Client Identifier
      */
     protected static final byte DHCP_CLIENT_IDENTIFIER = 61;
+    protected byte[] mClientId;
 
     /**
      * DHCP zero-length option code: pad
@@ -281,7 +293,7 @@ public abstract class DhcpPacket {
     protected final Inet4Address mClientIp;
     protected final Inet4Address mYourIp;
     private final Inet4Address mNextIp;
-    private final Inet4Address mRelayIp;
+    protected final Inet4Address mRelayIp;
 
     /**
      * Does the client request a broadcast response?
@@ -338,14 +350,57 @@ public abstract class DhcpPacket {
         return mClientMac;
     }
 
+    // TODO: refactor DhcpClient to set clientId when constructing packets and remove
+    // hasExplicitClientId logic
     /**
-     * Returns the client ID. This follows RFC 2132 and is based on the hardware address.
+     * Returns whether a client ID was set in the options for this packet.
+     */
+    public boolean hasExplicitClientId() {
+        return mClientId != null;
+    }
+
+    /**
+     * Convenience method to return the client ID if it was set explicitly, or null otherwise.
+     */
+    @Nullable
+    public byte[] getExplicitClientIdOrNull() {
+        return hasExplicitClientId() ? getClientId() : null;
+    }
+
+    /**
+     * Returns the client ID. If not set explicitly, this follows RFC 2132 and creates a client ID
+     * based on the hardware address.
      */
     public byte[] getClientId() {
-        byte[] clientId = new byte[mClientMac.length + 1];
-        clientId[0] = CLIENT_ID_ETHER;
-        System.arraycopy(mClientMac, 0, clientId, 1, mClientMac.length);
+        final byte[] clientId;
+        if (hasExplicitClientId()) {
+            clientId = Arrays.copyOf(mClientId, mClientId.length);
+        } else {
+            clientId = new byte[mClientMac.length + 1];
+            clientId[0] = CLIENT_ID_ETHER;
+            System.arraycopy(mClientMac, 0, clientId, 1, mClientMac.length);
+        }
         return clientId;
+    }
+
+    /**
+     * Returns whether a parameter is included in the parameter request list option of this packet.
+     *
+     * <p>If there is no parameter request list option in the packet, false is returned.
+     *
+     * @param paramId ID of the parameter, such as {@link #DHCP_MTU} or {@link #DHCP_HOST_NAME}.
+     */
+    public boolean hasRequestedParam(byte paramId) {
+        if (mRequestedParams == null) {
+            return false;
+        }
+
+        for (byte reqParam : mRequestedParams) {
+            if (reqParam == paramId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -531,8 +586,10 @@ public abstract class DhcpPacket {
 
     /**
      * Adds an optional parameter containing an array of bytes.
+     *
+     * <p>This method is a no-op if the payload argument is null.
      */
-    protected static void addTlv(ByteBuffer buf, byte type, byte[] payload) {
+    protected static void addTlv(ByteBuffer buf, byte type, @Nullable byte[] payload) {
         if (payload != null) {
             if (payload.length > MAX_OPTION_LEN) {
                 throw new IllegalArgumentException("DHCP option too long: "
@@ -546,8 +603,10 @@ public abstract class DhcpPacket {
 
     /**
      * Adds an optional parameter containing an IP address.
+     *
+     * <p>This method is a no-op if the address argument is null.
      */
-    protected static void addTlv(ByteBuffer buf, byte type, Inet4Address addr) {
+    protected static void addTlv(ByteBuffer buf, byte type, @Nullable Inet4Address addr) {
         if (addr != null) {
             addTlv(buf, type, addr.getAddress());
         }
@@ -555,8 +614,10 @@ public abstract class DhcpPacket {
 
     /**
      * Adds an optional parameter containing a list of IP addresses.
+     *
+     * <p>This method is a no-op if the addresses argument is null or empty.
      */
-    protected static void addTlv(ByteBuffer buf, byte type, List<Inet4Address> addrs) {
+    protected static void addTlv(ByteBuffer buf, byte type, @Nullable List<Inet4Address> addrs) {
         if (addrs == null || addrs.size() == 0) return;
 
         int optionLen = 4 * addrs.size();
@@ -574,9 +635,11 @@ public abstract class DhcpPacket {
     }
 
     /**
-     * Adds an optional parameter containing a short integer
+     * Adds an optional parameter containing a short integer.
+     *
+     * <p>This method is a no-op if the value argument is null.
      */
-    protected static void addTlv(ByteBuffer buf, byte type, Short value) {
+    protected static void addTlv(ByteBuffer buf, byte type, @Nullable Short value) {
         if (value != null) {
             buf.put(type);
             buf.put((byte) 2);
@@ -585,9 +648,11 @@ public abstract class DhcpPacket {
     }
 
     /**
-     * Adds an optional parameter containing a simple integer
+     * Adds an optional parameter containing a simple integer.
+     *
+     * <p>This method is a no-op if the value argument is null.
      */
-    protected static void addTlv(ByteBuffer buf, byte type, Integer value) {
+    protected static void addTlv(ByteBuffer buf, byte type, @Nullable Integer value) {
         if (value != null) {
             buf.put(type);
             buf.put((byte) 4);
@@ -597,12 +662,16 @@ public abstract class DhcpPacket {
 
     /**
      * Adds an optional parameter containing an ASCII string.
+     *
+     * <p>This method is a no-op if the string argument is null.
      */
-    protected static void addTlv(ByteBuffer buf, byte type, String str) {
-        try {
-            addTlv(buf, type, str.getBytes("US-ASCII"));
-        } catch (UnsupportedEncodingException e) {
-           throw new IllegalArgumentException("String is not US-ASCII: " + str);
+    protected static void addTlv(ByteBuffer buf, byte type, @Nullable String str) {
+        if (str != null) {
+            try {
+                addTlv(buf, type, str.getBytes("US-ASCII"));
+            } catch (UnsupportedEncodingException e) {
+                throw new IllegalArgumentException("String is not US-ASCII: " + str);
+            }
         }
     }
 
@@ -634,6 +703,27 @@ public abstract class DhcpPacket {
         addTlv(buf, DHCP_VENDOR_CLASS_ID, getVendorId());
         final String hn = getHostname();
         if (!TextUtils.isEmpty(hn)) addTlv(buf, DHCP_HOST_NAME, hn);
+    }
+
+    protected void addCommonServerTlvs(ByteBuffer buf) {
+        addTlv(buf, DHCP_LEASE_TIME, mLeaseTime);
+        if (mLeaseTime != null && mLeaseTime != INFINITE_LEASE) {
+            // The client should renew at 1/2 the lease-expiry interval
+            addTlv(buf, DHCP_RENEWAL_TIME, (int) (Integer.toUnsignedLong(mLeaseTime) / 2));
+            // Default rebinding time is set as below by RFC2131
+            addTlv(buf, DHCP_REBINDING_TIME,
+                    (int) (Integer.toUnsignedLong(mLeaseTime) * 875L / 1000L));
+        }
+        addTlv(buf, DHCP_SUBNET_MASK, mSubnetMask);
+        addTlv(buf, DHCP_BROADCAST_ADDRESS, mBroadcastAddress);
+        addTlv(buf, DHCP_ROUTER, mGateways);
+        addTlv(buf, DHCP_DNS_SERVER, mDnsServers);
+        addTlv(buf, DHCP_DOMAIN_NAME, mDomainName);
+        addTlv(buf, DHCP_HOST_NAME, mHostName);
+        addTlv(buf, DHCP_VENDOR_INFO, mVendorInfo);
+        if (mMtu != null && Short.toUnsignedInt(mMtu) >= IPV4_MIN_MTU) {
+            addTlv(buf, DHCP_MTU, mMtu);
+        }
     }
 
     /**
@@ -740,6 +830,7 @@ public abstract class DhcpPacket {
         Inet4Address nextIp;
         Inet4Address relayIp;
         byte[] clientMac;
+        byte[] clientId = null;
         List<Inet4Address> dnsServers = new ArrayList<>();
         List<Inet4Address> gateways = new ArrayList<>();  // aka router
         Inet4Address serverIdentifier = null;
@@ -1038,16 +1129,16 @@ public abstract class DhcpPacket {
                 throw new ParseException(DhcpErrorEvent.DHCP_NO_MSG_TYPE,
                         "No DHCP message type option");
             case DHCP_MESSAGE_TYPE_DISCOVER:
-                newPacket = new DhcpDiscoverPacket(
-                    transactionId, secs, clientMac, broadcast);
+                newPacket = new DhcpDiscoverPacket(transactionId, secs, relayIp, clientMac,
+                        broadcast, ipSrc);
                 break;
             case DHCP_MESSAGE_TYPE_OFFER:
                 newPacket = new DhcpOfferPacket(
-                    transactionId, secs, broadcast, ipSrc, clientIp, yourIp, clientMac);
+                    transactionId, secs, broadcast, ipSrc, relayIp, clientIp, yourIp, clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_REQUEST:
                 newPacket = new DhcpRequestPacket(
-                    transactionId, secs, clientIp, clientMac, broadcast);
+                    transactionId, secs, clientIp, relayIp, clientMac, broadcast);
                 break;
             case DHCP_MESSAGE_TYPE_DECLINE:
                 newPacket = new DhcpDeclinePacket(
@@ -1056,12 +1147,19 @@ public abstract class DhcpPacket {
                 break;
             case DHCP_MESSAGE_TYPE_ACK:
                 newPacket = new DhcpAckPacket(
-                    transactionId, secs, broadcast, ipSrc, clientIp, yourIp, clientMac);
+                    transactionId, secs, broadcast, ipSrc, relayIp, clientIp, yourIp, clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_NAK:
                 newPacket = new DhcpNakPacket(
-                    transactionId, secs, clientIp, yourIp, nextIp, relayIp,
-                    clientMac);
+                        transactionId, secs, relayIp, clientMac, broadcast);
+                break;
+            case DHCP_MESSAGE_TYPE_RELEASE:
+                if (serverIdentifier == null) {
+                    throw new ParseException(DhcpErrorEvent.MISC_ERROR,
+                            "DHCPRELEASE without server identifier");
+                }
+                newPacket = new DhcpReleasePacket(
+                        transactionId, serverIdentifier, clientIp, relayIp, clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_INFORM:
                 newPacket = new DhcpInformPacket(
@@ -1074,6 +1172,7 @@ public abstract class DhcpPacket {
         }
 
         newPacket.mBroadcastAddress = bcAddr;
+        newPacket.mClientId = clientId;
         newPacket.mDnsServers = dnsServers;
         newPacket.mDomainName = domainName;
         newPacket.mGateways = gateways;
@@ -1173,8 +1272,8 @@ public abstract class DhcpPacket {
      */
     public static ByteBuffer buildDiscoverPacket(int encap, int transactionId,
         short secs, byte[] clientMac, boolean broadcast, byte[] expectedParams) {
-        DhcpPacket pkt = new DhcpDiscoverPacket(
-            transactionId, secs, clientMac, broadcast);
+        DhcpPacket pkt = new DhcpDiscoverPacket(transactionId, secs, INADDR_ANY /* relayIp */,
+                clientMac, broadcast, INADDR_ANY /* srcIp */);
         pkt.mRequestedParams = expectedParams;
         return pkt.buildPacket(encap, DHCP_SERVER, DHCP_CLIENT);
     }
@@ -1184,19 +1283,26 @@ public abstract class DhcpPacket {
      * parameters.
      */
     public static ByteBuffer buildOfferPacket(int encap, int transactionId,
-        boolean broadcast, Inet4Address serverIpAddr, Inet4Address clientIpAddr,
-        byte[] mac, Integer timeout, Inet4Address netMask, Inet4Address bcAddr,
-        List<Inet4Address> gateways, List<Inet4Address> dnsServers,
-        Inet4Address dhcpServerIdentifier, String domainName) {
+        boolean broadcast, Inet4Address serverIpAddr, Inet4Address relayIp,
+        Inet4Address yourIp, byte[] mac, Integer timeout, Inet4Address netMask,
+        Inet4Address bcAddr, List<Inet4Address> gateways, List<Inet4Address> dnsServers,
+        Inet4Address dhcpServerIdentifier, String domainName, String hostname, boolean metered,
+        short mtu) {
         DhcpPacket pkt = new DhcpOfferPacket(
-            transactionId, (short) 0, broadcast, serverIpAddr, INADDR_ANY, clientIpAddr, mac);
+                transactionId, (short) 0, broadcast, serverIpAddr, relayIp,
+                INADDR_ANY /* clientIp */, yourIp, mac);
         pkt.mGateways = gateways;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
         pkt.mDomainName = domainName;
+        pkt.mHostName = hostname;
         pkt.mServerIdentifier = dhcpServerIdentifier;
         pkt.mSubnetMask = netMask;
         pkt.mBroadcastAddress = bcAddr;
+        pkt.mMtu = mtu;
+        if (metered) {
+            pkt.mVendorInfo = VENDOR_INFO_ANDROID_METERED;
+        }
         return pkt.buildPacket(encap, DHCP_CLIENT, DHCP_SERVER);
     }
 
@@ -1204,31 +1310,38 @@ public abstract class DhcpPacket {
      * Builds a DHCP-ACK packet from the required specified parameters.
      */
     public static ByteBuffer buildAckPacket(int encap, int transactionId,
-        boolean broadcast, Inet4Address serverIpAddr, Inet4Address clientIpAddr,
-        byte[] mac, Integer timeout, Inet4Address netMask, Inet4Address bcAddr,
-        List<Inet4Address> gateways, List<Inet4Address> dnsServers,
-        Inet4Address dhcpServerIdentifier, String domainName) {
+        boolean broadcast, Inet4Address serverIpAddr, Inet4Address relayIp, Inet4Address yourIp,
+        Inet4Address requestClientIp, byte[] mac, Integer timeout, Inet4Address netMask,
+        Inet4Address bcAddr, List<Inet4Address> gateways, List<Inet4Address> dnsServers,
+        Inet4Address dhcpServerIdentifier, String domainName, String hostname, boolean metered,
+        short mtu) {
         DhcpPacket pkt = new DhcpAckPacket(
-            transactionId, (short) 0, broadcast, serverIpAddr, INADDR_ANY, clientIpAddr, mac);
+                transactionId, (short) 0, broadcast, serverIpAddr, relayIp, requestClientIp, yourIp,
+                mac);
         pkt.mGateways = gateways;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
         pkt.mDomainName = domainName;
+        pkt.mHostName = hostname;
         pkt.mSubnetMask = netMask;
         pkt.mServerIdentifier = dhcpServerIdentifier;
         pkt.mBroadcastAddress = bcAddr;
+        pkt.mMtu = mtu;
+        if (metered) {
+            pkt.mVendorInfo = VENDOR_INFO_ANDROID_METERED;
+        }
         return pkt.buildPacket(encap, DHCP_CLIENT, DHCP_SERVER);
     }
 
     /**
      * Builds a DHCP-NAK packet from the required specified parameters.
      */
-    public static ByteBuffer buildNakPacket(int encap, int transactionId,
-        Inet4Address serverIpAddr, Inet4Address clientIpAddr, byte[] mac) {
-        DhcpPacket pkt = new DhcpNakPacket(transactionId, (short) 0, clientIpAddr,
-            serverIpAddr, serverIpAddr, serverIpAddr, mac);
-        pkt.mMessage = "requested address not available";
-        pkt.mRequestedIp = clientIpAddr;
+    public static ByteBuffer buildNakPacket(int encap, int transactionId, Inet4Address serverIpAddr,
+            Inet4Address relayIp, byte[] mac, boolean broadcast, String message) {
+        DhcpPacket pkt = new DhcpNakPacket(
+                transactionId, (short) 0, relayIp, mac, broadcast);
+        pkt.mMessage = message;
+        pkt.mServerIdentifier = serverIpAddr;
         return pkt.buildPacket(encap, DHCP_CLIENT, DHCP_SERVER);
     }
 
@@ -1240,7 +1353,7 @@ public abstract class DhcpPacket {
         byte[] clientMac, Inet4Address requestedIpAddress,
         Inet4Address serverIdentifier, byte[] requestedParams, String hostName) {
         DhcpPacket pkt = new DhcpRequestPacket(transactionId, secs, clientIp,
-            clientMac, broadcast);
+                INADDR_ANY /* relayIp */, clientMac, broadcast);
         pkt.mRequestedIp = requestedIpAddress;
         pkt.mServerIdentifier = serverIdentifier;
         pkt.mHostName = hostName;

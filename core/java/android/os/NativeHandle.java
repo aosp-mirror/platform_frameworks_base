@@ -16,8 +16,11 @@
 
 package android.os;
 
+import static android.system.OsConstants.F_DUPFD_CLOEXEC;
+
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.system.ErrnoException;
 import android.system.Os;
 
@@ -30,6 +33,7 @@ import java.io.FileDescriptor;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class NativeHandle implements Closeable {
     // whether this object owns mFds
     private boolean mOwn = false;
@@ -108,7 +112,10 @@ public final class NativeHandle implements Closeable {
         FileDescriptor[] fds = new FileDescriptor[mFds.length];
         try {
             for (int i = 0; i < mFds.length; i++) {
-                fds[i] = Os.dup(mFds[i]);
+                FileDescriptor newFd = new FileDescriptor();
+                int fdint = Os.fcntlInt(mFds[i], F_DUPFD_CLOEXEC, 0);
+                newFd.setInt$(fdint);
+                fds[i] = newFd;
             }
         } catch (ErrnoException e) {
             e.rethrowAsIOException();

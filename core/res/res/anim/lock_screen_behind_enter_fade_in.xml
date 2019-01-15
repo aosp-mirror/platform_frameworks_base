@@ -16,7 +16,6 @@
   -->
 
 <alpha xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#ff000000"
     android:detachWallpaper="true"
     android:shareInterpolator="false"
     android:interpolator="@interpolator/linear"

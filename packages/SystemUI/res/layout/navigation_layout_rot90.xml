@@ -18,14 +18,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_marginTop="@dimen/rounded_corner_content_padding"
+    android:layout_marginBottom="@dimen/rounded_corner_content_padding"
+    android:paddingTop="@dimen/nav_content_padding"
+    android:paddingBottom="@dimen/nav_content_padding">
 
     <com.android.systemui.statusbar.phone.NearestTouchFrame
         android:id="@+id/nav_buttons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="@dimen/rounded_corner_content_padding"
-        android:paddingBottom="@dimen/rounded_corner_content_padding"
         android:clipChildren="false"
         android:clipToPadding="false">
 
@@ -34,10 +36,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingTop="@dimen/nav_content_padding"
-            android:paddingBottom="@dimen/nav_content_padding"
-            android:clipChildren="false"
-            android:clipToPadding="false" />
+            android:clipToPadding="false"
+            android:clipChildren="false" />
 
         <com.android.systemui.statusbar.phone.ReverseLinearLayout
             android:id="@+id/center_group"
@@ -45,10 +45,8 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:orientation="vertical"
-            android:paddingTop="@dimen/nav_content_padding"
-            android:paddingBottom="@dimen/nav_content_padding"
-            android:clipChildren="false"
-            android:clipToPadding="false" />
+            android:clipToPadding="false"
+            android:clipChildren="false" />
 
     </com.android.systemui.statusbar.phone.NearestTouchFrame>
 

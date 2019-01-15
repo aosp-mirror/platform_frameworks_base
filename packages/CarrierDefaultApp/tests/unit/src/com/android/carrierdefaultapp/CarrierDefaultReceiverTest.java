@@ -104,6 +104,6 @@ public class CarrierDefaultReceiverTest extends InstrumentationTestCase {
         assertNotNull(pendingIntent);
 
         Rlog.d(TAG, "verify carrier action: disable all metered apns");
-        verify(mTelephonyMgr).carrierActionSetMeteredApnsEnabled(eq(subId), eq(false));
+        verify(mTelephonyMgr).setCarrierDataEnabled(eq(false));
     }
 }

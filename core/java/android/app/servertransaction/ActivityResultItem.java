@@ -18,6 +18,7 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
 import android.os.IBinder;
@@ -34,6 +35,7 @@ import java.util.Objects;
  */
 public class ActivityResultItem extends ClientTransactionItem {
 
+    @UnsupportedAppUsage
     private List<ResultInfo> mResultInfoList;
 
     /* TODO(b/78294732)

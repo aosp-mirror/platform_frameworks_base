@@ -34,9 +34,18 @@ import java.util.function.Predicate;
 /**
  * Helper functions for dumping the state of system services.
  * Test:
- atest /android/pi-dev/frameworks/base/core/tests/coretests/src/com/android/internal/util/DumpUtilsTest.java
+ atest FrameworksCoreTests:DumpUtilsTest
  */
 public final class DumpUtils {
+
+    /**
+     * List of component names that should be dumped in the bug report critical section.
+     *
+     * @hide
+     */
+    public static final ComponentName[] CRITICAL_SECTION_COMPONENTS = {
+            new ComponentName("com.android.systemui", "com.android.systemui.SystemUIService")
+    };
     private static final String TAG = "DumpUtils";
     private static final boolean DEBUG = false;
 
@@ -213,6 +222,45 @@ public final class DumpUtils {
     }
 
     /**
+     * Return whether a package should be dumped in the critical section.
+     */
+    private static boolean isCriticalPackage(@Nullable ComponentName cname) {
+        if (cname == null) {
+            return false;
+        }
+
+        for (int i = 0; i < CRITICAL_SECTION_COMPONENTS.length; i++) {
+            if (cname.equals(CRITICAL_SECTION_COMPONENTS[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return whether a package name is considered to be part of the platform and in the critical
+     * section.
+     *
+     * @hide
+     */
+    public static boolean isPlatformCriticalPackage(@Nullable ComponentName.WithComponentName wcn) {
+        return (wcn != null) && isPlatformPackage(wcn.getComponentName()) &&
+                isCriticalPackage(wcn.getComponentName());
+    }
+
+    /**
+     * Return whether a package name is considered to be part of the platform but not in the the
+     * critical section.
+     *
+     * @hide
+     */
+    public static boolean isPlatformNonCriticalPackage(
+            @Nullable ComponentName.WithComponentName wcn) {
+        return (wcn != null) && isPlatformPackage(wcn.getComponentName()) &&
+                !isCriticalPackage(wcn.getComponentName());
+    }
+
+    /**
      * Used for dumping providers and services. Return a predicate for a given filter string.
      * @hide
      */
@@ -236,6 +284,16 @@ public final class DumpUtils {
         // Dump all non-platform?
         if ("all-non-platform".equals(filterString)) {
             return DumpUtils::isNonPlatformPackage;
+        }
+
+        // Dump all platform-critical?
+        if ("all-platform-critical".equals(filterString)) {
+            return DumpUtils::isPlatformCriticalPackage;
+        }
+
+        // Dump all platform-non-critical?
+        if ("all-platform-non-critical".equals(filterString)) {
+            return DumpUtils::isPlatformNonCriticalPackage;
         }
 
         // Is the filter a component name? If so, do an exact match.

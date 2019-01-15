@@ -19,7 +19,7 @@ package com.android.settingslib.widget;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
-import android.support.v7.preference.PreferenceViewHolder;
+import androidx.preference.PreferenceViewHolder;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.widget.TextView;

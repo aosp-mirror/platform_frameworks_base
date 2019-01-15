@@ -140,5 +140,21 @@ public class MbmsErrors {
         public static final int ERROR_UNKNOWN_FILE_INFO = 403;
     }
 
+    /**
+     * Indicates the errors that are applicable only to the group call use-case.
+     */
+    public static class GroupCallErrors {
+        private GroupCallErrors() { }
+        /** Indicates that the middleware was unable to start the group call. */
+        public static final int ERROR_UNABLE_TO_START_SERVICE = 501;
+
+        /**
+         * Indicates that the app called
+         * {@link android.telephony.MbmsGroupCallSession#startGroupCall} more than once for the
+         * same {@code tmgi}.
+         */
+        public static final int ERROR_DUPLICATE_START_GROUP_CALL = 502;
+    }
+
     private MbmsErrors() {}
 }

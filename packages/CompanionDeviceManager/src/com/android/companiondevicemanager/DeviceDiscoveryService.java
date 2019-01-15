@@ -184,7 +184,6 @@ public class DeviceDiscoveryService extends Service {
         if (shouldScan(mBluetoothFilters)) {
             final IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-            intentFilter.addAction(BluetoothDevice.ACTION_DISAPPEARED);
 
             mBluetoothBroadcastReceiver = new BluetoothBroadcastReceiver();
             registerReceiver(mBluetoothBroadcastReceiver, intentFilter);

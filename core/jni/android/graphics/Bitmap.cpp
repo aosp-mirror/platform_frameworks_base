@@ -48,7 +48,7 @@ namespace android {
 
 class BitmapWrapper {
 public:
-    BitmapWrapper(Bitmap* bitmap)
+    explicit BitmapWrapper(Bitmap* bitmap)
         : mBitmap(bitmap) { }
 
     void freePixels() {
@@ -1095,7 +1095,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 #endif
         // Dup the file descriptor so we can keep a reference to it after the Parcel
         // is disposed.
-        int dupFd = dup(blob.fd());
+        int dupFd = fcntl(blob.fd(), F_DUPFD_CLOEXEC, 0);
         if (dupFd < 0) {
             ALOGE("Error allocating dup fd. Error:%d", errno);
             blob.release();

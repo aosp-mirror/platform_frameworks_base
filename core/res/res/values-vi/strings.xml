@@ -128,13 +128,17 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Sự cố khi đăng ký dịch vụ gọi qua Wi‑Fi với nhà mạng của bạn: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Gọi điện qua Wi-Fi %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Gọi qua Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Cuộc gọi qua WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Cuộc gọi qua WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Gọi qua Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Tắt"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Ưu tiên Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Được ưu tiên trên thiết bị di động"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Ưu tiên dữ liệu di động"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Chỉ Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Không được chuyển tiếp"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi không có quyền truy cập Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Nhấn để biết tùy chọn"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Những thay đổi trong mục cài đặt điểm phát sóng của bạn"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Bằng tần của điểm phát sóng đã thay đổi."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Thiết bị này không hỗ trợ tùy chọn chỉ sử dụng băng tần 5 GHz. Thay vào đó, thiết bị này sẽ sử dụng băng tần 5 GHz khi có thể."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Đã chuyển sang <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Thiết bị sử dụng <xliff:g id="NEW_NETWORK">%1$s</xliff:g> khi <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> không có quyền truy cập Internet. Bạn có thể phải trả phí."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Đã chuyển từ <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> sang <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

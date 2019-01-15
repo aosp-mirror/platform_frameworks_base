@@ -246,7 +246,7 @@
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Sélectionner les mémoires tampon journal à stocker en permanence sur l\'appareil"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Sélectionner une configuration USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Sélectionner une configuration USB"</string>
-    <string name="allow_mock_location" msgid="2787962564578664888">"Positions fictives"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"Autoriser les positions fictives"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Autoriser les positions fictives"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Activer inspect. attribut affich."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Maintenir les données mobiles à l\'état actif, même lorsque le Wi‑Fi est actif (pour changer rapidement de réseau)"</string>

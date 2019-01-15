@@ -19,6 +19,8 @@
 #include "ValueVisitor.h"
 #include "util/BigBuffer.h"
 
+using android::ConfigDescription;
+
 namespace aapt {
 
 void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool, IDiagnostics* diag) {

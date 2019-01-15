@@ -20,9 +20,9 @@ import com.android.i18n.phonenumbers.NumberParseException;
 import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
-import com.android.i18n.phonenumbers.ShortNumberInfo;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -279,6 +279,7 @@ public class PhoneNumberUtils {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static String extractNetworkPortionAlt(String phoneNumber) {
         if (phoneNumber == null) {
             return null;
@@ -352,6 +353,7 @@ public class PhoneNumberUtils {
      * RFC 3601 says pause is 'p' and tonewait is 'w'.
      * @hide
      */
+    @UnsupportedAppUsage
     public static String convertPreDial(String phoneNumber) {
         if (phoneNumber == null) {
             return null;
@@ -464,6 +466,7 @@ public class PhoneNumberUtils {
     /**
      * @hide only for testing.
      */
+    @UnsupportedAppUsage
     public static boolean compare(String a, String b, boolean useStrictComparation) {
         return (useStrictComparation ? compareStrictly(a, b) : compareLoosely(a, b));
     }
@@ -482,6 +485,7 @@ public class PhoneNumberUtils {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean
     compareLoosely(String a, String b) {
         int ia, ib;
@@ -579,6 +583,7 @@ public class PhoneNumberUtils {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean
     compareStrictly(String a, String b) {
         return compareStrictly(a, b, true);
@@ -587,6 +592,7 @@ public class PhoneNumberUtils {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean
     compareStrictly(String a, String b, boolean acceptInvalidCCCPrefix) {
         if (a == null || b == null) {
@@ -1260,6 +1266,7 @@ public class PhoneNumberUtils {
      * @deprecated Use link #formatNumber(String phoneNumber, String defaultCountryIso) instead
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static String formatNumber(String source, int defaultFormattingType) {
         SpannableStringBuilder text = new SpannableStringBuilder(source);
         formatNumber(text, defaultFormattingType);
@@ -1720,6 +1727,7 @@ public class PhoneNumberUtils {
     //
     // However, in order to loose match 650-555-1212 and 555-1212, we need to set the min match
     // to 7.
+    @UnsupportedAppUsage
     static final int MIN_MATCH = 7;
 
     /**
@@ -1729,7 +1737,10 @@ public class PhoneNumberUtils {
      * @param number the number to look up.
      * @return true if the number is in the list of emergency numbers
      *         listed in the RIL / SIM, otherwise return false.
+     *
+     * @deprecated Please use {@link TelephonyManager#isCurrentEmergencyNumber(String)} instead.
      */
+    @Deprecated
     public static boolean isEmergencyNumber(String number) {
         return isEmergencyNumber(getDefaultVoiceSubId(), number);
     }
@@ -1742,8 +1753,14 @@ public class PhoneNumberUtils {
      * @param number the number to look up.
      * @return true if the number is in the list of emergency numbers
      *         listed in the RIL / SIM, otherwise return false.
+     *
+     * @deprecated Please use {@link TelephonyManager#isCurrentEmergencyNumber(String)}
+     *             instead.
+     *
      * @hide
      */
+    @Deprecated
+    @UnsupportedAppUsage
     public static boolean isEmergencyNumber(int subId, String number) {
         // Return true only if the specified number *exactly* matches
         // one of the emergency numbers listed by the RIL / SIM.
@@ -1768,8 +1785,12 @@ public class PhoneNumberUtils {
      *         listed in the RIL / SIM, *or* if the number starts with the
      *         same digits as any of those emergency numbers.
      *
+     * @deprecated Please use {@link TelephonyManager#isCurrentPotentialEmergencyNumber(String)}
+     *             instead.
+     *
      * @hide
      */
+    @Deprecated
     public static boolean isPotentialEmergencyNumber(String number) {
         return isPotentialEmergencyNumber(getDefaultVoiceSubId(), number);
     }
@@ -1792,8 +1813,14 @@ public class PhoneNumberUtils {
      * @return true if the number is in the list of emergency numbers
      *         listed in the RIL / SIM, *or* if the number starts with the
      *         same digits as any of those emergency numbers.
+     *
+     * @deprecated Please use {@link TelephonyManager#isCurrentPotentialEmergencyNumber(String)}
+     *             instead.
+     *
      * @hide
      */
+    @UnsupportedAppUsage
+    @Deprecated
     public static boolean isPotentialEmergencyNumber(int subId, String number) {
         // Check against the emergency numbers listed by the RIL / SIM,
         // and *don't* require an exact match.
@@ -1856,8 +1883,13 @@ public class PhoneNumberUtils {
      * @return if the number is an emergency number for the specific country, then return true,
      * otherwise false
      *
+     * @deprecated Please use {@link TelephonyManager#isCurrentEmergencyNumber(String)}
+     *             instead.
+     *
      * @hide
      */
+    @Deprecated
+    @UnsupportedAppUsage
     public static boolean isEmergencyNumber(String number, String defaultCountryIso) {
             return isEmergencyNumber(getDefaultVoiceSubId(), number, defaultCountryIso);
     }
@@ -1870,8 +1902,13 @@ public class PhoneNumberUtils {
      * @param defaultCountryIso the specific country which the number should be checked against
      * @return if the number is an emergency number for the specific country, then return true,
      * otherwise false
+     *
+     * @deprecated Please use {@link TelephonyManager#isCurrentEmergencyNumber(String)}
+     *             instead.
+     *
      * @hide
      */
+    @Deprecated
     public static boolean isEmergencyNumber(int subId, String number, String defaultCountryIso) {
         return isEmergencyNumberInternal(subId, number,
                                          defaultCountryIso,
@@ -1897,8 +1934,12 @@ public class PhoneNumberUtils {
      *         country, *or* if the number starts with the same digits as
      *         any of those emergency numbers.
      *
+     * @deprecated Please use {@link TelephonyManager#isCurrentPotentialEmergencyNumber(String)}
+     *             instead.
+     *
      * @hide
      */
+    @Deprecated
     public static boolean isPotentialEmergencyNumber(String number, String defaultCountryIso) {
         return isPotentialEmergencyNumber(getDefaultVoiceSubId(), number, defaultCountryIso);
     }
@@ -1922,8 +1963,13 @@ public class PhoneNumberUtils {
      * @return true if the number is an emergency number for the specific
      *         country, *or* if the number starts with the same digits as
      *         any of those emergency numbers.
+     *
+     * @deprecated Please use {@link TelephonyManager#isCurrentPotentialEmergencyNumber(String)}
+     *             instead.
+     *
      * @hide
      */
+    @Deprecated
     public static boolean isPotentialEmergencyNumber(int subId, String number,
             String defaultCountryIso) {
         return isEmergencyNumberInternal(subId, number,
@@ -1971,92 +2017,7 @@ public class PhoneNumberUtils {
     private static boolean isEmergencyNumberInternal(int subId, String number,
                                                      String defaultCountryIso,
                                                      boolean useExactMatch) {
-        // If the number passed in is null, just return false:
-        if (number == null) return false;
-
-        // If the number passed in is a SIP address, return false, since the
-        // concept of "emergency numbers" is only meaningful for calls placed
-        // over the cell network.
-        // (Be sure to do this check *before* calling extractNetworkPortionAlt(),
-        // since the whole point of extractNetworkPortionAlt() is to filter out
-        // any non-dialable characters (which would turn 'abc911def@example.com'
-        // into '911', for example.))
-        if (isUriNumber(number)) {
-            return false;
-        }
-
-        // Strip the separators from the number before comparing it
-        // to the list.
-        number = extractNetworkPortionAlt(number);
-
-        String emergencyNumbers = "";
-        int slotId = SubscriptionManager.getSlotIndex(subId);
-
-        // retrieve the list of emergency numbers
-        // check read-write ecclist property first
-        String ecclist = (slotId <= 0) ? "ril.ecclist" : ("ril.ecclist" + slotId);
-
-        emergencyNumbers = SystemProperties.get(ecclist, "");
-
-        Rlog.d(LOG_TAG, "slotId:" + slotId + " subId:" + subId + " country:"
-                + defaultCountryIso + " emergencyNumbers: " +  emergencyNumbers);
-
-        if (TextUtils.isEmpty(emergencyNumbers)) {
-            // then read-only ecclist property since old RIL only uses this
-            emergencyNumbers = SystemProperties.get("ro.ril.ecclist");
-        }
-
-        if (!TextUtils.isEmpty(emergencyNumbers)) {
-            // searches through the comma-separated list for a match,
-            // return true if one is found.
-            for (String emergencyNum : emergencyNumbers.split(",")) {
-                // It is not possible to append additional digits to an emergency number to dial
-                // the number in Brazil - it won't connect.
-                if (useExactMatch || "BR".equalsIgnoreCase(defaultCountryIso)) {
-                    if (number.equals(emergencyNum)) {
-                        return true;
-                    }
-                } else {
-                    if (number.startsWith(emergencyNum)) {
-                        return true;
-                    }
-                }
-            }
-            // no matches found against the list!
-            return false;
-        }
-
-        Rlog.d(LOG_TAG, "System property doesn't provide any emergency numbers."
-                + " Use embedded logic for determining ones.");
-
-        // If slot id is invalid, means that there is no sim card.
-        // According spec 3GPP TS22.101, the following numbers should be
-        // ECC numbers when SIM/USIM is not present.
-        emergencyNumbers = ((slotId < 0) ? "112,911,000,08,110,118,119,999" : "112,911");
-
-        for (String emergencyNum : emergencyNumbers.split(",")) {
-            if (useExactMatch) {
-                if (number.equals(emergencyNum)) {
-                    return true;
-                }
-            } else {
-                if (number.startsWith(emergencyNum)) {
-                    return true;
-                }
-            }
-        }
-
-        // No ecclist system property, so use our own list.
-        if (defaultCountryIso != null) {
-            ShortNumberInfo info = ShortNumberInfo.getInstance();
-            if (useExactMatch) {
-                return info.isEmergencyNumber(number, defaultCountryIso);
-            } else {
-                return info.connectsToEmergencyNumber(number, defaultCountryIso);
-            }
-        }
-
-        return false;
+        return TelephonyManager.getDefault().isCurrentEmergencyNumber(number);
     }
 
     /**
@@ -2066,7 +2027,11 @@ public class PhoneNumberUtils {
      * @param context the specific context which the number should be checked against
      * @return true if the specified number is an emergency number for the country the user
      * is currently in.
+     *
+     * @deprecated Please use {@link TelephonyManager#isCurrentEmergencyNumber(String)}
+     *             instead.
      */
+    @Deprecated
     public static boolean isLocalEmergencyNumber(Context context, String number) {
         return isLocalEmergencyNumber(context, getDefaultVoiceSubId(), number);
     }
@@ -2079,8 +2044,14 @@ public class PhoneNumberUtils {
      * @param context the specific context which the number should be checked against
      * @return true if the specified number is an emergency number for the country the user
      * is currently in.
+     *
+     * @deprecated Please use {@link TelephonyManager#isCurrentEmergencyNumber(String)}
+     *             instead.
+     *
      * @hide
      */
+    @Deprecated
+    @UnsupportedAppUsage
     public static boolean isLocalEmergencyNumber(Context context, int subId, String number) {
         return isLocalEmergencyNumberInternal(subId, number,
                                               context,
@@ -2107,8 +2078,14 @@ public class PhoneNumberUtils {
      *              CountryDetector.
      *
      * @see android.location.CountryDetector
+     *
+     * @deprecated Please use {@link TelephonyManager#isCurrentPotentialEmergencyNumber(String)}
+     *             instead.
+     *
      * @hide
      */
+    @Deprecated
+    @UnsupportedAppUsage
     public static boolean isPotentialLocalEmergencyNumber(Context context, String number) {
         return isPotentialLocalEmergencyNumber(context, getDefaultVoiceSubId(), number);
     }
@@ -2133,8 +2110,13 @@ public class PhoneNumberUtils {
      * @return true if the specified number is an emergency number for a local country, based on the
      *              CountryDetector.
      *
+     * @deprecated Please use {@link TelephonyManager#isCurrentPotentialEmergencyNumber(String)}
+     *             instead.
+     *
      * @hide
      */
+    @UnsupportedAppUsage
+    @Deprecated
     public static boolean isPotentialLocalEmergencyNumber(Context context, int subId,
             String number) {
         return isLocalEmergencyNumberInternal(subId, number,
@@ -2244,6 +2226,7 @@ public class PhoneNumberUtils {
      * to read the VM number.
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isVoiceMailNumber(Context context, int subId, String number) {
         String vmNumber, mdn;
         try {
@@ -2390,6 +2373,7 @@ public class PhoneNumberUtils {
      *
      * @hide TODO: pending API Council approval
      */
+    @UnsupportedAppUsage
     public static String cdmaCheckAndProcessPlusCode(String dialStr) {
         if (!TextUtils.isEmpty(dialStr)) {
             if (isReallyDialable(dialStr.charAt(0)) &&
@@ -2569,6 +2553,7 @@ public class PhoneNumberUtils {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static CharSequence ttsSpanAsPhoneNumber(CharSequence phoneNumber) {
         return createTtsSpannable(phoneNumber);
     }
@@ -2680,6 +2665,7 @@ public class PhoneNumberUtils {
      * i.e. NXX-NXX-XXXX, N is any digit 2-9 and X is any digit 0-9
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isNanp (String dialStr) {
         boolean retVal = false;
         if (dialStr != null) {
@@ -2727,6 +2713,7 @@ public class PhoneNumberUtils {
      * @param number
      * @return true if number contains @
      */
+    @UnsupportedAppUsage
     public static boolean isUriNumber(String number) {
         // Note we allow either "@" or "%40" to indicate a URI, in case
         // the passed-in string is URI-escaped.  (Neither "@" nor "%40"
@@ -2744,6 +2731,7 @@ public class PhoneNumberUtils {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static String getUsernameFromUriNumber(String number) {
         // The delimiter between username and domain name can be
         // either "@" or "%40" (the URI-escaped equivalent.)

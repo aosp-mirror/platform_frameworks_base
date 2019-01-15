@@ -82,6 +82,7 @@ static Status checkIncidentPermissions(const IncidentReportArgs& args) {
                         Status::EX_SECURITY,
                         "Calling process does not have permission to get local data.");
             }
+            break;
         case DEST_EXPLICIT:
             if (callingUid != AID_SHELL && callingUid != AID_ROOT && callingUid != AID_STATSD &&
                 callingUid != AID_SYSTEM) {
@@ -91,6 +92,7 @@ static Status checkIncidentPermissions(const IncidentReportArgs& args) {
                         Status::EX_SECURITY,
                         "Calling process does not have permission to get explicit data.");
             }
+            break;
     }
     return Status::ok();
 }

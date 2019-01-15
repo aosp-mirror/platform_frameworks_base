@@ -20,6 +20,7 @@
 #include <regex>
 #include <string>
 
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 
 #include "LoadedApk.h"
@@ -43,6 +44,7 @@ using ::aapt::configuration::AndroidSdk;
 using ::aapt::configuration::OutputArtifact;
 using ::aapt::xml::kSchemaAndroid;
 using ::aapt::xml::XmlResource;
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 
 /**

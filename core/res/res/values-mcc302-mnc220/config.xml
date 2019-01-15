@@ -23,24 +23,13 @@
 
     <integer name="config_mobile_mtu">1410</integer>
 
-    <!-- String containing the apn value for tethering.  May be overriden by secure settings
-         TETHER_DUN_APN.  Value is a comma separated series of strings:
-         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type",
-         Or string format of ApnSettingV3.
-         note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string-array translatable="false" name="config_tether_apndata">
-        <item>[ApnSettingV3]TELUS ISP,isp.telus.com,,,,,,,,,302,220,,DUN,IP,IP,true,0,,,,,,,gid,5455</item>
-        <item>[ApnSettingV3]Tethered Mobile Internet,isp.mb.com,,,,,,,,,302,220,,DUN,,,true,0,,,,,,,gid,5043</item>
-        <item>[ApnSettingV3]Tethered Public Mobile,isp.mb.com,,,,,,,,,302,220,,DUN,,,true,0,,,,,,,gid,4D4F</item>
-    </string-array>
-
     <!-- Values for GPS configuration (Telus) -->
     <string-array translatable="false" name="config_gpsParameters">
         <item>SUPL_HOST=supl.google.com</item>
         <item>SUPL_PORT=7275</item>
         <item>SUPL_VER=0x20000</item>
         <item>SUPL_MODE=1</item>
-        <item>SUPL_ES=0</item>
+        <item>SUPL_ES=1</item>
         <item>LPP_PROFILE=3</item>
         <item>USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL=1</item>
         <item>A_GLONASS_POS_PROTOCOL_SELECT=0</item>

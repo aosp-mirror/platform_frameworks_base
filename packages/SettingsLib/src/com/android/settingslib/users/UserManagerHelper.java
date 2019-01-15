@@ -25,9 +25,9 @@ import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.sysprop.CarProperties;
 import android.util.Log;
 
 import com.android.internal.util.UserIcons;
@@ -43,7 +43,6 @@ import java.util.List;
 @Deprecated
 public final class UserManagerHelper {
     private static final String TAG = "UserManagerHelper";
-    private static final String HEADLESS_SYSTEM_USER = "android.car.systemuser.headless";
     private final Context mContext;
     private final UserManager mUserManager;
     private final ActivityManager mActivityManager;
@@ -84,7 +83,7 @@ public final class UserManagerHelper {
      * @return {@boolean true} if headless system user.
      */
     public boolean isHeadlessSystemUser() {
-        return SystemProperties.getBoolean(HEADLESS_SYSTEM_USER, false);
+        return CarProperties.headless_system_user().orElse(false);
     }
 
     /**

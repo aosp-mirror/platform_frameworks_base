@@ -40,17 +40,17 @@ public class InternalStreamingSessionCallback extends IMbmsStreamingSessionCallb
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onError(errorCode, message);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -60,17 +60,17 @@ public class InternalStreamingSessionCallback extends IMbmsStreamingSessionCallb
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onStreamingServicesUpdated(services);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -79,17 +79,17 @@ public class InternalStreamingSessionCallback extends IMbmsStreamingSessionCallb
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onMiddlewareReady();
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     public void stop() {

@@ -151,12 +151,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     public void fadeInTranslating() {
-        float translation = mShelfIcons.getTranslationY();
-        mShelfIcons.setTranslationY(translation - mShelfAppearTranslation);
+        mShelfIcons.setTranslationY(-mShelfAppearTranslation);
         mShelfIcons.setAlpha(0);
         mShelfIcons.animate()
                 .setInterpolator(Interpolators.DECELERATE_QUINT)
-                .translationY(translation)
+                .translationY(0)
                 .setDuration(SHELF_IN_TRANSLATION_DURATION)
                 .start();
         mShelfIcons.animate()
@@ -482,8 +481,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         iconTransformDistance = Math.min(iconTransformDistance, fullHeight);
         if (isLastChild) {
             fullHeight = Math.min(fullHeight, row.getMinHeight() - getIntrinsicHeight());
-            iconTransformDistance = Math.min(iconTransformDistance,
-                    row.getMinHeight() - getIntrinsicHeight() * icon.getIconScale());
+            iconTransformDistance = Math.min(iconTransformDistance, row.getMinHeight()
+                    - getIntrinsicHeight());
         }
         float viewEnd = viewStart + fullHeight;
         if (expandingAnimated && mAmbientState.getScrollY() == 0

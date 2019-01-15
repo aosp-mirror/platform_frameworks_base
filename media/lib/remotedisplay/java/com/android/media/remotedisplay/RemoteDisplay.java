@@ -16,6 +16,7 @@
 
 package com.android.media.remotedisplay;
 
+import android.annotation.SystemApi;
 import android.media.RemoteDisplayState.RemoteDisplayInfo;
 import android.text.TextUtils;
 
@@ -23,7 +24,10 @@ import java.util.Objects;
 
 /**
  * Represents a remote display that has been discovered.
+ *
+ * @hide
  */
+@SystemApi
 public class RemoteDisplay {
     private final RemoteDisplayInfo mMutableInfo;
     private RemoteDisplayInfo mImmutableInfo;

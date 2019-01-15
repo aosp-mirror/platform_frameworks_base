@@ -21,15 +21,16 @@
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
 #include "androidfw/AssetManager.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/ResourceTypes.h"
 
-#include "ConfigDescription.h"
 #include "NameMangler.h"
 #include "Resource.h"
 #include "ResourceUtils.h"
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 using ::android::StringPiece16;
 

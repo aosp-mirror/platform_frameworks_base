@@ -28,6 +28,7 @@ import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a distinct method to place or receive a phone call. Apps which can place calls and
@@ -154,6 +155,18 @@ public final class PhoneAccount implements Parcelable {
      */
     public static final String EXTRA_PLAY_CALL_RECORDING_TONE =
             "android.telecom.extra.PLAY_CALL_RECORDING_TONE";
+
+    /**
+     * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()} which
+     * indicates whether calls for a {@link PhoneAccount} should skip call filtering.
+     * <p>
+     * If not specified, this will default to false; all calls will undergo call filtering unless
+     * specifically exempted (e.g. {@link Connection#PROPERTY_EMERGENCY_CALLBACK_MODE}.) However,
+     * this may be used to skip call filtering when it has already been performed on another device.
+     * @hide
+     */
+    public static final String EXTRA_SKIP_CALL_FILTERING =
+        "android.telecom.extra.SKIP_CALL_FILTERING";
 
     /**
      * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
@@ -347,6 +360,33 @@ public final class PhoneAccount implements Parcelable {
     private final Bundle mExtras;
     private boolean mIsEnabled;
     private String mGroupId;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PhoneAccount that = (PhoneAccount) o;
+        return mCapabilities == that.mCapabilities &&
+                mHighlightColor == that.mHighlightColor &&
+                mSupportedAudioRoutes == that.mSupportedAudioRoutes &&
+                mIsEnabled == that.mIsEnabled &&
+                Objects.equals(mAccountHandle, that.mAccountHandle) &&
+                Objects.equals(mAddress, that.mAddress) &&
+                Objects.equals(mSubscriptionAddress, that.mSubscriptionAddress) &&
+                Objects.equals(mLabel, that.mLabel) &&
+                Objects.equals(mShortDescription, that.mShortDescription) &&
+                Objects.equals(mSupportedUriSchemes, that.mSupportedUriSchemes) &&
+                areBundlesEqual(mExtras, that.mExtras) &&
+                Objects.equals(mGroupId, that.mGroupId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mAccountHandle, mAddress, mSubscriptionAddress, mCapabilities,
+                mHighlightColor, mLabel, mShortDescription, mSupportedUriSchemes,
+                mSupportedAudioRoutes,
+                mExtras, mIsEnabled, mGroupId);
+    }
 
     /**
      * Helper class for creating a {@link PhoneAccount}.
@@ -945,10 +985,10 @@ public final class PhoneAccount implements Parcelable {
     /**
      * Generates a string representation of a capabilities bitmask.
      *
-     * @param capabilities The capabilities bitmask.
      * @return String representation of the capabilities bitmask.
+     * @hide
      */
-    private String capabilitiesToString() {
+    public String capabilitiesToString() {
         StringBuilder sb = new StringBuilder();
         if (hasCapabilities(CAPABILITY_SELF_MANAGED)) {
             sb.append("SelfManaged ");
@@ -1009,5 +1049,32 @@ public final class PhoneAccount implements Parcelable {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Determines if two {@link Bundle}s are equal.
+     * @param extras First {@link Bundle} to check.
+     * @param newExtras {@link Bundle} to compare against.
+     * @return {@code true} if the {@link Bundle}s are equal, {@code false} otherwise.
+     */
+    private static boolean areBundlesEqual(Bundle extras, Bundle newExtras) {
+        if (extras == null || newExtras == null) {
+            return extras == newExtras;
+        }
+
+        if (extras.size() != newExtras.size()) {
+            return false;
+        }
+
+        for(String key : extras.keySet()) {
+            if (key != null) {
+                final Object value = extras.get(key);
+                final Object newValue = newExtras.get(key);
+                if (!Objects.equals(value, newValue)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

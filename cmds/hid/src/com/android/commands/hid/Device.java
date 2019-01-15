@@ -23,6 +23,7 @@ import android.os.Message;
 import android.os.MessageQueue;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.os.SomeArgs;
 
@@ -31,11 +32,14 @@ public class Device {
 
     private static final int MSG_OPEN_DEVICE = 1;
     private static final int MSG_SEND_REPORT = 2;
-    private static final int MSG_CLOSE_DEVICE = 3;
+    private static final int MSG_SEND_GET_FEATURE_REPORT_REPLY = 3;
+    private static final int MSG_CLOSE_DEVICE = 4;
 
     private final int mId;
     private final HandlerThread mThread;
     private final DeviceHandler mHandler;
+    // mFeatureReports is limited to 256 entries, because the report number is 8-bit
+    private final SparseArray<byte[]> mFeatureReports;
     private long mTimeToSend;
 
     private final Object mCond = new Object();
@@ -47,13 +51,16 @@ public class Device {
     private static native long nativeOpenDevice(String name, int id, int vid, int pid,
             byte[] descriptor, DeviceCallback callback);
     private static native void nativeSendReport(long ptr, byte[] data);
+    private static native void nativeSendGetFeatureReportReply(long ptr, int id, byte[] data);
     private static native void nativeCloseDevice(long ptr);
 
-    public Device(int id, String name, int vid, int pid, byte[] descriptor, byte[] report) {
+    public Device(int id, String name, int vid, int pid, byte[] descriptor,
+            byte[] report, SparseArray<byte[]> featureReports) {
         mId = id;
         mThread = new HandlerThread("HidDeviceHandler");
         mThread.start();
         mHandler = new DeviceHandler(mThread.getLooper());
+        mFeatureReports = featureReports;
         SomeArgs args = SomeArgs.obtain();
         args.argi1 = id;
         args.argi2 = vid;
@@ -113,6 +120,13 @@ public class Device {
                         Log.e(TAG, "Tried to send report to closed device.");
                     }
                     break;
+                case MSG_SEND_GET_FEATURE_REPORT_REPLY:
+                    if (mPtr != 0) {
+                        nativeSendGetFeatureReportReply(mPtr, msg.arg1, (byte[]) msg.obj);
+                    } else {
+                        Log.e(TAG, "Tried to send feature report reply to closed device.");
+                    }
+                    break;
                 case MSG_CLOSE_DEVICE:
                     if (mPtr != 0) {
                         nativeCloseDevice(mPtr);
@@ -143,6 +157,23 @@ public class Device {
     private class DeviceCallback {
         public void onDeviceOpen() {
             mHandler.resumeEvents();
+        }
+
+        public void onDeviceGetReport(int requestId, int reportId) {
+            byte[] report = mFeatureReports.get(reportId);
+
+            if (report == null) {
+                Log.e(TAG, "Requested feature report " + reportId + " is not specified");
+            }
+
+            Message msg;
+            msg = mHandler.obtainMessage(MSG_SEND_GET_FEATURE_REPORT_REPLY, requestId, 0, report);
+
+            // Message is set to asynchronous so it won't be blocked by synchronization
+            // barrier during UHID_OPEN. This is necessary for drivers that do
+            // UHID_GET_REPORT requests during probe.
+            msg.setAsynchronous(true);
+            mHandler.sendMessageAtTime(msg, mTimeToSend);
         }
 
         public void onDeviceError() {

@@ -47,6 +47,22 @@ public final class CellInfoWcdma extends CellInfo implements Parcelable {
         this.mCellSignalStrengthWcdma = ci.mCellSignalStrengthWcdma.copy();
     }
 
+    /** @hide */
+    public CellInfoWcdma(android.hardware.radio.V1_0.CellInfo ci) {
+        super(ci);
+        final android.hardware.radio.V1_0.CellInfoWcdma ciw = ci.wcdma.get(0);
+        mCellIdentityWcdma = new CellIdentityWcdma(ciw.cellIdentityWcdma);
+        mCellSignalStrengthWcdma = new CellSignalStrengthWcdma(ciw.signalStrengthWcdma);
+    }
+
+    /** @hide */
+    public CellInfoWcdma(android.hardware.radio.V1_2.CellInfo ci) {
+        super(ci);
+        final android.hardware.radio.V1_2.CellInfoWcdma ciw = ci.wcdma.get(0);
+        mCellIdentityWcdma = new CellIdentityWcdma(ciw.cellIdentityWcdma);
+        mCellSignalStrengthWcdma = new CellSignalStrengthWcdma(ciw.signalStrengthWcdma);
+    }
+
     @Override
     public CellIdentityWcdma getCellIdentity() {
         return mCellIdentityWcdma;

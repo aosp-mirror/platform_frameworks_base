@@ -28,7 +28,20 @@ import java.util.EnumMap;
  * Describes the status of a network interface.
  * <p>Use {@link ConnectivityManager#getActiveNetworkInfo()} to get an instance that represents
  * the current network connection.
+ *
+ * @deprecated Callers should instead use the {@link ConnectivityManager.NetworkCallback} API to
+ *             learn about connectivity changes, or switch to use
+ *             {@link ConnectivityManager#getNetworkCapabilities} or
+ *             {@link ConnectivityManager#getLinkProperties} to get information synchronously. Keep
+ *             in mind that while callbacks are guaranteed to be called for every event in order,
+ *             synchronous calls have no such constraints, and as such it is unadvisable to use the
+ *             synchronous methods inside the callbacks as they will often not offer a view of
+ *             networking that is consistent (that is: they may return a past or a future state with
+ *             respect to the event being processed by the callback). Instead, callers are advised
+ *             to only use the arguments of the callbacks, possibly memorizing the specific bits of
+ *             information they need to keep from one callback to another.
  */
+@Deprecated
 public class NetworkInfo implements Parcelable {
 
     /**
@@ -52,7 +65,10 @@ public class NetworkInfo implements Parcelable {
      * <tr><td><code>FAILED</code></td><td><code>DISCONNECTED</code></td></tr>
      * <tr><td><code>BLOCKED</code></td><td><code>DISCONNECTED</code></td></tr>
      * </table>
+     *
+     * @deprecated See {@link NetworkInfo}.
      */
+    @Deprecated
     public enum State {
         CONNECTING, CONNECTED, SUSPENDED, DISCONNECTING, DISCONNECTED, UNKNOWN
     }
@@ -61,7 +77,10 @@ public class NetworkInfo implements Parcelable {
      * The fine-grained state of a network connection. This level of detail
      * is probably of interest to few applications. Most should use
      * {@link android.net.NetworkInfo.State State} instead.
+     *
+     * @deprecated See {@link NetworkInfo}.
      */
+    @Deprecated
     public enum DetailedState {
         /** Ready to start data connection setup. */
         IDLE,
@@ -202,7 +221,9 @@ public class NetworkInfo implements Parcelable {
      * Return a network-type-specific integer describing the subtype
      * of the network.
      * @return the network subtype
+     * @deprecated Use {@link android.telephony.TelephonyManager#getDataNetworkType} instead.
      */
+    @Deprecated
     public int getSubtype() {
         synchronized (this) {
             return mSubtype;
@@ -243,7 +264,9 @@ public class NetworkInfo implements Parcelable {
     /**
      * Return a human-readable name describing the subtype of the network.
      * @return the name of the network subtype
+     * @deprecated Use {@link android.telephony.TelephonyManager#getDataNetworkType} instead.
      */
+    @Deprecated
     public String getSubtypeName() {
         synchronized (this) {
             return mSubtypeName;
@@ -278,7 +301,15 @@ public class NetworkInfo implements Parcelable {
      * connections and pass data.
      * <p>Always call this before attempting to perform data transactions.
      * @return {@code true} if network connectivity exists, {@code false} otherwise.
+     * @deprecated Apps should instead use the
+     *             {@link android.net.ConnectivityManager.NetworkCallback} API to
+     *             learn about connectivity changes. See
+     *             {@link ConnectivityManager#registerDefaultNetworkCallback} and
+     *             {@link ConnectivityManager#registerNetworkCallback}. These will
+     *             give a more accurate picture of the connectivity state of
+     *             the device and let apps react more easily and quickly to changes.
      */
+    @Deprecated
     public boolean isConnected() {
         synchronized (this) {
             return mState == State.CONNECTED;
@@ -411,7 +442,15 @@ public class NetworkInfo implements Parcelable {
     /**
      * Reports the current fine-grained state of the network.
      * @return the fine-grained state
+     * @deprecated Apps should instead use the
+     *             {@link android.net.ConnectivityManager.NetworkCallback} API to
+     *             learn about connectivity changes. See
+     *             {@link ConnectivityManager#registerDefaultNetworkCallback} and
+     *             {@link ConnectivityManager#registerNetworkCallback}. These will
+     *             give a more accurate picture of the connectivity state of
+     *             the device and let apps react more easily and quickly to changes.
      */
+    @Deprecated
     public DetailedState getDetailedState() {
         synchronized (this) {
             return mDetailedState;
@@ -443,8 +482,10 @@ public class NetworkInfo implements Parcelable {
      * Set the extraInfo field.
      * @param extraInfo an optional {@code String} providing addditional network state
      * information passed up from the lower networking layers.
+     * @deprecated See {@link NetworkInfo#getExtraInfo}.
      * @hide
      */
+    @Deprecated
     public void setExtraInfo(String extraInfo) {
         synchronized (this) {
             this.mExtraInfo = extraInfo;
@@ -468,7 +509,10 @@ public class NetworkInfo implements Parcelable {
      * Report the extra information about the network state, if any was
      * provided by the lower networking layers.
      * @return the extra information, or null if not available
+     * @deprecated Use other services e.g. WifiManager to get additional information passed up from
+     *             the lower networking layers.
      */
+    @Deprecated
     public String getExtraInfo() {
         synchronized (this) {
             return mExtraInfo;

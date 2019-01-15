@@ -21,6 +21,7 @@ import java.util.HashMap;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -88,7 +89,7 @@ public class CountryDetector {
      *       create an instance of this class is using the factory
      *       Context.getSystemService.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public CountryDetector(ICountryDetector service) {
         mService = service;
         mListeners = new HashMap<CountryListener, ListenerTransport>();

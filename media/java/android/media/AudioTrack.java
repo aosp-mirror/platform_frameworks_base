@@ -3222,7 +3222,7 @@ public class AudioTrack extends PlayerBase
                                                 int offsetInFloats, int sizeInFloats, int format,
                                                 boolean isBlocking);
 
-    private native final int native_write_native_bytes(Object audioData,
+    private native final int native_write_native_bytes(ByteBuffer audioData,
             int positionInBytes, int sizeInBytes, int format, boolean blocking);
 
     private native final int native_reload_static();

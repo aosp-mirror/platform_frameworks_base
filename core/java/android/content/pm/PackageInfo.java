@@ -18,6 +18,8 @@ package android.content.pm;
 
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
+import android.apex.ApexInfo;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -390,6 +392,11 @@ public class PackageInfo implements Parcelable {
     @Nullable
     public String compileSdkVersionCodename;
 
+    /**
+     * Whether the package is an APEX package.
+     */
+    public boolean isApex;
+
     public PackageInfo() {
     }
 
@@ -472,6 +479,7 @@ public class PackageInfo implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        dest.writeBoolean(isApex);
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -487,7 +495,7 @@ public class PackageInfo implements Parcelable {
         }
     };
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private PackageInfo(Parcel source) {
         packageName = source.readString();
         splitNames = source.createStringArray();
@@ -533,7 +541,7 @@ public class PackageInfo implements Parcelable {
         if (hasSigningInfo != 0) {
             signingInfo = SigningInfo.CREATOR.createFromParcel(source);
         }
-
+        isApex = source.readBoolean();
         // The component lists were flattened with the redundant ApplicationInfo
         // instances omitted.  Distribute the canonical one here as appropriate.
         if (applicationInfo != null) {
@@ -542,6 +550,15 @@ public class PackageInfo implements Parcelable {
             propagateApplicationInfo(applicationInfo, services);
             propagateApplicationInfo(applicationInfo, providers);
         }
+    }
+
+    /**
+     * @hide
+     */
+    public PackageInfo(ApexInfo apexInfo) {
+        packageName = apexInfo.packageName;
+        setLongVersionCode(apexInfo.versionCode);
+        isApex = true;
     }
 
     private void propagateApplicationInfo(ApplicationInfo appInfo, ComponentInfo[] components) {

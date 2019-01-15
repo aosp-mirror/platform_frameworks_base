@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.Widget;
 import android.content.Context;
 import android.util.AttributeSet;
@@ -33,7 +34,9 @@ import com.android.internal.R;
 @Widget
 public class ZoomControls extends LinearLayout {
 
+    @UnsupportedAppUsage
     private final ZoomButton mZoomIn;
+    @UnsupportedAppUsage
     private final ZoomButton mZoomOut;
         
     public ZoomControls(Context context) {

@@ -219,6 +219,8 @@ message GaugeMetric {
 
   optional int64 what = 2;
 
+  optional int64 trigger_event = 12;
+
   optional FieldFilter gauge_fields_filter = 3;
 
   optional int64 condition = 4;

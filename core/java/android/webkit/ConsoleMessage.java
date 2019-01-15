@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 /**
  * Public class representing a JavaScript console message from WebCore. This could be a issued
@@ -36,13 +37,13 @@ public class ConsoleMessage {
         DEBUG
     };
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private MessageLevel mLevel;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mMessage;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mSourceId;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mLineNumber;
 
     public ConsoleMessage(String message, String sourceId, int lineNumber, MessageLevel msgLevel) {

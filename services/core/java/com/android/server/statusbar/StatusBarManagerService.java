@@ -140,13 +140,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             switch (which) {
                 case 1:
                     what1 = what;
-                    return;
+                    break;
                 case 2:
                     what2 = what;
-                    return;
+                    break;
                 default:
                     Slog.w(TAG, "Can't set unsupported disable flag " + which
                             + ": 0x" + Integer.toHexString(what));
+                    break;
             }
             this.pkg = pkg;
         }

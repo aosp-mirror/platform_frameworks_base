@@ -2,6 +2,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.app.ActivityManager.processStateAmToProto;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_TIMEOUT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -9,6 +10,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_ACTIVITY_START;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_BIND_APPLICATION_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_CALLING_PACKAGE_NAME;
@@ -21,8 +23,48 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TR
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_REPORTED_DRAWN_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_STARTING_WINDOW_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_FLAGS;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_IS_FULLSCREEN;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_IS_NO_DISPLAY;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_IS_VISIBLE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_IS_VISIBLE_IGNORING_KEYGUARD;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_LAUNCH;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_VISIBLE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_LAUNCH_MODE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_PROCESS_NAME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_REAL_ACTIVITY;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_RESULT_TO_PKG_NAME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_RESULT_TO_SHORT_COMPONENT_NAME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_SHORT_COMPONENT_NAME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_ACTIVITY_RECORD_TARGET_ACTIVITY;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_CALLING_PACKAGE_NAME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_CALLING_UID;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_CALLING_UID_HAS_ANY_VISIBLE_WINDOW;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_CALLING_UID_PROC_STATE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_CLASS_NAME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_COMING_FROM_PENDING_INTENT;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_LAUNCH_TOKEN;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INTENT_ACTION;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_PROCESS_RECORD_CUR_PROC_STATE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_PROCESS_RECORD_HAS_CLIENT_ACTIVITIES;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_PROCESS_RECORD_HAS_FOREGROUND_ACTIVITIES;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_PROCESS_RECORD_HAS_FOREGROUND_SERVICES;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_PROCESS_RECORD_HAS_OVERLAY_UI;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_PROCESS_RECORD_HAS_TOP_UI;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_PROCESS_RECORD_MILLIS_SINCE_FG_INTERACTION;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_PROCESS_RECORD_MILLIS_SINCE_LAST_INTERACTION_EVENT;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_PROCESS_RECORD_MILLIS_SINCE_UNIMPORTANT;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_PROCESS_RECORD_PENDING_UI_CLEAN;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_PROCESS_RECORD_PROCESS_NAME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_REAL_CALLING_UID;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_REAL_CALLING_UID_PROC_STATE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_REAL_CALLING_UID_HAS_ANY_VISIBLE_WINDOW;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TARGET_PACKAGE_NAME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TARGET_SHORT_COMPONENT_NAME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TARGET_UID;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TARGET_UID_HAS_ANY_VISIBLE_WINDOW;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TARGET_UID_PROC_STATE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TARGET_WHITELIST_TAG;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PACKAGE_OPTIMIZATION_COMPILATION_REASON;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PACKAGE_OPTIMIZATION_COMPILATION_FILTER;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_COLD_LAUNCH;
@@ -37,6 +79,7 @@ import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.dex.ArtManagerInternal;
 import android.content.pm.dex.PackageOptimizationInfo;
@@ -620,6 +663,95 @@ class ActivityMetricsLogger {
                 info.launchedActivity.info.name,
                 info.currentTransitionProcessRunning,
                 startupTimeMs);
+    }
+
+    void logActivityStart(Intent intent, ProcessRecord callerApp, ActivityRecord r,
+            int callingUid, String callingPackage, int callingUidProcState,
+            boolean callingUidHasAnyVisibleWindow,
+            int realCallingUid, int realCallingUidProcState,
+            boolean realCallingUidHasAnyVisibleWindow,
+            int targetUid, String targetPackage, int targetUidProcState,
+            boolean targetUidHasAnyVisibleWindow, String targetWhitelistTag,
+            boolean comingFromPendingIntent) {
+
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        final long nowUptime = SystemClock.uptimeMillis();
+        final LogMaker builder = new LogMaker(ACTION_ACTIVITY_START);
+        builder.setTimestamp(System.currentTimeMillis());
+        builder.addTaggedData(FIELD_CALLING_UID, callingUid);
+        builder.addTaggedData(FIELD_CALLING_PACKAGE_NAME, callingPackage);
+        builder.addTaggedData(FIELD_CALLING_UID_PROC_STATE,
+                processStateAmToProto(callingUidProcState));
+        builder.addTaggedData(FIELD_CALLING_UID_HAS_ANY_VISIBLE_WINDOW,
+                callingUidHasAnyVisibleWindow ? 1 : 0);
+        builder.addTaggedData(FIELD_REAL_CALLING_UID, realCallingUid);
+        builder.addTaggedData(FIELD_REAL_CALLING_UID_PROC_STATE,
+                processStateAmToProto(realCallingUidProcState));
+        builder.addTaggedData(FIELD_REAL_CALLING_UID_HAS_ANY_VISIBLE_WINDOW,
+                realCallingUidHasAnyVisibleWindow ? 1 : 0);
+        builder.addTaggedData(FIELD_TARGET_UID, targetUid);
+        builder.addTaggedData(FIELD_TARGET_PACKAGE_NAME, targetPackage);
+        builder.addTaggedData(FIELD_TARGET_UID_PROC_STATE,
+                processStateAmToProto(targetUidProcState));
+        builder.addTaggedData(FIELD_TARGET_UID_HAS_ANY_VISIBLE_WINDOW,
+                targetUidHasAnyVisibleWindow ? 1 : 0);
+        builder.addTaggedData(FIELD_TARGET_WHITELIST_TAG, targetWhitelistTag);
+        builder.addTaggedData(FIELD_TARGET_SHORT_COMPONENT_NAME, r.shortComponentName);
+        builder.addTaggedData(FIELD_COMING_FROM_PENDING_INTENT, comingFromPendingIntent ? 1 : 0);
+        builder.addTaggedData(FIELD_INTENT_ACTION, intent.getAction());
+        if (callerApp != null) {
+            builder.addTaggedData(FIELD_PROCESS_RECORD_PROCESS_NAME, callerApp.processName);
+            builder.addTaggedData(FIELD_PROCESS_RECORD_CUR_PROC_STATE,
+                    processStateAmToProto(callerApp.curProcState));
+            builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_CLIENT_ACTIVITIES,
+                    callerApp.hasClientActivities ? 1 : 0);
+            builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_FOREGROUND_SERVICES,
+                    callerApp.hasForegroundServices() ? 1 : 0);
+            builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_FOREGROUND_ACTIVITIES,
+                    callerApp.foregroundActivities ? 1 : 0);
+            builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_TOP_UI, callerApp.hasTopUi ? 1 : 0);
+            builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_OVERLAY_UI,
+                    callerApp.hasOverlayUi ? 1 : 0);
+            builder.addTaggedData(FIELD_PROCESS_RECORD_PENDING_UI_CLEAN,
+                    callerApp.pendingUiClean ? 1 : 0);
+            if (callerApp.interactionEventTime != 0) {
+                builder.addTaggedData(FIELD_PROCESS_RECORD_MILLIS_SINCE_LAST_INTERACTION_EVENT,
+                        (nowElapsed - callerApp.interactionEventTime));
+            }
+            if (callerApp.fgInteractionTime != 0) {
+                builder.addTaggedData(FIELD_PROCESS_RECORD_MILLIS_SINCE_FG_INTERACTION,
+                        (nowElapsed - callerApp.fgInteractionTime));
+            }
+            if (callerApp.whenUnimportant != 0) {
+                builder.addTaggedData(FIELD_PROCESS_RECORD_MILLIS_SINCE_UNIMPORTANT,
+                        (nowUptime - callerApp.whenUnimportant));
+            }
+        }
+        builder.addTaggedData(FIELD_ACTIVITY_RECORD_LAUNCH_MODE, r.info.launchMode);
+        builder.addTaggedData(FIELD_ACTIVITY_RECORD_TARGET_ACTIVITY, r.info.targetActivity);
+        builder.addTaggedData(FIELD_ACTIVITY_RECORD_FLAGS, r.info.flags);
+        builder.addTaggedData(FIELD_ACTIVITY_RECORD_REAL_ACTIVITY, r.realActivity.toShortString());
+        builder.addTaggedData(FIELD_ACTIVITY_RECORD_SHORT_COMPONENT_NAME, r.shortComponentName);
+        builder.addTaggedData(FIELD_ACTIVITY_RECORD_PROCESS_NAME, r.processName);
+        builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_FULLSCREEN, r.fullscreen ? 1 : 0);
+        builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_NO_DISPLAY, r.noDisplay ? 1 : 0);
+        if (r.lastVisibleTime != 0) {
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_VISIBLE,
+                    (nowUptime - r.lastVisibleTime));
+        }
+        if (r.resultTo != null) {
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_RESULT_TO_PKG_NAME, r.resultTo.packageName);
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_RESULT_TO_SHORT_COMPONENT_NAME,
+                    r.resultTo.shortComponentName);
+        }
+        builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_VISIBLE, r.visible ? 1 : 0);
+        builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_VISIBLE_IGNORING_KEYGUARD,
+                r.visibleIgnoringKeyguard ? 1 : 0);
+        if (r.lastLaunchTime != 0) {
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_LAUNCH,
+                    (nowUptime - r.lastLaunchTime));
+        }
+        mMetricsLogger.write(builder);
     }
 
     private int getTransitionType(WindowingModeTransitionInfo info) {

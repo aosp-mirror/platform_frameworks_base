@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.os.Process.CLAT_UID;
+
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -44,6 +46,7 @@ import java.util.Objects;
  *
  * @hide
  */
+// @NotThreadSafe
 public class NetworkStats implements Parcelable {
     private static final String TAG = "NetworkStats";
     /** {@link #iface} value when interface details unavailable. */
@@ -443,6 +446,26 @@ public class NetworkStats implements Parcelable {
         return entry;
     }
 
+    /**
+     * If @{code dest} is not equal to @{code src}, copy entry from index @{code src} to index
+     * @{code dest}.
+     */
+    private void maybeCopyEntry(int dest, int src) {
+        if (dest == src) return;
+        iface[dest] = iface[src];
+        uid[dest] = uid[src];
+        set[dest] = set[src];
+        tag[dest] = tag[src];
+        metered[dest] = metered[src];
+        roaming[dest] = roaming[src];
+        defaultNetwork[dest] = defaultNetwork[src];
+        rxBytes[dest] = rxBytes[src];
+        rxPackets[dest] = rxPackets[src];
+        txBytes[dest] = txBytes[src];
+        txPackets[dest] = txPackets[src];
+        operations[dest] = operations[src];
+    }
+
     public long getElapsedRealtime() {
         return elapsedRealtime;
     }
@@ -807,18 +830,25 @@ public class NetworkStats implements Parcelable {
      *
      * <p>For 464xlat traffic, xt_qtaguid sees every IPv4 packet twice, once as a native IPv4
      * packet on the stacked interface, and once as translated to an IPv6 packet on the
-     * base interface. For correct stats accounting on the base interface, every 464xlat
-     * packet needs to be subtracted from the root UID on the base interface both for tx
-     * and rx traffic (http://b/12249687, http:/b/33681750).
+     * base interface. For correct stats accounting on the base interface, if using xt_qtaguid,
+     * every rx 464xlat packet needs to be subtracted from the root UID on the base interface
+     * (http://b/12249687, http:/b/33681750), and every tx 464xlat packet which was counted onto
+     * clat uid should be ignored.
+     *
+     * As for eBPF, the per uid stats is collected by different hook, the rx packets on base
+     * interface will not be counted. Thus, the adjustment on root uid is not needed. However, the
+     * tx traffic counted in the same way xt_qtaguid does, so the traffic on clat uid still
+     * needs to be ignored.
      *
      * <p>This method will behave fine if {@code stackedIfaces} is an non-synchronized but add-only
      * {@code ConcurrentHashMap}
      * @param baseTraffic Traffic on the base interfaces. Will be mutated.
      * @param stackedTraffic Stats with traffic stacked on top of our ifaces. Will also be mutated.
      * @param stackedIfaces Mapping ipv6if -> ipv4if interface where traffic is counted on both.
+     * @param useBpfStats True if eBPF is in use.
      */
     public static void apply464xlatAdjustments(NetworkStats baseTraffic,
-            NetworkStats stackedTraffic, Map<String, String> stackedIfaces) {
+            NetworkStats stackedTraffic, Map<String, String> stackedIfaces, boolean useBpfStats) {
         // Total 464xlat traffic to subtract from uid 0 on all base interfaces.
         // stackedIfaces may grow afterwards, but NetworkStats will just be resized automatically.
         final NetworkStats adjustments = new NetworkStats(0, stackedIfaces.size());
@@ -836,16 +866,18 @@ public class NetworkStats implements Parcelable {
             if (baseIface == null) {
                 continue;
             }
-            // Subtract any 464lat traffic seen for the root UID on the current base interface.
+            // Subtract xt_qtaguid 464lat rx traffic seen for the root UID on the current base
+            // interface. As for eBPF, the per uid stats is collected by different hook, the rx
+            // packets on base interface will not be counted.
             adjust.iface = baseIface;
-            adjust.rxBytes = -(entry.rxBytes + entry.rxPackets * IPV4V6_HEADER_DELTA);
-            adjust.txBytes = -(entry.txBytes + entry.txPackets * IPV4V6_HEADER_DELTA);
-            adjust.rxPackets = -entry.rxPackets;
-            adjust.txPackets = -entry.txPackets;
+            if (!useBpfStats) {
+                adjust.rxBytes = -(entry.rxBytes + entry.rxPackets * IPV4V6_HEADER_DELTA);
+                adjust.rxPackets = -entry.rxPackets;
+            }
             adjustments.combineValues(adjust);
 
-            // For 464xlat traffic, xt_qtaguid only counts the bytes of the native IPv4 packet sent
-            // on the stacked interface with prefix "v4-" and drops the IPv6 header size after
+            // For 464xlat traffic, per uid stats only counts the bytes of the native IPv4 packet
+            // sent on the stacked interface with prefix "v4-" and drops the IPv6 header size after
             // unwrapping. To account correctly for on-the-wire traffic, add the 20 additional bytes
             // difference for all packets (http://b/12249687, http:/b/33681750).
             entry.rxBytes += entry.rxPackets * IPV4V6_HEADER_DELTA;
@@ -853,6 +885,9 @@ public class NetworkStats implements Parcelable {
             stackedTraffic.setValues(i, entry);
         }
 
+        // Traffic on clat uid is v6 tx traffic that is already counted with app uid on the stacked
+        // v4 interface, so it needs to be removed to avoid double-counting.
+        baseTraffic.removeUids(new int[] {CLAT_UID});
         baseTraffic.combineAllValues(adjustments);
     }
 
@@ -864,8 +899,8 @@ public class NetworkStats implements Parcelable {
      * base and stacked traffic.
      * @param stackedIfaces Mapping ipv6if -> ipv4if interface where traffic is counted on both.
      */
-    public void apply464xlatAdjustments(Map<String, String> stackedIfaces) {
-        apply464xlatAdjustments(this, this, stackedIfaces);
+    public void apply464xlatAdjustments(Map<String, String> stackedIfaces, boolean useBpfStats) {
+        apply464xlatAdjustments(this, this, stackedIfaces, useBpfStats);
     }
 
     /**
@@ -931,21 +966,18 @@ public class NetworkStats implements Parcelable {
     }
 
     /**
-     * Return all rows except those attributed to the requested UID; doesn't
-     * mutate the original structure.
+     * Remove all rows that match one of specified UIDs.
      */
-    public NetworkStats withoutUids(int[] uids) {
-        final NetworkStats stats = new NetworkStats(elapsedRealtime, 10);
-
-        Entry entry = new Entry();
+    public void removeUids(int[] uids) {
+        int nextOutputEntry = 0;
         for (int i = 0; i < size; i++) {
-            entry = getValues(i, entry);
-            if (!ArrayUtils.contains(uids, entry.uid)) {
-                stats.addValues(entry);
+            if (!ArrayUtils.contains(uids, uid[i])) {
+                maybeCopyEntry(nextOutputEntry, i);
+                nextOutputEntry++;
             }
         }
 
-        return stats;
+        size = nextOutputEntry;
     }
 
     /**

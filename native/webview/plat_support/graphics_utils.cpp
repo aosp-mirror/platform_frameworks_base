@@ -25,8 +25,8 @@
 #include <cstdlib>
 #include <jni.h>
 #include <utils/Log.h>
+#include "android/graphics/GraphicsJNI.h"
 #include "graphic_buffer_impl.h"
-#include "GraphicsJNI.h"
 #include "SkCanvasStateUtils.h"
 #include "SkGraphics.h"
 #include "SkPicture.h"

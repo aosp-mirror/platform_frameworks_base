@@ -30,37 +30,17 @@ LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src) \
-    $(call all-Iaidl-files-under, src) \
-    $(call all-java-files-under, ../src)
+    $(call all-Iaidl-files-under, src)
 
-LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
-    frameworks/base/packages/SystemUI/res \
-    frameworks/base/packages/SystemUI/res-keyguard \
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    SystemUIPluginLib \
-    SystemUISharedLib \
-    android-support-car \
-    android-support-v4 \
-    android-support-v7-recyclerview \
-    android-support-v7-preference \
-    android-support-v7-appcompat \
-    android-support-v7-mediarouter \
-    android-support-v7-palette \
-    android-support-v14-preference \
-    android-support-v17-leanback \
-    android-slices-core \
-    android-slices-view \
-    android-slices-builders \
-    android-arch-core-runtime \
-    android-arch-lifecycle-extensions \
+    SystemUI-core
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     metrics-helper-lib \
     android-support-test \
     mockito-target-inline-minus-junit4 \
-    SystemUI-proto \
-    SystemUI-tags \
     testables \
     truth-prebuilt \
 
@@ -69,7 +49,6 @@ LOCAL_MULTILIB := both
 LOCAL_JNI_SHARED_LIBRARIES := \
     libdexmakerjvmtiagent \
     libmultiplejvmtiagentsinterferenceagent
-
 
 LOCAL_JAVA_LIBRARIES := \
     android.test.runner \
@@ -111,8 +90,6 @@ jacoco_exclude := $(subst $(space),$(comma),$(patsubst %,%*,$(local_classes)))
 
 LOCAL_JACK_COVERAGE_INCLUDE_FILTER := com.android.systemui.*
 LOCAL_JACK_COVERAGE_EXCLUDE_FILTER := com.android.systemui.tests.*,$(jacoco_exclude)
-
-include frameworks/base/packages/SettingsLib/common.mk
 
 ifeq ($(EXCLUDE_SYSTEMUI_TESTS),)
     include $(BUILD_PACKAGE)

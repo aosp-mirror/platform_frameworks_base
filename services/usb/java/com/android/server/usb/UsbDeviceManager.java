@@ -69,6 +69,7 @@ import android.os.storage.StorageVolume;
 import android.provider.Settings;
 import android.service.usb.UsbDeviceManagerProto;
 import android.service.usb.UsbHandlerProto;
+import android.sysprop.VoldProperties;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -279,13 +280,13 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
         }
         mControlFds.put(UsbManager.FUNCTION_MTP, mtpFd);
         FileDescriptor ptpFd = nativeOpenControl(UsbManager.USB_FUNCTION_PTP);
-        if (mtpFd == null) {
-            Slog.e(TAG, "Failed to open control for mtp");
+        if (ptpFd == null) {
+            Slog.e(TAG, "Failed to open control for ptp");
         }
         mControlFds.put(UsbManager.FUNCTION_PTP, ptpFd);
 
         boolean secureAdbEnabled = SystemProperties.getBoolean("ro.adb.secure", false);
-        boolean dataEncrypted = "1".equals(SystemProperties.get("vold.decrypt"));
+        boolean dataEncrypted = "1".equals(VoldProperties.decrypt().orElse(""));
         if (secureAdbEnabled && !dataEncrypted) {
             mDebuggingManager = new UsbDebuggingManager(context);
         }
@@ -539,7 +540,8 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
             // We do not show the USB notification if the primary volume supports mass storage.
             // The legacy mass storage UI will be used instead.
             final StorageManager storageManager = StorageManager.from(mContext);
-            final StorageVolume primary = storageManager.getPrimaryVolume();
+            final StorageVolume primary =
+                    storageManager != null ? storageManager.getPrimaryVolume() : null;
 
             boolean massStorageSupported = primary != null && primary.allowMassStorage();
             mUseUsbNotification = !massStorageSupported && mContext.getResources().getBoolean(
@@ -1758,8 +1760,8 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                     mGadgetProxy.linkToDeath(new UsbGadgetDeathRecipient(),
                             USB_GADGET_HAL_DEATH_COOKIE);
                     mCurrentFunctions = UsbManager.FUNCTION_NONE;
-                    mGadgetProxy.getCurrentUsbFunctions(new UsbGadgetCallback());
                     mCurrentUsbFunctionsRequested = true;
+                    mGadgetProxy.getCurrentUsbFunctions(new UsbGadgetCallback());
                 }
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);

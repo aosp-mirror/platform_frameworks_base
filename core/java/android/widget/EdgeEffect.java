@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.ColorInt;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -79,6 +80,7 @@ public class EdgeEffect {
     private static final float RADIUS_FACTOR = 0.6f;
 
     private float mGlowAlpha;
+    @UnsupportedAppUsage
     private float mGlowScaleY;
 
     private float mGlowAlphaStart;
@@ -106,6 +108,7 @@ public class EdgeEffect {
     private float mPullDistance;
 
     private final Rect mBounds = new Rect();
+    @UnsupportedAppUsage
     private final Paint mPaint = new Paint();
     private float mRadius;
     private float mBaseGlowScale;

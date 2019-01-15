@@ -281,7 +281,7 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Kedipkan layar saat apl beroperasi lama pada utas utama"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Lokasi penunjuk"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Hamparan layar menampilkan data sentuhan saat ini"</string>
-    <string name="show_touches" msgid="2642976305235070316">"Tampilkan ketukan"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Tampilkan tap"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Tampilkan masukan visual untuk ketukan"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Lihat pembaruan permukaan"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Sorot seluruh permukaan jendela saat diperbarui"</string>

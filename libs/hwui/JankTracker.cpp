@@ -81,7 +81,6 @@ static FrameInfoIndex sFrameStart = FrameInfoIndex::IntendedVsync;
 JankTracker::JankTracker(ProfileDataContainer* globalData, const DisplayInfo& displayInfo) {
     mGlobalData = globalData;
     nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1_s / displayInfo.fps);
-#if USE_HWC2
     nsecs_t sfOffset = frameIntervalNanos - (displayInfo.presentationDeadline - 1_ms);
     nsecs_t offsetDelta = sfOffset - displayInfo.appVsyncOffset;
     // There are two different offset cases. If the offsetDelta is positive
@@ -95,7 +94,6 @@ JankTracker::JankTracker(ProfileDataContainer* globalData, const DisplayInfo& di
         // return due to the staggering of VSYNC-app & VSYNC-sf.
         mDequeueTimeForgiveness = offsetDelta + 4_ms;
     }
-#endif
     setFrameInterval(frameIntervalNanos);
 }
 
@@ -146,7 +144,7 @@ void JankTracker::finishFrame(const FrameInfo& frame) {
                              frame[FrameInfoIndex::IntendedVsync] + mFrameInterval);
 
     // If we hit the deadline, cool!
-    if (frame[FrameInfoIndex::FrameCompleted] < mSwapDeadline) {
+    if (frame[FrameInfoIndex::FrameCompleted] < mSwapDeadline || totalDuration < mFrameInterval) {
         if (isTripleBuffered) {
             mData->reportJankType(JankType::kHighInputLatency);
             (*mGlobalData)->reportJankType(JankType::kHighInputLatency);

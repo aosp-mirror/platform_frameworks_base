@@ -184,7 +184,8 @@ public class ExternalStorageProvider extends FileSystemProvider {
                     title = mStorageManager.getBestVolumeDescription(privateVol);
                     storageUuid = StorageManager.convert(privateVol.fsUuid);
                 }
-            } else if (volume.getType() == VolumeInfo.TYPE_PUBLIC
+            } else if ((volume.getType() == VolumeInfo.TYPE_PUBLIC
+                            || volume.getType() == VolumeInfo.TYPE_STUB)
                     && volume.getMountUserId() == userId) {
                 rootId = volume.getFsUuid();
                 title = mStorageManager.getBestVolumeDescription(volume);
@@ -221,7 +222,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
                 root.flags |= Root.FLAG_REMOVABLE_USB;
             }
 
-            if (!VolumeInfo.ID_EMULATED_INTERNAL.equals(volume.getId())) {
+            if (volume.getType() != VolumeInfo.TYPE_EMULATED) {
                 root.flags |= Root.FLAG_SUPPORTS_EJECT;
             }
 

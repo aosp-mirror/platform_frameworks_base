@@ -251,7 +251,7 @@ static bool hasSameVerbs(const PathData& from, const PathData& to) {
 }
 
 TEST(PathParser, parseStringForData) {
-    for (TestData testData : sTestDataSet) {
+    for (const TestData& testData : sTestDataSet) {
         PathParser::ParseResult result;
         // Test generated path data against the given data.
         PathData pathData;
@@ -271,7 +271,7 @@ TEST(PathParser, parseStringForData) {
 }
 
 TEST(VectorDrawableUtils, createSkPathFromPathData) {
-    for (TestData testData : sTestDataSet) {
+    for (const TestData& testData : sTestDataSet) {
         SkPath expectedPath;
         testData.skPathLamda(&expectedPath);
         SkPath actualPath;
@@ -281,7 +281,7 @@ TEST(VectorDrawableUtils, createSkPathFromPathData) {
 }
 
 TEST(PathParser, parseAsciiStringForSkPath) {
-    for (TestData testData : sTestDataSet) {
+    for (const TestData& testData : sTestDataSet) {
         PathParser::ParseResult result;
         size_t length = strlen(testData.pathString);
         // Check the return value as well as the SkPath generated.
@@ -304,8 +304,8 @@ TEST(PathParser, parseAsciiStringForSkPath) {
 }
 
 TEST(VectorDrawableUtils, morphPathData) {
-    for (TestData fromData : sTestDataSet) {
-        for (TestData toData : sTestDataSet) {
+    for (const TestData& fromData : sTestDataSet) {
+        for (const TestData& toData : sTestDataSet) {
             bool canMorph = VectorDrawableUtils::canMorph(fromData.pathData, toData.pathData);
             if (fromData.pathData == toData.pathData) {
                 EXPECT_TRUE(canMorph);
@@ -319,8 +319,8 @@ TEST(VectorDrawableUtils, morphPathData) {
 
 TEST(VectorDrawableUtils, interpolatePathData) {
     // Interpolate path data with itself and every other path data
-    for (TestData fromData : sTestDataSet) {
-        for (TestData toData : sTestDataSet) {
+    for (const TestData& fromData : sTestDataSet) {
+        for (const TestData& toData : sTestDataSet) {
             PathData outData;
             bool success = VectorDrawableUtils::interpolatePathData(&outData, fromData.pathData,
                                                                     toData.pathData, 0.5);
@@ -331,7 +331,7 @@ TEST(VectorDrawableUtils, interpolatePathData) {
 
     float fractions[] = {0, 0.00001, 0.28, 0.5, 0.7777, 0.9999999, 1};
     // Now try to interpolate with a slightly modified version of self and expect success
-    for (TestData fromData : sTestDataSet) {
+    for (const TestData& fromData : sTestDataSet) {
         PathData toPathData = fromData.pathData;
         for (size_t i = 0; i < toPathData.points.size(); i++) {
             toPathData.points[i]++;

@@ -24,10 +24,10 @@
 #include <tuple>
 #include <vector>
 
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 #include "utils/JenkinsHash.h"
 
-#include "ConfigDescription.h"
 #include "Source.h"
 
 namespace aapt {
@@ -108,7 +108,7 @@ struct ResourceNameRef {
   ResourceNameRef() = default;
   ResourceNameRef(const ResourceNameRef&) = default;
   ResourceNameRef(ResourceNameRef&&) = default;
-  ResourceNameRef(const ResourceName& rhs);  // NOLINT(implicit)
+  ResourceNameRef(const ResourceName& rhs);  // NOLINT(google-explicit-constructor)
   ResourceNameRef(const android::StringPiece& p, ResourceType t, const android::StringPiece& e);
   ResourceNameRef& operator=(const ResourceNameRef& rhs) = default;
   ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
@@ -139,7 +139,7 @@ struct ResourceId {
 
   ResourceId();
   ResourceId(const ResourceId& rhs);
-  ResourceId(uint32_t res_id);  // NOLINT(implicit)
+  ResourceId(uint32_t res_id);  // NOLINT(google-explicit-constructor)
   ResourceId(uint8_t p, uint8_t t, uint16_t e);
 
   bool is_valid() const;
@@ -171,7 +171,7 @@ struct ResourceFile {
   ResourceName name;
 
   // Configuration
-  ConfigDescription config;
+  android::ConfigDescription config;
 
   // Type
   Type type;
@@ -189,7 +189,7 @@ struct ResourceFile {
  */
 struct ResourceKey {
   ResourceName name;
-  ConfigDescription config;
+  android::ConfigDescription config;
 };
 
 bool operator<(const ResourceKey& a, const ResourceKey& b);
@@ -201,16 +201,16 @@ bool operator<(const ResourceKey& a, const ResourceKey& b);
  */
 struct ResourceKeyRef {
   ResourceNameRef name;
-  ConfigDescription config;
+  android::ConfigDescription config;
 
   ResourceKeyRef() = default;
-  ResourceKeyRef(const ResourceNameRef& n, const ConfigDescription& c)
+  ResourceKeyRef(const ResourceNameRef& n, const android::ConfigDescription& c)
       : name(n), config(c) {}
 
   /**
    * Prevent taking a reference to a temporary. This is bad.
    */
-  ResourceKeyRef(ResourceName&& n, const ConfigDescription& c) = delete;
+  ResourceKeyRef(ResourceName&& n, const android::ConfigDescription& c) = delete;
 };
 
 bool operator<(const ResourceKeyRef& a, const ResourceKeyRef& b);

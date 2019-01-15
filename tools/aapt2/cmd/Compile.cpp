@@ -21,11 +21,11 @@
 #include "android-base/errors.h"
 #include "android-base/file.h"
 #include "android-base/utf8.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 
-#include "ConfigDescription.h"
 #include "Diagnostics.h"
 #include "Flags.h"
 #include "ResourceParser.h"
@@ -50,6 +50,7 @@
 
 using ::aapt::io::FileInputStream;
 using ::aapt::text::Printer;
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 using ::android::base::SystemErrorCodeToString;
 using ::google::protobuf::io::CopyingOutputStreamAdaptor;
@@ -485,7 +486,7 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
     }
 
     Printer r_txt_printer(&fout_text);
-    for (const auto res : xmlres->file.exported_symbols) {
+    for (const auto& res : xmlres->file.exported_symbols) {
       r_txt_printer.Print("default int id ");
       r_txt_printer.Println(res.name.entry);
     }
@@ -644,7 +645,7 @@ static bool CompileFile(IAaptContext* context, const CompileOptions& options,
 
 class CompileContext : public IAaptContext {
  public:
-  CompileContext(IDiagnostics* diagnostics) : diagnostics_(diagnostics) {
+  explicit CompileContext(IDiagnostics* diagnostics) : diagnostics_(diagnostics) {
   }
 
   PackageType GetPackageType() override {

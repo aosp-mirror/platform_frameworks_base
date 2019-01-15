@@ -1550,7 +1550,6 @@ public class WifiManager {
     /**
      * @return true if this adapter supports Device-to-AP RTT
      */
-    @SystemApi
     public boolean isDeviceToApRttSupported() {
         return isFeatureSupported(WIFI_FEATURE_D2AP_RTT);
     }
@@ -2178,6 +2177,21 @@ public class WifiManager {
     public boolean setWifiApConfiguration(WifiConfiguration wifiConfig) {
         try {
             return mService.setWifiApConfiguration(wifiConfig, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Method that triggers a notification to the user about a conversion to their saved AP config.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void notifyUserOfApBandConversion() {
+        Log.d(TAG, "apBand was converted, notify the user");
+        try {
+            mService.notifyUserOfApBandConversion(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

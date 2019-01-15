@@ -34,6 +34,7 @@
 
 using ::aapt::ResourceUtils::StringBuilder;
 using ::aapt::text::Utf8Iterator;
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 
 namespace aapt {
@@ -77,7 +78,7 @@ static uint32_t ParseFormatType(const StringPiece& piece) {
 
 static uint32_t ParseFormatAttribute(const StringPiece& str) {
   uint32_t mask = 0;
-  for (StringPiece part : util::Tokenize(str, '|')) {
+  for (const StringPiece& part : util::Tokenize(str, '|')) {
     StringPiece trimmed_part = util::TrimWhitespace(part);
     uint32_t type = ParseFormatType(trimmed_part);
     if (type == 0) {

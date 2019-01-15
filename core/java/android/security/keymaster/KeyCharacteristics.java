@@ -52,6 +52,14 @@ public class KeyCharacteristics implements Parcelable {
         readFromParcel(in);
     }
 
+    /**
+     * Makes a shallow copy of other by copying the other's references to the KeymasterArguments
+     */
+    public void shallowCopyFrom(KeyCharacteristics other) {
+        this.swEnforced = other.swEnforced;
+        this.hwEnforced = other.hwEnforced;
+    }
+
     @Override
     public int describeContents() {
         return 0;

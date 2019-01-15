@@ -24,6 +24,7 @@
 #include <ostream>
 #include <string>
 
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 using ::testing::Eq;
 using ::testing::NotNull;

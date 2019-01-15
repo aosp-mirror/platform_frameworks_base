@@ -18,14 +18,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_marginStart="@dimen/rounded_corner_content_padding"
+    android:layout_marginEnd="@dimen/rounded_corner_content_padding"
+    android:paddingStart="@dimen/nav_content_padding"
+    android:paddingEnd="@dimen/nav_content_padding">
 
     <com.android.systemui.statusbar.phone.NearestTouchFrame
         android:id="@+id/nav_buttons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="@dimen/rounded_corner_content_padding"
-        android:paddingEnd="@dimen/rounded_corner_content_padding"
         android:clipChildren="false"
         android:clipToPadding="false">
 
@@ -34,8 +36,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:paddingStart="@dimen/nav_content_padding"
-            android:paddingEnd="@dimen/nav_content_padding"
             android:clipToPadding="false"
             android:clipChildren="false" />
 
@@ -46,8 +46,6 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingStart="@dimen/nav_content_padding"
-            android:paddingEnd="@dimen/nav_content_padding"
             android:clipToPadding="false"
             android:clipChildren="false" />
 

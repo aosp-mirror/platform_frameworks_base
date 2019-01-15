@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.IBinder;
 
 import java.io.FileDescriptor;
@@ -677,12 +678,12 @@ public class MediaMetadataRetriever
      * allocated internally.
      */
     public native void release();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private native void native_setup();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static native void native_init();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private native final void native_finalize();
 
     @Override
@@ -923,5 +924,51 @@ public class MediaMetadataRetriever
      * @hide
      */
     public static final int METADATA_KEY_EXIF_LENGTH = 34;
+
+    /**
+     * This key retrieves the color standard, if available.
+     *
+     * @see MediaFormat#COLOR_STANDARD_BT709
+     * @see MediaFormat#COLOR_STANDARD_BT601_PAL
+     * @see MediaFormat#COLOR_STANDARD_BT601_NTSC
+     * @see MediaFormat#COLOR_STANDARD_BT2020
+     *
+     * @hide
+     */
+    public static final int METADATA_KEY_COLOR_STANDARD = 35;
+
+    /**
+     * This key retrieves the color transfer, if available.
+     *
+     * @see MediaFormat#COLOR_TRANSFER_LINEAR
+     * @see MediaFormat#COLOR_TRANSFER_SDR_VIDEO
+     * @see MediaFormat#COLOR_TRANSFER_ST2084
+     * @see MediaFormat#COLOR_TRANSFER_HLG
+     *
+     * @hide
+     */
+    public static final int METADATA_KEY_COLOR_TRANSFER = 36;
+
+    /**
+     * This key retrieves the color range, if available.
+     *
+     * @see MediaFormat#COLOR_RANGE_LIMITED
+     * @see MediaFormat#COLOR_RANGE_FULL
+     *
+     * @hide
+     */
+    public static final int METADATA_KEY_COLOR_RANGE    = 37;
     // Add more here...
+
+    /**
+     * This key retrieves the sample rate, if available.
+     * @hide
+     */
+    public static final int METADATA_KEY_SAMPLERATE      = 38;
+
+    /**
+     * This key retrieves the bits per sample, if available.
+     * @hide
+     */
+    public static final int METADATA_KEY_BITS_PER_SAMPLE = 39;
 }

@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.method.MetaKeyKeyListener;
@@ -1245,7 +1246,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     @UnsupportedAppUsage
     private int mDeviceId;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mSource;
     @UnsupportedAppUsage
     private int mMetaState;
@@ -1626,7 +1627,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @hide
      */
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final void recycle() {
         super.recycle();
         mCharacters = null;

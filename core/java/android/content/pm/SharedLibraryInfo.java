@@ -19,11 +19,13 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -69,16 +71,22 @@ public final class SharedLibraryInfo implements Parcelable {
      */
     public static final int VERSION_UNDEFINED = -1;
 
+    private final String mPath;
+    private final String mPackageName;
     private final String mName;
+    private final List<String> mCodePaths;
 
     private final long mVersion;
     private final @Type int mType;
     private final VersionedPackage mDeclaringPackage;
     private final List<VersionedPackage> mDependentPackages;
+    private List<SharedLibraryInfo> mDependencies;
 
     /**
      * Creates a new instance.
      *
+     * @param codePaths For a non {@link #TYPE_BUILTIN builtin} library, the locations of jars of
+     *                  this shared library. Null for builtin library.
      * @param name The lib name.
      * @param version The lib version if not builtin.
      * @param type The lib type.
@@ -87,18 +95,26 @@ public final class SharedLibraryInfo implements Parcelable {
      *
      * @hide
      */
-    public SharedLibraryInfo(String name, long version, int type,
-            VersionedPackage declaringPackage, List<VersionedPackage> dependentPackages) {
+    public SharedLibraryInfo(String path, String packageName, List<String> codePaths,
+            String name, long version, int type,
+            VersionedPackage declaringPackage, List<VersionedPackage> dependentPackages,
+            List<SharedLibraryInfo> dependencies) {
+        mPath = path;
+        mPackageName = packageName;
+        mCodePaths = codePaths;
         mName = name;
         mVersion = version;
         mType = type;
         mDeclaringPackage = declaringPackage;
         mDependentPackages = dependentPackages;
+        mDependencies = dependencies;
     }
 
     private SharedLibraryInfo(Parcel parcel) {
-        this(parcel.readString(), parcel.readLong(), parcel.readInt(),
-                parcel.readParcelable(null), parcel.readArrayList(null));
+        this(parcel.readString(), parcel.readString(), parcel.readArrayList(null),
+                parcel.readString(), parcel.readLong(),
+                parcel.readInt(), parcel.readParcelable(null), parcel.readArrayList(null),
+                parcel.createTypedArrayList(SharedLibraryInfo.CREATOR));
     }
 
     /**
@@ -118,6 +134,90 @@ public final class SharedLibraryInfo implements Parcelable {
      */
     public String getName() {
         return mName;
+    }
+
+    /**
+     * If the shared library is a jar file, returns the path of that jar. Null otherwise.
+     * Only libraries with TYPE_BUILTIN are in jar files.
+     *
+     * @return The path.
+     *
+     * @hide
+     */
+    public @Nullable String getPath() {
+        return mPath;
+    }
+
+    /**
+     * If the shared library is an apk, returns the package name. Null otherwise.
+     * Only libraries with TYPE_DYNAMIC or TYPE_STATIC are in apks.
+     *
+     * @return The package name.
+     *
+     * @hide
+     */
+    public @Nullable String getPackageName() {
+        return mPackageName;
+    }
+
+    /**
+     * Get all code paths for that library.
+     *
+     * @return All code paths.
+     *
+     * @hide
+     */
+    public List<String> getAllCodePaths() {
+        if (getPath() != null) {
+            // Builtin library.
+            ArrayList<String> list = new ArrayList<>();
+            list.add(getPath());
+            return list;
+        } else {
+            // Static or dynamic library.
+            return mCodePaths;
+        }
+    }
+
+    /**
+     * Add a library dependency to that library. Note that this
+     * should be called under the package manager lock.
+     *
+     * @hide
+     */
+    public void addDependency(@Nullable SharedLibraryInfo info) {
+        if (info == null) {
+            // For convenience of the caller, allow null to be passed.
+            // This can happen when we create the dependencies of builtin
+            // libraries.
+            return;
+        }
+        if (mDependencies == null) {
+            mDependencies = new ArrayList<>();
+        }
+        mDependencies.add(info);
+    }
+
+    /**
+     * Clear all dependencies.
+     *
+     * @hide
+     */
+    public void clearDependencies() {
+        mDependencies = null;
+    }
+
+    /**
+     * Gets the libraries this library directly depends on. Note that
+     * the package manager prevents recursive dependencies when installing
+     * a package.
+     *
+     * @return The dependencies.
+     *
+     * @hide
+     */
+    public @Nullable List<SharedLibraryInfo> getDependencies() {
+        return mDependencies;
     }
 
     /**
@@ -196,11 +296,15 @@ public final class SharedLibraryInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(mPath);
+        parcel.writeString(mPackageName);
+        parcel.writeList(mCodePaths);
         parcel.writeString(mName);
         parcel.writeLong(mVersion);
         parcel.writeInt(mType);
         parcel.writeParcelable(mDeclaringPackage, flags);
         parcel.writeList(mDependentPackages);
+        parcel.writeTypedList(mDependencies);
     }
 
     private static String typeToString(int type) {

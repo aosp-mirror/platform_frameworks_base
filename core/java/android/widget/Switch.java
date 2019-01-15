@@ -21,6 +21,7 @@ import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -93,12 +94,14 @@ public class Switch extends CompoundButton {
     private static final int SERIF = 2;
     private static final int MONOSPACE = 3;
 
+    @UnsupportedAppUsage
     private Drawable mThumbDrawable;
     private ColorStateList mThumbTintList = null;
     private PorterDuff.Mode mThumbTintMode = null;
     private boolean mHasThumbTint = false;
     private boolean mHasThumbTintMode = false;
 
+    @UnsupportedAppUsage
     private Drawable mTrackDrawable;
     private ColorStateList mTrackTintList = null;
     private PorterDuff.Mode mTrackTintMode = null;
@@ -106,6 +109,7 @@ public class Switch extends CompoundButton {
     private boolean mHasTrackTintMode = false;
 
     private int mThumbTextPadding;
+    @UnsupportedAppUsage
     private int mSwitchMinWidth;
     private int mSwitchPadding;
     private boolean mSplitTrack;
@@ -127,18 +131,21 @@ public class Switch extends CompoundButton {
      * Width required to draw the switch track and thumb. Includes padding and
      * optical bounds for both the track and thumb.
      */
+    @UnsupportedAppUsage
     private int mSwitchWidth;
 
     /**
      * Height required to draw the switch track and thumb. Includes padding and
      * optical bounds for both the track and thumb.
      */
+    @UnsupportedAppUsage
     private int mSwitchHeight;
 
     /**
      * Width of the thumb's content region. Does not include padding or
      * optical bounds.
      */
+    @UnsupportedAppUsage
     private int mThumbWidth;
 
     /** Left bound for drawing the switch track and thumb. */
@@ -155,7 +162,9 @@ public class Switch extends CompoundButton {
 
     private TextPaint mTextPaint;
     private ColorStateList mTextColors;
+    @UnsupportedAppUsage
     private Layout mOnLayout;
+    @UnsupportedAppUsage
     private Layout mOffLayout;
     private TransformationMethod2 mSwitchTransformationMethod;
     private ObjectAnimator mPositionAnimator;
@@ -1050,6 +1059,7 @@ public class Switch extends CompoundButton {
         mPositionAnimator.start();
     }
 
+    @UnsupportedAppUsage
     private void cancelPositionAnimator() {
         if (mPositionAnimator != null) {
             mPositionAnimator.cancel();
@@ -1065,6 +1075,7 @@ public class Switch extends CompoundButton {
      *
      * @param position new position between [0,1]
      */
+    @UnsupportedAppUsage
     private void setThumbPosition(float position) {
         mThumbPosition = position;
         invalidate();

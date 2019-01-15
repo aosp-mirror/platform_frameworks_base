@@ -15,6 +15,8 @@
 package android.telecom;
 
 import android.Manifest;
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
@@ -29,15 +31,19 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.telecom.ITelecomService;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Provides access to information about active calls and registration/call-management functionality.
@@ -173,6 +179,33 @@ public class TelecomManager {
      */
     public static final String EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME =
             "android.telecom.extra.CHANGE_DEFAULT_DIALER_PACKAGE_NAME";
+
+    /**
+     * Broadcast intent action indicating that the current default call screening app has changed.
+     *
+     * The string extra {@link #EXTRA_DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME} will contain the
+     * name of the Component of the previous or the new call screening app.
+     *
+     * The boolean extra {@link #EXTRA_IS_DEFAULT_CALL_SCREENING_APP} will indicate the component
+     * name in the String extra {@link #EXTRA_DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME} is default
+     * call screening app or not.
+     */
+    public static final String ACTION_DEFAULT_CALL_SCREENING_APP_CHANGED =
+        "android.telecom.action.DEFAULT_CALL_SCREENING_APP_CHANGED";
+
+    /**
+     * Extra value used with {@link #ACTION_DEFAULT_CALL_SCREENING_APP_CHANGED} broadcast to
+     * indicate the ComponentName of the call screening app which has changed.
+     */
+    public static final String EXTRA_DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME =
+            "android.telecom.extra.DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME";
+
+    /**
+     * Extra value used with {@link #ACTION_DEFAULT_CALL_SCREENING_APP_CHANGED} broadcast to
+     * indicate whether an app is the default call screening app.
+     */
+    public static final String EXTRA_IS_DEFAULT_CALL_SCREENING_APP =
+            "android.telecom.extra.IS_DEFAULT_CALL_SCREENING_APP";
 
     /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} containing a boolean that
@@ -317,6 +350,15 @@ public class TelecomManager {
             "android.telecom.extra.CALL_TECHNOLOGY_TYPE";
 
     /**
+     * Optional extra for communicating the call network technology used by a
+     * {@link android.telecom.Connection} to Telecom and InCallUI.
+     *
+     * @see {@code NETWORK_TYPE_*} in {@link android.telephony.TelephonyManager}.
+     */
+    public static final String EXTRA_CALL_NETWORK_TYPE =
+            "android.telecom.extra.CALL_NETWORK_TYPE";
+
+    /**
      * An optional {@link android.content.Intent#ACTION_CALL} intent extra denoting the
      * package name of the app specifying an alternative gateway for the call.
      * The value is a string.
@@ -376,8 +418,10 @@ public class TelecomManager {
      * <p>
      * The phone number of the call used by Telecom to determine which call should be handed over.
      * @hide
+     * @deprecated Use the public handover APIs.  See
+     * {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} for more information.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 119305590)
     public static final String EXTRA_IS_HANDOVER = "android.telecom.extra.IS_HANDOVER";
 
     /**
@@ -491,11 +535,19 @@ public class TelecomManager {
     public static final char DTMF_CHARACTER_WAIT = ';';
 
     /**
+     * @hide
+     */
+    @IntDef(prefix = { "TTY_MODE_" },
+            value = {TTY_MODE_OFF, TTY_MODE_FULL, TTY_MODE_HCO, TTY_MODE_VCO})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TtyMode {}
+
+    /**
      * TTY (teletypewriter) mode is off.
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final int TTY_MODE_OFF = 0;
 
     /**
@@ -504,6 +556,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int TTY_MODE_FULL = 1;
 
     /**
@@ -513,6 +566,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int TTY_MODE_HCO = 2;
 
     /**
@@ -522,6 +576,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int TTY_MODE_VCO = 3;
 
     /**
@@ -622,6 +677,18 @@ public class TelecomManager {
             "android.telecom.extra.USE_ASSISTED_DIALING";
 
     /**
+     * Optional extra for {@link #placeCall(Uri, Bundle)} containing an integer that specifies
+     * the source where user initiated this call. This data is used in metrics.
+     * Valid source are:
+     * {@link ParcelableCallAnalytics#CALL_SOURCE_UNSPECIFIED},
+     * {@link ParcelableCallAnalytics#CALL_SOURCE_EMERGENCY_DIALPAD},
+     * {@link ParcelableCallAnalytics#CALL_SOURCE_EMERGENCY_SHORTCUT}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_CALL_SOURCE = "android.telecom.extra.CALL_SOURCE";
+
+    /**
      * The following 4 constants define how properties such as phone numbers and names are
      * displayed to the user.
      */
@@ -655,7 +722,7 @@ public class TelecomManager {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static TelecomManager from(Context context) {
         return (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
     }
@@ -778,8 +845,9 @@ public class TelecomManager {
      * @return The phone account handle of the current sim call manager.
      *
      * @hide
+     * @deprecated Use {@link #getSimCallManager()}.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 119305590)
     public PhoneAccountHandle getSimCallManager(int userId) {
         try {
             if (isServiceConnected()) {
@@ -880,10 +948,12 @@ public class TelecomManager {
      * Returns a list of {@link PhoneAccountHandle}s including those which have not been enabled
      * by the user.
      *
+     * @param includeDisabledAccounts When {@code true}, disabled phone accounts will be included,
+     *                                when {@code false}, only
      * @return A list of {@code PhoneAccountHandle} objects.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 119305590)
     public List<PhoneAccountHandle> getCallCapablePhoneAccounts(boolean includeDisabledAccounts) {
         try {
             if (isServiceConnected()) {
@@ -1106,7 +1176,7 @@ public class TelecomManager {
     /**
      * Used to set the default dialer package.
      *
-     * @param packageName to set the default dialer to..
+     * @param packageName to set the default dialer to.
      *
      * @result {@code true} if the default dialer was successfully changed, {@code false} if
      *         the specified package does not correspond to an installed dialer, or is already
@@ -1116,8 +1186,13 @@ public class TelecomManager {
      * Requires permission: {@link android.Manifest.permission#WRITE_SECURE_SETTINGS}
      *
      * @hide
+     * @deprecated Use RoleManager instead.
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @Deprecated
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            android.Manifest.permission.WRITE_SECURE_SETTINGS})
     public boolean setDefaultDialer(String packageName) {
         try {
             if (isServiceConnected()) {
@@ -1130,12 +1205,10 @@ public class TelecomManager {
     }
 
     /**
-     * Used to determine the dialer package that is preloaded on the system partition.
+     * Determines the package name of the system-provided default phone app.
      *
      * @return package name for the system dialer package or null if no system dialer is preloaded.
-     * @hide
      */
-    @UnsupportedAppUsage
     public String getSystemDialerPackage() {
         try {
             if (isServiceConnected()) {
@@ -1320,7 +1393,6 @@ public class TelecomManager {
      * otherwise.
      */
     @RequiresPermission(Manifest.permission.ANSWER_PHONE_CALLS)
-    @SystemApi
     public boolean endCall() {
         try {
             if (isServiceConnected()) {
@@ -1397,7 +1469,6 @@ public class TelecomManager {
     /**
      * Returns whether TTY is supported on this device.
      */
-    @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
@@ -1423,8 +1494,9 @@ public class TelecomManager {
      * - {@link TelecomManager#TTY_MODE_VCO}
      * @hide
      */
-    @UnsupportedAppUsage
-    public int getCurrentTtyMode() {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @TtyMode int getCurrentTtyMode() {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getCurrentTtyMode(mContext.getOpPackageName());
@@ -1861,6 +1933,43 @@ public class TelecomManager {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException acceptHandover: " + e);
         }
+    }
+
+    /**
+     * Determines if there is an ongoing emergency call.  This can be either an outgoing emergency
+     * call, as identified by the dialed number, or because a call was identified by the network
+     * as an emergency call.
+     * @return {@code true} if there is an ongoing emergency call, {@code false} otherwise.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean isInEmergencyCall() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().isInEmergencyCall();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException isInEmergencyCall: " + e);
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * Handles {@link Intent#ACTION_CALL} intents trampolined from UserCallActivity.
+     * @param intent The {@link Intent#ACTION_CALL} intent to handle.
+     * @hide
+     */
+    public void handleCallIntent(Intent intent) {
+        try {
+            if (isServiceConnected()) {
+                getTelecomService().handleCallIntent(intent);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException handleCallIntent: " + e);
+        }
+
     }
 
     private ITelecomService getTelecomService() {

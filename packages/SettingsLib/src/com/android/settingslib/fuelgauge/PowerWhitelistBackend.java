@@ -16,13 +16,14 @@
 
 package com.android.settingslib.fuelgauge;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.telecom.DefaultDialerManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -89,6 +90,13 @@ public class PowerWhitelistBackend {
         if (TextUtils.equals(pkg, defaultDialer)) {
             return true;
         }
+
+        final DevicePolicyManager devicePolicyManager = mAppContext.getSystemService(
+                DevicePolicyManager.class);
+        if (devicePolicyManager.packageHasActiveAdmins(pkg)) {
+            return true;
+        }
+
         return false;
     }
 

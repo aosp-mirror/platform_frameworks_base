@@ -1,0 +1,2 @@
+# extra for MTP related files
+per-file android_mtp_*.cpp=marcone@google.com,jsharkey@android.com,jameswei@google.com,rmojumder@google.com

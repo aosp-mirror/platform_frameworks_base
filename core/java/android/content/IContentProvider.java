@@ -21,6 +21,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
@@ -80,7 +81,7 @@ public interface IContentProvider extends IInterface {
             Bundle opts, ICancellationSignal signal) throws RemoteException, FileNotFoundException;
 
     /* IPC constants */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     static final String descriptor = "android.content.IContentProvider";
 
     @UnsupportedAppUsage

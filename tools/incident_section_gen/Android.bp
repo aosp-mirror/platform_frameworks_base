@@ -24,6 +24,8 @@ cc_binary_host {
         "-O0",
         "-Wall",
         "-Werror",
+        // Allow implicit fallthroughs in main.cpp until they are fixed.
+        "-Wno-error=implicit-fallthrough",
     ],
     srcs: ["main.cpp"],
     shared_libs: [

@@ -20,8 +20,8 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.Rlog;
@@ -250,6 +250,47 @@ public final class TelephonyPermissions {
     }
 
     /**
+     * Ensure the caller (or self, if not processing an IPC) has
+     * {@link android.Manifest.permission#READ_PHONE_STATE} or carrier privileges.
+     *
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     */
+    public static void enforeceCallingOrSelfReadPhoneStatePermissionOrCarrierPrivilege(
+            Context context, int subId, String message) {
+        if (context.checkCallingOrSelfPermission(android.Manifest.permission.READ_PHONE_STATE)
+                == PERMISSION_GRANTED) {
+            return;
+        }
+
+        if (DBG) {
+            Rlog.d(LOG_TAG, "No READ_PHONE_STATE permission, check carrier privilege next.");
+        }
+
+        enforceCallingOrSelfCarrierPrivilege(subId, message);
+    }
+
+    /**
+     * Ensure the caller (or self, if not processing an IPC) has
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or carrier privileges.
+     *
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     */
+    public static void enforeceCallingOrSelfReadPrivilegedPhoneStatePermissionOrCarrierPrivilege(
+            Context context, int subId, String message) {
+        if (context.checkCallingOrSelfPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+                == PERMISSION_GRANTED) {
+            return;
+        }
+
+        if (DBG) {
+            Rlog.d(LOG_TAG, "No READ_PRIVILEDED_PHONE_STATE permission, " +
+                    "check carrier privilege next.");
+        }
+
+        enforceCallingOrSelfCarrierPrivilege(subId, message);
+    }
+
+    /**
      * Make sure the caller (or self, if not processing an IPC) has carrier privileges.
      *
      * @throws SecurityException if the caller does not have the required privileges
@@ -287,5 +328,18 @@ public final class TelephonyPermissions {
         }
         Rlog.e(LOG_TAG, "Phone process is down, cannot check carrier privileges");
         return TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
+    }
+
+    /**
+     * Throws if the caller is not of a shell (or root) UID.
+     *
+     * @param callingUid pass Binder.callingUid().
+     */
+    public static void enforceShellOnly(int callingUid, String message) {
+        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+            return; // okay
+        }
+
+        throw new SecurityException(message + ": Only shell user can call it");
     }
 }

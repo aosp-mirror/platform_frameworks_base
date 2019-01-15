@@ -39,7 +39,7 @@ using base::unique_fd;
 
 static const std::string kResourcesArsc("resources.arsc");
 
-ApkAssets::ApkAssets(void* unmanaged_handle, const std::string& path)
+ApkAssets::ApkAssets(ZipArchiveHandle unmanaged_handle, const std::string& path)
     : zip_handle_(unmanaged_handle, ::CloseArchive), path_(path) {
 }
 

@@ -15,11 +15,15 @@
  */
 package android.provider;
 
+import android.annotation.IntDef;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telecom.Log;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * <p>
@@ -220,6 +224,63 @@ public class BlockedNumberContract {
     public static final String RES_NUMBER_IS_BLOCKED = "blocked";
 
     /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            prefix = { "STATUS_" },
+            value = {STATUS_NOT_BLOCKED, STATUS_BLOCKED_IN_LIST, STATUS_BLOCKED_RESTRICTED,
+                    STATUS_BLOCKED_UNKNOWN_NUMBER, STATUS_BLOCKED_PAYPHONE,
+                    STATUS_BLOCKED_NOT_IN_CONTACTS})
+    public @interface BlockStatus {}
+
+    /**
+     * Integer reason code used with {@link #RES_BLOCK_STATUS} to indicate that a call was not
+     * blocked.
+     * @hide
+     */
+    public static final int STATUS_NOT_BLOCKED = 0;
+
+    /**
+     * Integer reason code used with {@link #RES_BLOCK_STATUS} to indicate that a call was blocked
+     * because it is in the list of blocked numbers maintained by the provider.
+     * @hide
+     */
+    public static final int STATUS_BLOCKED_IN_LIST = 1;
+
+    /**
+     * Integer reason code used with {@link #RES_BLOCK_STATUS} to indicate that a call was blocked
+     * because it is from a restricted number.
+     * @hide
+     */
+    public static final int STATUS_BLOCKED_RESTRICTED = 2;
+
+    /**
+     * Integer reason code used with {@link #RES_BLOCK_STATUS} to indicate that a call was blocked
+     * because it is from an unknown number.
+     * @hide
+     */
+    public static final int STATUS_BLOCKED_UNKNOWN_NUMBER = 3;
+
+    /**
+     * Integer reason code used with {@link #RES_BLOCK_STATUS} to indicate that a call was blocked
+     * because it is from a pay phone.
+     * @hide
+     */
+    public static final int STATUS_BLOCKED_PAYPHONE = 4;
+
+    /**
+     * Integer reason code used with {@link #RES_BLOCK_STATUS} to indicate that a call was blocked
+     * because it is from a number not in the users contacts.
+     * @hide
+     */
+    public static final int STATUS_BLOCKED_NOT_IN_CONTACTS = 5;
+
+    /**
+     * Integer reason indicating whether a call was blocked, and if so why.
+     * @hide
+     */
+    public static final String RES_BLOCK_STATUS = "block_status";
+
+    /** @hide */
     public static final String RES_NUM_ROWS_DELETED = "num_deleted";
 
     /** @hide */
@@ -411,19 +472,23 @@ public class BlockedNumberContract {
          * @param context the context of the caller.
          * @param phoneNumber the number to check.
          * @param extras the extra attribute of the number.
-         * @return {@code true} if should block the number. {@code false} otherwise.
+         * @return result code indicating if the number should be blocked, and if so why.
+         *         Valid values are: {@link #STATUS_NOT_BLOCKED}, {@link #STATUS_BLOCKED_IN_LIST},
+         *         {@link #STATUS_BLOCKED_NOT_IN_CONTACTS}, {@link #STATUS_BLOCKED_PAYPHONE},
+         *         {@link #STATUS_BLOCKED_RESTRICTED}, {@link #STATUS_BLOCKED_UNKNOWN_NUMBER}.
          */
-        public static boolean shouldSystemBlockNumber(Context context, String phoneNumber,
+        public static int shouldSystemBlockNumber(Context context, String phoneNumber,
                 Bundle extras) {
             try {
                 final Bundle res = context.getContentResolver().call(
                         AUTHORITY_URI, METHOD_SHOULD_SYSTEM_BLOCK_NUMBER, phoneNumber, extras);
-                return res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
+                return res != null ? res.getInt(RES_BLOCK_STATUS, STATUS_NOT_BLOCKED) :
+                        BlockedNumberContract.STATUS_NOT_BLOCKED;
             } catch (NullPointerException | IllegalArgumentException ex) {
                 // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
                 // either of these happen.
                 Log.w(null, "shouldSystemBlockNumber: provider not ready.");
-                return false;
+                return BlockedNumberContract.STATUS_NOT_BLOCKED;
             }
         }
 
@@ -501,6 +566,28 @@ public class BlockedNumberContract {
             extras.putBoolean(EXTRA_ENHANCED_SETTING_VALUE, value);
             context.getContentResolver().call(AUTHORITY_URI, METHOD_SET_ENHANCED_BLOCK_SETTING,
                     null, extras);
+        }
+
+        /**
+         * Converts a block status constant to a string equivalent for logging.
+         * @hide
+         */
+        public static String blockStatusToString(int blockStatus) {
+            switch (blockStatus) {
+                case STATUS_NOT_BLOCKED:
+                    return "not blocked";
+                case STATUS_BLOCKED_IN_LIST:
+                    return "blocked - in list";
+                case STATUS_BLOCKED_RESTRICTED:
+                    return "blocked - restricted";
+                case STATUS_BLOCKED_UNKNOWN_NUMBER:
+                    return "blocked - unknown";
+                case STATUS_BLOCKED_PAYPHONE:
+                    return "blocked - payphone";
+                case STATUS_BLOCKED_NOT_IN_CONTACTS:
+                    return "blocked - not in contacts";
+            }
+            return "unknown";
         }
 
         /**

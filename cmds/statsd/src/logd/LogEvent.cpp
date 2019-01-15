@@ -379,7 +379,7 @@ float LogEvent::GetFloat(size_t key, status_t* err) const {
 
 string LogEvent::ToString() const {
     string result;
-    result += StringPrintf("{ %lld %lld (%d)", (long long)mLogdTimestampNs,
+    result += StringPrintf("{ uid(%d) %lld %lld (%d)", mLogUid, (long long)mLogdTimestampNs,
                            (long long)mElapsedTimestampNs, mTagId);
     for (const auto& value : mValues) {
         result +=

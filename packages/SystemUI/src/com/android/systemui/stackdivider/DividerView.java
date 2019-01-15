@@ -226,22 +226,16 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         public boolean performAccessibilityAction(View host, int action, Bundle args) {
             int currentPosition = getCurrentPosition();
             SnapTarget nextTarget = null;
-            switch (action) {
-                case R.id.action_move_tl_full:
-                    nextTarget = mSnapAlgorithm.getDismissEndTarget();
-                    break;
-                case R.id.action_move_tl_70:
-                    nextTarget = mSnapAlgorithm.getLastSplitTarget();
-                    break;
-                case R.id.action_move_tl_50:
-                    nextTarget = mSnapAlgorithm.getMiddleTarget();
-                    break;
-                case R.id.action_move_tl_30:
-                    nextTarget = mSnapAlgorithm.getFirstSplitTarget();
-                    break;
-                case R.id.action_move_rb_full:
-                    nextTarget = mSnapAlgorithm.getDismissStartTarget();
-                    break;
+            if (action == R.id.action_move_tl_full) {
+                nextTarget = mSnapAlgorithm.getDismissEndTarget();
+            } else if (action == R.id.action_move_tl_70) {
+                nextTarget = mSnapAlgorithm.getLastSplitTarget();
+            } else if (action == R.id.action_move_tl_50) {
+                nextTarget = mSnapAlgorithm.getMiddleTarget();
+            } else if (action == R.id.action_move_tl_30) {
+                nextTarget = mSnapAlgorithm.getFirstSplitTarget();
+            } else if (action == R.id.action_move_rb_full) {
+                nextTarget = mSnapAlgorithm.getDismissStartTarget();
             }
             if (nextTarget != null) {
                 startDragging(true /* animate */, false /* touching */);

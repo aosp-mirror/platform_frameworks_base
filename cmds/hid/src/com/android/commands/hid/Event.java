@@ -19,6 +19,7 @@ package com.android.commands.hid;
 import android.util.JsonReader;
 import android.util.JsonToken;
 import android.util.Log;
+import android.util.SparseArray;
 
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -39,6 +40,7 @@ public class Event {
     private int mVid;
     private int mPid;
     private byte[] mReport;
+    private SparseArray<byte[]> mFeatureReports;
     private int mDuration;
 
     public int getId() {
@@ -69,6 +71,10 @@ public class Event {
         return mReport;
     }
 
+    public SparseArray<byte[]> getFeatureReports() {
+        return mFeatureReports;
+    }
+
     public int getDuration() {
         return mDuration;
     }
@@ -81,6 +87,7 @@ public class Event {
             + ", vid=" + mVid
             + ", pid=" + mPid
             + ", report=" + Arrays.toString(mReport)
+            + ", feature_reports=" + mFeatureReports.toString()
             + ", duration=" + mDuration
             + "}";
     }
@@ -110,6 +117,10 @@ public class Event {
 
         public void setReport(byte[] report) {
             mEvent.mReport = report;
+        }
+
+        public void setFeatureReports(SparseArray<byte[]> reports) {
+            mEvent.mFeatureReports = reports;
         }
 
         public void setVid(int vid) {
@@ -185,6 +196,9 @@ public class Event {
                             case "report":
                                 eb.setReport(readData());
                                 break;
+                            case "feature_reports":
+                                eb.setFeatureReports(readFeatureReports());
+                                break;
                             case "duration":
                                 eb.setDuration(readInt());
                                 break;
@@ -232,6 +246,47 @@ public class Event {
         private int readInt() throws IOException {
             String val = mReader.nextString();
             return Integer.decode(val);
+        }
+
+        private SparseArray<byte[]> readFeatureReports()
+                throws IllegalStateException, IOException {
+            SparseArray<byte[]> featureReports = new SparseArray();
+            try {
+                mReader.beginArray();
+                while (mReader.hasNext()) {
+                    // If "id" is not specified, it defaults to 0, which means
+                    // report does not contain report ID (based on HID specs).
+                    int id = 0;
+                    byte[] data = null;
+                    mReader.beginObject();
+                    while (mReader.hasNext()) {
+                        String name = mReader.nextName();
+                        switch (name) {
+                            case "id":
+                                id = readInt();
+                                break;
+                            case "data":
+                                data = readData();
+                                break;
+                            default:
+                                consumeRemainingElements();
+                                mReader.endObject();
+                                throw new IllegalStateException("Invalid key in feature report: "
+                                        + name);
+                        }
+                    }
+                    mReader.endObject();
+                    if (data != null)
+                        featureReports.put(id, data);
+                }
+                mReader.endArray();
+            } catch (IllegalStateException|NumberFormatException e) {
+                consumeRemainingElements();
+                mReader.endArray();
+                throw new IllegalStateException("Encountered malformed data.", e);
+            } finally {
+                return featureReports;
+            }
         }
 
         private void consumeRemainingElements() throws IOException {

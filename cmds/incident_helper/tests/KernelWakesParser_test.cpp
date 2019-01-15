@@ -84,9 +84,9 @@ TEST_F(KernelWakesParserTest, Normal) {
     record1->set_event_count(8);
     record1->set_wakeup_count(0);
     record1->set_expire_count(0);
-    record1->set_active_since(0l);
-    record1->set_total_time(0l);
-    record1->set_max_time(0l);
+    record1->set_active_since(0L);
+    record1->set_total_time(0L);
+    record1->set_max_time(0L);
     record1->set_last_change(131348LL);
     record1->set_prevent_suspend_time(0LL);
 
@@ -96,9 +96,9 @@ TEST_F(KernelWakesParserTest, Normal) {
     record2->set_event_count(143);
     record2->set_wakeup_count(0);
     record2->set_expire_count(0);
-    record2->set_active_since(0l);
-    record2->set_total_time(123l);
-    record2->set_max_time(3l);
+    record2->set_active_since(0L);
+    record2->set_total_time(123L);
+    record2->set_max_time(3L);
     record2->set_last_change(2067286206LL);
     record2->set_prevent_suspend_time(0LL);
 

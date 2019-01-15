@@ -38,7 +38,7 @@ import android.graphics.drawable.Icon;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.v4.graphics.ColorUtils;
+import androidx.core.graphics.ColorUtils;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -197,6 +197,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 mDarkAmount);
         final int outerBounds = mStatusBarIconSize;
         mIconScale = (float)imageBounds / (float)outerBounds;
+        updatePivot();
     }
 
     private void updateIconScaleForSystemIcons() {
@@ -859,6 +860,12 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             mLayoutRunnable.run();
             mLayoutRunnable = null;
         }
+        updatePivot();
+    }
+
+    private void updatePivot() {
+        setPivotX((1 - mIconScale) / 2.0f * getWidth());
+        setPivotY((getHeight() - mIconScale * getWidth()) / 2.0f);
     }
 
     public void executeOnLayout(Runnable runnable) {

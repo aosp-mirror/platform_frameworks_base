@@ -28,6 +28,7 @@ import org.mockito.internal.stubbing.StubberImpl;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.mockito.stubbing.Stubber;
+import org.mockito.quality.Strictness;
 import junit.framework.Assert;
 
 import java.util.Locale;
@@ -210,12 +211,16 @@ public class TextToSpeechTests extends InstrumentationTestCase {
     }
 
     public static abstract class CountDownBehaviour extends StubberImpl {
+        public CountDownBehaviour(Strictness strictness) {
+            super(strictness);
+        }
+
         /** Used to mock methods that return a result. */
         public abstract Stubber andReturn(Object result);
     }
 
     public static CountDownBehaviour doCountDown(final CountDownLatch latch) {
-        return new CountDownBehaviour() {
+        return new CountDownBehaviour(Strictness.WARN) {
             @Override
             public <T> T when(T mock) {
                 return Mockito.doAnswer(new Answer<Void>() {
@@ -229,7 +234,7 @@ public class TextToSpeechTests extends InstrumentationTestCase {
 
             @Override
             public Stubber andReturn(final Object result) {
-                return new StubberImpl() {
+                return new StubberImpl(Strictness.WARN) {
                     @Override
                     public <T> T when(T mock) {
                         return Mockito.doAnswer(new Answer<Object>() {

@@ -22,6 +22,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
+import android.os.Build;
 import android.text.Layout.Directions;
 import android.text.Layout.TabStops;
 import android.text.style.CharacterStyle;
@@ -61,7 +62,7 @@ public class TextLine {
     private TabStops mTabs;
     private char[] mChars;
     private boolean mCharsValid;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Spanned mSpanned;
     private PrecomputedText mComputed;
 

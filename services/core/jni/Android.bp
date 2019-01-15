@@ -57,17 +57,6 @@ cc_library_static {
         "frameworks/native/services",
         "system/gatekeeper/include",
     ],
-
-    product_variables: {
-        arc: {
-            cflags: [
-                "-DUSE_ARC",
-            ],
-            srcs: [
-                "com_android_server_ArcVideoService.cpp",
-            ],
-        }
-    }
 }
 
 cc_defaults {
@@ -98,7 +87,6 @@ cc_defaults {
         "libsensorservicehidl",
         "libgui",
         "libusbhost",
-        "libsuspend",
         "libtinyalsa",
         "libEGL",
         "libGLESv2",
@@ -108,7 +96,8 @@ cc_defaults {
         "libhwbinder",
         "libutils",
         "libhwui",
-        "libbpf",
+        "libbpf_android",
+        "libnetdbpf",
         "libnetdutils",
         "android.hardware.audio.common@2.0",
         "android.hardware.broadcastradio@1.0",
@@ -130,6 +119,7 @@ cc_defaults {
         "android.hardware.vr@1.0",
         "android.frameworks.schedulerservice@1.0",
         "android.frameworks.sensorservice@1.0",
+        "android.system.suspend@1.0",
     ],
 
     static_libs: [
@@ -142,7 +132,6 @@ cc_defaults {
             shared_libs: [
                 "libarcbridge",
                 "libarcbridgeservice",
-                "libarcvideobridge",
                 "libchrome",
                 "libmojo",
             ],

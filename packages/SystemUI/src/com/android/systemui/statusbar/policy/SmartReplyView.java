@@ -127,19 +127,14 @@ public class SmartReplyView extends ViewGroup {
         final int length = arr.getIndexCount();
         for (int i = 0; i < length; i++) {
             int attr = arr.getIndex(i);
-            switch (attr) {
-                case R.styleable.SmartReplyView_spacing:
-                    spacing = arr.getDimensionPixelSize(i, 0);
-                    break;
-                case R.styleable.SmartReplyView_singleLineButtonPaddingHorizontal:
-                    singleLineButtonPaddingHorizontal = arr.getDimensionPixelSize(i, 0);
-                    break;
-                case R.styleable.SmartReplyView_doubleLineButtonPaddingHorizontal:
-                    doubleLineButtonPaddingHorizontal = arr.getDimensionPixelSize(i, 0);
-                    break;
-                case R.styleable.SmartReplyView_buttonStrokeWidth:
-                    strokeWidth = arr.getDimensionPixelSize(i, 0);
-                    break;
+            if (attr == R.styleable.SmartReplyView_spacing) {
+                spacing = arr.getDimensionPixelSize(i, 0);
+            } else if (attr == R.styleable.SmartReplyView_singleLineButtonPaddingHorizontal) {
+                singleLineButtonPaddingHorizontal = arr.getDimensionPixelSize(i, 0);
+            } else if (attr == R.styleable.SmartReplyView_doubleLineButtonPaddingHorizontal) {
+                doubleLineButtonPaddingHorizontal = arr.getDimensionPixelSize(i, 0);
+            } else if (attr == R.styleable.SmartReplyView_buttonStrokeWidth) {
+                strokeWidth = arr.getDimensionPixelSize(i, 0);
             }
         }
         arr.recycle();

@@ -15,7 +15,7 @@
  */
 package com.android.systemui.qs;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.view.View;
 
 /**

@@ -21,6 +21,8 @@
 #include "DominatorTree.h"
 #include "ResourceTable.h"
 
+using android::ConfigDescription;
+
 namespace aapt {
 
 namespace {

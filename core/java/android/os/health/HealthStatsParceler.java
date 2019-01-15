@@ -16,6 +16,7 @@
 
 package android.os.health;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -50,10 +51,12 @@ public class HealthStatsParceler implements Parcelable {
         }
     };
 
+    @UnsupportedAppUsage
     public HealthStatsParceler(HealthStatsWriter writer) {
         mWriter = writer;
     }
 
+    @UnsupportedAppUsage
     public HealthStatsParceler(Parcel in) {
         mHealthStats = new HealthStats(in);
     }
@@ -72,6 +75,7 @@ public class HealthStatsParceler implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     public HealthStats getHealthStats() {
         if (mWriter != null) {
             final Parcel parcel = Parcel.obtain();

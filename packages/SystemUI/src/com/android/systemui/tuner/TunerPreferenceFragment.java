@@ -16,8 +16,8 @@ package com.android.systemui.tuner;
 
 import android.app.DialogFragment;
 import android.os.Bundle;
-import android.support.v14.preference.PreferenceFragment;
-import android.support.v7.preference.Preference;
+import androidx.preference.PreferenceFragment;
+import androidx.preference.Preference;
 
 public abstract class TunerPreferenceFragment extends PreferenceFragment {
 

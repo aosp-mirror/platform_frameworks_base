@@ -173,12 +173,13 @@ public class ZygoteInit {
     }
 
     native private static void nativePreloadAppProcessHALs();
+    native private static void nativePreloadOpenGL();
 
     private static void preloadOpenGL() {
         String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
         if (!SystemProperties.getBoolean(PROPERTY_DISABLE_OPENGL_PRELOADING, false) &&
                 (driverPackageName == null || driverPackageName.isEmpty())) {
-            EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
+            nativePreloadOpenGL();
         }
     }
 
@@ -535,9 +536,11 @@ public class ZygoteInit {
     static ClassLoader createPathClassLoader(String classPath, int targetSdkVersion) {
         String libraryPath = System.getProperty("java.library.path");
 
+        // We use the boot class loader, that's what the runtime expects at AOT.
+        ClassLoader parent = ClassLoader.getSystemClassLoader().getParent();
+
         return ClassLoaderFactory.createClassLoader(classPath, libraryPath, libraryPath,
-                ClassLoader.getSystemClassLoader(), targetSdkVersion, true /* isNamespaceShared */,
-                null /* classLoaderName */);
+                parent, targetSdkVersion, true /* isNamespaceShared */, null /* classLoaderName */);
     }
 
     /**

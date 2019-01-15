@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"При регистрирането на функцията за обаждания през Wi-Fi с оператора ви възникна грешка: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s – обаждания през Wi-Fi"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Обаждания през Wi-Fi от <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Обаждане през WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Обаждане през WLAN от <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi от <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Обаждания през Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWi-Fi от <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Изключено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Предпочита се Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Предпочитат се мобилни данни"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi мрежата няма достъп до интернет"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Докоснете за опции"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Промени в настройките ви за точка за достъп"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Честотната лента на точката ви за достъп е променена."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Това устройство не поддържа предпочитанието ви за използване само на честотната лента от 5 ГХц. Вместо това то ще я ползва, когато е възможно."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Превключи се към <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Устройството използва <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, когато <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма достъп до интернет. Възможно е да бъдете таксувани."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Превключи се от <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> към <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

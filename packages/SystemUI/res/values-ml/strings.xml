@@ -172,7 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"കാരിയർ നെറ്റ്‌വർക്ക് മാറ്റൽ"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ബാറ്ററി വിശദാംശങ്ങൾ തുറക്കുക"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ബാറ്ററി <xliff:g id="NUMBER">%d</xliff:g> ശതമാനം."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ബാറ്ററി ചാർജുചെയ്യുന്നു, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ശതമാനം."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ബാറ്ററി ചാർജുചെയ്യുന്നു, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"സിസ്‌റ്റം ക്രമീകരണങ്ങൾ."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"അറിയിപ്പുകൾ."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"എല്ലാ അറിയിപ്പുകളും കാണുക"</string>
@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> എന്നത് മറയ്‌ക്കണോ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"അടുത്ത തവണ നിങ്ങൾ അത് ക്രമീകരണങ്ങളിൽ ഓണാക്കുമ്പോൾ അത് വീണ്ടും ദൃശ്യമാകും."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"മറയ്‌ക്കുക"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"നിങ്ങൾ ഉപയോഗിക്കുന്നത് ഔദ്യോഗിക പ്രൊഫൈലാണ്"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"കോള്‍"</string>
     <string name="stream_system" msgid="7493299064422163147">"സിസ്റ്റം"</string>
     <string name="stream_ring" msgid="8213049469184048338">"റിംഗുചെയ്യുക"</string>
@@ -850,7 +849,7 @@
     <string name="auto_saver_text" msgid="6324376061044218113">"ബാറ്ററി <xliff:g id="PERCENTAGE">%d</xliff:g>%% ആകുമ്പോൾ സ്വമേധയാ ഓണാക്കുക"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"വേണ്ട"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"ബാറ്ററി ലാഭിക്കൽ ഷെഡ്യൂൾ ഓണാക്കുക"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"ബാറ്ററി <xliff:g id="PERCENTAGE">%d</xliff:g>%%-ൽ താഴെയാകുമ്പോൾ, ബാറ്ററി ലാഭിക്കൽ സ്വമേധയാ ഓണാകും."</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"ബാറ്ററി <xliff:g id="PERCENTAGE">%d</xliff:g>%% ൽ താഴെയാകുമ്പോൾ, ബാറ്ററി ലാഭിക്കൽ സ്വമേധയാ ഓണാകും."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ക്രമീകരണം"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"മനസ്സിലായി"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI ഹീപ്പ് ഡമ്പ് ചെയ്യുക"</string>

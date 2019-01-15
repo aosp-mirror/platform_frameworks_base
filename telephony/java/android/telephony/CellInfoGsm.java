@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
@@ -32,6 +33,7 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
     private CellSignalStrengthGsm mCellSignalStrengthGsm;
 
     /** @hide */
+    @UnsupportedAppUsage
     public CellInfoGsm() {
         super();
         mCellIdentityGsm = new CellIdentityGsm();
@@ -41,8 +43,24 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
     /** @hide */
     public CellInfoGsm(CellInfoGsm ci) {
         super(ci);
-        this.mCellIdentityGsm = ci.mCellIdentityGsm.copy();
-        this.mCellSignalStrengthGsm = ci.mCellSignalStrengthGsm.copy();
+        mCellIdentityGsm = ci.mCellIdentityGsm.copy();
+        mCellSignalStrengthGsm = ci.mCellSignalStrengthGsm.copy();
+    }
+
+    /** @hide */
+    public CellInfoGsm(android.hardware.radio.V1_0.CellInfo ci) {
+        super(ci);
+        final android.hardware.radio.V1_0.CellInfoGsm cig = ci.gsm.get(0);
+        mCellIdentityGsm = new CellIdentityGsm(cig.cellIdentityGsm);
+        mCellSignalStrengthGsm = new CellSignalStrengthGsm(cig.signalStrengthGsm);
+    }
+
+    /** @hide */
+    public CellInfoGsm(android.hardware.radio.V1_2.CellInfo ci) {
+        super(ci);
+        final android.hardware.radio.V1_2.CellInfoGsm cig = ci.gsm.get(0);
+        mCellIdentityGsm = new CellIdentityGsm(cig.cellIdentityGsm);
+        mCellSignalStrengthGsm = new CellSignalStrengthGsm(cig.signalStrengthGsm);
     }
 
     @Override

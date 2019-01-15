@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.MenuRes;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.Menu;
@@ -39,9 +40,11 @@ import com.android.internal.view.menu.ShowableListMenu;
  * it.
  */
 public class PopupMenu {
+    @UnsupportedAppUsage
     private final Context mContext;
     private final MenuBuilder mMenu;
     private final View mAnchor;
+    @UnsupportedAppUsage
     private final MenuPopupHelper mPopup;
 
     private OnMenuItemClickListener mMenuItemClickListener;

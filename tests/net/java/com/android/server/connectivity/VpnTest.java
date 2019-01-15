@@ -507,13 +507,15 @@ public class VpnTest {
 
     private static void assertBlocked(Vpn vpn, int... uids) {
         for (int uid : uids) {
-            assertTrue("Uid " + uid + " should be blocked", vpn.isBlockingUid(uid));
+            final boolean blocked = vpn.getLockdown() && vpn.isBlockingUid(uid);
+            assertTrue("Uid " + uid + " should be blocked", blocked);
         }
     }
 
     private static void assertUnblocked(Vpn vpn, int... uids) {
         for (int uid : uids) {
-            assertFalse("Uid " + uid + " should not be blocked", vpn.isBlockingUid(uid));
+            final boolean blocked = vpn.getLockdown() && vpn.isBlockingUid(uid);
+            assertFalse("Uid " + uid + " should not be blocked", blocked);
         }
     }
 

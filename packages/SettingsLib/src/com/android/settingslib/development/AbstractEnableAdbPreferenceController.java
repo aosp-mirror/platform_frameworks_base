@@ -22,12 +22,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.support.annotation.VisibleForTesting;
-import android.support.v14.preference.SwitchPreference;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.preference.Preference;
-import android.support.v7.preference.PreferenceScreen;
-import android.support.v7.preference.TwoStatePreference;
+import androidx.annotation.VisibleForTesting;
+import androidx.preference.SwitchPreference;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceScreen;
+import androidx.preference.TwoStatePreference;
 import android.text.TextUtils;
 
 import com.android.settingslib.core.ConfirmationDialogController;

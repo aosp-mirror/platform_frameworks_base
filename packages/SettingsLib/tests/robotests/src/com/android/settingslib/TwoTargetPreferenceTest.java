@@ -24,7 +24,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 import android.content.Context;
-import android.support.v7.preference.PreferenceViewHolder;
+import androidx.preference.PreferenceViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;

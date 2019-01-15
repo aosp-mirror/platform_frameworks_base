@@ -173,7 +173,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 || mStatusBar.isFullScreenUserSwitcherState()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
         } else if (mShowing && !mDozing) {
-            if (!isWakeAndUnlocking()) {
+            if (!isWakeAndUnlocking() && !mStatusBar.isInLaunchTransition()) {
                 mBouncer.setExpansion(expansion);
             }
             if (expansion != KeyguardBouncer.EXPANSION_HIDDEN && tracking

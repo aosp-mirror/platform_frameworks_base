@@ -16,9 +16,11 @@
 
 #include "link/Linkers.h"
 
-#include "ConfigDescription.h"
+#include "androidfw/ConfigDescription.h"
+
 #include "test/Test.h"
 
+using ::android::ConfigDescription;
 using ::testing::NotNull;
 
 namespace aapt {

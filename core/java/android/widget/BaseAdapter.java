@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.view.View;
@@ -29,6 +30,7 @@ import android.view.ViewGroup;
  * specialized {@link SpinnerAdapter} interface).
  */
 public abstract class BaseAdapter implements ListAdapter, SpinnerAdapter {
+    @UnsupportedAppUsage
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
     private CharSequence[] mAutofillOptions;
 

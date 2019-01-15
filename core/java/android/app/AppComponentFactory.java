@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 
 /**
  * Interface used to control the instantiation of manifest elements.
@@ -31,6 +32,17 @@ import android.content.Intent;
  * @see #instantiateProvider
  */
 public class AppComponentFactory {
+
+    /**
+     * Allows application to override the creation of the default class loader.
+     * This can be used to perform things such as dependency injection or setting up
+     * a custom class loader hierarchy.
+     *
+     * @param cl        The default classloader instantiated by platform.
+     */
+    public @NonNull ClassLoader instantiateClassLoader(@NonNull ClassLoader cl) {
+        return cl;
+    }
 
     /**
      * Allows application to override the creation of the application object. This can be used to
@@ -119,6 +131,19 @@ public class AppComponentFactory {
             @NonNull String className)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         return (ContentProvider) cl.loadClass(className).newInstance();
+    }
+
+    private ApplicationInfo mApplicationInfo = null;
+
+    void setApplicationInfo(ApplicationInfo info) {
+        mApplicationInfo = info;
+    }
+
+    /**
+     * Returns the ApplicationInfo associated with this package.
+     */
+    public ApplicationInfo getApplicationInfo() {
+        return mApplicationInfo;
     }
 
     /**

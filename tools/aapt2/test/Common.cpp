@@ -16,6 +16,8 @@
 
 #include "test/Common.h"
 
+using android::ConfigDescription;
+
 namespace aapt {
 namespace test {
 

@@ -5,8 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"ଏହି ନେଟ୍‌ୱର୍କ ଯେପରି ଅଛି, ସେହିପରି ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"ଏହି ନେଟ୍‌ୱର୍କକୁ ବ୍ୟବହାର କରନ୍ତୁ ନାହିଁ"</string>
     <string name="action_bar_label" msgid="917235635415966620">"ନେଟ୍‌ୱର୍କରେ ସାଇନ୍‍ ଇନ୍‍ କରନ୍ତୁ"</string>
-    <!-- no translation found for action_bar_title (5645564790486983117) -->
-    <skip />
+    <string name="action_bar_title" msgid="5645564790486983117">"%1$sରେ ସାଇନ୍‍-ଇନ୍‍ କରନ୍ତୁ"</string>
     <string name="ssl_error_warning" msgid="6653188881418638872">"ଆପଣ ଯୋଗ ଦେବାକୁ ଚେଷ୍ଟା କରୁଥିବା ନେଟ୍‌ୱର୍କର ସୁରକ୍ଷା ସମସ୍ୟା ଅଛି।"</string>
     <string name="ssl_error_example" msgid="647898534624078900">"ଉଦାହରଣସ୍ୱରୂପ, ଲଗଇନ୍‍ ପୃଷ୍ଠା ଦେଖାଯାଇଥିବା ସଂସ୍ଥାର ନହୋଇଥାଇପାରେ।"</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"ବ୍ରାଉଜର୍‍ ଜରିଆରେ ଯେମିତିବି ହେଉ ଜାରି ରଖନ୍ତୁ"</string>

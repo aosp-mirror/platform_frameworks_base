@@ -37,7 +37,6 @@ public abstract class UpdateEngineCallback {
      * be one of the values from {@link UpdateEngine.UpdateStatusConstants},
      * and {@code percent} will be valid [TODO: in which cases?].
      */
-    @SystemApi
     public abstract void onStatusUpdate(int status, float percent);
 
     /**
@@ -45,6 +44,5 @@ public abstract class UpdateEngineCallback {
      * unsuccessfully. The value of {@code errorCode} will be one of the
      * values from {@link UpdateEngine.ErrorCodeConstants}.
      */
-    @SystemApi
     public abstract void onPayloadApplicationComplete(int errorCode);
 }

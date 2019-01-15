@@ -24,6 +24,7 @@
 #include "compile/Pseudolocalizer.h"
 #include "util/Util.h"
 
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 using ::android::StringPiece16;
 

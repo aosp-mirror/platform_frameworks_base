@@ -23,10 +23,10 @@ import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.reset;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -36,18 +36,18 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkMisc;
-import android.support.test.runner.AndroidJUnit4;
+import android.net.NetworkStack;
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.format.DateUtils;
 
 import com.android.internal.R;
 import com.android.server.ConnectivityService;
-import com.android.server.connectivity.NetworkNotificationManager;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
 
-import org.junit.runner.RunWith;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -70,13 +70,16 @@ public class LingerMonitorTest {
     @Mock NetworkMisc mMisc;
     @Mock NetworkNotificationManager mNotifier;
     @Mock Resources mResources;
+    @Mock NetworkStack mNetworkStack;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mCtx.getResources()).thenReturn(mResources);
         when(mCtx.getPackageName()).thenReturn("com.android.server.connectivity");
-        when(mConnService.createNetworkMonitor(any(), any(), any(), any())).thenReturn(null);
+        when(mCtx.getSystemServiceName(NetworkStack.class))
+                .thenReturn(Context.NETWORK_STACK_SERVICE);
+        when(mCtx.getSystemService(Context.NETWORK_STACK_SERVICE)).thenReturn(mNetworkStack);
 
         mMonitor = new TestableLingerMonitor(mCtx, mNotifier, HIGH_DAILY_LIMIT, HIGH_RATE_LIMIT);
     }
@@ -349,7 +352,7 @@ public class LingerMonitorTest {
         caps.addCapability(0);
         caps.addTransportType(transport);
         NetworkAgentInfo nai = new NetworkAgentInfo(null, null, new Network(netId), info, null,
-                caps, 50, mCtx, null, mMisc, null, mConnService);
+                caps, 50, mCtx, null, mMisc, mConnService);
         nai.everValidated = true;
         return nai;
     }

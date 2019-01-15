@@ -24,6 +24,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.media.MediaCodecInfo.CodecCapabilities;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -405,7 +406,7 @@ import java.util.Map;
  <p>
  The codec in turn will return a read-only output buffer via the {@link
  Callback#onOutputBufferAvailable onOutputBufferAvailable} callback in asynchronous mode, or in
- response to a {@link #dequeueOutputBuffer dequeuOutputBuffer} call in synchronous mode. After the
+ response to a {@link #dequeueOutputBuffer dequeueOutputBuffer} call in synchronous mode. After the
  output buffer has been processed, call one of the {@link #releaseOutputBuffer
  releaseOutputBuffer} methods to return the buffer to the codec.
  <p>
@@ -3580,7 +3581,7 @@ final public class MediaCodec {
         native_init();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private long mNativeContext;
 
     /** @hide */

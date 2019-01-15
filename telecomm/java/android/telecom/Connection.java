@@ -38,6 +38,8 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.view.Surface;
 
@@ -46,6 +48,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -269,6 +272,9 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Call can be upgraded to a video call.
+     * @deprecated Use {@link #CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL} and
+     * {@link #CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL} to indicate for a call whether or not
+     * video calling is supported.
      */
     public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 0x00080000;
 
@@ -411,6 +417,13 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_ASSISTED_DIALING_USED = 1 << 9;
 
+    /**
+     * Set by the framework to indicate that the network has identified a Connection as an emergency
+     * call.
+     * @hide
+     */
+    public static final int PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL = 1 << 10;
+
     //**********************************************************************************************
     // Next PROPERTY value: 1<<10
     //**********************************************************************************************
@@ -490,6 +503,14 @@ public abstract class Connection extends Conferenceable {
      */
     public static final String EXTRA_ORIGINAL_CONNECTION_ID =
             "android.telecom.extra.ORIGINAL_CONNECTION_ID";
+
+    /**
+     * Boolean connection extra key set on the extras passed to
+     * {@link Connection#sendConnectionEvent} which indicates that audio is present
+     * on the RTT call when the extra value is true.
+     */
+    public static final String EXTRA_IS_RTT_AUDIO_PRESENT =
+            "android.telecom.extra.IS_RTT_AUDIO_PRESENT";
 
     /**
      * Connection event used to inform Telecom that it should play the on hold tone.  This is used
@@ -584,6 +605,8 @@ public abstract class Connection extends Conferenceable {
      * {@link Call#EVENT_REQUEST_HANDOVER} that the handover from this {@link Connection} has
      * successfully completed.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_HANDOVER_COMPLETE =
             "android.telecom.event.HANDOVER_COMPLETE";
@@ -593,9 +616,23 @@ public abstract class Connection extends Conferenceable {
      * {@link Call#EVENT_REQUEST_HANDOVER} that the handover from this {@link Connection} has failed
      * to complete.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_HANDOVER_FAILED =
             "android.telecom.event.HANDOVER_FAILED";
+
+    /**
+     * Connection extra key used to store SIP invite fields for an incoming call for IMS calls
+     */
+    public static final String EXTRA_SIP_INVITE = "android.telecom.extra.SIP_INVITE";
+
+    /**
+     * Connection event used to inform an {@link InCallService} that the RTT audio indication
+     * has changed.
+     */
+    public static final String EVENT_RTT_AUDIO_INDICATION_CHANGED =
+            "android.telecom.event.RTT_AUDIO_INDICATION_CHANGED";
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
@@ -800,6 +837,10 @@ public abstract class Connection extends Conferenceable {
             builder.append(isLong ? " PROPERTY_IS_RTT" : " rtt");
         }
 
+        if (can(properties, PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL)) {
+            builder.append(isLong ? " PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL" : " ecall");
+        }
+
         builder.append("]");
         return builder.toString();
     }
@@ -855,6 +896,8 @@ public abstract class Connection extends Conferenceable {
         private final OutputStreamWriter mPipeToInCall;
         private final ParcelFileDescriptor mFdFromInCall;
         private final ParcelFileDescriptor mFdToInCall;
+
+        private final FileInputStream mFromInCallFileInputStream;
         private char[] mReadBuffer = new char[READ_BUFFER_SIZE];
 
         /**
@@ -863,8 +906,11 @@ public abstract class Connection extends Conferenceable {
         public RttTextStream(ParcelFileDescriptor toInCall, ParcelFileDescriptor fromInCall) {
             mFdFromInCall = fromInCall;
             mFdToInCall = toInCall;
+            mFromInCallFileInputStream = new FileInputStream(fromInCall.getFileDescriptor());
+
+            // Wrap the FileInputStream in a Channel so that it's interruptible.
             mPipeFromInCall = new InputStreamReader(
-                    new FileInputStream(fromInCall.getFileDescriptor()));
+                    Channels.newInputStream(Channels.newChannel(mFromInCallFileInputStream)));
             mPipeToInCall = new OutputStreamWriter(
                     new FileOutputStream(toInCall.getFileDescriptor()));
         }
@@ -912,7 +958,7 @@ public abstract class Connection extends Conferenceable {
          * not entered any new text yet.
          */
         public String readImmediately() throws IOException {
-            if (mPipeFromInCall.ready()) {
+            if (mFromInCallFileInputStream.available() > 0) {
                 return read();
             } else {
                 return null;
@@ -1879,6 +1925,24 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Returns RIL voice radio technology used for current connection.
+     *
+     * @return the RIL voice radio technology used for current connection,
+     *         see {@code RIL_RADIO_TECHNOLOGY_*} in {@link android.telephony.ServiceState}.
+     *
+     * @hide
+     */
+    public final @ServiceState.RilRadioTechnology int getCallRadioTech() {
+        int voiceNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        Bundle extras = getExtras();
+        if (extras != null) {
+            voiceNetworkType = extras.getInt(TelecomManager.EXTRA_CALL_NETWORK_TYPE,
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN);
+        }
+        return ServiceState.networkTypeToRilRadioTechnology(voiceNetworkType);
+    }
+
+    /**
      * @return The status hints for this connection.
      */
     public final StatusHints getStatusHints() {
@@ -2309,6 +2373,26 @@ public abstract class Connection extends Conferenceable {
      */
     public final void setConnectionStartElapsedRealTime(long connectElapsedTimeMillis) {
         mConnectElapsedTimeMillis = connectElapsedTimeMillis;
+    }
+
+    /**
+     * Sets RIL voice radio technology used for current connection.
+     *
+     * @param vrat the RIL Voice Radio Technology used for current connection,
+     *             see {@code RIL_RADIO_TECHNOLOGY_*} in {@link android.telephony.ServiceState}.
+     *
+     * @hide
+     */
+    public final void setCallRadioTech(@ServiceState.RilRadioTechnology int vrat) {
+        putExtra(TelecomManager.EXTRA_CALL_NETWORK_TYPE,
+                ServiceState.rilRadioTechnologyToNetworkType(vrat));
+        // Propagates the call radio technology to its parent {@link android.telecom.Conference}
+        // This action only covers non-IMS CS conference calls.
+        // For IMS PS call conference call, it can be updated via its host connection
+        // {@link #Listener.onExtrasChanged} event.
+        if (getConference() != null) {
+            getConference().setCallRadioTech(vrat);
+        }
     }
 
     /**

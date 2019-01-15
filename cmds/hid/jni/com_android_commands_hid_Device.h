@@ -15,6 +15,7 @@
  */
 
 #include <memory>
+#include <vector>
 
 #include <jni.h>
 
@@ -27,6 +28,7 @@ public:
     ~DeviceCallback();
 
     void onDeviceOpen();
+    void onDeviceGetReport(uint32_t requestId, uint8_t reportId);
     void onDeviceError();
 
 private:
@@ -38,13 +40,13 @@ private:
 class Device {
 public:
     static Device* open(int32_t id, const char* name, int32_t vid, int32_t pid,
-            std::unique_ptr<uint8_t[]> descriptor, size_t descriptorSize,
-            std::unique_ptr<DeviceCallback> callback);
+            std::vector<uint8_t> descriptor, std::unique_ptr<DeviceCallback> callback);
 
     Device(int32_t id, int fd, std::unique_ptr<DeviceCallback> callback);
     ~Device();
 
-    void sendReport(uint8_t* report, size_t reportSize);
+    void sendReport(const std::vector<uint8_t>& report) const;
+    void sendGetFeatureReportReply(uint32_t id, const std::vector<uint8_t>& report) const;
     void close();
 
     int handleEvents(int events);

@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -334,7 +335,7 @@ public final class InputMethodManager {
     /**
      * The InputConnection that was last retrieved from the served view.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     ControlledInputConnectionWrapper mServedInputConnectionWrapper;
     /**
      * The completions that were last provided by the served view.
@@ -1420,6 +1421,10 @@ public final class InputMethodManager {
                     mServedView.getWindowToken() == appWindowToken) {
                 finishInputLocked();
             }
+            if (mCurRootView != null &&
+                    mCurRootView.getWindowToken() == appWindowToken) {
+                mCurRootView = null;
+            }
         }
     }
 
@@ -2249,7 +2254,7 @@ public final class InputMethodManager {
      * Notify that a user took some action with this input method.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 114740982, maxTargetSdk = Build.VERSION_CODES.P)
     public void notifyUserAction() {
         synchronized (mH) {
             if (mLastSentUserActionNotificationSequenceNumber ==

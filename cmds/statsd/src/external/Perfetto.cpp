@@ -105,9 +105,9 @@ bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config,
 
     readPipe.reset();  // Close the read end (owned by the child process).
 
-    // Using fopen() because fwrite() has the right logic to chunking write()
+    // Using fdopen() because fwrite() has the right logic to chunking write()
     // over a pipe (see __sfvwrite()).
-    FILE* writePipeStream = fdopen(writePipe.get(), "wb");
+    FILE* writePipeStream = android::base::Fdopen(std::move(writePipe), "wb");
     if (!writePipeStream) {
         ALOGE("fdopen() failed while calling the Perfetto client: %s", strerror(errno));
         return false;

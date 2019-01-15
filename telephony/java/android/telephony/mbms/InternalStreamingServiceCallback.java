@@ -39,17 +39,17 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onError(errorCode, message);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -58,17 +58,17 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onStreamStateUpdated(state, reason);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -77,17 +77,17 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onMediaDescriptionUpdated();
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -96,17 +96,17 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onBroadcastSignalStrengthUpdated(signalStrength);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -115,17 +115,17 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onStreamMethodUpdated(methodType);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     public void stop() {

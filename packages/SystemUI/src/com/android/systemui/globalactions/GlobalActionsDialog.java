@@ -89,6 +89,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolator;
 
 import java.util.ArrayList;
@@ -317,8 +318,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         ArraySet<String> addedKeys = new ArraySet<String>();
         mHasLogoutButton = false;
         mHasLockdownButton = false;
-        mSeparatedEmergencyButtonEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.FASTER_EMERGENCY_PHONE_CALL_ENABLED, 0) != 0;
+        mSeparatedEmergencyButtonEnabled = true;
         for (int i = 0; i < defaultActions.length; i++) {
             String actionKey = defaultActions[i];
             if (addedKeys.contains(actionKey)) {
@@ -448,9 +448,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private class EmergencyDialerAction extends SinglePressAction {
-        private static final String ACTION_EMERGENCY_DIALER_DIAL =
-                "com.android.phone.EmergencyDialer.DIAL";
-
         private EmergencyDialerAction() {
             super(R.drawable.ic_faster_emergency,
                     R.string.global_action_emergency);
@@ -458,8 +455,10 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public void onPress() {
-            Intent intent = new Intent(ACTION_EMERGENCY_DIALER_DIAL);
+            Intent intent = new Intent(EmergencyDialerConstants.ACTION_DIAL);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
+                    EmergencyDialerConstants.ENTRY_TYPE_POWER_MENU);
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         }
 

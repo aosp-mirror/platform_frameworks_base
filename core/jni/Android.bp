@@ -34,7 +34,6 @@ cc_library_shared {
     ],
 
     cppflags: ["-Wno-conversion-null"],
-    cpp_std: "c++17",
 
     srcs: [
         "AndroidRuntime.cpp",
@@ -42,6 +41,7 @@ cc_library_shared {
         "com_google_android_gles_jni_EGLImpl.cpp",
         "com_google_android_gles_jni_GLImpl.cpp", // TODO: .arm
         "android_app_Activity.cpp",
+	"android_app_ActivityThread.cpp",
         "android_app_NativeActivity.cpp",
         "android_app_admin_SecurityLog.cpp",
         "android_opengl_EGL14.cpp",
@@ -227,13 +227,14 @@ cc_library_shared {
     static_libs: [
         "libgif",
         "libseccomp_policy",
-        "libselinux",
         "libgrallocusage",
         "libscrypt_static",
+        "libstatssocket",
     ],
 
     shared_libs: [
-        "libbpf",
+        "libbpf_android",
+        "libnetdbpf",
         "libnetdutils",
         "libmemtrack",
         "libandroidfw",
@@ -263,7 +264,7 @@ cc_library_shared {
         "libhardware",
         "libhardware_legacy",
         "libselinux",
-        "libicuuc",
+        "libandroidicu",
         "libmedia",
         "libmediametrics",
         "libaudioclient",

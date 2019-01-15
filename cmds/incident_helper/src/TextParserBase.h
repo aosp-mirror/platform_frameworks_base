@@ -30,7 +30,7 @@ class TextParserBase {
 public:
     String8 name;
 
-    TextParserBase(String8 name) : name(name) {};
+    explicit TextParserBase(String8 name) : name(name) {};
     virtual ~TextParserBase() {};
 
     virtual status_t Parse(const int in, const int out) const = 0;

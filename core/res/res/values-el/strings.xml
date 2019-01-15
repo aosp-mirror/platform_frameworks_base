@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Παρουσιάστηκε πρόβλημα με την εγγραφή της κλήσης Wi‑Fi με την εταιρεία κινητής τηλεφωνίας: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Κλήση Wi-Fi"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Κλήση Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Κλήση μέσω WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Κλήση μέσω WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Κλήση Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Ανενεργό"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Προτίμηση Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Προτίμηση δικτύου κινητής τηλεφωνίας"</string>
@@ -320,7 +324,7 @@
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Επιτρέπει στην εφαρμογή να αναπτύξει ή να συμπτύξει τη γραμμή κατάστασης."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"εγκαθιστά συντομεύσεις"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Επιτρέπει σε μια εφαρμογή την προσθήκη συντομεύσεων στην Αρχική οθόνη χωρίς την παρέμβαση του χρήστη."</string>
-    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"καταργεί την εγκατάσταση συντομεύσεων"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"απεγκατάσταση συντομεύσεων"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Επιτρέπει στην εφαρμογή την κατάργηση συντομεύσεων από την Αρχική οθόνη χωρίς την παρέμβαση του χρήστη."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"αναδρομολογεί τις εξερχόμενες κλήσεις"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Επιτρέπει στην εφαρμογή να βλέπει τον αριθμό που καλέσατε κατά τη διάρκεια μιας εξερχόμενης κλήσης με επιλογή ανακατεύθυνσης της κλήσης σε έναν διαφορετικό αριθμό ή διακοπής της κλήσης."</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Το Wi-Fi δεν έχει πρόσβαση στο διαδίκτυο"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Πατήστε για να δείτε τις επιλογές"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Αλλαγές στις ρυθμίσεις σημείου πρόσβασης Wi-Fi"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Το εύρος σημείου πρόσβασης Wi-Fi άλλαξε."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Αυτή η συσκευή δεν υποστηρίζει την προτίμησή σας για τη ζώνη 5 GHz μόνο. Αντ\' αυτού, αυτή η συσκευή θα χρησιμοποιεί τη ζώνη 5 GHz όταν είναι διαθέσιμη."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Μετάβαση σε δίκτυο <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Η συσκευή χρησιμοποιεί το δίκτυο <xliff:g id="NEW_NETWORK">%1$s</xliff:g> όταν το δίκτυο <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> δεν έχει πρόσβαση στο διαδίκτυο. Μπορεί να ισχύουν χρεώσεις."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Μετάβαση από το δίκτυο <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> στο δίκτυο <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

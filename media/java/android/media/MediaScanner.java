@@ -159,8 +159,9 @@ public class MediaScanner implements AutoCloseable {
 
     public static final String SCANNED_BUILD_PREFS_NAME = "MediaScanBuild";
     public static final String LAST_INTERNAL_SCAN_FINGERPRINT = "lastScanFingerprint";
-    private static final String SYSTEM_SOUNDS_DIR = "/system/media/audio";
-    private static final String PRODUCT_SOUNDS_DIR = "/product/media/audio";
+    private static final String SYSTEM_SOUNDS_DIR = Environment.getRootDirectory() + "/media/audio";
+    private static final String OEM_SOUNDS_DIR = Environment.getOemDirectory() + "/media/audio";
+    private static final String PRODUCT_SOUNDS_DIR = Environment.getProductDirectory() + "/media/audio";
     private static String sLastInternalScanFingerprint;
 
     private static final String[] ID3_GENRES = {
@@ -512,6 +513,9 @@ public class MediaScanner implements AutoCloseable {
         private boolean mScanSuccess;
         private int mWidth;
         private int mHeight;
+        private int mColorStandard;
+        private int mColorTransfer;
+        private int mColorRange;
 
         public MyMediaScannerClient() {
             mDateFormatter = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
@@ -591,6 +595,9 @@ public class MediaScanner implements AutoCloseable {
             mCompilation = 0;
             mWidth = 0;
             mHeight = 0;
+            mColorStandard = -1;
+            mColorTransfer = -1;
+            mColorRange = -1;
 
             return entry;
         }
@@ -759,6 +766,12 @@ public class MediaScanner implements AutoCloseable {
                 mWidth = parseSubstring(value, 0, 0);
             } else if (name.equalsIgnoreCase("height")) {
                 mHeight = parseSubstring(value, 0, 0);
+            } else if (name.equalsIgnoreCase("colorstandard")) {
+                mColorStandard = parseSubstring(value, 0, -1);
+            } else if (name.equalsIgnoreCase("colortransfer")) {
+                mColorTransfer = parseSubstring(value, 0, -1);
+            } else if (name.equalsIgnoreCase("colorrange")) {
+                mColorRange = parseSubstring(value, 0, -1);
             } else {
                 //Log.v(TAG, "unknown tag: " + name + " (" + mProcessGenres + ")");
             }
@@ -905,6 +918,15 @@ public class MediaScanner implements AutoCloseable {
                     if (resolution != null) {
                         map.put(Video.Media.RESOLUTION, resolution);
                     }
+                    if (mColorStandard >= 0) {
+                        map.put(Video.Media.COLOR_STANDARD, mColorStandard);
+                    }
+                    if (mColorTransfer >= 0) {
+                        map.put(Video.Media.COLOR_TRANSFER, mColorTransfer);
+                    }
+                    if (mColorRange >= 0) {
+                        map.put(Video.Media.COLOR_RANGE, mColorRange);
+                    }
                     if (mDate > 0) {
                         map.put(Video.Media.DATE_TAKEN, mDate);
                     }
@@ -988,7 +1010,7 @@ public class MediaScanner implements AutoCloseable {
                 ExifInterface exif = null;
                 try {
                     exif = new ExifInterface(entry.mPath);
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     // exif is null
                 }
                 if (exif != null) {
@@ -1192,6 +1214,9 @@ public class MediaScanner implements AutoCloseable {
         if (path.startsWith(SYSTEM_SOUNDS_DIR + ALARMS_DIR)
                 || path.startsWith(SYSTEM_SOUNDS_DIR + RINGTONES_DIR)
                 || path.startsWith(SYSTEM_SOUNDS_DIR + NOTIFICATIONS_DIR)
+                || path.startsWith(OEM_SOUNDS_DIR + ALARMS_DIR)
+                || path.startsWith(OEM_SOUNDS_DIR + RINGTONES_DIR)
+                || path.startsWith(OEM_SOUNDS_DIR + NOTIFICATIONS_DIR)
                 || path.startsWith(PRODUCT_SOUNDS_DIR + ALARMS_DIR)
                 || path.startsWith(PRODUCT_SOUNDS_DIR + RINGTONES_DIR)
                 || path.startsWith(PRODUCT_SOUNDS_DIR + NOTIFICATIONS_DIR)) {
@@ -1609,7 +1634,7 @@ public class MediaScanner implements AutoCloseable {
             selectionArgs = new String[] { path };
             c = mMediaProvider.query(mFilesUriNoNotify, FILES_PRESCAN_PROJECTION,
                     where, selectionArgs, null, null);
-            if (c.moveToFirst()) {
+            if (c != null && c.moveToFirst()) {
                 long rowId = c.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
                 int format = c.getInt(FILES_PRESCAN_FORMAT_COLUMN_INDEX);
                 long lastModified = c.getLong(FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);

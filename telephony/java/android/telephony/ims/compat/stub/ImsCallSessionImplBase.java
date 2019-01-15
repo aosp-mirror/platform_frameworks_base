@@ -28,6 +28,7 @@ import android.telephony.ims.aidl.IImsCallSessionListener;
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
 
+import android.annotation.UnsupportedAppUsage;
 import android.telephony.ims.ImsCallSession;
 
 /**
@@ -589,6 +590,12 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
         @Override
         public void callSessionRttMessageReceived(String rttMessage) throws RemoteException {
             mNewListener.callSessionRttMessageReceived(rttMessage);
+        }
+
+        @Override
+        public void callSessionRttAudioIndicatorChanged(ImsStreamMediaProfile profile)
+                throws RemoteException {
+            mNewListener.callSessionRttAudioIndicatorChanged(profile);
         }
     }
 }

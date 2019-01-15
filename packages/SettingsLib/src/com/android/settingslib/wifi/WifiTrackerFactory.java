@@ -16,8 +16,8 @@
 package com.android.settingslib.wifi;
 
 import android.content.Context;
-import android.support.annotation.Keep;
-import android.support.annotation.NonNull;
+import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 
 import com.android.settingslib.core.lifecycle.Lifecycle;
 

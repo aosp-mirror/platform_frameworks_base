@@ -343,51 +343,47 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
                 }
                 is_swappable = true;
             } else if (strncmp(name, "/dev/", 5) == 0) {
+                whichHeap = HEAP_UNKNOWN_DEV;
                 if (strncmp(name, "/dev/kgsl-3d0", 13) == 0) {
                     whichHeap = HEAP_GL_DEV;
-                } else if (strncmp(name, "/dev/ashmem", 11) == 0) {
-                    if (strncmp(name, "/dev/ashmem/dalvik-", 19) == 0) {
-                        whichHeap = HEAP_DALVIK_OTHER;
-                        if (strstr(name, "/dev/ashmem/dalvik-LinearAlloc") == name) {
-                            subHeap = HEAP_DALVIK_OTHER_LINEARALLOC;
-                        } else if ((strstr(name, "/dev/ashmem/dalvik-alloc space") == name) ||
-                                   (strstr(name, "/dev/ashmem/dalvik-main space") == name)) {
-                            // This is the regular Dalvik heap.
-                            whichHeap = HEAP_DALVIK;
-                            subHeap = HEAP_DALVIK_NORMAL;
-                        } else if (strstr(name, "/dev/ashmem/dalvik-large object space") == name ||
-                                   strstr(name, "/dev/ashmem/dalvik-free list large object space")
-                                       == name) {
-                            whichHeap = HEAP_DALVIK;
-                            subHeap = HEAP_DALVIK_LARGE;
-                        } else if (strstr(name, "/dev/ashmem/dalvik-non moving space") == name) {
-                            whichHeap = HEAP_DALVIK;
-                            subHeap = HEAP_DALVIK_NON_MOVING;
-                        } else if (strstr(name, "/dev/ashmem/dalvik-zygote space") == name) {
-                            whichHeap = HEAP_DALVIK;
-                            subHeap = HEAP_DALVIK_ZYGOTE;
-                        } else if (strstr(name, "/dev/ashmem/dalvik-indirect ref") == name) {
-                            subHeap = HEAP_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE;
-                        } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name ||
-                                   strstr(name, "/dev/ashmem/dalvik-data-code-cache") == name) {
-                            subHeap = HEAP_DALVIK_OTHER_CODE_CACHE;
-                        } else if (strstr(name, "/dev/ashmem/dalvik-CompilerMetadata") == name) {
-                            subHeap = HEAP_DALVIK_OTHER_COMPILER_METADATA;
-                        } else {
-                            subHeap = HEAP_DALVIK_OTHER_ACCOUNTING;  // Default to accounting.
-                        }
-                    } else if (strncmp(name, "/dev/ashmem/CursorWindow", 24) == 0) {
-                        whichHeap = HEAP_CURSOR;
-                    } else if (strncmp(name, "/dev/ashmem/libc malloc", 23) == 0) {
-                        whichHeap = HEAP_NATIVE;
-                    } else {
-                        whichHeap = HEAP_ASHMEM;
-                    }
-                } else {
-                    whichHeap = HEAP_UNKNOWN_DEV;
+                } else if (strncmp(name, "/dev/ashmem/CursorWindow", 24) == 0) {
+                    whichHeap = HEAP_CURSOR;
+                } else if (strncmp(name, "/dev/ashmem", 11)) {
+                    whichHeap = HEAP_ASHMEM;
                 }
             } else if (strncmp(name, "[anon:", 6) == 0) {
                 whichHeap = HEAP_UNKNOWN;
+                if (strncmp(name, "[anon:dalvik-", 13) == 0) {
+                    whichHeap = HEAP_DALVIK_OTHER;
+                    if (strstr(name, "[anon:dalvik-LinearAlloc") == name) {
+                        subHeap = HEAP_DALVIK_OTHER_LINEARALLOC;
+                    } else if ((strstr(name, "[anon:dalvik-alloc space") == name) ||
+                               (strstr(name, "[anon:dalvik-main space") == name)) {
+                        // This is the regular Dalvik heap.
+                        whichHeap = HEAP_DALVIK;
+                        subHeap = HEAP_DALVIK_NORMAL;
+                    } else if (strstr(name, "[anon:dalvik-large object space") == name ||
+                               strstr(name, "[anon:dalvik-free list large object space")
+                                   == name) {
+                        whichHeap = HEAP_DALVIK;
+                        subHeap = HEAP_DALVIK_LARGE;
+                    } else if (strstr(name, "[anon:dalvik-non moving space") == name) {
+                        whichHeap = HEAP_DALVIK;
+                        subHeap = HEAP_DALVIK_NON_MOVING;
+                    } else if (strstr(name, "[anon:dalvik-zygote space") == name) {
+                        whichHeap = HEAP_DALVIK;
+                        subHeap = HEAP_DALVIK_ZYGOTE;
+                    } else if (strstr(name, "[anon:dalvik-indirect ref") == name) {
+                        subHeap = HEAP_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE;
+                    } else if (strstr(name, "[anon:dalvik-jit-code-cache") == name ||
+                               strstr(name, "[anon:dalvik-data-code-cache") == name) {
+                        subHeap = HEAP_DALVIK_OTHER_CODE_CACHE;
+                    } else if (strstr(name, "[anon:dalvik-CompilerMetadata") == name) {
+                        subHeap = HEAP_DALVIK_OTHER_COMPILER_METADATA;
+                    } else {
+                        subHeap = HEAP_DALVIK_OTHER_ACCOUNTING;  // Default to accounting.
+                    }
+                }
             } else if (nameLen > 0) {
                 whichHeap = HEAP_UNKNOWN_MAP;
             } else if (start == prevEnd && prevHeap == HEAP_SO) {

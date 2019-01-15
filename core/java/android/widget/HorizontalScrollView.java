@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -76,13 +77,17 @@ public class HorizontalScrollView extends FrameLayout {
     private long mLastScroll;
 
     private final Rect mTempRect = new Rect();
+    @UnsupportedAppUsage
     private OverScroller mScroller;
+    @UnsupportedAppUsage
     private EdgeEffect mEdgeGlowLeft;
+    @UnsupportedAppUsage
     private EdgeEffect mEdgeGlowRight;
 
     /**
      * Position of the last motion event.
      */
+    @UnsupportedAppUsage
     private int mLastMotionX;
 
     /**
@@ -96,6 +101,7 @@ public class HorizontalScrollView extends FrameLayout {
      * layout is dirty. This prevents the scroll from being wrong if the child has not been
      * laid out before requesting focus.
      */
+    @UnsupportedAppUsage
     private View mChildToScrollTo = null;
 
     /**
@@ -103,11 +109,13 @@ public class HorizontalScrollView extends FrameLayout {
      * not the same as 'is being flinged', which can be checked by
      * mScroller.isFinished() (flinging begins when the user lifts his finger).
      */
+    @UnsupportedAppUsage
     private boolean mIsBeingDragged = false;
 
     /**
      * Determines speed during touch scrolling
      */
+    @UnsupportedAppUsage
     private VelocityTracker mVelocityTracker;
 
     /**
@@ -126,7 +134,9 @@ public class HorizontalScrollView extends FrameLayout {
     private int mMinimumVelocity;
     private int mMaximumVelocity;
 
+    @UnsupportedAppUsage
     private int mOverscrollDistance;
+    @UnsupportedAppUsage
     private int mOverflingDistance;
 
     private float mHorizontalScrollFactor;
@@ -437,6 +447,7 @@ public class HorizontalScrollView extends FrameLayout {
         }
     }
 
+    @UnsupportedAppUsage
     private void recycleVelocityTracker() {
         if (mVelocityTracker != null) {
             mVelocityTracker.recycle();

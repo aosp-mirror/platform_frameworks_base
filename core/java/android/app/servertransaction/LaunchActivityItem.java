@@ -18,6 +18,7 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.ProfilerInfo;
@@ -45,8 +46,10 @@ import java.util.Objects;
  */
 public class LaunchActivityItem extends ClientTransactionItem {
 
+    @UnsupportedAppUsage
     private Intent mIntent;
     private int mIdent;
+    @UnsupportedAppUsage
     private ActivityInfo mInfo;
     private Configuration mCurConfig;
     private Configuration mOverrideConfig;

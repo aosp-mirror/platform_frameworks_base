@@ -40,7 +40,6 @@ import android.util.Log;
 import com.android.internal.util.BitUtils;
 
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 
 import java.io.FileDescriptor;
 import java.net.InetAddress;

@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -47,6 +48,7 @@ public class ViewFlipper extends ViewAnimator {
     private boolean mRunning = false;
     private boolean mStarted = false;
     private boolean mVisible = false;
+    @UnsupportedAppUsage
     private boolean mUserPresent = true;
 
     public ViewFlipper(Context context) {
@@ -168,6 +170,7 @@ public class ViewFlipper extends ViewAnimator {
      *            addition to queuing future flips. If omitted, defaults to
      *            true.
      */
+    @UnsupportedAppUsage
     private void updateRunning(boolean flipNow) {
         boolean running = mVisible && mStarted && mUserPresent;
         if (running != mRunning) {

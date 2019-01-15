@@ -16,6 +16,7 @@
 
 package android.app.servertransaction;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -33,6 +34,7 @@ import java.util.Objects;
  */
 public class NewIntentItem extends ClientTransactionItem {
 
+    @UnsupportedAppUsage
     private List<ReferrerIntent> mIntents;
     private boolean mPause;
 

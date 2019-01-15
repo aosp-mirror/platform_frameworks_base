@@ -99,6 +99,7 @@ import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_DEFAULT;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_NON_METERED;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_SYSTEM;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_TMP_WHITELIST;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_WHITELIST;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_BG_RESTRICT;
@@ -269,14 +270,12 @@ import java.util.concurrent.TimeUnit;
  * enforcement.
  *
  * <p>
- * This class uses 2-3 locks to synchronize state:
+ * This class uses 2 locks to synchronize state:
  * <ul>
  * <li>{@code mUidRulesFirstLock}: used to guard state related to individual UIDs (such as firewall
  * rules).
  * <li>{@code mNetworkPoliciesSecondLock}: used to guard state related to network interfaces (such
  * as network policies).
- * <li>{@code allLocks}: not a "real" lock, but an indication (through @GuardedBy) that all locks
- * must be held.
  * </ul>
  *
  * <p>
@@ -418,7 +417,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final Object mUidRulesFirstLock = new Object();
     final Object mNetworkPoliciesSecondLock = new Object();
 
-    @GuardedBy("allLocks") volatile boolean mSystemReady;
+    @GuardedBy({"mUidRulesFirstLock", "mNetworkPoliciesSecondLock"})
+    volatile boolean mSystemReady;
 
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictBackground;
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictPower;
@@ -544,7 +544,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final ServiceThread mUidEventThread;
 
-    @GuardedBy("allLocks")
+    @GuardedBy({"mUidRulesFirstLock", "mNetworkPoliciesSecondLock"})
     private final AtomicFile mPolicyFile;
 
     private final AppOpsManager mAppOps;
@@ -4786,46 +4786,75 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final long startTime = mStatLogger.getTime();
 
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-        final boolean ret = isUidNetworkingBlockedInternal(uid, isNetworkMetered);
-
-        mStatLogger.logDurationStat(Stats.IS_UID_NETWORKING_BLOCKED, startTime);
-
-        return ret;
-    }
-
-    private boolean isUidNetworkingBlockedInternal(int uid, boolean isNetworkMetered) {
         final int uidRules;
         final boolean isBackgroundRestricted;
         synchronized (mUidRulesFirstLock) {
             uidRules = mUidRules.get(uid, RULE_NONE);
             isBackgroundRestricted = mRestrictBackground;
         }
-        if (hasRule(uidRules, RULE_REJECT_ALL)) {
-            mLogger.networkBlocked(uid, NTWK_BLOCKED_POWER);
-            return true;
+        final boolean ret = isUidNetworkingBlockedInternal(uid, uidRules, isNetworkMetered,
+                isBackgroundRestricted, mLogger);
+
+        mStatLogger.logDurationStat(Stats.IS_UID_NETWORKING_BLOCKED, startTime);
+
+        return ret;
+    }
+
+    private static boolean isSystem(int uid) {
+        return uid < Process.FIRST_APPLICATION_UID;
+    }
+
+    static boolean isUidNetworkingBlockedInternal(int uid, int uidRules, boolean isNetworkMetered,
+            boolean isBackgroundRestricted, @Nullable NetworkPolicyLogger logger) {
+        final int reason;
+        // Networks are never blocked for system components
+        if (isSystem(uid)) {
+            reason = NTWK_ALLOWED_SYSTEM;
         }
-        if (!isNetworkMetered) {
-            mLogger.networkBlocked(uid, NTWK_ALLOWED_NON_METERED);
-            return false;
+        else if (hasRule(uidRules, RULE_REJECT_ALL)) {
+            reason = NTWK_BLOCKED_POWER;
         }
-        if (hasRule(uidRules, RULE_REJECT_METERED)) {
-            mLogger.networkBlocked(uid, NTWK_BLOCKED_BLACKLIST);
-            return true;
+        else if (!isNetworkMetered) {
+            reason = NTWK_ALLOWED_NON_METERED;
         }
-        if (hasRule(uidRules, RULE_ALLOW_METERED)) {
-            mLogger.networkBlocked(uid, NTWK_ALLOWED_WHITELIST);
-            return false;
+        else if (hasRule(uidRules, RULE_REJECT_METERED)) {
+            reason = NTWK_BLOCKED_BLACKLIST;
         }
-        if (hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED)) {
-            mLogger.networkBlocked(uid, NTWK_ALLOWED_TMP_WHITELIST);
-            return false;
+        else if (hasRule(uidRules, RULE_ALLOW_METERED)) {
+            reason = NTWK_ALLOWED_WHITELIST;
         }
-        if (isBackgroundRestricted) {
-            mLogger.networkBlocked(uid, NTWK_BLOCKED_BG_RESTRICT);
-            return true;
+        else if (hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED)) {
+            reason = NTWK_ALLOWED_TMP_WHITELIST;
         }
-        mLogger.networkBlocked(uid, NTWK_ALLOWED_DEFAULT);
-        return false;
+        else if (isBackgroundRestricted) {
+            reason = NTWK_BLOCKED_BG_RESTRICT;
+        }
+        else {
+            reason = NTWK_ALLOWED_DEFAULT;
+        }
+
+        final boolean blocked;
+        switch(reason) {
+            case NTWK_ALLOWED_DEFAULT:
+            case NTWK_ALLOWED_NON_METERED:
+            case NTWK_ALLOWED_TMP_WHITELIST:
+            case NTWK_ALLOWED_WHITELIST:
+            case NTWK_ALLOWED_SYSTEM:
+                blocked = false;
+                break;
+            case NTWK_BLOCKED_POWER:
+            case NTWK_BLOCKED_BLACKLIST:
+            case NTWK_BLOCKED_BG_RESTRICT:
+                blocked = true;
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+        if (logger != null) {
+            logger.networkBlocked(uid, reason);
+        }
+
+        return blocked;
     }
 
     private class NetworkPolicyManagerInternalImpl extends NetworkPolicyManagerInternal {
@@ -4867,11 +4896,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         public boolean isUidNetworkingBlocked(int uid, String ifname) {
             final long startTime = mStatLogger.getTime();
 
+            final int uidRules;
+            final boolean isBackgroundRestricted;
+            synchronized (mUidRulesFirstLock) {
+                uidRules = mUidRules.get(uid, RULE_NONE);
+                isBackgroundRestricted = mRestrictBackground;
+            }
             final boolean isNetworkMetered;
             synchronized (mNetworkPoliciesSecondLock) {
                 isNetworkMetered = mMeteredIfaces.contains(ifname);
             }
-            final boolean ret = isUidNetworkingBlockedInternal(uid, isNetworkMetered);
+            final boolean ret = isUidNetworkingBlockedInternal(uid, uidRules, isNetworkMetered,
+                    isBackgroundRestricted, mLogger);
 
             mStatLogger.logDurationStat(Stats.IS_UID_NETWORKING_BLOCKED, startTime);
 

@@ -9,5 +9,17 @@
     <string name="ssl_error_warning">The network you&#8217;re trying to join has security issues.</string>
     <string name="ssl_error_example">For example, the login page may not belong to the organization shown.</string>
     <string name="ssl_error_continue">Continue anyway via browser</string>
+    <string name="ssl_error_untrusted">This certificate isn\'t from a trusted authority.</string>
+    <string name="ssl_error_mismatch">The name of the site doesn\'t match the name on the certificate.</string>
+    <string name="ssl_error_expired">This certificate has expired.</string>
+    <string name="ssl_error_not_yet_valid">This certificate isn\'t valid yet.</string>
+    <string name="ssl_error_date_invalid">This certificate has an invalid date.</string>
+    <string name="ssl_error_invalid">This certificate is invalid.</string>
+    <string name="ssl_error_unknown">Unknown certificate error.</string>
+    <string name="ssl_security_warning_title">Security warning</string>
+    <string name="ssl_error_view_certificate">View certificate</string>
+    <string name="ok">OK</string>
+    <string name="page_info_address">Address:</string>
+    <string name="page_info">Page info</string>
 
 </resources>

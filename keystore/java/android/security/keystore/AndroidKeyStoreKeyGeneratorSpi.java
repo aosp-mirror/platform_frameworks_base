@@ -210,6 +210,10 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                         throw new InvalidAlgorithmParameterException(
                             "HMAC key size must be at least 64 bits.");
                     }
+                    if (mKeySizeBits > 512 && spec.isStrongBoxBacked()) {
+                        throw new InvalidAlgorithmParameterException(
+                            "StrongBox HMAC key size must be smaller than 512 bits.");
+                    }
 
                     // JCA HMAC key algorithm implies a digest (e.g., HmacSHA256 key algorithm
                     // implies SHA-256 digest). Because keymaster HMAC key is authorized only for
@@ -301,6 +305,9 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
                         mRng, (mKeySizeBits + 7) / 8);
         int flags = 0;
+        if (spec.isStrongBoxBacked()) {
+            flags |= KeyStore.FLAG_STRONGBOX;
+        }
         String keyAliasInKeystore = Credentials.USER_PRIVATE_KEY + spec.getKeystoreAlias();
         KeyCharacteristics resultingKeyCharacteristics = new KeyCharacteristics();
         boolean success = false;
@@ -314,8 +321,12 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                     flags,
                     resultingKeyCharacteristics);
             if (errorCode != KeyStore.NO_ERROR) {
-                throw new ProviderException(
-                        "Keystore operation failed", KeyStore.getKeyStoreException(errorCode));
+                if (errorCode == KeyStore.HARDWARE_TYPE_UNAVAILABLE) {
+                    throw new StrongBoxUnavailableException("Failed to generate key");
+                } else {
+                    throw new ProviderException(
+                            "Keystore operation failed", KeyStore.getKeyStoreException(errorCode));
+                }
             }
             @KeyProperties.KeyAlgorithmEnum String keyAlgorithmJCA;
             try {

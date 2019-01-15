@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
@@ -28,7 +29,6 @@ import android.os.ParcelFileDescriptor;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.String;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
@@ -122,8 +122,19 @@ public final class Call {
      * The key to retrieve the optional {@code PhoneAccount}s Telecom can bundle with its Call
      * extras. Used to pass the phone accounts to display on the front end to the user in order to
      * select phone accounts to (for example) place a call.
+     * @deprecated Use the list from {@link #EXTRA_SUGGESTED_PHONE_ACCOUNTS} instead.
      */
+    @Deprecated
     public static final String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
+
+    /**
+     * Key for extra used to pass along a list of {@link PhoneAccountSuggestion}s to the in-call
+     * UI when a call enters the {@link #STATE_SELECT_PHONE_ACCOUNT} state. The list included here
+     * will have the same length and be in the same order as the list passed with
+     * {@link #AVAILABLE_PHONE_ACCOUNTS}.
+     */
+    public static final String EXTRA_SUGGESTED_PHONE_ACCOUNTS =
+            "android.telecom.extra.SUGGESTED_PHONE_ACCOUNTS";
 
     /**
      * Extra key used to indicate the time (in milliseconds since midnight, January 1, 1970 UTC)
@@ -141,6 +152,8 @@ public final class Call {
      * The caller must specify the {@link #EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE} to indicate to
      * Telecom which {@link PhoneAccountHandle} the {@link Call} should be handed over to.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_REQUEST_HANDOVER =
             "android.telecom.event.REQUEST_HANDOVER";
@@ -149,6 +162,8 @@ public final class Call {
      * Extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Specifies the
      * {@link PhoneAccountHandle} to which a call should be handed over to.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE =
             "android.telecom.extra.HANDOVER_PHONE_ACCOUNT_HANDLE";
@@ -161,6 +176,8 @@ public final class Call {
      * {@link VideoProfile#STATE_BIDIRECTIONAL}, {@link VideoProfile#STATE_RX_ENABLED}, and
      * {@link VideoProfile#STATE_TX_ENABLED}.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EXTRA_HANDOVER_VIDEO_STATE =
             "android.telecom.extra.HANDOVER_VIDEO_STATE";
@@ -176,6 +193,8 @@ public final class Call {
      * {@link ConnectionService#onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}
      * is called to initate the handover.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EXTRA_HANDOVER_EXTRAS = "android.telecom.extra.HANDOVER_EXTRAS";
 
@@ -186,6 +205,8 @@ public final class Call {
      * <p>
      * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_HANDOVER_COMPLETE =
             "android.telecom.event.HANDOVER_COMPLETE";
@@ -198,6 +219,8 @@ public final class Call {
      * <p>
      * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_HANDOVER_SOURCE_DISCONNECTED =
             "android.telecom.event.HANDOVER_SOURCE_DISCONNECTED";
@@ -209,6 +232,8 @@ public final class Call {
      * <p>
      * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_HANDOVER_FAILED =
             "android.telecom.event.HANDOVER_FAILED";
@@ -308,8 +333,11 @@ public final class Call {
         /**
          * Call can be upgraded to a video call.
          * @hide
+         * @deprecated Use {@link #CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL} and
+         * {@link #CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL} to indicate for a call
+         * whether or not video calling is supported.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 119305590)
         public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 0x00080000;
 
         /**
@@ -383,7 +411,19 @@ public final class Call {
         public static final int PROPERTY_WIFI = 0x00000008;
 
         /**
-         * Call is using high definition audio.
+         * When set, the UI should indicate to the user that a call is using high definition
+         * audio.
+         * <p>
+         * The underlying {@link ConnectionService} is responsible for reporting this
+         * property.  It is important to note that this property is not intended to report the
+         * actual audio codec being used for a Call, but whether the call should be indicated
+         * to the user as high definition.
+         * <p>
+         * The Android Telephony stack reports this property for calls based on a number
+         * of factors, including which audio codec is used and whether a call is using an HD
+         * codec end-to-end.  Some mobile operators choose to suppress display of an HD indication,
+         * and in these cases this property will not be set for a call even if the underlying audio
+         * codec is in fact "high definition".
          */
         public static final int PROPERTY_HIGH_DEF_AUDIO = 0x00000010;
 
@@ -434,8 +474,31 @@ public final class Call {
          */
         public static final int PROPERTY_RTT = 0x00000400;
 
+        /**
+         * Indicates that the call has been identified as the network as an emergency call. This
+         * property may be set for both incoming and outgoing calls which the network identifies as
+         * emergency calls.
+         */
+        public static final int PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL = 0x00000800;
+
+        /**
+         * Indicates that the call is using VoIP audio mode.
+         * <p>
+         * When this property is set, the {@link android.media.AudioManager} audio mode for this
+         * call will be {@link android.media.AudioManager#MODE_IN_COMMUNICATION}.  When this
+         * property is not set, the audio mode for this call will be
+         * {@link android.media.AudioManager#MODE_IN_CALL}.
+         * <p>
+         * This property reflects changes made using {@link Connection#setAudioModeIsVoip(boolean)}.
+         * <p>
+         * You can use this property to determine whether an un-answered incoming call or a held
+         * call will use VoIP audio mode (if the call does not currently have focus, the system
+         * audio mode may not reflect the mode the call will use).
+         */
+        public static final int PROPERTY_VOIP_AUDIO_MODE = 0x00001000;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00000800
+        // Next PROPERTY value: 0x00002000
         //******************************************************************************************
 
         private final String mTelecomCallId;
@@ -455,6 +518,7 @@ public final class Call {
         private final Bundle mExtras;
         private final Bundle mIntentExtras;
         private final long mCreationTimeMillis;
+        private final CallIdentification mCallIdentification;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -595,11 +659,20 @@ public final class Call {
             if (hasProperty(properties, PROPERTY_IS_EXTERNAL_CALL)) {
                 builder.append(" PROPERTY_IS_EXTERNAL_CALL");
             }
-            if(hasProperty(properties, PROPERTY_HAS_CDMA_VOICE_PRIVACY)) {
+            if (hasProperty(properties, PROPERTY_HAS_CDMA_VOICE_PRIVACY)) {
                 builder.append(" PROPERTY_HAS_CDMA_VOICE_PRIVACY");
             }
-            if(hasProperty(properties, PROPERTY_ASSISTED_DIALING_USED)) {
+            if (hasProperty(properties, PROPERTY_ASSISTED_DIALING_USED)) {
                 builder.append(" PROPERTY_ASSISTED_DIALING_USED");
+            }
+            if (hasProperty(properties, PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL)) {
+                builder.append(" PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL");
+            }
+            if (hasProperty(properties, PROPERTY_RTT)) {
+                builder.append(" PROPERTY_RTT");
+            }
+            if (hasProperty(properties, PROPERTY_VOIP_AUDIO_MODE)) {
+                builder.append(" PROPERTY_VOIP_AUDIO_MODE");
             }
             builder.append("]");
             return builder.toString();
@@ -627,6 +700,12 @@ public final class Call {
         }
 
         /**
+         * The display name for the caller.
+         * <p>
+         * This is the name as reported by the {@link ConnectionService} associated with this call.
+         * The name reported by a {@link CallScreeningService} can be retrieved using
+         * {@link CallIdentification#getName()}.
+         *
          * @return The display name for the caller.
          */
         public String getCallerDisplayName() {
@@ -742,6 +821,23 @@ public final class Call {
             return mCreationTimeMillis;
         }
 
+        /**
+         * Returns {@link CallIdentification} information provided by a
+         * {@link CallScreeningService} for this call.
+         * <p>
+         * {@link InCallService} implementations should display the {@link CallIdentification} for
+         * calls.  The name of the call screening service is provided in
+         * {@link CallIdentification#getCallScreeningAppName()} and should be used to attribute the
+         * call identification information.
+         *
+         * @return The {@link CallIdentification} if it was provided by a
+         * {@link CallScreeningService}, or {@code null} if no {@link CallScreeningService} has
+         * provided {@link CallIdentification} information for the call.
+         */
+        public @Nullable CallIdentification getCallIdentification() {
+            return mCallIdentification;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {
@@ -762,7 +858,8 @@ public final class Call {
                         Objects.equals(mStatusHints, d.mStatusHints) &&
                         areBundlesEqual(mExtras, d.mExtras) &&
                         areBundlesEqual(mIntentExtras, d.mIntentExtras) &&
-                        Objects.equals(mCreationTimeMillis, d.mCreationTimeMillis);
+                        Objects.equals(mCreationTimeMillis, d.mCreationTimeMillis) &&
+                        Objects.equals(mCallIdentification, d.mCallIdentification);
             }
             return false;
         }
@@ -783,7 +880,8 @@ public final class Call {
                             mStatusHints,
                             mExtras,
                             mIntentExtras,
-                            mCreationTimeMillis);
+                            mCreationTimeMillis,
+                            mCallIdentification);
         }
 
         /** {@hide} */
@@ -803,7 +901,8 @@ public final class Call {
                 StatusHints statusHints,
                 Bundle extras,
                 Bundle intentExtras,
-                long creationTimeMillis) {
+                long creationTimeMillis,
+                CallIdentification callIdentification) {
             mTelecomCallId = telecomCallId;
             mHandle = handle;
             mHandlePresentation = handlePresentation;
@@ -820,6 +919,7 @@ public final class Call {
             mExtras = extras;
             mIntentExtras = intentExtras;
             mCreationTimeMillis = creationTimeMillis;
+            mCallIdentification = callIdentification;
         }
 
         /** {@hide} */
@@ -840,16 +940,23 @@ public final class Call {
                     parcelableCall.getStatusHints(),
                     parcelableCall.getExtras(),
                     parcelableCall.getIntentExtras(),
-                    parcelableCall.getCreationTimeMillis());
+                    parcelableCall.getCreationTimeMillis(),
+                    parcelableCall.getCallIdentification());
         }
 
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append("[pa: ");
+            sb.append("[id: ");
+            sb.append(mTelecomCallId);
+            sb.append(", pa: ");
             sb.append(mAccountHandle);
             sb.append(", hdl: ");
-            sb.append(Log.pii(mHandle));
+            sb.append(Log.piiHandle(mHandle));
+            sb.append(", hdlPres: ");
+            sb.append(mHandlePresentation);
+            sb.append(", videoState: ");
+            sb.append(VideoProfile.videoStateToString(mVideoState));
             sb.append(", caps: ");
             sb.append(capabilitiesToString(mCallCapabilities));
             sb.append(", props: ");

@@ -31,6 +31,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -2797,6 +2798,7 @@ public class GridLayout extends ViewGroup {
         }
     }
 
+    @UnsupportedAppUsage
     static final Alignment UNDEFINED_ALIGNMENT = new Alignment() {
         @Override
         int getGravityOffset(View view, int cellDelta) {

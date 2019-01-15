@@ -22,6 +22,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
 import static android.text.format.Time.getJulianDay;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -76,6 +77,7 @@ public class DateTimeView extends TextView {
         this(context, null);
     }
 
+    @UnsupportedAppUsage
     public DateTimeView(Context context, AttributeSet attrs) {
         super(context, attrs);
         final TypedArray a = context.obtainStyledAttributes(attrs,
@@ -124,6 +126,7 @@ public class DateTimeView extends TextView {
     }
 
     @android.view.RemotableViewMethod
+    @UnsupportedAppUsage
     public void setTime(long time) {
         Time t = new Time();
         t.set(time);
@@ -149,6 +152,7 @@ public class DateTimeView extends TextView {
         }
     }
 
+    @UnsupportedAppUsage
     void update() {
         if (mTime == null || getVisibility() == GONE) {
             return;

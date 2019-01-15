@@ -16,12 +16,16 @@
 
 package android.telephony;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -64,7 +68,13 @@ public class CarrierConfigManager {
      * This intent is broadcast by the system when carrier config changes. An int is specified in
      * {@link #EXTRA_SLOT_INDEX} to indicate the slot index that this is for. An optional int extra
      * {@link #EXTRA_SUBSCRIPTION_INDEX} is included to indicate the subscription index if a valid
-     * one is available for the slot index.
+     * one is available for the slot index. An optional int extra
+     * {@link TelephonyManager#EXTRA_CARRIER_ID} is included to indicate the carrier id for the
+     * changed carrier configuration. An optional int extra
+     * {@link TelephonyManager#EXTRA_PRECISE_CARRIER_ID} is included to indicate the precise
+     * carrier id for the changed carrier configuration.
+     * @see TelephonyManager#getSimCarrierId()
+     * @see TelephonyManager#getSimPreciseCarrierId()
      */
     public static final String
             ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
@@ -74,19 +84,72 @@ public class CarrierConfigManager {
     // system image, that can be added in packages/apps/CarrierConfig.
 
     /**
+     * Specifies a value that identifies the version of the carrier configuration that is
+     * currently in use. This string is displayed on the UI.
+     * The format of the string is not specified.
+     */
+    public static final String KEY_CARRIER_CONFIG_VERSION_STRING =
+            "carrier_config_version_string";
+
+    /**
      * This flag specifies whether VoLTE availability is based on provisioning. By default this is
      * false.
      */
     public static final String
             KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
 
+    /**
+     * Boolean indicating if the "Call forwarding" item is visible in the Call Settings menu.
+     * true means visible. false means gone.
+     * @hide
+     */
+    public static final String KEY_CALL_FORWARDING_VISIBILITY_BOOL =
+            "call_forwarding_visibility_bool";
+
+    /**
+     * Boolean indicating if the "Caller ID" item is visible in the Additional Settings menu.
+     * true means visible. false means gone.
+     * @hide
+     */
+    public static final String KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL =
+            "additional_settings_caller_id_visibility_bool";
+
+    /**
+     * Boolean indicating if the "Call Waiting" item is visible in the Additional Settings menu.
+     * true means visible. false means gone.
+     * @hide
+     */
+    public static final String KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL =
+            "additional_settings_call_waiting_visibility_bool";
+
    /**
     * Boolean indicating if the "Call barring" item is visible in the Call Settings menu.
-    * true means visible. false means gone.
-    * @hide
+    * If true, the "Call Barring" menu will be visible. If false, the menu will be gone.
+    *
+    * Disabled by default.
     */
     public static final String KEY_CALL_BARRING_VISIBILITY_BOOL =
             "call_barring_visibility_bool";
+
+    /**
+     * Flag indicating whether or not changing the call barring password via the "Call Barring"
+     * settings menu is supported. If true, the option will be visible in the "Call
+     * Barring" settings menu. If false, the option will not be visible.
+     *
+     * Enabled by default.
+     */
+    public static final String KEY_CALL_BARRING_SUPPORTS_PASSWORD_CHANGE_BOOL =
+            "call_barring_supports_password_change_bool";
+
+    /**
+     * Flag indicating whether or not deactivating all call barring features via the "Call Barring"
+     * settings menu is supported. If true, the option will be visible in the "Call
+     * Barring" settings menu. If false, the option will not be visible.
+     *
+     * Enabled by default.
+     */
+    public static final String KEY_CALL_BARRING_SUPPORTS_DEACTIVATE_ALL_BOOL =
+            "call_barring_supports_deactivate_all_bool";
 
     /**
      * Flag indicating whether the Phone app should ignore EVENT_SIM_NETWORK_LOCKED
@@ -138,10 +201,20 @@ public class CarrierConfigManager {
     /**
      * Flag indicating whether radio is to be restarted on error PDP_FAIL_REGULAR_DEACTIVATION
      * This is false by default.
+     *
+     * @deprecated Use {@link #KEY_RADIO_RESTART_FAILURE_CAUSES_INT_ARRAY} instead
      */
-    public static final String
-            KEY_RESTART_RADIO_ON_PDP_FAIL_REGULAR_DEACTIVATION_BOOL =
-                    "restart_radio_on_pdp_fail_regular_deactivation_bool";
+    @Deprecated
+    public static final String KEY_RESTART_RADIO_ON_PDP_FAIL_REGULAR_DEACTIVATION_BOOL =
+            "restart_radio_on_pdp_fail_regular_deactivation_bool";
+
+    /**
+     * A list of failure cause codes that will trigger a modem restart when telephony receiving
+     * one of those during data setup. The cause codes are defined in 3GPP TS 24.008 Annex I and
+     * TS 24.301 Annex B.
+     */
+    public static final String KEY_RADIO_RESTART_FAILURE_CAUSES_INT_ARRAY =
+            "radio_restart_failure_causes_int_array";
 
     /**
      * If true, enable vibration (haptic feedback) for key presses in the EmergencyDialer activity.
@@ -213,6 +286,14 @@ public class CarrierConfigManager {
     /** Control whether users can reach the carrier portions of Cellular Network Settings. */
     public static final String
             KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL = "hide_carrier_network_settings_bool";
+
+    /**
+     * Do only allow auto selection in Advanced Network Settings when in home network.
+     * Manual selection is allowed when in roaming network.
+     * @hide
+     */
+    public static final String
+            KEY_ONLY_AUTO_SELECT_IN_HOME_NETWORK_BOOL = "only_auto_select_in_home_network";
 
     /**
      * Control whether users receive a simplified network settings UI and improved network
@@ -327,7 +408,6 @@ public class CarrierConfigManager {
      * @see SubscriptionManager#getSubscriptionPlans(int)
      * @see SubscriptionManager#setSubscriptionPlans(int, java.util.List)
      */
-    @SystemApi
     public static final String KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING =
             "config_plans_package_override_string";
 
@@ -485,19 +565,19 @@ public class CarrierConfigManager {
             "carrier_wfc_supports_wifi_only_bool";
 
     /**
-     * Default WFC_IMS_MODE for home network   0: WIFI_ONLY
-     *                                         1: CELLULAR_PREFERRED
-     *                                         2: WIFI_PREFERRED
-     * @hide
+     * Default mode for WFC over IMS on home network:
+     * <ul>
+     *   <li>0: Wi-Fi only
+     *   <li>1: prefer mobile network
+     *   <li>2: prefer Wi-Fi
+     * </ul>
      */
     public static final String KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT =
             "carrier_default_wfc_ims_mode_int";
 
     /**
-     * Default WFC_IMS_MODE for roaming
-     * See {@link KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT} for valid values.
-     *
-     * @hide
+     * Default mode for WFC over IMS on roaming network.
+     * See {@link #KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT} for meaning of values.
      */
     public static final String KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT =
             "carrier_default_wfc_ims_roaming_mode_int";
@@ -956,9 +1036,9 @@ public class CarrierConfigManager {
     public static final String KEY_HIDE_ENHANCED_4G_LTE_BOOL = "hide_enhanced_4g_lte_bool";
 
     /**
-     * Default Enhanced 4G LTE mode enabled. When this is {@code true}, Enhanced 4G LTE mode by
-     * default is on, otherwise if {@code false}, Enhanced 4G LTE mode by default is off.
-     * @hide
+     * Sets the default state for the "Enhanced 4G LTE" or "Advanced Calling" mode toggle set by the
+     * user. When this is {@code true}, this mode by default is on, otherwise if {@code false},
+     * this mode by default is off.
      */
     public static final String KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL =
             "enhanced_4g_lte_on_by_default_bool";
@@ -1013,12 +1093,51 @@ public class CarrierConfigManager {
             "wfc_operator_error_codes_string_array";
 
     /**
-     * Indexes of SPN format strings in wfcSpnFormats and wfcDataSpnFormats.
+     * Indexes of SPN format strings in wfcSpnFormats.
+     *
+     * <p>Available options are:
+     * <ul>
+     * <li>  0: %s</li>
+     * <li>  1: %s Wi-Fi Calling</li>
+     * <li>  2: WLAN Call</li>
+     * <li>  3: %s WLAN Call</li>
+     * <li>  4: %s Wi-Fi</li>
+     * <li>  5: WiFi Calling | %s</li>
+     * <li>  6: %s VoWifi</li>
+     * <li>  7: Wi-Fi Calling</li>
+     * <li>  8: Wi-Fi</li>
+     * <li>  9: WiFi Calling</li>
+     * <li> 10: VoWifi</li>
      * @hide
      */
     public static final String KEY_WFC_SPN_FORMAT_IDX_INT = "wfc_spn_format_idx_int";
-    /** @hide */
+
+    /**
+     * Indexes of data SPN format strings in wfcSpnFormats.
+     *
+     * @see KEY_WFC_SPN_FORMAT_IDX_INT for available options.
+     * @hide
+     */
     public static final String KEY_WFC_DATA_SPN_FORMAT_IDX_INT = "wfc_data_spn_format_idx_int";
+
+    /**
+     * Indexes of SPN format strings in wfcSpnFormats used during flight mode.
+     *
+     * Set to -1 to use the value from KEY_WFC_SPN_FORMAT_IDX_INT also in this case.
+     * @see KEY_WFC_SPN_FORMAT_IDX_INT for other available options.
+     * @hide
+     */
+    public static final String KEY_WFC_FLIGHT_MODE_SPN_FORMAT_IDX_INT =
+            "wfc_flight_mode_spn_format_idx_int";
+
+    /**
+     * Use root locale when reading wfcSpnFormats.
+     *
+     * If true, then the root locale will always be used when reading wfcSpnFormats. This means the
+     * non localized version of wfcSpnFormats will be used.
+     * @hide
+     */
+    public static final String KEY_WFC_SPN_USE_ROOT_LOCALE = "wfc_spn_use_root_locale";
 
     /**
      * The Component Name of the activity that can setup the emergency addrees for WiFi Calling
@@ -1047,6 +1166,35 @@ public class CarrierConfigManager {
      * and SPN is unavailable
      */
     public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
+
+    /**
+     * String to override sim country iso.
+     * Sim country iso is based on sim MCC which is coarse and doesn't work with dual IMSI SIM where
+     * a SIM can have multiple MCC from different countries.
+     * Instead, each sim carrier should have a single country code, apply per carrier based iso
+     * code as an override. The overridden value can be read from
+     * {@link TelephonyManager#getSimCountryIso()} and {@link SubscriptionInfo#getCountryIso()}
+     *
+     * @hide
+     */
+    public static final String KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING =
+            "sim_country_iso_override_string";
+
+   /**
+    * The Component Name of a carrier-provided CallScreeningService implementation. Telecom will
+    * bind to {@link android.telecom.CallScreeningService} for ALL incoming calls and provide
+    * the carrier
+    * CallScreeningService with the opportunity to allow or block calls.
+    * <p>
+    * The String includes the package name/the class name.
+    * Example:
+    * <item>com.android.carrier/com.android.carrier.callscreeningserviceimpl</item>
+    * <p>
+    * Using {@link ComponentName#flattenToString()} to convert a ComponentName object to String.
+    * Using {@link ComponentName#unflattenFromString(String)} to convert a String object to a
+    * ComponentName.
+    */
+    public static final String KEY_CARRIER_CALL_SCREENING_APP_STRING = "call_screening_app";
 
     /**
      * Override the registered PLMN name using #KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING.
@@ -1119,14 +1267,60 @@ public class CarrierConfigManager {
             "always_show_data_rat_icon_bool";
 
     /**
+     * Boolean indicating if default data account should show LTE or 4G icon
+     * @hide
+     */
+    public static final String KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL =
+            "show_4g_for_lte_data_icon_bool";
+
+    /**
+     * Boolean indicating if lte+ icon should be shown if available
+     * @hide
+     */
+    public static final String KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL =
+            "hide_lte_plus_data_icon_bool";
+
+    /**
      * Boolean to decide whether to show precise call failed cause to user
      * @hide
      */
     public static final String KEY_SHOW_PRECISE_FAILED_CAUSE_BOOL =
             "show_precise_failed_cause_bool";
 
-    // These variables are used by the MMS service and exposed through another API, {@link
-    // SmsManager}. The variable names and string values are copied from there.
+    /**
+     * Boolean to decide whether lte is enabled.
+     * @hide
+     */
+    public static final String KEY_LTE_ENABLED_BOOL = "lte_enabled_bool";
+
+    /**
+     * Boolean to decide whether TD-SCDMA is supported.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_TDSCDMA_BOOL = "support_tdscdma_bool";
+
+    /**
+     * A list of mcc/mnc that support TD-SCDMA for device when connect to the roaming network.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY =
+            "support_tdscdma_roaming_networks_string_array";
+
+    /**
+     * Boolean to decide whether world mode is enabled.
+     * @hide
+     */
+    public static final String KEY_WORLD_MODE_ENABLED_BOOL = "world_mode_enabled_bool";
+
+    /**
+     * Flatten {@link android.content.ComponentName} of the carrier's settings activity.
+     * @hide
+     */
+    public static final String KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING =
+            "carrier_settings_activity_component_name_string";
+
+    // These variables are used by the MMS service and exposed through another API,
+    // SmsManager. The variable names and string values are copied from there.
     public static final String KEY_MMS_ALIAS_ENABLED_BOOL = "aliasEnabled";
     public static final String KEY_MMS_ALLOW_ATTACH_AUDIO_BOOL = "allowAttachAudio";
     public static final String KEY_MMS_APPEND_TRANSACTION_ID_BOOL = "enabledTransID";
@@ -1162,19 +1356,14 @@ public class CarrierConfigManager {
     public static final String KEY_MMS_CLOSE_CONNECTION_BOOL = "mmsCloseConnection";
 
     /**
-     * If carriers require differentiate un-provisioned status: cold sim or out of credit sim
-     * a package name and activity name can be provided to launch a supported carrier application
-     * that check the sim provisioning status
-     * The first element is the package name and the second element is the activity name
-     * of the provisioning app
-     * example:
-     * <item>com.google.android.carrierPackageName</item>
-     * <item>com.google.android.carrierPackageName.CarrierActivityName</item>
-     * The ComponentName of the carrier activity that can setup the device and activate with the
-     * network as part of the Setup Wizard flow.
+     * The flatten {@link android.content.ComponentName componentName} of the activity that can
+     * setup the device and activate with the network per carrier requirements.
+     *
+     * e.g, com.google.android.carrierPackageName/.CarrierActivityName
      * @hide
      */
-     public static final String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
+    @SystemApi
+    public static final String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
 
     /**
      * Defines carrier-specific actions which act upon
@@ -1188,6 +1377,7 @@ public class CarrierConfigManager {
      * disable_metered_apns}
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_REDIRECTION_STRING_ARRAY =
             "carrier_default_actions_on_redirection_string_array";
 
@@ -1208,9 +1398,9 @@ public class CarrierConfigManager {
      * Example: "default"
      *
      * {@code ERROR_CODE_1} is an integer defined in
-     * {@link com.android.internal.telephony.dataconnection.DcFailCause DcFailure}
+     * {@link DataFailCause DcFailure}
      * Example:
-     * {@link com.android.internal.telephony.dataconnection.DcFailCause#MISSING_UNKNOWN_APN}
+     * {@link DataFailCause#MISSING_UNKNOWN_APN}
      *
      * {@code CARRIER_ACTION_IDX_1} is an integer defined in
      * {@link com.android.carrierdefaultapp.CarrierActionUtils CarrierActionUtils}
@@ -1549,9 +1739,19 @@ public class CarrierConfigManager {
      * When {@code false}, use default title for Enhanced 4G LTE Mode settings.
      * When {@code true}, use the variant.
      * @hide
+     * @deprecated use {@link #KEY_ENHANCED_4G_LTE_TITLE_VARIANT_INT}.
      */
+    @Deprecated
     public static final String KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL =
             "enhanced_4g_lte_title_variant_bool";
+
+    /**
+     * The index indicates the carrier specified title string of Enahnce 4G LTE Mode settings.
+     * Default value is 0, which indicates the default title string.
+     * @hide
+     */
+    public static final String KEY_ENHANCED_4G_LTE_TITLE_VARIANT_INT =
+            "enhanced_4g_lte_title_variant_int";
 
     /**
      * Indicates whether the carrier wants to notify the user when handover of an LTE video call to
@@ -1662,6 +1862,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL =
             "notify_international_call_on_wfc_bool";
+
+    /**
+     * Flag to hide Preset APN details. If true, user cannot enter ApnEditor view of Preset APN,
+     * and cannot view details of the APN. If false, user can enter ApnEditor view of Preset APN.
+     * Default value is false.
+     */
+    public static final String KEY_HIDE_PRESET_APN_DETAILS_BOOL = "hide_preset_apn_details_bool";
 
     /**
      * Flag specifying whether to show an alert dialog for video call charges.
@@ -1793,6 +2000,8 @@ public class CarrierConfigManager {
      * Determine whether to use only RSRP for the number of LTE signal bars.
      * @hide
      */
+    // FIXME: this key and related keys must not be exposed without a consistent philosophy for
+    // all RATs.
     public static final String KEY_USE_ONLY_RSRP_FOR_LTE_SIGNAL_BAR_BOOL =
             "use_only_rsrp_for_lte_signal_bar_bool";
 
@@ -1800,6 +2009,7 @@ public class CarrierConfigManager {
      * Key identifying if voice call barring notification is required to be shown to the user.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL =
             "disable_voice_barring_notification_bool";
 
@@ -1870,6 +2080,31 @@ public class CarrierConfigManager {
     public static final String KEY_RTT_SUPPORTED_BOOL = "rtt_supported_bool";
 
     /**
+     * Indicates if the carrier supports auto-upgrading a call to RTT when receiving a call from a
+     * RTT-supported device.
+     * @hide
+     */
+    public static final String KEY_RTT_AUTO_UPGRADE_BOOL = "rtt_auto_upgrade_bool";
+
+    /**
+     * Indicates if the carrier supports RTT during a video call.
+     * @hide
+     */
+    public static final String KEY_RTT_SUPPORTED_FOR_VT_BOOL = "rtt_supported_for_vt_bool";
+
+    /**
+     * Indicates if the carrier supports upgrading a voice call to an RTT call during the call.
+     * @hide
+     */
+    public static final String KEY_RTT_UPGRADE_SUPPORTED_BOOL = "rtt_upgrade_supported_bool";
+
+    /**
+     * Indicates if the carrier supports downgrading a RTT call to a voice call during the call.
+     * @hide
+     */
+    public static final String KEY_RTT_DOWNGRADE_SUPPORTED_BOOL = "rtt_downgrade_supported_bool";
+
+    /**
      * The flag to disable the popup dialog which warns the user of data charges.
      * @hide
      */
@@ -1887,6 +2122,17 @@ public class CarrierConfigManager {
      */
     public static final String KEY_SKIP_CF_FAIL_TO_DISABLE_DIALOG_BOOL =
             "skip_cf_fail_to_disable_dialog_bool";
+
+    /**
+     * Flag specifying whether operator supports including no reply condition timer option on
+     * CFNRy (3GPP TS 24.082 3: Call Forwarding on No Reply) in the call forwarding settings UI.
+     * {@code true}  - include no reply condition timer option on CFNRy
+     * {@code false} - don't include no reply condition timer option on CFNRy
+     *
+     * @hide
+     */
+    public static final String KEY_SUPPORT_NO_REPLY_TIMER_FOR_CFNRY_BOOL =
+            "support_no_reply_timer_for_cfnry_bool";
 
     /**
      * List of the FAC (feature access codes) to dial as a normal call.
@@ -1957,17 +2203,24 @@ public class CarrierConfigManager {
      * the binding intent go to.
      * @hide
      */
-    public static final String KEY_CARRIER_NETWORK_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING
-             = "carrier_network_service_wlan_package_override_string";
+    public static final String KEY_CARRIER_NETWORK_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING =
+            "carrier_network_service_wlan_package_override_string";
 
     /**
      * Decides when clients try to bind to wwan (cellular) network service, which package name will
      * the binding intent go to.
      * @hide
      */
-    public static final String KEY_CARRIER_NETWORK_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING
-            = "carrier_network_service_wwan_package_override_string";
+    public static final String KEY_CARRIER_NETWORK_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING =
+            "carrier_network_service_wwan_package_override_string";
 
+    /**
+     * The package name of qualified networks service that telephony binds to.
+     *
+     * @hide
+     */
+    public static final String KEY_CARRIER_QUALIFIED_NETWORKS_SERVICE_PACKAGE_OVERRIDE_STRING =
+            "carrier_qualified_networks_service_package_override_string";
     /**
      * A list of 4 LTE RSCP thresholds above which a signal level is considered POOR,
      * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
@@ -1989,9 +2242,11 @@ public class CarrierConfigManager {
      * e.g.) To use RSCP by default, set the value to "rscp". The signal strength level will
      * then be determined by #KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY
      * <p>
-     * Currently this only supports the value "rscp"
+     * Currently this supports the value "rscp" and "rssi".
      * @hide
      */
+    // FIXME: this key and related keys must not be exposed without a consistent philosophy for
+    // all RATs.
     public static final String KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING =
             "wcdma_default_signal_strength_measurement_string";
 
@@ -2004,11 +2259,121 @@ public class CarrierConfigManager {
     public static final String KEY_UNDELIVERED_SMS_MESSAGE_EXPIRATION_TIME =
             "undelivered_sms_message_expiration_time";
 
+    /**
+     * Support for the original string display of CDMA MO call.
+     * By default, it is disabled.
+     * @hide
+     */
+    public static final String KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL =
+            "config_show_orig_dial_string_for_cdma";
+
+    /**
+     * Specifies a carrier-defined {@link CallRedirectionService} which Telecom will bind
+     * to for outgoing calls.  An empty string indicates that no carrier-defined
+     * {@link CallRedirectionService} is specified.
+     * @hide
+     */
+    public static final String KEY_CALL_REDIRECTION_SERVICE_COMPONENT_NAME_STRING =
+            "call_redirection_service_component_name_string";
+
+    /**
+     * Flag specifying whether to show notification(call blocking disabled) when Enhanced Call
+     * Blocking(KEY_SUPPORT_ENHANCED_CALL_BLOCKING_BOOL) is enabled and making emergency call.
+     * When true, notification is shown always.
+     * When false, notification is shown only when any setting of "Enhanced Blocked number" is
+     * enabled.
+     */
+    public static final String KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL =
+            "show_call_blocking_disabled_notification_always_bool";
+
+    /**
+     * Some carriers only support SS over UT via INTERNET PDN.
+     * When mobile data is OFF or data roaming OFF during roaming,
+     * UI should block the call forwarding operation and notify the user
+     * that the function only works if data is available.
+     * @hide
+     */
+    public static final String KEY_CALL_FORWARDING_OVER_UT_WARNING_BOOL =
+            "call_forwarding_over_ut_warning_bool";
+
+    /**
+     * Some carriers only support SS over UT via INTERNET PDN.
+     * When mobile data is OFF or data roaming OFF during roaming,
+     * UI should block the call barring operation and notify the user
+     * that the function only works if data is available.
+     * @hide
+     */
+    public static final String KEY_CALL_BARRING_OVER_UT_WARNING_BOOL =
+            "call_barring_over_ut_warning_bool";
+
+    /**
+     * Some carriers only support SS over UT via INTERNET PDN.
+     * When mobile data is OFF or data roaming OFF during roaming,
+     * UI should block the caller id operation and notify the user
+     * that the function only works if data is available.
+     * @hide
+     */
+    public static final String KEY_CALLER_ID_OVER_UT_WARNING_BOOL =
+            "caller_id_over_ut_warning_bool";
+
+    /**
+     * Some carriers only support SS over UT via INTERNET PDN.
+     * When mobile data is OFF or data roaming OFF during roaming,
+     * UI should block the call waiting operation and notify the user
+     * that the function only works if data is available.
+     * @hide
+     */
+    public static final String KEY_CALL_WAITING_OVER_UT_WARNING_BOOL =
+            "call_waiting_over_ut_warning_bool";
+
+    /**
+     * Flag indicating whether to support "Network default" option in Caller ID settings for Calling
+     * Line Identification Restriction (CLIR).
+     */
+    public static final String KEY_SUPPORT_CLIR_NETWORK_DEFAULT_BOOL =
+            "support_clir_network_default_bool";
+
+    /**
+     * Determines whether the carrier want to support emergency dialer shortcut.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_EMERGENCY_DIALER_SHORTCUT_BOOL =
+            "support_emergency_dialer_shortcut_bool";
+
+    /**
+     * Controls RSRP threshold at which AlternativeNetworkService will decide whether
+     * the opportunistic network is good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT =
+            "opportunistic_network_entry_threshold_rsrp_int";
+
+    /**
+     * Controls RSSNR threshold at which AlternativeNetworkService will decide whether
+     * the opportunistic network is good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT =
+            "opportunistic_network_entry_threshold_rssnr_int";
+
+    /**
+     * Controls RSRP threshold below which AlternativeNetworkService will decide whether
+     * the opportunistic network available is not good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT =
+            "opportunistic_network_exit_threshold_rsrp_int";
+
+    /**
+     * Controls RSSNR threshold below which AlternativeNetworkService will decide whether
+     * the opportunistic network available is not good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT =
+            "opportunistic_network_exit_threshold_rssnr_int";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
     static {
         sDefaults = new PersistableBundle();
+        sDefaults.putString(KEY_CARRIER_CONFIG_VERSION_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_DEFLECT_IMS_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_PLAY_REMOTE_HOLD_TONE_BOOL, false);
@@ -2048,6 +2413,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL, true);
         sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_QUALIFIED_NETWORKS_SERVICE_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING, "");
@@ -2059,11 +2425,17 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL, true);
         sDefaults.putBoolean(KEY_HAS_IN_CALL_NOISE_SUPPRESSION_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL, false);
+        sDefaults.putBoolean(KEY_ONLY_AUTO_SELECT_IN_HOME_NETWORK_BOOL, false);
         sDefaults.putBoolean(KEY_SIMPLIFIED_NETWORK_SETTINGS_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_SIM_LOCK_SETTINGS_BOOL, false);
 
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONED_BOOL, false);
         sDefaults.putBoolean(KEY_CALL_BARRING_VISIBILITY_BOOL, false);
+        sDefaults.putBoolean(KEY_CALL_BARRING_SUPPORTS_PASSWORD_CHANGE_BOOL, true);
+        sDefaults.putBoolean(KEY_CALL_BARRING_SUPPORTS_DEACTIVATE_ALL_BOOL, true);
+        sDefaults.putBoolean(KEY_CALL_FORWARDING_VISIBILITY_BOOL, true);
+        sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL, true);
+        sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL, false);
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
@@ -2085,6 +2457,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_WORLD_PHONE_BOOL, false);
         sDefaults.putBoolean(KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL, true);
         sDefaults.putBoolean(KEY_RESTART_RADIO_ON_PDP_FAIL_REGULAR_DEACTIVATION_BOOL, false);
+        sDefaults.putIntArray(KEY_RADIO_RESTART_FAILURE_CAUSES_INT_ARRAY, new int[]{});
         sDefaults.putInt(KEY_VOLTE_REPLACEMENT_RAT_INT, 0);
         sDefaults.putString(KEY_DEFAULT_SIM_CALL_MANAGER_STRING, "");
         sDefaults.putString(KEY_VVM_DESTINATION_NUMBER_STRING, "");
@@ -2175,16 +2548,20 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_WFC_OPERATOR_ERROR_CODES_STRING_ARRAY, null);
         sDefaults.putInt(KEY_WFC_SPN_FORMAT_IDX_INT, 0);
         sDefaults.putInt(KEY_WFC_DATA_SPN_FORMAT_IDX_INT, 0);
+        sDefaults.putInt(KEY_WFC_FLIGHT_MODE_SPN_FORMAT_IDX_INT, -1);
+        sDefaults.putBoolean(KEY_WFC_SPN_USE_ROOT_LOCALE, false);
         sDefaults.putString(KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
+        sDefaults.putString(KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_CALL_SCREENING_APP_STRING, "");
         sDefaults.putBoolean(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_DATA_ROAMING_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_SKIP_CF_FAIL_TO_DISABLE_DIALOG_BOOL, false);
-        sDefaults.putBoolean(KEY_SUPPORT_ENHANCED_CALL_BLOCKING_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORT_ENHANCED_CALL_BLOCKING_BOOL, true);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
@@ -2281,6 +2658,7 @@ public class CarrierConfigManager {
 
         sDefaults.putStringArray(KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL, false);
+        sDefaults.putInt(KEY_ENHANCED_4G_LTE_TITLE_VARIANT_INT, 0);
         sDefaults.putBoolean(KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL, false);
         sDefaults.putStringArray(KEY_FILTERED_CNAP_NAMES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
@@ -2294,6 +2672,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISPLAY_VOICEMAIL_NUMBER_AS_DEFAULT_CALL_FORWARDING_NUMBER_BOOL,
                 false);
         sDefaults.putBoolean(KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL, false);
+        sDefaults.putBoolean(KEY_HIDE_PRESET_APN_DETAILS_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_VIDEO_CALL_CHARGES_ALERT_DIALOG_BOOL, false);
         sDefaults.putStringArray(KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY,
                 null);
@@ -2310,11 +2689,19 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_CHARGE_INDICATION_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORT_NO_REPLY_TIMER_FOR_CFNRY_BOOL, true);
         sDefaults.putStringArray(KEY_FEATURE_ACCESS_CODES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_IDENTIFY_HIGH_DEFINITION_CALLS_IN_CALL_LOG_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_PRECISE_FAILED_CAUSE_BOOL, false);
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, false);
+        sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
+        sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
+        sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
+        sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_WORLD_MODE_ENABLED_BOOL, false);
+        sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING, "");
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
         sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,
@@ -2331,7 +2718,23 @@ public class CarrierConfigManager {
                         -95, /* SIGNAL_STRENGTH_GOOD */
                         -85  /* SIGNAL_STRENGTH_GREAT */
                 });
-        sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "");
+        sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
+        sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
+        sDefaults.putBoolean(KEY_CALL_FORWARDING_OVER_UT_WARNING_BOOL, false);
+        sDefaults.putBoolean(KEY_CALL_BARRING_OVER_UT_WARNING_BOOL, false);
+        sDefaults.putBoolean(KEY_CALLER_ID_OVER_UT_WARNING_BOOL, false);
+        sDefaults.putBoolean(KEY_CALL_WAITING_OVER_UT_WARNING_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORT_CLIR_NETWORK_DEFAULT_BOOL, true);
+        sDefaults.putBoolean(KEY_SUPPORT_EMERGENCY_DIALER_SHORTCUT_BOOL, true);
+        /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT, -108);
+        /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_MODERATE */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT, -118);
+        /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_GOOD */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 45);
+        /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_MODERATE */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 10);
     }
 
     /**
@@ -2363,6 +2766,40 @@ public class CarrierConfigManager {
                     + ex.toString());
         }
         return null;
+    }
+
+    /**
+     * Overrides the carrier config of the provided subscription ID with the provided values.
+     *
+     * Any further queries to carrier config from any process will return
+     * the overriden values after this method returns. The overrides are effective for the lifetime
+     * of the phone process.
+     *
+     * May throw an {@link IllegalArgumentException} if {@code overrideValues} contains invalid
+     * values for the specified config keys.
+     *
+     * @param subscriptionId The subscription ID for which the override should be done.
+     * @param overrideValues Key-value pairs of the values that are to be overriden. If null,
+     *                       all previous overrides will be disabled and the config reset back to
+     *                       its initial state.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    @TestApi
+    public void overrideConfig(int subscriptionId, @Nullable PersistableBundle overrideValues) {
+        try {
+            ICarrierConfigLoader loader = getICarrierConfigLoader();
+            if (loader == null) {
+                Rlog.w(TAG, "Error setting config for subId " + subscriptionId
+                        + " ICarrierConfigLoader is null");
+                return;
+            }
+            loader.overrideConfig(subscriptionId, overrideValues);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "Error setting config for subId " + subscriptionId + ": "
+                    + ex.toString());
+        }
     }
 
     /**

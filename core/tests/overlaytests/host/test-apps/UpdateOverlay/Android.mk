@@ -21,6 +21,8 @@ LOCAL_PACKAGE_NAME := OverlayHostTests_UpdateOverlay
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
+LOCAL_USE_AAPT2 := true
+LOCAL_AAPT_FLAGS := --no-resource-removal
 include $(BUILD_PACKAGE)
 
 my_package_prefix := com.android.server.om.hosttest.framework_overlay

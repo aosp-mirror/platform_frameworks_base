@@ -27,6 +27,9 @@
 #include "androidfw/LoadedArsc.h"
 #include "androidfw/misc.h"
 
+struct ZipArchive;
+typedef ZipArchive* ZipArchiveHandle;
+
 namespace android {
 
 class LoadedIdmap;
@@ -88,9 +91,9 @@ class ApkAssets {
   // Creates an Asset from any file on the file system.
   static std::unique_ptr<Asset> CreateAssetFromFile(const std::string& path);
 
-  ApkAssets(void* unmanaged_handle, const std::string& path);
+  ApkAssets(ZipArchiveHandle unmanaged_handle, const std::string& path);
 
-  using ZipArchivePtr = std::unique_ptr<void, void(*)(void*)>;
+  using ZipArchivePtr = std::unique_ptr<ZipArchive, void(*)(ZipArchiveHandle)>;
 
   ZipArchivePtr zip_handle_;
   const std::string path_;

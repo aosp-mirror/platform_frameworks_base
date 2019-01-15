@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.UnsupportedAppUsage;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
+import android.os.Build;
 
 /**
  * Retrieves the
@@ -496,7 +497,7 @@ public class CamcorderProfile
     }
 
     // Methods implemented by JNI
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static native final void native_init();
     @UnsupportedAppUsage
     private static native final CamcorderProfile native_get_camcorder_profile(

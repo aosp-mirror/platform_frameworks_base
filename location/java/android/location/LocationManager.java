@@ -2322,7 +2322,7 @@ public class LocationManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public boolean sendNiResponse(int notifId, int userResponse) {
         try {
             return mService.sendNiResponse(notifId, userResponse);

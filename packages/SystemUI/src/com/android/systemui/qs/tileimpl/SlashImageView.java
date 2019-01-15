@@ -17,7 +17,7 @@ package com.android.systemui.qs.tileimpl;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.widget.ImageView;
 
 import com.android.internal.annotations.VisibleForTesting;

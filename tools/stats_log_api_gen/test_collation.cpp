@@ -212,5 +212,19 @@ TEST(CollationTest, PassOnGoodStateAtomOptions) {
     EXPECT_EQ(0, errorCount);
 }
 
+TEST(CollationTest, PassOnGoodBinaryFieldAtom) {
+    Atoms atoms;
+    int errorCount =
+            collate_atoms(GoodEventWithBinaryFieldAtom::descriptor(), &atoms);
+    EXPECT_EQ(0, errorCount);
+}
+
+TEST(CollationTest, FailOnBadBinaryFieldAtom) {
+    Atoms atoms;
+    int errorCount =
+            collate_atoms(BadEventWithBinaryFieldAtom::descriptor(), &atoms);
+    EXPECT_TRUE(errorCount > 0);
+}
+
 }  // namespace stats_log_api_gen
 }  // namespace android

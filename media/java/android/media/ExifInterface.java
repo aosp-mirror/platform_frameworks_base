@@ -21,6 +21,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -469,7 +470,7 @@ public class ExifInterface {
     // See http://www.exiv2.org/makernote.html#R11
     private static final int PEF_MAKER_NOTE_SKIP_SIZE = 6;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static SimpleDateFormat sFormatter;
 
     // See Exchangeable image file format for digital still cameras: Exif version 2.2.
@@ -1295,7 +1296,7 @@ public class ExifInterface {
         sExifPointerTagMap.put(EXIF_POINTER_TAGS[5].number, IFD_TYPE_ORF_IMAGE_PROCESSING); // 8256
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mFilename;
     private final FileDescriptor mSeekableFileDescriptor;
     private final AssetManager.AssetInputStream mAssetInputStream;
@@ -1305,7 +1306,7 @@ public class ExifInterface {
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
     private Set<Integer> mAttributesOffsets = new HashSet<>(EXIF_TAGS.length);
     private ByteOrder mExifByteOrder = ByteOrder.BIG_ENDIAN;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean mHasThumbnail;
     // The following values used for indicating a thumbnail position.
     private int mThumbnailOffset;
@@ -2087,7 +2088,7 @@ public class ExifInterface {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static float convertRationalLatLonToFloat(String rationalString, String ref) {
         try {
             String [] parts = rationalString.split(",");
@@ -2550,8 +2551,22 @@ public class ExifInterface {
                     }
                     try {
                         if (mPosition != position) {
+                            // We don't allow seek to positions after the available bytes,
+                            // the input stream won't be able to seek back then.
+                            // However, if we hit an exception before (mPosition set to -1),
+                            // let it try the seek in hope it might recover.
+                            if (mPosition >= 0 && position >= mPosition + in.available()) {
+                                return -1;
+                            }
                             in.seek(position);
                             mPosition = position;
+                        }
+
+                        // If the read will cause us to go over the available bytes,
+                        // reduce the size so that we stay in the available range.
+                        // Otherwise the input stream may not be able to seek back.
+                        if (size > in.available()) {
+                            size = in.available();
                         }
 
                         int bytesRead = in.read(buffer, offset, size);

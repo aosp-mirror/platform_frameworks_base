@@ -65,6 +65,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
+import static android.content.pm.PackageManager.MATCH_APEX;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
@@ -83,6 +84,11 @@ import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageParser.isApkFile;
+import static android.content.pm.SharedLibraryNames.ANDROID_HIDL_BASE;
+import static android.content.pm.SharedLibraryNames.ANDROID_HIDL_MANAGER;
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_BASE;
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_MOCK;
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_RUNNER;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
@@ -118,6 +124,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.apex.ApexInfo;
+import android.apex.IApexService;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
@@ -367,6 +375,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 /**
@@ -447,6 +456,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final int BLUETOOTH_UID = Process.BLUETOOTH_UID;
     private static final int SHELL_UID = Process.SHELL_UID;
     private static final int SE_UID = Process.SE_UID;
+    private static final int NETWORKSTACK_UID = Process.NETWORK_STACK_UID;
 
     // Suffix used during package installation when copying/moving
     // package apks to install directory.
@@ -901,23 +911,9 @@ public class PackageManagerService extends IPackageManager.Stub
     final ParallelPackageParserCallback mParallelPackageParserCallback =
             new ParallelPackageParserCallback();
 
-    public static final class SharedLibraryEntry {
-        public final @Nullable String path;
-        public final @Nullable String apk;
-        public final @NonNull SharedLibraryInfo info;
-
-        SharedLibraryEntry(String _path, String _apk, String name, long version, int type,
-                String declaringPackageName, long declaringPackageVersionCode) {
-            path = _path;
-            apk = _apk;
-            info = new SharedLibraryInfo(name, version, type, new VersionedPackage(
-                    declaringPackageName, declaringPackageVersionCode), null);
-        }
-    }
-
     // Currently known shared libraries.
-    final ArrayMap<String, LongSparseArray<SharedLibraryEntry>> mSharedLibraries = new ArrayMap<>();
-    final ArrayMap<String, LongSparseArray<SharedLibraryEntry>> mStaticLibsByDeclaringPackage =
+    final ArrayMap<String, LongSparseArray<SharedLibraryInfo>> mSharedLibraries = new ArrayMap<>();
+    final ArrayMap<String, LongSparseArray<SharedLibraryInfo>> mStaticLibsByDeclaringPackage =
             new ArrayMap<>();
 
     // All available activities, for your resolving pleasure.
@@ -2399,6 +2395,28 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
+    private void setupBuiltinSharedLibraryDependenciesLocked() {
+        // Builtin libraries don't have versions.
+        long version = SharedLibraryInfo.VERSION_UNDEFINED;
+
+        SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(ANDROID_HIDL_MANAGER, version);
+        if (libraryInfo != null) {
+            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_HIDL_BASE, version));
+        }
+
+        libraryInfo = getSharedLibraryInfoLPr(ANDROID_TEST_RUNNER, version);
+        if (libraryInfo != null) {
+            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_MOCK, version));
+            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_BASE, version));
+        }
+
+        libraryInfo = getSharedLibraryInfoLPr(ANDROID_TEST_MOCK, version);
+        if (libraryInfo != null) {
+            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_BASE, version));
+        }
+    }
+
     public PackageManagerService(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
         LockGuard.installLock(mPackages, LockGuard.INDEX_PACKAGES);
@@ -2451,6 +2469,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mSettings.addSharedUserLPw("android.uid.shell", SHELL_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.se", SE_UID,
+                ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        mSettings.addSharedUserLPw("android.uid.networkstack", NETWORKSTACK_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
@@ -2507,9 +2527,12 @@ public class PackageManagerService extends IPackageManager.Stub
             for (int i = 0; i < builtInLibCount; i++) {
                 String name = libConfig.keyAt(i);
                 String path = libConfig.valueAt(i);
-                addSharedLibraryLPw(path, null, name, SharedLibraryInfo.VERSION_UNDEFINED,
+                addSharedLibraryLPw(path, null, null, name, SharedLibraryInfo.VERSION_UNDEFINED,
                         SharedLibraryInfo.TYPE_BUILTIN, PLATFORM_PACKAGE_NAME, 0);
             }
+            // Builtin libraries cannot encode their dependency where they are
+            // defined, so fix that now.
+            setupBuiltinSharedLibraryDependenciesLocked();
 
             SELinuxMMAC.readInstallPolicy();
 
@@ -3512,11 +3535,15 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private @NonNull String getRequiredSharedLibraryLPr(String name, int version) {
         synchronized (mPackages) {
-            SharedLibraryEntry libraryEntry = getSharedLibraryEntryLPr(name, version);
-            if (libraryEntry == null) {
+            SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(name, version);
+            if (libraryInfo == null) {
                 throw new IllegalStateException("Missing required shared library:" + name);
             }
-            return libraryEntry.apk;
+            String packageName = libraryInfo.getPackageName();
+            if (packageName == null) {
+                throw new IllegalStateException("Expected a package for shared library " + name);
+            }
+            return packageName;
         }
     }
 
@@ -4249,9 +4276,9 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
 
-        final SharedLibraryEntry libEntry = getSharedLibraryEntryLPr(ps.pkg.staticSharedLibName,
+        final SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(ps.pkg.staticSharedLibName,
                 ps.pkg.staticSharedLibVersion);
-        if (libEntry == null) {
+        if (libraryInfo == null) {
             return false;
         }
 
@@ -4268,11 +4295,11 @@ public class PackageManagerService extends IPackageManager.Stub
             PackageSetting uidPs = mSettings.getPackageLPr(uidPackageName);
             if (uidPs != null) {
                 final int index = ArrayUtils.indexOf(uidPs.usesStaticLibraries,
-                        libEntry.info.getName());
+                        libraryInfo.getName());
                 if (index < 0) {
                     continue;
                 }
-                if (uidPs.pkg.usesStaticLibrariesVersions[index] == libEntry.info.getLongVersion()) {
+                if (uidPs.pkg.usesStaticLibrariesVersions[index] == libraryInfo.getLongVersion()) {
                     return false;
                 }
             }
@@ -4668,14 +4695,14 @@ public class PackageManagerService extends IPackageManager.Stub
             final int[] allUsers = sUserManager.getUserIds();
             final int libCount = mSharedLibraries.size();
             for (int i = 0; i < libCount; i++) {
-                final LongSparseArray<SharedLibraryEntry> versionedLib
+                final LongSparseArray<SharedLibraryInfo> versionedLib
                         = mSharedLibraries.valueAt(i);
                 if (versionedLib == null) {
                     continue;
                 }
                 final int versionCount = versionedLib.size();
                 for (int j = 0; j < versionCount; j++) {
-                    SharedLibraryInfo libInfo = versionedLib.valueAt(j).info;
+                    SharedLibraryInfo libInfo = versionedLib.valueAt(j);
                     // Skip packages that are not static shared libs.
                     if (!libInfo.isStatic()) {
                         break;
@@ -5041,14 +5068,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final int libCount = mSharedLibraries.size();
             for (int i = 0; i < libCount; i++) {
-                LongSparseArray<SharedLibraryEntry> versionedLib = mSharedLibraries.valueAt(i);
+                LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.valueAt(i);
                 if (versionedLib == null) {
                     continue;
                 }
 
                 final int versionCount = versionedLib.size();
                 for (int j = 0; j < versionCount; j++) {
-                    SharedLibraryInfo libInfo = versionedLib.valueAt(j).info;
+                    SharedLibraryInfo libInfo = versionedLib.valueAt(j);
                     if (!canSeeStaticLibraries && libInfo.isStatic()) {
                         break;
                     }
@@ -5064,10 +5091,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         Binder.restoreCallingIdentity(identity);
                     }
 
-                    SharedLibraryInfo resLibInfo = new SharedLibraryInfo(libInfo.getName(),
-                            libInfo.getLongVersion(), libInfo.getType(),
-                            libInfo.getDeclaringPackage(), getPackagesUsingSharedLibraryLPr(libInfo,
-                            flags, userId));
+                    SharedLibraryInfo resLibInfo = new SharedLibraryInfo(libInfo.getPath(),
+                            libInfo.getPackageName(), libInfo.getAllCodePaths(),
+                            libInfo.getName(), libInfo.getLongVersion(),
+                            libInfo.getType(), libInfo.getDeclaringPackage(),
+                            getPackagesUsingSharedLibraryLPr(libInfo, flags, userId),
+                            (libInfo.getDependencies() == null
+                                    ? null
+                                    : new ArrayList(libInfo.getDependencies())));
 
                     if (result == null) {
                         result = new ArrayList<>();
@@ -5182,28 +5213,28 @@ public class PackageManagerService extends IPackageManager.Stub
             Set<String> libs = null;
             final int libCount = mSharedLibraries.size();
             for (int i = 0; i < libCount; i++) {
-                LongSparseArray<SharedLibraryEntry> versionedLib = mSharedLibraries.valueAt(i);
+                LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.valueAt(i);
                 if (versionedLib == null) {
                     continue;
                 }
                 final int versionCount = versionedLib.size();
                 for (int j = 0; j < versionCount; j++) {
-                    SharedLibraryEntry libEntry = versionedLib.valueAt(j);
-                    if (!libEntry.info.isStatic()) {
+                    SharedLibraryInfo libraryInfo = versionedLib.valueAt(j);
+                    if (!libraryInfo.isStatic()) {
                         if (libs == null) {
                             libs = new ArraySet<>();
                         }
-                        libs.add(libEntry.info.getName());
+                        libs.add(libraryInfo.getName());
                         break;
                     }
-                    PackageSetting ps = mSettings.getPackageLPr(libEntry.apk);
+                    PackageSetting ps = mSettings.getPackageLPr(libraryInfo.getPackageName());
                     if (ps != null && !filterSharedLibPackageLPr(ps, Binder.getCallingUid(),
                             UserHandle.getUserId(Binder.getCallingUid()),
                             PackageManager.MATCH_STATIC_SHARED_LIBRARIES)) {
                         if (libs == null) {
                             libs = new ArraySet<>();
                         }
-                        libs.add(libEntry.info.getName());
+                        libs.add(libraryInfo.getName());
                         break;
                     }
                 }
@@ -7887,6 +7918,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForPackage(flags, userId, null);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
+        final boolean listApex = (flags & MATCH_APEX) != 0;
+
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /* requireFullPermission */, false /* checkShell */,
                 "get installed packages");
@@ -7925,7 +7958,22 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
             }
-
+            if (listApex) {
+                final IApexService apex = IApexService.Stub.asInterface(
+                        ServiceManager.getService("apexservice"));
+                if (apex != null) {
+                    try {
+                        final ApexInfo[] activePkgs = apex.getActivePackages();
+                        for (ApexInfo apexInfo : activePkgs) {
+                            list.add(new PackageInfo(apexInfo));
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to retrieve packages from apexservice: " + e.toString());
+                    }
+                } else {
+                    Log.e(TAG, "Unable to connect to apexservice for querying packages.");
+                }
+            }
             return new ParceledListSlice<>(list);
         }
     }
@@ -9362,7 +9410,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     mDexManager.getPackageUseInfoOrDefault(depPackage.packageName), libraryOptions);
             }
         }
-        return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets,
+        return pdo.performDexOpt(p, p.usesLibraryInfos, instructionSets,
                 getOrCreateCompilerPackageStats(p),
                 mDexManager.getPackageUseInfoOrDefault(p.packageName), options);
     }
@@ -9451,24 +9499,24 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private PackageParser.Package findSharedNonSystemLibrary(String name, long version) {
         synchronized (mPackages) {
-            SharedLibraryEntry libEntry = getSharedLibraryEntryLPr(name, version);
-            if (libEntry != null) {
-                return mPackages.get(libEntry.apk);
+            SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(name, version);
+            if (libraryInfo != null) {
+                return mPackages.get(libraryInfo.getPackageName());
             }
             return null;
         }
     }
 
-    private SharedLibraryEntry getSharedLibraryEntryLPr(String name, long version) {
-        LongSparseArray<SharedLibraryEntry> versionedLib = mSharedLibraries.get(name);
+    private @Nullable SharedLibraryInfo getSharedLibraryInfoLPr(String name, long version) {
+        LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
         if (versionedLib == null) {
             return null;
         }
         return versionedLib.get(version);
     }
 
-    private SharedLibraryEntry getLatestSharedLibraVersionLPr(PackageParser.Package pkg) {
-        LongSparseArray<SharedLibraryEntry> versionedLib = mSharedLibraries.get(
+    private SharedLibraryInfo getLatestSharedLibraVersionLPr(PackageParser.Package pkg) {
+        LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(
                 pkg.staticSharedLibName);
         if (versionedLib == null) {
             return null;
@@ -9700,15 +9748,44 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void addSharedLibraryLPr(Set<String> usesLibraryFiles,
-            SharedLibraryEntry file,
-            PackageParser.Package changingLib) {
-        if (file.path != null) {
-            usesLibraryFiles.add(file.path);
+    @GuardedBy("mPackages")
+    private void applyDefiningSharedLibraryUpdateLocked(
+            PackageParser.Package pkg, SharedLibraryInfo libInfo,
+            BiConsumer<SharedLibraryInfo, SharedLibraryInfo> action) {
+        // Note that libraries defined by this package may be null if:
+        // - Package manager was unable to create the shared library. The package still
+        //   gets installed, but the shared library does not get created.
+        // Or:
+        // - Package manager is in a state where package isn't scanned yet. This will
+        //   get called again after scanning to fix the dependencies.
+        if (pkg.isLibrary()) {
+            if (pkg.staticSharedLibName != null) {
+                SharedLibraryInfo definedLibrary = getSharedLibraryInfoLPr(
+                        pkg.staticSharedLibName, pkg.staticSharedLibVersion);
+                if (definedLibrary != null) {
+                    action.accept(definedLibrary, libInfo);
+                }
+            } else {
+                for (String libraryName : pkg.libraryNames) {
+                    SharedLibraryInfo definedLibrary = getSharedLibraryInfoLPr(
+                            libraryName, SharedLibraryInfo.VERSION_UNDEFINED);
+                    if (definedLibrary != null) {
+                        action.accept(definedLibrary, libInfo);
+                    }
+                }
+            }
+        }
+    }
+
+    @GuardedBy("mPackages")
+    private void addSharedLibraryLPr(PackageParser.Package pkg, Set<String> usesLibraryFiles,
+            SharedLibraryInfo libInfo, PackageParser.Package changingLib) {
+        if (libInfo.getPath() != null) {
+            usesLibraryFiles.add(libInfo.getPath());
             return;
         }
-        PackageParser.Package p = mPackages.get(file.apk);
-        if (changingLib != null && changingLib.packageName.equals(file.apk)) {
+        PackageParser.Package p = mPackages.get(libInfo.getPackageName());
+        if (changingLib != null && changingLib.packageName.equals(libInfo.getPackageName())) {
             // If we are doing this while in the middle of updating a library apk,
             // then we need to make sure to use that new apk for determining the
             // dependencies here.  (We haven't yet finished committing the new apk
@@ -9719,6 +9796,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if (p != null) {
             usesLibraryFiles.addAll(p.getAllCodePaths());
+            // If the package provides libraries, add the dependency to them.
+            applyDefiningSharedLibraryUpdateLocked(pkg, libInfo, (definingLibrary, dependency) -> {
+                definingLibrary.addDependency(dependency);
+            });
             if (p.usesLibraryFiles != null) {
                 Collections.addAll(usesLibraryFiles, p.usesLibraryFiles);
             }
@@ -9730,45 +9811,61 @@ public class PackageManagerService extends IPackageManager.Stub
         if (pkg == null) {
             return;
         }
+
+        // If the package provides libraries, clear their old dependencies.
+        // This method will set them up again.
+        applyDefiningSharedLibraryUpdateLocked(pkg, null, (definingLibrary, dependency) -> {
+            definingLibrary.clearDependencies();
+        });
         // The collection used here must maintain the order of addition (so
         // that libraries are searched in the correct order) and must have no
         // duplicates.
-        Set<String> usesLibraryFiles = null;
+        ArrayList<SharedLibraryInfo> usesLibraryInfos = null;
         if (pkg.usesLibraries != null) {
-            usesLibraryFiles = addSharedLibrariesLPw(pkg.usesLibraries,
-                    null, null, pkg.packageName, changingLib, true,
+            usesLibraryInfos = addSharedLibrariesLPw(pkg.usesLibraries,
+                    null, null, pkg.packageName, true,
                     pkg.applicationInfo.targetSdkVersion, null);
         }
         if (pkg.usesStaticLibraries != null) {
-            usesLibraryFiles = addSharedLibrariesLPw(pkg.usesStaticLibraries,
+            usesLibraryInfos = addSharedLibrariesLPw(pkg.usesStaticLibraries,
                     pkg.usesStaticLibrariesVersions, pkg.usesStaticLibrariesCertDigests,
-                    pkg.packageName, changingLib, true,
-                    pkg.applicationInfo.targetSdkVersion, usesLibraryFiles);
+                    pkg.packageName, true,
+                    pkg.applicationInfo.targetSdkVersion, usesLibraryInfos);
         }
         if (pkg.usesOptionalLibraries != null) {
-            usesLibraryFiles = addSharedLibrariesLPw(pkg.usesOptionalLibraries,
-                    null, null, pkg.packageName, changingLib, false,
-                    pkg.applicationInfo.targetSdkVersion, usesLibraryFiles);
+            usesLibraryInfos = addSharedLibrariesLPw(pkg.usesOptionalLibraries,
+                    null, null, pkg.packageName, false,
+                    pkg.applicationInfo.targetSdkVersion, usesLibraryInfos);
         }
-        if (!ArrayUtils.isEmpty(usesLibraryFiles)) {
+        if (usesLibraryInfos != null) {
+            pkg.usesLibraryInfos = usesLibraryInfos;
+            // Use LinkedHashSet to preserve the order of files added to
+            // usesLibraryFiles while eliminating duplicates.
+            Set<String> usesLibraryFiles = new LinkedHashSet<>();
+            for (SharedLibraryInfo libInfo : usesLibraryInfos) {
+                addSharedLibraryLPr(pkg, usesLibraryFiles, libInfo, changingLib);
+            }
             pkg.usesLibraryFiles = usesLibraryFiles.toArray(new String[usesLibraryFiles.size()]);
         } else {
+            pkg.usesLibraryInfos = null;
             pkg.usesLibraryFiles = null;
         }
     }
 
-    private Set<String> addSharedLibrariesLPw(@NonNull List<String> requestedLibraries,
+    @GuardedBy("mPackages")
+    private ArrayList<SharedLibraryInfo> addSharedLibrariesLPw(
+            @NonNull List<String> requestedLibraries,
             @Nullable long[] requiredVersions, @Nullable String[][] requiredCertDigests,
-            @NonNull String packageName, @Nullable PackageParser.Package changingLib,
-            boolean required, int targetSdk, @Nullable Set<String> outUsedLibraries)
+            @NonNull String packageName, boolean required, int targetSdk,
+            @Nullable ArrayList<SharedLibraryInfo> outUsedLibraries)
             throws PackageManagerException {
         final int libCount = requestedLibraries.size();
         for (int i = 0; i < libCount; i++) {
             final String libName = requestedLibraries.get(i);
             final long libVersion = requiredVersions != null ? requiredVersions[i]
                     : SharedLibraryInfo.VERSION_UNDEFINED;
-            final SharedLibraryEntry libEntry = getSharedLibraryEntryLPr(libName, libVersion);
-            if (libEntry == null) {
+            final SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(libName, libVersion);
+            if (libraryInfo == null) {
                 if (required) {
                     throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
                             "Package " + packageName + " requires unavailable shared library "
@@ -9780,14 +9877,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             } else {
                 if (requiredVersions != null && requiredCertDigests != null) {
-                    if (libEntry.info.getLongVersion() != requiredVersions[i]) {
+                    if (libraryInfo.getLongVersion() != requiredVersions[i]) {
                         throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
                             "Package " + packageName + " requires unavailable static shared"
                                     + " library " + libName + " version "
-                                    + libEntry.info.getLongVersion() + "; failing!");
+                                    + libraryInfo.getLongVersion() + "; failing!");
                     }
 
-                    PackageParser.Package libPkg = mPackages.get(libEntry.apk);
+                    PackageParser.Package libPkg = mPackages.get(libraryInfo.getPackageName());
                     if (libPkg == null) {
                         throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
                                 "Package " + packageName + " requires unavailable static shared"
@@ -9844,11 +9941,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 if (outUsedLibraries == null) {
-                    // Use LinkedHashSet to preserve the order of files added to
-                    // usesLibraryFiles while eliminating duplicates.
-                    outUsedLibraries = new LinkedHashSet<>();
+                    outUsedLibraries = new ArrayList<>();
                 }
-                addSharedLibraryLPr(outUsedLibraries, libEntry, changingLib);
+                outUsedLibraries.add(libraryInfo);
             }
         }
         return outUsedLibraries;
@@ -10230,9 +10325,9 @@ public class PackageManagerService extends IPackageManager.Stub
         // library in order to compare signatures.
         PackageSetting signatureCheckPs = pkgSetting;
         if (pkg.applicationInfo.isStaticSharedLibrary()) {
-            SharedLibraryEntry libraryEntry = getLatestSharedLibraVersionLPr(pkg);
-            if (libraryEntry != null) {
-                signatureCheckPs = mSettings.getPackageLPr(libraryEntry.apk);
+            SharedLibraryInfo libraryInfo = getLatestSharedLibraVersionLPr(pkg);
+            if (libraryInfo != null) {
+                signatureCheckPs = mSettings.getPackageLPr(libraryInfo.getPackageName());
             }
         }
 
@@ -11061,12 +11156,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 long minVersionCode = Long.MIN_VALUE;
                 long maxVersionCode = Long.MAX_VALUE;
 
-                LongSparseArray<SharedLibraryEntry> versionedLib = mSharedLibraries.get(
+                LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(
                         pkg.staticSharedLibName);
                 if (versionedLib != null) {
                     final int versionCount = versionedLib.size();
                     for (int i = 0; i < versionCount; i++) {
-                        SharedLibraryInfo libInfo = versionedLib.valueAt(i).info;
+                        SharedLibraryInfo libInfo = versionedLib.valueAt(i);
                         final long libVersionCode = libInfo.getDeclaringPackage()
                                 .getLongVersionCode();
                         if (libInfo.getLongVersion() <  pkg.staticSharedLibVersion) {
@@ -11252,9 +11347,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private boolean addSharedLibraryLPw(String path, String apk, String name, long version,
-            int type, String declaringPackageName, long declaringVersionCode) {
-        LongSparseArray<SharedLibraryEntry> versionedLib = mSharedLibraries.get(name);
+    private boolean addSharedLibraryLPw(String path, String apk, List<String> codePaths,
+            String name, long version, int type, String declaringPackageName,
+            long declaringVersionCode) {
+        LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
         if (versionedLib == null) {
             versionedLib = new LongSparseArray<>();
             mSharedLibraries.put(name, versionedLib);
@@ -11264,14 +11360,15 @@ public class PackageManagerService extends IPackageManager.Stub
         } else if (versionedLib.indexOfKey(version) >= 0) {
             return false;
         }
-        SharedLibraryEntry libEntry = new SharedLibraryEntry(path, apk, name,
-                version, type, declaringPackageName, declaringVersionCode);
-        versionedLib.put(version, libEntry);
+        SharedLibraryInfo libraryInfo = new SharedLibraryInfo(path, apk, codePaths, name,
+                version, type, new VersionedPackage(declaringPackageName, declaringVersionCode),
+                null, null);
+        versionedLib.put(version, libraryInfo);
         return true;
     }
 
     private boolean removeSharedLibraryLPw(String name, long version) {
-        LongSparseArray<SharedLibraryEntry> versionedLib = mSharedLibraries.get(name);
+        LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
         if (versionedLib == null) {
             return false;
         }
@@ -11279,12 +11376,12 @@ public class PackageManagerService extends IPackageManager.Stub
         if (libIdx < 0) {
             return false;
         }
-        SharedLibraryEntry libEntry = versionedLib.valueAt(libIdx);
+        SharedLibraryInfo libraryInfo = versionedLib.valueAt(libIdx);
         versionedLib.remove(version);
         if (versionedLib.size() <= 0) {
             mSharedLibraries.remove(name);
-            if (libEntry.info.getType() == SharedLibraryInfo.TYPE_STATIC) {
-                mStaticLibsByDeclaringPackage.remove(libEntry.info.getDeclaringPackage()
+            if (libraryInfo.getType() == SharedLibraryInfo.TYPE_STATIC) {
+                mStaticLibsByDeclaringPackage.remove(libraryInfo.getDeclaringPackage()
                         .getPackageName());
             }
         }
@@ -11350,10 +11447,17 @@ public class PackageManagerService extends IPackageManager.Stub
             if (pkg.staticSharedLibName != null) {
                 // Static shared libs don't allow renaming as they have synthetic package
                 // names to allow install of multiple versions, so use name from manifest.
-                if (addSharedLibraryLPw(null, pkg.packageName, pkg.staticSharedLibName,
+                if (addSharedLibraryLPw(null, pkg.packageName, pkg.getAllCodePaths(),
+                        pkg.staticSharedLibName,
                         pkg.staticSharedLibVersion, SharedLibraryInfo.TYPE_STATIC,
                         pkg.manifestPackageName, pkg.getLongVersionCode())) {
                     hasStaticSharedLibs = true;
+                    // Shared libraries for the package need to be updated.
+                    try {
+                        updateSharedLibrariesLPr(pkg, null);
+                    } catch (PackageManagerException e) {
+                        Slog.e(TAG, "updateSharedLibrariesLPr failed: ", e);
+                    }
                 } else {
                     Slog.w(TAG, "Package " + pkg.packageName + " library "
                                 + pkg.staticSharedLibName + " already exists; skipping");
@@ -11395,12 +11499,18 @@ public class PackageManagerService extends IPackageManager.Stub
                             allowed = true;
                         }
                         if (allowed) {
-                            if (!addSharedLibraryLPw(null, pkg.packageName, name,
-                                    SharedLibraryInfo.VERSION_UNDEFINED,
+                            if (!addSharedLibraryLPw(null, pkg.packageName, pkg.getAllCodePaths(),
+                                    name, SharedLibraryInfo.VERSION_UNDEFINED,
                                     SharedLibraryInfo.TYPE_DYNAMIC,
                                     pkg.packageName, pkg.getLongVersionCode())) {
                                 Slog.w(TAG, "Package " + pkg.packageName + " library "
                                         + name + " already exists; skipping");
+                            }
+                            // Shared libraries for the package need to be updated.
+                            try {
+                                updateSharedLibrariesLPr(pkg, null);
+                            } catch (PackageManagerException e) {
+                                Slog.e(TAG, "updateSharedLibrariesLPr failed: ", e);
                             }
                         } else {
                             Slog.w(TAG, "Package " + pkg.packageName + " declares lib "
@@ -13967,6 +14077,68 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
+    @Override
+    public void setSystemAppHiddenUntilInstalled(String packageName, boolean hidden) {
+        enforceSystemOrPhoneCaller("setSystemAppHiddenUntilInstalled");
+        synchronized (mPackages) {
+            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            if (pkgSetting == null || !pkgSetting.isSystem()) {
+                return;
+            }
+            PackageParser.Package pkg = pkgSetting.pkg;
+            if (pkg != null && pkg.applicationInfo != null) {
+                pkg.applicationInfo.hiddenUntilInstalled = hidden;
+            }
+            final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(packageName);
+            if (disabledPs == null) {
+                return;
+            }
+            pkg = disabledPs.pkg;
+            if (pkg != null && pkg.applicationInfo != null) {
+                pkg.applicationInfo.hiddenUntilInstalled = hidden;
+            }
+        }
+    }
+
+    @Override
+    public boolean setSystemAppInstallState(String packageName, boolean installed, int userId) {
+        enforceSystemOrPhoneCaller("setSystemAppInstallState");
+        synchronized (mPackages) {
+            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            // The target app should always be in system
+            if (pkgSetting == null || !pkgSetting.isSystem()) {
+                return false;
+            }
+            // Check if the install state is the same
+            if (pkgSetting.getInstalled(userId) == installed) {
+                return false;
+            }
+        }
+
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            if (installed) {
+                // install the app from uninstalled state
+                installExistingPackageAsUser(
+                        packageName,
+                        userId,
+                        0 /*installFlags*/,
+                        PackageManager.INSTALL_REASON_DEVICE_SETUP);
+                return true;
+            }
+
+            // uninstall the app from installed state
+            deletePackageVersioned(
+                    new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+                    new LegacyPackageDeleteObserver(null).getBinder(),
+                    userId,
+                    PackageManager.DELETE_SYSTEM_APP);
+            return true;
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
     private void sendApplicationHiddenForUser(String packageName, PackageSetting pkgSetting,
             int userId) {
         final PackageRemovedInfo info = new PackageRemovedInfo(this);
@@ -14031,10 +14203,16 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
             int installReason) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
-                null);
-        PackageSetting pkgSetting;
         final int callingUid = Binder.getCallingUid();
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED
+                && mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.INSTALL_EXISTING_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Neither user " + callingUid + " nor current process has "
+                    + android.Manifest.permission.INSTALL_PACKAGES + ".");
+        }
+        PackageSetting pkgSetting;
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, true /* checkShell */,
                 "installExistingPackage for user " + userId);
@@ -14178,7 +14356,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         unactionedPackages.add(packageName);
                         continue;
                     }
-                    if (!canSuspendPackageForUserLocked(packageName, userId)) {
+                    if (suspended && !canSuspendPackageForUserLocked(packageName, userId)) {
                         unactionedPackages.add(packageName);
                         continue;
                     }
@@ -14333,44 +14511,44 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mPackages")
     private boolean canSuspendPackageForUserLocked(String packageName, int userId) {
         if (isPackageDeviceAdmin(packageName, userId)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": has an active device admin");
             return false;
         }
 
         String activeLauncherPackageName = getActiveLauncherPackageName(userId);
         if (packageName.equals(activeLauncherPackageName)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": contains the active launcher");
             return false;
         }
 
         if (packageName.equals(mRequiredInstallerPackage)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": required for package installation");
             return false;
         }
 
         if (packageName.equals(mRequiredUninstallerPackage)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": required for package uninstallation");
             return false;
         }
 
         if (packageName.equals(mRequiredVerifierPackage)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": required for package verification");
             return false;
         }
 
         if (packageName.equals(getDefaultDialerPackageName(userId))) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": is the default dialer");
             return false;
         }
 
         if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": protected package");
             return false;
         }
@@ -17262,9 +17440,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 // the package setting for the latest library version.
                 PackageSetting signatureCheckPs = ps;
                 if (pkg.applicationInfo.isStaticSharedLibrary()) {
-                    SharedLibraryEntry libraryEntry = getLatestSharedLibraVersionLPr(pkg);
-                    if (libraryEntry != null) {
-                        signatureCheckPs = mSettings.getPackageLPr(libraryEntry.apk);
+                    SharedLibraryInfo libraryInfo = getLatestSharedLibraVersionLPr(pkg);
+                    if (libraryInfo != null) {
+                        signatureCheckPs = mSettings.getPackageLPr(libraryInfo.getPackageName());
                     }
                 }
 
@@ -17529,7 +17707,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // Prepare the application profiles for the new code paths.
         // This needs to be done before invoking dexopt so that any install-time profile
         // can be used for optimizations.
-        mArtManagerService.prepareAppProfiles(pkg, resolveUserIds(args.user.getIdentifier()));
+        mArtManagerService.prepareAppProfiles(pkg, resolveUserIds(args.user.getIdentifier()),
+                /* updateReferenceProfileContent= */ true);
 
         // Check whether we need to dexopt the app.
         //
@@ -17569,7 +17748,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     REASON_INSTALL,
                     DexoptOptions.DEXOPT_BOOT_COMPLETE |
                     DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE);
-            mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
+            mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryInfos,
                     null /* instructionSets */,
                     getOrCreateCompilerPackageStats(pkg),
                     mDexManager.getPackageUseInfoOrDefault(pkg.packageName),
@@ -17955,7 +18134,7 @@ public class PackageManagerService extends IPackageManager.Stub
         packageName = normalizedPackageName != null ? normalizedPackageName : packageName;
 
         // Is this a static library?
-        LongSparseArray<SharedLibraryEntry> versionedLib =
+        LongSparseArray<SharedLibraryInfo> versionedLib =
                 mStaticLibsByDeclaringPackage.get(packageName);
         if (versionedLib == null || versionedLib.size() <= 0) {
             return packageName;
@@ -17967,7 +18146,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.SHELL_UID
                 && callingAppId != Process.ROOT_UID) {
             versionsCallerCanSee = new LongSparseLongArray();
-            String libName = versionedLib.valueAt(0).info.getName();
+            String libName = versionedLib.valueAt(0).getName();
             String[] uidPackages = getPackagesForUid(Binder.getCallingUid());
             if (uidPackages != null) {
                 for (String uidPackage : uidPackages) {
@@ -17987,29 +18166,29 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // Find the version the caller can see and the app version code
-        SharedLibraryEntry highestVersion = null;
+        SharedLibraryInfo highestVersion = null;
         final int versionCount = versionedLib.size();
         for (int i = 0; i < versionCount; i++) {
-            SharedLibraryEntry libEntry = versionedLib.valueAt(i);
+            SharedLibraryInfo libraryInfo = versionedLib.valueAt(i);
             if (versionsCallerCanSee != null && versionsCallerCanSee.indexOfKey(
-                    libEntry.info.getLongVersion()) < 0) {
+                    libraryInfo.getLongVersion()) < 0) {
                 continue;
             }
-            final long libVersionCode = libEntry.info.getDeclaringPackage().getLongVersionCode();
+            final long libVersionCode = libraryInfo.getDeclaringPackage().getLongVersionCode();
             if (versionCode != PackageManager.VERSION_CODE_HIGHEST) {
                 if (libVersionCode == versionCode) {
-                    return libEntry.apk;
+                    return libraryInfo.getPackageName();
                 }
             } else if (highestVersion == null) {
-                highestVersion = libEntry;
-            } else if (libVersionCode  > highestVersion.info
+                highestVersion = libraryInfo;
+            } else if (libVersionCode  > highestVersion
                     .getDeclaringPackage().getLongVersionCode()) {
-                highestVersion = libEntry;
+                highestVersion = libraryInfo;
             }
         }
 
         if (highestVersion != null) {
-            return highestVersion.apk;
+            return highestVersion.getPackageName();
         }
 
         return packageName;
@@ -18171,19 +18350,19 @@ public class PackageManagerService extends IPackageManager.Stub
             allUsers = sUserManager.getUserIds();
 
             if (pkg != null && pkg.staticSharedLibName != null) {
-                SharedLibraryEntry libEntry = getSharedLibraryEntryLPr(pkg.staticSharedLibName,
+                SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(pkg.staticSharedLibName,
                         pkg.staticSharedLibVersion);
-                if (libEntry != null) {
+                if (libraryInfo != null) {
                     for (int currUserId : allUsers) {
                         if (removeUser != UserHandle.USER_ALL && removeUser != currUserId) {
                             continue;
                         }
                         List<VersionedPackage> libClientPackages = getPackagesUsingSharedLibraryLPr(
-                                libEntry.info, 0, currUserId);
+                                libraryInfo, 0, currUserId);
                         if (!ArrayUtils.isEmpty(libClientPackages)) {
                             Slog.w(TAG, "Not removing package " + pkg.manifestPackageName
-                                    + " hosting lib " + libEntry.info.getName() + " version "
-                                    + libEntry.info.getLongVersion() + " used by " + libClientPackages
+                                    + " hosting lib " + libraryInfo.getName() + " version "
+                                    + libraryInfo.getLongVersion() + " used by " + libClientPackages
                                     + " for user " + currUserId);
                             return PackageManager.DELETE_FAILED_USED_SHARED_LIBRARY;
                         }
@@ -21093,6 +21272,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         CarrierAppUtils.disableCarrierAppsUntilPrivileged(mContext.getOpPackageName(), this,
                 mContext.getContentResolver(), UserHandle.USER_SYSTEM);
 
+        disableSkuSpecificApps();
+
         // Read the compatibilty setting when the system is ready.
         boolean compatibilityModeEnabled = android.provider.Settings.Global.getInt(
                 mContext.getContentResolver(),
@@ -21522,14 +21703,14 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 final Iterator<String> it = mSharedLibraries.keySet().iterator();
                 while (it.hasNext()) {
                     String libName = it.next();
-                    LongSparseArray<SharedLibraryEntry> versionedLib
+                    LongSparseArray<SharedLibraryInfo> versionedLib
                             = mSharedLibraries.get(libName);
                     if (versionedLib == null) {
                         continue;
                     }
                     final int versionCount = versionedLib.size();
                     for (int i = 0; i < versionCount; i++) {
-                        SharedLibraryEntry libEntry = versionedLib.valueAt(i);
+                        SharedLibraryInfo libraryInfo = versionedLib.valueAt(i);
                         if (!checkin) {
                             if (!printedHeader) {
                                 if (dumpState.onTitlePrinted())
@@ -21541,19 +21722,19 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                         } else {
                             pw.print("lib,");
                         }
-                        pw.print(libEntry.info.getName());
-                        if (libEntry.info.isStatic()) {
-                            pw.print(" version=" + libEntry.info.getLongVersion());
+                        pw.print(libraryInfo.getName());
+                        if (libraryInfo.isStatic()) {
+                            pw.print(" version=" + libraryInfo.getLongVersion());
                         }
                         if (!checkin) {
                             pw.print(" -> ");
                         }
-                        if (libEntry.path != null) {
+                        if (libraryInfo.getPath() != null) {
                             pw.print(" (jar) ");
-                            pw.print(libEntry.path);
+                            pw.print(libraryInfo.getPath());
                         } else {
                             pw.print(" (apk) ");
-                            pw.print(libEntry.apk);
+                            pw.print(libraryInfo.getPackageName());
                         }
                         pw.println();
                     }
@@ -21880,6 +22061,27 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
+    //TODO: b/111402650
+    private void disableSkuSpecificApps() {
+        String apkList[] = mContext.getResources().getStringArray(
+                R.array.config_disableApksUnlessMatchedSku_apk_list);
+        String skuArray[] = mContext.getResources().getStringArray(
+                R.array.config_disableApkUnlessMatchedSku_skus_list);
+        if (ArrayUtils.isEmpty(apkList)) {
+           return;
+        }
+        String sku = SystemProperties.get("ro.boot.hardware.sku");
+        if (!TextUtils.isEmpty(sku) && ArrayUtils.contains(skuArray, sku)) {
+            return;
+        }
+        for (String packageName : apkList) {
+            setSystemAppHiddenUntilInstalled(packageName, true);
+            for (UserInfo user : sUserManager.getUsers(false)) {
+                setSystemAppInstallState(packageName, false, user.id);
+            }
+        }
+    }
+
     private void dumpProto(FileDescriptor fd) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
 
@@ -21931,22 +22133,24 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final int count = mSharedLibraries.size();
         for (int i = 0; i < count; i++) {
             final String libName = mSharedLibraries.keyAt(i);
-            LongSparseArray<SharedLibraryEntry> versionedLib = mSharedLibraries.get(libName);
+            LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(libName);
             if (versionedLib == null) {
                 continue;
             }
             final int versionCount = versionedLib.size();
             for (int j = 0; j < versionCount; j++) {
-                final SharedLibraryEntry libEntry = versionedLib.valueAt(j);
+                final SharedLibraryInfo libraryInfo = versionedLib.valueAt(j);
                 final long sharedLibraryToken =
                         proto.start(PackageServiceDumpProto.SHARED_LIBRARIES);
-                proto.write(PackageServiceDumpProto.SharedLibraryProto.NAME, libEntry.info.getName());
-                final boolean isJar = (libEntry.path != null);
+                proto.write(PackageServiceDumpProto.SharedLibraryProto.NAME, libraryInfo.getName());
+                final boolean isJar = (libraryInfo.getPath() != null);
                 proto.write(PackageServiceDumpProto.SharedLibraryProto.IS_JAR, isJar);
                 if (isJar) {
-                    proto.write(PackageServiceDumpProto.SharedLibraryProto.PATH, libEntry.path);
+                    proto.write(PackageServiceDumpProto.SharedLibraryProto.PATH,
+                            libraryInfo.getPath());
                 } else {
-                    proto.write(PackageServiceDumpProto.SharedLibraryProto.APK, libEntry.apk);
+                    proto.write(PackageServiceDumpProto.SharedLibraryProto.APK,
+                            libraryInfo.getPackageName());
                 }
                 proto.end(sharedLibraryToken);
             }
@@ -22606,8 +22810,18 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         //
         // We also have to cover non system users because we do not call the usual install package
         // methods for them.
+        //
+        // NOTE: in order to speed up first boot time we only create the current profile and do not
+        // update the content of the reference profile. A system image should already be configured
+        // with the right profile keys and the profiles for the speed-profile prebuilds should
+        // already be copied. That's done in #performDexOptUpgrade.
+        //
+        // TODO(calin, mathieuc): We should use .dm files for prebuilds profiles instead of
+        // manually copying them in #performDexOptUpgrade. When we do that we should have a more
+        // granular check here and only update the existing profiles.
         if (mIsUpgrade || mFirstBoot || (userId != UserHandle.USER_SYSTEM)) {
-            mArtManagerService.prepareAppProfiles(pkg, userId);
+            mArtManagerService.prepareAppProfiles(pkg, userId,
+                /* updateReferenceProfileContent= */ false);
         }
 
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {

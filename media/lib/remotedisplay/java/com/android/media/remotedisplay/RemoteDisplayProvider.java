@@ -16,6 +16,7 @@
 
 package com.android.media.remotedisplay;
 
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -88,7 +89,10 @@ import java.util.Collection;
  * IMPORTANT: This class is effectively a public API for unbundled applications, and
  * must remain API stable. See README.txt in the root of this package for more information.
  * </p>
+ *
+ * @hide
  */
+@SystemApi
 public abstract class RemoteDisplayProvider {
     private static final int MSG_SET_CALLBACK = 1;
     private static final int MSG_SET_DISCOVERY_MODE = 2;

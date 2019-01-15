@@ -67,7 +67,7 @@ struct FileRec {
 class BackupDataWriter
 {
 public:
-    BackupDataWriter(int fd);
+    explicit BackupDataWriter(int fd);
     // does not close fd
     ~BackupDataWriter();
 
@@ -104,7 +104,7 @@ private:
 class BackupDataReader
 {
 public:
-    BackupDataReader(int fd);
+    explicit BackupDataReader(int fd);
     // does not close fd
     ~BackupDataReader();
 

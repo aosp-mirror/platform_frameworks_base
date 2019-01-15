@@ -80,16 +80,12 @@ public final class AudioFocusInfo implements Parcelable {
      * The audio attributes for the audio focus request.
      * @return non-null {@link AudioAttributes}.
      */
-    @SystemApi
     public AudioAttributes getAttributes() { return mAttributes; }
 
-    @SystemApi
     public int getClientUid() { return mClientUid; }
 
-    @SystemApi
     public String getClientId() { return mClientId; }
 
-    @SystemApi
     public String getPackageName() { return mPackageName; }
 
     /**
@@ -99,7 +95,6 @@ public final class AudioFocusInfo implements Parcelable {
      *     {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK},
      *     {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE}.
      */
-    @SystemApi
     public int getGainRequest() { return mGainRequest; }
 
     /**
@@ -109,7 +104,6 @@ public final class AudioFocusInfo implements Parcelable {
      *   {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT} or
      *   {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK}.
      */
-    @SystemApi
     public int getLossReceived() { return mLossReceived; }
 
     /** @hide */
@@ -124,7 +118,6 @@ public final class AudioFocusInfo implements Parcelable {
      *     {@link AudioManager#AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS}, and
      *     {@link AudioManager#AUDIOFOCUS_FLAG_LOCK}.
      */
-    @SystemApi
     public int getFlags() { return mFlags; }
 
     @Override

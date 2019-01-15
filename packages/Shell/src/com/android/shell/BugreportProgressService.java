@@ -16,6 +16,8 @@
 
 package com.android.shell;
 
+import static android.content.pm.PackageManager.FEATURE_LEANBACK;
+import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
 import static com.android.shell.BugreportPrefs.STATE_HIDE;
@@ -42,6 +44,7 @@ import java.util.zip.ZipOutputStream;
 
 import libcore.io.Streams;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.MetricsLogger;
@@ -53,6 +56,7 @@ import com.google.android.collect.Lists;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.annotation.MainThread;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -88,7 +92,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
-import android.support.v4.content.FileProvider;
+import androidx.core.content.FileProvider;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -232,9 +236,11 @@ public class BugreportProgressService extends Service {
      */
     private boolean mTakingScreenshot;
 
+    @GuardedBy("sNotificationBundle")
     private static final Bundle sNotificationBundle = new Bundle();
 
     private boolean mIsWatch;
+    private boolean mIsTv;
 
     private int mLastProgressPercent;
 
@@ -255,6 +261,9 @@ public class BugreportProgressService extends Service {
         final Configuration conf = mContext.getResources().getConfiguration();
         mIsWatch = (conf.uiMode & Configuration.UI_MODE_TYPE_MASK) ==
                 Configuration.UI_MODE_TYPE_WATCH;
+        PackageManager packageManager = getPackageManager();
+        mIsTv = packageManager.hasSystemFeature(FEATURE_LEANBACK)
+                || packageManager.hasSystemFeature(FEATURE_TELEVISION);
         NotificationManager nm = NotificationManager.from(mContext);
         nm.createNotificationChannel(
                 new NotificationChannel(NOTIFICATION_CHANNEL_ID,
@@ -500,8 +509,8 @@ public class BugreportProgressService extends Service {
                 .setProgress(info.max, info.progress, false)
                 .setOngoing(true);
 
-        // Wear bugreport doesn't need the bug info dialog, screenshot and cancel action.
-        if (!mIsWatch) {
+        // Wear and ATV bugreport doesn't need the bug info dialog, screenshot and cancel action.
+        if (!(mIsWatch || mIsTv)) {
             final Action cancelAction = new Action.Builder(null, mContext.getString(
                     com.android.internal.R.string.cancel), newCancelIntent(mContext, info)).build();
             final Intent infoIntent = new Intent(mContext, BugreportProgressService.class);
@@ -791,6 +800,18 @@ public class BugreportProgressService extends Service {
             Log.wtf(TAG, "Missing " + EXTRA_BUGREPORT + " on intent " + intent);
             return;
         }
+        final int max = intent.getIntExtra(EXTRA_MAX, -1);
+        final File screenshotFile = getFileExtra(intent, EXTRA_SCREENSHOT);
+        final String shareTitle = intent.getStringExtra(EXTRA_TITLE);
+        final String shareDescription = intent.getStringExtra(EXTRA_DESCRIPTION);
+        onBugreportFinished(id, bugreportFile, screenshotFile, shareTitle, shareDescription, max);
+    }
+
+    /**
+     * Wraps up bugreport generation and triggers a notification to share the bugreport.
+     */
+    private void onBugreportFinished(int id, File bugreportFile, @Nullable File screenshotFile,
+        String shareTitle, String shareDescription, int max) {
         mInfoDialog.onBugreportFinished();
         BugreportInfo info = getInfo(id);
         if (info == null) {
@@ -801,22 +822,17 @@ public class BugreportProgressService extends Service {
         }
         info.renameScreenshots(mScreenshotsDir);
         info.bugreportFile = bugreportFile;
+        if (screenshotFile != null) {
+            info.addScreenshot(screenshotFile);
+        }
 
-        final int max = intent.getIntExtra(EXTRA_MAX, -1);
         if (max != -1) {
             MetricsLogger.histogram(this, "dumpstate_duration", max);
             info.max = max;
         }
 
-        final File screenshot = getFileExtra(intent, EXTRA_SCREENSHOT);
-        if (screenshot != null) {
-            info.addScreenshot(screenshot);
-        }
-
-        final String shareTitle = intent.getStringExtra(EXTRA_TITLE);
         if (!TextUtils.isEmpty(shareTitle)) {
             info.title = shareTitle;
-            final String shareDescription = intent.getStringExtra(EXTRA_DESCRIPTION);
             if (!TextUtils.isEmpty(shareDescription)) {
                 info.shareDescription= shareDescription;
             }
@@ -1053,10 +1069,12 @@ public class BugreportProgressService extends Service {
     }
 
     private static Notification.Builder newBaseNotification(Context context) {
-        if (sNotificationBundle.isEmpty()) {
-            // Rename notifcations from "Shell" to "Android System"
-            sNotificationBundle.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                    context.getString(com.android.internal.R.string.android_system_label));
+        synchronized (sNotificationBundle) {
+            if (sNotificationBundle.isEmpty()) {
+                // Rename notifcations from "Shell" to "Android System"
+                sNotificationBundle.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
+                        context.getString(com.android.internal.R.string.android_system_label));
+            }
         }
         return new Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
                 .addExtras(sNotificationBundle)
@@ -1934,6 +1952,23 @@ public class BugreportProgressService extends Service {
         }
 
         @Override
+        public void onProgress(int progress) throws RemoteException {
+            // TODO(b/111441001): change max argument?
+            updateProgressInfo(progress, CAPPED_MAX);
+        }
+
+        @Override
+        public void onError(int errorCode) throws RemoteException {
+            // TODO(b/111441001): implement
+        }
+
+        @Override
+        public void onFinished(long durationMs, String title, String description)
+                throws RemoteException {
+            // TODO(b/111441001): implement
+        }
+
+        @Override
         public void onProgressUpdated(int progress) throws RemoteException {
             /*
              * Checks whether the progress changed in a way that should be displayed to the user:
@@ -1954,21 +1989,7 @@ public class BugreportProgressService extends Service {
             }
 
             if (newPercentage > oldPercentage) {
-                if (DEBUG) {
-                    if (progress != info.progress) {
-                        Log.v(TAG, "Updating progress for PID " + info.pid + "(id: " + info.id
-                                + ") from " + info.progress + " to " + progress);
-                    }
-                    if (max != info.max) {
-                        Log.v(TAG, "Updating max progress for PID " + info.pid + "(id: " + info.id
-                                + ") from " + info.max + " to " + max);
-                    }
-                }
-                info.progress = progress;
-                info.max = max;
-                info.lastUpdate = System.currentTimeMillis();
-
-                updateProgress(info);
+                updateProgressInfo(progress, max);
             }
         }
 
@@ -1989,6 +2010,24 @@ public class BugreportProgressService extends Service {
 
         public void dump(String prefix, PrintWriter pw) {
             pw.print(prefix); pw.print("token: "); pw.println(token);
+        }
+
+        private void updateProgressInfo(int progress, int max) {
+            if (DEBUG) {
+                if (progress != info.progress) {
+                    Log.v(TAG, "Updating progress for PID " + info.pid + "(id: " + info.id
+                            + ") from " + info.progress + " to " + progress);
+                }
+                if (max != info.max) {
+                    Log.v(TAG, "Updating max progress for PID " + info.pid + "(id: " + info.id
+                            + ") from " + info.max + " to " + max);
+                }
+            }
+            info.progress = progress;
+            info.max = max;
+            info.lastUpdate = System.currentTimeMillis();
+
+            updateProgress(info);
         }
     }
 }

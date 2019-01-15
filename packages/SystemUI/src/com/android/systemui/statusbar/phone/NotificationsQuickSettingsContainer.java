@@ -20,7 +20,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
-import android.support.annotation.DimenRes;
+import androidx.annotation.DimenRes;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewStub;

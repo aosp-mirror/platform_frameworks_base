@@ -81,7 +81,7 @@ public class IpClientTest {
     private static final int TEST_IFINDEX = 1001;
     // See RFC 7042#section-2.1.2 for EUI-48 documentation values.
     private static final MacAddress TEST_MAC = MacAddress.fromString("00:00:5E:00:53:01");
-    private static final int TEST_TIMEOUT_MS = 200;
+    private static final int TEST_TIMEOUT_MS = 400;
 
     @Mock private Context mContext;
     @Mock private INetworkManagementService mNMService;

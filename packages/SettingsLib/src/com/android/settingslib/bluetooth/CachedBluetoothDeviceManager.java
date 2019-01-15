@@ -162,14 +162,14 @@ public class CachedBluetoothDeviceManager {
      */
     public synchronized String getHearingAidPairDeviceSummary(CachedBluetoothDevice device) {
         String pairDeviceSummary = null;
-        if (device.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
-            for (CachedBluetoothDevice hearingAidDevice : mHearingAidDevicesNotAddedInCache) {
-                if (hearingAidDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID
-                    && hearingAidDevice.getHiSyncId() == device.getHiSyncId()) {
-                    pairDeviceSummary = hearingAidDevice.getConnectionSummary();
-                }
-            }
+        CachedBluetoothDevice otherHearingAidDevice =
+            getHearingAidOtherDevice(device, device.getHiSyncId());
+        if (otherHearingAidDevice != null) {
+            pairDeviceSummary = otherHearingAidDevice.getConnectionSummary();
         }
+        log("getHearingAidPairDeviceSummary: pairDeviceSummary=" + pairDeviceSummary
+            + ", otherHearingAidDevice=" + otherHearingAidDevice);
+ 
         return pairDeviceSummary;
     }
 
@@ -358,7 +358,7 @@ public class CachedBluetoothDeviceManager {
         }
     }
 
-    private CachedBluetoothDevice getHearingAidOtherDevice(CachedBluetoothDevice thisDevice,
+    public CachedBluetoothDevice getHearingAidOtherDevice(CachedBluetoothDevice thisDevice,
                                                            long hiSyncId) {
         if (hiSyncId == BluetoothHearingAid.HI_SYNC_ID_INVALID) {
             return null;

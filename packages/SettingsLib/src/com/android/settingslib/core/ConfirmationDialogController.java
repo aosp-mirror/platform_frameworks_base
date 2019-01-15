@@ -16,8 +16,8 @@
 
 package com.android.settingslib.core;
 
-import android.support.annotation.Nullable;
-import android.support.v7.preference.Preference;
+import androidx.annotation.Nullable;
+import androidx.preference.Preference;
 
 /**
  * Interface for {@link AbstractPreferenceController} objects which manage confirmation dialogs

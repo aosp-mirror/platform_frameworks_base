@@ -31,6 +31,8 @@
 #include "test/Context.h"
 #include "test/Test.h"
 
+using ::android::ConfigDescription;
+
 namespace aapt {
 namespace {
 

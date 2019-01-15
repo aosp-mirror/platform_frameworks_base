@@ -31,6 +31,7 @@
 #include "util/Util.h"
 
 using ::aapt::text::Utf8Iterator;
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 using ::android::StringPiece16;
 using ::android::base::StringPrintf;
@@ -359,7 +360,7 @@ std::unique_ptr<BinaryPrimitive> TryParseFlagSymbol(const Attribute* flag_attr,
     return util::make_unique<BinaryPrimitive>(flags);
   }
 
-  for (StringPiece part : util::Tokenize(str, '|')) {
+  for (const StringPiece& part : util::Tokenize(str, '|')) {
     StringPiece trimmed_part = util::TrimWhitespace(part);
 
     bool flag_set = false;

@@ -16,7 +16,7 @@
 
 package com.android.settingslib.core.lifecycle.events;
 
-import android.support.v7.preference.PreferenceScreen;
+import androidx.preference.PreferenceScreen;
 
 public interface SetPreferenceScreen {
 

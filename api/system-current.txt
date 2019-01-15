@@ -4,7 +4,6 @@ package android {
     field public static final java.lang.String ACCESS_AMBIENT_LIGHT_STATS = "android.permission.ACCESS_AMBIENT_LIGHT_STATS";
     field public static final java.lang.String ACCESS_BROADCAST_RADIO = "android.permission.ACCESS_BROADCAST_RADIO";
     field public static final java.lang.String ACCESS_CACHE_FILESYSTEM = "android.permission.ACCESS_CACHE_FILESYSTEM";
-    field public static final java.lang.String ACCESS_CHECKIN_PROPERTIES = "android.permission.ACCESS_CHECKIN_PROPERTIES";
     field public static final java.lang.String ACCESS_DRM_CERTIFICATES = "android.permission.ACCESS_DRM_CERTIFICATES";
     field public static final deprecated java.lang.String ACCESS_FM_RADIO = "android.permission.ACCESS_FM_RADIO";
     field public static final java.lang.String ACCESS_MOCK_LOCATION = "android.permission.ACCESS_MOCK_LOCATION";
@@ -13,13 +12,10 @@ package android {
     field public static final java.lang.String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
     field public static final java.lang.String ACCESS_SHORTCUTS = "android.permission.ACCESS_SHORTCUTS";
     field public static final java.lang.String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
-    field public static final java.lang.String ACCOUNT_MANAGER = "android.permission.ACCOUNT_MANAGER";
     field public static final java.lang.String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final java.lang.String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
     field public static final java.lang.String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
     field public static final java.lang.String BACKUP = "android.permission.BACKUP";
-    field public static final java.lang.String BATTERY_STATS = "android.permission.BATTERY_STATS";
-    field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
     field public static final deprecated java.lang.String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
     field public static final java.lang.String BIND_DIRECTORY_SEARCH = "android.permission.BIND_DIRECTORY_SEARCH";
     field public static final java.lang.String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
@@ -27,8 +23,8 @@ package android {
     field public static final java.lang.String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
     field public static final java.lang.String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE";
+    field public static final java.lang.String BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE = "android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE";
     field public static final java.lang.String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
-    field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
     field public static final java.lang.String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final java.lang.String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
@@ -38,20 +34,13 @@ package android {
     field public static final java.lang.String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
     field public static final java.lang.String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final java.lang.String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
-    field public static final java.lang.String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
     field public static final java.lang.String BRICK = "android.permission.BRICK";
     field public static final java.lang.String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final deprecated java.lang.String BROADCAST_NETWORK_PRIVILEGED = "android.permission.BROADCAST_NETWORK_PRIVILEGED";
-    field public static final java.lang.String CALL_PRIVILEGED = "android.permission.CALL_PRIVILEGED";
     field public static final java.lang.String CAMERA_DISABLE_TRANSMIT_LED = "android.permission.CAMERA_DISABLE_TRANSMIT_LED";
     field public static final java.lang.String CAPTURE_AUDIO_HOTWORD = "android.permission.CAPTURE_AUDIO_HOTWORD";
-    field public static final java.lang.String CAPTURE_AUDIO_OUTPUT = "android.permission.CAPTURE_AUDIO_OUTPUT";
-    field public static final java.lang.String CAPTURE_SECURE_VIDEO_OUTPUT = "android.permission.CAPTURE_SECURE_VIDEO_OUTPUT";
     field public static final java.lang.String CAPTURE_TV_INPUT = "android.permission.CAPTURE_TV_INPUT";
-    field public static final java.lang.String CAPTURE_VIDEO_OUTPUT = "android.permission.CAPTURE_VIDEO_OUTPUT";
     field public static final java.lang.String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
-    field public static final java.lang.String CHANGE_COMPONENT_ENABLED_STATE = "android.permission.CHANGE_COMPONENT_ENABLED_STATE";
-    field public static final java.lang.String CHANGE_CONFIGURATION = "android.permission.CHANGE_CONFIGURATION";
     field public static final java.lang.String CHANGE_DEVICE_IDLE_TEMP_WHITELIST = "android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST";
     field public static final java.lang.String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
     field public static final java.lang.String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
@@ -59,30 +48,21 @@ package android {
     field public static final java.lang.String CONNECTIVITY_USE_RESTRICTED_NETWORKS = "android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS";
     field public static final java.lang.String CONTROL_DISPLAY_SATURATION = "android.permission.CONTROL_DISPLAY_SATURATION";
     field public static final java.lang.String CONTROL_INCALL_EXPERIENCE = "android.permission.CONTROL_INCALL_EXPERIENCE";
-    field public static final java.lang.String CONTROL_LOCATION_UPDATES = "android.permission.CONTROL_LOCATION_UPDATES";
     field public static final java.lang.String CONTROL_VPN = "android.permission.CONTROL_VPN";
     field public static final java.lang.String CRYPT_KEEPER = "android.permission.CRYPT_KEEPER";
-    field public static final java.lang.String DELETE_CACHE_FILES = "android.permission.DELETE_CACHE_FILES";
-    field public static final java.lang.String DELETE_PACKAGES = "android.permission.DELETE_PACKAGES";
     field public static final java.lang.String DEVICE_POWER = "android.permission.DEVICE_POWER";
-    field public static final java.lang.String DIAGNOSTIC = "android.permission.DIAGNOSTIC";
     field public static final java.lang.String DISPATCH_PROVISIONING_MESSAGE = "android.permission.DISPATCH_PROVISIONING_MESSAGE";
-    field public static final java.lang.String DUMP = "android.permission.DUMP";
     field public static final java.lang.String FORCE_BACK = "android.permission.FORCE_BACK";
     field public static final java.lang.String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
-    field public static final java.lang.String GET_ACCOUNTS_PRIVILEGED = "android.permission.GET_ACCOUNTS_PRIVILEGED";
     field public static final java.lang.String GET_APP_OPS_STATS = "android.permission.GET_APP_OPS_STATS";
     field public static final java.lang.String GET_PROCESS_STATE_AND_OOM_SCORE = "android.permission.GET_PROCESS_STATE_AND_OOM_SCORE";
     field public static final java.lang.String GET_TOP_ACTIVITY_INFO = "android.permission.GET_TOP_ACTIVITY_INFO";
-    field public static final java.lang.String GLOBAL_SEARCH = "android.permission.GLOBAL_SEARCH";
     field public static final java.lang.String GRANT_RUNTIME_PERMISSIONS = "android.permission.GRANT_RUNTIME_PERMISSIONS";
     field public static final java.lang.String HARDWARE_TEST = "android.permission.HARDWARE_TEST";
     field public static final java.lang.String HDMI_CEC = "android.permission.HDMI_CEC";
     field public static final java.lang.String HIDE_NON_SYSTEM_OVERLAY_WINDOWS = "android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS";
     field public static final java.lang.String INJECT_EVENTS = "android.permission.INJECT_EVENTS";
     field public static final java.lang.String INSTALL_GRANT_RUNTIME_PERMISSIONS = "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS";
-    field public static final java.lang.String INSTALL_LOCATION_PROVIDER = "android.permission.INSTALL_LOCATION_PROVIDER";
-    field public static final java.lang.String INSTALL_PACKAGES = "android.permission.INSTALL_PACKAGES";
     field public static final java.lang.String INSTALL_PACKAGE_UPDATES = "android.permission.INSTALL_PACKAGE_UPDATES";
     field public static final java.lang.String INSTALL_SELF_UPDATES = "android.permission.INSTALL_SELF_UPDATES";
     field public static final java.lang.String INTENT_FILTER_VERIFICATION_AGENT = "android.permission.INTENT_FILTER_VERIFICATION_AGENT";
@@ -92,7 +72,6 @@ package android {
     field public static final java.lang.String INVOKE_CARRIER_SETUP = "android.permission.INVOKE_CARRIER_SETUP";
     field public static final java.lang.String KILL_UID = "android.permission.KILL_UID";
     field public static final java.lang.String LOCAL_MAC_ADDRESS = "android.permission.LOCAL_MAC_ADDRESS";
-    field public static final java.lang.String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final java.lang.String LOOP_RADIO = "android.permission.LOOP_RADIO";
     field public static final java.lang.String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final java.lang.String MANAGE_APP_OPS_RESTRICTIONS = "android.permission.MANAGE_APP_OPS_RESTRICTIONS";
@@ -107,24 +86,19 @@ package android {
     field public static final java.lang.String MANAGE_USB = "android.permission.MANAGE_USB";
     field public static final java.lang.String MANAGE_USERS = "android.permission.MANAGE_USERS";
     field public static final java.lang.String MANAGE_USER_OEM_UNLOCK_STATE = "android.permission.MANAGE_USER_OEM_UNLOCK_STATE";
-    field public static final java.lang.String MASTER_CLEAR = "android.permission.MASTER_CLEAR";
-    field public static final java.lang.String MEDIA_CONTENT_CONTROL = "android.permission.MEDIA_CONTENT_CONTROL";
     field public static final java.lang.String MODIFY_APPWIDGET_BIND_PERMISSIONS = "android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS";
     field public static final java.lang.String MODIFY_AUDIO_ROUTING = "android.permission.MODIFY_AUDIO_ROUTING";
     field public static final java.lang.String MODIFY_CELL_BROADCASTS = "android.permission.MODIFY_CELL_BROADCASTS";
     field public static final java.lang.String MODIFY_DAY_NIGHT_MODE = "android.permission.MODIFY_DAY_NIGHT_MODE";
     field public static final deprecated java.lang.String MODIFY_NETWORK_ACCOUNTING = "android.permission.MODIFY_NETWORK_ACCOUNTING";
     field public static final java.lang.String MODIFY_PARENTAL_CONTROLS = "android.permission.MODIFY_PARENTAL_CONTROLS";
-    field public static final java.lang.String MODIFY_PHONE_STATE = "android.permission.MODIFY_PHONE_STATE";
     field public static final java.lang.String MODIFY_QUIET_MODE = "android.permission.MODIFY_QUIET_MODE";
-    field public static final java.lang.String MOUNT_FORMAT_FILESYSTEMS = "android.permission.MOUNT_FORMAT_FILESYSTEMS";
-    field public static final java.lang.String MOUNT_UNMOUNT_FILESYSTEMS = "android.permission.MOUNT_UNMOUNT_FILESYSTEMS";
     field public static final java.lang.String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
+    field public static final java.lang.String NETWORK_SETUP_WIZARD = "android.permission.NETWORK_SETUP_WIZARD";
     field public static final java.lang.String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final java.lang.String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
     field public static final java.lang.String OBSERVE_APP_USAGE = "android.permission.OBSERVE_APP_USAGE";
     field public static final java.lang.String OVERRIDE_WIFI_CONFIG = "android.permission.OVERRIDE_WIFI_CONFIG";
-    field public static final java.lang.String PACKAGE_USAGE_STATS = "android.permission.PACKAGE_USAGE_STATS";
     field public static final java.lang.String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
     field public static final java.lang.String PEERS_MAC_ADDRESS = "android.permission.PEERS_MAC_ADDRESS";
     field public static final java.lang.String PERFORM_CDMA_PROVISIONING = "android.permission.PERFORM_CDMA_PROVISIONING";
@@ -134,9 +108,7 @@ package android {
     field public static final java.lang.String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
     field public static final java.lang.String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
     field public static final java.lang.String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
-    field public static final java.lang.String READ_FRAME_BUFFER = "android.permission.READ_FRAME_BUFFER";
     field public static final java.lang.String READ_INSTALL_SESSIONS = "android.permission.READ_INSTALL_SESSIONS";
-    field public static final java.lang.String READ_LOGS = "android.permission.READ_LOGS";
     field public static final java.lang.String READ_NETWORK_USAGE_HISTORY = "android.permission.READ_NETWORK_USAGE_HISTORY";
     field public static final java.lang.String READ_OEM_UNLOCK_STATE = "android.permission.READ_OEM_UNLOCK_STATE";
     field public static final java.lang.String READ_PRINT_SERVICES = "android.permission.READ_PRINT_SERVICES";
@@ -148,7 +120,6 @@ package android {
     field public static final java.lang.String READ_WALLPAPER_INTERNAL = "android.permission.READ_WALLPAPER_INTERNAL";
     field public static final java.lang.String READ_WIFI_CREDENTIAL = "android.permission.READ_WIFI_CREDENTIAL";
     field public static final java.lang.String REAL_GET_TASKS = "android.permission.REAL_GET_TASKS";
-    field public static final java.lang.String REBOOT = "android.permission.REBOOT";
     field public static final java.lang.String RECEIVE_DATA_ACTIVITY_CHANGE = "android.permission.RECEIVE_DATA_ACTIVITY_CHANGE";
     field public static final java.lang.String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
     field public static final java.lang.String RECEIVE_WIFI_CREDENTIAL_CHANGE = "android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE";
@@ -162,27 +133,19 @@ package android {
     field public static final java.lang.String RETRIEVE_WINDOW_CONTENT = "android.permission.RETRIEVE_WINDOW_CONTENT";
     field public static final java.lang.String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final java.lang.String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
-    field public static final java.lang.String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
     field public static final java.lang.String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final java.lang.String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
     field public static final java.lang.String SERIAL_PORT = "android.permission.SERIAL_PORT";
     field public static final java.lang.String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
-    field public static final java.lang.String SET_ALWAYS_FINISH = "android.permission.SET_ALWAYS_FINISH";
-    field public static final java.lang.String SET_ANIMATION_SCALE = "android.permission.SET_ANIMATION_SCALE";
-    field public static final java.lang.String SET_DEBUG_APP = "android.permission.SET_DEBUG_APP";
     field public static final java.lang.String SET_HARMFUL_APP_WARNINGS = "android.permission.SET_HARMFUL_APP_WARNINGS";
     field public static final java.lang.String SET_MEDIA_KEY_LISTENER = "android.permission.SET_MEDIA_KEY_LISTENER";
     field public static final java.lang.String SET_ORIENTATION = "android.permission.SET_ORIENTATION";
     field public static final java.lang.String SET_POINTER_SPEED = "android.permission.SET_POINTER_SPEED";
-    field public static final java.lang.String SET_PROCESS_LIMIT = "android.permission.SET_PROCESS_LIMIT";
     field public static final java.lang.String SET_SCREEN_COMPATIBILITY = "android.permission.SET_SCREEN_COMPATIBILITY";
-    field public static final java.lang.String SET_TIME = "android.permission.SET_TIME";
     field public static final java.lang.String SET_VOLUME_KEY_LONG_PRESS_LISTENER = "android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER";
     field public static final java.lang.String SET_WALLPAPER_COMPONENT = "android.permission.SET_WALLPAPER_COMPONENT";
     field public static final java.lang.String SHOW_KEYGUARD_MESSAGE = "android.permission.SHOW_KEYGUARD_MESSAGE";
     field public static final java.lang.String SHUTDOWN = "android.permission.SHUTDOWN";
-    field public static final java.lang.String SIGNAL_PERSISTENT_PROCESSES = "android.permission.SIGNAL_PERSISTENT_PROCESSES";
-    field public static final java.lang.String STATUS_BAR = "android.permission.STATUS_BAR";
     field public static final java.lang.String STOP_APP_SWITCHES = "android.permission.STOP_APP_SWITCHES";
     field public static final java.lang.String SUBSTITUTE_NOTIFICATION_APP_NAME = "android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME";
     field public static final java.lang.String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
@@ -191,17 +154,13 @@ package android {
     field public static final java.lang.String TV_VIRTUAL_REMOTE_CONTROLLER = "android.permission.TV_VIRTUAL_REMOTE_CONTROLLER";
     field public static final java.lang.String UNLIMITED_SHORTCUTS_API_CALLS = "android.permission.UNLIMITED_SHORTCUTS_API_CALLS";
     field public static final java.lang.String UPDATE_APP_OPS_STATS = "android.permission.UPDATE_APP_OPS_STATS";
-    field public static final java.lang.String UPDATE_DEVICE_STATS = "android.permission.UPDATE_DEVICE_STATS";
     field public static final java.lang.String UPDATE_LOCK = "android.permission.UPDATE_LOCK";
     field public static final java.lang.String UPDATE_TIME_ZONE_RULES = "android.permission.UPDATE_TIME_ZONE_RULES";
     field public static final java.lang.String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
     field public static final java.lang.String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
-    field public static final java.lang.String WRITE_APN_SETTINGS = "android.permission.WRITE_APN_SETTINGS";
     field public static final java.lang.String WRITE_DREAM_STATE = "android.permission.WRITE_DREAM_STATE";
     field public static final java.lang.String WRITE_EMBEDDED_SUBSCRIPTIONS = "android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS";
-    field public static final java.lang.String WRITE_GSERVICES = "android.permission.WRITE_GSERVICES";
     field public static final java.lang.String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
-    field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
   }
 
   public static final class R.array {
@@ -424,10 +383,6 @@ package android.app {
 
 package android.app.admin {
 
-  public class DeviceAdminReceiver extends android.content.BroadcastReceiver {
-    method public deprecated void onReadyForUserInitialization(android.content.Context, android.content.Intent);
-  }
-
   public class DevicePolicyManager {
     method public java.lang.String getDeviceOwner();
     method public android.content.ComponentName getDeviceOwnerComponentOnAnyUser();
@@ -465,10 +420,7 @@ package android.app.admin {
   }
 
   public final class SystemUpdatePolicy implements android.os.Parcelable {
-    method public int describeContents();
     method public android.app.admin.SystemUpdatePolicy.InstallationOption getInstallationOptionAt(long);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.admin.SystemUpdatePolicy> CREATOR;
     field public static final int TYPE_PAUSE = 4; // 0x4
   }
 
@@ -2947,7 +2899,6 @@ package android.media.tv {
     method public void addBlockedRating(android.media.tv.TvContentRating);
     method public boolean captureFrame(java.lang.String, android.view.Surface, android.media.tv.TvStreamConfig);
     method public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(java.lang.String);
-    method public java.util.List<android.media.tv.TvContentRating> getBlockedRatings();
     method public java.util.List<android.media.tv.TvInputHardwareInfo> getHardwareList();
     method public java.util.List<android.media.tv.TvContentRatingSystemInfo> getTvContentRatingSystemList();
     method public boolean isSingleSessionActive();
@@ -3074,6 +3025,7 @@ package android.net {
   public class ConnectivityManager {
     method public java.lang.String getCaptivePortalServerUrl();
     method public boolean isTetheringSupported();
+    method public void setAirplaneMode(boolean);
     method public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
     method public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback, android.os.Handler);
     method public void stopTethering(int);
@@ -3088,7 +3040,25 @@ package android.net {
     method public void onTetheringStarted();
   }
 
+  public class LinkAddress implements android.os.Parcelable {
+    ctor public LinkAddress(java.net.InetAddress, int);
+    ctor public LinkAddress(java.lang.String);
+  }
+
+  public final class LinkProperties implements android.os.Parcelable {
+    ctor public LinkProperties();
+    method public boolean addRoute(android.net.RouteInfo);
+    method public void clear();
+    method public void setDnsServers(java.util.Collection<java.net.InetAddress>);
+    method public void setDomains(java.lang.String);
+    method public void setHttpProxy(android.net.ProxyInfo);
+    method public void setInterfaceName(java.lang.String);
+    method public void setLinkAddresses(java.util.Collection<android.net.LinkAddress>);
+    method public void setMtu(int);
+  }
+
   public final class NetworkCapabilities implements android.os.Parcelable {
+    method public int getSignalStrength();
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
   }
 
@@ -3106,6 +3076,10 @@ package android.net {
     ctor public NetworkRecommendationProvider(android.content.Context, java.util.concurrent.Executor);
     method public final android.os.IBinder getBinder();
     method public abstract void onRequestScores(android.net.NetworkKey[]);
+  }
+
+  public static class NetworkRequest.Builder {
+    method public android.net.NetworkRequest.Builder setSignalStrength(int);
   }
 
   public class NetworkScoreManager {
@@ -3156,11 +3130,9 @@ package android.net {
   }
 
   public class TrafficStats {
-    method public static void clearThreadStatsUid();
     method public static void setThreadStatsTagApp();
     method public static void setThreadStatsTagBackup();
     method public static void setThreadStatsTagRestore();
-    method public static void setThreadStatsUid(int);
   }
 
   public class VpnService extends android.app.Service {
@@ -3178,14 +3150,6 @@ package android.net {
     field public static final android.os.Parcelable.Creator<android.net.WifiKey> CREATOR;
     field public final java.lang.String bssid;
     field public final java.lang.String ssid;
-  }
-
-}
-
-package android.net.http {
-
-  public class X509TrustManagerExtensions {
-    method public boolean isSameTrustConfiguration(java.lang.String, java.lang.String);
   }
 
 }
@@ -3408,7 +3372,6 @@ package android.net.wifi {
     method public java.util.List<android.net.wifi.WifiConfiguration> getPrivilegedConfiguredNetworks();
     method public android.net.wifi.WifiConfiguration getWifiApConfiguration();
     method public int getWifiApState();
-    method public boolean isDeviceToApRttSupported();
     method public boolean isDeviceToDeviceRttSupported();
     method public boolean isPortableHotspotSupported();
     method public boolean isWifiApEnabled();
@@ -4281,6 +4244,23 @@ package android.provider {
     field public static final java.lang.String INSTANT_APPS_ENABLED = "instant_apps_enabled";
   }
 
+  public static final class Telephony.Carriers implements android.provider.BaseColumns {
+    field public static final java.lang.String APN_SET_ID = "apn_set_id";
+    field public static final int CARRIER_EDITED = 4; // 0x4
+    field public static final java.lang.String EDITED_STATUS = "edited";
+    field public static final java.lang.String MAX_CONNECTIONS = "max_conns";
+    field public static final java.lang.String MODEM_PERSIST = "modem_cognitive";
+    field public static final java.lang.String MTU = "mtu";
+    field public static final int NO_APN_SET_ID = 0; // 0x0
+    field public static final java.lang.String TIME_LIMIT_FOR_MAX_CONNECTIONS = "max_conns_time";
+    field public static final int UNEDITED = 0; // 0x0
+    field public static final int USER_DELETED = 2; // 0x2
+    field public static final java.lang.String USER_EDITABLE = "user_editable";
+    field public static final int USER_EDITED = 1; // 0x1
+    field public static final java.lang.String USER_VISIBLE = "user_visible";
+    field public static final java.lang.String WAIT_TIME_RETRY = "wait_time";
+  }
+
   public final class TimeZoneRulesDataContract {
     field public static final java.lang.String AUTHORITY = "com.android.timezone";
   }
@@ -4306,6 +4286,11 @@ package android.security.keystore {
     field public static final int ID_TYPE_IMEI = 2; // 0x2
     field public static final int ID_TYPE_MEID = 3; // 0x3
     field public static final int ID_TYPE_SERIAL = 1; // 0x1
+  }
+
+  public class DeviceIdAttestationException extends java.lang.Exception {
+    ctor public DeviceIdAttestationException(java.lang.String);
+    ctor public DeviceIdAttestationException(java.lang.String, java.lang.Throwable);
   }
 
 }
@@ -4438,7 +4423,27 @@ package android.service.autofill {
 
 }
 
+package android.service.carrier {
+
+  public abstract class ApnService extends android.app.Service {
+    ctor public ApnService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
+  }
+
+}
+
 package android.service.euicc {
+
+  public final class DownloadSubscriptionResult implements android.os.Parcelable {
+    ctor public DownloadSubscriptionResult(int, int, int);
+    method public int describeContents();
+    method public int getCardId();
+    method public int getResolvableErrors();
+    method public int getResult();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.euicc.DownloadSubscriptionResult> CREATOR;
+  }
 
   public final class EuiccProfileInfo implements android.os.Parcelable {
     method public int describeContents();
@@ -4493,7 +4498,8 @@ package android.service.euicc {
     ctor public EuiccService();
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract int onDeleteSubscription(int, java.lang.String);
-    method public abstract int onDownloadSubscription(int, android.telephony.euicc.DownloadableSubscription, boolean, boolean);
+    method public abstract android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, android.telephony.euicc.DownloadableSubscription, boolean, boolean, android.os.Bundle);
+    method public deprecated int onDownloadSubscription(int, android.telephony.euicc.DownloadableSubscription, boolean, boolean);
     method public abstract int onEraseSubscriptions(int);
     method public abstract android.service.euicc.GetDefaultDownloadableSubscriptionListResult onGetDefaultDownloadableSubscriptionList(int, boolean);
     method public abstract android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, android.telephony.euicc.DownloadableSubscription, boolean);
@@ -4507,19 +4513,25 @@ package android.service.euicc {
     method public abstract int onUpdateSubscriptionNickname(int, java.lang.String, java.lang.String);
     field public static final java.lang.String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS = "android.service.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
     field public static final java.lang.String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION = "android.service.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
-    field public static final java.lang.String ACTION_RESOLVE_CONFIRMATION_CODE = "android.service.euicc.action.RESOLVE_CONFIRMATION_CODE";
+    field public static final deprecated java.lang.String ACTION_RESOLVE_CONFIRMATION_CODE = "android.service.euicc.action.RESOLVE_CONFIRMATION_CODE";
     field public static final java.lang.String ACTION_RESOLVE_DEACTIVATE_SIM = "android.service.euicc.action.RESOLVE_DEACTIVATE_SIM";
     field public static final java.lang.String ACTION_RESOLVE_NO_PRIVILEGES = "android.service.euicc.action.RESOLVE_NO_PRIVILEGES";
+    field public static final java.lang.String ACTION_RESOLVE_RESOLVABLE_ERRORS = "android.service.euicc.action.RESOLVE_RESOLVABLE_ERRORS";
     field public static final java.lang.String CATEGORY_EUICC_UI = "android.service.euicc.category.EUICC_UI";
     field public static final java.lang.String EUICC_SERVICE_INTERFACE = "android.service.euicc.EuiccService";
+    field public static final java.lang.String EXTRA_RESOLUTION_ALLOW_POLICY_RULES = "android.service.euicc.extra.RESOLUTION_ALLOW_POLICY_RULES";
     field public static final java.lang.String EXTRA_RESOLUTION_CALLING_PACKAGE = "android.service.euicc.extra.RESOLUTION_CALLING_PACKAGE";
     field public static final java.lang.String EXTRA_RESOLUTION_CONFIRMATION_CODE = "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE";
     field public static final java.lang.String EXTRA_RESOLUTION_CONFIRMATION_CODE_RETRIED = "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE_RETRIED";
     field public static final java.lang.String EXTRA_RESOLUTION_CONSENT = "android.service.euicc.extra.RESOLUTION_CONSENT";
+    field public static final java.lang.String EXTRA_RESOLVABLE_ERRORS = "android.service.euicc.extra.RESOLVABLE_ERRORS";
+    field public static final int RESOLVABLE_ERROR_CONFIRMATION_CODE = 1; // 0x1
+    field public static final int RESOLVABLE_ERROR_POLICY_RULES = 2; // 0x2
     field public static final int RESULT_FIRST_USER = 1; // 0x1
     field public static final int RESULT_MUST_DEACTIVATE_SIM = -1; // 0xffffffff
-    field public static final int RESULT_NEED_CONFIRMATION_CODE = -2; // 0xfffffffe
+    field public static final deprecated int RESULT_NEED_CONFIRMATION_CODE = -2; // 0xfffffffe
     field public static final int RESULT_OK = 0; // 0x0
+    field public static final int RESULT_RESOLVABLE_ERRORS = -2; // 0xfffffffe
   }
 
   public static abstract class EuiccService.OtaStatusChangedCallback {
@@ -4573,28 +4585,6 @@ package android.service.notification {
     field public static final java.lang.String KEY_PEOPLE = "key_people";
     field public static final java.lang.String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
     field public static final java.lang.String KEY_USER_SENTIMENT = "key_user_sentiment";
-  }
-
-  public final class Condition implements android.os.Parcelable {
-    ctor public Condition(android.net.Uri, java.lang.String, java.lang.String, java.lang.String, int, int, int);
-    method public android.service.notification.Condition copy();
-    method public static boolean isValidId(android.net.Uri, java.lang.String);
-    method public static android.net.Uri.Builder newId(android.content.Context);
-    method public static java.lang.String relevanceToString(int);
-    method public static java.lang.String stateToString(int);
-    field public static final int FLAG_RELEVANT_ALWAYS = 2; // 0x2
-    field public static final int FLAG_RELEVANT_NOW = 1; // 0x1
-    field public static final java.lang.String SCHEME = "condition";
-    field public static final int STATE_ERROR = 3; // 0x3
-    field public static final int STATE_UNKNOWN = 2; // 0x2
-    field public final int flags;
-    field public final int icon;
-    field public final java.lang.String line1;
-    field public final java.lang.String line2;
-  }
-
-  public abstract class ConditionProviderService extends android.app.Service {
-    method public void onRequestConditions(int);
   }
 
   public abstract class NotificationAssistantService extends android.service.notification.NotificationListenerService {
@@ -4983,6 +4973,18 @@ package android.telecom {
     field public static final int CAPABILITY_MULTI_USER = 32; // 0x20
   }
 
+  public final class PhoneAccountSuggestion implements android.os.Parcelable {
+    ctor public PhoneAccountSuggestion(android.telecom.PhoneAccountHandle, int, boolean);
+  }
+
+  public class PhoneAccountSuggestionService extends android.app.Service {
+    ctor public PhoneAccountSuggestionService();
+    method public void onAccountSuggestionRequest(java.lang.String);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public final void suggestPhoneAccounts(java.lang.String, java.util.List<android.telecom.PhoneAccountSuggestion>);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.telecom.PhoneAccountSuggestionService";
+  }
+
   public final class RemoteConference {
     method public deprecated void setAudioState(android.telecom.AudioState);
   }
@@ -5039,20 +5041,25 @@ package android.telecom {
     method public void clearPhoneAccounts();
     method public android.telecom.TelecomAnalytics dumpAnalytics();
     method public void enablePhoneAccount(android.telecom.PhoneAccountHandle, boolean);
-    method public boolean endCall();
     method public java.util.List<android.telecom.PhoneAccountHandle> getAllPhoneAccountHandles();
     method public java.util.List<android.telecom.PhoneAccount> getAllPhoneAccounts();
     method public int getAllPhoneAccountsCount();
     method public int getCallState();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
+    method public int getCurrentTtyMode();
     method public deprecated android.content.ComponentName getDefaultPhoneApp();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsForPackage();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
+    method public boolean isInEmergencyCall();
     method public boolean isRinging();
-    method public boolean isTtySupported();
+    method public deprecated boolean setDefaultDialer(java.lang.String);
     field public static final java.lang.String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
     field public static final java.lang.String EXTRA_CLEAR_MISSED_CALLS_INTENT = "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecom.extra.CONNECTION_SERVICE";
+    field public static final int TTY_MODE_FULL = 1; // 0x1
+    field public static final int TTY_MODE_HCO = 2; // 0x2
+    field public static final int TTY_MODE_OFF = 0; // 0x0
+    field public static final int TTY_MODE_VCO = 3; // 0x3
   }
 
 }
@@ -5064,14 +5071,223 @@ package android.telephony {
     field public static final int WWAN = 1; // 0x1
   }
 
+  public class CallAttributes implements android.os.Parcelable {
+    ctor public CallAttributes(android.telephony.PreciseCallState, int, android.telephony.CallQuality);
+    method public int describeContents();
+    method public android.telephony.CallQuality getCallQuality();
+    method public int getNetworkType();
+    method public android.telephony.PreciseCallState getPreciseCallState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
+  }
+
+  public final class CallQuality implements android.os.Parcelable {
+    ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int);
+    method public int describeContents();
+    method public int getAverageRelativeJitter();
+    method public int getAverageRoundTripTime();
+    method public int getCallDuration();
+    method public int getCodecType();
+    method public int getDownlinkCallQualityLevel();
+    method public int getMaxRelativeJitter();
+    method public int getNumRtpPacketsNotReceived();
+    method public int getNumRtpPacketsReceived();
+    method public int getNumRtpPacketsTransmitted();
+    method public int getNumRtpPacketsTransmittedLost();
+    method public int getUplinkCallQualityLevel();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CALL_QUALITY_BAD = 4; // 0x4
+    field public static final int CALL_QUALITY_EXCELLENT = 0; // 0x0
+    field public static final int CALL_QUALITY_FAIR = 2; // 0x2
+    field public static final int CALL_QUALITY_GOOD = 1; // 0x1
+    field public static final int CALL_QUALITY_NOT_AVAILABLE = 5; // 0x5
+    field public static final int CALL_QUALITY_POOR = 3; // 0x3
+    field public static final android.os.Parcelable.Creator<android.telephony.CallQuality> CREATOR;
+  }
+
   public class CarrierConfigManager {
     method public static android.os.PersistableBundle getDefaultConfig();
+    method public void overrideConfig(int, android.os.PersistableBundle);
     method public void updateConfigForPhoneId(int, java.lang.String);
-    field public static final java.lang.String KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING = "config_plans_package_override_string";
+    field public static final java.lang.String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
+  }
+
+  public final class DataFailCause {
+    field public static final int ACTIVATION_REJECT_GGSN = 30; // 0x1e
+    field public static final int ACTIVATION_REJECT_UNSPECIFIED = 31; // 0x1f
+    field public static final int ACTIVE_PDP_CONTEXT_MAX_NUMBER_REACHED = 65; // 0x41
+    field public static final int APN_TYPE_CONFLICT = 112; // 0x70
+    field public static final int AUTH_FAILURE_ON_EMERGENCY_CALL = 122; // 0x7a
+    field public static final int COMPANION_IFACE_IN_USE = 118; // 0x76
+    field public static final int CONDITIONAL_IE_ERROR = 100; // 0x64
+    field public static final int EMERGENCY_IFACE_ONLY = 116; // 0x74
+    field public static final int EMM_ACCESS_BARRED = 115; // 0x73
+    field public static final int EMM_ACCESS_BARRED_INFINITE_RETRY = 121; // 0x79
+    field public static final int ERROR_UNSPECIFIED = 65535; // 0xffff
+    field public static final int ESM_INFO_NOT_RECEIVED = 53; // 0x35
+    field public static final int FEATURE_NOT_SUPP = 40; // 0x28
+    field public static final int FILTER_SEMANTIC_ERROR = 44; // 0x2c
+    field public static final int FILTER_SYTAX_ERROR = 45; // 0x2d
+    field public static final int GPRS_REGISTRATION_FAIL = -2; // 0xfffffffe
+    field public static final int IFACE_AND_POL_FAMILY_MISMATCH = 120; // 0x78
+    field public static final int IFACE_MISMATCH = 117; // 0x75
+    field public static final int INSUFFICIENT_RESOURCES = 26; // 0x1a
+    field public static final int INTERNAL_CALL_PREEMPT_BY_HIGH_PRIO_APN = 114; // 0x72
+    field public static final int INVALID_MANDATORY_INFO = 96; // 0x60
+    field public static final int INVALID_PCSCF_ADDR = 113; // 0x71
+    field public static final int INVALID_TRANSACTION_ID = 81; // 0x51
+    field public static final int IP_ADDRESS_MISMATCH = 119; // 0x77
+    field public static final int LLC_SNDCP = 25; // 0x19
+    field public static final int LOST_CONNECTION = 65540; // 0x10004
+    field public static final int MESSAGE_INCORRECT_SEMANTIC = 95; // 0x5f
+    field public static final int MESSAGE_TYPE_UNSUPPORTED = 97; // 0x61
+    field public static final int MISSING_UNKNOWN_APN = 27; // 0x1b
+    field public static final int MSG_AND_PROTOCOL_STATE_UNCOMPATIBLE = 101; // 0x65
+    field public static final int MSG_TYPE_NONCOMPATIBLE_STATE = 98; // 0x62
+    field public static final int MULTI_CONN_TO_SAME_PDN_NOT_ALLOWED = 55; // 0x37
+    field public static final int NAS_SIGNALLING = 14; // 0xe
+    field public static final int NETWORK_FAILURE = 38; // 0x26
+    field public static final int NONE = 0; // 0x0
+    field public static final int NSAPI_IN_USE = 35; // 0x23
+    field public static final int OEM_DCFAILCAUSE_1 = 4097; // 0x1001
+    field public static final int OEM_DCFAILCAUSE_10 = 4106; // 0x100a
+    field public static final int OEM_DCFAILCAUSE_11 = 4107; // 0x100b
+    field public static final int OEM_DCFAILCAUSE_12 = 4108; // 0x100c
+    field public static final int OEM_DCFAILCAUSE_13 = 4109; // 0x100d
+    field public static final int OEM_DCFAILCAUSE_14 = 4110; // 0x100e
+    field public static final int OEM_DCFAILCAUSE_15 = 4111; // 0x100f
+    field public static final int OEM_DCFAILCAUSE_2 = 4098; // 0x1002
+    field public static final int OEM_DCFAILCAUSE_3 = 4099; // 0x1003
+    field public static final int OEM_DCFAILCAUSE_4 = 4100; // 0x1004
+    field public static final int OEM_DCFAILCAUSE_5 = 4101; // 0x1005
+    field public static final int OEM_DCFAILCAUSE_6 = 4102; // 0x1006
+    field public static final int OEM_DCFAILCAUSE_7 = 4103; // 0x1007
+    field public static final int OEM_DCFAILCAUSE_8 = 4104; // 0x1008
+    field public static final int OEM_DCFAILCAUSE_9 = 4105; // 0x1009
+    field public static final int ONLY_IPV4_ALLOWED = 50; // 0x32
+    field public static final int ONLY_IPV6_ALLOWED = 51; // 0x33
+    field public static final int ONLY_SINGLE_BEARER_ALLOWED = 52; // 0x34
+    field public static final int OPERATOR_BARRED = 8; // 0x8
+    field public static final int PDN_CONN_DOES_NOT_EXIST = 54; // 0x36
+    field public static final int PDP_WITHOUT_ACTIVE_TFT = 46; // 0x2e
+    field public static final int PREF_RADIO_TECH_CHANGED = -4; // 0xfffffffc
+    field public static final int PROTOCOL_ERRORS = 111; // 0x6f
+    field public static final int QOS_NOT_ACCEPTED = 37; // 0x25
+    field public static final int RADIO_NOT_AVAILABLE = 65537; // 0x10001
+    field public static final int RADIO_POWER_OFF = -5; // 0xfffffffb
+    field public static final int REGISTRATION_FAIL = -1; // 0xffffffff
+    field public static final int REGULAR_DEACTIVATION = 36; // 0x24
+    field public static final int SERVICE_OPTION_NOT_SUBSCRIBED = 33; // 0x21
+    field public static final int SERVICE_OPTION_NOT_SUPPORTED = 32; // 0x20
+    field public static final int SERVICE_OPTION_OUT_OF_ORDER = 34; // 0x22
+    field public static final int SIGNAL_LOST = -3; // 0xfffffffd
+    field public static final int TETHERED_CALL_ACTIVE = -6; // 0xfffffffa
+    field public static final int TFT_SEMANTIC_ERROR = 41; // 0x29
+    field public static final int TFT_SYTAX_ERROR = 42; // 0x2a
+    field public static final int UMTS_REACTIVATION_REQ = 39; // 0x27
+    field public static final int UNKNOWN = 65536; // 0x10000
+    field public static final int UNKNOWN_INFO_ELEMENT = 99; // 0x63
+    field public static final int UNKNOWN_PDP_ADDRESS_TYPE = 28; // 0x1c
+    field public static final int UNKNOWN_PDP_CONTEXT = 43; // 0x2b
+    field public static final int UNSUPPORTED_APN_IN_CURRENT_PLMN = 66; // 0x42
+    field public static final int USER_AUTHENTICATION = 29; // 0x1d
+  }
+
+  public class DisconnectCause {
+    field public static final int ALREADY_DIALING = 72; // 0x48
+    field public static final int ANSWERED_ELSEWHERE = 52; // 0x34
+    field public static final int BUSY = 4; // 0x4
+    field public static final int CALLING_DISABLED = 74; // 0x4a
+    field public static final int CALL_BARRED = 20; // 0x14
+    field public static final int CALL_PULLED = 51; // 0x33
+    field public static final int CANT_CALL_WHILE_RINGING = 73; // 0x49
+    field public static final int CDMA_ACCESS_BLOCKED = 35; // 0x23
+    field public static final int CDMA_ACCESS_FAILURE = 32; // 0x20
+    field public static final int CDMA_ALREADY_ACTIVATED = 49; // 0x31
+    field public static final int CDMA_DROP = 27; // 0x1b
+    field public static final int CDMA_INTERCEPT = 28; // 0x1c
+    field public static final int CDMA_LOCKED_UNTIL_POWER_CYCLE = 26; // 0x1a
+    field public static final int CDMA_NOT_EMERGENCY = 34; // 0x22
+    field public static final int CDMA_PREEMPTED = 33; // 0x21
+    field public static final int CDMA_REORDER = 29; // 0x1d
+    field public static final int CDMA_RETRY_ORDER = 31; // 0x1f
+    field public static final int CDMA_SO_REJECT = 30; // 0x1e
+    field public static final int CONGESTION = 5; // 0x5
+    field public static final int CS_RESTRICTED = 22; // 0x16
+    field public static final int CS_RESTRICTED_EMERGENCY = 24; // 0x18
+    field public static final int CS_RESTRICTED_NORMAL = 23; // 0x17
+    field public static final int DATA_DISABLED = 54; // 0x36
+    field public static final int DATA_LIMIT_REACHED = 55; // 0x37
+    field public static final int DIALED_CALL_FORWARDING_WHILE_ROAMING = 57; // 0x39
+    field public static final int DIALED_MMI = 39; // 0x27
+    field public static final int DIAL_LOW_BATTERY = 62; // 0x3e
+    field public static final int DIAL_MODIFIED_TO_DIAL = 48; // 0x30
+    field public static final int DIAL_MODIFIED_TO_DIAL_VIDEO = 66; // 0x42
+    field public static final int DIAL_MODIFIED_TO_SS = 47; // 0x2f
+    field public static final int DIAL_MODIFIED_TO_USSD = 46; // 0x2e
+    field public static final int DIAL_VIDEO_MODIFIED_TO_DIAL = 69; // 0x45
+    field public static final int DIAL_VIDEO_MODIFIED_TO_DIAL_VIDEO = 70; // 0x46
+    field public static final int DIAL_VIDEO_MODIFIED_TO_SS = 67; // 0x43
+    field public static final int DIAL_VIDEO_MODIFIED_TO_USSD = 68; // 0x44
+    field public static final int EMERGENCY_PERM_FAILURE = 64; // 0x40
+    field public static final int EMERGENCY_TEMP_FAILURE = 63; // 0x3f
+    field public static final int ERROR_UNSPECIFIED = 36; // 0x24
+    field public static final int FDN_BLOCKED = 21; // 0x15
+    field public static final int ICC_ERROR = 19; // 0x13
+    field public static final int IMEI_NOT_ACCEPTED = 58; // 0x3a
+    field public static final int IMS_ACCESS_BLOCKED = 60; // 0x3c
+    field public static final int IMS_MERGED_SUCCESSFULLY = 45; // 0x2d
+    field public static final int IMS_SIP_ALTERNATE_EMERGENCY_CALL = 71; // 0x47
+    field public static final int INCOMING_MISSED = 1; // 0x1
+    field public static final int INCOMING_REJECTED = 16; // 0x10
+    field public static final int INVALID_CREDENTIALS = 10; // 0xa
+    field public static final int INVALID_NUMBER = 7; // 0x7
+    field public static final int LIMIT_EXCEEDED = 15; // 0xf
+    field public static final int LOCAL = 3; // 0x3
+    field public static final int LOST_SIGNAL = 14; // 0xe
+    field public static final int LOW_BATTERY = 61; // 0x3d
+    field public static final int MAXIMUM_NUMBER_OF_CALLS_REACHED = 53; // 0x35
+    field public static final int MMI = 6; // 0x6
+    field public static final int NORMAL = 2; // 0x2
+    field public static final int NORMAL_UNSPECIFIED = 65; // 0x41
+    field public static final int NOT_DISCONNECTED = 0; // 0x0
+    field public static final int NOT_VALID = -1; // 0xffffffff
+    field public static final int NO_PHONE_NUMBER_SUPPLIED = 38; // 0x26
+    field public static final int NUMBER_UNREACHABLE = 8; // 0x8
+    field public static final int OTASP_PROVISIONING_IN_PROCESS = 76; // 0x4c
+    field public static final int OUTGOING_CANCELED = 44; // 0x2c
+    field public static final int OUTGOING_FAILURE = 43; // 0x2b
+    field public static final int OUT_OF_NETWORK = 11; // 0xb
+    field public static final int OUT_OF_SERVICE = 18; // 0x12
+    field public static final int POWER_OFF = 17; // 0x11
+    field public static final int SERVER_ERROR = 12; // 0xc
+    field public static final int SERVER_UNREACHABLE = 9; // 0x9
+    field public static final int TIMED_OUT = 13; // 0xd
+    field public static final int TOO_MANY_ONGOING_CALLS = 75; // 0x4b
+    field public static final int UNOBTAINABLE_NUMBER = 25; // 0x19
+    field public static final int VIDEO_CALL_NOT_ALLOWED_WHILE_TTY_ENABLED = 50; // 0x32
+    field public static final int VOICEMAIL_NUMBER_MISSING = 40; // 0x28
+    field public static final int WIFI_LOST = 59; // 0x3b
+  }
+
+  public final class LteVopsSupportInfo implements android.os.Parcelable {
+    ctor public LteVopsSupportInfo(int, int);
+    method public int describeContents();
+    method public int getEmcBearerSupport();
+    method public int getVopsSupport();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.LteVopsSupportInfo> CREATOR;
+    field public static final int LTE_STATUS_NOT_AVAILABLE = 1; // 0x1
+    field public static final int LTE_STATUS_NOT_SUPPORTED = 3; // 0x3
+    field public static final int LTE_STATUS_SUPPORTED = 2; // 0x2
   }
 
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
     field public static final java.lang.String MBMS_DOWNLOAD_SERVICE_ACTION = "android.telephony.action.EmbmsDownload";
+  }
+
+  public class MbmsGroupCallSession implements java.lang.AutoCloseable {
+    field public static final java.lang.String MBMS_GROUP_CALL_SERVICE_ACTION = "android.telephony.action.EmbmsGroupCall";
   }
 
   public class MbmsStreamingSession implements java.lang.AutoCloseable {
@@ -5088,8 +5304,10 @@ package android.telephony {
     method public int getDomain();
     method public int getRegState();
     method public int getRejectCause();
+    method public int getRoamingType();
     method public int getTransportType();
     method public boolean isEmergencyEnabled();
+    method public boolean isRoaming();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationState> CREATOR;
     field public static final int DOMAIN_CS = 1; // 0x1
@@ -5110,16 +5328,15 @@ package android.telephony {
   public abstract class NetworkService extends android.app.Service {
     ctor public NetworkService();
     method protected abstract android.telephony.NetworkService.NetworkServiceProvider createNetworkServiceProvider(int);
-    field public static final java.lang.String NETWORK_SERVICE_EXTRA_SLOT_ID = "android.telephony.extra.SLOT_ID";
     field public static final java.lang.String NETWORK_SERVICE_INTERFACE = "android.telephony.NetworkService";
   }
 
-  public class NetworkService.NetworkServiceProvider {
+  public abstract class NetworkService.NetworkServiceProvider implements java.lang.AutoCloseable {
     ctor public NetworkService.NetworkServiceProvider(int);
+    method public abstract void close();
     method public void getNetworkRegistrationState(int, android.telephony.NetworkServiceCallback);
     method public final int getSlotId();
     method public final void notifyNetworkRegistrationStateChanged();
-    method protected void onDestroy();
   }
 
   public class NetworkServiceCallback {
@@ -5132,15 +5349,184 @@ package android.telephony {
     field public static final int RESULT_SUCCESS = 0; // 0x0
   }
 
+  public abstract interface NumberVerificationCallback {
+    method public default void onCallReceived(java.lang.String);
+    method public default void onVerificationFailed(int);
+    field public static final int REASON_CONCURRENT_REQUESTS = 4; // 0x4
+    field public static final int REASON_IN_ECBM = 5; // 0x5
+    field public static final int REASON_IN_EMERGENCY_CALL = 6; // 0x6
+    field public static final int REASON_NETWORK_NOT_AVAILABLE = 2; // 0x2
+    field public static final int REASON_TIMED_OUT = 1; // 0x1
+    field public static final int REASON_TOO_MANY_CALLS = 3; // 0x3
+    field public static final int REASON_UNSPECIFIED = 0; // 0x0
+  }
+
+  public final class PhoneNumberRange implements android.os.Parcelable {
+    ctor public PhoneNumberRange(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+    method public int describeContents();
+    method public boolean matches(java.lang.String);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.PhoneNumberRange> CREATOR;
+  }
+
+  public class PhoneStateListener {
+    method public void onCallAttributesChanged(android.telephony.CallAttributes);
+    method public void onCallDisconnectCauseChanged(int, int);
+    method public void onPreciseCallStateChanged(android.telephony.PreciseCallState);
+    method public void onPreciseDataConnectionStateChanged(android.telephony.PreciseDataConnectionState);
+    method public void onRadioPowerStateChanged(int);
+    method public void onSrvccStateChanged(int);
+    method public void onVoiceActivationStateChanged(int);
+    field public static final int LISTEN_CALL_ATTRIBUTES_CHANGED = 67108864; // 0x4000000
+    field public static final int LISTEN_CALL_DISCONNECT_CAUSES = 33554432; // 0x2000000
+    field public static final int LISTEN_PRECISE_CALL_STATE = 2048; // 0x800
+    field public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
+    field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
+    field public static final int LISTEN_SRVCC_STATE_CHANGED = 16384; // 0x4000
+    field public static final int LISTEN_VOICE_ACTIVATION_STATE = 131072; // 0x20000
+  }
+
+  public final class PreciseCallState implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getBackgroundCallState();
+    method public int getForegroundCallState();
+    method public int getRingingCallState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.PreciseCallState> CREATOR;
+    field public static final int PRECISE_CALL_STATE_ACTIVE = 1; // 0x1
+    field public static final int PRECISE_CALL_STATE_ALERTING = 4; // 0x4
+    field public static final int PRECISE_CALL_STATE_DIALING = 3; // 0x3
+    field public static final int PRECISE_CALL_STATE_DISCONNECTED = 7; // 0x7
+    field public static final int PRECISE_CALL_STATE_DISCONNECTING = 8; // 0x8
+    field public static final int PRECISE_CALL_STATE_HOLDING = 2; // 0x2
+    field public static final int PRECISE_CALL_STATE_IDLE = 0; // 0x0
+    field public static final int PRECISE_CALL_STATE_INCOMING = 5; // 0x5
+    field public static final int PRECISE_CALL_STATE_NOT_VALID = -1; // 0xffffffff
+    field public static final int PRECISE_CALL_STATE_WAITING = 6; // 0x6
+  }
+
+  public final class PreciseDataConnectionState implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getDataConnectionApn();
+    method public int getDataConnectionApnTypeBitMask();
+    method public int getDataConnectionFailCause();
+    method public int getDataConnectionState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.PreciseDataConnectionState> CREATOR;
+  }
+
+  public class PreciseDisconnectCause {
+    field public static final int ACCESS_CLASS_BLOCKED = 260; // 0x104
+    field public static final int ACCESS_INFORMATION_DISCARDED = 43; // 0x2b
+    field public static final int ACM_LIMIT_EXCEEDED = 68; // 0x44
+    field public static final int BEARER_CAPABILITY_NOT_AUTHORIZED = 57; // 0x39
+    field public static final int BEARER_NOT_AVAIL = 58; // 0x3a
+    field public static final int BEARER_SERVICE_NOT_IMPLEMENTED = 65; // 0x41
+    field public static final int BUSY = 17; // 0x11
+    field public static final int CALL_BARRED = 240; // 0xf0
+    field public static final int CALL_REJECTED = 21; // 0x15
+    field public static final int CDMA_ACCESS_BLOCKED = 1009; // 0x3f1
+    field public static final int CDMA_ACCESS_FAILURE = 1006; // 0x3ee
+    field public static final int CDMA_DROP = 1001; // 0x3e9
+    field public static final int CDMA_INTERCEPT = 1002; // 0x3ea
+    field public static final int CDMA_LOCKED_UNTIL_POWER_CYCLE = 1000; // 0x3e8
+    field public static final int CDMA_NOT_EMERGENCY = 1008; // 0x3f0
+    field public static final int CDMA_PREEMPTED = 1007; // 0x3ef
+    field public static final int CDMA_REORDER = 1003; // 0x3eb
+    field public static final int CDMA_RETRY_ORDER = 1005; // 0x3ed
+    field public static final int CDMA_SO_REJECT = 1004; // 0x3ec
+    field public static final int CHANNEL_NOT_AVAIL = 44; // 0x2c
+    field public static final int CHANNEL_UNACCEPTABLE = 6; // 0x6
+    field public static final int CONDITIONAL_IE_ERROR = 100; // 0x64
+    field public static final int DESTINATION_OUT_OF_ORDER = 27; // 0x1b
+    field public static final int ERROR_UNSPECIFIED = 65535; // 0xffff
+    field public static final int FACILITY_REJECTED = 29; // 0x1d
+    field public static final int FDN_BLOCKED = 241; // 0xf1
+    field public static final int IMEI_NOT_ACCEPTED = 243; // 0xf3
+    field public static final int IMSI_UNKNOWN_IN_VLR = 242; // 0xf2
+    field public static final int INCOMING_CALLS_BARRED_WITHIN_CUG = 55; // 0x37
+    field public static final int INCOMPATIBLE_DESTINATION = 88; // 0x58
+    field public static final int INFORMATION_ELEMENT_NON_EXISTENT = 99; // 0x63
+    field public static final int INTERWORKING_UNSPECIFIED = 127; // 0x7f
+    field public static final int INVALID_MANDATORY_INFORMATION = 96; // 0x60
+    field public static final int INVALID_NUMBER_FORMAT = 28; // 0x1c
+    field public static final int INVALID_TRANSACTION_IDENTIFIER = 81; // 0x51
+    field public static final int MESSAGE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE = 101; // 0x65
+    field public static final int MESSAGE_TYPE_NON_IMPLEMENTED = 97; // 0x61
+    field public static final int MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE = 98; // 0x62
+    field public static final int NETWORK_DETACH = 261; // 0x105
+    field public static final int NETWORK_OUT_OF_ORDER = 38; // 0x26
+    field public static final int NETWORK_REJECT = 252; // 0xfc
+    field public static final int NETWORK_RESP_TIMEOUT = 251; // 0xfb
+    field public static final int NORMAL = 16; // 0x10
+    field public static final int NORMAL_UNSPECIFIED = 31; // 0x1f
+    field public static final int NOT_VALID = -1; // 0xffffffff
+    field public static final int NO_ANSWER_FROM_USER = 19; // 0x13
+    field public static final int NO_CIRCUIT_AVAIL = 34; // 0x22
+    field public static final int NO_DISCONNECT_CAUSE_AVAILABLE = 0; // 0x0
+    field public static final int NO_ROUTE_TO_DESTINATION = 3; // 0x3
+    field public static final int NO_USER_RESPONDING = 18; // 0x12
+    field public static final int NO_VALID_SIM = 249; // 0xf9
+    field public static final int NUMBER_CHANGED = 22; // 0x16
+    field public static final int OEM_CAUSE_1 = 61441; // 0xf001
+    field public static final int OEM_CAUSE_10 = 61450; // 0xf00a
+    field public static final int OEM_CAUSE_11 = 61451; // 0xf00b
+    field public static final int OEM_CAUSE_12 = 61452; // 0xf00c
+    field public static final int OEM_CAUSE_13 = 61453; // 0xf00d
+    field public static final int OEM_CAUSE_14 = 61454; // 0xf00e
+    field public static final int OEM_CAUSE_15 = 61455; // 0xf00f
+    field public static final int OEM_CAUSE_2 = 61442; // 0xf002
+    field public static final int OEM_CAUSE_3 = 61443; // 0xf003
+    field public static final int OEM_CAUSE_4 = 61444; // 0xf004
+    field public static final int OEM_CAUSE_5 = 61445; // 0xf005
+    field public static final int OEM_CAUSE_6 = 61446; // 0xf006
+    field public static final int OEM_CAUSE_7 = 61447; // 0xf007
+    field public static final int OEM_CAUSE_8 = 61448; // 0xf008
+    field public static final int OEM_CAUSE_9 = 61449; // 0xf009
+    field public static final int ONLY_DIGITAL_INFORMATION_BEARER_AVAILABLE = 70; // 0x46
+    field public static final int OPERATOR_DETERMINED_BARRING = 8; // 0x8
+    field public static final int OUT_OF_SRV = 248; // 0xf8
+    field public static final int PREEMPTION = 25; // 0x19
+    field public static final int PROTOCOL_ERROR_UNSPECIFIED = 111; // 0x6f
+    field public static final int QOS_NOT_AVAIL = 49; // 0x31
+    field public static final int RADIO_ACCESS_FAILURE = 253; // 0xfd
+    field public static final int RADIO_INTERNAL_ERROR = 250; // 0xfa
+    field public static final int RADIO_LINK_FAILURE = 254; // 0xfe
+    field public static final int RADIO_LINK_LOST = 255; // 0xff
+    field public static final int RADIO_OFF = 247; // 0xf7
+    field public static final int RADIO_RELEASE_ABNORMAL = 259; // 0x103
+    field public static final int RADIO_RELEASE_NORMAL = 258; // 0x102
+    field public static final int RADIO_SETUP_FAILURE = 257; // 0x101
+    field public static final int RADIO_UPLINK_FAILURE = 256; // 0x100
+    field public static final int RECOVERY_ON_TIMER_EXPIRED = 102; // 0x66
+    field public static final int REQUESTED_FACILITY_NOT_IMPLEMENTED = 69; // 0x45
+    field public static final int REQUESTED_FACILITY_NOT_SUBSCRIBED = 50; // 0x32
+    field public static final int RESOURCES_UNAVAILABLE_OR_UNSPECIFIED = 47; // 0x2f
+    field public static final int SEMANTICALLY_INCORRECT_MESSAGE = 95; // 0x5f
+    field public static final int SERVICE_OPTION_NOT_AVAILABLE = 63; // 0x3f
+    field public static final int SERVICE_OR_OPTION_NOT_IMPLEMENTED = 79; // 0x4f
+    field public static final int STATUS_ENQUIRY = 30; // 0x1e
+    field public static final int SWITCHING_CONGESTION = 42; // 0x2a
+    field public static final int TEMPORARY_FAILURE = 41; // 0x29
+    field public static final int UNOBTAINABLE_NUMBER = 1; // 0x1
+    field public static final int USER_NOT_MEMBER_OF_CUG = 87; // 0x57
+  }
+
   public class ServiceState implements android.os.Parcelable {
+    method public android.telephony.NetworkRegistrationState getNetworkRegistrationState(int, int);
     method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates();
-    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates(int);
-    method public android.telephony.NetworkRegistrationState getNetworkRegistrationStates(int, int);
+    method public deprecated java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates(int);
+    method public deprecated android.telephony.NetworkRegistrationState getNetworkRegistrationStates(int, int);
+    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForDomain(int);
+    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForTransportType(int);
+    field public static final int ROAMING_TYPE_DOMESTIC = 2; // 0x2
+    field public static final int ROAMING_TYPE_INTERNATIONAL = 3; // 0x3
+    field public static final int ROAMING_TYPE_NOT_ROAMING = 0; // 0x0
+    field public static final int ROAMING_TYPE_UNKNOWN = 1; // 0x1
   }
 
   public final class SmsManager {
     method public void sendMultipartTextMessageWithoutPersisting(java.lang.String, java.lang.String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
-    method public void sendTextMessageWithoutPersisting(java.lang.String, java.lang.String, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
     field public static final int RESULT_CANCELLED = 23; // 0x17
     field public static final int RESULT_ENCODING_ERROR = 18; // 0x12
     field public static final int RESULT_ERROR_FDN_CHECK_FAILURE = 6; // 0x6
@@ -5163,50 +5549,33 @@ package android.telephony {
 
   public class SubscriptionInfo implements android.os.Parcelable {
     method public java.util.List<android.telephony.UiccAccessRule> getAccessRules();
+    method public int getCardId();
+    method public int getProfileClass();
   }
 
   public class SubscriptionManager {
     method public java.util.List<android.telephony.SubscriptionInfo> getAvailableSubscriptionInfoList();
-    method public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
     method public void requestEmbeddedSubscriptionInfoListRefresh();
-    method public void setSubscriptionOverrideCongested(int, boolean, long);
-    method public void setSubscriptionOverrideUnmetered(int, boolean, long);
-    method public void setSubscriptionPlans(int, java.util.List<android.telephony.SubscriptionPlan>);
-    field public static final java.lang.String ACTION_MANAGE_SUBSCRIPTION_PLANS = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
-    field public static final java.lang.String ACTION_REFRESH_SUBSCRIPTION_PLANS = "android.telephony.action.REFRESH_SUBSCRIPTION_PLANS";
-  }
-
-  public final class SubscriptionPlan implements android.os.Parcelable {
-    method public java.util.Iterator<android.util.Range<java.time.ZonedDateTime>> cycleIterator();
-    method public int describeContents();
-    method public int getDataLimitBehavior();
-    method public long getDataLimitBytes();
-    method public long getDataUsageBytes();
-    method public long getDataUsageTime();
-    method public java.lang.CharSequence getSummary();
-    method public java.lang.CharSequence getTitle();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final long BYTES_UNKNOWN = -1L; // 0xffffffffffffffffL
-    field public static final long BYTES_UNLIMITED = 9223372036854775807L; // 0x7fffffffffffffffL
-    field public static final android.os.Parcelable.Creator<android.telephony.SubscriptionPlan> CREATOR;
-    field public static final int LIMIT_BEHAVIOR_BILLED = 1; // 0x1
-    field public static final int LIMIT_BEHAVIOR_DISABLED = 0; // 0x0
-    field public static final int LIMIT_BEHAVIOR_THROTTLED = 2; // 0x2
-    field public static final int LIMIT_BEHAVIOR_UNKNOWN = -1; // 0xffffffff
-    field public static final long TIME_UNKNOWN = -1L; // 0xffffffffffffffffL
+    method public void setDefaultDataSubId(int);
+    method public void setDefaultSmsSubId(int);
+    method public void requestEmbeddedSubscriptionInfoListRefresh(int);
+    field public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
+    field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff
+    field public static final int PROFILE_CLASS_OPERATIONAL = 2; // 0x2
+    field public static final int PROFILE_CLASS_PROVISIONING = 1; // 0x1
+    field public static final int PROFILE_CLASS_TESTING = 0; // 0x0
+    field public static final int PROFILE_CLASS_UNSET = -1; // 0xffffffff
+    field public static final android.net.Uri VT_ENABLED_CONTENT_URI;
+    field public static final android.net.Uri WFC_ENABLED_CONTENT_URI;
+    field public static final android.net.Uri WFC_MODE_CONTENT_URI;
+    field public static final android.net.Uri WFC_ROAMING_ENABLED_CONTENT_URI;
+    field public static final android.net.Uri WFC_ROAMING_MODE_CONTENT_URI;
   }
 
   public static class SubscriptionPlan.Builder {
-    method public android.telephony.SubscriptionPlan build();
-    method public static android.telephony.SubscriptionPlan.Builder createNonrecurring(java.time.ZonedDateTime, java.time.ZonedDateTime);
-    method public static android.telephony.SubscriptionPlan.Builder createRecurring(java.time.ZonedDateTime, java.time.Period);
     method public static deprecated android.telephony.SubscriptionPlan.Builder createRecurringDaily(java.time.ZonedDateTime);
     method public static deprecated android.telephony.SubscriptionPlan.Builder createRecurringMonthly(java.time.ZonedDateTime);
     method public static deprecated android.telephony.SubscriptionPlan.Builder createRecurringWeekly(java.time.ZonedDateTime);
-    method public android.telephony.SubscriptionPlan.Builder setDataLimit(long, int);
-    method public android.telephony.SubscriptionPlan.Builder setDataUsage(long, long);
-    method public android.telephony.SubscriptionPlan.Builder setSummary(java.lang.CharSequence);
-    method public android.telephony.SubscriptionPlan.Builder setTitle(java.lang.CharSequence);
   }
 
   public final class TelephonyHistogram implements android.os.Parcelable {
@@ -5230,7 +5599,6 @@ package android.telephony {
   }
 
   public class TelephonyManager {
-    method public deprecated void answerRingingCall();
     method public deprecated void call(java.lang.String, java.lang.String);
     method public int checkCarrierPrivilegesForPackage(java.lang.String);
     method public int checkCarrierPrivilegesForPackageAnyPhone(java.lang.String);
@@ -5238,8 +5606,9 @@ package android.telephony {
     method public boolean disableDataConnectivity();
     method public boolean enableDataConnectivity();
     method public void enableVideoCalling(boolean);
-    method public deprecated boolean endCall();
+    method public java.lang.String getAidForAppType(int);
     method public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
+    method public int getCardIdForDefaultEuicc();
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntentAndPhone(android.content.Intent, int);
     method public java.lang.String getCdmaMdn();
@@ -5253,32 +5622,43 @@ package android.telephony {
     method public deprecated boolean getDataEnabled();
     method public deprecated boolean getDataEnabled(int);
     method public boolean getEmergencyCallbackMode();
+    method public java.lang.String getIsimDomain();
+    method public int getPreferredNetworkType(int);
+    method public int getRadioPowerState();
     method public int getSimApplicationState();
     method public int getSimCardState();
+    method public int getSupportedRadioAccessFamily();
     method public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
+    method public android.telephony.UiccCardInfo[] getUiccCardsInfo();
     method public android.telephony.UiccSlotInfo[] getUiccSlotsInfo();
     method public android.os.Bundle getVisualVoicemailSettings();
     method public int getVoiceActivationState();
     method public boolean handlePinMmi(java.lang.String);
     method public boolean handlePinMmiForSubscriber(int, java.lang.String);
+    method public boolean isCurrentPotentialEmergencyNumber(java.lang.String);
     method public boolean isDataConnectivityPossible();
-    method public boolean isIdle();
-    method public boolean isOffhook();
-    method public boolean isRadioOn();
-    method public boolean isRinging();
+    method public deprecated boolean isIdle();
+    method public deprecated boolean isOffhook();
+    method public deprecated boolean isRadioOn();
+    method public deprecated boolean isRinging();
     method public boolean isVideoCallingEnabled();
     method public deprecated boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();
+    method public boolean rebootRadio();
+    method public void requestCellInfoUpdate(android.os.WorkSource, java.util.concurrent.Executor, android.telephony.TelephonyManager.CellInfoCallback);
+    method public void requestNumberVerification(android.telephony.PhoneNumberRange, long, java.util.concurrent.Executor, android.telephony.NumberVerificationCallback);
+    method public boolean resetRadioConfig();
     method public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
+    method public void setCarrierDataEnabled(boolean);
     method public void setDataActivationState(int);
     method public deprecated void setDataEnabled(int, boolean);
+    method public void setDataRoamingEnabled(boolean);
     method public boolean setRadio(boolean);
     method public boolean setRadioPower(boolean);
     method public void setSimPowerState(int);
     method public void setSimPowerStateForSlot(int, int);
     method public deprecated void setVisualVoicemailEnabled(android.telecom.PhoneAccountHandle, boolean);
     method public void setVoiceActivationState(int);
-    method public deprecated void silenceRinger();
     method public boolean supplyPin(java.lang.String);
     method public int[] supplyPinReportResult(java.lang.String);
     method public boolean supplyPuk(java.lang.String, java.lang.String);
@@ -5296,6 +5676,53 @@ package android.telephony {
     field public static final java.lang.String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final java.lang.String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final java.lang.String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
+    field public static final int INVALID_CARD_ID = -1; // 0xffffffff
+    field public static final long MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS = 60000L; // 0xea60L
+    field public static final int NETWORK_MODE_CDMA_EVDO = 4; // 0x4
+    field public static final int NETWORK_MODE_CDMA_NO_EVDO = 5; // 0x5
+    field public static final int NETWORK_MODE_EVDO_NO_CDMA = 6; // 0x6
+    field public static final int NETWORK_MODE_GLOBAL = 7; // 0x7
+    field public static final int NETWORK_MODE_GSM_ONLY = 1; // 0x1
+    field public static final int NETWORK_MODE_GSM_UMTS = 3; // 0x3
+    field public static final int NETWORK_MODE_LTE_CDMA_EVDO = 8; // 0x8
+    field public static final int NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA = 10; // 0xa
+    field public static final int NETWORK_MODE_LTE_GSM_WCDMA = 9; // 0x9
+    field public static final int NETWORK_MODE_LTE_ONLY = 11; // 0xb
+    field public static final int NETWORK_MODE_LTE_TDSCDMA = 15; // 0xf
+    field public static final int NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA = 22; // 0x16
+    field public static final int NETWORK_MODE_LTE_TDSCDMA_GSM = 17; // 0x11
+    field public static final int NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA = 20; // 0x14
+    field public static final int NETWORK_MODE_LTE_TDSCDMA_WCDMA = 19; // 0x13
+    field public static final int NETWORK_MODE_LTE_WCDMA = 12; // 0xc
+    field public static final int NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA = 21; // 0x15
+    field public static final int NETWORK_MODE_TDSCDMA_GSM = 16; // 0x10
+    field public static final int NETWORK_MODE_TDSCDMA_GSM_WCDMA = 18; // 0x12
+    field public static final int NETWORK_MODE_TDSCDMA_ONLY = 13; // 0xd
+    field public static final int NETWORK_MODE_TDSCDMA_WCDMA = 14; // 0xe
+    field public static final int NETWORK_MODE_WCDMA_ONLY = 2; // 0x2
+    field public static final int NETWORK_MODE_WCDMA_PREF = 0; // 0x0
+    field public static final int NETWORK_TYPE_BITMASK_1xRTT = 128; // 0x80
+    field public static final int NETWORK_TYPE_BITMASK_CDMA = 16; // 0x10
+    field public static final int NETWORK_TYPE_BITMASK_EDGE = 4; // 0x4
+    field public static final int NETWORK_TYPE_BITMASK_EHRPD = 16384; // 0x4000
+    field public static final int NETWORK_TYPE_BITMASK_EVDO_0 = 32; // 0x20
+    field public static final int NETWORK_TYPE_BITMASK_EVDO_A = 64; // 0x40
+    field public static final int NETWORK_TYPE_BITMASK_EVDO_B = 4096; // 0x1000
+    field public static final int NETWORK_TYPE_BITMASK_GPRS = 2; // 0x2
+    field public static final int NETWORK_TYPE_BITMASK_GSM = 65536; // 0x10000
+    field public static final int NETWORK_TYPE_BITMASK_HSDPA = 256; // 0x100
+    field public static final int NETWORK_TYPE_BITMASK_HSPA = 1024; // 0x400
+    field public static final int NETWORK_TYPE_BITMASK_HSPAP = 32768; // 0x8000
+    field public static final int NETWORK_TYPE_BITMASK_HSUPA = 512; // 0x200
+    field public static final int NETWORK_TYPE_BITMASK_LTE = 8192; // 0x2000
+    field public static final int NETWORK_TYPE_BITMASK_LTE_CA = 524288; // 0x80000
+    field public static final int NETWORK_TYPE_BITMASK_NR = 1048576; // 0x100000
+    field public static final int NETWORK_TYPE_BITMASK_TD_SCDMA = 131072; // 0x20000
+    field public static final int NETWORK_TYPE_BITMASK_UMTS = 8; // 0x8
+    field public static final int NETWORK_TYPE_BITMASK_UNKNOWN = 1; // 0x1
+    field public static final int RADIO_POWER_OFF = 0; // 0x0
+    field public static final int RADIO_POWER_ON = 1; // 0x1
+    field public static final int RADIO_POWER_UNAVAILABLE = 2; // 0x2
     field public static final int SIM_ACTIVATION_STATE_ACTIVATED = 2; // 0x2
     field public static final int SIM_ACTIVATION_STATE_ACTIVATING = 1; // 0x1
     field public static final int SIM_ACTIVATION_STATE_DEACTIVATED = 3; // 0x3
@@ -5303,6 +5730,11 @@ package android.telephony {
     field public static final int SIM_ACTIVATION_STATE_UNKNOWN = 0; // 0x0
     field public static final int SIM_STATE_LOADED = 10; // 0xa
     field public static final int SIM_STATE_PRESENT = 11; // 0xb
+    field public static final int SRVCC_STATE_HANDOVER_CANCELED = 3; // 0x3
+    field public static final int SRVCC_STATE_HANDOVER_COMPLETED = 1; // 0x1
+    field public static final int SRVCC_STATE_HANDOVER_FAILED = 2; // 0x2
+    field public static final int SRVCC_STATE_HANDOVER_NONE = -1; // 0xffffffff
+    field public static final int SRVCC_STATE_HANDOVER_STARTED = 0; // 0x0
   }
 
   public final class UiccAccessRule implements android.os.Parcelable {
@@ -5314,6 +5746,18 @@ package android.telephony {
     method public java.lang.String getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.UiccAccessRule> CREATOR;
+  }
+
+  public class UiccCardInfo implements android.os.Parcelable {
+    ctor public UiccCardInfo(boolean, int, java.lang.String, java.lang.String, int);
+    method public int describeContents();
+    method public int getCardId();
+    method public java.lang.String getEid();
+    method public java.lang.String getIccId();
+    method public int getSlotIndex();
+    method public boolean isEuicc();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.UiccCardInfo> CREATOR;
   }
 
   public class UiccSlotInfo implements android.os.Parcelable {
@@ -5362,17 +5806,12 @@ package android.telephony.data {
   }
 
   public final class DataProfile implements android.os.Parcelable {
-    ctor public DataProfile(int, java.lang.String, java.lang.String, int, java.lang.String, java.lang.String, int, int, int, int, boolean, int, java.lang.String, int, int, java.lang.String, java.lang.String, boolean);
-    ctor public DataProfile(android.os.Parcel);
-    method public int describeContents();
     method public java.lang.String getApn();
     method public int getAuthType();
     method public int getBearerBitmap();
     method public int getMaxConns();
     method public int getMaxConnsTime();
     method public int getMtu();
-    method public java.lang.String getMvnoMatchData();
-    method public java.lang.String getMvnoType();
     method public java.lang.String getPassword();
     method public int getProfileId();
     method public java.lang.String getProtocol();
@@ -5382,9 +5821,8 @@ package android.telephony.data {
     method public java.lang.String getUserName();
     method public int getWaitTime();
     method public boolean isEnabled();
-    method public boolean isModemCognitive();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.data.DataProfile> CREATOR;
+    method public boolean isPersistent();
+    method public boolean isPreferred();
     field public static final int TYPE_3GPP = 1; // 0x1
     field public static final int TYPE_3GPP2 = 2; // 0x2
     field public static final int TYPE_COMMON = 0; // 0x0
@@ -5393,20 +5831,19 @@ package android.telephony.data {
   public abstract class DataService extends android.app.Service {
     ctor public DataService();
     method public abstract android.telephony.data.DataService.DataServiceProvider createDataServiceProvider(int);
-    field public static final java.lang.String DATA_SERVICE_EXTRA_SLOT_ID = "android.telephony.data.extra.SLOT_ID";
     field public static final java.lang.String DATA_SERVICE_INTERFACE = "android.telephony.data.DataService";
     field public static final int REQUEST_REASON_HANDOVER = 3; // 0x3
     field public static final int REQUEST_REASON_NORMAL = 1; // 0x1
     field public static final int REQUEST_REASON_SHUTDOWN = 2; // 0x2
   }
 
-  public class DataService.DataServiceProvider {
+  public abstract class DataService.DataServiceProvider implements java.lang.AutoCloseable {
     ctor public DataService.DataServiceProvider(int);
+    method public abstract void close();
     method public void deactivateDataCall(int, int, android.telephony.data.DataServiceCallback);
     method public void getDataCallList(android.telephony.data.DataServiceCallback);
     method public final int getSlotId();
     method public final void notifyDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
-    method protected void onDestroy();
     method public void setDataProfile(java.util.List<android.telephony.data.DataProfile>, boolean, android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(android.telephony.data.DataProfile, boolean, android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, android.telephony.data.DataProfile, boolean, boolean, int, android.net.LinkProperties, android.telephony.data.DataServiceCallback);
@@ -5424,6 +5861,19 @@ package android.telephony.data {
     field public static final int RESULT_ERROR_INVALID_ARG = 2; // 0x2
     field public static final int RESULT_ERROR_UNSUPPORTED = 1; // 0x1
     field public static final int RESULT_SUCCESS = 0; // 0x0
+  }
+
+  public abstract class QualifiedNetworksService extends android.app.Service {
+    ctor public QualifiedNetworksService();
+    method public abstract android.telephony.data.QualifiedNetworksService.NetworkAvailabilityUpdater createNetworkAvailabilityUpdater(int);
+    field public static final java.lang.String QUALIFIED_NETWORKS_SERVICE_INTERFACE = "android.telephony.data.QualifiedNetworksService";
+  }
+
+  public abstract class QualifiedNetworksService.NetworkAvailabilityUpdater implements java.lang.AutoCloseable {
+    ctor public QualifiedNetworksService.NetworkAvailabilityUpdater(int);
+    method public abstract void close();
+    method public final int getSlotIndex();
+    method public final void updateQualifiedNetworkTypes(int, int[]);
   }
 
 }
@@ -5475,6 +5925,7 @@ package android.telephony.euicc {
     field public static final int RESET_OPTION_DELETE_FIELD_LOADED_TEST_PROFILES = 2; // 0x2
     field public static final int RESET_OPTION_DELETE_OPERATIONAL_PROFILES = 1; // 0x1
     field public static final int RESET_OPTION_RESET_DEFAULT_SMDP_ADDRESS = 4; // 0x4
+    field public static final int RESULT_CALLER_NOT_ALLOWED = -3; // 0xfffffffd
     field public static final int RESULT_EUICC_NOT_FOUND = -2; // 0xfffffffe
     field public static final int RESULT_OK = 0; // 0x0
     field public static final int RESULT_UNKNOWN_ERROR = -1; // 0xffffffff
@@ -5560,7 +6011,18 @@ package android.telephony.ims {
     method public int getTimeSeconds();
     method public int getToA();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CDIV_CF_REASON_ALL = 4; // 0x4
+    field public static final int CDIV_CF_REASON_ALL_CONDITIONAL = 5; // 0x5
+    field public static final int CDIV_CF_REASON_BUSY = 1; // 0x1
+    field public static final int CDIV_CF_REASON_NOT_LOGGED_IN = 6; // 0x6
+    field public static final int CDIV_CF_REASON_NOT_REACHABLE = 3; // 0x3
+    field public static final int CDIV_CF_REASON_NO_REPLY = 2; // 0x2
+    field public static final int CDIV_CF_REASON_UNCONDITIONAL = 0; // 0x0
     field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsCallForwardInfo> CREATOR;
+    field public static final int STATUS_ACTIVE = 1; // 0x1
+    field public static final int STATUS_NOT_ACTIVE = 0; // 0x0
+    field public static final int TYPE_OF_ADDRESS_INTERNATIONAL = 145; // 0x91
+    field public static final int TYPE_OF_ADDRESS_UNKNOWN = 129; // 0x81
   }
 
   public final class ImsCallProfile implements android.os.Parcelable {
@@ -5577,6 +6039,7 @@ package android.telephony.ims {
     method public android.os.Bundle getCallExtras();
     method public int getCallType();
     method public static int getCallTypeFromVideoState(int);
+    method public int getEmergencyServiceCategories();
     method public android.telephony.ims.ImsStreamMediaProfile getMediaProfile();
     method public int getRestrictCause();
     method public int getServiceType();
@@ -5588,6 +6051,8 @@ package android.telephony.ims {
     method public void setCallExtra(java.lang.String, java.lang.String);
     method public void setCallExtraBoolean(java.lang.String, boolean);
     method public void setCallExtraInt(java.lang.String, int);
+    method public void setCallRestrictCause(int);
+    method public void setEmergencyServiceCategories(int);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
     method public void updateCallType(android.telephony.ims.ImsCallProfile);
     method public void updateMediaProfile(android.telephony.ims.ImsCallProfile);
@@ -5611,6 +6076,7 @@ package android.telephony.ims {
     field public static final int DIALSTRING_SS_CONF = 1; // 0x1
     field public static final int DIALSTRING_USSD = 2; // 0x2
     field public static final java.lang.String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
+    field public static final java.lang.String EXTRA_ADDITIONAL_SIP_INVITE_FIELDS = "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
     field public static final java.lang.String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
     field public static final java.lang.String EXTRA_CHILD_NUMBER = "ChildNum";
     field public static final java.lang.String EXTRA_CNA = "cna";
@@ -5618,6 +6084,7 @@ package android.telephony.ims {
     field public static final java.lang.String EXTRA_CODEC = "Codec";
     field public static final java.lang.String EXTRA_DIALSTRING = "dialstring";
     field public static final java.lang.String EXTRA_DISPLAY_TEXT = "DisplayText";
+    field public static final java.lang.String EXTRA_EMERGENCY_CALL = "e_call";
     field public static final java.lang.String EXTRA_IS_CALL_PULL = "CallPull";
     field public static final java.lang.String EXTRA_OI = "oi";
     field public static final java.lang.String EXTRA_OIR = "oir";
@@ -5648,6 +6115,7 @@ package android.telephony.ims {
     method public void callSessionInviteParticipantsRequestDelivered();
     method public void callSessionInviteParticipantsRequestFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMayHandover(int, int);
+    method public void callSessionRttAudioIndicatorChanged(android.telephony.ims.ImsStreamMediaProfile);
     method public void callSessionMergeComplete(android.telephony.ims.stub.ImsCallSessionImplBase);
     method public void callSessionMergeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMergeStarted(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
@@ -5696,17 +6164,58 @@ package android.telephony.ims {
   }
 
   public final class ImsExternalCallState implements android.os.Parcelable {
+    ctor public ImsExternalCallState(java.lang.String, android.net.Uri, android.net.Uri, boolean, int, int, boolean);
     method public int describeContents();
     method public android.net.Uri getAddress();
     method public int getCallId();
     method public int getCallState();
     method public int getCallType();
+    method public android.net.Uri getLocalAddress();
     method public boolean isCallHeld();
     method public boolean isCallPullable();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CALL_STATE_CONFIRMED = 1; // 0x1
     field public static final int CALL_STATE_TERMINATED = 2; // 0x2
     field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsExternalCallState> CREATOR;
+  }
+
+  public class ImsMmTelManager {
+    method public static android.telephony.ims.ImsMmTelManager createForSubscriptionId(android.content.Context, int);
+    method public int getVoWiFiModeSetting();
+    method public boolean isAdvancedCallingSettingEnabled();
+    method public boolean isAvailable(int, int);
+    method public boolean isCapable(int, int);
+    method public boolean isVoWiFiRoamingSettingEnabled();
+    method public boolean isVoWiFiSettingEnabled();
+    method public boolean isVtSettingEnabled();
+    method public void registerImsRegistrationCallback(java.util.concurrent.Executor, android.telephony.ims.ImsMmTelManager.RegistrationCallback);
+    method public void registerMmTelCapabilityCallback(java.util.concurrent.Executor, android.telephony.ims.ImsMmTelManager.CapabilityCallback);
+    method public void setAdvancedCallingSetting(boolean);
+    method public void setRttCapabilitySetting(boolean);
+    method public void setVoWiFiModeSetting(int);
+    method public void setVoWiFiNonPersistent(boolean, int);
+    method public void setVoWiFiRoamingModeSetting(int);
+    method public void setVoWiFiRoamingSetting(boolean);
+    method public void setVoWiFiSetting(boolean);
+    method public void setVtSetting(boolean);
+    method public void unregisterImsRegistrationCallback(android.telephony.ims.ImsMmTelManager.RegistrationCallback);
+    method public void unregisterMmTelCapabilityCallback(android.telephony.ims.ImsMmTelManager.CapabilityCallback);
+    field public static final int WIFI_MODE_CELLULAR_PREFERRED = 1; // 0x1
+    field public static final int WIFI_MODE_WIFI_ONLY = 0; // 0x0
+    field public static final int WIFI_MODE_WIFI_PREFERRED = 2; // 0x2
+  }
+
+  public static class ImsMmTelManager.CapabilityCallback {
+    ctor public ImsMmTelManager.CapabilityCallback();
+    method public void onCapabilitiesStatusChanged(android.telephony.ims.feature.MmTelFeature.MmTelCapabilities);
+  }
+
+  public static class ImsMmTelManager.RegistrationCallback {
+    ctor public ImsMmTelManager.RegistrationCallback();
+    method public void onDeregistered(android.telephony.ims.ImsReasonInfo);
+    method public void onRegistered(int);
+    method public void onRegistering(int);
+    method public void onTechnologyChangeFailed(int, android.telephony.ims.ImsReasonInfo);
   }
 
   public final class ImsReasonInfo implements android.os.Parcelable {
@@ -5776,6 +6285,7 @@ package android.telephony.ims {
     field public static final int CODE_NETWORK_DETACH = 1513; // 0x5e9
     field public static final int CODE_NETWORK_REJECT = 1504; // 0x5e0
     field public static final int CODE_NETWORK_RESP_TIMEOUT = 1503; // 0x5df
+    field public static final int CODE_NO_CSFB_IN_CS_ROAM = 1516; // 0x5ec
     field public static final int CODE_NO_VALID_SIM = 1501; // 0x5dd
     field public static final int CODE_OEM_CAUSE_1 = 61441; // 0xf001
     field public static final int CODE_OEM_CAUSE_10 = 61450; // 0xf00a
@@ -5802,6 +6312,7 @@ package android.telephony.ims {
     field public static final int CODE_RADIO_SETUP_FAILURE = 1509; // 0x5e5
     field public static final int CODE_RADIO_UPLINK_FAILURE = 1508; // 0x5e4
     field public static final int CODE_REGISTRATION_ERROR = 1000; // 0x3e8
+    field public static final int CODE_REJECTED_ELSEWHERE = 1017; // 0x3f9
     field public static final int CODE_REJECT_1X_COLLISION = 1603; // 0x643
     field public static final int CODE_REJECT_CALL_ON_OTHER_SUB = 1602; // 0x642
     field public static final int CODE_REJECT_CALL_TYPE_NOT_ALLOWED = 1605; // 0x645
@@ -5825,25 +6336,40 @@ package android.telephony.ims {
     field public static final int CODE_REJECT_VT_AVPF_NOT_ALLOWED = 1619; // 0x653
     field public static final int CODE_REJECT_VT_TTY_NOT_ALLOWED = 1615; // 0x64f
     field public static final int CODE_REMOTE_CALL_DECLINE = 1404; // 0x57c
+    field public static final int CODE_SESSION_MODIFICATION_FAILED = 1517; // 0x5ed
     field public static final int CODE_SIP_ALTERNATE_EMERGENCY_CALL = 1514; // 0x5ea
+    field public static final int CODE_SIP_AMBIGUOUS = 376; // 0x178
     field public static final int CODE_SIP_BAD_ADDRESS = 337; // 0x151
     field public static final int CODE_SIP_BAD_REQUEST = 331; // 0x14b
     field public static final int CODE_SIP_BUSY = 338; // 0x152
+    field public static final int CODE_SIP_CALL_OR_TRANS_DOES_NOT_EXIST = 372; // 0x174
     field public static final int CODE_SIP_CLIENT_ERROR = 342; // 0x156
+    field public static final int CODE_SIP_EXTENSION_REQUIRED = 370; // 0x172
     field public static final int CODE_SIP_FORBIDDEN = 332; // 0x14c
     field public static final int CODE_SIP_GLOBAL_ERROR = 362; // 0x16a
+    field public static final int CODE_SIP_INTERVAL_TOO_BRIEF = 371; // 0x173
+    field public static final int CODE_SIP_LOOP_DETECTED = 373; // 0x175
+    field public static final int CODE_SIP_METHOD_NOT_ALLOWED = 366; // 0x16e
     field public static final int CODE_SIP_NOT_ACCEPTABLE = 340; // 0x154
     field public static final int CODE_SIP_NOT_FOUND = 333; // 0x14d
     field public static final int CODE_SIP_NOT_REACHABLE = 341; // 0x155
     field public static final int CODE_SIP_NOT_SUPPORTED = 334; // 0x14e
+    field public static final int CODE_SIP_PROXY_AUTHENTICATION_REQUIRED = 367; // 0x16f
     field public static final int CODE_SIP_REDIRECTED = 321; // 0x141
     field public static final int CODE_SIP_REQUEST_CANCELLED = 339; // 0x153
+    field public static final int CODE_SIP_REQUEST_ENTITY_TOO_LARGE = 368; // 0x170
+    field public static final int CODE_SIP_REQUEST_PENDING = 377; // 0x179
     field public static final int CODE_SIP_REQUEST_TIMEOUT = 335; // 0x14f
+    field public static final int CODE_SIP_REQUEST_URI_TOO_LARGE = 369; // 0x171
     field public static final int CODE_SIP_SERVER_ERROR = 354; // 0x162
     field public static final int CODE_SIP_SERVER_INTERNAL_ERROR = 351; // 0x15f
     field public static final int CODE_SIP_SERVER_TIMEOUT = 353; // 0x161
     field public static final int CODE_SIP_SERVICE_UNAVAILABLE = 352; // 0x160
     field public static final int CODE_SIP_TEMPRARILY_UNAVAILABLE = 336; // 0x150
+    field public static final int CODE_SIP_TOO_MANY_HOPS = 374; // 0x176
+    field public static final int CODE_SIP_TRANSACTION_DOES_NOT_EXIST = 343; // 0x157
+    field public static final int CODE_SIP_UNDECIPHERABLE = 378; // 0x17a
+    field public static final int CODE_SIP_USER_MARKED_UNWANTED = 365; // 0x16d
     field public static final int CODE_SIP_USER_REJECTED = 361; // 0x169
     field public static final int CODE_SUPP_SVC_CANCELLED = 1202; // 0x4b2
     field public static final int CODE_SUPP_SVC_FAILED = 1201; // 0x4b1
@@ -5852,9 +6378,11 @@ package android.telephony.ims {
     field public static final int CODE_TIMEOUT_NO_ANSWER = 202; // 0xca
     field public static final int CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE = 203; // 0xcb
     field public static final int CODE_UNSPECIFIED = 0; // 0x0
+    field public static final int CODE_USER_CANCELLED_SESSION_MODIFICATION = 512; // 0x200
     field public static final int CODE_USER_DECLINE = 504; // 0x1f8
     field public static final int CODE_USER_IGNORE = 503; // 0x1f7
     field public static final int CODE_USER_NOANSWER = 502; // 0x1f6
+    field public static final int CODE_USER_REJECTED_SESSION_MODIFICATION = 511; // 0x1ff
     field public static final int CODE_USER_TERMINATED = 501; // 0x1f5
     field public static final int CODE_USER_TERMINATED_BY_REMOTE = 510; // 0x1fe
     field public static final int CODE_UT_CB_PASSWORD_MISMATCH = 821; // 0x335
@@ -5890,6 +6418,13 @@ package android.telephony.ims {
   public final class ImsSsData implements android.os.Parcelable {
     ctor public ImsSsData(int, int, int, int, int);
     method public int describeContents();
+    method public android.telephony.ims.ImsCallForwardInfo[] getCallForwardInfo();
+    method public int getRequestType();
+    method public int getResult();
+    method public int getServiceClass();
+    method public int getServiceType();
+    method public android.telephony.ims.ImsSsInfo[] getSuppServiceInfo();
+    method public int getTeleserviceType();
     method public boolean isTypeBarring();
     method public boolean isTypeCf();
     method public boolean isTypeClip();
@@ -5902,6 +6437,16 @@ package android.telephony.ims {
     method public boolean isTypeUnConditional();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSsData> CREATOR;
+    field public static final int RESULT_SUCCESS = 0; // 0x0
+    field public static final int SERVICE_CLASS_DATA = 2; // 0x2
+    field public static final int SERVICE_CLASS_DATA_CIRCUIT_ASYNC = 32; // 0x20
+    field public static final int SERVICE_CLASS_DATA_CIRCUIT_SYNC = 16; // 0x10
+    field public static final int SERVICE_CLASS_DATA_PACKET_ACCESS = 64; // 0x40
+    field public static final int SERVICE_CLASS_DATA_PAD = 128; // 0x80
+    field public static final int SERVICE_CLASS_FAX = 4; // 0x4
+    field public static final int SERVICE_CLASS_NONE = 0; // 0x0
+    field public static final int SERVICE_CLASS_SMS = 8; // 0x8
+    field public static final int SERVICE_CLASS_VOICE = 1; // 0x1
     field public static final int SS_ACTIVATION = 0; // 0x0
     field public static final int SS_ALL_BARRING = 18; // 0x12
     field public static final int SS_ALL_DATA_TELESERVICES = 3; // 0x3
@@ -5938,13 +6483,31 @@ package android.telephony.ims {
     field public static final int SS_WAIT = 12; // 0xc
   }
 
+  public static class ImsSsData.Builder {
+    ctor public ImsSsData.Builder(int, int, int, int, int);
+    method public android.telephony.ims.ImsSsData build();
+    method public android.telephony.ims.ImsSsData.Builder setCallForwardingInfo(android.telephony.ims.ImsCallForwardInfo[]);
+    method public android.telephony.ims.ImsSsData.Builder setSuppServiceInfo(android.telephony.ims.ImsSsInfo[]);
+  }
+
   public final class ImsSsInfo implements android.os.Parcelable {
-    ctor public ImsSsInfo(int, java.lang.String);
+    ctor public deprecated ImsSsInfo(int, java.lang.String);
     method public int describeContents();
-    method public java.lang.String getIcbNum();
+    method public int getClirInterrogationStatus();
+    method public int getClirOutgoingState();
+    method public deprecated java.lang.String getIcbNum();
+    method public java.lang.String getIncomingCommunicationBarringNumber();
     method public int getProvisionStatus();
     method public int getStatus();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CLIR_OUTGOING_DEFAULT = 0; // 0x0
+    field public static final int CLIR_OUTGOING_INVOCATION = 1; // 0x1
+    field public static final int CLIR_OUTGOING_SUPPRESSION = 2; // 0x2
+    field public static final int CLIR_STATUS_NOT_PROVISIONED = 0; // 0x0
+    field public static final int CLIR_STATUS_PROVISIONED_PERMANENT = 1; // 0x1
+    field public static final int CLIR_STATUS_TEMPORARILY_ALLOWED = 4; // 0x4
+    field public static final int CLIR_STATUS_TEMPORARILY_RESTRICTED = 3; // 0x3
+    field public static final int CLIR_STATUS_UNKNOWN = 2; // 0x2
     field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSsInfo> CREATOR;
     field public static final int DISABLED = 0; // 0x0
     field public static final int ENABLED = 1; // 0x1
@@ -5954,16 +6517,27 @@ package android.telephony.ims {
     field public static final int SERVICE_PROVISIONING_UNKNOWN = -1; // 0xffffffff
   }
 
+  public static class ImsSsInfo.Builder {
+    ctor public ImsSsInfo.Builder(int);
+    method public android.telephony.ims.ImsSsInfo build();
+    method public android.telephony.ims.ImsSsInfo.Builder setClirInterrogationStatus(int);
+    method public android.telephony.ims.ImsSsInfo.Builder setClirOutgoingState(int);
+    method public android.telephony.ims.ImsSsInfo.Builder setIncomingCommunicationBarringNumber(java.lang.String);
+    method public android.telephony.ims.ImsSsInfo.Builder setProvisionStatus(int);
+  }
+
   public final class ImsStreamMediaProfile implements android.os.Parcelable {
     ctor public ImsStreamMediaProfile(int, int, int, int, int);
     method public void copyFrom(android.telephony.ims.ImsStreamMediaProfile);
     method public int describeContents();
     method public int getAudioDirection();
     method public int getAudioQuality();
+    method public boolean getRttAudioSpeech();
     method public int getRttMode();
     method public int getVideoDirection();
     method public int getVideoQuality();
     method public boolean isRttCall();
+    method public void setRttAudioSpeech(boolean);
     method public void setRttMode(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int AUDIO_QUALITY_AMR = 1; // 0x1
@@ -6049,6 +6623,22 @@ package android.telephony.ims {
     method public void receiveSessionModifyResponse(int, android.telecom.VideoProfile, android.telecom.VideoProfile);
   }
 
+  public class ProvisioningManager {
+    method public static android.telephony.ims.ProvisioningManager createForSubscriptionId(android.content.Context, int);
+    method public int getProvisioningIntValue(int);
+    method public java.lang.String getProvisioningStringValue(int);
+    method public void registerProvisioningChangedCallback(java.util.concurrent.Executor, android.telephony.ims.ProvisioningManager.Callback);
+    method public int setProvisioningIntValue(int, int);
+    method public int setProvisioningStringValue(int, java.lang.String);
+    method public void unregisterProvisioningChangedCallback(android.telephony.ims.ProvisioningManager.Callback);
+  }
+
+  public static class ProvisioningManager.Callback {
+    ctor public ProvisioningManager.Callback();
+    method public void onProvisioningIntChanged(int, int);
+    method public void onProvisioningStringChanged(int, java.lang.String);
+  }
+
 }
 
 package android.telephony.ims.feature {
@@ -6085,6 +6675,10 @@ package android.telephony.ims.feature {
     field public static final int STATE_UNAVAILABLE = 0; // 0x0
   }
 
+  public static class ImsFeature.Capabilities {
+    field protected int mCapabilities;
+  }
+
   protected static class ImsFeature.CapabilityCallbackProxy {
     method public void onChangeCapabilityConfigurationError(int, int, int);
   }
@@ -6112,8 +6706,9 @@ package android.telephony.ims.feature {
     field public static final int PROCESS_CALL_IMS = 0; // 0x0
   }
 
-  public static class MmTelFeature.MmTelCapabilities {
-    ctor public MmTelFeature.MmTelCapabilities(android.telephony.ims.feature.ImsFeature.Capabilities);
+  public static class MmTelFeature.MmTelCapabilities extends android.telephony.ims.feature.ImsFeature.Capabilities {
+    ctor public MmTelFeature.MmTelCapabilities();
+    ctor public deprecated MmTelFeature.MmTelCapabilities(android.telephony.ims.feature.ImsFeature.Capabilities);
     ctor public MmTelFeature.MmTelCapabilities(int);
     method public final void addCapabilities(int);
     method public final boolean isCapable(int);
@@ -6353,6 +6948,17 @@ package android.telephony.mbms.vendor {
     method public int requestUpdateFileServices(int, java.util.List<java.lang.String>) throws android.os.RemoteException;
     method public int resetDownloadKnowledge(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int setTempFileRootDirectory(int, java.lang.String) throws android.os.RemoteException;
+  }
+
+  public class MbmsGroupCallServiceBase extends android.app.Service {
+    ctor public MbmsGroupCallServiceBase();
+    method public void dispose(int) throws android.os.RemoteException;
+    method public int initialize(android.telephony.mbms.MbmsGroupCallSessionCallback, int) throws android.os.RemoteException;
+    method public void onAppCallbackDied(int, int);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public int startGroupCall(int, long, java.util.List<java.lang.Integer>, java.util.List<java.lang.Integer>, android.telephony.mbms.GroupCallCallback);
+    method public void stopGroupCall(int, long);
+    method public void updateGroupCall(int, long, java.util.List<java.lang.Integer>, java.util.List<java.lang.Integer>);
   }
 
   public class MbmsStreamingServiceBase extends android.os.Binder {

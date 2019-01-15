@@ -19,6 +19,7 @@ package com.android.internal.view;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -151,6 +152,7 @@ public final class InputBindResult implements Parcelable {
     /**
      * The input method service.
      */
+    @UnsupportedAppUsage
     public final IInputMethodSession method;
 
     /**
@@ -230,6 +232,7 @@ public final class InputBindResult implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<InputBindResult> CREATOR =
             new Parcelable.Creator<InputBindResult>() {
         @Override

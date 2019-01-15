@@ -47,7 +47,7 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"تنظیمات"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"چرخش خودکار صفحه"</string>
-    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"بی‌صدا"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"صامت"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"خودکار"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"اعلان‌ها"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"اتصال اینترنتی با بلوتوث تلفن همراه"</string>
@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> مخفی شود؟"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"دفعه بعد که آن را روشن کنید، در تنظیمات نشان داده می‌شود."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"پنهان کردن"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"درحال استفاده از نمایه کاری‌تان هستید"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"تماس"</string>
     <string name="stream_system" msgid="7493299064422163147">"سیستم"</string>
     <string name="stream_ring" msgid="8213049469184048338">"زنگ زدن"</string>
@@ -535,14 +534,14 @@
     <string name="ring_toggle_title" msgid="3281244519428819576">"تماس‌ها"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"زنگ زدن"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"لرزش"</string>
-    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"بی‌صدا"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"صامت"</string>
     <string name="qs_status_phone_vibrate" msgid="204362991135761679">"تلفن در حالت لرزش است"</string>
     <string name="qs_status_phone_muted" msgid="5437668875879171548">"تلفن بی‌صدا است"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏%1$s. برای باصدا کردن ضربه بزنید."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. برای تنظیم روی لرزش ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. برای بی‌صدا کردن ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. برای صامت کردن ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری صامت شود."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‏%1$s. برای تنظیم روی لرزش، ضربه بزنید."</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. برای بی‌صدا کردن ضربه بزنید."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. برای صامت کردن ضربه بزنید."</string>
     <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"صامت کردن"</string>
     <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"باصدا کردن"</string>
     <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"لرزش"</string>

@@ -17,9 +17,10 @@
 package com.android.settingslib.license;
 
 import android.content.Context;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.util.Log;
 
+import com.android.settingslib.R;
 import com.android.settingslib.utils.AsyncLoader;
 
 import java.io.File;
@@ -36,7 +37,9 @@ public class LicenseHtmlLoader extends AsyncLoader<File> {
             "/system/etc/NOTICE.xml.gz",
             "/vendor/etc/NOTICE.xml.gz",
             "/odm/etc/NOTICE.xml.gz",
-            "/oem/etc/NOTICE.xml.gz"};
+            "/oem/etc/NOTICE.xml.gz",
+            "/product/etc/NOTICE.xml.gz",
+            "/product_services/etc/NOTICE.xml.gz"};
     private static final String NOTICE_HTML_FILE_NAME = "NOTICE.html";
 
     private Context mContext;
@@ -105,6 +108,7 @@ public class LicenseHtmlLoader extends AsyncLoader<File> {
 
     @VisibleForTesting
     boolean generateHtmlFile(List<File> xmlFiles, File htmlFile) {
-        return LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, htmlFile);
+        return LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, htmlFile,
+                    mContext.getString(R.string.notice_header));
     }
 }

@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Terjadi masalah saat mendaftarkan panggilan Wi‑Fi dengan operator Anda: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Panggilan Wi-Fi"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Panggilan Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Panggilan WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Panggilan WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Panggilan WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Nonaktif"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi dipilih"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Seluler dipilih"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tidak memiliki akses internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tap untuk melihat opsi"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Perubahan pada setelan hotspot Anda"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Pita hotspot Anda telah berubah."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Perangkat ini tidak mendukung preferensi Anda, yaitu hanya 5GHz. Sebagai gantinya, perangkat ini akan menggunakan pita frekuensi 5GHz jika tersedia."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Dialihkan ke <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Perangkat menggunakan <xliff:g id="NEW_NETWORK">%1$s</xliff:g> jika <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> tidak memiliki akses internet. Tarif mungkin berlaku."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Dialihkan dari <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ke <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1269,7 +1276,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tap untuk memilih bahasa dan tata letak"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Tampilkan di atas aplikasi lain"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Tampilkan di atas apl lain"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ditampilkan di atas aplikasi lain"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ditampilkan di atas aplikasi lain"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Jika Anda tidak ingin <xliff:g id="NAME">%s</xliff:g> menggunakan fitur ini, tap untuk membuka setelan dan menonaktifkannya."</string>

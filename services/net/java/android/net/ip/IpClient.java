@@ -228,6 +228,9 @@ public class IpClient extends StateMachine {
     //       Encourages logging of any available arguments, and all call sites
     //       are necessarily logged identically.
     //
+    // NOTE: Log first because passed objects may or may not be thread-safe and
+    // once passed on to the callback they may be modified by another thread.
+    //
     // TODO: Find an lighter weight approach.
     private class LoggingCallbackWrapper extends Callback {
         private static final String PREFIX = "INVOKE ";
@@ -243,63 +246,63 @@ public class IpClient extends StateMachine {
 
         @Override
         public void onPreDhcpAction() {
-            mCallback.onPreDhcpAction();
             log("onPreDhcpAction()");
+            mCallback.onPreDhcpAction();
         }
         @Override
         public void onPostDhcpAction() {
-            mCallback.onPostDhcpAction();
             log("onPostDhcpAction()");
+            mCallback.onPostDhcpAction();
         }
         @Override
         public void onNewDhcpResults(DhcpResults dhcpResults) {
-            mCallback.onNewDhcpResults(dhcpResults);
             log("onNewDhcpResults({" + dhcpResults + "})");
+            mCallback.onNewDhcpResults(dhcpResults);
         }
         @Override
         public void onProvisioningSuccess(LinkProperties newLp) {
-            mCallback.onProvisioningSuccess(newLp);
             log("onProvisioningSuccess({" + newLp + "})");
+            mCallback.onProvisioningSuccess(newLp);
         }
         @Override
         public void onProvisioningFailure(LinkProperties newLp) {
-            mCallback.onProvisioningFailure(newLp);
             log("onProvisioningFailure({" + newLp + "})");
+            mCallback.onProvisioningFailure(newLp);
         }
         @Override
         public void onLinkPropertiesChange(LinkProperties newLp) {
-            mCallback.onLinkPropertiesChange(newLp);
             log("onLinkPropertiesChange({" + newLp + "})");
+            mCallback.onLinkPropertiesChange(newLp);
         }
         @Override
         public void onReachabilityLost(String logMsg) {
-            mCallback.onReachabilityLost(logMsg);
             log("onReachabilityLost(" + logMsg + ")");
+            mCallback.onReachabilityLost(logMsg);
         }
         @Override
         public void onQuit() {
-            mCallback.onQuit();
             log("onQuit()");
+            mCallback.onQuit();
         }
         @Override
         public void installPacketFilter(byte[] filter) {
-            mCallback.installPacketFilter(filter);
             log("installPacketFilter(byte[" + filter.length + "])");
+            mCallback.installPacketFilter(filter);
         }
         @Override
         public void startReadPacketFilter() {
-            mCallback.startReadPacketFilter();
             log("startReadPacketFilter()");
+            mCallback.startReadPacketFilter();
         }
         @Override
         public void setFallbackMulticastFilter(boolean enabled) {
-            mCallback.setFallbackMulticastFilter(enabled);
             log("setFallbackMulticastFilter(" + enabled + ")");
+            mCallback.setFallbackMulticastFilter(enabled);
         }
         @Override
         public void setNeighborDiscoveryOffload(boolean enable) {
-            mCallback.setNeighborDiscoveryOffload(enable);
             log("setNeighborDiscoveryOffload(" + enable + ")");
+            mCallback.setNeighborDiscoveryOffload(enable);
         }
     }
 
@@ -431,6 +434,7 @@ public class IpClient extends StateMachine {
         public ProvisioningConfiguration(ProvisioningConfiguration other) {
             mEnableIPv4 = other.mEnableIPv4;
             mEnableIPv6 = other.mEnableIPv6;
+            mUsingMultinetworkPolicyTracker = other.mUsingMultinetworkPolicyTracker;
             mUsingIpReachabilityMonitor = other.mUsingIpReachabilityMonitor;
             mRequestedPreDhcpActionMs = other.mRequestedPreDhcpActionMs;
             mInitialConfig = InitialConfiguration.copy(other.mInitialConfig);
@@ -524,7 +528,7 @@ public class IpClient extends StateMachine {
                 return false;
             }
             // There no more than one IPv4 address
-            if (ipAddresses.stream().filter(Inet4Address.class::isInstance).count() > 1) {
+            if (ipAddresses.stream().filter(LinkAddress::isIPv4).count() > 1) {
                 return false;
             }
 
@@ -1384,6 +1388,20 @@ public class IpClient extends StateMachine {
 
     private boolean startIpReachabilityMonitor() {
         try {
+            // TODO: Fetch these parameters from settings, and install a
+            // settings observer to watch for update and re-program these
+            // parameters (Q: is this level of dynamic updatability really
+            // necessary or does reading from settings at startup suffice?).
+            final int NUM_SOLICITS = 5;
+            final int INTER_SOLICIT_INTERVAL_MS = 750;
+            setNeighborParameters(mDependencies.getNetd(), mInterfaceName,
+                    NUM_SOLICITS, INTER_SOLICIT_INTERVAL_MS);
+        } catch (Exception e) {
+            mLog.e("Failed to adjust neighbor parameters", e);
+            // Carry on using the system defaults (currently: 3, 1000);
+        }
+
+        try {
             mIpReachabilityMonitor = new IpReachabilityMonitor(
                     mContext,
                     mInterfaceParams,
@@ -1859,6 +1877,20 @@ public class IpClient extends StateMachine {
         public String toString() {
             return String.format("rcvd_in=%s, proc_in=%s",
                                  receivedInState, processedInState);
+        }
+    }
+
+    private static void setNeighborParameters(
+            INetd netd, String ifName, int num_solicits, int inter_solicit_interval_ms)
+            throws RemoteException, IllegalArgumentException {
+        Preconditions.checkNotNull(netd);
+        Preconditions.checkArgument(!TextUtils.isEmpty(ifName));
+        Preconditions.checkArgument(num_solicits > 0);
+        Preconditions.checkArgument(inter_solicit_interval_ms > 0);
+
+        for (int family : new Integer[]{INetd.IPV4, INetd.IPV6}) {
+            netd.setProcSysNet(family, INetd.NEIGH, ifName, "retrans_time_ms", Integer.toString(inter_solicit_interval_ms));
+            netd.setProcSysNet(family, INetd.NEIGH, ifName, "ucast_solicit", Integer.toString(num_solicits));
         }
     }
 

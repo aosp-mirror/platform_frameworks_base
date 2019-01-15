@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.UnsupportedAppUsage;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -65,7 +66,7 @@ public class ResultInfo implements Parcelable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final Parcelable.Creator<ResultInfo> CREATOR
             = new Parcelable.Creator<ResultInfo>() {
         public ResultInfo createFromParcel(Parcel in) {

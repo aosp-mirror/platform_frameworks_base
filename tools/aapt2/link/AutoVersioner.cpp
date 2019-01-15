@@ -20,14 +20,16 @@
 
 #include "android-base/logging.h"
 
-#include "ConfigDescription.h"
 #include "ResourceTable.h"
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
 
+using android::ConfigDescription;
+
 namespace aapt {
 
-bool ShouldGenerateVersionedResource(const ResourceEntry* entry, const ConfigDescription& config,
+bool ShouldGenerateVersionedResource(const ResourceEntry* entry,
+                                     const ConfigDescription& config,
                                      const ApiVersion sdk_version_to_generate) {
   // We assume the caller is trying to generate a version greater than the current configuration.
   CHECK(sdk_version_to_generate > config.sdkVersion);

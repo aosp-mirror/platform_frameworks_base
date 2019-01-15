@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Problem gjatë regjistrimit të telefonatave me Wi‑Fi me operatorin tënd celular: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Telefonatat me Wi-Fi nga %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Telefonatë me Wi-Fi në <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Telefonatë me WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Telefonatë me WLAN në <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi në <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Telefonatë me Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi në <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Çaktivizuar"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferohet Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferohet rrjeti celular"</string>
@@ -284,7 +288,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të dërgojë dhe të shikojë mesazhet SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hapësira e ruajtjes"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"qasjen te fotografitë, përmbajtjet audio-vizuale dhe skedarët në pajisje"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te fotografitë, media dhe skedarët në pajisjen tënde?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Të lejohet apl. &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; që të ketë qasje te fotografitë, media dhe skedarët në pajisjen tënde?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"regjistro audio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të regjistrojë audio?"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nuk ka qasje në internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Trokit për opsionet"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ndryshimet në cilësimet e zonës së qasjes për internet"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Brezi yt i zonës së qasjes për internet ka ndryshuar."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Kjo pajisje nuk e mbështet preferencën për vetëm 5 GHz. Përkundrazi, pajisja do të përdorë brezin 5 GHz nëse ka."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Kaloi te <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Pajisja përdor <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kur <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nuk ka qasje në internet. Mund të zbatohen tarifa."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Kaloi nga <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> te <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

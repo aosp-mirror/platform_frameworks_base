@@ -25,9 +25,6 @@
     <!-- Alias used to reference framework "OK" string in keyguard.  -->
     <item type="string" name="ok">@*android:string/ok</item>
 
-    <!-- Alias used to reference framework "OK" string in keyguard.  -->
-    <item type="string" name="system_ui_date_pattern">@*android:string/system_ui_date_pattern</item>
-
     <!-- Alias used to reference framework configuration for screen rotation.  -->
     <item type="bool" name="config_enableLockScreenRotation">@*android:bool/config_enableLockScreenRotation</item>
 

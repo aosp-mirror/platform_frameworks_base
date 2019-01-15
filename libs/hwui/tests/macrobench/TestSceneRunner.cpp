@@ -81,11 +81,11 @@ void outputBenchmarkReport(const TestScene::Info& info, const TestScene::Options
     // mean and stddev which doesn't make sense for our usage
     std::vector<BenchmarkReporter::Run> reports;
     BenchmarkReporter::Run report;
-    report.benchmark_name = info.name;
+    report.run_name = info.name;
     report.iterations = static_cast<int64_t>(opts.count);
     report.real_accumulated_time = durationInS;
     report.cpu_accumulated_time = durationInS;
-    report.items_per_second = opts.count / durationInS;
+    report.counters["items_per_second"] = opts.count / durationInS;
     reports.push_back(report);
     reporter->ReportRuns(reports);
 
@@ -94,13 +94,13 @@ void outputBenchmarkReport(const TestScene::Info& info, const TestScene::Options
     // in that test case than percentiles.
     if (!opts.renderOffscreen) {
         for (auto& ri : REPORTS) {
-            reports[0].benchmark_name = info.name;
-            reports[0].benchmark_name += ri.suffix;
+            reports[0].run_name = info.name;
+            reports[0].run_name += ri.suffix;
             durationInS = proxy->frameTimePercentile(ri.percentile) / 1000.0;
             reports[0].real_accumulated_time = durationInS;
             reports[0].cpu_accumulated_time = durationInS;
             reports[0].iterations = 1;
-            reports[0].items_per_second = 0;
+            reports[0].counters["items_per_second"] = 0;
             reporter->ReportRuns(reports);
         }
     }

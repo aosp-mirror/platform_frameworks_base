@@ -16,15 +16,21 @@
 
 package android.telephony.ims;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.telecom.VideoProfile;
+import android.telephony.emergency.EmergencyNumber;
+import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.util.Log;
 
 import com.android.internal.telephony.PhoneConstants;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Parcelable object to handle IMS call profile.
@@ -116,10 +122,14 @@ public final class ImsCallProfile implements Parcelable {
      * @hide
      */
     public static final String EXTRA_CONFERENCE = "conference";
+
     /**
-     * @hide
+     * Boolean extra property set on an {@link ImsCallProfile} to indicate that this call is an
+     * emergency call.  The {@link ImsService} sets this on a call to indicate that the network has
+     * identified the call as an emergency call.
      */
-    public static final String EXTRA_E_CALL = "e_call";
+    public static final String EXTRA_EMERGENCY_CALL = "e_call";
+
     /**
      * @hide
      */
@@ -201,16 +211,35 @@ public final class ImsCallProfile implements Parcelable {
     public static final int DIALSTRING_USSD = 2;
 
     /**
-     * Values for causes that restrict call types
+     * Call is not restricted on peer side and High Definition media is supported
      */
-    // Default cause not restricted at peer and HD is supported
     public static final int CALL_RESTRICT_CAUSE_NONE = 0;
-    // Service not supported by RAT at peer
+
+    /**
+     * High Definition media is not supported on the peer side due to the Radio Access Technology
+     * (RAT) it is are connected to.
+     */
     public static final int CALL_RESTRICT_CAUSE_RAT = 1;
-    // Service Disabled at peer
+
+    /**
+     * The service has been disabled on the peer side.
+     */
     public static final int CALL_RESTRICT_CAUSE_DISABLED = 2;
-    // HD is not supported
+
+    /**
+     * High definition media is not currently supported.
+     */
     public static final int CALL_RESTRICT_CAUSE_HD = 3;
+
+    /**@hide*/
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "CALL_RESTRICT_CAUSE_", value = {
+            CALL_RESTRICT_CAUSE_NONE,
+            CALL_RESTRICT_CAUSE_RAT,
+            CALL_RESTRICT_CAUSE_DISABLED,
+            CALL_RESTRICT_CAUSE_HD
+    })
+    public @interface CallRestrictCause {}
 
     /**
      * String extra properties
@@ -233,6 +262,8 @@ public final class ImsCallProfile implements Parcelable {
     public static final String EXTRA_DISPLAY_TEXT = "DisplayText";
     public static final String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
     public static final String EXTRA_IS_CALL_PULL = "CallPull";
+    public static final String EXTRA_ADDITIONAL_SIP_INVITE_FIELDS =
+                                  "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
 
     /**
      * Extra key which the RIL can use to indicate the radio technology used for a call.
@@ -244,7 +275,8 @@ public final class ImsCallProfile implements Parcelable {
      * constants, the values passed for the {@link #EXTRA_CALL_RAT_TYPE} should be strings (e.g.
      * "14" vs (int) 14).
      * Note: This is used by {@link com.android.internal.telephony.imsphone.ImsPhoneConnection#
-     *      updateWifiStateFromExtras(Bundle)} to determine whether to set the
+     *      updateImsCallRatFromExtras(Bundle)} to determine whether to set the
+     * {@link android.telecom.TelecomManager#EXTRA_CALL_NETWORK_TYPE} extra value and
      * {@link android.telecom.Connection#PROPERTY_WIFI} property on a connection.
      */
     public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
@@ -260,9 +292,33 @@ public final class ImsCallProfile implements Parcelable {
     /** @hide */
     public int mServiceType;
     /** @hide */
+    @UnsupportedAppUsage
     public int mCallType;
     /** @hide */
-    public int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
+    @UnsupportedAppUsage
+    public @CallRestrictCause int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
+
+    /**
+     * The emergency service categories, only valid if {@link #getServiceType} returns
+     * {@link #SERVICE_TYPE_EMERGENCY}
+     *
+     * If valid, the value is the bitwise-OR combination of the following constants:
+     * <ol>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_POLICE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AMBULANCE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MIEC} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AIEC} </li>
+     * </ol>
+     *
+     * Reference: 3gpp 23.167, Section 6 - Functional description;
+     *            3gpp 22.101, Section 10 - Emergency Calls.
+     */
+    private @EmergencyServiceCategories int mEmergencyServiceCategories =
+            EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED;
 
     /**
      * Extras associated with this {@link ImsCallProfile}.
@@ -277,7 +333,7 @@ public final class ImsCallProfile implements Parcelable {
      *     <li>{@code long[]}</li>
      *     <li>{@code double[]}</li>
      *     <li>{@code String[]}</li>
-     *     <li>{@link PersistableBundle}</li>
+     *     <li>{@link android.os.PersistableBundle}</li>
      *     <li>{@link Boolean} (and boolean)</li>
      *     <li>{@code boolean[]}</li>
      *     <li>Other {@link Parcelable} classes in the {@code android.*} namespace.</li>
@@ -287,8 +343,10 @@ public final class ImsCallProfile implements Parcelable {
      * a {@link android.os.Binder}.
      */
     /** @hide */
+    @UnsupportedAppUsage
     public Bundle mCallExtras;
     /** @hide */
+    @UnsupportedAppUsage
     public ImsStreamMediaProfile mMediaProfile;
 
     /** @hide */
@@ -416,6 +474,14 @@ public final class ImsCallProfile implements Parcelable {
         }
     }
 
+    /**
+     * Set the call restrict cause, which provides the reason why a call has been restricted from
+     * using High Definition media.
+     */
+    public void setCallRestrictCause(@CallRestrictCause int cause) {
+        mRestrictCause = cause;
+    }
+
     public void updateCallType(ImsCallProfile profile) {
         mCallType = profile.mCallType;
     }
@@ -455,6 +521,7 @@ public final class ImsCallProfile implements Parcelable {
         out.writeInt(mCallType);
         out.writeBundle(filteredExtras);
         out.writeParcelable(mMediaProfile, 0);
+        out.writeInt(mEmergencyServiceCategories);
     }
 
     private void readFromParcel(Parcel in) {
@@ -462,6 +529,7 @@ public final class ImsCallProfile implements Parcelable {
         mCallType = in.readInt();
         mCallExtras = in.readBundle();
         mMediaProfile = in.readParcelable(ImsStreamMediaProfile.class.getClassLoader());
+        mEmergencyServiceCategories = in.readInt();
     }
 
     public static final Creator<ImsCallProfile> CREATOR = new Creator<ImsCallProfile>() {
@@ -484,7 +552,11 @@ public final class ImsCallProfile implements Parcelable {
         return mCallType;
     }
 
-    public int getRestrictCause() {
+    /**
+     * @return The call restrict cause, which provides the reason why a call has been restricted
+     * from using High Definition media.
+     */
+    public @CallRestrictCause int getRestrictCause() {
         return mRestrictCause;
     }
 
@@ -568,6 +640,7 @@ public final class ImsCallProfile implements Parcelable {
      * See {@link #presentationToOir(int)}.
      * @hide
      */
+    @UnsupportedAppUsage
     public static int presentationToOIR(int presentation) {
         switch (presentation) {
             case PhoneConstants.PRESENTATION_RESTRICTED:
@@ -664,5 +737,54 @@ public final class ImsCallProfile implements Parcelable {
      */
     private static boolean isVideoStateSet(int videoState, int videoStateToCheck) {
         return (videoState & videoStateToCheck) == videoStateToCheck;
+    }
+
+    /**
+     * Set the emergency service categories. The set value is valid only if
+     * {@link #getServiceType} returns {@link #SERVICE_TYPE_EMERGENCY}
+     *
+     * If valid, the value is the bitwise-OR combination of the following constants:
+     * <ol>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_POLICE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AMBULANCE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MIEC} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AIEC} </li>
+     * </ol>
+     *
+     * Reference: 3gpp 23.167, Section 6 - Functional description;
+     *            3gpp 22.101, Section 10 - Emergency Calls.
+     */
+    public void setEmergencyServiceCategories(
+            @EmergencyServiceCategories int emergencyServiceCategories) {
+        mEmergencyServiceCategories = emergencyServiceCategories;
+    }
+
+    /**
+     * Get the emergency service categories, only valid if {@link #getServiceType} returns
+     * {@link #SERVICE_TYPE_EMERGENCY}
+     *
+     * @return the emergency service categories,
+     *
+     * If valid, the value is the bitwise-OR combination of the following constants:
+     * <ol>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_POLICE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AMBULANCE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MIEC} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AIEC} </li>
+     * </ol>
+     *
+     * Reference: 3gpp 23.167, Section 6 - Functional description;
+     *            3gpp 22.101, Section 10 - Emergency Calls.
+     */
+    public @EmergencyServiceCategories int getEmergencyServiceCategories() {
+        return mEmergencyServiceCategories;
     }
 }

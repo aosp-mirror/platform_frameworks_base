@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import android.annotation.UnsupportedAppUsage;
+
 public abstract class SmsAddress {
     // From TS 23.040 9.1.2.5 and TS 24.008 table 10.5.118
     // and C.S0005-D table 2.7.1.3.2.4-2
@@ -29,6 +31,7 @@ public abstract class SmsAddress {
 
     public int ton;
     public String address;
+    @UnsupportedAppUsage
     public byte[] origBytes;
 
     /**

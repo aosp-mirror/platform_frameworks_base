@@ -59,7 +59,7 @@ public:
     virtual void doFrame() = 0;
 
 protected:
-    ~IFrameCallback() {}
+    virtual ~IFrameCallback() {}
 };
 
 struct VsyncSource {

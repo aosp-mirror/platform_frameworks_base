@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -52,16 +53,13 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     private final static String TAG = "OTADexopt";
     private final static boolean DEBUG_DEXOPT = true;
 
-    // The synthetic library dependencies denoting "no checks."
-    private final static String[] NO_LIBRARIES =
-            new String[] { PackageDexOptimizer.SKIP_SHARED_LIBRARY_CHECK };
-
     // The amount of "available" (free - low threshold) space necessary at the start of an OTA to
     // not bulk-delete unused apps' odex files.
     private final static long BULK_DELETE_THRESHOLD = 1024 * 1024 * 1024;  // 1GB.
 
     private final Context mContext;
     private final PackageManagerService mPackageManagerService;
+    private final MetricsLogger metricsLogger;
 
     // TODO: Evaluate the need for WeakReferences here.
 
@@ -94,6 +92,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     public OtaDexoptService(Context context, PackageManagerService packageManagerService) {
         this.mContext = context;
         this.mPackageManagerService = packageManagerService;
+        metricsLogger = new MetricsLogger();
     }
 
     public static OtaDexoptService main(Context context,
@@ -124,7 +123,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         synchronized (mPackageManagerService.mPackages) {
             // Important: the packages we need to run with ab-ota compiler-reason.
             important = PackageManagerServiceUtils.getPackagesForDexopt(
-                    mPackageManagerService.mPackages.values(), mPackageManagerService);
+                    mPackageManagerService.mPackages.values(), mPackageManagerService,
+                    DEBUG_DEXOPT);
             // Others: we should optimize this with the (first-)boot compiler-reason.
             others = new ArrayList<>(mPackageManagerService.mPackages.values());
             others.removeAll(important);
@@ -157,6 +157,24 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         long spaceAvailableNow = getAvailableSpace();
 
         prepareMetricsLogging(important.size(), others.size(), spaceAvailable, spaceAvailableNow);
+
+        if (DEBUG_DEXOPT) {
+            try {
+                // Output some data about the packages.
+                PackageParser.Package lastUsed = Collections.max(important,
+                        (pkg1, pkg2) -> Long.compare(
+                                pkg1.getLatestForegroundPackageUseTimeInMills(),
+                                pkg2.getLatestForegroundPackageUseTimeInMills()));
+                Log.d(TAG, "A/B OTA: lastUsed time = "
+                        + lastUsed.getLatestForegroundPackageUseTimeInMills());
+                Log.d(TAG, "A/B OTA: deprioritized packages:");
+                for (PackageParser.Package pkg : others) {
+                    Log.d(TAG, "  " + pkg.packageName + " - "
+                            + pkg.getLatestForegroundPackageUseTimeInMills());
+                }
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @Override
@@ -266,8 +284,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                     throws InstallerException {
                 final StringBuilder builder = new StringBuilder();
 
-                // The current version.
-                builder.append("9 ");
+                // The current version. For v10, see b/115993344.
+                builder.append("10 ");
 
                 builder.append("dexopt");
 
@@ -315,14 +333,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         PackageDexOptimizer optimizer = new OTADexoptPackageDexOptimizer(
                 collectingInstaller, mPackageManagerService.mInstallLock, mContext);
 
-        String[] libraryDependencies = pkg.usesLibraryFiles;
-        if (pkg.isSystem()) {
-            // For system apps, we want to avoid classpaths checks.
-            libraryDependencies = NO_LIBRARIES;
-        }
-
-
-        optimizer.performDexOpt(pkg, libraryDependencies,
+        optimizer.performDexOpt(pkg, pkg.usesLibraryInfos,
                 null /* ISAs */,
                 null /* CompilerStats.PackageStats */,
                 mPackageManagerService.getDexManager().getPackageUseInfoOrDefault(pkg.packageName),
@@ -423,24 +434,22 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     private void performMetricsLogging() {
         long finalTime = System.nanoTime();
 
-        MetricsLogger.histogram(mContext, "ota_dexopt_available_space_before_mb",
+        metricsLogger.histogram("ota_dexopt_available_space_before_mb",
                 inMegabytes(availableSpaceBefore));
-        MetricsLogger.histogram(mContext, "ota_dexopt_available_space_after_bulk_delete_mb",
+        metricsLogger.histogram("ota_dexopt_available_space_after_bulk_delete_mb",
                 inMegabytes(availableSpaceAfterBulkDelete));
-        MetricsLogger.histogram(mContext, "ota_dexopt_available_space_after_dexopt_mb",
+        metricsLogger.histogram("ota_dexopt_available_space_after_dexopt_mb",
                 inMegabytes(availableSpaceAfterDexopt));
 
-        MetricsLogger.histogram(mContext, "ota_dexopt_num_important_packages",
-                importantPackageCount);
-        MetricsLogger.histogram(mContext, "ota_dexopt_num_other_packages", otherPackageCount);
+        metricsLogger.histogram("ota_dexopt_num_important_packages", importantPackageCount);
+        metricsLogger.histogram("ota_dexopt_num_other_packages", otherPackageCount);
 
-        MetricsLogger.histogram(mContext, "ota_dexopt_num_commands", dexoptCommandCountTotal);
-        MetricsLogger.histogram(mContext, "ota_dexopt_num_commands_executed",
-                dexoptCommandCountExecuted);
+        metricsLogger.histogram("ota_dexopt_num_commands", dexoptCommandCountTotal);
+        metricsLogger.histogram("ota_dexopt_num_commands_executed", dexoptCommandCountExecuted);
 
         final int elapsedTimeSeconds =
                 (int) TimeUnit.NANOSECONDS.toSeconds(finalTime - otaDexoptTimeStart);
-        MetricsLogger.histogram(mContext, "ota_dexopt_time_s", elapsedTimeSeconds);
+        metricsLogger.histogram("ota_dexopt_time_s", elapsedTimeSeconds);
     }
 
     private static class OTADexoptPackageDexOptimizer extends

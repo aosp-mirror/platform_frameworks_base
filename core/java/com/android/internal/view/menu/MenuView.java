@@ -19,6 +19,7 @@ package com.android.internal.view.menu;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuItemImpl;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.drawable.Drawable;
 
 /**
@@ -40,6 +41,7 @@ public interface MenuView {
      * Returns the default animations to be used for this menu when entering/exiting.
      * @return A resource ID for the default animations to be used for this menu.
      */
+    @UnsupportedAppUsage
     public int getWindowAnimations();
     
     /**
@@ -61,6 +63,7 @@ public interface MenuView {
          * Gets the item data that this view is displaying.
          * @return the item data, or null if there is not one
          */
+        @UnsupportedAppUsage
         public MenuItemImpl getItemData();
         
         /**

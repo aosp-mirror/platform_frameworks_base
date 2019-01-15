@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.MotionEvent.ACTION_DOWN;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_BACK;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_DEAD_ZONE;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_HOME;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_NONE;
 
@@ -40,7 +41,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -255,13 +256,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         @Override
         public boolean performAccessibilityAction(View host, int action, Bundle args) {
-            switch (action) {
-                case R.id.action_toggle_overview:
-                    SysUiServiceProvider.getComponent(getContext(), Recents.class)
-                            .toggleRecentApps();
-                    break;
-                default:
-                    return super.performAccessibilityAction(host, action, args);
+            if (action == R.id.action_toggle_overview) {
+                SysUiServiceProvider.getComponent(getContext(), Recents.class)
+                        .toggleRecentApps();
+            } else {
+                return super.performAccessibilityAction(host, action, args);
             }
             return true;
         }
@@ -328,15 +327,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (shouldDeadZoneConsumeTouchEvents(event)) {
-            return true;
-        }
+        final boolean deadZoneConsumed = shouldDeadZoneConsumeTouchEvents(event);
         switch (event.getActionMasked()) {
             case ACTION_DOWN:
                 int x = (int) event.getX();
                 int y = (int) event.getY();
                 mDownHitTarget = HIT_TARGET_NONE;
-                if (getBackButton().isVisible() && mBackButtonBounds.contains(x, y)) {
+                if (deadZoneConsumed) {
+                    mDownHitTarget = HIT_TARGET_DEAD_ZONE;
+                } else if (getBackButton().isVisible() && mBackButtonBounds.contains(x, y)) {
                     mDownHitTarget = HIT_TARGET_BACK;
                 } else if (getHomeButton().isVisible() && mHomeButtonBounds.contains(x, y)) {
                     mDownHitTarget = HIT_TARGET_HOME;
@@ -353,9 +352,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (shouldDeadZoneConsumeTouchEvents(event)) {
-            return true;
-        }
+        shouldDeadZoneConsumeTouchEvents(event);
         if (mGestureHelper.onTouchEvent(event)) {
             return true;
         }
@@ -764,7 +761,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 showSwipeUpUI ? mQuickStepAccessibilityDelegate : null);
     }
 
-    private void updateSlippery() {
+    public void updateSlippery() {
         setSlippery(!isQuickStepSwipeUpEnabled() || mPanelView.isFullyExpanded());
     }
 

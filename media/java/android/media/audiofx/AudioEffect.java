@@ -21,6 +21,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -872,7 +873,7 @@ public class AudioEffect {
      * In case of failure, the returned value is negative and implementation specific.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public int command(int cmdCode, byte[] command, byte[] reply)
             throws IllegalStateException {
         checkState("command()");

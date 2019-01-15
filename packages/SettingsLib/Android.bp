@@ -1,0 +1,25 @@
+android_library {
+
+    name: "SettingsLib",
+
+    libs: [
+        "androidx.annotation_annotation",
+        "androidx.legacy_legacy-support-v4",
+        "androidx.recyclerview_recyclerview",
+        "androidx.preference_preference",
+        "androidx.appcompat_appcompat",
+        "androidx.lifecycle_lifecycle-runtime",
+    ],
+
+    // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
+    // LOCAL_SHARED_JAVA_LIBRARIES := androidx.lifecycle_lifecycle-common
+
+    resource_dirs: ["res"],
+
+    srcs: ["src/**/*.java"],
+
+    min_sdk_version: "21",
+
+}
+
+// For the test package.

@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Error al registrar la Llamada con Wi‑Fi con tu operador: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Llamada por Wi-Fi de %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Llamada por Wi-Fi de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Llamada por WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Llamada por WLAN de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Llamada por Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi de <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivada"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Red Wi-Fi preferida"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Red móvil preferida"</string>
@@ -295,7 +299,7 @@
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"leer y escribir el registro de llamadas telefónicas"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"¿Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda al registro de las llamadas telefónicas?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Teléfono"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"realizar y administrar llamadas telefónicas"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"hacer y administrar llamadas telefónicas"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"¿Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; haga y administre las llamadas telefónicas?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporales"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceder a los datos del sensor acerca de tus signos vitales"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"La red Wi-Fi no tiene acceso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Presiona para ver opciones"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Cambios en la configuración de tu hotspot"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Cambió la banda de tu hotspot."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Si bien este dispositivo no admite la opción para conectarse exclusivamente a bandas de 5 GHz, las usará cuando estén disponibles."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Se cambió a <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"El dispositivo usa <xliff:g id="NEW_NETWORK">%1$s</xliff:g> cuando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> no tiene acceso a Internet. Es posible que se apliquen cargos."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Se cambió de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> a <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

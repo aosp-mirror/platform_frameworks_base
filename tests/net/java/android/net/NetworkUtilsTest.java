@@ -24,6 +24,8 @@ import static android.net.NetworkUtils.intToInet4AddressHTL;
 import static android.net.NetworkUtils.netmaskToPrefixLength;
 import static android.net.NetworkUtils.prefixLengthToV4NetmaskIntHTH;
 import static android.net.NetworkUtils.prefixLengthToV4NetmaskIntHTL;
+import static android.net.NetworkUtils.getBroadcastAddress;
+import static android.net.NetworkUtils.getPrefixMaskAsInet4Address;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -124,7 +126,6 @@ public class NetworkUtilsTest {
         assertInvalidNetworkMask(IPv4Address("255.255.255.253"));
         assertInvalidNetworkMask(IPv4Address("255.255.0.255"));
     }
-
 
     @Test
     public void testPrefixLengthToV4NetmaskIntHTL() {
@@ -265,5 +266,45 @@ public class NetworkUtilsTest {
         set.add(new IpPrefix("f00b:a33::/112"));
         assertEquals(BigInteger.valueOf(7l - 4 + 4 + 16 + 65536),
                 NetworkUtils.routedIPv6AddressCount(set));
+    }
+
+    @Test
+    public void testGetPrefixMaskAsAddress() {
+        assertEquals("255.255.240.0", getPrefixMaskAsInet4Address(20).getHostAddress());
+        assertEquals("255.0.0.0", getPrefixMaskAsInet4Address(8).getHostAddress());
+        assertEquals("0.0.0.0", getPrefixMaskAsInet4Address(0).getHostAddress());
+        assertEquals("255.255.255.255", getPrefixMaskAsInet4Address(32).getHostAddress());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetPrefixMaskAsAddress_PrefixTooLarge() {
+        getPrefixMaskAsInet4Address(33);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetPrefixMaskAsAddress_NegativePrefix() {
+        getPrefixMaskAsInet4Address(-1);
+    }
+
+    @Test
+    public void testGetBroadcastAddress() {
+        assertEquals("192.168.15.255",
+                getBroadcastAddress(IPv4Address("192.168.0.123"), 20).getHostAddress());
+        assertEquals("192.255.255.255",
+                getBroadcastAddress(IPv4Address("192.168.0.123"), 8).getHostAddress());
+        assertEquals("192.168.0.123",
+                getBroadcastAddress(IPv4Address("192.168.0.123"), 32).getHostAddress());
+        assertEquals("255.255.255.255",
+                getBroadcastAddress(IPv4Address("192.168.0.123"), 0).getHostAddress());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetBroadcastAddress_PrefixTooLarge() {
+        getBroadcastAddress(IPv4Address("192.168.0.123"), 33);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetBroadcastAddress_NegativePrefix() {
+        getBroadcastAddress(IPv4Address("192.168.0.123"), -1);
     }
 }

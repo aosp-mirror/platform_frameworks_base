@@ -23,7 +23,7 @@ import android.content.Context;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.util.ArraySet;
 
 import com.android.internal.logging.MetricsLogger;

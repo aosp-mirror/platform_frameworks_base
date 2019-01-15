@@ -17,8 +17,10 @@
 package android.os.health;
 
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.BatteryStats;
+import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -49,6 +51,7 @@ public class SystemHealthManager {
      * Construct a new SystemHealthManager object.
      * @hide
      */
+    @UnsupportedAppUsage
     public SystemHealthManager() {
         this(IBatteryStats.Stub.asInterface(ServiceManager.getService(BatteryStats.SERVICE_NAME)));
     }
@@ -63,6 +66,7 @@ public class SystemHealthManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static SystemHealthManager from(Context context) {
         return (SystemHealthManager)context.getSystemService(Context.SYSTEM_HEALTH_SERVICE);
     }

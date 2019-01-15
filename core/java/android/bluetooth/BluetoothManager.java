@@ -52,8 +52,7 @@ import java.util.List;
 @RequiresFeature(PackageManager.FEATURE_BLUETOOTH)
 public final class BluetoothManager {
     private static final String TAG = "BluetoothManager";
-    private static final boolean DBG = true;
-    private static final boolean VDBG = true;
+    private static final boolean DBG = false;
 
     private final BluetoothAdapter mAdapter;
 
@@ -68,6 +67,7 @@ public final class BluetoothManager {
         }
         // Legacy api - getDefaultAdapter does not take in the context
         mAdapter = BluetoothAdapter.getDefaultAdapter();
+        mAdapter.setContext(context);
     }
 
     /**

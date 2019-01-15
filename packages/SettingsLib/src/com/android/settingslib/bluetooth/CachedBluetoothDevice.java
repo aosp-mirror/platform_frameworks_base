@@ -29,7 +29,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.bluetooth.BluetoothAdapter;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 
@@ -109,6 +109,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mHiSyncId = id;
     }
 
+    public boolean isHearingAidDevice() {
+        return mHiSyncId != BluetoothHearingAid.HI_SYNC_ID_INVALID;
+    }
+
     /**
      * Last time a bt profile auto-connect was attempted.
      * If an ACTION_UUID intent comes in within
@@ -143,8 +147,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     void onProfileStateChanged(LocalBluetoothProfile profile, int newProfileState) {
         if (Utils.D) {
-            Log.d(TAG, "onProfileStateChanged: profile " + profile +
-                    " newProfileState " + newProfileState);
+            Log.d(TAG, "onProfileStateChanged: profile " + profile + ", device=" + mDevice
+                    + ", newProfileState " + newProfileState);
         }
         if (mLocalAdapter.getBluetoothState() == BluetoothAdapter.STATE_TURNING_OFF)
         {
@@ -249,7 +253,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
         int preferredProfiles = 0;
         for (LocalBluetoothProfile profile : mProfiles) {
-            if (connectAllProfiles ? profile.isConnectable() : profile.isAutoConnectable()) {
+            if (connectAllProfiles ? profile.accessProfileEnabled() : profile.isAutoConnectable()) {
                 if (profile.isPreferred(mDevice)) {
                     ++preferredProfiles;
                     connectInt(profile);
@@ -735,7 +739,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         List<LocalBluetoothProfile> connectableProfiles =
                 new ArrayList<LocalBluetoothProfile>();
         for (LocalBluetoothProfile profile : mProfiles) {
-            if (profile.isConnectable()) {
+            if (profile.accessProfileEnabled()) {
                 connectableProfiles.add(profile);
             }
         }

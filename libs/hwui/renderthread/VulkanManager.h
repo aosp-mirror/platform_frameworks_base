@@ -127,6 +127,7 @@ private:
             fPtr = ptr;
             return *this;
         }
+        // NOLINTNEXTLINE(google-explicit-constructor)
         operator FNPTR_TYPE() const { return fPtr; }
 
     private:

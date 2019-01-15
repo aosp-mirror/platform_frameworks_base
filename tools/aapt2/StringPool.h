@@ -24,9 +24,9 @@
 #include <vector>
 
 #include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 
-#include "ConfigDescription.h"
 #include "Diagnostics.h"
 #include "util/BigBuffer.h"
 
@@ -60,12 +60,12 @@ class StringPool {
       kLowPriority = 0xffffffffu,
     };
     uint32_t priority = kNormalPriority;
-    ConfigDescription config;
+    android::ConfigDescription config;
 
     Context() = default;
-    Context(uint32_t p, const ConfigDescription& c) : priority(p), config(c) {}
+    Context(uint32_t p, const android::ConfigDescription& c) : priority(p), config(c) {}
     explicit Context(uint32_t p) : priority(p) {}
-    explicit Context(const ConfigDescription& c) : priority(kNormalPriority), config(c) {
+    explicit Context(const android::ConfigDescription& c) : priority(kNormalPriority), config(c) {
     }
   };
 

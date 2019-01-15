@@ -370,7 +370,7 @@
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Ekranı sola doğru böl"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Ekranı sağa doğru böl"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Genel bakışı aç/kapat"</string>
-    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Ödeme alındı"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Şarj oldu"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Şarj oluyor"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Tam şarj olmasına <xliff:g id="CHARGING_TIME">%s</xliff:g> kaldı"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Şarj olmuyor"</string>
@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> gizlensin mi?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ayarlardan etkinleştirdiğiniz bir sonraki sefer tekrar görünür."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Gizle"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"İş profilinizi kullanıyorsunuz"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Çağrı"</string>
     <string name="stream_system" msgid="7493299064422163147">"Sistem"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Zili çaldır"</string>
