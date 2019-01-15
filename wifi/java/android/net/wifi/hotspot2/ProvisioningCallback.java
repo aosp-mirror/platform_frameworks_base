@@ -16,6 +16,7 @@
 
 package android.net.wifi.hotspot2;
 
+import android.annotation.SystemApi;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 
@@ -25,6 +26,7 @@ import android.os.Handler;
  *
  * @hide
  */
+@SystemApi
 public abstract class ProvisioningCallback {
 
     /**

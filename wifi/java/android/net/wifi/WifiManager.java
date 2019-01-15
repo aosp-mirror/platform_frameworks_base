@@ -236,9 +236,11 @@ public class WifiManager {
     public static final int WIFI_CREDENTIAL_FORGOT = 1;
 
     /** @hide */
+    @SystemApi
     public static final int PASSPOINT_HOME_NETWORK = 0;
 
     /** @hide */
+    @SystemApi
     public static final int PASSPOINT_ROAMING_NETWORK = 1;
 
     /**
@@ -1219,7 +1221,11 @@ public class WifiManager {
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD
+    })
     public List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>> getAllMatchingWifiConfigs(
             @NonNull List<ScanResult> scanResults) {
         List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>> configs = new ArrayList<>();
@@ -1258,7 +1264,11 @@ public class WifiManager {
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD
+    })
     public Map<OsuProvider, List<ScanResult>> getMatchingOsuProviders(
             List<ScanResult> scanResults) {
         try {
@@ -1281,7 +1291,11 @@ public class WifiManager {
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD
+    })
     public Map<OsuProvider, PasspointConfiguration> getMatchingPasspointConfigsForOsuProviders(
             @NonNull Set<OsuProvider> osuProviders) {
         try {
@@ -4323,6 +4337,11 @@ public class WifiManager {
      * @param callback {@link ProvisioningCallback} for updates regarding provisioning flow
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD
+    })
     public void startSubscriptionProvisioning(OsuProvider provider, ProvisioningCallback callback,
             @Nullable Handler handler) {
         Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();

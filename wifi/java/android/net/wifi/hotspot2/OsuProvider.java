@@ -16,6 +16,7 @@
 
 package android.net.wifi.hotspot2;
 
+import android.annotation.SystemApi;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.net.wifi.WifiSsid;
@@ -36,16 +37,19 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class OsuProvider implements Parcelable {
     /**
      * OSU (Online Sign-Up) method: OMA DM (Open Mobile Alliance Device Management).
      * For more info, refer to Section 8.3 of the Hotspot 2.0 Release 2 Technical Specification.
+     * @hide
      */
     public static final int METHOD_OMA_DM = 0;
 
     /**
      * OSU (Online Sign-Up) method: SOAP XML SPP (Subscription Provisioning Protocol).
      * For more info, refer to Section 8.4 of the Hotspot 2.0 Release 2 Technical Specification.
+     * @hide
      */
     public static final int METHOD_SOAP_XML_SPP = 1;
 
@@ -84,6 +88,7 @@ public final class OsuProvider implements Parcelable {
      */
     private final Icon mIcon;
 
+    /** @hide */
     public OsuProvider(WifiSsid osuSsid, Map<String, String> friendlyNames,
             String serviceDescription, Uri serverUri, String nai, List<Integer> methodList,
             Icon icon) {
@@ -104,6 +109,7 @@ public final class OsuProvider implements Parcelable {
      * Copy constructor.
      *
      * @param source The source to copy from
+     * @hide
      */
     public OsuProvider(OsuProvider source) {
         if (source == null) {
@@ -130,10 +136,12 @@ public final class OsuProvider implements Parcelable {
         mIcon = source.mIcon;
     }
 
+    /** @hide */
     public WifiSsid getOsuSsid() {
         return mOsuSsid;
     }
 
+    /** @hide */
     public void setOsuSsid(WifiSsid osuSsid) {
         mOsuSsid = osuSsid;
     }
@@ -162,10 +170,12 @@ public final class OsuProvider implements Parcelable {
         return mFriendlyNames.get(mFriendlyNames.keySet().stream().findFirst().get());
     }
 
+    /** @hide */
     public Map<String, String> getFriendlyNameList() {
         return mFriendlyNames;
     }
 
+    /** @hide */
     public String getServiceDescription() {
         return mServiceDescription;
     }
@@ -174,14 +184,17 @@ public final class OsuProvider implements Parcelable {
         return mServerUri;
     }
 
+    /** @hide */
     public String getNetworkAccessIdentifier() {
         return mNetworkAccessIdentifier;
     }
 
+    /** @hide */
     public List<Integer> getMethodList() {
         return mMethodList;
     }
 
+    /** @hide */
     public Icon getIcon() {
         return mIcon;
     }
