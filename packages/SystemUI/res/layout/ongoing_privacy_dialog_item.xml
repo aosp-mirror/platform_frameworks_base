@@ -25,12 +25,18 @@
     android:focusable="true"
     android:layout_gravity="center_vertical">
 
-    <ImageView
-        android:id="@+id/app_icon"
+    <FrameLayout
         android:layout_height="@dimen/ongoing_appops_dialog_app_icon_size"
         android:layout_width="@dimen/ongoing_appops_dialog_app_icon_size"
-        android:layout_gravity="start|center_vertical"
-    />
+        android:layout_gravity="start|center_vertical">
+
+        <ImageView
+            android:id="@+id/app_icon"
+            android:layout_height="@dimen/ongoing_appops_dialog_app_icon_size"
+            android:layout_width="@dimen/ongoing_appops_dialog_app_icon_size"
+            android:layout_gravity="center"
+            />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/app_name"
