@@ -371,6 +371,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private boolean mSuplEsEnabled = false;
 
     private final Context mContext;
+    private final Looper mLooper;
     private final LocationExtras mLocationExtras = new LocationExtras();
     private final GnssStatusListenerHelper mGnssStatusListenerHelper;
     private final GnssSatelliteBlacklistHelper mGnssSatelliteBlacklistHelper;
@@ -381,6 +382,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final NtpTimeHelper mNtpTimeHelper;
     private final GnssBatchingProvider mGnssBatchingProvider;
     private final GnssGeofenceProvider mGnssGeofenceProvider;
+    private GnssVisibilityControl mGnssVisibilityControl;
 
     // Handler for processing events
     private Handler mHandler;
@@ -555,6 +557,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mC2KServerPort = mGnssConfiguration.getC2KPort(TCP_MIN_PORT);
         mNIHandler.setEmergencyExtensionSeconds(mGnssConfiguration.getEsExtensionSec());
         mSuplEsEnabled = mGnssConfiguration.getSuplEs(0) == 1;
+        if (mGnssVisibilityControl != null) {
+            mGnssVisibilityControl.updateProxyApps(mGnssConfiguration.getProxyApps());
+        }
     }
 
     public GnssLocationProvider(Context context, LocationProviderManager locationProviderManager,
@@ -562,6 +567,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         super(locationProviderManager);
 
         mContext = context;
+        mLooper = looper;
 
         // Create a wake lock
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -1834,6 +1840,27 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
+    // Implements method nfwNotifyCb() in IGnssVisibilityControlCallback.hal.
+    @NativeEntryPoint
+    private void reportNfwNotification(String proxyAppPackageName, byte protocolStack,
+            String otherProtocolStackName, byte requestor, String requestorId, byte responseType,
+            boolean inEmergencyMode, boolean isCachedLocation) {
+        if (mGnssVisibilityControl == null) {
+            Log.e(TAG, "reportNfwNotification: mGnssVisibilityControl is not initialized.");
+            return;
+        }
+
+        mGnssVisibilityControl.reportNfwNotification(proxyAppPackageName, protocolStack,
+                otherProtocolStackName, requestor, requestorId, responseType, inEmergencyMode,
+                isCachedLocation);
+    }
+
+    // Implements method isInEmergencySession() in IGnssVisibilityControlCallback.hal.
+    @NativeEntryPoint
+    boolean isInEmergencySession() {
+        return mNIHandler.getInEmergency();
+    }
+
     private void sendMessage(int message, int arg, Object obj) {
         // hold a wake lock until this message is delivered
         // note that this assumes the message will not be removed from the queue before
@@ -1920,6 +1947,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 Log.w(TAG, "Native initialization failed at bootup");
             } else {
                 native_cleanup();
+            }
+
+            if (native_is_gnss_visibility_control_supported()) {
+                mGnssVisibilityControl = new GnssVisibilityControl(mContext, mLooper);
             }
 
             // load default GPS configuration
@@ -2078,6 +2109,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static native void class_init_native();
 
     private static native boolean native_is_supported();
+
+    private static native boolean native_is_gnss_visibility_control_supported();
 
     private static native void native_init_once();
 
