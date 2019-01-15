@@ -3999,7 +3999,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         @Override
-        public void onDoubleTap(float screenX, float screenY) {
+        public void onSlpiTap(float screenX, float screenY) {
             if (screenX > 0 && screenY > 0 && mAmbientIndicationContainer != null
                 && mAmbientIndicationContainer.getVisibility() == View.VISIBLE) {
                 mAmbientIndicationContainer.getLocationOnScreen(mTmpInt2);

@@ -58,6 +58,15 @@ public class AmbientDisplayConfiguration {
         return mContext.getResources().getBoolean(R.bool.config_dozePulsePickup);
     }
 
+    public boolean tapGestureEnabled(int user) {
+        return boolSettingDefaultOn(Settings.Secure.DOZE_TAP_SCREEN_GESTURE, user)
+                && tapSensorAvailable();
+    }
+
+    public boolean tapSensorAvailable() {
+        return !TextUtils.isEmpty(tapSensorType());
+    }
+
     public boolean doubleTapGestureEnabled(int user) {
         return boolSettingDefaultOn(Settings.Secure.DOZE_DOUBLE_TAP_GESTURE, user)
                 && doubleTapSensorAvailable();
@@ -84,6 +93,10 @@ public class AmbientDisplayConfiguration {
 
     public String doubleTapSensorType() {
         return mContext.getResources().getString(R.string.config_dozeDoubleTapSensorType);
+    }
+
+    public String tapSensorType() {
+        return mContext.getResources().getString(R.string.config_dozeTapSensorType);
     }
 
     public String longPressSensorType() {

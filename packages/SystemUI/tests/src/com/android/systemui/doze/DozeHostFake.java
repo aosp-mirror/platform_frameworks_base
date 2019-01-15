@@ -104,7 +104,7 @@ class DozeHostFake implements DozeHost {
     }
 
     @Override
-    public void onDoubleTap(float x, float y) {
+    public void onSlpiTap(float x, float y) {
         doubleTapX = y;
         doubleTapY = y;
     }
