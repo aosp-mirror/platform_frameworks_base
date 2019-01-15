@@ -239,6 +239,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.permission.PermissionControllerManager;
 import android.provider.MediaStore;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -317,7 +318,6 @@ import com.android.server.pm.permission.PermissionManagerInternal;
 import com.android.server.pm.permission.PermissionManagerInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionsState;
-import com.android.server.pm.permission.PermissionsState.PermissionState;
 import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -370,6 +370,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -442,6 +443,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final boolean ENABLE_FREE_CACHE_V2 =
             SystemProperties.getBoolean("fw.free_cache_v2", true);
+
+    private static final long BACKUP_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(60);
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
@@ -19573,28 +19576,32 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new SecurityException("Only the system may call getPermissionGrantBackup()");
         }
 
-        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-        try {
-            final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
-            serializer.startDocument(null, true);
-            serializer.startTag(null, TAG_PERMISSION_BACKUP);
+        AtomicReference<byte[]> backup = new AtomicReference<>();
+        mContext.getSystemService(PermissionControllerManager.class).getRuntimePermissionBackup(
+                UserHandle.of(userId), mContext.getMainExecutor(), (b) -> {
+                    synchronized (backup) {
+                        backup.set(b);
+                        backup.notifyAll();
+                    }
+                });
 
-            synchronized (mPackages) {
-                serializeRuntimePermissionGrantsLPr(serializer, userId);
-            }
+        long start = System.currentTimeMillis();
+        synchronized (backup) {
+            while (backup.get() == null) {
+                long timeLeft = start + BACKUP_TIMEOUT_MILLIS - System.currentTimeMillis();
+                if (timeLeft <= 0) {
+                    return null;
+                }
 
-            serializer.endTag(null, TAG_PERMISSION_BACKUP);
-            serializer.endDocument();
-            serializer.flush();
-        } catch (Exception e) {
-            if (DEBUG_BACKUP) {
-                Slog.e(TAG, "Unable to write default apps for backup", e);
+                try {
+                    backup.wait(timeLeft);
+                } catch (InterruptedException ignored) {
+                    return null;
+                }
             }
-            return null;
         }
 
-        return dataStream.toByteArray();
+        return backup.get();
     }
 
     @Override
@@ -19617,66 +19624,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 Slog.e(TAG, "Exception restoring preferred activities: " + e.getMessage());
             }
         }
-    }
-
-    @GuardedBy("mPackages")
-    private void serializeRuntimePermissionGrantsLPr(XmlSerializer serializer, final int userId)
-            throws IOException {
-        serializer.startTag(null, TAG_ALL_GRANTS);
-
-        final int N = mSettings.mPackages.size();
-        for (int i = 0; i < N; i++) {
-            final PackageSetting ps = mSettings.mPackages.valueAt(i);
-            boolean pkgGrantsKnown = false;
-
-            PermissionsState packagePerms = ps.getPermissionsState();
-
-            for (PermissionState state : packagePerms.getRuntimePermissionStates(userId)) {
-                final int grantFlags = state.getFlags();
-                // only look at grants that are not system/policy fixed
-                if ((grantFlags & SYSTEM_RUNTIME_GRANT_MASK) == 0) {
-                    final boolean isGranted = state.isGranted();
-                    // And only back up the user-twiddled state bits
-                    if (isGranted || (grantFlags & USER_RUNTIME_GRANT_MASK) != 0) {
-                        final String packageName = mSettings.mPackages.keyAt(i);
-                        if (!pkgGrantsKnown) {
-                            serializer.startTag(null, TAG_GRANT);
-                            serializer.attribute(null, ATTR_PACKAGE_NAME, packageName);
-                            pkgGrantsKnown = true;
-                        }
-
-                        final boolean userSet =
-                                (grantFlags & FLAG_PERMISSION_USER_SET) != 0;
-                        final boolean userFixed =
-                                (grantFlags & FLAG_PERMISSION_USER_FIXED) != 0;
-                        final boolean revoke =
-                                (grantFlags & FLAG_PERMISSION_REVOKE_ON_UPGRADE) != 0;
-
-                        serializer.startTag(null, TAG_PERMISSION);
-                        serializer.attribute(null, ATTR_PERMISSION_NAME, state.getName());
-                        if (isGranted) {
-                            serializer.attribute(null, ATTR_IS_GRANTED, "true");
-                        }
-                        if (userSet) {
-                            serializer.attribute(null, ATTR_USER_SET, "true");
-                        }
-                        if (userFixed) {
-                            serializer.attribute(null, ATTR_USER_FIXED, "true");
-                        }
-                        if (revoke) {
-                            serializer.attribute(null, ATTR_REVOKE_ON_UPGRADE, "true");
-                        }
-                        serializer.endTag(null, TAG_PERMISSION);
-                    }
-                }
-            }
-
-            if (pkgGrantsKnown) {
-                serializer.endTag(null, TAG_GRANT);
-            }
-        }
-
-        serializer.endTag(null, TAG_ALL_GRANTS);
     }
 
     @GuardedBy("mPackages")

@@ -4863,6 +4863,7 @@ package android.permission {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract int onCountPermissionApps(java.util.List<java.lang.String>, boolean, boolean);
     method public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
+    method public abstract void onGetRuntimePermissionsBackup(android.os.UserHandle, java.io.OutputStream);
     method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
     method public abstract java.util.Map<java.lang.String, java.util.List<java.lang.String>> onRevokeRuntimePermissions(java.util.Map<java.lang.String, java.util.List<java.lang.String>>, boolean, int, java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.permission.PermissionControllerService";

@@ -36,10 +36,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -51,6 +53,11 @@ import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.util.Preconditions;
 
+import libcore.io.IoUtils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -58,6 +65,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Interface for communicating with the permission controller.
@@ -115,6 +123,20 @@ public final class PermissionControllerManager {
          *                {@code Map<packageName, List<permission>>}
          */
         public abstract void onRevokeRuntimePermissions(@NonNull Map<String, List<String>> revoked);
+    }
+
+    /**
+     * Callback for delivering the result of {@link #getRuntimePermissionBackup}.
+     *
+     * @hide
+     */
+    public interface OnGetRuntimePermissionBackupCallback {
+        /**
+         * The result for {@link #getRuntimePermissionBackup}.
+         *
+         * @param backup The backup file
+         */
+        void onGetRuntimePermissionsBackup(@NonNull byte[] backup);
     }
 
     /**
@@ -216,6 +238,26 @@ public final class PermissionControllerManager {
 
         sRemoteService.scheduleRequest(new PendingRevokeRuntimePermissionRequest(sRemoteService,
                 request, doDryRun, reason, mContext.getPackageName(), executor, callback));
+    }
+
+    /**
+     * Create a backup of the runtime permissions.
+     *
+     * @param user The user to be backed up
+     * @param executor Executor on which to invoke the callback
+     * @param callback Callback to receive the result
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS)
+    public void getRuntimePermissionBackup(@NonNull UserHandle user,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnGetRuntimePermissionBackupCallback callback) {
+        checkNotNull(executor);
+        checkNotNull(callback);
+
+        sRemoteService.scheduleRequest(new PendingGetRuntimePermissionBackup(sRemoteService,
+                user, executor, callback));
     }
 
     /**
@@ -355,6 +397,89 @@ public final class PermissionControllerManager {
     }
 
     /**
+     * Task to read a large amount of data from a remote service.
+     */
+    private static class FileReaderTask<Callback extends Consumer<byte[]>>
+            extends AsyncTask<Void, Void, byte[]> {
+        private ParcelFileDescriptor mLocalPipe;
+        private ParcelFileDescriptor mRemotePipe;
+
+        private final @NonNull Callback mCallback;
+
+        FileReaderTask(@NonNull Callback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            ParcelFileDescriptor[] pipe;
+            try {
+                pipe = ParcelFileDescriptor.createPipe();
+            } catch (IOException e) {
+                Log.e(TAG, "Could not create pipe needed to get runtime permission backup", e);
+                return;
+            }
+
+            mLocalPipe = pipe[0];
+            mRemotePipe = pipe[1];
+        }
+
+        /**
+         * Get the file descriptor the remote service should write the data to.
+         *
+         * <p>Needs to be closed <u>locally</u> before the FileReader can finish.
+         *
+         * @return The file the data should be written to
+         */
+        ParcelFileDescriptor getRemotePipe() {
+            return mRemotePipe;
+        }
+
+        @Override
+        protected byte[] doInBackground(Void... ignored) {
+            ByteArrayOutputStream combinedBuffer = new ByteArrayOutputStream();
+
+            try (InputStream in = new ParcelFileDescriptor.AutoCloseInputStream(mLocalPipe)) {
+                byte[] buffer = new byte[16 * 1024];
+
+                while (!isCancelled()) {
+                    int numRead = in.read(buffer);
+                    if (numRead == -1) {
+                        break;
+                    }
+
+                    combinedBuffer.write(buffer, 0, numRead);
+                }
+            } catch (IOException | NullPointerException e) {
+                Log.e(TAG, "Error reading runtime permission backup", e);
+                combinedBuffer.reset();
+            }
+
+            return combinedBuffer.toByteArray();
+        }
+
+        /**
+         * Interrupt the reading of the data.
+         *
+         * <p>Needs to be called when canceling this task as it might be hung.
+         */
+        void interruptRead() {
+            IoUtils.closeQuietly(mLocalPipe);
+        }
+
+        @Override
+        protected void onCancelled() {
+            onPostExecute(new byte[]{});
+        }
+
+        @Override
+        protected void onPostExecute(byte[] backup) {
+            IoUtils.closeQuietly(mLocalPipe);
+            mCallback.accept(backup);
+        }
+    }
+
+    /**
      * Request for {@link #revokeRuntimePermissions}
      */
     private static final class PendingRevokeRuntimePermissionRequest extends
@@ -437,6 +562,68 @@ public final class PermissionControllerManager {
             } catch (RemoteException e) {
                 Log.e(TAG, "Error revoking runtime permission", e);
             }
+        }
+    }
+
+    /**
+     * Request for {@link #getRuntimePermissionBackup}
+     */
+    private static final class PendingGetRuntimePermissionBackup extends
+            AbstractRemoteService.PendingRequest<RemoteService, IPermissionController>
+            implements Consumer<byte[]> {
+        private final @NonNull FileReaderTask<PendingGetRuntimePermissionBackup> mBackupReader;
+        private final @NonNull Executor mExecutor;
+        private final @NonNull OnGetRuntimePermissionBackupCallback mCallback;
+        private final @NonNull UserHandle mUser;
+
+        private PendingGetRuntimePermissionBackup(@NonNull RemoteService service,
+                @NonNull UserHandle user, @NonNull @CallbackExecutor Executor executor,
+                @NonNull OnGetRuntimePermissionBackupCallback callback) {
+            super(service);
+
+            mUser = user;
+            mExecutor = executor;
+            mCallback = callback;
+
+            mBackupReader = new FileReaderTask<>(this);
+        }
+
+        @Override
+        protected void onTimeout(RemoteService remoteService) {
+            mBackupReader.cancel(true);
+            mBackupReader.interruptRead();
+        }
+
+        @Override
+        public void run() {
+            mBackupReader.execute();
+
+            ParcelFileDescriptor remotePipe = mBackupReader.getRemotePipe();
+            try {
+                getService().getServiceInterface().getRuntimePermissionBackup(mUser, remotePipe);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error getting runtime permission backup", e);
+            } finally {
+                // Remote pipe end is duped by binder call. Local copy is not needed anymore
+                IoUtils.closeQuietly(remotePipe);
+            }
+        }
+
+        /**
+         * Called when the {@link #mBackupReader} finished reading the file.
+         *
+         * @param backup The data read
+         */
+        @Override
+        public void accept(byte[] backup) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onGetRuntimePermissionsBackup(backup));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+
+            finish();
         }
     }
 
