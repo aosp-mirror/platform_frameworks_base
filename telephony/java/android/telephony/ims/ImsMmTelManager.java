@@ -714,7 +714,7 @@ public class ImsMmTelManager {
      * @see #setVoWiFiRoamingSetting(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    @WiFiCallingMode int getVoWiFiRoamingModeSetting() {
+    public @WiFiCallingMode int getVoWiFiRoamingModeSetting() {
         try {
             return getITelephony().getVoWiFiRoamingModeSetting(mSubId);
         } catch (RemoteException e) {
