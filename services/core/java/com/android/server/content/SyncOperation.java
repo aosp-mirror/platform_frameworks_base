@@ -363,14 +363,19 @@ public class SyncOperation {
 
     @Override
     public String toString() {
-        return dump(null, true, null);
+        return dump(null, true, null, false);
     }
 
-    String dump(PackageManager pm, boolean shorter, SyncAdapterStateFetcher appStates) {
+    public String toSafeString() {
+        return dump(null, true, null, true);
+    }
+
+    String dump(PackageManager pm, boolean shorter, SyncAdapterStateFetcher appStates,
+            boolean logSafe) {
         StringBuilder sb = new StringBuilder();
         sb.append("JobId=").append(jobId)
                 .append(" ")
-                .append(target.account.name)
+                .append(logSafe ? "***" : target.account.name)
                 .append("/")
                 .append(target.account.type)
                 .append(" u")
