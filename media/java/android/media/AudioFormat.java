@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -816,7 +817,7 @@ public final class AudioFormat implements Parcelable {
      *
      * @return The audio frame size in bytes corresponding to the encoding and the channel mask.
      */
-    public int getFrameSizeInBytes() {
+    public @IntRange(from = 1) int getFrameSizeInBytes() {
         return mFrameSizeInBytes;
     }
 
