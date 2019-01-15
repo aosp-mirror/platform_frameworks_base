@@ -3760,9 +3760,11 @@ public class PackageParser {
             ai.flags |= ApplicationInfo.FLAG_MULTIARCH;
         }
 
+        final boolean extractNativeLibsDefault =
+                owner.applicationInfo.targetSdkVersion < Build.VERSION_CODES.Q;
         if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_extractNativeLibs,
-                true)) {
+                extractNativeLibsDefault)) {
             ai.flags |= ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS;
         }
 
