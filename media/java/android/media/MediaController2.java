@@ -19,6 +19,7 @@ package android.media;
 import static android.media.MediaConstants.KEY_ALLOWED_COMMANDS;
 import static android.media.MediaConstants.KEY_PACKAGE_NAME;
 import static android.media.MediaConstants.KEY_PID;
+import static android.media.MediaConstants.KEY_PLAYBACK_ACTIVE;
 import static android.media.MediaConstants.KEY_SESSION2LINK;
 import static android.media.Session2Command.RESULT_ERROR_UNKNOWN_ERROR;
 import static android.media.Session2Command.RESULT_INFO_SKIPPED;
@@ -30,7 +31,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -82,6 +82,8 @@ public class MediaController2 implements AutoCloseable {
     private ArrayMap<ResultReceiver, Integer> mPendingCommands;
     //@GuardedBy("mLock")
     private ArraySet<Integer> mRequestedCommandSeqNumbers;
+    //@GuardedBy("mLock")
+    private boolean mPlaybackActive;
 
     /**
      * Create a {@link MediaController2} from the {@link Session2Token}.
@@ -160,6 +162,18 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
+     * Returns whether the session's playback is active.
+     *
+     * @return {@code true} if playback active. {@code false} otherwise.
+     * @see ControllerCallback#onPlaybackActiveChanged(MediaController2, boolean)
+     */
+    public boolean isPlaybackActive() {
+        synchronized (mLock) {
+            return mPlaybackActive;
+        }
+    }
+
+    /**
      * Sends a session command to the session
      * <p>
      * @param command the session command
@@ -221,89 +235,82 @@ public class MediaController2 implements AutoCloseable {
 
     // Called by Controller2Link.onConnected
     void onConnected(int seq, Bundle connectionResult) {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            Session2Link sessionBinder = connectionResult.getParcelable(KEY_SESSION2LINK);
-            Session2CommandGroup allowedCommands =
-                    connectionResult.getParcelable(KEY_ALLOWED_COMMANDS);
-            if (DEBUG) {
-                Log.d(TAG, "notifyConnected sessionBinder=" + sessionBinder
-                        + ", allowedCommands=" + allowedCommands);
-            }
-            if (sessionBinder == null || allowedCommands == null) {
-                // Connection rejected.
-                close();
-                return;
-            }
-            synchronized (mLock) {
-                mSessionBinder = sessionBinder;
-                mAllowedCommands = allowedCommands;
-                // Implementation for the local binder is no-op,
-                // so can be used without worrying about deadlock.
-                sessionBinder.linkToDeath(mDeathRecipient, 0);
-                mConnectedToken = new Session2Token(mSessionToken.getUid(), TYPE_SESSION,
-                        mSessionToken.getPackageName(), sessionBinder);
-            }
-            mCallbackExecutor.execute(() -> {
-                mCallback.onConnected(MediaController2.this, allowedCommands);
-            });
-        } finally {
-            Binder.restoreCallingIdentity(token);
+        Session2Link sessionBinder = connectionResult.getParcelable(KEY_SESSION2LINK);
+        Session2CommandGroup allowedCommands =
+                connectionResult.getParcelable(KEY_ALLOWED_COMMANDS);
+        boolean playbackActive = connectionResult.getBoolean(KEY_PLAYBACK_ACTIVE);
+        if (DEBUG) {
+            Log.d(TAG, "notifyConnected sessionBinder=" + sessionBinder
+                    + ", allowedCommands=" + allowedCommands);
         }
+        if (sessionBinder == null || allowedCommands == null) {
+            // Connection rejected.
+            close();
+            return;
+        }
+        synchronized (mLock) {
+            mSessionBinder = sessionBinder;
+            mAllowedCommands = allowedCommands;
+            mPlaybackActive = playbackActive;
+
+            // Implementation for the local binder is no-op,
+            // so can be used without worrying about deadlock.
+            sessionBinder.linkToDeath(mDeathRecipient, 0);
+            mConnectedToken = new Session2Token(mSessionToken.getUid(), TYPE_SESSION,
+                    mSessionToken.getPackageName(), sessionBinder);
+        }
+        mCallbackExecutor.execute(() -> {
+            mCallback.onConnected(MediaController2.this, allowedCommands);
+        });
     }
 
     // Called by Controller2Link.onDisconnected
     void onDisconnected(int seq) {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            // close() will call mCallback.onDisconnected
-            close();
-        } finally {
-            Binder.restoreCallingIdentity(token);
+        // close() will call mCallback.onDisconnected
+        close();
+    }
+
+    // Called by Controller2Link.onPlaybackActiveChanged
+    void onPlaybackActiveChanged(int seq, boolean playbackActive) {
+        synchronized (mLock) {
+            mPlaybackActive = playbackActive;
         }
+        mCallbackExecutor.execute(() -> {
+            mCallback.onPlaybackActiveChanged(MediaController2.this, playbackActive);
+        });
     }
 
     // Called by Controller2Link.onSessionCommand
     void onSessionCommand(int seq, Session2Command command, Bundle args,
             @Nullable ResultReceiver resultReceiver) {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
-                mRequestedCommandSeqNumbers.add(seq);
-            }
-            mCallbackExecutor.execute(() -> {
-                boolean isCanceled;
-                synchronized (mLock) {
-                    isCanceled = !mRequestedCommandSeqNumbers.remove(seq);
-                }
-                if (isCanceled) {
-                    resultReceiver.send(RESULT_INFO_SKIPPED, null);
-                    return;
-                }
-                Session2Command.Result result = mCallback.onSessionCommand(
-                        MediaController2.this, command, args);
-                if (resultReceiver != null) {
-                    if (result == null) {
-                        throw new RuntimeException("onSessionCommand shouldn't return null");
-                    } else {
-                        resultReceiver.send(result.getResultCode(), result.getResultData());
-                    }
-                }
-            });
-        } finally {
-            Binder.restoreCallingIdentity(token);
+        synchronized (mLock) {
+            mRequestedCommandSeqNumbers.add(seq);
         }
+        mCallbackExecutor.execute(() -> {
+            boolean isCanceled;
+            synchronized (mLock) {
+                isCanceled = !mRequestedCommandSeqNumbers.remove(seq);
+            }
+            if (isCanceled) {
+                resultReceiver.send(RESULT_INFO_SKIPPED, null);
+                return;
+            }
+            Session2Command.Result result = mCallback.onSessionCommand(
+                    MediaController2.this, command, args);
+            if (resultReceiver != null) {
+                if (result == null) {
+                    throw new RuntimeException("onSessionCommand shouldn't return null");
+                } else {
+                    resultReceiver.send(result.getResultCode(), result.getResultData());
+                }
+            }
+        });
     }
 
     // Called by Controller2Link.onSessionCommand
     void onCancelCommand(int seq) {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
-                mRequestedCommandSeqNumbers.remove(seq);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
+        synchronized (mLock) {
+            mRequestedCommandSeqNumbers.remove(seq);
         }
     }
 
@@ -391,6 +398,17 @@ public class MediaController2 implements AutoCloseable {
          * @param controller the controller for this event
          */
         public void onDisconnected(@NonNull MediaController2 controller) {}
+
+        /**
+         * Called when the playback of the session's playback activeness is changed.
+         *
+         * @param controller the controller for this event
+         * @param playbackActive {@code true} if the session's playback is active.
+         *                       {@code false} otherwise.
+         * @see MediaController2#isPlaybackActive()
+         */
+        public void onPlaybackActiveChanged(@NonNull MediaController2 controller,
+                boolean playbackActive) {}
 
         /**
          * Called when the connected session sent a session command.
