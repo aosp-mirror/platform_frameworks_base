@@ -48,6 +48,7 @@ import com.android.internal.os.IResultReceiver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -77,6 +78,7 @@ public abstract class ContentCaptureService extends Service {
             "android.service.contentcapture.ContentCaptureService";
 
     private Handler mHandler;
+    private IContentCaptureServiceCallback mCallback;
 
     /**
      * Binder that receives calls from the system server.
@@ -84,9 +86,15 @@ public abstract class ContentCaptureService extends Service {
     private final IContentCaptureService mServerInterface = new IContentCaptureService.Stub() {
 
         @Override
-        public void onConnectedStateChanged(boolean state) {
-            mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnConnectedStateChanged,
-                    ContentCaptureService.this, state));
+        public void onConnected(IBinder callback) {
+            mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnConnected,
+                    ContentCaptureService.this, callback));
+        }
+
+        @Override
+        public void onDisconnected() {
+            mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnDisconnected,
+                    ContentCaptureService.this));
         }
 
         @Override
@@ -166,7 +174,16 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setContentCaptureWhitelist(@Nullable List<String> packages,
             @Nullable List<ComponentName> activities) {
-        //TODO(b/122595322): implement
+        final IContentCaptureServiceCallback callback = mCallback;
+        if (callback == null) {
+            Log.w(TAG, "setContentCaptureWhitelist(): no server callback");
+            return;
+        }
+        try {
+            callback.setContentCaptureWhitelist(packages, activities);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -177,7 +194,16 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setActivityContentCaptureEnabled(@NonNull ComponentName activity,
             boolean enabled) {
-        //TODO(b/122595322): implement
+        final IContentCaptureServiceCallback callback = mCallback;
+        if (callback == null) {
+            Log.w(TAG, "setActivityContentCaptureEnabled(): no server callback");
+            return;
+        }
+        try {
+            callback.setActivityContentCaptureEnabled(activity, enabled);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -188,7 +214,16 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setPackageContentCaptureEnabled(@NonNull String packageName,
             boolean enabled) {
-        //TODO(b/122595322): implement
+        final IContentCaptureServiceCallback callback = mCallback;
+        if (callback == null) {
+            Log.w(TAG, "setPackageContentCaptureEnabled(): no server callback");
+            return;
+        }
+        try {
+            callback.setPackageContentCaptureEnabled(packageName, enabled);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -197,7 +232,12 @@ public abstract class ContentCaptureService extends Service {
      */
     @NonNull
     public final Set<ComponentName> getContentCaptureDisabledActivities() {
-        //TODO(b/122595322): implement
+        final IContentCaptureServiceCallback callback = mCallback;
+        if (callback == null) {
+            Log.w(TAG, "getContentCaptureDisabledActivities(): no server callback");
+            return Collections.emptySet();
+        }
+        //TODO(b/122595322): implement (using SyncResultReceiver)
         return null;
     }
 
@@ -207,7 +247,12 @@ public abstract class ContentCaptureService extends Service {
      */
     @NonNull
     public final Set<String> getContentCaptureDisabledPackages() {
-        //TODO(b/122595322): implement
+        final IContentCaptureServiceCallback callback = mCallback;
+        if (callback == null) {
+            Log.w(TAG, "getContentCaptureDisabledPackages(): no server callback");
+            return Collections.emptySet();
+        }
+        //TODO(b/122595322): implement (using SyncResultReceiver)
         return null;
     }
 
@@ -307,12 +352,14 @@ public abstract class ContentCaptureService extends Service {
         }
     }
 
-    private void handleOnConnectedStateChanged(boolean state) {
-        if (state) {
-            onConnected();
-        } else {
-            onDisconnected();
-        }
+    private void handleOnConnected(@NonNull IBinder callback) {
+        mCallback = IContentCaptureServiceCallback.Stub.asInterface(callback);
+        onConnected();
+    }
+
+    private void handleOnDisconnected() {
+        onDisconnected();
+        mCallback = null;
     }
 
     //TODO(b/111276913): consider caching the InteractionSessionId for the lifetime of the session,

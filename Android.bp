@@ -305,6 +305,7 @@ java_defaults {
         "core/java/android/service/euicc/IUpdateSubscriptionNicknameCallback.aidl",
         "core/java/android/service/gatekeeper/IGateKeeperService.aidl",
         "core/java/android/service/contentcapture/IContentCaptureService.aidl",
+        "core/java/android/service/contentcapture/IContentCaptureServiceCallback.aidl",
         "core/java/android/service/notification/INotificationListener.aidl",
         "core/java/android/service/notification/IStatusBarNotificationHolder.aidl",
         "core/java/android/service/notification/IConditionListener.aidl",
