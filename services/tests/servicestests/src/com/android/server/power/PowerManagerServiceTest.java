@@ -21,7 +21,6 @@ import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -86,7 +85,7 @@ public class PowerManagerServiceTest extends AndroidTestCase {
                 .setBrightnessFactor(BRIGHTNESS_FACTOR)
                 .build();
         when(mBatterySaverPolicyMock.getBatterySaverPolicy(
-                eq(PowerManager.ServiceType.SCREEN_BRIGHTNESS), anyBoolean()))
+                eq(PowerManager.ServiceType.SCREEN_BRIGHTNESS)))
                 .thenReturn(mPowerSaveState);
 
         mDisplayPowerRequest = new DisplayPowerRequest();

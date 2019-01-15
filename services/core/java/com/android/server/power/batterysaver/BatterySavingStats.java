@@ -57,9 +57,10 @@ public class BatterySavingStats {
     interface BatterySaverState {
         int OFF = 0;
         int ON = 1;
+        int ADAPTIVE = 2;
 
         int SHIFT = 0;
-        int BITS = 1;
+        int BITS = 2;
         int MASK = (1 << BITS) - 1;
 
         static int fromIndex(int index) {

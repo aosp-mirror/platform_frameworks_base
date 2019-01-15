@@ -53,8 +53,8 @@ public class BatterySaverLocationPlugin implements Plugin {
     private void updateLocationState(BatterySaverController caller) {
         final boolean kill =
                 (caller.getBatterySaverPolicy().getGpsMode()
-                        == PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF) &&
-                caller.isEnabled() && !caller.isInteractive();
+                        == PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF)
+                        && !caller.isInteractive();
 
         if (DEBUG) {
             Slog.d(TAG, "Battery saver " + (kill ? "stopping" : "restoring") + " location.");

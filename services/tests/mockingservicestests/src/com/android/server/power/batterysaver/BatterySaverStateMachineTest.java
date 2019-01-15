@@ -16,6 +16,7 @@
 package com.android.server.power.batterysaver;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
@@ -178,7 +179,11 @@ public class BatterySaverStateMachineTest {
                 .getSystemService(NotificationManager.class);
         doAnswer((inv) -> mDevice.batterySaverEnabled = inv.getArgument(0))
                 .when(mMockBatterySaverController).enableBatterySaver(anyBoolean(), anyInt());
+        doReturn(true).when(mMockBatterySaverController)
+                .setAdaptivePolicyLocked(any(BatterySaverPolicy.Policy.class), anyInt());
         when(mMockBatterySaverController.isEnabled())
+                .thenAnswer((inv) -> mDevice.batterySaverEnabled);
+        when(mMockBatterySaverController.isFullEnabled())
                 .thenAnswer((inv) -> mDevice.batterySaverEnabled);
         when(mMockResources.getBoolean(
                 com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled))
