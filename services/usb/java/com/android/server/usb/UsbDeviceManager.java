@@ -1760,8 +1760,8 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                     mGadgetProxy.linkToDeath(new UsbGadgetDeathRecipient(),
                             USB_GADGET_HAL_DEATH_COOKIE);
                     mCurrentFunctions = UsbManager.FUNCTION_NONE;
-                    mGadgetProxy.getCurrentUsbFunctions(new UsbGadgetCallback());
                     mCurrentUsbFunctionsRequested = true;
+                    mGadgetProxy.getCurrentUsbFunctions(new UsbGadgetCallback());
                 }
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
