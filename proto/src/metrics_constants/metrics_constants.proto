@@ -73,6 +73,10 @@ message MetricsEvent {
 
     // The view switched to summary mode (most relevant for notifications)
     TYPE_COLLAPSE = 14;
+
+    // The notification was adjusted by the assistant. Enum value is
+    // out of sequence due to b/122737498.
+    TYPE_NOTIFICATION_ASSISTANT_ADJUSTMENT = 1573;
   }
 
   // Types of alerts, as bit field values

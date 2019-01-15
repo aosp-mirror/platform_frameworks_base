@@ -1263,7 +1263,7 @@ public final class NotificationRecord {
     public LogMaker getAdjustmentLogMaker() {
         return getLogMaker()
                 .setCategory(MetricsEvent.NOTIFICATION_ITEM)
-                .setType(MetricsEvent.NOTIFICATION_ASSISTANT_ADJUSTMENT);
+                .setType(MetricsEvent.TYPE_NOTIFICATION_ASSISTANT_ADJUSTMENT);
     }
 
     @VisibleForTesting
