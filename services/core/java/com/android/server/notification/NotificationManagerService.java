@@ -2311,22 +2311,22 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public boolean areAppOverlaysAllowed(String pkg) {
-            return areAppOverlaysAllowedForPackage(pkg, Binder.getCallingUid());
+        public boolean areBubblesAllowed(String pkg) {
+            return areBubblesAllowedForPackage(pkg, Binder.getCallingUid());
         }
 
         @Override
-        public boolean areAppOverlaysAllowedForPackage(String pkg, int uid) {
-            enforceSystemOrSystemUIOrSamePackage("Caller not system or systemui or same package",
-                    pkg);
-            return mPreferencesHelper.areAppOverlaysAllowed(pkg, uid);
+        public boolean areBubblesAllowedForPackage(String pkg, int uid) {
+            enforceSystemOrSystemUIOrSamePackage(pkg,
+                    "Caller not system or systemui or same package");
+            return mPreferencesHelper.areBubblessAllowed(pkg, uid);
         }
 
         @Override
-        public void setAppOverlaysAllowed(String pkg, int uid, boolean allowed) {
+        public void setBubblesAllowed(String pkg, int uid, boolean allowed) {
             checkCallerIsSystem();
 
-            mPreferencesHelper.setAppOverlaysAllowed(pkg, uid, allowed);
+            mPreferencesHelper.setBubblesAllowed(pkg, uid, allowed);
             handleSavePolicyFile();
         }
 

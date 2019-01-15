@@ -3511,9 +3511,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAppOverlay() throws Exception {
-        mBinderService.setAppOverlaysAllowed(PKG, mUid, false);
-        assertFalse(mBinderService.areAppOverlaysAllowedForPackage(PKG, mUid));
+    public void testBubble() throws Exception {
+        mBinderService.setBubblesAllowed(PKG, mUid, false);
+        assertFalse(mBinderService.areBubblesAllowedForPackage(PKG, mUid));
     }
 
     @Test
