@@ -323,7 +323,7 @@ public class PluginInstanceManager<T extends Plugin> {
                     return null;
                 }
                 // Create our own ClassLoader so we can use our own code as the parent.
-                ClassLoader classLoader = mManager.getClassLoader(info.sourceDir, info.packageName);
+                ClassLoader classLoader = mManager.getClassLoader(info);
                 Context pluginContext = new PluginContextWrapper(
                         mContext.createApplicationContext(info, 0), classLoader);
                 Class<?> pluginClass = Class.forName(cls, true, classLoader);

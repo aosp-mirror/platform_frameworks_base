@@ -91,7 +91,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mMockPm = mock(PackageManager.class);
         mMockListener = mock(PluginListener.class);
         mMockManager = mock(PluginManagerImpl.class);
-        when(mMockManager.getClassLoader(any(), any())).thenReturn(getClass().getClassLoader());
+        when(mMockManager.getClassLoader(any())).thenReturn(getClass().getClassLoader());
         mMockEnabler = mock(PluginEnabler.class);
         when(mMockManager.getPluginEnabler()).thenReturn(mMockEnabler);
         mMockVersionInfo = mock(VersionInfo.class);
