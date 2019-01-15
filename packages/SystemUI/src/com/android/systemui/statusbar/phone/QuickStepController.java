@@ -34,12 +34,19 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.hardware.input.InputManager;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
+
+import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
@@ -64,7 +71,10 @@ public class QuickStepController implements GestureHelper {
 
     /** Experiment to swipe home button left to execute a back key press */
     private static final String HIDE_BACK_BUTTON_PROP = "quickstepcontroller_hideback";
+    private static final String ENABLE_CLICK_THROUGH_NAV_PROP = "quickstepcontroller_clickthrough";
     private static final long BACK_BUTTON_FADE_IN_ALPHA = 150;
+    private static final long CLICK_THROUGH_TAP_DELAY = 70;
+    private static final long CLICK_THROUGH_TAP_RESET_DELAY = 100;
 
     /** When the home-swipe-back gesture is disallowed, make it harder to pull */
     private static final float HORIZONTAL_GESTURE_DAMPING = 0.3f;
@@ -100,6 +110,9 @@ public class QuickStepController implements GestureHelper {
     private float mMinDragLimit;
     private float mDragDampeningFactor;
     private float mEdgeSwipeThreshold;
+    private boolean mClickThroughPressed;
+    private float mClickThroughPressX;
+    private float mClickThroughPressY;
 
     private NavigationGestureAction mCurrentAction;
     private NavigationGestureAction[] mGestureActions = new NavigationGestureAction[MAX_GESTURES];
@@ -116,6 +129,19 @@ public class QuickStepController implements GestureHelper {
         mStatusBar = SysUiServiceProvider.getComponent(context, StatusBar.class);
         mOverviewEventSender = Dependency.get(OverviewProxyService.class);
     }
+
+    private final Runnable mClickThroughSendTap = new Runnable() {
+        @Override
+        public void run() {
+            sendTap(mClickThroughPressX, mClickThroughPressY);
+            mNavigationBarView.postDelayed(mClickThroughResetTap, CLICK_THROUGH_TAP_RESET_DELAY);
+        }
+    };
+
+    private final Runnable mClickThroughResetTap = () -> {
+        setWindowTouchable(true);
+        mClickThroughPressed = false;
+    };
 
     public void setComponents(NavigationBarView navigationBarView) {
         mNavigationBarView = navigationBarView;
@@ -320,6 +346,25 @@ public class QuickStepController implements GestureHelper {
             case MotionEvent.ACTION_UP:
                 if (mCurrentAction != null) {
                     mCurrentAction.endGesture();
+                } else if (action == MotionEvent.ACTION_UP
+                        && getBoolGlobalSetting(mContext, ENABLE_CLICK_THROUGH_NAV_PROP)
+                        && !mClickThroughPressed) {
+                    // Enable click through functionality where no gesture has been detected and not
+                    // passed the drag slop so inject a touch event at the same location
+                    // after making the navigation bar window untouchable. After a some time, the
+                    // navigation bar will be able to take input events again
+                    float diffX = Math.abs(event.getX() - mTouchDownX);
+                    float diffY = Math.abs(event.getY() - mTouchDownY);
+
+                    if ((diffX <= NavigationBarCompat.getQuickStepDragSlopPx()
+                            && diffY <= NavigationBarCompat.getQuickStepDragSlopPx())) {
+                        setWindowTouchable(false);
+                        mClickThroughPressX = event.getRawX();
+                        mClickThroughPressY = event.getRawY();
+                        mClickThroughPressed = true;
+                        mNavigationBarView.postDelayed(mClickThroughSendTap,
+                                CLICK_THROUGH_TAP_DELAY);
+                    }
                 }
 
                 // Return the hit target back to its original position
@@ -348,6 +393,19 @@ public class QuickStepController implements GestureHelper {
             mCurrentAction = null;
         }
         return mCurrentAction != null || deadZoneConsumed;
+    }
+
+    private void setWindowTouchable(boolean flag) {
+        final WindowManager.LayoutParams lp = (WindowManager.LayoutParams)
+                ((ViewGroup) mNavigationBarView.getParent()).getLayoutParams();
+        if (flag) {
+            lp.flags &= ~LayoutParams.FLAG_NOT_TOUCHABLE;
+        } else {
+            lp.flags |= LayoutParams.FLAG_NOT_TOUCHABLE;
+        }
+        final WindowManager wm = (WindowManager) mNavigationBarView.getContext()
+                .getSystemService(Context.WINDOW_SERVICE);
+        wm.updateViewLayout((View) mNavigationBarView.getParent(), lp);
     }
 
     private boolean isEdgeSwipeAlongNavBar(int touchDown, boolean dragPositiveDirection) {
@@ -560,6 +618,38 @@ public class QuickStepController implements GestureHelper {
             }
         }
         return false;
+    }
+
+    private void sendTap(float x, float y) {
+        long now = SystemClock.uptimeMillis();
+        injectMotionEvent(InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.ACTION_DOWN, now, x, y, 1.0f);
+        injectMotionEvent(InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.ACTION_UP, now, x, y, 0.0f);
+    }
+
+    private int getInputDeviceId(int inputSource) {
+        int[] devIds = InputDevice.getDeviceIds();
+        for (int devId : devIds) {
+            InputDevice inputDev = InputDevice.getDevice(devId);
+            if (inputDev.supportsSource(inputSource)) {
+                return devId;
+            }
+        }
+        return 0;
+    }
+
+    private void injectMotionEvent(int inputSource, int action, long when, float x, float y,
+            float pressure) {
+        final float defaultSize = 1.0f;
+        final int defaultMetaState = 0;
+        final float defaultPrecisionX = 1.0f;
+        final float defaultPrecisionY = 1.0f;
+        final int defaultEdgeFlags = 0;
+        MotionEvent event = MotionEvent.obtain(when, when, action, x, y, pressure, defaultSize,
+                defaultMetaState, defaultPrecisionX, defaultPrecisionY,
+                getInputDeviceId(inputSource), defaultEdgeFlags);
+        event.setSource(inputSource);
+        InputManager.getInstance().injectInputEvent(event,
+                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
     private boolean proxyMotionEvents(MotionEvent event) {
