@@ -33,21 +33,12 @@ applications that come with the platform
         <permission name="android.permission.CRYPT_KEEPER"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.carrierconfig">
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.cellbroadcastreceiver">
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.RECEIVE_EMERGENCY_BROADCAST"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.contacts">
-        <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
-        <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.defcontainer">
@@ -77,12 +68,6 @@ applications that come with the platform
     <privapp-permissions package="com.android.externalstorage">
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.launcher3">
-        <permission name="android.permission.BIND_APPWIDGET"/>
-        <permission name="android.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS"/>
-        <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.location.fused">
@@ -225,10 +210,6 @@ applications that come with the platform
         <permission name="android.permission.USE_RESERVED_DISK"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.provision">
-        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.mainline.networkstack">
         <permission name="android.permission.ACCESS_NETWORK_CONDITIONS"/>
         <permission name="android.permission.CHANGE_BACKGROUND_DATA_SETTING"/>
@@ -331,15 +312,6 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.statementservice">
         <permission name="android.permission.INTENT_FILTER_VERIFICATION_AGENT"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.storagemanager">
-        <permission name="android.permission.DELETE_PACKAGES"/>
-        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-        <permission name="android.permission.MANAGE_USERS"/>
-        <permission name="android.permission.PACKAGE_USAGE_STATS"/>
-        <permission name="android.permission.USE_RESERVED_DISK"/>
-        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.tv">
