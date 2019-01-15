@@ -406,7 +406,6 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         @Nullable
         private ArraySet<String> getRoleHoldersInternal(@NonNull String roleName,
                 @UserIdInt int userId) {
-            migrateRoleIfNecessary(roleName, userId);
             RoleUserState userState = getOrCreateUserState(userId);
             return userState.getRoleHolders(roleName);
         }
