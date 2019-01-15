@@ -125,7 +125,7 @@ message Atom {
         PhoneServiceStateChanged phone_service_state_changed = 94;
         PhoneStateChanged phone_state_changed = 95;
         LowMemReported low_mem_reported = 81;
-
+        NetworkDnsEventReported network_dns_event_reported = 116;
 
     }
 
@@ -2017,3 +2017,52 @@ message Temperature {
     // Temperature in tenths of a degree C.
     optional int32 temperature_dC = 3;
 }
+
+/**
+ * Logs the latency period(in microseconds) and the return code of
+ * the DNS(Domain Name System) lookups.
+ * These 4 methods(GETADDRINFO,GETHOSTBYNAME,GETHOSTBYADDR,RES_NSEND)
+ * to get info(address or hostname) from DNS server(or DNS cache).
+ * Logged from:
+ *   /system/netd/server/DnsProxyListener.cpp
+ */
+message NetworkDnsEventReported {
+    // The types of the DNS lookups, as defined in
+    //system/netd/server/binder/android/net/metrics/INetdEventListener.aidl
+    enum EventType {
+        EVENT_UNKNOWN = 0;
+        EVENT_GETADDRINFO = 1;
+        EVENT_GETHOSTBYNAME = 2;
+        EVENT_GETHOSTBYADDR = 3;
+        EVENT_RES_NSEND = 4;
+    }
+    optional EventType event_type = 1;
+
+    // The return value of the DNS resolver for each DNS lookups.
+    //bionic/libc/include/netdb.h
+    //system/netd/resolv/include/netd_resolv/resolv.h
+    enum ReturnCode {
+        EAI_NO_ERROR = 0;
+        EAI_ADDRFAMILY = 1;
+        EAI_AGAIN = 2;
+        EAI_BADFLAGS = 3;
+        EAI_FAIL = 4;
+        EAI_FAMILY = 5;
+        EAI_MEMORY = 6;
+        EAI_NODATA = 7;
+        EAI_NONAME = 8;
+        EAI_SERVICE = 9;
+        EAI_SOCKTYPE = 10;
+        EAI_SYSTEM = 11;
+        EAI_BADHINTS = 12;
+        EAI_PROTOCOL = 13;
+        EAI_OVERFLOW = 14;
+        RESOLV_TIMEOUT = 255;
+        EAI_MAX = 256;
+    }
+    optional ReturnCode return_code = 2;
+
+    // The latency period(in microseconds) it took for this DNS lookup to complete.
+    optional int32 latency_micros = 3;
+}
+
