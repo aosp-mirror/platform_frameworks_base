@@ -138,6 +138,7 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
                 event->getDeviceId(), event->getSource(), event->getDisplayId(),
                 event->getAction(), event->getActionButton(), event->getFlags(),
                 event->getEdgeFlags(), event->getMetaState(), event->getButtonState(),
+                event->getClassification(),
                 event->getXOffset(), event->getYOffset(),
                 event->getXPrecision(), event->getYPrecision(),
                 event->getDownTime(), event->getHistoricalEventTime(i),
