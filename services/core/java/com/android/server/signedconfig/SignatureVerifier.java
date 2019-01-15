@@ -119,6 +119,8 @@ public class SignatureVerifier {
         }
         if (mProdKey ==  null) {
             Slog.e(TAG, "No prod key; construction failed?");
+            mEvent.status =
+                    StatsLog.SIGNED_CONFIG_REPORTED__STATUS__SIGNATURE_CHECK_FAILED_PROD_KEY_ABSENT;
             return false;
         }
         if (verifyWithPublicKey(mProdKey, data, signature)) {

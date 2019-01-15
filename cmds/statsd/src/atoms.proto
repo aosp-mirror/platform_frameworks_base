@@ -3884,6 +3884,7 @@ message SignedConfigReported {
         OLD_CONFIG = 6;
         SIGNATURE_CHECK_FAILED = 7;
         NOT_APPLICABLE = 8;
+        SIGNATURE_CHECK_FAILED_PROD_KEY_ABSENT = 9;
     }
     optional Status status = 2;
 
