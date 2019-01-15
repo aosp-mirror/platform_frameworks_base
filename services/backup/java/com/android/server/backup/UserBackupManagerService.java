@@ -1466,11 +1466,7 @@ public class UserBackupManagerService {
             }
         }
         if (agent == null) {
-            try {
-                mActivityManager.clearPendingBackup();
-            } catch (RemoteException e) {
-                // can't happen - ActivityManager is local
-            }
+            mActivityManagerInternal.clearPendingBackup(mUserId);
         }
         return agent;
     }

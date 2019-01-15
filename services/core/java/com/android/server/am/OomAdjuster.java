@@ -1024,7 +1024,8 @@ public final class OomAdjuster {
         app.hasStartedServices = false;
         app.adjSeq = mAdjSeq;
 
-        if (mService.mBackupTarget != null && app == mService.mBackupTarget.app) {
+        final BackupRecord backupTarget = mService.mBackupTargets.get(app.userId);
+        if (backupTarget != null && app == backupTarget.app) {
             // If possible we want to avoid killing apps while they're being backed up
             if (adj > ProcessList.BACKUP_APP_ADJ) {
                 if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "oom BACKUP_APP_ADJ for " + app);
