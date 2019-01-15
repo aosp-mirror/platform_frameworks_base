@@ -418,12 +418,10 @@ public class UsbHostManager {
                         parser.getRawDescriptors());
 
                 // Stats collection
-                if (parser.hasAudioInterface()) {
-                    StatsLog.write(StatsLog.USB_DEVICE_ATTACHED, newDevice.getVendorId(),
-                            newDevice.getProductId(), parser.hasAudioInterface(),
-                            parser.hasHIDInterface(), parser.hasStorageInterface(),
-                            StatsLog.USB_DEVICE_ATTACHED__STATE__STATE_CONNECTED, 0);
-                }
+                StatsLog.write(StatsLog.USB_DEVICE_ATTACHED, newDevice.getVendorId(),
+                        newDevice.getProductId(), parser.hasAudioInterface(),
+                        parser.hasHIDInterface(), parser.hasStorageInterface(),
+                        StatsLog.USB_DEVICE_ATTACHED__STATE__STATE_CONNECTED, 0);
             }
         }
 
@@ -455,14 +453,12 @@ public class UsbHostManager {
                 if (current != null) {
                     UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress,
                             current.mDescriptors);
-                    if (parser.hasAudioInterface()) {
                         // Stats collection
-                        StatsLog.write(StatsLog.USB_DEVICE_ATTACHED, device.getVendorId(),
-                                device.getProductId(), parser.hasAudioInterface(),
-                                parser.hasHIDInterface(),  parser.hasStorageInterface(),
-                                StatsLog.USB_DEVICE_ATTACHED__STATE__STATE_DISCONNECTED,
-                                System.currentTimeMillis() - current.mTimestamp);
-                    }
+                    StatsLog.write(StatsLog.USB_DEVICE_ATTACHED, device.getVendorId(),
+                            device.getProductId(), parser.hasAudioInterface(),
+                            parser.hasHIDInterface(),  parser.hasStorageInterface(),
+                            StatsLog.USB_DEVICE_ATTACHED__STATE__STATE_DISCONNECTED,
+                            System.currentTimeMillis() - current.mTimestamp);
                 }
             } else {
                 Slog.d(TAG, "Removed device at " + deviceAddress + " was already gone");
