@@ -52,7 +52,6 @@ public class MockProvider extends AbstractLocationProvider {
         mExtras = null;
 
         setProperties(properties);
-        setEnabled(true);
     }
 
     /** Sets the enabled state of this mock provider. */
