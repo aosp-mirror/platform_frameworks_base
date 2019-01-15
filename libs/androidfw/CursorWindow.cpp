@@ -94,7 +94,7 @@ status_t CursorWindow::createFromParcel(Parcel* parcel, CursorWindow** outCursor
         if (size < 0) {
             result = UNKNOWN_ERROR;
         } else {
-            int dupAshmemFd = ::dup(ashmemFd);
+            int dupAshmemFd = ::fcntl(ashmemFd, F_DUPFD_CLOEXEC, 0);
             if (dupAshmemFd < 0) {
                 result = -errno;
             } else {
