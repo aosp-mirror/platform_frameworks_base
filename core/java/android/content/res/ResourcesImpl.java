@@ -299,6 +299,13 @@ public class ResourcesImpl {
     }
 
     @NonNull
+    String getLastResourceResolution() throws NotFoundException {
+        String str = mAssets.getLastResourceResolution();
+        if (str != null) return str;
+        throw new NotFoundException("Associated AssetManager hasn't resolved a resource");
+    }
+
+    @NonNull
     CharSequence getQuantityText(@PluralsRes int id, int quantity) throws NotFoundException {
         PluralRules rule = getPluralRule();
         CharSequence res = mAssets.getResourceBagText(id,

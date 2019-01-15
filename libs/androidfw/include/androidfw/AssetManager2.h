@@ -229,6 +229,14 @@ class AssetManager2 {
                                    ResTable_config* in_out_selected_config, uint32_t* in_out_flags,
                                    uint32_t* out_last_reference) const;
 
+  // Enables or disables resource resolution logging. Clears stored steps when
+  // disabled.
+  void SetResourceResolutionLoggingEnabled(bool enabled);
+
+  // Returns formatted log of last resource resolution path, or empty if no
+  // resource has been resolved yet.
+  std::string GetLastResourceResolution() const;
+
   // Retrieves the best matching bag/map resource with ID `resid`.
   // This method will resolve all parent references for this bag and merge keys with the child.
   // To iterate over the keys, use the following idiom:
@@ -346,6 +354,48 @@ class AssetManager2 {
   // Cached set of bags. These are cached because they can inherit keys from parent bags,
   // which involves some calculation.
   std::unordered_map<uint32_t, util::unique_cptr<ResolvedBag>> cached_bags_;
+
+  // Whether or not to save resource resolution steps
+  bool resource_resolution_logging_enabled_ = false;
+
+  struct Resolution {
+
+    struct Step {
+
+      enum class Type {
+        INITIAL,
+        BETTER_MATCH,
+        OVERLAID
+      };
+
+      // Marks what kind of override this step was.
+      Type type;
+
+      // Built name of configuration for this step.
+      String8 config_name;
+
+      // Marks the package name of the better resource found in this step.
+      const std::string* package_name;
+    };
+
+    // Last resolved resource ID.
+    uint32_t resid;
+
+    // Last resolved resource result cookie.
+    ApkAssetsCookie cookie = kInvalidCookie;
+
+    // Last resolved resource type.
+    StringPoolRef type_string_ref;
+
+    // Last resolved resource entry.
+    StringPoolRef entry_string_ref;
+
+    // Steps taken to resolve last resource.
+    std::vector<Step> steps;
+  };
+
+  // Record of the last resolved resource's resolution path.
+  mutable Resolution last_resolution;
 };
 
 class Theme {
