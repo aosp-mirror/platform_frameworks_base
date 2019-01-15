@@ -36,6 +36,8 @@ import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
+import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
+import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -681,6 +683,62 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertEquals(2, mTask.mActivities.size());
 
         mStack.handleAppDiedLocked(secondActivity.app);
+
+        assertThat(mTask.mActivities).isEmpty();
+        assertThat(mStack.getAllTasks()).isEmpty();
+    }
+
+    @Test
+    public void testHandleAppDied_RelaunchesAfterCrashDuringWindowingModeResize() {
+        final ActivityRecord activity = new ActivityBuilder(mService).setTask(mTask).build();
+
+        activity.mRelaunchReason = RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+        activity.launchCount = 1;
+        activity.haveState = false;
+
+        mStack.handleAppDiedLocked(activity.app);
+
+        assertEquals(1, mTask.mActivities.size());
+        assertEquals(1, mStack.getAllTasks().size());
+    }
+
+    @Test
+    public void testHandleAppDied_NotRelaunchAfterThreeCrashesDuringWindowingModeResize() {
+        final ActivityRecord activity = new ActivityBuilder(mService).setTask(mTask).build();
+
+        activity.mRelaunchReason = RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+        activity.launchCount = 3;
+        activity.haveState = false;
+
+        mStack.handleAppDiedLocked(activity.app);
+
+        assertThat(mTask.mActivities).isEmpty();
+        assertThat(mStack.getAllTasks()).isEmpty();
+    }
+
+    @Test
+    public void testHandleAppDied_RelaunchesAfterCrashDuringFreeResize() {
+        final ActivityRecord activity = new ActivityBuilder(mService).setTask(mTask).build();
+
+        activity.mRelaunchReason = RELAUNCH_REASON_FREE_RESIZE;
+        activity.launchCount = 1;
+        activity.haveState = false;
+
+        mStack.handleAppDiedLocked(activity.app);
+
+        assertEquals(1, mTask.mActivities.size());
+        assertEquals(1, mStack.getAllTasks().size());
+    }
+
+    @Test
+    public void testHandleAppDied_NotRelaunchAfterThreeCrashesDuringFreeResize() {
+        final ActivityRecord activity = new ActivityBuilder(mService).setTask(mTask).build();
+
+        activity.mRelaunchReason = RELAUNCH_REASON_FREE_RESIZE;
+        activity.launchCount = 3;
+        activity.haveState = false;
+
+        mStack.handleAppDiedLocked(activity.app);
 
         assertThat(mTask.mActivities).isEmpty();
         assertThat(mStack.getAllTasks()).isEmpty();
