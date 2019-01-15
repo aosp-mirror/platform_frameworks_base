@@ -317,4 +317,7 @@ public abstract class ActivityManagerInternal {
 
     /** Returns true if the given uid is the app in the foreground. */
     public abstract boolean isAppForeground(int uid);
+
+    /** Remove pending backup for the given userId. */
+    public abstract void clearPendingBackup(int userId);
 }
