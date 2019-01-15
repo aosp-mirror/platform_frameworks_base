@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.ComponentName;
@@ -46,6 +47,15 @@ import com.android.internal.telecom.ICallScreeningService;
  * </service>
  * }
  * </pre>
+ * <p>
+ * A CallScreeningService performs two functions:
+ * <ol>
+ *     <li>Call blocking/screening - the service can choose which calls will ring on the user's
+ *     device, and which will be silently sent to voicemail.</li>
+ *     <li>Call identification - the service can optionally provide {@link CallIdentification}
+ *     information about a {@link Call.Details call} which will be shown to the user in the
+ *     Dialer app.</li>
+ * </ol>
  */
 public abstract class CallScreeningService extends Service {
     /**
@@ -229,16 +239,23 @@ public abstract class CallScreeningService extends Service {
      *
      * @param callDetails Information about a new incoming call, see {@link Call.Details}.
      */
-    public abstract void onScreenCall(Call.Details callDetails);
+    public abstract void onScreenCall(@NonNull Call.Details callDetails);
 
     /**
      * Responds to the given call, either allowing it or disallowing it.
+     * <p>
+     * The {@link CallScreeningService} calls this method to inform the system whether the call
+     * should be silently blocked or not.
      *
      * @param callDetails The call to allow.
+     *                    <p>
+     *                    Must be the same {@link Call.Details call} which was provided to the
+     *                    {@link CallScreeningService} via {@link #onScreenCall(Call.Details)}.
      * @param response The {@link CallScreeningService.CallResponse} which contains information
      * about how to respond to a call.
      */
-    public final void respondToCall(Call.Details callDetails, CallResponse response) {
+    public final void respondToCall(@NonNull Call.Details callDetails,
+            @NonNull CallResponse response) {
         try {
             if (response.getDisallowCall()) {
                 mCallScreeningAdapter.disallowCall(
@@ -250,6 +267,34 @@ public abstract class CallScreeningService extends Service {
             } else {
                 mCallScreeningAdapter.allowCall(callDetails.getTelecomCallId());
             }
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Provide {@link CallIdentification} information about a {@link Call.Details call}.
+     * <p>
+     * The {@link CallScreeningService} calls this method to provide information it has identified
+     * about a {@link Call.Details call}.  This information will potentially be shown to the user
+     * in the {@link InCallService dialer} app.  It will be logged to the
+     * {@link android.provider.CallLog}.
+     * <p>
+     * A {@link CallScreeningService} should only call this method for calls for which it is able to
+     * provide some {@link CallIdentification} for.  {@link CallIdentification} instances with no
+     * fields set will be ignored by the system.
+     *
+     * @param callDetails The call to provide information for.
+     *                    <p>
+     *                    Must be the same {@link Call.Details call} which was provided to the
+     *                    {@link CallScreeningService} via {@link #onScreenCall(Call.Details)}.
+     * @param identification An instance of {@link CallIdentification} with information about the
+     *                       {@link Call.Details call}.
+     */
+    public final void provideCallIdentification(@NonNull Call.Details callDetails,
+            @NonNull CallIdentification identification) {
+        try {
+            mCallScreeningAdapter.provideCallIdentification(callDetails.getTelecomCallId(),
+                    identification);
         } catch (RemoteException e) {
         }
     }

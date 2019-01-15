@@ -31,6 +31,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -42,6 +43,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Provides access to information about active calls and registration/call-management functionality.
@@ -1184,8 +1186,10 @@ public class TelecomManager {
      * Requires permission: {@link android.Manifest.permission#WRITE_SECURE_SETTINGS}
      *
      * @hide
+     * @deprecated Use RoleManager instead.
      */
     @SystemApi
+    @Deprecated
     @RequiresPermission(allOf = {
             android.Manifest.permission.MODIFY_PHONE_STATE,
             android.Manifest.permission.WRITE_SECURE_SETTINGS})
@@ -1214,79 +1218,6 @@ public class TelecomManager {
             Log.e(TAG, "RemoteException attempting to get the system dialer package name.", e);
         }
         return null;
-    }
-
-    /**
-     * Used to trigger display of the ChangeDefaultCallScreeningApp activity to prompt the user to
-     * change the call screening app.
-     *
-     * A {@link SecurityException} will be thrown if calling package name doesn't match the package
-     * of the passed {@link ComponentName}
-     *
-     * @param componentName to verify that the calling package name matches the package of the
-     * passed ComponentName.
-     */
-    public void requestChangeDefaultCallScreeningApp(@NonNull ComponentName componentName) {
-        try {
-            if (isServiceConnected()) {
-                getTelecomService().requestChangeDefaultCallScreeningApp(componentName, mContext
-                    .getOpPackageName());
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG,
-                "RemoteException calling ITelecomService#requestChangeDefaultCallScreeningApp.",
-                e);
-        }
-    }
-
-    /**
-     * Used to verify that the passed ComponentName is default call screening app.
-     *
-     * @param componentName to verify that the package of the passed ComponentName matched the default
-     * call screening packageName.
-     *
-     * @return {@code true} if the passed componentName matches the default call screening's, {@code
-     * false} if the passed componentName is null, or it doesn't match default call screening's.
-     */
-    public boolean isDefaultCallScreeningApp(ComponentName componentName) {
-        try {
-            if (isServiceConnected()) {
-                return getTelecomService().isDefaultCallScreeningApp(componentName);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG,
-                "RemoteException calling ITelecomService#isDefaultCallScreeningApp.",
-                e);
-        }
-        return false;
-    }
-
-    /**
-     * Used to set the default call screening package.
-     *
-     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} Requires
-     * permission: {@link android.Manifest.permission#WRITE_SECURE_SETTINGS}
-     *
-     * A {@link IllegalArgumentException} will be thrown if the specified package and component name
-     * of {@link ComponentName} does't exist, or the specified component of {@link ComponentName}
-     * does't have {@link android.Manifest.permission#BIND_SCREENING_SERVICE}.
-     *
-     * @param componentName to set the default call screening to.
-     * @hide
-     */
-    @RequiresPermission(anyOf = {
-        android.Manifest.permission.MODIFY_PHONE_STATE,
-        android.Manifest.permission.WRITE_SECURE_SETTINGS
-    })
-    public void setDefaultCallScreeningApp(ComponentName componentName) {
-        try {
-            if (isServiceConnected()) {
-                getTelecomService().setDefaultCallScreeningApp(componentName);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG,
-                "RemoteException calling ITelecomService#setDefaultCallScreeningApp.", e);
-        }
     }
 
     /**
