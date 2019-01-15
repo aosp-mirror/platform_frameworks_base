@@ -17,9 +17,11 @@
 package android.os;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 
 /** @hide */
 @SystemApi
+@TestApi
 public interface IHwBinder {
     /**
      * Process a hwbinder transaction.

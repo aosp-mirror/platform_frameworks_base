@@ -17,8 +17,11 @@
 package android.os;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+
 /** @hide */
 @SystemApi
+@TestApi
 public interface IHwInterface {
     /**
      * @return the binder object that corresponds to this interface.
