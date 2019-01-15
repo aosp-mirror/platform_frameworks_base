@@ -236,7 +236,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Opties weergeven voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Een willekeurig MAC-adres bij het maken van verbinding met wifi-netwerken"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Betaald"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Met datalimiet"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Gratis"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Logger-buffergrootten"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Kies Logger-grootten per logbuffer"</string>
