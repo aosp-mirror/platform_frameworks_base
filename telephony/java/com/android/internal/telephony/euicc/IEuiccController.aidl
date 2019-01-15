@@ -39,7 +39,7 @@ interface IEuiccController {
     oneway void switchToSubscription(int subscriptionId, String callingPackage,
         in PendingIntent callbackIntent);
     oneway void updateSubscriptionNickname(int subscriptionId, String nickname,
-        in PendingIntent callbackIntent);
+        String callingPackage, in PendingIntent callbackIntent);
     oneway void eraseSubscriptions(in PendingIntent callbackIntent);
     oneway void retainSubscriptionsForFactoryReset(in PendingIntent callbackIntent);
 }
