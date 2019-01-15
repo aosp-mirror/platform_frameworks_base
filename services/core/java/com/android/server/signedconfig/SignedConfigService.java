@@ -26,6 +26,7 @@ import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.server.LocalServices;
 
@@ -82,21 +83,30 @@ public class SignedConfigService {
         }
         if (metaData.containsKey(KEY_GLOBAL_SETTINGS)
                 && metaData.containsKey(KEY_GLOBAL_SETTINGS_SIGNATURE)) {
-            String config = metaData.getString(KEY_GLOBAL_SETTINGS);
-            String signature = metaData.getString(KEY_GLOBAL_SETTINGS_SIGNATURE);
+            SignedConfigEvent event = new SignedConfigEvent();
             try {
-                // Base64 encoding is standard (not URL safe) encoding: RFC4648
-                config = new String(Base64.getDecoder().decode(config), StandardCharsets.UTF_8);
-            } catch (IllegalArgumentException iae) {
-                Slog.e(TAG, "Failed to base64 decode global settings config from " + packageName);
-                return;
+                event.type = StatsLog.SIGNED_CONFIG_REPORTED__TYPE__GLOBAL_SETTINGS;
+                event.fromPackage = packageName;
+                String config = metaData.getString(KEY_GLOBAL_SETTINGS);
+                String signature = metaData.getString(KEY_GLOBAL_SETTINGS_SIGNATURE);
+                try {
+                    // Base64 encoding is standard (not URL safe) encoding: RFC4648
+                    config = new String(Base64.getDecoder().decode(config), StandardCharsets.UTF_8);
+                } catch (IllegalArgumentException iae) {
+                    Slog.e(TAG, "Failed to base64 decode global settings config from "
+                            + packageName);
+                    event.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__BASE64_FAILURE_CONFIG;
+                    return;
+                }
+                if (DBG) {
+                    Slog.d(TAG, "Got global settings config: " + config);
+                    Slog.d(TAG, "Got global settings signature: " + signature);
+                }
+                new GlobalSettingsConfigApplicator(mContext, packageName, event).applyConfig(
+                        config, signature);
+            } finally {
+                event.send();
             }
-            if (DBG) {
-                Slog.d(TAG, "Got global settings config: " + config);
-                Slog.d(TAG, "Got global settings signature: " + signature);
-            }
-            new GlobalSettingsConfigApplicator(mContext, packageName).applyConfig(
-                    config, signature);
         } else {
             if (DBG) Slog.d(TAG, "Package has no global settings config/signature.");
         }

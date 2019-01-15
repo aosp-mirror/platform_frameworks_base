@@ -18,6 +18,7 @@ package com.android.server.signedconfig;
 
 import android.os.Build;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -43,9 +44,11 @@ public class SignatureVerifier {
             "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaAn2XVifsLTHg616nTsOMVmlhBoECGbTEBTKKvdd2hO60"
             + "pj1pnU8SMkhYfaNxZuKgw9LNvOwlFwStboIYeZ3lQ==";
 
+    private final SignedConfigEvent mEvent;
     private final PublicKey mDebugKey;
 
-    public SignatureVerifier() {
+    public SignatureVerifier(SignedConfigEvent event) {
+        mEvent = event;
         mDebugKey = createKey(DEBUG_KEY);
     }
 
@@ -80,6 +83,7 @@ public class SignatureVerifier {
         try {
             signature = Base64.getDecoder().decode(base64Signature);
         } catch (IllegalArgumentException e) {
+            mEvent.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__BASE64_FAILURE_SIGNATURE;
             Slog.e(TAG, "Failed to base64 decode signature");
             return false;
         }
@@ -94,6 +98,7 @@ public class SignatureVerifier {
                 verifier.update(data);
                 if (verifier.verify(signature)) {
                     Slog.i(TAG, "Verified config using debug key");
+                    mEvent.verifiedWith = StatsLog.SIGNED_CONFIG_REPORTED__VERIFIED_WITH__DEBUG;
                     return true;
                 } else {
                     if (DBG) Slog.i(TAG, "Config verification failed using debug key");
@@ -104,6 +109,7 @@ public class SignatureVerifier {
         }
         // TODO verify production key.
         Slog.w(TAG, "NO PRODUCTION KEY YET, FAILING VERIFICATION");
+        mEvent.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__SIGNATURE_CHECK_FAILED;
         return false;
     }
 }

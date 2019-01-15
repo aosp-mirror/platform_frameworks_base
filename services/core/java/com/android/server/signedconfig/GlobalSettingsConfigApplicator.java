@@ -23,6 +23,7 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -66,12 +67,14 @@ class GlobalSettingsConfigApplicator {
 
     private final Context mContext;
     private final String mSourcePackage;
+    private final SignedConfigEvent mEvent;
     private final SignatureVerifier mVerifier;
 
-    GlobalSettingsConfigApplicator(Context context, String sourcePackage) {
+    GlobalSettingsConfigApplicator(Context context, String sourcePackage, SignedConfigEvent event) {
         mContext = context;
         mSourcePackage = sourcePackage;
-        mVerifier = new SignatureVerifier();
+        mEvent = event;
+        mVerifier = new SignatureVerifier(mEvent);
     }
 
     private boolean checkSignature(String data, String signature) {
@@ -79,6 +82,7 @@ class GlobalSettingsConfigApplicator {
             return mVerifier.verifySignature(data, signature);
         } catch (GeneralSecurityException e) {
             Slog.e(TAG, "Failed to verify signature", e);
+            mEvent.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__SECURITY_EXCEPTION;
             return false;
         }
     }
@@ -109,14 +113,17 @@ class GlobalSettingsConfigApplicator {
         SignedConfig config;
         try {
             config = SignedConfig.parse(configStr, ALLOWED_KEYS, KEY_VALUE_MAPPERS);
+            mEvent.version = config.version;
         } catch (InvalidConfigException e) {
             Slog.e(TAG, "Failed to parse global settings from package " + mSourcePackage, e);
+            mEvent.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__INVALID_CONFIG;
             return;
         }
         int currentVersion = getCurrentConfigVersion();
         if (currentVersion >= config.version) {
             Slog.i(TAG, "Global settings from package " + mSourcePackage
                     + " is older than existing: " + config.version + "<=" + currentVersion);
+            mEvent.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__OLD_CONFIG;
             return;
         }
         // We have new config!
@@ -126,10 +133,12 @@ class GlobalSettingsConfigApplicator {
                 config.getMatchingConfig(Build.VERSION.SDK_INT);
         if (matchedConfig == null) {
             Slog.i(TAG, "Settings is not applicable to current SDK version; ignoring");
+            mEvent.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__NOT_APPLICABLE;
             return;
         }
 
         Slog.i(TAG, "Updating global settings to version " + config.version);
         updateCurrentConfig(config.version, matchedConfig.values);
+        mEvent.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__APPLIED;
     }
 }
