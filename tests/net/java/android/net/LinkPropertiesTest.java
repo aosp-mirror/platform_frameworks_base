@@ -18,6 +18,7 @@ package android.net;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -33,6 +34,9 @@ import android.support.test.runner.AndroidJUnit4;
 import android.system.OsConstants;
 import android.util.ArraySet;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,9 +44,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -504,6 +505,40 @@ public class LinkPropertiesTest {
     }
 
     @Test
+    public void testNat64Prefix() throws Exception {
+        LinkProperties lp = new LinkProperties();
+        lp.addLinkAddress(LINKADDRV4);
+        lp.addLinkAddress(LINKADDRV6);
+
+        assertNull(lp.getNat64Prefix());
+
+        IpPrefix p = new IpPrefix("64:ff9b::/96");
+        lp.setNat64Prefix(p);
+        assertEquals(p, lp.getNat64Prefix());
+
+        p = new IpPrefix("2001:db8:a:b:1:2:3::/96");
+        lp.setNat64Prefix(p);
+        assertEquals(p, lp.getNat64Prefix());
+
+        p = new IpPrefix("2001:db8:a:b:1:2::/80");
+        try {
+            lp.setNat64Prefix(p);
+        } catch (IllegalArgumentException expected) {
+        }
+
+        p = new IpPrefix("64:ff9b::/64");
+        try {
+            lp.setNat64Prefix(p);
+        } catch (IllegalArgumentException expected) {
+        }
+
+        assertEquals(new IpPrefix("2001:db8:a:b:1:2:3::/96"), lp.getNat64Prefix());
+
+        lp.setNat64Prefix(null);
+        assertNull(lp.getNat64Prefix());
+    }
+
+    @Test
     public void testIsProvisioned() {
         LinkProperties lp4 = new LinkProperties();
         assertFalse("v4only:empty", lp4.isProvisioned());
@@ -815,7 +850,7 @@ public class LinkPropertiesTest {
     }
 
     @Test
-    public void testLinkPropertiesParcelable() {
+    public void testLinkPropertiesParcelable() throws Exception {
         LinkProperties source = new LinkProperties();
         source.setInterfaceName(NAME);
         // set 2 link addresses
@@ -832,6 +867,8 @@ public class LinkPropertiesTest {
         source.addValidatedPrivateDnsServer(GATEWAY61);
 
         source.setMtu(MTU);
+
+        source.setNat64Prefix(new IpPrefix("2001:db8:1:2:64:64::/96"));
 
         Parcel p = Parcel.obtain();
         source.writeToParcel(p, /* flags */ 0);
