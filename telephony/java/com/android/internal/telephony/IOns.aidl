@@ -66,7 +66,7 @@ interface IOns {
      * @return true if request is accepted, else false.
      *
      */
-    boolean setPreferredData(int subId, String callingPackage);
+    boolean setPreferredDataSubscriptionId(int subId, String callingPackage);
 
     /**
      * Get preferred opportunistic data subscription Id
@@ -78,7 +78,7 @@ interface IOns {
      * subscription id
      *
      */
-    int getPreferredData(String callingPackage);
+    int getPreferredDataSubscriptionId(String callingPackage);
 
     /**
      * Update availability of a list of networks in the current location.
