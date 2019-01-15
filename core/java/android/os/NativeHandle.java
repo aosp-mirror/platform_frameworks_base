@@ -20,6 +20,7 @@ import static android.system.OsConstants.F_DUPFD_CLOEXEC;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.system.ErrnoException;
 import android.system.Os;
 
@@ -32,6 +33,7 @@ import java.io.FileDescriptor;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class NativeHandle implements Closeable {
     // whether this object owns mFds
     private boolean mOwn = false;
