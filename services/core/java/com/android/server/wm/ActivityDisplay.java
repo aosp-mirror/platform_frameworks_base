@@ -626,6 +626,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             return;
         }
 
+        // Collect the stacks that are necessary to be removed instead of performing the removal
+        // by looping mStacks, so that we don't miss any stacks after the stack size changed or
+        // stacks reordered.
+        final ArrayList<ActivityStack> stacks = new ArrayList<>();
         for (int j = windowingModes.length - 1 ; j >= 0; --j) {
             final int windowingMode = windowingModes[j];
             for (int i = mStacks.size() - 1; i >= 0; --i) {
@@ -636,8 +640,12 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 if (stack.getWindowingMode() != windowingMode) {
                     continue;
                 }
-                mRootActivityContainer.mStackSupervisor.removeStack(stack);
+                stacks.add(stack);
             }
+        }
+
+        for (int i = stacks.size() - 1; i >= 0; --i) {
+            mRootActivityContainer.mStackSupervisor.removeStack(stacks.get(i));
         }
     }
 
@@ -646,14 +654,22 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             return;
         }
 
+        // Collect the stacks that are necessary to be removed instead of performing the removal
+        // by looping mStacks, so that we don't miss any stacks after the stack size changed or
+        // stacks reordered.
+        final ArrayList<ActivityStack> stacks = new ArrayList<>();
         for (int j = activityTypes.length - 1 ; j >= 0; --j) {
             final int activityType = activityTypes[j];
             for (int i = mStacks.size() - 1; i >= 0; --i) {
                 final ActivityStack stack = mStacks.get(i);
                 if (stack.getActivityType() == activityType) {
-                    mRootActivityContainer.mStackSupervisor.removeStack(stack);
+                    stacks.add(stack);
                 }
             }
+        }
+
+        for (int i = stacks.size() - 1; i >= 0; --i) {
+            mRootActivityContainer.mStackSupervisor.removeStack(stacks.get(i));
         }
     }
 
