@@ -545,7 +545,9 @@ public class NetworkMonitor extends StateMachine {
                     return HANDLED;
                 case CMD_FORCE_REEVALUATION:
                 case CMD_CAPTIVE_PORTAL_RECHECK:
-                    log("Forcing reevaluation for UID " + message.arg1);
+                    final int dnsCount = mDnsStallDetector.getConsecutiveTimeoutCount();
+                    validationLog("Forcing reevaluation for UID " + message.arg1
+                            + ". Dns signal count: " + dnsCount);
                     mUidResponsibleForReeval = message.arg1;
                     transitionTo(mEvaluatingState);
                     return HANDLED;
