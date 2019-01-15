@@ -28,12 +28,14 @@ import android.database.Cursor;
 import android.location.Country;
 import android.location.CountryDetector;
 import android.net.Uri;
+import android.os.Build;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.CommonDataKinds.Callable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.DataUsageFeedback;
+import android.telecom.CallIdentification;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -603,6 +605,69 @@ public class CallLog {
         public static final String BLOCK_REASON = "block_reason";
 
         /**
+         * The package name of the {@link android.telecom.CallScreeningService} which provided
+         * {@link android.telecom.CallIdentification} for this call.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_ID_PACKAGE_NAME = "call_id_package_name";
+
+        /**
+         * The app name of the {@link android.telecom.CallScreeningService} which provided
+         * {@link android.telecom.CallIdentification} for this call.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_ID_APP_NAME = "call_id_app_name";
+
+        /**
+         * The {@link CallIdentification#getName() name} of a call, as provided by the
+         * {@link android.telecom.CallScreeningService}.
+         * <p>
+         * The name is provided by the app identified by {@link #CALL_ID_PACKAGE_NAME} and
+         * {@link #CALL_ID_APP_NAME}.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_ID_NAME = "call_id_name";
+
+        /**
+         * The {@link CallIdentification#getDescription() description} of a call, as provided by the
+         * {@link android.telecom.CallScreeningService}.
+         * <p>
+         * The description is provided by the app identified by {@link #CALL_ID_PACKAGE_NAME} and
+         * {@link #CALL_ID_APP_NAME}.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_ID_DESCRIPTION = "call_id_description";
+
+        /**
+         * The {@link CallIdentification#getDetails() details} of a call, as provided by the
+         * {@link android.telecom.CallScreeningService}.
+         * <p>
+         * The details field is provided by the app identified by {@link #CALL_ID_PACKAGE_NAME} and
+         * {@link #CALL_ID_APP_NAME}.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CALL_ID_DETAILS = "call_id_details";
+
+        /**
+         * The {@link CallIdentification#getNuisanceConfidence() nuisance confidence} of a call, as
+         * provided by the {@link android.telecom.CallScreeningService}.
+         * <p>
+         * Valid values are defined in {@link CallIdentification}, and include:
+         * <ul>
+         *     <li>{@link CallIdentification#CONFIDENCE_NOT_NUISANCE}</li>
+         *     <li>{@link CallIdentification#CONFIDENCE_LIKELY_NOT_NUISANCE}</li>
+         *     <li>{@link CallIdentification#CONFIDENCE_UNKNOWN}</li>
+         *     <li>{@link CallIdentification#CONFIDENCE_LIKELY_NUISANCE}</li>
+         *     <li>{@link CallIdentification#CONFIDENCE_NUISANCE}</li>
+         * </ul>
+         * <p>
+         * The nuisance confidence is provided by the app identified by
+         * {@link #CALL_ID_PACKAGE_NAME} and {@link #CALL_ID_APP_NAME}.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String CALL_ID_NUISANCE_CONFIDENCE = "call_id_nuisance_confidence";
+
+        /**
          * Adds a call to the call log.
          *
          * @param ci the CallerInfo object to get the target contact from.  Can be null
@@ -631,7 +696,8 @@ public class CallLog {
                 presentation, callType, features, accountHandle, start, duration,
                 dataUsage, false /* addForAllUsers */, null /* userToBeInsertedTo */,
                 false /* isRead */, Calls.BLOCK_REASON_NOT_BLOCKED /* callBlockReason */,
-                null /* callScreeningAppName */, null /* callScreeningComponentName */);
+                null /* callScreeningAppName */, null /* callScreeningComponentName */,
+                null /* callIdentification */);
         }
 
 
@@ -671,7 +737,8 @@ public class CallLog {
                 features, accountHandle, start, duration, dataUsage, addForAllUsers,
                 userToBeInsertedTo, false /* isRead */ , Calls.BLOCK_REASON_NOT_BLOCKED
                 /* callBlockReason */, null /* callScreeningAppName */,
-                null /* callScreeningComponentName */);
+                null /* callScreeningComponentName */,
+                null /* callIdentification */);
         }
 
         /**
@@ -705,19 +772,32 @@ public class CallLog {
          * @param callBlockReason The reason why the call is blocked.
          * @param callScreeningAppName The call screening application name which block the call.
          * @param callScreeningComponentName The call screening component name which block the call.
+         * @param callIdPackageName The package name of the
+         *      {@link android.telecom.CallScreeningService} which provided
+         *      {@link CallIdentification}.
+         * @param callIdAppName The app name of the {@link android.telecom.CallScreeningService}
+         *                      which provided {@link CallIdentification}.
+         * @param callIdName The caller name provided by the
+         *      {@link android.telecom.CallScreeningService}.
+         * @param callIdDescription The caller description provided by the
+         *      {@link android.telecom.CallScreeningService}.
+         * @param callIdDetails The caller details provided by the
+         *      {@link android.telecom.CallScreeningService}.
+         * @param callIdCallType The caller type provided by the
+         *      {@link android.telecom.CallScreeningService}.
          *
          * @result The URI of the call log entry belonging to the user that made or received this
          *        call.  This could be of the shadow provider.  Do not return it to non-system apps,
          *        as they don't have permissions.
          * {@hide}
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 String postDialDigits, String viaNumber, int presentation, int callType,
                 int features, PhoneAccountHandle accountHandle, long start, int duration,
                 Long dataUsage, boolean addForAllUsers, UserHandle userToBeInsertedTo,
                 boolean isRead, int callBlockReason, String callScreeningAppName,
-                String callScreeningComponentName) {
+                String callScreeningComponentName, CallIdentification callIdentification) {
             if (VERBOSE_LOG) {
                 Log.v(LOG_TAG, String.format("Add call: number=%s, user=%s, for all=%s",
                         number, userToBeInsertedTo, addForAllUsers));
@@ -798,6 +878,22 @@ public class CallLog {
             values.put(BLOCK_REASON, callBlockReason);
             values.put(CALL_SCREENING_APP_NAME, callScreeningAppName);
             values.put(CALL_SCREENING_COMPONENT_NAME, callScreeningComponentName);
+
+            if (callIdentification != null) {
+                values.put(CALL_ID_PACKAGE_NAME, callIdentification.getCallScreeningPackageName());
+                values.put(CALL_ID_APP_NAME, callIdentification.getCallScreeningAppName());
+                values.put(CALL_ID_NAME, callIdentification.getName());
+                values.put(CALL_ID_DESCRIPTION, callIdentification.getDescription());
+                values.put(CALL_ID_DETAILS, callIdentification.getDetails());
+                values.put(CALL_ID_NUISANCE_CONFIDENCE, callIdentification.getNuisanceConfidence());
+            } else {
+                values.putNull(CALL_ID_PACKAGE_NAME);
+                values.putNull(CALL_ID_APP_NAME);
+                values.putNull(CALL_ID_NAME);
+                values.putNull(CALL_ID_DESCRIPTION);
+                values.putNull(CALL_ID_DETAILS);
+                values.putNull(CALL_ID_NUISANCE_CONFIDENCE);
+            }
 
             if ((ci != null) && (ci.contactIdOrZero > 0)) {
                 // Update usage information for the number associated with the contact ID.
