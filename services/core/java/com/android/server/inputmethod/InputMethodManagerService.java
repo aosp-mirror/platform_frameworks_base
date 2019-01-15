@@ -89,6 +89,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -309,6 +310,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final HardKeyboardListener mHardKeyboardListener;
     private final AppOpsManager mAppOpsManager;
     private final UserManager mUserManager;
+    private final UserManagerInternal mUserManagerInternal;
 
     // All known input methods.  mMethodMap also serves as the global
     // lock for this class.
@@ -1405,6 +1407,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }, true /*asyncHandler*/);
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mHardKeyboardListener = new HardKeyboardListener();
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
@@ -1489,7 +1492,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // If the system is not ready or the device is not yed unlocked by the user, then we use
         // copy-on-write settings.
         final boolean useCopyOnWriteSettings =
-                !mSystemReady || !mUserManager.isUserUnlockingOrUnlocked(newUserId);
+                !mSystemReady || !mUserManagerInternal.isUserUnlockingOrUnlocked(newUserId);
         mSettings.switchCurrentUser(newUserId, useCopyOnWriteSettings);
         updateCurrentProfileIds();
         // Additional subtypes should be reset when the user is changed
@@ -1562,7 +1565,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mLastSystemLocales = mRes.getConfiguration().getLocales();
                 final int currentUserId = mSettings.getCurrentUserId();
                 mSettings.switchCurrentUser(currentUserId,
-                        !mUserManager.isUserUnlockingOrUnlocked(currentUserId));
+                        !mUserManagerInternal.isUserUnlockingOrUnlocked(currentUserId));
                 mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
                 mNotificationManager = mContext.getSystemService(NotificationManager.class);
                 mStatusBar = statusBar;
