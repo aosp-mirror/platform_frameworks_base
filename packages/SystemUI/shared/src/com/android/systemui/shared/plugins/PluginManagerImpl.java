@@ -14,6 +14,7 @@
 
 package com.android.systemui.shared.plugins;
 
+import android.app.LoadedApk;
 import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
@@ -44,15 +45,17 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
-import com.android.systemui.shared.plugins.PluginInstanceManager.PluginContextWrapper;
 import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
 
 import dalvik.system.PathClassLoader;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 /**
  * @see Plugin
@@ -117,6 +120,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         return mPluginEnabler;
     }
 
+    // TODO(mankoff): This appears to be only called from tests. Remove?
     public <T extends Plugin> T getOneShotPlugin(Class<T> cls) {
         ProvidesInterface info = cls.getDeclaredAnnotation(ProvidesInterface.class);
         if (info == null) {
@@ -282,17 +286,25 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         }
     }
 
-    public ClassLoader getClassLoader(String sourceDir, String pkg) {
-        if (!isDebuggable && !mWhitelistedPlugins.contains(pkg)) {
-            Log.w(TAG, "Cannot get class loader for non-whitelisted plugin. Src:" + sourceDir +
-                    ", pkg: " + pkg);
+    /** Returns class loader specific for the given plugin. */
+    public ClassLoader getClassLoader(ApplicationInfo appInfo) {
+        if (!isDebuggable && !mWhitelistedPlugins.contains(appInfo.packageName)) {
+            Log.w(TAG, "Cannot get class loader for non-whitelisted plugin. Src:"
+                    + appInfo.sourceDir + ", pkg: " + appInfo.packageName);
             return null;
         }
-        if (mClassLoaders.containsKey(pkg)) {
-            return mClassLoaders.get(pkg);
+        if (mClassLoaders.containsKey(appInfo.packageName)) {
+            return mClassLoaders.get(appInfo.packageName);
         }
-        ClassLoader classLoader = new PathClassLoader(sourceDir, getParentClassLoader());
-        mClassLoaders.put(pkg, classLoader);
+
+        List<String> zipPaths = new ArrayList<>();
+        List<String> libPaths = new ArrayList<>();
+        LoadedApk.makePaths(null, true, appInfo, zipPaths, libPaths);
+        ClassLoader classLoader = new PathClassLoader(
+                TextUtils.join(File.pathSeparator, zipPaths),
+                TextUtils.join(File.pathSeparator, libPaths),
+                getParentClassLoader());
+        mClassLoaders.put(appInfo.packageName, classLoader);
         return classLoader;
     }
 
@@ -307,11 +319,6 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                     "com.android.systemui.plugin");
         }
         return mParentClassLoader;
-    }
-
-    public Context getContext(ApplicationInfo info, String pkg) throws NameNotFoundException {
-        ClassLoader classLoader = getClassLoader(info.sourceDir, pkg);
-        return new PluginContextWrapper(mContext.createApplicationContext(info, 0), classLoader);
     }
 
     public <T> boolean dependsOn(Plugin p, Class<T> cls) {
