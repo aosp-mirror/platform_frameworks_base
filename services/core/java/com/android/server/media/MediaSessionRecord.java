@@ -80,7 +80,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final ControllerStub mController;
     private final SessionStub mSession;
     private final SessionCb mSessionCb;
-    private final MediaSessionService mService;
+    private final MediaSessionService.ServiceImpl mService;
     private final Context mContext;
 
     private final Object mLock = new Object();
@@ -120,7 +120,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private String mMetadataDescription;
 
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
-            SessionCallbackLink cb, String tag, MediaSessionService service, Looper handlerLooper) {
+            SessionCallbackLink cb, String tag, MediaSessionService.ServiceImpl service,
+            Looper handlerLooper) {
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
