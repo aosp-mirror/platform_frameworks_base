@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * A POD object to represent attributes of a single L2 network entry.
@@ -206,5 +207,53 @@ public class NetworkAttributes {
     @Override
     public int hashCode() {
         return Objects.hash(assignedV4Address, groupHint, dnsAddresses, mtu);
+    }
+
+    /** Pretty print */
+    @Override
+    public String toString() {
+        final StringJoiner resultJoiner = new StringJoiner(" ", "{", "}");
+        final ArrayList<String> nullFields = new ArrayList<>();
+
+        if (null != assignedV4Address) {
+            resultJoiner.add("assignedV4Addr :");
+            resultJoiner.add(assignedV4Address.toString());
+        } else {
+            nullFields.add("assignedV4Addr");
+        }
+
+        if (null != groupHint) {
+            resultJoiner.add("groupHint :");
+            resultJoiner.add(groupHint);
+        } else {
+            nullFields.add("groupHint");
+        }
+
+        if (null != dnsAddresses) {
+            resultJoiner.add("dnsAddr : [");
+            for (final InetAddress addr : dnsAddresses) {
+                resultJoiner.add(addr.getHostAddress());
+            }
+            resultJoiner.add("]");
+        } else {
+            nullFields.add("dnsAddr");
+        }
+
+        if (null != mtu) {
+            resultJoiner.add("mtu :");
+            resultJoiner.add(mtu.toString());
+        } else {
+            nullFields.add("mtu");
+        }
+
+        if (!nullFields.isEmpty()) {
+            resultJoiner.add("; Null fields : [");
+            for (final String field : nullFields) {
+                resultJoiner.add(field);
+            }
+            resultJoiner.add("]");
+        }
+
+        return resultJoiner.toString();
     }
 }

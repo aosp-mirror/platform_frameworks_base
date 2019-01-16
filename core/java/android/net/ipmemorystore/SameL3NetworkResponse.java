@@ -128,4 +128,19 @@ public class SameL3NetworkResponse {
     public int hashCode() {
         return Objects.hash(l2Key1, l2Key2, confidence);
     }
+
+    @Override
+    /** Pretty print */
+    public String toString() {
+        switch (getNetworkSameness()) {
+            case NETWORK_SAME:
+                return "\"" + l2Key1 + "\" same L3 network as \"" + l2Key2 + "\"";
+            case NETWORK_DIFFERENT:
+                return "\"" + l2Key1 + "\" different L3 network from \"" + l2Key2 + "\"";
+            case NETWORK_NEVER_CONNECTED:
+                return "\"" + l2Key1 + "\" can't be tested against \"" + l2Key2 + "\"";
+            default:
+                return "Buggy sameness value ? \"" + l2Key1 + "\", \"" + l2Key2 + "\"";
+        }
+    }
 }
