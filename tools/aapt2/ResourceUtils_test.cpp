@@ -16,6 +16,7 @@
 
 #include "ResourceUtils.h"
 
+#include "SdkConstants.h"
 #include "Resource.h"
 #include "test/Test.h"
 
@@ -210,6 +211,17 @@ TEST(ResourceUtilsTest, ItemsWithWhitespaceAreParsedCorrectly) {
   const uint32_t expected_float_flattened = *(uint32_t*)&expected_float;
   EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(" 12.0\n   ", ResTable_map::TYPE_FLOAT),
               Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_FLOAT, expected_float_flattened))));
+}
+
+TEST(ResourceUtilsTest, ParseSdkVersionWithCodename) {
+  const android::StringPiece codename =
+      GetDevelopmentSdkCodeNameAndVersion().first;
+  const int version = GetDevelopmentSdkCodeNameAndVersion().second;
+
+  EXPECT_THAT(ResourceUtils::ParseSdkVersion(codename), Eq(Maybe<int>(version)));
+  EXPECT_THAT(
+      ResourceUtils::ParseSdkVersion(codename.to_string() + ".fingerprint"),
+      Eq(Maybe<int>(version)));
 }
 
 TEST(ResourceUtilsTest, StringBuilderWhitespaceRemoval) {
