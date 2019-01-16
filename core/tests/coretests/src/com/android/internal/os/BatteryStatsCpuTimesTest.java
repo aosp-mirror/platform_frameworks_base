@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.internal.os;
 
 import static android.os.BatteryStats.STATS_SINCE_CHARGED;
@@ -36,10 +37,11 @@ import static org.mockito.Mockito.when;
 
 import android.os.BatteryStats;
 import android.os.UserHandle;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.SparseLongArray;
 import android.view.Display;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -64,7 +66,7 @@ import java.util.Arrays;
  * Install: adb install -r \
  * ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
  * Run: adb shell am instrument -e class com.android.internal.os.BatteryStatsCpuTimesTest -w \
- * com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
+ * com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
  *
  * or
  *

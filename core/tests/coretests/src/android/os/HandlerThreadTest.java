@@ -16,13 +16,9 @@
 
 package android.os;
 
+import androidx.test.filters.MediumTest;
+
 import junit.framework.TestCase;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
-import android.os.Process;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
 
 public class HandlerThreadTest extends TestCase {
     private static final int TEST_WHAT = 1;

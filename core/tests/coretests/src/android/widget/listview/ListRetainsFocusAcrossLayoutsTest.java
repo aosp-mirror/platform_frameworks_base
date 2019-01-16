@@ -16,11 +16,10 @@
 
 package android.widget.listview;
 
-import android.widget.listview.ListItemFocusablesClose;
-
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
+
+import androidx.test.filters.MediumTest;
 
 public class ListRetainsFocusAcrossLayoutsTest extends ActivityInstrumentationTestCase<ListItemFocusablesClose> {
 

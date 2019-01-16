@@ -16,8 +16,6 @@
 
 package android.widget.listview;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.ListActivity;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -31,6 +29,8 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * See 1080989. You need some contacts for this adapter.

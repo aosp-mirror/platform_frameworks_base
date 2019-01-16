@@ -13,17 +13,17 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
 package android.animation;
 
-import android.support.test.filters.LargeTest;
 import android.test.ActivityInstrumentationTestCase2;
+
+import androidx.test.filters.LargeTest;
+
+import com.android.frameworks.coretests.R;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import com.android.frameworks.coretests.R;
 
 @LargeTest
 public class AnimatorInflaterTest extends ActivityInstrumentationTestCase2<BasicAnimatorActivity>  {

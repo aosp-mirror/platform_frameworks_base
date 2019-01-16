@@ -16,8 +16,6 @@
 
 package android.widget.focus;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.ListActivity;
 import android.content.Context;
 import android.os.Bundle;
@@ -25,6 +23,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * A layout with a ListView containing buttons.

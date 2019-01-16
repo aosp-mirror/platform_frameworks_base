@@ -32,9 +32,10 @@ import static java.util.Collections.emptyList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.test.InstrumentationRegistry;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Test;

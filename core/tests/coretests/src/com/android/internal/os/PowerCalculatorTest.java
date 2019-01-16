@@ -17,13 +17,13 @@
 
 package com.android.internal.os;
 
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.os.BatteryStats;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import junit.framework.TestCase;
 

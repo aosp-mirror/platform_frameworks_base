@@ -16,20 +16,19 @@
 
 package android.view;
 
-import com.android.frameworks.coretests.R;
-import android.view.DrawableBgMinSize;
-import android.test.TouchUtils;
-import android.test.suitebuilder.annotation.MediumTest;
-
 import android.graphics.drawable.Drawable;
 import android.test.ActivityInstrumentationTestCase;
-import android.view.View;
+import android.test.TouchUtils;
 import android.widget.AbsoluteLayout;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.test.filters.MediumTest;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * {@link DrawableBgMinSize} exercises Views to obey their background drawable's

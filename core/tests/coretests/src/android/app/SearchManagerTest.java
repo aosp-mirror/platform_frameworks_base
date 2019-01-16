@@ -17,17 +17,13 @@
 package android.app;
 
 import android.app.activity.LocalActivity;
-
-import android.app.Activity;
-import android.app.ISearchManager;
-import android.app.SearchManager;
-import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.ServiceManager;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 /**
  * To launch this test from the command line:

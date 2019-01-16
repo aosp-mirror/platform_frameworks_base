@@ -18,7 +18,6 @@ package android.os;
 
 import android.app.Activity;
 import android.hardware.display.DisplayManager;
-import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
 import android.view.View.OnClickListener;

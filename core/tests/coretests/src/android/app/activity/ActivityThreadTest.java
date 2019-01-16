@@ -36,12 +36,13 @@ import android.app.servertransaction.StopActivityItem;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.IBinder;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.MediumTest;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.MergedConfiguration;
 import android.view.Display;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.MediumTest;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

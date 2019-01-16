@@ -57,7 +57,6 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.Voice;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 import android.view.Window;
@@ -65,6 +64,8 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.widget.Toast;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController.FrameworkObjectProvider;

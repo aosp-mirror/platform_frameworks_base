@@ -19,8 +19,8 @@ package android.util;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

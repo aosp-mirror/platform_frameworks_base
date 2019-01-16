@@ -16,16 +16,12 @@
 
 package android.view;
 
-import com.android.frameworks.coretests.R;
-
-import android.os.Bundle;
 import android.app.Activity;
+import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.view.ViewGroup;
-import android.view.View;
-import android.view.Display;
-import android.view.ViewConfiguration;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * This activity contains two Views, one as big as the screen, one much larger. The large one

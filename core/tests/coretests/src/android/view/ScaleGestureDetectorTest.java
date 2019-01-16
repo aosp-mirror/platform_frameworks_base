@@ -16,26 +16,22 @@
 
 package android.view;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+
 import android.content.Context;
-import android.support.test.filters.LargeTest;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.DisplayMetrics;
-import android.view.PinchZoomAction;
-import android.view.ScaleGesture;
-import android.view.WindowManager;
 import android.widget.TextView;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
 
 import com.android.frameworks.coretests.R;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.Espresso.onView;
 
 @LargeTest
 public class ScaleGestureDetectorTest extends ActivityInstrumentationTestCase2<ScaleGesture> {

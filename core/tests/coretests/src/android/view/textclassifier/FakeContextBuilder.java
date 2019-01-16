@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -29,9 +30,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.support.test.InstrumentationRegistry;
 
-import androidx.annotation.Nullable;
+import androidx.test.InstrumentationRegistry;
 
 import com.google.common.base.Preconditions;
 

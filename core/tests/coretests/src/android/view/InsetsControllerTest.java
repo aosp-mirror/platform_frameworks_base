@@ -17,18 +17,20 @@
 package android.view;
 
 import static android.view.InsetsState.TYPE_TOP_BAR;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
+
 import static org.mockito.Mockito.mock;
 
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.FlakyTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 @Presubmit
 @FlakyTest(detail = "Promote once confirmed non-flaky")

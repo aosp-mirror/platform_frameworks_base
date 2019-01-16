@@ -17,12 +17,13 @@
 package android.widget.listview.arrowscroll;
 
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.util.ListUtil;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.listview.ListInterleaveFocusables;
+
+import androidx.test.filters.MediumTest;
 
 public class ListInterleaveFocusablesTest extends ActivityInstrumentationTestCase2<ListInterleaveFocusables> {
     private ListView mListView;

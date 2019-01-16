@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.view.textclassifier.logging;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_TEXT_SELECTION_SMART_SHARE;
@@ -24,12 +25,13 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.google.common.truth.Truth.assertThat;
 
 import android.metrics.LogMaker;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.textclassifier.ConversationAction;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassifierEvent;
 import android.view.textclassifier.TextClassifierEventTronLogger;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.logging.MetricsLogger;
 

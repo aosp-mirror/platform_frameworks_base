@@ -16,14 +16,14 @@
 
 package android.widget.scroll;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
-import android.os.Bundle;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * A screen with some scenarios that exercise {@link ScrollView}'s implementation

@@ -22,8 +22,9 @@ import android.content.pm.PackageParserCacheHelper.ReadHelper;
 import android.content.pm.PackageParserCacheHelper.WriteHelper;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

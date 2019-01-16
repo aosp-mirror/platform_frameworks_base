@@ -18,7 +18,8 @@ package android.content;
 
 import android.content.res.AssetManager;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import java.io.IOException;
 import java.io.InputStream;

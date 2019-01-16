@@ -18,12 +18,12 @@ package android.widget.listview;
 
 import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.Button;
 import android.widget.ListView;
 
+import androidx.test.filters.MediumTest;
+
 import com.android.frameworks.coretests.R;
-import android.widget.listview.ListViewHeight;
 
 public class ListViewHeightTest extends ActivityInstrumentationTestCase<ListViewHeight> {
     private ListViewHeight mActivity;

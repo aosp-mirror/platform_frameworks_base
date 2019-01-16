@@ -16,13 +16,10 @@
 
 package android.view.menu;
 
-import android.util.KeyUtils;
-import com.android.internal.view.menu.IconMenuView;
-import com.android.internal.view.menu.MenuBuilder;
-
-import android.content.pm.ActivityInfo;
-import android.support.test.filters.LargeTest;
 import android.test.ActivityInstrumentationTestCase;
+import android.util.KeyUtils;
+
+import androidx.test.filters.LargeTest;
 
 @LargeTest
 public class MenuLayoutLandscapeTest extends ActivityInstrumentationTestCase<MenuLayoutLandscape> {

@@ -25,24 +25,24 @@ import static org.junit.Assert.assertSame;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
 import android.graphics.Typeface;
 import android.os.Handler;
-import android.provider.FontsContract.Columns;
 import android.provider.FontsContract.FontFamilyResult;
-import android.provider.FontsContract.FontInfo;
-import android.provider.FontsContract;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-import java.util.ArrayList;
-import java.util.List;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

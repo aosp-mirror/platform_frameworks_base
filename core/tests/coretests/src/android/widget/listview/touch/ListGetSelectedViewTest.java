@@ -17,13 +17,13 @@
 package android.widget.listview.touch;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.test.TouchUtils;
-import android.widget.ListView;
 import android.view.View;
-
+import android.widget.ListView;
 import android.widget.listview.ListGetSelectedView;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 /**
  * This test is made to check that getSelectedView() will return

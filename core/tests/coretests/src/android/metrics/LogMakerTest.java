@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.metrics;
 
-import android.support.test.filters.LargeTest;
+import androidx.test.filters.LargeTest;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 

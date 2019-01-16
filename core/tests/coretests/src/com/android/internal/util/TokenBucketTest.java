@@ -18,6 +18,7 @@ package com.android.internal.util;
 
 import android.os.SystemClock;
 import android.text.format.DateUtils;
+
 import junit.framework.TestCase;
 
 public class TokenBucketTest extends TestCase {
@@ -54,9 +55,9 @@ public class TokenBucketTest extends TestCase {
 
         drain(new TokenBucket(FILL_DELTA_VERY_LONG, 10, 100), 10);
 
-        drain(new TokenBucket((int)DateUtils.MINUTE_IN_MILLIS, 50), 50);
-        drain(new TokenBucket((int)DateUtils.HOUR_IN_MILLIS, 10), 10);
-        drain(new TokenBucket((int)DateUtils.DAY_IN_MILLIS, 200), 200);
+        drain(new TokenBucket((int) DateUtils.MINUTE_IN_MILLIS, 50), 50);
+        drain(new TokenBucket((int) DateUtils.HOUR_IN_MILLIS, 10), 10);
+        drain(new TokenBucket((int) DateUtils.DAY_IN_MILLIS, 200), 200);
     }
 
     public void testReset() {
@@ -163,16 +164,16 @@ public class TokenBucketTest extends TestCase {
 
     void assertDuration(long expected, long elapsed) {
         String msg = String.format(
-            "expected elapsed time at least %d ms, but was %d ms", expected, elapsed);
+                "expected elapsed time at least %d ms, but was %d ms", expected, elapsed);
         elapsed += 1; // one millisecond extra guard
         assertTrue(msg, elapsed >= expected);
     }
 
-    void assertThrow(Fn fn)     {
-      try {
-          fn.call();
-          fail("expected n exception to be thrown.");
-      } catch (Throwable t) {}
+    void assertThrow(Fn fn) {
+        try {
+            fn.call();
+            fail("expected n exception to be thrown.");
+        } catch (Throwable t) { }
     }
 
     interface Fn { void call(); }

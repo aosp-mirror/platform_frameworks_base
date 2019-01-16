@@ -54,10 +54,11 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
 
 import com.android.frameworks.coretests.R;
 import com.android.internal.content.PackageHelper;

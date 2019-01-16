@@ -16,8 +16,6 @@
 
 package android.widget.layout.table;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -25,6 +23,8 @@ import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * This test adds an extra row with an extra column in the table.

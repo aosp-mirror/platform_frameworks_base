@@ -19,7 +19,8 @@ package android.os.storage;
 import android.os.ParcelFileDescriptor;
 import android.os.ProxyFileDescriptorCallback;
 import android.system.ErrnoException;
-import android.test.suitebuilder.annotation.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 import com.android.frameworks.coretests.R;
 

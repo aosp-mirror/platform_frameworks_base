@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.service.notification;
 
 import static junit.framework.Assert.assertEquals;
@@ -28,9 +29,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.metrics.LogMaker;
 import android.os.UserHandle;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 

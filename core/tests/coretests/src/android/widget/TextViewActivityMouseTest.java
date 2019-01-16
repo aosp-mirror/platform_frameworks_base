@@ -43,13 +43,14 @@ import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIn
 import static android.widget.espresso.TextViewAssertions.hasSelection;
 
 import android.app.Activity;
-import android.support.test.filters.MediumTest;
-import android.support.test.filters.Suppress;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.MotionEvent;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 

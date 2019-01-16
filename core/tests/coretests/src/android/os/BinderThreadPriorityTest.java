@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
 
 import java.io.File;

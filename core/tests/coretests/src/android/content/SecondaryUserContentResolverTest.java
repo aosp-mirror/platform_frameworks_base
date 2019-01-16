@@ -18,7 +18,8 @@ package android.content;
 
 import android.content.pm.UserInfo;
 import android.os.RemoteException;
-import android.support.test.filters.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 /**
  * To run the tests, use
@@ -31,7 +32,7 @@ import android.support.test.filters.LargeTest;
  * Install: adb install -r \
  *     ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
  * Run: adb shell am instrument -e class android.content.SecondaryUserContentResolverTest -w \
- *     com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
+ *     com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
  */
 @LargeTest
 public class SecondaryUserContentResolverTest extends AbstractCrossUserContentResolverTest {

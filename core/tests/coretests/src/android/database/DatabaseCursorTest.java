@@ -18,10 +18,6 @@ package android.database;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.CursorIndexOutOfBoundsException;
-import android.database.DataSetObserver;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteCursorDriver;
 import android.database.sqlite.SQLiteDatabase;
@@ -29,10 +25,11 @@ import android.database.sqlite.SQLiteQuery;
 import android.os.Looper;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
 
 import java.io.File;
 import java.util.ArrayList;

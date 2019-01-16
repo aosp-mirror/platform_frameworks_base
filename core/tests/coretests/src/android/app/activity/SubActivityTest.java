@@ -16,8 +16,9 @@
 
 package android.app.activity;
 
-import android.test.suitebuilder.annotation.Suppress;
 import android.content.ComponentName;
+
+import androidx.test.filters.Suppress;
 
 @Suppress
 public class SubActivityTest extends ActivityTestsBase {

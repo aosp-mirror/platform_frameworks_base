@@ -16,17 +16,15 @@
 
 package android.view;
 
-import com.android.frameworks.coretests.R;
-import android.view.ViewGroupChildren;
-
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.test.ViewAsserts;
-import android.test.UiThreadTest;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.MediumTest;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Exercises {@link android.view.ViewGroup}'s ability to add/remove children.

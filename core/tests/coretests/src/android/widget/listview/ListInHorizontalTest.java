@@ -16,8 +16,6 @@
 
 package android.widget.listview;
 
-import android.widget.listview.ListInHorizontal;
-
 public class ListInHorizontalTest extends ListUnspecifiedMeasure<ListInHorizontal> {
     public ListInHorizontalTest() {
         super(ListInHorizontal.class);

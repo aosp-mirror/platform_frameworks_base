@@ -16,18 +16,18 @@
 
 package android.widget.listview;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.ListActivity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.android.frameworks.coretests.R;
 
 import java.util.Random;
 

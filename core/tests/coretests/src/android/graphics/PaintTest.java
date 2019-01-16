@@ -18,9 +18,9 @@ package android.graphics;
 
 import static org.junit.Assert.assertNotEquals;
 
-import android.graphics.Paint;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import java.util.Arrays;
 import java.util.HashSet;

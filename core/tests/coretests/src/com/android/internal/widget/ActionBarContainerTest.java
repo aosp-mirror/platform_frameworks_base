@@ -18,10 +18,11 @@ package com.android.internal.widget;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.view.ActionMode;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.test.filters.SmallTest;
 
 /**
  * Tests for {@link ActionBarContainer}.

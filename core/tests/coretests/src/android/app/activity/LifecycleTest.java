@@ -18,8 +18,9 @@ package android.app.activity;
 
 import android.content.ComponentName;
 import android.content.Intent;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
 
 public class LifecycleTest extends ActivityTestsBase {
     private Intent mTopIntent;

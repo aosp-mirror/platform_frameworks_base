@@ -21,6 +21,7 @@ import android.os.Looper;
 import android.util.SparseIntArray;
 
 import com.android.internal.location.gnssmetrics.GnssMetrics;
+
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.Future;
