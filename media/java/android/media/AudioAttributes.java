@@ -736,8 +736,9 @@ public final class AudioAttributes implements Parcelable {
          * @param preset one of {@link MediaRecorder.AudioSource#DEFAULT},
          *     {@link MediaRecorder.AudioSource#MIC}, {@link MediaRecorder.AudioSource#CAMCORDER},
          *     {@link MediaRecorder.AudioSource#VOICE_RECOGNITION},
-         *     {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION} or
-         *     {@link MediaRecorder.AudioSource#UNPROCESSED}
+         *     {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION},
+         *     {@link MediaRecorder.AudioSource#UNPROCESSED} or
+         *     {@link MediaRecorder.AudioSource#VOICE_PERFORMANCE}
          * @return the same Builder instance.
          */
         @SystemApi
@@ -749,6 +750,7 @@ public final class AudioAttributes implements Parcelable {
                 case MediaRecorder.AudioSource.VOICE_RECOGNITION:
                 case MediaRecorder.AudioSource.VOICE_COMMUNICATION:
                 case MediaRecorder.AudioSource.UNPROCESSED:
+                case MediaRecorder.AudioSource.VOICE_PERFORMANCE:
                     mSource = preset;
                     break;
                 default:
@@ -760,7 +762,7 @@ public final class AudioAttributes implements Parcelable {
         /**
          * @hide
          * Same as {@link #setCapturePreset(int)} but authorizes the use of HOTWORD,
-         * REMOTE_SUBMIX, RADIO_TUNER, VOICE_DOWNLINK, VOICE_UPLINK and VOICE_CALL.
+         * REMOTE_SUBMIX, RADIO_TUNER, VOICE_DOWNLINK, VOICE_UPLINK, VOICE_CALL and ECHO_REFERENCE.
          * @param preset
          * @return the same Builder instance.
          */
@@ -771,7 +773,8 @@ public final class AudioAttributes implements Parcelable {
                     || (preset == MediaRecorder.AudioSource.RADIO_TUNER)
                     || (preset == MediaRecorder.AudioSource.VOICE_DOWNLINK)
                     || (preset == MediaRecorder.AudioSource.VOICE_UPLINK)
-                    || (preset == MediaRecorder.AudioSource.VOICE_CALL)) {
+                    || (preset == MediaRecorder.AudioSource.VOICE_CALL)
+                    || (preset == MediaRecorder.AudioSource.ECHO_REFERENCE)) {
                 mSource = preset;
             } else {
                 setCapturePreset(preset);

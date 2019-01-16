@@ -302,6 +302,34 @@ public class MediaRecorder implements AudioRouting,
          *  {@link #DEFAULT} otherwise. */
         public static final int UNPROCESSED = 9;
 
+
+        /**
+         * Source for capturing audio meant to be processed in real time and played back for live
+         * performance (e.g karaoke).
+         * <p>
+         * The capture path will minimize latency and coupling with
+         * playback path.
+         * </p>
+         */
+        public static final int VOICE_PERFORMANCE = 10;
+
+        /**
+         * Source for an echo canceller to capture the reference signal to be cancelled.
+         * <p>
+         * The echo reference signal will be captured as close as possible to the DAC in order
+         * to include all post processing applied to the playback path.
+         * </p><p>
+         * Capturing the echo reference requires the
+         * {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+         * This permission is reserved for use by system components and is not available to
+         * third-party applications.
+         * </p>
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT)
+        public static final int ECHO_REFERENCE = 1997;
+
         /**
          * Audio source for capturing broadcast radio tuner output.
          * @hide
@@ -343,6 +371,7 @@ public class MediaRecorder implements AudioRouting,
         case AudioSource.VOICE_COMMUNICATION:
         //case REMOTE_SUBMIX:  considered "system" as it requires system permissions
         case AudioSource.UNPROCESSED:
+        case AudioSource.VOICE_PERFORMANCE:
             return false;
         default:
             return true;
@@ -372,6 +401,10 @@ public class MediaRecorder implements AudioRouting,
             return "REMOTE_SUBMIX";
         case AudioSource.UNPROCESSED:
             return "UNPROCESSED";
+        case AudioSource.ECHO_REFERENCE:
+            return "ECHO_REFERENCE";
+        case AudioSource.VOICE_PERFORMANCE:
+            return "VOICE_PERFORMANCE";
         case AudioSource.RADIO_TUNER:
             return "RADIO_TUNER";
         case AudioSource.HOTWORD:
@@ -524,7 +557,7 @@ public class MediaRecorder implements AudioRouting,
      * @see android.media.MediaRecorder.AudioSource
      */
     public static final int getAudioSourceMax() {
-        return AudioSource.UNPROCESSED;
+        return AudioSource.VOICE_PERFORMANCE;
     }
 
     /**
