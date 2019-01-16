@@ -317,21 +317,22 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
         mExecutor.execute(() -> {
             try {
                 if (null == l2Key) {
-                    listener.onL2KeyResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), l2Key, null);
+                    listener.onNetworkAttributesRetrieved(
+                            makeStatus(ERROR_ILLEGAL_ARGUMENT), l2Key, null);
                     return;
                 }
                 if (null == mDb) {
-                    listener.onL2KeyResponse(makeStatus(ERROR_DATABASE_CANNOT_BE_OPENED), l2Key,
-                            null);
+                    listener.onNetworkAttributesRetrieved(
+                            makeStatus(ERROR_DATABASE_CANNOT_BE_OPENED), l2Key, null);
                     return;
                 }
                 try {
                     final NetworkAttributes attributes =
                             IpMemoryStoreDatabase.retrieveNetworkAttributes(mDb, l2Key);
-                    listener.onL2KeyResponse(makeStatus(SUCCESS), l2Key,
+                    listener.onNetworkAttributesRetrieved(makeStatus(SUCCESS), l2Key,
                             null == attributes ? null : attributes.toParcelable());
                 } catch (final Exception e) {
-                    listener.onL2KeyResponse(makeStatus(ERROR_GENERIC), l2Key, null);
+                    listener.onNetworkAttributesRetrieved(makeStatus(ERROR_GENERIC), l2Key, null);
                 }
             } catch (final RemoteException e) {
                 // Client at the other end died
