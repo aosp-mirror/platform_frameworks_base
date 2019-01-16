@@ -4683,7 +4683,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         mCellNetworkAgent.connect(true);
         networkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
-        verify(mNetworkManagementService, times(1)).startClatd(MOBILE_IFNAME);
+        verify(mMockNetd, times(1)).clatdStart(MOBILE_IFNAME);
         Nat464Xlat clat = mService.getNat464Xlat(mCellNetworkAgent);
 
         // Clat iface up, expect stack link updated.
@@ -4710,7 +4710,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         waitForIdle();
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
-        verify(mNetworkManagementService, times(1)).stopClatd(MOBILE_IFNAME);
+        verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
 
         // Clat iface removed, expect linkproperties revert to original one
         clat.interfaceRemoved(CLAT_PREFIX + MOBILE_IFNAME);
