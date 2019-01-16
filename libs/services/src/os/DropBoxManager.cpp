@@ -228,15 +228,4 @@ DropBoxManager::add(const Entry& entry)
     return service->add(entry);
 }
 
-Status
-DropBoxManager::getNextEntry(const String16& tag, long msec, Entry* entry)
-{
-    sp<IDropBoxManagerService> service = interface_cast<IDropBoxManagerService>(
-        defaultServiceManager()->getService(android::String16("dropbox")));
-    if (service == NULL) {
-        return Status::fromExceptionCode(Status::EX_NULL_POINTER, "can't find dropbox service");
-    }
-    return service->getNextEntry(tag, msec, android::String16("android"), entry);
-}
-
 }} // namespace android::os
