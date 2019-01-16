@@ -182,6 +182,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             subs.add(subscription);
         }
         when(mMockSm.getActiveSubscriptionInfoList()).thenReturn(subs);
+        when(mMockSm.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(subs);
         mNetworkController.doUpdateMobileControllers();
     }
 
