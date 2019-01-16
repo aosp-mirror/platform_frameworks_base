@@ -210,6 +210,7 @@ import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
+import android.sysprop.DisplayProperties;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.text.format.Time;
@@ -245,7 +246,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.appop.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -261,6 +261,7 @@ import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentController;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
+import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.UserManagerService;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -694,7 +695,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean isPc = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
 
         // Transfer any global setting for forcing RTL layout, into a System Property
-        SystemProperties.set(DEVELOPMENT_FORCE_RTL, forceRtl ? "1":"0");
+        DisplayProperties.debug_force_rtl(forceRtl);
 
         final Configuration configuration = new Configuration();
         Settings.System.getConfiguration(resolver, configuration);

@@ -10695,7 +10695,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProtoUtils.toDuration(proto, ActivityManagerServiceDumpProcessesProto.LAST_IDLE_TIME, mLastIdleTime, now);
             proto.write(ActivityManagerServiceDumpProcessesProto.LOW_RAM_SINCE_LAST_IDLE_MS, getLowRamTimeSinceIdle(now));
         }
-
     }
 
     void writeProcessesToGcToProto(ProtoOutputStream proto, long fieldId, String dumpPackage) {
