@@ -94,7 +94,6 @@ package android {
     field public static final java.lang.String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
     field public static final java.lang.String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
     field public static final java.lang.String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
-    field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final java.lang.String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final java.lang.String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
     field public static final java.lang.String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";

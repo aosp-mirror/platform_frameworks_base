@@ -1,3 +1,11 @@
+package android {
+
+  public static final class Manifest.permission {
+    field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
+  }
+
+}
+
 package android.app {
 
   public class Notification implements android.os.Parcelable {

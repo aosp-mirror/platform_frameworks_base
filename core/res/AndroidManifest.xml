@@ -3196,9 +3196,10 @@
 
     <!-- @SystemApi Required to add or remove another application as a device admin.
          <p>Not for use by third-party applications.
-         @hide -->
+         @hide
+         @removed -->
     <permission android:name="android.permission.MANAGE_DEVICE_ADMINS"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an app to reset the device password.
          <p>Not for use by third-party applications.
