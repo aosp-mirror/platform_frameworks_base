@@ -25,7 +25,13 @@ import android.graphics.Color;
 /**
  * An interface for reading the properties of an inspectable object.
  *
- * Used as the parameter for {@link InspectionCompanion#readProperties(Object, PropertyReader)}.
+ * {@code PropertyReader} is defined as an interface that will be called by
+ * {@link InspectionCompanion#readProperties(Object, PropertyReader)}. This approach allows a
+ * client inspector to read the values of primitive properties without the overhead of
+ * instantiating a class to hold the property values for each inspection pass. If an inspectable
+ * remains unchanged between reading passes, it should be possible for a {@code PropertyReader} to
+ * avoid new allocations for subsequent reading passes.
+ *
  * It has separate methods for all primitive types to avoid autoboxing overhead if a concrete
  * implementation is able to work with primitives. Implementations should be prepared to accept
  * {null} as the value of {@link PropertyReader#readObject(int, Object)}.
@@ -38,7 +44,7 @@ public interface PropertyReader {
      *
      * @param id Identifier of the property from a {@link PropertyMapper}
      * @param value Value of the property
-     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {boolean}
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {@code boolean}
      */
     void readBoolean(int id, boolean value);
 
@@ -47,7 +53,7 @@ public interface PropertyReader {
      *
      * @param id Identifier of the property from a {@link PropertyMapper}
      * @param value Value of the property
-     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {byte}
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {@code byte}
      */
     void readByte(int id, byte value);
 
@@ -56,7 +62,7 @@ public interface PropertyReader {
      *
      * @param id Identifier of the property from a {@link PropertyMapper}
      * @param value Value of the property
-     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {char}
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {@code char}
      */
     void readChar(int id, char value);
 
@@ -65,7 +71,7 @@ public interface PropertyReader {
      *
      * @param id Identifier of the property from a {@link PropertyMapper}
      * @param value Value of the property
-     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {double}
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {@code double}
      */
     void readDouble(int id, double value);
 
@@ -74,7 +80,7 @@ public interface PropertyReader {
      *
      * @param id Identifier of the property from a {@link PropertyMapper}
      * @param value Value of the property
-     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {float}
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {@code float}
      */
     void readFloat(int id, float value);
 
@@ -83,7 +89,7 @@ public interface PropertyReader {
      *
      * @param id Identifier of the property from a {@link PropertyMapper}
      * @param value Value of the property
-     * @throws PropertyTypeMismatchException If the property ID is not mapped as an {int}
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as an {@code int}
      */
     void readInt(int id, int value);
 
@@ -92,7 +98,7 @@ public interface PropertyReader {
      *
      * @param id Identifier of the property from a {@link PropertyMapper}
      * @param value Value of the property
-     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {long}
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {@code long}
      */
     void readLong(int id, long value);
 
@@ -101,7 +107,7 @@ public interface PropertyReader {
      *
      * @param id Identifier of the property from a {@link PropertyMapper}
      * @param value Value of the property
-     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {short}
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as a {@code short}
      */
     void readShort(int id, short value);
 

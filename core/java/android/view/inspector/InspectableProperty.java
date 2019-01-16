@@ -105,7 +105,6 @@ public @interface InspectableProperty {
     /**
      * One entry in an enumeration packed into a primitive {int}.
      *
-     * @see IntEnumMapping
      * @hide
      */
     @Target({TYPE})
