@@ -328,14 +328,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private int mLastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
     /**
-     * Flag indicating that the application is receiving an orientation that has different metrics
-     * than it expected. E.g. Portrait instead of Landscape.
-     *
-     * @see #updateRotationUnchecked()
-     */
-    private boolean mAltOrientation = false;
-
-    /**
      * Orientation forced by some window. If there is no visible window that specifies orientation
      * it is set to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED}.
      *
@@ -1085,10 +1077,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mLastOrientation;
     }
 
-    boolean getAltOrientation() {
-        return mAltOrientation;
-    }
-
     int getLastWindowForcedOrientation() {
         return mLastWindowForcedOrientation;
     }
@@ -1130,15 +1118,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     boolean rotationNeedsUpdate() {
         final int lastOrientation = getLastOrientation();
         final int oldRotation = getRotation();
-        final boolean oldAltOrientation = getAltOrientation();
 
         final int rotation = mDisplayRotation.rotationForOrientation(lastOrientation, oldRotation);
-        final boolean altOrientation = !mDisplayRotation.rotationHasCompatibleMetrics(
-                lastOrientation, rotation);
-        if (oldRotation == rotation && oldAltOrientation == altOrientation) {
-            return false;
-        }
-        return true;
+        return oldRotation != rotation;
     }
 
     /**
@@ -1336,7 +1318,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         final int oldRotation = mRotation;
         final int lastOrientation = mLastOrientation;
-        final boolean oldAltOrientation = mAltOrientation;
         final int rotation = mDisplayRotation.rotationForOrientation(lastOrientation, oldRotation);
         if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Computed rotation=" + rotation + " for display id="
                 + mDisplayId + " based on lastOrientation=" + lastOrientation
@@ -1368,35 +1349,26 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         final boolean rotateSeamlessly = mayRotateSeamlessly;
 
-        // TODO: Implement forced rotation changes.
-        //       Set mAltOrientation to indicate that the application is receiving
-        //       an orientation that has different metrics than it expected.
-        //       eg. Portrait instead of Landscape.
-
-        final boolean altOrientation = !mDisplayRotation.rotationHasCompatibleMetrics(
-                lastOrientation, rotation);
-
         if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
                 + " selected orientation " + lastOrientation
                 + ", got rotation " + rotation + " which has "
-                + (altOrientation ? "incompatible" : "compatible") + " metrics");
+                + " metrics");
 
-        if (oldRotation == rotation && oldAltOrientation == altOrientation) {
+        if (oldRotation == rotation) {
             // No change.
             return false;
         }
 
         if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
                 + " rotation changed to " + rotation
-                + (altOrientation ? " (alt)" : "") + " from " + oldRotation
-                + (oldAltOrientation ? " (alt)" : "") + ", lastOrientation=" + lastOrientation);
+                + " from " + oldRotation
+                + ", lastOrientation=" + lastOrientation);
 
         if (DisplayContent.deltaRotation(rotation, oldRotation) != 2) {
             mWaitingForConfig = true;
         }
 
         mRotation = rotation;
-        mAltOrientation = altOrientation;
 
         mWmService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
         mWmService.mH.sendNewMessageDelayed(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT,
@@ -1538,26 +1510,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private DisplayInfo updateDisplayAndOrientation(int uiMode) {
         // Use the effective "visual" dimensions based on current rotation
         final boolean rotated = (mRotation == ROTATION_90 || mRotation == ROTATION_270);
-        final int realdw = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
-        final int realdh = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
-        int dw = realdw;
-        int dh = realdh;
-
-        if (mAltOrientation) {
-            if (realdw > realdh) {
-                // Turn landscape into portrait.
-                int maxw = (int)(realdh/1.3f);
-                if (maxw < realdw) {
-                    dw = maxw;
-                }
-            } else {
-                // Turn portrait into landscape.
-                int maxh = (int)(realdw/1.3f);
-                if (maxh < realdh) {
-                    dh = maxh;
-                }
-            }
-        }
+        final int dw = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
+        final int dh = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
 
         // Update application display metrics.
         final WmDisplayCutout wmDisplayCutout = calculateDisplayCutoutForRotation(mRotation);

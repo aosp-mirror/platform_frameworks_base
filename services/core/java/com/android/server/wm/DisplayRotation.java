@@ -676,36 +676,6 @@ public class DisplayRotation {
         return rotation == mPortraitRotation || rotation == mUpsideDownRotation;
     }
 
-    /**
-     * Given an orientation constant and a rotation, returns true if the rotation
-     * has compatible metrics to the requested orientation.  For example, if
-     * the application requested landscape and got seascape, then the rotation
-     * has compatible metrics; if the application requested portrait and got landscape,
-     * then the rotation has incompatible metrics; if the application did not specify
-     * a preference, then anything goes.
-     *
-     * @param orientation An orientation constant, such as
-     * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE}.
-     * @param rotation The rotation to check.
-     * @return True if the rotation is compatible with the requested orientation.
-     */
-    boolean rotationHasCompatibleMetrics(int orientation, int rotation) {
-        switch (orientation) {
-            case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-            case ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT:
-                return isAnyPortrait(rotation);
-
-            case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-            case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
-                return isLandscapeOrSeascape(rotation);
-
-            default:
-                return true;
-        }
-    }
-
     private boolean isValidRotationChoice(final int preferredRotation) {
         // Determine if the given app orientation is compatible with the provided rotation choice.
         switch (mCurrentAppOrientation) {
