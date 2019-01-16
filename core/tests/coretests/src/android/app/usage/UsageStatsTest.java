@@ -21,6 +21,7 @@ import static android.app.usage.UsageEvents.Event.ACTIVITY_PAUSED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_STOPPED;
 import static android.app.usage.UsageEvents.Event.CONTINUING_FOREGROUND_SERVICE;
+import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.END_OF_DAY;
 import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_START;
@@ -529,6 +530,11 @@ public class UsageStatsTest {
     }
 
     @Test
+    public void testEvent_DEVICE_SHUTDOWN() {
+        testClosingEvent(DEVICE_SHUTDOWN);
+    }
+
+    @Test
     public void testEvent_FLUSH_TO_DISK() {
         testClosingEvent(FLUSH_TO_DISK);
     }
@@ -536,8 +542,9 @@ public class UsageStatsTest {
     private void testClosingEvent(int eventType) {
         // When these three closing events are received, all open activities/services need to be
         // closed and usage stats are updated.
-        if (eventType != FLUSH_TO_DISK) {
-            fail("Closing eventType must be one of FLUSH_TO_DISK");
+        if (eventType != DEVICE_SHUTDOWN
+                && eventType != FLUSH_TO_DISK) {
+            fail("Closing eventType must be one of DEVICE_SHUTDOWN, FLUSH_TO_DISK");
         }
 
         left.mPackageName = "com.test";

@@ -320,4 +320,10 @@ public abstract class ActivityManagerInternal {
 
     /** Remove pending backup for the given userId. */
     public abstract void clearPendingBackup(int userId);
+
+    /**
+     * When power button is very long pressed, call this interface to do some pre-shutdown work
+     * like persisting database etc.
+     */
+    public abstract void prepareForPossibleShutdown();
 }

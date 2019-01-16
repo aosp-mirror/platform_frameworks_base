@@ -22,6 +22,7 @@ import static android.app.usage.UsageEvents.Event.ACTIVITY_STOPPED;
 import static android.app.usage.UsageEvents.Event.CONFIGURATION_CHANGE;
 import static android.app.usage.UsageEvents.Event.CONTINUE_PREVIOUS_DAY;
 import static android.app.usage.UsageEvents.Event.CONTINUING_FOREGROUND_SERVICE;
+import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.END_OF_DAY;
 import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_START;
@@ -66,7 +67,7 @@ public class IntervalStats {
     public final ArrayMap<String, UsageStats> packageStats = new ArrayMap<>();
     public final ArrayMap<Configuration, ConfigurationStats> configurations = new ArrayMap<>();
     public Configuration activeConfiguration;
-    public EventList events;
+    public EventList events = new EventList();
 
     // A string cache. This is important as when we're parsing XML files, we don't want to
     // keep hundreds of strings that have the same contents. We will read the string
@@ -110,6 +111,9 @@ public class IntervalStats {
             }
         }
 
+    }
+
+    public IntervalStats() {
     }
 
     /**
@@ -253,6 +257,7 @@ public class IntervalStats {
             case ROLLOVER_FOREGROUND_SERVICE:
             case CONTINUE_PREVIOUS_DAY:
             case CONTINUING_FOREGROUND_SERVICE:
+            case DEVICE_SHUTDOWN:
                 return true;
         }
         return false;
@@ -281,8 +286,9 @@ public class IntervalStats {
     @VisibleForTesting
     public void update(String packageName, String className, long timeStamp, int eventType,
             int instanceId) {
-        if (eventType == FLUSH_TO_DISK) {
-            // FLUSH_TO_DISK are sent to all packages.
+        if (eventType == DEVICE_SHUTDOWN
+                || eventType == FLUSH_TO_DISK) {
+            // DEVICE_SHUTDOWN and FLUSH_TO_DISK are sent to all packages.
             final int size = packageStats.size();
             for (int i = 0; i < size; i++) {
                 UsageStats usageStats = packageStats.valueAt(i);
@@ -321,9 +327,6 @@ public class IntervalStats {
      */
     @VisibleForTesting
     public void addEvent(Event event) {
-        if (events == null) {
-            events = new EventList();
-        }
         // Cache common use strings
         event.mPackage = getCachedStringRef(event.mPackage);
         if (event.mClass != null) {

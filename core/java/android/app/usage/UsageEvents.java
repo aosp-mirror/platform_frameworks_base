@@ -245,10 +245,18 @@ public final class UsageEvents implements Parcelable {
         public static final int FLUSH_TO_DISK = 25;
 
         /**
+         * An event type denoting that the device underwent a shutdown process.
+         * A DEVICE_SHUTDOWN event should be treated as if all started activities and foreground
+         * services are now stopped and no explicit {@link #ACTIVITY_STOPPED} and
+         * {@link #FOREGROUND_SERVICE_STOP} events will be generated for them.
+         */
+        public static final int DEVICE_SHUTDOWN = 26;
+
+        /**
          * Keep in sync with the greatest event type value.
          * @hide
          */
-        public static final int MAX_EVENT_TYPE = 25;
+        public static final int MAX_EVENT_TYPE = 26;
 
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;

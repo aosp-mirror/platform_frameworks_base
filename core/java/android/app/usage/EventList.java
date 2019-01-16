@@ -103,21 +103,4 @@ public class EventList {
         }
         return result;
     }
-
-    /**
-     * Remove events of certain type on or after a timestamp.
-     * @param type The type of event to remove.
-     * @param timeStamp the timeStamp on or after which to remove the event.
-     */
-    public void removeOnOrAfter(int type, long timeStamp) {
-        for (int i = mEvents.size() - 1; i >= 0; i--) {
-            UsageEvents.Event event = mEvents.get(i);
-            if (event.mTimeStamp < timeStamp) {
-                break;
-            }
-            if (event.mEventType == type) {
-                mEvents.remove(i);
-            }
-        }
-    }
 }

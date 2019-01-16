@@ -17867,6 +17867,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void clearPendingBackup(int userId) {
             ActivityManagerService.this.clearPendingBackup(userId);
         }
+
+        /**
+         * When power button is very long pressed, call this interface to do some pre-shutdown work
+         * like persisting database etc.
+         */
+        @Override
+        public void prepareForPossibleShutdown() {
+            ActivityManagerService.this.prepareForPossibleShutdown();
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
@@ -18120,6 +18129,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         } catch (RemoteException e) {
             throw new IllegalStateException("Process disappeared");
+        }
+    }
+
+    /**
+     * When power button is very long pressed, call this interface to do some pre-shutdown work
+     * like persisting database etc.
+     */
+    public void prepareForPossibleShutdown() {
+        synchronized (this) {
+            if (mUsageStatsService != null) {
+                mUsageStatsService.prepareForPossibleShutdown();
+            }
         }
     }
 

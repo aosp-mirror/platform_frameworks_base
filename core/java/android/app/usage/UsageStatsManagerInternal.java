@@ -98,6 +98,12 @@ public abstract class UsageStatsManagerInternal {
     public abstract void prepareShutdown();
 
     /**
+     * When the device power button is long pressed for 3.5 seconds, prepareForPossibleShutdown()
+     * is called.
+     */
+    public abstract void prepareForPossibleShutdown();
+
+    /**
      * Returns true if the app has not been used for a certain amount of time. How much time?
      * Could be hours, could be days, who knows?
      *

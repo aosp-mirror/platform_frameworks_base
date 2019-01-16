@@ -16,6 +16,7 @@
 
 package com.android.server.usage;
 
+import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageStatsManager.INTERVAL_BEST;
 import static android.app.usage.UsageStatsManager.INTERVAL_COUNT;
 import static android.app.usage.UsageStatsManager.INTERVAL_DAILY;
@@ -134,6 +135,18 @@ class UserUsageStatsService {
             updateRolloverDeadline();
         }
 
+        // During system reboot, add a DEVICE_SHUTDOWN event to the end of event list, the timestamp
+        // is last time UsageStatsDatabase is persisted to disk.
+        final IntervalStats currentDailyStats = mCurrentStats[INTERVAL_DAILY];
+        if (currentDailyStats != null) {
+            final int size = currentDailyStats.events.size();
+            if (size == 0 || currentDailyStats.events.get(size - 1).mEventType != DEVICE_SHUTDOWN) {
+                // The last event in event list is not DEVICE_SHUTDOWN, then we insert one.
+                final Event event = new Event(DEVICE_SHUTDOWN, currentDailyStats.lastTimeSaved);
+                currentDailyStats.addEvent(event);
+            }
+        }
+
         if (mDatabase.isNewUpdate()) {
             notifyNewUpdate();
         }
@@ -175,7 +188,9 @@ class UserUsageStatsService {
                 // ACTIVITY_STOPPED.
                 && event.mEventType != Event.ACTIVITY_DESTROYED
                 // FLUSH_TO_DISK is a private event.
-                && event.mEventType != Event.FLUSH_TO_DISK) {
+                && event.mEventType != Event.FLUSH_TO_DISK
+                // DEVICE_SHUTDOWN is added to event list after reboot.
+                && event.mEventType != Event.DEVICE_SHUTDOWN) {
             currentDailyStats.addEvent(event);
         }
 
@@ -393,10 +408,6 @@ class UserUsageStatsService {
                     @Override
                     public void combine(IntervalStats stats, boolean mutable,
                             List<Event> accumulatedResult) {
-                        if (stats.events == null) {
-                            return;
-                        }
-
                         final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                         final int size = stats.events.size();
                         for (int i = startIndex; i < size; i++) {
@@ -434,10 +445,6 @@ class UserUsageStatsService {
         names.add(packageName);
         final List<Event> results = queryStats(INTERVAL_DAILY,
                 beginTime, endTime, (stats, mutable, accumulatedResult) -> {
-                    if (stats.events == null) {
-                        return;
-                    }
-
                     final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                     final int size = stats.events.size();
                     for (int i = startIndex; i < size; i++) {
@@ -696,10 +703,6 @@ class UserUsageStatsService {
                     @Override
                     public void combine(IntervalStats stats, boolean mutable,
                             List<Event> accumulatedResult) {
-                        if (stats.events == null) {
-                            return;
-                        }
-
                         final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                         final int size = stats.events.size();
                         for (int i = startIndex; i < size; i++) {
@@ -925,10 +928,12 @@ class UserUsageStatsService {
                 return "SCREEN_INTERACTIVE";
             case Event.SCREEN_NON_INTERACTIVE:
                 return "SCREEN_NON_INTERACTIVE";
-            case UsageEvents.Event.KEYGUARD_SHOWN:
+            case Event.KEYGUARD_SHOWN:
                 return "KEYGUARD_SHOWN";
-            case UsageEvents.Event.KEYGUARD_HIDDEN:
+            case Event.KEYGUARD_HIDDEN:
                 return "KEYGUARD_HIDDEN";
+            case Event.DEVICE_SHUTDOWN:
+                return "DEVICE_SHUTDOWN";
             default:
                 return "UNKNOWN_TYPE_" + eventType;
         }
