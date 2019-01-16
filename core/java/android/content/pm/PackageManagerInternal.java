@@ -137,6 +137,12 @@ public abstract class PackageManagerInternal {
     public abstract void setLocationPackagesProvider(PackagesProvider provider);
 
     /**
+     * Set the location extra packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract  void setLocationExtraPackagesProvider(PackagesProvider provider);
+
+    /**
      * Sets the voice interaction packages provider.
      * @param provider The packages provider.
      */

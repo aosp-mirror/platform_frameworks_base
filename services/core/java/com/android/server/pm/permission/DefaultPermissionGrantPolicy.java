@@ -225,6 +225,7 @@ public final class DefaultPermissionGrantPolicy {
     private final Handler mHandler;
 
     private PackagesProvider mLocationPackagesProvider;
+    private PackagesProvider mLocationExtraPackagesProvider;
     private PackagesProvider mVoiceInteractionPackagesProvider;
     private PackagesProvider mSmsAppPackagesProvider;
     private PackagesProvider mDialerAppPackagesProvider;
@@ -267,6 +268,13 @@ public final class DefaultPermissionGrantPolicy {
     public void setLocationPackagesProvider(PackagesProvider provider) {
         synchronized (mLock) {
             mLocationPackagesProvider = provider;
+        }
+    }
+
+    /** Sets the provider for loction extra packages. */
+    public void setLocationExtraPackagesProvider(PackagesProvider provider) {
+        synchronized (mLock) {
+            mLocationExtraPackagesProvider = provider;
         }
     }
 
@@ -403,6 +411,7 @@ public final class DefaultPermissionGrantPolicy {
         Log.i(TAG, "Granting permissions to default platform handlers for user " + userId);
 
         final PackagesProvider locationPackagesProvider;
+        final PackagesProvider locationExtraPackagesProvider;
         final PackagesProvider voiceInteractionPackagesProvider;
         final PackagesProvider smsAppPackagesProvider;
         final PackagesProvider dialerAppPackagesProvider;
@@ -412,6 +421,7 @@ public final class DefaultPermissionGrantPolicy {
 
         synchronized (mLock) {
             locationPackagesProvider = mLocationPackagesProvider;
+            locationExtraPackagesProvider = mLocationExtraPackagesProvider;
             voiceInteractionPackagesProvider = mVoiceInteractionPackagesProvider;
             smsAppPackagesProvider = mSmsAppPackagesProvider;
             dialerAppPackagesProvider = mDialerAppPackagesProvider;
@@ -424,6 +434,8 @@ public final class DefaultPermissionGrantPolicy {
                 ? voiceInteractionPackagesProvider.getPackages(userId) : null;
         String[] locationPackageNames = (locationPackagesProvider != null)
                 ? locationPackagesProvider.getPackages(userId) : null;
+        String[] locationExtraPackageNames = (locationExtraPackagesProvider != null)
+                ? locationExtraPackagesProvider.getPackages(userId) : null;
         String[] smsAppPackageNames = (smsAppPackagesProvider != null)
                 ? smsAppPackagesProvider.getPackages(userId) : null;
         String[] dialerAppPackageNames = (dialerAppPackagesProvider != null)
@@ -636,6 +648,12 @@ public final class DefaultPermissionGrantPolicy {
                         SENSORS_PERMISSIONS, STORAGE_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(packageName, userId,
                         LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
+            }
+        }
+        if (locationExtraPackageNames != null) {
+            // Also grant location permission to location extra packages.
+            for (String packageName : locationExtraPackageNames) {
+                grantPermissionsToSystemPackage(packageName, userId, LOCATION_PERMISSIONS);
             }
         }
 

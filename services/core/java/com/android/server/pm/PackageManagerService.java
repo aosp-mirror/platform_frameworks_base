@@ -23138,6 +23138,11 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public void setLocationExtraPackagesProvider(PackagesProvider provider) {
+            mDefaultPermissionPolicy.setLocationExtraPackagesProvider(provider);
+        }
+
+        @Override
         public void setVoiceInteractionPackagesProvider(PackagesProvider provider) {
             mDefaultPermissionPolicy.setVoiceInteractionPackagesProvider(provider);
         }
