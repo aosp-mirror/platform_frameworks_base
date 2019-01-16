@@ -129,7 +129,7 @@ public class DexManager {
         mPackageDexOptimizer = pdo;
         mInstaller = installer;
         mInstallLock = installLock;
-        mDexLogger = new DexLogger(pms, installer, installLock);
+        mDexLogger = new DexLogger(pms, installer);
     }
 
     public DexLogger getDexLogger() {

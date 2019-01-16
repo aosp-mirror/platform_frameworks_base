@@ -28,7 +28,6 @@ import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
@@ -53,21 +52,18 @@ public class DexLogger {
 
     private final IPackageManager mPackageManager;
     private final PackageDynamicCodeLoading mPackageDynamicCodeLoading;
-    private final Object mInstallLock;
-    @GuardedBy("mInstallLock")
     private final Installer mInstaller;
 
-    public DexLogger(IPackageManager pms, Installer installer, Object installLock) {
-        this(pms, installer, installLock, new PackageDynamicCodeLoading());
+    public DexLogger(IPackageManager pms, Installer installer) {
+        this(pms, installer, new PackageDynamicCodeLoading());
     }
 
     @VisibleForTesting
-    DexLogger(IPackageManager pms, Installer installer, Object installLock,
+    DexLogger(IPackageManager pms, Installer installer,
             PackageDynamicCodeLoading packageDynamicCodeLoading) {
         mPackageManager = pms;
         mPackageDynamicCodeLoading = packageDynamicCodeLoading;
         mInstaller = installer;
-        mInstallLock = installLock;
     }
 
     public Set<String> getAllPackagesWithDynamicCodeLoading() {
@@ -131,14 +127,16 @@ public class DexLogger {
             }
 
             byte[] hash = null;
-            synchronized (mInstallLock) {
-                try {
-                    hash = mInstaller.hashSecondaryDexFile(filePath, packageName, appInfo.uid,
-                            appInfo.volumeUuid, storageFlags);
-                } catch (InstallerException e) {
-                    Slog.e(TAG, "Got InstallerException when hashing file " + filePath
-                            + ": " + e.getMessage());
-                }
+            try {
+                // Note that we do not take the install lock here. Hashing should never interfere
+                // with app update/compilation/removal. We may get anomalous results if a file
+                // changes while we hash it, but that can happen anyway and is harmless for our
+                // purposes.
+                hash = mInstaller.hashSecondaryDexFile(filePath, packageName, appInfo.uid,
+                        appInfo.volumeUuid, storageFlags);
+            } catch (InstallerException e) {
+                Slog.e(TAG, "Got InstallerException when hashing file " + filePath
+                        + ": " + e.getMessage());
             }
 
             String fileName = new File(filePath).getName();
