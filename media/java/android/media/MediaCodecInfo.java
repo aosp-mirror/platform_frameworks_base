@@ -163,7 +163,7 @@ public final class MediaCodecInfo {
         // such as B-frame support, arithmetic coding...
         public CodecProfileLevel[] profileLevels;  // NOTE this array is modifiable by user
 
-        // from OMX_COLOR_FORMATTYPE
+        // from MediaCodecConstants
         /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
         public static final int COLOR_FormatMonochrome              = 1;
         /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
@@ -344,7 +344,7 @@ public final class MediaCodecInfo {
         /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100;
         // COLOR_FormatSurface indicates that the data will be a GraphicBuffer metadata reference.
-        // In OMX this is called OMX_COLOR_FormatAndroidOpaque.
+        // Note: in OMX this is called OMX_COLOR_FormatAndroidOpaque.
         public static final int COLOR_FormatSurface                   = 0x7F000789;
 
         /**
@@ -435,8 +435,7 @@ public final class MediaCodecInfo {
         public static final int COLOR_QCOM_FormatYUV420SemiPlanar     = 0x7fa30c00;
 
         /**
-         * Defined in the OpenMAX IL specs, color format values are drawn from
-         * OMX_COLOR_FORMATTYPE.
+         * The color format for the media. This is one of the color constants defined in this class.
          */
         public int[] colorFormats; // NOTE this array is modifiable by user
 
@@ -2879,7 +2878,9 @@ public final class MediaCodecInfo {
      * {@link MediaCodecInfo.CodecCapabilities#profileLevels} field.
      */
     public static final class CodecProfileLevel {
-        // from OMX_VIDEO_AVCPROFILETYPE
+        // These constants were originally in-line with OMX values, but this
+        // correspondence is no longer maintained.
+
         public static final int AVCProfileBaseline = 0x01;
         public static final int AVCProfileMain     = 0x02;
         public static final int AVCProfileExtended = 0x04;
@@ -2890,7 +2891,6 @@ public final class MediaCodecInfo {
         public static final int AVCProfileConstrainedBaseline = 0x10000;
         public static final int AVCProfileConstrainedHigh     = 0x80000;
 
-        // from OMX_VIDEO_AVCLEVELTYPE
         public static final int AVCLevel1       = 0x01;
         public static final int AVCLevel1b      = 0x02;
         public static final int AVCLevel11      = 0x04;
@@ -2908,8 +2908,10 @@ public final class MediaCodecInfo {
         public static final int AVCLevel5       = 0x4000;
         public static final int AVCLevel51      = 0x8000;
         public static final int AVCLevel52      = 0x10000;
+        public static final int AVCLevel6       = 0x20000;
+        public static final int AVCLevel61      = 0x40000;
+        public static final int AVCLevel62      = 0x80000;
 
-        // from OMX_VIDEO_H263PROFILETYPE
         public static final int H263ProfileBaseline             = 0x01;
         public static final int H263ProfileH320Coding           = 0x02;
         public static final int H263ProfileBackwardCompatible   = 0x04;
@@ -2920,7 +2922,6 @@ public final class MediaCodecInfo {
         public static final int H263ProfileInterlace            = 0x80;
         public static final int H263ProfileHighLatency          = 0x100;
 
-        // from OMX_VIDEO_H263LEVELTYPE
         public static final int H263Level10      = 0x01;
         public static final int H263Level20      = 0x02;
         public static final int H263Level30      = 0x04;
@@ -2930,7 +2931,6 @@ public final class MediaCodecInfo {
         public static final int H263Level60      = 0x40;
         public static final int H263Level70      = 0x80;
 
-        // from OMX_VIDEO_MPEG4PROFILETYPE
         public static final int MPEG4ProfileSimple              = 0x01;
         public static final int MPEG4ProfileSimpleScalable      = 0x02;
         public static final int MPEG4ProfileCore                = 0x04;
@@ -2948,7 +2948,6 @@ public final class MediaCodecInfo {
         public static final int MPEG4ProfileAdvancedScalable    = 0x4000;
         public static final int MPEG4ProfileAdvancedSimple      = 0x8000;
 
-        // from OMX_VIDEO_MPEG4LEVELTYPE
         public static final int MPEG4Level0      = 0x01;
         public static final int MPEG4Level0b     = 0x02;
         public static final int MPEG4Level1      = 0x04;
@@ -2960,7 +2959,6 @@ public final class MediaCodecInfo {
         public static final int MPEG4Level5      = 0x80;
         public static final int MPEG4Level6      = 0x100;
 
-        // from OMX_VIDEO_MPEG2PROFILETYPE
         public static final int MPEG2ProfileSimple              = 0x00;
         public static final int MPEG2ProfileMain                = 0x01;
         public static final int MPEG2Profile422                 = 0x02;
@@ -2968,14 +2966,12 @@ public final class MediaCodecInfo {
         public static final int MPEG2ProfileSpatial             = 0x04;
         public static final int MPEG2ProfileHigh                = 0x05;
 
-        // from OMX_VIDEO_MPEG2LEVELTYPE
         public static final int MPEG2LevelLL     = 0x00;
         public static final int MPEG2LevelML     = 0x01;
         public static final int MPEG2LevelH14    = 0x02;
         public static final int MPEG2LevelHL     = 0x03;
         public static final int MPEG2LevelHP     = 0x04;
 
-        // from OMX_AUDIO_AACPROFILETYPE
         public static final int AACObjectMain       = 1;
         public static final int AACObjectLC         = 2;
         public static final int AACObjectSSR        = 3;
@@ -2990,16 +2986,13 @@ public final class MediaCodecInfo {
         /** xHE-AAC (includes USAC) */
         public static final int AACObjectXHE        = 42;
 
-        // from OMX_VIDEO_VP8LEVELTYPE
         public static final int VP8Level_Version0 = 0x01;
         public static final int VP8Level_Version1 = 0x02;
         public static final int VP8Level_Version2 = 0x04;
         public static final int VP8Level_Version3 = 0x08;
 
-        // from OMX_VIDEO_VP8PROFILETYPE
         public static final int VP8ProfileMain = 0x01;
 
-        // from OMX_VIDEO_VP9PROFILETYPE
         public static final int VP9Profile0 = 0x01;
         public static final int VP9Profile1 = 0x02;
         public static final int VP9Profile2 = 0x04;
@@ -3010,7 +3003,6 @@ public final class MediaCodecInfo {
         public static final int VP9Profile2HDR10Plus = 0x4000;
         public static final int VP9Profile3HDR10Plus = 0x8000;
 
-        // from OMX_VIDEO_VP9LEVELTYPE
         public static final int VP9Level1  = 0x1;
         public static final int VP9Level11 = 0x2;
         public static final int VP9Level2  = 0x4;
@@ -3026,14 +3018,12 @@ public final class MediaCodecInfo {
         public static final int VP9Level61 = 0x1000;
         public static final int VP9Level62 = 0x2000;
 
-        // from OMX_VIDEO_HEVCPROFILETYPE
         public static final int HEVCProfileMain        = 0x01;
         public static final int HEVCProfileMain10      = 0x02;
         public static final int HEVCProfileMainStill   = 0x04;
         public static final int HEVCProfileMain10HDR10 = 0x1000;
         public static final int HEVCProfileMain10HDR10Plus = 0x2000;
 
-        // from OMX_VIDEO_HEVCLEVELTYPE
         public static final int HEVCMainTierLevel1  = 0x1;
         public static final int HEVCHighTierLevel1  = 0x2;
         public static final int HEVCMainTierLevel2  = 0x4;
@@ -3067,7 +3057,6 @@ public final class MediaCodecInfo {
             HEVCHighTierLevel51 | HEVCHighTierLevel52 | HEVCHighTierLevel6 | HEVCHighTierLevel61 |
             HEVCHighTierLevel62;
 
-        // from OMX_VIDEO_DOLBYVISIONPROFILETYPE
         public static final int DolbyVisionProfileDvavPer = 0x1;
         public static final int DolbyVisionProfileDvavPen = 0x2;
         public static final int DolbyVisionProfileDvheDer = 0x4;
@@ -3079,7 +3068,6 @@ public final class MediaCodecInfo {
         public static final int DolbyVisionProfileDvheSt = 0x100;
         public static final int DolbyVisionProfileDvavSe = 0x200;
 
-        // from OMX_VIDEO_DOLBYVISIONLEVELTYPE
         public static final int DolbyVisionLevelHd24    = 0x1;
         public static final int DolbyVisionLevelHd30    = 0x2;
         public static final int DolbyVisionLevelFhd24   = 0x4;
@@ -3090,17 +3078,44 @@ public final class MediaCodecInfo {
         public static final int DolbyVisionLevelUhd48   = 0x80;
         public static final int DolbyVisionLevelUhd60   = 0x100;
 
+        public static final int AV1Profile0     = 0x1;
+        public static final int AV1Profile1     = 0x2;
+        public static final int AV1Profile2     = 0x4;
+
+        public static final int AV1Level2       = 0x1;
+        public static final int AV1Level21      = 0x2;
+        public static final int AV1Level22      = 0x4;
+        public static final int AV1Level23      = 0x8;
+        public static final int AV1Level3       = 0x10;
+        public static final int AV1Level31      = 0x20;
+        public static final int AV1Level32      = 0x40;
+        public static final int AV1Level33      = 0x80;
+        public static final int AV1Level4       = 0x100;
+        public static final int AV1Level41      = 0x200;
+        public static final int AV1Level42      = 0x400;
+        public static final int AV1Level43      = 0x800;
+        public static final int AV1Level5       = 0x1000;
+        public static final int AV1Level51      = 0x2000;
+        public static final int AV1Level52      = 0x4000;
+        public static final int AV1Level53      = 0x8000;
+        public static final int AV1Level6       = 0x10000;
+        public static final int AV1Level61      = 0x20000;
+        public static final int AV1Level62      = 0x40000;
+        public static final int AV1Level63      = 0x80000;
+        public static final int AV1Level7       = 0x100000;
+        public static final int AV1Level71      = 0x200000;
+        public static final int AV1Level72      = 0x400000;
+        public static final int AV1Level73      = 0x800000;
+
         /**
-         * Defined in the OpenMAX IL specs, depending on the type of media
-         * this can be OMX_VIDEO_AVCPROFILETYPE, OMX_VIDEO_H263PROFILETYPE,
-         * OMX_VIDEO_MPEG4PROFILETYPE, OMX_VIDEO_VP8PROFILETYPE or OMX_VIDEO_VP9PROFILETYPE.
+         * The profile of the media content. Depending on the type of media this can be
+         * one of the profile values defined in this class.
          */
         public int profile;
 
         /**
-         * Defined in the OpenMAX IL specs, depending on the type of media
-         * this can be OMX_VIDEO_AVCLEVELTYPE, OMX_VIDEO_H263LEVELTYPE
-         * OMX_VIDEO_MPEG4LEVELTYPE, OMX_VIDEO_VP8LEVELTYPE or OMX_VIDEO_VP9LEVELTYPE.
+         * The level of the media content. Depending on the type of media this can be
+         * one of the level values defined in this class.
          *
          * Note that VP9 decoder on platforms before {@link android.os.Build.VERSION_CODES#N} may
          * not advertise a profile level support. For those VP9 decoders, please use

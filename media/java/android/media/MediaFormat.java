@@ -124,6 +124,7 @@ import java.util.stream.Collectors;
 public final class MediaFormat {
     public static final String MIMETYPE_VIDEO_VP8 = "video/x-vnd.on2.vp8";
     public static final String MIMETYPE_VIDEO_VP9 = "video/x-vnd.on2.vp9";
+    public static final String MIMETYPE_VIDEO_AV1 = "video/av01";
     public static final String MIMETYPE_VIDEO_AVC = "video/avc";
     public static final String MIMETYPE_VIDEO_HEVC = "video/hevc";
     public static final String MIMETYPE_VIDEO_MPEG4 = "video/mp4v-es";
