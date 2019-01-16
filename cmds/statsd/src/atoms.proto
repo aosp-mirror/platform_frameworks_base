@@ -202,6 +202,7 @@ message Atom {
         NfcHceTransactionOccurred nfc_hce_transaction_occurred = 139;
         SeStateChanged se_state_changed = 140;
         SeOmapiReported se_omapi_reported = 141;
+        BroadcastDispatchLatencyReported broadcast_dispatch_latency_reported = 142;
     }
 
     // Pulled events will start at field 10000.
@@ -4451,4 +4452,14 @@ message SeOmapiReported {
   optional string terminal = 2;
 
   optional string packageName = 3;
+}
+
+/**
+  * Logs the dispatch latencey of a broadcast during processing of BOOT_COMPLETED.
+  * The dispatch latencey is the dispatchClockTime - enqueueClockTime.
+  * Logged from:
+  *   frameworks/base/services/core/java/com/android/server/am/BroadcastQueue.java
+  */
+message BroadcastDispatchLatencyReported {
+  optional int64 dispatch_latency_millis = 1;
 }

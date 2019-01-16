@@ -240,6 +240,8 @@ class UserController implements Handler.Callback {
 
     private final LockPatternUtils mLockPatternUtils;
 
+    volatile boolean mBootCompleted;
+
     UserController(ActivityManagerService service) {
         this(new Injector(service));
     }
@@ -567,6 +569,7 @@ class UserController implements Handler.Callback {
                             Bundle extras, boolean ordered, boolean sticky, int sendingUser)
                             throws RemoteException {
                         Slog.i(UserController.TAG, "Finished processing BOOT_COMPLETED for u" + userId);
+                        mBootCompleted = true;
                     }
                 }, 0, null, null,
                 new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
