@@ -98,6 +98,12 @@ import java.util.ArrayList;
  * href="{@docRoot}guide/topics/resources/index.html">Application Resources</a>.</p>
  */
 public class Resources {
+    /**
+     * The {@code null} resource ID. This denotes an invalid resource ID that is returned by the
+     * system when a resource is not found or the value is set to {@code @null} in XML.
+     */
+    public static final @AnyRes int ID_NULL = 0;
+
     static final String TAG = "Resources";
 
     private static final Object sSync = new Object();
