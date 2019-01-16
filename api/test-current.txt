@@ -945,6 +945,11 @@ package android.os {
     field public static final android.os.Parcelable.Creator<android.os.IncidentReportArgs> CREATOR;
   }
 
+  public final class MessageQueue {
+    method public int postSyncBarrier();
+    method public void removeSyncBarrier(int);
+  }
+
   public final class NativeHandle implements java.io.Closeable {
     ctor public NativeHandle();
     ctor public NativeHandle(java.io.FileDescriptor, boolean);
@@ -955,11 +960,6 @@ package android.os {
     method public java.io.FileDescriptor[] getFileDescriptors();
     method public int[] getInts();
     method public boolean hasSingleFileDescriptor();
-  }
-
-  public final class MessageQueue {
-    method public int postSyncBarrier();
-    method public void removeSyncBarrier(int);
   }
 
   public final class PowerManager {
