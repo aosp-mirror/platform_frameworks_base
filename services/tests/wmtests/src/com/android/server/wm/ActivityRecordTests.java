@@ -41,9 +41,11 @@ import static org.junit.Assert.assertTrue;
 import android.app.ActivityOptions;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.PauseActivityItem;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.util.MergedConfiguration;
 import android.util.MutableBoolean;
 
 import androidx.test.filters.MediumTest;
@@ -250,5 +252,73 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.onRequestedOverrideConfigurationChanged(newConfig);
         assertEquals(prevSeq + 1, appWindowTokenRequestedOrientation.seq);
         verify(mActivity.mAppWindowToken).onMergedOverrideConfigurationChanged();
+    }
+
+    @Test
+    public void testSetsRelaunchReason_NotDragResizing() {
+        mActivity.setState(ActivityStack.ActivityState.RESUMED, "Testing");
+
+        mTask.onRequestedOverrideConfigurationChanged(mTask.getConfiguration());
+        mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
+                mActivity.getConfiguration()));
+
+        mActivity.info.configChanges &= ~ActivityInfo.CONFIG_ORIENTATION;
+        final Configuration newConfig = new Configuration(mTask.getConfiguration());
+        newConfig.orientation = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
+                ? Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
+        mTask.onRequestedOverrideConfigurationChanged(newConfig);
+
+        mActivity.mRelaunchReason = ActivityTaskManagerService.RELAUNCH_REASON_NONE;
+
+        mActivity.ensureActivityConfiguration(0, false, false);
+
+        assertEquals(ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE,
+                mActivity.mRelaunchReason);
+    }
+
+    @Test
+    public void testSetsRelaunchReason_DragResizing() {
+        mActivity.setState(ActivityStack.ActivityState.RESUMED, "Testing");
+
+        mTask.onRequestedOverrideConfigurationChanged(mTask.getConfiguration());
+        mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
+                mActivity.getConfiguration()));
+
+        mActivity.info.configChanges &= ~ActivityInfo.CONFIG_ORIENTATION;
+        final Configuration newConfig = new Configuration(mTask.getConfiguration());
+        newConfig.orientation = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
+                ? Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
+        mTask.onRequestedOverrideConfigurationChanged(newConfig);
+
+        doReturn(true).when(mTask.getTask()).isDragResizing();
+
+        mActivity.mRelaunchReason = ActivityTaskManagerService.RELAUNCH_REASON_NONE;
+
+        mActivity.ensureActivityConfiguration(0, false, false);
+
+        assertEquals(ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE,
+                mActivity.mRelaunchReason);
+    }
+
+    @Test
+    public void testSetsRelaunchReason_NonResizeConfigChanges() {
+        mActivity.setState(ActivityStack.ActivityState.RESUMED, "Testing");
+
+        mTask.onRequestedOverrideConfigurationChanged(mTask.getConfiguration());
+        mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
+                mActivity.getConfiguration()));
+
+        mActivity.info.configChanges &= ~ActivityInfo.CONFIG_FONT_SCALE;
+        final Configuration newConfig = new Configuration(mTask.getConfiguration());
+        newConfig.fontScale = 5;
+        mTask.onRequestedOverrideConfigurationChanged(newConfig);
+
+        mActivity.mRelaunchReason =
+                ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+
+        mActivity.ensureActivityConfiguration(0, false, false);
+
+        assertEquals(ActivityTaskManagerService.RELAUNCH_REASON_NONE,
+                mActivity.mRelaunchReason);
     }
 }
