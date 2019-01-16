@@ -109,6 +109,19 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      */
     public static final int STATE_BY_APP = 0x40;
 
+    /**
+     * Session is disabled because session start was never replied.
+     *
+     * @hide
+     */
+    public static final int STATE_NO_RESPONSE = 0x80;
+
+    /**
+     * Session is disabled because an internal error.
+     *
+     * @hide
+     */
+    public static final int STATE_INTERNAL_ERROR = 0x100;
 
     private static final int INITIAL_CHILDREN_CAPACITY = 5;
 
