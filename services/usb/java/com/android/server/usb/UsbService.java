@@ -762,6 +762,15 @@ public class UsbService extends IUsbManager.Stub {
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
                             "", 0);
                 }
+            } else if ("set-contaminant-status".equals(args[0]) && args.length == 3) {
+                final String portId = args[1];
+                final Boolean wet = Boolean.parseBoolean(args[2]);
+                if (mPortManager != null) {
+                    mPortManager.simulateContaminantStatus(portId, wet, pw);
+                    pw.println();
+                    mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
+                            "", 0);
+                }
             } else if ("ports".equals(args[0]) && args.length == 1) {
                 if (mPortManager != null) {
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
@@ -805,6 +814,11 @@ public class UsbService extends IUsbManager.Stub {
                 pw.println("  dumpsys usb add-port \"matrix\" ufp");
                 pw.println("  dumpsys usb connect-port \"matrix\" ufp sink device");
                 pw.println("  dumpsys usb reset");
+                pw.println();
+                pw.println("Example simulate contaminant status:");
+                pw.println("  dumpsys usb add-port \"matrix\" ufp");
+                pw.println("  dumpsys usb set-contaminant-status \"matrix\" true");
+                pw.println("  dumpsys usb set-contaminant-status \"matrix\" false");
                 pw.println();
                 pw.println("Example USB device descriptors:");
                 pw.println("  dumpsys usb dump-descriptors -dump-short");

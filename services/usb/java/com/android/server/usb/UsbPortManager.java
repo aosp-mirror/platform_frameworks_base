@@ -497,6 +497,27 @@ public class UsbPortManager {
         }
     }
 
+    /**
+     * Sets contaminant status for simulated USB port objects.
+     */
+    public void simulateContaminantStatus(String portId, boolean detected,
+            IndentingPrintWriter pw) {
+        synchronized (mLock) {
+            final RawPortInfo portInfo = mSimulatedPorts.get(portId);
+            if (portInfo == null) {
+                pw.println("Simulated port not found.");
+                return;
+            }
+
+            pw.println("Simulating wet port: portId=" + portId
+                    + ", wet=" + detected);
+            portInfo.contaminantDetectionStatus = detected
+                    ? UsbPortStatus.CONTAMINANT_DETECTION_DETECTED
+                    : UsbPortStatus.CONTAMINANT_DETECTION_NOT_DETECTED;
+            updatePortsLocked(pw, null);
+        }
+    }
+
     public void disconnectSimulatedPort(String portId, IndentingPrintWriter pw) {
         synchronized (mLock) {
             final RawPortInfo portInfo = mSimulatedPorts.get(portId);
