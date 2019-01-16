@@ -167,6 +167,7 @@ public class SurfaceControl implements Parcelable {
             InputWindowHandle handle);
     private static native void nativeTransferTouchFocus(long transactionObj, IBinder fromToken,
             IBinder toToken);
+    private static native boolean nativeGetProtectedContentSupport();
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -1727,6 +1728,14 @@ public class SurfaceControl implements Parcelable {
     public static GraphicBuffer captureLayers(IBinder layerHandleToken, Rect sourceCrop,
             float frameScale) {
         return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale);
+    }
+
+    /**
+     * Returns whether protected content is supported in GPU composition.
+     * @hide
+     */
+    public static boolean getProtectedContentSupport() {
+        return nativeGetProtectedContentSupport();
     }
 
     /**
