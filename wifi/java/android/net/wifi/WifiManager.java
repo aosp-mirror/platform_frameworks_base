@@ -1727,7 +1727,13 @@ public class WifiManager {
      * @param fqdn The FQDN of the Passpoint configuration to be removed
      * @throws IllegalArgumentException if no configuration is associated with the given FQDN.
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
+     * @deprecated This is no longer supported.
      */
+    @Deprecated
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD
+    })
     public void removePasspointConfiguration(String fqdn) {
         try {
             if (!mService.removePasspointConfiguration(fqdn, mContext.getOpPackageName())) {
@@ -1745,7 +1751,13 @@ public class WifiManager {
      *
      * @return A list of {@link PasspointConfiguration}
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
+     * @deprecated This is no longer supported.
      */
+    @Deprecated
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD
+    })
     public List<PasspointConfiguration> getPasspointConfigurations() {
         try {
             return mService.getPasspointConfigurations();
