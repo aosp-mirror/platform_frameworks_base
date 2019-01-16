@@ -199,6 +199,13 @@ public final class DataFailCause {
     /** @hide */
     public static final int RESET_BY_FRAMEWORK = 0x10005;
 
+    /**
+     * Data handover failed.
+     *
+     * @hide
+     */
+    public static final int HANDOVER_FAILED = 0x10006;
+
     /** @hide */
     @IntDef(value = {
             NONE,
