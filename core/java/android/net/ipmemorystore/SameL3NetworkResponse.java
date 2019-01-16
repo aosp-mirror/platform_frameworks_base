@@ -91,7 +91,8 @@ public class SameL3NetworkResponse {
         return confidence > 0.5 ? NETWORK_SAME : NETWORK_DIFFERENT;
     }
 
-    SameL3NetworkResponse(@NonNull final String l2Key1, @NonNull final String l2Key2,
+    /** @hide */
+    public SameL3NetworkResponse(@NonNull final String l2Key1, @NonNull final String l2Key2,
             final float confidence) {
         this.l2Key1 = l2Key1;
         this.l2Key2 = l2Key2;
