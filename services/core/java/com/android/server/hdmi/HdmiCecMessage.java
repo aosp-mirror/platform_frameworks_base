@@ -112,12 +112,11 @@ public final class HdmiCecMessage {
     @Override
     public String toString() {
         StringBuffer s = new StringBuffer();
-        s.append(String.format("<%s> src: %d, dst: %d",
-                opcodeToString(mOpcode), mSource, mDestination));
+        s.append(String.format("<%s> %X%X:%02X",
+                opcodeToString(mOpcode), mSource, mDestination, mOpcode));
         if (mParams.length > 0) {
-            s.append(", params:");
             for (byte data : mParams) {
-                s.append(String.format(" %02X", data));
+                s.append(String.format(":%02X", data));
             }
         }
         return s.toString();

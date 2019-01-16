@@ -20,9 +20,13 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.util.IndentingPrintWriter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
 
 /**
  * Various utilities to handle HDMI CEC messages.
@@ -316,5 +320,75 @@ final class HdmiUtils {
         return new HdmiDeviceInfo(info.getLogicalAddress(),
                 info.getPhysicalAddress(), info.getPortId(), info.getDeviceType(),
                 info.getVendorId(), info.getDisplayName(), newPowerStatus);
+    }
+
+    /**
+     * Dump a {@link SparseArray} to the print writer.
+     *
+     * <p>The dump is formatted:
+     * <pre>
+     *     name:
+     *        key = value
+     *        key = value
+     *        ...
+     * </pre>
+     */
+    static <T> void dumpSparseArray(IndentingPrintWriter pw, String name,
+            SparseArray<T> sparseArray) {
+        printWithTrailingColon(pw, name);
+        pw.increaseIndent();
+        int size = sparseArray.size();
+        for (int i = 0; i < size; i++) {
+            int key = sparseArray.keyAt(i);
+            T value = sparseArray.get(key);
+            pw.printPair(Integer.toString(key), value);
+            pw.println();
+        }
+        pw.decreaseIndent();
+    }
+
+    private static void printWithTrailingColon(IndentingPrintWriter pw, String name) {
+        pw.println(name.endsWith(":") ? name : name.concat(":"));
+    }
+
+    /**
+     * Dump a {@link Map} to the print writer.
+     *
+     * <p>The dump is formatted:
+     * <pre>
+     *     name:
+     *        key = value
+     *        key = value
+     *        ...
+     * </pre>
+     */
+    static <K, V> void dumpMap(IndentingPrintWriter pw, String name, Map<K, V> map) {
+        printWithTrailingColon(pw, name);
+        pw.increaseIndent();
+        for (Map.Entry<K, V> entry: map.entrySet()) {
+            pw.printPair(entry.getKey().toString(), entry.getValue());
+            pw.println();
+        }
+        pw.decreaseIndent();
+    }
+
+    /**
+     * Dump a {@link Map} to the print writer.
+     *
+     * <p>The dump is formatted:
+     * <pre>
+     *     name:
+     *        value
+     *        value
+     *        ...
+     * </pre>
+     */
+    static <T> void dumpIterable(IndentingPrintWriter pw, String name, Iterable<T> values) {
+        printWithTrailingColon(pw, name);
+        pw.increaseIndent();
+        for (T value : values) {
+            pw.println(value);
+        }
+        pw.decreaseIndent();
     }
 }

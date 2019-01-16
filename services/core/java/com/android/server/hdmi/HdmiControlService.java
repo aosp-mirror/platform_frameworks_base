@@ -26,6 +26,7 @@ import static com.android.server.hdmi.Constants.OPTION_MHL_ENABLE;
 import static com.android.server.hdmi.Constants.OPTION_MHL_INPUT_SWITCHING;
 import static com.android.server.hdmi.Constants.OPTION_MHL_POWER_CHARGE;
 import static com.android.server.hdmi.Constants.OPTION_MHL_SERVICE_CONTROL;
+import static com.android.server.power.ShutdownThread.SHUTDOWN_ACTION_PROPERTY;
 
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
@@ -184,9 +185,10 @@ public class HdmiControlService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             assertRunOnServiceThread();
+            boolean isReboot = SystemProperties.get(SHUTDOWN_ACTION_PROPERTY).contains("1");
             switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_OFF:
-                    if (isPowerOnOrTransient()) {
+                    if (isPowerOnOrTransient() && !isReboot) {
                         onStandby(STANDBY_SCREEN_OFF);
                     }
                     break;
@@ -202,7 +204,7 @@ public class HdmiControlService extends SystemService {
                     }
                     break;
                 case Intent.ACTION_SHUTDOWN:
-                    if (isPowerOnOrTransient()) {
+                    if (isPowerOnOrTransient() && !isReboot) {
                         onStandby(STANDBY_SHUTDOWN);
                     }
                     break;
@@ -609,6 +611,9 @@ public class HdmiControlService extends SystemService {
                 case Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED:
                     if (isTvDeviceEnabled()) {
                         tv().setSystemAudioControlFeatureEnabled(enabled);
+                    }
+                    if (isAudioSystemDevice()) {
+                        audioSystem().onSystemAduioControlFeatureSupportChanged(enabled);
                     }
                     break;
                 case Global.HDMI_CEC_SWITCH_ENABLED:
@@ -1887,27 +1892,28 @@ public class HdmiControlService extends SystemService {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, writer)) return;
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
 
-            pw.println("mHdmiControlEnabled: " + mHdmiControlEnabled);
             pw.println("mProhibitMode: " + mProhibitMode);
-            if (mCecController != null) {
-                pw.println("mCecController: ");
-                pw.increaseIndent();
-                mCecController.dump(pw);
-                pw.decreaseIndent();
-            }
+            pw.println("mPowerStatus: " + mPowerStatus);
+
+            // System settings
+            pw.println("System_settings:");
+            pw.increaseIndent();
+            pw.println("mHdmiControlEnabled: " + mHdmiControlEnabled);
+            pw.println("mMhlInputChangeEnabled: " + mMhlInputChangeEnabled);
+            pw.decreaseIndent();
 
             pw.println("mMhlController: ");
             pw.increaseIndent();
             mMhlController.dump(pw);
             pw.decreaseIndent();
 
-            pw.println("mPortInfo: ");
-            pw.increaseIndent();
-            for (HdmiPortInfo hdmiPortInfo : mPortInfo) {
-                pw.println("- " + hdmiPortInfo);
+            HdmiUtils.dumpIterable(pw, "mPortInfo:", mPortInfo);
+            if (mCecController != null) {
+                pw.println("mCecController: ");
+                pw.increaseIndent();
+                mCecController.dump(pw);
+                pw.decreaseIndent();
             }
-            pw.decreaseIndent();
-            pw.println("mPowerStatus: " + mPowerStatus);
         }
     }
 

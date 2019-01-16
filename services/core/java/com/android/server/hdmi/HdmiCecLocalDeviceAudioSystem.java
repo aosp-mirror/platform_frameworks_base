@@ -37,6 +37,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.Constants.AudioCodec;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -89,12 +90,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mSystemAudioControlFeatureEnabled = true;
-        // TODO(amyjojo) make System Audio Control controllable by users
-        /*mSystemAudioControlFeatureEnabled =
-        mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);*/
         mRoutingControlFeatureEnabled =
             mService.readBooleanSetting(Global.HDMI_CEC_SWITCH_ENABLED, true);
+        mSystemAudioControlFeatureEnabled =
+            mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);
         // TODO(amyjojo): make the map ro property.
         mTvInputs.put(Constants.CEC_SWITCH_HDMI1,
                 "com.droidlogic.tvinput/.services.Hdmi1InputService/HW5");
@@ -275,7 +274,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             int systemAudioOnPowerOnProp, boolean lastSystemAudioControlStatus) {
         if ((systemAudioOnPowerOnProp == ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON)
                 || ((systemAudioOnPowerOnProp == USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON)
-                && lastSystemAudioControlStatus)) {
+                && lastSystemAudioControlStatus && isSystemAudioControlFeatureEnabled())) {
             addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
         }
     }
@@ -408,8 +407,11 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected boolean handleGiveAudioStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
-
-        reportAudioStatus(message.getSource());
+        if (isSystemAudioControlFeatureEnabled()) {
+            reportAudioStatus(message.getSource());
+        } else {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
+        }
         return true;
     }
 
@@ -776,6 +778,13 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         HdmiLogger.debug("[A]UpdateSystemAudio mode[on=%b] output=[%X]", on, device);
     }
 
+    void onSystemAduioControlFeatureSupportChanged(boolean enabled) {
+        setSystemAudioControlFeatureEnabled(enabled);
+        if (enabled) {
+            addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
+        }
+    }
+
     @ServiceThreadOnly
     void setSystemAudioControlFeatureEnabled(boolean enabled) {
         assertRunOnServiceThread();
@@ -1078,4 +1087,20 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         mDeviceInfos.clear();
     }
+
+    @Override
+    protected void dump(IndentingPrintWriter pw) {
+        pw.println("HdmiCecLocalDeviceAudioSystem:");
+        pw.increaseIndent();
+        pw.println("mSystemAudioActivated: " + mSystemAudioActivated);
+        pw.println("mSystemAudioControlFeatureEnabled: " + mSystemAudioControlFeatureEnabled);
+        pw.println("mTvSystemAudioModeSupport: " + mTvSystemAudioModeSupport);
+        pw.println("mArcEstablished: " + mArcEstablished);
+        pw.println("mArcIntentUsed: " + mArcIntentUsed);
+        HdmiUtils.dumpMap(pw, "mTvInputs:", mTvInputs);
+        HdmiUtils.dumpSparseArray(pw, "mDeviceInfos:", mDeviceInfos);
+        pw.decreaseIndent();
+        super.dump(pw);
+    }
+
 }
