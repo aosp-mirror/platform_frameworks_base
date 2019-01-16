@@ -61,7 +61,6 @@ public class BubbleControllerTest extends SysuiTestCase {
     private IActivityManager mActivityManager;
     @Mock
     private DozeParameters mDozeParameters;
-    @Mock
     private FrameLayout mStatusBarView;
     @Captor
     private ArgumentCaptor<NotificationEntryListener> mEntryListenerCaptor;
@@ -80,6 +79,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mStatusBarView = new FrameLayout(mContext);
         mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
 
         // Bubbles get added to status bar window view

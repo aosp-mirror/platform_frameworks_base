@@ -22,8 +22,8 @@
 
     <com.android.systemui.bubbles.BadgedImageView
         android:id="@+id/bubble_image"
-        android:layout_width="@dimen/bubble_size"
-        android:layout_height="@dimen/bubble_size"
+        android:layout_width="@dimen/individual_bubble_size"
+        android:layout_height="@dimen/individual_bubble_size"
         android:padding="@dimen/bubble_view_padding"
         android:clipToPadding="false"/>
 
