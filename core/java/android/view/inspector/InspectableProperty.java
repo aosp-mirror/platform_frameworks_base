@@ -20,7 +20,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.content.res.ResourceId;
+import android.content.res.Resources;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -57,16 +57,16 @@ public @interface InspectableProperty {
      * If left as {ID_NULL}, and {@link #hasAttributeId()} is true, the attribute ID will be
      * inferred from {@link #name()}.
      *
-     * @return The attribute ID of the property or {@link ResourceId#ID_NULL}
+     * @return The attribute ID of the property or {@link Resources#ID_NULL}
      */
-    int attributeId() default ResourceId.ID_NULL;
+    int attributeId() default Resources.ID_NULL;
 
     /**
      * If this property has an attribute ID.
      *
      * Set to false if the annotated property does not have an attribute ID, that is, it is not
      * inflated from an XML attribute. This will prevent the automatic inference of the attribute
-     * ID if {@link #attributeId()} is set to {@link ResourceId#ID_NULL}.
+     * ID if {@link #attributeId()} is set to {@link Resources#ID_NULL}.
      *
      * @return Whether to infer an attribute ID if not supplied
      */
