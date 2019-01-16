@@ -3705,11 +3705,16 @@ public class ActivityManager {
      * Returns whether switching to provided user was successful.
      *
      * @param user the user to switch to.
+     *
+     * @throws IllegalArgumentException if the user is null.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public boolean switchUser(UserHandle user) {
+    public boolean switchUser(@NonNull UserHandle user) {
+        if (user == null) {
+            throw new IllegalArgumentException("UserHandle cannot be null.");
+        }
         return switchUser(user.getIdentifier());
     }
 

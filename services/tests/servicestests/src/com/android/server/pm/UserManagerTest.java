@@ -544,6 +544,18 @@ public class UserManagerTest extends AndroidTestCase {
         switchUser(-1, UserHandle.of(startUser), false);
     }
 
+    public void testSwitchUserByHandle_ThrowsException() {
+        synchronized (mUserSwitchLock) {
+            try {
+                ActivityManager am = getContext().getSystemService(ActivityManager.class);
+                am.switchUser(null);
+                fail("Expected IllegalArgumentException on passing in a null UserHandle.");
+            } catch (IllegalArgumentException expected) {
+                // Do nothing - exception is expected.
+            }
+        }
+    }
+
     @MediumTest
     public void testConcurrentUserCreate() throws Exception {
         int userCount = mUserManager.getUserCount();
