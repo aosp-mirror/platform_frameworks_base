@@ -562,7 +562,7 @@ public class TransportManager {
     private void registerTransportsFromPackage(
             String packageName, Predicate<ComponentName> transportComponentFilter) {
         try {
-            mPackageManager.getPackageInfo(packageName, 0);
+            mPackageManager.getPackageInfoAsUser(packageName, 0, mUserId);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.e(TAG, "Trying to register transports from package not found " + packageName);
             return;
@@ -599,7 +599,8 @@ public class TransportManager {
             return false;
         }
         try {
-            PackageInfo packInfo = mPackageManager.getPackageInfo(transport.getPackageName(), 0);
+            PackageInfo packInfo =
+                    mPackageManager.getPackageInfoAsUser(transport.getPackageName(), 0, mUserId);
             if ((packInfo.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
                     == 0) {
                 Slog.w(TAG, "Transport package " + transport.getPackageName() + " not privileged");

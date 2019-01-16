@@ -495,7 +495,7 @@ public class UserBackupManagerService {
 
         mBaseStateDir = checkNotNull(baseStateDir, "baseStateDir cannot be null");
         mBaseStateDir.mkdirs();
-        if (!SELinux.restorecon(mBaseStateDir)) {
+        if (!SELinux.restoreconRecursive(mBaseStateDir)) {
             Slog.w(TAG, "SELinux restorecon failed on " + mBaseStateDir);
         }
 
@@ -504,7 +504,7 @@ public class UserBackupManagerService {
         // is managed by init.rc so we don't have to create it below.
         if (userId != UserHandle.USER_SYSTEM) {
             mDataDir.mkdirs();
-            if (!SELinux.restorecon(mDataDir)) {
+            if (!SELinux.restoreconRecursive(mDataDir)) {
                 Slog.w(TAG, "SELinux restorecon failed on " + mDataDir);
             }
         }
@@ -584,7 +584,7 @@ public class UserBackupManagerService {
         mBackupHandler.postDelayed(this::parseLeftoverJournals, INITIALIZATION_DELAY_MILLIS);
 
         // Power management
-        mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
+        mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*-" + userId);
     }
 
     void initializeBackupEnableState() {
@@ -1352,7 +1352,7 @@ public class UserBackupManagerService {
     private List<PackageInfo> allAgentPackages() {
         // !!! TODO: cache this and regenerate only when necessary
         int flags = PackageManager.GET_SIGNING_CERTIFICATES;
-        List<PackageInfo> packages = mPackageManager.getInstalledPackages(flags);
+        List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(flags, mUserId);
         int numPackages = packages.size();
         for (int a = numPackages - 1; a >= 0; a--) {
             PackageInfo pkg = packages.get(a);
@@ -1366,8 +1366,8 @@ public class UserBackupManagerService {
                     // we will need the shared library path, so look that up and store it here.
                     // This is used implicitly when we pass the PackageInfo object off to
                     // the Activity Manager to launch the app for backup/restore purposes.
-                    app = mPackageManager.getApplicationInfo(pkg.packageName,
-                            PackageManager.GET_SHARED_LIBRARY_FILES);
+                    app = mPackageManager.getApplicationInfoAsUser(pkg.packageName,
+                            PackageManager.GET_SHARED_LIBRARY_FILES, mUserId);
                     pkg.applicationInfo.sharedLibraryFiles = app.sharedLibraryFiles;
                     pkg.applicationInfo.sharedLibraryInfos = app.sharedLibraryInfos;
                 }
@@ -1392,7 +1392,7 @@ public class UserBackupManagerService {
             notification.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES
                     | Intent.FLAG_RECEIVER_FOREGROUND);
             notification.putExtra(BACKUP_FINISHED_PACKAGE_EXTRA, packageName);
-            mContext.sendBroadcastAsUser(notification, UserHandle.OWNER);
+            mContext.sendBroadcastAsUser(notification, UserHandle.of(mUserId));
         }
 
         mProcessedPackagesJournal.addPackage(packageName);
@@ -2208,11 +2208,10 @@ public class UserBackupManagerService {
     /** Used by both incremental and full restore to restore widget data. */
     public void restoreWidgetData(String packageName, byte[] widgetData) {
         // Apply the restored widget state and generate the ID update for the app
-        // TODO: http://b/22388012
         if (MORE_DEBUG) {
             Slog.i(TAG, "Incorporating restored widget data");
         }
-        AppWidgetBackupBridge.restoreWidgetState(packageName, widgetData, UserHandle.USER_SYSTEM);
+        AppWidgetBackupBridge.restoreWidgetState(packageName, widgetData, mUserId);
     }
 
     // *****************************
@@ -2291,20 +2290,6 @@ public class UserBackupManagerService {
 
     /** Sent from an app's backup agent to let the service know that there's new data to backup. */
     public void dataChanged(final String packageName) {
-        final int callingUserHandle = UserHandle.getCallingUserId();
-        if (callingUserHandle != UserHandle.USER_SYSTEM) {
-            // TODO: http://b/22388012
-            // App is running under a non-owner user profile.  For now, we do not back
-            // up data from secondary user profiles.
-            // TODO: backups for all user profiles although don't add backup for profiles
-            // without adding admin control in DevicePolicyManager.
-            if (MORE_DEBUG) {
-                Slog.v(TAG, "dataChanged(" + packageName + ") ignored because it's user "
-                        + callingUserHandle);
-            }
-            return;
-        }
-
         final HashSet<String> targets = dataChangedTargets(packageName);
         if (targets == null) {
             Slog.w(TAG, "dataChanged but no participant pkg='" + packageName + "'"
@@ -2921,7 +2906,7 @@ public class UserBackupManagerService {
         try {
             int transportUid =
                     mContext.getPackageManager()
-                            .getPackageUid(transportComponent.getPackageName(), 0);
+                            .getPackageUidAsUser(transportComponent.getPackageName(), 0, mUserId);
             if (callingUid != transportUid) {
                 throw new SecurityException("Only the transport can change its description");
             }

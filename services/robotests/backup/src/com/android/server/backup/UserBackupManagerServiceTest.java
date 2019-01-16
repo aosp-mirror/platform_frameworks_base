@@ -514,10 +514,14 @@ public class UserBackupManagerServiceTest {
     private void setUpForUpdateTransportAttributes() throws Exception {
         mTransportComponent = mTransport.getTransportComponent();
         String transportPackage = mTransportComponent.getPackageName();
+        PackageInfo packageInfo = getPackageInfo(transportPackage);
 
         ShadowPackageManager shadowPackageManager = shadowOf(mContext.getPackageManager());
-        shadowPackageManager.addPackage(transportPackage);
+        shadowPackageManager.installPackage(packageInfo);
         shadowPackageManager.setPackagesForUid(PACKAGE_UID, transportPackage);
+        // Set up for user invocations on ApplicationPackageManager.
+        ShadowApplicationPackageManager.addInstalledPackage(transportPackage, packageInfo);
+        ShadowApplicationPackageManager.setPackageUid(transportPackage, PACKAGE_UID);
 
         mTransportUid = mContext.getPackageManager().getPackageUid(transportPackage, 0);
     }

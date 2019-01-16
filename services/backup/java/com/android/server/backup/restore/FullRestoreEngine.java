@@ -68,6 +68,8 @@ import java.util.List;
 public class FullRestoreEngine extends RestoreEngine {
 
     private final UserBackupManagerService mBackupManagerService;
+    private final int mUserId;
+
     // Task in charge of monitoring timeouts
     private final BackupRestoreTask mMonitorTask;
 
@@ -146,6 +148,7 @@ public class FullRestoreEngine extends RestoreEngine {
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
         mIsAdbRestore = isAdbRestore;
+        mUserId = backupManagerService.getUserId();
     }
 
     public IBackupAgent getAgent() {
@@ -272,7 +275,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                         instream, mBackupManagerService.getContext(),
                                         mDeleteObserver, mManifestSignatures,
                                         mPackagePolicies, info, installerPackageName,
-                                        bytesReadListener, mBackupManagerService.getUserId());
+                                        bytesReadListener, mUserId);
                                 // good to go; promote to ACCEPT
                                 mPackagePolicies.put(pkg, isSuccessfullyInstalled
                                         ? RestorePolicy.ACCEPT
@@ -329,9 +332,8 @@ public class FullRestoreEngine extends RestoreEngine {
                         }
 
                         try {
-                            mTargetApp =
-                                    mBackupManagerService.getPackageManager().getApplicationInfo(
-                                            pkg, 0);
+                            mTargetApp = mBackupManagerService.getPackageManager()
+                                    .getApplicationInfoAsUser(pkg, 0, mUserId);
 
                             // If we haven't sent any data to this app yet, we probably
                             // need to clear it first. Check that.
@@ -684,7 +686,7 @@ public class FullRestoreEngine extends RestoreEngine {
         String packageListString = Settings.Secure.getStringForUser(
                 mBackupManagerService.getContext().getContentResolver(),
                 Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE,
-                mBackupManagerService.getUserId());
+                mUserId);
         if (TextUtils.isEmpty(packageListString)) {
             return false;
         }

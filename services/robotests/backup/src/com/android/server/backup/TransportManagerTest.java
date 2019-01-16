@@ -58,7 +58,9 @@ import com.android.server.backup.transport.OnTransportRegisteredListener;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportClientManager;
 import com.android.server.backup.transport.TransportNotRegisteredException;
+import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,6 +68,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowPackageManager;
 
 import java.util.ArrayList;
@@ -75,6 +78,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowApplicationPackageManager.class})
 @Presubmit
 public class TransportManagerTest {
     private static final String PACKAGE_A = "some.package.a";
@@ -100,6 +104,12 @@ public class TransportManagerTest {
         mTransportA1 = genericTransport(PACKAGE_A, "TransportFoo");
         mTransportA2 = genericTransport(PACKAGE_A, "TransportBar");
         mTransportB1 = genericTransport(PACKAGE_B, "TransportBaz");
+    }
+
+    /** Reset shadow state. */
+    @After
+    public void tearDown() throws Exception {
+        ShadowApplicationPackageManager.reset();
     }
 
     @Test
@@ -666,7 +676,8 @@ public class TransportManagerTest {
         packageInfo.packageName = packageName;
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.privateFlags = flags;
-        mShadowPackageManager.addPackage(packageInfo);
+        mShadowPackageManager.installPackage(packageInfo);
+        ShadowApplicationPackageManager.addInstalledPackage(packageName, packageInfo);
     }
 
     private TransportManager createTransportManagerWithRegisteredTransports(
