@@ -2008,6 +2008,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
         }
 
+        if ((events & PhoneStateListener.LISTEN_PREFERRED_DATA_SUBID_CHANGE) != 0) {
+            // It can have either READ_PHONE_STATE or READ_PRIVILEGED_PHONE_STATE.
+            TelephonyPermissions.checkReadPhoneState(mContext,
+                    SubscriptionManager.INVALID_SUBSCRIPTION_ID, Binder.getCallingPid(),
+                    Binder.getCallingUid(), callingPackage, "listen to "
+                            + "LISTEN_PREFERRED_DATA_SUBID_CHANGE");
+        }
 
         if ((events & PhoneStateListener.LISTEN_CALL_DISCONNECT_CAUSES) != 0) {
             mContext.enforceCallingOrSelfPermission(
