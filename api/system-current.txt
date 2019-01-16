@@ -1134,7 +1134,7 @@ package android.content.pm {
   }
 
   public class CrossProfileApps {
-    method public void startAnyActivity(android.content.ComponentName, android.os.UserHandle);
+    method public void startActivity(android.content.ComponentName, android.os.UserHandle);
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {

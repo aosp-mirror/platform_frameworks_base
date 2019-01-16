@@ -18,6 +18,7 @@ package android.content.pm;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -76,9 +77,23 @@ public class CrossProfileApps {
     }
 
     /**
-     * Starts the specified activity of the caller package in the specified profile if the caller
-     * has {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES} permission and
-     * both the caller and target user profiles are in the same user group.
+     * @deprecated use {@link #startActivity(ComponentName, UserHandle)} instead.
+     *
+     * @removed
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage
+    public void startAnyActivity(@NonNull ComponentName component, @NonNull UserHandle targetUser) {
+        startActivity(component, targetUser);
+    }
+
+    /**
+     * Starts the specified activity of the caller package in the specified profile. Unlike
+     * {@link #startMainActivity}, this can start any activity of the caller package, not just
+     * the main activity.
+     * The caller must have the {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES}
+     * permission and both the caller and target user profiles must be in the same profile group.
      *
      * @param component The ComponentName of the activity to launch. It must be exported.
      * @param targetUser The UserHandle of the profile, must be one of the users returned by
@@ -88,7 +103,7 @@ public class CrossProfileApps {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES)
-    public void startAnyActivity(@NonNull ComponentName component, @NonNull UserHandle targetUser) {
+    public void startActivity(@NonNull ComponentName component, @NonNull UserHandle targetUser) {
         try {
             mService.startActivityAsUser(mContext.getIApplicationThread(),
                     mContext.getPackageName(), component, targetUser.getIdentifier(), false);
