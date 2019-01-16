@@ -62,7 +62,7 @@ public:
     // file descriptor.
     Status addFile(const String16& tag, int fd, int flags);
 
-    class Entry : public virtual RefBase, public Parcelable {
+    class Entry : public Parcelable {
     public:
         Entry();
         virtual ~Entry();
@@ -88,9 +88,6 @@ public:
 
         friend class DropBoxManager;
     };
-
-    // Get the next entry from the drop box after the specified time.
-    Status getNextEntry(const String16& tag, long msec, Entry* entry);
 
 private:
     enum {
