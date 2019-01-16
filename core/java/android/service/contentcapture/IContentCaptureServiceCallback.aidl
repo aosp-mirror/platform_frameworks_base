@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,20 @@
 
 package android.service.contentcapture;
 
-import android.os.IBinder;
-import android.service.contentcapture.SnapshotData;
-import android.view.contentcapture.ContentCaptureContext;
-
+import android.content.ComponentName;
 import com.android.internal.os.IResultReceiver;
 
 import java.util.List;
 
 /**
- * Interface from the system to a Content Capture service.
+ * Interface from the Content Capture service to the system.
  *
  * @hide
  */
-oneway interface IContentCaptureService {
-    void onConnected(IBinder callback);
-    void onDisconnected();
-    void onSessionStarted(in ContentCaptureContext context, String sessionId, int uid,
-                          in IResultReceiver clientReceiver);
-    void onSessionFinished(String sessionId);
-    void onActivitySnapshot(String sessionId, in SnapshotData snapshotData);
+oneway interface IContentCaptureServiceCallback {
+    void setContentCaptureWhitelist(in List<String> packages, in List<ComponentName> activities);
+    void setActivityContentCaptureEnabled(in ComponentName activity, boolean enabled);
+    void setPackageContentCaptureEnabled(in String packageName, boolean enabled);
+    void getContentCaptureDisabledActivities(in IResultReceiver receiver);
+    void getContentCaptureDisabledPackages(in IResultReceiver receiver);
 }

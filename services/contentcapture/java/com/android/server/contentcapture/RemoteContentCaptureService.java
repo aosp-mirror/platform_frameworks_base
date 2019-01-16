@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
 import android.service.contentcapture.IContentCaptureService;
+import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
 import android.text.format.DateUtils;
 import android.util.Slog;
@@ -35,12 +36,15 @@ final class RemoteContentCaptureService
 
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
 
+    private final IBinder mServerCallback;
+
     RemoteContentCaptureService(Context context, String serviceInterface,
-            ComponentName componentName, int userId,
+            ComponentName serviceComponentName, IContentCaptureServiceCallback callback, int userId,
             ContentCaptureServiceCallbacks callbacks, boolean bindInstantServiceAllowed,
             boolean verbose) {
-        super(context, serviceInterface, componentName, userId, callbacks,
+        super(context, serviceInterface, serviceComponentName, userId, callbacks,
                 bindInstantServiceAllowed, verbose, /* initialCapacity= */ 2);
+        mServerCallback = callback.asBinder();
 
         // Bind right away, which will trigger a onConnected() on service's
         scheduleBind();
@@ -69,7 +73,11 @@ final class RemoteContentCaptureService
             scheduleUnbind();
         }
         try {
-            mService.onConnectedStateChanged(state);
+            if (state) {
+                mService.onConnected(mServerCallback);
+            } else {
+                mService.onDisconnected();
+            }
         } catch (Exception e) {
             Slog.w(mTag, "Exception calling onConnectedStateChanged(" + state + "): " + e);
         }
