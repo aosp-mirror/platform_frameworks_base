@@ -337,6 +337,25 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private final PlatformIdleStateCallback mPlatformIdleStateCallback;
 
+    private final Runnable mDeferSetCharging = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (BatteryStatsImpl.this) {
+                if (mOnBattery) {
+                    // if the device gets unplugged in the time between this runnable being
+                    // executed and the lock being taken, we don't want to set charging state
+                    return;
+                }
+                boolean changed = setChargingLocked(true);
+                if (changed) {
+                    final long uptime = mClocks.uptimeMillis();
+                    final long elapsedRealtime = mClocks.elapsedRealtime();
+                    addHistoryRecordLocked(elapsedRealtime, uptime);
+                }
+            }
+        }
+    };
+
     /**
      * This handler is running on {@link BackgroundThread}.
      */
@@ -12340,6 +12359,14 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     boolean setChargingLocked(boolean charging) {
+        // if the device is no longer charging, remove the callback
+        // if the device is now charging, it means that this is either called
+        // 1. directly when level >= 90
+        // 2. or from within the runnable that we deferred
+        // For 1. if we have an existing callback, remove it, since we will immediatelly send a
+        // ACTION_CHARGING
+        // For 2. we remove existing callback so we don't send multiple ACTION_CHARGING
+        mHandler.removeCallbacks(mDeferSetCharging);
         if (mCharging != charging) {
             mCharging = charging;
             if (charging) {
@@ -12678,12 +12705,23 @@ public class BatteryStatsImpl extends BatteryStats {
                     // charging even if it happens to go down a level.
                     changed |= setChargingLocked(true);
                     mLastChargeStepLevel = level;
-                } if (!mCharging) {
+                }
+                if (!mCharging) {
                     if (mLastChargeStepLevel < level) {
-                        // We have not reporting that we are charging, but the level has now
-                        // gone up, so consider the state to be charging.
-                        changed |= setChargingLocked(true);
+                        // We have not reported that we are charging, but the level has gone up,
+                        // but we would like to not have tons of activity from charging-constraint
+                        // jobs, so instead of reporting ACTION_CHARGING immediately, we defer it.
                         mLastChargeStepLevel = level;
+                        if (!mHandler.hasCallbacks(mDeferSetCharging)) {
+                            mHandler.postDelayed(
+                                    mDeferSetCharging,
+                                    mConstants.BATTERY_CHARGED_DELAY_MS);
+                        }
+                    } else if (mLastChargeStepLevel > level) {
+                        // if we had deferred a runnable due to charge level increasing, but then
+                        // later the charge level drops (could be due to thermal issues), we don't
+                        // want to trigger the deferred runnable, so remove it here
+                        mHandler.removeCallbacks(mDeferSetCharging);
                     }
                 } else {
                     if (mLastChargeStepLevel > level) {
@@ -13300,6 +13338,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 = "battery_level_collection_delay_ms";
         public static final String KEY_MAX_HISTORY_FILES = "max_history_files";
         public static final String KEY_MAX_HISTORY_BUFFER_KB = "max_history_buffer_kb";
+        public static final String KEY_BATTERY_CHARGED_DELAY_MS =
+                "battery_charged_delay_ms";
 
         private static final boolean DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE = false;
         private static final boolean DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME = true;
@@ -13312,6 +13352,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private static final int DEFAULT_MAX_HISTORY_BUFFER_KB = 128; /*Kilo Bytes*/
         private static final int DEFAULT_MAX_HISTORY_FILES_LOW_RAM_DEVICE = 64;
         private static final int DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB = 64; /*Kilo Bytes*/
+        private static final int DEFAULT_BATTERY_CHARGED_DELAY_MS = 900000; /* 15 min */
 
         public boolean TRACK_CPU_TIMES_BY_PROC_STATE = DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE;
         public boolean TRACK_CPU_ACTIVE_CLUSTER_TIME = DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME;
@@ -13324,6 +13365,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 = DEFAULT_BATTERY_LEVEL_COLLECTION_DELAY_MS;
         public int MAX_HISTORY_FILES;
         public int MAX_HISTORY_BUFFER; /*Bytes*/
+        public int BATTERY_CHARGED_DELAY_MS = DEFAULT_BATTERY_CHARGED_DELAY_MS;
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -13392,6 +13434,9 @@ public class BatteryStatsImpl extends BatteryStats {
                                 DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB
                                 : DEFAULT_MAX_HISTORY_BUFFER_KB)
                         * 1024;
+                BATTERY_CHARGED_DELAY_MS = mParser.getInt(
+                        KEY_BATTERY_CHARGED_DELAY_MS,
+                        DEFAULT_BATTERY_CHARGED_DELAY_MS);
             }
         }
 
@@ -13449,6 +13494,8 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.println(MAX_HISTORY_FILES);
             pw.print(KEY_MAX_HISTORY_BUFFER_KB); pw.print("=");
             pw.println(MAX_HISTORY_BUFFER/1024);
+            pw.print(KEY_BATTERY_CHARGED_DELAY_MS); pw.print("=");
+            pw.println(BATTERY_CHARGED_DELAY_MS);
         }
     }
 
