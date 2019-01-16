@@ -327,6 +327,18 @@ public class HdmiAudioSystemClientTest {
         public int getPhysicalAddress() {
             return 0x0000;
         }
+
+        @Override
+        public void powerOffRemoteDevice(int logicalAddress, int powerStatus) {
+        }
+
+        @Override
+        public void powerOnRemoteDevice(int logicalAddress, int powerStatus) {
+        }
+
+        @Override
+        public void askRemoteDeviceToBecomeActiveSource(int physicalAddress) {
+        }
     }
 
 }
