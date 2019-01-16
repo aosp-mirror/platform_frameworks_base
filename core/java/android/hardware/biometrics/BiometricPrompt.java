@@ -235,7 +235,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * requiring confirmation.
          *
          * @param requireConfirmation
-         * @hide
          */
         public Builder setRequireConfirmation(boolean requireConfirmation) {
             mBundle.putBoolean(KEY_REQUIRE_CONFIRMATION, requireConfirmation);
