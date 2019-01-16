@@ -74,6 +74,79 @@ void draw_gl(int functor, void* data,
   support->callbacks.draw_gl(functor, support->data, &params);
 }
 
+void initializeVk(int functor, void* data,
+                  const uirenderer::VkFunctorInitParams& init_vk_params) {
+  SupportData* support = static_cast<SupportData*>(data);
+  VkPhysicalDeviceFeatures2 device_features_2;
+  if (init_vk_params.device_features_2)
+    device_features_2 = *init_vk_params.device_features_2;
+
+  AwDrawFn_InitVkParams params{
+      .version = kAwDrawFnVersion,
+      .instance = init_vk_params.instance,
+      .physical_device = init_vk_params.physical_device,
+      .device = init_vk_params.device,
+      .queue = init_vk_params.queue,
+      .graphics_queue_index = init_vk_params.graphics_queue_index,
+      .instance_version = init_vk_params.instance_version,
+      .enabled_instance_extension_names =
+          init_vk_params.enabled_instance_extension_names,
+      .enabled_instance_extension_names_length =
+          init_vk_params.enabled_instance_extension_names_length,
+      .enabled_device_extension_names =
+          init_vk_params.enabled_device_extension_names,
+      .enabled_device_extension_names_length =
+          init_vk_params.enabled_device_extension_names_length,
+      .device_features = nullptr,
+      .device_features_2 =
+          init_vk_params.device_features_2 ? &device_features_2 : nullptr,
+  };
+  support->callbacks.init_vk(functor, support->data, &params);
+}
+
+void drawVk(int functor, void* data, const uirenderer::VkFunctorDrawParams& draw_vk_params) {
+  SupportData* support = static_cast<SupportData*>(data);
+  float gabcdef[7];
+  draw_vk_params.color_space_ptr->transferFn(gabcdef);
+  AwDrawFn_DrawVkParams params{
+      .version = kAwDrawFnVersion,
+      .width = draw_vk_params.width,
+      .height = draw_vk_params.height,
+      .is_layer = draw_vk_params.is_layer,
+      .secondary_command_buffer = draw_vk_params.secondary_command_buffer,
+      .color_attachment_index = draw_vk_params.color_attachment_index,
+      .compatible_render_pass = draw_vk_params.compatible_render_pass,
+      .format = draw_vk_params.format,
+      .transfer_function_g = gabcdef[0],
+      .transfer_function_a = gabcdef[1],
+      .transfer_function_b = gabcdef[2],
+      .transfer_function_c = gabcdef[3],
+      .transfer_function_d = gabcdef[4],
+      .transfer_function_e = gabcdef[5],
+      .transfer_function_f = gabcdef[6],
+      .clip_left = draw_vk_params.clip_left,
+      .clip_top = draw_vk_params.clip_top,
+      .clip_right = draw_vk_params.clip_right,
+      .clip_bottom = draw_vk_params.clip_bottom,
+  };
+  COMPILE_ASSERT(sizeof(params.color_space_toXYZD50) == sizeof(skcms_Matrix3x3),
+                 gamut_transform_size_mismatch);
+  draw_vk_params.color_space_ptr->toXYZD50(
+      reinterpret_cast<skcms_Matrix3x3*>(&params.color_space_toXYZD50));
+  COMPILE_ASSERT(NELEM(params.transform) == NELEM(draw_vk_params.transform),
+                 mismatched_transform_matrix_sizes);
+  for (int i = 0; i < NELEM(params.transform); ++i) {
+    params.transform[i] = draw_vk_params.transform[i];
+  }
+  support->callbacks.draw_vk(functor, support->data, &params);
+}
+
+void postDrawVk(int functor, void* data) {
+  SupportData* support = static_cast<SupportData*>(data);
+  AwDrawFn_PostDrawVkParams params{.version = kAwDrawFnVersion};
+  support->callbacks.post_draw_vk(functor, support->data, &params);
+}
+
 int CreateFunctor(void* data, AwDrawFnFunctorCallbacks* functor_callbacks) {
   static bool callbacks_initialized = false;
   static uirenderer::WebViewFunctorCallbacks webview_functor_callbacks = {
@@ -82,9 +155,19 @@ int CreateFunctor(void* data, AwDrawFnFunctorCallbacks* functor_callbacks) {
       .onDestroyed = &onDestroyed,
   };
   if (!callbacks_initialized) {
-    // Under uirenderer::RenderMode::Vulkan, whether gles or vk union should
-    // be populated should match whether the vk-gl interop is used.
-    webview_functor_callbacks.gles.draw = &draw_gl;
+    switch (uirenderer::WebViewFunctor_queryPlatformRenderMode()) {
+      case uirenderer::RenderMode::OpenGL_ES:
+        webview_functor_callbacks.gles.draw = &draw_gl;
+        break;
+      case uirenderer::RenderMode::Vulkan:
+        webview_functor_callbacks.vk.initialize = &initializeVk;
+        webview_functor_callbacks.vk.draw = &drawVk;
+        webview_functor_callbacks.vk.postDraw = &postDrawVk;
+        // TODO(boliu): Remove this once SkiaRecordingCanvas::drawWebViewFunctor
+        // no longer uses GL interop.
+        webview_functor_callbacks.gles.draw = &draw_gl;
+        break;
+    }
     callbacks_initialized = true;
   }
   SupportData* support = new SupportData{

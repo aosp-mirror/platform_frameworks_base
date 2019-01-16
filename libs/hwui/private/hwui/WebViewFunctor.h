@@ -19,6 +19,7 @@
 
 #include <cutils/compiler.h>
 #include <private/hwui/DrawGlInfo.h>
+#include <private/hwui/DrawVkInfo.h>
 
 namespace android::uirenderer {
 
@@ -52,18 +53,12 @@ struct WebViewFunctorCallbacks {
             // Called on RenderThread. initialize is guaranteed to happen before this call
             void (*draw)(int functor, void* data, const DrawGlInfo& params);
         } gles;
-        // TODO: VK support. The current DrawVkInfo is monolithic and needs to be split up for
-        // what params are valid on what callbacks
         struct {
             // Called either the first time the functor is used or the first time it's used after
             // a call to onContextDestroyed.
-            // void (*initialize)(int functor, const InitParams& params);
-            // void (*frameStart)(int functor, /* todo: what params are actually needed for this to
-            // be useful? Is this useful? */)
-            // void (*draw)(int functor, const CompositeParams& params /* todo: rename - composite
-            // almost always means something else, and we aren't compositing */);
-            // void (*frameEnd)(int functor, const PostCompositeParams& params /* todo: same as
-            // CompositeParams - rename */);
+            void (*initialize)(int functor, void* data, const VkFunctorInitParams& params);
+            void (*draw)(int functor, void* data, const VkFunctorDrawParams& params);
+            void (*postDraw)(int functor, void*);
         } vk;
     };
 };

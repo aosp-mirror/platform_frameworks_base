@@ -74,7 +74,10 @@ struct AwDrawFn_InitVkParams {
   VkQueue queue;
   uint32_t graphics_queue_index;
   uint32_t instance_version;
-  const char* const* enabled_extension_names;
+  const char* const* enabled_instance_extension_names;
+  uint32_t enabled_instance_extension_names_length;
+  const char* const* enabled_device_extension_names;
+  uint32_t enabled_device_extension_names_length;
   // Only one of device_features and device_features_2 should be non-null.
   // If both are null then no features are enabled.
   VkPhysicalDeviceFeatures* device_features;
@@ -128,15 +131,13 @@ struct AwDrawFn_DrawVkParams {
 
 struct AwDrawFn_PostDrawVkParams {
   int version;
-
-  // Input: Fence for the composite command buffer to signal it has finished its
-  // work on the GPU.
-  int fd;
 };
 
 // Called on render thread while UI thread is blocked. Called for both GL and
 // VK.
-typedef void AwDrawFn_OnSync(int functor, void* data, AwDrawFn_OnSyncParams* params);
+typedef void AwDrawFn_OnSync(int functor,
+                             void* data,
+                             AwDrawFn_OnSyncParams* params);
 
 // Called on render thread when either the context is destroyed _or_ when the
 // functor's last reference goes away. Will always be called with an active
@@ -150,17 +151,24 @@ typedef void AwDrawFn_OnContextDestroyed(int functor, void* data);
 typedef void AwDrawFn_OnDestroyed(int functor, void* data);
 
 // Only called for GL.
-typedef void AwDrawFn_DrawGL(int functor, void* data, AwDrawFn_DrawGLParams* params);
+typedef void AwDrawFn_DrawGL(int functor,
+                             void* data,
+                             AwDrawFn_DrawGLParams* params);
 
 // Initialize vulkan state. Needs to be called again after any
 // OnContextDestroyed. Only called for Vulkan.
-typedef void AwDrawFn_InitVk(int functor, void* data, AwDrawFn_InitVkParams* params);
+typedef void AwDrawFn_InitVk(int functor,
+                             void* data,
+                             AwDrawFn_InitVkParams* params);
 
 // Only called for Vulkan.
-typedef void AwDrawFn_DrawVk(int functor, void* data, AwDrawFn_DrawVkParams* params);
+typedef void AwDrawFn_DrawVk(int functor,
+                             void* data,
+                             AwDrawFn_DrawVkParams* params);
 
 // Only called for Vulkan.
-typedef void AwDrawFn_PostDrawVk(int functor, void* data,
+typedef void AwDrawFn_PostDrawVk(int functor,
+                                 void* data,
                                  AwDrawFn_PostDrawVkParams* params);
 
 struct AwDrawFnFunctorCallbacks {
@@ -183,7 +191,8 @@ enum AwDrawFnRenderMode {
 typedef AwDrawFnRenderMode AwDrawFn_QueryRenderMode(void);
 
 // Create a functor. |functor_callbacks| should be valid until OnDestroyed.
-typedef int AwDrawFn_CreateFunctor(void* data, AwDrawFnFunctorCallbacks* functor_callbacks);
+typedef int AwDrawFn_CreateFunctor(void* data,
+                                   AwDrawFnFunctorCallbacks* functor_callbacks);
 
 // May be called on any thread to signal that the functor should be destroyed.
 // The functor will receive an onDestroyed when the last usage of it is
