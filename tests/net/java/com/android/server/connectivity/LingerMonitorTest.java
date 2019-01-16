@@ -32,11 +32,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.INetd;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkMisc;
 import android.net.NetworkStack;
+import android.os.INetworkManagementService;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.format.DateUtils;
@@ -66,6 +68,8 @@ public class LingerMonitorTest {
     LingerMonitor mMonitor;
 
     @Mock ConnectivityService mConnService;
+    @Mock INetd mNetd;
+    @Mock INetworkManagementService mNMS;
     @Mock Context mCtx;
     @Mock NetworkMisc mMisc;
     @Mock NetworkNotificationManager mNotifier;
@@ -352,7 +356,7 @@ public class LingerMonitorTest {
         caps.addCapability(0);
         caps.addTransportType(transport);
         NetworkAgentInfo nai = new NetworkAgentInfo(null, null, new Network(netId), info, null,
-                caps, 50, mCtx, null, mMisc, mConnService);
+                caps, 50, mCtx, null, mMisc, mConnService, mNetd, mNMS);
         nai.everValidated = true;
         return nai;
     }
