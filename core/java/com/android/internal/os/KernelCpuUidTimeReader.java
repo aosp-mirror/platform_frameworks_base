@@ -177,6 +177,9 @@ public abstract class KernelCpuUidTimeReader<T> {
      * The file contains a monotonically increasing count of time for a single boot. This class
      * maintains the previous results of a call to {@link #readDelta} in order to provide a proper
      * delta.
+     *
+     * The second parameter of the callback is a long[] with 2 elements, [user time in us, system
+     * time in us].
      */
     public static class KernelCpuUidUserSysTimeReader extends KernelCpuUidTimeReader<long[]> {
         private static final String REMOVE_UID_PROC_FILE = "/proc/uid_cputime/remove_uid_range";

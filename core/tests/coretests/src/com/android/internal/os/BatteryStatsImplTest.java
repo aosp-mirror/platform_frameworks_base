@@ -39,6 +39,7 @@ import android.view.Display;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.util.ArrayUtils;
 
 import org.junit.Before;
@@ -54,7 +55,7 @@ import java.util.Arrays;
 @RunWith(AndroidJUnit4.class)
 public class BatteryStatsImplTest {
     @Mock
-    private KernelUidCpuFreqTimeReader mKernelUidCpuFreqTimeReader;
+    private KernelCpuUidFreqTimeReader mKernelUidCpuFreqTimeReader;
     @Mock
     private KernelSingleUidTimeReader mKernelSingleUidTimeReader;
 
@@ -67,7 +68,7 @@ public class BatteryStatsImplTest {
         when(mKernelUidCpuFreqTimeReader.allUidTimesAvailable()).thenReturn(true);
         when(mKernelSingleUidTimeReader.singleUidCpuTimesAvailable()).thenReturn(true);
         mBatteryStatsImpl = new MockBatteryStatsImpl()
-                .setKernelUidCpuFreqTimeReader(mKernelUidCpuFreqTimeReader)
+                .setKernelCpuUidFreqTimeReader(mKernelUidCpuFreqTimeReader)
                 .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader);
     }
 
