@@ -108,7 +108,6 @@ final class AutofillManagerServiceImpl
 
     private static final Random sRandom = new Random();
 
-    private final LocalLog mRequestsHistory;
     private final LocalLog mUiLatencyHistory;
     private final LocalLog mWtfHistory;
     private final FieldClassificationStrategy mFieldClassificationStrategy;
@@ -166,12 +165,12 @@ final class AutofillManagerServiceImpl
     @Nullable
     private RemoteAugmentedAutofillService mRemoteAugmentedAutofillService;
 
-    AutofillManagerServiceImpl(AutofillManagerService master, Object lock, LocalLog requestsHistory,
+    AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
-            AutofillCompatState autofillCompatState, boolean disabled) {
+            AutofillCompatState autofillCompatState,
+            boolean disabled) {
         super(master, lock, userId);
 
-        mRequestsHistory = requestsHistory;
         mUiLatencyHistory = uiLatencyHistory;
         mWtfHistory = wtfHistory;
         mUi = ui;
@@ -301,7 +300,7 @@ final class AutofillManagerServiceImpl
                 + " s=" + mInfo.getServiceInfo().packageName
                 + " u=" + mUserId + " i=" + autofillId + " b=" + virtualBounds
                 + " hc=" + hasCallback + " f=" + flags;
-        mRequestsHistory.log(historyItem);
+        mMaster.logRequestLocked(historyItem);
 
         newSession.updateLocked(autofillId, virtualBounds, value, ACTION_START_SESSION, flags);
 

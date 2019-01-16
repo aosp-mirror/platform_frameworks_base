@@ -77,7 +77,6 @@ final class ContentCapturePerUserService
     ContentCapturePerUserService(@NonNull ContentCaptureManagerService master,
             @NonNull Object lock, boolean disabled, @UserIdInt int userId) {
         super(master, lock, userId);
-
         updateRemoteServiceLocked(disabled);
     }
 
@@ -162,14 +161,24 @@ final class ContentCapturePerUserService
             @NonNull ComponentName componentName, int taskId, int displayId,
             @NonNull String sessionId, int uid, int flags,
             @NonNull IResultReceiver clientReceiver) {
-        if (!isEnabledLocked()) {
+
+        final ComponentName serviceComponentName = getServiceComponentName();
+        final boolean enabled = isEnabledLocked();
+        final String historyItem =
+                "id=" + sessionId + " uid=" + uid
+                + " a=" + ComponentName.flattenToShortString(componentName)
+                + " t=" + taskId + " d=" + displayId
+                + " s=" + ComponentName.flattenToShortString(serviceComponentName)
+                + " u=" + mUserId + " f=" + flags + (enabled ? "" : " (disabled)");
+        mMaster.logRequestLocked(historyItem);
+
+        if (!enabled) {
             // TODO: it would be better to split in differet reasons, like
             // STATE_DISABLED_NO_SERVICE and STATE_DISABLED_BY_DEVICE_POLICY
             setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_NO_SERVICE,
                     /* binder= */ null);
             return;
         }
-        final ComponentName serviceComponentName = getServiceComponentName();
         if (serviceComponentName == null) {
             // TODO(b/111276913): this happens when the system service is starting, we should
             // probably handle it in a more elegant way (like waiting for boot_complete or

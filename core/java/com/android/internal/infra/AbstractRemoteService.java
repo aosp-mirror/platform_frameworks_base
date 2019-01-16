@@ -139,6 +139,14 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         return mDestroyed;
     }
 
+    /**
+     * Gets the name of the service.
+     */
+    @NonNull
+    public final ComponentName getComponentName() {
+        return mComponentName;
+    }
+
     private void handleOnConnectedStateChangedInternal(boolean connected) {
         if (connected) {
             handlePendingRequests();
