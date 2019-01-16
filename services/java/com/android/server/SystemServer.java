@@ -56,6 +56,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.IStorageManager;
+import android.provider.Settings;
 import android.sysprop.VoldProperties;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
