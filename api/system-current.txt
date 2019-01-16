@@ -150,6 +150,7 @@ package android {
     field public static final java.lang.String REGISTER_CALL_PROVIDER = "android.permission.REGISTER_CALL_PROVIDER";
     field public static final java.lang.String REGISTER_CONNECTION_MANAGER = "android.permission.REGISTER_CONNECTION_MANAGER";
     field public static final java.lang.String REGISTER_SIM_SUBSCRIPTION = "android.permission.REGISTER_SIM_SUBSCRIPTION";
+    field public static final java.lang.String REMOTE_DISPLAY_PROVIDER = "android.permission.REMOTE_DISPLAY_PROVIDER";
     field public static final java.lang.String REMOVE_DRM_CERTIFICATES = "android.permission.REMOVE_DRM_CERTIFICATES";
     field public static final java.lang.String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final java.lang.String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
