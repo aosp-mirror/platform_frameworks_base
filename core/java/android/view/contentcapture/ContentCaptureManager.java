@@ -35,7 +35,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.SyncResultReceiver;
 
 import java.io.PrintWriter;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /*
  * NOTE: all methods in this class should return right away, or do the real work in a handler
@@ -125,7 +124,7 @@ public final class ContentCaptureManager {
         synchronized (mLock) {
             if (mMainSession == null) {
                 mMainSession = new MainContentCaptureSession(mContext, mHandler, mService,
-                        new AtomicBoolean(mDisabled));
+                        mDisabled);
                 if (VERBOSE) {
                     Log.v(TAG, "getDefaultContentCaptureSession(): created " + mMainSession);
                 }

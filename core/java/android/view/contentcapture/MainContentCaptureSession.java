@@ -88,6 +88,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      */
     public static final String EXTRA_BINDER = "binder";
 
+    // TODO(b/111276913): make sure disabled state is in sync with manager's disabled
     @NonNull
     private final AtomicBoolean mDisabled;
 
@@ -113,7 +114,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @Nullable
     private DeathRecipient mDirectServiceVulture;
 
-    private int mState = STATE_UNKNOWN;
+    private int mState = UNKNWON_STATE;
 
     @Nullable
     private IBinder mApplicationToken;
@@ -133,11 +134,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     /** @hide */
     protected MainContentCaptureSession(@NonNull Context context, @NonNull Handler handler,
             @Nullable IContentCaptureManager systemServerInterface,
-            @NonNull AtomicBoolean disabled) {
+            @NonNull boolean disabled) {
         mContext = context;
         mHandler = handler;
         mSystemServerInterface = systemServerInterface;
-        mDisabled = disabled;
+        mDisabled = new AtomicBoolean(disabled);
     }
 
     @Override
@@ -184,7 +185,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     private void handleStartSession(@NonNull IBinder token, @NonNull ComponentName componentName,
             int flags) {
-        if (mState != STATE_UNKNOWN) {
+        if (mState != UNKNWON_STATE) {
             // TODO(b/111276913): revisit this scenario
             Log.w(TAG, "ignoring handleStartSession(" + token + ") while on state "
                     + getStateAsString(mState));
@@ -247,18 +248,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             }
         }
 
-        // TODO(b/111276913): change the resultCode to use flags so there's just one flag for
-        // disabled stuff
-        if (resultCode == STATE_DISABLED_NO_SERVICE || resultCode == STATE_DISABLED_DUPLICATED_ID
-                || resultCode == STATE_DISABLED_BY_FLAG_SECURE
-                || resultCode == STATE_DISABLED_BY_APP) {
+        if ((mState & STATE_DISABLED) != 0) {
             mDisabled.set(true);
             handleResetSession(/* resetState= */ false);
         } else {
             mDisabled.set(false);
         }
         if (VERBOSE) {
-            Log.v(TAG, "handleSessionStarted() result: code=" + resultCode + ", id=" + mId
+            Log.v(TAG, "handleSessionStarted() result: id=" + mId
                     + ", state=" + getStateAsString(mState) + ", disabled=" + mDisabled.get()
                     + ", binder=" + binder + ", events=" + (mEvents == null ? 0 : mEvents.size()));
         }
@@ -408,7 +405,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     // clearings out.
     private void handleResetSession(boolean resetState) {
         if (resetState) {
-            mState = STATE_UNKNOWN;
+            mState = UNKNWON_STATE;
         }
 
         // TODO(b/122454205): must reset children (which currently is owned by superclass)
@@ -497,8 +494,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
         pw.print(prefix); pw.print("mDisabled: "); pw.println(mDisabled.get());
         pw.print(prefix); pw.print("isEnabled(): "); pw.println(isContentCaptureEnabled());
-        pw.print(prefix); pw.print("state: "); pw.print(mState); pw.print(" (");
-        pw.print(getStateAsString(mState)); pw.println(")");
+        pw.print(prefix); pw.print("state: "); pw.println(getStateAsString(mState));
         if (mApplicationToken != null) {
             pw.print(prefix); pw.print("app token: "); pw.println(mApplicationToken);
         }
