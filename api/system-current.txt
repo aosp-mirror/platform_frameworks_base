@@ -3301,6 +3301,7 @@ package android.media {
   }
 
   public final class MediaRecorder.AudioSource {
+    field public static final int ECHO_REFERENCE = 1997; // 0x7cd
     field public static final int HOTWORD = 1999; // 0x7cf
     field public static final int RADIO_TUNER = 1998; // 0x7ce
   }
