@@ -122,7 +122,6 @@ public final class MediaSessionManager {
      * {@link MediaSession2.Builder} instead.
      *
      * @param token newly created session2 token
-     * @hide
      */
     public void notifySession2Created(@NonNull Session2Token token) {
         if (token == null) {
@@ -196,9 +195,7 @@ public final class MediaSessionManager {
      * reject your uses of {@link MediaSession2}.
      *
      * @return A list of {@link Session2Token}.
-     * @hide
      */
-    // TODO: unhide
     @NonNull
     public List<Session2Token> getSession2Tokens() {
         return getSession2Tokens(UserHandle.myUserId());
@@ -209,13 +206,12 @@ public final class MediaSessionManager {
      * given user.
      * <p>
      * If you want to get tokens for another user, you must hold the
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
+     * android.Manifest.permission#INTERACT_ACROSS_USERS_FULL permission.
      *
      * @param userId The user id to fetch sessions for.
      * @return A list of {@link Session2Token}
      * @hide
      */
-    // TODO: unhide
     @NonNull
     public List<Session2Token> getSession2Tokens(int userId) {
         try {
@@ -342,13 +338,25 @@ public final class MediaSessionManager {
      * for consistent behavior across all devices.
      *
      * @param listener The listener to add
-     * @param handler The handler to call listener on. If {@code null}, calling thread's looper will
-     *                be used.
-     * @hide
      */
-    // TODO(jaewan): Unhide
     public void addOnSession2TokensChangedListener(
-            @NonNull OnSession2TokensChangedListener listener, @Nullable Handler handler) {
+            @NonNull OnSession2TokensChangedListener listener) {
+        addOnSession2TokensChangedListener(UserHandle.myUserId(), listener, new Handler());
+    }
+
+    /**
+     * Adds a listener to be notified when the {@link #getSession2Tokens()} changes.
+     * <p>
+     * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
+     * for consistent behavior across all devices.
+     *
+     * @param listener The listener to add
+     * @param handler The handler to call listener on.
+     */
+    public void addOnSession2TokensChangedListener(
+            @NonNull OnSession2TokensChangedListener listener, @NonNull Handler handler) {
         addOnSession2TokensChangedListener(UserHandle.myUserId(), listener, handler);
     }
 
@@ -392,9 +400,7 @@ public final class MediaSessionManager {
      * Removes the {@link OnSession2TokensChangedListener} to stop receiving session token updates.
      *
      * @param listener The listener to remove.
-     * @hide
      */
-    // TODO(jaewan): Unhide
     public void removeOnSession2TokensChangedListener(
             @NonNull OnSession2TokensChangedListener listener) {
         if (listener == null) {
@@ -688,8 +694,6 @@ public final class MediaSessionManager {
      * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
      * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
      * for consistent behavior across all devices.
-     *
-     * @hide
      */
     public interface OnSession2TokensChangedListener {
         /**
