@@ -66,7 +66,8 @@ public class DctConstants {
     public static final int EVENT_DATA_CONNECTION_DETACHED = BASE + 9;
     public static final int EVENT_ROAMING_ON = BASE + 11;
     public static final int EVENT_ROAMING_OFF = BASE + 12;
-    public static final int EVENT_ENABLE_NEW_APN = BASE + 13;
+    public static final int EVENT_ENABLE_APN = BASE + 13;
+    public static final int EVENT_DISABLE_APN = BASE + 14;
     public static final int EVENT_DISCONNECT_DONE = BASE + 15;
     public static final int EVENT_DATA_CONNECTION_ATTACHED = BASE + 16;
     public static final int EVENT_DATA_STALL_ALARM = BASE + 17;
