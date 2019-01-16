@@ -24,7 +24,9 @@ import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
+import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
+import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
@@ -125,8 +127,8 @@ message Atom {
         PhoneServiceStateChanged phone_service_state_changed = 94;
         PhoneStateChanged phone_state_changed = 95;
         LowMemReported low_mem_reported = 81;
-        ThermalThrottlingStateChanged thermal_throttling = 86;
         NetworkDnsEventReported network_dns_event_reported = 116;
+        DataStallEvent data_stall_event = 121;
     }
 
     // Pulled events will start at field 10000.
@@ -2086,3 +2088,25 @@ message NetworkDnsEventReported {
     optional int32 latency_micros = 3;
 }
 
+/**
+ * Logs when a data stall event occurs.
+ *
+ * Log from:
+ *     frameworks/base/services/core/java/com/android/server/connectivity/NetworkMonitor.java
+ */
+message DataStallEvent {
+    // Data stall evaluation type.
+    // See frameworks/base/services/core/java/com/android/server/connectivity/NetworkMonitor.java
+    // Refer to the definition of DATA_STALL_EVALUATION_TYPE_*.
+    optional int32 evaluation_type = 1;
+    // See definition in data_stall_event.proto.
+    optional com.android.server.connectivity.ProbeResult validation_result = 2;
+    // See definition in data_stall_event.proto.
+    optional android.net.NetworkCapabilitiesProto.Transport network_type = 3;
+    // See definition in data_stall_event.proto.
+    optional com.android.server.connectivity.WifiData wifi_info = 4 [(log_mode) = MODE_BYTES];
+    // See definition in data_stall_event.proto.
+    optional com.android.server.connectivity.CellularData cell_info = 5 [(log_mode) = MODE_BYTES];
+    // See definition in data_stall_event.proto.
+    optional com.android.server.connectivity.DnsEvent dns_event = 6 [(log_mode) = MODE_BYTES];
+}
