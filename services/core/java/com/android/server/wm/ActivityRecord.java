@@ -3451,7 +3451,7 @@ final class ActivityRecord extends ConfigurationContainer {
      * {@code ActivityRecordProto} is the outer-most proto data.
      */
     void writeToProto(ProtoOutputStream proto) {
-        super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER, WindowTraceLogLevel.ALL);
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(STATE, mState.toString());
         proto.write(VISIBLE, visible);

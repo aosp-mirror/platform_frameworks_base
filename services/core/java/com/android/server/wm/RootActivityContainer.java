@@ -2372,12 +2372,13 @@ class RootActivityContainer extends ConfigurationContainer
         return printed;
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    protected void writeToProto(ProtoOutputStream proto, long fieldId,
+            @WindowTraceLogLevel int logLevel) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER, logLevel);
         for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
             final ActivityDisplay activityDisplay = mActivityDisplays.get(displayNdx);
-            activityDisplay.writeToProto(proto, DISPLAYS);
+            activityDisplay.writeToProto(proto, DISPLAYS, logLevel);
         }
         mStackSupervisor.getKeyguardController().writeToProto(proto, KEYGUARD_CONTROLLER);
         // TODO(b/111541062): Update tests to look for resumed activities on all displays

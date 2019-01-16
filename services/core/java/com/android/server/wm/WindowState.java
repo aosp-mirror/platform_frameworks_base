@@ -3221,9 +3221,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId,
+            @WindowTraceLogLevel int logLevel) {
+        boolean isVisible = isVisible();
+        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible) {
+            return;
+        }
+
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER, trim);
+        super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(DISPLAY_ID, getDisplayId());
         proto.write(STACK_ID, getStackId());
@@ -3235,7 +3241,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWinAnimator.writeToProto(proto, ANIMATOR);
         proto.write(ANIMATING_EXIT, mAnimatingExit);
         for (int i = 0; i < mChildren.size(); i++) {
-            mChildren.get(i).writeToProto(proto, CHILD_WINDOWS, trim);
+            mChildren.get(i).writeToProto(proto, CHILD_WINDOWS, logLevel);
         }
         proto.write(REQUESTED_WIDTH, mRequestedWidth);
         proto.write(REQUESTED_HEIGHT, mRequestedHeight);
@@ -3247,7 +3253,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         proto.write(DESTROYING, mDestroying);
         proto.write(REMOVED, mRemoved);
         proto.write(IS_ON_SCREEN, isOnScreen());
-        proto.write(IS_VISIBLE, isVisible());
+        proto.write(IS_VISIBLE, isVisible);
         proto.write(PENDING_SEAMLESS_ROTATION, mPendingSeamlessRotate != null);
         proto.write(FINISHED_SEAMLESS_ROTATION_FRAME, mFinishSeamlessRotateFrameNumber);
         proto.write(FORCE_SEAMLESS_ROTATION, mForceSeamlesslyRotate);

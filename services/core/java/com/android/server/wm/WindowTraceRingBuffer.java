@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import android.util.proto.ProtoOutputStream;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -49,20 +51,20 @@ class WindowTraceRingBuffer extends WindowTraceBuffer {
         synchronized (mBufferLock) {
             try (OutputStream os = new FileOutputStream(mTraceFile, true)) {
                 while (!mBuffer.isEmpty()) {
-                    byte[] proto;
-                    proto = mBuffer.poll();
-                    mBufferSize -= proto.length;
-                    os.write(proto);
+                    ProtoOutputStream proto = mBuffer.poll();
+                    mBufferSize -= proto.getRawSize();
+                    byte[] protoBytes = proto.getBytes();
+                    os.write(protoBytes);
                 }
             }
         }
     }
 
     private void discardOldest() {
-        byte[] item = mBuffer.poll();
+        ProtoOutputStream item = mBuffer.poll();
         if (item == null) {
             throw new IllegalStateException("No element to discard from buffer");
         }
-        mBufferSize -= item.length;
+        mBufferSize -= item.getRawSize();
     }
 }

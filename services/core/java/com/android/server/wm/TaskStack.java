@@ -1340,12 +1340,17 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId,
+            @WindowTraceLogLevel int logLevel) {
+        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            return;
+        }
+
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER, trim);
+        super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
         proto.write(ID, mStackId);
         for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
-            mChildren.get(taskNdx).writeToProto(proto, TASKS, trim);
+            mChildren.get(taskNdx).writeToProto(proto, TASKS, logLevel);
         }
         proto.write(FILLS_PARENT, matchParentBounds());
         getRawBounds().writeToProto(proto, BOUNDS);

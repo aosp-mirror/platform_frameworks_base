@@ -67,27 +67,25 @@ public class WindowTraceBufferTest {
         ProtoOutputStream toWrite1 = getDummy(1);
         ProtoOutputStream toWrite2 = getDummy(2);
         ProtoOutputStream toWrite3 = getDummy(3);
-        byte[] toWrite1Bytes = toWrite1.getBytes();
-        byte[] toWrite2Bytes = toWrite2.getBytes();
-        byte[] toWrite3Bytes = toWrite3.getBytes();
-
-        final int objectSize = toWrite1.getBytes().length;
+        final int objectSize = toWrite1.getRawSize();
         final int bufferCapacity = objectSize * 2;
 
         final WindowTraceBuffer buffer = buildQueueBuffer(bufferCapacity);
 
         buffer.add(toWrite1);
+        byte[] toWrite1Bytes = toWrite1.getBytes();
         assertTrue("First element should be in the list",
                 buffer.contains(toWrite1Bytes));
 
         buffer.add(toWrite2);
+        byte[] toWrite2Bytes = toWrite2.getBytes();
         assertTrue("First element should be in the list",
                 buffer.contains(toWrite1Bytes));
         assertTrue("Second element should be in the list",
                 buffer.contains(toWrite2Bytes));
 
         buffer.add(toWrite3);
-
+        byte[] toWrite3Bytes = toWrite3.getBytes();
         assertTrue("First element should be in the list",
                 buffer.contains(toWrite1Bytes));
         assertTrue("Second element should be in the list",
@@ -105,7 +103,7 @@ public class WindowTraceBufferTest {
     @Test
     public void testTraceRingBuffer_addItem() throws Exception {
         ProtoOutputStream toWrite = getDummy(1);
-        final int objectSize = toWrite.getBytes().length;
+        final int objectSize = toWrite.getRawSize();
 
         final WindowTraceBuffer buffer = buildRingBuffer(objectSize);
 
@@ -125,25 +123,25 @@ public class WindowTraceBufferTest {
         ProtoOutputStream toWrite1 = getDummy(1);
         ProtoOutputStream toWrite2 = getDummy(2);
         ProtoOutputStream toWrite3 = getDummy(3);
-        byte[] toWrite1Bytes = toWrite1.getBytes();
-        byte[] toWrite2Bytes = toWrite2.getBytes();
-        byte[] toWrite3Bytes = toWrite3.getBytes();
-        final int objectSize = toWrite1.getBytes().length;
+        final int objectSize = toWrite1.getRawSize();
 
         final int bufferCapacity = objectSize * 2 + 1;
         final WindowTraceBuffer buffer = buildRingBuffer(bufferCapacity);
 
         buffer.add(toWrite1);
+        byte[] toWrite1Bytes = toWrite1.getBytes();
         assertTrue("First element should be in the list",
                 buffer.contains(toWrite1Bytes));
 
         buffer.add(toWrite2);
+        byte[] toWrite2Bytes = toWrite2.getBytes();
         assertTrue("First element should be in the list",
                 buffer.contains(toWrite1Bytes));
         assertTrue("Second element should be in the list",
                 buffer.contains(toWrite2Bytes));
 
         buffer.add(toWrite3);
+        byte[] toWrite3Bytes = toWrite3.getBytes();
         assertTrue("First element should not be in the list",
                 !buffer.contains(toWrite1Bytes));
         assertTrue("Second element should be in the list",
@@ -161,9 +159,7 @@ public class WindowTraceBufferTest {
     public void testTraceRingBuffer_addItemMustOverwriteMultiple() throws Exception {
         ProtoOutputStream toWriteSmall1 = getDummy(1);
         ProtoOutputStream toWriteSmall2 = getDummy(2);
-        byte[] toWriteSmall1Bytes = toWriteSmall1.getBytes();
-        byte[] toWriteSmall2Bytes = toWriteSmall2.getBytes();
-        final int objectSize = toWriteSmall1.getBytes().length;
+        final int objectSize = toWriteSmall1.getRawSize();
 
         final int bufferCapacity = objectSize * 2;
         final WindowTraceBuffer buffer = buildRingBuffer(bufferCapacity);
@@ -171,20 +167,21 @@ public class WindowTraceBufferTest {
         ProtoOutputStream toWriteBig = new ProtoOutputStream();
         toWriteBig.write(MAGIC_NUMBER, 1);
         toWriteBig.write(MAGIC_NUMBER, 2);
-        byte[] toWriteBigBytes = toWriteBig.getBytes();
-        toWriteBig.flush();
 
         buffer.add(toWriteSmall1);
+        byte[] toWriteSmall1Bytes = toWriteSmall1.getBytes();
         assertTrue("First element should be in the list",
                 buffer.contains(toWriteSmall1Bytes));
 
         buffer.add(toWriteSmall2);
+        byte[] toWriteSmall2Bytes = toWriteSmall2.getBytes();
         assertTrue("First element should be in the list",
                 buffer.contains(toWriteSmall1Bytes));
         assertTrue("Second element should be in the list",
                 buffer.contains(toWriteSmall2Bytes));
 
         buffer.add(toWriteBig);
+        byte[] toWriteBigBytes = toWriteBig.getBytes();
         assertTrue("Third element should overwrite all others",
                 !buffer.contains(toWriteSmall1Bytes));
         assertTrue("Third element should overwrite all others",

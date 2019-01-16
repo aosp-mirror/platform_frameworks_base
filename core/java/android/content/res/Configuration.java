@@ -1096,34 +1096,38 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * @param protoOutputStream Stream to write the Configuration object to.
      * @param fieldId           Field Id of the Configuration as defined in the parent message
      * @param persisted         Note if this proto will be persisted to disk
+     * @param critical          If true, reduce amount of data written.
      * @hide
      */
-    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId, boolean persisted) {
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId, boolean persisted,
+            boolean critical) {
         final long token = protoOutputStream.start(fieldId);
-        protoOutputStream.write(FONT_SCALE, fontScale);
-        protoOutputStream.write(MCC, mcc);
-        protoOutputStream.write(MNC, mnc);
-        if (mLocaleList != null) {
-            mLocaleList.writeToProto(protoOutputStream, LOCALES);
+        if (!critical) {
+            protoOutputStream.write(FONT_SCALE, fontScale);
+            protoOutputStream.write(MCC, mcc);
+            protoOutputStream.write(MNC, mnc);
+            if (mLocaleList != null) {
+                mLocaleList.writeToProto(protoOutputStream, LOCALES);
+            }
+            protoOutputStream.write(SCREEN_LAYOUT, screenLayout);
+            protoOutputStream.write(COLOR_MODE, colorMode);
+            protoOutputStream.write(TOUCHSCREEN, touchscreen);
+            protoOutputStream.write(KEYBOARD, keyboard);
+            protoOutputStream.write(KEYBOARD_HIDDEN, keyboardHidden);
+            protoOutputStream.write(HARD_KEYBOARD_HIDDEN, hardKeyboardHidden);
+            protoOutputStream.write(NAVIGATION, navigation);
+            protoOutputStream.write(NAVIGATION_HIDDEN, navigationHidden);
+            protoOutputStream.write(UI_MODE, uiMode);
+            protoOutputStream.write(SMALLEST_SCREEN_WIDTH_DP, smallestScreenWidthDp);
+            protoOutputStream.write(DENSITY_DPI, densityDpi);
+            // For persistence, we do not care about window configuration
+            if (!persisted && windowConfiguration != null) {
+                windowConfiguration.writeToProto(protoOutputStream, WINDOW_CONFIGURATION);
+            }
         }
-        protoOutputStream.write(SCREEN_LAYOUT, screenLayout);
-        protoOutputStream.write(COLOR_MODE, colorMode);
-        protoOutputStream.write(TOUCHSCREEN, touchscreen);
-        protoOutputStream.write(KEYBOARD, keyboard);
-        protoOutputStream.write(KEYBOARD_HIDDEN, keyboardHidden);
-        protoOutputStream.write(HARD_KEYBOARD_HIDDEN, hardKeyboardHidden);
-        protoOutputStream.write(NAVIGATION, navigation);
-        protoOutputStream.write(NAVIGATION_HIDDEN, navigationHidden);
         protoOutputStream.write(ORIENTATION, orientation);
-        protoOutputStream.write(UI_MODE, uiMode);
         protoOutputStream.write(SCREEN_WIDTH_DP, screenWidthDp);
         protoOutputStream.write(SCREEN_HEIGHT_DP, screenHeightDp);
-        protoOutputStream.write(SMALLEST_SCREEN_WIDTH_DP, smallestScreenWidthDp);
-        protoOutputStream.write(DENSITY_DPI, densityDpi);
-        // For persistence, we do not care about window configuration
-        if (!persisted && windowConfiguration != null) {
-            windowConfiguration.writeToProto(protoOutputStream, WINDOW_CONFIGURATION);
-        }
         protoOutputStream.end(token);
     }
 
@@ -1136,7 +1140,20 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * @hide
      */
     public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
-        writeToProto(protoOutputStream, fieldId, false);
+        writeToProto(protoOutputStream, fieldId, false /* persisted */, false /* critical */);
+    }
+
+    /**
+     * Write to a protocol buffer output stream.
+     * Protocol buffer message definition at {@link android.content.ConfigurationProto}
+     *
+     * @param protoOutputStream Stream to write the Configuration object to.
+     * @param fieldId           Field Id of the Configuration as defined in the parent message
+     * @param critical          If true, reduce amount of data written.
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId, boolean critical) {
+        writeToProto(protoOutputStream, fieldId, false /* persisted */, critical);
     }
 
     /**

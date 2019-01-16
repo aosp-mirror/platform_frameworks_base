@@ -53,6 +53,7 @@ class WindowTracing {
 
     private WindowTraceBuffer mTraceBuffer;
 
+    private @WindowTraceLogLevel int mWindowTraceLogLevel = WindowTraceLogLevel.TRIM;
     private boolean mContinuousMode;
     private boolean mEnabled;
     private volatile boolean mEnabledLockFree;
@@ -118,6 +119,8 @@ class WindowTracing {
                     + "trace is restarted.");
         }
         mContinuousMode = continuous;
+        mWindowTraceLogLevel = (continuous) ? WindowTraceLogLevel.CRITICAL :
+                WindowTraceLogLevel.TRIM;
     }
 
     private void appendTraceEntry(ProtoOutputStream proto) {
@@ -166,22 +169,26 @@ class WindowTracing {
             return;
         }
 
-        ProtoOutputStream os = new ProtoOutputStream();
-        long tokenOuter = os.start(ENTRY);
-        os.write(ELAPSED_REALTIME_NANOS, SystemClock.elapsedRealtimeNanos());
-        os.write(WHERE, where);
-
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "writeToProtoLocked");
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "writeToBufferLocked");
         try {
-            long tokenInner = os.start(WINDOW_MANAGER_SERVICE);
-            service.writeToProtoLocked(os, true /* trim */);
-            os.end(tokenInner);
+            ProtoOutputStream os = new ProtoOutputStream();
+            long tokenOuter = os.start(ENTRY);
+            os.write(ELAPSED_REALTIME_NANOS, SystemClock.elapsedRealtimeNanos());
+            os.write(WHERE, where);
+
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "writeToProtoLocked");
+            try {
+                long tokenInner = os.start(WINDOW_MANAGER_SERVICE);
+                service.writeToProtoLocked(os, mWindowTraceLogLevel);
+                os.end(tokenInner);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+            }
+            os.end(tokenOuter);
+            appendTraceEntry(os);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
-        os.end(tokenOuter);
-        appendTraceEntry(os);
-        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     /**
