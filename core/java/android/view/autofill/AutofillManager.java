@@ -2997,5 +2997,23 @@ public final class AutofillManager {
                 afm.post(() -> afm.autofill(sessionId, ids, values));
             }
         }
+
+        @Override
+        public void requestShowFillUi(int sessionId, AutofillId id, int width, int height,
+                Rect anchorBounds, IAutofillWindowPresenter presenter) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.requestShowFillUi(sessionId, id, width, height, anchorBounds,
+                        presenter));
+            }
+        }
+
+        @Override
+        public void requestHideFillUi(int sessionId, AutofillId id) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.requestHideFillUi(id, false));
+            }
+        }
     }
 }

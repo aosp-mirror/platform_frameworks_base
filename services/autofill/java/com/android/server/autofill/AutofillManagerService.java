@@ -701,6 +701,11 @@ public final class AutofillManagerService
         public void onBackKeyPressed() {
             if (sDebug) Slog.d(TAG, "onBackKeyPressed()");
             mUi.hideAll(null);
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service =
+                        getServiceForUserLocked(UserHandle.getCallingUserId());
+                service.onBackKeyPressed();
+            }
         }
 
         @Override

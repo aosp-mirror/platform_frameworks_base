@@ -36,5 +36,5 @@ oneway interface IAugmentedAutofillService {
                        in ComponentName activityComponent, in AutofillId focusedId,
                        in AutofillValue focusedValue, long requestTime, in IFillCallback callback);
 
-    void onDestroyFillWindowRequest(int sessionId);
+    void onDestroyAllFillWindowsRequest();
 }
