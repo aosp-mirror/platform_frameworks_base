@@ -76,6 +76,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Log;
+import android.util.LongArrayQueue;
 import android.util.NtpTrustedTime;
 import android.util.Pair;
 import android.util.Slog;
@@ -90,6 +91,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocalLog;
 import com.android.internal.util.StatLogger;
 import com.android.server.AppStateTracker.Listener;
@@ -144,6 +146,7 @@ class AlarmManagerService extends SystemService {
     static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
     static final int TICK_HISTORY_DEPTH = 10;
+    static final long MILLIS_IN_DAY = 24 * 60 * 60 * 1000;
 
     // Indices into the APP_STANDBY_MIN_DELAYS and KEYS_APP_STANDBY_DELAY arrays
     static final int ACTIVE_INDEX = 0;
@@ -194,6 +197,7 @@ class AlarmManagerService extends SystemService {
     ArrayList<Alarm> mPendingNonWakeupAlarms = new ArrayList<>();
     ArrayList<InFlight> mInFlight = new ArrayList<>();
     AlarmHandler mHandler;
+    AppWakeupHistory mAppWakeupHistory;
     ClockReceiver mClockReceiver;
     final DeliveryTracker mDeliveryTracker = new DeliveryTracker();
     Intent mTimeTickIntent;
@@ -276,7 +280,91 @@ class AlarmManagerService extends SystemService {
 
     private AppStateTracker mAppStateTracker;
     private boolean mAppStandbyParole;
-    private ArrayMap<Pair<String, Integer>, Long> mLastAlarmDeliveredForPackage = new ArrayMap<>();
+
+    /**
+     * A rolling window history of previous times when an alarm was sent to a package.
+     */
+    private static class AppWakeupHistory {
+        private ArrayMap<Pair<String, Integer>, LongArrayQueue> mPackageHistory =
+                new ArrayMap<>();
+        private long mWindowSize;
+
+        AppWakeupHistory(long windowSize) {
+            mWindowSize = windowSize;
+        }
+
+        void recordAlarmForPackage(String packageName, int userId, long nowElapsed) {
+            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
+            LongArrayQueue history = mPackageHistory.get(packageUser);
+            if (history == null) {
+                history = new LongArrayQueue();
+                mPackageHistory.put(packageUser, history);
+            }
+            if (history.size() == 0 || history.peekLast() < nowElapsed) {
+                history.addLast(nowElapsed);
+            }
+            snapToWindow(history);
+        }
+
+        void removeForUser(int userId) {
+            for (int i = mPackageHistory.size() - 1; i >= 0; i--) {
+                final Pair<String, Integer> packageUserKey = mPackageHistory.keyAt(i);
+                if (packageUserKey.second == userId) {
+                    mPackageHistory.removeAt(i);
+                }
+            }
+        }
+
+        void removeForPackage(String packageName, int userId) {
+            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
+            mPackageHistory.remove(packageUser);
+        }
+
+        private void snapToWindow(LongArrayQueue history) {
+            while (history.peekFirst() + mWindowSize < history.peekLast()) {
+                history.removeFirst();
+            }
+        }
+
+        int getTotalWakeupsInWindow(String packageName, int userId) {
+            final LongArrayQueue history = mPackageHistory.get(Pair.create(packageName, userId));
+            return (history == null) ? 0 : history.size();
+        }
+
+        long getLastWakeupForPackage(String packageName, int userId, int positionFromEnd) {
+            final LongArrayQueue history = mPackageHistory.get(Pair.create(packageName, userId));
+            if (history == null) {
+                return 0;
+            }
+            final int i = history.size() - positionFromEnd;
+            return (i < 0) ? 0 : history.get(i);
+        }
+
+        void dump(PrintWriter pw, String prefix, long nowElapsed) {
+            dump(new IndentingPrintWriter(pw, "  ").setIndent(prefix), nowElapsed);
+        }
+
+        void dump(IndentingPrintWriter pw, long nowElapsed) {
+            pw.println("App Alarm history:");
+            pw.increaseIndent();
+            for (int i = 0; i < mPackageHistory.size(); i++) {
+                final Pair<String, Integer> packageUser = mPackageHistory.keyAt(i);
+                final LongArrayQueue timestamps = mPackageHistory.valueAt(i);
+                pw.print(packageUser.first);
+                pw.print(", u");
+                pw.print(packageUser.second);
+                pw.print(": ");
+                // limit dumping to a max of 100 values
+                final int lastIdx = Math.max(0, timestamps.size() - 100);
+                for (int j = timestamps.size() - 1; j >= lastIdx; j--) {
+                    TimeUtils.formatDuration(timestamps.get(j), nowElapsed, pw);
+                    pw.print(", ");
+                }
+                pw.println();
+            }
+            pw.decreaseIndent();
+        }
+    }
 
     /**
      * All times are in milliseconds. These constants are kept synchronized with the system
@@ -301,6 +389,17 @@ class AlarmManagerService extends SystemService {
                 = "allow_while_idle_whitelist_duration";
         @VisibleForTesting
         static final String KEY_LISTENER_TIMEOUT = "listener_timeout";
+        @VisibleForTesting
+        static final String KEY_APP_STANDBY_QUOTAS_ENABLED = "app_standby_quotas_enabled";
+        private static final String KEY_APP_STANDBY_WINDOW = "app_standby_window";
+        @VisibleForTesting
+        final String[] KEYS_APP_STANDBY_QUOTAS = {
+                "standby_active_quota",
+                "standby_working_quota",
+                "standby_frequent_quota",
+                "standby_rare_quota",
+                "standby_never_quota",
+        };
 
         // Keys for specifying throttling delay based on app standby bucketing
         private final String[] KEYS_APP_STANDBY_DELAY = {
@@ -318,6 +417,18 @@ class AlarmManagerService extends SystemService {
         private static final long DEFAULT_ALLOW_WHILE_IDLE_LONG_TIME = 9*60*1000;
         private static final long DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION = 10*1000;
         private static final long DEFAULT_LISTENER_TIMEOUT = 5 * 1000;
+        private static final boolean DEFAULT_APP_STANDBY_QUOTAS_ENABLED = true;
+        private static final long DEFAULT_APP_STANDBY_WINDOW = 60 * 60 * 1000;  // 1 hr
+        /**
+         * Max number of times an app can receive alarms in {@link #APP_STANDBY_WINDOW}
+         */
+        private final int[] DEFAULT_APP_STANDBY_QUOTAS = {
+                720,    // Active
+                10,     // Working
+                2,      // Frequent
+                1,      // Rare
+                0       // Never
+        };
         private final long[] DEFAULT_APP_STANDBY_DELAYS = {
                 0,                       // Active
                 6 * 60_000,              // Working
@@ -347,8 +458,11 @@ class AlarmManagerService extends SystemService {
 
         // Direct alarm listener callback timeout
         public long LISTENER_TIMEOUT = DEFAULT_LISTENER_TIMEOUT;
+        public boolean APP_STANDBY_QUOTAS_ENABLED = DEFAULT_APP_STANDBY_QUOTAS_ENABLED;
 
+        public long APP_STANDBY_WINDOW = DEFAULT_APP_STANDBY_WINDOW;
         public long[] APP_STANDBY_MIN_DELAYS = new long[DEFAULT_APP_STANDBY_DELAYS.length];
+        public int[] APP_STANDBY_QUOTAS = new int[DEFAULT_APP_STANDBY_QUOTAS.length];
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -408,48 +522,90 @@ class AlarmManagerService extends SystemService {
                         DEFAULT_APP_STANDBY_DELAYS[ACTIVE_INDEX]);
                 for (int i = WORKING_INDEX; i < KEYS_APP_STANDBY_DELAY.length; i++) {
                     APP_STANDBY_MIN_DELAYS[i] = mParser.getDurationMillis(KEYS_APP_STANDBY_DELAY[i],
-                            Math.max(APP_STANDBY_MIN_DELAYS[i-1], DEFAULT_APP_STANDBY_DELAYS[i]));
+                            Math.max(APP_STANDBY_MIN_DELAYS[i - 1], DEFAULT_APP_STANDBY_DELAYS[i]));
+                }
+
+                APP_STANDBY_QUOTAS_ENABLED = mParser.getBoolean(KEY_APP_STANDBY_QUOTAS_ENABLED,
+                        DEFAULT_APP_STANDBY_QUOTAS_ENABLED);
+
+                APP_STANDBY_WINDOW = mParser.getLong(KEY_APP_STANDBY_WINDOW,
+                        DEFAULT_APP_STANDBY_WINDOW);
+                if (APP_STANDBY_WINDOW > DEFAULT_APP_STANDBY_WINDOW) {
+                    Slog.w(TAG, "Cannot exceed the app_standby_window size of "
+                            + DEFAULT_APP_STANDBY_WINDOW);
+                    APP_STANDBY_WINDOW = DEFAULT_APP_STANDBY_WINDOW;
+                } else if (APP_STANDBY_WINDOW < DEFAULT_APP_STANDBY_WINDOW) {
+                    // Not recommended outside of testing.
+                    Slog.w(TAG, "Using a non-default app_standby_window of " + APP_STANDBY_WINDOW);
+                }
+
+                APP_STANDBY_QUOTAS[ACTIVE_INDEX] = mParser.getInt(
+                        KEYS_APP_STANDBY_QUOTAS[ACTIVE_INDEX],
+                        DEFAULT_APP_STANDBY_QUOTAS[ACTIVE_INDEX]);
+                for (int i = WORKING_INDEX; i < KEYS_APP_STANDBY_QUOTAS.length; i++) {
+                    APP_STANDBY_QUOTAS[i] = mParser.getInt(KEYS_APP_STANDBY_QUOTAS[i],
+                            Math.min(APP_STANDBY_QUOTAS[i - 1], DEFAULT_APP_STANDBY_QUOTAS[i]));
                 }
                 updateAllowWhileIdleWhitelistDurationLocked();
             }
         }
 
-        void dump(PrintWriter pw) {
-            pw.println("  Settings:");
+        void dump(PrintWriter pw, String prefix) {
+            dump(new IndentingPrintWriter(pw, "  ").setIndent(prefix));
+        }
 
-            pw.print("    "); pw.print(KEY_MIN_FUTURITY); pw.print("=");
+        void dump(IndentingPrintWriter pw) {
+            pw.println("Settings:");
+
+            pw.increaseIndent();
+
+            pw.print(KEY_MIN_FUTURITY); pw.print("=");
             TimeUtils.formatDuration(MIN_FUTURITY, pw);
             pw.println();
 
-            pw.print("    "); pw.print(KEY_MIN_INTERVAL); pw.print("=");
+            pw.print(KEY_MIN_INTERVAL); pw.print("=");
             TimeUtils.formatDuration(MIN_INTERVAL, pw);
             pw.println();
 
-            pw.print("    "); pw.print(KEY_MAX_INTERVAL); pw.print("=");
+            pw.print(KEY_MAX_INTERVAL); pw.print("=");
             TimeUtils.formatDuration(MAX_INTERVAL, pw);
             pw.println();
 
-            pw.print("    "); pw.print(KEY_LISTENER_TIMEOUT); pw.print("=");
+            pw.print(KEY_LISTENER_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(LISTENER_TIMEOUT, pw);
             pw.println();
 
-            pw.print("    "); pw.print(KEY_ALLOW_WHILE_IDLE_SHORT_TIME); pw.print("=");
+            pw.print(KEY_ALLOW_WHILE_IDLE_SHORT_TIME); pw.print("=");
             TimeUtils.formatDuration(ALLOW_WHILE_IDLE_SHORT_TIME, pw);
             pw.println();
 
-            pw.print("    "); pw.print(KEY_ALLOW_WHILE_IDLE_LONG_TIME); pw.print("=");
+            pw.print(KEY_ALLOW_WHILE_IDLE_LONG_TIME); pw.print("=");
             TimeUtils.formatDuration(ALLOW_WHILE_IDLE_LONG_TIME, pw);
             pw.println();
 
-            pw.print("    "); pw.print(KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION); pw.print("=");
+            pw.print(KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION); pw.print("=");
             TimeUtils.formatDuration(ALLOW_WHILE_IDLE_WHITELIST_DURATION, pw);
             pw.println();
 
             for (int i = 0; i < KEYS_APP_STANDBY_DELAY.length; i++) {
-                pw.print("    "); pw.print(KEYS_APP_STANDBY_DELAY[i]); pw.print("=");
+                pw.print(KEYS_APP_STANDBY_DELAY[i]); pw.print("=");
                 TimeUtils.formatDuration(APP_STANDBY_MIN_DELAYS[i], pw);
                 pw.println();
             }
+
+            pw.print(KEY_APP_STANDBY_QUOTAS_ENABLED); pw.print("=");
+            pw.println(APP_STANDBY_QUOTAS_ENABLED);
+
+            pw.print(KEY_APP_STANDBY_WINDOW); pw.print("=");
+            TimeUtils.formatDuration(APP_STANDBY_WINDOW, pw);
+            pw.println();
+
+            for (int i = 0; i < KEYS_APP_STANDBY_QUOTAS.length; i++) {
+                pw.print(KEYS_APP_STANDBY_QUOTAS[i]); pw.print("=");
+                pw.println(APP_STANDBY_QUOTAS[i]);
+            }
+
+            pw.decreaseIndent();
         }
 
         void dumpProto(ProtoOutputStream proto, long fieldId) {
@@ -924,7 +1080,7 @@ class AlarmManagerService extends SystemService {
                 if (targetPackages != null && !targetPackages.contains(packageUser)) {
                     continue;
                 }
-                if (adjustDeliveryTimeBasedOnStandbyBucketLocked(alarm)) {
+                if (adjustDeliveryTimeBasedOnBucketLocked(alarm)) {
                     batch.remove(alarm);
                     rescheduledAlarms.add(alarm);
                 }
@@ -1298,6 +1454,7 @@ class AlarmManagerService extends SystemService {
         synchronized (mLock) {
             mHandler = new AlarmHandler();
             mConstants = new Constants(mHandler);
+            mAppWakeupHistory = new AppWakeupHistory(Constants.DEFAULT_APP_STANDBY_WINDOW);
 
             mNextWakeup = mNextNonWakeup = 0;
 
@@ -1581,6 +1738,27 @@ class AlarmManagerService extends SystemService {
     }
 
     /**
+     * Returns the maximum alarms that an app in the specified bucket can receive in a rolling time
+     * window given by {@link Constants#APP_STANDBY_WINDOW}
+     */
+    @VisibleForTesting
+    int getQuotaForBucketLocked(int bucket) {
+        final int index;
+        if (bucket <= UsageStatsManager.STANDBY_BUCKET_ACTIVE) {
+            index = ACTIVE_INDEX;
+        } else if (bucket <= UsageStatsManager.STANDBY_BUCKET_WORKING_SET) {
+            index = WORKING_INDEX;
+        } else if (bucket <= UsageStatsManager.STANDBY_BUCKET_FREQUENT) {
+            index = FREQUENT_INDEX;
+        } else if (bucket < UsageStatsManager.STANDBY_BUCKET_NEVER) {
+            index = RARE_INDEX;
+        } else {
+            index = NEVER_INDEX;
+        }
+        return mConstants.APP_STANDBY_QUOTAS[index];
+    }
+
+    /**
      * Return the minimum time that should elapse before an app in the specified bucket
      * can receive alarms again
      */
@@ -1606,7 +1784,7 @@ class AlarmManagerService extends SystemService {
      * @param alarm The alarm to adjust
      * @return true if the alarm delivery time was updated.
      */
-    private boolean adjustDeliveryTimeBasedOnStandbyBucketLocked(Alarm alarm) {
+    private boolean adjustDeliveryTimeBasedOnBucketLocked(Alarm alarm) {
         if (isExemptFromAppStandby(alarm)) {
             return false;
         }
@@ -1627,17 +1805,48 @@ class AlarmManagerService extends SystemService {
         final int standbyBucket = mUsageStatsManagerInternal.getAppStandbyBucket(
                 sourcePackage, sourceUserId, mInjector.getElapsedRealtime());
 
-        final Pair<String, Integer> packageUser = Pair.create(sourcePackage, sourceUserId);
-        final long lastElapsed = mLastAlarmDeliveredForPackage.getOrDefault(packageUser, 0L);
-        if (lastElapsed > 0) {
-            final long minElapsed = lastElapsed + getMinDelayForBucketLocked(standbyBucket);
-            if (alarm.expectedWhenElapsed < minElapsed) {
-                alarm.whenElapsed = alarm.maxWhenElapsed = minElapsed;
-            } else {
-                // app is now eligible to run alarms at the originally requested window.
+        if (mConstants.APP_STANDBY_QUOTAS_ENABLED) {
+            // Quota deferring implementation:
+            final int wakeupsInWindow = mAppWakeupHistory.getTotalWakeupsInWindow(sourcePackage,
+                    sourceUserId);
+            final int quotaForBucket = getQuotaForBucketLocked(standbyBucket);
+            boolean deferred = false;
+            if (wakeupsInWindow >= quotaForBucket) {
+                final long minElapsed;
+                if (quotaForBucket <= 0) {
+                    // Just keep deferring for a day till the quota changes
+                    minElapsed = mInjector.getElapsedRealtime() + MILLIS_IN_DAY;
+                } else {
+                    // Suppose the quota for window was q, and the qth last delivery time for this
+                    // package was t(q) then the next delivery must be after t(q) + <window_size>
+                    final long t = mAppWakeupHistory.getLastWakeupForPackage(sourcePackage,
+                            sourceUserId, quotaForBucket);
+                    minElapsed = t + 1 + mConstants.APP_STANDBY_WINDOW;
+                }
+                if (alarm.expectedWhenElapsed < minElapsed) {
+                    alarm.whenElapsed = alarm.maxWhenElapsed = minElapsed;
+                    deferred = true;
+                }
+            }
+            if (!deferred) {
                 // Restore original requirements in case they were changed earlier.
                 alarm.whenElapsed = alarm.expectedWhenElapsed;
                 alarm.maxWhenElapsed = alarm.expectedMaxWhenElapsed;
+            }
+        } else {
+            // Minimum delay deferring implementation:
+            final long lastElapsed = mAppWakeupHistory.getLastWakeupForPackage(sourcePackage,
+                    sourceUserId, 1);
+            if (lastElapsed > 0) {
+                final long minElapsed = lastElapsed + getMinDelayForBucketLocked(standbyBucket);
+                if (alarm.expectedWhenElapsed < minElapsed) {
+                    alarm.whenElapsed = alarm.maxWhenElapsed = minElapsed;
+                } else {
+                    // app is now eligible to run alarms at the originally requested window.
+                    // Restore original requirements in case they were changed earlier.
+                    alarm.whenElapsed = alarm.expectedWhenElapsed;
+                    alarm.maxWhenElapsed = alarm.expectedMaxWhenElapsed;
+                }
             }
         }
         return (oldWhenElapsed != alarm.whenElapsed || oldMaxWhenElapsed != alarm.maxWhenElapsed);
@@ -1694,7 +1903,7 @@ class AlarmManagerService extends SystemService {
                 mAllowWhileIdleDispatches.add(ent);
             }
         }
-        adjustDeliveryTimeBasedOnStandbyBucketLocked(a);
+        adjustDeliveryTimeBasedOnBucketLocked(a);
         insertAndBatchAlarmLocked(a);
 
         if (a.alarmClock != null) {
@@ -1913,7 +2122,7 @@ class AlarmManagerService extends SystemService {
     void dumpImpl(PrintWriter pw) {
         synchronized (mLock) {
             pw.println("Current Alarm Manager state:");
-            mConstants.dump(pw);
+            mConstants.dump(pw, "  ");
             pw.println();
 
             if (mAppStateTracker != null) {
@@ -2063,14 +2272,7 @@ class AlarmManagerService extends SystemService {
                 pw.println("    none");
             }
 
-            pw.println("  mLastAlarmDeliveredForPackage:");
-            for (int i = 0; i < mLastAlarmDeliveredForPackage.size(); i++) {
-                Pair<String, Integer> packageUser = mLastAlarmDeliveredForPackage.keyAt(i);
-                pw.print("    Package " + packageUser.first + ", User " + packageUser.second + ":");
-                TimeUtils.formatDuration(mLastAlarmDeliveredForPackage.valueAt(i), nowELAPSED, pw);
-                pw.println();
-            }
-            pw.println();
+            mAppWakeupHistory.dump(pw, "  ", nowELAPSED);
 
             if (mPendingIdleUntil != null || mPendingWhileIdleAlarms.size() > 0) {
                 pw.println();
@@ -3857,6 +4059,7 @@ class AlarmManagerService extends SystemService {
             obtainMessage(REMOVE_FOR_STOPPED, uid, 0).sendToTarget();
         }
 
+        @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case ALARM_EVENT: {
@@ -4025,64 +4228,57 @@ class AlarmManagerService extends SystemService {
         public void onReceive(Context context, Intent intent) {
             final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
             synchronized (mLock) {
-                String action = intent.getAction();
                 String pkgList[] = null;
-                if (Intent.ACTION_QUERY_PACKAGE_RESTART.equals(action)) {
-                    pkgList = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
-                    for (String packageName : pkgList) {
-                        if (lookForPackageLocked(packageName)) {
-                            setResultCode(Activity.RESULT_OK);
-                            return;
-                        }
-                    }
-                    return;
-                } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
-                    pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
-                    int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                    if (userHandle >= 0) {
-                        removeUserLocked(userHandle);
-                        for (int i = mLastAlarmDeliveredForPackage.size() - 1; i >= 0; i--) {
-                            final Pair<String, Integer> packageUser =
-                                    mLastAlarmDeliveredForPackage.keyAt(i);
-                            if (packageUser.second == userHandle) {
-                                mLastAlarmDeliveredForPackage.removeAt(i);
+                switch (intent.getAction()) {
+                    case Intent.ACTION_QUERY_PACKAGE_RESTART:
+                        pkgList = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
+                        for (String packageName : pkgList) {
+                            if (lookForPackageLocked(packageName)) {
+                                setResultCode(Activity.RESULT_OK);
+                                return;
                             }
                         }
-                    }
-                } else if (Intent.ACTION_UID_REMOVED.equals(action)) {
-                    if (uid >= 0) {
-                        mLastAllowWhileIdleDispatch.delete(uid);
-                        mUseAllowWhileIdleShortTime.delete(uid);
-                    }
-                } else {
-                    if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
-                            && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                        // This package is being updated; don't kill its alarms.
                         return;
-                    }
-                    Uri data = intent.getData();
-                    if (data != null) {
-                        String pkg = data.getSchemeSpecificPart();
-                        if (pkg != null) {
-                            pkgList = new String[]{pkg};
+                    case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
+                        pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                        break;
+                    case Intent.ACTION_USER_STOPPED:
+                        final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                        if (userHandle >= 0) {
+                            removeUserLocked(userHandle);
+                            mAppWakeupHistory.removeForUser(userHandle);
                         }
-                    }
+                        return;
+                    case Intent.ACTION_UID_REMOVED:
+                        if (uid >= 0) {
+                            mLastAllowWhileIdleDispatch.delete(uid);
+                            mUseAllowWhileIdleShortTime.delete(uid);
+                        }
+                        return;
+                    case Intent.ACTION_PACKAGE_REMOVED:
+                        if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                            // This package is being updated; don't kill its alarms.
+                            return;
+                        }
+                        // Intentional fall-through.
+                    case Intent.ACTION_PACKAGE_RESTARTED:
+                        final Uri data = intent.getData();
+                        if (data != null) {
+                            final String pkg = data.getSchemeSpecificPart();
+                            if (pkg != null) {
+                                pkgList = new String[]{pkg};
+                            }
+                        }
+                        break;
                 }
                 if (pkgList != null && (pkgList.length > 0)) {
-                    for (int i = mLastAlarmDeliveredForPackage.size() - 1; i >= 0; i--) {
-                        Pair<String, Integer> packageUser = mLastAlarmDeliveredForPackage.keyAt(i);
-                        if (ArrayUtils.contains(pkgList, packageUser.first)
-                                && packageUser.second == UserHandle.getUserId(uid)) {
-                            mLastAlarmDeliveredForPackage.removeAt(i);
-                        }
-                    }
                     for (String pkg : pkgList) {
                         if (uid >= 0) {
-                            // package-removed case
+                            // package-removed and package-restarted case
+                            mAppWakeupHistory.removeForPackage(pkg, UserHandle.getUserId(uid));
                             removeLocked(uid);
                         } else {
-                            // external-applications-unavailable etc case
+                            // external-applications-unavailable case
                             removeLocked(pkg);
                         }
                         mPriorities.remove(pkg);
@@ -4126,7 +4322,8 @@ class AlarmManagerService extends SystemService {
     /**
      * Tracking of app assignments to standby buckets
      */
-    final class AppStandbyTracker extends UsageStatsManagerInternal.AppIdleStateChangeListener {
+    private final class AppStandbyTracker extends
+            UsageStatsManagerInternal.AppIdleStateChangeListener {
         @Override
         public void onAppIdleStateChanged(final String packageName, final @UserIdInt int userId,
                 boolean idle, int bucket, int reason) {
@@ -4467,7 +4664,8 @@ class AlarmManagerService extends SystemService {
             if (!isExemptFromAppStandby(alarm)) {
                 final Pair<String, Integer> packageUser = Pair.create(alarm.sourcePackage,
                         UserHandle.getUserId(alarm.creatorUid));
-                mLastAlarmDeliveredForPackage.put(packageUser, nowELAPSED);
+                mAppWakeupHistory.recordAlarmForPackage(alarm.sourcePackage,
+                        UserHandle.getUserId(alarm.creatorUid), nowELAPSED);
             }
 
             final BroadcastStats bs = inflight.mBroadcastStats;
