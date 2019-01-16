@@ -26,6 +26,8 @@ import android.annotation.NonNull;
 public class Status {
     public static final int SUCCESS = 0;
 
+    public static final int ERROR_DATABASE_CANNOT_BE_OPENED = -1;
+
     public final int resultCode;
 
     public Status(final int resultCode) {
@@ -46,5 +48,15 @@ public class Status {
 
     public boolean isSuccess() {
         return SUCCESS == resultCode;
+    }
+
+    /** Pretty print */
+    @Override
+    public String toString() {
+        switch (resultCode) {
+            case SUCCESS: return "SUCCESS";
+            case ERROR_DATABASE_CANNOT_BE_OPENED: return "DATABASE CANNOT BE OPENED";
+            default: return "Unknown value ?!";
+        }
     }
 }
