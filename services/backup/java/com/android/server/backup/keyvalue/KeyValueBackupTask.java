@@ -45,6 +45,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SELinux;
+import android.os.UserHandle;
 import android.os.WorkSource;
 
 import com.android.internal.annotations.GuardedBy;
@@ -686,8 +687,12 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                     ParcelFileDescriptor.open(
                             mNewStateFile, MODE_READ_WRITE | MODE_CREATE | MODE_TRUNCATE);
 
-            if (!SELinux.restorecon(mBackupDataFile)) {
-                mReporter.onRestoreconFailed(mBackupDataFile);
+            // TODO (b/120424138): Remove once the system user is migrated to use the per-user CE
+            // directory. Per-user CE directories are managed by vold.
+            if (mUserId == UserHandle.USER_SYSTEM) {
+                if (!SELinux.restorecon(mBackupDataFile)) {
+                    mReporter.onRestoreconFailed(mBackupDataFile);
+                }
             }
 
             IBackupTransport transport = mTransportClient.connectOrThrow("KVBT.extractAgentData()");

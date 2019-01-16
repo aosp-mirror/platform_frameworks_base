@@ -494,20 +494,18 @@ public class UserBackupManagerService {
                 mUserId);
 
         mBaseStateDir = checkNotNull(baseStateDir, "baseStateDir cannot be null");
-        mBaseStateDir.mkdirs();
-        if (!SELinux.restoreconRecursive(mBaseStateDir)) {
-            Slog.w(TAG, "SELinux restorecon failed on " + mBaseStateDir);
-        }
-
-        mDataDir = checkNotNull(dataDir, "dataDir cannot be null");
-        // TODO(b/120424138): Remove when the system user moves out of the cache dir. The cache dir
-        // is managed by init.rc so we don't have to create it below.
-        if (userId != UserHandle.USER_SYSTEM) {
-            mDataDir.mkdirs();
-            if (!SELinux.restoreconRecursive(mDataDir)) {
-                Slog.w(TAG, "SELinux restorecon failed on " + mDataDir);
+        // TODO (b/120424138): Remove once the system user is migrated to use the per-user CE
+        // directory. Per-user CE directories are managed by vold.
+        if (userId == UserHandle.USER_SYSTEM) {
+            mBaseStateDir.mkdirs();
+            if (!SELinux.restorecon(mBaseStateDir)) {
+                Slog.w(TAG, "SELinux restorecon failed on " + mBaseStateDir);
             }
         }
+
+        // TODO (b/120424138): The system user currently uses the cache which is managed by init.rc
+        // Initialization and restorecon is managed by vold for per-user CE directories.
+        mDataDir = checkNotNull(dataDir, "dataDir cannot be null");
         mBackupPasswordManager = new BackupPasswordManager(mContext, mBaseStateDir, mRng);
 
         // Receivers for scheduled backups and transport initialization operations.
