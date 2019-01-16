@@ -17,12 +17,14 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.annotation.Size;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.FontVariationAxis;
 import android.os.Build;
@@ -969,6 +971,31 @@ public class Paint {
      */
     public void setColor(@ColorInt int color) {
         nSetColor(mNativePaint, color);
+    }
+
+    /**
+     * Set the paint's color with a {@link ColorLong}. Note that the color is
+     * a long with an encoded {@link ColorSpace} as well as alpha and r,g,b.
+     * These values are not premultiplied, meaning that alpha can be any value,
+     * regardless of the values of r,g,b. See the {@link Color} class for more
+     * details.
+     *
+     * @param color The new color (including alpha and {@link ColorSpace})
+     *      to set in the paint.
+     * @throws IllegalArgumentException if the color space encoded in the long
+     *      is invalid or unknown.
+     *
+     * @hide pending API approval
+     */
+    @TestApi
+    public void setColor(@ColorLong long color) {
+        ColorSpace cs = Color.colorSpace(color);
+        float r = Color.red(color);
+        float g = Color.green(color);
+        float b = Color.blue(color);
+        float a = Color.alpha(color);
+
+        nSetColor(mNativePaint, cs, r, g, b, a);
     }
 
     /**
@@ -2906,6 +2933,8 @@ public class Paint {
             int contextStart, int contextEnd, boolean isRtl, int offset);
     private static native int nGetOffsetForAdvance(long paintPtr, char[] text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, float advance);
+    private static native void nSetColor(long paintPtr, ColorSpace cs,
+            float r, float g, float b, float a);
 
 
     // ---------------- @FastNative ------------------------
