@@ -27,7 +27,6 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
 import android.platform.test.annotations.Presubmit;
-import android.provider.Settings.Global;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -555,8 +554,10 @@ public class SettingsBackupTest {
                     Settings.Global.APPOP_HISTORY_PARAMETERS,
                     Settings.Global.APPOP_HISTORY_MODE,
                     Settings.Global.APPOP_HISTORY_INTERVAL_MULTIPLIER,
-                    Settings.Global.APPOP_HISTORY_BASE_INTERVAL_MILLIS);
-
+                    Settings.Global.APPOP_HISTORY_BASE_INTERVAL_MILLIS,
+                    Settings.Global.ENABLE_RADIO_BUG_DETECTION,
+                    Settings.Global.RADIO_BUG_WAKELOCK_TIMEOUT_COUNT_THRESHOLD,
+                    Settings.Global.RADIO_BUG_SYSTEM_ERROR_COUNT_THRESHOLD);
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
