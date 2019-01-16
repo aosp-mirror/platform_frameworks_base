@@ -25,6 +25,7 @@ import android.os.LocaleList;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.textclassifier.TextClassification;
@@ -692,11 +693,19 @@ final class SelectionActionModeHelper {
                 mLastClassificationLocales = mLocales;
 
                 trimText();
+                final TextClassification classification;
+                if (Linkify.containsUnsupportedCharacters(mText)) {
+                    // Do not show smart actions for text containing unsupported characters.
+                    android.util.EventLog.writeEvent(0x534e4554, "116321860", -1, "");
+                    classification = TextClassification.EMPTY;
+                } else {
+                    classification = mTextClassifier.classifyText(
+                            mTrimmedText, mRelativeStart, mRelativeEnd, mLocales);
+                }
                 mLastClassificationResult = new SelectionResult(
                         mSelectionStart,
                         mSelectionEnd,
-                        mTextClassifier.classifyText(
-                                mTrimmedText, mRelativeStart, mRelativeEnd, mLocales),
+                        classification,
                         selection);
 
             }
