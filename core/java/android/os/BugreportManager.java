@@ -114,7 +114,6 @@ public class BugreportManager {
         }
     }
 
-    // TODO(b/111441001) Connect up with BugreportListener methods.
     private final class DumpstateListener extends IDumpstateListener.Stub
             implements DeathRecipient {
         private final BugreportListener mListener;
@@ -130,35 +129,35 @@ public class BugreportManager {
 
         @Override
         public void onProgress(int progress) throws RemoteException {
-            // TODO(b/111441001): implement
+            mListener.onProgress(progress);
         }
 
         @Override
         public void onError(int errorCode) throws RemoteException {
-            // TODO(b/111441001): implement
+            mListener.onError(errorCode);
         }
 
         @Override
         public void onFinished(long durationMs, String title, String description)
                 throws RemoteException {
-            // TODO(b/111441001): implement
+            mListener.onFinished(durationMs, title, description);
         }
 
         // Old methods; should go away
         @Override
         public void onProgressUpdated(int progress) throws RemoteException {
-            // TODO(b/111441001): implement
+            // TODO(b/111441001): remove from interface
         }
 
         @Override
         public void onMaxProgressUpdated(int maxProgress) throws RemoteException {
-            // TODO(b/111441001): implement
+            // TODO(b/111441001): remove from interface
         }
 
         @Override
         public void onSectionComplete(String title, int status, int size, int durationMs)
                 throws RemoteException {
-            // TODO(b/111441001): implement
+            // TODO(b/111441001): remove from interface
         }
     }
 }
