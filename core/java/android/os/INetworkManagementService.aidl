@@ -356,16 +356,6 @@ interface INetworkManagementService
     void removeVpnUidRanges(int netId, in UidRange[] ranges);
 
     /**
-     * Start the clatd (464xlat) service on the given interface.
-     */
-    void startClatd(String interfaceName);
-
-    /**
-     * Stop the clatd (464xlat) service on the given interface.
-     */
-    void stopClatd(String interfaceName);
-
-    /**
      * Start listening for mobile activity state changes.
      */
     void registerNetworkActivityListener(INetworkActivityListener listener);
