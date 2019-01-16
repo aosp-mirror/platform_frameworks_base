@@ -345,6 +345,10 @@ public class HdmiControlService extends SystemService {
     @Nullable
     private Looper mIoLooper;
 
+    // Thread safe physical address
+    @GuardedBy("mLock")
+    private int mPhysicalAddress = Constants.INVALID_PHYSICAL_ADDRESS;
+
     // Last input port before switching to the MHL port. Should switch back to this port
     // when the mobile device sends the request one touch play with off.
     // Gets invalidated if we go to other port/input.
@@ -564,7 +568,8 @@ public class HdmiControlService extends SystemService {
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                 Global.MHL_INPUT_SWITCHING_ENABLED,
-                Global.MHL_POWER_CHARGE_ENABLED
+                Global.MHL_POWER_CHARGE_ENABLED,
+                Global.HDMI_CEC_SWITCH_ENABLED
         };
         for (String s : settings) {
             resolver.registerContentObserver(Global.getUriFor(s), false, mSettingsObserver,
@@ -604,6 +609,11 @@ public class HdmiControlService extends SystemService {
                 case Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED:
                     if (isTvDeviceEnabled()) {
                         tv().setSystemAudioControlFeatureEnabled(enabled);
+                    }
+                    break;
+                case Global.HDMI_CEC_SWITCH_ENABLED:
+                    if (isAudioSystemDevice()) {
+                        audioSystem().setRoutingControlFeatureEnables(enabled);
                     }
                     break;
                 case Global.MHL_INPUT_SWITCHING_ENABLED:
@@ -733,6 +743,10 @@ public class HdmiControlService extends SystemService {
     protected void initPortInfo() {
         assertRunOnServiceThread();
         HdmiPortInfo[] cecPortInfo = null;
+
+        synchronized (mLock) {
+            mPhysicalAddress = getPhysicalAddress();
+        }
 
         // CEC HAL provides majority of the info while MHL does only MHL support flag for
         // each port. Return empty array if CEC HAL didn't provide the info.
@@ -1532,6 +1546,14 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
+        public int getPhysicalAddress() {
+            enforceAccessPermission();
+            synchronized (mLock) {
+                return mPhysicalAddress;
+            }
+        }
+
+        @Override
         public void setSystemAudioMode(final boolean enabled, final IHdmiControlCallback callback) {
             enforceAccessPermission();
             runOnServiceThread(new Runnable() {
@@ -1834,14 +1856,28 @@ public class HdmiControlService extends SystemService {
                         Slog.w(TAG, "audio system is not in system audio mode");
                         return;
                     }
-                    int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
+                    audioSystem().reportAudioStatus(Constants.ADDR_TV);
+                }
+            });
+        }
 
-                    sendCecCommand(HdmiCecMessageBuilder
-                            .buildReportAudioStatus(
-                                    device.getDeviceInfo().getLogicalAddress(),
-                                    Constants.ADDR_TV,
-                                    scaledVolume,
-                                    isMute));
+        @Override
+        public void setSystemAudioModeOnForAudioOnlySource() {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!isAudioSystemDevice()) {
+                        Slog.e(TAG, "Not an audio system device. Won't set system audio mode on");
+                        return;
+                    }
+                    if (!audioSystem().checkSupportAndSetSystemAudioMode(true)) {
+                        Slog.e(TAG, "System Audio Mode is not supported.");
+                        return;
+                    }
+                    sendCecCommand(
+                            HdmiCecMessageBuilder.buildSetSystemAudioMode(
+                                    audioSystem().mAddress, Constants.ADDR_BROADCAST, true));
                 }
             });
         }

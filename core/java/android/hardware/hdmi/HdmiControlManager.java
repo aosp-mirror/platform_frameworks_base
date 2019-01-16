@@ -432,6 +432,19 @@ public final class HdmiControlManager {
     }
 
     /**
+     * Get the physical address of the device.
+     *
+     * @hide
+     */
+    public int getPhysicalAddress() {
+        try {
+            return mService.getPhysicalAddress();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Listener used to get hotplug event from HDMI port.
      */
     public interface HotplugEventListener {

@@ -270,6 +270,7 @@ public class SettingsBackupTest {
                     Settings.Global.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS,
                     Settings.Global.GNSS_SATELLITE_BLACKLIST,
                     Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS,
+                    Settings.Global.HDMI_CEC_SWITCH_ENABLED,
                     Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                     Settings.Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                     Settings.Global.HDMI_CONTROL_ENABLED,

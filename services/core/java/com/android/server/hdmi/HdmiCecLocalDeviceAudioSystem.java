@@ -26,10 +26,12 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioDeviceInfo;
+import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.tv.TvContract;
 import android.os.SystemProperties;
+import android.provider.Settings.Global;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -40,8 +42,12 @@ import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 /**
  * Represent a logical device of type {@link HdmiDeviceInfo#DEVICE_AUDIO_SYSTEM} residing in Android
@@ -87,6 +93,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         // TODO(amyjojo) make System Audio Control controllable by users
         /*mSystemAudioControlFeatureEnabled =
         mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);*/
+        mRoutingControlFeatureEnabled =
+            mService.readBooleanSetting(Global.HDMI_CEC_SWITCH_ENABLED, true);
         // TODO(amyjojo): make the map ro property.
         mTvInputs.put(Constants.CEC_SWITCH_HDMI1,
                 "com.droidlogic.tvinput/.services.Hdmi1InputService/HW5");
@@ -401,7 +409,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     protected boolean handleGiveAudioStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
-        reportAudioStatus(message);
+        reportAudioStatus(message.getSource());
         return true;
     }
 
@@ -478,14 +486,91 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     private byte[] getSupportedShortAudioDescriptors(
             AudioDeviceInfo deviceInfo, @AudioCodec int[] audioFormatCodes) {
-        // TODO(b/80297701) implement
-        return new byte[] {};
+        ArrayList<byte[]> sads = new ArrayList<>(audioFormatCodes.length);
+        for (@AudioCodec int audioFormatCode : audioFormatCodes) {
+            byte[] sad = getSupportedShortAudioDescriptor(deviceInfo, audioFormatCode);
+            if (sad != null) {
+                if (sad.length == 3) {
+
+                    sads.add(sad);
+                } else {
+                    HdmiLogger.warning(
+                            "Dropping Short Audio Descriptor with length %d for requested codec %x",
+                            sad.length, audioFormatCode);
+                }
+            }
+        }
+        // Short Audio Descriptors are always 3 bytes long.
+        byte[] bytes = new byte[sads.size() * 3];
+        int index = 0;
+        for (byte[] sad : sads) {
+            System.arraycopy(sad, 0, bytes, index, 3);
+            index += 3;
+        }
+        return bytes;
+    }
+
+    /**
+     * Returns a 3 byte short audio descriptor as described in CEC 1.4 table 29 or null if the
+     * audioFormatCode is not supported.
+     */
+    @Nullable
+    private byte[] getSupportedShortAudioDescriptor(
+            AudioDeviceInfo deviceInfo, @AudioCodec int audioFormatCode) {
+        switch (audioFormatCode) {
+            case Constants.AUDIO_CODEC_NONE: {
+                return null;
+            }
+            case Constants.AUDIO_CODEC_LPCM: {
+                return getLpcmShortAudioDescriptor(deviceInfo);
+            }
+            // TODO(b/80297701): implement the rest of the codecs
+            case Constants.AUDIO_CODEC_DD:
+            case Constants.AUDIO_CODEC_MPEG1:
+            case Constants.AUDIO_CODEC_MP3:
+            case Constants.AUDIO_CODEC_MPEG2:
+            case Constants.AUDIO_CODEC_AAC:
+            case Constants.AUDIO_CODEC_DTS:
+            case Constants.AUDIO_CODEC_ATRAC:
+            case Constants.AUDIO_CODEC_ONEBITAUDIO:
+            case Constants.AUDIO_CODEC_DDP:
+            case Constants.AUDIO_CODEC_DTSHD:
+            case Constants.AUDIO_CODEC_TRUEHD:
+            case Constants.AUDIO_CODEC_DST:
+            case Constants.AUDIO_CODEC_WMAPRO:
+            default: {
+                return null;
+            }
+        }
+    }
+
+    @Nullable
+    private byte[] getLpcmShortAudioDescriptor(AudioDeviceInfo deviceInfo) {
+        // TODO(b/80297701): implement
+        return null;
     }
 
     @Nullable
     private AudioDeviceInfo getSystemAudioDeviceInfo() {
-        // TODO(b/80297701) implement
-        // Get the audio device used for system audio mode.
+        AudioManager audioManager = mService.getContext().getSystemService(AudioManager.class);
+        if (audioManager == null) {
+            HdmiLogger.error(
+                    "Error getting system audio device because AudioManager not available.");
+            return null;
+        }
+        AudioDeviceInfo[] devices = audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS);
+        HdmiLogger.debug("Found %d audio input devices", devices.length);
+        for (AudioDeviceInfo device : devices) {
+            HdmiLogger.debug("%s at port %s", device.getProductName(), device.getPort());
+            HdmiLogger.debug("Supported encodings are %s",
+                    Arrays.stream(device.getEncodings()).mapToObj(
+                            AudioFormat::toLogFriendlyEncoding
+                    ).collect(Collectors.joining(", ")));
+            // TODO(b/80297701) use the actual device type that system audio mode is connected to.
+            if (device.getType() == AudioDeviceInfo.TYPE_HDMI_ARC) {
+                return device;
+            }
+        }
         return null;
     }
 
@@ -583,17 +668,20 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             .setWiredDeviceConnectionState(AudioSystem.DEVICE_IN_HDMI, enabled ? 1 : 0, "", "");
     }
 
-    private void reportAudioStatus(HdmiCecMessage message) {
+    void reportAudioStatus(int source) {
         assertRunOnServiceThread();
 
         int volume = mService.getAudioManager().getStreamVolume(AudioManager.STREAM_MUSIC);
         boolean mute = mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
         int maxVolume = mService.getAudioManager().getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int minVolume = mService.getAudioManager().getStreamMinVolume(AudioManager.STREAM_MUSIC);
         int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
+        HdmiLogger.debug("Reporting volume %i (%i-%i) as CEC volume %i", volume,
+                minVolume, maxVolume, scaledVolume);
 
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildReportAudioStatus(
-                        mAddress, message.getSource(), scaledVolume, mute));
+                        mAddress, source, scaledVolume, mute));
     }
 
     /**
@@ -693,6 +781,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         assertRunOnServiceThread();
         synchronized (mLock) {
             mSystemAudioControlFeatureEnabled = enabled;
+        }
+    }
+
+    @ServiceThreadOnly
+    void setRoutingControlFeatureEnables(boolean enabled) {
+        assertRunOnServiceThread();
+        synchronized (mLock) {
+            mRoutingControlFeatureEnabled = enabled;
         }
     }
 
@@ -831,6 +927,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     protected void routeToInputFromPortId(int portId) {
+        if (!isRoutingControlFeatureEnabled()) {
+            HdmiLogger.debug("Routing Control Feature is not enabled.");
+            return;
+        }
         if (mArcIntentUsed) {
             routeToTvInputFromPortId(portId);
         } else {

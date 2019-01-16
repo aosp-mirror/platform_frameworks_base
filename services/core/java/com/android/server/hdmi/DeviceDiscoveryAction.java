@@ -51,6 +51,8 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
     private static final int STATE_WAITING_FOR_OSD_NAME = 3;
     // State in which the action is waiting for gathering vendor id of non-local devices.
     private static final int STATE_WAITING_FOR_VENDOR_ID = 4;
+    // State in which the action is waiting for devices to be ready
+    private static final int STATE_WAITING_FOR_DEVICES = 5;
 
     /**
      * Interface used to report result of device discovery.
@@ -90,6 +92,19 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
     private int mProcessedDeviceCount = 0;
     private int mTimeoutRetry = 0;
     private boolean mIsTvDevice = source().mService.isTvDevice();
+    private final int mDelayPeriod;
+
+    /**
+     * Constructor.
+     *
+     * @param source an instance of {@link HdmiCecLocalDevice}.
+     * @param delay delay action for this period between query Physical Address and polling
+     */
+    DeviceDiscoveryAction(HdmiCecLocalDevice source, DeviceDiscoveryCallback callback, int delay) {
+        super(source);
+        mCallback = Preconditions.checkNotNull(callback);
+        mDelayPeriod = delay;
+    }
 
     /**
      * Constructor.
@@ -97,8 +112,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
      * @param source an instance of {@link HdmiCecLocalDevice}.
      */
     DeviceDiscoveryAction(HdmiCecLocalDevice source, DeviceDiscoveryCallback callback) {
-        super(source);
-        mCallback = Preconditions.checkNotNull(callback);
+        this(source, callback, 0);
     }
 
     @Override
@@ -117,7 +131,11 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
 
                 Slog.v(TAG, "Device detected: " + ackedAddress);
                 allocateDevices(ackedAddress);
-                startPhysicalAddressStage();
+                if (mDelayPeriod > 0) {
+                    startToDelayAction();
+                } else {
+                    startPhysicalAddressStage();
+                }
             }
         }, Constants.POLL_ITERATION_REVERSE_ORDER
             | Constants.POLL_STRATEGY_REMOTES_DEVICES, HdmiConfig.DEVICE_POLLING_RETRY);
@@ -129,6 +147,13 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
             DeviceInfo info = new DeviceInfo(i);
             mDevices.add(info);
         }
+    }
+
+    private void startToDelayAction() {
+        Slog.v(TAG, "Waiting for connected devices to be ready");
+        mState = STATE_WAITING_FOR_DEVICES;
+
+        checkAndProceedStage();
     }
 
     private void startPhysicalAddressStage() {
@@ -157,6 +182,11 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         }
         sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(getSourceAddress(), address));
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
+    }
+
+    private void delayActionWithTimePeriod(int timeDelay) {
+        mActionTimer.clearTimerMessage();
+        addTimer(mState, timeDelay);
     }
 
     private void startOsdNameStage() {
@@ -385,6 +415,9 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
     private void sendQueryCommand() {
         int address = mDevices.get(mProcessedDeviceCount).mLogicalAddress;
         switch (mState) {
+            case STATE_WAITING_FOR_DEVICES:
+                delayActionWithTimePeriod(mDelayPeriod);
+                return;
             case STATE_WAITING_FOR_PHYSICAL_ADDRESS:
                 queryPhysicalAddress(address);
                 return;
@@ -405,6 +438,10 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
             return;
         }
 
+        if (mState == STATE_WAITING_FOR_DEVICES) {
+            startPhysicalAddressStage();
+            return;
+        }
         if (++mTimeoutRetry < HdmiConfig.TIMEOUT_RETRY) {
             sendQueryCommand();
             return;

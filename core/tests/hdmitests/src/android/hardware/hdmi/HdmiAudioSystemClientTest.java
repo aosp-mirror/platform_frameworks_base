@@ -318,6 +318,15 @@ public class HdmiAudioSystemClientTest {
             mMaxVolume = maxVolume;
             mIsMute = isMute;
         }
+
+        @Override
+        public void setSystemAudioModeOnForAudioOnlySource() {
+        }
+
+        @Override
+        public int getPhysicalAddress() {
+            return 0x0000;
+        }
     }
 
 }
