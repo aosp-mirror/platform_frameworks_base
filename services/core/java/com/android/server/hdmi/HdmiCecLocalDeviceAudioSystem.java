@@ -269,6 +269,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void onAddressAllocated(int logicalAddress, int reason) {
         assertRunOnServiceThread();
+        if (reason == mService.INITIATED_BY_ENABLE_CEC) {
+            mService.setAndBroadcastActiveSource(mService.getPhysicalAddress(),
+                    getDeviceInfo().getDeviceType(), Constants.ADDR_BROADCAST);
+        }
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                         mAddress, mService.getPhysicalAddress(), mDeviceType));
@@ -288,7 +292,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     @Override
     protected int findKeyReceiverAddress() {
-        return Constants.ADDR_TV;
+        if (getActiveSource().isValid()) {
+            return getActiveSource().logicalAddress;
+        }
+        return Constants.ADDR_INVALID;
     }
 
     @VisibleForTesting
@@ -1051,8 +1058,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             return;
         }
 
-        int routingInformationPath =
-                getActivePathOnSwitchFromActivePortId(getRoutingPort());
+        int routingInformationPath = mService.portIdToPath(getRoutingPort());
         // If current device is already the leaf of the whole HDMI system, will do nothing.
         if (routingInformationPath == mService.getPhysicalAddress()) {
             HdmiLogger.debug("Current device can't assign valid physical address"
