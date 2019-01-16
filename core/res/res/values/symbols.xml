@@ -3042,6 +3042,13 @@
   <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficientsNative" />
   <java-symbol type="array" name="config_availableColorModes" />
 
+  <java-symbol type="bool" name="config_displayWhiteBalanceAvailable" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureMin" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureMax" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureDefault" />
+  <java-symbol type="array" name="config_displayWhiteBalanceDisplayPrimaries" />
+  <java-symbol type="array" name="config_displayWhiteBalanceDisplayNominalWhite" />
+
   <!-- Default first user restrictions -->
   <java-symbol type="array" name="config_defaultFirstUserRestrictions" />
 
@@ -3529,4 +3536,7 @@
   <java-symbol type="string" name="dynamic_mode_notification_title" />
   <java-symbol type="string" name="dynamic_mode_notification_summary" />
   <java-symbol type="drawable" name="ic_battery" />
+
+  <java-symbol type="bool" name="config_skipSensorAvailable" />
+  <java-symbol type="bool" name="config_silenceSensorAvailable" />
 </resources>

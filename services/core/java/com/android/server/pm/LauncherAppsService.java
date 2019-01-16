@@ -304,6 +304,17 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        public boolean shouldHideFromSuggestions(String packageName, UserHandle user) {
+            if (!canAccessProfile(user.getIdentifier(), "cannot get shouldHideFromSuggestions")) {
+                return false;
+            }
+            final PackageManagerInternal pmi = LocalServices.getService(
+                    PackageManagerInternal.class);
+            int flags = pmi.getDistractingPackageRestrictions(packageName, user.getIdentifier());
+            return (flags & PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS) != 0;
+        }
+
+        @Override
         public ParceledListSlice<ResolveInfo> getLauncherActivities(String callingPackage,
                 String packageName, UserHandle user) throws RemoteException {
             ParceledListSlice<ResolveInfo> launcherActivities = queryActivitiesForUser(

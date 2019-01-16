@@ -4586,93 +4586,100 @@ public class WifiManager {
         }
     }
 
-    /* DPP - Device Provisioning Protocol AKA "Easy Connect" */
+    /* Easy Connect - AKA Device Provisioning Protocol (DPP) */
 
     /**
-     * DPP Network role: Station.
+     * Easy Connect Network role: Station.
+     *
      * @hide
      */
     @SystemApi
-    public static final int DPP_NETWORK_ROLE_STA = 0;
+    public static final int EASY_CONNECT_NETWORK_ROLE_STA = 0;
 
     /**
-     * DPP Network role: Access Point.
+     * Easy Connect Network role: Access Point.
+     *
      * @hide
      */
     @SystemApi
-    public static final int DPP_NETWORK_ROLE_AP = 1;
+    public static final int EASY_CONNECT_NETWORK_ROLE_AP = 1;
 
     /** @hide */
-    @IntDef(prefix = {"DPP_NETWORK_ROLE_"}, value = {
-            DPP_NETWORK_ROLE_STA,
-            DPP_NETWORK_ROLE_AP,
+    @IntDef(prefix = {"EASY_CONNECT_NETWORK_ROLE_"}, value = {
+            EASY_CONNECT_NETWORK_ROLE_STA,
+            EASY_CONNECT_NETWORK_ROLE_AP,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface DppNetworkRole {}
+    public @interface EasyConnectNetworkRole {
+    }
 
     /**
-     * Start DPP in Configurator-Initiator role. The current device will initiate DPP bootstrapping
-     * with a peer, and configure the peer with the SSID and password of the specified network using
-     * the DPP protocol on an encrypted link.
+     * Start Easy Connect (DPP) in Configurator-Initiator role. The current device will initiate
+     * Easy Connect bootstrapping with a peer, and configure the peer with the SSID and password of
+     * the specified network using the Easy Connect protocol on an encrypted link.
      *
-     * @param enrolleeUri URI of the Enrollee obtained separately (e.g. QR code scanning)
-     * @param selectedNetworkId Selected network ID to be sent to the peer
+     * @param enrolleeUri         URI of the Enrollee obtained separately (e.g. QR code scanning)
+     * @param selectedNetworkId   Selected network ID to be sent to the peer
      * @param enrolleeNetworkRole The network role of the enrollee
-     * @param callback Callback for status updates
-     * @param handler The handler on whose thread to execute the callbacks. Null for main thread.
+     * @param callback            Callback for status updates
+     * @param handler             The handler on whose thread to execute the callbacks. Null for
+     *                            main thread.
      * @hide
      */
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_SETUP_WIZARD})
-    public void startDppAsConfiguratorInitiator(@NonNull String enrolleeUri,
-            int selectedNetworkId, @DppNetworkRole int enrolleeNetworkRole,
-            @Nullable Handler handler, @NonNull DppStatusCallback callback) {
+    public void startEasyConnectAsConfiguratorInitiator(@NonNull String enrolleeUri,
+            int selectedNetworkId, @EasyConnectNetworkRole int enrolleeNetworkRole,
+            @Nullable Handler handler, @NonNull EasyConnectStatusCallback callback) {
         Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
         Binder binder = new Binder();
         try {
             mService.startDppAsConfiguratorInitiator(binder, enrolleeUri, selectedNetworkId,
-                    enrolleeNetworkRole, new DppCallbackProxy(looper, callback));
+                    enrolleeNetworkRole, new EasyConnectCallbackProxy(looper, callback));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Start DPP in Enrollee-Initiator role. The current device will initiate DPP bootstrapping
-     * with a peer, and receive the SSID and password from the peer configurator.
+     * Start Easy Connect (DPP) in Enrollee-Initiator role. The current device will initiate Easy
+     * Connect bootstrapping with a peer, and receive the SSID and password from the peer
+     * configurator.
      *
      * @param configuratorUri URI of the Configurator obtained separately (e.g. QR code scanning)
-     * @param callback Callback for status updates
-     * @param handler The handler on whose thread to execute the callbacks. Null for main thread.
+     * @param callback        Callback for status updates
+     * @param handler         The handler on whose thread to execute the callbacks. Null for main
+     *                        thread.
      * @hide
      */
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_SETUP_WIZARD})
-    public void startDppAsEnrolleeInitiator(@NonNull String configuratorUri,
-            @Nullable Handler handler, @NonNull DppStatusCallback callback) {
+    public void startEasyConnectAsEnrolleeInitiator(@NonNull String configuratorUri,
+            @Nullable Handler handler, @NonNull EasyConnectStatusCallback callback) {
         Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
         Binder binder = new Binder();
         try {
             mService.startDppAsEnrolleeInitiator(binder, configuratorUri,
-                     new DppCallbackProxy(looper, callback));
+                    new EasyConnectCallbackProxy(looper, callback));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Stop or abort a current DPP session.
+     * Stop or abort a current Easy Connect (DPP) session.
+     *
      * @hide
      */
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_SETUP_WIZARD})
-    public void stopDppSession() {
+    public void stopEasyConnectSession() {
         try {
             /* Request lower layers to stop/abort and clear resources */
             mService.stopDppSession();
@@ -4682,48 +4689,50 @@ public class WifiManager {
     }
 
     /**
-     * Helper class to support DPP callbacks
+     * Helper class to support Easy Connect (DPP) callbacks
+     *
      * @hide
      */
     @SystemApi
-    private static class DppCallbackProxy extends IDppCallback.Stub {
+    private static class EasyConnectCallbackProxy extends IDppCallback.Stub {
         private final Handler mHandler;
-        private final DppStatusCallback mDppStatusCallback;
+        private final EasyConnectStatusCallback mEasyConnectStatusCallback;
 
-        DppCallbackProxy(Looper looper, DppStatusCallback dppStatusCallback) {
+        EasyConnectCallbackProxy(Looper looper,
+                EasyConnectStatusCallback easyConnectStatusCallback) {
             mHandler = new Handler(looper);
-            mDppStatusCallback = dppStatusCallback;
+            mEasyConnectStatusCallback = easyConnectStatusCallback;
         }
 
         @Override
         public void onSuccessConfigReceived(int newNetworkId) {
-            Log.d(TAG, "DPP onSuccessConfigReceived callback");
+            Log.d(TAG, "Easy Connect onSuccessConfigReceived callback");
             mHandler.post(() -> {
-                mDppStatusCallback.onEnrolleeSuccess(newNetworkId);
+                mEasyConnectStatusCallback.onEnrolleeSuccess(newNetworkId);
             });
         }
 
         @Override
         public void onSuccess(int status) {
-            Log.d(TAG, "DPP onSuccess callback");
+            Log.d(TAG, "Easy Connect onSuccess callback");
             mHandler.post(() -> {
-                mDppStatusCallback.onConfiguratorSuccess(status);
+                mEasyConnectStatusCallback.onConfiguratorSuccess(status);
             });
         }
 
         @Override
         public void onFailure(int status) {
-            Log.d(TAG, "DPP onFailure callback");
+            Log.d(TAG, "Easy Connect onFailure callback");
             mHandler.post(() -> {
-                mDppStatusCallback.onFailure(status);
+                mEasyConnectStatusCallback.onFailure(status);
             });
         }
 
         @Override
         public void onProgress(int status) {
-            Log.d(TAG, "DPP onProgress callback");
+            Log.d(TAG, "Easy Connect onProgress callback");
             mHandler.post(() -> {
-                mDppStatusCallback.onProgress(status);
+                mEasyConnectStatusCallback.onProgress(status);
             });
         }
     }

@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -28,6 +29,7 @@ import java.util.Arrays;
 
 /** @hide */
 @SystemApi
+@TestApi
 public class HwParcel {
     private static final String TAG = "HwParcel";
 

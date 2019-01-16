@@ -732,6 +732,38 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    /**
+     * Enable resource resolution logging to track the steps taken to resolve the last resource
+     * entry retrieved. Stores the configuration and package names for each step.
+     *
+     * Default disabled.
+     *
+     * @param enabled Boolean indicating whether to enable or disable logging.
+     *
+     * @hide
+     */
+    public void setResourceResolutionLoggingEnabled(boolean enabled) {
+        synchronized (this) {
+            ensureValidLocked();
+            nativeSetResourceResolutionLoggingEnabled(mObject, enabled);
+        }
+    }
+
+    /**
+     * Retrieve the last resource resolution path logged.
+     *
+     * @return Formatted string containing last resource ID/name and steps taken to resolve final
+     * entry, including configuration and package names.
+     *
+     * @hide
+     */
+    public @Nullable String getLastResourceResolution() {
+        synchronized (this) {
+            ensureValidLocked();
+            return nativeGetLastResourceResolution(mObject);
+        }
+    }
+
     CharSequence getPooledStringForCookie(int cookie, int id) {
         // Cookies map to ApkAssets starting at 1.
         return getApkAssets()[cookie - 1].getStringFromPool(id);
@@ -1383,6 +1415,8 @@ public final class AssetManager implements AutoCloseable {
     private static native @Nullable String nativeGetResourceEntryName(long ptr, @AnyRes int resid);
     private static native @Nullable String[] nativeGetLocales(long ptr, boolean excludeSystem);
     private static native @Nullable Configuration[] nativeGetSizeConfigurations(long ptr);
+    private static native void nativeSetResourceResolutionLoggingEnabled(long ptr, boolean enabled);
+    private static native @Nullable String nativeGetLastResourceResolution(long ptr);
 
     // Style attribute retrieval native methods.
     private static native void nativeApplyStyle(long ptr, long themePtr, @AttrRes int defStyleAttr,

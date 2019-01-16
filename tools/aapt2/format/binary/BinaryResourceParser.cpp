@@ -42,6 +42,19 @@ namespace aapt {
 
 namespace {
 
+static std::u16string strcpy16_dtoh(const char16_t* src, size_t len) {
+  size_t utf16_len = strnlen16(src, len);
+  if (utf16_len == 0) {
+    return {};
+  }
+  std::u16string dst;
+  dst.resize(utf16_len);
+  for (size_t i = 0; i < utf16_len; i++) {
+    dst[i] = util::DeviceToHost16(src[i]);
+  }
+  return dst;
+}
+
 // Visitor that converts a reference's resource ID to a resource name, given a mapping from
 // resource ID to resource name.
 class ReferenceIdToNameVisitor : public DescendingValueVisitor {
@@ -176,12 +189,8 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
   }
 
   // Extract the package name.
-  size_t len = strnlen16((const char16_t*)package_header->name, arraysize(package_header->name));
-  std::u16string package_name;
-  package_name.resize(len);
-  for (size_t i = 0; i < len; i++) {
-    package_name[i] = util::DeviceToHost16(package_header->name[i]);
-  }
+  std::u16string package_name = strcpy16_dtoh((const char16_t*)package_header->name,
+                                              arraysize(package_header->name));
 
   ResourceTablePackage* package =
       table_->CreatePackage(util::Utf16ToUtf8(package_name), static_cast<uint8_t>(package_id));
@@ -435,6 +444,11 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
   }
 
   auto overlayable = std::make_shared<Overlayable>();
+  overlayable->name = util::Utf16ToUtf8(strcpy16_dtoh((const char16_t*)header->name,
+                                                      arraysize(header->name)));
+  overlayable->actor = util::Utf16ToUtf8(strcpy16_dtoh((const char16_t*)header->actor,
+                                                       arraysize(header->name)));
+  overlayable->source = source_.WithLine(0);
 
   ResChunkPullParser parser(GetChunkData(chunk),
                             GetChunkDataLen(chunk));

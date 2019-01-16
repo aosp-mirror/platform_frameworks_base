@@ -920,8 +920,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Backup/restore process management
      */
-    String mBackupAppName = null;
-    BackupRecord mBackupTarget = null;
+    @GuardedBy("this")
+    final SparseArray<BackupRecord> mBackupTargets = new SparseArray<>();
 
     final ProviderMap mProviderMap;
 
@@ -4365,6 +4365,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessList.removeProcessLocked(app, false, true, "timeout publishing content providers");
     }
 
+    @GuardedBy("this")
     private final void processStartTimedOutLocked(ProcessRecord app) {
         final int pid = app.pid;
         boolean gone = mPidsSelfLocked.removeIfNoThread(pid);
@@ -4385,7 +4386,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
             }
             removeLruProcessLocked(app);
-            if (mBackupTarget != null && mBackupTarget.app.pid == pid) {
+            final BackupRecord backupTarget = mBackupTargets.get(app.userId);
+            if (backupTarget != null && backupTarget.app.pid == pid) {
                 Slog.w(TAG, "Unattached app died before backup, skipping");
                 mHandler.post(new Runnable() {
                 @Override
@@ -4393,7 +4395,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         try {
                             IBackupManager bm = IBackupManager.Stub.asInterface(
                                     ServiceManager.getService(Context.BACKUP_SERVICE));
-                            bm.agentDisconnected(app.info.packageName);
+                            bm.agentDisconnectedForUser(app.userId, app.info.packageName);
                         } catch (RemoteException e) {
                             // Can't happen; the backup manager is local
                         }
@@ -4516,6 +4518,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (DEBUG_ALL) Slog.v(
             TAG, "New app record " + app
             + " thread=" + thread.asBinder() + " pid=" + pid);
+        final BackupRecord backupTarget = mBackupTargets.get(app.userId);
         try {
             int testMode = ApplicationThreadConstants.DEBUG_OFF;
             if (mDebugApp != null && mDebugApp.equals(processName)) {
@@ -4537,11 +4540,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // If the app is being launched for restore or full backup, set it up specially
             boolean isRestrictedBackupMode = false;
-            if (mBackupTarget != null && mBackupAppName.equals(processName)) {
-                isRestrictedBackupMode = mBackupTarget.appInfo.uid >= FIRST_APPLICATION_UID
-                        && ((mBackupTarget.backupMode == BackupRecord.RESTORE)
-                                || (mBackupTarget.backupMode == BackupRecord.RESTORE_FULL)
-                                || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL));
+            if (backupTarget != null && backupTarget.appInfo.packageName.equals(processName)) {
+                isRestrictedBackupMode = backupTarget.appInfo.uid >= FIRST_APPLICATION_UID
+                        && ((backupTarget.backupMode == BackupRecord.RESTORE)
+                                || (backupTarget.backupMode == BackupRecord.RESTORE_FULL)
+                                || (backupTarget.backupMode == BackupRecord.BACKUP_FULL));
             }
 
             final ActiveInstrumentation instr = app.getActiveInstrumentation();
@@ -4749,15 +4752,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Check whether the next backup agent is in this process...
-        if (!badApp && mBackupTarget != null && mBackupTarget.app == app) {
+        if (!badApp && backupTarget != null && backupTarget.app == app) {
             if (DEBUG_BACKUP) Slog.v(TAG_BACKUP,
                     "New app is backup target, launching agent for " + app);
-            notifyPackageUse(mBackupTarget.appInfo.packageName,
+            notifyPackageUse(backupTarget.appInfo.packageName,
                              PackageManager.NOTIFY_PACKAGE_USE_BACKUP);
             try {
-                thread.scheduleCreateBackupAgent(mBackupTarget.appInfo,
-                        compatibilityInfoForPackage(mBackupTarget.appInfo),
-                        mBackupTarget.backupMode);
+                thread.scheduleCreateBackupAgent(backupTarget.appInfo,
+                        compatibilityInfoForPackage(backupTarget.appInfo),
+                        backupTarget.backupMode);
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown creating backup agent in " + app, e);
                 badApp = true;
@@ -13224,16 +13227,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.receivers.clear();
 
         // If the app is undergoing backup, tell the backup manager about it
-        if (mBackupTarget != null && app.pid == mBackupTarget.app.pid) {
+        final BackupRecord backupTarget = mBackupTargets.get(app.userId);
+        if (backupTarget != null && app.pid == backupTarget.app.pid) {
             if (DEBUG_BACKUP || DEBUG_CLEANUP) Slog.d(TAG_CLEANUP, "App "
-                    + mBackupTarget.appInfo + " died during backup");
+                    + backupTarget.appInfo + " died during backup");
             mHandler.post(new Runnable() {
                 @Override
                 public void run(){
                     try {
                         IBackupManager bm = IBackupManager.Stub.asInterface(
                                 ServiceManager.getService(Context.BACKUP_SERVICE));
-                        bm.agentDisconnected(app.info.packageName);
+                        bm.agentDisconnectedForUser(app.userId, app.info.packageName);
                     } catch (RemoteException e) {
                         // can't happen; backup manager is local
                     }
@@ -13573,7 +13577,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     // instantiated.  The backup agent will invoke backupAgentCreated() on the
     // activity manager to announce its creation.
     public boolean bindBackupAgent(String packageName, int backupMode, int userId) {
-        if (DEBUG_BACKUP) Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode=" + backupMode);
+        if (DEBUG_BACKUP) {
+            Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode="
+                    + backupMode + " userId=" + userId + " callingUid = " + Binder.getCallingUid()
+                    + " uid = " + Process.myUid());
+        }
         enforceCallingPermission("android.permission.CONFIRM_FULL_BACKUP", "bindBackupAgent");
 
         IPackageManager pm = AppGlobals.getPackageManager();
@@ -13625,10 +13633,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 proc.inFullBackup = true;
             }
             r.app = proc;
-            oldBackupUid = mBackupTarget != null ? mBackupTarget.appInfo.uid : -1;
+            final BackupRecord backupTarget = mBackupTargets.get(userId);
+            oldBackupUid = backupTarget != null ? backupTarget.appInfo.uid : -1;
             newBackupUid = proc.inFullBackup ? r.appInfo.uid : -1;
-            mBackupTarget = r;
-            mBackupAppName = app.packageName;
+            mBackupTargets.put(userId, r);
 
             // Try not to kill the process during backup
             updateOomAdjLocked(proc, true);
@@ -13663,14 +13671,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         return true;
     }
 
-    @Override
-    public void clearPendingBackup() {
-        if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "clearPendingBackup");
-        enforceCallingPermission("android.permission.BACKUP", "clearPendingBackup");
+    private void clearPendingBackup(int userId) {
+        if (DEBUG_BACKUP) {
+            Slog.v(TAG_BACKUP, "clearPendingBackup: userId = " + userId + " callingUid = "
+                    + Binder.getCallingUid() + " uid = " + Process.myUid());
+        }
 
         synchronized (this) {
-            mBackupTarget = null;
-            mBackupAppName = null;
+            mBackupTargets.delete(userId);
         }
 
         JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
@@ -13678,12 +13686,19 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     // A backup agent has just come up
+    @Override
     public void backupAgentCreated(String agentPackageName, IBinder agent) {
-        if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "backupAgentCreated: " + agentPackageName
-                + " = " + agent);
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (DEBUG_BACKUP) {
+            Slog.v(TAG_BACKUP, "backupAgentCreated: " + agentPackageName + " = " + agent
+                    + " callingUserId = " + callingUserId + " callingUid = "
+                    + Binder.getCallingUid() + " uid = " + Process.myUid());
+        }
 
         synchronized(this) {
-            if (!agentPackageName.equals(mBackupAppName)) {
+            final BackupRecord backupTarget = mBackupTargets.get(callingUserId);
+            String backupAppName = backupTarget == null ? null : backupTarget.appInfo.packageName;
+            if (!agentPackageName.equals(backupAppName)) {
                 Slog.e(TAG, "Backup agent created for " + agentPackageName + " but not requested!");
                 return;
             }
@@ -13693,7 +13708,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             IBackupManager bm = IBackupManager.Stub.asInterface(
                     ServiceManager.getService(Context.BACKUP_SERVICE));
-            bm.agentConnected(agentPackageName, agent);
+            bm.agentConnectedForUser(callingUserId, agentPackageName, agent);
         } catch (RemoteException e) {
             // can't happen; the backup manager service is local
         } catch (Exception e) {
@@ -13706,7 +13721,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // done with this agent
     public void unbindBackupAgent(ApplicationInfo appInfo) {
-        if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "unbindBackupAgent: " + appInfo);
+        if (DEBUG_BACKUP) {
+            Slog.v(TAG_BACKUP, "unbindBackupAgent: " + appInfo + " appInfo.uid = "
+                    + appInfo.uid + " callingUid = " + Binder.getCallingUid() + " uid = "
+                    + Process.myUid());
+        }
+
         enforceCallingPermission("android.permission.CONFIRM_FULL_BACKUP", "unbindBackupAgent");
         if (appInfo == null) {
             Slog.w(TAG, "unbind backup agent for null app");
@@ -13715,24 +13735,27 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         int oldBackupUid;
 
+        final int userId = UserHandle.getUserId(appInfo.uid);
         synchronized(this) {
+            final BackupRecord backupTarget = mBackupTargets.get(userId);
+            String backupAppName = backupTarget == null ? null : backupTarget.appInfo.packageName;
             try {
-                if (mBackupAppName == null) {
+                if (backupAppName == null) {
                     Slog.w(TAG, "Unbinding backup agent with no active backup");
                     return;
                 }
 
-                if (!mBackupAppName.equals(appInfo.packageName)) {
+                if (!backupAppName.equals(appInfo.packageName)) {
                     Slog.e(TAG, "Unbind of " + appInfo + " but is not the current backup target");
                     return;
                 }
 
                 // Not backing this app up any more; reset its OOM adjustment
-                final ProcessRecord proc = mBackupTarget.app;
+                final ProcessRecord proc = backupTarget.app;
                 updateOomAdjLocked(proc, true);
                 proc.inFullBackup = false;
 
-                oldBackupUid = mBackupTarget != null ? mBackupTarget.appInfo.uid : -1;
+                oldBackupUid = backupTarget != null ? backupTarget.appInfo.uid : -1;
 
                 // If the app crashed during backup, 'thread' will be null here
                 if (proc.thread != null) {
@@ -13745,8 +13768,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             } finally {
-                mBackupTarget = null;
-                mBackupAppName = null;
+                mBackupTargets.delete(userId);
             }
         }
 
@@ -17770,6 +17792,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean isAppForeground(int uid) {
             return ActivityManagerService.this.isAppForeground(uid);
+        }
+
+        @Override
+        public void clearPendingBackup(int userId) {
+            ActivityManagerService.this.clearPendingBackup(userId);
         }
     }
 

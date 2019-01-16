@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CANCELED;
@@ -50,6 +51,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -745,8 +747,9 @@ class ActivityStarter {
         // not sure if we need to create START_ABORTED_BACKGROUND so for now piggybacking
         // on START_ABORTED
         if (!abort) {
-            abort |= shouldAbortBackgroundActivityStart(callingUid, callingPackage, realCallingUid,
-                    callerApp, originatingPendingIntent, allowBackgroundActivityStart);
+            abort |= shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage,
+                    realCallingUid, callerApp, originatingPendingIntent,
+                    allowBackgroundActivityStart, intent);
         }
 
         // Merge the two options bundles, while realCallerOptions takes precedence.
@@ -893,9 +896,10 @@ class ActivityStarter {
                 true /* doResume */, checkedOptions, inTask, outActivity);
     }
 
-    private boolean shouldAbortBackgroundActivityStart(int callingUid, final String callingPackage,
-            int realCallingUid, WindowProcessController callerApp,
-            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
+    private boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
+            final String callingPackage, int realCallingUid, WindowProcessController callerApp,
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart,
+            Intent intent) {
         if (mService.isBackgroundActivityStartsEnabled()) {
             return false;
         }
@@ -908,19 +912,24 @@ class ActivityStarter {
             return false;
         }
         // don't abort if the callingUid is in the foreground or is a persistent system process
-        if (isUidForeground(callingUid) || isUidPersistentSystemProcess(callingUid)) {
+        final boolean isCallingUidForeground = isUidForeground(callingUid);
+        final boolean isCallingUidPersistentSystemProcess = isUidPersistentSystemProcess(
+                callingUid);
+        if (isCallingUidForeground || isCallingUidPersistentSystemProcess) {
             return false;
         }
         // take realCallingUid into consideration
+        final boolean isRealCallingUidForeground = isUidForeground(realCallingUid);
+        final boolean isRealCallingUidPersistentSystemProcess = isUidPersistentSystemProcess(
+                realCallingUid);
         if (realCallingUid != callingUid) {
             // don't abort if the realCallingUid is in the foreground and callingUid isn't
-            if (isUidForeground(realCallingUid)) {
+            if (isRealCallingUidForeground) {
                 return false;
             }
             // if the realCallingUid is a persistent system process, abort if the IntentSender
             // wasn't whitelisted to start an activity
-            if (isUidPersistentSystemProcess(realCallingUid) && (originatingPendingIntent != null)
-                    && allowBackgroundActivityStart) {
+            if (isRealCallingUidPersistentSystemProcess && allowBackgroundActivityStart) {
                 return false;
             }
         }
@@ -928,11 +937,28 @@ class ActivityStarter {
         if (callerApp != null && callerApp.areBackgroundActivityStartsAllowed()) {
             return false;
         }
+        // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
+        if (mService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
+                == PERMISSION_GRANTED) {
+            return false;
+        }
         // don't abort if the caller has the same uid as the recents component
         if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
             return false;
         }
         // anything that has fallen through will currently be aborted
+        Slog.w(TAG, "Blocking background activity start [callingPackage: " + callingPackage
+                + "; callingUid: " + callingUid
+                + "; isCallingUidForeground: " + isCallingUidForeground
+                + "; isCallingUidPersistentSystemProcess: " + isCallingUidPersistentSystemProcess
+                + "; realCallingUid: " + realCallingUid
+                + "; isRealCallingUidForeground: " + isRealCallingUidForeground
+                + "; isRealCallingUidPersistentSystemProcess: "
+                        + isRealCallingUidPersistentSystemProcess
+                + "; originatingPendingIntent: " + originatingPendingIntent
+                + "; isBgStartWhitelisted: " + allowBackgroundActivityStart
+                + "; intent: " + intent
+                + "]");
         // TODO: remove this toast after feature development is done
         mService.mUiHandler.post(() -> {
             Toast.makeText(mService.mContext,

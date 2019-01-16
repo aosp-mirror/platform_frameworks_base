@@ -18,6 +18,7 @@ package com.android.server.signedconfig;
 
 import android.os.Build;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -42,11 +43,18 @@ public class SignatureVerifier {
     private static final String DEBUG_KEY =
             "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaAn2XVifsLTHg616nTsOMVmlhBoECGbTEBTKKvdd2hO60"
             + "pj1pnU8SMkhYfaNxZuKgw9LNvOwlFwStboIYeZ3lQ==";
+    private static final String PROD_KEY =
+            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE+lky6wKyGL6lE1VrD0YTMHwb0Xwc+tzC8MvnrzVxodvTp"
+            + "VY/jV7V+Zktcx+pry43XPABFRXtbhTo+qykhyBA1g==";
 
+    private final SignedConfigEvent mEvent;
     private final PublicKey mDebugKey;
+    private final PublicKey mProdKey;
 
-    public SignatureVerifier() {
-        mDebugKey = createKey(DEBUG_KEY);
+    public SignatureVerifier(SignedConfigEvent event) {
+        mEvent = event;
+        mDebugKey = Build.IS_DEBUGGABLE ? createKey(DEBUG_KEY) : null;
+        mProdKey = createKey(PROD_KEY);
     }
 
     private static PublicKey createKey(String base64) {
@@ -67,6 +75,14 @@ public class SignatureVerifier {
         }
     }
 
+    private boolean verifyWithPublicKey(PublicKey key, byte[] data, byte[] signature)
+            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature verifier = Signature.getInstance("SHA256withECDSA");
+        verifier.initVerify(key);
+        verifier.update(data);
+        return verifier.verify(signature);
+    }
+
     /**
      * Verify a signature for signed config.
      *
@@ -80,6 +96,7 @@ public class SignatureVerifier {
         try {
             signature = Base64.getDecoder().decode(base64Signature);
         } catch (IllegalArgumentException e) {
+            mEvent.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__BASE64_FAILURE_SIGNATURE;
             Slog.e(TAG, "Failed to base64 decode signature");
             return false;
         }
@@ -89,11 +106,9 @@ public class SignatureVerifier {
         if (Build.IS_DEBUGGABLE) {
             if (mDebugKey != null) {
                 if (DBG) Slog.w(TAG, "Trying to verify signature using debug key");
-                Signature verifier = Signature.getInstance("SHA256withECDSA");
-                verifier.initVerify(mDebugKey);
-                verifier.update(data);
-                if (verifier.verify(signature)) {
+                if (verifyWithPublicKey(mDebugKey, data, signature)) {
                     Slog.i(TAG, "Verified config using debug key");
+                    mEvent.verifiedWith = StatsLog.SIGNED_CONFIG_REPORTED__VERIFIED_WITH__DEBUG;
                     return true;
                 } else {
                     if (DBG) Slog.i(TAG, "Config verification failed using debug key");
@@ -102,8 +117,20 @@ public class SignatureVerifier {
                 Slog.w(TAG, "Debuggable build, but have no debug key");
             }
         }
-        // TODO verify production key.
-        Slog.w(TAG, "NO PRODUCTION KEY YET, FAILING VERIFICATION");
-        return false;
+        if (mProdKey ==  null) {
+            Slog.e(TAG, "No prod key; construction failed?");
+            mEvent.status =
+                    StatsLog.SIGNED_CONFIG_REPORTED__STATUS__SIGNATURE_CHECK_FAILED_PROD_KEY_ABSENT;
+            return false;
+        }
+        if (verifyWithPublicKey(mProdKey, data, signature)) {
+            Slog.i(TAG, "Verified config using production key");
+            mEvent.verifiedWith = StatsLog.SIGNED_CONFIG_REPORTED__VERIFIED_WITH__PRODUCTION;
+            return true;
+        } else {
+            if (DBG) Slog.i(TAG, "Verification failed using production key");
+            mEvent.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__SIGNATURE_CHECK_FAILED;
+            return false;
+        }
     }
 }

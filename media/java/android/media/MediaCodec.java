@@ -2289,6 +2289,30 @@ final public class MediaCodec {
          */
         public static final int ERROR_UNSUPPORTED_OPERATION = 6;
 
+        /**
+         * This indicates that the security level of the device is not
+         * sufficient to meet the requirements set by the content owner
+         * in the license policy.
+         */
+        public static final int ERROR_INSUFFICIENT_SECURITY = 7;
+
+        /**
+         * This indicates that the video frame being decrypted exceeds
+         * the size of the device's protected output buffers. When
+         * encountering this error the app should try playing content
+         * of a lower resolution.
+         */
+        public static final int ERROR_FRAME_TOO_LARGE = 8;
+
+        /**
+         * This error indicates that session state has been
+         * invalidated. It can occur on devices that are not capable
+         * of retaining crypto session state across device
+         * suspend/resume. The session must be closed and a new
+         * session opened to resume operation.
+         */
+        public static final int ERROR_LOST_STATE = 9;
+
         /** @hide */
         @IntDef({
             ERROR_NO_KEY,
@@ -2296,7 +2320,10 @@ final public class MediaCodec {
             ERROR_RESOURCE_BUSY,
             ERROR_INSUFFICIENT_OUTPUT_PROTECTION,
             ERROR_SESSION_NOT_OPENED,
-            ERROR_UNSUPPORTED_OPERATION
+            ERROR_UNSUPPORTED_OPERATION,
+            ERROR_INSUFFICIENT_SECURITY,
+            ERROR_FRAME_TOO_LARGE,
+            ERROR_LOST_STATE
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface CryptoErrorCode {}

@@ -297,7 +297,7 @@ class V2Tokenizer(object):
 class V2LineParser(object):
     __slots__ = ["tokenized", "current", "len"]
 
-    MODIFIERS = set("public protected internal private abstract default static final transient volatile synchronized".split())
+    MODIFIERS = set("public protected internal private abstract default static final transient volatile synchronized native operator sealed strictfp infix inline suspend vararg".split())
     JAVA_LANG_TYPES = set("AbstractMethodError AbstractStringBuilder Appendable ArithmeticException ArrayIndexOutOfBoundsException ArrayStoreException AssertionError AutoCloseable Boolean BootstrapMethodError Byte Character CharSequence Class ClassCastException ClassCircularityError ClassFormatError ClassLoader ClassNotFoundException Cloneable CloneNotSupportedException Comparable Compiler Deprecated Double Enum EnumConstantNotPresentException Error Exception ExceptionInInitializerError Float FunctionalInterface IllegalAccessError IllegalAccessException IllegalArgumentException IllegalMonitorStateException IllegalStateException IllegalThreadStateException IncompatibleClassChangeError IndexOutOfBoundsException InheritableThreadLocal InstantiationError InstantiationException Integer InternalError InterruptedException Iterable LinkageError Long Math NegativeArraySizeException NoClassDefFoundError NoSuchFieldError NoSuchFieldException NoSuchMethodError NoSuchMethodException NullPointerException Number NumberFormatException Object OutOfMemoryError Override Package package-info.java Process ProcessBuilder ProcessEnvironment ProcessImpl Readable ReflectiveOperationException Runnable Runtime RuntimeException RuntimePermission SafeVarargs SecurityException SecurityManager Short StackOverflowError StackTraceElement StrictMath String StringBuffer StringBuilder StringIndexOutOfBoundsException SuppressWarnings System Thread ThreadDeath ThreadGroup ThreadLocal Throwable TypeNotPresentException UNIXProcess UnknownError UnsatisfiedLinkError UnsupportedClassVersionError UnsupportedOperationException VerifyError VirtualMachineError Void".split())
 
     def __init__(self, raw):
@@ -355,7 +355,7 @@ class V2LineParser(object):
         self.parse_eof()
 
     def parse_into_field(self, field):
-        kind = self.parse_token("field")
+        kind = self.parse_one_of("field", "property")
         field.split = [kind]
         annotations = self.parse_annotations()
         if "@Deprecated" in annotations:
@@ -442,13 +442,19 @@ class V2LineParser(object):
         return None
 
     def parse_type(self):
+        self.parse_annotations()
         type = self.parse_token()
+        if type[-1] == '.':
+            self.parse_annotations()
+            type += self.parse_token()
         if type in V2LineParser.JAVA_LANG_TYPES:
             type = "java.lang." + type
         self.parse_matching_paren("<", ">")
         while True:
             t = self.lookahead()
-            if t == "[]":
+            if t == "@":
+                self.parse_annotation()
+            elif t == "[]":
                 type += self.parse_token()
             elif self.parse_kotlin_nullability() is not None:
                 pass  # discard nullability for now
@@ -478,16 +484,22 @@ class V2LineParser(object):
             self.parse_token(",")
 
     def parse_arg(self):
+        self.parse_if("vararg")  # kotlin vararg
         self.parse_annotations()
         type = self.parse_arg_type()
         l = self.lookahead()
         if l != "," and l != ")":
-            self.parse_token()  # kotlin argument name
+            if self.lookahead() != '=':
+                self.parse_token()  # kotlin argument name
             if self.parse_if('='): # kotlin default value
-                (self.parse_matching_paren('(', ')') or
-                 self.parse_matching_paren('{', '}') or
-                 self.parse_token() and self.parse_matching_paren('(', ')'))
+                self.parse_expression()
         return type
+
+    def parse_expression(self):
+        while not self.lookahead() in [')', ',', ';']:
+            (self.parse_matching_paren('(', ')') or
+            self.parse_matching_paren('{', '}') or
+            self.parse_token())
 
     def parse_throws(self):
         ret = []
@@ -516,7 +528,7 @@ class V2LineParser(object):
 
     def parse_annotation_default(self):
         if self.parse_if("default"):
-            self.parse_value()
+            self.parse_expression()
 
     def parse_value(self):
         if self.lookahead() == "{":
@@ -599,7 +611,7 @@ def _parse_stream_to_generator(f):
             clazz.ctors.append(Method(clazz, line, raw, blame, sig_format=sig_format))
         elif raw.startswith("    method"):
             clazz.methods.append(Method(clazz, line, raw, blame, sig_format=sig_format))
-        elif raw.startswith("    field"):
+        elif raw.startswith("    field") or raw.startswith("    property"):
             clazz.fields.append(Field(clazz, line, raw, blame, sig_format=sig_format))
         elif raw.startswith("  }") and clazz:
             yield clazz
@@ -942,7 +954,7 @@ def verify_fields(clazz):
             else:
                 error(clazz, f, "F2", "Bare fields must be marked final, or add accessors if mutable")
 
-        if not "static" in f.split:
+        if "static" not in f.split and "property" not in f.split:
             if not re.match("[a-z]([a-zA-Z]+)?", f.name):
                 error(clazz, f, "S1", "Non-static fields must be named using myField style")
 
@@ -1650,7 +1662,7 @@ def verify_method_name_not_kotlin_operator(clazz):
         binary.add(op)
 
     for m in clazz.methods:
-        if 'static' in m.split:
+        if 'static' in m.split or 'operator' in m.split:
             continue
 
         # https://kotlinlang.org/docs/reference/operator-overloading.html#unary-prefix-operators

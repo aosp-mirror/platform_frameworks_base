@@ -29,6 +29,12 @@ enum Action {
 
     // ACTION: Settings > Any preference is changed
     ACTION_SETTINGS_PREFERENCE_CHANGE = 853;
+
+    // ACTION: Tap & Pay -> Default Application Setting -> Use Forground
+    ACTION_NFC_PAYMENT_FOREGROUND_SETTING = 1622;
+
+    // ACTION: Tap & Pay -> Default Application Setting -> Use Default
+    ACTION_NFC_PAYMENT_ALWAYS_SETTING = 1623;
 }
 
 /**
@@ -85,4 +91,10 @@ enum PageId {
 
     // OPEN: Settings > Apps & Notifications -> Special app access -> Financial Apps Sms Access
     SETTINGS_FINANCIAL_APPS_SMS_ACCESS = 1597;
+
+    // OPEN: Settings > System > Input & Gesture > Skip songs
+    SETTINGS_GESTURE_SKIP = 1624;
+
+    // OPEN: Settings > System > Input & Gesture > Silence alerts
+    SETTINGS_GESTURE_SILENCE = 1625;
 }

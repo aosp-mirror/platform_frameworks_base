@@ -65,9 +65,9 @@ interface INotificationManager
     boolean areNotificationsEnabled(String pkg);
     int getPackageImportance(String pkg);
 
-    void setAppOverlaysAllowed(String pkg, int uid, boolean allowed);
-    boolean areAppOverlaysAllowed(String pkg);
-    boolean areAppOverlaysAllowedForPackage(String pkg, int uid);
+    void setBubblesAllowed(String pkg, int uid, boolean allowed);
+    boolean areBubblesAllowed(String pkg);
+    boolean areBubblesAllowedForPackage(String pkg, int uid);
 
     void createNotificationChannelGroups(String pkg, in ParceledListSlice channelGroupList);
     void createNotificationChannels(String pkg, in ParceledListSlice channelsList);

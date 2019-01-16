@@ -27,6 +27,7 @@ import android.os.Process;
 import android.service.notification.NotificationAssistantService;
 import android.text.TextUtils;
 import android.util.LruCache;
+import android.view.textclassifier.ConversationAction;
 import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
@@ -65,13 +66,13 @@ public class SmartActionsHelper {
     private static final int MAX_MESSAGES_TO_EXTRACT = 5;
     private static final int MAX_RESULT_ID_TO_CACHE = 20;
 
-    private static final ConversationActions.TypeConfig TYPE_CONFIG =
-            new ConversationActions.TypeConfig.Builder().setIncludedTypes(
-                    Collections.singletonList(ConversationActions.TYPE_TEXT_REPLY))
+    private static final TextClassifier.EntityConfig TYPE_CONFIG =
+            new TextClassifier.EntityConfig.Builder().setIncludedTypes(
+                    Collections.singletonList(ConversationAction.TYPE_TEXT_REPLY))
                     .includeTypesFromTextClassifier(false)
                     .build();
     private static final List<String> HINTS =
-            Collections.singletonList(ConversationActions.HINT_FOR_NOTIFICATION);
+            Collections.singletonList(ConversationActions.Request.HINT_FOR_NOTIFICATION);
 
     private Context mContext;
     @Nullable
@@ -137,7 +138,7 @@ public class SmartActionsHelper {
 
         ConversationActions conversationActionsResult =
                 mTextClassifier.suggestConversationActions(request);
-        List<ConversationActions.ConversationAction> conversationActions =
+        List<ConversationAction> conversationActions =
                 conversationActionsResult.getConversationActions();
         ArrayList<CharSequence> replies = conversationActions.stream()
                 .map(conversationAction -> conversationAction.getTextReply())
@@ -193,7 +194,7 @@ public class SmartActionsHelper {
         }
         TextClassifierEvent textClassifierEvent =
                 createTextClassifierEventBuilder(TextClassifierEvent.TYPE_SMART_ACTION, resultId)
-                        .setEntityType(ConversationActions.TYPE_TEXT_REPLY)
+                        .setEntityType(ConversationAction.TYPE_TEXT_REPLY)
                         .build();
         mTextClassifier.onTextClassifierEvent(textClassifierEvent);
     }

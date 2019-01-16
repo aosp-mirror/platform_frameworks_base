@@ -284,8 +284,9 @@ public class BubbleController {
     @Nullable
     private PendingIntent getAppOverlayIntent(NotificationEntry notif) {
         Notification notification = notif.notification.getNotification();
-        if (canLaunchInActivityView(notification.getAppOverlayIntent())) {
-            return notification.getAppOverlayIntent();
+        if (canLaunchInActivityView(notification.getBubbleMetadata() != null
+                ? notification.getBubbleMetadata().getIntent() : null)) {
+            return notification.getBubbleMetadata().getIntent();
         } else if (shouldUseContentIntent(mContext)
                 && canLaunchInActivityView(notification.contentIntent)) {
             Log.d(TAG, "[addBubble " + notif.key
@@ -446,15 +447,16 @@ public class BubbleController {
         StatusBarNotification n = entry.notification;
         boolean canAppOverlay = false;
         try {
-            canAppOverlay = mNotificationManagerService.areAppOverlaysAllowedForPackage(
+            canAppOverlay = mNotificationManagerService.areBubblesAllowedForPackage(
                     n.getPackageName(), n.getUid());
         } catch (RemoteException e) {
             Log.w(TAG, "Error calling NoMan to determine if app can overlay", e);
         }
 
         boolean canChannelOverlay = mNotificationEntryManager.getNotificationData().getChannel(
-                entry.key).canOverlayApps();
-        boolean hasOverlayIntent = n.getNotification().getAppOverlayIntent() != null;
+                entry.key).canBubble();
+        boolean hasOverlayIntent = n.getNotification().getBubbleMetadata() != null
+                && n.getNotification().getBubbleMetadata().getIntent() != null;
         return hasOverlayIntent && canChannelOverlay && canAppOverlay;
     }
 

@@ -1047,7 +1047,6 @@ package android.app.role {
     method public void removeRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
     method public boolean removeRoleHolderFromController(java.lang.String, java.lang.String);
     method public void setRoleNamesFromController(java.util.List<java.lang.String>);
-    field public static final java.lang.String EXTRA_REQUEST_ROLE_NAME = "android.app.role.extra.REQUEST_ROLE_NAME";
   }
 
   public abstract interface RoleManagerCallback {
@@ -1254,6 +1253,7 @@ package android.content {
     field public static final java.lang.String ACTION_INSTANT_APP_RESOLVER_SETTINGS = "android.intent.action.INSTANT_APP_RESOLVER_SETTINGS";
     field public static final java.lang.String ACTION_INTENT_FILTER_NEEDS_VERIFICATION = "android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION";
     field public static final java.lang.String ACTION_MANAGE_APP_PERMISSIONS = "android.intent.action.MANAGE_APP_PERMISSIONS";
+    field public static final java.lang.String ACTION_MANAGE_DEFAULT_APP = "android.intent.action.MANAGE_DEFAULT_APP";
     field public static final java.lang.String ACTION_MANAGE_PERMISSIONS = "android.intent.action.MANAGE_PERMISSIONS";
     field public static final java.lang.String ACTION_MANAGE_PERMISSION_APPS = "android.intent.action.MANAGE_PERMISSION_APPS";
     field public static final java.lang.String ACTION_MANAGE_SPECIAL_APP_ACCESSES = "android.intent.action.MANAGE_SPECIAL_APP_ACCESSES";
@@ -1284,11 +1284,12 @@ package android.content {
     field public static final java.lang.String EXTRA_LONG_VERSION_CODE = "android.intent.extra.LONG_VERSION_CODE";
     field public static final java.lang.String EXTRA_ORIGINATING_UID = "android.intent.extra.ORIGINATING_UID";
     field public static final java.lang.String EXTRA_PACKAGES = "android.intent.extra.PACKAGES";
-    field public static final java.lang.String EXTRA_PERMISSION_NAME = "android.intent.extra.PERMISSION_NAME";
     field public static final java.lang.String EXTRA_PERMISSION_GROUP_NAME = "android.intent.extra.PERMISSION_GROUP_NAME";
+    field public static final java.lang.String EXTRA_PERMISSION_NAME = "android.intent.extra.PERMISSION_NAME";
     field public static final java.lang.String EXTRA_REASON = "android.intent.extra.REASON";
     field public static final java.lang.String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
     field public static final java.lang.String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
+    field public static final java.lang.String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
     field public static final java.lang.String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
     field public static final java.lang.String EXTRA_VERIFICATION_BUNDLE = "android.intent.extra.VERIFICATION_BUNDLE";
     field public static final java.lang.String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
@@ -1461,6 +1462,7 @@ package android.content.pm {
     method public abstract void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public void sendDeviceCustomizationReadyBroadcast();
     method public abstract boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
+    method public java.lang.String[] setDistractingPackageRestrictions(java.lang.String[], int);
     method public void setHarmfulAppWarning(java.lang.String, java.lang.CharSequence);
     method public deprecated java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, java.lang.String);
     method public java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, android.content.pm.SuspendDialogInfo);
@@ -1528,11 +1530,17 @@ package android.content.pm {
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_INSTANT = 8388608; // 0x800000
+    field public static final int RESTRICTION_HIDE_FROM_SUGGESTIONS = 1; // 0x1
+    field public static final int RESTRICTION_HIDE_NOTIFICATIONS = 2; // 0x2
+    field public static final int RESTRICTION_NONE = 0; // 0x0
   }
 
   public static abstract class PackageManager.DexModuleRegisterCallback {
     ctor public PackageManager.DexModuleRegisterCallback();
     method public abstract void onDexModuleRegistered(java.lang.String, boolean, java.lang.String);
+  }
+
+  public static abstract class PackageManager.DistractionRestriction implements java.lang.annotation.Annotation {
   }
 
   public static abstract interface PackageManager.OnPermissionsChangedListener {
@@ -3900,24 +3908,24 @@ package android.net {
 
 package android.net.wifi {
 
-  public abstract class DppStatusCallback {
-    ctor public DppStatusCallback();
+  public abstract class EasyConnectStatusCallback {
+    ctor public EasyConnectStatusCallback();
     method public abstract void onConfiguratorSuccess(int);
     method public abstract void onEnrolleeSuccess(int);
     method public abstract void onFailure(int);
     method public abstract void onProgress(int);
-    field public static final int DPP_EVENT_FAILURE = -7; // 0xfffffff9
-    field public static final int DPP_EVENT_FAILURE_AUTHENTICATION = -2; // 0xfffffffe
-    field public static final int DPP_EVENT_FAILURE_BUSY = -5; // 0xfffffffb
-    field public static final int DPP_EVENT_FAILURE_CONFIGURATION = -4; // 0xfffffffc
-    field public static final int DPP_EVENT_FAILURE_INVALID_NETWORK = -9; // 0xfffffff7
-    field public static final int DPP_EVENT_FAILURE_INVALID_URI = -1; // 0xffffffff
-    field public static final int DPP_EVENT_FAILURE_NOT_COMPATIBLE = -3; // 0xfffffffd
-    field public static final int DPP_EVENT_FAILURE_NOT_SUPPORTED = -8; // 0xfffffff8
-    field public static final int DPP_EVENT_FAILURE_TIMEOUT = -6; // 0xfffffffa
-    field public static final int DPP_EVENT_PROGRESS_AUTHENTICATION_SUCCESS = 0; // 0x0
-    field public static final int DPP_EVENT_PROGRESS_RESPONSE_PENDING = 1; // 0x1
-    field public static final int DPP_EVENT_SUCCESS_CONFIGURATION_SENT = 0; // 0x0
+    field public static final int EASY_CONNECT_EVENT_FAILURE = -7; // 0xfffffff9
+    field public static final int EASY_CONNECT_EVENT_FAILURE_AUTHENTICATION = -2; // 0xfffffffe
+    field public static final int EASY_CONNECT_EVENT_FAILURE_BUSY = -5; // 0xfffffffb
+    field public static final int EASY_CONNECT_EVENT_FAILURE_CONFIGURATION = -4; // 0xfffffffc
+    field public static final int EASY_CONNECT_EVENT_FAILURE_INVALID_NETWORK = -9; // 0xfffffff7
+    field public static final int EASY_CONNECT_EVENT_FAILURE_INVALID_URI = -1; // 0xffffffff
+    field public static final int EASY_CONNECT_EVENT_FAILURE_NOT_COMPATIBLE = -3; // 0xfffffffd
+    field public static final int EASY_CONNECT_EVENT_FAILURE_NOT_SUPPORTED = -8; // 0xfffffff8
+    field public static final int EASY_CONNECT_EVENT_FAILURE_TIMEOUT = -6; // 0xfffffffa
+    field public static final int EASY_CONNECT_EVENT_PROGRESS_AUTHENTICATION_SUCCESS = 0; // 0x0
+    field public static final int EASY_CONNECT_EVENT_PROGRESS_RESPONSE_PENDING = 1; // 0x1
+    field public static final int EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_SENT = 0; // 0x0
   }
 
   public deprecated class RttManager {
@@ -4148,10 +4156,10 @@ package android.net.wifi {
     method public void save(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
     method public void setDeviceMobilityState(int);
     method public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
-    method public void startDppAsConfiguratorInitiator(java.lang.String, int, int, android.os.Handler, android.net.wifi.DppStatusCallback);
-    method public void startDppAsEnrolleeInitiator(java.lang.String, android.os.Handler, android.net.wifi.DppStatusCallback);
+    method public void startEasyConnectAsConfiguratorInitiator(java.lang.String, int, int, android.os.Handler, android.net.wifi.EasyConnectStatusCallback);
+    method public void startEasyConnectAsEnrolleeInitiator(java.lang.String, android.os.Handler, android.net.wifi.EasyConnectStatusCallback);
     method public boolean startScan(android.os.WorkSource);
-    method public void stopDppSession();
+    method public void stopEasyConnectSession();
     method public void unregisterNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback);
     field public static final int CHANGE_REASON_ADDED = 0; // 0x0
     field public static final int CHANGE_REASON_CONFIG_CHANGE = 2; // 0x2
@@ -4161,8 +4169,8 @@ package android.net.wifi {
     field public static final int DEVICE_MOBILITY_STATE_LOW_MVMT = 2; // 0x2
     field public static final int DEVICE_MOBILITY_STATE_STATIONARY = 3; // 0x3
     field public static final int DEVICE_MOBILITY_STATE_UNKNOWN = 0; // 0x0
-    field public static final int DPP_NETWORK_ROLE_AP = 1; // 0x1
-    field public static final int DPP_NETWORK_ROLE_STA = 0; // 0x0
+    field public static final int EASY_CONNECT_NETWORK_ROLE_AP = 1; // 0x1
+    field public static final int EASY_CONNECT_NETWORK_ROLE_STA = 0; // 0x0
     field public static final java.lang.String EXTRA_CHANGE_REASON = "changeReason";
     field public static final java.lang.String EXTRA_MULTIPLE_NETWORKS_CHANGED = "multipleChanges";
     field public static final java.lang.String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
@@ -4855,6 +4863,8 @@ package android.permission {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract int onCountPermissionApps(java.util.List<java.lang.String>, boolean, boolean);
     method public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
+    method public abstract void onGetRuntimePermissionsBackup(android.os.UserHandle, java.io.OutputStream);
+    method public abstract java.util.List<android.permission.RuntimePermissionUsageInfo> onPermissionUsageResult(boolean, long);
     method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
     method public abstract java.util.Map<java.lang.String, java.util.List<java.lang.String>> onRevokeRuntimePermissions(java.util.Map<java.lang.String, java.util.List<java.lang.String>>, boolean, int, java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
@@ -4883,11 +4893,12 @@ package android.permission {
   public final class RuntimePermissionUsageInfo implements android.os.Parcelable {
     ctor public RuntimePermissionUsageInfo(java.lang.CharSequence, int);
     method public int describeContents();
-    method public java.lang.CharSequence getName();
     method public int getAppAccessCount();
+    method public java.lang.CharSequence getName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionUsageInfo> CREATOR;
   }
+
 }
 
 package android.permissionpresenterservice {
@@ -7243,7 +7254,6 @@ package android.telephony.ims {
     method public void callSessionInviteParticipantsRequestDelivered();
     method public void callSessionInviteParticipantsRequestFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMayHandover(int, int);
-    method public void callSessionRttAudioIndicatorChanged(android.telephony.ims.ImsStreamMediaProfile);
     method public void callSessionMergeComplete(android.telephony.ims.stub.ImsCallSessionImplBase);
     method public void callSessionMergeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMergeStarted(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
@@ -7254,6 +7264,7 @@ package android.telephony.ims {
     method public void callSessionResumeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionResumeReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionResumed(android.telephony.ims.ImsCallProfile);
+    method public void callSessionRttAudioIndicatorChanged(android.telephony.ims.ImsStreamMediaProfile);
     method public void callSessionRttMessageReceived(java.lang.String);
     method public void callSessionRttModifyRequestReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionRttModifyResponseReceived(int);

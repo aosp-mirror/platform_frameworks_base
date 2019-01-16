@@ -59,6 +59,7 @@ public class WifiConfigurationTest {
         WifiConfiguration config = new WifiConfiguration();
         config.setPasspointManagementObjectTree(cookie);
         config.trusted = false;
+        config.updateIdentifier = "1234";
         MacAddress macBeforeParcel = config.getOrCreateRandomizedMacAddress();
         Parcel parcelW = Parcel.obtain();
         config.writeToParcel(parcelW, 0);
@@ -73,6 +74,7 @@ public class WifiConfigurationTest {
         // lacking a useful config.equals, check two fields near the end.
         assertEquals(cookie, reconfig.getMoTree());
         assertEquals(macBeforeParcel, reconfig.getOrCreateRandomizedMacAddress());
+        assertEquals(config.updateIdentifier, reconfig.updateIdentifier);
         assertFalse(reconfig.trusted);
 
         Parcel parcelWW = Parcel.obtain();
@@ -248,6 +250,18 @@ public class WifiConfigurationTest {
         MacAddress defaultMac = MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS);
         config.setRandomizedMacAddress(null);
         assertEquals(defaultMac, config.getRandomizedMacAddress());
+    }
+
+    /**
+     * Verifies that updateIdentifier should be copied for copy constructor.
+     */
+    @Test
+    public void testUpdateIdentifierForCopyConstructor() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.updateIdentifier = "1234";
+        WifiConfiguration copyConfig = new WifiConfiguration(config);
+
+        assertEquals(config.updateIdentifier, copyConfig.updateIdentifier);
     }
 
     /**

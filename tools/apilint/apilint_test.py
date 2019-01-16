@@ -225,11 +225,12 @@ class V2ParserTests(unittest.TestCase):
         self.assertEquals('pkg.SuppressLint', cls.fullname)
 
     def test_parse_method(self):
-        m = self._method("method @Deprecated public static <T> Class<T>[][] name("
+        m = self._method("method @Deprecated public static native <T> Class<T>[][] name("
                          + "Class<T[]>[][], Class<T[][][]>[][]...) throws Exception, T;")
         self.assertTrue('static' in m.split)
         self.assertTrue('public' in m.split)
         self.assertTrue('method' in m.split)
+        self.assertTrue('native' in m.split)
         self.assertTrue('deprecated' in m.split)
         self.assertEquals('java.lang.Class[][]', m.typ)
         self.assertEquals('name', m.name)
@@ -248,6 +249,7 @@ class V2ParserTests(unittest.TestCase):
         self._method('method abstract String category() default "";', cls=cls)
         self._method('method abstract boolean deepExport() default false;', cls=cls)
         self._method('method abstract ViewDebug.FlagToString[] flagMapping() default {};', cls=cls)
+        self._method('method abstract ViewDebug.FlagToString[] flagMapping() default (double)java.lang.Float.NEGATIVE_INFINITY;', cls=cls)
 
     def test_parse_string_field(self):
         f = self._field('field @Deprecated public final String SOME_NAME = "value";')
@@ -285,6 +287,45 @@ class V2ParserTests(unittest.TestCase):
                          + "Class<T?>[][]?[]!...!) throws Exception, T;")
         self._method("method <T> T name(T a = 1, T b = A(1), Lambda f = { false }, N? n = null, "
                          + """double c = (1/0), float d = 1.0f, String s = "heyo", char c = 'a');""")
+
+    def test_kotlin_operator(self):
+        self._method('method public operator void unaryPlus(androidx.navigation.NavDestination);')
+        self._method('method public static operator androidx.navigation.NavDestination get(androidx.navigation.NavGraph, @IdRes int id);')
+        self._method('method public static operator <T> T get(androidx.navigation.NavigatorProvider, kotlin.reflect.KClass<T> clazz);')
+
+    def test_kotlin_property(self):
+        self._field('property public VM value;')
+        self._field('property public final String? action;')
+
+    def test_kotlin_varargs(self):
+        self._method('method public void error(int p = "42", Integer int2 = "null", int p1 = "42", vararg String args);')
+
+    def test_kotlin_default_values(self):
+        self._method('method public void foo(String! = null, String! = "Hello World", int = 42);')
+        self._method('method void method(String, String firstArg = "hello", int secondArg = "42", String thirdArg = "world");')
+        self._method('method void method(String, String firstArg = "hello", int secondArg = "42");')
+        self._method('method void method(String, String firstArg = "hello");')
+        self._method('method void edit(android.Type, boolean commit = false, Function1<? super Editor,kotlin.Unit> action);')
+        self._method('method <K, V> LruCache<K,V> lruCache(int maxSize, Function2<? super K,? super V,java.lang.Integer> sizeOf = { _, _ -> 1 }, Function1<? extends V> create = { (V)null }, Function4<kotlin.Unit> onEntryRemoved = { _, _, _, _ ->  });')
+        self._method('method android.Bitmap? drawToBitmap(android.View, android.Config config = android.graphics.Bitmap.Config.ARGB_8888);')
+        self._method('method void emptyLambda(Function0<kotlin.Unit> sizeOf = {});')
+        self._method('method void method1(int p = 42, Integer? int2 = null, int p1 = 42, String str = "hello world", java.lang.String... args);')
+        self._method('method void method2(int p, int int2 = (2 * int) * some.other.pkg.Constants.Misc.SIZE);')
+        self._method('method void method3(String str, int p, int int2 = double(int) + str.length);')
+        self._method('method void print(test.pkg.Foo foo = test.pkg.Foo());')
+
+    def test_type_use_annotation(self):
+        self._method('method public static int codePointAt(char @NonNull [], int);')
+        self._method('method @NonNull public java.util.Set<java.util.Map.@NonNull Entry<K,V>> entrySet();')
+
+        m = self._method('method @NonNull public java.lang.annotation.@NonNull Annotation @NonNull [] getAnnotations();')
+        self.assertEquals('java.lang.annotation.Annotation[]', m.typ)
+
+        m = self._method('method @NonNull public abstract java.lang.annotation.@NonNull Annotation @NonNull [] @NonNull [] getParameterAnnotations();')
+        self.assertEquals('java.lang.annotation.Annotation[][]', m.typ)
+
+        m = self._method('method @NonNull public @NonNull String @NonNull [] split(@NonNull String, int);')
+        self.assertEquals('java.lang.String[]', m.typ)
 
 if __name__ == "__main__":
     unittest.main()

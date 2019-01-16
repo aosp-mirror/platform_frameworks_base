@@ -223,8 +223,17 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
     io::IFile* file = iterator->Next();
     std::string path = file->GetSource().path;
 
+    std::string output_path = path;
+    bool is_resource = path.find("res/") == 0;
+    if (is_resource) {
+      auto it = options.shortened_path_map.find(path);
+      if (it != options.shortened_path_map.end()) {
+        output_path = it->second;
+      }
+    }
+
     // Skip resources that are not referenced if requested.
-    if (path.find("res/") == 0 && referenced_resources.find(path) == referenced_resources.end()) {
+    if (is_resource && referenced_resources.find(output_path) == referenced_resources.end()) {
       if (context->IsVerbose()) {
         context->GetDiagnostics()->Note(DiagMessage()
                                         << "Removing resource '" << path << "' from APK.");
@@ -283,7 +292,8 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
         return false;
       }
     } else {
-      if (!io::CopyFileToArchivePreserveCompression(context, file, path, writer)) {
+      if (!io::CopyFileToArchivePreserveCompression(
+              context, file, output_path, writer)) {
         return false;
       }
     }

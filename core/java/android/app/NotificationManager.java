@@ -1080,14 +1080,14 @@ public class NotificationManager {
      * notification shade, floating over other apps' content.
      *
      * <p>This value will be ignored for notifications that are posted to channels that do not
-     * allow app overlays ({@link NotificationChannel#canOverlayApps()}.
+     * allow bubbles ({@link NotificationChannel#canBubble()}.
      *
-     * @see Notification#getAppOverlayIntent()
+     * @see Notification#getBubbleMetadata()
      */
-    public boolean areAppOverlaysAllowed() {
+    public boolean areBubblesAllowed() {
         INotificationManager service = getService();
         try {
-            return service.areAppOverlaysAllowed(mContext.getPackageName());
+            return service.areBubblesAllowed(mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

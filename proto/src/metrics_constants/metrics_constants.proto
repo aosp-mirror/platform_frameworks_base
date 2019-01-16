@@ -6794,8 +6794,24 @@ message MetricsEvent {
     // OS: Q
     NOTIFICATION_BLOCKING_HELPER = 1621;
 
+    // ACTION: Tap & Pay -> Default Application Setting -> Use Forground
+    // OS: Q
+    ACTION_NFC_PAYMENT_FOREGROUND_SETTING = 1622;
+
+    // ACTION: Tap & Pay -> Default Application Setting -> Use Default
+    // OS: Q
+    ACTION_NFC_PAYMENT_ALWAYS_SETTING = 1623;
     // ---- End Q Constants, all Q constants go above this line ----
 
+    // OPEN: Settings > System > Input & Gesture > Skip song gesture
+    // OS: Q
+    SETTINGS_GESTURE_SKIP_SONG = 1624;
+
+    // OPEN: Settings > System > Input & Gesture > Silence gesture
+    // OS: Q
+    SETTINGS_GESTURE_SILENCE = 1625;
+
+    // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

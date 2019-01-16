@@ -81,8 +81,7 @@ static sk_sp<SkColorSpace> dataSpaceToColorSpace(ui::Dataspace d)
         case ui::Dataspace::V0_SRGB:
             return SkColorSpace::MakeSRGB();
         case ui::Dataspace::DISPLAY_P3:
-            return SkColorSpace::MakeRGB(
-                    SkColorSpace::kSRGB_RenderTargetGamma, SkColorSpace::kDCIP3_D65_Gamut);
+            return SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
         default:
             return nullptr;
     }

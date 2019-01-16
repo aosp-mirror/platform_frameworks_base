@@ -7824,8 +7824,10 @@ public class AudioService extends IAudioService.Stub
 
     /** see AudioPolicy.setUidDeviceAffinity() */
     public int setUidDeviceAffinity(IAudioPolicyCallback pcb, int uid,
-            @NonNull int[] deviceTypes,
-            @NonNull String[] deviceAddresses) {
+            @NonNull int[] deviceTypes, @NonNull String[] deviceAddresses) {
+        if (DEBUG_AP) {
+            Log.d(TAG, "setUidDeviceAffinity for " + pcb.asBinder() + " uid:" + uid);
+        }
         synchronized (mAudioPolicies) {
             final AudioPolicyProxy app =
                     checkUpdateForPolicy(pcb, "Cannot change device affinity in audio policy");
@@ -7835,21 +7837,23 @@ public class AudioService extends IAudioService.Stub
             if (!app.hasMixRoutedToDevices(deviceTypes, deviceAddresses)) {
                 return AudioManager.ERROR;
             }
+            return app.setUidDeviceAffinities(uid, deviceTypes, deviceAddresses);
         }
-        return AudioManager.SUCCESS;
     }
 
     /** see AudioPolicy.removeUidDeviceAffinity() */
     public int removeUidDeviceAffinity(IAudioPolicyCallback pcb, int uid) {
+        if (DEBUG_AP) {
+            Log.d(TAG, "removeUidDeviceAffinity for " + pcb.asBinder() + " uid:" + uid);
+        }
         synchronized (mAudioPolicies) {
             final AudioPolicyProxy app =
                     checkUpdateForPolicy(pcb, "Cannot remove device affinity in audio policy");
             if (app == null) {
                 return AudioManager.ERROR;
             }
-
+            return app.removeUidDeviceAffinities(uid);
         }
-        return AudioManager.SUCCESS;
     }
 
     public int setFocusPropertiesForPolicy(int duckingBehavior, IAudioPolicyCallback pcb) {
@@ -8160,27 +8164,41 @@ public class AudioService extends IAudioService.Stub
             Binder.restoreCallingIdentity(identity);
         }
 
-        void setUidDeviceAffinities(int uid, @NonNull int[] types, @NonNull String[] addresses) {
+        int setUidDeviceAffinities(int uid, @NonNull int[] types, @NonNull String[] addresses) {
             final Integer Uid = new Integer(uid);
+            int res;
             if (mUidDeviceAffinities.remove(Uid) != null) {
                 final long identity = Binder.clearCallingIdentity();
-                AudioSystem.removeUidDeviceAffinities(uid);
+                res = AudioSystem.removeUidDeviceAffinities(uid);
                 Binder.restoreCallingIdentity(identity);
+                if (res != AudioSystem.SUCCESS) {
+                    Log.e(TAG, "AudioSystem. removeUidDeviceAffinities(" + uid + ") failed, "
+                            + " cannot call AudioSystem.setUidDeviceAffinities");
+                    return AudioManager.ERROR;
+                }
             }
             final long identity = Binder.clearCallingIdentity();
-            final int res = AudioSystem.setUidDeviceAffinities(uid, types, addresses);
+            res = AudioSystem.setUidDeviceAffinities(uid, types, addresses);
             Binder.restoreCallingIdentity(identity);
             if (res == AudioSystem.SUCCESS) {
                 mUidDeviceAffinities.put(Uid, new AudioDeviceArray(types, addresses));
+                return AudioManager.SUCCESS;
             }
+            Log.e(TAG, "AudioSystem. setUidDeviceAffinities(" + uid + ") failed");
+            return AudioManager.ERROR;
         }
 
-        void removeUidDeviceAffinities(int uid, @NonNull int[] types, @NonNull String[] addresses) {
+        int removeUidDeviceAffinities(int uid) {
             if (mUidDeviceAffinities.remove(new Integer(uid)) != null) {
                 final long identity = Binder.clearCallingIdentity();
-                AudioSystem.removeUidDeviceAffinities(uid);
+                final int res = AudioSystem.removeUidDeviceAffinities(uid);
                 Binder.restoreCallingIdentity(identity);
+                if (res == AudioSystem.SUCCESS) {
+                    return AudioManager.SUCCESS;
+                }
             }
+            Log.e(TAG, "AudioSystem. removeUidDeviceAffinities failed");
+            return AudioManager.ERROR;
         }
     };
 

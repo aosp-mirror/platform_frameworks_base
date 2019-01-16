@@ -18,9 +18,11 @@ package android.graphics;
 
 import android.annotation.CheckResult;
 import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.content.res.ResourcesImpl;
@@ -1780,6 +1782,30 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Fills the bitmap's pixels with the specified {@link Color}.
+     *
+     * @throws IllegalStateException if the bitmap is not mutable.
+     * @throws IllegalArgumentException if the color space encoded in the long
+     *                                  is invalid or unknown.
+     *
+     * @hide pending API approval
+     */
+    @TestApi
+    public void eraseColor(@ColorLong long c) {
+        checkRecycled("Can't erase a recycled bitmap");
+        if (!isMutable()) {
+            throw new IllegalStateException("cannot erase immutable bitmaps");
+        }
+
+        ColorSpace cs = Color.colorSpace(c);
+        float r = Color.red(c);
+        float g = Color.green(c);
+        float b = Color.blue(c);
+        float a = Color.alpha(c);
+        nativeErase(mNativePtr, cs, r, g, b, a);
+    }
+
+    /**
      * Returns the {@link Color} at the specified location. Throws an exception
      * if x or y are out of bounds (negative or >= to the width or height
      * respectively). The returned color is a non-premultiplied ARGB value in
@@ -2123,6 +2149,8 @@ public final class Bitmap implements Parcelable {
                                             int quality, OutputStream stream,
                                             byte[] tempStorage);
     private static native void nativeErase(long nativeBitmap, int color);
+    private static native void nativeErase(long nativeBitmap, ColorSpace cs,
+                                           float r, float g, float b, float a);
     private static native int nativeRowBytes(long nativeBitmap);
     private static native int nativeConfig(long nativeBitmap);
 

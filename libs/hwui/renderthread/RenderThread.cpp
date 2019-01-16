@@ -171,6 +171,9 @@ void RenderThread::initThreadLocals() {
     mRenderState = new RenderState(*this);
     mVkManager = new VulkanManager(*this);
     mCacheManager = new CacheManager(mDisplayInfo);
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        mVkManager->initialize();
+    }
 }
 
 void RenderThread::requireGlContext() {

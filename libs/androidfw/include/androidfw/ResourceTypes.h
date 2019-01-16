@@ -1611,6 +1611,12 @@ struct ResTable_lib_entry
 struct ResTable_overlayable_header
 {
   struct ResChunk_header header;
+
+  // The name of the overlayable set of resources that overlays target.
+  uint16_t name[256];
+
+ // The component responsible for enabling and disabling overlays targeting this chunk.
+  uint16_t actor[256];
 };
 
 /**

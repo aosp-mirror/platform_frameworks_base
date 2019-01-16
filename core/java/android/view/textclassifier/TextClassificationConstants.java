@@ -117,15 +117,15 @@ public final class TextClassificationConstants {
             .add(TextClassifier.TYPE_FLIGHT_NUMBER).toString();
     private static final String CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES =
             new StringJoiner(ENTITY_LIST_DELIMITER)
-                    .add(ConversationActions.TYPE_TEXT_REPLY)
-                    .add(ConversationActions.TYPE_CREATE_REMINDER)
-                    .add(ConversationActions.TYPE_CALL_PHONE)
-                    .add(ConversationActions.TYPE_OPEN_URL)
-                    .add(ConversationActions.TYPE_SEND_EMAIL)
-                    .add(ConversationActions.TYPE_SEND_SMS)
-                    .add(ConversationActions.TYPE_TRACK_FLIGHT)
-                    .add(ConversationActions.TYPE_VIEW_CALENDAR)
-                    .add(ConversationActions.TYPE_VIEW_MAP)
+                    .add(ConversationAction.TYPE_TEXT_REPLY)
+                    .add(ConversationAction.TYPE_CREATE_REMINDER)
+                    .add(ConversationAction.TYPE_CALL_PHONE)
+                    .add(ConversationAction.TYPE_OPEN_URL)
+                    .add(ConversationAction.TYPE_SEND_EMAIL)
+                    .add(ConversationAction.TYPE_SEND_SMS)
+                    .add(ConversationAction.TYPE_TRACK_FLIGHT)
+                    .add(ConversationAction.TYPE_VIEW_CALENDAR)
+                    .add(ConversationAction.TYPE_VIEW_MAP)
                     .toString();
 
     private final boolean mSystemTextClassifierEnabled;

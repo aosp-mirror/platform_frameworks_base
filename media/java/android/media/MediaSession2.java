@@ -19,7 +19,7 @@ package android.media;
 import static android.media.MediaConstants.KEY_ALLOWED_COMMANDS;
 import static android.media.MediaConstants.KEY_PACKAGE_NAME;
 import static android.media.MediaConstants.KEY_PID;
-import static android.media.MediaConstants.KEY_SESSION2_STUB;
+import static android.media.MediaConstants.KEY_SESSION2LINK;
 import static android.media.Session2Command.RESULT_ERROR_UNKNOWN_ERROR;
 import static android.media.Session2Command.RESULT_INFO_SKIPPED;
 import static android.media.Session2Token.TYPE_SESSION;
@@ -56,10 +56,9 @@ import java.util.concurrent.Executor;
  * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
  * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
  * for consistent behavior across all devices.
- * @hide
  */
 public class MediaSession2 implements AutoCloseable {
-    static final String TAG = "MediaSession";
+    static final String TAG = "MediaSession2";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     // Note: This checks the uniqueness of a session ID only in a single process.
@@ -89,7 +88,6 @@ public class MediaSession2 implements AutoCloseable {
     private final Handler mResultHandler;
 
     //@GuardedBy("mLock")
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
     private boolean mClosed;
 
     MediaSession2(@NonNull Context context, @NonNull String id, PendingIntent sessionActivity,
@@ -113,6 +111,7 @@ public class MediaSession2 implements AutoCloseable {
                 Context.MEDIA_SESSION_SERVICE);
         // NOTE: mResultHandler uses main looper, so this MUST NOT be blocked.
         mResultHandler = new Handler(context.getMainLooper());
+        mClosed = false;
     }
 
     @Override
@@ -179,6 +178,7 @@ public class MediaSession2 implements AutoCloseable {
      * @return a token which will be sent together in {@link SessionCallback#onCommandResult}
      *     when its result is received.
      */
+    @NonNull
     public Object sendSessionCommand(@NonNull ControllerInfo controller,
             @NonNull Session2Command command, @Nullable Bundle args) {
         if (controller == null) {
@@ -206,7 +206,10 @@ public class MediaSession2 implements AutoCloseable {
      * @param controller the controller to get the session command
      * @param token the token which is returned from {@link #sendSessionCommand}.
      */
-    public void cancelSessionCommand(ControllerInfo controller, Object token) {
+    public void cancelSessionCommand(@NonNull ControllerInfo controller, @NonNull Object token) {
+        if (controller == null) {
+            throw new IllegalArgumentException("controller shouldn't be null");
+        }
         if (token == null) {
             throw new IllegalArgumentException("token shouldn't be null");
         }
@@ -267,7 +270,7 @@ public class MediaSession2 implements AutoCloseable {
                     // It's needed because we cannot call synchronous calls between
                     // session/controller.
                     Bundle connectionResult = new Bundle();
-                    connectionResult.putParcelable(KEY_SESSION2_STUB, mSessionStub);
+                    connectionResult.putParcelable(KEY_SESSION2LINK, mSessionStub);
                     connectionResult.putParcelable(KEY_ALLOWED_COMMANDS,
                             controllerInfo.mAllowedCommands);
 
@@ -558,7 +561,7 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (!(obj instanceof ControllerInfo)) return false;
             if (this == obj) return true;
 
@@ -570,6 +573,7 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         @Override
+        @NonNull
         public String toString() {
             return "ControllerInfo {pkg=" + mRemoteUserInfo.getPackageName() + ", uid="
                     + mRemoteUserInfo.getUid() + ", allowedCommands=" + mAllowedCommands + "})";
@@ -693,7 +697,7 @@ public class MediaSession2 implements AutoCloseable {
          * @return the result for the session command. A runtime exception will be thrown if null
          *         is returned.
          */
-        @NonNull
+        @Nullable
         public Session2Command.Result onSessionCommand(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller, @NonNull Session2Command command,
                 @Nullable Bundle args) {

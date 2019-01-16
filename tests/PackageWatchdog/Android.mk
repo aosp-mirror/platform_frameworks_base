@@ -23,7 +23,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     junit \
     frameworks-base-testutils \
     android-support-test \
-    services
+    services.core
 
 LOCAL_JAVA_LIBRARIES := \
     android.test.runner

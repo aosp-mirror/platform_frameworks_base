@@ -15,7 +15,7 @@
 -->
 
 <resources>
-<overlayable>
+<overlayable name="OverlayableResources1" actor="overlay://theme">
     <!-- Any overlay can overlay the value of @string/overlayable1 -->
     <item type="string" name="overlayable1" />
 
@@ -31,9 +31,9 @@
     </policy>
 </overlayable>
 
-<overlayable>
+<overlayable name="OverlayableResources2" actor="overlay://com.android.overlayable">
     <!-- Any overlay on the product_services, vendor, or product partition can overlay the value of
-   @string/overlayable3 -->
+        @string/overlayable3 -->
     <policy type="product_services|vendor|product">
         <item type="string" name="overlayable3" />
     </policy>

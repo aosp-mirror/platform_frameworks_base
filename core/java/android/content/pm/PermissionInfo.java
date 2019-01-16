@@ -158,6 +158,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int PROTECTION_FLAG_OEM = 0x4000;
 
     /**

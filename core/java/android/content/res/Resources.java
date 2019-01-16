@@ -2010,21 +2010,35 @@ public class Resources {
     public String getResourceTypeName(@AnyRes int resid) throws NotFoundException {
         return mResourcesImpl.getResourceTypeName(resid);
     }
-    
+
     /**
      * Return the entry name for a given resource identifier.
-     * 
+     *
      * @param resid The resource identifier whose entry name is to be
      * retrieved.
-     * 
+     *
      * @return A string holding the entry name of the resource.
-     * 
+     *
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
+     *
      * @see #getResourceName
      */
     public String getResourceEntryName(@AnyRes int resid) throws NotFoundException {
         return mResourcesImpl.getResourceEntryName(resid);
+    }
+
+    /**
+     * Return formatted log of the last retrieved resource's resolution path.
+     *
+     * @return A string holding a formatted log of the steps taken to resolve the last resource.
+     *
+     * @throws NotFoundException Throws NotFoundException if there hasn't been a resource
+     * resolved yet.
+     *
+     * @hide
+     */
+    public String getLastResourceResolution() throws NotFoundException {
+        return mResourcesImpl.getLastResourceResolution();
     }
     
     /**

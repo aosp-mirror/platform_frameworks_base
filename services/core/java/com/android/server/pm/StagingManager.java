@@ -130,7 +130,7 @@ public class StagingManager {
                 ServiceManager.getService("apexservice"));
         boolean success;
         try {
-            success = apex.submitStagedSession(sessionId, apexInfoList);
+            success = apex.submitStagedSession(sessionId, new int[0], apexInfoList);
         } catch (RemoteException re) {
             Slog.e(TAG, "Unable to contact apexservice", re);
             return false;

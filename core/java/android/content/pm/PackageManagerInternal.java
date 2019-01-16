@@ -284,6 +284,17 @@ public abstract class PackageManagerInternal {
     public abstract SuspendDialogInfo getSuspendedDialogInfo(String suspendedPackage, int userId);
 
     /**
+     * Gets any distraction flags set via
+     * {@link PackageManager#setDistractingPackageRestrictions(String[], int)}
+     *
+     * @param packageName
+     * @param userId
+     * @return A bitwise OR of any of the {@link PackageManager.DistractionRestriction}
+     */
+    public abstract @PackageManager.DistractionRestriction int getDistractingPackageRestrictions(
+            String packageName, int userId);
+
+    /**
      * Do a straight uid lookup for the given package/application in the given user.
      * @see PackageManager#getPackageUidAsUser(String, int, int)
      * @return The app's uid, or < 0 if the package was not found in that user

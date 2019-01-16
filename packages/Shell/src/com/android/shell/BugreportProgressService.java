@@ -56,6 +56,7 @@ import com.google.android.collect.Lists;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.annotation.MainThread;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -799,6 +800,18 @@ public class BugreportProgressService extends Service {
             Log.wtf(TAG, "Missing " + EXTRA_BUGREPORT + " on intent " + intent);
             return;
         }
+        final int max = intent.getIntExtra(EXTRA_MAX, -1);
+        final File screenshotFile = getFileExtra(intent, EXTRA_SCREENSHOT);
+        final String shareTitle = intent.getStringExtra(EXTRA_TITLE);
+        final String shareDescription = intent.getStringExtra(EXTRA_DESCRIPTION);
+        onBugreportFinished(id, bugreportFile, screenshotFile, shareTitle, shareDescription, max);
+    }
+
+    /**
+     * Wraps up bugreport generation and triggers a notification to share the bugreport.
+     */
+    private void onBugreportFinished(int id, File bugreportFile, @Nullable File screenshotFile,
+        String shareTitle, String shareDescription, int max) {
         mInfoDialog.onBugreportFinished();
         BugreportInfo info = getInfo(id);
         if (info == null) {
@@ -809,22 +822,17 @@ public class BugreportProgressService extends Service {
         }
         info.renameScreenshots(mScreenshotsDir);
         info.bugreportFile = bugreportFile;
+        if (screenshotFile != null) {
+            info.addScreenshot(screenshotFile);
+        }
 
-        final int max = intent.getIntExtra(EXTRA_MAX, -1);
         if (max != -1) {
             MetricsLogger.histogram(this, "dumpstate_duration", max);
             info.max = max;
         }
 
-        final File screenshot = getFileExtra(intent, EXTRA_SCREENSHOT);
-        if (screenshot != null) {
-            info.addScreenshot(screenshot);
-        }
-
-        final String shareTitle = intent.getStringExtra(EXTRA_TITLE);
         if (!TextUtils.isEmpty(shareTitle)) {
             info.title = shareTitle;
-            final String shareDescription = intent.getStringExtra(EXTRA_DESCRIPTION);
             if (!TextUtils.isEmpty(shareDescription)) {
                 info.shareDescription= shareDescription;
             }
@@ -1944,6 +1952,23 @@ public class BugreportProgressService extends Service {
         }
 
         @Override
+        public void onProgress(int progress) throws RemoteException {
+            // TODO(b/111441001): change max argument?
+            updateProgressInfo(progress, CAPPED_MAX);
+        }
+
+        @Override
+        public void onError(int errorCode) throws RemoteException {
+            // TODO(b/111441001): implement
+        }
+
+        @Override
+        public void onFinished(long durationMs, String title, String description)
+                throws RemoteException {
+            // TODO(b/111441001): implement
+        }
+
+        @Override
         public void onProgressUpdated(int progress) throws RemoteException {
             /*
              * Checks whether the progress changed in a way that should be displayed to the user:
@@ -1964,21 +1989,7 @@ public class BugreportProgressService extends Service {
             }
 
             if (newPercentage > oldPercentage) {
-                if (DEBUG) {
-                    if (progress != info.progress) {
-                        Log.v(TAG, "Updating progress for PID " + info.pid + "(id: " + info.id
-                                + ") from " + info.progress + " to " + progress);
-                    }
-                    if (max != info.max) {
-                        Log.v(TAG, "Updating max progress for PID " + info.pid + "(id: " + info.id
-                                + ") from " + info.max + " to " + max);
-                    }
-                }
-                info.progress = progress;
-                info.max = max;
-                info.lastUpdate = System.currentTimeMillis();
-
-                updateProgress(info);
+                updateProgressInfo(progress, max);
             }
         }
 
@@ -1999,6 +2010,24 @@ public class BugreportProgressService extends Service {
 
         public void dump(String prefix, PrintWriter pw) {
             pw.print(prefix); pw.print("token: "); pw.println(token);
+        }
+
+        private void updateProgressInfo(int progress, int max) {
+            if (DEBUG) {
+                if (progress != info.progress) {
+                    Log.v(TAG, "Updating progress for PID " + info.pid + "(id: " + info.id
+                            + ") from " + info.progress + " to " + progress);
+                }
+                if (max != info.max) {
+                    Log.v(TAG, "Updating max progress for PID " + info.pid + "(id: " + info.id
+                            + ") from " + info.max + " to " + max);
+                }
+            }
+            info.progress = progress;
+            info.max = max;
+            info.lastUpdate = System.currentTimeMillis();
+
+            updateProgress(info);
         }
     }
 }

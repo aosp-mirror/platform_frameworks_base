@@ -25,6 +25,7 @@ import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -135,9 +136,13 @@ public class PluginManagerTest extends SysuiTestCase {
         });
         resetExceptionHandler();
 
+        String sourceDir = "myPlugin";
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.sourceDir = sourceDir;
+        applicationInfo.packageName = WHITELISTED_PACKAGE;
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        assertNull(mPluginManager.getOneShotPlugin("myPlugin", TestPlugin.class));
-        assertNull(mPluginManager.getClassLoader("myPlugin", WHITELISTED_PACKAGE));
+        assertNull(mPluginManager.getOneShotPlugin(sourceDir, TestPlugin.class));
+        assertNull(mPluginManager.getClassLoader(applicationInfo));
     }
 
     @Test
@@ -152,9 +157,16 @@ public class PluginManagerTest extends SysuiTestCase {
         });
         resetExceptionHandler();
 
+        String sourceDir = "myPlugin";
+        ApplicationInfo whiteListedApplicationInfo = new ApplicationInfo();
+        whiteListedApplicationInfo.sourceDir = sourceDir;
+        whiteListedApplicationInfo.packageName = WHITELISTED_PACKAGE;
+        ApplicationInfo invalidApplicationInfo = new ApplicationInfo();
+        invalidApplicationInfo.sourceDir = sourceDir;
+        invalidApplicationInfo.packageName = "com.android.invalidpackage";
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        assertNotNull(mPluginManager.getClassLoader("myPlugin", WHITELISTED_PACKAGE));
-        assertNull(mPluginManager.getClassLoader("myPlugin", "com.android.invalidpackage"));
+        assertNotNull(mPluginManager.getClassLoader(whiteListedApplicationInfo));
+        assertNull(mPluginManager.getClassLoader(invalidApplicationInfo));
     }
 
     @Test

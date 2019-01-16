@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Represents an ongoing {@link MediaSession2} or a {@link MediaSession2Service}.
+ * Represents an ongoing {@link MediaSession2} or a MediaSession2Service.
  * If it's representing a session service, it may not be ongoing.
  * <p>
  * This API is not generally intended for third party application developers.
@@ -45,9 +45,8 @@ import java.util.Objects;
  * This may be passed to apps by the session owner to allow them to create a
  * {@link MediaController2} to communicate with the session.
  * <p>
- * It can be also obtained by {@link MediaSessionManager}.
+ * It can be also obtained by {@link android.media.session.MediaSessionManager}.
  *
- * @hide
  */
 // New version of MediaSession2.Token for following reasons
 //   - Stop implementing Parcelable for updatable support
@@ -56,6 +55,7 @@ import java.util.Objects;
 //     This helps controller apps to keep target of dispatching media key events in uniform way.
 //     For details about the reason, see following. (Android O+)
 //         android.media.session.MediaSessionManager.Callback#onAddressedPlayerChanged
+// TODO: use @link for MediaSession2Service
 public final class Session2Token implements Parcelable {
     private static final String TAG = "Session2Token";
 
@@ -75,7 +75,7 @@ public final class Session2Token implements Parcelable {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "TYPE_", value = {TYPE_SESSION, TYPE_SESSION_SERVICE, TYPE_LIBRARY_SERVICE})
+    @IntDef(prefix = "TYPE_", value = {TYPE_SESSION, TYPE_SESSION_SERVICE})
     public @interface TokenType {
     }
 
@@ -85,14 +85,9 @@ public final class Session2Token implements Parcelable {
     public static final int TYPE_SESSION = 0;
 
     /**
-     * Type for {@link MediaSession2Service}.
+     * Type for MediaSession2Service.
      */
     public static final int TYPE_SESSION_SERVICE = 1;
-
-    /**
-     * Type for {@link MediaLibrary2Service}.
-     */
-    public static final int TYPE_LIBRARY_SERVICE = 2;
 
     private final int mUid;
     private final @TokenType int mType;
@@ -102,8 +97,7 @@ public final class Session2Token implements Parcelable {
     private final ComponentName mComponentName;
 
     /**
-     * Constructor for the token with type {@link #TYPE_SESSION_SERVICE} or
-     * {@link #TYPE_LIBRARY_SERVICE}.
+     * Constructor for the token with type {@link #TYPE_SESSION_SERVICE}.
      *
      * @param context The context.
      * @param serviceComponent The component name of the service.
@@ -239,7 +233,6 @@ public final class Session2Token implements Parcelable {
      * @return type of the token
      * @see #TYPE_SESSION
      * @see #TYPE_SESSION_SERVICE
-     * @see #TYPE_LIBRARY_SERVICE
      */
     public @TokenType int getType() {
         return mType;

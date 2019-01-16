@@ -223,6 +223,7 @@ public final class Settings {
     private static final String ATTR_BLOCKED = "blocked";
     // New name for the above attribute.
     private static final String ATTR_HIDDEN = "hidden";
+    private static final String ATTR_DISTRACTION_FLAGS = "distraction_flags";
     private static final String ATTR_SUSPENDED = "suspended";
     private static final String ATTR_SUSPENDING_PACKAGE = "suspending-package";
     /**
@@ -734,6 +735,7 @@ public final class Settings {
                                 true /*stopped*/,
                                 true /*notLaunched*/,
                                 false /*hidden*/,
+                                0 /*distractionFlags*/,
                                 false /*suspended*/,
                                 null /*suspendingPackage*/,
                                 null /*dialogInfo*/,
@@ -1628,6 +1630,7 @@ public final class Settings {
                                 false /*stopped*/,
                                 false /*notLaunched*/,
                                 false /*hidden*/,
+                                0 /*distractionFlags*/,
                                 false /*suspended*/,
                                 null /*suspendingPackage*/,
                                 null /*dialogInfo*/,
@@ -1703,6 +1706,8 @@ public final class Settings {
                     hidden = hiddenStr == null
                             ? hidden : Boolean.parseBoolean(hiddenStr);
 
+                    final int distractionFlags = XmlUtils.readIntAttribute(parser,
+                            ATTR_DISTRACTION_FLAGS, 0);
                     final boolean suspended = XmlUtils.readBooleanAttribute(parser, ATTR_SUSPENDED,
                             false);
                     String suspendingPackage = parser.getAttributeValue(null,
@@ -1781,7 +1786,8 @@ public final class Settings {
                         setBlockUninstallLPw(userId, name, true);
                     }
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
-                            hidden, suspended, suspendingPackage, suspendDialogInfo,
+                            hidden, distractionFlags, suspended, suspendingPackage,
+                            suspendDialogInfo,
                             suspendedAppExtras, suspendedLauncherExtras, instantApp, virtualPreload,
                             enabledCaller, enabledComponents, disabledComponents, verifState,
                             linkGeneration, installReason, harmfulAppWarning);
@@ -2088,6 +2094,10 @@ public final class Settings {
                 }
                 if (ustate.hidden) {
                     serializer.attribute(null, ATTR_HIDDEN, "true");
+                }
+                if (ustate.distractionFlags != 0) {
+                    serializer.attribute(null, ATTR_DISTRACTION_FLAGS,
+                            Integer.toString(ustate.distractionFlags));
                 }
                 if (ustate.suspended) {
                     serializer.attribute(null, ATTR_SUSPENDED, "true");

@@ -424,30 +424,30 @@ jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SkColorSpaceTransferFn GraphicsJNI::getNativeTransferParameters(JNIEnv* env, jobject transferParams) {
-    SkColorSpaceTransferFn p;
-    p.fA = (float) env->GetDoubleField(transferParams, gTransferParams_aFieldID);
-    p.fB = (float) env->GetDoubleField(transferParams, gTransferParams_bFieldID);
-    p.fC = (float) env->GetDoubleField(transferParams, gTransferParams_cFieldID);
-    p.fD = (float) env->GetDoubleField(transferParams, gTransferParams_dFieldID);
-    p.fE = (float) env->GetDoubleField(transferParams, gTransferParams_eFieldID);
-    p.fF = (float) env->GetDoubleField(transferParams, gTransferParams_fFieldID);
-    p.fG = (float) env->GetDoubleField(transferParams, gTransferParams_gFieldID);
+skcms_TransferFunction GraphicsJNI::getNativeTransferParameters(JNIEnv* env, jobject transferParams) {
+    skcms_TransferFunction p;
+    p.a = (float) env->GetDoubleField(transferParams, gTransferParams_aFieldID);
+    p.b = (float) env->GetDoubleField(transferParams, gTransferParams_bFieldID);
+    p.c = (float) env->GetDoubleField(transferParams, gTransferParams_cFieldID);
+    p.d = (float) env->GetDoubleField(transferParams, gTransferParams_dFieldID);
+    p.e = (float) env->GetDoubleField(transferParams, gTransferParams_eFieldID);
+    p.f = (float) env->GetDoubleField(transferParams, gTransferParams_fFieldID);
+    p.g = (float) env->GetDoubleField(transferParams, gTransferParams_gFieldID);
     return p;
 }
 
-SkMatrix44 GraphicsJNI::getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50) {
-    SkMatrix44 xyzMatrix(SkMatrix44::kIdentity_Constructor);
+skcms_Matrix3x3 GraphicsJNI::getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50) {
+    skcms_Matrix3x3 xyzMatrix;
     jfloat* array = env->GetFloatArrayElements(xyzD50, NULL);
-    xyzMatrix.setFloat(0, 0, array[0]);
-    xyzMatrix.setFloat(1, 0, array[1]);
-    xyzMatrix.setFloat(2, 0, array[2]);
-    xyzMatrix.setFloat(0, 1, array[3]);
-    xyzMatrix.setFloat(1, 1, array[4]);
-    xyzMatrix.setFloat(2, 1, array[5]);
-    xyzMatrix.setFloat(0, 2, array[6]);
-    xyzMatrix.setFloat(1, 2, array[7]);
-    xyzMatrix.setFloat(2, 2, array[8]);
+    xyzMatrix.vals[0][0] = array[0];
+    xyzMatrix.vals[1][0] = array[1];
+    xyzMatrix.vals[2][0] = array[2];
+    xyzMatrix.vals[0][1] = array[3];
+    xyzMatrix.vals[1][1] = array[4];
+    xyzMatrix.vals[2][1] = array[5];
+    xyzMatrix.vals[0][2] = array[6];
+    xyzMatrix.vals[1][2] = array[7];
+    xyzMatrix.vals[2][2] = array[8];
     env->ReleaseFloatArrayElements(xyzD50, array, 0);
     return xyzMatrix;
 }
@@ -456,12 +456,14 @@ sk_sp<SkColorSpace> GraphicsJNI::getNativeColorSpace(JNIEnv* env, jobject colorS
     if (colorSpace == nullptr) return nullptr;
     if (!env->IsInstanceOf(colorSpace, gColorSpaceRGB_class)) {
         doThrowIAE(env, "The color space must be an RGB color space");
+        return nullptr;
     }
 
     jobject transferParams = env->CallObjectMethod(colorSpace,
             gColorSpaceRGB_getTransferParametersMethodID);
     if (transferParams == nullptr) {
         doThrowIAE(env, "The color space must use an ICC parametric transfer function");
+        return nullptr;
     }
 
     jfloatArray illuminantD50 = (jfloatArray) env->GetStaticObjectField(gColorSpace_class,
@@ -472,8 +474,8 @@ sk_sp<SkColorSpace> GraphicsJNI::getNativeColorSpace(JNIEnv* env, jobject colorS
     jfloatArray xyzD50 = (jfloatArray) env->CallObjectMethod(colorSpaceD50,
             gColorSpaceRGB_getTransformMethodID);
 
-    SkMatrix44 xyzMatrix = getNativeXYZMatrix(env, xyzD50);
-    SkColorSpaceTransferFn transferFunction = getNativeTransferParameters(env, transferParams);
+    skcms_Matrix3x3 xyzMatrix = getNativeXYZMatrix(env, xyzD50);
+    skcms_TransferFunction transferFunction = getNativeTransferParameters(env, transferParams);
 
     return SkColorSpace::MakeRGB(transferFunction, xyzMatrix);
 }
@@ -499,30 +501,30 @@ jobject GraphicsJNI::getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColor
         } else if (decodeColorSpace.get() != nullptr) {
             // Try to match against known RGB color spaces using the CIE XYZ D50
             // conversion matrix and numerical transfer function parameters
-            SkMatrix44 xyzMatrix(SkMatrix44::kUninitialized_Constructor);
+            skcms_Matrix3x3 xyzMatrix;
             LOG_ALWAYS_FATAL_IF(!decodeColorSpace->toXYZD50(&xyzMatrix));
 
-            SkColorSpaceTransferFn transferParams;
+            skcms_TransferFunction transferParams;
             // We can only handle numerical transfer functions at the moment
             LOG_ALWAYS_FATAL_IF(!decodeColorSpace->isNumericalTransferFn(&transferParams));
 
             jobject params = env->NewObject(gTransferParameters_class,
                     gTransferParameters_constructorMethodID,
-                    transferParams.fA, transferParams.fB, transferParams.fC,
-                    transferParams.fD, transferParams.fE, transferParams.fF,
-                    transferParams.fG);
+                    transferParams.a, transferParams.b, transferParams.c,
+                    transferParams.d, transferParams.e, transferParams.f,
+                    transferParams.g);
 
             jfloatArray xyzArray = env->NewFloatArray(9);
             jfloat xyz[9] = {
-                    xyzMatrix.getFloat(0, 0),
-                    xyzMatrix.getFloat(1, 0),
-                    xyzMatrix.getFloat(2, 0),
-                    xyzMatrix.getFloat(0, 1),
-                    xyzMatrix.getFloat(1, 1),
-                    xyzMatrix.getFloat(2, 1),
-                    xyzMatrix.getFloat(0, 2),
-                    xyzMatrix.getFloat(1, 2),
-                    xyzMatrix.getFloat(2, 2)
+                    xyzMatrix.vals[0][0],
+                    xyzMatrix.vals[1][0],
+                    xyzMatrix.vals[2][0],
+                    xyzMatrix.vals[0][1],
+                    xyzMatrix.vals[1][1],
+                    xyzMatrix.vals[2][1],
+                    xyzMatrix.vals[0][2],
+                    xyzMatrix.vals[1][2],
+                    xyzMatrix.vals[2][2]
             };
             env->SetFloatArrayRegion(xyzArray, 0, 9, xyz);
 

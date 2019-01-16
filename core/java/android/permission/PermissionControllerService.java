@@ -33,11 +33,16 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallback;
+import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +56,7 @@ import java.util.Map;
  */
 @SystemApi
 public abstract class PermissionControllerService extends Service {
+    private static final String LOG_TAG = PermissionControllerService.class.getSimpleName();
 
     /**
      * The {@link Intent} action that must be declared as handled by a service
@@ -81,6 +87,15 @@ public abstract class PermissionControllerService extends Service {
     public abstract @NonNull Map<String, List<String>> onRevokeRuntimePermissions(
             @NonNull Map<String, List<String>> requests, boolean doDryRun,
             @PermissionControllerManager.Reason int reason, @NonNull String callerPackageName);
+
+    /**
+     * Create a backup of the runtime permissions.
+     *
+     * @param user The user to back up
+     * @param out The stream to write the backup to
+     */
+    public abstract void onGetRuntimePermissionsBackup(@NonNull UserHandle user,
+            @NonNull OutputStream out);
 
     /**
      * Gets the runtime permissions for an app.
@@ -163,6 +178,18 @@ public abstract class PermissionControllerService extends Service {
             }
 
             @Override
+            public void getRuntimePermissionBackup(UserHandle user, ParcelFileDescriptor pipe) {
+                checkNotNull(user);
+                checkNotNull(pipe);
+
+                enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
+
+                mHandler.sendMessage(obtainMessage(
+                        PermissionControllerService::getRuntimePermissionsBackup,
+                        PermissionControllerService.this, user, pipe));
+            }
+
+            @Override
             public void getAppPermissions(String packageName, RemoteCallback callback) {
                 checkNotNull(packageName, "packageName");
                 checkNotNull(callback, "callback");
@@ -235,6 +262,15 @@ public abstract class PermissionControllerService extends Service {
         Bundle result = new Bundle();
         result.putBundle(PermissionControllerManager.KEY_RESULT, bundledizedRevoked);
         callback.sendResult(result);
+    }
+
+    private void getRuntimePermissionsBackup(@NonNull UserHandle user,
+            @NonNull ParcelFileDescriptor outFile) {
+        try (OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(outFile)) {
+            onGetRuntimePermissionsBackup(user, out);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Could not open pipe to write backup tp", e);
+        }
     }
 
     private void getAppPermissions(@NonNull String packageName, @NonNull RemoteCallback callback) {

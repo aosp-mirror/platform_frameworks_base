@@ -41,10 +41,6 @@ public class VisibilityLoggerMixin implements LifecycleObserver {
     private int mSourceMetricsCategory = MetricsProto.MetricsEvent.VIEW_UNKNOWN;
     private long mVisibleTimestamp;
 
-    private VisibilityLoggerMixin() {
-        mMetricsCategory = METRICS_CATEGORY_UNKNOWN;
-    }
-
     public VisibilityLoggerMixin(int metricsCategory, MetricsFeatureProvider metricsFeature) {
         mMetricsCategory = metricsCategory;
         mMetricsFeature = metricsFeature;
@@ -80,13 +76,5 @@ public class VisibilityLoggerMixin implements LifecycleObserver {
         mSourceMetricsCategory = intent.getIntExtra(
                 MetricsFeatureProvider.EXTRA_SOURCE_METRICS_CATEGORY,
                 MetricsProto.MetricsEvent.VIEW_UNKNOWN);
-    }
-
-    /** Returns elapsed time since onResume() */
-    public long elapsedTimeSinceVisible() {
-        if (mVisibleTimestamp == 0) {
-            return 0;
-        }
-        return SystemClock.elapsedRealtime() - mVisibleTimestamp;
     }
 }

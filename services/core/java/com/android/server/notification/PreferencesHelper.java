@@ -81,7 +81,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_NAME = "name";
     private static final String ATT_UID = "uid";
     private static final String ATT_ID = "id";
-    private static final String ATT_APP_OVERLAY = "overlay";
+    private static final String ATT_ALLOW_BUBBLE = "allow_bubble";
     private static final String ATT_PRIORITY = "priority";
     private static final String ATT_VISIBILITY = "visibility";
     private static final String ATT_IMPORTANCE = "importance";
@@ -94,8 +94,9 @@ public class PreferencesHelper implements RankingConfig {
     private static final int DEFAULT_VISIBILITY = NotificationManager.VISIBILITY_NO_OVERRIDE;
     private static final int DEFAULT_IMPORTANCE = NotificationManager.IMPORTANCE_UNSPECIFIED;
     private static final boolean DEFAULT_SHOW_BADGE = true;
-    private static final boolean DEFAULT_ALLOW_APP_OVERLAY = true;
+    private static final boolean DEFAULT_ALLOW_BUBBLE = true;
     private static final boolean DEFAULT_OEM_LOCKED_IMPORTANCE  = false;
+
     /**
      * Default value for what fields are user locked. See {@link LockableAppFields} for all lockable
      * fields.
@@ -108,7 +109,7 @@ public class PreferencesHelper implements RankingConfig {
     @IntDef({LockableAppFields.USER_LOCKED_IMPORTANCE})
     public @interface LockableAppFields {
         int USER_LOCKED_IMPORTANCE = 0x00000001;
-        int USER_LOCKED_APP_OVERLAY = 0x00000002;
+        int USER_LOCKED_BUBBLE = 0x00000002;
     }
 
     // pkg|uid => PackagePreferences
@@ -176,7 +177,7 @@ public class PreferencesHelper implements RankingConfig {
                                     XmlUtils.readBooleanAttribute(
                                             parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE),
                                     XmlUtils.readBooleanAttribute(
-                                            parser, ATT_APP_OVERLAY, DEFAULT_ALLOW_APP_OVERLAY));
+                                            parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
                             r.importance = XmlUtils.readIntAttribute(
                                     parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
                             r.priority = XmlUtils.readIntAttribute(
@@ -272,11 +273,11 @@ public class PreferencesHelper implements RankingConfig {
     private PackagePreferences getOrCreatePackagePreferences(String pkg, int uid) {
         return getOrCreatePackagePreferences(pkg, uid,
                 DEFAULT_IMPORTANCE, DEFAULT_PRIORITY, DEFAULT_VISIBILITY, DEFAULT_SHOW_BADGE,
-                DEFAULT_ALLOW_APP_OVERLAY);
+                DEFAULT_ALLOW_BUBBLE);
     }
 
     private PackagePreferences getOrCreatePackagePreferences(String pkg, int uid, int importance,
-            int priority, int visibility, boolean showBadge, boolean allowAppOverlay) {
+            int priority, int visibility, boolean showBadge, boolean allowBubble) {
         final String key = packagePreferencesKey(pkg, uid);
         synchronized (mPackagePreferences) {
             PackagePreferences
@@ -290,7 +291,7 @@ public class PreferencesHelper implements RankingConfig {
                 r.priority = priority;
                 r.visibility = visibility;
                 r.showBadge = showBadge;
-                r.appOverlay = allowAppOverlay;
+                r.allowBubble = allowBubble;
 
                 try {
                     createDefaultChannelIfNeeded(r);
@@ -392,7 +393,7 @@ public class PreferencesHelper implements RankingConfig {
                                 || r.channels.size() > 0
                                 || r.groups.size() > 0
                                 || r.delegate != null
-                                || r.appOverlay != DEFAULT_ALLOW_APP_OVERLAY;
+                                || r.allowBubble != DEFAULT_ALLOW_BUBBLE;
                 if (hasNonDefaultSettings) {
                     out.startTag(null, TAG_PACKAGE);
                     out.attribute(null, ATT_NAME, r.pkg);
@@ -405,8 +406,8 @@ public class PreferencesHelper implements RankingConfig {
                     if (r.visibility != DEFAULT_VISIBILITY) {
                         out.attribute(null, ATT_VISIBILITY, Integer.toString(r.visibility));
                     }
-                    if (r.appOverlay != DEFAULT_ALLOW_APP_OVERLAY) {
-                        out.attribute(null, ATT_APP_OVERLAY, Boolean.toString(r.appOverlay));
+                    if (r.allowBubble != DEFAULT_ALLOW_BUBBLE) {
+                        out.attribute(null, ATT_ALLOW_BUBBLE, Boolean.toString(r.allowBubble));
                     }
                     out.attribute(null, ATT_SHOW_BADGE, Boolean.toString(r.showBadge));
                     out.attribute(null, ATT_APP_USER_LOCKED_FIELDS,
@@ -452,14 +453,28 @@ public class PreferencesHelper implements RankingConfig {
         out.endTag(null, TAG_RANKING);
     }
 
-    public void setAppOverlaysAllowed(String pkg, int uid, boolean allowed) {
+    /**
+     * Sets whether bubbles are allowed.
+     *
+     * @param pkg the package to allow or not allow bubbles for.
+     * @param uid the uid to allow or not allow bubbles for.
+     * @param allowed whether bubbles are allowed.
+     */
+    public void setBubblesAllowed(String pkg, int uid, boolean allowed) {
         PackagePreferences p = getOrCreatePackagePreferences(pkg, uid);
-        p.appOverlay = allowed;
-        p.lockedAppFields = p.lockedAppFields | LockableAppFields.USER_LOCKED_APP_OVERLAY;
+        p.allowBubble = allowed;
+        p.lockedAppFields = p.lockedAppFields | LockableAppFields.USER_LOCKED_BUBBLE;
     }
 
-    public boolean areAppOverlaysAllowed(String pkg, int uid) {
-        return getOrCreatePackagePreferences(pkg, uid).appOverlay;
+    /**
+     * Whether bubbles are allowed.
+     *
+     * @param pkg the package to check if bubbles are allowed for
+     * @param uid the uid to check if bubbles are allowed for.
+     * @return whether bubbles are allowed.
+     */
+    public boolean areBubblessAllowed(String pkg, int uid) {
+        return getOrCreatePackagePreferences(pkg, uid).allowBubble;
     }
 
     public int getAppLockedFields(String pkg, int uid) {
@@ -1232,8 +1247,8 @@ public class PreferencesHelper implements RankingConfig {
         if (original.canShowBadge() != update.canShowBadge()) {
             update.lockFields(NotificationChannel.USER_LOCKED_SHOW_BADGE);
         }
-        if (original.isAppOverlayAllowed() != update.isAppOverlayAllowed()) {
-            update.lockFields(NotificationChannel.USER_LOCKED_ALLOW_APP_OVERLAY);
+        if (original.isBubbleAllowed() != update.isBubbleAllowed()) {
+            update.lockFields(NotificationChannel.USER_LOCKED_ALLOW_BUBBLE);
         }
     }
 
@@ -1654,7 +1669,7 @@ public class PreferencesHelper implements RankingConfig {
         int priority = DEFAULT_PRIORITY;
         int visibility = DEFAULT_VISIBILITY;
         boolean showBadge = DEFAULT_SHOW_BADGE;
-        boolean appOverlay = DEFAULT_ALLOW_APP_OVERLAY;
+        boolean allowBubble = DEFAULT_ALLOW_BUBBLE;
         int lockedAppFields = DEFAULT_LOCKED_APP_FIELDS;
         boolean oemLockedImportance = DEFAULT_OEM_LOCKED_IMPORTANCE;
         List<String> futureOemLockedChannels = new ArrayList<>();

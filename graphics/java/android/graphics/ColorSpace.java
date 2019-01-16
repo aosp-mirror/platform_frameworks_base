@@ -1661,10 +1661,12 @@ public abstract class ColorSpace {
      * @param rhs 3x3 matrix, as a non-null array of 9 floats
      * @return A new array of 9 floats containing the result of the multiplication
      *         of rhs by lhs
+     *
+     * @hide
      */
     @NonNull
     @Size(9)
-    private static float[] mul3x3(@NonNull @Size(9) float[] lhs, @NonNull @Size(9) float[] rhs) {
+    public static float[] mul3x3(@NonNull @Size(9) float[] lhs, @NonNull @Size(9) float[] rhs) {
         float[] r = new float[9];
         r[0] = lhs[0] * rhs[0] + lhs[3] * rhs[1] + lhs[6] * rhs[2];
         r[1] = lhs[1] * rhs[0] + lhs[4] * rhs[1] + lhs[7] * rhs[2];

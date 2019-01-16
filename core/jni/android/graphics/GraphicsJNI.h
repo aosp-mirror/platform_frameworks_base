@@ -10,7 +10,6 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkColorSpace.h"
-#include "SkMatrix44.h"
 #include <jni.h>
 #include <hwui/Canvas.h>
 #include <hwui/Bitmap.h>
@@ -101,8 +100,8 @@ public:
             int srcStride, int x, int y, int width, int height,
             SkBitmap* dstBitmap);
 
-    static SkColorSpaceTransferFn getNativeTransferParameters(JNIEnv* env, jobject transferParams);
-    static SkMatrix44 getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50);
+    static skcms_TransferFunction getNativeTransferParameters(JNIEnv* env, jobject transferParams);
+    static skcms_Matrix3x3 getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50);
     static sk_sp<SkColorSpace> getNativeColorSpace(JNIEnv* env, jobject colorSpace);
 
     static jobject getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColorSpace,

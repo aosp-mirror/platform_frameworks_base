@@ -17,6 +17,7 @@
 #ifndef ANDROIDFW_RESOURCEUTILS_H
 #define ANDROIDFW_RESOURCEUTILS_H
 
+#include "androidfw/AssetManager2.h"
 #include "androidfw/StringPiece.h"
 
 namespace android {
@@ -26,6 +27,17 @@ namespace android {
 // Returns false if there was a syntax error.
 bool ExtractResourceName(const StringPiece& str, StringPiece* out_package, StringPiece* out_type,
                          StringPiece* out_entry);
+
+// Convert a type_string_ref, entry_string_ref, and package
+// to AssetManager2::ResourceName. Useful for getting
+// resource name without re-running AssetManager2::FindEntry searches.
+bool ToResourceName(StringPoolRef& type_string_ref,
+                    StringPoolRef& entry_string_ref,
+                    const LoadedPackage* package,
+                    AssetManager2::ResourceName* out_name);
+
+// Formats a ResourceName to "package:type/entry_name".
+std::string ToFormattedResourceString(AssetManager2::ResourceName* resource_name);
 
 inline uint32_t fix_package_id(uint32_t resid, uint8_t package_id) {
   return (resid & 0x00ffffffu) | (static_cast<uint32_t>(package_id) << 24);

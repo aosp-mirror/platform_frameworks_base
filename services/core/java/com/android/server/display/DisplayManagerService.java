@@ -95,6 +95,7 @@ import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.wm.SurfaceAnimationThread;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.server.display.ColorDisplayService.ColorDisplayServiceInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -791,6 +792,16 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    private void setVirtualDisplayStateInternal(IBinder appToken, boolean isOn) {
+        synchronized (mSyncRoot) {
+            if (mVirtualDisplayAdapter == null) {
+                return;
+            }
+
+            mVirtualDisplayAdapter.setVirtualDisplayStateLocked(appToken, isOn);
+        }
+    }
+
     private void registerDefaultDisplayAdapters() {
         // Register default display adapters.
         synchronized (mSyncRoot) {
@@ -1459,6 +1470,13 @@ public final class DisplayManagerService extends SystemService {
 
             pw.println();
             mPersistentDataStore.dump(pw);
+
+            final ColorDisplayServiceInternal cds = LocalServices.getService(
+                    ColorDisplayServiceInternal.class);
+            if (cds != null) {
+                pw.println();
+                cds.dump(pw);
+            }
         }
     }
 
@@ -1916,6 +1934,16 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 releaseVirtualDisplayInternal(callback.asBinder());
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setVirtualDisplayState(IVirtualDisplayCallback callback, boolean isOn) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setVirtualDisplayStateInternal(callback.asBinder(), isOn);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

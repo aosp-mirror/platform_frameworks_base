@@ -25,38 +25,6 @@
 namespace android {
 namespace uirenderer {
 
-static inline bool almostEqual(float a, float b) {
-    return std::abs(a - b) < 1e-2f;
-}
-
-bool transferFunctionCloseToSRGB(const SkColorSpace* colorSpace) {
-    if (colorSpace == nullptr) return true;
-    if (colorSpace->isSRGB()) return true;
-
-    SkColorSpaceTransferFn transferFunction;
-    if (colorSpace->isNumericalTransferFn(&transferFunction)) {
-        // sRGB transfer function params:
-        const float sRGBParamA = 1 / 1.055f;
-        const float sRGBParamB = 0.055f / 1.055f;
-        const float sRGBParamC = 1 / 12.92f;
-        const float sRGBParamD = 0.04045f;
-        const float sRGBParamE = 0.0f;
-        const float sRGBParamF = 0.0f;
-        const float sRGBParamG = 2.4f;
-
-        // This comparison will catch Display P3
-        return almostEqual(sRGBParamA, transferFunction.fA) &&
-               almostEqual(sRGBParamB, transferFunction.fB) &&
-               almostEqual(sRGBParamC, transferFunction.fC) &&
-               almostEqual(sRGBParamD, transferFunction.fD) &&
-               almostEqual(sRGBParamE, transferFunction.fE) &&
-               almostEqual(sRGBParamF, transferFunction.fF) &&
-               almostEqual(sRGBParamG, transferFunction.fG);
-    }
-
-    return false;
-}
-
 android::PixelFormat ColorTypeToPixelFormat(SkColorType colorType) {
     switch (colorType) {
         case kRGBA_8888_SkColorType:
@@ -79,19 +47,19 @@ android::PixelFormat ColorTypeToPixelFormat(SkColorType colorType) {
 
 sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
 
-    SkColorSpace::Gamut gamut;
+    skcms_Matrix3x3 gamut;
     switch (dataspace & HAL_DATASPACE_STANDARD_MASK) {
         case HAL_DATASPACE_STANDARD_BT709:
-            gamut = SkColorSpace::kSRGB_Gamut;
+            gamut = SkNamedGamut::kSRGB;
             break;
         case HAL_DATASPACE_STANDARD_BT2020:
-            gamut = SkColorSpace::kRec2020_Gamut;
+            gamut = SkNamedGamut::kRec2020;
             break;
         case HAL_DATASPACE_STANDARD_DCI_P3:
-            gamut = SkColorSpace::kDCIP3_D65_Gamut;
+            gamut = SkNamedGamut::kDCIP3;
             break;
         case HAL_DATASPACE_STANDARD_ADOBE_RGB:
-            gamut = SkColorSpace::kAdobeRGB_Gamut;
+            gamut = SkNamedGamut::kAdobeRGB;
             break;
         case HAL_DATASPACE_STANDARD_UNSPECIFIED:
             return nullptr;
@@ -109,9 +77,9 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
 
     switch (dataspace & HAL_DATASPACE_TRANSFER_MASK) {
         case HAL_DATASPACE_TRANSFER_LINEAR:
-            return SkColorSpace::MakeRGB(SkColorSpace::kLinear_RenderTargetGamma, gamut);
+            return SkColorSpace::MakeRGB(SkNamedTransferFn::kLinear, gamut);
         case HAL_DATASPACE_TRANSFER_SRGB:
-            return SkColorSpace::MakeRGB(SkColorSpace::kSRGB_RenderTargetGamma, gamut);
+            return SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, gamut);
         case HAL_DATASPACE_TRANSFER_GAMMA2_2:
             return SkColorSpace::MakeRGB({2.2f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, gamut);
         case HAL_DATASPACE_TRANSFER_GAMMA2_6:

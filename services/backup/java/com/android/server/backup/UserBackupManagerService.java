@@ -249,11 +249,11 @@ public class UserBackupManagerService {
     private final TransportManager mTransportManager;
     private final HandlerThread mUserBackupThread;
 
-    private Context mContext;
-    private PackageManager mPackageManager;
-    private IPackageManager mPackageManagerBinder;
-    private IActivityManager mActivityManager;
-    private ActivityManagerInternal mActivityManagerInternal;
+    private final Context mContext;
+    private final PackageManager mPackageManager;
+    private final IPackageManager mPackageManagerBinder;
+    private final IActivityManager mActivityManager;
+    private final ActivityManagerInternal mActivityManagerInternal;
     private PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
     private final IStorageManager mStorageManager;
@@ -1466,11 +1466,7 @@ public class UserBackupManagerService {
             }
         }
         if (agent == null) {
-            try {
-                mActivityManager.clearPendingBackup();
-            } catch (RemoteException e) {
-                // can't happen - ActivityManager is local
-            }
+            mActivityManagerInternal.clearPendingBackup(mUserId);
         }
         return agent;
     }

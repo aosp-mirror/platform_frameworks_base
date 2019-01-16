@@ -71,7 +71,7 @@ int ASharedMemory_dupFromJava(JNIEnv* env, jobject javaSharedMemory) {
     }
     int fd = env->CallIntMethod(javaSharedMemory, sSharedMemory.getFd);
     if (fd != -1) {
-        fd = dup(fd);
+        fd = fcntl(fd, F_DUPFD_CLOEXEC, 0);
     }
     return fd;
 }

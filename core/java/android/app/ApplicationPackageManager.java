@@ -2276,6 +2276,16 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String[] setDistractingPackageRestrictions(String[] packages, int distractionFlags) {
+        try {
+            return mPM.setDistractingPackageRestrictionsAsUser(packages, distractionFlags,
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
             PersistableBundle appExtras, PersistableBundle launcherExtras,
             String dialogMessage) {

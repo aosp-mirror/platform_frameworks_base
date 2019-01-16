@@ -20,8 +20,9 @@
 
 #include <algorithm>
 #include <iterator>
-#include <set>
 #include <map>
+#include <set>
+#include <sstream>
 
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
@@ -372,6 +373,9 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
   uint32_t best_offset = 0u;
   uint32_t type_flags = 0u;
 
+  Resolution::Step::Type resolution_type;
+  std::vector<Resolution::Step> resolution_steps;
+
   // If desired_config is the same as the set configuration, then we can use our filtered list
   // and we don't need to match the configurations, since they already matched.
   const bool use_fast_path = desired_config == &configuration_;
@@ -403,8 +407,8 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
     // If the package is an overlay, then even configurations that are the same MUST be chosen.
     const bool package_is_overlay = loaded_package->IsOverlay();
 
-    const FilteredConfigGroup& filtered_group = loaded_package_impl.filtered_configs_[type_idx];
     if (use_fast_path) {
+      const FilteredConfigGroup& filtered_group = loaded_package_impl.filtered_configs_[type_idx];
       const std::vector<ResTable_config>& candidate_configs = filtered_group.configurations;
       const size_t type_count = candidate_configs.size();
       for (uint32_t i = 0; i < type_count; i++) {
@@ -412,21 +416,34 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
 
         // We can skip calling ResTable_config::match() because we know that all candidate
         // configurations that do NOT match have been filtered-out.
-        if ((best_config == nullptr || this_config.isBetterThan(*best_config, desired_config)) ||
-            (package_is_overlay && this_config.compare(*best_config) == 0)) {
-          // The configuration matches and is better than the previous selection.
-          // Find the entry value if it exists for this configuration.
-          const ResTable_type* type_chunk = filtered_group.types[i];
-          const uint32_t offset = LoadedPackage::GetEntryOffset(type_chunk, local_entry_idx);
-          if (offset == ResTable_type::NO_ENTRY) {
-            continue;
-          }
+        if (best_config == nullptr) {
+          resolution_type = Resolution::Step::Type::INITIAL;
+        } else if (this_config.isBetterThan(*best_config, desired_config)) {
+          resolution_type = Resolution::Step::Type::BETTER_MATCH;
+        } else if (package_is_overlay && this_config.compare(*best_config) == 0) {
+          resolution_type = Resolution::Step::Type::OVERLAID;
+        } else {
+          continue;
+        }
 
-          best_cookie = cookie;
-          best_package = loaded_package;
-          best_type = type_chunk;
-          best_config = &this_config;
-          best_offset = offset;
+        // The configuration matches and is better than the previous selection.
+        // Find the entry value if it exists for this configuration.
+        const ResTable_type* type = filtered_group.types[i];
+        const uint32_t offset = LoadedPackage::GetEntryOffset(type, local_entry_idx);
+        if (offset == ResTable_type::NO_ENTRY) {
+          continue;
+        }
+
+        best_cookie = cookie;
+        best_package = loaded_package;
+        best_type = type;
+        best_config = &this_config;
+        best_offset = offset;
+
+        if (resource_resolution_logging_enabled_) {
+          resolution_steps.push_back(Resolution::Step{resolution_type,
+                                                      this_config.toString(),
+                                                      &loaded_package->GetPackageName()});
         }
       }
     } else {
@@ -440,23 +457,38 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
         ResTable_config this_config;
         this_config.copyFromDtoH((*iter)->config);
 
-        if (this_config.match(*desired_config)) {
-          if ((best_config == nullptr || this_config.isBetterThan(*best_config, desired_config)) ||
-              (package_is_overlay && this_config.compare(*best_config) == 0)) {
-            // The configuration matches and is better than the previous selection.
-            // Find the entry value if it exists for this configuration.
-            const uint32_t offset = LoadedPackage::GetEntryOffset(*iter, local_entry_idx);
-            if (offset == ResTable_type::NO_ENTRY) {
-              continue;
-            }
+        if (!this_config.match(*desired_config)) {
+          continue;
+        }
 
-            best_cookie = cookie;
-            best_package = loaded_package;
-            best_type = *iter;
-            best_config_copy = this_config;
-            best_config = &best_config_copy;
-            best_offset = offset;
-          }
+        if (best_config == nullptr) {
+          resolution_type = Resolution::Step::Type::INITIAL;
+        } else if (this_config.isBetterThan(*best_config, desired_config)) {
+          resolution_type = Resolution::Step::Type::BETTER_MATCH;
+        } else if (package_is_overlay && this_config.compare(*best_config) == 0) {
+          resolution_type = Resolution::Step::Type::OVERLAID;
+        } else {
+          continue;
+        }
+
+        // The configuration matches and is better than the previous selection.
+        // Find the entry value if it exists for this configuration.
+        const uint32_t offset = LoadedPackage::GetEntryOffset(*iter, local_entry_idx);
+        if (offset == ResTable_type::NO_ENTRY) {
+          continue;
+        }
+
+        best_cookie = cookie;
+        best_package = loaded_package;
+        best_type = *iter;
+        best_config_copy = this_config;
+        best_config = &best_config_copy;
+        best_offset = offset;
+
+        if (resource_resolution_logging_enabled_) {
+          resolution_steps.push_back(Resolution::Step{resolution_type,
+                                                      this_config.toString(),
+                                                      &loaded_package->GetPackageName()});
         }
       }
     }
@@ -478,7 +510,93 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
   out_entry->entry_string_ref =
       StringPoolRef(best_package->GetKeyStringPool(), best_entry->key.index);
   out_entry->dynamic_ref_table = &package_group.dynamic_ref_table;
+
+  if (resource_resolution_logging_enabled_) {
+    last_resolution.resid = resid;
+    last_resolution.cookie = best_cookie;
+    last_resolution.steps = resolution_steps;
+
+    // Cache only the type/entry refs since that's all that's needed to build name
+    last_resolution.type_string_ref =
+        StringPoolRef(best_package->GetTypeStringPool(), best_type->id - 1);
+    last_resolution.entry_string_ref =
+        StringPoolRef(best_package->GetKeyStringPool(), best_entry->key.index);
+  }
+
   return best_cookie;
+}
+
+void AssetManager2::SetResourceResolutionLoggingEnabled(bool enabled) {
+  resource_resolution_logging_enabled_ = enabled;
+
+  if (!enabled) {
+    last_resolution.cookie = kInvalidCookie;
+    last_resolution.resid = 0;
+    last_resolution.steps.clear();
+    last_resolution.type_string_ref = StringPoolRef();
+    last_resolution.entry_string_ref = StringPoolRef();
+  }
+}
+
+std::string AssetManager2::GetLastResourceResolution() const {
+  if (!resource_resolution_logging_enabled_) {
+    LOG(ERROR) << "Must enable resource resolution logging before getting path.";
+    return std::string();
+  }
+
+  auto cookie = last_resolution.cookie;
+  if (cookie == kInvalidCookie) {
+    LOG(ERROR) << "AssetManager hasn't resolved a resource to read resolution path.";
+    return std::string();
+  }
+
+  uint32_t resid = last_resolution.resid;
+  std::vector<Resolution::Step>& steps = last_resolution.steps;
+
+  ResourceName resource_name;
+  std::string resource_name_string;
+
+  const LoadedPackage* package =
+      apk_assets_[cookie]->GetLoadedArsc()->GetPackageById(get_package_id(resid));
+
+  if (package != nullptr) {
+    ToResourceName(last_resolution.type_string_ref,
+                   last_resolution.entry_string_ref,
+                   package,
+                   &resource_name);
+    resource_name_string = ToFormattedResourceString(&resource_name);
+  }
+
+  std::stringstream log_stream;
+  log_stream << base::StringPrintf("Resolution for 0x%08x ", resid)
+            << resource_name_string
+            << "\n\tFor config -"
+            << configuration_.toString();
+
+  std::string prefix;
+  for (Resolution::Step step : steps) {
+    switch (step.type) {
+      case Resolution::Step::Type::INITIAL:
+        prefix = "Found initial";
+        break;
+      case Resolution::Step::Type::BETTER_MATCH:
+        prefix = "Found better";
+        break;
+      case Resolution::Step::Type::OVERLAID:
+        prefix = "Overlaid";
+        break;
+    }
+
+    if (!prefix.empty()) {
+      log_stream << "\n\t" << prefix << ": " << *step.package_name;
+
+      if (!step.config_name.isEmpty()) {
+        log_stream << " -" << step.config_name;
+      }
+    }
+  }
+
+  return log_stream.str();
 }
 
 bool AssetManager2::GetResourceName(uint32_t resid, ResourceName* out_name) const {
@@ -495,27 +613,10 @@ bool AssetManager2::GetResourceName(uint32_t resid, ResourceName* out_name) cons
     return false;
   }
 
-  out_name->package = package->GetPackageName().data();
-  out_name->package_len = package->GetPackageName().size();
-
-  out_name->type = entry.type_string_ref.string8(&out_name->type_len);
-  out_name->type16 = nullptr;
-  if (out_name->type == nullptr) {
-    out_name->type16 = entry.type_string_ref.string16(&out_name->type_len);
-    if (out_name->type16 == nullptr) {
-      return false;
-    }
-  }
-
-  out_name->entry = entry.entry_string_ref.string8(&out_name->entry_len);
-  out_name->entry16 = nullptr;
-  if (out_name->entry == nullptr) {
-    out_name->entry16 = entry.entry_string_ref.string16(&out_name->entry_len);
-    if (out_name->entry16 == nullptr) {
-      return false;
-    }
-  }
-  return true;
+  return ToResourceName(entry.type_string_ref,
+                        entry.entry_string_ref,
+                        package,
+                        out_name);
 }
 
 bool AssetManager2::GetResourceFlags(uint32_t resid, uint32_t* out_flags) const {

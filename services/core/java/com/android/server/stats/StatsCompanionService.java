@@ -43,6 +43,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.fingerprint.FingerprintManager;
 import android.net.ConnectivityManager;
+import android.net.INetworkStatsService;
 import android.net.Network;
 import android.net.NetworkRequest;
 import android.net.NetworkStats;
@@ -90,7 +91,6 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.IProcessStats;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
@@ -210,6 +210,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private final Context mContext;
     private final AlarmManager mAlarmManager;
+    private final INetworkStatsService mNetworkStatsService;
     @GuardedBy("sStatsdLock")
     private static IStatsManager sStatsd;
     private static final Object sStatsdLock = new Object();
@@ -257,6 +258,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         super();
         mContext = context;
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        mNetworkStatsService = INetworkStatsService.Stub.asInterface(
+              ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         mBaseDir.mkdirs();
         mAppUpdateReceiver = new AppUpdateReceiver();
         mUserUpdateReceiver = new BroadcastReceiver() {
@@ -788,14 +791,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             if (ifaces.length == 0) {
                 return;
             }
-            NetworkStatsFactory nsf = new NetworkStatsFactory();
+            if (mNetworkStatsService == null) {
+                Slog.e(TAG, "NetworkStats Service is not available!");
+                return;
+            }
             // Combine all the metrics per Uid into one record.
-            NetworkStats stats =
-                    nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces, NetworkStats.TAG_NONE,
-                            null)
-                            .groupedByUid();
+            NetworkStats stats = mNetworkStatsService.getDetailedUidStats(ifaces).groupedByUid();
             addNetworkStats(tagId, pulledData, stats, false);
-        } catch (java.io.IOException e) {
+        } catch (RemoteException e) {
             Slog.e(TAG, "Pulling netstats for wifi bytes has error", e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -812,12 +815,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             if (ifaces.length == 0) {
                 return;
             }
-            NetworkStatsFactory nsf = new NetworkStatsFactory();
+            if (mNetworkStatsService == null) {
+                Slog.e(TAG, "NetworkStats Service is not available!");
+                return;
+            }
             NetworkStats stats = rollupNetworkStatsByFGBG(
-                    nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces, NetworkStats.TAG_NONE,
-                            null));
+                    mNetworkStatsService.getDetailedUidStats(ifaces));
             addNetworkStats(tagId, pulledData, stats, true);
-        } catch (java.io.IOException e) {
+        } catch (RemoteException e) {
             Slog.e(TAG, "Pulling netstats for wifi bytes w/ fg/bg has error", e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -834,14 +839,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             if (ifaces.length == 0) {
                 return;
             }
-            NetworkStatsFactory nsf = new NetworkStatsFactory();
+            if (mNetworkStatsService == null) {
+                Slog.e(TAG, "NetworkStats Service is not available!");
+                return;
+            }
             // Combine all the metrics per Uid into one record.
-            NetworkStats stats =
-                    nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces, NetworkStats.TAG_NONE,
-                            null)
-                            .groupedByUid();
+            NetworkStats stats = mNetworkStatsService.getDetailedUidStats(ifaces).groupedByUid();
             addNetworkStats(tagId, pulledData, stats, false);
-        } catch (java.io.IOException e) {
+        } catch (RemoteException e) {
             Slog.e(TAG, "Pulling netstats for mobile bytes has error", e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -874,12 +879,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             if (ifaces.length == 0) {
                 return;
             }
-            NetworkStatsFactory nsf = new NetworkStatsFactory();
+            if (mNetworkStatsService == null) {
+                Slog.e(TAG, "NetworkStats Service is not available!");
+                return;
+            }
             NetworkStats stats = rollupNetworkStatsByFGBG(
-                    nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces, NetworkStats.TAG_NONE,
-                            null));
+                    mNetworkStatsService.getDetailedUidStats(ifaces));
             addNetworkStats(tagId, pulledData, stats, true);
-        } catch (java.io.IOException e) {
+        } catch (RemoteException e) {
             Slog.e(TAG, "Pulling netstats for mobile bytes w/ fg/bg has error", e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -2058,6 +2065,17 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         mContext.unregisterReceiver(mShutdownEventReceiver);
         cancelAnomalyAlarm();
         cancelPullingAlarm();
+
+        BinderCallsStatsService.Internal binderStats =
+                LocalServices.getService(BinderCallsStatsService.Internal.class);
+        if (binderStats != null) {
+            binderStats.reset();
+        }
+
+        LooperStats looperStats = LocalServices.getService(LooperStats.class);
+        if (looperStats != null) {
+            looperStats.reset();
+        }
     }
 
     @Override
