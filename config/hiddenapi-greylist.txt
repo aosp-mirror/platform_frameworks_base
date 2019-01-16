@@ -1568,7 +1568,6 @@ Landroid/telephony/TelephonyManager$MultiSimVariants;->values()[Landroid/telepho
 Landroid/test/AndroidTestCase;->getTestContext()Landroid/content/Context;
 Landroid/test/AndroidTestCase;->setTestContext(Landroid/content/Context;)V
 Landroid/test/InstrumentationTestCase;->runMethod(Ljava/lang/reflect/Method;I)V
-Landroid/test/RepetitiveTest;->numIterations()I
 Landroid/util/Singleton;-><init>()V
 Landroid/util/XmlPullAttributes;-><init>(Lorg/xmlpull/v1/XmlPullParser;)V
 Landroid/util/XmlPullAttributes;->mParser:Lorg/xmlpull/v1/XmlPullParser;

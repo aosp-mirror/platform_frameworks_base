@@ -26,8 +26,10 @@ import java.lang.annotation.Target;
  * When the annotation is present, the test method is executed the number of times specified by
  * numIterations and defaults to 1.
  *
- * {@hide} Not needed for public API.
+ * @deprecated New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RepetitiveTest {
