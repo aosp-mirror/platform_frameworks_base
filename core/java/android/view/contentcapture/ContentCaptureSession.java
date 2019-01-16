@@ -93,6 +93,13 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      */
     public static final int STATE_DISABLED_BY_FLAG_SECURE = 5;
 
+    /**
+     * Session is disabled manually by the specific app.
+     *
+     * @hide
+     */
+    public static final int STATE_DISABLED_BY_APP = 6;
+
     private static final int INITIAL_CHILDREN_CAPACITY = 5;
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
@@ -395,6 +402,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 return "DISABLED_DUPLICATED_ID";
             case STATE_DISABLED_BY_FLAG_SECURE:
                 return "DISABLED_FLAG_SECURE";
+            case STATE_DISABLED_BY_APP:
+                return "DISABLED_BY_APP";
             default:
                 return "INVALID:" + state;
         }

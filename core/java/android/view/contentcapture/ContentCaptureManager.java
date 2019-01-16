@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.SyncResultReceiver;
@@ -62,8 +63,10 @@ public final class ContentCaptureManager {
     static final boolean VERBOSE = false;
     static final boolean DEBUG = true; // STOPSHIP if not set to false
 
-    @NonNull
-    private final AtomicBoolean mDisabled = new AtomicBoolean();
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private boolean mDisabled;
 
     @NonNull
     private final Context mContext;
@@ -71,11 +74,16 @@ public final class ContentCaptureManager {
     @Nullable
     private final IContentCaptureManager mService;
 
+    // Flags used for starting session.
+    @GuardedBy("mLock")
+    private int mFlags;
+
     // TODO(b/119220549): use UI Thread directly (as calls are one-way) or a shared thread / handler
     // held at the Application level
     @NonNull
     private final Handler mHandler;
 
+    @GuardedBy("mLock")
     private MainContentCaptureSession mMainSession;
 
     /** @hide */
@@ -114,20 +122,25 @@ public final class ContentCaptureManager {
     @NonNull
     @UiThread
     public MainContentCaptureSession getMainContentCaptureSession() {
-        if (mMainSession == null) {
-            mMainSession = new MainContentCaptureSession(mContext, mHandler, mService,
-                    mDisabled);
-            if (VERBOSE) {
-                Log.v(TAG, "getDefaultContentCaptureSession(): created " + mMainSession);
+        synchronized (mLock) {
+            if (mMainSession == null) {
+                mMainSession = new MainContentCaptureSession(mContext, mHandler, mService,
+                        new AtomicBoolean(mDisabled));
+                if (VERBOSE) {
+                    Log.v(TAG, "getDefaultContentCaptureSession(): created " + mMainSession);
+                }
             }
+            return mMainSession;
         }
-        return mMainSession;
     }
 
     /** @hide */
     public void onActivityStarted(@NonNull IBinder applicationToken,
             @NonNull ComponentName activityComponent, int flags) {
-        getMainContentCaptureSession().start(applicationToken, activityComponent, flags);
+        synchronized (mLock) {
+            mFlags |= flags;
+            getMainContentCaptureSession().start(applicationToken, activityComponent, mFlags);
+        }
     }
 
     /** @hide */
@@ -173,7 +186,9 @@ public final class ContentCaptureManager {
      * Checks whether content capture is enabled for this activity.
      */
     public boolean isContentCaptureEnabled() {
-        return mService != null && !mDisabled.get();
+        synchronized (mLock) {
+            return mService != null && !mDisabled;
+        }
     }
 
     /**
@@ -183,7 +198,9 @@ public final class ContentCaptureManager {
      * it on {@link android.app.Activity#onCreate(android.os.Bundle, android.os.PersistableBundle)}.
      */
     public void setContentCaptureEnabled(boolean enabled) {
-        //TODO(b/111276913): implement (need to finish / disable all sessions)
+        synchronized (mLock) {
+            mFlags |= enabled ? 0 : ContentCaptureContext.FLAG_DISABLED_BY_APP;
+        }
     }
 
     /**
@@ -198,20 +215,22 @@ public final class ContentCaptureManager {
 
     /** @hide */
     public void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.println("ContentCaptureManager");
-
-        pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled.get());
-        pw.print(prefix); pw.print("Context: "); pw.println(mContext);
-        pw.print(prefix); pw.print("User: "); pw.println(mContext.getUserId());
-        if (mService != null) {
-            pw.print(prefix); pw.print("Service: "); pw.println(mService);
-        }
-        if (mMainSession != null) {
-            final String prefix2 = prefix + "  ";
-            pw.print(prefix); pw.println("Main session:");
-            mMainSession.dump(prefix2, pw);
-        } else {
-            pw.print(prefix); pw.println("No sessions");
+        synchronized (mLock) {
+            pw.print(prefix); pw.println("ContentCaptureManager");
+            pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
+            pw.print(prefix); pw.print("Context: "); pw.println(mContext);
+            pw.print(prefix); pw.print("User: "); pw.println(mContext.getUserId());
+            if (mService != null) {
+                pw.print(prefix); pw.print("Service: "); pw.println(mService);
+            }
+            pw.print(prefix); pw.print("Flags: "); pw.println(mFlags);
+            if (mMainSession != null) {
+                final String prefix2 = prefix + "  ";
+                pw.print(prefix); pw.println("Main session:");
+                mMainSession.dump(prefix2, pw);
+            } else {
+                pw.print(prefix); pw.println("No sessions");
+            }
         }
     }
 

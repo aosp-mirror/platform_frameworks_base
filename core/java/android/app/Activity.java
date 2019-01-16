@@ -1048,9 +1048,8 @@ public class Activity extends ContextThemeWrapper
 
     private void notifyContentCaptureManagerIfNeeded(@ContentCaptureNotificationType int type) {
         final ContentCaptureManager cm = getContentCaptureManager();
-        if (cm == null) {
-            return;
-        }
+        if (cm == null) return;
+
         switch (type) {
             case CONTENT_CAPTURE_START:
                 //TODO(b/111276913): decide whether the InteractionSessionId should be
