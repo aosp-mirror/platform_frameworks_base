@@ -4445,6 +4445,10 @@ package android.os {
     method public abstract java.lang.Object onTransactStarted(android.os.IBinder, int);
   }
 
+  public static class Build.VERSION {
+    field public static final java.lang.String PREVIEW_SDK_FINGERPRINT;
+  }
+
   public final class ConfigUpdate {
     field public static final java.lang.String ACTION_UPDATE_CARRIER_ID_DB = "android.os.action.UPDATE_CARRIER_ID_DB";
     field public static final java.lang.String ACTION_UPDATE_CARRIER_PROVISIONING_URLS = "android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS";
