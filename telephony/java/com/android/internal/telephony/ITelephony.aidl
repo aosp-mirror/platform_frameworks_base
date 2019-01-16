@@ -41,6 +41,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
+import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsConfigCallback;
@@ -1776,4 +1777,14 @@ interface ITelephony {
      * Set the String provisioning value for the provisioning key specified.
      */
     int setImsProvisioningString(int subId, int key, String value);
+
+    /**
+     * Update Emergency Number List for Test Mode.
+     */
+    void updateEmergencyNumberListTestMode(int action, in EmergencyNumber num);
+
+    /**
+     * Get the full emergency number list for Test Mode.
+     */
+    List<String> getEmergencyNumberListTestMode();
 }

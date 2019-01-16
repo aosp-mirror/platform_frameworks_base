@@ -27,6 +27,7 @@ import android.telephony.Rlog;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -176,6 +177,12 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      * Bit-field which indicates the number is from the platform-maintained database.
      */
     public static final int EMERGENCY_NUMBER_SOURCE_DATABASE =  1 << 4;
+    /**
+     * Bit-field which indicates the number is from test mode.
+     *
+     * @hide
+     */
+    public static final int EMERGENCY_NUMBER_SOURCE_TEST =  1 << 5;
     /** Bit-field which indicates the number is from the modem config. */
     public static final int EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG =
             EmergencyNumberSource.MODEM_CONFIG;
@@ -323,6 +330,21 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      * @return bitmask of the emergency service categories
      */
     public @EmergencyServiceCategories int getEmergencyServiceCategoryBitmask() {
+        return mEmergencyServiceCategoryBitmask;
+    }
+
+    /**
+     * Returns the bitmask of emergency service categories of the emergency number for
+     * internal dialing.
+     *
+     * @return bitmask of the emergency service categories
+     *
+     * @hide
+     */
+    public @EmergencyServiceCategories int getEmergencyServiceCategoryBitmaskInternalDial() {
+        if (mEmergencyNumberSourceBitmask == EMERGENCY_NUMBER_SOURCE_DATABASE) {
+            return EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED;
+        }
         return mEmergencyServiceCategoryBitmask;
     }
 
@@ -577,6 +599,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
                 emergencyNumberList.remove(i--);
             }
         }
+        Collections.sort(emergencyNumberList);
     }
 
     /**
@@ -613,6 +636,12 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         if (first.getEmergencyCallRouting() != second.getEmergencyCallRouting()) {
             return false;
         }
+        // Never merge two numbers if one of them is from test mode but the other one is not;
+        // This supports to remove a number from the test mode.
+        if (first.isFromSources(EMERGENCY_NUMBER_SOURCE_TEST)
+                ^ second.isFromSources(EMERGENCY_NUMBER_SOURCE_TEST)) {
+            return false;
+        }
         return true;
     }
 
@@ -637,5 +666,14 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
                     first.getEmergencyCallRouting());
         }
         return null;
+    }
+
+    /**
+     * Validate Emergency Number address that only allows '0'-'9', '*', or '#'
+     *
+     * @hide
+     */
+    public static boolean validateEmergencyNumberAddress(String address) {
+        return address.matches("[0-9*#]+");
     }
 }
