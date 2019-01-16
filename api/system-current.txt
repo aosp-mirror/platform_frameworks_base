@@ -6827,6 +6827,7 @@ package android.telephony {
     method public void dial(java.lang.String);
     method public boolean disableDataConnectivity();
     method public boolean enableDataConnectivity();
+    method public boolean enableModemForSlot(int, boolean);
     method public void enableVideoCalling(boolean);
     method public java.lang.String getAidForAppType(int);
     method public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);

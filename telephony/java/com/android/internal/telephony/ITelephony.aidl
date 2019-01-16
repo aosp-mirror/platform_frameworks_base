@@ -1787,4 +1787,9 @@ interface ITelephony {
      * Get the full emergency number list for Test Mode.
      */
     List<String> getEmergencyNumberListTestMode();
+
+    /**
+     * Enable or disable a logical modem stack associated with the slotIndex.
+     */
+    boolean enableModemForSlot(int slotIndex, boolean enable);
 }
