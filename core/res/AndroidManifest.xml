@@ -487,6 +487,7 @@
     <protected-broadcast android:name="android.security.action.TRUST_STORE_CHANGED" />
     <protected-broadcast android:name="android.security.action.KEYCHAIN_CHANGED" />
     <protected-broadcast android:name="android.security.action.KEY_ACCESS_CHANGED" />
+    <protected-broadcast android:name="android.telecom.action.NUISANCE_CALL_STATUS_CHANGED" />
     <protected-broadcast android:name="android.telecom.action.PHONE_ACCOUNT_REGISTERED" />
     <protected-broadcast android:name="android.telecom.action.PHONE_ACCOUNT_UNREGISTERED" />
     <protected-broadcast android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />

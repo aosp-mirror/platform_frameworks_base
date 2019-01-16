@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.app.Service;
@@ -31,6 +32,9 @@ import android.os.RemoteException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.ICallScreeningAdapter;
 import com.android.internal.telecom.ICallScreeningService;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This service can be implemented by the default dialer (see
@@ -88,6 +92,128 @@ import com.android.internal.telecom.ICallScreeningService;
  * </pre>
  */
 public abstract class CallScreeningService extends Service {
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            prefix = { "CALL_DURATION_" },
+            value = {CALL_DURATION_VERY_SHORT, CALL_DURATION_SHORT, CALL_DURATION_MEDIUM,
+                    CALL_DURATION_LONG})
+    public @interface CallDuration {}
+
+    /**
+     * Call duration reported with {@link #EXTRA_CALL_DURATION} to indicate to the
+     * {@link CallScreeningService} the duration of a call for which the user reported the nuisance
+     * status (see {@link TelecomManager#reportNuisanceCallStatus(Uri, boolean)}).  The
+     * {@link CallScreeningService} can use this as a signal for training nuisance detection
+     * algorithms.  The call duration is reported in coarse grained buckets to minimize exposure of
+     * identifying call log information to the {@link CallScreeningService}.
+     * <p>
+     * Indicates the call was < 3 seconds in duration.
+     */
+    public static final int CALL_DURATION_VERY_SHORT = 1;
+
+    /**
+     * Call duration reported with {@link #EXTRA_CALL_DURATION} to indicate to the
+     * {@link CallScreeningService} the duration of a call for which the user reported the nuisance
+     * status (see {@link TelecomManager#reportNuisanceCallStatus(Uri, boolean)}).  The
+     * {@link CallScreeningService} can use this as a signal for training nuisance detection
+     * algorithms.  The call duration is reported in coarse grained buckets to minimize exposure of
+     * identifying call log information to the {@link CallScreeningService}.
+     * <p>
+     * Indicates the call was greater than 3 seconds, but less than 60 seconds in duration.
+     */
+    public static final int CALL_DURATION_SHORT = 2;
+
+    /**
+     * Call duration reported with {@link #EXTRA_CALL_DURATION} to indicate to the
+     * {@link CallScreeningService} the duration of a call for which the user reported the nuisance
+     * status (see {@link TelecomManager#reportNuisanceCallStatus(Uri, boolean)}).  The
+     * {@link CallScreeningService} can use this as a signal for training nuisance detection
+     * algorithms.  The call duration is reported in coarse grained buckets to minimize exposure of
+     * identifying call log information to the {@link CallScreeningService}.
+     * <p>
+     * Indicates the call was greater than 60 seconds, but less than 120 seconds in duration.
+     */
+    public static final int CALL_DURATION_MEDIUM = 3;
+
+    /**
+     * Call duration reported with {@link #EXTRA_CALL_DURATION} to indicate to the
+     * {@link CallScreeningService} the duration of a call for which the user reported the nuisance
+     * status (see {@link TelecomManager#reportNuisanceCallStatus(Uri, boolean)}).  The
+     * {@link CallScreeningService} can use this as a signal for training nuisance detection
+     * algorithms.  The call duration is reported in coarse grained buckets to minimize exposure of
+     * identifying call log information to the {@link CallScreeningService}.
+     * <p>
+     * Indicates the call was greater than 120 seconds.
+     */
+    public static final int CALL_DURATION_LONG = 4;
+
+    /**
+     * Telecom sends this intent to the {@link CallScreeningService} which the user has chosen to
+     * fill the call screening role when the user indicates through the default dialer whether a
+     * call is a nuisance call or not (see
+     * {@link TelecomManager#reportNuisanceCallStatus(Uri, boolean)}).
+     * <p>
+     * The following extra values are provided for the call:
+     * <ol>
+     *     <li>{@link #EXTRA_CALL_HANDLE} - the handle of the call.</li>
+     *     <li>{@link #EXTRA_IS_NUISANCE} - {@code true} if the user reported the call as a nuisance
+     *     call, {@code false} otherwise.</li>
+     *     <li>{@link #EXTRA_CALL_TYPE} - reports the type of call (incoming, rejected, missed,
+     *     blocked).</li>
+     *     <li>{@link #EXTRA_CALL_DURATION} - the duration of the call (see
+     *     {@link #EXTRA_CALL_DURATION} for valid values).</li>
+     * </ol>
+     * <p>
+     * {@link CallScreeningService} implementations which want to track whether the user reports
+     * calls are nuisance calls should use declare a broadcast receiver in their manifest for this
+     * intent.
+     * <p>
+     * Note: Only {@link CallScreeningService} implementations which have provided
+     * {@link CallIdentification} information for calls at some point will receive this intent.
+     */
+    public static final String ACTION_NUISANCE_CALL_STATUS_CHANGED =
+            "android.telecom.action.NUISANCE_CALL_STATUS_CHANGED";
+
+    /**
+     * Extra used to provide the handle of the call for
+     * {@link #ACTION_NUISANCE_CALL_STATUS_CHANGED}.  The call handle is reported as a
+     * {@link Uri}.
+     */
+    public static final String EXTRA_CALL_HANDLE = "android.telecom.extra.CALL_HANDLE";
+
+    /**
+     * Boolean extra used to indicate whether the user reported a call as a nuisance call.
+     * When {@code true}, the user reported that a call was a nuisance call, {@code false}
+     * otherwise.  Sent with {@link #ACTION_NUISANCE_CALL_STATUS_CHANGED}.
+     */
+    public static final String EXTRA_IS_NUISANCE = "android.telecom.extra.IS_NUISANCE";
+
+    /**
+     * Integer extra used with {@link #ACTION_NUISANCE_CALL_STATUS_CHANGED} to report the type of
+     * call. Valid values are:
+     * <UL>
+     *   <li>{@link android.provider.CallLog.Calls#MISSED_TYPE}</li>
+     *   <li>{@link android.provider.CallLog.Calls#INCOMING_TYPE}</li>
+     *   <li>{@link android.provider.CallLog.Calls#BLOCKED_TYPE}</li>
+     *   <li>{@link android.provider.CallLog.Calls#REJECTED_TYPE}</li>
+     * </UL>
+     */
+    public static final String EXTRA_CALL_TYPE = "android.telecom.extra.CALL_TYPE";
+
+    /**
+     * Integer extra used to with {@link #ACTION_NUISANCE_CALL_STATUS_CHANGED} to report how long
+     * the call lasted.  Valid values are:
+     * <UL>
+     *     <LI>{@link #CALL_DURATION_VERY_SHORT}</LI>
+     *     <LI>{@link #CALL_DURATION_SHORT}</LI>
+     *     <LI>{@link #CALL_DURATION_MEDIUM}</LI>
+     *     <LI>{@link #CALL_DURATION_LONG}</LI>
+     * </UL>
+     */
+    public static final String EXTRA_CALL_DURATION = "android.telecom.extra.CALL_DURATION";
+
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
