@@ -614,11 +614,21 @@ public class HdmiControlService extends SystemService {
                         tv().setSystemAudioControlFeatureEnabled(enabled);
                     }
                     if (isAudioSystemDevice()) {
+                        if (audioSystem() == null) {
+                            Slog.e(TAG, "Audio System device has not registered yet."
+                                    + " Can't turn system audio mode on.");
+                            break;
+                        }
                         audioSystem().onSystemAduioControlFeatureSupportChanged(enabled);
                     }
                     break;
                 case Global.HDMI_CEC_SWITCH_ENABLED:
                     if (isAudioSystemDevice()) {
+                        if (audioSystem() == null) {
+                            Slog.w(TAG, "Switch device has not registered yet."
+                                    + " Can't turn routing on.");
+                            break;
+                        }
                         audioSystem().setRoutingControlFeatureEnables(enabled);
                     }
                     break;
@@ -847,7 +857,10 @@ public class HdmiControlService extends SystemService {
     int pathToPortId(int path) {
         int mask = 0xF000;
         int finalMask = 0xF000;
-        int physicalAddress = getPhysicalAddress();
+        int physicalAddress;
+        synchronized (mLock) {
+            physicalAddress = mPhysicalAddress;
+        }
         int maskedAddress = physicalAddress;
 
         while (maskedAddress != 0) {
@@ -1155,7 +1168,7 @@ public class HdmiControlService extends SystemService {
         String displayName = Build.MODEL;
         return new HdmiDeviceInfo(logicalAddress,
                 getPhysicalAddress(), pathToPortId(getPhysicalAddress()), deviceType,
-                getVendorId(), displayName);
+                getVendorId(), displayName, powerStatus);
     }
 
     @ServiceThreadOnly
@@ -1374,6 +1387,33 @@ public class HdmiControlService extends SystemService {
             HdmiCecLocalDeviceTv tv = tv();
             if (tv == null) {
                 Slog.w(TAG, "Local tv device not available");
+                if (isPlaybackDevice()) {
+                    // if playback device itself is the active source,
+                    // return its own device info.
+                    if (playback() != null && playback().mIsActiveSource) {
+                        return playback().getDeviceInfo();
+                    }
+                    // Otherwise get the active source and look for it from the device list
+                    ActiveSource activeSource = mActiveSource;
+                    // If the active source is not set yet, return null
+                    if (!activeSource.isValid()) {
+                        return null;
+                    }
+                    if (audioSystem() != null) {
+                        HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
+                        for (HdmiDeviceInfo info : audioSystem.getSafeCecDevicesLocked()) {
+                            if (info.getLogicalAddress() == activeSource.logicalAddress) {
+                                return info;
+                            }
+                        }
+                    }
+                    // If the device info is not in the list yet, return a device info with minimum
+                    // information from mActiveSource.
+                    return new HdmiDeviceInfo(activeSource.logicalAddress,
+                        activeSource.physicalAddress, pathToPortId(activeSource.physicalAddress),
+                        HdmiUtils.getTypeFromAddress(activeSource.logicalAddress), 0,
+                        HdmiUtils.getDefaultDeviceName(activeSource.logicalAddress));
+                }
                 return null;
             }
             ActiveSource activeSource = tv.getActiveSource();
@@ -1636,13 +1676,11 @@ public class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (powerStatus == HdmiControlManager.POWER_STATUS_ON
-                            || powerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON) {
-                        sendCecCommand(HdmiCecMessageBuilder.buildStandby(
-                                getRemoteControlSourceAddress(), logicalAddress));
-                    } else {
-                        Slog.w(TAG, "Device " + logicalAddress + " is already off " + powerStatus);
-                    }
+                    Slog.w(TAG, "Device "
+                            + logicalAddress + " power status is " + powerStatus
+                            + " before standby command sent out");
+                    sendCecCommand(HdmiCecMessageBuilder.buildStandby(
+                            getRemoteControlSourceAddress(), logicalAddress));
                 }
             });
         }
@@ -1667,9 +1705,8 @@ public class HdmiControlService extends SystemService {
                         } else {
                             Slog.e(TAG, "Can't get the correct local device to handle routing.");
                         }
-                    } else {
-                        sendCecCommand(setStreamPath);
                     }
+                    sendCecCommand(setStreamPath);
                 }
             });
         }
@@ -1926,6 +1963,10 @@ public class HdmiControlService extends SystemService {
                 public void run() {
                     if (!isAudioSystemDevice()) {
                         Slog.e(TAG, "Not an audio system device. Won't set system audio mode on");
+                        return;
+                    }
+                    if (audioSystem() == null) {
+                        Slog.e(TAG, "Audio System local device is not registered");
                         return;
                     }
                     if (!audioSystem().checkSupportAndSetSystemAudioMode(true)) {
