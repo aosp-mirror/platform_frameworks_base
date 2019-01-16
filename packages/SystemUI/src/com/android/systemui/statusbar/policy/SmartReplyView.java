@@ -479,13 +479,20 @@ public class SmartReplyView extends ViewGroup {
         remeasureButtonsIfNecessary(accumulatedMeasures.mButtonPaddingHorizontal,
                                     accumulatedMeasures.mMaxChildHeight);
 
+        int buttonHeight = Math.max(getSuggestedMinimumHeight(), mPaddingTop
+                + accumulatedMeasures.mMaxChildHeight + mPaddingBottom);
+
+        // Set the corner radius to half the button height to make the side of the buttons look like
+        // a semicircle.
+        for (View smartSuggestionButton : smartSuggestions) {
+            setCornerRadius((Button) smartSuggestionButton, ((float) buttonHeight) / 2);
+        }
+
         setMeasuredDimension(
                 resolveSize(Math.max(getSuggestedMinimumWidth(),
                                      accumulatedMeasures.mMeasuredWidth),
                             widthMeasureSpec),
-                resolveSize(Math.max(getSuggestedMinimumHeight(), mPaddingTop
-                        + accumulatedMeasures.mMaxChildHeight + mPaddingBottom),
-                            heightMeasureSpec));
+                resolveSize(buttonHeight, heightMeasureSpec));
     }
 
     /**
@@ -804,6 +811,23 @@ public class SmartReplyView extends ViewGroup {
             button.setBackground(drawable);
         }
         button.setTextColor(textColor);
+    }
+
+    private void setCornerRadius(Button button, float radius) {
+        Drawable drawable = button.getBackground();
+        if (drawable instanceof RippleDrawable) {
+            // Mutate in case other notifications are using this drawable.
+            drawable = drawable.mutate();
+            RippleDrawable ripple = (RippleDrawable) drawable;
+            Drawable inset = ripple.getDrawable(0);
+            if (inset instanceof InsetDrawable) {
+                Drawable background = ((InsetDrawable) inset).getDrawable();
+                if (background instanceof GradientDrawable) {
+                    GradientDrawable gradientDrawable = (GradientDrawable) background;
+                    gradientDrawable.setCornerRadius(radius);
+                }
+            }
+        }
     }
 
     private ActivityStarter getActivityStarter() {

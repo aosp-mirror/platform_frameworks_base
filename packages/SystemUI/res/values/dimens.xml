@@ -876,8 +876,10 @@
     <dimen name="smart_reply_button_stroke_width">1dp</dimen>
     <dimen name="smart_reply_button_font_size">14sp</dimen>
     <dimen name="smart_reply_button_line_spacing_extra">6sp</dimen> <!-- Total line height 20sp. -->
-    <dimen name="smart_action_button_icon_size">24dp</dimen>
-    <dimen name="smart_action_button_icon_padding">10dp</dimen>
+    <!-- Corner radius = half of min_height to create rounded sides. -->
+    <dimen name="smart_reply_button_corner_radius">24dp</dimen>
+    <dimen name="smart_action_button_icon_size">18dp</dimen>
+    <dimen name="smart_action_button_icon_padding">8dp</dimen>
 
     <!-- A reasonable upper bound for the height of the smart reply button. The measuring code
             needs to start with a guess for the maximum size. Currently two-line smart reply buttons

@@ -25,7 +25,7 @@
             android:insetRight="0dp"
             android:insetBottom="8dp">
             <shape android:shape="rectangle">
-                <corners android:radius="8dp" />
+              <corners android:radius="@dimen/smart_reply_button_corner_radius" />
                 <stroke android:width="@dimen/smart_reply_button_stroke_width"
                         android:color="@color/smart_reply_button_stroke" />
                 <solid android:color="@color/smart_reply_button_background"/>
