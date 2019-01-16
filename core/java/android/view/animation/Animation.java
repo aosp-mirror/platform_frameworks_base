@@ -187,6 +187,7 @@ public abstract class Animation implements Cloneable {
     /**
      * An animation listener to be notified when the animation starts, ends or repeats.
      */
+    @UnsupportedAppUsage
     private AnimationListener mListener;
 
     /**
