@@ -216,6 +216,12 @@ public class TypedValue {
      * */
     public int density;
 
+    /**
+     * If the Value came from a style resource, this holds the corresponding style resource id
+     * against which the attribute was resolved.
+     */
+    public int sourceStyleResourceId;
+
     /* ------------------------------------------------------------ */
 
     /** Return the data for this value as a float.  Only use for values

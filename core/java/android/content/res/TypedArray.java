@@ -19,6 +19,7 @@ package android.content.res;
 import android.annotation.AnyRes;
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
+import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
@@ -63,13 +64,15 @@ public class TypedArray {
     }
 
     // STYLE_ prefixed constants are offsets within the typed data array.
-    static final int STYLE_NUM_ENTRIES = 6;
+    // Keep this in sync with libs/androidfw/include/androidfw/AttributeResolution.h
+    static final int STYLE_NUM_ENTRIES = 7;
     static final int STYLE_TYPE = 0;
     static final int STYLE_DATA = 1;
     static final int STYLE_ASSET_COOKIE = 2;
     static final int STYLE_RESOURCE_ID = 3;
     static final int STYLE_CHANGING_CONFIGURATIONS = 4;
     static final int STYLE_DENSITY = 5;
+    static final int SYTLE_SOURCE_STYLE_RESOURCE_ID = 6;
 
     @UnsupportedAppUsage
     private final Resources mResources;
@@ -1098,6 +1101,31 @@ public class TypedArray {
     }
 
     /**
+     * Returns the resource ID of the style against which the specified attribute was resolved,
+     * otherwise returns defValue.
+     *
+     * @param index Index of attribute whose source style to retrieve.
+     * @param defValue Value to return if the attribute is not defined or
+     *                 not a resource.
+     *
+     * @return Attribute source style resource ID or defValue if it was not resolved in any style.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     */
+    @StyleRes
+    public int getSourceStyleResourceId(@StyleableRes int index, @StyleRes int defValue) {
+        if (mRecycled) {
+            throw new RuntimeException("Cannot make calls to a recycled instance!");
+        }
+
+        index *= STYLE_NUM_ENTRIES;
+        final int resid = mData[index + SYTLE_SOURCE_STYLE_RESOURCE_ID];
+        if (resid != 0) {
+            return resid;
+        }
+        return defValue;
+    }
+
+    /**
      * Determines whether there is an attribute at <var>index</var>.
      * <p>
      * <strong>Note:</strong> If the attribute was set to {@code @empty} or
@@ -1309,6 +1337,7 @@ public class TypedArray {
                 data[index + STYLE_CHANGING_CONFIGURATIONS]);
         outValue.density = data[index + STYLE_DENSITY];
         outValue.string = (type == TypedValue.TYPE_STRING) ? loadStringValueAt(index) : null;
+        outValue.sourceStyleResourceId = data[index + SYTLE_SOURCE_STYLE_RESOURCE_ID];
         return true;
     }
 
