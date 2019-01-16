@@ -176,6 +176,19 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
         assertFalse(mConstants.getShowInHeadsUp());
     }
 
+    @Test
+    public void testMaxNumActionsWithNoConfig() {
+        assertTrue(mConstants.isEnabled());
+        assertEquals(-1, mConstants.getMaxNumActions());
+    }
+
+    @Test
+    public void testMaxNumActionsSet() {
+        overrideSetting("enabled=true,max_num_actions=10");
+        triggerConstantsOnChange();
+        assertEquals(10, mConstants.getMaxNumActions());
+    }
+
     private void overrideSetting(String flags) {
         Settings.Global.putString(mContext.getContentResolver(),
                 Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS, flags);

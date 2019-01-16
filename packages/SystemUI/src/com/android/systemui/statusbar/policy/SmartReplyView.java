@@ -372,8 +372,17 @@ public class SmartReplyView extends ViewGroup {
         // reply button is added.
         SmartSuggestionMeasures actionsMeasures = null;
 
+        final int maxNumActions = mConstants.getMaxNumActions();
+        int numShownActions = 0;
+
         for (View child : smartSuggestions) {
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            if (maxNumActions != -1 // -1 means 'no limit'
+                    && lp.buttonType == SmartButtonType.ACTION
+                    && numShownActions >= maxNumActions) {
+                // We've reached the maximum number of actions, don't add another one!
+                continue;
+            }
 
             child.setPadding(accumulatedMeasures.mButtonPaddingHorizontal, child.getPaddingTop(),
                     accumulatedMeasures.mButtonPaddingHorizontal, child.getPaddingBottom());
@@ -457,6 +466,9 @@ public class SmartReplyView extends ViewGroup {
 
             lp.show = true;
             displayedChildCount++;
+            if (lp.buttonType == SmartButtonType.ACTION) {
+                numShownActions++;
+            }
         }
 
         if (mSmartRepliesGeneratedByAssistant) {
