@@ -281,15 +281,18 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
     std::unique_ptr<NativeCode> code;
     bool needs_native_bridge = false;
 
+    char* nativeloader_error_msg = nullptr;
     void* handle = OpenNativeLibrary(env,
                                      sdkVersion,
                                      pathStr.c_str(),
                                      classLoader,
                                      libraryPath,
                                      &needs_native_bridge,
-                                     &g_error_msg);
+                                     &nativeloader_error_msg);
 
     if (handle == nullptr) {
+        g_error_msg = nativeloader_error_msg;
+        NativeLoaderFreeErrorMessage(nativeloader_error_msg);
         ALOGW("NativeActivity LoadNativeLibrary(\"%s\") failed: %s",
               pathStr.c_str(),
               g_error_msg.c_str());
