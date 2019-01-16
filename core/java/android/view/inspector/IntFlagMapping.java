@@ -19,14 +19,20 @@ package android.view.inspector;
 import android.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * Maps the values of an {int} property to arrays of string for properties that encode flags.
+ * Maps the values of an {@code int} property to arrays of string for properties that encode flags.
  *
  * An {@link InspectionCompanion} may provide an instance of this class to a {@link PropertyMapper}
- * for flag values packed into primitive {int} properties.
+ * for flag values packed into primitive {@code int} properties.
  *
- * Each flag has a
+ * Each flag has a mask and a target value, for non-exclusive flags, the target can also be used as
+ * the mask. A given integer value is compared against each flag to find what flags are active for
+ * it by bitwise anding it with the mask and comparing the result against the target, that is,
+ * {@code (value & mask) == target}.
  *
  * This class is immutable, and must be constructed by a {@link Builder}.
  *
@@ -42,8 +48,8 @@ public final class IntFlagMapping {
      * @return The names of the enabled flags
      */
     @NonNull
-    public String[] namesOf(int value) {
-        ArrayList<String> enabledFlagNames = new ArrayList<>(mFlags.length);
+    public Set<String> get(int value) {
+        final Set<String> enabledFlagNames = new HashSet<>(mFlags.length);
 
         for (Flag flag : mFlags) {
             if (flag.isEnabledFor(value)) {
@@ -51,7 +57,7 @@ public final class IntFlagMapping {
             }
         }
 
-        return enabledFlagNames.toArray(new String[enabledFlagNames.size()]);
+        return Collections.unmodifiableSet(enabledFlagNames);
     }
 
     /**
@@ -81,7 +87,7 @@ public final class IntFlagMapping {
          * The target value will be used as a mask, to handle the common case where flag values
          * are not mutually exclusive. The flag will be considered enabled for a property value if
          * the result of bitwise anding the target and the value equals the target, that is:
-         * {(value & target) == target}.
+         * {@code (value & target) == target}.
          *
          * @param name The name of the flag
          * @param target The value to compare against
@@ -97,7 +103,7 @@ public final class IntFlagMapping {
          * Add a new flag with a mask.
          *
          * The flag will be considered enabled for a property value if the result of bitwise anding
-         * the value and the mask equals the target, that is: {(value & mask) == target}.
+         * the value and the mask equals the target, that is: {@code (value & mask) == target}.
          *
          * @param name The name of the flag
          * @param target The value to compare against
@@ -108,13 +114,6 @@ public final class IntFlagMapping {
         public Builder addFlag(@NonNull String name, int target, int mask) {
             mFlags.add(new Flag(name, target, mask));
             return this;
-        }
-
-        /**
-         * Clear the builder, allowing for recycling.
-         */
-        public void clear() {
-            mFlags.clear();
         }
 
         /**
@@ -143,7 +142,7 @@ public final class IntFlagMapping {
         }
 
         /**
-         * Compare the supplied property value against the mask and taget.
+         * Compare the supplied property value against the mask and target.
          *
          * @param value The value to check
          * @return True if this flag is enabled
