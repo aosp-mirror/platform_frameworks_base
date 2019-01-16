@@ -134,10 +134,11 @@ public final class OomAdjuster {
 
         mLocalPowerManager = LocalServices.getService(PowerManagerInternal.class);
         mConstants = mService.mConstants;
-        // mConstants can be null under test, which causes AppCompactor to crash
-        if (mConstants != null) {
-            mAppCompact = new AppCompactor(mService);
-        }
+        mAppCompact = new AppCompactor(mService);
+    }
+
+    void initSettings() {
+        mAppCompact.init();
     }
 
     /**
@@ -1679,7 +1680,7 @@ public final class OomAdjuster {
 
         if (app.curAdj != app.setAdj) {
             // don't compact during bootup
-            if (mConstants.USE_COMPACTION && mService.mBooted) {
+            if (mAppCompact.useCompaction() && mService.mBooted) {
                 // Perform a minor compaction when a perceptible app becomes the prev/home app
                 // Perform a major compaction when any app enters cached
                 // reminder: here, setAdj is previous state, curAdj is upcoming state
@@ -2104,4 +2105,8 @@ public final class OomAdjuster {
                 + " mNewNumServiceProcs=" + mNewNumServiceProcs);
     }
 
+    @GuardedBy("mService")
+    void dumpAppCompactorSettings(PrintWriter pw) {
+        mAppCompact.dump(pw);
+    }
 }

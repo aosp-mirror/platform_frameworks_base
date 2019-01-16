@@ -7228,6 +7228,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mActivityTaskManager.installSystemProviders();
         mDevelopmentSettingsObserver = new DevelopmentSettingsObserver();
         SettingsToPropertiesMapper.start(mContext.getContentResolver());
+        mOomAdjuster.initSettings();
 
         // Now that the settings provider is published we can consider sending
         // in a rescue party.
@@ -9340,6 +9341,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             mConstants.dump(pw);
+            mOomAdjuster.dumpAppCompactorSettings(pw);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
@@ -9739,6 +9741,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("settings".equals(cmd)) {
                 synchronized (this) {
                     mConstants.dump(pw);
+                    mOomAdjuster.dumpAppCompactorSettings(pw);
                 }
             } else if ("services".equals(cmd) || "s".equals(cmd)) {
                 if (dumpClient) {

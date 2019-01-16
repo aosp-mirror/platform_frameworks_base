@@ -153,6 +153,34 @@ public final class DeviceConfig {
         String OOB_WHITELIST = "oob_whitelist";
     }
 
+    /**
+     * Namespace for activity manager related features. These features will be applied
+     * immediately upon change.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface ActivityManager {
+        String NAMESPACE = "activity_manager";
+
+        /**
+         * App compaction flags. See {@link com.android.server.am.AppCompactor}.
+         */
+        String KEY_USE_COMPACTION = "use_compaction";
+        String KEY_COMPACT_ACTION_1 = "compact_action_1";
+        String KEY_COMPACT_ACTION_2 = "compact_action_2";
+        String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
+        String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
+        String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
+        String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
+
+        /**
+         * Maximum number of cached processes. See
+         * {@link com.android.server.am.ActivityManagerConstants}.
+         */
+        String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
+    }
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static Map<OnPropertyChangedListener, Pair<String, Executor>> sListeners =
