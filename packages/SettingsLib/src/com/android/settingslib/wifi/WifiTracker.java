@@ -68,6 +68,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -585,7 +586,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                     Map<Integer, List<ScanResult>>> pairing : passpointConfigsAndScans) {
                 WifiConfiguration config = pairing.first;
 
-                // TODO(b/118705403): Prioritize home networks before roaming networks
                 List<ScanResult> scanResults = new ArrayList<>();
 
                 List<ScanResult> homeScans =
@@ -600,8 +600,12 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                     roamingScans = new ArrayList<>();
                 }
 
-                scanResults.addAll(homeScans);
-                scanResults.addAll(roamingScans);
+                // TODO(b/118705403): Differentiate home network vs roaming network for summary info
+                if (!homeScans.isEmpty()) {
+                    scanResults.addAll(homeScans);
+                } else {
+                    scanResults.addAll(roamingScans);
+                }
 
                 if (seenFQDNs.add(config.FQDN)) {
                     int bestRssi = Integer.MIN_VALUE;
@@ -620,19 +624,19 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             }
 
             // Add Passpoint OSU Provider AccessPoints
-            // TODO(b/118705403): filter out OSU Providers which we already have credentials from.
             Map<OsuProvider, List<ScanResult>> providersAndScans =
                     mWifiManager.getMatchingOsuProviders(cachedScanResults);
+            Set<OsuProvider> alreadyProvisioned = mWifiManager
+                    .getMatchingPasspointConfigsForOsuProviders(
+                            providersAndScans.keySet()).keySet();
             for (OsuProvider provider : providersAndScans.keySet()) {
-                AccessPoint accessPointOsu = new AccessPoint(mContext, provider);
-                // TODO(b/118705403): accessPointOsu.setScanResults(Matching ScanResult with best
-                // RSSI)
-                // TODO(b/118705403): Figure out if we would need to update an OSU AP (this will be
-                // used if we need to display it at the top of the picker as the "active" AP).
-                // Otherwise, OSU APs should ignore attempts to update the active connection
-                // info.
-                // accessPointOsu.update(connectionConfig, mLastInfo, mLastNetworkInfo);
-                accessPoints.add(accessPointOsu);
+                if (!alreadyProvisioned.contains(provider)) {
+                    AccessPoint accessPointOsu =
+                            getCachedOrCreateOsu(providersAndScans.get(provider),
+                                    cachedAccessPoints, provider);
+                    accessPointOsu.update(connectionConfig, mLastInfo, mLastNetworkInfo);
+                    accessPoints.add(accessPointOsu);
+                }
             }
 
 
@@ -695,6 +699,27 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         }
         final AccessPoint accessPoint = new AccessPoint(mContext, scanResults);
         return accessPoint;
+    }
+
+    private AccessPoint getCachedOrCreateOsu(
+            List<ScanResult> scanResults,
+            List<AccessPoint> cache,
+            OsuProvider provider) {
+        AccessPoint matchedAccessPoint = null;
+        ListIterator<AccessPoint> lit = cache.listIterator();
+        while (lit.hasNext()) {
+            AccessPoint currentAccessPoint = lit.next();
+            if (currentAccessPoint.getKey().equals(AccessPoint.getKey(provider))) {
+                lit.remove();
+                matchedAccessPoint = currentAccessPoint;
+                break;
+            }
+        }
+        if (matchedAccessPoint == null) {
+            matchedAccessPoint = new AccessPoint(mContext, provider);
+        }
+        matchedAccessPoint.setScanResults(scanResults);
+        return matchedAccessPoint;
     }
 
     private void updateNetworkInfo(NetworkInfo networkInfo) {
