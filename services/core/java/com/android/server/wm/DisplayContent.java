@@ -1160,12 +1160,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Override
     boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
             ConfigurationContainer requestingContainer) {
+        final int previousRotation = mRotation;
         final Configuration config = updateOrientationFromAppTokens(
                 getRequestedOverrideConfiguration(), freezeDisplayToken, false);
-        // If display rotation class tells us that it doesn't consider app requested orientation,
-        // this display won't rotate just because of an app changes its requested orientation. Thus
-        // it indicates that this display chooses not to handle this request.
-        final boolean handled = getDisplayRotation().respectAppRequestedOrientation();
+        // This event is considered handled iff a configuration propagation is triggered, because
+        // that's the only place lower level containers check if they need to do something to this
+        // request. The only guaranteed signal is that the display is rotated to a different
+        // orientation (i.e. rotating 180 degrees doesn't count).
+        final boolean handled = (mRotation - previousRotation) % 2 != 0;
         if (config == null) {
             return handled;
         }
