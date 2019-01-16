@@ -30,17 +30,9 @@
          android:layout_height="wrap_content"
          android:layout_gravity="center_horizontal"
          android:layout_alignParentTop="true">
-        <TextClock
+        <include
              android:id="@+id/default_clock_view"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_gravity="center_horizontal"
-             android:letterSpacing="0.03"
-             android:textColor="?attr/wallpaperTextColor"
-             android:singleLine="true"
-             style="@style/widget_big"
-             android:format12Hour="@string/keyguard_widget_12_hours_format"
-             android:format24Hour="@string/keyguard_widget_24_hours_format" />
+             layout="@layout/text_clock" />
     </FrameLayout>
     <include layout="@layout/keyguard_status_area"
         android:id="@+id/keyguard_status_area"
