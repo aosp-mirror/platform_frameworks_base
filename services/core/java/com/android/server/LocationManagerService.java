@@ -1041,12 +1041,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         @Override
         public void onSetProperties(ProviderProperties properties) {
-            // move calls coming from below LMS onto a different thread to avoid deadlock
-            runInternal(() -> {
-                synchronized (mLock) {
-                    mProperties = properties;
-                }
-            });
+            // because this does not invoke any other methods which might result in calling back
+            // into the location provider, it is safe to run this on the calling thread. it is also
+            // currently necessary to run this on the calling thread to ensure that property changes
+            // are publicly visibly immediately, ie for mock providers which are created.
+            synchronized (mLock) {
+                mProperties = properties;
+            }
         }
 
         @GuardedBy("mLock")
