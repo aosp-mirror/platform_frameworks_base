@@ -5556,9 +5556,9 @@ package android.telephony {
   public class SubscriptionManager {
     method public java.util.List<android.telephony.SubscriptionInfo> getAvailableSubscriptionInfoList();
     method public void requestEmbeddedSubscriptionInfoListRefresh();
+    method public void requestEmbeddedSubscriptionInfoListRefresh(int);
     method public void setDefaultDataSubId(int);
     method public void setDefaultSmsSubId(int);
-    method public void requestEmbeddedSubscriptionInfoListRefresh(int);
     field public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
     field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff
     field public static final int PROFILE_CLASS_OPERATIONAL = 2; // 0x2
@@ -6092,7 +6092,6 @@ package android.telephony.ims {
     method public void callSessionInviteParticipantsRequestDelivered();
     method public void callSessionInviteParticipantsRequestFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMayHandover(int, int);
-    method public void callSessionRttAudioIndicatorChanged(android.telephony.ims.ImsStreamMediaProfile);
     method public void callSessionMergeComplete(android.telephony.ims.stub.ImsCallSessionImplBase);
     method public void callSessionMergeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMergeStarted(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
@@ -6103,6 +6102,7 @@ package android.telephony.ims {
     method public void callSessionResumeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionResumeReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionResumed(android.telephony.ims.ImsCallProfile);
+    method public void callSessionRttAudioIndicatorChanged(android.telephony.ims.ImsStreamMediaProfile);
     method public void callSessionRttMessageReceived(java.lang.String);
     method public void callSessionRttModifyRequestReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionRttModifyResponseReceived(int);
