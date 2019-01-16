@@ -462,22 +462,19 @@ class KeyguardController {
             mOccluded = false;
             mDismissingKeyguardActivity = null;
 
-            // Only the top activity of the focused stack on each display may control it's
-            // occluded state.
-            final ActivityStack focusedStack = display.getFocusedStack();
-            if (focusedStack != null) {
-                final ActivityRecord topDismissing =
-                        focusedStack.getTopDismissingKeyguardActivity();
-                mOccluded = focusedStack.topActivityOccludesKeyguard() || (topDismissing != null
-                                && focusedStack.topRunningActivityLocked() == topDismissing
-                                && controller.canShowWhileOccluded(
+            final ActivityStack stack = getStackForControllingOccluding(display);
+            if (stack != null) {
+                final ActivityRecord topDismissing = stack.getTopDismissingKeyguardActivity();
+                mOccluded = stack.topActivityOccludesKeyguard() || (topDismissing != null
+                        && stack.topRunningActivityLocked() == topDismissing
+                        && controller.canShowWhileOccluded(
                                 true /* dismissKeyguard */,
                                 false /* showWhenLocked */));
-                if (focusedStack.getTopDismissingKeyguardActivity() != null) {
-                    mDismissingKeyguardActivity = focusedStack.getTopDismissingKeyguardActivity();
+                if (stack.getTopDismissingKeyguardActivity() != null) {
+                    mDismissingKeyguardActivity = stack.getTopDismissingKeyguardActivity();
                 }
-                mOccluded |= controller.mWindowManager.isShowingDream();
             }
+            mOccluded |= controller.mWindowManager.isShowingDream();
 
             // TODO(b/113840485): Handle app transition for individual display, and apply occluded
             // state change to secondary displays.
@@ -490,6 +487,23 @@ class KeyguardController {
                     && controller.mWindowManager.isKeyguardSecure()) {
                 mRequestDismissKeyguard = true;
             }
+        }
+
+        /**
+         * Gets the stack used to check the occluded state.
+         * <p>
+         * Only the top non-pinned activity of the focusable stack on each display can control its
+         * occlusion state.
+         */
+        private ActivityStack getStackForControllingOccluding(ActivityDisplay display) {
+            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+                final ActivityStack stack = display.getChildAt(stackNdx);
+                if (stack != null && stack.isFocusableAndVisible()
+                        && !stack.inPinnedWindowingMode()) {
+                    return stack;
+                }
+            }
+            return null;
         }
 
         void dumpStatus(PrintWriter pw, String prefix) {
