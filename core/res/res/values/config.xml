@@ -3696,7 +3696,7 @@
     <string name="config_inputEventCompatProcessorOverrideClassName" translatable="false"></string>
 
     <!-- Component name for the default module metadata provider on this device -->
-    <string name="config_defaultModuleMetadataProvider">com.android.modulemetadata</string>
+    <string name="config_defaultModuleMetadataProvider" translatable="false">com.android.modulemetadata</string>
 
     <!-- This is the default launcher component to use on secondary displays that support system
          decorations.
