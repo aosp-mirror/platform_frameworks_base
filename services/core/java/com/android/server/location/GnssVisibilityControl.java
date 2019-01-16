@@ -28,6 +28,7 @@ import android.os.PowerManager;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.StatsLog;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -278,14 +279,24 @@ class GnssVisibilityControl {
         if (DEBUG) Log.d(TAG, nfwNotification.toString());
 
         final String proxyAppPackageName = nfwNotification.mProxyAppPackageName;
+        Boolean isLocationPermissionEnabled = mProxyAppToLocationPermissions.get(
+                proxyAppPackageName);
+        boolean isLocationRequestAccepted =
+                nfwNotification.mResponseType != NfwNotification.NFW_RESPONSE_TYPE_REJECTED;
+        boolean isPermissionMismatched;
+        if (isLocationPermissionEnabled == null) {
+            isPermissionMismatched = isLocationRequestAccepted;
+        } else {
+            isPermissionMismatched = (isLocationPermissionEnabled != isLocationRequestAccepted);
+        }
+        logEvent(nfwNotification, isPermissionMismatched);
+
         if (TextUtils.isEmpty(proxyAppPackageName)) {
             Log.e(TAG, "ProxyAppPackageName field is not set. Not sending intent to proxy app for "
                     + nfwNotification);
             return;
         }
 
-        Boolean isLocationPermissionEnabled = mProxyAppToLocationPermissions.get(
-                proxyAppPackageName);
         if (isLocationPermissionEnabled == null) {
             // App is not in the configured list.
             Log.e(TAG, "Could not find proxy app with name: " + proxyAppPackageName + " in the "
@@ -317,9 +328,7 @@ class GnssVisibilityControl {
         mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, clsAppUid, proxyAppPackageName);
 
         // Log proxy app permission mismatch between framework and GNSS HAL.
-        boolean isLocationRequestAccepted =
-                nfwNotification.mResponseType != NfwNotification.NFW_RESPONSE_TYPE_REJECTED;
-        if (isLocationPermissionEnabled != isLocationRequestAccepted) {
+        if (isPermissionMismatched) {
             Log.w(TAG, "Permission mismatch. Framework proxy app " + proxyAppPackageName
                     + " location permission is set to " + isLocationPermissionEnabled
                     + " but GNSS non-framework location access response type is "
@@ -336,6 +345,19 @@ class GnssVisibilityControl {
             Log.w(TAG, "Activity not found. Failed to send non-framework location access"
                     + " notification intent to proxy app activity: " + proxAppActivityName);
         }
+    }
+
+    private void logEvent(NfwNotification notification, boolean isPermissionMismatched) {
+        StatsLog.write(StatsLog.GNSS_NFW_NOTIFICATION_REPORTED,
+                notification.mProxyAppPackageName,
+                notification.mProtocolStack,
+                notification.mOtherProtocolStackName,
+                notification.mRequestor,
+                notification.mRequestorId,
+                notification.mResponseType,
+                notification.mInEmergencyMode,
+                notification.mIsCachedLocation,
+                isPermissionMismatched);
     }
 
     private void postEvent(Runnable event) {

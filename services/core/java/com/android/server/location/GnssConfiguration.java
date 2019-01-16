@@ -23,6 +23,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.StatsLog;
 
 import libcore.io.IoUtils;
 
@@ -231,6 +232,8 @@ class GnssConfiguration {
 
         mEsExtensionSec = getRangeCheckedConfigEsExtensionSec();
 
+        logConfigurations();
+
         final HalInterfaceVersion gnssConfigurationIfaceVersion =
                 native_get_gnss_configuration_version();
         if (gnssConfigurationIfaceVersion != null) {
@@ -280,6 +283,23 @@ class GnssConfiguration {
             Log.d(TAG, "Skipped configuration update because GNSS configuration in GPS HAL is not"
                     + " supported");
         }
+    }
+
+    private void logConfigurations() {
+        StatsLog.write(StatsLog.GNSS_CONFIGURATION_REPORTED,
+                getSuplHost(),
+                getSuplPort(0),
+                getC2KHost(),
+                getC2KPort(0),
+                getIntConfig(CONFIG_SUPL_VER, 0),
+                getSuplMode(0),
+                getSuplEs(0) == 1,
+                getIntConfig(CONFIG_LPP_PROFILE, 0),
+                getIntConfig(CONFIG_A_GLONASS_POS_PROTOCOL_SELECT, 0),
+                getIntConfig(CONFIG_USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL, 0) == 1,
+                getIntConfig(CONFIG_GPS_LOCK, 0),
+                getEsExtensionSec(),
+                mProperties.getProperty(CONFIG_NFW_PROXY_APPS));
     }
 
     /**

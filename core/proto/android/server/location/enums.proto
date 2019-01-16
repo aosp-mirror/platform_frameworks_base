@@ -28,3 +28,105 @@ enum GpsSignalQualityEnum {
     GPS_SIGNAL_QUALITY_POOR = 0;
     GPS_SIGNAL_QUALITY_GOOD = 1;
 }
+
+// A type which distinguishes different categories of NI request, such as VOICE, UMTS_SUPL etc.
+enum GnssNiType {
+    VOICE = 1;
+    UMTS_SUPL = 2;
+    UMTS_CTRL_PLANE = 3;
+    EMERGENCY_SUPL = 4;
+};
+
+// GNSS NI responses, used to define the response in NI structures.
+enum GnssUserResponseType {
+    RESPONSE_ACCEPT = 1;
+    RESPONSE_DENY = 2;
+    RESPONSE_NORESP = 3;
+};
+
+// GNSS NI data encoding scheme.
+enum GnssNiEncodingType {
+    ENC_NONE = 0;
+    ENC_SUPL_GSM_DEFAULT = 1;
+    ENC_SUPL_UTF8 = 2;
+    ENC_SUPL_UCS2 = 3;
+    ENC_UNKNOWN = -1;
+};
+
+// Protocol stack that initiated the non-framework location request.
+enum NfwProtocolStack {
+    // Cellular control plane requests.
+    CTRL_PLANE = 0;
+    // All types of SUPL requests.
+    SUPL = 1;
+    // All types of requests from IMS.
+    IMS = 10;
+    // All types of requests from SIM.
+    SIM = 11;
+    // Requests from other protocol stacks.
+    OTHER_PROTOCOL_STACK = 100;
+};
+
+// Source initiating/receiving the location information.
+enum NfwRequestor  {
+    // Wireless service provider.
+    CARRIER = 0;
+    // Device manufacturer.
+    OEM = 10;
+    // Modem chipset vendor.
+    MODEM_CHIPSET_VENDOR = 11;
+    // GNSS chipset vendor.
+    GNSS_CHIPSET_VENDOR = 12;
+    // Other chipset vendor.
+    OTHER_CHIPSET_VENDOR = 13;
+    // Automobile client.
+    AUTOMOBILE_CLIENT = 20;
+    // Other sources.
+    OTHER_REQUESTOR = 100;
+};
+
+// Indicates whether location information was provided for this request.
+enum NfwResponseType {
+    // Request rejected because framework has not given permission for this use case.
+    REJECTED = 0;
+    // Request accepted but could not provide location because of a failure.
+    ACCEPTED_NO_LOCATION_PROVIDED = 1;
+    // Request accepted and location provided.
+    ACCEPTED_LOCATION_PROVIDED = 2;
+};
+
+// The SUPL mode.
+enum SuplMode {
+    // Mobile Station Based.
+    MSB = 0x01;
+    // Mobile Station Assisted.
+    MSA = 0x02;
+};
+
+// Enum that hold the bit masks for various LTE Positioning Profile settings (LPP_PROFILE
+// configuration parameter). If none of the bits in the enum are set, the default setting is
+// Radio Resource Location Protocol(RRLP).
+enum LppProfile {
+    // Enable LTE Positioning Protocol user plane.
+    USER_PLANE = 0x01;
+    // Enable LTE Positioning Protocol Control plane.
+    CONTROL_PLANE = 0x02;
+};
+
+// Positioning protocol on A-Glonass system.
+enum GlonassPosProtocol {
+    // Radio Resource Control(RRC) control-plane.
+    RRC_CPLANE = 0x01;
+    // Radio Resource Location user-plane.
+    RRLP_CPLANE = 0x02;
+    // LTE Positioning Protocol User plane.
+    LPP_UPLANE = 0x04;
+};
+
+// Configurations of how GPS functionalities should be locked when user turns off GPS On setting.
+enum GpsLock {
+    // Lock Mobile Originated GPS functionalitues.
+    MO = 0x01;
+    // Lock Network Initiated GPS functionalities.
+    NI = 0x02;
+};
