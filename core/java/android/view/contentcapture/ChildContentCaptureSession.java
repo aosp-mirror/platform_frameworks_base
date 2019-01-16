@@ -92,6 +92,7 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
             int flags) {
         getMainCaptureSession().notifyViewTextChanged(mId, id, text, flags);
     }
+
     @Override
     boolean isContentCaptureEnabled() {
         return getMainCaptureSession().isContentCaptureEnabled();

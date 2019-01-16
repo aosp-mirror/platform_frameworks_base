@@ -31,6 +31,7 @@ import android.view.contentcapture.ViewNode.ViewStructureImpl;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
@@ -343,6 +344,31 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     }
 
     abstract void internalNotifyViewDisappeared(@NonNull AutofillId id);
+
+    /**
+     * Notifies the Content Capture Service that many nodes has been removed from a virtual view
+     * structure.
+     *
+     * <p>Should only be called by views that handle their own virtual view hierarchy.
+     *
+     * @param hostId id of the view hosting the virtual hierarchy.
+     * @param virtualIds ids of the virtual children.
+     *
+     * @throws IllegalArgumentException if the {@code hostId} is an autofill id for a virtual view.
+     * @throws IllegalArgumentException if {@code virtualIds} is empty
+     */
+    public final void notifyViewsDisappeared(@NonNull AutofillId hostId,
+            @NonNull int[] virtualIds) {
+        Preconditions.checkArgument(!hostId.isVirtual(), "parent cannot be virtual");
+        Preconditions.checkArgument(!ArrayUtils.isEmpty(virtualIds), "virtual ids cannot be empty");
+        if (!isContentCaptureEnabled()) return;
+
+        // TODO(b/121050915): create a new VIEWS_DISAPPEARED event type, which could also be used
+        // to batch delete non-virtual views
+        for (int id : virtualIds) {
+            internalNotifyViewDisappeared(new AutofillId(hostId, id, getIdAsInt()));
+        }
+    }
 
     /**
      * Notifies the Intelligence Service that the value of a text node has been changed.
