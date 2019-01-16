@@ -48,6 +48,9 @@ package android.test {
     method public abstract void startTiming(boolean);
   }
 
+  public abstract deprecated class RepetitiveTest implements java.lang.annotation.Annotation {
+  }
+
   public abstract deprecated class UiThreadTest implements java.lang.annotation.Annotation {
   }
 
