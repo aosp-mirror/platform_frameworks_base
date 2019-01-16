@@ -9907,4 +9907,33 @@ public class TelephonyManager {
         }
         return ret;
     }
+
+    /**
+     * Enable or disable a logical modem stack. When a logical modem is disabled, the corresponding
+     * SIM will still be visible to the user but its mapping modem will not have any radio activity.
+     * For example, we will disable a modem when user or system believes the corresponding SIM
+     * is temporarily not needed (e.g. out of coverage), and will enable it back on when needed.
+     *
+     * Requires that the calling app has permission
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     * @param slotIndex which corresponding modem will operate on.
+     * @param enable whether to enable or disable the modem stack.
+     * @return whether the operation is successful.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean enableModemForSlot(int slotIndex, boolean enable) {
+        boolean ret = false;
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ret = telephony.enableModemForSlot(slotIndex, enable);
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "enableModem RemoteException", ex);
+        }
+        return ret;
+    }
 }
