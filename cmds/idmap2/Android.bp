@@ -20,6 +20,7 @@ cc_defaults {
         "misc-*",
         "modernize-*",
         "readability-*",
+        "-modernize-avoid-c-arrays",
     ],
     tidy_flags: [
         "-system-headers",
