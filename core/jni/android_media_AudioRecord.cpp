@@ -841,6 +841,43 @@ static jint android_media_AudioRecord_get_active_microphones(JNIEnv *env,
     return jStatus;
 }
 
+static int android_media_AudioRecord_set_microphone_direction(JNIEnv *env, jobject thiz,
+                                                              jint direction) {
+    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
+    if (lpRecorder == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioRecord pointer for setMicrophoneDirection()");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+
+    jint jStatus = AUDIO_JAVA_SUCCESS;
+    status_t status =
+        lpRecorder->setMicrophoneDirection(static_cast<audio_microphone_direction_t>(direction));
+    if (status != NO_ERROR) {
+        jStatus = nativeToJavaStatus(status);
+    }
+
+    return jStatus;
+}
+
+static int android_media_AudioRecord_set_microphone_field_dimension(JNIEnv *env, jobject thiz,
+                                                                    jfloat zoom) {
+    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
+    if (lpRecorder == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioRecord pointer for setMicrophoneFieldDimension()");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+
+    jint jStatus = AUDIO_JAVA_SUCCESS;
+    status_t status = lpRecorder->setMicrophoneFieldDimension(zoom);
+    if (status != NO_ERROR) {
+        jStatus = nativeToJavaStatus(status);
+    }
+
+    return jStatus;
+}
+
 // ----------------------------------------------------------------------------
 static jint android_media_AudioRecord_get_port_id(JNIEnv *env,  jobject thiz) {
     sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
@@ -896,6 +933,10 @@ static const JNINativeMethod gMethods[] = {
     {"native_get_active_microphones", "(Ljava/util/ArrayList;)I",
                                         (void *)android_media_AudioRecord_get_active_microphones},
     {"native_getPortId", "()I", (void *)android_media_AudioRecord_get_port_id},
+    {"native_set_microphone_direction", "(I)I",
+                                (void *)android_media_AudioRecord_set_microphone_direction},
+    {"native_set_microphone_field_dimension", "(F)I",
+                                (void *)android_media_AudioRecord_set_microphone_field_dimension},
 };
 
 // field names found in android/media/AudioRecord.java

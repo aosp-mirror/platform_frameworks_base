@@ -61,7 +61,8 @@ import java.util.concurrent.Executor;
  * been read yet. Data should be read from the audio hardware in chunks of sizes inferior to
  * the total recording buffer size.
  */
-public class AudioRecord implements AudioRouting, AudioRecordingMonitor, AudioRecordingMonitorClient
+public class AudioRecord implements AudioRouting, MicrophoneDirection,
+        AudioRecordingMonitor, AudioRecordingMonitorClient
 {
     //---------------------------------------------------------
     // Constants
@@ -1657,7 +1658,6 @@ public class AudioRecord implements AudioRouting, AudioRecordingMonitor, AudioRe
         return activeMicrophones;
     }
 
-
     //--------------------------------------------------------------------------
     // Implementation of AudioRecordingMonitor interface
     //--------------------
@@ -1705,6 +1705,33 @@ public class AudioRecord implements AudioRouting, AudioRecordingMonitor, AudioRe
      */
     public int getPortId() {
         return native_getPortId();
+    }
+
+    //--------------------------------------------------------------------------
+    // MicrophoneDirection
+    //--------------------
+    /**
+     * Specifies the logical microphone (for processing).
+     *
+     * @param direction Direction constant (MicrophoneDirection.MIC_DIRECTION_*)
+     * @return retval OK if the call is successful, an error code otherwise.
+     * @hide
+     */
+    public int setMicrophoneDirection(int direction) {
+        return native_set_microphone_direction(direction);
+    }
+
+    /**
+     * Specifies the zoom factor (i.e. the field dimension) for the selected microphone
+     * (for processing). The selected microphone is determined by the use-case for the stream.
+     *
+     * @param zoom the desired field dimension of microphone capture. Range is from -1 (wide angle),
+     * though 0 (no zoom) to 1 (maximum zoom).
+     * @return retval OK if the call is successful, an error code otherwise.
+     * @hide
+     */
+    public int setMicrophoneFieldDimension(float zoom) {
+        return native_set_microphone_field_dimension(zoom);
     }
 
     //---------------------------------------------------------
@@ -1859,6 +1886,9 @@ public class AudioRecord implements AudioRouting, AudioRecordingMonitor, AudioRe
             ArrayList<MicrophoneInfo> activeMicrophones);
 
     private native int native_getPortId();
+
+    private native int native_set_microphone_direction(int direction);
+    private native int native_set_microphone_field_dimension(float zoom);
 
     //---------------------------------------------------------
     // Utility methods
