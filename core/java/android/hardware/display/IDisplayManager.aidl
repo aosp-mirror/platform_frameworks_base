@@ -116,4 +116,9 @@ interface IDisplayManager {
 
     // Get the minimum brightness curve.
     Curve getMinimumBrightnessCurve();
+
+    // Gets the id of the preferred wide gamut color space for all displays.
+    // The wide gamut color space is returned from composition pipeline
+    // based on hardware capability.
+    int getPreferredWideGamutColorSpaceId();
 }

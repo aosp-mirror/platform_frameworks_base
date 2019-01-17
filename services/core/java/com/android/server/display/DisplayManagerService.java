@@ -36,6 +36,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.ColorSpace;
 import android.graphics.Point;
 import android.hardware.SensorManager;
 import android.hardware.display.AmbientBrightnessDayStats;
@@ -93,9 +94,9 @@ import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
+import com.android.server.display.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.wm.SurfaceAnimationThread;
 import com.android.server.wm.WindowManagerInternal;
-import com.android.server.display.ColorDisplayService.ColorDisplayServiceInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -294,6 +295,7 @@ public final class DisplayManagerService extends SystemService {
     // is rejected by the system.
     private final Curve mMinimumBrightnessCurve;
     private final Spline mMinimumBrightnessSpline;
+    private final ColorSpace mWideColorSpace;
 
     public DisplayManagerService(Context context) {
         this(context, new Injector());
@@ -322,6 +324,8 @@ public final class DisplayManagerService extends SystemService {
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
         mCurrentUserId = UserHandle.USER_SYSTEM;
+        ColorSpace[] colorSpaces = SurfaceControl.getCompositionColorSpaces();
+        mWideColorSpace = colorSpaces[1];
     }
 
     public void setupSchedulerPolicies() {
@@ -1071,6 +1075,10 @@ public final class DisplayManagerService extends SystemService {
     @VisibleForTesting
     Curve getMinimumBrightnessCurveInternal() {
         return mMinimumBrightnessCurve;
+    }
+
+    int getPreferredWideGamutColorSpaceIdInternal() {
+        return mWideColorSpace.getId();
     }
 
     private void setBrightnessConfigurationForUserInternal(
@@ -2123,6 +2131,16 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return getMinimumBrightnessCurveInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public int getPreferredWideGamutColorSpaceId() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return getPreferredWideGamutColorSpaceIdInternal();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
