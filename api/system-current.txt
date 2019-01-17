@@ -4144,12 +4144,19 @@ package android.net.wifi {
     field public static final int WPA2_PSK = 4; // 0x4
   }
 
+  public class WifiInfo implements android.os.Parcelable {
+    method public boolean isOsuAp();
+  }
+
   public class WifiManager {
     method public void connect(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
     method public void connect(int, android.net.wifi.WifiManager.ActionListener);
     method public void disable(int, android.net.wifi.WifiManager.ActionListener);
     method public void disableEphemeralNetwork(java.lang.String);
     method public void forget(int, android.net.wifi.WifiManager.ActionListener);
+    method public java.util.List<android.util.Pair<android.net.wifi.WifiConfiguration, java.util.Map<java.lang.Integer, java.util.List<android.net.wifi.ScanResult>>>> getAllMatchingWifiConfigs(java.util.List<android.net.wifi.ScanResult>);
+    method public java.util.Map<android.net.wifi.hotspot2.OsuProvider, java.util.List<android.net.wifi.ScanResult>> getMatchingOsuProviders(java.util.List<android.net.wifi.ScanResult>);
+    method public java.util.Map<android.net.wifi.hotspot2.OsuProvider, android.net.wifi.hotspot2.PasspointConfiguration> getMatchingPasspointConfigsForOsuProviders(java.util.Set<android.net.wifi.hotspot2.OsuProvider>);
     method public java.util.List<android.net.wifi.WifiConfiguration> getPrivilegedConfiguredNetworks();
     method public android.net.wifi.WifiConfiguration getWifiApConfiguration();
     method public int getWifiApState();
@@ -4164,6 +4171,7 @@ package android.net.wifi {
     method public void startEasyConnectAsConfiguratorInitiator(java.lang.String, int, int, android.os.Handler, android.net.wifi.EasyConnectStatusCallback);
     method public void startEasyConnectAsEnrolleeInitiator(java.lang.String, android.os.Handler, android.net.wifi.EasyConnectStatusCallback);
     method public boolean startScan(android.os.WorkSource);
+    method public void startSubscriptionProvisioning(android.net.wifi.hotspot2.OsuProvider, android.net.wifi.hotspot2.ProvisioningCallback, android.os.Handler);
     method public void stopEasyConnectSession();
     method public void unregisterNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback);
     field public static final int CHANGE_REASON_ADDED = 0; // 0x0
@@ -4183,6 +4191,8 @@ package android.net.wifi {
     field public static final java.lang.String EXTRA_WIFI_CONFIGURATION = "wifiConfiguration";
     field public static final java.lang.String EXTRA_WIFI_CREDENTIAL_EVENT_TYPE = "et";
     field public static final java.lang.String EXTRA_WIFI_CREDENTIAL_SSID = "ssid";
+    field public static final int PASSPOINT_HOME_NETWORK = 0; // 0x0
+    field public static final int PASSPOINT_ROAMING_NETWORK = 1; // 0x1
     field public static final java.lang.String WIFI_AP_STATE_CHANGED_ACTION = "android.net.wifi.WIFI_AP_STATE_CHANGED";
     field public static final int WIFI_AP_STATE_DISABLED = 11; // 0xb
     field public static final int WIFI_AP_STATE_DISABLING = 10; // 0xa
@@ -4355,6 +4365,59 @@ package android.net.wifi.aware {
 
   public class WifiAwareSession implements java.lang.AutoCloseable {
     method public android.net.NetworkSpecifier createNetworkSpecifierPmk(int, byte[], byte[]);
+  }
+
+}
+
+package android.net.wifi.hotspot2 {
+
+  public final class OsuProvider implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getFriendlyName();
+    method public android.net.Uri getServerUri();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.net.wifi.hotspot2.OsuProvider> CREATOR;
+  }
+
+  public abstract class ProvisioningCallback {
+    ctor public ProvisioningCallback();
+    method public abstract void onProvisioningComplete();
+    method public abstract void onProvisioningFailure(int);
+    method public abstract void onProvisioningStatus(int);
+    field public static final int OSU_FAILURE_ADD_PASSPOINT_CONFIGURATION = 22; // 0x16
+    field public static final int OSU_FAILURE_AP_CONNECTION = 1; // 0x1
+    field public static final int OSU_FAILURE_INVALID_SERVER_URL = 8; // 0x8
+    field public static final int OSU_FAILURE_NO_AAA_SERVER_TRUST_ROOT_NODE = 17; // 0x11
+    field public static final int OSU_FAILURE_NO_AAA_TRUST_ROOT_CERTIFICATE = 21; // 0x15
+    field public static final int OSU_FAILURE_NO_OSU_ACTIVITY_FOUND = 14; // 0xe
+    field public static final int OSU_FAILURE_NO_POLICY_SERVER_TRUST_ROOT_NODE = 19; // 0x13
+    field public static final int OSU_FAILURE_NO_PPS_MO = 16; // 0x10
+    field public static final int OSU_FAILURE_NO_REMEDIATION_SERVER_TRUST_ROOT_NODE = 18; // 0x12
+    field public static final int OSU_FAILURE_OSU_PROVIDER_NOT_FOUND = 23; // 0x17
+    field public static final int OSU_FAILURE_PROVISIONING_ABORTED = 6; // 0x6
+    field public static final int OSU_FAILURE_PROVISIONING_NOT_AVAILABLE = 7; // 0x7
+    field public static final int OSU_FAILURE_RETRIEVE_TRUST_ROOT_CERTIFICATES = 20; // 0x14
+    field public static final int OSU_FAILURE_SERVER_CONNECTION = 3; // 0x3
+    field public static final int OSU_FAILURE_SERVER_URL_INVALID = 2; // 0x2
+    field public static final int OSU_FAILURE_SERVER_VALIDATION = 4; // 0x4
+    field public static final int OSU_FAILURE_SERVICE_PROVIDER_VERIFICATION = 5; // 0x5
+    field public static final int OSU_FAILURE_SOAP_MESSAGE_EXCHANGE = 11; // 0xb
+    field public static final int OSU_FAILURE_START_REDIRECT_LISTENER = 12; // 0xc
+    field public static final int OSU_FAILURE_TIMED_OUT_REDIRECT_LISTENER = 13; // 0xd
+    field public static final int OSU_FAILURE_UNEXPECTED_COMMAND_TYPE = 9; // 0x9
+    field public static final int OSU_FAILURE_UNEXPECTED_SOAP_MESSAGE_STATUS = 15; // 0xf
+    field public static final int OSU_FAILURE_UNEXPECTED_SOAP_MESSAGE_TYPE = 10; // 0xa
+    field public static final int OSU_STATUS_AP_CONNECTED = 2; // 0x2
+    field public static final int OSU_STATUS_AP_CONNECTING = 1; // 0x1
+    field public static final int OSU_STATUS_INIT_SOAP_EXCHANGE = 6; // 0x6
+    field public static final int OSU_STATUS_REDIRECT_RESPONSE_RECEIVED = 8; // 0x8
+    field public static final int OSU_STATUS_RETRIEVING_TRUST_ROOT_CERTS = 11; // 0xb
+    field public static final int OSU_STATUS_SECOND_SOAP_EXCHANGE = 9; // 0x9
+    field public static final int OSU_STATUS_SERVER_CONNECTED = 5; // 0x5
+    field public static final int OSU_STATUS_SERVER_CONNECTING = 3; // 0x3
+    field public static final int OSU_STATUS_SERVER_VALIDATED = 4; // 0x4
+    field public static final int OSU_STATUS_THIRD_SOAP_EXCHANGE = 10; // 0xa
+    field public static final int OSU_STATUS_WAITING_FOR_REDIRECT_RESPONSE = 7; // 0x7
   }
 
 }
