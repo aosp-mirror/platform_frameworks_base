@@ -4671,7 +4671,10 @@ public class WifiManager {
     }
 
     /**
-     * Stop or abort a current Easy Connect (DPP) session.
+     * Stop or abort a current Easy Connect (DPP) session. This call, once processed, will
+     * terminate any ongoing transaction, and clean up all associated resources. Caller should not
+     * expect any callbacks once this call is made. However, due to the asynchronous nature of
+     * this call, a callback may be fired if it was already pending in the queue.
      *
      * @hide
      */
