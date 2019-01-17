@@ -25,7 +25,7 @@ java_library_static {
     static_libs: [
         "android.test.base-minus-junit",
         "android.test.runner-minus-junit",
-        "android.test.mock.impl",
+        "android.test.mock_static",
     ],
 
     no_framework_libs: true,
