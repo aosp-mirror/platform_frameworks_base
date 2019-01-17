@@ -677,6 +677,8 @@ java_defaults {
         "ext",
     ],
 
+    jarjar_rules: ":framework-hidl-jarjar",
+
     static_libs: [
         "apex_aidl_interface-java",
         "networkstack-aidl-interfaces-java",
@@ -730,6 +732,11 @@ filegroup {
         "core/java/android/os/IStatsCompanionService.aidl",
         "core/java/android/os/IStatsManager.aidl",
     ],
+}
+
+filegroup {
+    name: "framework-hidl-jarjar",
+    srcs: ["jarjar_rules_hidl.txt"],
 }
 
 java_library {
