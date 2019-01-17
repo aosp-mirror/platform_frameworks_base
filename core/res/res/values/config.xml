@@ -3702,9 +3702,6 @@
     <!-- Whether or not the "SMS app service" feature is enabled -->
     <bool name="config_useSmsAppService">true</bool>
 
-    <!-- Component name for default assistant on this device -->
-    <string name="config_defaultAssistantComponentName">#+UNSET</string>
-
     <!-- Class name for the InputEvent compatibility processor override.
          Empty string means use the default compatibility processor
          (android.view.InputEventCompatProcessor). -->

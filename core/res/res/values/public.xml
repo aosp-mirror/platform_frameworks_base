@@ -2986,7 +2986,7 @@
     </public-group>
 
     <public-group type="array" first-id="0x01070006">
-      <!-- @hide @SystemApi -->
+      <!-- @hide @TestApi @SystemApi -->
       <public name="config_defaultRoleHolders" />
     </public-group>
 

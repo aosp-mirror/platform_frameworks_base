@@ -172,6 +172,15 @@ public final class RoleManager {
     public static final String ROLE_CALL_COMPANION_APP = "android.app.role.CALL_COMPANION_APP";
 
     /**
+     * The name of the assistant app role.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String ROLE_ASSISTANT = "android.app.role.ASSISTANT";
+
+    /**
      * The action used to request user approval of a role for an application.
      *
      * @hide

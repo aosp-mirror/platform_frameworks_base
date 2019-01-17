@@ -7791,6 +7791,9 @@ public final class Settings {
          * or an activity that handles ACTION_ASSIST, or empty which means using the default
          * handling.
          *
+         * <p>This should be set indirectly by setting the {@link
+         * android.app.role.RoleManager#ROLE_ASSISTANT assistant role}.
+         *
          * @hide
          */
         @UnsupportedAppUsage

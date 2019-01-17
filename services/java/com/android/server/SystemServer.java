@@ -1546,6 +1546,12 @@ public final class SystemServer {
                 traceEnd();
             }
 
+            // Grants default permissions and defines roles
+            traceBeginAndSlog("StartRoleManagerService");
+            mSystemServiceManager.startService(new RoleManagerService(
+                    mSystemContext, new LegacyRoleResolutionPolicy(mSystemContext)));
+            traceEnd();
+
             // We need to always start this service, regardless of whether the
             // FEATURE_VOICE_RECOGNIZERS feature is set, because it needs to take care
             // of initializing various settings.  It will internally modify its behavior
@@ -1994,12 +2000,6 @@ public final class SystemServer {
             } catch (Throwable e) {
                 reportWtf("observing native crashes", e);
             }
-            traceEnd();
-
-            // Grants default permissions and defines roles
-            traceBeginAndSlog("StartRoleManagerService");
-            mSystemServiceManager.startService(new RoleManagerService(
-                    mSystemContext, new LegacyRoleResolutionPolicy(mSystemContext)));
             traceEnd();
 
             // No dependency on Webview preparation in system server. But this should

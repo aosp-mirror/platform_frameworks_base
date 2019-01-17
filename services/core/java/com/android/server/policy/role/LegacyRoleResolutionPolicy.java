@@ -18,6 +18,7 @@ package com.android.server.policy.role;
 
 import android.annotation.NonNull;
 import android.app.role.RoleManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Debug;
 import android.provider.Settings;
@@ -89,6 +90,17 @@ public class LegacyRoleResolutionPolicy implements RoleManagerService.RoleHolder
                 }
 
                 return CollectionUtils.singletonOrEmpty(result);
+            }
+            case RoleManager.ROLE_ASSISTANT: {
+                String legacyAssistant = Settings.Secure.getStringForUser(
+                        mContext.getContentResolver(), Settings.Secure.ASSISTANT, userId);
+
+                if (legacyAssistant == null || legacyAssistant.isEmpty()) {
+                    return Collections.emptyList();
+                } else {
+                    return Collections.singletonList(
+                            ComponentName.unflattenFromString(legacyAssistant).getPackageName());
+                }
             }
             default: {
                 Slog.e(LOG_TAG, "Don't know how to find legacy role holders for " + roleName);
