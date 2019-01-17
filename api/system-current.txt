@@ -4398,7 +4398,7 @@ package android.net.wifi.hotspot2 {
     method public abstract void onProvisioningStatus(int);
     field public static final int OSU_FAILURE_ADD_PASSPOINT_CONFIGURATION = 22; // 0x16
     field public static final int OSU_FAILURE_AP_CONNECTION = 1; // 0x1
-    field public static final int OSU_FAILURE_INVALID_SERVER_URL = 8; // 0x8
+    field public static final int OSU_FAILURE_INVALID_URL_FORMAT_FOR_OSU = 8; // 0x8
     field public static final int OSU_FAILURE_NO_AAA_SERVER_TRUST_ROOT_NODE = 17; // 0x11
     field public static final int OSU_FAILURE_NO_AAA_TRUST_ROOT_CERTIFICATE = 21; // 0x15
     field public static final int OSU_FAILURE_NO_OSU_ACTIVITY_FOUND = 14; // 0xe
