@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.euicc.IEuiccController;
 
@@ -40,7 +41,11 @@ import java.lang.annotation.RetentionPolicy;
  * EuiccManager is the application interface to eUICCs, or eSIMs/embedded SIMs.
  *
  * <p>You do not instantiate this class directly; instead, you retrieve an instance through
- * {@link Context#getSystemService(String)} and {@link Context#EUICC_SERVICE}.
+ * {@link Context#getSystemService(String)} and {@link Context#EUICC_SERVICE}. This instance will be
+ * created using the default eUICC.
+ *
+ * <p>On a device with multiple eUICCs, you may want to create multiple EuiccManagers. To do this
+ * you can call {@link #createForCardId}.
  *
  * <p>See {@link #isEnabled} before attempting to use these APIs.
  */
@@ -248,10 +253,29 @@ public class EuiccManager {
     public static final int EUICC_OTA_STATUS_UNAVAILABLE = 5;
 
     private final Context mContext;
+    private final int mCardId;
 
     /** @hide */
     public EuiccManager(Context context) {
         mContext = context;
+        TelephonyManager tm = (TelephonyManager)
+                context.getSystemService(Context.TELEPHONY_SERVICE);
+        mCardId = tm.getCardIdForDefaultEuicc();
+    }
+
+    /** @hide */
+    private EuiccManager(Context context, int cardId) {
+        mContext = context;
+        mCardId = cardId;
+    }
+
+    /**
+     * Create a new EuiccManager object pinned to the given card ID.
+     *
+     * @return an EuiccManager that uses the given card ID for all calls.
+     */
+    public EuiccManager createForCardId(int cardId) {
+        return new EuiccManager(mContext, cardId);
     }
 
     /**
@@ -274,7 +298,8 @@ public class EuiccManager {
      * Returns the EID identifying the eUICC hardware.
      *
      * <p>Requires that the calling app has carrier privileges on the active subscription on the
-     * eUICC.
+     * current eUICC. A calling app with carrier privileges for one eUICC may not necessarily have
+     * access to the EID of another eUICC.
      *
      * @return the EID. May be null if {@link #isEnabled()} is false or the eUICC is not ready.
      */
@@ -284,7 +309,7 @@ public class EuiccManager {
             return null;
         }
         try {
-            return getIEuiccController().getEid();
+            return getIEuiccController().getEid(mCardId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -307,7 +332,7 @@ public class EuiccManager {
             return EUICC_OTA_STATUS_UNAVAILABLE;
         }
         try {
-            return getIEuiccController().getOtaStatus();
+            return getIEuiccController().getOtaStatus(mCardId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -317,10 +342,10 @@ public class EuiccManager {
      * Attempt to download the given {@link DownloadableSubscription}.
      *
      * <p>Requires the {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission,
-     * or the calling app must be authorized to manage both the currently-active subscription and
-     * the subscription to be downloaded according to the subscription metadata. Without the former,
-     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the callback
-     * intent to prompt the user to accept the download.
+     * or the calling app must be authorized to manage both the currently-active subscription on the
+     * current eUICC and the subscription to be downloaded according to the subscription metadata.
+     * Without the former, an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be
+     * returned in the callback intent to prompt the user to accept the download.
      *
      * @param subscription the subscription to download.
      * @param switchAfterDownload if true, the profile will be activated upon successful download.
@@ -334,7 +359,7 @@ public class EuiccManager {
             return;
         }
         try {
-            getIEuiccController().downloadSubscription(subscription, switchAfterDownload,
+            getIEuiccController().downloadSubscription(mCardId, subscription, switchAfterDownload,
                     mContext.getOpPackageName(), null /* resolvedBundle */, callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -401,7 +426,7 @@ public class EuiccManager {
             return;
         }
         try {
-            getIEuiccController().continueOperation(resolutionIntent, resolutionExtras);
+            getIEuiccController().continueOperation(mCardId, resolutionIntent, resolutionExtras);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -433,8 +458,8 @@ public class EuiccManager {
             return;
         }
         try {
-            getIEuiccController().getDownloadableSubscriptionMetadata(
-                    subscription, mContext.getOpPackageName(), callbackIntent);
+            getIEuiccController().getDownloadableSubscriptionMetadata(mCardId, subscription,
+                    mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -463,7 +488,7 @@ public class EuiccManager {
             return;
         }
         try {
-            getIEuiccController().getDefaultDownloadableSubscriptionList(
+            getIEuiccController().getDefaultDownloadableSubscriptionList(mCardId,
                     mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -482,7 +507,7 @@ public class EuiccManager {
             return null;
         }
         try {
-            return getIEuiccController().getEuiccInfo();
+            return getIEuiccController().getEuiccInfo(mCardId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -508,7 +533,7 @@ public class EuiccManager {
             return;
         }
         try {
-            getIEuiccController().deleteSubscription(
+            getIEuiccController().deleteSubscription(mCardId,
                     subscriptionId, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -536,7 +561,7 @@ public class EuiccManager {
             return;
         }
         try {
-            getIEuiccController().switchToSubscription(
+            getIEuiccController().switchToSubscription(mCardId,
                     subscriptionId, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -562,7 +587,7 @@ public class EuiccManager {
             return;
         }
         try {
-            getIEuiccController().updateSubscriptionNickname(
+            getIEuiccController().updateSubscriptionNickname(mCardId,
                     subscriptionId, nickname, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -586,7 +611,7 @@ public class EuiccManager {
             return;
         }
         try {
-            getIEuiccController().eraseSubscriptions(callbackIntent);
+            getIEuiccController().eraseSubscriptions(mCardId, callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -616,7 +641,7 @@ public class EuiccManager {
             return;
         }
         try {
-            getIEuiccController().retainSubscriptionsForFactoryReset(callbackIntent);
+            getIEuiccController().retainSubscriptionsForFactoryReset(mCardId, callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
