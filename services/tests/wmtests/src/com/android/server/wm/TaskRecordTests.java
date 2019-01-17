@@ -314,13 +314,11 @@ public class TaskRecordTests extends ActivityTestsBase {
         // Wire up task and stack.
         task.mTask.mTaskRecord = task;
         doCallRealMethod().when(task.mTask).onDescendantOrientationChanged(any(), any());
-        doReturn(stack.getWindowContainerController().mContainer).when(task.mTask).getParent();
+        doReturn(stack.getTaskStack()).when(task.mTask).getParent();
 
         // Wire up stack and display content.
-        doCallRealMethod().when(stack.mWindowContainerController.mContainer)
-                .onDescendantOrientationChanged(any(), any());
-        doReturn(display.mDisplayContent).when(stack.mWindowContainerController.mContainer)
-                .getParent();
+        doCallRealMethod().when(stack.mTaskStack).onDescendantOrientationChanged(any(), any());
+        doReturn(display.mDisplayContent).when(stack.mTaskStack).getParent();
 
         activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         assertTrue("Bounds of the task should be pillarboxed.",
