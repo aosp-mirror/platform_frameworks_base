@@ -1118,6 +1118,24 @@ package android.os {
     field public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Waveform> CREATOR;
   }
 
+  public class VintfObject {
+    method public static java.lang.String[] getHalNamesAndVersions();
+    method public static java.lang.String getSepolicyVersion();
+    method public static java.lang.Long getTargetFrameworkCompatibilityMatrixVersion();
+    method public static java.util.Map<java.lang.String, java.lang.String[]> getVndkSnapshots();
+    method public static java.lang.String[] report();
+  }
+
+  public class VintfRuntimeInfo {
+    method public static java.lang.String getCpuInfo();
+    method public static java.lang.String getHardwareId();
+    method public static java.lang.String getKernelVersion();
+    method public static java.lang.String getNodeName();
+    method public static java.lang.String getOsName();
+    method public static java.lang.String getOsRelease();
+    method public static java.lang.String getOsVersion();
+  }
+
   public class WorkSource implements android.os.Parcelable {
     ctor public WorkSource(int);
     method public boolean add(int);
