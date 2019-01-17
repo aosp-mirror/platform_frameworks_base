@@ -116,6 +116,7 @@ public abstract class BiometricServiceBase extends SystemService
     protected HashMap<Integer, PerformanceStats> mPerformanceMap = new HashMap<>();
     // Transactions that make use of CryptoObjects are tracked by mCryptoPerformaceMap.
     protected HashMap<Integer, PerformanceStats> mCryptoPerformanceMap = new HashMap<>();
+    protected int mHALDeathCount;
 
     protected class PerformanceStats {
         public int accept; // number of accepted biometrics
@@ -596,6 +597,7 @@ public abstract class BiometricServiceBase extends SystemService
     public void serviceDied(long cookie) {
         Slog.e(getTag(), "HAL died");
         mMetricsLogger.count(getMetrics().tagHalDied(), 1);
+        mHALDeathCount++;
         handleError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                 0 /*vendorCode */);
     }
