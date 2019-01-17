@@ -834,10 +834,10 @@ public abstract class BatteryStats implements Parcelable {
          * also be bumped.
          */
         static final String[] USER_ACTIVITY_TYPES = {
-            "other", "button", "touch", "accessibility"
+            "other", "button", "touch", "accessibility", "attention"
         };
 
-        public static final int NUM_USER_ACTIVITY_TYPES = 4;
+        public static final int NUM_USER_ACTIVITY_TYPES = USER_ACTIVITY_TYPES.length;
 
         public abstract void noteUserActivityLocked(int type);
         public abstract boolean hasUserActivity();

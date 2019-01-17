@@ -229,6 +229,7 @@ public final class PowerManagerService extends SystemService
     private final BatterySaverController mBatterySaverController;
     private final BatterySaverStateMachine mBatterySaverStateMachine;
     private final BatterySavingStats mBatterySavingStats;
+    private final AttentionDetector mAttentionDetector;
     private final BinderService mBinderService;
     private final LocalService mLocalService;
     private final NativeWrapper mNativeWrapper;
@@ -736,6 +737,7 @@ public final class PowerManagerService extends SystemService
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
         mConstants = new Constants(mHandler);
         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
+        mAttentionDetector = new AttentionDetector(this::onUserAttention, mLock);
 
         mBatterySavingStats = new BatterySavingStats(mLock);
         mBatterySaverPolicy =
@@ -804,6 +806,7 @@ public final class PowerManagerService extends SystemService
             mDisplayManagerInternal = getLocalService(DisplayManagerInternal.class);
             mPolicy = getLocalService(WindowManagerPolicy.class);
             mBatteryManagerInternal = getLocalService(BatteryManagerInternal.class);
+            mAttentionDetector.systemReady(mContext);
 
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             mScreenBrightnessSettingMinimum = pm.getMinimumScreenBrightnessSetting();
@@ -1326,6 +1329,16 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    private void onUserAttention() {
+        synchronized (mLock) {
+            if (userActivityNoUpdateLocked(SystemClock.uptimeMillis(),
+                    PowerManager.USER_ACTIVITY_EVENT_ATTENTION, 0 /* flags */,
+                    Process.SYSTEM_UID)) {
+                updatePowerStateLocked();
+            }
+        }
+    }
+
     private boolean userActivityNoUpdateLocked(long eventTime, int event, int flags, int uid) {
         if (DEBUG_SPEW) {
             Slog.d(TAG, "userActivityNoUpdateLocked: eventTime=" + eventTime
@@ -1346,6 +1359,7 @@ public final class PowerManagerService extends SystemService
             }
 
             mNotifier.onUserActivity(event, uid);
+            mAttentionDetector.onUserActivity(eventTime, event);
 
             if (mUserInactiveOverrideFromWindowManager) {
                 mUserInactiveOverrideFromWindowManager = false;
@@ -1593,6 +1607,7 @@ public final class PowerManagerService extends SystemService
             if (mNotifier != null) {
                 mNotifier.onWakefulnessChangeStarted(wakefulness, reason);
             }
+            mAttentionDetector.onWakefulnessChangeStarted(wakefulness);
         }
     }
 
@@ -2083,6 +2098,10 @@ public final class PowerManagerService extends SystemService
                     }
                     mUserActivitySummary = USER_ACTIVITY_SCREEN_DREAM;
                     nextTimeout = -1;
+                }
+
+                if ((mUserActivitySummary & USER_ACTIVITY_SCREEN_BRIGHT) != 0) {
+                    nextTimeout = mAttentionDetector.updateUserActivity(nextTimeout);
                 }
 
                 if (nextProfileTimeout > 0) {
@@ -3477,6 +3496,7 @@ public final class PowerManagerService extends SystemService
 
             mBatterySaverPolicy.dump(pw);
             mBatterySaverStateMachine.dump(pw);
+            mAttentionDetector.dump(pw);
 
             pw.println();
             final int numProfiles = mProfilePowerState.size();
