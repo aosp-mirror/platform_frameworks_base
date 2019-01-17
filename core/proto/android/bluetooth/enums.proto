@@ -41,3 +41,18 @@ enum EnableDisableReasonEnum {
     ENABLE_DISABLE_REASON_USER_SWITCH = 8;
     ENABLE_DISABLE_REASON_RESTORE_USER_SETTING = 9;
 }
+
+enum DirectionEnum {
+    DIRECTION_UNKNOWN = 0;
+    DIRECTION_OUTGOING = 1;
+    DIRECTION_INCOMING = 2;
+}
+
+// First item is the default value, other values follow Bluetooth spec definition
+enum LinkTypeEnum {
+    // Link type is at most 1 byte (0xFF), thus 0xFFF must not be a valid value
+    LINK_TYPE_UNKNOWN = 0xFFF;
+    LINK_TYPE_SCO = 0x00;
+    LINK_TYPE_ACL = 0x01;
+    LINK_TYPE_ESCO = 0x02;
+}
