@@ -36,6 +36,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 
 import android.platform.test.annotations.Presubmit;
 
@@ -276,5 +279,61 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         anotherAlwaysOnTopStack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
         assertEquals(anotherAlwaysOnTopStack, display.getChildAt(topPosition - 1));
+    }
+
+    @Test
+    public void testRemoveStackInWindowingModes() {
+        removeStackTests(() -> mRootActivityContainer.removeStacksInWindowingModes(
+                WINDOWING_MODE_FULLSCREEN));
+    }
+
+    @Test
+    public void testRemoveStackWithActivityTypes() {
+        removeStackTests(
+                () -> mRootActivityContainer.removeStacksWithActivityTypes(ACTIVITY_TYPE_STANDARD));
+    }
+
+    private void removeStackTests(Runnable runnable) {
+        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+        final ActivityStack stack1 = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, ON_TOP);
+        final ActivityStack stack2 = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, ON_TOP);
+        final ActivityStack stack3 = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, ON_TOP);
+        final ActivityStack stack4 = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, ON_TOP);
+        final TaskRecord task1 = new TaskBuilder(mService.mStackSupervisor).setStack(
+                stack1).setTaskId(1).build();
+        final TaskRecord task2 = new TaskBuilder(mService.mStackSupervisor).setStack(
+                stack2).setTaskId(2).build();
+        final TaskRecord task3 = new TaskBuilder(mService.mStackSupervisor).setStack(
+                stack3).setTaskId(3).build();
+        final TaskRecord task4 = new TaskBuilder(mService.mStackSupervisor).setStack(
+                stack4).setTaskId(4).build();
+
+        // Reordering stacks while removing stacks.
+        doAnswer(invocation -> {
+            display.positionChildAtTop(stack3, false);
+            return true;
+        }).when(mSupervisor).removeTaskByIdLocked(eq(task4.taskId), anyBoolean(), anyBoolean(),
+                any());
+
+        // Removing stacks from the display while removing stacks.
+        doAnswer(invocation -> {
+            display.removeChild(stack2);
+            return true;
+        }).when(mSupervisor).removeTaskByIdLocked(eq(task2.taskId), anyBoolean(), anyBoolean(),
+                any());
+
+        runnable.run();
+        verify(mSupervisor).removeTaskByIdLocked(eq(task4.taskId), anyBoolean(), anyBoolean(),
+                any());
+        verify(mSupervisor).removeTaskByIdLocked(eq(task3.taskId), anyBoolean(), anyBoolean(),
+                any());
+        verify(mSupervisor).removeTaskByIdLocked(eq(task2.taskId), anyBoolean(), anyBoolean(),
+                any());
+        verify(mSupervisor).removeTaskByIdLocked(eq(task1.taskId), anyBoolean(), anyBoolean(),
+                any());
     }
 }
