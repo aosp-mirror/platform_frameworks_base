@@ -248,10 +248,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockView.setShowCurrentUserTime(showCurrentUserTime);
     }
 
-    public void setElegantTextHeight(boolean elegant) {
-        mClockView.setElegantTextHeight(elegant);
-    }
-
     public void setTextSize(int unit, float size) {
         mClockView.setTextSize(unit, size);
     }

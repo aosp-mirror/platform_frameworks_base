@@ -14,18 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<com.android.keyguard.clock.ClockLayout
+<TextClock
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-  >
-  <include
-      android:id="@+id/digital_clock"
-      layout="@layout/text_clock"
-  />
-  <com.android.keyguard.clock.StretchAnalogClock
-      android:id="@+id/analog_clock"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-  />
-</com.android.keyguard.clock.ClockLayout>
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:letterSpacing="0.03"
+    android:textColor="?attr/wallpaperTextColor"
+    android:singleLine="true"
+    style="@style/widget_big"
+    android:format12Hour="@string/keyguard_widget_12_hours_format"
+    android:format24Hour="@string/keyguard_widget_24_hours_format"
+    android:elegantTextHeight="false"
+/>
