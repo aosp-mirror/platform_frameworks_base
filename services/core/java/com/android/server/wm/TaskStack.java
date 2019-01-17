@@ -21,6 +21,7 @@ import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LE
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
@@ -33,6 +34,10 @@ import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 
+import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
+import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
+import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
+import static com.android.server.wm.BoundsAnimationController.SchedulePipModeChangedState;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.StackProto.ADJUSTED_BOUNDS;
 import static com.android.server.wm.StackProto.ADJUSTED_FOR_IME;
@@ -47,10 +52,12 @@ import static com.android.server.wm.StackProto.ID;
 import static com.android.server.wm.StackProto.MINIMIZE_AMOUNT;
 import static com.android.server.wm.StackProto.TASKS;
 import static com.android.server.wm.StackProto.WINDOW_CONTAINER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.CallSuper;
+import android.app.RemoteAction;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -71,9 +78,10 @@ import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 public class TaskStack extends WindowContainer<Task> implements
-        BoundsAnimationTarget {
+        BoundsAnimationTarget, ConfigurationContainerListener {
     /** Minimum size of an adjusted stack bounds relative to original stack bounds. Used to
      * restrict IME adjustment so that a min portion of top stack remains visible.*/
     private static final float ADJUSTED_STACK_FRACTION_MIN = 0.3f;
@@ -92,6 +100,10 @@ public class TaskStack extends WindowContainer<Task> implements
     private Rect mTmpRect = new Rect();
     private Rect mTmpRect2 = new Rect();
     private Rect mTmpRect3 = new Rect();
+
+    /** For Pinned stack controlling. */
+    private Rect mTmpFromBounds = new Rect();
+    private Rect mTmpToBounds = new Rect();
 
     /** Stack bounds adjusted to screen content area (taking into account IM windows, etc.) */
     private final Rect mAdjustedBounds = new Rect();
@@ -141,6 +153,9 @@ public class TaskStack extends WindowContainer<Task> implements
 
     private Dimmer mDimmer = new Dimmer(this);
 
+    // TODO: remove after unification.
+    ActivityStack mActivityStack;
+
     /**
      * For {@link #prepareSurfaces}.
      */
@@ -150,10 +165,11 @@ public class TaskStack extends WindowContainer<Task> implements
     private final AnimatingAppWindowTokenRegistry mAnimatingAppWindowTokenRegistry =
             new AnimatingAppWindowTokenRegistry();
 
-    TaskStack(WindowManagerService service, int stackId, StackWindowController controller) {
+    TaskStack(WindowManagerService service, int stackId, ActivityStack activityStack) {
         super(service);
         mStackId = stackId;
-        setController(controller);
+        mActivityStack = activityStack;
+        activityStack.registerConfigurationChangeListener(this);
         mDockedStackMinimizeThickness = service.mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_minimize_thickness);
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId);
@@ -572,6 +588,49 @@ public class TaskStack extends WindowContainer<Task> implements
         positionChildAt(position, task, moveParents /* includingParents */, showForAllUsers);
     }
 
+    void positionChildAt(Task child, int position) {
+        if (DEBUG_STACK) {
+            Slog.i(TAG_WM, "positionChildAt: positioning task=" + child + " at " + position);
+        }
+        if (child == null) {
+            if (DEBUG_STACK) {
+                Slog.i(TAG_WM, "positionChildAt: could not find task=" + this);
+            }
+            return;
+        }
+        child.positionAt(position);
+        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+    }
+
+    void positionChildAtTop(Task child, boolean includingParents) {
+        if (child == null) {
+            // TODO: Fix the call-points that cause this to happen.
+            return;
+        }
+
+        positionChildAt(POSITION_TOP, child, includingParents);
+
+        final DisplayContent displayContent = getDisplayContent();
+        if (displayContent.mAppTransition.isTransitionSet()) {
+            child.setSendingToBottom(false);
+        }
+        displayContent.layoutAndAssignWindowLayersIfNeeded();
+    }
+
+    void positionChildAtBottom(Task child, boolean includingParents) {
+        if (child == null) {
+            // TODO: Fix the call-points that cause this to happen.
+            return;
+        }
+
+        positionChildAt(POSITION_BOTTOM, child, includingParents);
+
+        if (getDisplayContent().mAppTransition.isTransitionSet()) {
+            child.setSendingToBottom(true);
+        }
+        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+    }
+
     @Override
     void positionChildAt(int position, Task child, boolean includingParents) {
         positionChildAt(position, child, includingParents, child.showForAllUsers());
@@ -594,6 +653,21 @@ public class TaskStack extends WindowContainer<Task> implements
 
         final int toTop = targetPosition == mChildren.size() - 1 ? 1 : 0;
         EventLog.writeEvent(EventLogTags.WM_TASK_MOVED, child.mTaskId, toTop, targetPosition);
+    }
+
+    void reparent(int displayId, Rect outStackBounds, boolean onTop) {
+        final DisplayContent targetDc = mWmService.mRoot.getDisplayContent(displayId);
+        if (targetDc == null) {
+            throw new IllegalArgumentException("Trying to move stackId=" + mStackId
+                    + " to unknown displayId=" + displayId);
+        }
+
+        targetDc.moveStackToDisplay(this, onTop);
+        if (matchParentBounds()) {
+            outStackBounds.setEmpty();
+        } else {
+            getRawBounds(outStackBounds);
+        }
     }
 
     // TODO: We should really have users as a window container in the hierarchy so that we don't
@@ -722,6 +796,23 @@ public class TaskStack extends WindowContainer<Task> implements
         updateSurfaceSize(getPendingTransaction());
         updateSurfacePosition();
         scheduleAnimation();
+    }
+
+    /**
+     * Re-sizes a stack and its containing tasks.
+     *
+     * @param bounds New stack bounds. Passing in null sets the bounds to fullscreen.
+     * @param taskBounds Bounds for tasks in the resized stack, keyed by task id.
+     * @param taskTempInsetBounds Inset bounds for individual tasks, keyed by task id.
+     */
+    void resize(Rect bounds, SparseArray<Rect> taskBounds,
+            SparseArray<Rect> taskTempInsetBounds) {
+        // We might trigger a configuration change. Save the current task bounds for freezing.
+        prepareFreezingTaskBounds();
+        if (setBounds(bounds, taskBounds, taskTempInsetBounds) && isVisible()) {
+            getDisplayContent().setLayoutNeeded();
+            mWmService.mWindowPlacerLocked.performSurfacePlacement();
+        }
     }
 
     /**
@@ -929,12 +1020,7 @@ public class TaskStack extends WindowContainer<Task> implements
                 (dockedStack == null || dockedStack == this) ? null : dockedStack.getRawBounds();
         getStackDockedModeBoundsLocked(mDisplayContent.getConfiguration(), dockedBounds,
                 null /* currentTempTaskBounds */, bounds, tempBounds);
-        getController().requestResize(bounds);
-    }
-
-    @Override
-    StackWindowController getController() {
-        return (StackWindowController) super.getController();
+        mActivityStack.requestResize(bounds);
     }
 
     @Override
@@ -944,6 +1030,14 @@ public class TaskStack extends WindowContainer<Task> implements
             return;
         }
         removeImmediately();
+    }
+
+    @Override
+    void removeImmediately() {
+        if (mActivityStack != null) {
+            mActivityStack.unregisterConfigurationChangeListener(this);
+        }
+        super.removeImmediately();
     }
 
     @Override
@@ -1572,14 +1666,13 @@ public class TaskStack extends WindowContainer<Task> implements
                 // I don't believe you...
             }
 
-            final PinnedStackWindowController controller =
-                    (PinnedStackWindowController) getController();
-            if (schedulePipModeChangedCallback && controller != null) {
+            if (schedulePipModeChangedCallback && mActivityStack != null) {
                 // We need to schedule the PiP mode change before the animation up. It is possible
                 // in this case for the animation down to not have been completed, so always
                 // force-schedule and update to the client to ensure that it is notified that it
                 // is no longer in picture-in-picture mode
-                controller.updatePictureInPictureModeForPinnedStackAnimation(null, forceUpdate);
+                mActivityStack.updatePictureInPictureModeForPinnedStackAnimation(null,
+                        forceUpdate);
             }
         }
         return true;
@@ -1592,12 +1685,10 @@ public class TaskStack extends WindowContainer<Task> implements
             // Update to the final bounds if requested. This is done here instead of in the bounds
             // animator to allow us to coordinate this after we notify the PiP mode changed
 
-            final PinnedStackWindowController controller =
-                    (PinnedStackWindowController) getController();
-            if (schedulePipModeChangedCallback && controller != null) {
+            if (schedulePipModeChangedCallback) {
                 // We need to schedule the PiP mode change after the animation down, so use the
                 // final bounds
-                controller.updatePictureInPictureModeForPinnedStackAnimation(
+                mActivityStack.updatePictureInPictureModeForPinnedStackAnimation(
                         mBoundsAnimationTarget, false /* forceUpdate */);
             }
 
@@ -1622,6 +1713,135 @@ public class TaskStack extends WindowContainer<Task> implements
             // No PiP animation, just run the normal animation-end logic
             onPipAnimationEndResize();
         }
+    }
+
+    /**
+     * @return the current stack bounds transformed to the given {@param aspectRatio}. If
+     *         the default bounds is {@code null}, then the {@param aspectRatio} is applied to the
+     *         default bounds.
+     */
+    Rect getPictureInPictureBounds(float aspectRatio, Rect stackBounds) {
+        if (!mWmService.mSupportsPictureInPicture) {
+            return null;
+        }
+
+        final DisplayContent displayContent = getDisplayContent();
+        if (displayContent == null) {
+            return null;
+        }
+
+        if (!inPinnedWindowingMode()) {
+            return null;
+        }
+
+        final PinnedStackController pinnedStackController =
+                displayContent.getPinnedStackController();
+        if (stackBounds == null) {
+            // Calculate the aspect ratio bounds from the default bounds
+            stackBounds = pinnedStackController.getDefaultOrLastSavedBounds();
+        }
+
+        if (pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)) {
+            return pinnedStackController.transformBoundsToAspectRatio(stackBounds, aspectRatio,
+                    true /* useCurrentMinEdgeSize */);
+        } else {
+            return stackBounds;
+        }
+    }
+
+    /**
+     * Animates the pinned stack.
+     */
+    void animateResizePinnedStack(Rect toBounds, Rect sourceHintBounds,
+            int animationDuration, boolean fromFullscreen) {
+        if (!inPinnedWindowingMode()) {
+            return;
+        }
+        // Get the from-bounds
+        final Rect fromBounds = new Rect();
+        getBounds(fromBounds);
+
+        // Get non-null fullscreen to-bounds for animating if the bounds are null
+        @SchedulePipModeChangedState int schedulePipModeChangedState =
+                NO_PIP_MODE_CHANGED_CALLBACKS;
+        final boolean toFullscreen = toBounds == null;
+        if (toFullscreen) {
+            if (fromFullscreen) {
+                throw new IllegalArgumentException("Should not defer scheduling PiP mode"
+                        + " change on animation to fullscreen.");
+            }
+            schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_START;
+
+            mWmService.getStackBounds(
+                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mTmpToBounds);
+            if (!mTmpToBounds.isEmpty()) {
+                // If there is a fullscreen bounds, use that
+                toBounds = new Rect(mTmpToBounds);
+            } else {
+                // Otherwise, use the display bounds
+                toBounds = new Rect();
+                getDisplayContent().getBounds(toBounds);
+            }
+        } else if (fromFullscreen) {
+            schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_END;
+        }
+
+        setAnimationFinalBounds(sourceHintBounds, toBounds, toFullscreen);
+
+        final Rect finalToBounds = toBounds;
+        final @SchedulePipModeChangedState int finalSchedulePipModeChangedState =
+                schedulePipModeChangedState;
+        final DisplayContent displayContent = getDisplayContent();
+        displayContent.mBoundsAnimationController.getHandler().post(() -> {
+            displayContent.mBoundsAnimationController.animateBounds(this, fromBounds,
+                    finalToBounds, animationDuration, finalSchedulePipModeChangedState,
+                    fromFullscreen, toFullscreen);
+        });
+    }
+
+    /**
+     * Sets the current picture-in-picture aspect ratio.
+     */
+    void setPictureInPictureAspectRatio(float aspectRatio) {
+        if (!mWmService.mSupportsPictureInPicture) {
+            return;
+        }
+
+        if (!inPinnedWindowingMode()) {
+            return;
+        }
+
+        final PinnedStackController pinnedStackController =
+                getDisplayContent().getPinnedStackController();
+
+        if (Float.compare(aspectRatio, pinnedStackController.getAspectRatio()) == 0) {
+            return;
+        }
+        getAnimationOrCurrentBounds(mTmpFromBounds);
+        mTmpToBounds.set(mTmpFromBounds);
+        getPictureInPictureBounds(aspectRatio, mTmpToBounds);
+        if (!mTmpToBounds.equals(mTmpFromBounds)) {
+            animateResizePinnedStack(mTmpToBounds, null /* sourceHintBounds */,
+                    -1 /* duration */, false /* fromFullscreen */);
+        }
+        pinnedStackController.setAspectRatio(
+                pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)
+                        ? aspectRatio : -1f);
+    }
+
+    /**
+     * Sets the current picture-in-picture actions.
+     */
+    void setPictureInPictureActions(List<RemoteAction> actions) {
+        if (!mWmService.mSupportsPictureInPicture) {
+            return;
+        }
+
+        if (!inPinnedWindowingMode()) {
+            return;
+        }
+
+        getDisplayContent().getPinnedStackController().setActions(actions);
     }
 
     @Override

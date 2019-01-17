@@ -16,12 +16,15 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager.TaskDescription;
 import android.content.res.Configuration;
@@ -58,7 +61,7 @@ public class WindowFrameTests extends WindowTestsBase {
         boolean mDockedResizingForTest = false;
         WindowStateWithTask(WindowManagerService wm, IWindow iWindow, WindowToken windowToken,
                 WindowManager.LayoutParams attrs, Task t) {
-            super(wm, null, iWindow, windowToken, null, 0, 0, attrs, 0, 0,
+            super(wm, mock(Session.class), iWindow, windowToken, null, 0, 0, attrs, 0, 0,
                     false /* ownerCanAddInternalSystemWindow */);
             mTask = t;
         }
@@ -113,9 +116,9 @@ public class WindowFrameTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mWindowToken = WindowTestUtils.createTestAppWindowToken(
-                mWm.getDefaultDisplayContentLocked());
-        mStubStack = new TaskStack(mWm, 0, null);
+        mWindowToken = createAppWindowToken(mWm.getDefaultDisplayContentLocked(),
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        mStubStack = WindowTestUtils.createMockTaskStack();
     }
 
     // Do not use this function directly in the tests below. Instead, use more explicit function

@@ -41,7 +41,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.util.Log;
@@ -240,8 +239,7 @@ class WindowTestsBase {
 
     WindowTestUtils.TestAppWindowToken createTestAppWindowToken(DisplayContent dc, int
             windowingMode, int activityType) {
-        final TaskStack stack = createStackControllerOnStackOnDisplay(windowingMode, activityType,
-                dc).mContainer;
+        final TaskStack stack = createTaskStackOnDisplay(windowingMode, activityType, dc);
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final WindowTestUtils.TestAppWindowToken appWindowToken =
                 WindowTestUtils.createTestAppWindowToken(dc);
@@ -350,28 +348,20 @@ class WindowTestsBase {
     /** Creates a {@link TaskStack} and adds it to the specified {@link DisplayContent}. */
     TaskStack createTaskStackOnDisplay(DisplayContent dc) {
         synchronized (mWm.mGlobalLock) {
-            return createStackControllerOnDisplay(dc).mContainer;
+            return createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, dc);
         }
     }
 
-    StackWindowController createStackControllerOnDisplay(DisplayContent dc) {
-        synchronized (mWm.mGlobalLock) {
-            return createStackControllerOnStackOnDisplay(
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, dc);
-        }
-    }
-
-    StackWindowController createStackControllerOnStackOnDisplay(
-            int windowingMode, int activityType, DisplayContent dc) {
+    TaskStack createTaskStackOnDisplay(int windowingMode, int activityType, DisplayContent dc) {
         synchronized (mWm.mGlobalLock) {
             final Configuration overrideConfig = new Configuration();
             overrideConfig.windowConfiguration.setWindowingMode(windowingMode);
             overrideConfig.windowConfiguration.setActivityType(activityType);
             final int stackId = ++sNextStackId;
-            final StackWindowController controller = new StackWindowController(stackId, null,
-                    dc.getDisplayId(), true /* onTop */, new Rect(), mWm);
-            controller.onRequestedOverrideConfigurationChanged(overrideConfig);
-            return controller;
+            final TaskStack stack = new TaskStack(mWm, stackId, mock(ActivityStack.class));
+            dc.setStackOnDisplay(stackId, true, stack);
+            stack.onRequestedOverrideConfigurationChanged(overrideConfig);
+            return stack;
         }
     }
 

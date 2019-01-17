@@ -455,17 +455,10 @@ class TaskRecord extends ConfigurationContainer {
         }
 
         final Rect bounds = updateOverrideConfigurationFromLaunchBounds();
-        final StackWindowController stackController = getStack().getWindowContainerController();
+        final TaskStack stack = getStack().getTaskStack();
 
-        if (DEBUG_STACK) {
-            Slog.i(TAG_WM, "TaskRecord: taskId=" + taskId
-                    + " stack=" + stackController + " bounds=" + bounds);
-        }
-
-        final TaskStack stack = stackController.mContainer;
         if (stack == null) {
-            throw new IllegalArgumentException("TaskRecord: invalid stack="
-                    + stackController);
+            throw new IllegalArgumentException("TaskRecord: invalid stack=" + mStack);
         }
         EventLog.writeEvent(WM_TASK_CREATED, taskId, stack.mStackId);
         mTask = new Task(taskId, stack, userId, mService.mWindowManager, mResizeMode,
@@ -742,7 +735,7 @@ class TaskRecord extends ConfigurationContainer {
 
             // Must reparent first in window manager to avoid a situation where AM can delete the
             // we are coming from in WM before we reparent because it became empty.
-            mTask.reparent(toStack.getWindowContainerController(), position,
+            mTask.reparent(toStack.getTaskStack(), position,
                     moveStackMode == REPARENT_MOVE_STACK_TO_FRONT);
 
             final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_STACK_TO_FRONT

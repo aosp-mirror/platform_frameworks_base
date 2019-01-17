@@ -221,7 +221,7 @@ class LaunchParamsPersister {
     }
 
     private boolean saveTaskToLaunchParam(TaskRecord task, PersistableLaunchParams params) {
-        final ActivityStack<?> stack = task.getStack();
+        final ActivityStack stack = task.getStack();
         final int displayId = stack.mDisplayId;
         final ActivityDisplay display =
                 mSupervisor.mRootActivityContainer.getActivityDisplay(displayId);

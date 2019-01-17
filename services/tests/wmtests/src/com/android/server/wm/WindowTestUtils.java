@@ -103,12 +103,10 @@ public class WindowTestUtils {
     }
 
     /**
-     * Creates a mock instance of {@link StackWindowController}.
+     * Creates a mock instance of {@link TestTaskStack}.
      */
-    public static StackWindowController createMockStackWindowContainerController() {
-        StackWindowController controller = mock(StackWindowController.class);
-        controller.mContainer = mock(TestTaskStack.class);
-        return controller;
+    public static TaskStack createMockTaskStack() {
+        return mock(TestTaskStack.class);
     }
 
     /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
@@ -201,6 +199,11 @@ public class WindowTestUtils {
         }
 
         @Override
+        void onParentSet() {
+            // Do nothing.
+        }
+
+        @Override
         boolean isOnTop() {
             return mOnTop;
         }
@@ -283,10 +286,9 @@ public class WindowTestUtils {
         }
     }
 
-    public static TestTask createTestTask(StackWindowController stackWindowController) {
-        return new TestTask(sNextTaskId++, stackWindowController.mContainer, 0,
-                stackWindowController.mService, RESIZE_MODE_UNRESIZEABLE, false,
-                mock(TaskRecord.class));
+    public static TestTask createTestTask(TaskStack stack) {
+        return new TestTask(sNextTaskId++, stack, 0, stack.mWmService, RESIZE_MODE_UNRESIZEABLE,
+                false, mock(TaskRecord.class));
     }
 
     public static class TestIApplicationToken implements IApplicationToken {
@@ -333,6 +335,11 @@ public class WindowTestUtils {
             super.updateResizingWindowIfNeeded();
 
             mHasSurface = hadSurface;
+        }
+
+        @Override
+        void onParentSet() {
+            // Do nothing;
         }
     }
 }

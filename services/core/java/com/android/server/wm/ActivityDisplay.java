@@ -278,12 +278,12 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
 
         // Since positionChildAt() is called during the creation process of pinned stacks,
-        // ActivityStack#getWindowContainerController() can be null. In this special case,
+        // ActivityStack#getStack() can be null. In this special case,
         // since DisplayContest#positionStackAt() is called in TaskStack#onConfigurationChanged(),
         // we don't have to call WindowContainerController#positionChildAt() here.
-        if (stack.getWindowContainerController() != null && mDisplayContent != null) {
+        if (stack.getTaskStack() != null && mDisplayContent != null) {
             mDisplayContent.positionStackAt(insertPosition,
-                    stack.getWindowContainerController().mContainer, includingParents);
+                    stack.getTaskStack(), includingParents);
         }
         if (!wasContained) {
             stack.setParent(this);
@@ -450,13 +450,12 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     @VisibleForTesting
     <T extends ActivityStack> T createStackUnchecked(int windowingMode, int activityType,
             int stackId, boolean onTop) {
-        if (windowingMode == WINDOWING_MODE_PINNED) {
-            return (T) new PinnedActivityStack(this, stackId,
-                    mRootActivityContainer.mStackSupervisor, onTop);
+        if (windowingMode == WINDOWING_MODE_PINNED && activityType != ACTIVITY_TYPE_STANDARD) {
+            throw new IllegalArgumentException("Stack with windowing mode cannot with non standard "
+                    + "activity type.");
         }
         return (T) new ActivityStack(this, stackId,
-                mRootActivityContainer.mStackSupervisor, windowingMode, activityType,
-                onTop);
+                mRootActivityContainer.mStackSupervisor, windowingMode, activityType, onTop);
     }
 
     /**
@@ -1019,8 +1018,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return mSplitScreenPrimaryStack != null;
     }
 
-    PinnedActivityStack getPinnedStack() {
-        return (PinnedActivityStack) mPinnedStack;
+    ActivityStack getPinnedStack() {
+        return mPinnedStack;
     }
 
     boolean hasPinnedStack() {

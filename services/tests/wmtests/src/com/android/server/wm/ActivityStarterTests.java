@@ -143,7 +143,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .setStack(mService.mRootActivityContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */))
                 .build();
-        assertThat((Object) task2.getStack()).isInstanceOf(PinnedActivityStack.class);
+        assertThat((Object) task2.getStack()).isInstanceOf(ActivityStack.class);
         mStarter.updateBounds(task2, bounds);
 
         verify(mService, times(1)).resizeStack(eq(task2.getStack().mStackId),
