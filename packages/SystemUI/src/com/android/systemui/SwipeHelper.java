@@ -604,8 +604,14 @@ public class SwipeHelper implements Gefingerpoken {
                         if (absDelta >= size) {
                             delta = delta > 0 ? maxScrollDistance : -maxScrollDistance;
                         } else {
-                            delta = maxScrollDistance * (float) Math.sin(
-                                    (delta / size) * (Math.PI / 2));
+                            int startPosition = mCallback.getConstrainSwipeStartPosition();
+                            if (absDelta > startPosition) {
+                                int signedStartPosition =
+                                        (int) (startPosition * Math.signum(delta));
+                                delta = signedStartPosition
+                                        + maxScrollDistance * (float) Math.sin(
+                                        ((delta - signedStartPosition) / size) * (Math.PI / 2));
+                            }
                         }
                     }
 
@@ -740,6 +746,14 @@ public class SwipeHelper implements Gefingerpoken {
          * @return The factor the falsing threshold should be multiplied with
          */
         float getFalsingThresholdFactor();
+
+        /**
+         * @return The position, in pixels, at which a constrained swipe should start being
+         * constrained.
+         */
+        default int getConstrainSwipeStartPosition() {
+            return 0;
+        }
 
         /**
          * @return If true, the given view is draggable.
