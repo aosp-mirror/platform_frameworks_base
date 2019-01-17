@@ -6199,11 +6199,9 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package to set as the default SMS application.
      * @throws SecurityException if {@code admin} is not a device owner.
-     *
-     * @hide
      */
-    @UnsupportedAppUsage
-    public void setDefaultSmsApplication(@NonNull ComponentName admin, String packageName) {
+    public void setDefaultSmsApplication(@NonNull ComponentName admin,
+            @NonNull String packageName) {
         throwIfParentInstance("setDefaultSmsApplication");
         if (mService != null) {
             try {
