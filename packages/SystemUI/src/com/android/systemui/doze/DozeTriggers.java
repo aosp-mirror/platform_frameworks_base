@@ -132,6 +132,7 @@ public class DozeTriggers implements DozeMachine.Part {
     private void onSensor(int pulseReason, boolean sensorPerformedProxCheck,
             float screenX, float screenY, float[] rawValues) {
         boolean isDoubleTap = pulseReason == DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP;
+        boolean isTap = pulseReason == DozeLog.PULSE_REASON_SENSOR_TAP;
         boolean isPickup = pulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
         boolean isLongPress = pulseReason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS;
         boolean isWakeDisplay = pulseReason == DozeLog.REASON_SENSOR_WAKE_UP;
@@ -148,8 +149,10 @@ public class DozeTriggers implements DozeMachine.Part {
                     // In pocket, drop event.
                     return;
                 }
-                if (isDoubleTap) {
-                    mDozeHost.onDoubleTap(screenX, screenY);
+                if (isDoubleTap || isTap) {
+                    if (screenX != -1 && screenY != -1) {
+                        mDozeHost.onSlpiTap(screenX, screenY);
+                    }
                     mMachine.wakeUp();
                 } else if (isPickup) {
                     mMachine.wakeUp();

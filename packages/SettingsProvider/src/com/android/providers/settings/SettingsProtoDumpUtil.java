@@ -1882,6 +1882,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
                 SecureSettingsProto.Doze.PULSE_ON_DOUBLE_TAP);
+        dumpSetting(s, p,
+                Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
+                SecureSettingsProto.Doze.PULSE_ON_TAP);
         p.end(dozeToken);
 
         dumpSetting(s, p,

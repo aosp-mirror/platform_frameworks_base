@@ -35,7 +35,7 @@ public class DozeLog {
     private static final int SIZE = Build.IS_DEBUGGABLE ? 400 : 50;
     static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
-    private static final int REASONS = 9;
+    private static final int REASONS = 10;
 
     public static final int PULSE_REASON_NONE = -1;
     public static final int PULSE_REASON_INTENT = 0;
@@ -47,6 +47,7 @@ public class DozeLog {
     public static final int PULSE_REASON_DOCKING = 6;
     public static final int REASON_SENSOR_WAKE_UP = 7;
     public static final int PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN = 8;
+    public static final int PULSE_REASON_SENSOR_TAP = 9;
 
     private static boolean sRegisterKeyguardCallback = true;
 
@@ -207,6 +208,7 @@ public class DozeLog {
             case PULSE_REASON_DOCKING: return "docking";
             case PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN: return "wakelockscreen";
             case REASON_SENSOR_WAKE_UP: return "wakeup";
+            case PULSE_REASON_SENSOR_TAP: return "tap";
             default: throw new IllegalArgumentException("bad reason: " + pulseReason);
         }
     }

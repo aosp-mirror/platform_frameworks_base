@@ -2205,6 +2205,9 @@
     <!-- Type of the double tap sensor. Empty if double tap is not supported. -->
     <string name="config_dozeDoubleTapSensorType" translatable="false"></string>
 
+    <!-- Type of the tap sensor. Empty if tap is not supported. -->
+    <string name="config_dozeTapSensorType" translatable="false"></string>
+
     <!-- Type of the long press sensor. Empty if long press is not supported. -->
     <string name="config_dozeLongPressSensorType" translatable="false"></string>
 
