@@ -1,0 +1,21 @@
+android_app {
+    name: "MediaCore",
+
+    srcs: [
+        "src/**/*.java",
+    ],
+
+    static_libs: [
+        // TODO: Temporarily statically linked. Should go into "libs"
+        "media1",
+    ],
+
+    // System app
+    platform_apis: true,
+
+    // Privileged app
+    privileged: true,
+
+    // Make sure that the implementation only relies on SDK or system APIs.
+    sdk_version: "system_current",
+}
