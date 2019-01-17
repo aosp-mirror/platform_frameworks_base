@@ -1892,6 +1892,8 @@
                cell broadcasting sms, and MMS. -->
     <bool name="config_sms_capable">true</bool>
 
+    <!-- TODO: STOPSHIP(b/110557011): Remove this from framework and overlays as we use
+         config_defaultRoleHolders now. -->
     <!-- Default SMS Application. This will be the default SMS application when
          the phone first boots. The user can then change the default app to one
          of their choosing.
@@ -1909,6 +1911,12 @@
          If this string is empty or the specified package does not exist, then
          the behavior will be as though no app was named as an explicit default. -->
     <string name="default_browser" translatable="false"></string>
+
+    <!-- Default role holders. This will be an array of roles and package names of their default
+         holders, with each item in the format of "ROLE_NAME: PACKAGE_NAME_1, PACKAGE_NAME_2". -->
+    <string-array name="config_defaultRoleHolders" translatable="false">
+        <item>android.app.role.SMS: com.android.messaging</item>
+    </string-array>
 
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->

@@ -197,6 +197,7 @@ package android {
   }
 
   public static final class R.array {
+    field public static final int config_defaultRoleHolders = 17235974; // 0x1070006
     field public static final int config_keySystemUuidMapping = 17235973; // 0x1070005
   }
 
