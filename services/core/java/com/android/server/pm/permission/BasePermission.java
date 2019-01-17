@@ -247,6 +247,10 @@ public final class BasePermission {
     public boolean isDocumenter() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_DOCUMENTER) != 0;
     }
+    public boolean isConfigurator() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_CONFIGURATOR)
+            != 0;
+    }
 
     public void transfer(@NonNull String origPackageName, @NonNull String newPackageName) {
         if (!origPackageName.equals(sourcePackageName)) {

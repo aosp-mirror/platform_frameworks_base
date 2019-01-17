@@ -1342,6 +1342,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mSystemTextClassifierPackage;
     final @Nullable String mWellbeingPackage;
     final @Nullable String mDocumenterPackage;
+    final @Nullable String mConfiguratorPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
@@ -2865,6 +2866,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mWellbeingPackage = getWellbeingPackageName();
             mDocumenterPackage = getDocumenterPackageName();
+            mConfiguratorPackage =
+                    mContext.getString(R.string.config_deviceConfiguratorPackageName);
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -23122,6 +23125,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return mWellbeingPackage;
                 case PackageManagerInternal.PACKAGE_DOCUMENTER:
                     return mDocumenterPackage;
+                case PackageManagerInternal.PACKAGE_CONFIGURATOR:
+                    return mConfiguratorPackage;
             }
             return null;
         }
