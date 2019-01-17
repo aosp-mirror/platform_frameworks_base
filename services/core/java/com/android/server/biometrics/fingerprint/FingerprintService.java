@@ -777,6 +777,12 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     @Override
+    public void serviceDied(long cookie) {
+        super.serviceDied(cookie);
+        mDaemon = null;
+    }
+
+    @Override
     protected void updateActiveGroup(int userId, String clientPackage) {
         IBiometricsFingerprint daemon = getFingerprintDaemon();
 
@@ -1074,6 +1080,8 @@ public class FingerprintService extends BiometricServiceBase {
             Slog.e(TAG, "dump formatting failure", e);
         }
         pw.println(dump);
+        pw.println("HAL Deaths: " + mHALDeathCount);
+        mHALDeathCount = 0;
     }
 
     private void dumpProto(FileDescriptor fd) {

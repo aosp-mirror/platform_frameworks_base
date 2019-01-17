@@ -17,13 +17,15 @@
 package android.view;
 
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
+
 import static junit.framework.Assert.assertEquals;
 
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.FlakyTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

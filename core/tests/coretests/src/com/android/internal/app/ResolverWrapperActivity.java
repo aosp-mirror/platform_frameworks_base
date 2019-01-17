@@ -16,17 +16,12 @@
 
 package com.android.internal.app;
 
-import android.app.usage.UsageStatsManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.os.RemoteException;
-
-import java.util.function.Function;
-
 import static org.mockito.Mockito.mock;
 
+import android.app.usage.UsageStatsManager;
+import android.content.pm.PackageManager;
+
+import java.util.function.Function;
 
 /*
  * Simple wrapper around chooser activity to be able to initiate it under test

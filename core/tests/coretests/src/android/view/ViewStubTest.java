@@ -16,14 +16,12 @@
 
 package android.view;
 
-import android.view.StubbedView;
-import com.android.frameworks.coretests.R;
-
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.UiThreadTest;
-import android.view.View;
-import android.view.ViewStub;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.MediumTest;
+
+import com.android.frameworks.coretests.R;
 
 public class ViewStubTest extends ActivityInstrumentationTestCase<StubbedView> {
     public ViewStubTest() {

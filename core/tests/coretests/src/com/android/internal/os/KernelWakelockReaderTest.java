@@ -13,9 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.android.internal.os;
 
-import android.support.test.filters.SmallTest;
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 

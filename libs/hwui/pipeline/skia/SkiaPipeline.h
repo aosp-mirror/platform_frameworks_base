@@ -48,7 +48,7 @@ public:
     bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
                              ErrorHandler* errorHandler) override;
 
-    SkColorType getSurfaceColorType() const { return mSurfaceColorType; }
+    SkColorType getSurfaceColorType() const override { return mSurfaceColorType; }
     sk_sp<SkColorSpace> getSurfaceColorSpace() override { return mSurfaceColorSpace; }
 
     void renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,

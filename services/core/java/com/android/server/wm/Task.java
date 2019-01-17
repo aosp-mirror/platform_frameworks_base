@@ -209,25 +209,13 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
         super.removeImmediately();
     }
 
-    void reparent(StackWindowController stackController, int position, boolean moveParents) {
-        if (DEBUG_STACK) {
-            Slog.i(TAG_WM, "reparent: moving taskId=" + mTaskId
-                    + " to stack=" + stackController + " at " + position);
-        }
-        final TaskStack stack = stackController.mContainer;
-        if (stack == null) {
-            throw new IllegalArgumentException("reparent: could not find stack="
-                    + stackController);
-        }
-        reparent(stack, position, moveParents);
-        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
-    }
-
-
     void reparent(TaskStack stack, int position, boolean moveParents) {
         if (stack == mStack) {
             throw new IllegalArgumentException(
                     "task=" + this + " already child of stack=" + mStack);
+        }
+        if (stack == null) {
+            throw new IllegalArgumentException("reparent: could not find stack.");
         }
         if (DEBUG_STACK) Slog.i(TAG, "reParentTask: removing taskId=" + mTaskId
                 + " from stack=" + mStack);
@@ -254,6 +242,7 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
             onDisplayChanged(displayContent);
             prevDisplayContent.setLayoutNeeded();
         }
+        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
     }
 
     /** @see ActivityTaskManagerService#positionTaskInStack(int, int, int). */

@@ -19,10 +19,11 @@ package android.text;
 import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.Directions;
 import android.text.StaticLayoutTest.LayoutBuilder;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

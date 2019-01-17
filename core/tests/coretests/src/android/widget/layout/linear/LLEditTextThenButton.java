@@ -16,13 +16,13 @@
 
 package android.widget.layout.linear;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+
+import com.android.frameworks.coretests.R;
 
 public class LLEditTextThenButton extends Activity {
     private EditText mEditText;

@@ -16,8 +16,8 @@
 
 package android.net;
 
-import android.net.WebAddress;
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
+
 import junit.framework.TestCase;
 
 public class WebAddressTest extends TestCase {

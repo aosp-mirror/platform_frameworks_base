@@ -36,12 +36,12 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     frameworks-core-util-lib \
     mockwebserver \
     guava \
-    android-support-test \
+    androidx.test.runner \
+    androidx.test.rules \
     mockito-target-minus-junit4 \
     espresso-core \
     ub-uiautomator \
     platform-test-annotations \
-    compatibility-device-util \
     truth-prebuilt \
     print-test-util-lib \
     testng # TODO: remove once Android migrates to JUnit 4.12, which provide assertThrows

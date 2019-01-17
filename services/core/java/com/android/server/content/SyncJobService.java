@@ -141,10 +141,7 @@ public class SyncJobService extends JobService {
             final long runtime = nowUptime - startUptime;
 
 
-            if (startUptime == 0) {
-                wtf("Job " + jobId + " start uptime not found: "
-                        + " params=" + jobParametersToString(params));
-            } else if (runtime > 60 * 1000) {
+            if (runtime > 60 * 1000) {
                 // WTF if startSyncH() hasn't happened, *unless* onStopJob() was called too soon.
                 // (1 minute threshold.)
                 // Also don't wtf when it's not ready to sync.

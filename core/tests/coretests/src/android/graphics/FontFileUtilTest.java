@@ -22,10 +22,11 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.fonts.FontFileUtil;
 import android.graphics.fonts.FontVariationAxis;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
 import android.util.Log;
 import android.util.Pair;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 

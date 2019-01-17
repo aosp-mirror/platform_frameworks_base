@@ -172,7 +172,8 @@ public final class AudioRecordingConfiguration implements Parcelable {
         MediaRecorder.AudioSource.CAMCORDER,
         MediaRecorder.AudioSource.VOICE_RECOGNITION,
         MediaRecorder.AudioSource.VOICE_COMMUNICATION,
-        MediaRecorder.AudioSource.UNPROCESSED
+        MediaRecorder.AudioSource.UNPROCESSED,
+        MediaRecorder.AudioSource.VOICE_PERFORMANCE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioSource {}

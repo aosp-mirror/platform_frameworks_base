@@ -16,6 +16,9 @@
 
 package com.android.server.net.ipmemorystore;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+
 import android.content.Context;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -25,6 +28,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.io.File;
 
 /** Unit tests for {@link IpMemoryStoreServiceTest}. */
 @SmallTest
@@ -36,6 +41,7 @@ public class IpMemoryStoreServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        doReturn(new File("/tmp/test.db")).when(mMockContext).getDatabasePath(anyString());
     }
 
     @Test

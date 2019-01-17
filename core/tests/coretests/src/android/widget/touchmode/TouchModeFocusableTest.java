@@ -20,11 +20,12 @@ import static android.util.TouchModeFlexibleAsserts.assertInTouchModeAfterClick;
 import static android.util.TouchModeFlexibleAsserts.assertInTouchModeAfterTap;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.layout.linear.LLEditTextThenButton;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 /**
  * Some views, like edit texts, can keep and gain focus even when in touch mode.

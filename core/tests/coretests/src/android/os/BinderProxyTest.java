@@ -19,7 +19,8 @@ package android.os;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
+
+import androidx.test.filters.MediumTest;
 
 public class BinderProxyTest extends AndroidTestCase {
     private static class CountingListener implements Binder.ProxyTransactListener {

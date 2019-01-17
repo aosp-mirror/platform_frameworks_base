@@ -1640,6 +1640,13 @@ public class PermissionManagerService {
                 // Special permissions for the system default text classifier.
                 allowed = true;
             }
+            if (!allowed && bp.isConfigurator()
+                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                    PackageManagerInternal.PACKAGE_CONFIGURATOR,
+                    UserHandle.USER_SYSTEM))) {
+                // Special permissions for the device configurator.
+                allowed = true;
+            }
             if (!allowed && bp.isWellbeing()
                     && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
                     PackageManagerInternal.PACKAGE_WELLBEING, UserHandle.USER_SYSTEM))) {

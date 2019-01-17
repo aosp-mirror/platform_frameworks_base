@@ -107,6 +107,13 @@ public class DozeSensors {
                         dozeParameters.doubleTapReportsTouchCoordinates(),
                         true /* touchscreen */),
                 new TriggerSensor(
+                        findSensorWithType(config.tapSensorType()),
+                        Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
+                        true /* configured */,
+                        DozeLog.PULSE_REASON_SENSOR_TAP,
+                        false /* reports touch coordinates */,
+                        true /* touchscreen */),
+                new TriggerSensor(
                         findSensorWithType(config.longPressSensorType()),
                         Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                         false /* settingDef */,

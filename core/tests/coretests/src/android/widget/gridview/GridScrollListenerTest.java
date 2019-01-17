@@ -19,11 +19,12 @@ package android.widget.gridview;
 import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase;
 import android.test.TouchUtils;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.widget.AbsListView;
 import android.widget.GridView;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 public class GridScrollListenerTest extends ActivityInstrumentationTestCase<GridScrollListener> implements
         AbsListView.OnScrollListener {

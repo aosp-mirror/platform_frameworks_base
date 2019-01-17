@@ -16,12 +16,12 @@
 
 package android.os;
 
-import android.os.Debug;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
 
 /**
  * This class is used to test the native tracing support.  Run this test

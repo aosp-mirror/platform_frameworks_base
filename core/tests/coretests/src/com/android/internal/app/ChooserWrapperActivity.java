@@ -16,13 +16,13 @@
 
 package com.android.internal.app;
 
+import static org.mockito.Mockito.mock;
+
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
 import java.util.function.Function;
-
-import static org.mockito.Mockito.mock;
 
 public class ChooserWrapperActivity extends ChooserActivity {
     /*

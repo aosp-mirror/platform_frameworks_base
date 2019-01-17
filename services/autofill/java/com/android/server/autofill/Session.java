@@ -2619,7 +2619,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 currentValue);
 
         if (mAugmentedAutofillDestroyer == null) {
-            mAugmentedAutofillDestroyer = () -> remoteService.onDestroyAutofillWindowsRequest(id);
+            mAugmentedAutofillDestroyer = () -> remoteService.onDestroyAutofillWindowsRequest();
         }
         return mAugmentedAutofillDestroyer;
     }

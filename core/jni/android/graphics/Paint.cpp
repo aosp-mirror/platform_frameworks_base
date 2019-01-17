@@ -557,6 +557,38 @@ namespace PaintGlue {
         return result;
     }
 
+    // FIXME: Should this be FastNative?
+    static void setColorLong(JNIEnv* env, jobject clazz, jlong paintHandle, jobject jColorSpace,
+            jfloat r, jfloat g, jfloat b, jfloat a) {
+        sk_sp<SkColorSpace> cs = GraphicsJNI::getNativeColorSpace(env, jColorSpace);
+        if (GraphicsJNI::hasException(env)) {
+            return;
+        }
+
+        SkColor4f color = SkColor4f{r, g, b, a};
+        reinterpret_cast<Paint*>(paintHandle)->setColor4f(color, cs.get());
+    }
+
+    static void setShadowLayerLong(JNIEnv* env, jobject clazz, jlong paintHandle, jfloat radius,
+                                   jfloat dx, jfloat dy, jobject jColorSpace,
+                                   jfloat r, jfloat g, jfloat b, jfloat a) {
+        sk_sp<SkColorSpace> cs = GraphicsJNI::getNativeColorSpace(env, jColorSpace);
+        if (GraphicsJNI::hasException(env)) {
+            return;
+        }
+
+        SkColor4f color = SkColor4f{r, g, b, a};
+
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        if (radius <= 0) {
+            paint->setLooper(nullptr);
+        }
+        else {
+            SkScalar sigma = android::uirenderer::Blur::convertRadiusToSigma(radius);
+            paint->setLooper(SkBlurDrawLooper::Make(color, cs.get(), sigma, dx, dy));
+        }
+    }
+
     // ------------------ @FastNative ---------------------------
 
     static jint setTextLocales(JNIEnv* env, jobject clazz, jlong objHandle, jstring locales) {
@@ -1075,6 +1107,9 @@ static const JNINativeMethod methods[] = {
     {"nGetRunAdvance", "(J[CIIIIZI)F", (void*) PaintGlue::getRunAdvance___CIIIIZI_F},
     {"nGetOffsetForAdvance", "(J[CIIIIZF)I",
             (void*) PaintGlue::getOffsetForAdvance___CIIIIZF_I},
+    {"nSetColor","(JLandroid/graphics/ColorSpace;FFFF)V", (void*) PaintGlue::setColorLong},
+    {"nSetShadowLayer", "(JFFFLandroid/graphics/ColorSpace;FFFF)V",
+            (void*)PaintGlue::setShadowLayerLong},
 
     // --------------- @FastNative ----------------------
 

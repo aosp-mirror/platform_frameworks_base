@@ -50,8 +50,10 @@ public class DetectTvSystemAudioModeSupportAction extends HdmiCecFeatureAction {
             if (mState != STATE_WAITING_FOR_FEATURE_ABORT) {
                 return false;
             }
-            finishAction(false);
-            return true;
+            if ((cmd.getParams()[0] & 0xFF) == Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE) {
+                finishAction(false);
+                return true;
+            }
         }
         return false;
     }

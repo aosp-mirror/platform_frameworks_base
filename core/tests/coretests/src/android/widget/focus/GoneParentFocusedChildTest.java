@@ -17,10 +17,10 @@
 package android.widget.focus;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.focus.GoneParentFocusedChild;
+
+import androidx.test.filters.MediumTest;
 
 /**
  * When a parent is GONE, key events shouldn't go to its children, even if they

@@ -17,6 +17,9 @@
 package com.android.server.contentcapture;
 
 import static android.service.contentcapture.ContentCaptureService.setClientState;
+import static android.view.contentcapture.ContentCaptureSession.STATE_DISABLED;
+import static android.view.contentcapture.ContentCaptureSession.STATE_DUPLICATED_ID;
+import static android.view.contentcapture.ContentCaptureSession.STATE_NO_SERVICE;
 
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
@@ -36,10 +39,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.contentcapture.ContentCaptureService;
+import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Slog;
-import android.view.contentcapture.ContentCaptureSession;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -48,6 +52,7 @@ import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Per-user instance of {@link ContentCaptureManagerService}.
@@ -71,6 +76,9 @@ final class ContentCapturePerUserService
      */
     @GuardedBy("mLock")
     private RemoteContentCaptureService mRemoteService;
+
+    private final ContentCaptureServiceRemoteCallback mRemoteServiceCallback =
+            new ContentCaptureServiceRemoteCallback();
 
     // TODO(b/111276913): add mechanism to prune stale sessions, similar to Autofill's
 
@@ -100,10 +108,10 @@ final class ContentCapturePerUserService
         }
 
         if (!disabled) {
-            mRemoteService = new RemoteContentCaptureService(
-                  mMaster.getContext(),
-                  ContentCaptureService.SERVICE_INTERFACE, serviceComponentName, mUserId, this,
-                  mMaster.isBindInstantServiceAllowed(), mMaster.verbose);
+            mRemoteService = new RemoteContentCaptureService(mMaster.getContext(),
+                    ContentCaptureService.SERVICE_INTERFACE, serviceComponentName,
+                    mRemoteServiceCallback, mUserId, this, mMaster.isBindInstantServiceAllowed(),
+                    mMaster.verbose);
         }
     }
 
@@ -165,7 +173,7 @@ final class ContentCapturePerUserService
         if (!isEnabledLocked()) {
             // TODO: it would be better to split in differet reasons, like
             // STATE_DISABLED_NO_SERVICE and STATE_DISABLED_BY_DEVICE_POLICY
-            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_NO_SERVICE,
+            setClientState(clientReceiver, STATE_DISABLED | STATE_NO_SERVICE,
                     /* binder= */ null);
             return;
         }
@@ -184,7 +192,7 @@ final class ContentCapturePerUserService
         if (existingSession != null) {
             Slog.w(TAG, "startSession(id=" + existingSession + ", token=" + activityToken
                     + ": ignoring because it already exists for " + existingSession.mActivityToken);
-            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_DUPLICATED_ID,
+            setClientState(clientReceiver, STATE_DISABLED | STATE_DUPLICATED_ID,
                     /* binder=*/ null);
             return;
         }
@@ -197,8 +205,7 @@ final class ContentCapturePerUserService
             // TODO(b/119613670): log metrics
             Slog.w(TAG, "startSession(id=" + existingSession + ", token=" + activityToken
                     + ": ignoring because service is not set");
-            // TODO(b/111276913): use a new disabled state?
-            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_NO_SERVICE,
+            setClientState(clientReceiver, STATE_DISABLED | STATE_NO_SERVICE,
                     /* binder= */ null);
             return;
         }
@@ -337,5 +344,51 @@ final class ContentCapturePerUserService
             }
         }
         return null;
+    }
+
+    private final class ContentCaptureServiceRemoteCallback extends
+            IContentCaptureServiceCallback.Stub {
+
+        @Override
+        public void setContentCaptureWhitelist(List<String> packages,
+                List<ComponentName> activities) {
+            if (mMaster.verbose) {
+                Log.v(TAG, "setContentCaptureWhitelist(packages=" + packages + ", activities="
+                        + activities + ")");
+            }
+            // TODO(b/122595322): implement
+            // TODO(b/119613670): log metrics
+        }
+
+        @Override
+        public void setActivityContentCaptureEnabled(ComponentName activity, boolean enabled) {
+            if (mMaster.verbose) {
+                Log.v(TAG, "setActivityContentCaptureEnabled(activity=" + activity + ", enabled="
+                        + enabled + ")");
+            }
+            // TODO(b/122595322): implement
+            // TODO(b/119613670): log metrics
+        }
+
+        @Override
+        public void setPackageContentCaptureEnabled(String packageName, boolean enabled) {
+            if (mMaster.verbose) {
+                Log.v(TAG,
+                        "setPackageContentCaptureEnabled(packageName=" + packageName + ", enabled="
+                                + enabled + ")");
+            }
+            // TODO(b/122595322): implement
+            // TODO(b/119613670): log metrics
+        }
+
+        @Override
+        public void getContentCaptureDisabledActivities(IResultReceiver receiver) {
+            // TODO(b/122595322): implement
+        }
+
+        @Override
+        public void getContentCaptureDisabledPackages(IResultReceiver receiver) {
+            // TODO(b/122595322): implement
+        }
     }
 }

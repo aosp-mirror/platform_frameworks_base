@@ -16,17 +16,17 @@
 
 package android.text;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.style.BulletSpan;
 import android.text.style.QuoteSpan;
 import android.text.style.SubscriptSpan;
 import android.text.style.UnderlineSpan;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

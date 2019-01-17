@@ -94,7 +94,6 @@ package android {
     field public static final java.lang.String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
     field public static final java.lang.String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
     field public static final java.lang.String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
-    field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final java.lang.String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final java.lang.String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
     field public static final java.lang.String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
@@ -129,6 +128,7 @@ package android {
     field public static final java.lang.String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
     field public static final java.lang.String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final java.lang.String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
+    field public static final java.lang.String READ_DEVICE_CONFIG = "android.permission.READ_DEVICE_CONFIG";
     field public static final java.lang.String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
     field public static final java.lang.String READ_INSTALL_SESSIONS = "android.permission.READ_INSTALL_SESSIONS";
     field public static final java.lang.String READ_NETWORK_USAGE_HISTORY = "android.permission.READ_NETWORK_USAGE_HISTORY";
@@ -151,6 +151,7 @@ package android {
     field public static final java.lang.String REGISTER_CALL_PROVIDER = "android.permission.REGISTER_CALL_PROVIDER";
     field public static final java.lang.String REGISTER_CONNECTION_MANAGER = "android.permission.REGISTER_CONNECTION_MANAGER";
     field public static final java.lang.String REGISTER_SIM_SUBSCRIPTION = "android.permission.REGISTER_SIM_SUBSCRIPTION";
+    field public static final java.lang.String REMOTE_DISPLAY_PROVIDER = "android.permission.REMOTE_DISPLAY_PROVIDER";
     field public static final java.lang.String REMOVE_DRM_CERTIFICATES = "android.permission.REMOVE_DRM_CERTIFICATES";
     field public static final java.lang.String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final java.lang.String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
@@ -184,6 +185,7 @@ package android {
     field public static final java.lang.String UPDATE_TIME_ZONE_RULES = "android.permission.UPDATE_TIME_ZONE_RULES";
     field public static final java.lang.String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
     field public static final java.lang.String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
+    field public static final java.lang.String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
     field public static final java.lang.String WRITE_DREAM_STATE = "android.permission.WRITE_DREAM_STATE";
     field public static final java.lang.String WRITE_EMBEDDED_SUBSCRIPTIONS = "android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS";
     field public static final java.lang.String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
@@ -1559,6 +1561,7 @@ package android.content.pm {
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     field public static final int FLAG_REMOVED = 2; // 0x2
+    field public static final int PROTECTION_FLAG_CONFIGURATOR = 524288; // 0x80000
     field public static final int PROTECTION_FLAG_DOCUMENTER = 262144; // 0x40000
     field public static final int PROTECTION_FLAG_OEM = 16384; // 0x4000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
@@ -3301,6 +3304,7 @@ package android.media {
   }
 
   public final class MediaRecorder.AudioSource {
+    field public static final int ECHO_REFERENCE = 1997; // 0x7cd
     field public static final int HOTWORD = 1999; // 0x7cf
     field public static final int RADIO_TUNER = 1998; // 0x7ce
   }
@@ -4443,6 +4447,10 @@ package android.os {
   public static abstract interface Binder.ProxyTransactListener {
     method public abstract void onTransactEnded(java.lang.Object);
     method public abstract java.lang.Object onTransactStarted(android.os.IBinder, int);
+  }
+
+  public static class Build.VERSION {
+    field public static final java.lang.String PREVIEW_SDK_FINGERPRINT;
   }
 
   public final class ConfigUpdate {
@@ -8495,6 +8503,8 @@ package android.webkit {
     method public abstract int getVisibleTitleHeight();
     method public abstract android.webkit.WebChromeClient getWebChromeClient();
     method public abstract android.webkit.WebViewClient getWebViewClient();
+    method public abstract android.webkit.WebViewRenderer getWebViewRenderer();
+    method public abstract android.webkit.WebViewRendererClient getWebViewRendererClient();
     method public abstract android.view.View getZoomControls();
     method public abstract void goBack();
     method public abstract void goBackOrForward(int);
@@ -8544,6 +8554,7 @@ package android.webkit {
     method public abstract void setVerticalScrollbarOverlay(boolean);
     method public abstract void setWebChromeClient(android.webkit.WebChromeClient);
     method public abstract void setWebViewClient(android.webkit.WebViewClient);
+    method public abstract void setWebViewRendererClient(java.util.concurrent.Executor, android.webkit.WebViewRendererClient);
     method public abstract boolean showFindDialog(java.lang.String, boolean);
     method public abstract void stopLoading();
     method public abstract boolean zoomBy(float);

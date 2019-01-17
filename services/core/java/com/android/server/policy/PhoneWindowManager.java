@@ -84,8 +84,10 @@ import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
-import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
-import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
+import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs
+        .CAMERA_LENS_COVER_ABSENT;
+import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs
+        .CAMERA_LENS_UNCOVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static com.android.server.wm.WindowManagerPolicyProto.KEYGUARD_DELEGATE;
@@ -478,6 +480,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mShortPressOnSleepBehavior;
     int mShortPressOnWindowBehavior;
     boolean mHasSoftInput = false;
+    boolean mHapticTextHandleEnabled;
     boolean mUseTvRouting;
     int mVeryLongPressTimeout;
     boolean mAllowStartActivityForLongPressOnPowerDuringSetup;
@@ -565,6 +568,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mScreenshotChordPowerKeyTriggered;
     private long mScreenshotChordPowerKeyTime;
 
+    private static final long MOVING_DISPLAY_TO_TOP_DURATION_MILLIS = 10;
+    private volatile boolean mMovingDisplayToTopKeyTriggered;
+    private volatile long mMovingDisplayToTopKeyTime;
+
     // Ringer toggle should reuse timing and triggering from screenshot power and a11y vol up
     private int mRingerToggleChord = VOLUME_HUSH_OFF;
 
@@ -604,7 +611,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mAodShowing;
 
     private boolean mPerDisplayFocusEnabled = false;
-    private int mTopFocusedDisplayId = INVALID_DISPLAY;
+    private volatile int mTopFocusedDisplayId = INVALID_DISPLAY;
 
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
@@ -632,6 +639,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_POWER_VERY_LONG_PRESS = 25;
     private static final int MSG_NOTIFY_USER_ACTIVITY = 26;
     private static final int MSG_RINGER_TOGGLE_CHORD = 27;
+    private static final int MSG_MOVE_DISPLAY_TO_TOP = 28;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -727,6 +735,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case MSG_RINGER_TOGGLE_CHORD:
                     handleRingerChordGesture();
                     break;
+                case MSG_MOVE_DISPLAY_TO_TOP:
+                    mWindowManagerFuncs.moveDisplayToTop(msg.arg1);
+                    mMovingDisplayToTopKeyTriggered = false;
+                    break;
             }
         }
     }
@@ -805,6 +817,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void onPersistentVrStateChanged(boolean enabled) {
             mDefaultDisplayPolicy.setPersistentVrModeEnabled(enabled);
+        }
+    };
+
+    private Runnable mPossibleVeryLongPressReboot = new Runnable() {
+        @Override
+        public void run() {
+            mActivityManagerInternal.prepareForPossibleShutdown();
         }
     };
 
@@ -953,6 +972,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Inform the StatusBar; but do not allow it to consume the event.
         sendSystemKeyToStatusBarAsync(event.getKeyCode());
 
+        schedulePossibleVeryLongPressReboot();
+
         // If the power key has still not yet been handled, then detect short
         // press, long press, or multi press and decide what to do.
         mPowerKeyHandled = hungUp || mScreenshotChordVolumeDownKeyTriggered
@@ -1056,6 +1077,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (hasVeryLongPressOnPowerBehavior()) {
             mHandler.removeMessages(MSG_POWER_VERY_LONG_PRESS);
         }
+        cancelPossibleVeryLongPressReboot();
     }
 
     private void cancelPendingBackKeyAction() {
@@ -1815,6 +1837,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mAllowStartActivityForLongPressOnPowerDuringSetup = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowStartActivityForLongPressOnPowerInSetup);
 
+        mHapticTextHandleEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableHapticTextHandle);
+
         mUseTvRouting = AudioSystem.getPlatformType(mContext) == AudioSystem.PLATFORM_TELEVISION;
 
         mHandleVolumeKeysInWM = mContext.getResources().getBoolean(
@@ -2558,12 +2583,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final int eventDisplayId = event.getDisplayId();
         if (result == 0 && !mPerDisplayFocusEnabled
                 && eventDisplayId != INVALID_DISPLAY && eventDisplayId != mTopFocusedDisplayId) {
-            // Someone tries to send a key event to a display which doesn't have a focused window.
-            // We drop the event here, or it will cause ANR.
-            // TODO (b/121057974): The user may be confused about why the key doesn't work, so we
-            // may need to deal with this problem.
-            Slog.i(TAG, "Dropping this event targeting display #" + eventDisplayId
-                    + " because the focus is on display #" + mTopFocusedDisplayId);
+            // An event is targeting a non-focused display. Try to move the display to top so that
+            // it can become the focused display to interact with the user.
+            final long eventDownTime = event.getDownTime();
+            if (mMovingDisplayToTopKeyTime < eventDownTime) {
+                // We have not handled this event yet. Move the display to top, and then tell
+                // dispatcher to try again later.
+                mMovingDisplayToTopKeyTime = eventDownTime;
+                mMovingDisplayToTopKeyTriggered = true;
+                mHandler.sendMessage(
+                        mHandler.obtainMessage(MSG_MOVE_DISPLAY_TO_TOP, eventDisplayId, 0));
+                return MOVING_DISPLAY_TO_TOP_DURATION_MILLIS;
+            } else if (mMovingDisplayToTopKeyTriggered) {
+                // The message has not been handled yet. Tell dispatcher to try again later.
+                return MOVING_DISPLAY_TO_TOP_DURATION_MILLIS;
+            }
+            // The target display is still not the top focused display. Drop the event because the
+            // display may not contain any window which can receive keys.
+            Slog.w(TAG, "Dropping key targeting non-focused display #" + eventDisplayId
+                    + " keyCode=" + KeyEvent.keyCodeToString(event.getKeyCode()));
             return -1;
         }
         return result;
@@ -4901,6 +4939,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void schedulePossibleVeryLongPressReboot() {
+        mHandler.removeCallbacks(mPossibleVeryLongPressReboot);
+        mHandler.postDelayed(mPossibleVeryLongPressReboot, mVeryLongPressTimeout);
+    }
+
+    private void cancelPossibleVeryLongPressReboot() {
+        mHandler.removeCallbacks(mPossibleVeryLongPressReboot);
+    }
+
     // TODO (multidisplay): Support multiple displays in WindowManagerPolicy.
     private void updateScreenOffSleepToken(boolean acquire) {
         if (acquire) {
@@ -5158,8 +5205,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case HapticFeedbackConstants.CLOCK_TICK:
             case HapticFeedbackConstants.CONTEXT_CLICK:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
-            case HapticFeedbackConstants.KEYBOARD_RELEASE:
             case HapticFeedbackConstants.TEXT_HANDLE_MOVE:
+                if (!mHapticTextHandleEnabled) {
+                    return null;
+                }
+            case HapticFeedbackConstants.KEYBOARD_RELEASE:
             case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
             case HapticFeedbackConstants.ENTRY_BUMP:
             case HapticFeedbackConstants.DRAG_CROSSING:
@@ -5324,11 +5374,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.println(mAllowStartActivityForLongPressOnPowerDuringSetup);
         pw.print(prefix);
                 pw.print("mHasSoftInput="); pw.print(mHasSoftInput);
-                pw.print(" mDismissImeOnBackKeyPressed="); pw.println(mDismissImeOnBackKeyPressed);
+                pw.print(" mHapticTextHandleEnabled="); pw.println(mHapticTextHandleEnabled);
         pw.print(prefix);
-                pw.print("mIncallPowerBehavior=");
-                pw.print(incallPowerBehaviorToString(mIncallPowerBehavior));
-                pw.print(" mIncallBackBehavior=");
+                pw.print("mDismissImeOnBackKeyPressed="); pw.print(mDismissImeOnBackKeyPressed);
+                pw.print(" mIncallPowerBehavior=");
+                pw.println(incallPowerBehaviorToString(mIncallPowerBehavior));
+        pw.print(prefix);
+                pw.print("mIncallBackBehavior=");
                 pw.print(incallBackBehaviorToString(mIncallBackBehavior));
                 pw.print(" mEndcallBehavior=");
                 pw.println(endcallBehaviorToString(mEndcallBehavior));

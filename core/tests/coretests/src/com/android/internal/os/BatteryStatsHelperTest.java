@@ -17,7 +17,6 @@
 
 package com.android.internal.os;
 
-
 import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -37,11 +36,12 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.BatteryStats;
 import android.os.Process;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.format.DateUtils;
 import android.util.StatsLog;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import junit.framework.TestCase;
 

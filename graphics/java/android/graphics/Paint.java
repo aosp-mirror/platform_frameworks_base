@@ -17,12 +17,14 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.annotation.Size;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.FontVariationAxis;
 import android.os.Build;
@@ -972,6 +974,31 @@ public class Paint {
     }
 
     /**
+     * Set the paint's color with a {@link ColorLong}. Note that the color is
+     * a long with an encoded {@link ColorSpace} as well as alpha and r,g,b.
+     * These values are not premultiplied, meaning that alpha can be any value,
+     * regardless of the values of r,g,b. See the {@link Color} class for more
+     * details.
+     *
+     * @param color The new color (including alpha and {@link ColorSpace})
+     *      to set in the paint.
+     * @throws IllegalArgumentException if the color space encoded in the long
+     *      is invalid or unknown.
+     *
+     * @hide pending API approval
+     */
+    @TestApi
+    public void setColor(@ColorLong long color) {
+        ColorSpace cs = Color.colorSpace(color);
+        float r = Color.red(color);
+        float g = Color.green(color);
+        float b = Color.blue(color);
+        float a = Color.alpha(color);
+
+        nSetColor(mNativePaint, cs, r, g, b, a);
+    }
+
+    /**
      * Helper to getColor() that just returns the color's alpha value. This is
      * the same as calling getColor() >>> 24. It always returns a value between
      * 0 (completely transparent) and 255 (completely opaque).
@@ -1370,12 +1397,45 @@ public class Paint {
      * The alpha of the shadow will be the paint's alpha if the shadow color is
      * opaque, or the alpha from the shadow color if not.
      */
-    public void setShadowLayer(float radius, float dx, float dy, int shadowColor) {
-      mShadowLayerRadius = radius;
-      mShadowLayerDx = dx;
-      mShadowLayerDy = dy;
-      mShadowLayerColor = shadowColor;
-      nSetShadowLayer(mNativePaint, radius, dx, dy, shadowColor);
+    public void setShadowLayer(float radius, float dx, float dy, @ColorInt int shadowColor) {
+        mShadowLayerRadius = radius;
+        mShadowLayerDx = dx;
+        mShadowLayerDy = dy;
+        mShadowLayerColor = shadowColor;
+        // FIXME: Share a single native method with the ColorLong version.
+        nSetShadowLayer(mNativePaint, radius, dx, dy, shadowColor);
+    }
+
+    /**
+     * This draws a shadow layer below the main layer, with the specified
+     * offset and color, and blur radius. If radius is 0, then the shadow
+     * layer is removed.
+     * <p>
+     * Can be used to create a blurred shadow underneath text. Support for use
+     * with other drawing operations is constrained to the software rendering
+     * pipeline.
+     * <p>
+     * The alpha of the shadow will be the paint's alpha if the shadow color is
+     * opaque, or the alpha from the shadow color if not.
+     *
+     * @throws IllegalArgumentException if the color space encoded in the long
+     *      is invalid or unknown.
+     *
+     * @hide pending API approval
+     */
+    @TestApi
+    public void setShadowLayer(float radius, float dx, float dy, @ColorLong long shadowColor) {
+        ColorSpace cs = Color.colorSpace(shadowColor);
+        float r = Color.red(shadowColor);
+        float g = Color.green(shadowColor);
+        float b = Color.blue(shadowColor);
+        float a = Color.alpha(shadowColor);
+        nSetShadowLayer(mNativePaint, radius, dx, dy, cs, r, g, b, a);
+
+        mShadowLayerRadius = radius;
+        mShadowLayerDx = dx;
+        mShadowLayerDy = dy;
+        mShadowLayerColor = Color.toArgb(shadowColor);
     }
 
     /**
@@ -2906,6 +2966,11 @@ public class Paint {
             int contextStart, int contextEnd, boolean isRtl, int offset);
     private static native int nGetOffsetForAdvance(long paintPtr, char[] text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, float advance);
+    private static native void nSetColor(long paintPtr, ColorSpace cs,
+            float r, float g, float b, float a);
+    private static native void nSetShadowLayer(long paintPtr,
+            float radius, float dx, float dy, ColorSpace cs,
+            float r, float g, float b, float a);
 
 
     // ---------------- @FastNative ------------------------
@@ -2961,7 +3026,7 @@ public class Paint {
             int mMinikinLocaleListId);
     @CriticalNative
     private static native void nSetShadowLayer(long paintPtr,
-            float radius, float dx, float dy, int color);
+            float radius, float dx, float dy, @ColorInt int color);
     @CriticalNative
     private static native boolean nHasShadowLayer(long paintPtr);
     @CriticalNative

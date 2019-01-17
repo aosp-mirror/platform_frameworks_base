@@ -2532,6 +2532,16 @@
     <permission android:name="android.permission.WRITE_GSERVICES"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows an application to modify config settings.
+    <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.WRITE_DEVICE_CONFIG"
+        android:protectionLevel="signature|configurator"/>
+
+    <!-- @SystemApi @hide Allows an application to read config settings.
+    <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.READ_DEVICE_CONFIG"
+        android:protectionLevel="signature|preinstalled" />
+
     <!-- @SystemApi @TestApi Allows an application to call
         {@link android.app.ActivityManager#forceStopPackage}.
         @hide -->
@@ -3196,9 +3206,10 @@
 
     <!-- @SystemApi Required to add or remove another application as a device admin.
          <p>Not for use by third-party applications.
-         @hide -->
+         @hide
+         @removed -->
     <permission android:name="android.permission.MANAGE_DEVICE_ADMINS"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an app to reset the device password.
          <p>Not for use by third-party applications.
@@ -3520,19 +3531,25 @@
     <permission android:name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to provide remote displays.
+         <p>Not for use by third-party applications.</p>
+         @hide -->
+    <permission android:name="android.permission.REMOTE_DISPLAY_PROVIDER"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows an application to capture video output.
          <p>Not for use by third-party applications.</p>
           @hide
           @removed -->
     <permission android:name="android.permission.CAPTURE_VIDEO_OUTPUT"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to capture secure video output.
          <p>Not for use by third-party applications.</p>
           @hide
           @removed -->
     <permission android:name="android.permission.CAPTURE_SECURE_VIDEO_OUTPUT"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to know what content is playing and control its playback.
          <p>Not for use by third-party applications due to privacy of media consumption</p>  -->

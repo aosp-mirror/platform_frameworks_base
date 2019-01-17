@@ -20,8 +20,12 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -105,5 +109,63 @@ public class TaskStackTests extends WindowTestsBase {
         stack.removeImmediately();
         assertNull(stack.getDisplayContent());
         assertNull(task.mStack);
+    }
+
+    @Test
+    public void testRemoveContainer() {
+        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stack);
+
+        assertNotNull(stack);
+        assertNotNull(task);
+        stack.removeIfPossible();
+        // Assert that the container was removed.
+        assertNull(stack.getParent());
+        assertEquals(0, stack.getChildCount());
+        assertNull(stack.getDisplayContent());
+        assertNull(task.getDisplayContent());
+        assertNull(task.mStack);
+    }
+
+    @Test
+    public void testRemoveContainer_deferRemoval() {
+        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stack);
+
+        // Stack removal is deferred if one of its child is animating.
+        task.setLocalIsAnimating(true);
+
+        stack.removeIfPossible();
+        // For the case of deferred removal the task controller will still be connected to the its
+        // container until the stack window container is removed.
+        assertNotNull(stack.getParent());
+        assertNotEquals(0, stack.getChildCount());
+        assertNotNull(task);
+
+        stack.removeImmediately();
+        // After removing, the task will be isolated.
+        assertNull(task.getParent());
+        assertEquals(0, task.getChildCount());
+        assertNull(task.getController());
+    }
+
+    @Test
+    public void testReparent() {
+        // Create first stack on primary display.
+        final TaskStack stack1 = createTaskStackOnDisplay(mDisplayContent);
+        final WindowTestUtils.TestTask task1 = WindowTestUtils.createTestTask(stack1);
+        task1.mOnDisplayChangedCalled = false;
+
+        // Create second display and put second stack on it.
+        final DisplayContent dc = createNewDisplay();
+        final TaskStack stack2 = createTaskStackOnDisplay(dc);
+
+        // Reparent
+        stack1.reparent(dc.getDisplayId(), new Rect(), true /* onTop */);
+        assertEquals(dc, stack1.getDisplayContent());
+        final int stack1PositionInParent = stack1.getParent().mChildren.indexOf(stack1);
+        final int stack2PositionInParent = stack1.getParent().mChildren.indexOf(stack2);
+        assertEquals(stack1PositionInParent, stack2PositionInParent + 1);
+        assertTrue(task1.mOnDisplayChangedCalled);
     }
 }

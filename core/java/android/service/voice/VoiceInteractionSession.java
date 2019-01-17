@@ -121,6 +121,12 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      */
     public static final int SHOW_SOURCE_NOTIFICATION = 1 << 6;
 
+    /**
+     * Flag for use with {@link #onShow}: indicates that the voice interaction service was invoked
+     * from an Android automotive system Ui.
+     */
+    public static final int SHOW_SOURCE_AUTOMOTIVE_SYSTEM_UI = 1 << 7;
+
     final Context mContext;
     final HandlerCaller mHandlerCaller;
 

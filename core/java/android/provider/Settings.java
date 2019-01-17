@@ -7391,6 +7391,14 @@ public final class Settings {
         private static final Validator DOZE_DOUBLE_TAP_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Whether the device should respond to the SLPI tap gesture.
+         * @hide
+         */
+        public static final String DOZE_TAP_SCREEN_GESTURE = "doze_tap_gesture";
+
+        private static final Validator DOZE_TAP_SCREEN_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * Gesture that wakes up the lock screen.
          * @hide
          */
@@ -7722,6 +7730,23 @@ public final class Settings {
          * @hide
          */
         public static final String TV_INPUT_CUSTOM_LABELS = "tv_input_custom_labels";
+
+        /**
+         * Whether TV app uses non-system inputs.
+         *
+         * <p>
+         * The value is boolean (1 or 0), where 1 means non-system TV inputs are allowed,
+         * and 0 means non-system TV inputs are not allowed.
+         *
+         * <p>
+         * Devices such as sound bars may have changed the system property allow_third_party_inputs
+         * to false so the TV Application only uses HDMI and other built in inputs. This setting
+         * allows user to override the default and have the TV Application use third party TV inputs
+         * available on play store.
+         *
+         * @hide
+         */
+        public static final String TV_APP_USES_NON_SYSTEM_INPUTS = "tv_app_uses_non_system_inputs";
 
         /**
          * Whether automatic routing of system audio to USB audio peripheral is disabled.
@@ -8461,6 +8486,7 @@ public final class Settings {
             DOZE_ALWAYS_ON,
             DOZE_PICK_UP_GESTURE,
             DOZE_DOUBLE_TAP_GESTURE,
+            DOZE_TAP_SCREEN_GESTURE,
             DOZE_WAKE_LOCK_SCREEN_GESTURE,
             DOZE_WAKE_SCREEN_GESTURE,
             NFC_PAYMENT_DEFAULT_COMPONENT,
@@ -8617,6 +8643,7 @@ public final class Settings {
             VALIDATORS.put(DOZE_ALWAYS_ON, DOZE_ALWAYS_ON_VALIDATOR);
             VALIDATORS.put(DOZE_PICK_UP_GESTURE, DOZE_PICK_UP_GESTURE_VALIDATOR);
             VALIDATORS.put(DOZE_DOUBLE_TAP_GESTURE, DOZE_DOUBLE_TAP_GESTURE_VALIDATOR);
+            VALIDATORS.put(DOZE_TAP_SCREEN_GESTURE, DOZE_TAP_SCREEN_GESTURE_VALIDATOR);
             VALIDATORS.put(DOZE_WAKE_LOCK_SCREEN_GESTURE, DOZE_WAKE_LOCK_SCREEN_GESTURE_VALIDATOR);
             VALIDATORS.put(DOZE_WAKE_SCREEN_GESTURE, DOZE_WAKE_SCREEN_GESTURE_VALIDATOR);
             VALIDATORS.put(NFC_PAYMENT_DEFAULT_COMPONENT, NFC_PAYMENT_DEFAULT_COMPONENT_VALIDATOR);
@@ -9379,6 +9406,15 @@ public final class Settings {
         */
         public static final String HDMI_SYSTEM_AUDIO_CONTROL_ENABLED =
                 "hdmi_system_audio_control_enabled";
+
+        /**
+         * Whether HDMI Routing Control feature is enabled. If enabled, the switch device will
+         * route to the correct input source on receiving Routing Control related messages. If
+         * disabled, you can only switch the input via controls on this device.
+         * @hide
+         */
+        public static final String HDMI_CEC_SWITCH_ENABLED =
+                "hdmi_cec_switch_enabled";
 
         /**
          * Whether TV will automatically turn on upon reception of the CEC command
@@ -11082,6 +11118,31 @@ public final class Settings {
         /** {@hide} */
         public static final String
                 BLUETOOTH_HEARING_AID_PRIORITY_PREFIX = "bluetooth_hearing_aid_priority_";
+        /**
+         * Enable/disable radio bug detection
+         *
+         * {@hide}
+         */
+        public static final String
+                ENABLE_RADIO_BUG_DETECTION = "enable_radio_bug_detection";
+
+        /**
+         * Count threshold of RIL wakelock timeout for radio bug detection
+         *
+         * {@hide}
+         */
+        public static final String
+                RADIO_BUG_WAKELOCK_TIMEOUT_COUNT_THRESHOLD =
+                "radio_bug_wakelock_timeout_count_threshold";
+
+        /**
+         * Count threshold of RIL system error for radio bug detection
+         *
+         * {@hide}
+         */
+        public static final String
+                RADIO_BUG_SYSTEM_ERROR_COUNT_THRESHOLD =
+                "radio_bug_system_error_count_threshold";
 
         /**
          * Activity manager specific settings.
@@ -11572,6 +11633,7 @@ public final class Settings {
          * battery_level_collection_delay_ms (long)
          * max_history_files (int)
          * max_history_buffer_kb (int)
+         * battery_charged_delay_ms (int)
          * </pre>
          *
          * <p>
@@ -11957,22 +12019,33 @@ public final class Settings {
                 "angle_gl_driver_selection_values";
 
         /**
-         * List of Apps selected to use Game Update Packages.
+         * Game Update Package global preference for all Apps.
+         * 0 = Default
+         * 1 = All Apps use Game Update Package
+         * 2 = All Apps use system graphics driver
+         * @hide
+         */
+        public static final String GUP_DEV_ALL_APPS = "gup_dev_all_apps";
+
+        /**
+         * List of Apps selected to use Game Update Package.
+         * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
          */
         public static final String GUP_DEV_OPT_IN_APPS = "gup_dev_opt_in_apps";
 
         /**
-         * List of Apps selected not to use Game Update Packages.
+         * List of Apps selected not to use Game Update Package.
+         * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
          */
         public static final String GUP_DEV_OPT_OUT_APPS = "gup_dev_opt_out_apps";
 
         /**
-         * Apps on the black list that are forbidden to useGame Update Package.
+         * Apps on the blacklist that are forbidden to use Game Update Package.
          * @hide
          */
-        public static final String GUP_BLACK_LIST = "gup_black_list";
+        public static final String GUP_BLACKLIST = "gup_blacklist";
 
         /**
          * Ordered GPU debug layer list for Vulkan
@@ -14053,7 +14126,7 @@ public final class Settings {
          *
          * @hide
          */
-        // TODO(b/117663715): require a new read permission
+        @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
         static String getString(ContentResolver resolver, String name) {
             return sNameValueCache.getStringForUser(resolver, name, resolver.getUserId());
         }
@@ -14076,8 +14149,7 @@ public final class Settings {
          *
          * @hide
          */
-        // TODO(b/117663715): require a new write permission restricted to a single source
-        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         static boolean putString(@NonNull ContentResolver resolver, @NonNull String name,
                 @Nullable String value, boolean makeDefault) {
             return sNameValueCache.putStringForUser(resolver, name, value, null, makeDefault,
@@ -14099,7 +14171,7 @@ public final class Settings {
          * @hide
          */
         // TODO(b/117663715): require a new write permission restricted to a single source
-        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         static void resetToDefaults(@NonNull ContentResolver resolver, @ResetMode int resetMode,
                 @Nullable String prefix) {
             try {

@@ -16,11 +16,7 @@
 
 package android.os;
 
-import com.google.android.collect.Lists;
 import junit.framework.TestSuite;
-
-import java.util.Enumeration;
-import java.util.List;
 
 public class OsTests {
     public static TestSuite suite() {

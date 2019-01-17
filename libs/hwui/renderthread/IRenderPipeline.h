@@ -84,6 +84,7 @@ public:
     virtual void onPrepareTree() = 0;
     virtual SkColorType getSurfaceColorType() const = 0;
     virtual sk_sp<SkColorSpace> getSurfaceColorSpace() = 0;
+    virtual GrSurfaceOrigin getSurfaceOrigin() = 0;
 
     virtual ~IRenderPipeline() {}
 };

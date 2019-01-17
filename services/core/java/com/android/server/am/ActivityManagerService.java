@@ -32,6 +32,7 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
 import static android.content.pm.PackageManager.GET_PROVIDERS;
+import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -318,7 +319,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
-import com.android.server.appop.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
 import com.android.server.DisplayThread;
@@ -337,6 +337,7 @@ import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
+import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
@@ -658,9 +659,47 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     /**
      * When an app has restrictions on the other apps that can have associations with it,
-     * it appears here with a set of the allowed apps.
+     * it appears here with a set of the allowed apps and also track debuggability of the app.
      */
-    ArrayMap<String, ArraySet<String>> mAllowedAssociations;
+    ArrayMap<String, PackageAssociationInfo> mAllowedAssociations;
+
+    /**
+     * Tracks association information for a particular package along with debuggability.
+     * <p> Associations for a package A are allowed to package B if B is part of the
+     *     allowed associations for A or if A is debuggable.
+     */
+    private final class PackageAssociationInfo {
+        private final String mSourcePackage;
+        private final ArraySet<String> mAllowedPackageAssociations;
+        private boolean mIsDebuggable;
+
+        PackageAssociationInfo(String sourcePackage, ArraySet<String> allowedPackages,
+                boolean isDebuggable) {
+            mSourcePackage = sourcePackage;
+            mAllowedPackageAssociations = allowedPackages;
+            mIsDebuggable = isDebuggable;
+        }
+
+        /**
+         * Returns true if {@code mSourcePackage} is allowed association with
+         * {@code targetPackage}.
+         */
+        boolean isPackageAssociationAllowed(String targetPackage) {
+            return mIsDebuggable || mAllowedPackageAssociations.contains(targetPackage);
+        }
+
+        boolean isDebuggable() {
+            return mIsDebuggable;
+        }
+
+        void setDebuggable(boolean isDebuggable) {
+            mIsDebuggable = isDebuggable;
+        }
+
+        ArraySet<String> getAllowedPackageAssociations() {
+            return mAllowedPackageAssociations;
+        }
+    }
 
     /**
      * All of the processes we currently have running organized by pid.
@@ -2392,12 +2431,10 @@ public class ActivityManagerService extends IActivityManager.Stub
      * If it does not, give it an empty set.
      */
     void requireAllowedAssociationsLocked(String packageName) {
-        if (mAllowedAssociations == null) {
-            mAllowedAssociations = new ArrayMap<>(
-                    SystemConfig.getInstance().getAllowedAssociations());
-        }
+        ensureAllowedAssociations();
         if (mAllowedAssociations.get(packageName) == null) {
-            mAllowedAssociations.put(packageName, new ArraySet<>());
+            mAllowedAssociations.put(packageName, new PackageAssociationInfo(packageName,
+                    new ArraySet<>(), /* isDebuggable = */ false));
         }
     }
 
@@ -2408,10 +2445,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * association is implicitly allowed.
      */
     boolean validateAssociationAllowedLocked(String pkg1, int uid1, String pkg2, int uid2) {
-        if (mAllowedAssociations == null) {
-            mAllowedAssociations = new ArrayMap<>(
-                    SystemConfig.getInstance().getAllowedAssociations());
-        }
+        ensureAllowedAssociations();
         // Interactions with the system uid are always allowed, since that is the core system
         // that everyone needs to be able to interact with. Also allow reflexive associations
         // within the same uid.
@@ -2419,22 +2453,55 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || UserHandle.getAppId(uid2) == SYSTEM_UID) {
             return true;
         }
-        // We won't allow this association if either pkg1 or pkg2 has a limit on the
-        // associations that are allowed with it, and the other package is not explicitly
-        // specified as one of those associations.
-        ArraySet<String> pkgs = mAllowedAssociations.get(pkg1);
-        if (pkgs != null) {
-            if (!pkgs.contains(pkg2)) {
-                return false;
-            }
+
+        // Check for association on both source and target packages.
+        PackageAssociationInfo pai = mAllowedAssociations.get(pkg1);
+        if (pai != null && !pai.isPackageAssociationAllowed(pkg2)) {
+            return false;
         }
-        pkgs = mAllowedAssociations.get(pkg2);
-        if (pkgs != null) {
-            return pkgs.contains(pkg1);
+        pai = mAllowedAssociations.get(pkg2);
+        if (pai != null && !pai.isPackageAssociationAllowed(pkg1)) {
+            return false;
         }
         // If no explicit associations are provided in the manifest, then assume the app is
         // allowed associations with any package.
         return true;
+    }
+
+    /** Sets up allowed associations for system prebuilt packages from system config (if needed). */
+    private void ensureAllowedAssociations() {
+        if (mAllowedAssociations == null) {
+            ArrayMap<String, ArraySet<String>> allowedAssociations =
+                    SystemConfig.getInstance().getAllowedAssociations();
+            mAllowedAssociations = new ArrayMap<>(allowedAssociations.size());
+            PackageManagerInternal pm = getPackageManagerInternalLocked();
+            for (int i = 0; i < allowedAssociations.size(); i++) {
+                final String pkg = allowedAssociations.keyAt(i);
+                final ArraySet<String> asc = allowedAssociations.valueAt(i);
+
+                // Query latest debuggable flag from package-manager.
+                boolean isDebuggable = false;
+                try {
+                    ApplicationInfo ai = AppGlobals.getPackageManager()
+                            .getApplicationInfo(pkg, MATCH_ALL, 0);
+                    if (ai != null) {
+                        isDebuggable = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                    }
+                } catch (RemoteException e) {
+                    /* ignore */
+                }
+                mAllowedAssociations.put(pkg, new PackageAssociationInfo(pkg, asc, isDebuggable));
+            }
+        }
+    }
+
+    /** Updates allowed associations for app info (specifically, based on debuggability).  */
+    private void updateAssociationForApp(ApplicationInfo appInfo) {
+        ensureAllowedAssociations();
+        PackageAssociationInfo pai = mAllowedAssociations.get(appInfo.packageName);
+        if (pai != null) {
+            pai.setDebuggable((appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+        }
     }
 
     @Override
@@ -10628,7 +10695,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProtoUtils.toDuration(proto, ActivityManagerServiceDumpProcessesProto.LAST_IDLE_TIME, mLastIdleTime, now);
             proto.write(ActivityManagerServiceDumpProcessesProto.LOW_RAM_SINCE_LAST_IDLE_MS, getLowRamTimeSinceIdle(now));
         }
-
     }
 
     void writeProcessesToGcToProto(ProtoOutputStream proto, long fieldId, String dumpPackage) {
@@ -10910,14 +10976,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     void dumpAllowedAssociationsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
         boolean needSep = false;
-        boolean printedAnything = false;
 
         pw.println("ACTIVITY MANAGER ALLOWED ASSOCIATION STATE (dumpsys activity allowed-associations)");
         boolean printed = false;
         if (mAllowedAssociations != null) {
             for (int i = 0; i < mAllowedAssociations.size(); i++) {
                 final String pkg = mAllowedAssociations.keyAt(i);
-                final ArraySet<String> asc = mAllowedAssociations.valueAt(i);
+                final ArraySet<String> asc =
+                        mAllowedAssociations.valueAt(i).getAllowedPackageAssociations();
                 boolean printedHeader = false;
                 for (int j = 0; j < asc.size(); j++) {
                     if (dumpPackage == null || pkg.equals(dumpPackage)
@@ -10926,7 +10992,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                             pw.println("  Allowed associations (by restricted package):");
                             printed = true;
                             needSep = true;
-                            printedAnything = true;
                         }
                         if (!printedHeader) {
                             pw.print("  * ");
@@ -10937,6 +11002,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.print("      Allow: ");
                         pw.println(asc.valueAt(j));
                     }
+                }
+                if (mAllowedAssociations.valueAt(i).isDebuggable()) {
+                    pw.println("      (debuggable)");
                 }
             }
         }
@@ -14519,6 +14587,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     + " ssp=" + ssp + " data=" + data);
                             return ActivityManager.BROADCAST_SUCCESS;
                         }
+                        updateAssociationForApp(aInfo);
                         mAtmInternal.onPackageReplaced(aInfo);
                         mServices.updateServiceApplicationInfoLocked(aInfo);
                         sendPackageBroadcastLocked(ApplicationThreadConstants.PACKAGE_REPLACED,
@@ -17798,6 +17867,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void clearPendingBackup(int userId) {
             ActivityManagerService.this.clearPendingBackup(userId);
         }
+
+        /**
+         * When power button is very long pressed, call this interface to do some pre-shutdown work
+         * like persisting database etc.
+         */
+        @Override
+        public void prepareForPossibleShutdown() {
+            ActivityManagerService.this.prepareForPossibleShutdown();
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
@@ -18051,6 +18129,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         } catch (RemoteException e) {
             throw new IllegalStateException("Process disappeared");
+        }
+    }
+
+    /**
+     * When power button is very long pressed, call this interface to do some pre-shutdown work
+     * like persisting database etc.
+     */
+    public void prepareForPossibleShutdown() {
+        synchronized (this) {
+            if (mUsageStatsService != null) {
+                mUsageStatsService.prepareForPossibleShutdown();
+            }
         }
     }
 

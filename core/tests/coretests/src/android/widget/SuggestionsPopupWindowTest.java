@@ -36,13 +36,13 @@ import static android.widget.espresso.SuggestionsPopupwindowUtils.clickSuggestio
 import static android.widget.espresso.SuggestionsPopupwindowUtils.onSuggestionsPopup;
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
 import static android.widget.espresso.TextViewActions.longPressOnTextAtIndex;
+
 import static org.hamcrest.Matchers.is;
+
 import android.content.res.TypedArray;
 import android.support.test.espresso.NoMatchingViewException;
 import android.support.test.espresso.ViewAssertion;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.Spanned;
@@ -50,6 +50,8 @@ import android.text.TextPaint;
 import android.text.style.SuggestionSpan;
 import android.text.style.TextAppearanceSpan;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.coretests.R;
 

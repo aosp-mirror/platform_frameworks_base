@@ -776,7 +776,7 @@ public class MediaPlayer2 implements AutoCloseable
                 }
                 boolean hasError = false;
                 for (DataSourceDesc dsd : dsds) {
-                    if (dsd != null) {
+                    if (dsd == null) {
                         hasError = true;
                         continue;
                     }

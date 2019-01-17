@@ -16,11 +16,10 @@
 
 package android.widget.listview;
 
+import android.util.ListScenario;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-
-import android.util.ListScenario;
 
 /**
  * Each list item has two focusables that are close enough together that

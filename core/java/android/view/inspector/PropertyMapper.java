@@ -18,6 +18,7 @@ package android.view.inspector;
 
 import android.annotation.AttrRes;
 import android.annotation.NonNull;
+import android.util.SparseArray;
 
 /**
  * An interface for mapping the string names of inspectable properties to integer identifiers.
@@ -154,7 +155,7 @@ public interface PropertyMapper {
     int mapIntEnum(
             @NonNull String name,
             @AttrRes int attributeId,
-            @NonNull IntEnumMapping mapping);
+            @NonNull SparseArray<String> mapping);
 
     /**
      * Map a string name to an integer ID for a flag set packed into an int property.

@@ -455,17 +455,10 @@ class TaskRecord extends ConfigurationContainer {
         }
 
         final Rect bounds = updateOverrideConfigurationFromLaunchBounds();
-        final StackWindowController stackController = getStack().getWindowContainerController();
+        final TaskStack stack = getStack().getTaskStack();
 
-        if (DEBUG_STACK) {
-            Slog.i(TAG_WM, "TaskRecord: taskId=" + taskId
-                    + " stack=" + stackController + " bounds=" + bounds);
-        }
-
-        final TaskStack stack = stackController.mContainer;
         if (stack == null) {
-            throw new IllegalArgumentException("TaskRecord: invalid stack="
-                    + stackController);
+            throw new IllegalArgumentException("TaskRecord: invalid stack=" + mStack);
         }
         EventLog.writeEvent(WM_TASK_CREATED, taskId, stack.mStackId);
         mTask = new Task(taskId, stack, userId, mService.mWindowManager, mResizeMode,
@@ -742,7 +735,7 @@ class TaskRecord extends ConfigurationContainer {
 
             // Must reparent first in window manager to avoid a situation where AM can delete the
             // we are coming from in WM before we reparent because it became empty.
-            mTask.reparent(toStack.getWindowContainerController(), position,
+            mTask.reparent(toStack.getTaskStack(), position,
                     moveStackMode == REPARENT_MOVE_STACK_TO_FRONT);
 
             final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_STACK_TO_FRONT
@@ -1278,28 +1271,28 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     /**
-     * Checks if the root activity requires a particular orientation (either by override or
+     * Checks if the top activity requires a particular orientation (either by override or
      * activityInfo) and returns that. Otherwise, this returns ORIENTATION_UNDEFINED.
      */
-    private int getRootActivityRequestedOrientation() {
-        ActivityRecord root = getRootActivity();
+    private int getTopActivityRequestedOrientation() {
+        ActivityRecord top = getTopActivity();
         if (getRequestedOverrideConfiguration().orientation != ORIENTATION_UNDEFINED
-                || root == null) {
+                || top == null) {
             return getRequestedOverrideConfiguration().orientation;
         }
-        int rootScreenOrientation = root.getOrientation();
-        if (rootScreenOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
+        int screenOrientation = top.getOrientation();
+        if (screenOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
             // NOSENSOR means the display's "natural" orientation, so return that.
             ActivityDisplay display = mStack != null ? mStack.getDisplay() : null;
             if (display != null && display.mDisplayContent != null) {
                 return mStack.getDisplay().mDisplayContent.getNaturalOrientation();
             }
-        } else if (rootScreenOrientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
+        } else if (screenOrientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
             // LOCKED means the activity's orientation remains unchanged, so return existing value.
-            return root.getConfiguration().orientation;
-        } else if (ActivityInfo.isFixedOrientationLandscape(rootScreenOrientation)) {
+            return top.getConfiguration().orientation;
+        } else if (ActivityInfo.isFixedOrientationLandscape(screenOrientation)) {
             return ORIENTATION_LANDSCAPE;
-        } else if (ActivityInfo.isFixedOrientationPortrait(rootScreenOrientation)) {
+        } else if (ActivityInfo.isFixedOrientationPortrait(screenOrientation)) {
             return ORIENTATION_PORTRAIT;
         }
         return ORIENTATION_UNDEFINED;
@@ -2196,9 +2189,9 @@ class TaskRecord extends ConfigurationContainer {
             // In FULLSCREEN mode, always start with empty bounds to indicate "fill parent"
             outOverrideBounds.setEmpty();
 
-            // If the task or its root activity require a different orientation, make it fit the
+            // If the task or its top activity requires a different orientation, make it fit the
             // available bounds by scaling down its bounds.
-            int forcedOrientation = getRootActivityRequestedOrientation();
+            int forcedOrientation = getTopActivityRequestedOrientation();
             if (forcedOrientation != ORIENTATION_UNDEFINED
                     && forcedOrientation != newParentConfig.orientation) {
                 final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();

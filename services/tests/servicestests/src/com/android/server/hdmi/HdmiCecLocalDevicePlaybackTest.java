@@ -81,7 +81,8 @@ public class HdmiCecLocalDevicePlaybackTest {
         mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
     }
 
-    @Ignore
+    // Playback device does not handle routing control related feature right now
+    @Ignore("b/120845532")
     @Test
     public void handleSetStreamPath_underCurrentDevice() {
         assertThat(mHdmiCecLocalDevicePlayback.getLocalActivePath()).isEqualTo(0);

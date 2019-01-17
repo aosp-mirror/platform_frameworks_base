@@ -39,7 +39,9 @@ import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -52,15 +54,34 @@ import org.junit.Test;
 @Presubmit
 public class AppTransitionTests extends WindowTestsBase {
 
+    private static RootWindowContainer sOriginalRootWindowContainer;
+
     private DisplayContent mDc;
+
+    @BeforeClass
+    public static void setUpRootWindowContainerMock() {
+        final WindowManagerService wm = WmServiceUtils.getWindowManagerService();
+        // For unit test, we don't need to test performSurfacePlacement to prevent some abnormal
+        // interaction with surfaceflinger native side.
+        sOriginalRootWindowContainer = wm.mRoot;
+        // Creating spied mock of RootWindowContainer shouldn't be done in @Before, since it will
+        // create unnecessary nested spied objects chain, because WindowManagerService object under
+        // test is a single instance shared among all tests that extend WindowTestsBase class.
+        // Instead it should be done once before running all tests in this test class.
+        wm.mRoot = spy(wm.mRoot);
+        doNothing().when(wm.mRoot).performSurfacePlacement(anyBoolean());
+    }
+
+    @AfterClass
+    public static void tearDownRootWindowContainerMock() {
+        final WindowManagerService wm = WmServiceUtils.getWindowManagerService();
+        wm.mRoot = sOriginalRootWindowContainer;
+        sOriginalRootWindowContainer = null;
+    }
 
     @Before
     public void setUp() throws Exception {
         mDc = mWm.getDefaultDisplayContentLocked();
-        // For unit test,  we don't need to test performSurfacePlacement to prevent some
-        // abnormal interaction with surfaceflinger native side.
-        mWm.mRoot = spy(mWm.mRoot);
-        doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
     }
 
     @Test
@@ -160,7 +181,7 @@ public class AppTransitionTests extends WindowTestsBase {
         assertTrue(dc1.mOpeningApps.size() > 0);
 
         // Move stack to another display.
-        stack1.getController().reparent(dc2.getDisplayId(),  new Rect(), true);
+        stack1.reparent(dc2.getDisplayId(),  new Rect(), true);
 
         // Verify if token are cleared from both pending transition list in former display.
         assertFalse(dc1.mOpeningApps.contains(token1));

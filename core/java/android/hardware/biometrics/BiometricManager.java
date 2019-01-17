@@ -42,13 +42,13 @@ public class BiometricManager {
     /**
      * The hardware is unavailable. Try again later.
      */
-    public static final int BIOMETRIC_ERROR_UNAVAILABLE =
+    public static final int BIOMETRIC_ERROR_HW_UNAVAILABLE =
             BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
 
     /**
      * The user does not have any biometrics enrolled.
      */
-    public static final int BIOMETRIC_ERROR_NO_BIOMETRICS =
+    public static final int BIOMETRIC_ERROR_NONE_ENROLLED =
             BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS;
 
     /**
@@ -58,8 +58,8 @@ public class BiometricManager {
             BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
 
     @IntDef({BIOMETRIC_SUCCESS,
-            BIOMETRIC_ERROR_UNAVAILABLE,
-            BIOMETRIC_ERROR_NO_BIOMETRICS,
+            BIOMETRIC_ERROR_HW_UNAVAILABLE,
+            BIOMETRIC_ERROR_NONE_ENROLLED,
             BIOMETRIC_ERROR_NO_HARDWARE})
     @interface BiometricError {}
 
@@ -95,8 +95,8 @@ public class BiometricManager {
      * Determine if biometrics can be used. In other words, determine if {@link BiometricPrompt}
      * can be expected to be shown (hardware available, templates enrolled, user-enabled).
      *
-     * @return Returns {@link #BIOMETRIC_ERROR_NO_BIOMETRICS} if the user does not have any
-     *     enrolled, or {@link #BIOMETRIC_ERROR_UNAVAILABLE} if none are currently
+     * @return Returns {@link #BIOMETRIC_ERROR_NONE_ENROLLED} if the user does not have any
+     *     enrolled, or {@link #BIOMETRIC_ERROR_HW_UNAVAILABLE} if none are currently
      *     supported/enabled. Returns {@link #BIOMETRIC_SUCCESS} if a biometric can currently be
      *     used (enrolled and available).
      */
@@ -113,7 +113,7 @@ public class BiometricManager {
                 return BIOMETRIC_ERROR_NO_HARDWARE;
             } else {
                 Slog.w(TAG, "hasEnrolledBiometrics(): Service not connected");
-                return BIOMETRIC_ERROR_UNAVAILABLE;
+                return BIOMETRIC_ERROR_HW_UNAVAILABLE;
             }
         }
     }

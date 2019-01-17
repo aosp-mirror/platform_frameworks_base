@@ -39,9 +39,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doCallRealMethod;
-
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
@@ -66,11 +63,11 @@ import android.view.Display;
 import android.view.DisplayInfo;
 
 import com.android.internal.app.IVoiceInteractor;
-import com.android.server.appop.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.ServiceThread;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.PendingIntentController;
+import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.uri.UriGrantsManagerInternal;
 
@@ -377,7 +374,7 @@ class ActivityTestsBase {
                 mStack.addTask(task, true, "creating test task");
                 task.setStack(mStack);
                 task.setTask();
-                mStack.getWindowContainerController().mContainer.addChild(task.mTask, 0);
+                mStack.getTaskStack().addChild(task.mTask, 0);
             }
 
             task.touchActiveTime();
@@ -632,7 +629,7 @@ class ActivityTestsBase {
 
         @SuppressWarnings("TypeParameterUnusedInFormals")
         @Override
-        <T extends ActivityStack> T createStackUnchecked(int windowingMode, int activityType,
+        ActivityStack createStackUnchecked(int windowingMode, int activityType,
                 int stackId, boolean onTop) {
             return new StackBuilder(mSupervisor.mRootActivityContainer).setDisplay(this)
                     .setWindowingMode(windowingMode).setActivityType(activityType)
@@ -681,10 +678,9 @@ class ActivityTestsBase {
      * method is called. Note that its functionality depends on the implementations of the
      * construction arguments.
      */
-    protected static class TestActivityStack<T extends StackWindowController>
-            extends ActivityStack<T> {
+    protected static class TestActivityStack
+            extends ActivityStack {
         private int mOnActivityRemovedFromStackCount = 0;
-        private T mContainerController;
 
         static final int IS_TRANSLUCENT_UNSET = 0;
         static final int IS_TRANSLUCENT_FALSE = 1;
@@ -724,20 +720,20 @@ class ActivityTestsBase {
         }
 
         @Override
-        protected T createStackWindowController(int displayId, boolean onTop, Rect outBounds) {
-            mContainerController = (T) WindowTestUtils.createMockStackWindowContainerController();
+        protected void createTaskStack(int displayId, boolean onTop, Rect outBounds) {
+            mTaskStack = WindowTestUtils.createMockTaskStack();
 
             // Primary pinned stacks require a non-empty out bounds to be set or else all tasks
             // will be moved to the full screen stack.
             if (getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 outBounds.set(0, 0, 100, 100);
             }
-            return mContainerController;
+
         }
 
         @Override
-        T getWindowContainerController() {
-            return mContainerController;
+        TaskStack getTaskStack() {
+            return mTaskStack;
         }
 
         void setIsTranslucent(boolean isTranslucent) {
@@ -827,27 +823,23 @@ class ActivityTestsBase {
         }
 
         @SuppressWarnings("TypeParameterUnusedInFormals")
-        <T extends ActivityStack> T build() {
+        ActivityStack build() {
             final int stackId = mStackId >= 0 ? mStackId : mDisplay.getNextStackId();
             if (mWindowingMode == WINDOWING_MODE_PINNED) {
-                return (T) new PinnedActivityStack(mDisplay, stackId,
-                        mRootActivityContainer.mStackSupervisor, mOnTop) {
+                return new ActivityStack(mDisplay, stackId, mRootActivityContainer.mStackSupervisor,
+                        mWindowingMode, ACTIVITY_TYPE_STANDARD, mOnTop) {
                     @Override
                     Rect getDefaultPictureInPictureBounds(float aspectRatio) {
                         return new Rect(50, 50, 100, 100);
                     }
 
                     @Override
-                    PinnedStackWindowController createStackWindowController(int displayId,
-                            boolean onTop, Rect outBounds) {
-                        PinnedStackWindowController controller =
-                                mock(PinnedStackWindowController.class);
-                        controller.mContainer = mock(TaskStack.class);
-                        return controller;
+                    void createTaskStack(int displayId, boolean onTop, Rect outBounds) {
+                        mTaskStack = mock(TaskStack.class);
                     }
                 };
             } else {
-                return (T) new TestActivityStack(mDisplay, stackId,
+                return new TestActivityStack(mDisplay, stackId,
                         mRootActivityContainer.mStackSupervisor, mWindowingMode,
                         mActivityType, mOnTop, mCreateActivity);
             }

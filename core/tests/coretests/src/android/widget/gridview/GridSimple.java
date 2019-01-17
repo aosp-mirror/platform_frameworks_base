@@ -18,11 +18,10 @@ package android.widget.gridview;
 
 import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
+import android.util.GridScenario;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import android.util.GridScenario;
 
 public class GridSimple extends GridScenario {
     @Override

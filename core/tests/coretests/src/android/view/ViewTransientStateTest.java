@@ -18,12 +18,11 @@ package android.view;
 
 import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.UiThreadTest;
-import android.test.suitebuilder.annotation.MediumTest;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.MediumTest;
 
 import com.android.frameworks.coretests.R;
-
-import static org.junit.Assert.assertFalse;
 
 /**
  * Exercise set View's transient state

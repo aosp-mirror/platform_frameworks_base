@@ -21,6 +21,7 @@ import static android.view.contentcapture.ContentCaptureManager.VERBOSE;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewStructure;
@@ -56,42 +57,71 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      *
      * @hide
      */
-    public static final int STATE_UNKNOWN = 0;
+    // NOTE: not prefixed by STATE_ so it's not printed on getStateAsString()
+    public static final int UNKNWON_STATE = 0x0;
 
     /**
      * Service's startSession() was called, but server didn't confirm it was created yet.
      *
      * @hide
      */
-    public static final int STATE_WAITING_FOR_SERVER = 1;
+    public static final int STATE_WAITING_FOR_SERVER = 0x1;
 
     /**
      * Session is active.
      *
      * @hide
      */
-    public static final int STATE_ACTIVE = 2;
+    public static final int STATE_ACTIVE = 0x2;
 
     /**
      * Session is disabled because there is no service for this user.
      *
      * @hide
      */
-    public static final int STATE_DISABLED_NO_SERVICE = 3;
+    public static final int STATE_DISABLED = 0x4;
 
     /**
      * Session is disabled because its id already existed on server.
      *
      * @hide
      */
-    public static final int STATE_DISABLED_DUPLICATED_ID = 4;
+    public static final int STATE_DUPLICATED_ID = 0x8;
+
+    /**
+     * Session is disabled because service is not set for user.
+     *
+     * @hide
+     */
+    public static final int STATE_NO_SERVICE = 0x10;
 
     /**
      * Session is disabled by FLAG_SECURE
      *
      * @hide
      */
-    public static final int STATE_DISABLED_BY_FLAG_SECURE = 5;
+    public static final int STATE_FLAG_SECURE = 0x20;
+
+    /**
+     * Session is disabled manually by the specific app.
+     *
+     * @hide
+     */
+    public static final int STATE_BY_APP = 0x40;
+
+    /**
+     * Session is disabled because session start was never replied.
+     *
+     * @hide
+     */
+    public static final int STATE_NO_RESPONSE = 0x80;
+
+    /**
+     * Session is disabled because an internal error.
+     *
+     * @hide
+     */
+    public static final int STATE_INTERNAL_ERROR = 0x100;
 
     private static final int INITIAL_CHILDREN_CAPACITY = 5;
 
@@ -110,7 +140,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     @Nullable
     protected final String mId;
 
-    private int mState = STATE_UNKNOWN;
+    private int mState = UNKNWON_STATE;
 
     // Lazily created on demand.
     private ContentCaptureSessionId mContentCaptureSessionId;
@@ -382,21 +412,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      */
     @NonNull
     protected static String getStateAsString(int state) {
-        switch (state) {
-            case STATE_UNKNOWN:
-                return "UNKNOWN";
-            case STATE_WAITING_FOR_SERVER:
-                return "WAITING_FOR_SERVER";
-            case STATE_ACTIVE:
-                return "ACTIVE";
-            case STATE_DISABLED_NO_SERVICE:
-                return "DISABLED_NO_SERVICE";
-            case STATE_DISABLED_DUPLICATED_ID:
-                return "DISABLED_DUPLICATED_ID";
-            case STATE_DISABLED_BY_FLAG_SECURE:
-                return "DISABLED_FLAG_SECURE";
-            default:
-                return "INVALID:" + state;
-        }
+        return state + " (" + (state == UNKNWON_STATE ? "UNKNOWN"
+                : DebugUtils.flagsToString(ContentCaptureSession.class, "STATE_", state)) + ")";
     }
 }

@@ -16,6 +16,7 @@
 
 package android.service.contentcapture;
 
+import android.os.IBinder;
 import android.service.contentcapture.SnapshotData;
 import android.view.contentcapture.ContentCaptureContext;
 
@@ -29,7 +30,8 @@ import java.util.List;
  * @hide
  */
 oneway interface IContentCaptureService {
-    void onConnectedStateChanged(boolean state);
+    void onConnected(IBinder callback);
+    void onDisconnected();
     void onSessionStarted(in ContentCaptureContext context, String sessionId, int uid,
                           in IResultReceiver clientReceiver);
     void onSessionFinished(String sessionId);

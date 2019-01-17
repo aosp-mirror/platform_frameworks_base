@@ -76,8 +76,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.Trace;
+import android.sysprop.DisplayProperties;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -810,14 +810,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * The logging tag used by this class when logging content capture-related messages.
      */
     private static final String CONTENT_CAPTURE_LOG_TAG = "View.ContentCapture";
-
-    /**
-     * When set to true, apps will draw debugging information about their layouts.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public static final String DEBUG_LAYOUT_PROPERTY = "debug.layout";
 
     /**
      * When set to true, this view will save its attribute data.
@@ -27833,7 +27825,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         /**
          * Show where the margins, bounds and layout bounds are for each view.
          */
-        boolean mDebugLayout = SystemProperties.getBoolean(DEBUG_LAYOUT_PROPERTY, false);
+        boolean mDebugLayout = DisplayProperties.debug_layout().orElse(false);
 
         /**
          * Point used to compute visible regions.

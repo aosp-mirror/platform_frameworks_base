@@ -31,6 +31,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -149,6 +150,11 @@ public class SystemAudioInitiationActionFromAvrTest {
                     public void setAndBroadcastActiveSourceFromOneDeviceType(
                             int sourceAddress, int physicalAddress) {
                         mBroadcastActiveSource = true;
+                    }
+
+                    @Override
+                    int pathToPortId(int path) {
+                        return -1;
                     }
                 };
         mHdmiCecLocalDeviceAudioSystem =
@@ -270,6 +276,7 @@ public class SystemAudioInitiationActionFromAvrTest {
         assertTrue(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated());
     }
 
+    @Ignore("b/120845532")
     @Test
     public void testIsPlaybackDevice_cannotReceiveActiveSource() {
         resetTestVariables();
@@ -282,10 +289,10 @@ public class SystemAudioInitiationActionFromAvrTest {
         mTestLooper.dispatchAll();
 
         assertThat(mMsgRequestActiveSourceCount).isEqualTo(1);
-        assertThat(mMsgSetSystemAudioModeCount).isEqualTo(1);
-        assertThat(mQueryTvSystemAudioModeSupportCount).isEqualTo(1);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated()).isTrue();
         assertThat(mBroadcastActiveSource).isTrue();
+        assertThat(mQueryTvSystemAudioModeSupportCount).isEqualTo(1);
+        assertThat(mMsgSetSystemAudioModeCount).isEqualTo(1);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated()).isTrue();
     }
 
     private void resetTestVariables() {

@@ -77,7 +77,6 @@ public class DexLoggerTests {
 
     @Mock IPackageManager mPM;
     @Mock Installer mInstaller;
-    private final Object mInstallLock = new Object();
 
     private PackageDynamicCodeLoading mPackageDynamicCodeLoading;
     private DexLogger mDexLogger;
@@ -103,7 +102,7 @@ public class DexLoggerTests {
         };
 
         // For test purposes capture log messages as well as sending to the event log.
-        mDexLogger = new DexLogger(mPM, mInstaller, mInstallLock, mPackageDynamicCodeLoading) {
+        mDexLogger = new DexLogger(mPM, mInstaller, mPackageDynamicCodeLoading) {
             @Override
                 void writeDclEvent(int uid, String message) {
                     super.writeDclEvent(uid, message);

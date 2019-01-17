@@ -114,5 +114,8 @@
     <item type="id" name="aod_mask_transition_progress_tag" />
     <item type="id" name="aod_mask_transition_progress_end_tag" />
     <item type="id" name="aod_mask_transition_progress_start_tag" />
+
+    <!-- Global Actions Menu -->
+    <item type="id" name="global_actions_view" />
 </resources>
 

@@ -34,6 +34,23 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
+static void free_features_extensions_structs(const VkPhysicalDeviceFeatures2& features) {
+    // All Vulkan structs that could be part of the features chain will start with the
+    // structure type followed by the pNext pointer. We cast to the CommonVulkanHeader
+    // so we can get access to the pNext for the next struct.
+    struct CommonVulkanHeader {
+        VkStructureType sType;
+        void*           pNext;
+    };
+
+    void* pNext = features.pNext;
+    while (pNext) {
+        void* current = pNext;
+        pNext = static_cast<CommonVulkanHeader*>(current)->pNext;
+        free(current);
+    }
+}
+
 #define GET_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(VK_NULL_HANDLE, "vk" #F)
 #define GET_INST_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(mInstance, "vk" #F)
 #define GET_DEV_PROC(F) m##F = (PFN_vk##F)vkGetDeviceProcAddr(mDevice, "vk" #F)
@@ -66,6 +83,11 @@ void VulkanManager::destroy() {
     mDevice = VK_NULL_HANDLE;
     mPhysicalDevice = VK_NULL_HANDLE;
     mInstance = VK_NULL_HANDLE;
+    mInstanceVersion = 0u;
+    mInstanceExtensions.clear();
+    mDeviceExtensions.clear();
+    free_features_extensions_structs(mPhysicalDeviceFeatures2);
+    mPhysicalDeviceFeatures2 = {};
 }
 
 bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFeatures2& features) {
@@ -81,7 +103,6 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         VK_MAKE_VERSION(1, 1, 0),           // apiVersion
     };
 
-    std::vector<const char*> instanceExtensions;
     {
         GET_PROC(EnumerateInstanceExtensionProperties);
 
@@ -99,7 +120,7 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         bool hasKHRSurfaceExtension = false;
         bool hasKHRAndroidSurfaceExtension = false;
         for (uint32_t i = 0; i < extensionCount; ++i) {
-            instanceExtensions.push_back(extensions[i].extensionName);
+            mInstanceExtensions.push_back(extensions[i].extensionName);
             if (!strcmp(extensions[i].extensionName, VK_KHR_SURFACE_EXTENSION_NAME)) {
                 hasKHRSurfaceExtension = true;
             }
@@ -120,8 +141,8 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         &app_info,                                 // pApplicationInfo
         0,                                         // enabledLayerNameCount
         nullptr,                                   // ppEnabledLayerNames
-        (uint32_t) instanceExtensions.size(),      // enabledExtensionNameCount
-        instanceExtensions.data(),                 // ppEnabledExtensionNames
+        (uint32_t) mInstanceExtensions.size(),     // enabledExtensionNameCount
+        mInstanceExtensions.data(),                // ppEnabledExtensionNames
     };
 
     GET_PROC(CreateInstance);
@@ -201,7 +222,6 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     // presentation with any native window. So just use the first one.
     mPresentQueueIndex = 0;
 
-    std::vector<const char*> deviceExtensions;
     {
         uint32_t extensionCount = 0;
         err = mEnumerateDeviceExtensionProperties(mPhysicalDevice, nullptr, &extensionCount,
@@ -220,7 +240,7 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         }
         bool hasKHRSwapchainExtension = false;
         for (uint32_t i = 0; i < extensionCount; ++i) {
-            deviceExtensions.push_back(extensions[i].extensionName);
+            mDeviceExtensions.push_back(extensions[i].extensionName);
             if (!strcmp(extensions[i].extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
                 hasKHRSwapchainExtension = true;
             }
@@ -237,8 +257,8 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         }
         return vkGetInstanceProcAddr(instance, proc_name);
     };
-    grExtensions.init(getProc, mInstance, mPhysicalDevice, instanceExtensions.size(),
-            instanceExtensions.data(), deviceExtensions.size(), deviceExtensions.data());
+    grExtensions.init(getProc, mInstance, mPhysicalDevice, mInstanceExtensions.size(),
+            mInstanceExtensions.data(), mDeviceExtensions.size(), mDeviceExtensions.data());
 
     if (!grExtensions.hasExtension(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME, 1)) {
         this->destroy();
@@ -308,8 +328,8 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         queueInfo,                               // pQueueCreateInfos
         0,                                       // layerCount
         nullptr,                                 // ppEnabledLayerNames
-        (uint32_t) deviceExtensions.size(),      // extensionCount
-        deviceExtensions.data(),                 // ppEnabledExtensionNames
+        (uint32_t) mDeviceExtensions.size(),     // extensionCount
+        mDeviceExtensions.data(),                // ppEnabledExtensionNames
         nullptr,                                 // ppEnabledFeatures
     };
 
@@ -351,36 +371,17 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     return true;
 }
 
-static void free_features_extensions_structs(const VkPhysicalDeviceFeatures2& features) {
-    // All Vulkan structs that could be part of the features chain will start with the
-    // structure type followed by the pNext pointer. We cast to the CommonVulkanHeader
-    // so we can get access to the pNext for the next struct.
-    struct CommonVulkanHeader {
-        VkStructureType sType;
-        void*           pNext;
-    };
-
-    void* pNext = features.pNext;
-    while (pNext) {
-        void* current = pNext;
-        pNext = static_cast<CommonVulkanHeader*>(current)->pNext;
-        free(current);
-    }
-}
-
 void VulkanManager::initialize() {
     if (mDevice != VK_NULL_HANDLE) {
         return;
     }
 
     GET_PROC(EnumerateInstanceVersion);
-    uint32_t instanceVersion = 0;
-    LOG_ALWAYS_FATAL_IF(mEnumerateInstanceVersion(&instanceVersion));
-    LOG_ALWAYS_FATAL_IF(instanceVersion < VK_MAKE_VERSION(1, 1, 0));
+    LOG_ALWAYS_FATAL_IF(mEnumerateInstanceVersion(&mInstanceVersion));
+    LOG_ALWAYS_FATAL_IF(mInstanceVersion < VK_MAKE_VERSION(1, 1, 0));
 
     GrVkExtensions extensions;
-    VkPhysicalDeviceFeatures2 features;
-    LOG_ALWAYS_FATAL_IF(!this->setupDevice(extensions, features));
+    LOG_ALWAYS_FATAL_IF(!this->setupDevice(extensions, mPhysicalDeviceFeatures2));
 
     mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
 
@@ -397,9 +398,9 @@ void VulkanManager::initialize() {
     backendContext.fDevice = mDevice;
     backendContext.fQueue = mGraphicsQueue;
     backendContext.fGraphicsQueueIndex = mGraphicsQueueIndex;
-    backendContext.fInstanceVersion = instanceVersion;
+    backendContext.fInstanceVersion = mInstanceVersion;
     backendContext.fVkExtensions = &extensions;
-    backendContext.fDeviceFeatures2 = &features;
+    backendContext.fDeviceFeatures2 = &mPhysicalDeviceFeatures2;
     backendContext.fGetProc = std::move(getProc);
 
     // create the command pool for the command buffers
@@ -433,11 +434,27 @@ void VulkanManager::initialize() {
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     mRenderThread.setGrContext(grContext);
 
-    free_features_extensions_structs(features);
-
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
         mSwapBehavior = SwapBehavior::BufferAge;
     }
+}
+
+VkFunctorInitParams VulkanManager::getVkFunctorInitParams() const {
+    return VkFunctorInitParams{
+            .instance = mInstance,
+            .physical_device = mPhysicalDevice,
+            .device = mDevice,
+            .queue = mGraphicsQueue,
+            .graphics_queue_index = mGraphicsQueueIndex,
+            .instance_version = mInstanceVersion,
+            .enabled_instance_extension_names = mInstanceExtensions.data(),
+            .enabled_instance_extension_names_length =
+                    static_cast<uint32_t>(mInstanceExtensions.size()),
+            .enabled_device_extension_names = mDeviceExtensions.data(),
+            .enabled_device_extension_names_length =
+                    static_cast<uint32_t>(mDeviceExtensions.size()),
+            .device_features_2 = &mPhysicalDeviceFeatures2,
+    };
 }
 
 // Returns the next BackbufferInfo to use for the next draw. The function will make sure all

@@ -17,6 +17,7 @@
 package com.android.server.hdmi;
 
 import android.annotation.IntDef;
+import android.annotation.StringDef;
 import android.hardware.hdmi.HdmiDeviceInfo;
 
 import java.lang.annotation.Retention;
@@ -221,6 +222,15 @@ final class Constants {
     static final int AUDIO_CODEC_DST = 0xD; // Support DST
     static final int AUDIO_CODEC_WMAPRO = 0xE; // Support WMA-Pro
     static final int AUDIO_CODEC_MAX = 0xF;
+
+    @StringDef({
+        AUDIO_DEVICE_ARC_IN,
+        AUDIO_DEVICE_SPDIF,
+    })
+    public @interface AudioDevice {}
+
+    static final String AUDIO_DEVICE_ARC_IN = "ARC_IN";
+    static final String AUDIO_DEVICE_SPDIF = "SPDIF";
 
     // Bit mask used to get the routing path of the top level device.
     // When &'d with the path 1.2.2.0 (0x1220), for instance, gives 1.0.0.0.

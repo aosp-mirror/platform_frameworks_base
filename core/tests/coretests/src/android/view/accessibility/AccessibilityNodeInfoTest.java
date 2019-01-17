@@ -25,10 +25,11 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import android.os.Parcel;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.CollectionUtils;
 

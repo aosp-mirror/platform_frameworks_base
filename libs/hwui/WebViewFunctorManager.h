@@ -42,6 +42,12 @@ public:
 
         void drawGl(const DrawGlInfo& drawInfo) const { mReference.drawGl(drawInfo); }
 
+        void initVk(const VkFunctorInitParams& params) { mReference.initVk(params); }
+
+        void drawVk(const VkFunctorDrawParams& params) { mReference.drawVk(params); }
+
+        void postDrawVk() { mReference.postDrawVk(); }
+
     private:
         friend class WebViewFunctor;
 
@@ -53,6 +59,9 @@ public:
     int id() const { return mFunctor; }
     void sync(const WebViewSyncData& syncData) const;
     void drawGl(const DrawGlInfo& drawInfo);
+    void initVk(const VkFunctorInitParams& params);
+    void drawVk(const VkFunctorDrawParams& params);
+    void postDrawVk();
     void destroyContext();
 
     sp<Handle> createHandle() {

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.provider;
 
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
@@ -23,7 +24,6 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 

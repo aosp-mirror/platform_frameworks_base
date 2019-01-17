@@ -191,6 +191,7 @@ public final class LinkProperties implements Parcelable {
             }
             setMtu(source.mMtu);
             mTcpBufferSizes = source.mTcpBufferSizes;
+            mNat64Prefix = source.mNat64Prefix;
         }
     }
 

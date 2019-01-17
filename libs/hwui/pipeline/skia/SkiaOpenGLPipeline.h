@@ -39,6 +39,7 @@ public:
               const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
               const std::vector<sp<RenderNode> >& renderNodes,
               FrameInfoVisualizer* profiler) override;
+    GrSurfaceOrigin getSurfaceOrigin() override { return kBottomLeft_GrSurfaceOrigin; }
     bool swapBuffers(const renderthread::Frame& frame, bool drew, const SkRect& screenDirty,
                      FrameInfo* currentFrameInfo, bool* requireSwap) override;
     DeferredLayerUpdater* createTextureLayer() override;

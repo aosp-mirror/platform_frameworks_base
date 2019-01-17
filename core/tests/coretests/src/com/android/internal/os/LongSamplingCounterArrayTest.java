@@ -30,8 +30,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +56,7 @@ import java.util.Arrays;
  * Install: adb install -r \
  *     ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
  * Run: adb shell am instrument -e class com.android.internal.os.LongSamplingCounterArrayTest -w \
- *     com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
+ *     com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)

@@ -92,6 +92,9 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         if (source.mService.audioSystem() != null) {
             source = source.mService.audioSystem();
         }
+        if (source.getLocalActivePort() != Constants.CEC_SWITCH_HOME) {
+            source.switchInputOnReceivingNewActivePath(getSourcePath());
+        }
         source.setRoutingPort(Constants.CEC_SWITCH_HOME);
         source.setLocalActivePort(Constants.CEC_SWITCH_HOME);
     }

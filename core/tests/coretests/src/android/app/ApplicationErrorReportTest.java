@@ -16,15 +16,16 @@
 
 package android.app;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import android.app.ApplicationErrorReport.CrashInfo;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import android.app.ApplicationErrorReport.CrashInfo;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest

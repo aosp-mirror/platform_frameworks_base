@@ -23,10 +23,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * Utility class used by resolver tests to create mock data
  */

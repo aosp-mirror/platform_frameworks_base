@@ -16,11 +16,10 @@
 
 package android.widget.gridview;
 
-import android.widget.gridview.GridStackFromBottomMany;
-
-import android.test.suitebuilder.annotation.MediumTest;
-import android.widget.GridView;
 import android.test.ActivityInstrumentationTestCase;
+import android.widget.GridView;
+
+import androidx.test.filters.MediumTest;
 
 public class GridStackFromBottomManyTest extends ActivityInstrumentationTestCase<GridStackFromBottomMany> {
     private GridStackFromBottomMany mActivity;

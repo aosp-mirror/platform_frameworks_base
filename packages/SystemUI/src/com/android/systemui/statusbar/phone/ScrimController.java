@@ -612,9 +612,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         anim.setStartDelay(mAnimationDelay);
         anim.setDuration(mAnimationDuration);
         anim.addListener(new AnimatorListenerAdapter() {
+            private Callback lastCallback = mCallback;
+
             @Override
             public void onAnimationEnd(Animator animation) {
-                onFinished();
+                onFinished(lastCallback);
 
                 scrim.setTag(TAG_KEY_ANIM, null);
                 dispatchScrimsVisible();
@@ -672,14 +674,23 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     }
 
     private void onFinished() {
+        onFinished(mCallback);
+    }
+
+    private void onFinished(Callback callback) {
         if (mWakeLockHeld) {
             mWakeLock.release();
             mWakeLockHeld = false;
         }
-        if (mCallback != null) {
-            mCallback.onFinished();
-            mCallback = null;
+
+        if (callback != null) {
+            callback.onFinished();
+
+            if (callback == mCallback) {
+                mCallback = null;
+            }
         }
+
         // When unlocking with fingerprint, we'll fade the scrims from black to transparent.
         // At the end of the animation we need to remove the tint.
         if (mState == ScrimState.UNLOCKED) {

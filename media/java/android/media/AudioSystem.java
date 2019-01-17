@@ -541,6 +541,8 @@ public class AudioSystem
     public static final int DEVICE_IN_BUS = DEVICE_BIT_IN | 0x100000;
     public static final int DEVICE_IN_PROXY = DEVICE_BIT_IN | 0x1000000;
     public static final int DEVICE_IN_USB_HEADSET = DEVICE_BIT_IN | 0x2000000;
+    public static final int DEVICE_IN_BLUETOOTH_BLE = DEVICE_BIT_IN | 0x4000000;
+    public static final int DEVICE_IN_ECHO_REFERENCE = DEVICE_BIT_IN | 0x10000000;
     @UnsupportedAppUsage
     public static final int DEVICE_IN_DEFAULT = DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
 
@@ -567,6 +569,8 @@ public class AudioSystem
                                              DEVICE_IN_BUS |
                                              DEVICE_IN_PROXY |
                                              DEVICE_IN_USB_HEADSET |
+                                             DEVICE_IN_BLUETOOTH_BLE |
+                                             DEVICE_IN_ECHO_REFERENCE |
                                              DEVICE_IN_DEFAULT);
     public static final int DEVICE_IN_ALL_SCO = DEVICE_IN_BLUETOOTH_SCO_HEADSET;
     public static final int DEVICE_IN_ALL_USB = (DEVICE_IN_USB_ACCESSORY |
@@ -641,6 +645,8 @@ public class AudioSystem
     public static final String DEVICE_IN_BUS_NAME = "bus";
     public static final String DEVICE_IN_PROXY_NAME = "proxy";
     public static final String DEVICE_IN_USB_HEADSET_NAME = "usb_headset";
+    public static final String DEVICE_IN_BLUETOOTH_BLE_NAME = "bt_ble";
+    public static final String DEVICE_IN_ECHO_REFERENCE_NAME = "echo_reference";
 
     @UnsupportedAppUsage
     public static String getOutputDeviceName(int device)
@@ -757,6 +763,10 @@ public class AudioSystem
             return DEVICE_IN_PROXY_NAME;
         case DEVICE_IN_USB_HEADSET:
             return DEVICE_IN_USB_HEADSET_NAME;
+        case DEVICE_IN_BLUETOOTH_BLE:
+            return DEVICE_IN_BLUETOOTH_BLE_NAME;
+        case DEVICE_IN_ECHO_REFERENCE:
+            return DEVICE_IN_ECHO_REFERENCE_NAME;
         case DEVICE_IN_DEFAULT:
         default:
             return Integer.toString(device);

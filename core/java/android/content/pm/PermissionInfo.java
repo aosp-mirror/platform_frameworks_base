@@ -203,6 +203,16 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     @TestApi
     public static final int PROTECTION_FLAG_DOCUMENTER = 0x40000;
 
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding to the
+     * {@code configurator} value of {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_CONFIGURATOR = 0x80000;
+
 
     /** @hide */
     @IntDef(flag = true, prefix = { "PROTECTION_FLAG_" }, value = {
@@ -222,6 +232,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER,
             PROTECTION_FLAG_WELLBEING,
             PROTECTION_FLAG_DOCUMENTER,
+            PROTECTION_FLAG_CONFIGURATOR,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionFlags {}
@@ -416,6 +427,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_DOCUMENTER) != 0) {
             protLevel += "|documenter";
+        }
+        if ((level & PROTECTION_FLAG_CONFIGURATOR) != 0) {
+            protLevel += "|configurator";
         }
         return protLevel;
     }

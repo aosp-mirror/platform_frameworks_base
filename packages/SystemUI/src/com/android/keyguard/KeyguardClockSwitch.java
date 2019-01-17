@@ -19,6 +19,7 @@ import android.widget.TextClock;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.clock.BubbleClockController;
+import com.android.keyguard.clock.StretchAnalogClockController;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.statusbar.StatusBarState;
@@ -146,6 +147,12 @@ public class KeyguardClockSwitch extends RelativeLayout {
                                 Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
                                 BubbleClockController.class.getName(),
                                 () -> BubbleClockController.build(mLayoutInflater)))
+                .withDefault(
+                        new SettingsGattedSupplier(
+                                mContentResolver,
+                                Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
+                                StretchAnalogClockController.class.getName(),
+                                () -> StretchAnalogClockController.build(mLayoutInflater)))
                 .build();
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
@@ -239,10 +246,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public void setShowCurrentUserTime(boolean showCurrentUserTime) {
         mClockView.setShowCurrentUserTime(showCurrentUserTime);
-    }
-
-    public void setElegantTextHeight(boolean elegant) {
-        mClockView.setElegantTextHeight(elegant);
     }
 
     public void setTextSize(int unit, float size) {

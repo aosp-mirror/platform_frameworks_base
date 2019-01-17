@@ -437,6 +437,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 if (mChildren.peekLast() != child) {
                     mChildren.remove(child);
                     mChildren.add(child);
+                    onChildPositionChanged();
                 }
                 if (includingParents && getParent() != null) {
                     getParent().positionChildAt(POSITION_TOP, this /* child */,
@@ -447,6 +448,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 if (mChildren.peekFirst() != child) {
                     mChildren.remove(child);
                     mChildren.addFirst(child);
+                    onChildPositionChanged();
                 }
                 if (includingParents && getParent() != null) {
                     getParent().positionChildAt(POSITION_BOTTOM, this /* child */,
@@ -460,8 +462,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 //       doing this adjustment here and remove any adjustments in the callers.
                 mChildren.remove(child);
                 mChildren.add(position, child);
+                onChildPositionChanged();
         }
-        onChildPositionChanged();
     }
 
     /**

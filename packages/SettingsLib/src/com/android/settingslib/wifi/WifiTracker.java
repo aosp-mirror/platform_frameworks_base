@@ -68,6 +68,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -585,7 +586,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                     Map<Integer, List<ScanResult>>> pairing : passpointConfigsAndScans) {
                 WifiConfiguration config = pairing.first;
 
-                // TODO(b/118705403): Prioritize home networks before roaming networks
                 List<ScanResult> scanResults = new ArrayList<>();
 
                 List<ScanResult> homeScans =
@@ -600,8 +600,12 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                     roamingScans = new ArrayList<>();
                 }
 
-                scanResults.addAll(homeScans);
-                scanResults.addAll(roamingScans);
+                // TODO(b/118705403): Differentiate home network vs roaming network for summary info
+                if (!homeScans.isEmpty()) {
+                    scanResults.addAll(homeScans);
+                } else {
+                    scanResults.addAll(roamingScans);
+                }
 
                 if (seenFQDNs.add(config.FQDN)) {
                     int bestRssi = Integer.MIN_VALUE;
@@ -612,27 +616,27 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                         }
                     }
 
-                    AccessPoint accessPoint = new AccessPoint(mContext, config);
-                    accessPoint.setScanResults(scanResults);
+                    AccessPoint accessPoint =
+                            getCachedOrCreatePasspoint(scanResults, cachedAccessPoints, config);
                     accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
                     accessPoints.add(accessPoint);
                 }
             }
 
             // Add Passpoint OSU Provider AccessPoints
-            // TODO(b/118705403): filter out OSU Providers which we already have credentials from.
             Map<OsuProvider, List<ScanResult>> providersAndScans =
                     mWifiManager.getMatchingOsuProviders(cachedScanResults);
+            Set<OsuProvider> alreadyProvisioned = mWifiManager
+                    .getMatchingPasspointConfigsForOsuProviders(
+                            providersAndScans.keySet()).keySet();
             for (OsuProvider provider : providersAndScans.keySet()) {
-                AccessPoint accessPointOsu = new AccessPoint(mContext, provider);
-                // TODO(b/118705403): accessPointOsu.setScanResults(Matching ScanResult with best
-                // RSSI)
-                // TODO(b/118705403): Figure out if we would need to update an OSU AP (this will be
-                // used if we need to display it at the top of the picker as the "active" AP).
-                // Otherwise, OSU APs should ignore attempts to update the active connection
-                // info.
-                // accessPointOsu.update(connectionConfig, mLastInfo, mLastNetworkInfo);
-                accessPoints.add(accessPointOsu);
+                if (!alreadyProvisioned.contains(provider)) {
+                    AccessPoint accessPointOsu =
+                            getCachedOrCreateOsu(providersAndScans.get(provider),
+                                    cachedAccessPoints, provider);
+                    accessPointOsu.update(connectionConfig, mLastInfo, mLastNetworkInfo);
+                    accessPoints.add(accessPointOsu);
+                }
             }
 
 
@@ -685,16 +689,49 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     AccessPoint getCachedOrCreate(
             List<ScanResult> scanResults,
             List<AccessPoint> cache) {
-        final int N = cache.size();
-        for (int i = 0; i < N; i++) {
-            if (cache.get(i).getKey().equals(AccessPoint.getKey(scanResults.get(0)))) {
-                AccessPoint ret = cache.remove(i);
-                ret.setScanResults(scanResults);
-                return ret;
+        AccessPoint accessPoint = getCachedByKey(cache, AccessPoint.getKey(scanResults.get(0)));
+        if (accessPoint == null) {
+            accessPoint = new AccessPoint(mContext, scanResults);
+        } else {
+            accessPoint.setScanResults(scanResults);
+        }
+        return accessPoint;
+    }
+
+    private AccessPoint getCachedOrCreatePasspoint(
+            List<ScanResult> scanResults,
+            List<AccessPoint> cache,
+            WifiConfiguration config) {
+        AccessPoint accessPoint = getCachedByKey(cache, AccessPoint.getKey(config));
+        if (accessPoint == null) {
+            accessPoint = new AccessPoint(mContext, config);
+        }
+        accessPoint.setScanResults(scanResults);
+        return accessPoint;
+    }
+
+    private AccessPoint getCachedOrCreateOsu(
+            List<ScanResult> scanResults,
+            List<AccessPoint> cache,
+            OsuProvider provider) {
+        AccessPoint accessPoint = getCachedByKey(cache, AccessPoint.getKey(provider));
+        if (accessPoint == null) {
+            accessPoint = new AccessPoint(mContext, provider);
+        }
+        accessPoint.setScanResults(scanResults);
+        return accessPoint;
+    }
+
+    private AccessPoint getCachedByKey(List<AccessPoint> cache, String key) {
+        ListIterator<AccessPoint> lit = cache.listIterator();
+        while (lit.hasNext()) {
+            AccessPoint currentAccessPoint = lit.next();
+            if (currentAccessPoint.getKey().equals(key)) {
+                lit.remove();
+                return currentAccessPoint;
             }
         }
-        final AccessPoint accessPoint = new AccessPoint(mContext, scanResults);
-        return accessPoint;
+        return null;
     }
 
     private void updateNetworkInfo(NetworkInfo networkInfo) {

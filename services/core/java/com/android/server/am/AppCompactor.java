@@ -44,7 +44,11 @@ public final class AppCompactor {
      */
     final ArrayList<ProcessRecord> mPendingCompactionProcesses = new ArrayList<ProcessRecord>();
 
-    /*
+    static final int COMPACT_PROCESS_SOME = 1;
+    static final int COMPACT_PROCESS_FULL = 2;
+    static final int COMPACT_PROCESS_MSG = 1;
+
+    /**
      * This thread must be moved to the system background cpuset.
      * If that doesn't happen, it's probably going to draw a lot of power.
      * However, this has to happen after the first updateOomAdjLocked, because
@@ -53,13 +57,22 @@ public final class AppCompactor {
      */
     final ServiceThread mCompactionThread;
 
-    static final int COMPACT_PROCESS_SOME = 1;
-    static final int COMPACT_PROCESS_FULL = 2;
-    static final int COMPACT_PROCESS_MSG = 1;
-    final Handler mCompactionHandler;
+    final private Handler mCompactionHandler;
 
-    final ActivityManagerService mAm;
-    final ActivityManagerConstants mConstants;
+    final private ActivityManagerService mAm;
+    final private ActivityManagerConstants mConstants;
+
+    final private String COMPACT_ACTION_FILE = "file";
+    final private String COMPACT_ACTION_ANON = "anon";
+    final private String COMPACT_ACTION_FULL = "full";
+
+    final private String compactActionSome;
+    final private String compactActionFull;
+
+    final private long throttleSomeSome;
+    final private long throttleSomeFull;
+    final private long throttleFullSome;
+    final private long throttleFullFull;
 
     public AppCompactor(ActivityManagerService am) {
         mAm = am;
@@ -69,6 +82,41 @@ public final class AppCompactor {
                 THREAD_PRIORITY_FOREGROUND, true);
         mCompactionThread.start();
         mCompactionHandler = new MemCompactionHandler(this);
+
+        switch(mConstants.COMPACT_ACTION_1) {
+            case 1:
+                compactActionSome = COMPACT_ACTION_FILE;
+                break;
+            case 2:
+                compactActionSome = COMPACT_ACTION_ANON;
+                break;
+            case 3:
+                compactActionSome = COMPACT_ACTION_FULL;
+                break;
+            default:
+                compactActionSome = COMPACT_ACTION_FILE;
+                break;
+        }
+
+        switch(mConstants.COMPACT_ACTION_2) {
+            case 1:
+                compactActionFull = COMPACT_ACTION_FILE;
+                break;
+            case 2:
+                compactActionFull = COMPACT_ACTION_ANON;
+                break;
+            case 3:
+                compactActionFull = COMPACT_ACTION_FULL;
+                break;
+            default:
+                compactActionFull = COMPACT_ACTION_FULL;
+                break;
+        }
+
+        throttleSomeSome = mConstants.COMPACT_THROTTLE_1;
+        throttleSomeFull = mConstants.COMPACT_THROTTLE_2;
+        throttleFullSome = mConstants.COMPACT_THROTTLE_3;
+        throttleFullFull = mConstants.COMPACT_THROTTLE_4;
     }
 
     // Must be called while holding AMS lock.
@@ -128,18 +176,16 @@ public final class AppCompactor {
                 }
 
                 // basic throttling
+                // use the ActivityManagerConstants knobs to determine whether current/prevous
+                // compaction combo should be throtted or not
                 if (pendingAction == COMPACT_PROCESS_SOME) {
-                    // if we're compacting some, then compact if >10s after last full
-                    // or >5s after last some
-                    if ((lastCompactAction == COMPACT_PROCESS_SOME && (start - lastCompactTime < 5000)) ||
-                        (lastCompactAction == COMPACT_PROCESS_FULL && (start - lastCompactTime < 10000))) {
+                    if ((lastCompactAction == COMPACT_PROCESS_SOME && (start - lastCompactTime < throttleSomeSome)) ||
+                        (lastCompactAction == COMPACT_PROCESS_FULL && (start - lastCompactTime < throttleSomeFull))) {
                         return;
                     }
                 } else {
-                    // if we're compacting full, then compact if >10s after last full
-                    // or >.5s after last some
-                    if ((lastCompactAction == COMPACT_PROCESS_SOME && (start - lastCompactTime < 500)) ||
-                        (lastCompactAction == COMPACT_PROCESS_FULL && (start - lastCompactTime < 10000))) {
+                    if ((lastCompactAction == COMPACT_PROCESS_SOME && (start - lastCompactTime < throttleFullSome)) ||
+                        (lastCompactAction == COMPACT_PROCESS_FULL && (start - lastCompactTime < throttleFullFull))) {
                         return;
                     }
                 }
@@ -151,9 +197,9 @@ public final class AppCompactor {
                     long[] rssBefore = Process.getRss(pid);
                     FileOutputStream fos = new FileOutputStream("/proc/" + pid + "/reclaim");
                     if (pendingAction == COMPACT_PROCESS_SOME) {
-                        action = "file";
+                        action = compactActionSome;
                     } else {
-                        action = "all";
+                        action = compactActionFull;
                     }
                     fos.write(action.getBytes());
                     fos.close();

@@ -323,8 +323,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     public void testFindTaskToMoveToFrontWhenRecentsOnTop() {
         // Create stack/task on default display.
         final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
-        final TestActivityStack targetStack =
-                new StackBuilder(mRootActivityContainer).setOnTop(false).build();
+        final TestActivityStack targetStack = (TestActivityStack) new StackBuilder(
+                mRootActivityContainer).setOnTop(false).build();
         final TaskRecord targetTask = targetStack.getChildAt(0);
 
         // Create Recents on top of the display.

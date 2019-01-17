@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.os.Process.myUid;
 
 import static java.lang.Character.MIN_VALUE;
 
@@ -1025,7 +1026,7 @@ public class Activity extends ContextThemeWrapper
      */
     @Nullable private ContentCaptureManager getContentCaptureManager() {
         // ContextCapture disabled for system apps
-        if (getApplicationInfo().isSystemApp()) return null;
+        if (!UserHandle.isApp(myUid())) return null;
         if (mContentCaptureManager == null) {
             mContentCaptureManager = getSystemService(ContentCaptureManager.class);
         }
@@ -1048,9 +1049,8 @@ public class Activity extends ContextThemeWrapper
 
     private void notifyContentCaptureManagerIfNeeded(@ContentCaptureNotificationType int type) {
         final ContentCaptureManager cm = getContentCaptureManager();
-        if (cm == null) {
-            return;
-        }
+        if (cm == null) return;
+
         switch (type) {
             case CONTENT_CAPTURE_START:
                 //TODO(b/111276913): decide whether the InteractionSessionId should be

@@ -24,8 +24,9 @@ import android.graphics.fonts.Font;
 import android.graphics.fonts.FontCustomizationParser;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.SystemFonts;
-import android.support.test.InstrumentationRegistry;
 import android.util.ArrayMap;
+
+import androidx.test.InstrumentationRegistry;
 
 import java.io.File;
 import java.io.FileOutputStream;

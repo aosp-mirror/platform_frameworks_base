@@ -16,11 +16,10 @@
 
 package android.widget.listview;
 
-import android.view.View;
-import android.view.ViewGroup;
-
 import android.util.ListItemFactory;
 import android.util.ListScenario;
+import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * List that has different view types

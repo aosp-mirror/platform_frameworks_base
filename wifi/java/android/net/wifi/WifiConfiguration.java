@@ -145,11 +145,23 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int SUITE_B_192 = 10;
 
+        /**
+         * WPA pre-shared key with stronger SHA256-based algorithms.
+         * @hide
+         */
+        public static final int WPA_PSK_SHA256 = 11;
+
+        /**
+         * WPA using EAP authentication with stronger SHA256-based algorithms.
+         * @hide
+         */
+        public static final int WPA_EAP_SHA256 = 12;
+
         public static final String varName = "key_mgmt";
 
         public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP",
                 "IEEE8021X", "WPA2_PSK", "OSEN", "FT_PSK", "FT_EAP",
-                "SAE", "OWE", "SUITE_B_192"};
+                "SAE", "OWE", "SUITE_B_192", "WPA_PSK_SHA256", "WPA_EAP_SHA256" };
     }
 
     /**

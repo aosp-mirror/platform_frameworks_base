@@ -18,7 +18,8 @@ package android.widget;
 
 import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.FlakyTest;
+
+import androidx.test.filters.FlakyTest;
 
 // TODO: tests fail intermittently. Add back MediumTest annotation when fixed
 public class AutoCompleteTextViewCallbacks
@@ -32,7 +33,7 @@ public class AutoCompleteTextViewCallbacks
 
     /** Test that the initial popup of the suggestions does not select anything.
      */
-    @FlakyTest(tolerance=3)
+    @FlakyTest
     public void testPopupNoSelection() throws Exception {
         AutoCompleteTextViewSimple theActivity = getActivity();
         AutoCompleteTextView textView = theActivity.getTextView();
@@ -57,7 +58,7 @@ public class AutoCompleteTextViewCallbacks
     }
 
     /** Test that arrow-down into the popup calls the onSelected callback. */
-    @FlakyTest(tolerance=3)
+    @FlakyTest
     public void testPopupEnterSelection() throws Exception {
         final AutoCompleteTextViewSimple theActivity = getActivity();
         AutoCompleteTextView textView = theActivity.getTextView();
@@ -106,7 +107,7 @@ public class AutoCompleteTextViewCallbacks
     }
 
     /** Test that arrow-up out of the popup calls the onNothingSelected callback */
-    @FlakyTest(tolerance=3)
+    @FlakyTest
     public void testPopupLeaveSelection() {
         final AutoCompleteTextViewSimple theActivity = getActivity();
         AutoCompleteTextView textView = theActivity.getTextView();

@@ -27,9 +27,9 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
 import android.platform.test.annotations.Presubmit;
-import android.provider.Settings.Global;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -270,6 +270,7 @@ public class SettingsBackupTest {
                     Settings.Global.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS,
                     Settings.Global.GNSS_SATELLITE_BLACKLIST,
                     Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS,
+                    Settings.Global.HDMI_CEC_SWITCH_ENABLED,
                     Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                     Settings.Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                     Settings.Global.HDMI_CONTROL_ENABLED,
@@ -477,9 +478,10 @@ public class SettingsBackupTest {
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE,
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS,
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES,
+                    Settings.Global.GUP_DEV_ALL_APPS,
                     Settings.Global.GUP_DEV_OPT_IN_APPS,
                     Settings.Global.GUP_DEV_OPT_OUT_APPS,
-                    Settings.Global.GUP_BLACK_LIST,
+                    Settings.Global.GUP_BLACKLIST,
                     Settings.Global.GPU_DEBUG_LAYER_APP,
                     Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT,
@@ -554,8 +556,10 @@ public class SettingsBackupTest {
                     Settings.Global.APPOP_HISTORY_PARAMETERS,
                     Settings.Global.APPOP_HISTORY_MODE,
                     Settings.Global.APPOP_HISTORY_INTERVAL_MULTIPLIER,
-                    Settings.Global.APPOP_HISTORY_BASE_INTERVAL_MILLIS);
-
+                    Settings.Global.APPOP_HISTORY_BASE_INTERVAL_MILLIS,
+                    Settings.Global.ENABLE_RADIO_BUG_DETECTION,
+                    Settings.Global.RADIO_BUG_WAKELOCK_TIMEOUT_COUNT_THRESHOLD,
+                    Settings.Global.RADIO_BUG_SYSTEM_ERROR_COUNT_THRESHOLD);
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
@@ -664,6 +668,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
                  Settings.Secure.SPELL_CHECKER_ENABLED,  // Intentionally removed in Q
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
+                 Settings.Secure.TV_APP_USES_NON_SYSTEM_INPUTS,
                  Settings.Secure.TV_INPUT_CUSTOM_LABELS,
                  Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
                  Settings.Secure.TV_USER_SETUP_COMPLETE,

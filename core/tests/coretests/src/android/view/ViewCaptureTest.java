@@ -21,13 +21,14 @@ import static org.junit.Assert.assertTrue;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.test.filters.SmallTest;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.SparseIntArray;
 import android.view.ViewDebug.CanvasProvider;
 import android.view.ViewDebug.HardwareCanvasProvider;
 import android.view.ViewDebug.SoftwareCanvasProvider;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 

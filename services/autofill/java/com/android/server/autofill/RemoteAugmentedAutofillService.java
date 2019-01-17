@@ -109,8 +109,8 @@ final class RemoteAugmentedAutofillService
     /**
      * Called by {@link Session} when it's time to destroy all augmented autofill requests.
      */
-    public void onDestroyAutofillWindowsRequest(int sessionId) {
-        scheduleAsyncRequest((s) -> s.onDestroyFillWindowRequest(sessionId));
+    public void onDestroyAutofillWindowsRequest() {
+        scheduleAsyncRequest((s) -> s.onDestroyAllFillWindowsRequest());
     }
 
     // TODO(b/111330312): inline into PendingAutofillRequest if it doesn't have any other subclass

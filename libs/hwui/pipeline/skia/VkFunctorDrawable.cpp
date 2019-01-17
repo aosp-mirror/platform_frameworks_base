@@ -17,6 +17,8 @@
 #include "VkFunctorDrawable.h"
 #include <private/hwui/DrawVkInfo.h>
 
+#include "renderthread/VulkanManager.h"
+#include "renderthread/RenderThread.h"
 #include <GrBackendDrawableInfo.h>
 #include <SkImage.h>
 #include <utils/Color.h>
@@ -31,34 +33,58 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-VkFunctorDrawHandler::VkFunctorDrawHandler(Functor* functor) : INHERITED(), mFunctor(functor) {}
+VkFunctorDrawHandler::VkFunctorDrawHandler(sp<WebViewFunctor::Handle> functor_handle,
+                                           const SkMatrix& matrix, const SkIRect& clip,
+                                           const SkImageInfo& image_info)
+        : INHERITED()
+        , mFunctorHandle(functor_handle)
+        , mMatrix(matrix)
+        , mClip(clip)
+        , mImageInfo(image_info) {}
 
 VkFunctorDrawHandler::~VkFunctorDrawHandler() {
-    // TODO(cblume) Fill in the DrawVkInfo parameters.
-    (*mFunctor)(DrawVkInfo::kModePostComposite, nullptr);
+    mFunctorHandle->postDrawVk();
 }
 
 void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
     ATRACE_CALL();
+    if (!renderthread::RenderThread::isCurrent())
+        LOG_ALWAYS_FATAL("VkFunctorDrawHandler::draw not called on render thread");
 
     GrVkDrawableInfo vulkan_info;
     if (!info.getVkDrawableInfo(&vulkan_info)) {
         return;
     }
+    renderthread::VulkanManager& vk_manager =
+            renderthread::RenderThread::getInstance().vulkanManager();
+    mFunctorHandle->initVk(vk_manager.getVkFunctorInitParams());
 
-    DrawVkInfo draw_vk_info;
-    // TODO(cblume) Fill in the rest of the parameters and test the actual call.
-    draw_vk_info.isLayer = true;
+    SkMatrix44 mat4(mMatrix);
+    VkFunctorDrawParams params{
+      .width = mImageInfo.width(),
+      .height = mImageInfo.height(),
+      .is_layer = false,  // TODO(boliu): Populate is_layer.
+      .color_space_ptr = mImageInfo.colorSpace(),
+      .clip_left = mClip.fLeft,
+      .clip_top = mClip.fTop,
+      .clip_right = mClip.fRight,
+      .clip_bottom = mClip.fBottom,
+    };
+    mat4.asColMajorf(&params.transform[0]);
+    params.secondary_command_buffer = vulkan_info.fSecondaryCommandBuffer;
+    params.color_attachment_index = vulkan_info.fColorAttachmentIndex;
+    params.compatible_render_pass = vulkan_info.fCompatibleRenderPass;
+    params.format = vulkan_info.fFormat;
 
-    (*mFunctor)(DrawVkInfo::kModeComposite, &draw_vk_info);
+    mFunctorHandle->drawVk(params);
+
+    vulkan_info.fDrawBounds->offset.x = mClip.fLeft;
+    vulkan_info.fDrawBounds->offset.y = mClip.fTop;
+    vulkan_info.fDrawBounds->extent.width = mClip.fRight - mClip.fLeft;
+    vulkan_info.fDrawBounds->extent.height = mClip.fBottom - mClip.fTop;
 }
 
 VkFunctorDrawable::~VkFunctorDrawable() {
-    if (auto lp = std::get_if<LegacyFunctor>(&mAnyFunctor)) {
-        if (lp->listener) {
-            lp->listener->onGlFunctorReleased(lp->functor);
-        }
-    }
 }
 
 void VkFunctorDrawable::onDraw(SkCanvas* /*canvas*/) {
@@ -67,16 +93,17 @@ void VkFunctorDrawable::onDraw(SkCanvas* /*canvas*/) {
 }
 
 std::unique_ptr<FunctorDrawable::GpuDrawHandler> VkFunctorDrawable::onSnapGpuDrawHandler(
-        GrBackendApi backendApi, const SkMatrix& matrix) {
+        GrBackendApi backendApi, const SkMatrix& matrix, const SkIRect& clip,
+        const SkImageInfo& image_info) {
     if (backendApi != GrBackendApi::kVulkan) {
         return nullptr;
     }
     std::unique_ptr<VkFunctorDrawHandler> draw;
     if (mAnyFunctor.index() == 0) {
-        LOG_ALWAYS_FATAL("Not implemented");
-        return nullptr;
+        return std::make_unique<VkFunctorDrawHandler>(std::get<0>(mAnyFunctor).handle, matrix, clip,
+                                                      image_info);
     } else {
-        return std::make_unique<VkFunctorDrawHandler>(std::get<1>(mAnyFunctor).functor);
+        LOG_ALWAYS_FATAL("Not implemented");
     }
 }
 

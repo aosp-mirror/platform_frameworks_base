@@ -18,10 +18,11 @@ package android.view;
 
 import android.test.ActivityInstrumentationTestCase;
 import android.test.TouchUtils;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.util.KeyUtils;
 import android.view.View.OnLongClickListener;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 import com.android.frameworks.coretests.R;
 

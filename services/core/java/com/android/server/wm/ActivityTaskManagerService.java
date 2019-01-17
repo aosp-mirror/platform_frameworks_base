@@ -82,13 +82,10 @@ import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.HEA
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.HOME_PROC;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.LAUNCHING_ACTIVITY;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.PREVIOUS_PROC;
-import static com.android.server.am.ActivityManagerServiceDumpProcessesProto
-        .PREVIOUS_PROC_VISIBLE_TIME_MS;
+import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.PREVIOUS_PROC_VISIBLE_TIME_MS;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.SCREEN_COMPAT_PACKAGES;
-import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage
-        .MODE;
-import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage
-        .PACKAGE;
+import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.MODE;
+import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.PACKAGE;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
@@ -210,6 +207,7 @@ import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
+import android.sysprop.DisplayProperties;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.text.format.Time;
@@ -245,7 +243,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.appop.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -261,6 +258,7 @@ import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentController;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
+import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.UserManagerService;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -694,7 +692,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean isPc = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
 
         // Transfer any global setting for forcing RTL layout, into a System Property
-        SystemProperties.set(DEVELOPMENT_FORCE_RTL, forceRtl ? "1":"0");
+        DisplayProperties.debug_force_rtl(forceRtl);
 
         final Configuration configuration = new Configuration();
         Settings.System.getConfiguration(resolver, configuration);
@@ -2407,7 +2405,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 if (animate) {
-                    final PinnedActivityStack stack = mRootActivityContainer.getStack(stackId);
+                    final ActivityStack stack = mRootActivityContainer.getStack(stackId);
                     if (stack == null) {
                         Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
                         return;
@@ -3712,7 +3710,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final PinnedActivityStack stack =
+                final ActivityStack stack =
                         mRootActivityContainer.getDefaultDisplay().getPinnedStack();
                 if (stack == null) {
                     Slog.w(TAG, "dismissPip: pinned stack not found.");
@@ -3834,9 +3832,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         // If we are animating to fullscreen then we have already dispatched the PIP mode
         // changed, so we should reflect that check here as well.
-        final PinnedActivityStack stack = r.getActivityStack();
-        final PinnedStackWindowController windowController = stack.getWindowContainerController();
-        return !windowController.mContainer.isAnimatingBoundsToFullscreen();
+        final TaskStack taskStack = r.getActivityStack().getTaskStack();
+        return !taskStack.isAnimatingBoundsToFullscreen();
     }
 
     @Override
@@ -3870,7 +3867,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                                 r.pictureInPictureArgs.getSourceRectHint());
                         mRootActivityContainer.moveActivityToPinnedStack(
                                 r, sourceBounds, aspectRatio, "enterPictureInPictureMode");
-                        final PinnedActivityStack stack = r.getActivityStack();
+                        final ActivityStack stack = r.getActivityStack();
                         stack.setPictureInPictureAspectRatio(aspectRatio);
                         stack.setPictureInPictureActions(actions);
                         MetricsLoggerWrapper.logPictureInPictureEnter(mContext, r.appInfo.uid,
@@ -3914,7 +3911,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // If the activity is already in picture-in-picture, update the pinned stack now
                     // if it is not already expanding to fullscreen. Otherwise, the arguments will
                     // be used the next time the activity enters PiP
-                    final PinnedActivityStack stack = r.getActivityStack();
+                    final ActivityStack stack = r.getActivityStack();
                     if (!stack.isAnimatingBoundsToFullscreen()) {
                         stack.setPictureInPictureAspectRatio(
                                 r.pictureInPictureArgs.getAspectRatio());

@@ -1,4 +1,21 @@
 java_library {
+    name: "media1",
+
+    srcs: [
+        ":media1-srcs",
+    ],
+
+    sdk_version: "system_current",
+}
+
+filegroup {
+    name: "media1-srcs",
+    srcs: [
+        "java/android/media/session/MediaSessionProviderService.java",
+    ],
+}
+
+java_library {
     // TODO: include media2.jar in the media apex and add it to the bootclasspath.
     name: "media2",
 

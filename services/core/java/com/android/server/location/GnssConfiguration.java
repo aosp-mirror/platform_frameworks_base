@@ -29,7 +29,10 @@ import libcore.io.IoUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -66,6 +69,7 @@ class GnssConfiguration {
             "USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL";
     private static final String CONFIG_GPS_LOCK = "GPS_LOCK";
     private static final String CONFIG_ES_EXTENSION_SEC = "ES_EXTENSION_SEC";
+    public static final String CONFIG_NFW_PROXY_APPS = "NFW_PROXY_APPS";
 
     // Limit on NI emergency mode time extension after emergency sessions ends
     private static final int MAX_EMERGENCY_MODE_EXTENSION_SECONDS = 300;  // 5 minute maximum
@@ -168,6 +172,32 @@ class GnssConfiguration {
      */
     String getLppProfile() {
         return mProperties.getProperty(CONFIG_LPP_PROFILE);
+    }
+
+    /**
+     * Returns the list of proxy apps from the value of config parameter NFW_PROXY_APPS or
+     * {@Collections.EMPTY_LIST} if no value is provided.
+     */
+    List<String> getProxyApps() {
+        // Space separated list of Android proxy app package names.
+        String proxyAppsStr = mProperties.getProperty(CONFIG_NFW_PROXY_APPS);
+        if (TextUtils.isEmpty(proxyAppsStr)) {
+            return Collections.EMPTY_LIST;
+        }
+
+        String[] proxyAppsArray = proxyAppsStr.trim().split("\\s+");
+        if (proxyAppsArray.length == 0) {
+            return Collections.EMPTY_LIST;
+        }
+
+        // TODO(b/122856486): Validate proxy app names so that a system app or some popular app
+        //                    with location permission is not specified as a proxy app.
+        ArrayList proxyApps = new ArrayList(proxyAppsArray.length);
+        for (String proxyApp : proxyAppsArray) {
+            proxyApps.add(proxyApp);
+        }
+
+        return proxyApps;
     }
 
     /**

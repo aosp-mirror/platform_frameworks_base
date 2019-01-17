@@ -17,80 +17,61 @@
 #ifndef ANDROID_HWUI_DRAW_VK_INFO_H
 #define ANDROID_HWUI_DRAW_VK_INFO_H
 
+#include <SkColorSpace.h>
 #include <vulkan/vulkan.h>
 
 namespace android {
 namespace uirenderer {
 
-/**
- * Structure used by VulkanRenderer::callDrawVKFunction() to pass and receive data from Vulkan
- * functors.
- */
-struct DrawVkInfo {
-    // Input: current width/height of destination surface
-    int width;
-    int height;
+struct VkFunctorInitParams {
+  VkInstance instance;
+  VkPhysicalDevice physical_device;
+  VkDevice device;
+  VkQueue queue;
+  uint32_t graphics_queue_index;
+  uint32_t instance_version;
+  const char* const* enabled_instance_extension_names;
+  uint32_t enabled_instance_extension_names_length;
+  const char* const* enabled_device_extension_names;
+  uint32_t enabled_device_extension_names_length;
+  const VkPhysicalDeviceFeatures2* device_features_2;
+};
 
-    // Input: is the render target an FBO
-    bool isLayer;
+struct VkFunctorDrawParams {
+  // Input: current width/height of destination surface.
+  int width;
+  int height;
 
-    // Input: current transform matrix, in OpenGL format
-    float transform[16];
+  // Input: is the render target a FBO
+  bool is_layer;
 
-    // Input: WebView should do its main compositing draws into this. It cannot do anything that
-    // would require stopping the render pass.
-    VkCommandBuffer secondaryCommandBuffer;
+  // Input: current transform matrix
+  float transform[16];
 
-    // Input: The main color attachment index where secondaryCommandBuffer will eventually be
-    // submitted.
-    uint32_t colorAttachmentIndex;
+  // Input WebView should do its main compositing draws into this. It cannot do
+  // anything that would require stopping the render pass.
+  VkCommandBuffer secondary_command_buffer;
 
-    // Input: A render pass which will be compatible to the one which the secondaryCommandBuffer
-    // will be submitted into.
-    VkRenderPass compatibleRenderPass;
+  // Input: The main color attachment index where secondary_command_buffer will
+  // eventually be submitted.
+  uint32_t color_attachment_index;
 
-    // Input: Format of the destination surface.
-    VkFormat format;
+  // Input: A render pass which will be compatible to the one which the
+  // secondary_command_buffer will be submitted into.
+  VkRenderPass compatible_render_pass;
 
-    // Input: Color space
-    const SkColorSpace* colorSpaceInfo;
+  // Input: Format of the destination surface.
+  VkFormat format;
 
-    // Input: current clip rect
-    int clipLeft;
-    int clipTop;
-    int clipRight;
-    int clipBottom;
+  // Input: Color space.
+  const SkColorSpace* color_space_ptr;
 
-    /**
-     * Values used as the "what" parameter of the functor.
-     */
-    enum Mode {
-        // Called once at WebView start
-        kModeInit,
-        // Called when things need to be re-created
-        kModeReInit,
-        // Notifies the app that the composite functor will be called soon. This allows WebView to
-        // begin work early.
-        kModePreComposite,
-        // Do the actual composite work
-        kModeComposite,
-        // This allows WebView to begin using the previously submitted objects in future work.
-        kModePostComposite,
-        // Invoked every time the UI thread pushes over a frame to the render thread and the owning
-        // view has a dirty display list*. This is a signal to sync any data that needs to be
-        // shared between the UI thread and the render thread. During this time the UI thread is
-        // blocked.
-        kModeSync
-    };
-
-    /**
-     * Values used by Vulkan functors to tell the framework what to do next.
-     */
-    enum Status {
-        // The functor is done
-        kStatusDone = 0x0,
-    };
-};  // struct DrawVkInfo
+  // Input: current clip rect
+  int clip_left;
+  int clip_top;
+  int clip_right;
+  int clip_bottom;
+};
 
 }  // namespace uirenderer
 }  // namespace android

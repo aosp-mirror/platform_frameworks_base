@@ -96,7 +96,7 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
 
     SkASSERT(mRenderThread.getGrContext() != nullptr);
     sk_sp<SkSurface> surface(SkSurface::MakeFromBackendRenderTarget(
-            mRenderThread.getGrContext(), backendRT, kBottomLeft_GrSurfaceOrigin, colorType,
+            mRenderThread.getGrContext(), backendRT, this->getSurfaceOrigin(), colorType,
             mSurfaceColorSpace, &props));
 
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);

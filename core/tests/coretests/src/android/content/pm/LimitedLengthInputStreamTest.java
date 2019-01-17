@@ -17,7 +17,8 @@
 package android.content.pm;
 
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
+
+import androidx.test.filters.MediumTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

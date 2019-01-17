@@ -42,6 +42,7 @@ import android.util.TimeUtils;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAugmentedAutofillManagerClient;
+import android.view.autofill.IAutofillWindowPresenter;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -95,10 +96,10 @@ public abstract class AugmentedAutofillService extends Service {
         }
 
         @Override
-        public void onDestroyFillWindowRequest(int sessionId) {
+        public void onDestroyAllFillWindowsRequest() {
             mHandler.sendMessage(
-                    obtainMessage(AugmentedAutofillService::handleOnDestroyFillWindowRequest,
-                            AugmentedAutofillService.this, sessionId));
+                    obtainMessage(AugmentedAutofillService::handleOnDestroyAllFillWindowsRequest,
+                            AugmentedAutofillService.this));
         }
     };
 
@@ -185,18 +186,21 @@ public abstract class AugmentedAutofillService extends Service {
                 new FillCallback(proxy));
     }
 
-    private void handleOnDestroyFillWindowRequest(@NonNull int sessionId) {
-        AutofillProxy proxy = null;
+    private void handleOnDestroyAllFillWindowsRequest() {
         if (mAutofillProxies != null) {
-            proxy = mAutofillProxies.get(sessionId);
+            final int size = mAutofillProxies.size();
+            for (int i = 0; i < size; i++) {
+                final int sessionId = mAutofillProxies.keyAt(i);
+                final AutofillProxy proxy = mAutofillProxies.valueAt(i);
+                if (proxy == null) {
+                    // TODO(b/111330312): this might be fine, in which case we should logv it
+                    Log.w(TAG, "No proxy for session " + sessionId);
+                    return;
+                }
+                proxy.destroy();
+            }
+            mAutofillProxies.clear();
         }
-        if (proxy == null) {
-            // TODO(b/111330312): this might be fine, in which case we should logv it
-            Log.w(TAG, "No proxy for session " + sessionId);
-            return;
-        }
-        proxy.destroy();
-        mAutofillProxies.remove(sessionId);
     }
 
     private void handleOnUnbind() {
@@ -348,6 +352,16 @@ public abstract class AugmentedAutofillService extends Service {
             synchronized (mLock) {
                 return mFillWindow;
             }
+        }
+
+        public void requestShowFillUi(int width, int height, Rect anchorBounds,
+                IAutofillWindowPresenter presenter) throws RemoteException {
+            mClient.requestShowFillUi(mSessionId, mFocusedId, width, height, anchorBounds,
+                    presenter);
+        }
+
+        public void requestHideFillUi() throws RemoteException {
+            mClient.requestHideFillUi(mSessionId, mFocusedId);
         }
 
         private void update(@NonNull AutofillId focusedId, @NonNull AutofillValue focusedValue) {

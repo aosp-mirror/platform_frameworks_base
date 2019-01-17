@@ -955,7 +955,7 @@ class RootActivityContainer extends ConfigurationContainer
         mWindowManager.deferSurfaceLayout();
 
         final ActivityDisplay display = r.getActivityStack().getDisplay();
-        PinnedActivityStack stack = display.getPinnedStack();
+        ActivityStack stack = display.getPinnedStack();
 
         // This will clear the pinned stack by moving an existing task to the full screen stack,
         // ensuring only one task is present.

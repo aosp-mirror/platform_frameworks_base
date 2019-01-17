@@ -17,13 +17,9 @@
 
 package android.os;
 
-import android.os.Process;
-import android.os.UserHandle;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.MediumTest;
 
 import junit.framework.TestCase;
-
 
 public class ProcessTest extends TestCase {
 

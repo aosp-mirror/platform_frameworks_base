@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package android.app;
 
 import static junit.framework.TestCase.assertNotNull;
@@ -27,10 +26,11 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Parcelable;
-import android.support.test.filters.MediumTest;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.ArrayMap;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;
 import org.junit.Test;

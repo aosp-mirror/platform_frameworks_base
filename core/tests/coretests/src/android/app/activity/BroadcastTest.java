@@ -27,11 +27,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.UserHandle;
-import android.support.test.filters.LargeTest;
-import android.test.FlakyTest;
 import android.util.Log;
 
-import java.util.Arrays;
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.LargeTest;
 
 @LargeTest
 public class BroadcastTest extends ActivityTestsBase {
@@ -231,7 +230,7 @@ public class BroadcastTest extends ActivityTestsBase {
     };
 
     // Mark flaky until http://b/issue?id=1191607 is resolved.
-    @FlakyTest(tolerance=2)
+    @FlakyTest
     public void testRegistered() throws Exception {
         runLaunchpad(LaunchpadActivity.BROADCAST_REGISTERED);
     }
@@ -248,12 +247,12 @@ public class BroadcastTest extends ActivityTestsBase {
         runLaunchpad(LaunchpadActivity.BROADCAST_ABORT);
     }
 
-    @FlakyTest(tolerance=2)
+    @FlakyTest
     public void testAll() throws Exception {
         runLaunchpad(LaunchpadActivity.BROADCAST_ALL);
     }
 
-    @FlakyTest(tolerance=2)
+    @FlakyTest
     public void testMulti() throws Exception {
         runLaunchpad(LaunchpadActivity.BROADCAST_MULTI);
     }
@@ -348,7 +347,7 @@ public class BroadcastTest extends ActivityTestsBase {
     }
 
     // Marking flaky until http://b/issue?id=1191337 is resolved
-    @FlakyTest(tolerance=2)
+    @FlakyTest
     public void testReceiveSticky() throws Exception {
         Intent intent = new Intent(LaunchpadActivity.BROADCAST_STICKY1, null);
         intent.putExtra("test", LaunchpadActivity.DATA_1);
@@ -358,7 +357,7 @@ public class BroadcastTest extends ActivityTestsBase {
     }
 
     // Marking flaky until http://b/issue?id=1191337 is resolved
-    @FlakyTest(tolerance=2)
+    @FlakyTest
     public void testReceive2Sticky() throws Exception {
         Intent intent = new Intent(LaunchpadActivity.BROADCAST_STICKY1, null);
         intent.putExtra("test", LaunchpadActivity.DATA_1);

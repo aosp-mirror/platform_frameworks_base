@@ -21,6 +21,7 @@ import static android.app.usage.UsageEvents.Event.ACTIVITY_PAUSED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_STOPPED;
 import static android.app.usage.UsageEvents.Event.CONTINUING_FOREGROUND_SERVICE;
+import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.END_OF_DAY;
 import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_START;
@@ -119,12 +120,9 @@ public final class UsageStats implements Parcelable {
     public int mLastEvent;
 
     /**
-     * If an activity is visible(onStart(), onPause() states) or in foreground (onResume() state),
-     * it has one entry in this map. When an activity becomes invisible (onStop() or onDestroy()),
-     * it is removed from this map.
      * Key is instanceId of the activity (ActivityRecode appToken hashCode)..
-     * Value is this activity's last event, one of ACTIVITY_RESUMED or
-     * ACTIVITY_PAUSED.
+     * Value is this activity's last event, one of ACTIVITY_RESUMED, ACTIVITY_PAUSED or
+     * ACTIVITY_STOPPED.
      * {@hide}
      */
     public SparseIntArray mActivities = new SparseIntArray();
@@ -560,6 +558,7 @@ public final class UsageStats implements Parcelable {
                 mLastTimeForegroundServiceUsed = timeStamp;
                 mForegroundServices.put(className, eventType);
                 break;
+            case DEVICE_SHUTDOWN:
             case FLUSH_TO_DISK:
                 // update usage of all active activities/services.
                 if (hasForegroundActivity()) {

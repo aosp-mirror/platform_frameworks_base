@@ -97,4 +97,7 @@ enum PageId {
 
     // OPEN: Settings > System > Input & Gesture > Silence alerts
     SETTINGS_GESTURE_SILENCE = 1625;
+
+    // OPEN: Settings > System > Input & Gesture > Tap to check
+    SETTINGS_GESTURE_TAP_SCREEN = 1626;
 }

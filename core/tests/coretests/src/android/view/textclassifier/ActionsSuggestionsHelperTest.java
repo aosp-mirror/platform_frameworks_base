@@ -22,8 +22,9 @@ import static android.view.textclassifier.ConversationActions.Message.PERSON_USE
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.Person;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.google.android.textclassifier.ActionsSuggestionsModel;
 
