@@ -7732,6 +7732,23 @@ public final class Settings {
         public static final String TV_INPUT_CUSTOM_LABELS = "tv_input_custom_labels";
 
         /**
+         * Whether TV app uses non-system inputs.
+         *
+         * <p>
+         * The value is boolean (1 or 0), where 1 means non-system TV inputs are allowed,
+         * and 0 means non-system TV inputs are not allowed.
+         *
+         * <p>
+         * Devices such as sound bars may have changed the system property allow_third_party_inputs
+         * to false so the TV Application only uses HDMI and other built in inputs. This setting
+         * allows user to override the default and have the TV Application use third party TV inputs
+         * available on play store.
+         *
+         * @hide
+         */
+        public static final String TV_APP_USES_NON_SYSTEM_INPUTS = "tv_app_uses_non_system_inputs";
+
+        /**
          * Whether automatic routing of system audio to USB audio peripheral is disabled.
          * The value is boolean (1 or 0), where 1 means automatic routing is disabled,
          * and 0 means automatic routing is enabled.

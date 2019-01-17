@@ -30,6 +30,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -147,6 +148,7 @@ public class ArcInitiationActionFromAvrTest {
         mTestLooper.dispatchAll();
     }
 
+    @Ignore("b/120845532")
     @Test
     public void arcInitiation_requestActiveSource() {
         mSendCecCommandSuccess = true;

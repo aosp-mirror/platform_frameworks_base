@@ -100,7 +100,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void setPreferredAddress(int addr) {
         assertRunOnServiceThread();
-        SystemProperties.set(Constants.PROPERTY_PREFERRED_ADDRESS_PLAYBACK,
+        mService.writeStringSetting(Constants.PROPERTY_PREFERRED_ADDRESS_PLAYBACK,
                 String.valueOf(addr));
     }
 

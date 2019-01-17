@@ -55,6 +55,10 @@ public final class HdmiControlManager {
 
     @Nullable private final IHdmiControlService mService;
 
+    private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
+
+    private int mPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+
     /**
      * Broadcast Action: Display OSD message.
      * <p>Send when the service has a message to display on screen for events
@@ -505,11 +509,38 @@ public final class HdmiControlManager {
      * @hide
      */
     public int getPhysicalAddress() {
+        if (mPhysicalAddress != INVALID_PHYSICAL_ADDRESS) {
+            return mPhysicalAddress;
+        }
         try {
-            return mService.getPhysicalAddress();
+            mPhysicalAddress = mService.getPhysicalAddress();
+            return mPhysicalAddress;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Check if the target device is connected to the current device. The
+     * API also returns true if the current device is the target.
+     *
+     * @param targetDevice {@link HdmiDeviceInfo} of the target device.
+     * @return true if {@code device} is directly or indirectly connected to the
+     *
+     * TODO(b/110094868): unhide for Q
+     * @hide
+     */
+    public boolean isTargetDeviceConnected(HdmiDeviceInfo targetDevice) {
+        mPhysicalAddress = getPhysicalAddress();
+        if (mPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
+            return false;
+        }
+        int targetPhysicalAddress = targetDevice.getPhysicalAddress();
+        if (targetPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
+            return false;
+        }
+        return HdmiUtils.getLocalPortFromPhysicalAddress(targetPhysicalAddress, mPhysicalAddress)
+            != HdmiUtils.TARGET_NOT_UNDER_LOCAL_DEVICE;
     }
 
     /**

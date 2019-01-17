@@ -40,7 +40,6 @@ import androidx.test.filters.SmallTest;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -142,7 +141,6 @@ public class HdmiCecControllerTest {
         assertEquals(ADDR_UNREGISTERED, mLogicalAddress);
     }
 
-    @Ignore("b/110413065 Support multiple device types 4 and 5.")
     @Test
     public void testAllocatLogicalAddress_PlaybackPreferredNotOccupied() {
         mHdmiCecController.allocateLogicalAddress(DEVICE_PLAYBACK, ADDR_PLAYBACK_1, mCallback);
@@ -158,7 +156,6 @@ public class HdmiCecControllerTest {
         assertEquals(ADDR_PLAYBACK_2, mLogicalAddress);
     }
 
-    @Ignore("b/110413065 Support multiple device types 4 and 5.")
     @Test
     public void testAllocatLogicalAddress_PlaybackNoPreferredNotOcuppied() {
         mHdmiCecController.allocateLogicalAddress(DEVICE_PLAYBACK, ADDR_UNREGISTERED, mCallback);
