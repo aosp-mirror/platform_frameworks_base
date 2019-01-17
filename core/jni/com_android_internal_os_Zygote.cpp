@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/*
+ * Disable optimization of this file if we are compiling with the address
+ * sanitizer.  This is a mitigation for b/122921367 and can be removed once the
+ * bug is fixed.
+ */
+#if __has_feature(address_sanitizer)
+#pragma clang optimize off
+#endif
+
 #define LOG_TAG "Zygote"
 
 // sys/mount.h has to come before linux/fs.h due to redefinition of MS_RDONLY, MS_BIND, etc
