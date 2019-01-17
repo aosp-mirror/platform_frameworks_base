@@ -197,6 +197,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy;
 import android.content.pm.IPackageDataObserver;
@@ -283,6 +284,7 @@ import android.util.TimeUtils;
 import android.util.TimingsTraceLog;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.IRecentsAnimationRunner;
 import android.view.LayoutInflater;
@@ -17619,6 +17621,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 return ActivityManagerService.this.getTaskForActivity(token, onlyRoot);
             }
+        }
+
+        @Override
+        public ActivityPresentationInfo getActivityPresentationInfo(IBinder token) {
+            int displayId = Display.INVALID_DISPLAY;
+            try {
+                displayId = mActivityTaskManager.getActivityDisplayId(token);
+            } catch (RemoteException e) {
+            }
+
+            return new ActivityPresentationInfo(mActivityTaskManager.getTaskForActivity(token,
+                    /*onlyRoot=*/ false), displayId,
+                    mActivityTaskManager.getActivityClassForToken(token));
         }
 
         @Override
