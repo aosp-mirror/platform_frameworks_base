@@ -5490,13 +5490,13 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUserId = UserHandle.getUserId(callingUid);
         final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
         // Map to base uids.
-        uid1 = UserHandle.getAppId(uid1);
-        uid2 = UserHandle.getAppId(uid2);
+        final int appId1 = UserHandle.getAppId(uid1);
+        final int appId2 = UserHandle.getAppId(uid2);
         // reader
         synchronized (mPackages) {
             Signature[] s1;
             Signature[] s2;
-            Object obj = mSettings.getSettingLPr(uid1);
+            Object obj = mSettings.getSettingLPr(appId1);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     if (isCallerInstantApp) {
@@ -5515,7 +5515,7 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
             }
-            obj = mSettings.getSettingLPr(uid2);
+            obj = mSettings.getSettingLPr(appId2);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     if (isCallerInstantApp) {
@@ -5570,11 +5570,11 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         // Map to base uids.
-        uid = UserHandle.getAppId(uid);
+        final int appId = UserHandle.getAppId(uid);
         // reader
         synchronized (mPackages) {
             final PackageParser.SigningDetails signingDetails;
-            final Object obj = mSettings.getSettingLPr(uid);
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
@@ -5690,10 +5690,10 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUid = Binder.getCallingUid();
         final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
         final int userId = UserHandle.getUserId(uid);
-        uid = UserHandle.getAppId(uid);
+        final int appId = UserHandle.getAppId(uid);
         // reader
         synchronized (mPackages) {
-            Object obj = mSettings.getSettingLPr(uid);
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 if (isCallerInstantApp) {
                     return null;
@@ -5728,8 +5728,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+        final int appId = UserHandle.getAppId(uid);
         synchronized (mPackages) {
-            Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 return sus.name + ":" + sus.userId;
@@ -5756,8 +5757,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final String[] names = new String[uids.length];
         synchronized (mPackages) {
             for (int i = uids.length - 1; i >= 0; i--) {
-                final int uid = uids[i];
-                Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
+                final int appId = UserHandle.getAppId(uids[i]);
+                final Object obj = mSettings.getSettingLPr(appId);
                 if (obj instanceof SharedUserSetting) {
                     final SharedUserSetting sus = (SharedUserSetting) obj;
                     names[i] = "shared:" + sus.name;
@@ -5805,8 +5806,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
+        final int appId = UserHandle.getAppId(uid);
         synchronized (mPackages) {
-            Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 return sus.pkgFlags;
@@ -5827,8 +5829,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
+        final int appId = UserHandle.getAppId(uid);
         synchronized (mPackages) {
-            Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 return sus.pkgPrivateFlags;
@@ -5848,10 +5851,10 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;
         }
-        uid = UserHandle.getAppId(uid);
+        final int appId = UserHandle.getAppId(uid);
         // reader
         synchronized (mPackages) {
-            Object obj = mSettings.getSettingLPr(uid);
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 final Iterator<PackageSetting> it = sus.packages.iterator();
@@ -18952,7 +18955,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mPackages")
     private int getUidTargetSdkVersionLockedLPr(int uid) {
-        Object obj = mSettings.getSettingLPr(uid);
+        final int appId = UserHandle.getAppId(uid);
+        final Object obj = mSettings.getSettingLPr(appId);
         if (obj instanceof SharedUserSetting) {
             final SharedUserSetting sus = (SharedUserSetting) obj;
             int vers = Build.VERSION_CODES.CUR_DEVELOPMENT;
