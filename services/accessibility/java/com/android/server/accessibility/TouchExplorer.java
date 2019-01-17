@@ -462,7 +462,7 @@ class TouchExplorer extends BaseEventStreamTransformation
             return false;
         }
 
-        endGestureDetection();
+        endGestureDetection(true);
 
         mAms.onGesture(gestureId);
 
@@ -472,7 +472,7 @@ class TouchExplorer extends BaseEventStreamTransformation
     @Override
     public boolean onGestureCancelled(MotionEvent event, int policyFlags) {
         if (mCurrentState == STATE_GESTURE_DETECTING) {
-            endGestureDetection();
+            endGestureDetection(event.getActionMasked() == MotionEvent.ACTION_UP);
             return true;
         } else if (mCurrentState == STATE_TOUCH_EXPLORING) {
             // If the finger is still moving, pass the event on.
@@ -804,13 +804,19 @@ class TouchExplorer extends BaseEventStreamTransformation
         }
     }
 
-    private void endGestureDetection() {
+    private void endGestureDetection(boolean interactionEnd) {
         mAms.onTouchInteractionEnd();
 
         // Announce the end of the gesture recognition.
         sendAccessibilityEvent(AccessibilityEvent.TYPE_GESTURE_DETECTION_END);
-        // Announce the end of a the touch interaction.
-        sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
+        if (interactionEnd) {
+            // Announce the end of a the touch interaction.
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
+        } else {
+            // If gesture detection is end, but user doesn't release the finger, announce the
+            // transition to exploration state.
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
+        }
 
         mExitGestureDetectionModeDelayed.cancel();
         mCurrentState = STATE_TOUCH_EXPLORING;
@@ -889,7 +895,6 @@ class TouchExplorer extends BaseEventStreamTransformation
         MotionEvent event = mInjectedPointerTracker.getLastInjectedHoverEvent();
         if (event != null && event.getActionMasked() == MotionEvent.ACTION_HOVER_EXIT) {
             final int pointerIdBits = event.getPointerIdBits();
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
             sendMotionEvent(event, MotionEvent.ACTION_HOVER_ENTER, pointerIdBits, policyFlags);
         }
     }
@@ -1148,8 +1153,8 @@ class TouchExplorer extends BaseEventStreamTransformation
             sendAccessibilityEvent(AccessibilityEvent.TYPE_GESTURE_DETECTION_END);
             // Clearing puts is in touch exploration state with a finger already
             // down, so announce the transition to exploration state.
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
             clear();
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
         }
     }
 
