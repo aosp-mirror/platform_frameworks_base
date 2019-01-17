@@ -2508,9 +2508,17 @@ public class CarrierConfigManager {
         public static final String KEY_GPS_LOCK_STRING = KEY_PREFIX + "gps_lock";
 
         /**
-         * SUPL NI emergency extension time in seconds. Default to "0".
+         * Control Plane / SUPL NI emergency extension time in seconds. Default to "0".
          */
         public static final String KEY_ES_EXTENSION_SEC = KEY_PREFIX + "es_extension_sec";
+
+        /**
+         * Space separated list of Android package names of proxy applications representing
+         * the non-framework entities requesting location directly from GNSS without involving
+         * the framework, as managed by IGnssVisibilityControl.hal. For example,
+         * "com.example.mdt com.example.ims".
+         */
+        public static final String KEY_NFW_PROXY_APPS = KEY_PREFIX + "nfw_proxy_apps";
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
@@ -2525,6 +2533,7 @@ public class CarrierConfigManager {
             defaults.putString(KEY_A_GLONASS_POS_PROTOCOL_SELECT_STRING, "0");
             defaults.putString(KEY_GPS_LOCK_STRING, "3");
             defaults.putString(KEY_ES_EXTENSION_SEC, "0");
+            defaults.putString(KEY_NFW_PROXY_APPS, "");
             return defaults;
         }
     }
