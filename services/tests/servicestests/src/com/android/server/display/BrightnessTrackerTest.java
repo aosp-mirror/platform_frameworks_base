@@ -37,6 +37,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayedContentSample;
+import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -47,6 +50,7 @@ import android.os.SystemClock;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.AtomicFile;
+import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -116,28 +120,81 @@ public class BrightnessTrackerTest {
         assertTrue(mInjector.mIdleScheduled);
         mInjector.sendScreenChange(/*screen on */ true);
         assertNotNull(mInjector.mSensorListener);
+        assertTrue(mInjector.mColorSamplingEnabled);
 
         mInjector.sendScreenChange(/*screen on */ false);
         assertNull(mInjector.mSensorListener);
+        assertFalse(mInjector.mColorSamplingEnabled);
 
         // Turn screen on while brightness mode is manual
         mInjector.setBrightnessMode(/* isBrightnessModeAutomatic */ false);
         mInjector.sendScreenChange(/*screen on */ true);
         assertNull(mInjector.mSensorListener);
+        assertFalse(mInjector.mColorSamplingEnabled);
 
         // Set brightness mode to automatic while screen is off.
         mInjector.sendScreenChange(/*screen on */ false);
         mInjector.setBrightnessMode(/* isBrightnessModeAutomatic */ true);
         assertNull(mInjector.mSensorListener);
+        assertFalse(mInjector.mColorSamplingEnabled);
 
         // Turn on screen while brightness mode is automatic.
         mInjector.sendScreenChange(/*screen on */ true);
         assertNotNull(mInjector.mSensorListener);
+        assertTrue(mInjector.mColorSamplingEnabled);
 
         mTracker.stop();
         assertNull(mInjector.mSensorListener);
         assertNull(mInjector.mBroadcastReceiver);
         assertFalse(mInjector.mIdleScheduled);
+        assertFalse(mInjector.mColorSamplingEnabled);
+    }
+
+    @Test
+    public void testNoColorSampling_WrongPixelFormat() {
+        mInjector.mDefaultSamplingAttributes =
+                new DisplayedContentSamplingAttributes(
+                        0x23,
+                        mInjector.mDefaultSamplingAttributes.getDataspace(),
+                        mInjector.mDefaultSamplingAttributes.getComponentMask());
+        startTracker(mTracker);
+        assertFalse(mInjector.mColorSamplingEnabled);
+        assertNull(mInjector.mDisplayListener);
+    }
+
+    @Test
+    public void testNoColorSampling_MissingComponent() {
+        mInjector.mDefaultSamplingAttributes =
+                new DisplayedContentSamplingAttributes(
+                        mInjector.mDefaultSamplingAttributes.getPixelFormat(),
+                        mInjector.mDefaultSamplingAttributes.getDataspace(),
+                        0x2);
+        startTracker(mTracker);
+        assertFalse(mInjector.mColorSamplingEnabled);
+        assertNull(mInjector.mDisplayListener);
+    }
+
+    @Test
+    public void testNoColorSampling_NoSupport() {
+        mInjector.mDefaultSamplingAttributes = null;
+        startTracker(mTracker);
+        assertFalse(mInjector.mColorSamplingEnabled);
+        assertNull(mInjector.mDisplayListener);
+    }
+
+    @Test
+    public void testColorSampling_FrameRateChange() {
+        startTracker(mTracker);
+        assertTrue(mInjector.mColorSamplingEnabled);
+        assertNotNull(mInjector.mDisplayListener);
+        int noFramesSampled = mInjector.mNoColorSamplingFrames;
+        mInjector.mFrameRate = 120.0f;
+        // Wrong display
+        mInjector.mDisplayListener.onDisplayChanged(Display.DEFAULT_DISPLAY + 10);
+        assertEquals(noFramesSampled, mInjector.mNoColorSamplingFrames);
+        // Correct display
+        mInjector.mDisplayListener.onDisplayChanged(Display.DEFAULT_DISPLAY);
+        assertEquals(noFramesSampled * 2, mInjector.mNoColorSamplingFrames);
     }
 
     @Test
@@ -149,26 +206,41 @@ public class BrightnessTrackerTest {
         assertNotNull(mInjector.mBroadcastReceiver);
         assertNotNull(mInjector.mContentObserver);
         assertTrue(mInjector.mIdleScheduled);
+        assertFalse(mInjector.mColorSamplingEnabled);
+        assertNull(mInjector.mDisplayListener);
 
         mInjector.setBrightnessMode(/*isBrightnessModeAutomatic*/ true);
         assertNotNull(mInjector.mSensorListener);
+        assertTrue(mInjector.mColorSamplingEnabled);
+        assertNotNull(mInjector.mDisplayListener);
 
         SensorEventListener listener = mInjector.mSensorListener;
+        DisplayManager.DisplayListener displayListener = mInjector.mDisplayListener;
         mInjector.mSensorListener = null;
+        mInjector.mColorSamplingEnabled = false;
+        mInjector.mDisplayListener = null;
         // Duplicate notification
         mInjector.setBrightnessMode(/*isBrightnessModeAutomatic*/ true);
         // Sensor shouldn't have been registered as it was already registered.
         assertNull(mInjector.mSensorListener);
+        assertFalse(mInjector.mColorSamplingEnabled);
+        assertNull(mInjector.mDisplayListener);
         mInjector.mSensorListener = listener;
+        mInjector.mDisplayListener = displayListener;
+        mInjector.mColorSamplingEnabled = true;
 
         mInjector.setBrightnessMode(/*isBrightnessModeAutomatic*/ false);
         assertNull(mInjector.mSensorListener);
+        assertFalse(mInjector.mColorSamplingEnabled);
+        assertNull(mInjector.mDisplayListener);
 
         mTracker.stop();
         assertNull(mInjector.mSensorListener);
         assertNull(mInjector.mBroadcastReceiver);
         assertNull(mInjector.mContentObserver);
         assertFalse(mInjector.mIdleScheduled);
+        assertFalse(mInjector.mColorSamplingEnabled);
+        assertNull(mInjector.mDisplayListener);
     }
 
     @Test
@@ -229,6 +301,8 @@ public class BrightnessTrackerTest {
         assertEquals(3333, event.colorTemperature);
         assertEquals("a.package", event.packageName);
         assertEquals(0, event.userId);
+        assertArrayEquals(new long[] {1, 10, 100, 1000, 300, 30, 10, 1}, event.colorValueBuckets);
+        assertEquals(10000, event.colorSampleDuration);
 
         assertEquals(1, eventsNoPackage.size());
         assertNull(eventsNoPackage.get(0).packageName);
@@ -342,7 +416,8 @@ public class BrightnessTrackerTest {
                 + "lastNits=\"32\" "
                 + "batteryLevel=\"0.5\" nightMode=\"true\" colorTemperature=\"3235\"\n"
                 + "lux=\"132.2,131.1\" luxTimestamps=\""
-                + Long.toString(someTimeAgo) + "," + Long.toString(someTimeAgo) + "\"/>"
+                + Long.toString(someTimeAgo) + "," + Long.toString(someTimeAgo) + "\""
+                + "colorSampleDuration=\"3456\" colorValueBuckets=\"123,598,23,19\"/>"
                 // Event that is too old so shouldn't show up.
                 + "<event nits=\"142\" timestamp=\""
                 + Long.toString(twoMonthsAgo) + "\" packageName=\""
@@ -368,6 +443,7 @@ public class BrightnessTrackerTest {
         assertTrue(event.isDefaultBrightnessConfig);
         assertEquals(0.5f, event.powerBrightnessFactor, FLOAT_DELTA);
         assertTrue(event.isUserSetBrightness);
+        assertNull(event.colorValueBuckets);
 
         events = tracker.getEvents(1, true).getList();
         assertEquals(1, events.size());
@@ -386,6 +462,8 @@ public class BrightnessTrackerTest {
         assertFalse(event.isDefaultBrightnessConfig);
         assertEquals(1.0, event.powerBrightnessFactor, FLOAT_DELTA);
         assertFalse(event.isUserSetBrightness);
+        assertEquals(3456L, event.colorSampleDuration);
+        assertArrayEquals(new long[] {123L, 598L, 23L, 19L}, event.colorValueBuckets);
 
         // Pretend user 1 is a profile of user 0.
         mInjector.mProfiles = new int[]{0, 1};
@@ -481,6 +559,8 @@ public class BrightnessTrackerTest {
         assertEquals(0.5f, event.powerBrightnessFactor, FLOAT_DELTA);
         assertTrue(event.isUserSetBrightness);
         assertFalse(event.isDefaultBrightnessConfig);
+        assertArrayEquals(new long[] {1, 10, 100, 1000, 300, 30, 10, 1}, event.colorValueBuckets);
+        assertEquals(10000, event.colorSampleDuration);
     }
 
     @Test
@@ -546,6 +626,7 @@ public class BrightnessTrackerTest {
         builder.setNightMode(false);
         builder.setColorTemperature(345);
         builder.setLastBrightness(50f);
+        builder.setColorValues(new long[] {23, 34, 45}, 1000L);
         BrightnessChangeEvent event = builder.build();
 
         event.writeToParcel(parcel, 0);
@@ -568,6 +649,8 @@ public class BrightnessTrackerTest {
         assertEquals(event.nightMode, event2.nightMode);
         assertEquals(event.colorTemperature, event2.colorTemperature);
         assertEquals(event.lastBrightness, event2.lastBrightness, FLOAT_DELTA);
+        assertArrayEquals(event.colorValueBuckets, event2.colorValueBuckets);
+        assertEquals(event.colorSampleDuration, event2.colorSampleDuration);
 
         parcel = Parcel.obtain();
         builder.setBatteryLevel(Float.NaN);
@@ -714,6 +797,7 @@ public class BrightnessTrackerTest {
     private class TestInjector extends BrightnessTracker.Injector {
         SensorEventListener mSensorListener;
         BroadcastReceiver mBroadcastReceiver;
+        DisplayManager.DisplayListener mDisplayListener;
         Map<String, Integer> mSecureIntSettings = new HashMap<>();
         long mCurrentTimeMillis = System.currentTimeMillis();
         long mElapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos();
@@ -723,6 +807,12 @@ public class BrightnessTrackerTest {
         int[] mProfiles;
         ContentObserver mContentObserver;
         boolean mIsBrightnessModeAutomatic = true;
+        boolean mColorSamplingEnabled = false;
+        DisplayedContentSamplingAttributes mDefaultSamplingAttributes =
+                new DisplayedContentSamplingAttributes(0x37, 0, 0x4);
+        float mFrameRate = 60.0f;
+        int mNoColorSamplingFrames;
+
 
         public TestInjector(Handler handler) {
             mHandler = handler;
@@ -881,6 +971,44 @@ public class BrightnessTrackerTest {
         public boolean isNightModeActive(Context context, int userId) {
             return mSecureIntSettings.getOrDefault(Settings.Secure.NIGHT_DISPLAY_ACTIVATED,
                     0) == 1;
+        }
+
+        @Override
+        public DisplayedContentSample sampleColor(int noFramesToSample) {
+            return new DisplayedContentSample(600L,
+                    null,
+                    null,
+                     new long[] {1, 10, 100, 1000, 300, 30, 10, 1},
+                    null);
+        }
+
+        @Override
+        public float getFrameRate(Context context) {
+            return mFrameRate;
+        }
+
+        @Override
+        public DisplayedContentSamplingAttributes getSamplingAttributes() {
+            return mDefaultSamplingAttributes;
+        }
+
+        @Override
+        public boolean enableColorSampling(boolean enable, int noFrames) {
+            mColorSamplingEnabled = enable;
+            mNoColorSamplingFrames = noFrames;
+            return true;
+        }
+
+        @Override
+        public void registerDisplayListener(Context context,
+                DisplayManager.DisplayListener listener, Handler handler) {
+            mDisplayListener = listener;
+        }
+
+        @Override
+        public void unRegisterDisplayListener(Context context,
+                DisplayManager.DisplayListener listener) {
+            mDisplayListener = null;
         }
     }
 }

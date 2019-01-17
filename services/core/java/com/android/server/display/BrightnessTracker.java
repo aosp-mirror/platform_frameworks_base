@@ -27,12 +27,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
 import android.database.ContentObserver;
+import android.graphics.PixelFormat;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayedContentSample;
+import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Environment;
@@ -48,6 +53,7 @@ import android.provider.Settings;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
+import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -55,6 +61,7 @@ import com.android.internal.app.ColorDisplayController;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.RingBuffer;
+import com.android.server.LocalServices;
 
 import libcore.io.IoUtils;
 
@@ -111,6 +118,8 @@ public class BrightnessTracker {
     private static final String ATTR_DEFAULT_CONFIG = "defaultConfig";
     private static final String ATTR_POWER_SAVE = "powerSaveFactor";
     private static final String ATTR_USER_POINT = "userPoint";
+    private static final String ATTR_COLOR_SAMPLE_DURATION = "colorSampleDuration";
+    private static final String ATTR_COLOR_VALUE_BUCKETS = "colorValueBuckets";
 
     private static final int MSG_BACKGROUND_START = 0;
     private static final int MSG_BRIGHTNESS_CHANGED = 1;
@@ -118,6 +127,10 @@ public class BrightnessTracker {
     private static final int MSG_START_SENSOR_LISTENER = 3;
 
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+
+    private static final long COLOR_SAMPLE_DURATION = TimeUnit.SECONDS.toSeconds(10);
+    // Sample chanel 2 of HSV which is the Value component.
+    private static final int COLOR_SAMPLE_COMPONENT_MASK = 0x1 << 2;
 
     // Lock held while accessing mEvents, is held while writing events to flash.
     private final Object mEventsLock = new Object();
@@ -136,12 +149,16 @@ public class BrightnessTracker {
     private final ContentResolver mContentResolver;
     private final Handler mBgHandler;
 
-    // mBroadcastReceiver,  mSensorListener, mSettingsObserver and mSensorRegistered
-    // should only be used on the mBgHandler thread.
+    // These members should only be accessed on the mBgHandler thread.
     private BroadcastReceiver mBroadcastReceiver;
     private SensorListener mSensorListener;
     private SettingsObserver mSettingsObserver;
+    private DisplayListener mDisplayListener;
     private boolean mSensorRegistered;
+    private boolean mColorSamplingEnabled;
+    private int mNoFramesToSample;
+    private float mFrameRate;
+    // End of block of members that should only be accessed on the mBgHandler thread.
 
     private @UserIdInt int mCurrentUserId = UserHandle.USER_NULL;
 
@@ -208,6 +225,7 @@ public class BrightnessTracker {
             mLastBrightness = initialBrightness;
             mStarted = true;
         }
+        enableColorSampling();
     }
 
     /** Stop listening for events */
@@ -226,6 +244,7 @@ public class BrightnessTracker {
         synchronized (mDataCollectionLock) {
             mStarted = false;
         }
+        disableColorSampling();
     }
 
     public void onSwitchUser(@UserIdInt int newUserId) {
@@ -366,6 +385,17 @@ public class BrightnessTracker {
         builder.setNightMode(mInjector.isNightModeActive(mContext, UserHandle.USER_CURRENT));
         builder.setColorTemperature(mInjector.getColorTemperature(mContext,
                 UserHandle.USER_CURRENT));
+
+        if (mColorSamplingEnabled) {
+            DisplayedContentSample sample = mInjector.sampleColor(mNoFramesToSample);
+            if (sample != null && sample.getSampleComponent(
+                    DisplayedContentSample.ColorComponent.CHANNEL2) != null) {
+                float numMillis = (sample.getNumFrames() / mFrameRate) * 1000.0f;
+                builder.setColorValues(
+                        sample.getSampleComponent(DisplayedContentSample.ColorComponent.CHANNEL2),
+                        Math.round(numMillis));
+            }
+        }
 
         BrightnessChangeEvent event = builder.build();
         if (DEBUG) {
@@ -541,6 +571,19 @@ public class BrightnessTracker {
                 }
                 out.attribute(null, ATTR_LUX, luxValues.toString());
                 out.attribute(null, ATTR_LUX_TIMESTAMPS, luxTimestamps.toString());
+                if (toWrite[i].colorValueBuckets != null
+                        && toWrite[i].colorValueBuckets.length > 0) {
+                    out.attribute(null, ATTR_COLOR_SAMPLE_DURATION,
+                            Long.toString(toWrite[i].colorSampleDuration));
+                    StringBuilder buckets = new StringBuilder();
+                    for (int j = 0; j < toWrite[i].colorValueBuckets.length; ++j) {
+                        if (j > 0) {
+                            buckets.append(',');
+                        }
+                        buckets.append(Long.toString(toWrite[i].colorValueBuckets[j]));
+                    }
+                    out.attribute(null, ATTR_COLOR_VALUE_BUCKETS, buckets.toString());
+                }
                 out.endTag(null, TAG_EVENT);
             }
         }
@@ -628,6 +671,20 @@ public class BrightnessTracker {
                         builder.setUserBrightnessPoint(Boolean.parseBoolean(userPoint));
                     }
 
+                    String colorSampleDurationString =
+                            parser.getAttributeValue(null, ATTR_COLOR_SAMPLE_DURATION);
+                    String colorValueBucketsString =
+                            parser.getAttributeValue(null, ATTR_COLOR_VALUE_BUCKETS);
+                    if (colorSampleDurationString != null && colorValueBucketsString != null) {
+                        long colorSampleDuration = Long.parseLong(colorSampleDurationString);
+                        String[] buckets = colorValueBucketsString.split(",");
+                        long[] bucketValues = new long[buckets.length];
+                        for (int i = 0; i < bucketValues.length; ++i) {
+                            bucketValues[i] = Long.parseLong(buckets[i]);
+                        }
+                        builder.setColorValues(bucketValues, colorSampleDuration);
+                    }
+
                     BrightnessChangeEvent event = builder.build();
                     if (DEBUG) {
                         Slog.i(TAG, "Read event " + event.brightness
@@ -695,6 +752,73 @@ public class BrightnessTracker {
 
     private void dumpLocal(PrintWriter pw) {
         pw.println("  mSensorRegistered=" + mSensorRegistered);
+        pw.println("  mColorSamplingEnabled=" + mColorSamplingEnabled);
+        pw.println("  mNoFramesToSample=" + mNoFramesToSample);
+        pw.println("  mFrameRate=" + mFrameRate);
+    }
+
+    private void enableColorSampling() {
+        if (!mInjector.isBrightnessModeAutomatic(mContentResolver)
+                || !mInjector.isInteractive(mContext)
+                || mColorSamplingEnabled) {
+            return;
+        }
+
+        mFrameRate = mInjector.getFrameRate(mContext);
+        if (mFrameRate <= 0) {
+            Slog.wtf(TAG, "Default display has a zero or negative framerate.");
+            return;
+        }
+        mNoFramesToSample = (int) (mFrameRate * COLOR_SAMPLE_DURATION);
+
+        DisplayedContentSamplingAttributes attributes = mInjector.getSamplingAttributes();
+        if (DEBUG && attributes != null) {
+            Slog.d(TAG, "Color sampling"
+                    + " mask=0x" + Integer.toHexString(attributes.getComponentMask())
+                    + " dataSpace=0x" + Integer.toHexString(attributes.getDataspace())
+                    + " pixelFormat=0x" + Integer.toHexString(attributes.getPixelFormat()));
+        }
+        // Do we support sampling the Value component of HSV
+        if (attributes != null && attributes.getPixelFormat() == PixelFormat.HSV_888
+                && (attributes.getComponentMask() & COLOR_SAMPLE_COMPONENT_MASK) != 0) {
+
+            mColorSamplingEnabled = mInjector.enableColorSampling(/* enable= */true,
+                    mNoFramesToSample);
+            if (DEBUG) {
+                Slog.i(TAG, "turning on color sampling for "
+                        + mNoFramesToSample + " frames, success=" + mColorSamplingEnabled);
+            }
+        }
+        if (mColorSamplingEnabled && mDisplayListener == null) {
+            mDisplayListener = new DisplayListener();
+            mInjector.registerDisplayListener(mContext, mDisplayListener, mBgHandler);
+        }
+    }
+
+    private void disableColorSampling() {
+        if (!mColorSamplingEnabled) {
+            return;
+        }
+        mInjector.enableColorSampling(/* enable= */ false, /* noFrames= */ 0);
+        mColorSamplingEnabled = false;
+        if (mDisplayListener != null) {
+            mInjector.unRegisterDisplayListener(mContext, mDisplayListener);
+            mDisplayListener = null;
+        }
+        if (DEBUG) {
+            Slog.i(TAG, "turning off color sampling");
+        }
+    }
+
+    private void updateColorSampling() {
+        if (!mColorSamplingEnabled) {
+            return;
+        }
+        float frameRate = mInjector.getFrameRate(mContext);
+        if (frameRate != mFrameRate) {
+            disableColorSampling();
+            enableColorSampling();
+        }
     }
 
     public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats(int userId) {
@@ -768,6 +892,26 @@ public class BrightnessTracker {
         }
     }
 
+    private final class DisplayListener implements DisplayManager.DisplayListener {
+
+        @Override
+        public void onDisplayAdded(int displayId) {
+            // Ignore
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            // Ignore
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                updateColorSampling();
+            }
+        }
+    }
+
     private final class SettingsObserver extends ContentObserver {
         public SettingsObserver(Handler handler) {
             super(handler);
@@ -828,9 +972,11 @@ public class BrightnessTracker {
                     break;
                 case MSG_START_SENSOR_LISTENER:
                     startSensorListener();
+                    enableColorSampling();
                     break;
                 case MSG_STOP_SENSOR_LISTENER:
                     stopSensorListener();
+                    disableColorSampling();
                     break;
             }
         }
@@ -956,6 +1102,45 @@ public class BrightnessTracker {
 
         public boolean isNightModeActive(Context context, int userId) {
             return new ColorDisplayController(context, userId).isActivated();
+        }
+
+        public DisplayedContentSample sampleColor(int noFramesToSample) {
+            final DisplayManagerInternal displayManagerInternal =
+                    LocalServices.getService(DisplayManagerInternal.class);
+            return displayManagerInternal.getDisplayedContentSample(
+                   Display.DEFAULT_DISPLAY, noFramesToSample, 0);
+        }
+
+        public float getFrameRate(Context context) {
+            final DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+            Display display = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+            return display.getRefreshRate();
+        }
+
+        public DisplayedContentSamplingAttributes getSamplingAttributes() {
+            final DisplayManagerInternal displayManagerInternal =
+                    LocalServices.getService(DisplayManagerInternal.class);
+            return displayManagerInternal.getDisplayedContentSamplingAttributes(
+                    Display.DEFAULT_DISPLAY);
+        }
+
+        public boolean enableColorSampling(boolean enable, int noFrames) {
+            final DisplayManagerInternal displayManagerInternal =
+                    LocalServices.getService(DisplayManagerInternal.class);
+            return displayManagerInternal.setDisplayedContentSamplingEnabled(
+                    Display.DEFAULT_DISPLAY, enable, COLOR_SAMPLE_COMPONENT_MASK, noFrames);
+        }
+
+        public void registerDisplayListener(Context context,
+                DisplayManager.DisplayListener listener, Handler handler) {
+            final DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+            displayManager.registerDisplayListener(listener, handler);
+        }
+
+        public void unRegisterDisplayListener(Context context,
+                DisplayManager.DisplayListener listener) {
+            final DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+            displayManager.unregisterDisplayListener(listener);
         }
     }
 }
