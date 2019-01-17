@@ -185,10 +185,13 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     private void handleStartSession(@NonNull IBinder token, @NonNull ComponentName componentName,
             int flags) {
-        if (mState != UNKNWON_STATE) {
-            // TODO(b/111276913): revisit this scenario
-            Log.w(TAG, "ignoring handleStartSession(" + token + ") while on state "
-                    + getStateAsString(mState));
+        if (handleHasStarted()) {
+            // TODO(b/122959591): make sure this is expected (and when), or use Log.w
+            if (DEBUG) {
+                Log.d(TAG, "ignoring handleStartSession(" + token + "/"
+                        + ComponentName.flattenToShortString(componentName) + " while on state "
+                        + getStateAsString(mState));
+            }
             return;
         }
         mState = STATE_WAITING_FOR_SERVER;
@@ -197,7 +200,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
         if (VERBOSE) {
             Log.v(TAG, "handleStartSession(): token=" + token + ", act="
-                    + getActivityDebugName() + ", id=" + mId);
+                    + getDebugState() + ", id=" + mId);
         }
 
         try {
@@ -212,7 +215,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                                 binder = resultData.getBinder(EXTRA_BINDER);
                                 if (binder == null) {
                                     Log.wtf(TAG, "No " + EXTRA_BINDER + " extra result");
-                                    handleResetState();
+                                    handleResetSession(STATE_DISABLED | STATE_INTERNAL_ERROR);
                                     return;
                                 }
                             }
@@ -234,7 +237,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      * @param binder handle to {@code IContentCaptureDirectManager}
      */
     private void handleSessionStarted(int resultCode, @Nullable IBinder binder) {
-        mState = resultCode;
         if (binder != null) {
             mDirectServiceInterface = IContentCaptureDirectManager.Stub.asInterface(binder);
             mDirectServiceVulture = () -> {
@@ -248,23 +250,33 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             }
         }
 
-        if ((mState & STATE_DISABLED) != 0) {
-            mDisabled.set(true);
-            handleResetSession(/* resetState= */ false);
+        if ((resultCode & STATE_DISABLED) != 0) {
+            handleResetSession(resultCode);
         } else {
+            mState = resultCode;
             mDisabled.set(false);
         }
         if (VERBOSE) {
-            Log.v(TAG, "handleSessionStarted() result: id=" + mId
+            Log.v(TAG, "handleSessionStarted() result: id=" + mId + " resultCode=" + resultCode
                     + ", state=" + getStateAsString(mState) + ", disabled=" + mDisabled.get()
                     + ", binder=" + binder + ", events=" + (mEvents == null ? 0 : mEvents.size()));
         }
     }
 
     private void handleSendEvent(@NonNull ContentCaptureEvent event, boolean forceFlush) {
+        if (!handleHasStarted()
+                && event.getType() != ContentCaptureEvent.TYPE_SESSION_STARTED) {
+            // TODO(b/120494182): comment when this could happen (dialogs?)
+            Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
+                    + ContentCaptureEvent.getTypeAsString(event.getType())
+                    + "): session not started yet");
+            return;
+        }
         if (mEvents == null) {
             if (VERBOSE) {
-                Log.v(TAG, "Creating buffer for " + MAX_BUFFER_SIZE + " events");
+                Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
+                        + ContentCaptureEvent.getTypeAsString(event.getType())
+                        + "): cCreating buffer for " + MAX_BUFFER_SIZE + " events");
             }
             mEvents = new ArrayList<>(MAX_BUFFER_SIZE);
         }
@@ -299,15 +311,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (mState != STATE_ACTIVE && numberEvents >= MAX_BUFFER_SIZE) {
             // Callback from startSession hasn't been called yet - typically happens on system
             // apps that are started before the system service
-            // TODO(b/111276913): try to ignore session while system is not ready / boot
+            // TODO(b/122959591): try to ignore session while system is not ready / boot
             // not complete instead. Similarly, the manager service should return right away
             // when the user does not have a service set
             if (DEBUG) {
-                Log.d(TAG, "Closing session for " + getActivityDebugName()
-                        + " after " + numberEvents + " delayed events and state "
-                        + getStateAsString(mState));
+                Log.d(TAG, "Closing session for " + getDebugState()
+                        + " after " + numberEvents + " delayed events");
             }
-            handleResetState();
+            handleResetSession(STATE_DISABLED | STATE_NO_RESPONSE);
             // TODO(b/111276913): blacklist activity / use special flag to indicate that
             // when it's launched again
             return;
@@ -316,14 +327,23 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         handleForceFlush();
     }
 
+    private boolean handleHasStarted() {
+        return mState != UNKNWON_STATE;
+    }
+
     private void handleScheduleFlush(boolean checkExisting) {
+        if (!handleHasStarted()) {
+            Log.v(TAG, "handleScheduleFlush(" + getDebugState() + "): session not started yet");
+            return;
+        }
         if (checkExisting && mHandler.hasMessages(MSG_FLUSH)) {
             // "Renew" the flush message by removing the previous one
             mHandler.removeMessages(MSG_FLUSH);
         }
         mNextFlush = SystemClock.elapsedRealtime() + FLUSHING_FREQUENCY_MS;
         if (VERBOSE) {
-            Log.v(TAG, "Scheduled to flush in " + FLUSHING_FREQUENCY_MS + "ms: " + mNextFlush);
+            Log.v(TAG, "handleScheduleFlush(" + getDebugState() + "): scheduled to flush in "
+                    + FLUSHING_FREQUENCY_MS + "ms: " + TimeUtils.formatUptime(mNextFlush));
         }
         mHandler.sendMessageDelayed(
                 obtainMessage(MainContentCaptureSession::handleFlushIfNeeded, this)
@@ -343,7 +363,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
         if (mDirectServiceInterface == null) {
             if (VERBOSE) {
-                Log.v(TAG, "handleForceFlush(): hold your horses, client not ready: " + mEvents);
+                Log.v(TAG, "handleForceFlush(" + getDebugState()
+                        + "): hold your horses, client not ready: " + mEvents);
             }
             if (!mHandler.hasMessages(MSG_FLUSH)) {
                 handleScheduleFlush(/* checkExisting= */ false);
@@ -354,14 +375,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         final int numberEvents = mEvents.size();
         try {
             if (DEBUG) {
-                Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getActivityDebugName());
+                Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState());
             }
             mHandler.removeMessages(MSG_FLUSH);
 
             final ParceledListSlice<ContentCaptureEvent> events = handleClearEvents();
             mDirectServiceInterface.sendEvents(events);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error sending " + numberEvents + " for " + getActivityDebugName()
+            Log.w(TAG, "Error sending " + numberEvents + " for " + getDebugState()
                     + ": " + e);
         }
     }
@@ -384,7 +405,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (DEBUG) {
             Log.d(TAG, "Destroying session (ctx=" + mContext + ", id=" + mId + ") with "
                     + (mEvents == null ? 0 : mEvents.size()) + " event(s) for "
-                    + getActivityDebugName());
+                    + getDebugState());
         }
 
         try {
@@ -393,21 +414,19 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             mSystemServerInterface.finishSession(mContext.getUserId(), mId);
         } catch (RemoteException e) {
             Log.e(TAG, "Error destroying system-service session " + mId + " for "
-                    + getActivityDebugName() + ": " + e);
+                    + getDebugState() + ": " + e);
         }
-    }
-
-    private void handleResetState() {
-        handleResetSession(/* resetState= */ true);
     }
 
     // TODO(b/122454205): once we support multiple sessions, we might need to move some of these
     // clearings out.
-    private void handleResetSession(boolean resetState) {
-        if (resetState) {
-            mState = UNKNWON_STATE;
+    private void handleResetSession(int newState) {
+        if (VERBOSE) {
+            Log.v(TAG, "handleResetSession(" + getActivityName() + "): from "
+                    + getStateAsString(mState) + " to " + getStateAsString(newState));
         }
-
+        mState = newState;
+        mDisabled.set((newState & STATE_DISABLED) != 0);
         // TODO(b/122454205): must reset children (which currently is owned by superclass)
         mApplicationToken = null;
         mComponentName = null;
@@ -524,8 +543,13 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     /**
      * Gets a string that can be used to identify the activity on logging statements.
      */
-    private String getActivityDebugName() {
-        return mComponentName == null ? mContext.getPackageName()
-                : mComponentName.flattenToShortString();
+    private String getActivityName() {
+        return mComponentName == null
+                ? "pkg:" + mContext.getPackageName()
+                : "act:" + mComponentName.flattenToShortString();
+    }
+
+    private String getDebugState() {
+        return getActivityName() + " (state=" + getStateAsString(mState) + ")";
     }
 }
