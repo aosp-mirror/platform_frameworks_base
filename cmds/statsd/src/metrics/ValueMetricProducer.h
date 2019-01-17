@@ -57,6 +57,9 @@ public:
     void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
                           const int64_t version) override {
         std::lock_guard<std::mutex> lock(mMutex);
+        if (!mSplitBucketForAppUpgrade) {
+            return;
+        }
         if (mIsPulled && mCondition) {
             pullAndMatchEventsLocked(eventTimeNs - 1);
         }
@@ -185,6 +188,8 @@ private:
 
     const int64_t mMaxPullDelayNs;
 
+    const bool mSplitBucketForAppUpgrade;
+
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsNoCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset);
@@ -193,6 +198,7 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledWithAppUpgradeDisabled);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestAnomalyDetection);

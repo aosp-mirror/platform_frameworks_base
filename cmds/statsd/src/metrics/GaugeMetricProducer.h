@@ -74,6 +74,9 @@ public:
                           const int64_t version) override {
         std::lock_guard<std::mutex> lock(mMutex);
 
+        if (!mSplitBucketForAppUpgrade) {
+            return;
+        }
         if (eventTimeNs > getCurrentBucketEndTimeNs()) {
             // Flush full buckets on the normal path up to the latest bucket boundary.
             flushIfNeededLocked(eventTimeNs);
@@ -176,11 +179,14 @@ private:
 
     const size_t mGaugeAtomsPerDimensionLimit;
 
+    const bool mSplitBucketForAppUpgrade;
+
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledWithUpgrade);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPulledWithAppUpgradeDisabled);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsAnomalyDetection);
     FRIEND_TEST(GaugeMetricProducerTest, TestFirstBucket);
     FRIEND_TEST(GaugeMetricProducerTest, TestPullOnTrigger);
