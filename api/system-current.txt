@@ -5743,6 +5743,11 @@ package android.provider {
     field public static final String NAMESPACE = "activity_manager";
   }
 
+  public static interface DeviceConfig.ActivityManagerNativeBoot {
+    field public static final String NAMESPACE = "activity_manager_native_boot";
+    field public static final String OFFLOAD_QUEUE_ENABLED = "offload_queue_enabled";
+  }
+
   public static interface DeviceConfig.AttentionManagerService {
     field public static final String NAMESPACE = "attention_manager_service";
     field public static final String PROPERTY_COMPONENT_NAME = "component_name";
