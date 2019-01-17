@@ -805,9 +805,11 @@ public class PhoneStateListener {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 
-            Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(
-                            () -> psl.onDataConnectionStateChanged(state, networkType)));
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> {
+                        psl.onDataConnectionStateChanged(state, networkType);
+                        psl.onDataConnectionStateChanged(state);
+                    }));
         }
 
         public void onDataActivity(int direction) {
