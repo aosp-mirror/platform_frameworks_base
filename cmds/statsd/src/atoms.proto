@@ -28,6 +28,7 @@ import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hci/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hfp/enums.proto";
 import "frameworks/base/core/proto/android/debug/enums.proto";
+import "frameworks/base/core/proto/android/hardware/biometrics/enums.proto";
 import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
@@ -146,9 +147,9 @@ message Atom {
         VibratorStateChanged vibrator_state_changed = 84;
         DeferredJobStatsReported deferred_job_stats_reported = 85;
         ThermalThrottlingStateChanged thermal_throttling = 86;
-        FingerprintAcquired fingerprint_acquired = 87;
-        FingerprintAuthenticated fingerprint_authenticated = 88;
-        FingerprintErrorOccurred fingerprint_error_occurred = 89;
+        BiometricAcquired biometric_acquired = 87;
+        BiometricAuthenticated biometric_authenticated = 88;
+        BiometricErrorOccurred biometric_error_occurred = 89;
         Notification notification = 90;
         BatteryHealthSnapshot battery_health_snapshot = 91;
         SlowIo slow_io = 92;
@@ -210,6 +211,7 @@ message Atom {
         SpeechDspStatReported speech_dsp_stat_reported = 145;
         UsbContaminantReported usb_contaminant_reported = 146;
         WatchdogRollbackOccurred watchdog_rollback_occurred = 147;
+        BiometricHalDeathReported biometric_hal_death_reported = 148;
     }
 
     // Pulled events will start at field 10000.
@@ -246,7 +248,7 @@ message Atom {
         CategorySize category_size = 10028;
         ProcStats proc_stats = 10029;
         BatteryVoltage battery_voltage = 10030;
-        NumFingerprints num_fingerprints = 10031;
+        NumBiometricsEnrolled num_fingerprints_enrolled = 10031;
         DiskIo disk_io = 10032;
         PowerProfile power_profile = 10033;
         ProcStatsPkgProc proc_stats_pkg_proc = 10034;
@@ -263,6 +265,7 @@ message Atom {
         BatteryCycleCount battery_cycle_count = 10045;
         DebugElapsedClock debug_elapsed_clock = 10046;
         DebugFailingElapsedClock debug_failing_elapsed_clock = 10047;
+        NumBiometricsEnrolled num_faces_enrolled = 10048;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -2373,58 +2376,95 @@ message GenericAtom {
 }
 
 /**
- * Logs when a fingerprint acquire event occurs.
+ * Logs when a biometric acquire event occurs.
  *
  * Logged from:
- *   frameworks/base/services/core/java/com/android/server/biometrics/fingerprint/FingerprintService.java
+ *   frameworks/base/services/core/java/com/android/server/biometrics
  */
-message FingerprintAcquired {
-    // The associated user. Eg: 0 for owners, 10+ for others.
-    // Defined in android/os/UserHandle.java
-    optional int32 user = 1;
-    // If this acquire is for a crypto fingerprint.
-    // e.g. Secure purchases, unlock password storage.
-    optional bool is_crypto = 2;
+message BiometricAcquired {
+    // Biometric modality that was acquired.
+    optional android.hardware.biometrics.ModalityEnum modality = 1;
+    // The associated user. Eg: 0 for owners, 10+ for others. Defined in android/os/UserHandle.java.
+    optional int32 user = 2;
+    // If this acquire is for a crypto operation. e.g. Secure purchases, unlock password storage.
+    optional bool is_crypto = 3;
+    // Action that the device is performing. Acquired messages are only expected for enroll and
+    // authenticate. Other actions may indicate an error.
+    optional android.hardware.biometrics.ActionEnum action = 4;
+    // The client that this acquisition was received for.
+    optional android.hardware.biometrics.ClientEnum client = 5;
+    // Acquired constants, e.g. ACQUIRED_GOOD. See constants defined by <Biometric>Manager.
+    optional int32 acquire_info = 6;
+    // Vendor-specific acquire info. Valid only if acquire_info == ACQUIRED_VENDOR.
+    optional int32 acquire_info_vendor = 7;
 }
 
 /**
- * Logs when a fingerprint authentication event occurs.
+ * Logs when a biometric authentication event occurs.
  *
  * Logged from:
- *   frameworks/base/services/core/java/com/android/server/biometrics/fingerprint/FingerprintService.java
+ *   frameworks/base/services/core/java/com/android/server/biometrics
  */
-message FingerprintAuthenticated {
-    // The associated user. Eg: 0 for owners, 10+ for others.
-    // Defined in android/os/UserHandle.java
-    optional int32 user = 1;
-    // If this authentication is for a crypto fingerprint.
-    // e.g. Secure purchases, unlock password storage.
-    optional bool is_crypto = 2;
-    // Whether or not this authentication was successful.
-    optional bool is_authenticated = 3;
-}
+message BiometricAuthenticated {
+    // Biometric modality that was used.
+    optional android.hardware.biometrics.ModalityEnum modality = 1;
+    // The associated user. Eg: 0 for owners, 10+ for others. Defined in android/os/UserHandle.java
+    optional int32 user = 2;
+    // If this authentication is for a crypto operation. e.g. Secure purchases, unlock password
+    // storage.
+    optional bool is_crypto = 3;
+    // The client that this acquisition was received for.
+    optional android.hardware.biometrics.ClientEnum client = 4;
 
-/**
- * Logs when a fingerprint error occurs.
- *
- * Logged from:
- *   frameworks/base/services/core/java/com/android/server/biometrics/fingerprint/FingerprintService.java
- */
-message FingerprintErrorOccurred {
-    // The associated user. Eg: 0 for owners, 10+ for others.
-    // Defined in android/os/UserHandle.java
-    optional int32 user = 1;
-    // If this error is for a crypto fingerprint.
-    // e.g. Secure purchases, unlock password storage.
-    optional bool is_crypto = 2;
-
-    enum Error {
+    enum State {
         UNKNOWN = 0;
-        LOCKOUT = 1;
-        PERMANENT_LOCKOUT = 2;
+        REJECTED = 1;
+        PENDING_CONFIRMATION = 2;
+        CONFIRMED = 3;
     }
-    // The type of error.
-    optional Error error = 3;
+
+    // State of the current auth attempt.
+    optional State state = 5;
+    // Time it took to authenticate. For BiometricPrompt where setRequireConfirmation(false) is
+    // specified and supported by the biometric modality, this is from the first ACQUIRED_GOOD to
+    // AUTHENTICATED. for setRequireConfirmation(true), this is from PENDING_CONFIRMATION to
+    // CONFIRMED.
+    optional int32 latency = 6;
+}
+
+/**
+ * Logs when a biometric error occurs.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/biometrics
+ */
+message BiometricErrorOccurred {
+    // Biometric modality that was used.
+    optional android.hardware.biometrics.ModalityEnum modality = 1;
+    // The associated user. Eg: 0 for owners, 10+ for others. Defined in android/os/UserHandle.java
+    optional int32 user = 2;
+    // If this error is for a crypto operation. e.g. Secure purchases, unlock password storage.
+    optional bool is_crypto = 3;
+    // Action that the device is performing.
+    optional android.hardware.biometrics.ActionEnum action = 4;
+    // The client that this acquisition was received for.
+    optional android.hardware.biometrics.ClientEnum client = 5;
+    // Error constants. See constants defined by <Biometric>Manager. Enums won't work since errors
+    // are unique to modality.
+    optional int32 error_info = 6;
+    // Vendor-specific error info. Valid only if acquire_info == ACQUIRED_VENDOR. These are defined
+    // by the vendor and not specified by the HIDL interface.
+    optional int32 error_info_vendor = 7;
+}
+
+/**
+ * Logs when a biometric HAL has crashed.
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/biometrics
+ */
+message BiometricHalDeathReported {
+    // Biometric modality.
+    optional android.hardware.biometrics.ModalityEnum modality = 1;
 }
 
 message Notification {
@@ -3367,14 +3407,14 @@ message DiskIo {
 /**
  * Pulls the number of fingerprints for each user.
  *
- * Pulled from StatsCompanionService, which queries FingerprintManager.
+ * Pulled from StatsCompanionService, which queries <Biometric>Manager.
  */
-message NumFingerprints {
+message NumBiometricsEnrolled {
     // The associated user. Eg: 0 for owners, 10+ for others.
     // Defined in android/os/UserHandle.java
     optional int32 user = 1;
     // Number of fingerprints registered to that user.
-    optional int32 num_fingerprints = 2;
+    optional int32 num_enrolled = 2;
 }
 
 message AggStats {

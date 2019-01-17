@@ -1897,7 +1897,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 pullCategorySize(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
-            case StatsLog.NUM_FINGERPRINTS: {
+            case StatsLog.NUM_FINGERPRINTS_ENROLLED: {
                 pullNumFingerprints(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
