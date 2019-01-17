@@ -306,9 +306,18 @@ public class GraphicsEnvironment {
                                                 String packageName,
                                                 String paths,
                                                 String devOptIn) {
-        // Check for temporary rules if debuggable or root
-        if (!isDebuggable(context) && !(getCanLoadSystemLibraries() == 1)) {
-            Log.v(TAG, "Skipping loading temporary rules file");
+        /**
+         * We only want to load a temp rules file for:
+         *  - apps that are marked 'debuggable' in their manifest
+         *  - devices that are running a userdebug build (ro.debuggable) or can inject libraries for
+         *    debugging (PR_SET_DUMPABLE).
+         */
+        boolean appIsDebuggable = isDebuggable(context);
+        boolean deviceIsDebuggable = getCanLoadSystemLibraries() == 1;
+        if (!(appIsDebuggable || deviceIsDebuggable)) {
+            Log.v(TAG, "Skipping loading temporary rules file: "
+                    + "appIsDebuggable = " + appIsDebuggable + ", "
+                    + "adbRootEnabled = " + deviceIsDebuggable);
             return false;
         }
 
