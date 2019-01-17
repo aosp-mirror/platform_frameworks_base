@@ -286,6 +286,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             mEvents = new ArrayList<>(MAX_BUFFER_SIZE);
         }
 
+        // Some type of events can be merged together
+        boolean addEvent = true;
+
         if (!mEvents.isEmpty() && eventType == TYPE_VIEW_TEXT_CHANGED) {
             final ContentCaptureEvent lastEvent = mEvents.get(mEvents.size() - 1);
 
@@ -297,10 +300,24 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                             + event.getText());
                 }
                 lastEvent.setText(event.getText());
-            } else {
-                mEvents.add(event);
+                addEvent = false;
             }
-        } else {
+        }
+
+        if (!mEvents.isEmpty() && eventType == TYPE_VIEW_DISAPPEARED) {
+            final ContentCaptureEvent lastEvent = mEvents.get(mEvents.size() - 1);
+            if (lastEvent.getType() == TYPE_VIEW_DISAPPEARED
+                    && event.getSessionId().equals(lastEvent.getSessionId())) {
+                if (VERBOSE) {
+                    Log.v(TAG, "Buffering TYPE_VIEW_DISAPPEARED events for session "
+                            + lastEvent.getSessionId());
+                }
+                lastEvent.addAutofillId(event.getId());
+                addEvent = false;
+            }
+        }
+
+        if (addEvent) {
             mEvents.add(event);
         }
 

@@ -363,8 +363,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         Preconditions.checkArgument(!ArrayUtils.isEmpty(virtualIds), "virtual ids cannot be empty");
         if (!isContentCaptureEnabled()) return;
 
-        // TODO(b/121050915): create a new VIEWS_DISAPPEARED event type, which could also be used
-        // to batch delete non-virtual views
+        // TODO(b/123036895): use a internalNotifyViewsDisappeared that optimizes how the event is
+        // parcelized
         for (int id : virtualIds) {
             internalNotifyViewDisappeared(new AutofillId(hostId, id, getIdAsInt()));
         }
