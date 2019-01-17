@@ -441,7 +441,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             Dependency.get(NotificationEntryManager.class);
     private final IStatusBarService mBarService = IStatusBarService.Stub.asInterface(
             ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    @VisibleForTesting
+    protected final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final NotificationRemoteInputManager mRemoteInputManager =
             Dependency.get(NotificationRemoteInputManager.class);
     private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
@@ -5638,8 +5639,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
       }
     };
 
+    @VisibleForTesting
     @ShadeViewRefactor(RefactorComponent.INPUT)
-    private final OnMenuEventListener mMenuEventListener = new OnMenuEventListener() {
+    protected final OnMenuEventListener mMenuEventListener = new OnMenuEventListener() {
         @Override
         public void onMenuClicked(View view, int x, int y, MenuItem item) {
             if (mLongPressListener == null) {
@@ -5647,8 +5649,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
             if (view instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_TOUCH_GEAR,
-                        row.getStatusBarNotification().getPackageName());
+                mMetricsLogger.write(row.getStatusBarNotification().getLogMaker()
+                        .setCategory(MetricsEvent.ACTION_TOUCH_GEAR)
+                        .setType(MetricsEvent.TYPE_ACTION)
+                        );
             }
             mLongPressListener.onLongPress(view, x, y, item);
         }
@@ -5671,8 +5675,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         public void onMenuShown(View row) {
             if (row instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow notificationRow = (ExpandableNotificationRow) row;
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_REVEAL_GEAR,
-                        notificationRow.getStatusBarNotification().getPackageName());
+                mMetricsLogger.write(notificationRow.getStatusBarNotification().getLogMaker()
+                        .setCategory(MetricsEvent.ACTION_REVEAL_GEAR)
+                        .setType(MetricsEvent.TYPE_ACTION));
                 mHeadsUpManager.setMenuShown(notificationRow.getEntry(), true);
             }
             mSwipeHelper.onMenuShown(row);
