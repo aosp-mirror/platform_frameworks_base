@@ -162,11 +162,11 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
     @Override
     public String toString() {
         return new StringBuilder()
-                .append("WifiNetworkSpecifierWifiNetworkSpecifier [")
+                .append("WifiNetworkSpecifier [")
                 .append(", SSID Match pattern=").append(ssidPatternMatcher)
                 .append(", BSSID Match pattern=").append(bssidPatternMatcher)
-                .append(", WifiConfiguration=").append(
-                wifiConfiguration == null ? null : wifiConfiguration.configKey())
+                .append(", SSID=").append(wifiConfiguration.SSID)
+                .append(", BSSID=").append(wifiConfiguration.BSSID)
                 .append(", requestorUid=").append(requestorUid)
                 .append("]")
                 .toString();
