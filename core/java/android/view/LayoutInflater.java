@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -398,19 +399,31 @@ public abstract class LayoutInflater {
     }
 
     private void initPrecompiledViews() {
+        // Check if precompiled layouts are enabled by a system property.
+        mUseCompiledView =
+            SystemProperties.getBoolean(USE_PRECOMPILED_LAYOUT_SYSTEM_PROPERTY, false);
+        if (!mUseCompiledView) {
+            return;
+        }
+
+        // Make sure the application allows code generation
+        ApplicationInfo appInfo = mContext.getApplicationInfo();
+        if ((appInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PREFER_CODE_INTEGRITY) != 0
+            || appInfo.isPrivilegedApp()) {
+            mUseCompiledView = false;
+            return;
+        }
+
+        // Try to load the precompiled layout file.
         try {
-            mUseCompiledView =
-                SystemProperties.getBoolean(USE_PRECOMPILED_LAYOUT_SYSTEM_PROPERTY, false);
-            if (mUseCompiledView) {
-                mPrecompiledClassLoader = mContext.getClassLoader();
-                String dexFile = mContext.getCodeCacheDir() + COMPILED_VIEW_DEX_FILE_NAME;
-                if (new File(dexFile).exists()) {
-                    mPrecompiledClassLoader = new PathClassLoader(dexFile, mPrecompiledClassLoader);
-                } else {
-                    // If the precompiled layout file doesn't exist, then disable precompiled
-                    // layouts.
-                    mUseCompiledView = false;
-                }
+            mPrecompiledClassLoader = mContext.getClassLoader();
+            String dexFile = mContext.getCodeCacheDir() + COMPILED_VIEW_DEX_FILE_NAME;
+            if (new File(dexFile).exists()) {
+                mPrecompiledClassLoader = new PathClassLoader(dexFile, mPrecompiledClassLoader);
+            } else {
+                // If the precompiled layout file doesn't exist, then disable precompiled
+                // layouts.
+                mUseCompiledView = false;
             }
         } catch (Throwable e) {
             if (DEBUG) {
