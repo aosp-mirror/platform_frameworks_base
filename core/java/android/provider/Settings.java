@@ -11724,6 +11724,7 @@ public final class Settings {
          * entity_list_not_editable                 (String[])
          * entity_list_editable                     (String[])
          * lang_id_threshold_override               (float)
+         * template_intent_factory_enabled          (boolean)
          * </pre>
          *
          * <p>

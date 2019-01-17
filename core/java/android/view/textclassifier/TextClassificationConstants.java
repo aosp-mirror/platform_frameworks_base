@@ -47,6 +47,7 @@ import java.util.StringJoiner;
  * entity_list_not_editable                 (String[])
  * entity_list_editable                     (String[])
  * lang_id_threshold_override               (float)
+ * template_intent_factory_enabled          (boolean)
  * </pre>
  *
  * <p>
@@ -97,6 +98,7 @@ public final class TextClassificationConstants {
             "notification_conversation_action_types_default";
     private static final String LANG_ID_THRESHOLD_OVERRIDE =
             "lang_id_threshold_override";
+    private static final String TEMPLATE_INTENT_FACTORY_ENABLED = "template_intent_factory_enabled";
 
     private static final boolean LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
     private static final boolean SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
@@ -137,6 +139,7 @@ public final class TextClassificationConstants {
      * @see EntityConfidence
      */
     private static final float LANG_ID_THRESHOLD_OVERRIDE_DEFAULT = -1f;
+    private static final boolean TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT = true;
 
     private final boolean mSystemTextClassifierEnabled;
     private final boolean mLocalTextClassifierEnabled;
@@ -155,6 +158,7 @@ public final class TextClassificationConstants {
     private final List<String> mInAppConversationActionTypesDefault;
     private final List<String> mNotificationConversationActionTypesDefault;
     private final float mLangIdThresholdOverride;
+    private final boolean mTemplateIntentFactoryEnabled;
 
     private TextClassificationConstants(@Nullable String settings) {
         final KeyValueListParser parser = new KeyValueListParser(',');
@@ -215,6 +219,8 @@ public final class TextClassificationConstants {
         mLangIdThresholdOverride = parser.getFloat(
                 LANG_ID_THRESHOLD_OVERRIDE,
                 LANG_ID_THRESHOLD_OVERRIDE_DEFAULT);
+        mTemplateIntentFactoryEnabled = parser.getBoolean(
+                TEMPLATE_INTENT_FACTORY_ENABLED, TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT);
     }
 
     /** Load from a settings string. */
@@ -290,6 +296,10 @@ public final class TextClassificationConstants {
         return mLangIdThresholdOverride;
     }
 
+    public boolean isTemplateIntentFactoryEnabled() {
+        return mTemplateIntentFactoryEnabled;
+    }
+
     private static List<String> parseStringList(String listStr) {
         return Collections.unmodifiableList(Arrays.asList(listStr.split(STRING_LIST_DELIMITER)));
     }
@@ -315,6 +325,7 @@ public final class TextClassificationConstants {
         pw.printPair("getNotificationConversationActionTypes",
                 mNotificationConversationActionTypesDefault);
         pw.printPair("getLangIdThresholdOverride", mLangIdThresholdOverride);
+        pw.printPair("isTemplateIntentFactoryEnabled", mTemplateIntentFactoryEnabled);
         pw.decreaseIndent();
         pw.println();
     }
