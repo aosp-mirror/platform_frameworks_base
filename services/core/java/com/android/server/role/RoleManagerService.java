@@ -342,10 +342,21 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     @WorkerThread
     private void notifyRoleHoldersChanged(@NonNull String roleName, @UserIdInt int userId) {
         RemoteCallbackList<IOnRoleHoldersChangedListener> listeners = getListeners(userId);
-        if (listeners == null) {
-            return;
+        if (listeners != null) {
+            notifyRoleHoldersChangedForListeners(listeners, roleName, userId);
         }
 
+        RemoteCallbackList<IOnRoleHoldersChangedListener> allUserListeners = getListeners(
+                UserHandle.USER_ALL);
+        if (allUserListeners != null) {
+            notifyRoleHoldersChangedForListeners(allUserListeners, roleName, userId);
+        }
+    }
+
+    @WorkerThread
+    private void notifyRoleHoldersChangedForListeners(
+            @NonNull RemoteCallbackList<IOnRoleHoldersChangedListener> listeners,
+            @NonNull String roleName, @UserIdInt int userId) {
         int broadcastCount = listeners.beginBroadcast();
         try {
             for (int i = 0; i < broadcastCount; i++) {
@@ -395,7 +406,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 Slog.e(LOG_TAG, "user " + userId + " does not exist");
                 return Collections.emptyList();
             }
-            userId = handleIncomingUser(userId, "getRoleHoldersAsUser");
+            userId = handleIncomingUser(userId, "getRoleHoldersAsUser", false);
             getContext().enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ROLE_HOLDERS,
                     "getRoleHoldersAsUser");
 
@@ -423,7 +434,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 Slog.e(LOG_TAG, "user " + userId + " does not exist");
                 return;
             }
-            userId = handleIncomingUser(userId, "addRoleHolderAsUser");
+            userId = handleIncomingUser(userId, "addRoleHolderAsUser", false);
             getContext().enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ROLE_HOLDERS,
                     "addRoleHolderAsUser");
 
@@ -440,7 +451,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 Slog.e(LOG_TAG, "user " + userId + " does not exist");
                 return;
             }
-            userId = handleIncomingUser(userId, "removeRoleHolderAsUser");
+            userId = handleIncomingUser(userId, "removeRoleHolderAsUser", false);
             getContext().enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ROLE_HOLDERS,
                     "removeRoleHolderAsUser");
 
@@ -457,7 +468,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 Slog.e(LOG_TAG, "user " + userId + " does not exist");
                 return;
             }
-            userId = handleIncomingUser(userId, "clearRoleHoldersAsUser");
+            userId = handleIncomingUser(userId, "clearRoleHoldersAsUser", false);
             getContext().enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ROLE_HOLDERS,
                     "clearRoleHoldersAsUser");
 
@@ -468,11 +479,12 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         public void addOnRoleHoldersChangedListenerAsUser(
                 @NonNull IOnRoleHoldersChangedListener listener, @UserIdInt int userId) {
             Preconditions.checkNotNull(listener, "listener cannot be null");
-            if (!mUserManagerInternal.exists(userId)) {
+            if (userId != UserHandle.USER_ALL && !mUserManagerInternal.exists(userId)) {
                 Slog.e(LOG_TAG, "user " + userId + " does not exist");
                 return;
             }
-            userId = handleIncomingUser(userId, "addOnRoleHoldersChangedListenerAsUser");
+            userId = handleIncomingUser(userId, "addOnRoleHoldersChangedListenerAsUser",
+                    true);
             getContext().enforceCallingOrSelfPermission(Manifest.permission.OBSERVE_ROLE_HOLDERS,
                     "addOnRoleHoldersChangedListenerAsUser");
 
@@ -485,11 +497,12 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         public void removeOnRoleHoldersChangedListenerAsUser(
                 @NonNull IOnRoleHoldersChangedListener listener, @UserIdInt int userId) {
             Preconditions.checkNotNull(listener, "listener cannot be null");
-            if (!mUserManagerInternal.exists(userId)) {
+            if (userId != UserHandle.USER_ALL && !mUserManagerInternal.exists(userId)) {
                 Slog.e(LOG_TAG, "user " + userId + " does not exist");
                 return;
             }
-            userId = handleIncomingUser(userId, "removeOnRoleHoldersChangedListenerAsUser");
+            userId = handleIncomingUser(userId, "removeOnRoleHoldersChangedListenerAsUser",
+                    true);
             getContext().enforceCallingOrSelfPermission(Manifest.permission.OBSERVE_ROLE_HOLDERS,
                     "removeOnRoleHoldersChangedListenerAsUser");
 
@@ -553,9 +566,10 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         }
 
         @CheckResult
-        private int handleIncomingUser(@UserIdInt int userId, @NonNull String name) {
+        private int handleIncomingUser(@UserIdInt int userId, @NonNull String name,
+                boolean allowAll) {
             return ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
-                    false, true, name, null);
+                    allowAll, true, name, null);
         }
 
         @Override
