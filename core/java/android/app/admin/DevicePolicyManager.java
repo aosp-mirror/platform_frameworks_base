@@ -2168,6 +2168,74 @@ public class DevicePolicyManager {
     public @interface SetPrivateDnsModeResultConstants {}
 
     /**
+     * Activity action: Starts the administrator to get the mode for the provisioning.
+     * This intent may contain the following extras:
+     * <ul>
+     *     <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_IMEI}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SERIAL_NUMBER}</li>
+     * </ul>
+     *
+     * <p>The target activity should return one of the following values in
+     * {@link #EXTRA_PROVISIONING_MODE} as result:
+     * <ul>
+     *     <li>{@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}</li>
+     *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE}</li>
+     *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE_ON_FULLY_MANAGED_DEVICE}</li>
+     * </ul>
+     *
+     * <p>The target activity may also return the account that needs to be migrated from primary
+     * user to managed profile in case of a profile owner provisioning in
+     * {@link #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE} as result.
+     */
+    public static final String ACTION_GET_PROVISIONING_MODE =
+            "android.app.action.GET_PROVISIONING_MODE";
+
+    /**
+     * A string extra holding the IMEI (International Mobile Equipment Identity) of the device.
+     */
+    public static final String EXTRA_PROVISIONING_IMEI = "android.app.extra.PROVISIONING_IMEI";
+
+    /**
+     * A string extra holding the serial number of the device.
+     */
+    public static final String EXTRA_PROVISIONING_SERIAL_NUMBER =
+            "android.app.extra.PROVISIONING_SERIAL_NUMBER";
+
+    /**
+     * An intent extra holding the provisioning mode returned by the administrator.
+     * The value for this extra should be one of the following:
+     * <ul>
+     *     <li>{@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}</li>
+     *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE}</li>
+     *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE_ON_FULLY_MANAGED_DEVICE}</li>
+     * </ul>
+     */
+    public static final String EXTRA_PROVISIONING_MODE =
+            "android.app.extra.PROVISIONING_MODE";
+
+    /**
+     * The provisioning mode for fully managed device.
+     */
+    public static final int PROVISIONING_MODE_FULLY_MANAGED_DEVICE = 1;
+
+    /**
+     * The provisioning mode for managed profile.
+     */
+    public static final int PROVISIONING_MODE_MANAGED_PROFILE = 2;
+
+    /**
+     * The provisioning mode for managed profile on a fully managed device.
+     */
+    public static final int PROVISIONING_MODE_MANAGED_PROFILE_ON_FULLY_MANAGED_DEVICE = 3;
+
+    /**
+     * Activity action: Starts the administrator to show policy compliance for the provisioning.
+     */
+    public static final String ACTION_ADMIN_POLICY_COMPLIANCE =
+            "android.app.action.ADMIN_POLICY_COMPLIANCE";
+
+    /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
      * @param admin The administrator component to check for.
