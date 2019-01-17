@@ -152,9 +152,7 @@ public final class Session2Token implements Parcelable {
         mType = in.readInt();
         mPackageName = in.readString();
         mServiceName = in.readString();
-        // TODO: Uncomment below and stop hardcode mSessionLink
-        mSessionLink = null;
-        //mSessionLink = ISession.Stub.asInterface(in.readStrongBinder());
+        mSessionLink = Session2Link.CREATOR.createFromParcel(in);
         mComponentName = ComponentName.unflattenFromString(in.readString());
     }
 
@@ -164,8 +162,7 @@ public final class Session2Token implements Parcelable {
         dest.writeInt(mType);
         dest.writeString(mPackageName);
         dest.writeString(mServiceName);
-        // TODO: Uncomment below
-        //dest.writeStrongBinder(mSessionLink.getBinder());
+        mSessionLink.writeToParcel(dest, flags);
         dest.writeString(mComponentName == null ? "" : mComponentName.flattenToString());
     }
 
