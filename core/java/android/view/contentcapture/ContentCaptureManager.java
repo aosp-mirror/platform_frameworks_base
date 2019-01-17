@@ -24,8 +24,8 @@ import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -50,8 +50,6 @@ import java.io.PrintWriter;
 public final class ContentCaptureManager {
 
     private static final String TAG = ContentCaptureManager.class.getSimpleName();
-
-    private static final String BG_THREAD_NAME = "intel_svc_streamer_thread";
 
     /**
      * Timeout for calls to system_server.
@@ -89,24 +87,13 @@ public final class ContentCaptureManager {
     public ContentCaptureManager(@NonNull Context context,
             @Nullable IContentCaptureManager service) {
         mContext = Preconditions.checkNotNull(context, "context cannot be null");
-        if (VERBOSE) {
-            Log.v(TAG, "Constructor for " + context.getPackageName());
-        }
-        mService = service;
-        // TODO(b/119220549): use an existing bg thread instead...
-        final HandlerThread bgThread = new HandlerThread(BG_THREAD_NAME);
-        bgThread.start();
-        mHandler = Handler.createAsync(bgThread.getLooper());
-    }
+        if (VERBOSE) Log.v(TAG, "Constructor for " + context.getPackageName());
 
-    @NonNull
-    private static Handler newHandler() {
-        // TODO(b/119220549): use an existing bg thread instead...
-        // TODO(b/119220549): use UI Thread directly (as calls are one-way) or an existing bgThread
-        // or a shared thread / handler held at the Application level
-        final HandlerThread bgThread = new HandlerThread(BG_THREAD_NAME);
-        bgThread.start();
-        return Handler.createAsync(bgThread.getLooper());
+        mService = service;
+        // TODO(b/119220549): we might not even need a handler, as the IPCs are oneway. But if we
+        // do, then we should optimize it to run the tests after the Choreographer finishes the most
+        // important steps of the frame.
+        mHandler = Handler.createAsync(Looper.getMainLooper());
     }
 
     /**
