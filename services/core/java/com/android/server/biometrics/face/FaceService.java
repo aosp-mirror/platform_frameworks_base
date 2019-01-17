@@ -675,6 +675,12 @@ public class FaceService extends BiometricServiceBase {
     }
 
     @Override
+    public void serviceDied(long cookie) {
+        super.serviceDied(cookie);
+        mDaemon = null;
+    }
+
+    @Override
     protected void updateActiveGroup(int userId, String clientPackage) {
         IBiometricsFace daemon = getFaceDaemon();
 
@@ -864,6 +870,8 @@ public class FaceService extends BiometricServiceBase {
             Slog.e(TAG, "dump formatting failure", e);
         }
         pw.println(dump);
+        pw.println("HAL Deaths: " + mHALDeathCount);
+        mHALDeathCount = 0;
     }
 
     private void dumpProto(FileDescriptor fd) {
