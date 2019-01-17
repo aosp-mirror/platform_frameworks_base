@@ -25,6 +25,7 @@ import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hci/enums.proto";
+import "frameworks/base/core/proto/android/bluetooth/hfp/enums.proto";
 import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
@@ -131,6 +132,8 @@ message Atom {
         NetworkDnsEventReported network_dns_event_reported = 116;
         DataStallEvent data_stall_event = 121;
         BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event = 125;
+        BluetoothAclConnectionStateChanged bluetooth_acl_connection_state_changed = 126;
+        BluetoothScoConnectionStateChanged bluetooth_sco_connection_state_changed = 127;
     }
 
     // Pulled events will start at field 10000.
@@ -998,10 +1001,12 @@ message BluetoothEnabledStateChanged {
 }
 
 /**
- * Logs when a Bluetooth device connects and disconnects.
+ * Logs when profiles on a Bluetooth device connects and disconnects.
  *
  * Logged from:
- *    packages/apps/Bluetooth/src/com/android/bluetooth/btservice/AdapterProperties.java
+ *    packages/apps/Bluetooth/src/com/android/bluetooth/btservice/RemoteDevices.java
+ *
+ * Next Tag: 5
  */
 message BluetoothConnectionStateChanged {
     // The state of the connection.
@@ -1010,10 +1015,65 @@ message BluetoothConnectionStateChanged {
     // An identifier that can be used to match connect and disconnect events.
     // Currently is last two bytes of a hash of a device level ID and
     // the mac address of the bluetooth device that is connected.
-    optional int32 obfuscated_id = 2;
+    // Deprecated: use obfuscated_id instead, this one is always 0 for Q+
+    optional int32 OBSOLETE_obfuscated_id = 2 [deprecated = true];
     // The profile that is connected. Eg. GATT, A2DP, HEADSET.
     // From android.bluetooth.BluetoothAdapter.java
+    // Default: 0 when not used
     optional int32 bt_profile = 3;
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 4 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Logs when a Bluetooth device connects and disconnects over ACL
+ *
+ * Logged from:
+ *    packages/apps/Bluetooth/src/com/android/bluetooth/btservice/AdapterProperties.java
+ *
+ * Next Tag: 3
+ */
+message BluetoothAclConnectionStateChanged {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // The state of the connection.
+    // Eg: CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED.
+    optional android.bluetooth.ConnectionStateEnum state = 2;
+}
+
+/**
+ * Logs when a Bluetooth device connects and disconnects over SCO
+ *
+ * Logged from:
+ *    packages/apps/Bluetooth/src/com/android/bluetooth/hfp/HeadsetStateMachine.java
+ *    packages/apps/Bluetooth/src/com/android/bluetooth/hfp/HeadsetClientStateMachine.java
+ *
+ * Next Tag: 4
+ */
+message BluetoothScoConnectionStateChanged {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // The state of the connection.
+    // Eg: CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED.
+    optional android.bluetooth.ConnectionStateEnum state = 2;
+    // Codec used for this SCO connection
+    // Default: UNKNOWN
+    optional android.bluetooth.hfp.ScoCodec codec = 3;
 }
 
 // Logs when there is an event affecting Bluetooth device's link layer connection.
