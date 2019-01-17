@@ -26,11 +26,11 @@ import android.widget.LinearLayout;
  * Layout class representing the Global Actions menu which appears when the power button is held.
  */
 public abstract class MultiListLayout extends LinearLayout {
-    boolean mHasOutsideTouch;
-    boolean mHasSeparatedView;
+    protected boolean mHasOutsideTouch;
+    protected boolean mHasSeparatedView;
 
-    int mExpectedSeparatedItemCount;
-    int mExpectedListItemCount;
+    protected int mExpectedSeparatedItemCount;
+    protected int mExpectedListItemCount;
 
     public MultiListLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
