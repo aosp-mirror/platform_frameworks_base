@@ -1778,11 +1778,7 @@ public final class Bitmap implements Parcelable {
         }
 
         ColorSpace cs = Color.colorSpace(c);
-        float r = Color.red(c);
-        float g = Color.green(c);
-        float b = Color.blue(c);
-        float a = Color.alpha(c);
-        nativeErase(mNativePtr, cs.getNativeInstance(), r, g, b, a);
+        nativeErase(mNativePtr, cs.getNativeInstance(), c);
     }
 
     /**
@@ -2128,8 +2124,7 @@ public final class Bitmap implements Parcelable {
                                             int quality, OutputStream stream,
                                             byte[] tempStorage);
     private static native void nativeErase(long nativeBitmap, int color);
-    private static native void nativeErase(long nativeBitmap, long colorSpacePtr,
-                                           float r, float g, float b, float a);
+    private static native void nativeErase(long nativeBitmap, long colorSpacePtr, long color);
     private static native int nativeRowBytes(long nativeBitmap);
     private static native int nativeConfig(long nativeBitmap);
 
