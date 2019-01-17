@@ -7191,6 +7191,7 @@ package android.telephony.ims {
     method public int getServiceType();
     method public static int getVideoStateFromCallType(int);
     method public static int getVideoStateFromImsCallProfile(android.telephony.ims.ImsCallProfile);
+    method public boolean isEmergencyCallTesting();
     method public boolean isVideoCall();
     method public boolean isVideoPaused();
     method public static int presentationToOir(int);
@@ -7199,6 +7200,7 @@ package android.telephony.ims {
     method public void setCallExtraInt(java.lang.String, int);
     method public void setCallRestrictCause(int);
     method public void setEmergencyCallRouting(int);
+    method public void setEmergencyCallTesting(boolean);
     method public void setEmergencyServiceCategories(int);
     method public void setEmergencyUrns(java.util.List<java.lang.String>);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
