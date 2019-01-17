@@ -13781,6 +13781,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     ServiceManager.getService(Context.BACKUP_SERVICE));
             if (bm != null) {
                 int userId = args.user.getIdentifier();
+                // For backwards compatibility as USER_ALL previously routed directly to USER_SYSTEM
+                // in the BackupManager. USER_ALL is used in compatibility tests.
+                if (userId == UserHandle.USER_ALL) {
+                    userId = UserHandle.USER_SYSTEM;
+                }
                 if (DEBUG_INSTALL) {
                     Log.v(TAG, "token " + token + " to BM for possible restore for user " + userId);
                 }
