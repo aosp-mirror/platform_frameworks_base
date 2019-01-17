@@ -54,6 +54,7 @@ import android.webkit.WebView.VisualStateCallback;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * WebView backend provider interface: this interface is the abstract backend to a WebView
@@ -236,6 +237,14 @@ public interface WebViewProvider {
     public void setWebViewClient(WebViewClient client);
 
     public WebViewClient getWebViewClient();
+
+    public WebViewRenderer getWebViewRenderer();
+
+    public void setWebViewRendererClient(
+            @Nullable Executor executor,
+            @Nullable WebViewRendererClient client);
+
+    public WebViewRendererClient getWebViewRendererClient();
 
     public void setDownloadListener(DownloadListener listener);
 
