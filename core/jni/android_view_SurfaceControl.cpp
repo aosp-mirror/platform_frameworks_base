@@ -660,6 +660,10 @@ static void nativeSetDisplayPowerMode(JNIEnv* env, jclass clazz, jobject tokenOb
     if (t.duration() > 100ms) ALOGD("Excessive delay in setPowerMode()");
 }
 
+static jboolean nativeGetProtectedContentSupport(JNIEnv* env, jclass) {
+    return static_cast<jboolean>(SurfaceComposerClient::getProtectedContentSupport());
+}
+
 static jboolean nativeClearContentFrameStats(JNIEnv* env, jclass clazz, jlong nativeObject) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->clearLayerFrameStats();
@@ -1028,6 +1032,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetAnimationFrameStats },
     {"nativeSetDisplayPowerMode", "(Landroid/os/IBinder;I)V",
             (void*)nativeSetDisplayPowerMode },
+    {"nativeGetProtectedContentSupport", "()Z",
+            (void*)nativeGetProtectedContentSupport },
     {"nativeDeferTransactionUntil", "(JJLandroid/os/IBinder;J)V",
             (void*)nativeDeferTransactionUntil },
     {"nativeDeferTransactionUntilSurface", "(JJJJ)V",
