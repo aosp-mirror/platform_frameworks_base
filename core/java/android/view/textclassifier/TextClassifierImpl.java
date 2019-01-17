@@ -43,6 +43,8 @@ import android.provider.ContactsContract;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
+import com.google.android.textclassifier.AnnotatorModel;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -91,7 +93,7 @@ public final class TextClassifierImpl implements TextClassifier {
     @GuardedBy("mLock") // Do not access outside this lock.
     private ModelFile mModel;
     @GuardedBy("mLock") // Do not access outside this lock.
-    private TextClassifierImplNative mNative;
+    private AnnotatorModel mNative;
 
     private final Object mLoggerLock = new Object();
     @GuardedBy("mLoggerLock") // Do not access outside this lock.
@@ -124,7 +126,7 @@ public final class TextClassifierImpl implements TextClassifier {
                     && rangeLength <= mSettings.getSuggestSelectionMaxRangeLength()) {
                 final String localesString = concatenateLocales(request.getDefaultLocales());
                 final ZonedDateTime refTime = ZonedDateTime.now();
-                final TextClassifierImplNative nativeImpl = getNative(request.getDefaultLocales());
+                final AnnotatorModel nativeImpl = getNative(request.getDefaultLocales());
                 final int start;
                 final int end;
                 if (mSettings.isModelDarkLaunchEnabled() && !request.isDarkLaunchAllowed()) {
@@ -133,7 +135,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 } else {
                     final int[] startEnd = nativeImpl.suggestSelection(
                             string, request.getStartIndex(), request.getEndIndex(),
-                            new TextClassifierImplNative.SelectionOptions(localesString));
+                            new AnnotatorModel.SelectionOptions(localesString));
                     start = startEnd[0];
                     end = startEnd[1];
                 }
@@ -141,10 +143,10 @@ public final class TextClassifierImpl implements TextClassifier {
                         && start >= 0 && end <= string.length()
                         && start <= request.getStartIndex() && end >= request.getEndIndex()) {
                     final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end);
-                    final TextClassifierImplNative.ClassificationResult[] results =
+                    final AnnotatorModel.ClassificationResult[] results =
                             nativeImpl.classifyText(
                                     string, start, end,
-                                    new TextClassifierImplNative.ClassificationOptions(
+                                    new AnnotatorModel.ClassificationOptions(
                                             refTime.toInstant().toEpochMilli(),
                                             refTime.getZone().getId(),
                                             localesString));
@@ -183,11 +185,11 @@ public final class TextClassifierImpl implements TextClassifier {
                 final String localesString = concatenateLocales(request.getDefaultLocales());
                 final ZonedDateTime refTime = request.getReferenceTime() != null
                         ? request.getReferenceTime() : ZonedDateTime.now();
-                final TextClassifierImplNative.ClassificationResult[] results =
+                final AnnotatorModel.ClassificationResult[] results =
                         getNative(request.getDefaultLocales())
                                 .classifyText(
                                         string, request.getStartIndex(), request.getEndIndex(),
-                                        new TextClassifierImplNative.ClassificationOptions(
+                                        new AnnotatorModel.ClassificationOptions(
                                                 refTime.toInstant().toEpochMilli(),
                                                 refTime.getZone().getId(),
                                                 localesString));
@@ -227,17 +229,17 @@ public final class TextClassifierImpl implements TextClassifier {
                     ? request.getEntityConfig().resolveEntityListModifications(
                             getEntitiesForHints(request.getEntityConfig().getHints()))
                     : mSettings.getEntityListDefault();
-            final TextClassifierImplNative nativeImpl =
+            final AnnotatorModel nativeImpl =
                     getNative(request.getDefaultLocales());
-            final TextClassifierImplNative.AnnotatedSpan[] annotations =
+            final AnnotatorModel.AnnotatedSpan[] annotations =
                     nativeImpl.annotate(
                         textString,
-                        new TextClassifierImplNative.AnnotationOptions(
+                        new AnnotatorModel.AnnotationOptions(
                                 refTime.toInstant().toEpochMilli(),
                                         refTime.getZone().getId(),
                                 concatenateLocales(request.getDefaultLocales())));
-            for (TextClassifierImplNative.AnnotatedSpan span : annotations) {
-                final TextClassifierImplNative.ClassificationResult[] results =
+            for (AnnotatorModel.AnnotatedSpan span : annotations) {
+                final AnnotatorModel.ClassificationResult[] results =
                         span.getClassification();
                 if (results.length == 0
                         || !entitiesToIdentify.contains(results[0].getCollection())) {
@@ -296,7 +298,7 @@ public final class TextClassifierImpl implements TextClassifier {
         }
     }
 
-    private TextClassifierImplNative getNative(LocaleList localeList)
+    private AnnotatorModel getNative(LocaleList localeList)
             throws FileNotFoundException {
         synchronized (mLock) {
             localeList = localeList == null ? LocaleList.getEmptyLocaleList() : localeList;
@@ -309,7 +311,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 destroyNativeIfExistsLocked();
                 final ParcelFileDescriptor fd = ParcelFileDescriptor.open(
                         new File(bestModel.getPath()), ParcelFileDescriptor.MODE_READ_ONLY);
-                mNative = new TextClassifierImplNative(fd.getFd());
+                mNative = new AnnotatorModel(fd.getFd());
                 closeAndLogError(fd);
                 mModel = bestModel;
             }
@@ -397,14 +399,14 @@ public final class TextClassifierImpl implements TextClassifier {
     }
 
     private TextClassification createClassificationResult(
-            TextClassifierImplNative.ClassificationResult[] classifications,
+            AnnotatorModel.ClassificationResult[] classifications,
             String text, int start, int end, @Nullable Instant referenceTime) {
         final String classifiedText = text.substring(start, end);
         final TextClassification.Builder builder = new TextClassification.Builder()
                 .setText(classifiedText);
 
         final int size = classifications.length;
-        TextClassifierImplNative.ClassificationResult highestScoringResult = null;
+        AnnotatorModel.ClassificationResult highestScoringResult = null;
         float highestScore = Float.MIN_VALUE;
         for (int i = 0; i < size; i++) {
             builder.setEntityType(classifications[i].getCollection(),
@@ -467,9 +469,9 @@ public final class TextClassifierImpl implements TextClassifier {
             try {
                 final ParcelFileDescriptor modelFd = ParcelFileDescriptor.open(
                         file, ParcelFileDescriptor.MODE_READ_ONLY);
-                final int version = TextClassifierImplNative.getVersion(modelFd.getFd());
+                final int version = AnnotatorModel.getVersion(modelFd.getFd());
                 final String supportedLocalesStr =
-                        TextClassifierImplNative.getLocales(modelFd.getFd());
+                        AnnotatorModel.getLocales(modelFd.getFd());
                 if (supportedLocalesStr.isEmpty()) {
                     Log.d(DEFAULT_LOG_TAG, "Ignoring " + file.getAbsolutePath());
                     return null;
@@ -657,7 +659,7 @@ public final class TextClassifierImpl implements TextClassifier {
         public static List<LabeledIntent> create(
                 Context context,
                 @Nullable Instant referenceTime,
-                TextClassifierImplNative.ClassificationResult classification,
+                AnnotatorModel.ClassificationResult classification,
                 String text) {
             final String type = classification.getCollection().trim().toLowerCase(Locale.ENGLISH);
             text = text.trim();
