@@ -47,10 +47,9 @@ import android.view.IWindowId;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
-import android.view.Surface;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.view.InsetsState;
 import android.view.WindowManager;
 
 import com.android.internal.os.logging.MetricsLoggerWrapper;
@@ -432,7 +431,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void insetsModified(IWindow window, InsetsState state) {
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             final WindowState windowState = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
             if (windowState != null) {

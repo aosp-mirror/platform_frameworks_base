@@ -723,7 +723,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         void updateSystemUiSettings() {
             boolean changed;
-            synchronized (mWindowMap) {
+            synchronized (mGlobalLock) {
                 changed = ImmersiveModeConfirmation.loadSetting(mCurrentUserId, mContext)
                         || PolicyControl.reloadFromSetting(mContext);
             }
@@ -2629,9 +2629,20 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void onUserSwitched() {
         mSettingsObserver.updateSystemUiSettings();
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             // force a re-application of focused window sysui visibility on each display.
             mRoot.forAllDisplayPolicies(DisplayPolicy::resetSystemUiVisibilityLw);
+        }
+    }
+
+    @Override
+    public void moveDisplayToTop(int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent != null && mRoot.getTopChild() != displayContent) {
+                mRoot.positionChildAt(WindowContainer.POSITION_TOP, displayContent,
+                        true /* includingParents */);
+            }
         }
     }
 
@@ -6379,7 +6390,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void setForceDesktopModeOnExternalDisplays(boolean forceDesktopModeOnExternalDisplays) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mForceDesktopModeOnExternalDisplays = forceDesktopModeOnExternalDisplays;
         }
     }
