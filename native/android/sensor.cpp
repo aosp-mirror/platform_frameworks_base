@@ -342,3 +342,8 @@ int ASensor_getHighestDirectReportRateLevel(ASensor const *sensor) {
     RETURN_IF_SENSOR_IS_NULL(ASENSOR_DIRECT_RATE_STOP);
     return static_cast<Sensor const *>(sensor)->getHighestDirectReportRateLevel();
 }
+
+int ASensor_getHandle(ASensor const* sensor) {
+    RETURN_IF_SENSOR_IS_NULL(ASENSOR_INVALID);
+    return static_cast<Sensor const*>(sensor)->getHandle();
+}
