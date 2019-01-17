@@ -2508,6 +2508,13 @@ final class ActivityRecord extends ConfigurationContainer {
         final IBinder binder =
                 (freezeScreenIfNeeded && appToken != null) ? appToken.asBinder() : null;
         mAppWindowToken.setOrientation(requestedOrientation, binder, this);
+
+        // Push the new configuration to the requested app in case where it's not pushed, e.g. when
+        // the request is handled at task level with letterbox.
+        if (!getMergedOverrideConfiguration().equals(
+                mLastReportedConfiguration.getMergedConfiguration())) {
+            ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+        }
     }
 
     int getOrientation() {
