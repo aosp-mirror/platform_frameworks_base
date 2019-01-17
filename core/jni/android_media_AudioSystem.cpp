@@ -2039,10 +2039,8 @@ android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP(
         return (jint)AUDIO_JAVA_BAD_VALUE;
     }
     std::vector<audio_format_t> encodingFormats;
-    //FIXME: enable when native implementaiton is merged
-    //status_t status = AudioSystem::getHwOffloadEncodingFormatsSupportedForA2DP(
-    //                      &encodingFormats);
-    status_t status = NO_ERROR;
+    status_t status = AudioSystem::getHwOffloadEncodingFormatsSupportedForA2DP(
+                          &encodingFormats);
     if (status != NO_ERROR) {
         ALOGE("%s: error %d", __FUNCTION__, status);
         jStatus = nativeToJavaStatus(status);
