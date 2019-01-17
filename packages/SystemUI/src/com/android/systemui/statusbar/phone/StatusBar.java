@@ -196,6 +196,7 @@ import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
+import com.android.systemui.statusbar.notification.NotificationListController;
 import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -387,6 +388,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NotificationGutsManager mGutsManager;
     protected NotificationLogger mNotificationLogger;
     protected NotificationEntryManager mEntryManager;
+    private NotificationListController mNotificationListController;
     private NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
     private NotificationRowBinder mNotificationRowBinder;
     protected NotificationViewHierarchyManager mViewHierarchyManager;
@@ -593,7 +595,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
         mForegroundServiceController.onAppOpChanged(code, uid, packageName, active);
         Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
-            mEntryManager.updateNotificationsForAppOp(code, uid, packageName, active);
+            mNotificationListController.updateNotificationsForAppOp(code, uid, packageName, active);
         });
     }
 
@@ -1044,6 +1046,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mScrimController, mActivityLaunchAnimator, mStatusBarKeyguardViewManager,
                 mNotificationAlertingManager);
 
+        mNotificationListController =
+                new NotificationListController(
+                        mEntryManager,
+                        (NotificationListContainer) mStackScroller,
+                        mForegroundServiceController,
+                        mDeviceProvisionedController);
+
         mAppOpsController.addCallback(APP_OPS, this);
         mNotificationListener.setUpWithPresenter(mPresenter);
         mNotificationShelf.setOnActivatedListener(mPresenter);
@@ -1056,6 +1065,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 this, Dependency.get(BubbleController.class), mNotificationActivityStarter));
 
         mGroupAlertTransferHelper.bind(mEntryManager, mGroupManager);
+        mNotificationListController.bind();
     }
 
     /**
@@ -2831,7 +2841,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         } catch (RemoteException e) {
             // Ignore.
         }
-        mEntryManager.destroy();
+        mNotificationListController.destroy();
         // End old BaseStatusBar.destroy().
         if (mStatusBarWindow != null) {
             mWindowManager.removeViewImmediate(mStatusBarWindow);
