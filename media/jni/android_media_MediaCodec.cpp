@@ -648,7 +648,6 @@ static jobject getCodecCapabilitiesObject(
 
     capabilities->getSupportedColorFormats(&colorFormats);
     capabilities->getSupportedProfileLevels(&profileLevels);
-    uint32_t flags = capabilities->getFlags();
     sp<AMessage> details = capabilities->getDetails();
 
     jobject defaultFormatObj = NULL;
@@ -687,7 +686,7 @@ static jobject getCodecCapabilitiesObject(
 
     return env->NewObject(
             gCodecInfo.capsClazz, gCodecInfo.capsCtorId,
-            profileLevelArray.get(), colorFormatsArray.get(), isEncoder, flags,
+            profileLevelArray.get(), colorFormatsArray.get(), isEncoder,
             defaultFormatRef.get(), detailsRef.get());
 }
 
@@ -700,23 +699,28 @@ status_t JMediaCodec::getCodecInfo(JNIEnv *env, jobject *codecInfoObject) const 
         return err;
     }
 
+    // TODO: get alias
     ScopedLocalRef<jstring> nameObject(env,
             env->NewStringUTF(codecInfo->getCodecName()));
 
+    ScopedLocalRef<jstring> canonicalNameObject(env,
+            env->NewStringUTF(codecInfo->getCodecName()));
+
+    MediaCodecInfo::Attributes attributes = codecInfo->getAttributes();
     bool isEncoder = codecInfo->isEncoder();
 
-    Vector<AString> mimes;
-    codecInfo->getSupportedMimes(&mimes);
+    Vector<AString> mediaTypes;
+    codecInfo->getSupportedMediaTypes(&mediaTypes);
 
     ScopedLocalRef<jobjectArray> capsArrayObj(env,
-        env->NewObjectArray(mimes.size(), gCodecInfo.capsClazz, NULL));
+        env->NewObjectArray(mediaTypes.size(), gCodecInfo.capsClazz, NULL));
 
-    for (size_t i = 0; i < mimes.size(); i++) {
+    for (size_t i = 0; i < mediaTypes.size(); i++) {
         const sp<MediaCodecInfo::Capabilities> caps =
-                codecInfo->getCapabilitiesFor(mimes[i].c_str());
+                codecInfo->getCapabilitiesFor(mediaTypes[i].c_str());
 
         ScopedLocalRef<jobject> capsObj(env, getCodecCapabilitiesObject(
-                env, mimes[i].c_str(), isEncoder, caps));
+                env, mediaTypes[i].c_str(), isEncoder, caps));
 
         env->SetObjectArrayElement(capsArrayObj.get(), i, capsObj.get());
     }
@@ -729,7 +733,7 @@ status_t JMediaCodec::getCodecInfo(JNIEnv *env, jobject *codecInfoObject) const 
             "(Ljava/lang/String;Z[Landroid/media/MediaCodecInfo$CodecCapabilities;)V");
 
     *codecInfoObject = env->NewObject(codecInfoClazz.get(), codecInfoCtorID,
-            nameObject.get(), isEncoder, capsArrayObj.get());
+            nameObject.get(), canonicalNameObject.get(), attributes, capsArrayObj.get());
 
     return OK;
 }
@@ -2079,7 +2083,7 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
     gCodecInfo.capsClazz = (jclass)env->NewGlobalRef(clazz.get());
 
     method = env->GetMethodID(clazz.get(), "<init>",
-            "([Landroid/media/MediaCodecInfo$CodecProfileLevel;[IZI"
+            "([Landroid/media/MediaCodecInfo$CodecProfileLevel;[IZ"
             "Ljava/util/Map;Ljava/util/Map;)V");
     CHECK(method != NULL);
     gCodecInfo.capsCtorId = method;
@@ -2217,7 +2221,7 @@ static const JNINativeMethod gMethods[] = {
     { "getImage", "(ZI)Landroid/media/Image;",
       (void *)android_media_MediaCodec_getImage },
 
-    { "getName", "()Ljava/lang/String;",
+    { "getCanonicalName", "()Ljava/lang/String;",
       (void *)android_media_MediaCodec_getName },
 
     { "getOwnCodecInfo", "()Landroid/media/MediaCodecInfo;",
