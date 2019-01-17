@@ -37,23 +37,25 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.leak.RotationUtils;
 
-public class HardwareUiLayout extends LinearLayout implements Tunable {
+/**
+ * Layout for placing two containers at a specific physical position on the device, relative to the
+ * device's hardware, regardless of screen rotation.
+ */
+public class HardwareUiLayout extends MultiListLayout implements Tunable {
 
     private static final String EDGE_BLEED = "sysui_hwui_edge_bleed";
     private static final String ROUNDED_DIVIDER = "sysui_hwui_rounded_divider";
     private final int[] mTmp2 = new int[2];
-    private View mList;
-    private View mSeparatedView;
+    private ViewGroup mList;
+    private ViewGroup mSeparatedView;
     private int mOldHeight;
     private boolean mAnimating;
     private AnimatorSet mAnimation;
     private View mDivision;
-    private boolean mHasOutsideTouch;
     private HardwareBgDrawable mListBackground;
     private HardwareBgDrawable mSeparatedViewBackground;
     private Animator mAnimator;
     private boolean mCollapse;
-    private boolean mHasSeparatedButton;
     private int mEndPoint;
     private boolean mEdgeBleed;
     private boolean mRoundedDivider;
@@ -64,6 +66,35 @@ public class HardwareUiLayout extends LinearLayout implements Tunable {
     public HardwareUiLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         updateSettings();
+    }
+
+    @Override
+    protected ViewGroup getSeparatedView() {
+        return findViewById(com.android.systemui.R.id.separated_button);
+    }
+
+    @Override
+    protected ViewGroup getListView() {
+        return findViewById(android.R.id.list);
+    }
+
+    @Override
+    public void removeAllItems() {
+        if (mList != null) {
+            mList.removeAllViews();
+        }
+        if (mSeparatedView != null) {
+            mSeparatedView.removeAllViews();
+        }
+    }
+
+    @Override
+    public ViewGroup getParentView(boolean separated, int index) {
+        if (separated) {
+            return getSeparatedView();
+        } else {
+            return getListView();
+        }
     }
 
     @Override
@@ -137,9 +168,9 @@ public class HardwareUiLayout extends LinearLayout implements Tunable {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         if (mList == null) {
             if (getChildCount() != 0) {
-                mList = getChildAt(0);
+                mList = getListView();
                 mList.setBackground(mListBackground);
-                mSeparatedView = getChildAt(1);
+                mSeparatedView = getSeparatedView();
                 mSeparatedView.setBackground(mSeparatedViewBackground);
                 updateEdgeMargin(mEdgeBleed ? 0 : getEdgePadding());
                 mOldHeight = mList.getMeasuredHeight();
@@ -187,7 +218,7 @@ public class HardwareUiLayout extends LinearLayout implements Tunable {
         } else {
             rotateLeft();
         }
-        if (mHasSeparatedButton) {
+        if (mHasSeparatedView) {
             if (from == ROTATION_SEASCAPE || to == ROTATION_SEASCAPE) {
                 // Separated view has top margin, so seascape separated view need special rotation,
                 // not a full left or right rotation.
@@ -408,8 +439,8 @@ public class HardwareUiLayout extends LinearLayout implements Tunable {
         if (mList == null) return;
         // If got separated button, setRotatedBackground to false,
         // all items won't get white background.
-        mListBackground.setRotatedBackground(mHasSeparatedButton);
-        mSeparatedViewBackground.setRotatedBackground(mHasSeparatedButton);
+        mListBackground.setRotatedBackground(mHasSeparatedView);
+        mSeparatedViewBackground.setRotatedBackground(mHasSeparatedView);
         if (mDivision != null && mDivision.getVisibility() == VISIBLE) {
             int index = mRotatedBackground ? 0 : 1;
             mDivision.getLocationOnScreen(mTmp2);
@@ -460,21 +491,21 @@ public class HardwareUiLayout extends LinearLayout implements Tunable {
             case RotationUtils.ROTATION_LANDSCAPE:
                 defaultTopPadding = getPaddingLeft();
                 viewsTotalHeight = mList.getMeasuredWidth() + mSeparatedView.getMeasuredWidth();
-                separatedViewTopMargin = mHasSeparatedButton ? params.leftMargin : 0;
+                separatedViewTopMargin = mHasSeparatedView ? params.leftMargin : 0;
                 screenHeight = getMeasuredWidth();
                 targetGravity = Gravity.CENTER_HORIZONTAL|Gravity.TOP;
                 break;
             case RotationUtils.ROTATION_SEASCAPE:
                 defaultTopPadding = getPaddingRight();
                 viewsTotalHeight = mList.getMeasuredWidth() + mSeparatedView.getMeasuredWidth();
-                separatedViewTopMargin = mHasSeparatedButton ? params.leftMargin : 0;
+                separatedViewTopMargin = mHasSeparatedView ? params.leftMargin : 0;
                 screenHeight = getMeasuredWidth();
                 targetGravity = Gravity.CENTER_HORIZONTAL|Gravity.BOTTOM;
                 break;
             default: // Portrait
                 defaultTopPadding = getPaddingTop();
                 viewsTotalHeight = mList.getMeasuredHeight() + mSeparatedView.getMeasuredHeight();
-                separatedViewTopMargin = mHasSeparatedButton ? params.topMargin : 0;
+                separatedViewTopMargin = mHasSeparatedView ? params.topMargin : 0;
                 screenHeight = getMeasuredHeight();
                 targetGravity = Gravity.CENTER_VERTICAL|Gravity.RIGHT;
                 break;
@@ -491,28 +522,8 @@ public class HardwareUiLayout extends LinearLayout implements Tunable {
         return super.getOutlineProvider();
     }
 
-    public void setOutsideTouchListener(OnClickListener onClickListener) {
-        mHasOutsideTouch = true;
-        requestLayout();
-        setOnClickListener(onClickListener);
-        setClickable(true);
-        setFocusable(true);
-    }
-
     public void setCollapse() {
         mCollapse = true;
-    }
-
-    public void setHasSeparatedButton(boolean hasSeparatedButton) {
-        mHasSeparatedButton = hasSeparatedButton;
-    }
-
-    public static HardwareUiLayout get(View v) {
-        if (v instanceof HardwareUiLayout) return (HardwareUiLayout) v;
-        if (v.getParent() instanceof View) {
-            return get((View) v.getParent());
-        }
-        return null;
     }
 
     private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener = inoutInfo -> {
