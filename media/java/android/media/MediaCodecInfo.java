@@ -2075,39 +2075,45 @@ public final class MediaCodecInfo {
                     boolean supported = true;
                     switch (profileLevel.level) {
                         case CodecProfileLevel.AVCLevel1:
-                            MBPS =    1485; FS =    99; BR =     64; DPB =    396; break;
+                            MBPS =     1485; FS =     99; BR =     64; DPB =    396; break;
                         case CodecProfileLevel.AVCLevel1b:
-                            MBPS =    1485; FS =    99; BR =    128; DPB =    396; break;
+                            MBPS =     1485; FS =     99; BR =    128; DPB =    396; break;
                         case CodecProfileLevel.AVCLevel11:
-                            MBPS =    3000; FS =   396; BR =    192; DPB =    900; break;
+                            MBPS =     3000; FS =    396; BR =    192; DPB =    900; break;
                         case CodecProfileLevel.AVCLevel12:
-                            MBPS =    6000; FS =   396; BR =    384; DPB =   2376; break;
+                            MBPS =     6000; FS =    396; BR =    384; DPB =   2376; break;
                         case CodecProfileLevel.AVCLevel13:
-                            MBPS =   11880; FS =   396; BR =    768; DPB =   2376; break;
+                            MBPS =    11880; FS =    396; BR =    768; DPB =   2376; break;
                         case CodecProfileLevel.AVCLevel2:
-                            MBPS =   11880; FS =   396; BR =   2000; DPB =   2376; break;
+                            MBPS =    11880; FS =    396; BR =   2000; DPB =   2376; break;
                         case CodecProfileLevel.AVCLevel21:
-                            MBPS =   19800; FS =   792; BR =   4000; DPB =   4752; break;
+                            MBPS =    19800; FS =    792; BR =   4000; DPB =   4752; break;
                         case CodecProfileLevel.AVCLevel22:
-                            MBPS =   20250; FS =  1620; BR =   4000; DPB =   8100; break;
+                            MBPS =    20250; FS =   1620; BR =   4000; DPB =   8100; break;
                         case CodecProfileLevel.AVCLevel3:
-                            MBPS =   40500; FS =  1620; BR =  10000; DPB =   8100; break;
+                            MBPS =    40500; FS =   1620; BR =  10000; DPB =   8100; break;
                         case CodecProfileLevel.AVCLevel31:
-                            MBPS =  108000; FS =  3600; BR =  14000; DPB =  18000; break;
+                            MBPS =   108000; FS =   3600; BR =  14000; DPB =  18000; break;
                         case CodecProfileLevel.AVCLevel32:
-                            MBPS =  216000; FS =  5120; BR =  20000; DPB =  20480; break;
+                            MBPS =   216000; FS =   5120; BR =  20000; DPB =  20480; break;
                         case CodecProfileLevel.AVCLevel4:
-                            MBPS =  245760; FS =  8192; BR =  20000; DPB =  32768; break;
+                            MBPS =   245760; FS =   8192; BR =  20000; DPB =  32768; break;
                         case CodecProfileLevel.AVCLevel41:
-                            MBPS =  245760; FS =  8192; BR =  50000; DPB =  32768; break;
+                            MBPS =   245760; FS =   8192; BR =  50000; DPB =  32768; break;
                         case CodecProfileLevel.AVCLevel42:
-                            MBPS =  522240; FS =  8704; BR =  50000; DPB =  34816; break;
+                            MBPS =   522240; FS =   8704; BR =  50000; DPB =  34816; break;
                         case CodecProfileLevel.AVCLevel5:
-                            MBPS =  589824; FS = 22080; BR = 135000; DPB = 110400; break;
+                            MBPS =   589824; FS =  22080; BR = 135000; DPB = 110400; break;
                         case CodecProfileLevel.AVCLevel51:
-                            MBPS =  983040; FS = 36864; BR = 240000; DPB = 184320; break;
+                            MBPS =   983040; FS =  36864; BR = 240000; DPB = 184320; break;
                         case CodecProfileLevel.AVCLevel52:
-                            MBPS = 2073600; FS = 36864; BR = 240000; DPB = 184320; break;
+                            MBPS =  2073600; FS =  36864; BR = 240000; DPB = 184320; break;
+                        case CodecProfileLevel.AVCLevel6:
+                            MBPS =  4177920; FS = 139264; BR = 240000; DPB = 696320; break;
+                        case CodecProfileLevel.AVCLevel61:
+                            MBPS =  8355840; FS = 139264; BR = 480000; DPB = 696320; break;
+                        case CodecProfileLevel.AVCLevel62:
+                            MBPS = 16711680; FS = 139264; BR = 800000; DPB = 696320; break;
                         default:
                             Log.w(TAG, "Unrecognized level "
                                     + profileLevel.level + " for " + mime);
