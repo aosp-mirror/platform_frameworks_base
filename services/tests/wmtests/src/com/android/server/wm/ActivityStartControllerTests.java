@@ -56,7 +56,6 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mService = createActivityTaskManagerService();
         mFactory = mock(Factory.class);
         mController = new ActivityStartController(mService, mService.mStackSupervisor, mFactory);
         mStarter = spy(new ActivityStarter(mController, mService,

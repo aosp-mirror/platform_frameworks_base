@@ -57,11 +57,6 @@ import org.junit.Test;
 @Presubmit
 public class ActivityDisplayTests extends ActivityTestsBase {
 
-    @Before
-    public void setUp() throws Exception {
-        setupActivityTaskManagerService();
-    }
-
     @Test
     public void testLastFocusedStackIsUpdatedWhenMovingStack() {
         // Create a stack at bottom.

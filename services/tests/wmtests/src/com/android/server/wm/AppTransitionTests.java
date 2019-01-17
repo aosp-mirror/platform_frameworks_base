@@ -60,7 +60,7 @@ public class AppTransitionTests extends WindowTestsBase {
 
     @BeforeClass
     public static void setUpRootWindowContainerMock() {
-        final WindowManagerService wm = WmServiceUtils.getWindowManagerService();
+        final WindowManagerService wm = TestSystemServices.getWindowManagerService();
         // For unit test, we don't need to test performSurfacePlacement to prevent some abnormal
         // interaction with surfaceflinger native side.
         sOriginalRootWindowContainer = wm.mRoot;
@@ -74,7 +74,7 @@ public class AppTransitionTests extends WindowTestsBase {
 
     @AfterClass
     public static void tearDownRootWindowContainerMock() {
-        final WindowManagerService wm = WmServiceUtils.getWindowManagerService();
+        final WindowManagerService wm = TestSystemServices.getWindowManagerService();
         wm.mRoot = sOriginalRootWindowContainer;
         sOriginalRootWindowContainer = null;
     }

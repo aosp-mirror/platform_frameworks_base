@@ -66,7 +66,7 @@ import java.util.concurrent.CountDownLatch;
 /**
  * A Test utility class to create a mock {@link WindowManagerService} instance for tests.
  */
-class WmServiceUtils {
+class TestSystemServices {
     private static StaticMockitoSession sMockitoSession;
     private static WindowManagerService sService;
     private static TestWindowManagerPolicy sPolicy;
@@ -78,7 +78,7 @@ class WmServiceUtils {
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
-        runWithDexmakerShareClassLoader(WmServiceUtils::setUpTestWindowService);
+        runWithDexmakerShareClassLoader(TestSystemServices::setUpTestWindowService);
     }
 
     static void tearDownWindowManagerService() {
@@ -147,7 +147,7 @@ class WmServiceUtils {
         final WindowManagerGlobalLock wmLock = new WindowManagerGlobalLock();
         doReturn(wmLock).when(atms).getGlobalLock();
 
-        sPolicy = new TestWindowManagerPolicy(WmServiceUtils::getWindowManagerService);
+        sPolicy = new TestWindowManagerPolicy(TestSystemServices::getWindowManagerService);
         sService = WindowManagerService.main(context, ims, false, false, sPolicy, atms);
 
         sService.onInitReady();

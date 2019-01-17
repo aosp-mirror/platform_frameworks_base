@@ -49,7 +49,6 @@ public class RunningTasksTest extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        setupActivityTaskManagerService();
         mRunningTasks = new RunningTasks();
     }
 
