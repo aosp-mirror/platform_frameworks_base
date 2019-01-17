@@ -221,6 +221,8 @@ message ConstantsProto {
     optional bool use_heartbeats = 23;
 
     message TimeController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
         // Whether or not TimeController should skip setting wakeup alarms for jobs that aren't
         // ready now.
         optional bool skip_not_ready_jobs = 1;
@@ -228,6 +230,8 @@ message ConstantsProto {
     optional TimeController time_controller = 25;
 
     message QuotaController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
         // How much time each app will have to run jobs within their standby bucket window.
         optional int64 allowed_time_per_period_ms = 1;
         // How much time the package should have before transitioning from out-of-quota to in-quota.
@@ -251,6 +255,21 @@ message ConstantsProto {
         optional int64 rare_window_size_ms = 6;
         // The maximum amount of time an app can have its jobs running within a 24 hour window.
         optional int64 max_execution_time_ms = 7;
+        // The maximum number of jobs an app can run within this particular standby bucket's
+        // window size.
+        optional int32 max_job_count_active = 8;
+        // The maximum number of jobs an app can run within this particular standby bucket's
+        // window size.
+        optional int32 max_job_count_working = 9;
+        // The maximum number of jobs an app can run within this particular standby bucket's
+        // window size.
+        optional int32 max_job_count_frequent = 10;
+        // The maximum number of jobs an app can run within this particular standby bucket's
+        // window size.
+        optional int32 max_job_count_rare = 11;
+        // The maximum number of jobs that should be allowed to run in the past
+        // {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS}.
+        optional int32 max_job_count_per_allowed_time = 12;
     }
     optional QuotaController quota_controller = 24;
 
