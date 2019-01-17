@@ -1343,6 +1343,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mWellbeingPackage;
     final @Nullable String mDocumenterPackage;
     final @Nullable String mConfiguratorPackage;
+    final @Nullable String mAppPredictionServicePackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
@@ -2868,6 +2869,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mDocumenterPackage = getDocumenterPackageName();
             mConfiguratorPackage =
                     mContext.getString(R.string.config_deviceConfiguratorPackageName);
+            mAppPredictionServicePackage = getAppPredictionServicePackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -3750,7 +3752,7 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Returns whether or not a full application can see an instant application.
      * <p>
-     * Currently, there are three cases in which this can occur:
+     * Currently, there are four cases in which this can occur:
      * <ol>
      * <li>The calling application is a "special" process. Special processes
      *     are those with a UID < {@link Process#FIRST_APPLICATION_UID}.</li>
@@ -3758,6 +3760,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *     {@link android.Manifest.permission#ACCESS_INSTANT_APPS}.</li>
      * <li>The calling application is the default launcher on the
      *     system partition.</li>
+     * <li>The calling application is the default app prediction service.</li>
      * </ol>
      */
     private boolean canViewInstantApps(int callingUid, int userId) {
@@ -3773,6 +3776,11 @@ public class PackageManagerService extends IPackageManager.Stub
             final ComponentName homeComponent = getDefaultHomeActivity(userId);
             if (homeComponent != null
                     && isCallerSameApp(homeComponent.getPackageName(), callingUid)) {
+                return true;
+            }
+            // TODO(b/122900055) Change/Remove this and replace with new permission role.
+            if (mAppPredictionServicePackage != null
+                    && isCallerSameApp(mAppPredictionServicePackage, callingUid)) {
                 return true;
             }
         }
@@ -19820,6 +19828,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         .setPackage(launcherComponent.getPackageName());
                 mContext.sendBroadcastAsUser(launcherIntent, UserHandle.of(launcherUid));
             }
+            // TODO(b/122900055) Change/Remove this and replace with new permission role.
+            if (mAppPredictionServicePackage != null) {
+                Intent predictorIntent = new Intent(PackageInstaller.ACTION_SESSION_COMMITTED)
+                        .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
+                        .putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
+                        .setPackage(mAppPredictionServicePackage);
+                mContext.sendBroadcastAsUser(predictorIntent, UserHandle.of(launcherUid));
+            }
         }
     }
 
@@ -19970,6 +19986,20 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public String getWellbeingPackageName() {
         return mContext.getString(R.string.config_defaultWellbeingPackage);
+    }
+
+    private String getAppPredictionServicePackageName() {
+        String flattenedAppPredictionServiceComponentName =
+                mContext.getString(R.string.config_defaultAppPredictionService);
+        if (flattenedAppPredictionServiceComponentName == null) {
+            return null;
+        }
+        ComponentName appPredictionServiceComponentName =
+                ComponentName.unflattenFromString(flattenedAppPredictionServiceComponentName);
+        if (appPredictionServiceComponentName == null) {
+            return null;
+        }
+        return appPredictionServiceComponentName.getPackageName();
     }
 
     @Override
