@@ -2115,6 +2115,14 @@
     <string name="high_temp_notif_message">Some features limited while phone cools down</string>
     <!-- Text body for dialog alerting user that their phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=300] -->
     <string name="high_temp_dialog_message">Your phone will automatically try to cool down. You can still use your phone, but it may run slower.\n\nOnce your phone has cooled down, it will run normally.</string>
+    <!-- Title for alarm dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=30] -->
+    <string name="high_temp_alarm_title">Unplug charger</string>
+    <!-- Text body for dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=300] -->
+    <string name="high_temp_alarm_notify_message">There\u2019s an issue charging this device. Unplug the power adapter, and take care as the cable may be warm.</string>
+    <!-- Text for See care steps button [CHAR LIMIT=300] -->
+    <string name="high_temp_alarm_help_care_steps">See care steps</string>
+    <!-- Text link directs to usb overheat help page. -->
+    <string name="high_temp_alarm_help_url" translatable="false">help_uri_usb_warm</string>
 
     <!-- SysUI Tuner: Button to select lock screen shortcut [CHAR LIMIT=60] -->
     <string name="lockscreen_shortcut_left">Left shortcut</string>
@@ -2375,5 +2383,4 @@
     <string name="no_bubbles">Block</string>
     <!-- Text used for button allowing user to approve / enable bubbles [CHAR LIMIT=20] -->
     <string name="yes_bubbles">Allow</string>
-
 </resources>

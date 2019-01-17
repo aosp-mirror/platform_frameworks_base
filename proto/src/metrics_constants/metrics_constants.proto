@@ -6162,6 +6162,11 @@ message MetricsEvent {
     // OS: P
     FIELD_AUTOFILL_SESSION_ID = 1456;
 
+    // FIELD: Device USB overheat alarm trigger.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    POWER_OVERHEAT_ALARM = 1457;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // Time since this notification last interrupted (visibly or audible) the user

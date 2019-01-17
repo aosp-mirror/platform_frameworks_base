@@ -328,16 +328,11 @@
 
     <bool name="quick_settings_show_full_alarm">false</bool>
 
-    <!-- Whether to show a warning notification when the device reaches a certain temperature. -->
+    <!-- Whether to show a warning notification when device's skin temperature is high. -->
     <integer name="config_showTemperatureWarning">0</integer>
 
-    <!-- Temp at which to show a warning notification if config_showTemperatureWarning is true.
-         If < 0, uses the skin temperature sensor shutdown value from
-         HardwarePropertiesManager#getDeviceTemperatures - config_warningTemperatureTolerance. -->
-    <integer name="config_warningTemperature">-1</integer>
-
-    <!-- Fudge factor for how much below the shutdown temp to show the warning. -->
-    <integer name="config_warningTemperatureTolerance">2</integer>
+    <!-- Whether to show a alarm dialog when device's usb port is overheating. -->
+    <integer name="config_showUsbPortAlarm">0</integer>
 
     <!-- Accessibility actions -->
     <item type="id" name="action_split_task_to_left" />
@@ -484,4 +479,5 @@
     </string-array>
 
     <integer name="ongoing_appops_dialog_max_apps">5</integer>
+
 </resources>

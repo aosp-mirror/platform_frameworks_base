@@ -16,9 +16,8 @@
 
 package com.android.systemui.power;
 
-import static android.test.MoreAsserts.assertNotEqual;
+import static com.google.common.truth.Truth.assertThat;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -38,7 +37,6 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.NotificationChannels;
 
-import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -150,5 +148,14 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
         mPowerNotificationWarnings.dismissThermalShutdownWarning();
         verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
                 eq(SystemMessage.NOTE_THERMAL_SHUTDOWN), any());
+    }
+
+    @Test
+    public void testShowUsbHighTemperatureAlarm() {
+        mPowerNotificationWarnings.showUsbHighTemperatureAlarm();
+        waitForIdleSync(mContext.getMainThreadHandler());
+        assertThat(mPowerNotificationWarnings.mUsbHighTempDialog).isNotNull();
+
+        mPowerNotificationWarnings.mUsbHighTempDialog.dismiss();
     }
 }
