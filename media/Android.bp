@@ -16,7 +16,6 @@ filegroup {
 }
 
 java_library {
-    // TODO: include updatable-media.jar in the media apex and add it to the bootclasspath.
     name: "updatable-media",
 
     srcs: [
