@@ -26,12 +26,16 @@ import static android.media.Session2Token.TYPE_SESSION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -63,6 +67,7 @@ public class MediaController2 implements AutoCloseable {
     private final Executor mCallbackExecutor;
     private final Controller2Link mControllerStub;
     private final Handler mResultHandler;
+    private final SessionServiceConnection mServiceConnection;
 
     private final Object mLock = new Object();
     //@GuardedBy("mLock")
@@ -118,16 +123,25 @@ public class MediaController2 implements AutoCloseable {
         mPendingCommands = new ArrayMap<>();
         mRequestedCommandSeqNumbers = new ArraySet<>();
 
+        boolean connectRequested;
         if (token.getType() == TYPE_SESSION) {
-            connectToSession();
+            mServiceConnection = null;
+            connectRequested = requestConnectToSession();
         } else {
-            // TODO: Handle connect to session service.
+            mServiceConnection = new SessionServiceConnection();
+            connectRequested = requestConnectToService();
+        }
+        if (!connectRequested) {
+            close();
         }
     }
 
     @Override
     public void close() {
         synchronized (mLock) {
+            if (mServiceConnection != null) {
+                mContext.unbindService(mServiceConnection);
+            }
             if (mSessionBinder != null) {
                 try {
                     mSessionBinder.disconnect(mControllerStub, getNextSeqNumber());
@@ -299,18 +313,55 @@ public class MediaController2 implements AutoCloseable {
         }
     }
 
-    private void connectToSession() {
-        Session2Link sessionBinder = mSessionToken.getSessionLink();
+    private Bundle createConnectionRequest() {
         Bundle connectionRequest = new Bundle();
         connectionRequest.putString(KEY_PACKAGE_NAME, mContext.getPackageName());
         connectionRequest.putInt(KEY_PID, Process.myPid());
+        return connectionRequest;
+    }
 
+    private boolean requestConnectToSession() {
+        Session2Link sessionBinder = mSessionToken.getSessionLink();
+        Bundle connectionRequest = createConnectionRequest();
         try {
             sessionBinder.connect(mControllerStub, getNextSeqNumber(), connectionRequest);
         } catch (RuntimeException e) {
-            Log.w(TAG, "Failed to call connection request. Framework will retry"
-                    + " automatically");
+            Log.w(TAG, "Failed to call connection request", e);
+            return false;
         }
+        return true;
+    }
+
+    private boolean requestConnectToService() {
+        // Service. Needs to get fresh binder whenever connection is needed.
+        final Intent intent = new Intent(MediaSession2Service.SERVICE_INTERFACE);
+        intent.setClassName(mSessionToken.getPackageName(), mSessionToken.getServiceName());
+
+        // Use bindService() instead of startForegroundService() to start session service for three
+        // reasons.
+        // 1. Prevent session service owner's stopSelf() from destroying service.
+        //    With the startForegroundService(), service's call of stopSelf() will trigger immediate
+        //    onDestroy() calls on the main thread even when onConnect() is running in another
+        //    thread.
+        // 2. Minimize APIs for developers to take care about.
+        //    With bindService(), developers only need to take care about Service.onBind()
+        //    but Service.onStartCommand() should be also taken care about with the
+        //    startForegroundService().
+        // 3. Future support for UI-less playback
+        //    If a service wants to keep running, it should be either foreground service or
+        //    bound service. But there had been request for the feature for system apps
+        //    and using bindService() will be better fit with it.
+        synchronized (mLock) {
+            boolean result = mContext.bindService(
+                    intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            if (!result) {
+                Log.w(TAG, "bind to " + mSessionToken + " failed");
+                return false;
+            } else if (DEBUG) {
+                Log.d(TAG, "bind to " + mSessionToken + " succeeded");
+            }
+        }
+        return true;
     }
 
     /**
@@ -366,5 +417,60 @@ public class MediaController2 implements AutoCloseable {
          */
         public void onCommandResult(@NonNull MediaController2 controller, @NonNull Object token,
                 @NonNull Session2Command command, @NonNull Session2Command.Result result) {}
+    }
+
+    // This will be called on the main thread.
+    private class SessionServiceConnection implements ServiceConnection {
+        SessionServiceConnection() {
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // Note that it's always main-thread.
+            boolean connectRequested = false;
+            try {
+                if (DEBUG) {
+                    Log.d(TAG, "onServiceConnected " + name + " " + this);
+                }
+                // Sanity check
+                if (!mSessionToken.getPackageName().equals(name.getPackageName())) {
+                    Log.wtf(TAG, "Expected connection to " + mSessionToken.getPackageName()
+                            + " but is connected to " + name);
+                    return;
+                }
+                IMediaSession2Service iService = IMediaSession2Service.Stub.asInterface(service);
+                if (iService == null) {
+                    Log.wtf(TAG, "Service interface is missing.");
+                    return;
+                }
+                Bundle connectionRequest = createConnectionRequest();
+                iService.connect(mControllerStub, getNextSeqNumber(), connectionRequest);
+                connectRequested = true;
+            } catch (RemoteException e) {
+                Log.w(TAG, "Service " + name + " has died prematurely", e);
+            } finally {
+                if (!connectRequested) {
+                    close();
+                }
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // Temporal lose of the binding because of the service crash. System will automatically
+            // rebind, so just no-op.
+            if (DEBUG) {
+                Log.w(TAG, "Session service " + name + " is disconnected.");
+            }
+            close();
+        }
+
+        @Override
+        public void onBindingDied(ComponentName name) {
+            // Permanent lose of the binding because of the service package update or removed.
+            // This SessionServiceRecord will be removed accordingly, but forget session binder here
+            // for sure.
+            close();
+        }
     }
 }

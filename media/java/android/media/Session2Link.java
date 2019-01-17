@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -145,8 +146,9 @@ public final class Session2Link implements Parcelable {
     }
 
     /** Stub implementation for IMediaSession2.connect */
-    public void onConnect(final Controller2Link caller, int seq, Bundle connectionRequest) {
-        mSession.onConnect(caller, seq, connectionRequest);
+    public void onConnect(final Controller2Link caller, int pid, int uid, int seq,
+            Bundle connectionRequest) {
+        mSession.onConnect(caller, pid, uid, seq, connectionRequest);
     }
 
     /** Stub implementation for IMediaSession2.disconnect */
@@ -168,23 +170,57 @@ public final class Session2Link implements Parcelable {
     private class Session2Stub extends IMediaSession2.Stub {
         @Override
         public void connect(final Controller2Link caller, int seq, Bundle connectionRequest) {
-            Session2Link.this.onConnect(caller, seq, connectionRequest);
+            if (caller == null || connectionRequest == null) {
+                return;
+            }
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Session2Link.this.onConnect(caller, pid, uid, seq, connectionRequest);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void disconnect(final Controller2Link caller, int seq) {
-            Session2Link.this.onDisconnect(caller, seq);
+            if (caller == null) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Session2Link.this.onDisconnect(caller, seq);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void sendSessionCommand(final Controller2Link caller, final int seq,
                 final Session2Command command, final Bundle args, ResultReceiver resultReceiver) {
-            Session2Link.this.onSessionCommand(caller, seq, command, args, resultReceiver);
+            if (caller == null) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Session2Link.this.onSessionCommand(caller, seq, command, args, resultReceiver);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void cancelSessionCommand(final Controller2Link caller, final int seq) {
-            Session2Link.this.onCancelCommand(caller, seq);
+            if (caller == null) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Session2Link.this.onCancelCommand(caller, seq);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 }

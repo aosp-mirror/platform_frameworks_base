@@ -31,7 +31,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.session.MediaSessionManager;
 import android.media.session.MediaSessionManager.RemoteUserInfo;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
@@ -41,7 +40,6 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,14 +115,18 @@ public class MediaSession2 implements AutoCloseable {
     @Override
     public void close() {
         try {
+            List<ControllerInfo> controllerInfos;
+            synchronized (mLock) {
+                if (mClosed) {
+                    return;
+                }
+                mClosed = true;
+                controllerInfos = getConnectedControllers();
+                mConnectedControllers.clear();
+                mCallback.onSessionClosed(this);
+            }
             synchronized (MediaSession2.class) {
                 SESSION_ID_LIST.remove(mSessionId);
-            }
-            Collection<ControllerInfo> controllerInfos;
-            synchronized (mLock) {
-                controllerInfos = mConnectedControllers.values();
-                mConnectedControllers.clear();
-                mClosed = true;
             }
             for (ControllerInfo info : controllerInfos) {
                 info.notifyDisconnected();
@@ -160,10 +162,7 @@ public class MediaSession2 implements AutoCloseable {
         if (command == null) {
             throw new IllegalArgumentException("command shouldn't be null");
         }
-        Collection<ControllerInfo> controllerInfos;
-        synchronized (mLock) {
-            controllerInfos = mConnectedControllers.values();
-        }
+        List<ControllerInfo> controllerInfos = getConnectedControllers();
         for (ControllerInfo controller : controllerInfos) {
             controller.sendSessionCommand(command, args, null);
         }
@@ -222,23 +221,26 @@ public class MediaSession2 implements AutoCloseable {
         }
     }
 
-    // Called by Session2Link.onConnect
-    void onConnect(final Controller2Link controller, int seq, Bundle connectionRequest) {
-        if (controller == null || connectionRequest == null) {
-            return;
+    SessionCallback getCallback() {
+        return mCallback;
+    }
+
+    // Called by Session2Link.onConnect and MediaSession2Service.MediaSession2ServiceStub.connect
+    void onConnect(final Controller2Link controller, int callingPid, int callingUid, int seq,
+            Bundle connectionRequest) {
+        if (callingPid == 0) {
+            // The pid here is from Binder.getCallingPid(), which can be 0 for an oneway call from
+            // the remote process. If it's the case, use PID from the connectionRequest.
+            callingPid = connectionRequest.getInt(KEY_PID);
         }
-        final int uid = Binder.getCallingUid();
-        final int callingPid = Binder.getCallingPid();
-        final long token = Binder.clearCallingIdentity();
-        // Binder.getCallingPid() can be 0 for an oneway call from the remote process.
-        // If it's the case, use PID from the ConnectionRequest.
-        final int pid = (callingPid != 0) ? callingPid : connectionRequest.getInt(KEY_PID);
-        final String pkg = connectionRequest.getString(KEY_PACKAGE_NAME);
-        try {
-            RemoteUserInfo remoteUserInfo = new RemoteUserInfo(pkg, pid, uid);
-            final ControllerInfo controllerInfo = new ControllerInfo(remoteUserInfo,
-                    mSessionManager.isTrustedForMediaControl(remoteUserInfo), controller);
-            mCallbackExecutor.execute(() -> {
+        String callingPkg = connectionRequest.getString(KEY_PACKAGE_NAME);
+
+        RemoteUserInfo remoteUserInfo = new RemoteUserInfo(callingPkg, callingPid, callingUid);
+        final ControllerInfo controllerInfo = new ControllerInfo(remoteUserInfo,
+                mSessionManager.isTrustedForMediaControl(remoteUserInfo), controller);
+        mCallbackExecutor.execute(() -> {
+            boolean accept = false;
+            try {
                 if (isClosed()) {
                     return;
                 }
@@ -247,77 +249,67 @@ public class MediaSession2 implements AutoCloseable {
                 // Don't reject connection for the request from trusted app.
                 // Otherwise server will fail to retrieve session's information to dispatch
                 // media keys to.
-                boolean accept =
-                        controllerInfo.mAllowedCommands != null || controllerInfo.isTrusted();
-                if (accept) {
-                    if (controllerInfo.mAllowedCommands == null) {
-                        // For trusted apps, send non-null allowed commands to keep
-                        // connection.
-                        controllerInfo.mAllowedCommands =
-                                new Session2CommandGroup.Builder().build();
+                accept = controllerInfo.mAllowedCommands != null || controllerInfo.isTrusted();
+                if (!accept) {
+                    return;
+                }
+                if (controllerInfo.mAllowedCommands == null) {
+                    // For trusted apps, send non-null allowed commands to keep
+                    // connection.
+                    controllerInfo.mAllowedCommands =
+                            new Session2CommandGroup.Builder().build();
+                }
+                if (DEBUG) {
+                    Log.d(TAG, "Accepting connection: " + controllerInfo);
+                }
+                synchronized (mLock) {
+                    if (mConnectedControllers.containsKey(controller)) {
+                        Log.w(TAG, "Controller " + controllerInfo + " has sent connection"
+                                + " request multiple times");
                     }
-                    if (DEBUG) {
-                        Log.d(TAG, "Accepting connection: " + controllerInfo);
-                    }
-                    synchronized (mLock) {
-                        if (mConnectedControllers.containsKey(controller)) {
-                            Log.w(TAG, "Controller " + controllerInfo + " has sent connection"
-                                    + " request multiple times");
-                        }
-                        mConnectedControllers.put(controller, controllerInfo);
-                    }
-                    // If connection is accepted, notify the current state to the controller.
-                    // It's needed because we cannot call synchronous calls between
-                    // session/controller.
-                    Bundle connectionResult = new Bundle();
-                    connectionResult.putParcelable(KEY_SESSION2LINK, mSessionStub);
-                    connectionResult.putParcelable(KEY_ALLOWED_COMMANDS,
-                            controllerInfo.mAllowedCommands);
+                    mConnectedControllers.put(controller, controllerInfo);
+                }
+                // If connection is accepted, notify the current state to the controller.
+                // It's needed because we cannot call synchronous calls between
+                // session/controller.
+                Bundle connectionResult = new Bundle();
+                connectionResult.putParcelable(KEY_SESSION2LINK, mSessionStub);
+                connectionResult.putParcelable(KEY_ALLOWED_COMMANDS,
+                        controllerInfo.mAllowedCommands);
 
-                    // Double check if session is still there, because close() can be called in
-                    // another thread.
-                    if (isClosed()) {
-                        return;
-                    }
-                    controllerInfo.notifyConnected(connectionResult);
-                } else {
+                // Double check if session is still there, because close() can be called in
+                // another thread.
+                if (isClosed()) {
+                    return;
+                }
+                controllerInfo.notifyConnected(connectionResult);
+            } finally {
+                if (!accept) {
                     if (DEBUG) {
                         Log.d(TAG, "Rejecting connection, controllerInfo=" + controllerInfo);
                     }
-                    controllerInfo.notifyDisconnected();
                 }
-            });
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+                controllerInfo.notifyDisconnected();
+            }
+        });
     }
 
     // Called by Session2Link.onDisconnect
-    void onDisconnect(final Controller2Link controller, int seq) {
-        if (controller == null) {
-            return;
-        }
+    void onDisconnect(@NonNull final Controller2Link controller, int seq) {
         final ControllerInfo controllerInfo;
         synchronized (mLock) {
-            controllerInfo = mConnectedControllers.get(controller);
+            controllerInfo = mConnectedControllers.remove(controller);
         }
         if (controllerInfo == null) {
             return;
         }
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            mCallbackExecutor.execute(() -> {
-                mCallback.onDisconnected(MediaSession2.this, controllerInfo);
-            });
-            mConnectedControllers.remove(controller);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        mCallbackExecutor.execute(() -> {
+            mCallback.onDisconnected(MediaSession2.this, controllerInfo);
+        });
     }
 
     // Called by Session2Link.onSessionCommand
-    void onSessionCommand(final Controller2Link controller, final int seq,
+    void onSessionCommand(@NonNull final Controller2Link controller, final int seq,
             final Session2Command command, final Bundle args,
             @Nullable ResultReceiver resultReceiver) {
         if (controller == null) {
@@ -332,34 +324,28 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         // TODO: check allowed commands.
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
-                controllerInfo.addRequestedCommandSeqNumber(seq);
-            }
-
-            mCallbackExecutor.execute(() -> {
-                if (!controllerInfo.removeRequestedCommandSeqNumber(seq)) {
-                    resultReceiver.send(RESULT_INFO_SKIPPED, null);
-                    return;
-                }
-                Session2Command.Result result = mCallback.onSessionCommand(
-                        MediaSession2.this, controllerInfo, command, args);
-                if (resultReceiver != null) {
-                    if (result == null) {
-                        throw new RuntimeException("onSessionCommand shouldn't return null");
-                    } else {
-                        resultReceiver.send(result.getResultCode(), result.getResultData());
-                    }
-                }
-            });
-        } finally {
-            Binder.restoreCallingIdentity(token);
+        synchronized (mLock) {
+            controllerInfo.addRequestedCommandSeqNumber(seq);
         }
+        mCallbackExecutor.execute(() -> {
+            if (!controllerInfo.removeRequestedCommandSeqNumber(seq)) {
+                resultReceiver.send(RESULT_INFO_SKIPPED, null);
+                return;
+            }
+            Session2Command.Result result = mCallback.onSessionCommand(
+                    MediaSession2.this, controllerInfo, command, args);
+            if (resultReceiver != null) {
+                if (result == null) {
+                    throw new RuntimeException("onSessionCommand shouldn't return null");
+                } else {
+                    resultReceiver.send(result.getResultCode(), result.getResultData());
+                }
+            }
+        });
     }
 
     // Called by Session2Link.onCancelCommand
-    void onCancelCommand(final Controller2Link controller, final int seq) {
+    void onCancelCommand(@NonNull final Controller2Link controller, final int seq) {
         final ControllerInfo controllerInfo;
         synchronized (mLock) {
             controllerInfo = mConnectedControllers.get(controller);
@@ -367,13 +353,15 @@ public class MediaSession2 implements AutoCloseable {
         if (controllerInfo == null) {
             return;
         }
+        controllerInfo.removeRequestedCommandSeqNumber(seq);
+    }
 
-        final long token = Binder.clearCallingIdentity();
-        try {
-            controllerInfo.removeRequestedCommandSeqNumber(seq);
-        } finally {
-            Binder.restoreCallingIdentity(token);
+    private List<ControllerInfo> getConnectedControllers() {
+        List<ControllerInfo> controllers = new ArrayList<>();
+        synchronized (mLock) {
+            controllers.addAll(mConnectedControllers.values());
         }
+        return controllers;
     }
 
     /**
@@ -660,6 +648,8 @@ public class MediaSession2 implements AutoCloseable {
      * This API is not generally intended for third party application developers.
      */
     public abstract static class SessionCallback {
+        ForegroundServiceEventCallback mForegroundServiceEventCallback;
+
         /**
          * Called when a controller is created for this session. Return allowed commands for
          * controller. By default it returns {@code null}.
@@ -716,5 +706,19 @@ public class MediaSession2 implements AutoCloseable {
         public void onCommandResult(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller, @NonNull Object token,
                 @NonNull Session2Command command, @NonNull Session2Command.Result result) {}
+
+        final void onSessionClosed(MediaSession2 session) {
+            if (mForegroundServiceEventCallback != null) {
+                mForegroundServiceEventCallback.onSessionClosed(session);
+            }
+        }
+
+        void setForegroundServiceEventCallback(ForegroundServiceEventCallback callback) {
+            mForegroundServiceEventCallback = callback;
+        }
+
+        abstract static class ForegroundServiceEventCallback {
+            public void onSessionClosed(MediaSession2 session) {}
+        }
     }
 }
