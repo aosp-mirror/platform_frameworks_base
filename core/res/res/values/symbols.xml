@@ -458,9 +458,7 @@
   <java-symbol type="integer" name="config_toastDefaultGravity" />
   <java-symbol type="integer" name="config_triplePressOnPowerBehavior" />
   <java-symbol type="integer" name="config_shortPressOnSleepBehavior" />
-  <java-symbol type="integer" name="config_wifi_framework_scan_interval" />
   <java-symbol type="integer" name="config_wifi_supplicant_scan_interval" />
-  <java-symbol type="integer" name="config_wifi_no_network_periodic_scan_interval" />
   <java-symbol type="integer" name="config_wifi_scan_interval_p2p_connected" />
   <java-symbol type="integer" name="config_windowOutsetBottom" />
   <java-symbol type="integer" name="db_connection_pool_size" />
