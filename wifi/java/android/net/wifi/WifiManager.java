@@ -4502,7 +4502,12 @@ public class WifiManager {
     }
 
     /**
-     * @return true if this device supports Wi-Fi Device Provisioning Protocol (Easy-connect)
+     * Wi-Fi Easy Connect (DPP) introduces standardized mechanisms to simplify the provisioning and
+     * configuration of Wi-Fi devices.
+     * For more details, visit <a href="https://www.wi-fi.org/">https://www.wi-fi.org/</a> and
+     * search for "Easy Connect" or "Device Provisioning Protocol specification".
+     *
+     * @return true if this device supports Wi-Fi Easy-connect (Device Provisioning Protocol)
      */
     public boolean isDppSupported() {
         return isFeatureSupported(WIFI_FEATURE_DPP);
