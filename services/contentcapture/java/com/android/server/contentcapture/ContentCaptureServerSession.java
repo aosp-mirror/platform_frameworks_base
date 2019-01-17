@@ -83,6 +83,8 @@ final class ContentCaptureServerSession {
      */
     @GuardedBy("mLock")
     public void sendActivitySnapshotLocked(@NonNull SnapshotData snapshotData) {
+        mService.getMaster().logRequestLocked("snapshot: id=" + mId);
+
         mRemoteService.onActivitySnapshotRequest(mId, snapshotData);
     }
 

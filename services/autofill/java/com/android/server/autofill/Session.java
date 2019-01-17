@@ -2610,6 +2610,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + " when server returned null for session " + this.id);
         }
 
+        final String historyItem =
+                "aug:id=" + id + " u=" + uid + " m=" + mode
+                + " a=" + ComponentName.flattenToShortString(mComponentName)
+                + " f=" + mCurrentViewId
+                + " s=" + remoteService.getComponentName();
+        mService.getMaster().logRequestLocked(historyItem);
+
         final AutofillValue currentValue = mViewStates.get(mCurrentViewId).getCurrentValue();
 
         // TODO(b/111330312): we might need to add a new state in the AutofillManager to optimize
