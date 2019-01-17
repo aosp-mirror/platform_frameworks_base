@@ -480,6 +480,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mShortPressOnSleepBehavior;
     int mShortPressOnWindowBehavior;
     boolean mHasSoftInput = false;
+    boolean mHapticTextHandleEnabled;
     boolean mUseTvRouting;
     int mVeryLongPressTimeout;
     boolean mAllowStartActivityForLongPressOnPowerDuringSetup;
@@ -1835,6 +1836,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_veryLongPressTimeout);
         mAllowStartActivityForLongPressOnPowerDuringSetup = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowStartActivityForLongPressOnPowerInSetup);
+
+        mHapticTextHandleEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableHapticTextHandle);
 
         mUseTvRouting = AudioSystem.getPlatformType(mContext) == AudioSystem.PLATFORM_TELEVISION;
 
@@ -5201,8 +5205,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case HapticFeedbackConstants.CLOCK_TICK:
             case HapticFeedbackConstants.CONTEXT_CLICK:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
-            case HapticFeedbackConstants.KEYBOARD_RELEASE:
             case HapticFeedbackConstants.TEXT_HANDLE_MOVE:
+                if (!mHapticTextHandleEnabled) {
+                    return null;
+                }
+            case HapticFeedbackConstants.KEYBOARD_RELEASE:
             case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
             case HapticFeedbackConstants.ENTRY_BUMP:
             case HapticFeedbackConstants.DRAG_CROSSING:
@@ -5367,11 +5374,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.println(mAllowStartActivityForLongPressOnPowerDuringSetup);
         pw.print(prefix);
                 pw.print("mHasSoftInput="); pw.print(mHasSoftInput);
-                pw.print(" mDismissImeOnBackKeyPressed="); pw.println(mDismissImeOnBackKeyPressed);
+                pw.print(" mHapticTextHandleEnabled="); pw.println(mHapticTextHandleEnabled);
         pw.print(prefix);
-                pw.print("mIncallPowerBehavior=");
-                pw.print(incallPowerBehaviorToString(mIncallPowerBehavior));
-                pw.print(" mIncallBackBehavior=");
+                pw.print("mDismissImeOnBackKeyPressed="); pw.print(mDismissImeOnBackKeyPressed);
+                pw.print(" mIncallPowerBehavior=");
+                pw.println(incallPowerBehaviorToString(mIncallPowerBehavior));
+        pw.print(prefix);
+                pw.print("mIncallBackBehavior=");
                 pw.print(incallBackBehaviorToString(mIncallBackBehavior));
                 pw.print(" mEndcallBehavior=");
                 pw.println(endcallBehaviorToString(mEndcallBehavior));
