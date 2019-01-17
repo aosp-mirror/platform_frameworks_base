@@ -28,6 +28,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.contentcapture.ContentCaptureSession.FlushReason;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -154,8 +155,8 @@ public final class ContentCaptureManager {
      *
      * @hide
      */
-    public void flush() {
-        getMainContentCaptureSession().flush();
+    public void flush(@FlushReason int reason) {
+        getMainContentCaptureSession().flush(reason);
     }
 
     /**

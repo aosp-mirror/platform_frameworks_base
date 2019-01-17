@@ -115,7 +115,7 @@ public class ContentCaptureSessionTest {
         }
 
         @Override
-        void flush() {
+        void flush(int reason) {
             throw new UnsupportedOperationException("should not have been called");
         }
 

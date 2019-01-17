@@ -35,7 +35,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
-import android.os.SystemClock;
+import android.util.LocalLog;
 import android.util.Log;
 import android.util.TimeUtils;
 import android.view.autofill.AutofillId;
@@ -131,6 +131,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     // Used just for debugging purposes (on dump)
     private long mNextFlush;
 
+    // TODO(b/121044064): use settings to set size
+    private final LocalLog mFlushHistory = new LocalLog(10);
+
     /** @hide */
     protected MainContentCaptureSession(@NonNull Context context, @NonNull Handler handler,
             @Nullable IContentCaptureManager systemServerInterface,
@@ -172,8 +175,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
-    void flush() {
-        mHandler.sendMessage(obtainMessage(MainContentCaptureSession::handleForceFlush, this));
+    void flush(@FlushReason int reason) {
+        mHandler.sendMessage(
+                obtainMessage(MainContentCaptureSession::handleForceFlush, this, reason));
     }
 
     @Override
@@ -264,24 +268,25 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     private void handleSendEvent(@NonNull ContentCaptureEvent event, boolean forceFlush) {
-        if (!handleHasStarted()
-                && event.getType() != ContentCaptureEvent.TYPE_SESSION_STARTED) {
+        final int eventType = event.getType();
+        if (!handleHasStarted() && eventType != ContentCaptureEvent.TYPE_SESSION_STARTED) {
             // TODO(b/120494182): comment when this could happen (dialogs?)
             Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
-                    + ContentCaptureEvent.getTypeAsString(event.getType())
+                    + ContentCaptureEvent.getTypeAsString(eventType)
                     + "): session not started yet");
             return;
         }
+        if (VERBOSE) Log.v(TAG, "handleSendEvent(" + getDebugState() + "): " + event);
         if (mEvents == null) {
             if (VERBOSE) {
                 Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
-                        + ContentCaptureEvent.getTypeAsString(event.getType())
-                        + "): cCreating buffer for " + MAX_BUFFER_SIZE + " events");
+                        + ContentCaptureEvent.getTypeAsString(eventType)
+                        + "): creating buffer for " + MAX_BUFFER_SIZE + " events");
             }
             mEvents = new ArrayList<>(MAX_BUFFER_SIZE);
         }
 
-        if (!mEvents.isEmpty() && event.getType() == TYPE_VIEW_TEXT_CHANGED) {
+        if (!mEvents.isEmpty() && eventType == TYPE_VIEW_TEXT_CHANGED) {
             final ContentCaptureEvent lastEvent = mEvents.get(mEvents.size() - 1);
 
             // TODO(b/121045053): check if flags match
@@ -304,7 +309,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         final boolean bufferEvent = numberEvents < MAX_BUFFER_SIZE;
 
         if (bufferEvent && !forceFlush) {
-            handleScheduleFlush(/* checkExisting= */ true);
+            handleScheduleFlush(FLUSH_REASON_IDLE_TIMEOUT, /* checkExisting= */ true);
             return;
         }
 
@@ -323,15 +328,26 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             // when it's launched again
             return;
         }
+        final int flushReason;
+        switch (eventType) {
+            case ContentCaptureEvent.TYPE_SESSION_STARTED:
+                flushReason = FLUSH_REASON_SESSION_STARTED;
+                break;
+            case ContentCaptureEvent.TYPE_SESSION_FINISHED:
+                flushReason = FLUSH_REASON_SESSION_FINISHED;
+                break;
+            default:
+                flushReason = FLUSH_REASON_FULL;
+        }
 
-        handleForceFlush();
+        handleForceFlush(flushReason);
     }
 
     private boolean handleHasStarted() {
         return mState != UNKNWON_STATE;
     }
 
-    private void handleScheduleFlush(boolean checkExisting) {
+    private void handleScheduleFlush(@FlushReason int reason, boolean checkExisting) {
         if (!handleHasStarted()) {
             Log.v(TAG, "handleScheduleFlush(" + getDebugState() + "): session not started yet");
             return;
@@ -340,43 +356,51 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             // "Renew" the flush message by removing the previous one
             mHandler.removeMessages(MSG_FLUSH);
         }
-        mNextFlush = SystemClock.elapsedRealtime() + FLUSHING_FREQUENCY_MS;
+        mNextFlush = System.currentTimeMillis() + FLUSHING_FREQUENCY_MS;
         if (VERBOSE) {
-            Log.v(TAG, "handleScheduleFlush(" + getDebugState() + "): scheduled to flush in "
-                    + FLUSHING_FREQUENCY_MS + "ms: " + TimeUtils.formatUptime(mNextFlush));
+            Log.v(TAG, "handleScheduleFlush(" + getDebugState()
+                    + ", reason=" + getflushReasonAsString(reason) + "): scheduled to flush in "
+                    + FLUSHING_FREQUENCY_MS + "ms: " + TimeUtils.logTimeOfDay(mNextFlush));
         }
         mHandler.sendMessageDelayed(
-                obtainMessage(MainContentCaptureSession::handleFlushIfNeeded, this)
+                obtainMessage(MainContentCaptureSession::handleFlushIfNeeded, this, reason)
                 .setWhat(MSG_FLUSH), FLUSHING_FREQUENCY_MS);
     }
 
-    private void handleFlushIfNeeded() {
+    private void handleFlushIfNeeded(@FlushReason int reason) {
         if (mEvents.isEmpty()) {
             if (VERBOSE) Log.v(TAG, "Nothing to flush");
             return;
         }
-        handleForceFlush();
+        handleForceFlush(reason);
     }
 
-    private void handleForceFlush() {
+    private void handleForceFlush(@FlushReason int reason) {
         if (mEvents == null) return;
 
         if (mDirectServiceInterface == null) {
             if (VERBOSE) {
                 Log.v(TAG, "handleForceFlush(" + getDebugState()
+                        + ", reason=" + getflushReasonAsString(reason)
                         + "): hold your horses, client not ready: " + mEvents);
             }
             if (!mHandler.hasMessages(MSG_FLUSH)) {
-                handleScheduleFlush(/* checkExisting= */ false);
+                handleScheduleFlush(reason, /* checkExisting= */ false);
             }
             return;
         }
 
         final int numberEvents = mEvents.size();
+        final String reasonString = getflushReasonAsString(reason);
+        if (DEBUG) {
+            Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState()
+                    + ". Reason: " + reasonString);
+        }
+        // Logs reason, size, max size, idle timeout
+        final String logRecord = "r=" + reasonString + " s=" + numberEvents
+                + " m=" + MAX_BUFFER_SIZE + " i=" + FLUSHING_FREQUENCY_MS;
         try {
-            if (DEBUG) {
-                Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState());
-            }
+            mFlushHistory.log(logRecord);
             mHandler.removeMessages(MSG_FLUSH);
 
             final ParceledListSlice<ContentCaptureEvent> events = handleClearEvents();
@@ -500,7 +524,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @Override
     void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
-        pw.print(prefix); pw.print("id: "); pw.println(mId);
         pw.print(prefix); pw.print("mContext: "); pw.println(mContext);
         pw.print(prefix); pw.print("user: "); pw.println(mContext.getUserId());
         if (mSystemServerInterface != null) {
@@ -535,8 +558,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             }
             pw.print(prefix); pw.print("flush frequency: "); pw.println(FLUSHING_FREQUENCY_MS);
             pw.print(prefix); pw.print("next flush: ");
-            TimeUtils.formatDuration(mNextFlush - SystemClock.elapsedRealtime(), pw); pw.println();
+            TimeUtils.formatDuration(mNextFlush - System.currentTimeMillis(), pw);
+            pw.print(" ("); pw.print(TimeUtils.logTimeOfDay(mNextFlush)); pw.println(")");
         }
+        pw.print(prefix); pw.println("flush history:");
+        mFlushHistory.reverseDump(/* fd= */ null, pw, /* args= */ null); pw.println();
+
         super.dump(prefix, pw);
     }
 

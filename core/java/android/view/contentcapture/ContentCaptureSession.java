@@ -19,6 +19,7 @@ import static android.view.contentcapture.ContentCaptureManager.DEBUG;
 import static android.view.contentcapture.ContentCaptureManager.VERBOSE;
 
 import android.annotation.CallSuper;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.DebugUtils;
@@ -35,6 +36,8 @@ import com.android.internal.util.Preconditions;
 import dalvik.system.CloseGuard;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -125,6 +128,32 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     private static final int INITIAL_CHILDREN_CAPACITY = 5;
 
+    /** @hide */
+    public static final int FLUSH_REASON_FULL = 1;
+    /** @hide */
+    public static final int FLUSH_REASON_ACTIVITY_PAUSED = 2;
+    /** @hide */
+    public static final int FLUSH_REASON_ACTIVITY_RESUMED = 3;
+    /** @hide */
+    public static final int FLUSH_REASON_SESSION_STARTED = 4;
+    /** @hide */
+    public static final int FLUSH_REASON_SESSION_FINISHED = 5;
+    /** @hide */
+    public static final int FLUSH_REASON_IDLE_TIMEOUT = 6;
+
+    /** @hide */
+    @IntDef(prefix = { "FLUSH_REASON_" }, value = {
+            FLUSH_REASON_FULL,
+            FLUSH_REASON_ACTIVITY_PAUSED,
+            FLUSH_REASON_ACTIVITY_RESUMED,
+            FLUSH_REASON_SESSION_STARTED,
+            FLUSH_REASON_SESSION_FINISHED,
+            FLUSH_REASON_IDLE_TIMEOUT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface FlushReason{}
+
+
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
     private final Object mLock = new Object();
@@ -212,7 +241,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /**
      * Flushes the buffered events to the service.
      */
-    abstract void flush();
+    abstract void flush(@FlushReason int reason);
 
     /**
      * Destroys this session, flushing out all pending notifications to the service.
@@ -250,7 +279,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         }
 
         try {
-            flush();
+            flush(FLUSH_REASON_SESSION_FINISHED);
         } finally {
             onDestroy();
         }
@@ -407,12 +436,31 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         return mId;
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @NonNull
     protected static String getStateAsString(int state) {
         return state + " (" + (state == UNKNWON_STATE ? "UNKNOWN"
                 : DebugUtils.flagsToString(ContentCaptureSession.class, "STATE_", state)) + ")";
+    }
+
+    /** @hide */
+    @NonNull
+    static String getflushReasonAsString(@FlushReason int reason) {
+        switch (reason) {
+            case FLUSH_REASON_FULL:
+                return "FULL";
+            case FLUSH_REASON_ACTIVITY_PAUSED:
+                return "PAUSED";
+            case FLUSH_REASON_ACTIVITY_RESUMED:
+                return "RESUMED";
+            case FLUSH_REASON_SESSION_STARTED:
+                return "STARTED";
+            case FLUSH_REASON_SESSION_FINISHED:
+                return "FINISHED";
+            case FLUSH_REASON_IDLE_TIMEOUT:
+                return "IDLE";
+            default:
+                return "UNKOWN-" + reason;
+        }
     }
 }

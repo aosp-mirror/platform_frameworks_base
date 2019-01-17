@@ -124,6 +124,7 @@ import android.view.autofill.AutofillPopupWindow;
 import android.view.autofill.IAutofillWindowPresenter;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureManager;
+import android.view.contentcapture.ContentCaptureSession;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -1034,13 +1035,15 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */ private static final int CONTENT_CAPTURE_START = 1;
-    /** @hide */ private static final int CONTENT_CAPTURE_FLUSH = 2;
-    /** @hide */ private static final int CONTENT_CAPTURE_STOP = 3;
+    /** @hide */ private static final int CONTENT_CAPTURE_PAUSE = 2;
+    /** @hide */ private static final int CONTENT_CAPTURE_RESUME = 3;
+    /** @hide */ private static final int CONTENT_CAPTURE_STOP = 4;
 
     /** @hide */
     @IntDef(prefix = { "CONTENT_CAPTURE_" }, value = {
             CONTENT_CAPTURE_START,
-            CONTENT_CAPTURE_FLUSH,
+            CONTENT_CAPTURE_PAUSE,
+            CONTENT_CAPTURE_RESUME,
             CONTENT_CAPTURE_STOP
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -1062,8 +1065,11 @@ public class Activity extends ContextThemeWrapper
                 }
                 cm.onActivityStarted(mToken, getComponentName(), flags);
                 break;
-            case CONTENT_CAPTURE_FLUSH:
-                cm.flush();
+            case CONTENT_CAPTURE_PAUSE:
+                cm.flush(ContentCaptureSession.FLUSH_REASON_ACTIVITY_PAUSED);
+                break;
+            case CONTENT_CAPTURE_RESUME:
+                cm.flush(ContentCaptureSession.FLUSH_REASON_ACTIVITY_RESUMED);
                 break;
             case CONTENT_CAPTURE_STOP:
                 cm.onActivityStopped();
@@ -1755,7 +1761,7 @@ public class Activity extends ContextThemeWrapper
             }
         }
         mCalled = true;
-        notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_FLUSH);
+        notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_RESUME);
     }
 
     /**
@@ -2149,7 +2155,7 @@ public class Activity extends ContextThemeWrapper
             }
         }
         mCalled = true;
-        notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_FLUSH);
+        notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_PAUSE);
     }
 
     /**
