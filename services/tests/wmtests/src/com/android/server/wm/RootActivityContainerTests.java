@@ -82,7 +82,6 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        setupActivityTaskManagerService();
         mFullscreenStack = mRootActivityContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
     }

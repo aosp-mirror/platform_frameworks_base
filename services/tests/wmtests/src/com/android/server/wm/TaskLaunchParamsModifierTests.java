@@ -75,10 +75,6 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        setupActivityTaskManagerService();
-        mService.mSupportsFreeformWindowManagement = true;
-        when(mSupervisor.canUseActivityOptionsLaunchBounds(any())).thenCallRealMethod();
-
         mActivity = new ActivityBuilder(mService).build();
         mActivity.appInfo.targetSdkVersion = Build.VERSION_CODES.N_MR1;
         mActivity.info.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES;

@@ -70,8 +70,6 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
     @Before
     public void setUpAMLO() throws Exception {
-        setupActivityTaskManagerService();
-
         mLaunchObserver = mock(ActivityMetricsLaunchObserver.class);
 
         // ActivityStackSupervisor always creates its own instance of ActivityMetricsLogger.

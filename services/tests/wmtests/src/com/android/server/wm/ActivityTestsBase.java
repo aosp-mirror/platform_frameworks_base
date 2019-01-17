@@ -111,6 +111,10 @@ class ActivityTestsBase {
     @Before
     public void setUpBase() {
         mTestInjector.setUp();
+
+        mService = new TestActivityTaskManagerService(mContext);
+        mSupervisor = mService.mStackSupervisor;
+        mRootActivityContainer = mService.mRootActivityContainer;
     }
 
     @After
@@ -120,17 +124,6 @@ class ActivityTestsBase {
             mService.setWindowManager(null);
             mService = null;
         }
-    }
-
-    ActivityTaskManagerService createActivityTaskManagerService() {
-        mService = new TestActivityTaskManagerService(mContext);
-        mSupervisor = mService.mStackSupervisor;
-        mRootActivityContainer = mService.mRootActivityContainer;
-        return mService;
-    }
-
-    void setupActivityTaskManagerService() {
-        createActivityTaskManagerService();
     }
 
     /** Creates a {@link TestActivityDisplay}. */

@@ -75,7 +75,6 @@ public class ActivityStackTests extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        setupActivityTaskManagerService();
         mDefaultDisplay = mRootActivityContainer.getDefaultDisplay();
         mStack = spy(mDefaultDisplay.createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */));

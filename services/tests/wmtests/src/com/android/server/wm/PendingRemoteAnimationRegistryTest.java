@@ -52,7 +52,6 @@ public class PendingRemoteAnimationRegistryTest extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mService = createActivityTaskManagerService();
         mService.mH.runWithScissors(() -> {
             mHandler = new TestHandler(null, mClock);
         }, 0);
