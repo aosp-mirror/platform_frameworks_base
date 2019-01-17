@@ -133,33 +133,40 @@ public class ProvisioningManager {
     }
 
     /**
-     * Register a new {@link Callback} to listen to changes to changes in
-     * IMS provisioning. Use {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to
-     * Subscription changed events and call
-     * {@link #unregisterProvisioningChangedCallback(Callback)} to clean up after a
-     * subscription is removed.
+     * Register a new {@link Callback} to listen to changes to changes in IMS provisioning.
+     *
+     * When the subscription associated with this callback is removed (SIM removed, ESIM swap,
+     * etc...), this callback will automatically be removed.
      * @param executor The {@link Executor} to call the callback methods on
      * @param callback The provisioning callbackto be registered.
      * @see #unregisterProvisioningChangedCallback(Callback)
      * @see SubscriptionManager.OnSubscriptionsChangedListener
+     * @throws IllegalArgumentException if the subscription associated with this callback is not
+     * active (SIM is not inserted, ESIM inactive) or the subscription is invalid.
+     * @throws IllegalStateException if the subscription associated with this callback is valid, but
+     * the {@link ImsService} associated with the subscription is not available. This can happen if
+     * the service crashed, for example.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerProvisioningChangedCallback(@CallbackExecutor Executor executor,
             @NonNull Callback callback) {
         callback.setExecutor(executor);
         try {
-            getITelephony().registerImsProvisioningChangedCallback(mSubId,
-                    callback.getBinder());
+            getITelephony().registerImsProvisioningChangedCallback(mSubId, callback.getBinder());
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
     /**
-     * Unregister an existing {@link Callback}. Ensure to call this method when cleaning
-     * up to avoid memory leaks or when the subscription is removed.
+     * Unregister an existing {@link Callback}. When the subscription associated with this
+     * callback is removed (SIM removed, ESIM swap, etc...), this callback will automatically be
+     * removed. If this method is called for an inactive subscription, it will result in a no-op.
      * @param callback The existing {@link Callback} to be removed.
      * @see #registerProvisioningChangedCallback(Executor, Callback)
+     *
+     * @throws IllegalArgumentException if the subscription associated with this callback is
+     * invalid.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterProvisioningChangedCallback(@NonNull Callback callback) {
