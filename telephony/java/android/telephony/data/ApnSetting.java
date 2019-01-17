@@ -81,7 +81,7 @@ public class ApnSetting implements Parcelable {
      */
     public static final int TYPE_ALL = ApnTypes.ALL;
     /** APN type for default data traffic. */
-    public static final int TYPE_DEFAULT = ApnTypes.DEFAULT;
+    public static final int TYPE_DEFAULT = ApnTypes.DEFAULT | ApnTypes.HIPRI;
     /** APN type for MMS traffic. */
     public static final int TYPE_MMS = ApnTypes.MMS;
     /** APN type for SUPL assisted GPS. */
@@ -1019,7 +1019,7 @@ public class ApnSetting implements Parcelable {
             return false;
         }
         // DEFAULT can handle HIPRI.
-        if (hasApnType(type) || (type == TYPE_HIPRI && hasApnType(TYPE_DEFAULT))) {
+        if (hasApnType(type)) {
             return true;
         }
         return false;
