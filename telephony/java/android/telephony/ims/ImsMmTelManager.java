@@ -92,7 +92,7 @@ public class ImsMmTelManager {
     public static final int WIFI_MODE_WIFI_PREFERRED = 2;
 
     /**
-     * Callback class for receiving Registration callback events.
+     * Callback class for receiving IMS network Registration callback events.
      * @see #registerImsRegistrationCallback(Executor, RegistrationCallback) (RegistrationCallback)
      * @see #unregisterImsRegistrationCallback(RegistrationCallback)
      */
@@ -241,7 +241,8 @@ public class ImsMmTelManager {
     }
 
     /**
-     * Receives IMS capability status updates from the ImsService.
+     * Receives IMS capability status updates from the ImsService. This information is also
+     * available via the {@link #isAvailable(int, int)} method below.
      *
      * @see #registerMmTelCapabilityCallback(Executor, CapabilityCallback) (CapabilityCallback)
      * @see #unregisterMmTelCapabilityCallback(CapabilityCallback)
@@ -290,6 +291,8 @@ public class ImsMmTelManager {
          * If unavailable, the feature is not able to support the unavailable capability at this
          * time.
          *
+         * This information can also be queried using the {@link #isAvailable(int, int)} API.
+         *
          * @param capabilities The new availability of the capabilities.
          */
         public void onCapabilitiesStatusChanged(
@@ -304,7 +307,7 @@ public class ImsMmTelManager {
         /**@hide*/
         // Only exposed as public method for compatibility with deprecated ImsManager APIs.
         // TODO: clean up dependencies and change back to private visibility.
-        public void setExecutor(Executor executor) {
+        public final void setExecutor(Executor executor) {
             mBinder.setExecutor(executor);
         }
     }
@@ -342,8 +345,7 @@ public class ImsMmTelManager {
      * Registers a {@link RegistrationCallback} with the system, which will provide registration
      * updates for the subscription specified in {@link #createForSubscriptionId(Context, int)}. Use
      * {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to Subscription changed
-     * events and call {@link #unregisterImsRegistrationCallback(RegistrationCallback)} to clean up
-     * after a subscription is removed.
+     * events and call {@link #unregisterImsRegistrationCallback(RegistrationCallback)} to clean up.
      *
      * When the callback is registered, it will initiate the callback c to be called with the
      * current registration state.
@@ -351,6 +353,12 @@ public class ImsMmTelManager {
      * @param executor The executor the callback events should be run on.
      * @param c The {@link RegistrationCallback} to be added.
      * @see #unregisterImsRegistrationCallback(RegistrationCallback)
+     * @throws IllegalArgumentException if the subscription associated with this callback is not
+     * active (SIM is not inserted, ESIM inactive) or invalid, or a null {@link Executor} or
+     * {@link CapabilityCallback} callback.
+     * @throws IllegalStateException if the subscription associated with this callback is valid, but
+     * the {@link ImsService} associated with the subscription is not available. This can happen if
+     * the service crashed, for example.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerImsRegistrationCallback(@CallbackExecutor Executor executor,
@@ -370,11 +378,17 @@ public class ImsMmTelManager {
     }
 
     /**
-     * Removes an existing {@link RegistrationCallback}. Ensure to call this method when cleaning
-     * up to avoid memory leaks or when the subscription is removed.
+     * Removes an existing {@link RegistrationCallback}.
+     *
+     * When the subscription associated with this callback is removed (SIM removed, ESIM swap,
+     * etc...), this callback will automatically be removed. If this method is called for an
+     * inactive subscription, it will result in a no-op.
+     *
      * @param c The {@link RegistrationCallback} to be removed.
      * @see SubscriptionManager.OnSubscriptionsChangedListener
      * @see #registerImsRegistrationCallback(Executor, RegistrationCallback)
+     * @throws IllegalArgumentException if the subscription ID associated with this callback is
+     * invalid.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterImsRegistrationCallback(@NonNull RegistrationCallback c) {
@@ -389,12 +403,14 @@ public class ImsMmTelManager {
     }
 
     /**
-     * Registers a {@link CapabilityCallback} with the system, which will provide MmTel capability
-     * updates for the subscription specified in {@link #createForSubscriptionId(Context, int)}.
+     * Registers a {@link CapabilityCallback} with the system, which will provide MmTel service
+     * availability updates for the subscription specified in
+     * {@link #createForSubscriptionId(Context, int)}. The method {@link #isAvailable(int, int)}
+     * can also be used to query this information at any time.
+     *
      * Use {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to
      * subscription changed events and call
-     * {@link #unregisterImsRegistrationCallback(RegistrationCallback)} to clean up after a
-     * subscription is removed.
+     * {@link #unregisterImsRegistrationCallback(RegistrationCallback)} to clean up.
      *
      * When the callback is registered, it will initiate the callback c to be called with the
      * current capabilities.
@@ -402,9 +418,15 @@ public class ImsMmTelManager {
      * @param executor The executor the callback events should be run on.
      * @param c The MmTel {@link CapabilityCallback} to be registered.
      * @see #unregisterMmTelCapabilityCallback(CapabilityCallback)
+     * @throws IllegalArgumentException if the subscription associated with this callback is not
+     * active (SIM is not inserted, ESIM inactive) or invalid, or a null {@link Executor} or
+     * {@link CapabilityCallback} callback.
+     * @throws IllegalStateException if the subscription associated with this callback is valid, but
+     * the {@link ImsService} associated with the subscription is not available. This can happen if
+     * the service crashed, for example.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void registerMmTelCapabilityCallback(@CallbackExecutor Executor executor,
+    public void registerMmTelCapabilityCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull CapabilityCallback c) {
         if (c == null) {
             throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
@@ -421,10 +443,15 @@ public class ImsMmTelManager {
     }
 
     /**
-     * Removes an existing MmTel {@link CapabilityCallback}. Be sure to call this when cleaning
-     * up to avoid memory leaks.
+     * Removes an existing MmTel {@link CapabilityCallback}.
+     *
+     * When the subscription associated with this callback is removed (SIM removed, ESIM swap,
+     * etc...), this callback will automatically be removed. If this method is called for an
+     * inactive subscription, it will result in a no-op.
      * @param c The MmTel {@link CapabilityCallback} to be removed.
      * @see #registerMmTelCapabilityCallback(Executor, CapabilityCallback)
+     * @throws IllegalArgumentException if the subscription ID associated with this callback is
+     * invalid.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterMmTelCapabilityCallback(@NonNull CapabilityCallback c) {
