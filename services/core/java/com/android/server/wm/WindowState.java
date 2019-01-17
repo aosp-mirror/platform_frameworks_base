@@ -536,7 +536,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Point mSurfacePosition = new Point();
 
     /**
-     * A region inside of this window to be excluded from touch-related focus switches.
+     * A region inside of this window to be excluded from touch.
      */
     private TapExcludeRegionHolder mTapExcludeRegionHolder;
 
@@ -2168,6 +2168,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
             region.set(mTmpRect);
             cropRegionToStackBoundsIfNeeded(region);
+            subtractTouchExcludeRegionIfNeeded(region);
+        } else if (modal && mTapExcludeRegionHolder != null) {
+            final Region touchExcludeRegion = Region.obtain();
+            amendTapExcludeRegion(touchExcludeRegion);
+            if (!touchExcludeRegion.isEmpty()) {
+                // Remove touch modal because there are some areas that cannot be touched.
+                flags |= FLAG_NOT_TOUCH_MODAL;
+                // Give it a large touchable region at first because it was touch modal. The window
+                // might be moved on the display, so the touchable region should be large enough to
+                // ensure it covers the whole display, no matter where it is moved.
+                getDisplayContent().getBounds(mTmpRect);
+                final int dw = mTmpRect.width();
+                final int dh = mTmpRect.height();
+                region.set(-dw, -dh, dw + dw, dh + dh);
+                // Subtract the area that cannot be touched.
+                region.op(touchExcludeRegion, Region.Op.DIFFERENCE);
+            }
+            touchExcludeRegion.recycle();
         } else {
             // Not modal or full screen modal
             getTouchableRegion(region);
@@ -2837,6 +2855,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
         cropRegionToStackBoundsIfNeeded(outRegion);
+        subtractTouchExcludeRegionIfNeeded(outRegion);
     }
 
     private void cropRegionToStackBoundsIfNeeded(Region region) {
@@ -2852,6 +2871,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         stack.getDimBounds(mTmpRect);
         region.op(mTmpRect, Region.Op.INTERSECT);
+    }
+
+    /**
+     * If this window has areas that cannot be touched, we subtract those areas from its touchable
+     * region.
+     */
+    private void subtractTouchExcludeRegionIfNeeded(Region touchableRegion) {
+        if (mTapExcludeRegionHolder == null) {
+            return;
+        }
+        final Region touchExcludeRegion = Region.obtain();
+        amendTapExcludeRegion(touchExcludeRegion);
+        if (!touchExcludeRegion.isEmpty()) {
+            touchableRegion.op(touchExcludeRegion, Region.Op.DIFFERENCE);
+        }
+        touchExcludeRegion.recycle();
     }
 
     /**
@@ -4716,11 +4751,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mTapExcludeRegionHolder.updateRegion(regionId, left, top, width, height);
         // Trigger touch exclude region update on current display.
         currentDisplay.updateTouchExcludeRegion();
+        // Trigger touchable region update for this window.
+        currentDisplay.getInputMonitor().updateInputWindowsLw(true /* force */);
     }
 
-    /** Union the region with current tap exclude region that this window provides. */
+    /**
+     * Union the region with current tap exclude region that this window provides.
+     *
+     * @param region The region to be amended. It is on the screen coordinates.
+     */
     void amendTapExcludeRegion(Region region) {
-        mTapExcludeRegionHolder.amendRegion(region, getBounds());
+        final Region tempRegion = Region.obtain();
+        mTmpRect.set(mWindowFrames.mFrame);
+        mTmpRect.offsetTo(0, 0);
+        mTapExcludeRegionHolder.amendRegion(tempRegion, mTmpRect);
+        // The region held by the holder is on the window coordinates. We need to translate it to
+        // the screen coordinates.
+        tempRegion.translate(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top);
+        region.op(tempRegion, Region.Op.UNION);
+        tempRegion.recycle();
     }
 
     @Override
