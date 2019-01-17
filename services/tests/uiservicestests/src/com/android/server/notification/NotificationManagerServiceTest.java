@@ -3403,6 +3403,77 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testHideAndUnhideNotificationsOnDistractingPackageBroadcast() {
+        // Post 2 notifications from 2 packages
+        NotificationRecord pkgA = new NotificationRecord(mContext,
+                generateSbn("a", 1000, 9, 0), mTestNotificationChannel);
+        mService.addNotification(pkgA);
+        NotificationRecord pkgB = new NotificationRecord(mContext,
+                generateSbn("b", 1001, 9, 0), mTestNotificationChannel);
+        mService.addNotification(pkgB);
+
+        // on broadcast, hide one of the packages
+        mService.simulatePackageDistractionBroadcast(
+                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS, new String[] {"a"});
+        ArgumentCaptor<List<NotificationRecord>> captorHide = ArgumentCaptor.forClass(List.class);
+        verify(mListeners, times(1)).notifyHiddenLocked(captorHide.capture());
+        assertEquals(1, captorHide.getValue().size());
+        assertEquals("a", captorHide.getValue().get(0).sbn.getPackageName());
+
+        // on broadcast, unhide the package
+        mService.simulatePackageDistractionBroadcast(
+                PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS, new String[] {"a"});
+        ArgumentCaptor<List<NotificationRecord>> captorUnhide = ArgumentCaptor.forClass(List.class);
+        verify(mListeners, times(1)).notifyUnhiddenLocked(captorUnhide.capture());
+        assertEquals(1, captorUnhide.getValue().size());
+        assertEquals("a", captorUnhide.getValue().get(0).sbn.getPackageName());
+    }
+
+    @Test
+    public void testHideAndUnhideNotificationsOnDistractingPackageBroadcast_multiPkg() {
+        // Post 2 notifications from 2 packages
+        NotificationRecord pkgA = new NotificationRecord(mContext,
+                generateSbn("a", 1000, 9, 0), mTestNotificationChannel);
+        mService.addNotification(pkgA);
+        NotificationRecord pkgB = new NotificationRecord(mContext,
+                generateSbn("b", 1001, 9, 0), mTestNotificationChannel);
+        mService.addNotification(pkgB);
+
+        // on broadcast, hide one of the packages
+        mService.simulatePackageDistractionBroadcast(
+                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS, new String[] {"a", "b"});
+        ArgumentCaptor<List<NotificationRecord>> captorHide = ArgumentCaptor.forClass(List.class);
+        verify(mListeners, times(2)).notifyHiddenLocked(captorHide.capture());
+        assertEquals(2, captorHide.getValue().size());
+        assertEquals("a", captorHide.getValue().get(0).sbn.getPackageName());
+        assertEquals("b", captorHide.getValue().get(1).sbn.getPackageName());
+
+        // on broadcast, unhide the package
+        mService.simulatePackageDistractionBroadcast(
+                PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS, new String[] {"a", "b"});
+        ArgumentCaptor<List<NotificationRecord>> captorUnhide = ArgumentCaptor.forClass(List.class);
+        verify(mListeners, times(2)).notifyUnhiddenLocked(captorUnhide.capture());
+        assertEquals(2, captorUnhide.getValue().size());
+        assertEquals("a", captorUnhide.getValue().get(0).sbn.getPackageName());
+        assertEquals("b", captorUnhide.getValue().get(1).sbn.getPackageName());
+    }
+
+    @Test
+    public void testNoNotificationsHiddenOnDistractingPackageBroadcast() {
+        // post notification from this package
+        final NotificationRecord notif1 = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true);
+        mService.addNotification(notif1);
+
+        // on broadcast, nothing is hidden since no notifications are of package "test_package"
+        mService.simulatePackageDistractionBroadcast(
+                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS, new String[] {"test_package"});
+        ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        verify(mListeners, times(1)).notifyHiddenLocked(captor.capture());
+        assertEquals(0, captor.getValue().size());
+    }
+
+    @Test
     public void testCanUseManagedServicesLowRamNoWatchNullPkg() {
         when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
         when(mActivityManager.isLowRamDevice()).thenReturn(true);
