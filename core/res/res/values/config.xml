@@ -690,6 +690,9 @@
          for automotive builds only (the one that have PackageManager#FEATURE_AUTOMOTIVE) -->
     <bool translatable="false" name="config_wifi_local_only_hotspot_5ghz">false</bool>
 
+    <!-- Indicates that connected MAC randomization is supported on this device -->
+    <bool translatable="false" name="config_wifi_connected_mac_randomization_supported">false</bool>
+
     <!-- Flag indicating whether we should enable the automatic brightness.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>

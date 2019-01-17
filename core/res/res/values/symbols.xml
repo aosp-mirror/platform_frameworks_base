@@ -1878,6 +1878,7 @@
   <java-symbol type="bool" name="config_wifi_dual_band_support" />
   <java-symbol type="bool" name="config_wifi_convert_apband_5ghz_to_any" />
   <java-symbol type="bool" name="config_wifi_local_only_hotspot_5ghz" />
+  <java-symbol type="bool" name="config_wifi_connected_mac_randomization_supported" />
   <java-symbol type="bool" name="config_wifi_fast_bss_transition_enabled" />
   <java-symbol type="bool" name="config_wimaxEnabled" />
   <java-symbol type="bool" name="show_ongoing_ime_switcher" />
