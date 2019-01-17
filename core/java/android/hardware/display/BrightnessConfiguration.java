@@ -91,9 +91,7 @@ public final class BrightnessConfiguration implements Parcelable {
      *
      * @return The matching brightness correction, or null.
      *
-     * @hide
      */
-    @SystemApi
     @Nullable
     public BrightnessCorrection getCorrectionByPackageName(String packageName) {
         return mCorrectionsByPackageName.get(packageName);
@@ -106,10 +104,7 @@ public final class BrightnessConfiguration implements Parcelable {
      *      The app category.
      *
      * @return The matching brightness correction, or null.
-     *
-     * @hide
      */
-    @SystemApi
     @Nullable
     public BrightnessCorrection getCorrectionByCategory(int category) {
         return mCorrectionsByCategory.get(category);
@@ -416,9 +411,7 @@ public final class BrightnessConfiguration implements Parcelable {
          *
          * @return The maximum number of corrections by package name allowed.
          *
-         * @hide
          */
-        @SystemApi
         public int getMaxCorrectionsByPackageName() {
             return MAX_CORRECTIONS_BY_PACKAGE_NAME;
         }
@@ -428,9 +421,7 @@ public final class BrightnessConfiguration implements Parcelable {
          *
          * @return The maximum number of corrections by category allowed.
          *
-         * @hide
          */
-        @SystemApi
         public int getMaxCorrectionsByCategory() {
             return MAX_CORRECTIONS_BY_CATEGORY;
         }
@@ -451,9 +442,7 @@ public final class BrightnessConfiguration implements Parcelable {
          *      Maximum number of corrections by package name exceeded (see
          *      {@link #getMaxCorrectionsByPackageName}).
          *
-         * @hide
          */
-        @SystemApi
         public Builder addCorrectionByPackageName(String packageName,
                 BrightnessCorrection correction) {
             if (mCorrectionsByPackageName.size() >= getMaxCorrectionsByPackageName()) {
@@ -479,9 +468,7 @@ public final class BrightnessConfiguration implements Parcelable {
          *      Maximum number of corrections by category exceeded (see
          *      {@link #getMaxCorrectionsByCategory}).
          *
-         * @hide
          */
-        @SystemApi
         public Builder addCorrectionByCategory(@ApplicationInfo.Category int category,
                 BrightnessCorrection correction) {
             if (mCorrectionsByCategory.size() >= getMaxCorrectionsByCategory()) {
@@ -504,8 +491,6 @@ public final class BrightnessConfiguration implements Parcelable {
 
         /**
          * Builds the {@link BrightnessConfiguration}.
-         *
-         * A brightness curve <b>must</b> be set before calling this.
          */
         public BrightnessConfiguration build() {
             if (mCurveLux == null || mCurveNits == null) {
