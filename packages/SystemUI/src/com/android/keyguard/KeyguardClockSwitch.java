@@ -20,6 +20,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.clock.BubbleClockController;
 import com.android.keyguard.clock.StretchAnalogClockController;
+import com.android.keyguard.clock.TypeClockController;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.statusbar.StatusBarState;
@@ -153,6 +154,12 @@ public class KeyguardClockSwitch extends RelativeLayout {
                                 Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
                                 StretchAnalogClockController.class.getName(),
                                 () -> StretchAnalogClockController.build(mLayoutInflater)))
+                .withDefault(
+                        new SettingsGattedSupplier(
+                                mContentResolver,
+                                Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
+                                TypeClockController.class.getName(),
+                                () -> TypeClockController.build(mLayoutInflater)))
                 .build();
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
