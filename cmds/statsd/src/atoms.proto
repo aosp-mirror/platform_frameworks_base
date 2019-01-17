@@ -24,6 +24,7 @@ import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
+import "frameworks/base/core/proto/android/bluetooth/hci/enums.proto";
 import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
@@ -130,6 +131,7 @@ message Atom {
         ThermalThrottlingStateChanged thermal_throttling = 86;
         NetworkDnsEventReported network_dns_event_reported = 116;
         DataStallEvent data_stall_event = 121;
+        BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event = 125;
     }
 
     // Pulled events will start at field 10000.
@@ -1034,6 +1036,90 @@ message BluetoothConnectionStateChanged {
     // From android.bluetooth.BluetoothAdapter.java
     optional int32 bt_profile = 3;
 }
+
+// Logs when there is an event affecting Bluetooth device's link layer connection.
+// - This event is triggered when there is a related HCI command or event
+// - Users of this metrics can deduce Bluetooth device's connection state from these events
+// - HCI commands are logged before the command is sent, after receiving command status, and after
+//   receiving command complete
+// - HCI events are logged when they arrive
+//
+// Low level log from system/bt
+//
+// Bluetooth classic commands:
+// - CMD_CREATE_CONNECTION
+// - CMD_DISCONNECT
+// - CMD_CREATE_CONNECTION_CANCEL
+// - CMD_ACCEPT_CONNECTION_REQUEST
+// - CMD_REJECT_CONNECTION_REQUEST
+// - CMD_SETUP_ESCO_CONNECTION
+// - CMD_ACCEPT_ESCO_CONNECTION
+// - CMD_REJECT_ESCO_CONNECTION
+// - CMD_ENH_SETUP_ESCO_CONNECTION
+// - CMD_ENH_ACCEPT_ESCO_CONNECTION
+//
+// Bluetooth low energy commands:
+// - CMD_BLE_CREATE_LL_CONN [Only logged on error or when initiator filter policy is 0x00]
+// - CMD_BLE_CREATE_CONN_CANCEL [Only logged when there is an error]
+// - CMD_BLE_EXTENDED_CREATE_CONNECTION [Only logged on error or when initiator filter policy is 0x00]
+// - CMD_BLE_CLEAR_WHITE_LIST
+// - CMD_BLE_ADD_WHITE_LIST
+// - CMD_BLE_REMOVE_WHITE_LIST
+//
+// Bluetooth classic events:
+// - EVT_CONNECTION_COMP
+// - EVT_CONNECTION_REQUEST
+// - EVT_DISCONNECTION_COMP
+// - EVT_ESCO_CONNECTION_COMP
+// - EVT_ESCO_CONNECTION_CHANGED
+//
+// Bluetooth low energy meta events:
+// - BLE_EVT_CONN_COMPLETE_EVT
+// - BLE_EVT_ENHANCED_CONN_COMPLETE_EVT
+//
+// Next tag: 10
+message BluetoothLinkLayerConnectionEvent {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Connection handle of this connection if available
+    // Range: 0x0000 - 0x0EFF (12 bits)
+    // Default: 0xFFFF if the handle is unknown
+    optional int32 connection_handle = 2;
+    // Direction of the link
+    // Default: DIRECTION_UNKNOWN
+    optional android.bluetooth.DirectionEnum direction = 3;
+    // Type of this link
+    // Default: LINK_TYPE_UNKNOWN
+    optional android.bluetooth.LinkTypeEnum type = 4;
+
+    // Reason metadata for this link layer connection event, rules for interpretation:
+    // 1. If hci_cmd is set and valid, hci_event can be either EVT_COMMAND_STATUS or
+    //    EVT_COMMAND_COMPLETE, ignore hci_ble_event in this case
+    // 2. If hci_event is set to EVT_BLE_META, look at hci_ble_event; otherwise, if hci_event is
+    //    set and valid, ignore hci_ble_event
+
+    // HCI command associated with this event
+    // Default: CMD_UNKNOWN
+    optional android.bluetooth.hci.CommandEnum hci_cmd = 5;
+    // HCI event associated with this event
+    // Default: EVT_UNKNOWN
+    optional android.bluetooth.hci.EventEnum hci_event = 6;
+    // HCI BLE meta event associated with this event
+    // Default: BLE_EVT_UNKNOWN
+    optional android.bluetooth.hci.BleMetaEventEnum hci_ble_event = 7;
+    // HCI command status code if this is triggerred by hci_cmd
+    // Default: STATUS_UNKNOWN
+    optional android.bluetooth.hci.StatusEnum cmd_status = 8;
+    // HCI reason code associated with this event
+    // Default: STATUS_UNKNOWN
+    optional android.bluetooth.hci.StatusEnum reason_code = 9;
+}
+
 
 /**
  * Logs when something is plugged into or removed from the USB-C connector.
