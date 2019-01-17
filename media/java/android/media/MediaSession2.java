@@ -239,7 +239,7 @@ public class MediaSession2 implements AutoCloseable {
         final ControllerInfo controllerInfo = new ControllerInfo(remoteUserInfo,
                 mSessionManager.isTrustedForMediaControl(remoteUserInfo), controller);
         mCallbackExecutor.execute(() -> {
-            boolean accept = false;
+            boolean connected = false;
             try {
                 if (isClosed()) {
                     return;
@@ -249,8 +249,7 @@ public class MediaSession2 implements AutoCloseable {
                 // Don't reject connection for the request from trusted app.
                 // Otherwise server will fail to retrieve session's information to dispatch
                 // media keys to.
-                accept = controllerInfo.mAllowedCommands != null || controllerInfo.isTrusted();
-                if (!accept) {
+                if (controllerInfo.mAllowedCommands == null && !controllerInfo.isTrusted()) {
                     return;
                 }
                 if (controllerInfo.mAllowedCommands == null) {
@@ -283,13 +282,18 @@ public class MediaSession2 implements AutoCloseable {
                     return;
                 }
                 controllerInfo.notifyConnected(connectionResult);
+                connected = true;
             } finally {
-                if (!accept) {
+                if (!connected) {
                     if (DEBUG) {
-                        Log.d(TAG, "Rejecting connection, controllerInfo=" + controllerInfo);
+                        Log.d(TAG, "Rejecting connection or notifying that session is closed"
+                                + ", controllerInfo=" + controllerInfo);
                     }
+                    synchronized (mLock) {
+                        mConnectedControllers.remove(controller);
+                    }
+                    controllerInfo.notifyDisconnected();
                 }
-                controllerInfo.notifyDisconnected();
             }
         });
     }
