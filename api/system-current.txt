@@ -3023,6 +3023,12 @@ package android.metrics {
 
 package android.net {
 
+  public class CaptivePortal implements android.os.Parcelable {
+    field public static final int APP_RETURN_DISMISSED = 0; // 0x0
+    field public static final int APP_RETURN_UNWANTED = 1; // 0x1
+    field public static final int APP_RETURN_WANTED_AS_IS = 2; // 0x2
+  }
+
   public class ConnectivityManager {
     method @RequiresPermission(android.Manifest.permission.LOCAL_MAC_ADDRESS) public String getCaptivePortalServerUrl();
     method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
@@ -3030,6 +3036,8 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback, android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void stopTethering(int);
+    field public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC = "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
+    field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
     field public static final int TETHERING_BLUETOOTH = 2; // 0x2
     field public static final int TETHERING_USB = 1; // 0x1
     field public static final int TETHERING_WIFI = 0; // 0x0
@@ -4220,8 +4228,23 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, @Nullable String, boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
+    field public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS = "captive_portal_fallback_probe_specs";
+    field public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
+    field public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
+    field public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
+    field public static final String CAPTIVE_PORTAL_MODE = "captive_portal_mode";
+    field public static final int CAPTIVE_PORTAL_MODE_AVOID = 2; // 0x2
+    field public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0; // 0x0
+    field public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1; // 0x1
+    field public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS = "captive_portal_other_fallback_urls";
+    field public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
+    field public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
     field public static final String CARRIER_APP_NAMES = "carrier_app_names";
     field public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
+    field public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD = "data_stall_consecutive_dns_timeout_threshold";
+    field public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
+    field public static final String DATA_STALL_MIN_EVALUATE_INTERVAL = "data_stall_min_evaluate_interval";
+    field public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD = "data_stall_valid_dns_time_threshold";
     field public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
     field public static final String EUICC_PROVISIONED = "euicc_provisioned";
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT = "install_carrier_app_notification_persistent";
