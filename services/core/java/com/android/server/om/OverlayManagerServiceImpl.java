@@ -270,7 +270,9 @@ final class OverlayManagerServiceImpl {
             Slog.d(TAG, "onTargetPackageUpgraded packageName=" + packageName + " userId=" + userId);
         }
 
-        updateAllOverlaysForTarget(packageName, userId, 0);
+        if (updateAllOverlaysForTarget(packageName, userId, 0)) {
+            mListener.onOverlaysChanged(packageName, userId);
+        }
     }
 
     void onTargetPackageRemoved(@NonNull final String packageName, final int userId) {
