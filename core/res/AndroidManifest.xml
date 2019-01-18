@@ -3056,6 +3056,15 @@
     <permission android:name="android.permission.BIND_TEXT_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Must be required by a AttentionService
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_ATTENTION_SERVICE"
+                android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.BIND_ATTENTION_SERVICE" />
+
     <!-- Must be required by a {@link android.net.VpnService},
          to ensure that only the system can bind to it.
          <p>Protection level: signature
