@@ -64,15 +64,11 @@ public class Letterbox {
     public void layout(Rect outer, Rect inner, Point surfaceOrigin) {
         mOuter.set(outer);
         mInner.set(inner);
-        mOuter.offset(-surfaceOrigin.x, -surfaceOrigin.y);
-        mInner.offset(-surfaceOrigin.x, -surfaceOrigin.y);
-        outer = mOuter;
-        inner = mInner;
 
-        mTop.layout(outer.left, outer.top, inner.right, inner.top);
-        mLeft.layout(outer.left, inner.top, inner.left, outer.bottom);
-        mBottom.layout(inner.left, inner.bottom, outer.right, outer.bottom);
-        mRight.layout(inner.right, outer.top, outer.right, inner.bottom);
+        mTop.layout(outer.left, outer.top, inner.right, inner.top, surfaceOrigin);
+        mLeft.layout(outer.left, inner.top, inner.left, outer.bottom, surfaceOrigin);
+        mBottom.layout(inner.left, inner.bottom, outer.right, outer.bottom, surfaceOrigin);
+        mRight.layout(inner.right, outer.top, outer.right, inner.bottom, surfaceOrigin);
     }
 
 
@@ -137,20 +133,18 @@ public class Letterbox {
         private final String mType;
         private SurfaceControl mSurface;
 
-        private final Rect mSurfaceFrame = new Rect();
-        private final Rect mLayoutFrame = new Rect();
+        private final Rect mSurfaceFrameRelative = new Rect();
+        private final Rect mLayoutFrameGlobal = new Rect();
+        private final Rect mLayoutFrameRelative = new Rect();
 
         public LetterboxSurface(String type) {
             mType = type;
         }
 
-        public void layout(int left, int top, int right, int bottom) {
-            if (mLayoutFrame.left == left && mLayoutFrame.top == top
-                    && mLayoutFrame.right == right && mLayoutFrame.bottom == bottom) {
-                // Nothing changed.
-                return;
-            }
-            mLayoutFrame.set(left, top, right, bottom);
+        public void layout(int left, int top, int right, int bottom, Point surfaceOrigin) {
+            mLayoutFrameGlobal.set(left, top, right, bottom);
+            mLayoutFrameRelative.set(mLayoutFrameGlobal);
+            mLayoutFrameRelative.offset(-surfaceOrigin.x, -surfaceOrigin.y);
         }
 
         private void createSurface() {
@@ -168,32 +162,37 @@ public class Letterbox {
         }
 
         public int getWidth() {
-            return Math.max(0, mLayoutFrame.width());
+            return Math.max(0, mLayoutFrameGlobal.width());
         }
 
         public int getHeight() {
-            return Math.max(0, mLayoutFrame.height());
+            return Math.max(0, mLayoutFrameGlobal.height());
         }
 
+        /**
+         * Returns if the given {@code rect} overlaps with this letterbox piece.
+         * @param rect the area to check for overlap in global coordinates
+         */
         public boolean isOverlappingWith(Rect rect) {
-            if (getWidth() <= 0 || getHeight() <= 0) {
+            if (mLayoutFrameGlobal.isEmpty()) {
                 return false;
             }
-            return Rect.intersects(rect, mLayoutFrame);
+            return Rect.intersects(rect, mLayoutFrameGlobal);
         }
 
         public void applySurfaceChanges(SurfaceControl.Transaction t) {
-            if (mSurfaceFrame.equals(mLayoutFrame)) {
+            if (mSurfaceFrameRelative.equals(mLayoutFrameRelative)) {
                 // Nothing changed.
                 return;
             }
-            mSurfaceFrame.set(mLayoutFrame);
-            if (!mSurfaceFrame.isEmpty()) {
+            mSurfaceFrameRelative.set(mLayoutFrameRelative);
+            if (!mSurfaceFrameRelative.isEmpty()) {
                 if (mSurface == null) {
                     createSurface();
                 }
-                t.setPosition(mSurface, mSurfaceFrame.left, mSurfaceFrame.top);
-                t.setWindowCrop(mSurface, mSurfaceFrame.width(), mSurfaceFrame.height());
+                t.setPosition(mSurface, mSurfaceFrameRelative.left, mSurfaceFrameRelative.top);
+                t.setWindowCrop(mSurface, mSurfaceFrameRelative.width(),
+                        mSurfaceFrameRelative.height());
                 t.show(mSurface);
             } else if (mSurface != null) {
                 t.hide(mSurface);
@@ -201,7 +200,7 @@ public class Letterbox {
         }
 
         public boolean needsApplySurfaceChanges() {
-            return !mSurfaceFrame.equals(mLayoutFrame);
+            return !mSurfaceFrameRelative.equals(mLayoutFrameRelative);
         }
     }
 }
