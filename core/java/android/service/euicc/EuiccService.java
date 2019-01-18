@@ -184,6 +184,12 @@ public abstract class EuiccService extends Service {
     public static final String EXTRA_RESOLUTION_CONFIRMATION_CODE_RETRIED =
             "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE_RETRIED";
 
+    /**
+     * Intent extra set for resolution requests containing an int indicating the current card Id.
+     */
+    public static final String EXTRA_RESOLUTION_CARD_ID =
+            "android.service.euicc.extra.RESOLUTION_CARD_ID";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "RESULT_" }, value = {
