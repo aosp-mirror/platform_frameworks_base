@@ -1877,6 +1877,7 @@
   <java-symbol type="bool" name="config_supportLongPressPowerWhenNonInteractive" />
   <java-symbol type="bool" name="config_wifi_background_scan_support" />
   <java-symbol type="bool" name="config_wifi_dual_band_support" />
+  <java-symbol type="integer" name="config_wifi_max_ap_interfaces" />
   <java-symbol type="bool" name="config_wifi_convert_apband_5ghz_to_any" />
   <java-symbol type="bool" name="config_wifi_local_only_hotspot_5ghz" />
   <java-symbol type="bool" name="config_wifi_connected_mac_randomization_supported" />
