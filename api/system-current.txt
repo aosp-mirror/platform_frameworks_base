@@ -8336,6 +8336,7 @@ package android.view.contentcapture {
     method public long getEventTime();
     method public int getFlags();
     method public android.view.autofill.AutofillId getId();
+    method public java.util.List<android.view.autofill.AutofillId> getIds();
     method public java.lang.CharSequence getText();
     method public int getType();
     method public android.view.contentcapture.ViewNode getViewNode();
