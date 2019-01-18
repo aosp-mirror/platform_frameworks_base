@@ -250,9 +250,26 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
      * Through the listener, returns the L2 key if one matched, or null.
      */
     @Override
-    public void findL2Key(@NonNull final NetworkAttributesParcelable attributes,
-            @NonNull final IOnL2KeyResponseListener listener) {
-        // TODO : implement this.
+    public void findL2Key(@Nullable final NetworkAttributesParcelable attributes,
+            @Nullable final IOnL2KeyResponseListener listener) {
+        if (null == listener) return;
+        mExecutor.execute(() -> {
+            try {
+                if (null == attributes) {
+                    listener.onL2KeyResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), null);
+                    return;
+                }
+                if (null == mDb) {
+                    listener.onL2KeyResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), null);
+                    return;
+                }
+                final String key = IpMemoryStoreDatabase.findClosestAttributes(mDb,
+                        new NetworkAttributes(attributes));
+                listener.onL2KeyResponse(makeStatus(SUCCESS), key);
+            } catch (final RemoteException e) {
+                // Client at the other end died
+            }
+        });
     }
 
     /**
