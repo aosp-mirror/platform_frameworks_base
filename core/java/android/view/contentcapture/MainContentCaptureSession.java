@@ -473,9 +473,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
-    void internalNotifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
-            int flags) {
-        notifyViewTextChanged(mId, id, text, flags);
+    void internalNotifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text) {
+        notifyViewTextChanged(mId, id, text);
     }
 
     @Override
@@ -516,9 +515,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     void notifyViewTextChanged(@NonNull String sessionId, @NonNull AutofillId id,
-            @Nullable CharSequence text, int flags) {
+            @Nullable CharSequence text) {
         mHandler.sendMessage(obtainMessage(MainContentCaptureSession::handleSendEvent, this,
-                new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED, flags).setAutofillId(id)
+                new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED).setAutofillId(id)
                         .setText(text), /* forceFlush= */ false));
     }
 

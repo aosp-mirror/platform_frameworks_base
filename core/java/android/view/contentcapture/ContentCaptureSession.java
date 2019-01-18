@@ -51,12 +51,6 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     private static final String TAG = ContentCaptureSession.class.getSimpleName();
 
     /**
-     * Used on {@link #notifyViewTextChanged(AutofillId, CharSequence, int)} to indicate that the
-     * text change was caused by user input (for example, through IME).
-     */
-    public static final int FLAG_USER_INPUT = 0x1;
-
-    /**
      * Initial state, when there is no session.
      *
      * @hide
@@ -375,8 +369,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      *
      * @param id of the node.
      * @param text new text.
-     * @param flags either {@code 0} or {@link #FLAG_USER_INPUT} when the value was explicitly
-     * changed by the user (for example, through the keyboard).
+     * @param flags currently ignored.
      */
     public final void notifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
             int flags) {
@@ -384,11 +377,11 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
         if (!isContentCaptureEnabled()) return;
 
-        internalNotifyViewTextChanged(id, text, flags);
+        internalNotifyViewTextChanged(id, text);
     }
 
-    abstract void internalNotifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
-            int flags);
+    abstract void internalNotifyViewTextChanged(@NonNull AutofillId id,
+            @Nullable CharSequence text);
 
     /**
      * Creates a {@link ViewStructure} for a "standard" view.

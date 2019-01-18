@@ -74,7 +74,6 @@ public final class ContentCaptureEvent implements Parcelable {
     private final @NonNull String mSessionId;
     private final int mType;
     private final long mEventTime;
-    private final int mFlags;
     private @Nullable AutofillId mId;
     private @Nullable ViewNode mNode;
     private @Nullable CharSequence mText;
@@ -82,21 +81,15 @@ public final class ContentCaptureEvent implements Parcelable {
     private @Nullable ContentCaptureContext mClientContext;
 
     /** @hide */
-    public ContentCaptureEvent(@NonNull String sessionId, int type, long eventTime, int flags) {
+    public ContentCaptureEvent(@NonNull String sessionId, int type, long eventTime) {
         mSessionId = sessionId;
         mType = type;
         mEventTime = eventTime;
-        mFlags = flags;
-    }
-
-    /** @hide */
-    public ContentCaptureEvent(@NonNull String sessionId, int type, int flags) {
-        this(sessionId, type, System.currentTimeMillis(), flags);
     }
 
     /** @hide */
     public ContentCaptureEvent(@NonNull String sessionId, int type) {
-        this(sessionId, type, /* flags= */ 0);
+        this(sessionId, type, System.currentTimeMillis());
     }
 
     /** @hide */
@@ -183,16 +176,6 @@ public final class ContentCaptureEvent implements Parcelable {
     }
 
     /**
-     * Gets optional flags associated with the event.
-     *
-     * @return either {@code 0} or
-     * {@link android.view.contentcapture.ContentCaptureSession#FLAG_USER_INPUT}.
-     */
-    public int getFlags() {
-        return mFlags;
-    }
-
-    /**
      * Gets the whole metadata of the node associated with the event.
      *
      * <p>Only set on {@link #TYPE_VIEW_APPEARED} events.
@@ -226,9 +209,6 @@ public final class ContentCaptureEvent implements Parcelable {
     public void dump(@NonNull PrintWriter pw) {
         pw.print("type="); pw.print(getTypeAsString(mType));
         pw.print(", time="); pw.print(mEventTime);
-        if (mFlags > 0) {
-            pw.print(", flags="); pw.print(mFlags);
-        }
         if (mId != null) {
             pw.print(", id="); pw.print(mId);
         }
@@ -255,9 +235,6 @@ public final class ContentCaptureEvent implements Parcelable {
         if (mType == TYPE_SESSION_STARTED && mParentSessionId != null) {
             string.append(", parent=").append(mParentSessionId);
         }
-        if (mFlags > 0) {
-            string.append(", flags=").append(mFlags);
-        }
         if (mId != null) {
             string.append(", id=").append(mId);
         }
@@ -281,7 +258,6 @@ public final class ContentCaptureEvent implements Parcelable {
         parcel.writeString(mSessionId);
         parcel.writeInt(mType);
         parcel.writeLong(mEventTime);
-        parcel.writeInt(mFlags);
         parcel.writeParcelable(mId, flags);
         ViewNode.writeToParcel(parcel, mNode, flags);
         parcel.writeCharSequence(mText);
@@ -301,9 +277,7 @@ public final class ContentCaptureEvent implements Parcelable {
             final String sessionId = parcel.readString();
             final int type = parcel.readInt();
             final long eventTime  = parcel.readLong();
-            final int flags = parcel.readInt();
-            final ContentCaptureEvent event =
-                    new ContentCaptureEvent(sessionId, type, eventTime, flags);
+            final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, type, eventTime);
             final AutofillId id = parcel.readParcelable(null);
             if (id != null) {
                 event.setAutofillId(id);

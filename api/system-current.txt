@@ -8311,7 +8311,6 @@ package android.view.contentcapture {
   public final class ContentCaptureEvent implements android.os.Parcelable {
     method public int describeContents();
     method public long getEventTime();
-    method public int getFlags();
     method public android.view.autofill.AutofillId getId();
     method public java.lang.CharSequence getText();
     method public int getType();
