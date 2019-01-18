@@ -25,7 +25,7 @@ LOCAL_MODULE_TAGS := tests
 # LOCAL_SDK_VERSION := current
 LOCAL_PRIVATE_PLATFORM_APIS := true
 
-LOCAL_STATIC_JAVA_LIBRARIES := compatibility-device-util android-support-test testng
+LOCAL_STATIC_JAVA_LIBRARIES := compatibility-device-util androidx.test.rules testng
 
 LOCAL_JAVA_LIBRARIES := android.test.base
 
