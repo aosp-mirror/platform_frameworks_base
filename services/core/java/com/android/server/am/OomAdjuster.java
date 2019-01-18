@@ -58,6 +58,7 @@ import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -184,6 +185,7 @@ public final class OomAdjuster {
 
     @GuardedBy("mService")
     final void updateOomAdjLocked() {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "updateOomAdj");
         mService.mOomAdjProfiler.oomAdjStarted();
         final ProcessRecord TOP_APP = mService.getTopAppLocked();
         final long now = SystemClock.uptimeMillis();
@@ -568,6 +570,7 @@ public final class OomAdjuster {
             }
         }
         mService.mOomAdjProfiler.oomAdjEnded();
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     private final ComputeOomAdjWindowCallback mTmpComputeOomAdjWindowCallback =
