@@ -730,7 +730,7 @@ status_t JMediaCodec::getCodecInfo(JNIEnv *env, jobject *codecInfoObject) const 
     CHECK(codecInfoClazz.get() != NULL);
 
     jmethodID codecInfoCtorID = env->GetMethodID(codecInfoClazz.get(), "<init>",
-            "(Ljava/lang/String;Z[Landroid/media/MediaCodecInfo$CodecCapabilities;)V");
+            "(Ljava/lang/String;Ljava/lang/String;I[Landroid/media/MediaCodecInfo$CodecCapabilities;)V");
 
     *codecInfoObject = env->NewObject(codecInfoClazz.get(), codecInfoCtorID,
             nameObject.get(), canonicalNameObject.get(), attributes, capsArrayObj.get());
