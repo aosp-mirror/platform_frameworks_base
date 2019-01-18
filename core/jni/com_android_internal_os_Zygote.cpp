@@ -95,6 +95,7 @@ using android::base::GetBoolProperty;
 static pid_t gSystemServerPid = 0;
 
 static const char kIsolatedStorage[] = "persist.sys.isolated_storage";
+static const char kIsolatedStorageSnapshot[] = "sys.isolated_storage_snapshot";
 static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
 static jmethodID gCallPostForkSystemServerHooks;
@@ -539,7 +540,7 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
         return true;
     }
 
-    if (GetBoolProperty(kIsolatedStorage, false)) {
+    if (GetBoolProperty(kIsolatedStorageSnapshot, GetBoolProperty(kIsolatedStorage, false))) {
         if (mount_mode == MOUNT_EXTERNAL_FULL) {
             storageSource = "/mnt/runtime/write";
             if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
