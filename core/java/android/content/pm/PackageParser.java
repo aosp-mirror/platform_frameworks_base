@@ -8484,4 +8484,42 @@ public class PackageParser {
             this.error = error;
         }
     }
+
+    public static PackageInfo generatePackageInfoFromApex(File apexFile, boolean collectCerts)
+            throws PackageParserException {
+        PackageInfo pi = new PackageInfo();
+        // TODO(b/123052859): We should avoid these repeated calls to parseApkLite each time
+        // we want to generate information for APEX modules.
+        PackageParser.ApkLite apk = PackageParser.parseApkLite(apexFile,
+            collectCerts ? PackageParser.PARSE_COLLECT_CERTIFICATES : 0);
+
+        pi.packageName = apk.packageName;
+        pi.setLongVersionCode(apk.getLongVersionCode());
+
+        if (collectCerts) {
+            if (apk.signingDetails.hasPastSigningCertificates()) {
+                // Package has included signing certificate rotation information.  Return
+                // the oldest cert so that programmatic checks keep working even if unaware
+                // of key rotation.
+                pi.signatures = new Signature[1];
+                pi.signatures[0] = apk.signingDetails.pastSigningCertificates[0];
+            } else if (apk.signingDetails.hasSignatures()) {
+                // otherwise keep old behavior
+                int numberOfSigs = apk.signingDetails.signatures.length;
+                pi.signatures = new Signature[numberOfSigs];
+                System.arraycopy(apk.signingDetails.signatures, 0, pi.signatures, 0,
+                    numberOfSigs);
+            }
+
+            if (apk.signingDetails != SigningDetails.UNKNOWN) {
+                // only return a valid SigningInfo if there is signing information to report
+                pi.signingInfo = new SigningInfo(apk.signingDetails);
+            } else {
+                pi.signingInfo = null;
+            }
+        }
+
+        pi.isApex = true;
+        return pi;
+    }
 }
