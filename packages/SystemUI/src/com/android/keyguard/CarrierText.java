@@ -42,8 +42,8 @@ public class CarrierText extends TextView {
     private CarrierTextController.CarrierTextCallback mCarrierTextCallback =
             new CarrierTextController.CarrierTextCallback() {
                 @Override
-                public void updateCarrierText(CharSequence carrierText, boolean simsReady) {
-                    setText(carrierText);
+                public void updateCarrierInfo(CarrierTextController.CarrierTextCallbackInfo info) {
+                    setText(info.carrierText);
                 }
 
                 @Override
@@ -53,7 +53,7 @@ public class CarrierText extends TextView {
 
                 @Override
                 public void finishedWakingUp() {
-                    setSelected(mShouldMarquee);
+                    setSelected(true);
                 }
             };
 
@@ -85,7 +85,6 @@ public class CarrierText extends TextView {
                 mShowMissingSim);
         mShouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setSelected(mShouldMarquee); // Allow marquee to work.
-
     }
 
     @Override
