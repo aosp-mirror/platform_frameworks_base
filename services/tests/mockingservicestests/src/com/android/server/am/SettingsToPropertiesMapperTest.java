@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,52 +16,98 @@
 
 package com.android.server.am;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyString;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
 import android.content.ContentResolver;
+import android.os.SystemProperties;
 import android.provider.Settings;
-import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 
-import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 
-import com.android.internal.util.Preconditions;
-import com.android.internal.util.test.FakeSettingsProvider;
-
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.Answers;
+import org.mockito.Mock;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Tests for {@link SettingsToPropertiesMapper}
- *
- *  Build/Install/Run:
- *  atest FrameworksServicesTests:SettingsToPropertiesMapperTest
+ * Test SettingsToPropertiesMapper.
  */
-@RunWith(AndroidJUnit4.class)
-@SmallTest
 public class SettingsToPropertiesMapperTest {
     private static final String NAME_VALID_CHARACTERS_REGEX = "^[\\w\\-@:]*$";
     private static final String[] TEST_MAPPING = new String[] {
             Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS
     };
 
-    private TestMapper mTestMapper;
-    private MockContentResolver mMockContentResolver;
+    private MockitoSession mSession;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private ContentResolver mMockContentResolver;
+
+    private SettingsToPropertiesMapper mTestMapper;
+
+    private HashMap<String, String> mSystemSettingsMap;
+    private HashMap<String, String> mGlobalSettingsMap;
 
     @Before
-    public void setupForEach() {
-        // Use FakeSettingsProvider to not affect global state
-        mMockContentResolver = new MockContentResolver(InstrumentationRegistry.getContext());
-        mMockContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
-        mTestMapper = new TestMapper(mMockContentResolver);
+    public void setUp() throws Exception {
+        mSession =
+                ExtendedMockito.mockitoSession().initMocks(
+                        this)
+                        .strictness(Strictness.LENIENT)
+                        .spyStatic(SystemProperties.class)
+                        .spyStatic(Settings.Global.class)
+                        .spyStatic(SettingsToPropertiesMapper.class)
+                        .startMocking();
+        mSystemSettingsMap = new HashMap<>();
+        mGlobalSettingsMap = new HashMap<>();
+
+        // Mock SystemProperties setter and various getters
+        doAnswer((Answer<Void>) invocationOnMock -> {
+                    String key = invocationOnMock.getArgument(0);
+                    String value = invocationOnMock.getArgument(1);
+
+                    mSystemSettingsMap.put(key, value);
+                    return null;
+                }
+        ).when(() -> SystemProperties.set(anyString(), anyString()));
+
+        doAnswer((Answer<String>) invocationOnMock -> {
+                    String key = invocationOnMock.getArgument(0);
+
+                    String storedValue = mSystemSettingsMap.get(key);
+                    return storedValue == null ? "" : storedValue;
+                }
+        ).when(() -> SystemProperties.get(anyString()));
+
+        // Mock Settings.Global methods
+        doAnswer((Answer<String>) invocationOnMock -> {
+                    String key = invocationOnMock.getArgument(1);
+
+                    return mGlobalSettingsMap.get(key);
+                }
+        ).when(() -> Settings.Global.getString(any(), anyString()));
+
+        mTestMapper = new SettingsToPropertiesMapper(
+            mMockContentResolver, TEST_MAPPING, new String[] {});
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mSession.finishMocking();
     }
 
     @Test
@@ -108,30 +154,27 @@ public class SettingsToPropertiesMapperTest {
 
     @Test
     public void testUpdatePropertiesFromSettings() {
-        Settings.Global.putString(mMockContentResolver,
-                Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS, "testValue");
+        mGlobalSettingsMap.put(Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS, "testValue");
 
         String systemPropertyName = "persist.device_config.global_settings."
                 + "sqlite_compatibility_wal_flags";
 
         mTestMapper.updatePropertiesFromSettings();
-        String propValue = mTestMapper.systemPropertiesGet(systemPropertyName);
+        String propValue = mSystemSettingsMap.get(systemPropertyName);
         Assert.assertEquals("testValue", propValue);
 
-        Settings.Global.putString(mMockContentResolver,
-                Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS, "testValue2");
+        mGlobalSettingsMap.put(Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS, "testValue2");
         mTestMapper.updatePropertyFromSetting(
                 Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS,
                 systemPropertyName);
-        propValue = mTestMapper.systemPropertiesGet(systemPropertyName);
+        propValue = mSystemSettingsMap.get(systemPropertyName);
         Assert.assertEquals("testValue2", propValue);
 
-        Settings.Global.putString(mMockContentResolver,
-                Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS, null);
+        mGlobalSettingsMap.put(Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS, null);
         mTestMapper.updatePropertyFromSetting(
                 Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS,
                 systemPropertyName);
-        propValue = mTestMapper.systemPropertiesGet(systemPropertyName);
+        propValue = mSystemSettingsMap.get(systemPropertyName);
         Assert.assertEquals("", propValue);
     }
 
@@ -163,71 +206,37 @@ public class SettingsToPropertiesMapperTest {
     public void testUpdatePropertiesFromSettings_PropertyAndSettingNotPresent() {
         // Test that empty property will not not be set if setting is not set
         mTestMapper.updatePropertiesFromSettings();
-        String propValue = mTestMapper.systemPropertiesGet("TestProperty");
+        String propValue = mSystemSettingsMap.get("TestProperty");
         Assert.assertNull("Property should not be set if setting is null", propValue);
     }
 
     @Test
     public void testIsNativeFlagsResetPerformed() {
-        mTestMapper.systemPropertiesSet("device_config.reset_performed", "true");
+        mSystemSettingsMap.put("device_config.reset_performed", "true");
         Assert.assertTrue(mTestMapper.isNativeFlagsResetPerformed());
 
-        mTestMapper.systemPropertiesSet("device_config.reset_performed", "false");
+        mSystemSettingsMap.put("device_config.reset_performed", "false");
         Assert.assertFalse(mTestMapper.isNativeFlagsResetPerformed());
 
-        mTestMapper.systemPropertiesSet("device_config.reset_performed", "");
+        mSystemSettingsMap.put("device_config.reset_performed", "");
         Assert.assertFalse(mTestMapper.isNativeFlagsResetPerformed());
     }
 
     @Test
     public void testGetResetNativeCategories() {
-        mTestMapper.systemPropertiesSet("device_config.reset_performed", "");
-        Assert.assertEquals(mTestMapper.getResetNativeCategories().length, 0);
-
-        mTestMapper.systemPropertiesSet("device_config.reset_performed", "true");
-        mTestMapper.setFileContent("");
-        Assert.assertEquals(mTestMapper.getResetNativeCategories().length, 0);
-
-        mTestMapper.systemPropertiesSet("device_config.reset_performed", "true");
-        mTestMapper.setFileContent("persist.device_config.category1.flag;"
+        doReturn("persist.device_config.category1.flag;"
                 + "persist.device_config.category2.flag;persist.device_config.category3.flag;"
-                + "persist.device_config.category3.flag2");
+                + "persist.device_config.category3.flag2")
+            .when(() -> SettingsToPropertiesMapper.getResetFlagsFileContent());
+
+        mSystemSettingsMap.put("device_config.reset_performed", "");
+        Assert.assertEquals(mTestMapper.getResetNativeCategories().length, 0);
+
+        mSystemSettingsMap.put("device_config.reset_performed", "true");
         List<String> categories = Arrays.asList(mTestMapper.getResetNativeCategories());
         Assert.assertEquals(3, categories.size());
         Assert.assertTrue(categories.contains("category1"));
         Assert.assertTrue(categories.contains("category2"));
         Assert.assertTrue(categories.contains("category3"));
-    }
-
-    private static class TestMapper extends SettingsToPropertiesMapper {
-        private final Map<String, String> mProps = new HashMap<>();
-
-        private String mFileContent = "";
-
-        TestMapper(ContentResolver contentResolver) {
-            super(contentResolver, TEST_MAPPING, new String[] {});
-        }
-
-        @Override
-        protected String systemPropertiesGet(String key) {
-            Preconditions.checkNotNull(key);
-            return mProps.get(key);
-        }
-
-        @Override
-        protected void systemPropertiesSet(String key, String value) {
-            Preconditions.checkNotNull(value);
-            Preconditions.checkNotNull(key);
-            mProps.put(key, value);
-        }
-
-        protected void setFileContent(String fileContent) {
-            mFileContent = fileContent;
-        }
-
-        @Override
-        protected String getResetFlagsFileContent() {
-            return mFileContent;
-        }
     }
 }
