@@ -2175,4 +2175,8 @@ enum PageId {
 
     // OPEN: Settings > System > Input & Gesture > Tap to check
     SETTINGS_GESTURE_TAP_SCREEN = 1626;
+
+    // OPEN: Settings > Network & internet > Click Mobile network to land on a page with a list of
+    // SIM/eSIM subscriptions.
+    MOBILE_NETWORK_LIST = 1627;
 }

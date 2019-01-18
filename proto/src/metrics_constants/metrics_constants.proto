@@ -6814,6 +6814,12 @@ message MetricsEvent {
     // OS: Q
     SETTINGS_GESTURE_TAP_SCREEN = 1626;
 
+    // OPEN: Settings > Network & internet > Click Mobile network to land on a page with a list of
+    // SIM/eSIM subscriptions.
+    // CATEGORY: SETTINGS
+    // OS: Q
+    MOBILE_NETWORK_LIST = 1627;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
