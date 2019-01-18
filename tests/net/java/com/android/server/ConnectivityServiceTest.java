@@ -122,7 +122,6 @@ import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
-import android.net.StringNetworkSpecifier;
 import android.net.UidRange;
 import android.net.metrics.IpConnectivityLog;
 import android.net.shared.NetworkMonitorUtils;
@@ -145,6 +144,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -2567,16 +2567,76 @@ public class ConnectivityServiceTest {
         return new NetworkRequest.Builder().addTransportType(TRANSPORT_WIFI);
     }
 
+    /**
+     * Verify request matching behavior with network specifiers.
+     *
+     * Note: this test is somewhat problematic since it involves removing capabilities from
+     * agents - i.e. agents rejecting requests which they previously accepted. This is flagged
+     * as a WTF bug in
+     * {@link ConnectivityService#mixInCapabilities(NetworkAgentInfo, NetworkCapabilities)} but
+     * does work.
+     */
     @Test
     public void testNetworkSpecifier() {
+        // A NetworkSpecifier subclass that matches all networks but must not be visible to apps.
+        class ConfidentialMatchAllNetworkSpecifier extends NetworkSpecifier implements
+                Parcelable {
+            @Override
+            public boolean satisfiedBy(NetworkSpecifier other) {
+                return true;
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {}
+
+            @Override
+            public NetworkSpecifier redact() {
+                return null;
+            }
+        }
+
+        // A network specifier that matches either another LocalNetworkSpecifier with the same
+        // string or a ConfidentialMatchAllNetworkSpecifier, and can be passed to apps as is.
+        class LocalStringNetworkSpecifier extends NetworkSpecifier implements Parcelable {
+            private String mString;
+
+            LocalStringNetworkSpecifier(String string) {
+                mString = string;
+            }
+
+            @Override
+            public boolean satisfiedBy(NetworkSpecifier other) {
+                if (other instanceof LocalStringNetworkSpecifier) {
+                    return TextUtils.equals(mString,
+                            ((LocalStringNetworkSpecifier) other).mString);
+                }
+                if (other instanceof ConfidentialMatchAllNetworkSpecifier) return true;
+                return false;
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {}
+        }
+
+
         NetworkRequest rEmpty1 = newWifiRequestBuilder().build();
         NetworkRequest rEmpty2 = newWifiRequestBuilder().setNetworkSpecifier((String) null).build();
         NetworkRequest rEmpty3 = newWifiRequestBuilder().setNetworkSpecifier("").build();
         NetworkRequest rEmpty4 = newWifiRequestBuilder().setNetworkSpecifier(
             (NetworkSpecifier) null).build();
-        NetworkRequest rFoo = newWifiRequestBuilder().setNetworkSpecifier("foo").build();
+        NetworkRequest rFoo = newWifiRequestBuilder().setNetworkSpecifier(
+                new LocalStringNetworkSpecifier("foo")).build();
         NetworkRequest rBar = newWifiRequestBuilder().setNetworkSpecifier(
-                new StringNetworkSpecifier("bar")).build();
+                new LocalStringNetworkSpecifier("bar")).build();
 
         TestNetworkCallback cEmpty1 = new TestNetworkCallback();
         TestNetworkCallback cEmpty2 = new TestNetworkCallback();
@@ -2585,7 +2645,7 @@ public class ConnectivityServiceTest {
         TestNetworkCallback cFoo = new TestNetworkCallback();
         TestNetworkCallback cBar = new TestNetworkCallback();
         TestNetworkCallback[] emptyCallbacks = new TestNetworkCallback[] {
-                cEmpty1, cEmpty2, cEmpty3 };
+                cEmpty1, cEmpty2, cEmpty3, cEmpty4 };
 
         mCm.registerNetworkCallback(rEmpty1, cEmpty1);
         mCm.registerNetworkCallback(rEmpty2, cEmpty2);
@@ -2593,6 +2653,9 @@ public class ConnectivityServiceTest {
         mCm.registerNetworkCallback(rEmpty4, cEmpty4);
         mCm.registerNetworkCallback(rFoo, cFoo);
         mCm.registerNetworkCallback(rBar, cBar);
+
+        LocalStringNetworkSpecifier nsFoo = new LocalStringNetworkSpecifier("foo");
+        LocalStringNetworkSpecifier nsBar = new LocalStringNetworkSpecifier("bar");
 
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
@@ -2602,30 +2665,54 @@ public class ConnectivityServiceTest {
         cEmpty4.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         assertNoCallbacks(cFoo, cBar);
 
-        mWiFiNetworkAgent.setNetworkSpecifier(new StringNetworkSpecifier("foo"));
+        mWiFiNetworkAgent.setNetworkSpecifier(nsFoo);
         cFoo.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         for (TestNetworkCallback c: emptyCallbacks) {
-            c.expectCallback(CallbackState.NETWORK_CAPABILITIES, mWiFiNetworkAgent);
+            c.expectCapabilitiesLike((caps) -> caps.getNetworkSpecifier().equals(nsFoo),
+                    mWiFiNetworkAgent);
         }
-        cFoo.expectCallback(CallbackState.NETWORK_CAPABILITIES, mWiFiNetworkAgent);
+        cFoo.expectCapabilitiesLike((caps) -> caps.getNetworkSpecifier().equals(nsFoo),
+                mWiFiNetworkAgent);
+        assertEquals(nsFoo,
+                mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork()).getNetworkSpecifier());
         cFoo.assertNoCallback();
 
-        mWiFiNetworkAgent.setNetworkSpecifier(new StringNetworkSpecifier("bar"));
+        mWiFiNetworkAgent.setNetworkSpecifier(nsBar);
         cFoo.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         cBar.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         for (TestNetworkCallback c: emptyCallbacks) {
-            c.expectCallback(CallbackState.NETWORK_CAPABILITIES, mWiFiNetworkAgent);
+            c.expectCapabilitiesLike((caps) -> caps.getNetworkSpecifier().equals(nsBar),
+                    mWiFiNetworkAgent);
         }
-        cBar.expectCallback(CallbackState.NETWORK_CAPABILITIES, mWiFiNetworkAgent);
+        cBar.expectCapabilitiesLike((caps) -> caps.getNetworkSpecifier().equals(nsBar),
+                mWiFiNetworkAgent);
+        assertEquals(nsBar,
+                mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork()).getNetworkSpecifier());
+        cBar.assertNoCallback();
+
+        mWiFiNetworkAgent.setNetworkSpecifier(new ConfidentialMatchAllNetworkSpecifier());
+        cFoo.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        for (TestNetworkCallback c : emptyCallbacks) {
+            c.expectCapabilitiesLike((caps) -> caps.getNetworkSpecifier() == null,
+                    mWiFiNetworkAgent);
+        }
+        cFoo.expectCapabilitiesLike((caps) -> caps.getNetworkSpecifier() == null,
+                mWiFiNetworkAgent);
+        cBar.expectCapabilitiesLike((caps) -> caps.getNetworkSpecifier() == null,
+                mWiFiNetworkAgent);
+        assertNull(
+                mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork()).getNetworkSpecifier());
+        cFoo.assertNoCallback();
         cBar.assertNoCallback();
 
         mWiFiNetworkAgent.setNetworkSpecifier(null);
+        cFoo.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         cBar.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         for (TestNetworkCallback c: emptyCallbacks) {
             c.expectCallback(CallbackState.NETWORK_CAPABILITIES, mWiFiNetworkAgent);
         }
 
-        assertNoCallbacks(cEmpty1, cEmpty2, cEmpty3, cFoo, cBar);
+        assertNoCallbacks(cEmpty1, cEmpty2, cEmpty3, cEmpty4, cFoo, cBar);
     }
 
     @Test
