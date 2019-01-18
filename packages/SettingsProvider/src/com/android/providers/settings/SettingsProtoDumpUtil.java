@@ -19,7 +19,6 @@ package com.android.providers.settings;
 import android.annotation.NonNull;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.provider.Settings.Global;
 import android.providers.settings.GlobalSettingsProto;
 import android.providers.settings.SecureSettingsProto;
 import android.providers.settings.SettingProto;
@@ -397,7 +396,7 @@ class SettingsProtoDumpUtil {
         p.end(certPinToken);
 
         dumpSetting(s, p,
-                Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
+                Settings.Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
                 GlobalSettingsProto.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.COMPATIBILITY_MODE,
@@ -734,7 +733,7 @@ class SettingsProtoDumpUtil {
                 Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                 GlobalSettingsProto.HEADS_UP_NOTIFICATIONS_ENABLED);
         dumpSetting(s, p,
-                Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
+                Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
                 GlobalSettingsProto.HIDDEN_API_BLACKLIST_EXEMPTIONS);
 
         final long inetCondToken = p.start(GlobalSettingsProto.INET_CONDITION);
@@ -829,6 +828,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.AUTOMATIC_POWER_SAVER_MODE,
                 GlobalSettingsProto.LowPowerMode.AUTOMATIC_POWER_SAVER_MODE);
+        dumpSetting(s, p,
+                Settings.Global.LOW_POWER_MODE_STICKY,
+                GlobalSettingsProto.LowPowerMode.STICKY_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED,
+                GlobalSettingsProto.LowPowerMode.STICKY_AUTO_DISABLE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL,
+                GlobalSettingsProto.LowPowerMode.STICKY_AUTO_DISABLE_LEVEL);
         p.end(lpmToken);
 
         dumpSetting(s, p,
@@ -879,7 +887,7 @@ class SettingsProtoDumpUtil {
         p.end(multiSimToken);
 
         dumpSetting(s, p,
-                Global.NATIVE_FLAGS_HEALTH_CHECK_ENABLED,
+                Settings.Global.NATIVE_FLAGS_HEALTH_CHECK_ENABLED,
                 GlobalSettingsProto.NATIVE_FLAGS_HEALTH_CHECK_ENABLED);
 
         final long netstatsToken = p.start(GlobalSettingsProto.NETSTATS);
@@ -1259,10 +1267,10 @@ class SettingsProtoDumpUtil {
 
         final long soundTriggerToken = p.start(GlobalSettingsProto.SOUND_TRIGGER);
         dumpSetting(s, p,
-                Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
+                Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
                 GlobalSettingsProto.SoundTrigger.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY);
         dumpSetting(s, p,
-                Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
+                Settings.Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
                 GlobalSettingsProto.SoundTrigger.DETECTION_SERVICE_OP_TIMEOUT_MS);
         p.end(soundTriggerToken);
 
@@ -1558,7 +1566,7 @@ class SettingsProtoDumpUtil {
                 GlobalSettingsProto.ZRAM_ENABLED);
 
         dumpSetting(s, p,
-                Global.APP_OPS_CONSTANTS,
+                Settings.Global.APP_OPS_CONSTANTS,
                 GlobalSettingsProto.APP_OPS_CONSTANTS);
 
         p.end(token);

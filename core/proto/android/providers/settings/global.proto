@@ -528,6 +528,16 @@ message GlobalSettingsProto {
         // Whether automatic battery saver mode is controlled via percentage,
         // {@link #DYNAMIC_POWER_SAVINGS_ENABLED} or disabled.
         optional SettingProto automatic_power_saver_mode = 4 [ (android.privacy).dest = DEST_AUTOMATIC];
+        // If 1, battery saver (low_power_mode) will be re-activated after the device is
+        // unplugged from a charger or rebooted.
+        optional SettingProto sticky_enabled = 5;
+        // Whether sticky battery saver should be deactivated once the battery level has reached the
+        // threshold specified by sticky_disable_level.
+        optional SettingProto sticky_auto_disable_enabled = 6;
+        // When a device is unplugged from a changer (or is rebooted), do not re-activate battery
+        // saver even if {@link #LOW_POWER_MODE_STICKY} is 1, if the battery level is equal to or
+        // above this threshold.
+        optional SettingProto sticky_auto_disable_level = 7;
     }
     optional LowPowerMode low_power_mode = 70;
 

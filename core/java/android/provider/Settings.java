@@ -12053,6 +12053,31 @@ public final class Settings {
         public static final String LOW_POWER_MODE_STICKY = "low_power_sticky";
 
         /**
+         * When a device is unplugged from a changer (or is rebooted), do not re-activate battery
+         * saver even if {@link #LOW_POWER_MODE_STICKY} is 1, if the battery level is equal to or
+         * above this threshold.
+         *
+         * @hide
+         */
+        public static final String LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL =
+                "low_power_sticky_auto_disable_level";
+
+        private static final Validator LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 100);
+
+        /**
+         * Whether sticky battery saver should be deactivated once the battery level has reached the
+         * threshold specified by {@link #LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL}.
+         *
+         * @hide
+         */
+        public static final String LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED =
+                "low_power_sticky_auto_disable_enabled";
+
+        private static final Validator LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED_VALIDATOR =
+                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1"});
+
+        /**
          * Battery level [1-100] at which low power mode automatically turns on.
          * Pre-Q If 0, it will not automatically turn on. Q and newer it will only automatically
          * turn on if the {@link #AUTOMATIC_POWER_SAVER_MODE} setting is also set to
@@ -12063,7 +12088,6 @@ public final class Settings {
          * @hide
          */
         public static final String LOW_POWER_MODE_TRIGGER_LEVEL = "low_power_trigger_level";
-
 
         private static final Validator LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR =
                 new SettingsValidators.InclusiveIntegerRangeValidator(0, 100);
@@ -13055,6 +13079,8 @@ public final class Settings {
             ENCODED_SURROUND_OUTPUT,
             ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
             LOW_POWER_MODE_TRIGGER_LEVEL,
+            LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED,
+            LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL,
             BLUETOOTH_ON,
             PRIVATE_DNS_MODE,
             PRIVATE_DNS_SPECIFIER,
@@ -13093,6 +13119,10 @@ public final class Settings {
             VALIDATORS.put(ENCODED_SURROUND_OUTPUT, ENCODED_SURROUND_OUTPUT_VALIDATOR);
             VALIDATORS.put(ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
                     ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS_VALIDATOR);
+            VALIDATORS.put(LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL,
+                    LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL_VALIDATOR);
+            VALIDATORS.put(LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED,
+                    LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED_VALIDATOR);
             VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL, LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
             VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                     LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
