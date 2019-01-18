@@ -20,6 +20,7 @@ import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
@@ -389,9 +390,13 @@ public abstract class LayoutInflater {
     }
 
     private void initPrecompiledViews() {
+        initPrecompiledViews(
+                SystemProperties.getBoolean(USE_PRECOMPILED_LAYOUT_SYSTEM_PROPERTY, false));
+    }
+
+    private void initPrecompiledViews(boolean enablePrecompiledViews) {
+        mUseCompiledView = enablePrecompiledViews;
         try {
-            mUseCompiledView =
-                SystemProperties.getBoolean(USE_PRECOMPILED_LAYOUT_SYSTEM_PROPERTY, false);
             if (mUseCompiledView) {
                 mPrecompiledClassLoader = mContext.getClassLoader();
                 String dexFile = mContext.getCodeCacheDir() + COMPILED_VIEW_DEX_FILE_NAME;
@@ -409,6 +414,17 @@ public abstract class LayoutInflater {
             }
             mUseCompiledView = false;
         }
+        if (!mUseCompiledView) {
+            mPrecompiledClassLoader = null;
+        }
+    }
+
+    /**
+     * @hide for use by CTS tests
+     */
+    @TestApi
+    public void setPrecompiledLayoutsEnabledForTesting(boolean enablePrecompiledLayouts) {
+        initPrecompiledViews(enablePrecompiledLayouts);
     }
 
     /**
