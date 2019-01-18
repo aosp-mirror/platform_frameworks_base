@@ -48,7 +48,6 @@ import android.content.UndoManager;
 import android.content.res.ColorStateList;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.content.res.ResourceId;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -889,7 +888,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // sanitize autofill requests.
     private boolean mTextSetFromXmlOrResourceId = false;
     // Resource id used to set the text.
-    private @StringRes int mTextId = ResourceId.ID_NULL;
+    private @StringRes int mTextId = Resources.ID_NULL;
     //
     // End of autofill-related attributes
 
@@ -1180,7 +1179,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 case com.android.internal.R.styleable.TextView_text:
                     textIsSetFromXml = true;
-                    mTextId = a.getResourceId(attr, ResourceId.ID_NULL);
+                    mTextId = a.getResourceId(attr, Resources.ID_NULL);
                     text = a.getText(attr);
                     break;
 
@@ -11031,7 +11030,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
                 structure.setDataIsSensitive(!mTextSetFromXmlOrResourceId);
             }
-            if (mTextId != ResourceId.ID_NULL) {
+            if (mTextId != Resources.ID_NULL) {
                 try {
                     structure.setTextIdEntry(getResources().getResourceEntryName(mTextId));
                 } catch (Resources.NotFoundException e) {

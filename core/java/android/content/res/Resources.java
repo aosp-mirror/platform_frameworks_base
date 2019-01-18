@@ -174,7 +174,7 @@ public class Resources {
     /** @hide */
     public static int selectSystemTheme(int curTheme, int targetSdkVersion, int orig, int holo,
             int dark, int deviceDefault) {
-        if (curTheme != ResourceId.ID_NULL) {
+        if (curTheme != ID_NULL) {
             return curTheme;
         }
         if (targetSdkVersion < Build.VERSION_CODES.HONEYCOMB) {

@@ -93,7 +93,7 @@ public final class InspectionCompanionGenerator {
     /**
      * The null resource ID.
      *
-     * @see android.content.res.ResourceId#ID_NULL
+     * @see android.content.res.Resources#ID_NULL
      */
     private static final int NO_ID = 0;
 

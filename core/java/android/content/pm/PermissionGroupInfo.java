@@ -49,7 +49,7 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
      * only access while in the foreground.
      *
      * From the "requestDetail" attribute or, if not set, {@link
-     * android.content.res.ResourceId#ID_NULL}.
+     * android.content.res.Resources#ID_NULL}.
      *
      * @hide
      */
@@ -61,7 +61,7 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
      * access. Also used when requesting both foreground and background access.
      *
      * From the "backgroundRequest" attribute or, if not set, {@link
-     * android.content.res.ResourceId#ID_NULL}.
+     * android.content.res.Resources#ID_NULL}.
      *
      * @hide
      */
@@ -73,7 +73,7 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
      * background access.
      *
      * From the "backgroundRequestDetail" attribute or, if not set, {@link
-     * android.content.res.ResourceId#ID_NULL}.
+     * android.content.res.Resources#ID_NULL}.
      *
      * @hide
      */
