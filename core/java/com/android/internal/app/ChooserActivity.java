@@ -96,14 +96,14 @@ public class ChooserActivity extends ResolverActivity {
     public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     /**
      * If set to true, use ShortcutManager to retrieve the matching direct share targets, instead of
      * binding to every ChooserTargetService implementation.
      */
     // TODO(b/121287573): Replace with a system flag (setprop?)
-    private static final boolean USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS = true;
+    private static final boolean USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS = false;
     // TODO(b/121287224): Re-evaluate this limit
     private static final int SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
 
