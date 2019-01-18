@@ -3331,7 +3331,8 @@ message PackageAssociationSourceProcessStatsProto {
     optional int32 process_uid = 1;
     // Process name.
     optional string process_name = 2;
-
+    // Package name.
+    optional string package_name = 7;
     // Total count of the times this association appeared.
     optional int32 total_count = 3;
 
@@ -3410,11 +3411,29 @@ message ProcessStatsSectionProto {
     }
     repeated Status status = 7;
 
+    // Number of pages available of various types and sizes, representation fragmentation.
+    repeated ProcessStatsAvailablePagesProto available_pages = 10;
+
     // Stats for each process.
     repeated ProcessStatsProto process_stats = 8;
 
     // Stats for each package.
     repeated ProcessStatsPackageProto package_stats = 9;
+}
+
+message ProcessStatsAvailablePagesProto {
+    // Node these pages are in (as per /proc/pagetypeinfo)
+    optional int32 node = 1;
+
+    // Zone these pages are in (as per /proc/pagetypeinfo)
+    optional string zone = 2;
+
+    // Label for the type of these pages (as per /proc/pagetypeinfo)
+    optional string label = 3;
+
+    // Distribution of number of pages available by order size.  First entry in array is
+    // order 0, second is order 1, etc.  Each order increase is a doubling of page size.
+    repeated int32 pages_per_order = 4;
 }
 
 /**
