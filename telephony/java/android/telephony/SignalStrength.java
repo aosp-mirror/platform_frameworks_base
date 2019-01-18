@@ -86,11 +86,6 @@ public class SignalStrength implements Parcelable {
     CellSignalStrengthTdscdma mTdscdma;
     CellSignalStrengthLte mLte;
 
-    /** Parameters from the framework */
-    @UnsupportedAppUsage
-    private int mLteRsrpBoost; // offset to be reduced from the rsrp threshold while calculating
-                                // signal strength level
-
     /**
      * Create a new SignalStrength from a intent notifier Bundle
      *
@@ -140,7 +135,6 @@ public class SignalStrength implements Parcelable {
         mWcdma = wcdma;
         mTdscdma = tdscdma;
         mLte = lte;
-        mLteRsrpBoost = 0;
     }
 
     /**
@@ -211,7 +205,6 @@ public class SignalStrength implements Parcelable {
 
     /** @hide */
     public void updateLevel(PersistableBundle cc, ServiceState ss) {
-        mLteRsrpBoost = ss.getLteEarfcnRsrpBoost();
         mCdma.updateLevel(cc, ss);
         mGsm.updateLevel(cc, ss);
         mWcdma.updateLevel(cc, ss);
@@ -241,7 +234,6 @@ public class SignalStrength implements Parcelable {
         mWcdma = new CellSignalStrengthWcdma(s.mWcdma);
         mTdscdma = new CellSignalStrengthTdscdma(s.mTdscdma);
         mLte = new CellSignalStrengthLte(s.mLte);
-        mLteRsrpBoost = s.mLteRsrpBoost;
     }
 
     /**
@@ -258,7 +250,6 @@ public class SignalStrength implements Parcelable {
         mWcdma = in.readParcelable(CellSignalStrengthWcdma.class.getClassLoader());
         mTdscdma = in.readParcelable(CellSignalStrengthTdscdma.class.getClassLoader());
         mLte = in.readParcelable(CellSignalStrengthLte.class.getClassLoader());
-        mLteRsrpBoost = in.readInt();
     }
 
     /**
@@ -270,8 +261,6 @@ public class SignalStrength implements Parcelable {
         out.writeParcelable(mWcdma, flags);
         out.writeParcelable(mTdscdma, flags);
         out.writeParcelable(mLte, flags);
-
-        out.writeInt(mLteRsrpBoost);
     }
 
     /**
@@ -382,11 +371,6 @@ public class SignalStrength implements Parcelable {
     @UnsupportedAppUsage
     public int getLteCqi() {
         return mLte.getCqi();
-    }
-
-    /** @hide */
-    public int getLteRsrpBoost() {
-        return mLteRsrpBoost;
     }
 
     /**
@@ -616,7 +600,7 @@ public class SignalStrength implements Parcelable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(mCdma, mGsm, mWcdma, mTdscdma, mLte, mLteRsrpBoost);
+        return Objects.hash(mCdma, mGsm, mWcdma, mTdscdma, mLte);
     }
 
     /**
@@ -632,8 +616,7 @@ public class SignalStrength implements Parcelable {
             && mGsm.equals(s.mGsm)
             && mWcdma.equals(s.mWcdma)
             && mTdscdma.equals(s.mTdscdma)
-            && mLte.equals(s.mLte)
-            && mLteRsrpBoost == s.mLteRsrpBoost;
+            && mLte.equals(s.mLte);
     }
 
     /**
@@ -647,7 +630,6 @@ public class SignalStrength implements Parcelable {
             .append(",mWcdma=").append(mWcdma)
             .append(",mTdscdma=").append(mTdscdma)
             .append(",mLte=").append(mLte)
-            .append(",mLteRsrpBoost=").append(mLteRsrpBoost)
             .append(",primary=").append(getPrimary().getClass().getSimpleName())
             .append("}")
             .toString();
@@ -666,8 +648,6 @@ public class SignalStrength implements Parcelable {
         mWcdma = m.getParcelable("Wcdma");
         mTdscdma = m.getParcelable("Tdscdma");
         mLte = m.getParcelable("Lte");
-
-        mLteRsrpBoost = m.getInt("LteRsrpBoost");
     }
 
     /**
@@ -683,8 +663,6 @@ public class SignalStrength implements Parcelable {
         m.putParcelable("Wcdma", mWcdma);
         m.putParcelable("Tdscdma", mTdscdma);
         m.putParcelable("Lte", mLte);
-
-        m.putInt("LteRsrpBoost", mLteRsrpBoost);
     }
 
     /**
