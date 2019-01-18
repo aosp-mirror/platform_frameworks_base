@@ -18,7 +18,6 @@ package android.content.pm;
 
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
-import android.apex.ApexInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -571,15 +570,6 @@ public class PackageInfo implements Parcelable {
             propagateApplicationInfo(applicationInfo, services);
             propagateApplicationInfo(applicationInfo, providers);
         }
-    }
-
-    /**
-     * @hide
-     */
-    public PackageInfo(ApexInfo apexInfo) {
-        packageName = apexInfo.packageName;
-        setLongVersionCode(apexInfo.versionCode);
-        isApex = true;
     }
 
     private void propagateApplicationInfo(ApplicationInfo appInfo, ComponentInfo[] components) {
