@@ -75,7 +75,7 @@ public class DozeDockHandlerTest extends SysuiTestCase {
         mContext.putComponent(DockManager.class, mDockManagerFake);
 
         mDockHandler = new DozeDockHandler(mContext, mMachine, mHost, mConfig,
-                Handler.createAsync(Looper.myLooper()));
+                Handler.createAsync(Looper.myLooper()), mDockManagerFake);
     }
 
     @Test

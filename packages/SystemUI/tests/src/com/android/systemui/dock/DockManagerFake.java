@@ -32,6 +32,11 @@ public class DockManagerFake implements DockManager {
         this.mCallback = null;
     }
 
+    @Override
+    public boolean isDocked() {
+        return false;
+    }
+
     public void setDockEvent(int event) {
         mCallback.onEvent(event);
     }

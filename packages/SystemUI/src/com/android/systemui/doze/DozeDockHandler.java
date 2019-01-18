@@ -22,7 +22,6 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeMachine.State;
 
@@ -46,12 +45,12 @@ public class DozeDockHandler implements DozeMachine.Part {
     private int mDockState = DockManager.STATE_NONE;
 
     public DozeDockHandler(Context context, DozeMachine machine, DozeHost dozeHost,
-            AmbientDisplayConfiguration config, Handler handler) {
+            AmbientDisplayConfiguration config, Handler handler, DockManager dockManager) {
         mMachine = machine;
         mDozeHost = dozeHost;
         mConfig = config;
         mHandler = handler;
-        mDockManager = SysUiServiceProvider.getComponent(context, DockManager.class);
+        mDockManager = dockManager;
     }
 
     @Override
