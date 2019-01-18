@@ -312,10 +312,7 @@ static void SetUpSeccompFilter(uid_t uid, bool is_child_zygote) {
   // Apply system or app filter based on uid.
   if (uid >= AID_APP_START) {
     if (is_child_zygote) {
-      // set_app_zygote_seccomp_filter();
-      // TODO(b/111434506) install the filter; for now, install the app filter
-      // which is more restrictive.
-      set_app_seccomp_filter();
+      set_app_zygote_seccomp_filter();
     } else {
       set_app_seccomp_filter();
     }
@@ -1309,14 +1306,10 @@ static void com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter(
     return;
   }
 
-  // TODO(b/111434506) install the filter
-
-  /*
   bool installed = install_setuidgid_seccomp_filter(uidGidMin, uidGidMax);
   if (!installed) {
       RuntimeAbort(env, __LINE__, "Could not install setuid/setgid seccomp filter.");
   }
-  */
 }
 
 static const JNINativeMethod gMethods[] = {
