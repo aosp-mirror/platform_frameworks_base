@@ -113,8 +113,12 @@ public final class GeofenceProxy {
             IGeofenceHardware geofenceHardware = IGeofenceHardware.Stub.asInterface(service);
 
             try {
-                geofenceHardware.setGpsGeofenceHardware(mGpsGeofenceHardware);
-                geofenceHardware.setFusedGeofenceHardware(mFusedGeofenceHardware);
+                if (mGpsGeofenceHardware != null) {
+                    geofenceHardware.setGpsGeofenceHardware(mGpsGeofenceHardware);
+                }
+                if (mFusedGeofenceHardware != null) {
+                    geofenceHardware.setFusedGeofenceHardware(mFusedGeofenceHardware);
+                }
 
                 mGeofenceHardware = geofenceHardware;
                 mServiceWatcher.runOnBinder(mUpdateGeofenceHardware);
