@@ -1601,15 +1601,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         return false;
     }
 
-    /** @hide */
-    @Override
-    public View findViewByAccessibilityIdTraversal(int accessibilityId) {
-        if (accessibilityId == getAccessibilityViewId()) {
-            return this;
-        }
-        return super.findViewByAccessibilityIdTraversal(accessibilityId);
-    }
-
     /**
      * Indicates whether the children's drawing cache is used during a scroll.
      * By default, the drawing cache is enabled but this will consume more memory.

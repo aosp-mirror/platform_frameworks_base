@@ -95,6 +95,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
 import android.view.accessibility.AccessibilityManager.HighTextContrastChangeListener;
+import android.view.accessibility.AccessibilityNodeIdManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -7901,17 +7902,14 @@ public final class ViewRootImpl implements ViewParent,
         // Intercept accessibility focus events fired by virtual nodes to keep
         // track of accessibility focus position in such nodes.
         final int eventType = event.getEventType();
+        final View source = getSourceForAccessibilityEvent(event);
         switch (eventType) {
             case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
-                final long sourceNodeId = event.getSourceNodeId();
-                final int accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(
-                        sourceNodeId);
-                View source = mView.findViewByAccessibilityId(accessibilityViewId);
                 if (source != null) {
                     AccessibilityNodeProvider provider = source.getAccessibilityNodeProvider();
                     if (provider != null) {
                         final int virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
-                                sourceNodeId);
+                                event.getSourceNodeId());
                         final AccessibilityNodeInfo node;
                         node = provider.createAccessibilityNodeInfo(virtualNodeId);
                         setAccessibilityFocus(source, node);
@@ -7919,15 +7917,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
             } break;
             case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED: {
-                final long sourceNodeId = event.getSourceNodeId();
-                final int accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(
-                        sourceNodeId);
-                View source = mView.findViewByAccessibilityId(accessibilityViewId);
-                if (source != null) {
-                    AccessibilityNodeProvider provider = source.getAccessibilityNodeProvider();
-                    if (provider != null) {
-                        setAccessibilityFocus(null, null);
-                    }
+                if (source != null && source.getAccessibilityNodeProvider() != null) {
+                    setAccessibilityFocus(null, null);
                 }
             } break;
 
@@ -7938,6 +7929,13 @@ public final class ViewRootImpl implements ViewParent,
         }
         mAccessibilityManager.sendAccessibilityEvent(event);
         return true;
+    }
+
+    private View getSourceForAccessibilityEvent(AccessibilityEvent event) {
+        final long sourceNodeId = event.getSourceNodeId();
+        final int accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(
+                sourceNodeId);
+        return AccessibilityNodeIdManager.getInstance().findView(accessibilityViewId);
     }
 
     /**
