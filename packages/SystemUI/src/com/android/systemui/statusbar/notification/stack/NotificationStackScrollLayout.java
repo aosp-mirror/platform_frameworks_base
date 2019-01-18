@@ -2226,13 +2226,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         int top = 0;
         if (section != null) {
             ActivatableNotificationView firstView = section.getFirstVisibleChild();
-            // Round Y up to avoid seeing the background during animation
-            int finalTranslationY = (int) Math.ceil(ViewState.getFinalTranslationY(firstView));
-            if (alreadyAnimating || section.isTargetTop(finalTranslationY)) {
-                // we're ending up at the same location as we are now, let's just skip the animation
-                top = finalTranslationY;
-            } else {
-                top = (int) Math.ceil(firstView.getTranslationY());
+            if (firstView != null) {
+                // Round Y up to avoid seeing the background during animation
+                int finalTranslationY = (int) Math.ceil(ViewState.getFinalTranslationY(firstView));
+                if (alreadyAnimating || section.isTargetTop(finalTranslationY)) {
+                    // we're ending up at the same location as we are now, let's just skip the
+                    // animation
+                    top = finalTranslationY;
+                } else {
+                    top = (int) Math.ceil(firstView.getTranslationY());
+                }
             }
         }
         return top;
