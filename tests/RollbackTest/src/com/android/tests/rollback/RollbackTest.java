@@ -38,6 +38,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -57,6 +58,7 @@ public class RollbackTest {
 
     private static final String TEST_APP_A = "com.android.tests.rollback.testapp.A";
     private static final String TEST_APP_B = "com.android.tests.rollback.testapp.B";
+    private static final String INSTRUMENTED_APP = "com.android.tests.rollback";
 
     /**
      * Test basic rollbacks.
@@ -662,5 +664,64 @@ public class RollbackTest {
         assertEquals(versionRolledBackFrom, info.getVersionRolledBackFrom().getLongVersionCode());
         assertEquals(packageName, info.getVersionRolledBackTo().getPackageName());
         assertEquals(versionRolledBackTo, info.getVersionRolledBackTo().getLongVersionCode());
+    }
+
+    // TODO(zezeozue): Stop ignoring after fixing race between rolling back and testing version
+    /**
+     * Test bad update automatic rollback.
+     */
+    @Ignore("Flaky")
+    @Test
+    public void testBadUpdateRollback() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.MANAGE_ROLLBACKS);
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+
+            // Prep installation of the test apps.
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppACrashingV2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            RollbackTestUtils.uninstall(TEST_APP_B);
+            RollbackTestUtils.install("RollbackTestAppBv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppBv2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
+
+            // Both test apps should now be available for rollback, and the
+            // targetPackage returned for rollback should be correct.
+            // TODO: See if there is a way to remove this race condition
+            // between when the app is installed and when the rollback
+            // is made available.
+            Thread.sleep(1000);
+            RollbackInfo rollbackA = rm.getAvailableRollback(TEST_APP_A);
+            assertNotNull(rollbackA);
+            assertEquals(TEST_APP_A, rollbackA.targetPackage.getPackageName());
+
+            RollbackInfo rollbackB = rm.getAvailableRollback(TEST_APP_B);
+            assertNotNull(rollbackB);
+            assertEquals(TEST_APP_B, rollbackB.targetPackage.getPackageName());
+
+            // Start apps PackageWatchdog#TRIGGER_FAILURE_COUNT times so TEST_APP_A crashes
+            for (int i = 0; i < 5; i++) {
+                RollbackTestUtils.launchPackage(TEST_APP_A);
+                Thread.sleep(1000);
+            }
+            Thread.sleep(1000);
+
+            // TEST_APP_A is automatically rolled back by the RollbackPackageHealthObserver
+            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+            // Instrumented app is still the package installer
+            Context context = InstrumentationRegistry.getContext();
+            String installer = context.getPackageManager().getInstallerPackageName(TEST_APP_A);
+            assertEquals(INSTRUMENTED_APP, installer);
+            // TEST_APP_B is untouched
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
+        } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
     }
 }
