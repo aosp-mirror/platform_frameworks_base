@@ -3933,10 +3933,10 @@ package android.net.wifi {
     method public abstract void onEnrolleeSuccess(int);
     method public abstract void onFailure(int);
     method public abstract void onProgress(int);
-    field public static final int EASY_CONNECT_EVENT_FAILURE = -7; // 0xfffffff9
     field public static final int EASY_CONNECT_EVENT_FAILURE_AUTHENTICATION = -2; // 0xfffffffe
     field public static final int EASY_CONNECT_EVENT_FAILURE_BUSY = -5; // 0xfffffffb
     field public static final int EASY_CONNECT_EVENT_FAILURE_CONFIGURATION = -4; // 0xfffffffc
+    field public static final int EASY_CONNECT_EVENT_FAILURE_GENERIC = -7; // 0xfffffff9
     field public static final int EASY_CONNECT_EVENT_FAILURE_INVALID_NETWORK = -9; // 0xfffffff7
     field public static final int EASY_CONNECT_EVENT_FAILURE_INVALID_URI = -1; // 0xffffffff
     field public static final int EASY_CONNECT_EVENT_FAILURE_NOT_COMPATIBLE = -3; // 0xfffffffd

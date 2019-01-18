@@ -101,7 +101,7 @@ public abstract class EasyConnectStatusCallback {
     /**
      * Easy Connect Failure event: General protocol failure.
      */
-    public static final int EASY_CONNECT_EVENT_FAILURE = -7;
+    public static final int EASY_CONNECT_EVENT_FAILURE_GENERIC = -7;
 
     /**
      * Easy Connect Failure event: Feature or option is not supported.
@@ -123,7 +123,7 @@ public abstract class EasyConnectStatusCallback {
             EASY_CONNECT_EVENT_FAILURE_CONFIGURATION,
             EASY_CONNECT_EVENT_FAILURE_BUSY,
             EASY_CONNECT_EVENT_FAILURE_TIMEOUT,
-            EASY_CONNECT_EVENT_FAILURE,
+            EASY_CONNECT_EVENT_FAILURE_GENERIC,
             EASY_CONNECT_EVENT_FAILURE_NOT_SUPPORTED,
             EASY_CONNECT_EVENT_FAILURE_INVALID_NETWORK,
     })
