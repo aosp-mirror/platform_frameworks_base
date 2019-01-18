@@ -485,9 +485,6 @@ class PackageFlattener {
           if (item.policies & OverlayableItem::Policy::kProduct) {
             policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION;
           }
-          if (item.policies & OverlayableItem::Policy::kProductServices) {
-            policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION;
-          }
         }
 
         auto policy = overlayable_chunk->policy_ids.find(policy_flags);

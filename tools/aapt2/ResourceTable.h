@@ -92,9 +92,6 @@ struct OverlayableItem {
 
     // The resource can be overlaid by any overlay on the product partition.
     kProduct = 0x08,
-
-    // The resource can be overlaid by any overlay on the product services partition.
-    kProductServices = 0x10
   };
 
   std::shared_ptr<Overlayable> overlayable;

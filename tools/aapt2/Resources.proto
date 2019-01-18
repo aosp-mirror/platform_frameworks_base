@@ -155,7 +155,6 @@ message OverlayableItem {
     SYSTEM = 1;
     VENDOR = 2;
     PRODUCT = 3;
-    PRODUCT_SERVICES = 4;
   }
 
   // The location of the <item> declaration in source.

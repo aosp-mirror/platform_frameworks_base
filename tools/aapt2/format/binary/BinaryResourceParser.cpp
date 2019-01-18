@@ -473,10 +473,6 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
           & ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION) {
         policies |= OverlayableItem::Policy::kProduct;
       }
-      if (policy_header->policy_flags
-          & ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION) {
-        policies |= OverlayableItem::Policy::kProductServices;
-      }
 
       const ResTable_ref* const ref_begin = reinterpret_cast<const ResTable_ref*>(
           ((uint8_t *)policy_header) + util::DeviceToHost32(policy_header->header.headerSize));

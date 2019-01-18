@@ -32,9 +32,9 @@
 </overlayable>
 
 <overlayable name="OverlayableResources2" actor="overlay://com.android.overlayable">
-    <!-- Any overlay on the product_services, vendor, or product partition can overlay the value of
+    <!-- Any overlay on the vendor or product partition can overlay the value of
         @string/overlayable3 -->
-    <policy type="product_services|vendor|product">
+    <policy type="vendor|product">
         <item type="string" name="overlayable3" />
     </policy>
 </overlayable>

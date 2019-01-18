@@ -390,9 +390,6 @@ bool DeserializeOverlayableItemFromPb(const pb::OverlayableItem& pb_overlayable,
       case pb::OverlayableItem::PRODUCT:
         out_overlayable->policies |= OverlayableItem::Policy::kProduct;
         break;
-      case pb::OverlayableItem::PRODUCT_SERVICES:
-        out_overlayable->policies |= OverlayableItem::Policy::kProductServices;
-        break;
       default:
         *out_error = "unknown overlayable policy";
         return false;
