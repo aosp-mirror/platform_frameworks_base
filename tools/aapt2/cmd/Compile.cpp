@@ -701,7 +701,10 @@ int Compile(IAaptContext* context, io::IFileCollection* inputs, IArchiveWriter* 
     }
 
     const std::string out_path = BuildIntermediateContainerFilename(path_data);
-    error |= !compile_func(context, options, path_data, file, output_writer, out_path);
+    if (!compile_func(context, options, path_data, file, output_writer, out_path)) {
+      context->GetDiagnostics()->Error(DiagMessage(file->GetSource()) << "file failed to compile");
+      error = true;
+    }
   }
 
   return error ? 1 : 0;
