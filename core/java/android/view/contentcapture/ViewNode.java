@@ -45,7 +45,6 @@ import com.android.internal.util.Preconditions;
 public final class ViewNode extends AssistStructure.ViewNode {
 
     private static final String TAG = ViewNode.class.getSimpleName();
-    private static final boolean VERBOSE = false;
 
     private static final long FLAGS_HAS_TEXT = 1L << 0;
     private static final long FLAGS_HAS_COMPLEX_TEXT = 1L << 1;
@@ -69,21 +68,18 @@ public final class ViewNode extends AssistStructure.ViewNode {
     private static final long FLAGS_SELECTED = 1L << 20;
     private static final long FLAGS_ACTIVATED = 1L << 21;
     private static final long FLAGS_OPAQUE = 1L << 22;
-    private static final long FLAGS_HAS_MATRIX = 1L << 23;
-    private static final long FLAGS_HAS_ELEVATION = 1L << 24;
-    private static final long FLAGS_HAS_ALPHA = 1L << 25;
-    private static final long FLAGS_HAS_CONTENT_DESCRIPTION = 1L << 26;
-    private static final long FLAGS_HAS_EXTRAS = 1L << 27;
-    private static final long FLAGS_HAS_LOCALE_LIST = 1L << 28;
-    private static final long FLAGS_HAS_INPUT_TYPE = 1L << 29;
-    private static final long FLAGS_HAS_MIN_TEXT_EMS = 1L << 30;
-    private static final long FLAGS_HAS_MAX_TEXT_EMS = 1L << 31;
-    private static final long FLAGS_HAS_MAX_TEXT_LENGTH = 1L << 32;
-    private static final long FLAGS_HAS_TEXT_ID_ENTRY = 1L << 33;
-    private static final long FLAGS_HAS_AUTOFILL_TYPE = 1L << 34;
-    private static final long FLAGS_HAS_AUTOFILL_VALUE = 1L << 35;
-    private static final long FLAGS_HAS_AUTOFILL_HINTS = 1L << 36;
-    private static final long FLAGS_HAS_AUTOFILL_OPTIONS = 1L << 37;
+    private static final long FLAGS_HAS_CONTENT_DESCRIPTION = 1L << 23;
+    private static final long FLAGS_HAS_EXTRAS = 1L << 24;
+    private static final long FLAGS_HAS_LOCALE_LIST = 1L << 25;
+    private static final long FLAGS_HAS_INPUT_TYPE = 1L << 26;
+    private static final long FLAGS_HAS_MIN_TEXT_EMS = 1L << 27;
+    private static final long FLAGS_HAS_MAX_TEXT_EMS = 1L << 28;
+    private static final long FLAGS_HAS_MAX_TEXT_LENGTH = 1L << 29;
+    private static final long FLAGS_HAS_TEXT_ID_ENTRY = 1L << 30;
+    private static final long FLAGS_HAS_AUTOFILL_TYPE = 1L << 31;
+    private static final long FLAGS_HAS_AUTOFILL_VALUE = 1L << 32;
+    private static final long FLAGS_HAS_AUTOFILL_HINTS = 1L << 33;
+    private static final long FLAGS_HAS_AUTOFILL_OPTIONS = 1L << 34;
 
     /** Flags used to optimize what's written to the parcel */
     private long mFlags;
@@ -103,9 +99,6 @@ public final class ViewNode extends AssistStructure.ViewNode {
     private int mScrollY;
     private int mWidth;
     private int mHeight;
-    private Matrix mMatrix;
-    private float mElevation;
-    private float mAlpha = 1.0f;
     private CharSequence mContentDescription;
     private Bundle mExtras;
     private LocaleList mLocaleList;
@@ -164,18 +157,6 @@ public final class ViewNode extends AssistStructure.ViewNode {
         if ((nodeFlags & FLAGS_HAS_SCROLL) != 0) {
             mScrollX = parcel.readInt();
             mScrollY = parcel.readInt();
-        }
-        if ((nodeFlags & FLAGS_HAS_MATRIX) != 0) {
-            mMatrix = new Matrix();
-            final float[] tmpMatrix = new float[9];
-            parcel.readFloatArray(tmpMatrix);
-            mMatrix.setValues(tmpMatrix);
-        }
-        if ((nodeFlags & FLAGS_HAS_ELEVATION) != 0) {
-            mElevation = parcel.readFloat();
-        }
-        if ((nodeFlags & FLAGS_HAS_ALPHA) != 0) {
-            mAlpha = parcel.readFloat();
         }
         if ((nodeFlags & FLAGS_HAS_CONTENT_DESCRIPTION) != 0) {
             mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
@@ -355,21 +336,6 @@ public final class ViewNode extends AssistStructure.ViewNode {
     }
 
     @Override
-    public Matrix getTransformation() {
-        return mMatrix;
-    }
-
-    @Override
-    public float getElevation() {
-        return mElevation;
-    }
-
-    @Override
-    public float getAlpha() {
-        return mAlpha;
-    }
-
-    @Override
     public CharSequence getContentDescription() {
         return mContentDescription;
     }
@@ -509,15 +475,6 @@ public final class ViewNode extends AssistStructure.ViewNode {
         if (mScrollX != 0 || mScrollY != 0) {
             nodeFlags |= FLAGS_HAS_SCROLL;
         }
-        if (mMatrix != null) {
-            nodeFlags |= FLAGS_HAS_MATRIX;
-        }
-        if (mElevation != 0) {
-            nodeFlags |= FLAGS_HAS_ELEVATION;
-        }
-        if (mAlpha != 1.0f) {
-            nodeFlags |= FLAGS_HAS_ALPHA;
-        }
         if (mContentDescription != null) {
             nodeFlags |= FLAGS_HAS_CONTENT_DESCRIPTION;
         }
@@ -590,18 +547,6 @@ public final class ViewNode extends AssistStructure.ViewNode {
         if ((nodeFlags & FLAGS_HAS_SCROLL) != 0) {
             parcel.writeInt(mScrollX);
             parcel.writeInt(mScrollY);
-        }
-        if ((nodeFlags & FLAGS_HAS_MATRIX) != 0) {
-            //TODO(b/122484602): use a singleton tmpMatrix (if logic is not moved to superclass)
-            final float[] tmpMatrix = new float[9];
-            mMatrix.getValues(tmpMatrix);
-            parcel.writeFloatArray(tmpMatrix);
-        }
-        if ((nodeFlags & FLAGS_HAS_ELEVATION) != 0) {
-            parcel.writeFloat(mElevation);
-        }
-        if ((nodeFlags & FLAGS_HAS_ALPHA) != 0) {
-            parcel.writeFloat(mAlpha);
         }
         if ((nodeFlags & FLAGS_HAS_CONTENT_DESCRIPTION) != 0) {
             TextUtils.writeToParcel(mContentDescription, parcel, 0);
@@ -702,21 +647,17 @@ public final class ViewNode extends AssistStructure.ViewNode {
 
         @Override
         public void setTransformation(Matrix matrix) {
-            if (matrix == null) {
-                mNode.mMatrix = null;
-            } else {
-                mNode.mMatrix = new Matrix(matrix);
-            }
+            Log.w(TAG, "setTransformation() is not supported");
         }
 
         @Override
         public void setElevation(float elevation) {
-            mNode.mElevation = elevation;
+            Log.w(TAG, "setElevation() is not supported");
         }
 
         @Override
         public void setAlpha(float alpha) {
-            mNode.mAlpha = alpha;
+            Log.w(TAG, "setAlpha() is not supported");
         }
 
         @Override

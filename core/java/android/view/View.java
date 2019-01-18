@@ -8219,6 +8219,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   <li>{@link ViewStructure#newHtmlInfoBuilder(String)}
      *   <li>{@link ViewStructure#setHtmlInfo(android.view.ViewStructure.HtmlInfo)}
      *   <li>{@link ViewStructure#setDataIsSensitive(boolean)}
+     *   <li>{@link ViewStructure#setAlpha(float)}
+     *   <li>{@link ViewStructure#setElevation(float)}
+     *   <li>{@link ViewStructure#setTransformation(Matrix)}
+     *
      * </ul>
      */
     public void onProvideContentCaptureStructure(@NonNull ViewStructure structure, int flags) {
@@ -8283,8 +8287,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         structure.setDimens(ignoredParentLeft + mLeft, ignoredParentTop + mTop, mScrollX, mScrollY,
                 mRight - mLeft, mBottom - mTop);
-        if (viewFor == VIEW_STRUCTURE_FOR_ASSIST
-                || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
+        if (viewFor == VIEW_STRUCTURE_FOR_ASSIST) {
             if (!hasIdentityMatrix()) {
                 structure.setTransformation(getMatrix());
             }
