@@ -361,7 +361,7 @@ public class EuiccManager {
     public boolean isEnabled() {
         // In the future, this may reach out to IEuiccController (if non-null) to check any dynamic
         // restrictions.
-        return getIEuiccController() != null;
+        return getIEuiccController() != null && mCardId != TelephonyManager.INVALID_CARD_ID;
     }
 
     /**
