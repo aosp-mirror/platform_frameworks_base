@@ -9055,6 +9055,8 @@ public class TelephonyManager {
      * <p>This method works only on devices with {@link
      * android.content.pm.PackageManager#FEATURE_TELEPHONY_CARRIERLOCK} enabled.
      *
+     * @deprecated use setCarrierRestrictionRules instead
+     *
      * @return The number of carriers set successfully. Should be length of
      * carrierList on success; -1 if carrierList null or on error.
      * @hide
@@ -9062,44 +9064,144 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public int setAllowedCarriers(int slotIndex, List<CarrierIdentifier> carriers) {
+        // Execute the method setCarrierRestrictionRules with an empty excluded list and
+        // indicating priority for the allowed list.
+        CarrierRestrictionRules carrierRestrictionRules = CarrierRestrictionRules.newBuilder()
+                .setAllowedCarriers(carriers)
+                .setDefaultCarrierRestriction(
+                    CarrierRestrictionRules.CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED)
+                .build();
+
+        int result = setCarrierRestrictionRules(carrierRestrictionRules);
+
+        // Convert boolean result into int, as required by this method.
+        if (result == SET_CARRIER_RESTRICTION_SUCCESS) {
+            return carriers.size();
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * The carrier restrictions were successfully set.
+     * @hide
+     */
+    @SystemApi
+    public static final int SET_CARRIER_RESTRICTION_SUCCESS = 0;
+
+    /**
+     * The carrier restrictions were not set due to lack of support in the modem. This can happen
+     * if the modem does not support setting the carrier restrictions or if the configuration
+     * passed in the {@code setCarrierRestrictionRules} is not supported by the modem.
+     * @hide
+     */
+    @SystemApi
+    public static final int SET_CARRIER_RESTRICTION_NOT_SUPPORTED = 1;
+
+    /**
+     * The setting of carrier restrictions failed.
+     * @hide
+     */
+    @SystemApi
+    public static final int SET_CARRIER_RESTRICTION_ERROR = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"SET_CARRIER_RESTRICTION_"},
+            value = {
+                    SET_CARRIER_RESTRICTION_SUCCESS,
+                    SET_CARRIER_RESTRICTION_NOT_SUPPORTED,
+                    SET_CARRIER_RESTRICTION_ERROR
+            })
+    public @interface SetCarrierRestrictionResult {}
+
+    /**
+     * Set the allowed carrier list and the excluded carrier list indicating the priority between
+     * the two lists.
+     * Requires system privileges.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     *
+     * <p>This method works only on devices with {@link
+     * android.content.pm.PackageManager#FEATURE_TELEPHONY_CARRIERLOCK} enabled.
+     *
+     * @return {@link #SET_CARRIER_RESTRICTION_SUCCESS} in case of success.
+     * {@link #SET_CARRIER_RESTRICTION_NOT_SUPPORTED} if the modem does not support the
+     * configuration. {@link #SET_CARRIER_RESTRICTION_ERROR} in all other error cases.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SetCarrierRestrictionResult
+    public int setCarrierRestrictionRules(@NonNull CarrierRestrictionRules rules) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.setAllowedCarriers(slotIndex, carriers);
+                return service.setAllowedCarriers(rules);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#setAllowedCarriers", e);
         } catch (NullPointerException e) {
             Log.e(TAG, "Error calling ITelephony#setAllowedCarriers", e);
         }
-        return -1;
+        return SET_CARRIER_RESTRICTION_ERROR;
     }
 
     /**
      * Get the allowed carrier list for slotIndex.
-     * Require system privileges. In the future we may add this to carrier APIs.
+     * Requires system privileges.
      *
      * <p>This method returns valid data on devices with {@link
      * android.content.pm.PackageManager#FEATURE_TELEPHONY_CARRIERLOCK} enabled.
+     *
+     * @deprecated Apps should use {@link getCarriersRestrictionRules} to retrieve the list of
+     * allowed and excliuded carriers, as the result of this API is valid only when the excluded
+     * list is empty. This API could return an empty list, even if some restrictions are present.
      *
      * @return List of {@link android.telephony.CarrierIdentifier}; empty list
      * means all carriers are allowed.
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public List<CarrierIdentifier> getAllowedCarriers(int slotIndex) {
+        CarrierRestrictionRules carrierRestrictionRule = getCarrierRestrictionRules();
+        if (carrierRestrictionRule != null) {
+            return carrierRestrictionRule.getAllowedCarriers();
+        }
+        return new ArrayList<CarrierIdentifier>(0);
+    }
+
+    /**
+     * Get the allowed carrier list and the excluded carrier list indicating the priority between
+     * the two lists.
+     * Require system privileges. In the future we may add this to carrier APIs.
+     *
+     * <p>This method returns valid data on devices with {@link
+     * android.content.pm.PackageManager#FEATURE_TELEPHONY_CARRIERLOCK} enabled.
+     *
+     * @return {@link CarrierRestrictionRules} which contains the allowed carrier list and the
+     * excluded carrier list with the priority between the two lists. Returns {@code null}
+     * in case of error.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Nullable
+    public CarrierRestrictionRules getCarrierRestrictionRules() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getAllowedCarriers(slotIndex);
+                return service.getAllowedCarriers();
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getAllowedCarriers", e);
         } catch (NullPointerException e) {
             Log.e(TAG, "Error calling ITelephony#getAllowedCarriers", e);
         }
-        return new ArrayList<CarrierIdentifier>(0);
+        return null;
     }
 
     /**
