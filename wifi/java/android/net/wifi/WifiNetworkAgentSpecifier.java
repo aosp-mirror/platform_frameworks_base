@@ -181,4 +181,9 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
         throw new IllegalStateException("WifiNetworkAgentSpecifier should never be used "
                 + "for requests.");
     }
+
+    @Override
+    public NetworkSpecifier redact() {
+        return null;
+    }
 }
