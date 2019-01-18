@@ -346,7 +346,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     }
 
     private void handleFullScreenIntent(NotificationEntry entry) {
-        boolean isHeadsUped = mNotificationInterruptionStateProvider.canHeadsUpCommon(entry);
+        boolean isHeadsUped = mNotificationInterruptionStateProvider.shouldHeadsUp(entry);
         if (!isHeadsUped && entry.notification.getNotification().fullScreenIntent != null) {
             if (shouldSuppressFullScreenIntent(entry)) {
                 if (DEBUG) {
