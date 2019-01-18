@@ -489,6 +489,7 @@ public interface RILConstants {
     int RIL_REQUEST_STOP_NETWORK_SCAN = 143;
     int RIL_REQUEST_START_KEEPALIVE = 144;
     int RIL_REQUEST_STOP_KEEPALIVE = 145;
+    int RIL_REQUEST_ENABLE_MODEM = 146;
 
     /* The following requests are not defined in RIL.h */
     int RIL_REQUEST_HAL_NON_RIL_BASE = 200;
