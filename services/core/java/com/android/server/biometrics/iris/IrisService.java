@@ -17,6 +17,7 @@
 package com.android.server.biometrics.iris;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
@@ -127,5 +128,10 @@ public class IrisService extends BiometricServiceBase {
     @Override
     protected boolean checkAppOps(int uid, String opPackageName) {
         return false;
+    }
+
+    @Override
+    protected int statsModality() {
+        return BiometricsProtoEnums.MODALITY_IRIS;
     }
 }

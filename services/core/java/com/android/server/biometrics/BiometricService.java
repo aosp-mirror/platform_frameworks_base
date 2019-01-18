@@ -41,6 +41,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
@@ -64,6 +65,7 @@ import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.R;
 import com.android.internal.statusbar.IStatusBarService;
@@ -309,6 +311,7 @@ public class BiometricService extends SystemService {
             // Continue authentication with the same modality/modalities after "try again" is
             // pressed
             final int mModality;
+            final boolean mRequireConfirmation;
 
             // The current state, which can be either idle, called, or started
             private int mState = STATE_AUTH_IDLE;
@@ -316,10 +319,13 @@ public class BiometricService extends SystemService {
             // the authentication.
             byte[] mTokenEscrow;
 
+            // Timestamp when hardware authentication occurred
+            private long mAuthenticatedTimeMs;
+
             AuthSession(HashMap<Integer, Integer> modalities, IBinder token, long sessionId,
                     int userId, IBiometricServiceReceiver receiver, String opPackageName,
                     Bundle bundle, int callingUid, int callingPid, int callingUserId,
-                    int modality) {
+                    int modality, boolean requireConfirmation) {
                 mModalitiesWaiting = modalities;
                 mToken = token;
                 mSessionId = sessionId;
@@ -331,6 +337,11 @@ public class BiometricService extends SystemService {
                 mCallingPid = callingPid;
                 mCallingUserId = callingUserId;
                 mModality = modality;
+                mRequireConfirmation = requireConfirmation;
+            }
+
+            boolean isCrypto() {
+                return mSessionId != 0;
             }
 
             boolean containsCookie(int cookie) {
@@ -412,6 +423,7 @@ public class BiometricService extends SystemService {
                         mCurrentAuthSession.mState = STATE_AUTH_IDLE;
                         mCurrentAuthSession = null;
                     } else {
+                        mCurrentAuthSession.mAuthenticatedTimeMs = System.currentTimeMillis();
                         // Store the auth token and submit it to keystore after the confirmation
                         // button has been pressed.
                         mCurrentAuthSession.mTokenEscrow = token;
@@ -557,6 +569,8 @@ public class BiometricService extends SystemService {
                     return;
                 }
 
+                logDialogDismissed(reason);
+
                 if (reason != BiometricPrompt.DISMISSED_REASON_POSITIVE) {
                     // Positive button is used by passive modalities as a "confirm" button,
                     // do not send to client
@@ -598,6 +612,77 @@ public class BiometricService extends SystemService {
                             mCurrentAuthSession.mCallingUserId,
                             mCurrentAuthSession.mModality);
                 });
+            }
+
+            private void logDialogDismissed(int reason) {
+                if (reason == BiometricPrompt.DISMISSED_REASON_POSITIVE) {
+                    // Explicit auth, authentication confirmed.
+                    // Latency in this case is authenticated -> confirmed. <Biometric>Service
+                    // should have the first half (first acquired -> authenticated).
+                    final long latency = System.currentTimeMillis()
+                            - mCurrentAuthSession.mAuthenticatedTimeMs;
+
+                    if (LoggableMonitor.DEBUG) {
+                        Slog.v(LoggableMonitor.TAG, "Confirmed! Modality: " + statsModality()
+                                + ", User: " + mCurrentAuthSession.mUserId
+                                + ", IsCrypto: " + mCurrentAuthSession.isCrypto()
+                                + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
+                                + ", RequireConfirmation: "
+                                    + mCurrentAuthSession.mRequireConfirmation
+                                + ", State: " + StatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED
+                                + ", Latency: " + latency);
+                    }
+
+                    StatsLog.write(StatsLog.BIOMETRIC_AUTHENTICATED,
+                            statsModality(),
+                            mCurrentAuthSession.mUserId,
+                            mCurrentAuthSession.isCrypto(),
+                            BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                            mCurrentAuthSession.mRequireConfirmation,
+                            StatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
+                            latency);
+                } else {
+                    int error = reason == BiometricPrompt.DISMISSED_REASON_NEGATIVE
+                            ? BiometricConstants.BIOMETRIC_ERROR_NEGATIVE_BUTTON
+                            : reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL
+                                    ? BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED
+                                    : 0;
+                    if (LoggableMonitor.DEBUG) {
+                        Slog.v(LoggableMonitor.TAG, "Dismissed! Modality: " + statsModality()
+                                + ", User: " + mCurrentAuthSession.mUserId
+                                + ", IsCrypto: " + mCurrentAuthSession.isCrypto()
+                                + ", Action: " + BiometricsProtoEnums.ACTION_AUTHENTICATE
+                                + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
+                                + ", Error: " + error);
+                    }
+                    // Auth canceled
+                    StatsLog.write(StatsLog.BIOMETRIC_ERROR_OCCURRED,
+                            statsModality(),
+                            mCurrentAuthSession.mUserId,
+                            mCurrentAuthSession.isCrypto(),
+                            BiometricsProtoEnums.ACTION_AUTHENTICATE,
+                            BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                            error,
+                            0 /* vendorCode */);
+                }
+            }
+
+            private int statsModality() {
+                int modality = 0;
+                if (mCurrentAuthSession == null) {
+                    return BiometricsProtoEnums.MODALITY_UNKNOWN;
+                }
+                if ((mCurrentAuthSession.mModality & BiometricAuthenticator.TYPE_FINGERPRINT)
+                        != 0) {
+                    modality |= BiometricsProtoEnums.MODALITY_FINGERPRINT;
+                }
+                if ((mCurrentAuthSession.mModality & BiometricAuthenticator.TYPE_IRIS) != 0) {
+                    modality |= BiometricsProtoEnums.MODALITY_IRIS;
+                }
+                if ((mCurrentAuthSession.mModality & BiometricAuthenticator.TYPE_FACE) != 0) {
+                    modality |= BiometricsProtoEnums.MODALITY_FACE;
+                }
+                return modality;
             }
         };
 
@@ -815,7 +900,11 @@ public class BiometricService extends SystemService {
             try {
                 boolean requireConfirmation = bundle.getBoolean(
                         BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true /* default */);
-
+                if ((modality & TYPE_FACE) != 0) {
+                    // Check if the user has forced confirmation to be required in Settings.
+                    requireConfirmation = requireConfirmation
+                            || mSettingObserver.getFaceAlwaysRequireConfirmation();
+                }
                 // Generate random cookies to pass to the services that should prepare to start
                 // authenticating. Store the cookie here and wait for all services to "ack"
                 // with the cookie. Once all cookies are received, we can show the prompt
@@ -827,7 +916,7 @@ public class BiometricService extends SystemService {
                 authenticators.put(modality, cookie);
                 mPendingAuthSession = new AuthSession(authenticators, token, sessionId, userId,
                         receiver, opPackageName, bundle, callingUid, callingPid, callingUserId,
-                        modality);
+                        modality, requireConfirmation);
                 mPendingAuthSession.mState = STATE_AUTH_CALLED;
                 // No polymorphism :(
                 if ((modality & TYPE_FINGERPRINT) != 0) {
@@ -839,9 +928,6 @@ public class BiometricService extends SystemService {
                     Slog.w(TAG, "Iris unsupported");
                 }
                 if ((modality & TYPE_FACE) != 0) {
-                    // Check if the user has forced confirmation to be required in Settings.
-                    requireConfirmation = requireConfirmation
-                            || mSettingObserver.getFaceAlwaysRequireConfirmation();
                     mFaceService.prepareForAuthentication(requireConfirmation,
                             token, sessionId, userId, mInternalReceiver, opPackageName,
                             cookie, callingUid, callingPid, callingUserId);
