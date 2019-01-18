@@ -95,6 +95,11 @@ public class NavigationBackAction extends NavigationGestureAction {
         }
     }
 
+    @Override
+    public boolean disableProxyEvents() {
+        return true;
+    }
+
     private void performBack() {
         sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
         sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);

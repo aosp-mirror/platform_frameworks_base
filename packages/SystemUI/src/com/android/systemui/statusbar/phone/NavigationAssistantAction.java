@@ -43,6 +43,11 @@ public class NavigationAssistantAction extends NavigationGestureAction {
     }
 
     @Override
+    public boolean disableProxyEvents() {
+        return true;
+    }
+
+    @Override
     public void onGestureStart(MotionEvent event) {
         mAssistManager.startAssist(new Bundle());
     }
