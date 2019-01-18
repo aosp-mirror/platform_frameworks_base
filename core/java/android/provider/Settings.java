@@ -11766,6 +11766,44 @@ public final class Settings {
         public static final String SYNC_MANAGER_CONSTANTS = "sync_manager_constants";
 
         /**
+         * Broadcast dispatch tuning parameters specific to foreground broadcasts.
+         *
+         * This is encoded as a key=value list, separated by commas. Ex: "foo=1,bar=true"
+         *
+         * The following keys are supported:
+         * <pre>
+         * bcast_timeout                (long)
+         * bcast_slow_time              (long)
+         * bcast_deferral               (long)
+         * bcast_deferral_decay_factor  (float)
+         * bcast_deferral_floor         (long)
+         * </pre>
+         *
+         * @hide
+         */
+        public static final String BROADCAST_FG_CONSTANTS = "bcast_fg_constants";
+
+        /**
+         * Broadcast dispatch tuning parameters specific to background broadcasts.
+         *
+         * This is encoded as a key=value list, separated by commas. Ex: "foo=1,bar=true".
+         * See {@link #BROADCAST_FG_CONSTANTS} for the list of supported keys.
+         *
+         * @hide
+         */
+        public static final String BROADCAST_BG_CONSTANTS = "bcast_bg_constants";
+
+        /**
+         * Broadcast dispatch tuning parameters specific to specific "offline" broadcasts.
+         *
+         * This is encoded as a key=value list, separated by commas. Ex: "foo=1,bar=true".
+         * See {@link #BROADCAST_FG_CONSTANTS} for the list of supported keys.
+         *
+         * @hide
+         */
+        public static final String BROADCAST_OFFLOAD_CONSTANTS = "bcast_offload_constants";
+
+        /**
          * Whether or not App Standby feature is enabled by system. This controls throttling of apps
          * based on usage patterns and predictions. Platform will turn on this feature if both this
          * flag and {@link #ADAPTIVE_BATTERY_MANAGEMENT_ENABLED} is on.

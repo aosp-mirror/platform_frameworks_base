@@ -48,6 +48,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_BROADCAST = DEBUG_ALL || false;
     static final boolean DEBUG_BROADCAST_BACKGROUND = DEBUG_BROADCAST || false;
     static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;
+    static final boolean DEBUG_BROADCAST_DEFERRAL = DEBUG_BROADCAST || false;
     static final boolean DEBUG_LRU = DEBUG_ALL || false;
     static final boolean DEBUG_MU = DEBUG_ALL || false;
     static final boolean DEBUG_NETWORK = DEBUG_ALL || false;
