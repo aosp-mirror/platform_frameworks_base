@@ -1460,8 +1460,9 @@ public class PackageManagerService extends IPackageManager.Stub
                             Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, args.traceMethod,
                                     args.traceCookie);
                         }
-                    } else {
-                        Slog.e(TAG, "Bogus post-install token " + msg.arg1);
+                    } else if (DEBUG_INSTALL) {
+                        // No post-install when we run restore from installExistingPackageForUser
+                        Slog.i(TAG, "Nothing to do for post-install token " + msg.arg1);
                     }
 
                     Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
@@ -12737,6 +12738,11 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
             int installReason) {
+        if (DEBUG_INSTALL) {
+            Log.v(TAG, "installExistingPackageAsUser package=" + packageName + " userId=" + userId
+                    + " installFlags=" + installFlags + " installReason=" + installReason);
+        }
+
         final int callingUid = Binder.getCallingUid();
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED
@@ -12807,6 +12813,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 synchronized (mPackages) {
                     updateSequenceNumberLP(pkgSetting, new int[]{ userId });
                 }
+                // start async restore with no post-install since we finish install here
+                PackageInstalledInfo res =
+                        createPackageInstalledInfo(PackageManager.INSTALL_SUCCEEDED);
+                res.pkg = pkgSetting.pkg;
+                restoreAndPostInstall(userId, res, null);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -13746,8 +13757,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             for (InstallRequest request : installRequests) {
-                resolvePackageInstalledInfo(request.args,
-                        request.installResult);
+                restoreAndPostInstall(request.args.user.getIdentifier(), request.installResult,
+                        new PostInstallData(request.args, request.installResult));
             }
         });
     }
@@ -13762,7 +13773,14 @@ public class PackageManagerService extends IPackageManager.Stub
         return res;
     }
 
-    private void resolvePackageInstalledInfo(InstallArgs args, PackageInstalledInfo res) {
+    /** @param data Post-install is performed only if this is non-null. */
+    private void restoreAndPostInstall(
+            int userId, PackageInstalledInfo res, @Nullable PostInstallData data) {
+        if (DEBUG_INSTALL) {
+            Log.v(TAG, "restoreAndPostInstall userId=" + userId + " package="
+                    + res.pkg.packageName);
+        }
+
         // A restore should be performed at this point if (a) the install
         // succeeded, (b) the operation is not an update, and (c) the new
         // package has not opted out of backup participation.
@@ -13778,9 +13796,12 @@ public class PackageManagerService extends IPackageManager.Stub
         int token;
         if (mNextInstallToken < 0) mNextInstallToken = 1;
         token = mNextInstallToken++;
+        if (data != null) {
+            mRunningInstalls.put(token, data);
+        } else if (DEBUG_INSTALL) {
+            Log.v(TAG, "No post-install required for " + token);
+        }
 
-        PostInstallData data = new PostInstallData(args, res);
-        mRunningInstalls.put(token, data);
         if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
 
         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED && doRestore) {
@@ -13791,7 +13812,6 @@ public class PackageManagerService extends IPackageManager.Stub
             IBackupManager bm = IBackupManager.Stub.asInterface(
                     ServiceManager.getService(Context.BACKUP_SERVICE));
             if (bm != null) {
-                int userId = args.user.getIdentifier();
                 // For backwards compatibility as USER_ALL previously routed directly to USER_SYSTEM
                 // in the BackupManager. USER_ALL is used in compatibility tests.
                 if (userId == UserHandle.USER_ALL) {
