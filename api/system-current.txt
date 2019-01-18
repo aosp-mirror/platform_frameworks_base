@@ -1572,6 +1572,10 @@ package android.content.pm {
     field public int requestRes;
   }
 
+  public class ResolveInfo implements android.os.Parcelable {
+    field public boolean handleAllWebDataURI;
+  }
+
   public class ShortcutManager {
     method public java.util.List<android.content.pm.ShortcutManager.ShareShortcutInfo> getShareTargets(android.content.IntentFilter);
   }
