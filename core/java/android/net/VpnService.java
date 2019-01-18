@@ -118,6 +118,11 @@ import java.util.List;
  * app must promote itself to the foreground after it's launched or the system
  * will shut down the app.
  *
+ * <h3>Developer's guide</h3>
+ *
+ * <p>To learn more about developing VPN apps, read the
+ * <a href="{@docRoot}guide/topics/connectivity/vpn">VPN developer's guide</a>.
+ *
  * @see Builder
  */
 public class VpnService extends Service {
