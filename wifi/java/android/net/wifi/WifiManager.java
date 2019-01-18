@@ -4509,7 +4509,7 @@ public class WifiManager {
      *
      * @return true if this device supports Wi-Fi Easy-connect (Device Provisioning Protocol)
      */
-    public boolean isDppSupported() {
+    public boolean isEasyConnectSupported() {
         return isFeatureSupported(WIFI_FEATURE_DPP);
     }
 
