@@ -39,34 +39,28 @@ static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkSca
 }
 
 void Canvas::drawTextDecorations(float x, float y, float length, const Paint& paint) {
-    uint32_t flags;
-    PaintFilter* paintFilter = getPaintFilter();
-    if (paintFilter) {
-        SkPaint paintCopy(paint);
-        paintFilter->filter(&paintCopy);
-        flags = paintCopy.getFlags();
-    } else {
-        flags = paint.getFlags();
-    }
-    if (flags & (SkPaint::kUnderlineText_ReserveFlag | SkPaint::kStrikeThruText_ReserveFlag)) {
+    // paint has already been filtered by our caller, so we can ignore any filter
+    const bool strikeThru = paint.isStrikeThru();
+    const bool underline = paint.isUnderline();
+    if (strikeThru || underline) {
         const SkScalar left = x;
         const SkScalar right = x + length;
-        if (flags & SkPaint::kUnderlineText_ReserveFlag) {
+        const float textSize = paint.getSkFont().getSize();
+        if (underline) {
             SkFontMetrics metrics;
-            paint.getFontMetrics(&metrics);
+            paint.getSkFont().getMetrics(&metrics);
             SkScalar position;
             if (!metrics.hasUnderlinePosition(&position)) {
-                position = paint.getTextSize() * Paint::kStdUnderline_Top;
+                position = textSize * Paint::kStdUnderline_Top;
             }
             SkScalar thickness;
             if (!metrics.hasUnderlineThickness(&thickness)) {
-                thickness = paint.getTextSize() * Paint::kStdUnderline_Thickness;
+                thickness = textSize * Paint::kStdUnderline_Thickness;
             }
             const SkScalar top = y + position;
             drawStroke(left, right, top, thickness, paint, this);
         }
-        if (flags & SkPaint::kStrikeThruText_ReserveFlag) {
-            const float textSize = paint.getTextSize();
+        if (strikeThru) {
             const float position = textSize * Paint::kStdStrikeThru_Top;
             const SkScalar thickness = textSize * Paint::kStdStrikeThru_Thickness;
             const SkScalar top = y + position;
@@ -75,19 +69,19 @@ void Canvas::drawTextDecorations(float x, float y, float length, const Paint& pa
     }
 }
 
-static void simplifyPaint(int color, SkPaint* paint) {
+static void simplifyPaint(int color, Paint* paint) {
     paint->setColor(color);
     paint->setShader(nullptr);
     paint->setColorFilter(nullptr);
     paint->setLooper(nullptr);
-    paint->setStrokeWidth(4 + 0.04 * paint->getTextSize());
+    paint->setStrokeWidth(4 + 0.04 * paint->getSkFont().getSize());
     paint->setStrokeJoin(SkPaint::kRound_Join);
     paint->setLooper(nullptr);
 }
 
 class DrawTextFunctor {
 public:
-    DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas, const SkPaint& paint, float x,
+    DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas, const Paint& paint, float x,
                     float y, minikin::MinikinRect& bounds, float totalAdvance)
             : layout(layout)
             , canvas(canvas)
@@ -123,14 +117,14 @@ public:
             bool darken = channelSum < (128 * 3);
 
             // outline
-            SkPaint outlinePaint(paint);
+            Paint outlinePaint(paint);
             simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, &outlinePaint);
             outlinePaint.setStyle(SkPaint::kStrokeAndFill_Style);
             canvas->drawGlyphs(glyphFunc, glyphCount, outlinePaint, x, y, bounds.mLeft, bounds.mTop,
                                bounds.mRight, bounds.mBottom, totalAdvance);
 
             // inner
-            SkPaint innerPaint(paint);
+            Paint innerPaint(paint);
             simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
             innerPaint.setStyle(SkPaint::kFill_Style);
             canvas->drawGlyphs(glyphFunc, glyphCount, innerPaint, x, y, bounds.mLeft, bounds.mTop,
@@ -145,7 +139,7 @@ public:
 private:
     const minikin::Layout& layout;
     Canvas* canvas;
-    const SkPaint& paint;
+    const Paint& paint;
     float x;
     float y;
     minikin::MinikinRect& bounds;

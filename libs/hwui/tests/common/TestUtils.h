@@ -278,10 +278,10 @@ public:
 
     static SkColor interpolateColor(float fraction, SkColor start, SkColor end);
 
-    static void drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint, float x,
+    static void drawUtf8ToCanvas(Canvas* canvas, const char* text, const Paint& paint, float x,
                                  float y);
 
-    static void drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint,
+    static void drawUtf8ToCanvas(Canvas* canvas, const char* text, const Paint& paint,
                                  const SkPath& path);
 
     static std::unique_ptr<uint16_t[]> asciiToUtf16(const char* str);

@@ -682,12 +682,11 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& pai
                             float y, float boundsLeft, float boundsTop, float boundsRight,
                             float boundsBottom, float totalAdvance) {
     if (count <= 0 || paint.nothingToDraw()) return;
-    SkPaint paintCopy(paint);
+    Paint paintCopy(paint);
     if (mPaintFilter) {
-        mPaintFilter->filter(&paintCopy);
+        mPaintFilter->filterFullPaint(&paintCopy);
     }
-    SkFont font = SkFont::LEGACY_ExtractFromPaint(paintCopy);
-    SkASSERT(paintCopy.getTextEncoding() == kGlyphID_SkTextEncoding);
+    const SkFont& font = paintCopy.getSkFont();
     // Stroke with a hairline is drawn on HW with a fill style for compatibility with Android O and
     // older.
     if (!mCanvasOwned && sApiLevel <= 27 && paintCopy.getStrokeWidth() <= 0 &&
@@ -710,12 +709,11 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& pai
 void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
                                   const Paint& paint, const SkPath& path, size_t start,
                                   size_t end) {
-    SkPaint paintCopy(paint);
+    Paint paintCopy(paint);
     if (mPaintFilter) {
-        mPaintFilter->filter(&paintCopy);
+        mPaintFilter->filterFullPaint(&paintCopy);
     }
-    SkFont font = SkFont::LEGACY_ExtractFromPaint(paintCopy);
-    SkASSERT(paintCopy.getTextEncoding() == kGlyphID_SkTextEncoding);
+    const SkFont& font = paintCopy.getSkFont();
 
     const int N = end - start;
     SkTextBlobBuilder builder;

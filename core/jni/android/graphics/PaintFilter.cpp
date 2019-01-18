@@ -21,6 +21,7 @@
 
 #include "core_jni_helpers.h"
 
+#include "hwui/Paint.h"
 #include "hwui/PaintFilter.h"
 #include "SkPaint.h"
 
@@ -29,44 +30,21 @@ namespace android {
 class PaintFlagsFilter : public PaintFilter {
 public:
     PaintFlagsFilter(uint32_t clearFlags, uint32_t setFlags) {
-        fClearFlags = static_cast<uint16_t>(clearFlags & SkPaint::kAllFlags);
-        fSetFlags = static_cast<uint16_t>(setFlags & SkPaint::kAllFlags);
+        fClearFlags = static_cast<uint16_t>(clearFlags);
+        fSetFlags = static_cast<uint16_t>(setFlags);
     }
     void filter(SkPaint* paint) override {
-        paint->setFlags((paint->getFlags() & ~fClearFlags) | fSetFlags);
+        uint32_t flags = Paint::GetSkPaintJavaFlags(*paint);
+        Paint::SetSkPaintJavaFlags(paint, (flags & ~fClearFlags) | fSetFlags);
+    }
+    void filterFullPaint(Paint* paint) override {
+        paint->setJavaFlags((paint->getJavaFlags() & ~fClearFlags) | fSetFlags);
     }
 
 private:
     uint16_t fClearFlags;
     uint16_t fSetFlags;
 };
-
-// Custom version of PaintFlagsDrawFilter that also calls setFilterQuality.
-class CompatPaintFlagsFilter : public PaintFlagsFilter {
-public:
-    CompatPaintFlagsFilter(uint32_t clearFlags, uint32_t setFlags, SkFilterQuality desiredQuality)
-    : PaintFlagsFilter(clearFlags, setFlags)
-    , fDesiredQuality(desiredQuality) {
-    }
-
-    virtual void filter(SkPaint* paint) {
-        PaintFlagsFilter::filter(paint);
-        paint->setFilterQuality(fDesiredQuality);
-    }
-
-private:
-    const SkFilterQuality fDesiredQuality;
-};
-
-// Returns whether flags contains FILTER_BITMAP_FLAG. If flags does, remove it.
-static inline bool hadFiltering(jint& flags) {
-    // Equivalent to the Java Paint's FILTER_BITMAP_FLAG.
-    static const uint32_t sFilterBitmapFlag = 0x02;
-
-    const bool result = (flags & sFilterBitmapFlag) != 0;
-    flags &= ~sFilterBitmapFlag;
-    return result;
-}
 
 class PaintFilterGlue {
 public:
@@ -78,29 +56,11 @@ public:
 
     static jlong CreatePaintFlagsFilter(JNIEnv* env, jobject clazz,
                                         jint clearFlags, jint setFlags) {
+        PaintFilter* filter = nullptr;
         if (clearFlags | setFlags) {
-            // Mask both groups of flags to remove FILTER_BITMAP_FLAG, which no
-            // longer has a Skia equivalent flag (instead it corresponds to
-            // calling setFilterQuality), and keep track of which group(s), if
-            // any, had the flag set.
-            const bool turnFilteringOn = hadFiltering(setFlags);
-            const bool turnFilteringOff = hadFiltering(clearFlags);
-
-            PaintFilter* filter;
-            if (turnFilteringOn) {
-                // Turning filtering on overrides turning it off.
-                filter = new CompatPaintFlagsFilter(clearFlags, setFlags,
-                        kLow_SkFilterQuality);
-            } else if (turnFilteringOff) {
-                filter = new CompatPaintFlagsFilter(clearFlags, setFlags,
-                        kNone_SkFilterQuality);
-            } else {
-                filter = new PaintFlagsFilter(clearFlags, setFlags);
-            }
-            return reinterpret_cast<jlong>(filter);
-        } else {
-            return NULL;
+            filter = new PaintFlagsFilter(clearFlags, setFlags);
         }
+        return reinterpret_cast<jlong>(filter);
     }
 };
 

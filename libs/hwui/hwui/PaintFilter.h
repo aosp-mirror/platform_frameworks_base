@@ -12,6 +12,7 @@ public:
      *  The implementation may modify the paint as they wish.
      */
     virtual void filter(SkPaint*) = 0;
+    virtual void filterFullPaint(Paint*) = 0;
 };
 
 } // namespace android

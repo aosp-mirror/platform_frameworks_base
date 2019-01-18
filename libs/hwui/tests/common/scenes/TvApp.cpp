@@ -17,6 +17,7 @@
 #include "SkBlendMode.h"
 #include "TestSceneBase.h"
 #include "tests/common/BitmapAllocationTestUtils.h"
+#include "hwui/Paint.h"
 
 class TvApp;
 class TvAppNoRoundedCorner;
@@ -116,13 +117,13 @@ private:
                                      [text, text2](RenderProperties& props, Canvas& canvas) {
                                          canvas.drawColor(0xFFFFEEEE, SkBlendMode::kSrcOver);
 
-                                         SkPaint paint;
+                                         Paint paint;
                                          paint.setAntiAlias(true);
-                                         paint.setTextSize(24);
+                                         paint.getSkFont().setSize(24);
 
                                          paint.setColor(Color::Black);
                                          TestUtils::drawUtf8ToCanvas(&canvas, text, paint, 10, 30);
-                                         paint.setTextSize(20);
+                                         paint.getSkFont().setSize(20);
                                          TestUtils::drawUtf8ToCanvas(&canvas, text2, paint, 10, 54);
 
                                      });
