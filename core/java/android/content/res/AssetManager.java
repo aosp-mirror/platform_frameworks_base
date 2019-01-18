@@ -1051,6 +1051,14 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    int[] getAttributeResolutionStack(long themePtr, @AttrRes int defStyleAttr,
+            @StyleRes int defStyleRes, @StyleRes int xmlStyle) {
+        synchronized (this) {
+            return nativeAttributeResolutionStack(
+                    mObject, themePtr, xmlStyle, defStyleAttr, defStyleRes);
+        }
+    }
+
     @UnsupportedAppUsage
     boolean resolveAttrs(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable int[] inValues, @NonNull int[] inAttrs, @NonNull int[] outValues,
@@ -1419,6 +1427,8 @@ public final class AssetManager implements AutoCloseable {
     private static native @Nullable String nativeGetLastResourceResolution(long ptr);
 
     // Style attribute retrieval native methods.
+    private static native int[] nativeAttributeResolutionStack(long ptr, long themePtr,
+            @StyleRes int xmlStyleRes, @AttrRes int defStyleAttr, @StyleRes int defStyleRes);
     private static native void nativeApplyStyle(long ptr, long themePtr, @AttrRes int defStyleAttr,
             @StyleRes int defStyleRes, long xmlParserPtr, @NonNull int[] inAttrs,
             long outValuesAddress, long outIndicesAddress);

@@ -35,6 +35,7 @@ import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.StyleRes;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.annotation.UnsupportedAppUsage;
@@ -91,6 +92,7 @@ import android.util.LongSparseLongArray;
 import android.util.Pools.SynchronizedPool;
 import android.util.Property;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.StateSet;
 import android.util.SuperNotCalledException;
 import android.util.TypedValue;
@@ -820,7 +822,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public static boolean mDebugViewAttributes = false;
+    public static boolean sDebugViewAttributes = false;
+
+    /**
+     * When set to this application package view will save its attribute data.
+     *
+     * @hide
+     */
+    public static String sDebugViewAttributesApplicationPackage;
 
     /**
      * Used to mark a View that has no ID.
@@ -5078,6 +5087,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @LayoutRes
     private int mSourceLayoutId = ID_NULL;
 
+    @Nullable
+    private SparseIntArray mAttributeSourceResId;
+
+    @Nullable
+    private int[] mAttributeResolutionStack;
+
+    @StyleRes
+    private int mExplicitStyle;
+
     /**
      * Cached reference to the {@link ContentCaptureSession}, is reset on {@link #invalidate()}.
      */
@@ -5253,7 +5271,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.View, defStyleAttr, defStyleRes);
 
-        if (mDebugViewAttributes) {
+        retrieveExplicitStyle(context.getTheme(), attrs);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.View, attrs, a,
+                defStyleAttr, defStyleRes);
+
+        if (sDebugViewAttributes) {
             saveAttributeData(attrs, a);
         }
 
@@ -5915,6 +5937,84 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns the ordered list of resource ID that are considered when resolving attribute values
+     * for this {@link View}. The list will include layout resource ID if the View is inflated from
+     * XML. It will also include a set of explicit styles if specified in XML using
+     * {@code style="..."}. Finally, it will include the default styles resolved from the theme.
+     *
+     * <p>
+     * <b>Note:</b> this method will only return actual values if the view attribute debugging
+     * is enabled in Android developer options.
+     *
+     * @return ordered list of resource ID that are considered when resolving attribute values for
+     * this {@link View}.
+     */
+    @NonNull
+    public List<Integer> getAttributeResolutionStack() {
+        ArrayList<Integer> stack = new ArrayList<>();
+        if (!sDebugViewAttributes) {
+            return stack;
+        }
+        if (mSourceLayoutId != ID_NULL) {
+            stack.add(mSourceLayoutId);
+        }
+        for (int i = 0; i < mAttributeResolutionStack.length; i++) {
+            stack.add(mAttributeResolutionStack[i]);
+        }
+        return stack;
+    }
+
+    /**
+     * Returns the mapping of attribute resource ID to source resource ID where the attribute value
+     * was set. Source resource ID can either be a layout resource ID, if the value was set in XML
+     * within the View tag, or a style resource ID, if the attribute was set in a style. The source
+     * resource value will be one of the resource IDs from {@link #getAttributeSourceResourceMap()}.
+     *
+     * <p>
+     * <b>Note:</b> this method will only return actual values if the view attribute debugging
+     * is enabled in Android developer options.
+     *
+     * @return mapping of attribute resource ID to source resource ID where the attribute value
+     * was set.
+     */
+    @NonNull
+    public Map<Integer, Integer> getAttributeSourceResourceMap() {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        if (!sDebugViewAttributes) {
+            return map;
+        }
+        for (int i = 0; i < mAttributeSourceResId.size(); i++) {
+            map.put(mAttributeSourceResId.keyAt(i), mAttributeSourceResId.valueAt(i));
+        }
+        return map;
+    }
+
+    /**
+     * Returns the resource ID for the style specified using {@code style="..."} in the
+     * {@link AttributeSet}'s backing XML element or {@link Resources#ID_NULL} otherwise if not
+     * specified or otherwise not applicable.
+     * <p>
+     * Each {@link View} can have an explicit style specified in the layout file.
+     * This style is used first during the {@link View} attribute resolution, then if an attribute
+     * is not defined there the resource system looks at default style and theme as fallbacks.
+     *
+     * <p>
+     * <b>Note:</b> this method will only return actual values if the view attribute debugging
+     * is enabled in Android developer options.
+     *
+     * @return The resource ID for the style specified using {@code style="..."} in the
+     *      {@link AttributeSet}'s backing XML element or {@link Resources#ID_NULL} otherwise
+     *      if not specified or otherwise not applicable.
+     */
+    @StyleRes
+    public int getExplicitStyle() {
+        if (!sDebugViewAttributes) {
+            return ID_NULL;
+        }
+        return mExplicitStyle;
+    }
+
+    /**
      * An implementation of OnClickListener that attempts to lazily load a
      * named click handling method from a parent or ancestor context.
      */
@@ -5998,6 +6098,46 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAttributeMap = new SparseArray<>();
         }
         return mAttributeMap;
+    }
+
+    private void retrieveExplicitStyle(@NonNull Resources.Theme theme,
+            @Nullable AttributeSet attrs) {
+        if (!sDebugViewAttributes) {
+            return;
+        }
+        mExplicitStyle = theme.getExplicitStyle(attrs);
+    }
+
+    /**
+     * Stores debugging information about attributes. This should be called in a constructor by
+     * every custom {@link View} that uses a custom styleable.
+     *  @param context Context under which this view is created.
+     * @param styleable A reference to styleable array R.styleable.Foo
+     * @param attrs AttributeSet used to construct this view.
+     * @param t Resolved {@link TypedArray} returned by a call to
+     *        {@link Resources#obtainAttributes(AttributeSet, int[])}.
+     * @param defStyleAttr Default style attribute passed into the view constructor.
+     * @param defStyleRes Default style resource passed into the view constructor.
+     */
+    public final void saveAttributeDataForStyleable(@NonNull Context context,
+            @NonNull int[] styleable, @Nullable AttributeSet attrs, @NonNull TypedArray t,
+            int defStyleAttr, int defStyleRes) {
+        if (!sDebugViewAttributes) {
+            return;
+        }
+
+        mAttributeResolutionStack = context.getTheme().getAttributeResolutionStack(
+                defStyleAttr, defStyleRes, mExplicitStyle);
+
+        if (mAttributeSourceResId == null) {
+            mAttributeSourceResId = new SparseIntArray();
+        }
+
+        final int indexCount = t.getIndexCount();
+        for (int j = 0; j < indexCount; ++j) {
+            final int index = t.getIndex(j);
+            mAttributeSourceResId.append(styleable[index], t.getSourceResourceId(index, 0));
+        }
     }
 
     private void saveAttributeData(@Nullable AttributeSet attrs, @NonNull TypedArray t) {

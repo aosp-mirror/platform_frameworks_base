@@ -1488,6 +1488,32 @@ public class ResourcesImpl {
                 }
             }
         }
+
+        /**
+         * Returns the ordered list of resource ID that are considered when resolving attribute
+         * values when making an equivalent call to
+         * {@link #obtainStyledAttributes(Resources.Theme, AttributeSet, int[], int, int)}. The list
+         * will include a set of explicit styles ({@code explicitStyleRes} and it will include the
+         * default styles ({@code defStyleAttr} and {@code defStyleRes}).
+         *
+         * @param defStyleAttr An attribute in the current theme that contains a
+         *                     reference to a style resource that supplies
+         *                     defaults values for the TypedArray.  Can be
+         *                     0 to not look for defaults.
+         * @param defStyleRes A resource identifier of a style resource that
+         *                    supplies default values for the TypedArray,
+         *                    used only if defStyleAttr is 0 or can not be found
+         *                    in the theme.  Can be 0 to not look for defaults.
+         * @param explicitStyleRes A resource identifier of an explicit style resource.
+         * @return ordered list of resource ID that are considered when resolving attribute values.
+         */
+        public int[] getAttributeResolutionStack(@AttrRes int defStyleAttr,
+                @StyleRes int defStyleRes, @StyleRes int explicitStyleRes) {
+            synchronized (mKey) {
+                return mAssets.getAttributeResolutionStack(
+                        mTheme, defStyleAttr, defStyleRes, explicitStyleRes);
+            }
+        }
     }
 
     private static class LookupStack {

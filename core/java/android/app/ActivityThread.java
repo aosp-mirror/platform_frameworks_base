@@ -4565,14 +4565,23 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     private void onCoreSettingsChange() {
-        boolean debugViewAttributes =
-                mCoreSettings.getInt(Settings.Global.DEBUG_VIEW_ATTRIBUTES, 0) != 0;
-        if (debugViewAttributes != View.mDebugViewAttributes) {
-            View.mDebugViewAttributes = debugViewAttributes;
-
+        if (updateDebugViewAttributeState()) {
             // request all activities to relaunch for the changes to take place
             relaunchAllActivities();
         }
+    }
+
+    private boolean updateDebugViewAttributeState() {
+        boolean previousState = View.sDebugViewAttributes;
+
+        View.sDebugViewAttributesApplicationPackage = mCoreSettings.getString(
+                Settings.Global.DEBUG_VIEW_ATTRIBUTES_APPLICATION_PACKAGE, "");
+        String currentPackage = (mBoundApplication != null && mBoundApplication.appInfo != null)
+                ? mBoundApplication.appInfo.packageName : "";
+        View.sDebugViewAttributes =
+                mCoreSettings.getInt(Settings.Global.DEBUG_VIEW_ATTRIBUTES, 0) != 0
+                        || View.sDebugViewAttributesApplicationPackage.equals(currentPackage);
+        return previousState != View.sDebugViewAttributes;
     }
 
     private void relaunchAllActivities() {
@@ -5950,8 +5959,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         // true : use 24 hour format.
         DateFormat.set24HourTimePref(is24Hr);
 
-        View.mDebugViewAttributes =
-                mCoreSettings.getInt(Settings.Global.DEBUG_VIEW_ATTRIBUTES, 0) != 0;
+        updateDebugViewAttributeState();
 
         StrictMode.initThreadDefaults(data.appInfo);
         StrictMode.initVmDefaults(data.appInfo);

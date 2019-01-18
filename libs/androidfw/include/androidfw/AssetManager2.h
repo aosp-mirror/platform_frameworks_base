@@ -237,6 +237,8 @@ class AssetManager2 {
   // resource has been resolved yet.
   std::string GetLastResourceResolution() const;
 
+  const std::vector<uint32_t> GetBagResIdStack(uint32_t resid);
+
   // Retrieves the best matching bag/map resource with ID `resid`.
   // This method will resolve all parent references for this bag and merge keys with the child.
   // To iterate over the keys, use the following idiom:
@@ -354,6 +356,10 @@ class AssetManager2 {
   // Cached set of bags. These are cached because they can inherit keys from parent bags,
   // which involves some calculation.
   std::unordered_map<uint32_t, util::unique_cptr<ResolvedBag>> cached_bags_;
+
+  // Cached set of bag resid stacks for each bag. These are cached because they might be requested
+  // a number of times for each view during View inspection.
+  std::unordered_map<uint32_t, std::vector<uint32_t>> cached_bag_resid_stacks_;
 
   // Whether or not to save resource resolution steps
   bool resource_resolution_logging_enabled_ = false;
