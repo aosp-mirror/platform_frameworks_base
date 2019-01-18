@@ -26,6 +26,7 @@ class MediaConstants {
     // Bundle key for Parcelable
     static final String KEY_SESSION2LINK = "android.media.key.SESSION2LINK";
     static final String KEY_ALLOWED_COMMANDS = "android.media.key.ALLOWED_COMMANDS";
+    static final String KEY_PLAYBACK_ACTIVE = "android.media.key.PLAYBACK_ACTIVE";
 
     private MediaConstants() {
     }
