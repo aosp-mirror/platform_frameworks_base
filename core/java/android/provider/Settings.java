@@ -6026,6 +6026,12 @@ public final class Settings {
                 ANY_STRING_VALIDATOR;
 
         /**
+         * Indicates which clock face to show on lock screen and AOD while docked.
+         * @hide
+         */
+        private static final String DOCKED_CLOCK_FACE = "docked_clock_face";
+
+        /**
          * Set by the system to track if the user needs to see the call to action for
          * the lockscreen notification policy.
          * @hide
