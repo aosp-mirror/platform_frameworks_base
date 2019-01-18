@@ -24,12 +24,14 @@ import static android.view.MotionEvent.ACTION_UP;
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.TextView;
 
 public class ActivityViewTestActivity extends Activity {
+    private static final String TAG = "ActivityViewTestActivity";
 
     private View mRoot;
     private TextView mTextView;
@@ -84,6 +86,7 @@ public class ActivityViewTestActivity extends Activity {
     }
 
     private void updateStateText(String state) {
+        Log.d(TAG, state);
         mTextView.setText(state);
     }
 
