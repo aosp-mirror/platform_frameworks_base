@@ -8222,7 +8222,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </ul>
      */
     public void onProvideContentCaptureStructure(@NonNull ViewStructure structure, int flags) {
-        onProvideStructure(structure, VIEW_STRUCTURE_FOR_CONTENT_CAPTURE, flags);
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                    "onProvideContentCaptureStructure() for " + getClass().getSimpleName());
+        }
+        try {
+            onProvideStructure(structure, VIEW_STRUCTURE_FOR_CONTENT_CAPTURE, flags);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
     }
 
     /** @hide */
@@ -9013,6 +9021,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </ol>
      */
     private void notifyAppearedOrDisappearedForContentCaptureIfNeeded(boolean appeared) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                    "notifyContentCapture(" + appeared + ") for " + getClass().getSimpleName());
+        }
+        try {
+            notifyAppearedOrDisappearedForContentCaptureIfNeededNoTrace(appeared);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
+    }
+
+    private void notifyAppearedOrDisappearedForContentCaptureIfNeededNoTrace(boolean appeared) {
         // First check if context has client, so it saves a service lookup when it doesn't
         if (!mContext.isContentCaptureSupported()) return;
 

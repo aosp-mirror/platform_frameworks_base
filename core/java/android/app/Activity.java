@@ -74,6 +74,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -1049,33 +1050,56 @@ public class Activity extends ContextThemeWrapper
     @Retention(RetentionPolicy.SOURCE)
     @interface ContentCaptureNotificationType{}
 
-
-    private void notifyContentCaptureManagerIfNeeded(@ContentCaptureNotificationType int type) {
-        final ContentCaptureManager cm = getContentCaptureManager();
-        if (cm == null) return;
-
+    private String getContentCaptureTypeAsString(@ContentCaptureNotificationType int type) {
         switch (type) {
             case CONTENT_CAPTURE_START:
-                //TODO(b/111276913): decide whether the InteractionSessionId should be
-                // saved / restored in the activity bundle - probably not
-                int flags = 0;
-                if ((getWindow().getAttributes().flags
-                        & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
-                    flags |= ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE;
-                }
-                cm.onActivityStarted(mToken, getComponentName(), flags);
-                break;
+                return "START";
             case CONTENT_CAPTURE_PAUSE:
-                cm.flush(ContentCaptureSession.FLUSH_REASON_ACTIVITY_PAUSED);
-                break;
+                return "PAUSE";
             case CONTENT_CAPTURE_RESUME:
-                cm.flush(ContentCaptureSession.FLUSH_REASON_ACTIVITY_RESUMED);
-                break;
+                return "RESUME";
             case CONTENT_CAPTURE_STOP:
-                cm.onActivityStopped();
-                break;
+                return "STOP";
             default:
-                Log.wtf(TAG, "Invalid @ContentCaptureNotificationType: " + type);
+                return "UNKNOW-" + type;
+        }
+    }
+
+    private void notifyContentCaptureManagerIfNeeded(@ContentCaptureNotificationType int type) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "notifyContentCapture(" + getContentCaptureTypeAsString(type) + ") for "
+                            + mComponent.toShortString());
+        }
+        try {
+            final ContentCaptureManager cm = getContentCaptureManager();
+            if (cm == null) return;
+
+            switch (type) {
+                case CONTENT_CAPTURE_START:
+                    //TODO(b/111276913): decide whether the InteractionSessionId should be
+                    // saved / restored in the activity bundle - probably not
+                    int flags = 0;
+                    if ((getWindow().getAttributes().flags
+                            & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
+                        flags |= ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE;
+                    }
+                    cm.onActivityStarted(mToken, getComponentName(), flags);
+                    break;
+                case CONTENT_CAPTURE_PAUSE:
+                    cm.flush(ContentCaptureSession.FLUSH_REASON_ACTIVITY_PAUSED);
+                    break;
+                case CONTENT_CAPTURE_RESUME:
+                    cm.flush(ContentCaptureSession.FLUSH_REASON_ACTIVITY_RESUMED);
+                    break;
+                case CONTENT_CAPTURE_STOP:
+                    cm.onActivityStopped();
+                    break;
+                default:
+                    Log.wtf(TAG, "Invalid @ContentCaptureNotificationType: " + type);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
