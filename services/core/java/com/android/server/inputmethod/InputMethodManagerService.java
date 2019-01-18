@@ -2903,7 +2903,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
             IInputContext inputContext, @MissingMethodFlags int missingMethods,
             int unverifiedTargetSdkVersion) {
-        final int userId = UserHandle.getUserId(Binder.getCallingUid());
+        final int callingUserId = UserHandle.getCallingUserId();
+        final int userId;
+        if (PER_PROFILE_IME_ENABLED && attribute != null && attribute.targetInputMethodUser != null
+                && attribute.targetInputMethodUser.getIdentifier() != callingUserId) {
+            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "Using EditorInfo.user requires INTERACT_ACROSS_USERS_FULL.");
+            userId = attribute.targetInputMethodUser.getIdentifier();
+            if (!mUserManagerInternal.isUserRunning(userId)) {
+                // There is a chance that we hit here because of race condition.  Let's just return
+                // an error code instead of crashing the caller process, which at least has
+                // INTERACT_ACROSS_USERS_FULL permission thus is likely to be an important process.
+                Slog.e(TAG, "User #" + userId + " is not running.");
+                return InputBindResult.INVALID_USER;
+            }
+        } else {
+            userId = callingUserId;
+        }
         InputBindResult res = null;
         synchronized (mMethodMap) {
             // Needs to check the validity before clearing calling identity
