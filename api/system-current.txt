@@ -1770,6 +1770,7 @@ package android.hardware.display {
   }
 
   public final class ColorDisplayManager {
+    method public boolean setAppSaturationLevel(java.lang.String, int);
     method public boolean setSaturationLevel(int);
   }
 

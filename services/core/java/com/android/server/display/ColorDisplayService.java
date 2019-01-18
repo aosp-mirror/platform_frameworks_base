@@ -27,6 +27,7 @@ import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Size;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -36,8 +37,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.hardware.display.ColorDisplayManager;
 import android.graphics.ColorSpace;
+import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.IColorDisplayManager;
 import android.net.Uri;
 import android.opengl.Matrix;
@@ -55,13 +56,16 @@ import android.view.animation.AnimationUtils;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ColorDisplayController;
+import com.android.internal.util.DumpUtils;
 import com.android.server.DisplayThread;
 import com.android.server.SystemService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -399,6 +403,8 @@ public final class ColorDisplayService extends SystemService {
     };
 
     private final Handler mHandler;
+
+    private final AppSaturationController mAppSaturationController = new AppSaturationController();
 
     private int mCurrentUser = UserHandle.USER_NULL;
     private ContentObserver mUserSetupObserver;
@@ -829,6 +835,22 @@ public final class ColorDisplayService extends SystemService {
         return LocalDateTime.MIN;
     }
 
+    private boolean setAppSaturationLevelInternal(String packageName, int saturationLevel) {
+        return mAppSaturationController
+                .setSaturationLevel(packageName, mCurrentUser, saturationLevel);
+    }
+
+    private void dumpInternal(PrintWriter pw) {
+        pw.println("COLOR DISPLAY MANAGER dumpsys (color_display)");
+        pw.println("Night Display:");
+        if (ColorDisplayManager.isNightDisplayAvailable(getContext())) {
+            pw.println("    Activated: " + mNightDisplayTintController.isActivated());
+        } else {
+            pw.println("    Not available");
+        }
+        mAppSaturationController.dump(pw);
+    }
+
     private abstract class NightDisplayAutoMode {
 
         public abstract void onActivated(boolean activated);
@@ -1132,6 +1154,16 @@ public final class ColorDisplayService extends SystemService {
         public void dump(PrintWriter pw) {
             mDisplayWhiteBalanceTintController.dump(pw);
         }
+
+        /**
+         * Adds a {@link WeakReference<ColorTransformController>} for a newly started activity, and
+         * invokes {@link ColorTransformController#applyAppSaturation(float[], float[])} if needed.
+         */
+        public boolean attachColorTransformController(String packageName, int uid,
+                WeakReference<ColorTransformController> controller) {
+            return mAppSaturationController
+                    .addColorTransformController(packageName, uid, controller);
+        }
     }
 
     /**
@@ -1161,6 +1193,15 @@ public final class ColorDisplayService extends SystemService {
                     break;
             }
         }
+    }
+
+    /**
+     * Interface for applying transforms to a given AppWindow.
+     */
+    public interface ColorTransformController {
+
+        /** Apply the given saturation (grayscale) matrix to the associated AppWindow. */
+        void applyAppSaturation(@Size(9) float[] matrix, @Size(3) float[] translation);
     }
 
     private final class BinderService extends IColorDisplayManager.Stub {
@@ -1195,6 +1236,31 @@ public final class ColorDisplayService extends SystemService {
                 Binder.restoreCallingIdentity(token);
             }
             return true;
+        }
+
+        @Override
+        public boolean setAppSaturationLevel(String packageName, int level) {
+            getContext().enforceCallingPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
+                    "Permission required to set display saturation level");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return setAppSaturationLevelInternal(packageName, level);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                dumpInternal(pw);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 }

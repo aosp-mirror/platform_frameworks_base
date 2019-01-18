@@ -17,6 +17,8 @@
 package android.hardware.display;
 
 import android.Manifest;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -61,13 +63,27 @@ public final class ColorDisplayManager {
      *
      * @param saturationLevel 0-100 (inclusive), where 100 is full saturation
      * @return whether the saturation level change was applied successfully
-     *
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
-    public boolean setSaturationLevel(int saturationLevel) {
+    public boolean setSaturationLevel(@IntRange(from = 0, to = 100) int saturationLevel) {
         return mManager.setSaturationLevel(saturationLevel);
+    }
+
+    /**
+     * Set the level of color saturation to apply to a specific app.
+     *
+     * @param packageName the package name of the app whose windows should be desaturated
+     * @param saturationLevel 0-100 (inclusive), where 100 is full saturation
+     * @return whether the saturation level change was applied successfully
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
+    public boolean setAppSaturationLevel(@NonNull String packageName,
+            @IntRange(from = 0, to = 100) int saturationLevel) {
+        return mManager.setAppSaturationLevel(packageName, saturationLevel);
     }
 
     /**
@@ -124,6 +140,14 @@ public final class ColorDisplayManager {
         boolean setSaturationLevel(int saturationLevel) {
             try {
                 return mCdm.setSaturationLevel(saturationLevel);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        boolean setAppSaturationLevel(String packageName, int saturationLevel) {
+            try {
+                return mCdm.setAppSaturationLevel(packageName, saturationLevel);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
