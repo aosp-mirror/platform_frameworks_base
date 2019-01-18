@@ -27,6 +27,7 @@ namespace android {
 class MediaMetricsJNI {
 public:
     static jobject writeMetricsToBundle(JNIEnv* env, MediaAnalyticsItem *item, jobject mybundle);
+    static jobject writeAttributesToBundle(JNIEnv* env, jobject mybundle, char *buffer, size_t length);
 };
 
 };  // namespace android
