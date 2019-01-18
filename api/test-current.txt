@@ -1269,15 +1269,11 @@ package android.os {
     method @Nullable public static android.os.VibrationEffect get(android.net.Uri, android.content.Context);
     method public abstract long getDuration();
     method protected static int scale(int, float, int);
-    field public static final int EFFECT_CLICK = 0; // 0x0
-    field public static final int EFFECT_DOUBLE_CLICK = 1; // 0x1
-    field public static final int EFFECT_HEAVY_CLICK = 5; // 0x5
     field public static final int EFFECT_POP = 4; // 0x4
     field public static final int EFFECT_STRENGTH_LIGHT = 0; // 0x0
     field public static final int EFFECT_STRENGTH_MEDIUM = 1; // 0x1
     field public static final int EFFECT_STRENGTH_STRONG = 2; // 0x2
     field public static final int EFFECT_THUD = 3; // 0x3
-    field public static final int EFFECT_TICK = 2; // 0x2
     field public static final int[] RINGTONES;
   }
 
