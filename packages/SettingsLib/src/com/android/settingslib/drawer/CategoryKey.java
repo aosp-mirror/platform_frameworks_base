@@ -51,6 +51,12 @@ public final class CategoryKey {
     public static final String CATEGORY_GESTURES = "com.android.settings.category.ia.gestures";
     public static final String CATEGORY_NIGHT_DISPLAY =
             "com.android.settings.category.ia.night_display";
+    public static final String CATEGORY_ABOUT_LEGAL =
+            "com.android.settings.category.ia.about_legal";
+    public static final String CATEGORY_MY_DEVICE_INFO =
+            "com.android.settings.category.ia.my_device_info";
+    public static final String CATEGORY_BATTERY_SAVER_SETTINGS =
+            "com.android.settings.category.ia.battery_saver_settings";
 
     public static final Map<String, String> KEY_COMPAT_MAP;
 
