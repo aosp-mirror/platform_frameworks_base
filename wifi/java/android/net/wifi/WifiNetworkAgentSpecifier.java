@@ -28,6 +28,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.util.Objects;
 
@@ -50,12 +51,24 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
      */
     private final int mOriginalRequestorUid;
 
+    /**
+     * The package name of the app that requested a specific wifi network using
+     * {@link WifiNetworkSpecifier}.
+     *
+     * Will only be filled when the device connects to a wifi network as a result of a
+     * {@link NetworkRequest} with {@link WifiNetworkSpecifier}. Will be set to null if the device
+     * auto-connected to a wifi network.
+     */
+    private final String mOriginalRequestorPackageName;
+
     public WifiNetworkAgentSpecifier(@NonNull WifiConfiguration wifiConfiguration,
-                                     int originalRequestorUid) {
+                                     int originalRequestorUid,
+                                     @Nullable String originalRequestorPackageName) {
         checkNotNull(wifiConfiguration);
 
         mWifiConfiguration = wifiConfiguration;
         mOriginalRequestorUid = originalRequestorUid;
+        mOriginalRequestorPackageName = originalRequestorPackageName;
     }
 
     /**
@@ -67,7 +80,9 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
                 public WifiNetworkAgentSpecifier createFromParcel(@NonNull Parcel in) {
                     WifiConfiguration wifiConfiguration = in.readParcelable(null);
                     int originalRequestorUid = in.readInt();
-                    return new WifiNetworkAgentSpecifier(wifiConfiguration, originalRequestorUid);
+                    String originalRequestorPackageName = in.readString();
+                    return new WifiNetworkAgentSpecifier(
+                            wifiConfiguration, originalRequestorUid, originalRequestorPackageName);
                 }
 
                 @Override
@@ -85,6 +100,7 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelable(mWifiConfiguration, flags);
         dest.writeInt(mOriginalRequestorUid);
+        dest.writeString(mOriginalRequestorPackageName);
     }
 
     @Override
@@ -137,6 +153,9 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
         if (ns.requestorUid != this.mOriginalRequestorUid) {
             return false;
         }
+        if (!TextUtils.equals(ns.requestorPackageName, this.mOriginalRequestorPackageName)) {
+            return false;
+        }
         return true;
     }
 
@@ -146,7 +165,8 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
                 mWifiConfiguration.SSID,
                 mWifiConfiguration.BSSID,
                 mWifiConfiguration.allowedKeyManagement,
-                mOriginalRequestorUid);
+                mOriginalRequestorUid,
+                mOriginalRequestorPackageName);
     }
 
     @Override
@@ -162,7 +182,9 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
                 && Objects.equals(this.mWifiConfiguration.BSSID, lhs.mWifiConfiguration.BSSID)
                 && Objects.equals(this.mWifiConfiguration.allowedKeyManagement,
                     lhs.mWifiConfiguration.allowedKeyManagement)
-                && mOriginalRequestorUid == lhs.mOriginalRequestorUid;
+                && mOriginalRequestorUid == lhs.mOriginalRequestorUid
+                && TextUtils.equals(mOriginalRequestorPackageName,
+                lhs.mOriginalRequestorPackageName);
     }
 
     @Override
@@ -172,6 +194,7 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
                 .append(", SSID=").append(mWifiConfiguration.SSID)
                 .append(", BSSID=").append(mWifiConfiguration.BSSID)
                 .append(", mOriginalRequestorUid=").append(mOriginalRequestorUid)
+                .append(", mOriginalRequestorPackageName=").append(mOriginalRequestorPackageName)
                 .append("]");
         return sb.toString();
     }

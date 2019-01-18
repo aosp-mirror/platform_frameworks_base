@@ -20,6 +20,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.net.MacAddress;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
@@ -586,7 +587,8 @@ public class WifiNetworkConfigBuilder {
                 mSsidPatternMatcher,
                 mBssidPatternMatcher,
                 buildWifiConfiguration(),
-                Process.myUid());
+                Process.myUid(),
+                ActivityThread.currentApplication().getApplicationContext().getOpPackageName());
     }
 
     /**
@@ -648,7 +650,8 @@ public class WifiNetworkConfigBuilder {
                 buildWifiConfiguration(),
                 mIsAppInteractionRequired,
                 mIsUserInteractionRequired,
-                Process.myUid());
+                Process.myUid(),
+                ActivityThread.currentApplication().getApplicationContext().getOpPackageName());
 
     }
 }
