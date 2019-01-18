@@ -147,12 +147,12 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 }
 
                 @Override
-                void writeStringSetting(String key, String value) {
+                void writeStringSystemProperty(String key, String value) {
                     // do nothing
                 }
 
                 @Override
-                boolean readBooleanSetting(String key, boolean defVal) {
+                boolean readBooleanSystemProperty(String key, boolean defVal) {
                     switch (key) {
                         case Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE:
                             return mMutingEnabled;
