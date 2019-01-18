@@ -279,7 +279,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                 Slog.d(TAG,
                         "Airplane Mode change - current state:  " + BluetoothAdapter.nameForState(
-                                st));
+                                st) + ", isAirplaneModeOn()=" + isAirplaneModeOn());
 
                 if (isAirplaneModeOn()) {
                     // Clear registered LE apps to force shut-off
