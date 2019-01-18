@@ -158,6 +158,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private NavigationBackAction mBackAction;
     private QuickSwitchAction mQuickSwitchAction;
     private NavigationAssistantAction mAssistantAction;
+    private NavigationNotificationPanelAction mNotificationPanelAction;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -374,6 +375,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mAssistantAction = new NavigationAssistantAction(this, mOverviewProxyService,
                     assistManager);
         }
+        if (mNotificationPanelAction == null) {
+            mNotificationPanelAction = new NavigationNotificationPanelAction(this,
+                    mOverviewProxyService, panel);
+        }
         if (mGestureHelper instanceof QuickStepController) {
             ((QuickStepController) mGestureHelper).setComponents(this);
             updateNavigationGestures();
@@ -406,6 +411,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 return mQuickSwitchAction;
             case NavigationPrototypeController.ACTION_ASSISTANT:
                 return mAssistantAction;
+            case NavigationPrototypeController.ACTION_EXPAND_NOTIFICATION:
+                return mNotificationPanelAction;
             case NavigationPrototypeController.ACTION_NOTHING:
                 return null;
             default:

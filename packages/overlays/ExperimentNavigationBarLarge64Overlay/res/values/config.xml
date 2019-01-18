@@ -16,7 +16,13 @@
  * limitations under the License.
  */
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Name of overlay [CHAR LIMIT=64] -->
-    <string name="experiment_navigationbar_overlay">Slim Navigation Bar Experiment (24dp)</string>
+<resources>
+    <!-- Height of the bottom navigation / system bar. -->
+    <dimen name="navigation_bar_height">64dp</dimen>
+    <!-- Width of the navigation bar when it is placed vertically on the screen -->
+    <dimen name="navigation_bar_width">64dp</dimen>
+    <!-- Height of the bottom navigation / system bar frame; navigation buttons height. -->
+    <dimen name="navigation_bar_frame_width">64dp</dimen>
+    <!-- Width of the navigation bar frame when it is placed vertically on the screen -->
+    <dimen name="navigation_bar_frame_height">64dp</dimen>
 </resources>

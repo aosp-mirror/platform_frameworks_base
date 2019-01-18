@@ -17,14 +17,14 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_RRO_THEME := ExperimentNavigationBarSlim24
+LOCAL_RRO_THEME := ExperimentNavigationBarLarge56
 LOCAL_CERTIFICATE := platform
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
-LOCAL_PACKAGE_NAME := ExperimentNavigationBarSlimOverlay24
+LOCAL_PACKAGE_NAME := ExperimentNavigationBarLargeOverlay56
 LOCAL_SDK_VERSION := current
 
 include $(BUILD_RRO_PACKAGE)
