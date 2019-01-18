@@ -312,7 +312,8 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
 
 void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
                                const std::vector<sp<RenderNode>>& nodes, bool opaque,
-                               const Rect& contentDrawBounds, sk_sp<SkSurface> surface) {
+                               const Rect& contentDrawBounds, sk_sp<SkSurface> surface,
+                               const SkMatrix& preTransform) {
     renderVectorDrawableCache();
 
     // draw all layers up front
@@ -323,12 +324,12 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
     std::unique_ptr<SkPictureRecorder> recorder;
     SkCanvas* canvas = tryCapture(surface.get());
 
-    renderFrameImpl(layers, clip, nodes, opaque, contentDrawBounds, canvas);
+    renderFrameImpl(layers, clip, nodes, opaque, contentDrawBounds, canvas, preTransform);
 
     endCapture(surface.get());
 
     if (CC_UNLIKELY(Properties::debugOverdraw)) {
-        renderOverdraw(layers, clip, nodes, contentDrawBounds, surface);
+        renderOverdraw(layers, clip, nodes, contentDrawBounds, surface, preTransform);
     }
 
     ATRACE_NAME("flush commands");
@@ -344,9 +345,11 @@ static Rect nodeBounds(RenderNode& node) {
 
 void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
                                    const std::vector<sp<RenderNode>>& nodes, bool opaque,
-                                   const Rect& contentDrawBounds, SkCanvas* canvas) {
+                                   const Rect& contentDrawBounds, SkCanvas* canvas,
+                                   const SkMatrix& preTransform) {
     SkAutoCanvasRestore saver(canvas, true);
-    canvas->androidFramework_setDeviceClipRestriction(clip.roundOut());
+    canvas->androidFramework_setDeviceClipRestriction(preTransform.mapRect(clip).roundOut());
+    canvas->concat(preTransform);
 
     // STOPSHIP: Revert, temporary workaround to clear always F16 frame buffer for b/74976293
     if (!opaque || getSurfaceColorType() == kRGBA_F16_SkColorType) {
@@ -486,7 +489,8 @@ static const uint32_t kOverdrawColors[2][6] = {
 
 void SkiaPipeline::renderOverdraw(const LayerUpdateQueue& layers, const SkRect& clip,
                                   const std::vector<sp<RenderNode>>& nodes,
-                                  const Rect& contentDrawBounds, sk_sp<SkSurface> surface) {
+                                  const Rect& contentDrawBounds, sk_sp<SkSurface> surface,
+                                  const SkMatrix& preTransform) {
     // Set up the overdraw canvas.
     SkImageInfo offscreenInfo = SkImageInfo::MakeA8(surface->width(), surface->height());
     sk_sp<SkSurface> offscreen = surface->makeSurface(offscreenInfo);
@@ -496,7 +500,7 @@ void SkiaPipeline::renderOverdraw(const LayerUpdateQueue& layers, const SkRect& 
     // each time a pixel would have been drawn.
     // Pass true for opaque so we skip the clear - the overdrawCanvas is already zero
     // initialized.
-    renderFrameImpl(layers, clip, nodes, true, contentDrawBounds, &overdrawCanvas);
+    renderFrameImpl(layers, clip, nodes, true, contentDrawBounds, &overdrawCanvas, preTransform);
     sk_sp<SkImage> counts = offscreen->makeImageSnapshot();
 
     // Draw overdraw colors to the canvas.  The color filter will convert counts to colors.
