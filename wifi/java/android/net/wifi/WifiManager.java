@@ -1176,7 +1176,9 @@ public class WifiManager {
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
-     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return an empty list.
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will return an empty list,
+     * except to callers with Carrier privilege which will receive a restricted list only
+     * containing configurations which they created.
      */
     @Deprecated
     @RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, ACCESS_WIFI_STATE})
