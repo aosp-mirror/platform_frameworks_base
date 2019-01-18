@@ -276,8 +276,9 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
     UidMap uidMap;
     SimpleAtomMatcher atomMatcher;
     atomMatcher.set_atom_id(tagId);
-    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
-        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
@@ -295,9 +296,8 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
             }));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      logEventMatcherIndex, eventMatcherWizard,
-                                      tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
-                                      pullerManager);
+                                      logEventMatcherIndex, eventMatcherWizard, tagId, -1, tagId,
+                                      bucketStartTimeNs, bucketStartTimeNs, pullerManager);
 
     vector<shared_ptr<LogEvent>> allData;
     shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);
@@ -332,6 +332,58 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
     EXPECT_EQ(2UL, gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
     EXPECT_EQ(3, gaugeProducer.mCurrentSlicedBucket->begin()
+                         ->second.front()
+                         .mFields->begin()
+                         ->mValue.int_value);
+}
+
+TEST(GaugeMetricProducerTest, TestPulledWithAppUpgradeDisabled) {
+    GaugeMetric metric;
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
+    metric.set_max_pull_delay_sec(INT_MAX);
+    metric.set_split_bucket_for_app_upgrade(false);
+    auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
+    gaugeFieldMatcher->set_field(tagId);
+    gaugeFieldMatcher->add_child()->set_field(2);
+
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
+        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, Pull(tagId, _)).WillOnce(Return(false));
+
+    GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard,
+                                      tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
+
+    vector<shared_ptr<LogEvent>> allData;
+    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);
+    event->write("some value");
+    event->write(1);
+    event->init();
+    allData.push_back(event);
+    gaugeProducer.onDataPulled(allData);
+    EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
+    EXPECT_EQ(1, gaugeProducer.mCurrentSlicedBucket->begin()
+                         ->second.front()
+                         .mFields->begin()
+                         ->mValue.int_value);
+
+    gaugeProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
+    EXPECT_EQ(0UL, gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(0L, gaugeProducer.mCurrentBucketNum);
+    EXPECT_EQ(bucketStartTimeNs, gaugeProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
+    EXPECT_EQ(1, gaugeProducer.mCurrentSlicedBucket->begin()
                          ->second.front()
                          .mFields->begin()
                          ->mValue.int_value);

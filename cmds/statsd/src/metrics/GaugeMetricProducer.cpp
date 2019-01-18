@@ -93,7 +93,8 @@ GaugeMetricProducer::GaugeMetricProducer(
                                           StatsdStats::kAtomDimensionKeySizeLimitMap.end()
                                   ? StatsdStats::kAtomDimensionKeySizeLimitMap.at(pullTagId).second
                                   : StatsdStats::kDimensionKeySizeHardLimit),
-      mGaugeAtomsPerDimensionLimit(metric.max_num_gauge_atoms_per_bucket()) {
+      mGaugeAtomsPerDimensionLimit(metric.max_num_gauge_atoms_per_bucket()),
+      mSplitBucketForAppUpgrade(metric.split_bucket_for_app_upgrade()) {
     mCurrentSlicedBucket = std::make_shared<DimToGaugeAtomsMap>();
     mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
     int64_t bucketSizeMills = 0;

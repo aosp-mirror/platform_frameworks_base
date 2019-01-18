@@ -105,7 +105,8 @@ ValueMetricProducer::ValueMetricProducer(
       mUseZeroDefaultBase(metric.use_zero_default_base()),
       mHasGlobalBase(false),
       mMaxPullDelayNs(metric.max_pull_delay_sec() > 0 ? metric.max_pull_delay_sec() * NS_PER_SEC
-                                                      : StatsdStats::kPullMaxDelayNs) {
+                                                      : StatsdStats::kPullMaxDelayNs),
+      mSplitBucketForAppUpgrade(metric.split_bucket_for_app_upgrade()) {
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
         bucketSizeMills = TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket());
