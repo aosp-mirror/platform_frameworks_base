@@ -45,6 +45,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Handler;
 import android.provider.Settings;
@@ -55,6 +56,8 @@ import android.testing.TestableLooper;
 import android.util.ArraySet;
 import android.view.View;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -92,6 +95,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     private NotificationGutsManager mGutsManager;
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
+    @Mock private MetricsLogger mMetricsLogger;
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationActivityStarter mNotificationActivityStarter;
     @Mock private NotificationStackScrollLayout mStackScroller;
@@ -105,6 +109,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);
+        mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mHandler = Handler.createAsync(mTestableLooper.getLooper());
 
         mHelper = new NotificationTestHelper(mContext);
@@ -141,7 +146,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(row.getWindowToken()).thenReturn(new Binder());
         when(row.getGuts()).thenReturn(guts);
 
-        mGutsManager.openGuts(row, 0, 0, menuItem);
+        assertTrue(mGutsManager.openGuts(row, 0, 0, menuItem));
         assertEquals(View.INVISIBLE, guts.getVisibility());
         mTestableLooper.processAllMessages();
         verify(guts).openControls(
@@ -189,7 +194,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(entry.getRow()).thenReturn(row);
         when(entry.getGuts()).thenReturn(guts);
 
-        mGutsManager.openGuts(row, 0, 0, menuItem);
+        assertTrue(mGutsManager.openGuts(row, 0, 0, menuItem));
         mTestableLooper.processAllMessages();
         verify(guts).openControls(
                 eq(true),
@@ -212,6 +217,34 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         // called again by mGutsManager.bindGuts(), in mGutsManager.onDensityOrFontScaleChanged()
         verify(row, times(2)).setGutsView(any());
+    }
+
+    @Test
+    public void testOpenGutsLogging() {
+        NotificationGutsManager gutsManager = spy(mGutsManager);
+        doReturn(true).when(gutsManager).bindGuts(any(), any());
+
+        NotificationGuts guts = spy(new NotificationGuts(mContext));
+        doReturn(true).when(guts).post(any());
+
+        ExpandableNotificationRow realRow = createTestNotificationRow();
+        NotificationMenuRowPlugin.MenuItem menuItem = createTestMenuItem(realRow);
+
+        ExpandableNotificationRow row = spy(realRow);
+        when(row.getWindowToken()).thenReturn(new Binder());
+        when(row.getGuts()).thenReturn(guts);
+        StatusBarNotification notification = spy(realRow.getStatusBarNotification());
+        when(row.getStatusBarNotification()).thenReturn(notification);
+
+        assertTrue(gutsManager.openGuts(row, 0, 0, menuItem));
+
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        verify(notification).getLogMaker();
+        verify(mMetricsLogger).write(logMakerCaptor.capture());
+        assertEquals(MetricsProto.MetricsEvent.ACTION_NOTE_CONTROLS,
+                logMakerCaptor.getValue().getCategory());
+        assertEquals(MetricsProto.MetricsEvent.TYPE_ACTION,
+                logMakerCaptor.getValue().getType());
     }
 
     @Test

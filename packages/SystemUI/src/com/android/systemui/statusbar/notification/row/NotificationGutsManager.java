@@ -25,6 +25,7 @@ import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -159,7 +160,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         return bindGuts(row, mGutsMenuItem);
     }
 
-    private boolean bindGuts(final ExpandableNotificationRow row,
+    @VisibleForTesting
+    protected boolean bindGuts(final ExpandableNotificationRow row,
             NotificationMenuRowPlugin.MenuItem item) {
         StatusBarNotification sbn = row.getStatusBarNotification();
 
@@ -389,7 +391,11 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             return false;
         }
 
-        mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_NOTE_CONTROLS);
+        LogMaker logMaker = (row.getStatusBarNotification() == null)
+                ? new LogMaker(MetricsProto.MetricsEvent.ACTION_NOTE_CONTROLS)
+                : row.getStatusBarNotification().getLogMaker();
+        mMetricsLogger.write(logMaker.setCategory(MetricsProto.MetricsEvent.ACTION_NOTE_CONTROLS)
+                    .setType(MetricsProto.MetricsEvent.TYPE_ACTION));
 
         // ensure that it's laid but not visible until actually laid out
         guts.setVisibility(View.INVISIBLE);
