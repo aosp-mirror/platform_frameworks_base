@@ -855,13 +855,9 @@ public class ResourcesImpl {
             try {
                 if (file.endsWith(".xml")) {
                     if (file.startsWith("res/color/")) {
-                        ColorStateList csl = loadColorStateList(wrapper, value, id, null);
-                        dr = (csl != null ? new ColorStateListDrawable(csl) : null);
+                        dr = loadColorOrXmlDrawable(wrapper, value, id, density, file);
                     } else {
-                        final XmlResourceParser rp = loadXmlResourceParser(
-                                file, id, value.assetCookie, "drawable");
-                        dr = Drawable.createFromXmlForDensity(wrapper, rp, density, null);
-                        rp.close();
+                        dr = loadXmlDrawable(wrapper, value, id, density, file);
                     }
                 } else {
                     final InputStream is = mAssets.openNonAsset(
@@ -913,6 +909,33 @@ public class ResourcesImpl {
         }
 
         return dr;
+    }
+
+    private Drawable loadColorOrXmlDrawable(@NonNull Resources wrapper, @NonNull TypedValue value,
+            int id, int density, String file) {
+        try {
+            ColorStateList csl = loadColorStateList(wrapper, value, id, null);
+            return new ColorStateListDrawable(csl);
+        } catch (NotFoundException originalException) {
+            // If we fail to load as color, try as normal XML drawable
+            try {
+                return loadXmlDrawable(wrapper, value, id, density, file);
+            } catch (Exception ignored) {
+                // If fallback also fails, throw the original exception
+                throw originalException;
+            }
+        }
+    }
+
+    private Drawable loadXmlDrawable(@NonNull Resources wrapper, @NonNull TypedValue value,
+            int id, int density, String file)
+            throws IOException, XmlPullParserException {
+        try (
+                XmlResourceParser rp =
+                        loadXmlResourceParser(file, id, value.assetCookie, "drawable")
+        ) {
+            return Drawable.createFromXmlForDensity(wrapper, rp, density, null);
+        }
     }
 
     /**
