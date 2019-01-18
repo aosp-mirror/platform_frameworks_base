@@ -16,6 +16,7 @@
 
 package com.android.systemui.bubbles;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
@@ -159,6 +160,12 @@ public class BubbleControllerTest extends SysuiTestCase {
         BubbleStackView stackView = mBubbleController.getStackView();
         stackView.expandStack();
         assertTrue(mBubbleController.isStackExpanded());
+
+        stackView.setExpandedBubble(mRow.getEntry());
+        assertEquals(stackView.getExpandedBubble().getEntry(), mRow.getEntry());
+
+        stackView.setExpandedBubble(mRow2.getEntry());
+        assertEquals(stackView.getExpandedBubble().getEntry(), mRow2.getEntry());
 
         mBubbleController.collapseStack();
         assertFalse(mBubbleController.isStackExpanded());
