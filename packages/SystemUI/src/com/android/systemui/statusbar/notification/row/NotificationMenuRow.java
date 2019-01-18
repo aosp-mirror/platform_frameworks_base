@@ -23,7 +23,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -250,12 +249,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         }
         mAppOpsItem = createAppOpsItem(mContext);
         if (NotificationUtils.useNewInterruptionModel(mContext)) {
-            int channelImportance = mParent.getEntry().channel.getImportance();
-            int effectiveImportance =
-                    channelImportance == NotificationManager.IMPORTANCE_UNSPECIFIED
-                            ? mParent.getEntry().importance : channelImportance;
-            mInfoItem = createInfoItem(mContext,
-                    effectiveImportance < NotificationManager.IMPORTANCE_DEFAULT);
+            mInfoItem = createInfoItem(mContext, !mParent.getEntry().isHighPriority());
         } else {
             mInfoItem = createInfoItem(mContext);
         }
