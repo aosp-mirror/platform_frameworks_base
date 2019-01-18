@@ -132,8 +132,11 @@ public final class OomAdjuster {
         mActiveUids = activeUids;
 
         mLocalPowerManager = LocalServices.getService(PowerManagerInternal.class);
-        mAppCompact = new AppCompactor(mService);
         mConstants = mService.mConstants;
+        // mConstants can be null under test, which causes AppCompactor to crash
+        if (mConstants != null) {
+            mAppCompact = new AppCompactor(mService);
+        }
     }
 
     /**
