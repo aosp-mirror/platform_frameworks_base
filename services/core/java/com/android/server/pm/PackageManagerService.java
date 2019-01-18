@@ -7872,8 +7872,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (apex != null) {
                     try {
                         final ApexInfo[] activePkgs = apex.getActivePackages();
-                        for (ApexInfo apexInfo : activePkgs) {
-                            list.add(new PackageInfo(apexInfo));
+                        for (ApexInfo ai : activePkgs) {
+                            try {
+                                 list.add(PackageParser.generatePackageInfoFromApex(
+                                         new File(ai.packagePath), true /* collect certs */));
+                            } catch (PackageParserException pe) {
+                                 throw new IllegalStateException("Unable to parse: " + ai, pe);
+                            }
                         }
                     } catch (RemoteException e) {
                         Log.e(TAG, "Unable to retrieve packages from apexservice: " + e.toString());
