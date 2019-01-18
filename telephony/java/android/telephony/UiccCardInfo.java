@@ -15,7 +15,6 @@
  */
 package android.telephony;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,10 +22,8 @@ import java.util.Objects;
 
 /**
  * The UiccCardInfo represents information about a currently inserted UICC or embedded eUICC.
- * @hide
  */
-@SystemApi
-public class UiccCardInfo implements Parcelable {
+public final class UiccCardInfo implements Parcelable {
 
     private final boolean mIsEuicc;
     private final int mCardId;
@@ -95,6 +92,9 @@ public class UiccCardInfo implements Parcelable {
     /**
      * Get the embedded ID (EID) of the eUICC. If the UiccCardInfo is not an eUICC
      * (see {@link #isEuicc()}), returns null.
+     * <p>
+     * Note that this field may be omitted if the caller does not have the correct permissions
+     * (see {@link TelephonyManager#getUiccCardsInfo()}).
      */
     public String getEid() {
         if (!mIsEuicc) {
@@ -105,6 +105,9 @@ public class UiccCardInfo implements Parcelable {
 
     /**
      * Get the ICCID of the UICC.
+     * <p>
+     * Note that this field may be omitted if the caller does not have the correct permissions
+     * (see {@link TelephonyManager#getUiccCardsInfo()}).
      */
     public String getIccId() {
         return mIccId;
@@ -115,6 +118,16 @@ public class UiccCardInfo implements Parcelable {
      */
     public int getSlotIndex() {
         return mSlotIndex;
+    }
+
+    /**
+     * Returns a copy of the UiccCardinfo with the clears the EID and ICCID set to null. These
+     * values are generally private and require carrier privileges to view.
+     *
+     * @hide
+     */
+    public UiccCardInfo getUnprivileged() {
+        return new UiccCardInfo(mIsEuicc, mCardId, null, null, mSlotIndex);
     }
 
     @Override
