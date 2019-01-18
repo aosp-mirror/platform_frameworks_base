@@ -209,6 +209,7 @@ message Atom {
         AdbConnectionChanged adb_connection_changed = 144;
         SpeechDspStatReported speech_dsp_stat_reported = 145;
         UsbContaminantReported usb_contaminant_reported = 146;
+        WatchdogRollbackOccurred watchdog_rollback_occurred = 147;
     }
 
     // Pulled events will start at field 10000.
@@ -1483,6 +1484,25 @@ message BluetoothLinkLayerConnectionEvent {
     // HCI reason code associated with this event
     // Default: STATUS_UNKNOWN
     optional android.bluetooth.hci.StatusEnum reason_code = 9;
+}
+
+/**
+ * Logs when a module is rolled back by Watchdog.
+ *
+ * Logged from: Rollback Manager
+ */
+message WatchdogRollbackOccurred {
+    enum RollbackType {
+        UNKNOWN = 0;
+        ROLLBACK_INITIATE = 1;
+        ROLLBACK_SUCCESS = 2;
+        ROLLBACK_FAILURE = 3;
+    }
+    optional RollbackType rollback_type = 1;
+
+    optional string package_name = 2;
+
+    optional int32 package_version_code = 3;
 }
 
 
