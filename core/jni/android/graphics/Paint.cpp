@@ -557,8 +557,9 @@ namespace PaintGlue {
         return result;
     }
 
-    // FIXME: Should this be FastNative?
-    static void setColorLong(JNIEnv* env, jobject clazz, jlong paintHandle, jobject jColorSpace,
+    // FIXME: Make this CriticalNative when we no longer need to use JNIEnv. b/122514935 will allow
+    // passing the SkColorSpace directly from JNI.
+    static void setColor(JNIEnv* env, jobject clazz, jlong paintHandle, jobject jColorSpace,
             jfloat r, jfloat g, jfloat b, jfloat a) {
         sk_sp<SkColorSpace> cs = GraphicsJNI::getNativeColorSpace(env, jColorSpace);
         if (GraphicsJNI::hasException(env)) {
@@ -569,9 +570,11 @@ namespace PaintGlue {
         reinterpret_cast<Paint*>(paintHandle)->setColor4f(color, cs.get());
     }
 
-    static void setShadowLayerLong(JNIEnv* env, jobject clazz, jlong paintHandle, jfloat radius,
-                                   jfloat dx, jfloat dy, jobject jColorSpace,
-                                   jfloat r, jfloat g, jfloat b, jfloat a) {
+    // FIXME: Make this CriticalNative when we no longer need to use JNIEnv. b/122514935 will allow
+    // passing the SkColorSpace directly from JNI.
+    static void setShadowLayer(JNIEnv* env, jobject clazz, jlong paintHandle, jfloat radius,
+                               jfloat dx, jfloat dy, jobject jColorSpace,
+                               jfloat r, jfloat g, jfloat b, jfloat a) {
         sk_sp<SkColorSpace> cs = GraphicsJNI::getNativeColorSpace(env, jColorSpace);
         if (GraphicsJNI::hasException(env)) {
             return;
@@ -782,22 +785,6 @@ namespace PaintGlue {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         Paint::Style style = static_cast<Paint::Style>(styleHandle);
         obj->setStyle(style);
-    }
-
-    static jint getColor(jlong paintHandle) {
-        int color;
-        color = reinterpret_cast<Paint*>(paintHandle)->getColor();
-        return static_cast<jint>(color);
-    }
-
-    static jint getAlpha(jlong paintHandle) {
-        int alpha;
-        alpha = reinterpret_cast<Paint*>(paintHandle)->getAlpha();
-        return static_cast<jint>(alpha);
-    }
-
-    static void setColor(jlong paintHandle, jint color) {
-        reinterpret_cast<Paint*>(paintHandle)->setColor(color);
     }
 
     static void setAlpha(jlong paintHandle, jint a) {
@@ -1047,18 +1034,6 @@ namespace PaintGlue {
         return SkScalarToFloat(Paint::kStdStrikeThru_Thickness * textSize);
     }
 
-    static void setShadowLayer(jlong paintHandle, jfloat radius,
-                               jfloat dx, jfloat dy, jint color) {
-        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        if (radius <= 0) {
-            paint->setLooper(nullptr);
-        }
-        else {
-            SkScalar sigma = android::uirenderer::Blur::convertRadiusToSigma(radius);
-            paint->setLooper(SkBlurDrawLooper::Make((SkColor)color, sigma, dx, dy));
-        }
-    }
-
     static jboolean hasShadowLayer(jlong paintHandle) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         return paint->getLooper() && paint->getLooper()->asABlurShadow(nullptr);
@@ -1107,9 +1082,9 @@ static const JNINativeMethod methods[] = {
     {"nGetRunAdvance", "(J[CIIIIZI)F", (void*) PaintGlue::getRunAdvance___CIIIIZI_F},
     {"nGetOffsetForAdvance", "(J[CIIIIZF)I",
             (void*) PaintGlue::getOffsetForAdvance___CIIIIZF_I},
-    {"nSetColor","(JLandroid/graphics/ColorSpace;FFFF)V", (void*) PaintGlue::setColorLong},
+    {"nSetColor","(JLandroid/graphics/ColorSpace;FFFF)V", (void*) PaintGlue::setColor},
     {"nSetShadowLayer", "(JFFFLandroid/graphics/ColorSpace;FFFF)V",
-            (void*)PaintGlue::setShadowLayerLong},
+            (void*)PaintGlue::setShadowLayer},
 
     // --------------- @FastNative ----------------------
 
@@ -1139,9 +1114,6 @@ static const JNINativeMethod methods[] = {
     {"nSetDither","(JZ)V", (void*) PaintGlue::setDither},
     {"nGetStyle","(J)I", (void*) PaintGlue::getStyle},
     {"nSetStyle","(JI)V", (void*) PaintGlue::setStyle},
-    {"nGetColor","(J)I", (void*) PaintGlue::getColor},
-    {"nSetColor","(JI)V", (void*) PaintGlue::setColor},
-    {"nGetAlpha","(J)I", (void*) PaintGlue::getAlpha},
     {"nSetAlpha","(JI)V", (void*) PaintGlue::setAlpha},
     {"nGetStrokeWidth","(J)F", (void*) PaintGlue::getStrokeWidth},
     {"nSetStrokeWidth","(JF)V", (void*) PaintGlue::setStrokeWidth},
@@ -1182,7 +1154,6 @@ static const JNINativeMethod methods[] = {
     {"nGetUnderlineThickness","(J)F", (void*) PaintGlue::getUnderlineThickness},
     {"nGetStrikeThruPosition","(J)F", (void*) PaintGlue::getStrikeThruPosition},
     {"nGetStrikeThruThickness","(J)F", (void*) PaintGlue::getStrikeThruThickness},
-    {"nSetShadowLayer", "(JFFFI)V", (void*)PaintGlue::setShadowLayer},
     {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer},
     {"nEqualsForTextMeasurement", "(JJ)Z", (void*)PaintGlue::equalsForTextMeasurement},
 };
