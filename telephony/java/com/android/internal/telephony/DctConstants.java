@@ -92,6 +92,7 @@ public class DctConstants {
     public static final int EVENT_DATA_RECONNECT = BASE + 47;
     public static final int EVENT_ROAMING_SETTING_CHANGE = BASE + 48;
     public static final int EVENT_DATA_SERVICE_BINDING_CHANGED = BASE + 49;
+    public static final int EVENT_DEVICE_PROVISIONED_CHANGE = BASE + 50;
 
     /***** Constants *****/
 
