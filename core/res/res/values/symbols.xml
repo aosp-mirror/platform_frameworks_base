@@ -3543,4 +3543,6 @@
 
   <java-symbol type="bool" name="config_skipSensorAvailable" />
   <java-symbol type="bool" name="config_silenceSensorAvailable" />
+
+  <java-symbol type="bool" name="config_zramWriteback" />
 </resources>

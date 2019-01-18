@@ -3735,4 +3735,7 @@
 
     <!-- If the sensor that silences alerts is available or not. -->
     <bool name="config_silenceSensorAvailable">false</bool>
+
+    <!-- Enable Zram writeback feature to allow unused pages in zram be written to flash. -->
+    <bool name="config_zramWriteback">false</bool>
 </resources>
