@@ -6820,6 +6820,10 @@ message MetricsEvent {
     // OS: Q
     MOBILE_NETWORK_LIST = 1627;
 
+    // OPEN: Settings > Display > Adaptive sleep
+    // OS: Q
+    SETTINGS_ADAPTIVE_SLEEP = 1628;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
