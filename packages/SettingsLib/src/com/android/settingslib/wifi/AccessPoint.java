@@ -622,7 +622,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                     .append(KEY_PREFIX_FQDN)
                     .append(config.FQDN).toString();
         } else {
-            return getKey(config.SSID, config.BSSID, getSecurity(config));
+            return getKey(removeDoubleQuotes(config.SSID), config.BSSID, getSecurity(config));
         }
     }
 
