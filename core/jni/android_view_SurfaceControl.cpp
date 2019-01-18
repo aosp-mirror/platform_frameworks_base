@@ -642,6 +642,27 @@ static jint nativeGetActiveColorMode(JNIEnv* env, jclass, jobject tokenObj) {
     return static_cast<jint>(SurfaceComposerClient::getActiveColorMode(token));
 }
 
+static jintArray nativeGetCompositionDataspaces(JNIEnv* env, jclass) {
+    ui::Dataspace defaultDataspace, wcgDataspace;
+    ui::PixelFormat defaultPixelFormat, wcgPixelFormat;
+    if (SurfaceComposerClient::getCompositionPreference(&defaultDataspace,
+                                                        &defaultPixelFormat,
+                                                        &wcgDataspace,
+                                                        &wcgPixelFormat) != NO_ERROR) {
+        return nullptr;
+    }
+    jintArray array = env->NewIntArray(2);
+    if (array == nullptr) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
+        return nullptr;
+    }
+    jint* arrayValues = env->GetIntArrayElements(array, 0);
+    arrayValues[0] = static_cast<jint>(defaultDataspace);
+    arrayValues[1] = static_cast<jint>(wcgDataspace);
+    env->ReleaseIntArrayElements(array, arrayValues, 0);
+    return array;
+}
+
 static jboolean nativeSetActiveColorMode(JNIEnv* env, jclass,
         jobject tokenObj, jint colorMode) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
@@ -1020,6 +1041,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetActiveColorMode},
     {"nativeSetActiveColorMode", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveColorMode},
+    {"nativeGetCompositionDataspaces", "()[I",
+            (void*)nativeGetCompositionDataspaces},
     {"nativeGetHdrCapabilities", "(Landroid/os/IBinder;)Landroid/view/Display$HdrCapabilities;",
             (void*)nativeGetHdrCapabilities },
     {"nativeClearContentFrameStats", "(J)Z",
