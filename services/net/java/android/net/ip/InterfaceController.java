@@ -19,7 +19,6 @@ package android.net.ip;
 import android.net.INetd;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
-import android.net.util.NetdService;
 import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
