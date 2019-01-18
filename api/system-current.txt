@@ -883,8 +883,8 @@ package android.app.contentsuggestions {
 
   public final class ClassificationsRequest implements android.os.Parcelable {
     method public int describeContents();
-    method public android.os.Bundle getExtras();
-    method public java.util.List<android.app.contentsuggestions.ContentSelection> getSelections();
+    method @Nullable public android.os.Bundle getExtras();
+    method @NonNull public java.util.List<android.app.contentsuggestions.ContentSelection> getSelections();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ClassificationsRequest> CREATOR;
   }
@@ -898,8 +898,8 @@ package android.app.contentsuggestions {
   public final class ContentClassification implements android.os.Parcelable {
     ctor public ContentClassification(@NonNull String, @NonNull android.os.Bundle);
     method public int describeContents();
-    method public android.os.Bundle getExtras();
-    method public String getId();
+    method @NonNull public android.os.Bundle getExtras();
+    method @NonNull public String getId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ContentClassification> CREATOR;
   }
@@ -907,8 +907,8 @@ package android.app.contentsuggestions {
   public final class ContentSelection implements android.os.Parcelable {
     ctor public ContentSelection(@NonNull String, @NonNull android.os.Bundle);
     method public int describeContents();
-    method public android.os.Bundle getExtras();
-    method public String getId();
+    method @NonNull public android.os.Bundle getExtras();
+    method @NonNull public String getId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ContentSelection> CREATOR;
   }
@@ -930,8 +930,8 @@ package android.app.contentsuggestions {
 
   public final class SelectionsRequest implements android.os.Parcelable {
     method public int describeContents();
-    method public android.os.Bundle getExtras();
-    method public android.graphics.Point getInterestPoint();
+    method @Nullable public android.os.Bundle getExtras();
+    method @Nullable public android.graphics.Point getInterestPoint();
     method public int getTaskId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.SelectionsRequest> CREATOR;

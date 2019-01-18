@@ -23,6 +23,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * Represents a suggested selection within a set of on screen content. The result of a
+ * {@link SelectionsRequest} to {@link ContentSuggestionsManager}.
+ *
  * @hide
  */
 @SystemApi
@@ -32,6 +35,12 @@ public final class ContentSelection implements Parcelable {
     @NonNull
     private final Bundle mExtras;
 
+    /**
+     * Default constructor.
+     *
+     * @param selectionId implementation specific id for the selection.
+     * @param extras containing the data that represents the selection.
+     */
     public ContentSelection(@NonNull String selectionId, @NonNull Bundle extras) {
         mSelectionId = selectionId;
         mExtras = extras;
@@ -40,14 +49,14 @@ public final class ContentSelection implements Parcelable {
     /**
      * Return the selection id.
      */
-    public String getId() {
+    public @NonNull String getId() {
         return mSelectionId;
     }
 
     /**
      * Return the selection extras.
      */
-    public Bundle getExtras() {
+    public @NonNull Bundle getExtras() {
         return mExtras;
     }
 
