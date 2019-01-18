@@ -439,10 +439,11 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.TEXT_SERVICES_MANAGER_SERVICE, TextServicesManager.class,
-                new StaticServiceFetcher<TextServicesManager>() {
+                new CachedServiceFetcher<TextServicesManager>() {
             @Override
-            public TextServicesManager createService() {
-                return TextServicesManager.getInstance();
+            public TextServicesManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                return TextServicesManager.createInstance(ctx);
             }});
 
         registerService(Context.KEYGUARD_SERVICE, KeyguardManager.class,
