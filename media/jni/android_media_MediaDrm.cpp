@@ -542,14 +542,15 @@ void JDrm::disconnect() {
 
 
 // static
-bool JDrm::IsCryptoSchemeSupported(const uint8_t uuid[16], const String8 &mimeType) {
+bool JDrm::IsCryptoSchemeSupported(const uint8_t uuid[16], const String8 &mimeType,
+                                   DrmPlugin::SecurityLevel securityLevel) {
     sp<IDrm> drm = MakeDrm();
 
     if (drm == NULL) {
         return false;
     }
 
-    return drm->isCryptoSchemeSupported(uuid, mimeType);
+    return drm->isCryptoSchemeSupported(uuid, mimeType, securityLevel);
 }
 
 status_t JDrm::initCheck() const {
@@ -930,8 +931,30 @@ static void android_media_MediaDrm_native_setup(
     setDrm(env, thiz, drm);
 }
 
+DrmPlugin::SecurityLevel jintToSecurityLevel(jint jlevel) {
+    DrmPlugin::SecurityLevel level;
+
+    if (jlevel == gSecurityLevels.kSecurityLevelMax) {
+        level = DrmPlugin::kSecurityLevelMax;
+    }  else if (jlevel == gSecurityLevels.kSecurityLevelSwSecureCrypto) {
+        level = DrmPlugin::kSecurityLevelSwSecureCrypto;
+    } else if (jlevel == gSecurityLevels.kSecurityLevelSwSecureDecode) {
+        level = DrmPlugin::kSecurityLevelSwSecureDecode;
+    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureCrypto) {
+        level = DrmPlugin::kSecurityLevelHwSecureCrypto;
+    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureDecode) {
+        level = DrmPlugin::kSecurityLevelHwSecureDecode;
+    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureAll) {
+        level = DrmPlugin::kSecurityLevelHwSecureAll;
+    } else {
+        level = DrmPlugin::kSecurityLevelUnknown;
+    }
+    return level;
+}
+
 static jboolean android_media_MediaDrm_isCryptoSchemeSupportedNative(
-    JNIEnv *env, jobject /* thiz */, jbyteArray uuidObj, jstring jmimeType) {
+        JNIEnv *env, jobject /* thiz */, jbyteArray uuidObj, jstring jmimeType,
+        jint jSecurityLevel) {
 
     if (uuidObj == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
@@ -952,8 +975,9 @@ static jboolean android_media_MediaDrm_isCryptoSchemeSupportedNative(
     if (jmimeType != NULL) {
         mimeType = JStringToString8(env, jmimeType);
     }
+    DrmPlugin::SecurityLevel securityLevel = jintToSecurityLevel(jSecurityLevel);
 
-    return JDrm::IsCryptoSchemeSupported(uuid.array(), mimeType);
+    return JDrm::IsCryptoSchemeSupported(uuid.array(), mimeType, securityLevel);
 }
 
 static jbyteArray android_media_MediaDrm_openSession(
@@ -965,21 +989,8 @@ static jbyteArray android_media_MediaDrm_openSession(
     }
 
     Vector<uint8_t> sessionId;
-    DrmPlugin::SecurityLevel level;
-
-    if (jlevel == gSecurityLevels.kSecurityLevelMax) {
-        level = DrmPlugin::kSecurityLevelMax;
-    }  else if (jlevel == gSecurityLevels.kSecurityLevelSwSecureCrypto) {
-        level = DrmPlugin::kSecurityLevelSwSecureCrypto;
-    } else if (jlevel == gSecurityLevels.kSecurityLevelSwSecureDecode) {
-        level = DrmPlugin::kSecurityLevelSwSecureDecode;
-    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureCrypto) {
-        level = DrmPlugin::kSecurityLevelHwSecureCrypto;
-    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureDecode) {
-        level = DrmPlugin::kSecurityLevelHwSecureDecode;
-    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureAll) {
-        level = DrmPlugin::kSecurityLevelHwSecureAll;
-    } else {
+    DrmPlugin::SecurityLevel level = jintToSecurityLevel(jlevel);
+    if (level == DrmPlugin::kSecurityLevelUnknown) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid security level");
         return NULL;
     }
@@ -1903,7 +1914,7 @@ static const JNINativeMethod gMethods[] = {
     { "native_setup", "(Ljava/lang/Object;[BLjava/lang/String;)V",
       (void *)android_media_MediaDrm_native_setup },
 
-    { "isCryptoSchemeSupportedNative", "([BLjava/lang/String;)Z",
+    { "isCryptoSchemeSupportedNative", "([BLjava/lang/String;I)Z",
       (void *)android_media_MediaDrm_isCryptoSchemeSupportedNative },
 
     { "openSession", "(I)[B",

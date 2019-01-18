@@ -176,7 +176,8 @@ public final class MediaDrm implements AutoCloseable {
      * @param uuid The UUID of the crypto scheme.
      */
     public static final boolean isCryptoSchemeSupported(@NonNull UUID uuid) {
-        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid), null);
+        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid), null,
+                SECURITY_LEVEL_UNKNOWN);
     }
 
     /**
@@ -189,7 +190,25 @@ public final class MediaDrm implements AutoCloseable {
      */
     public static final boolean isCryptoSchemeSupported(
             @NonNull UUID uuid, @NonNull String mimeType) {
-        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid), mimeType);
+        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid),
+                mimeType, SECURITY_LEVEL_UNKNOWN);
+    }
+
+    /**
+     * Query if the given scheme identified by its UUID is supported on
+     * this device, and whether the DRM plugin is able to handle the
+     * media container format specified by mimeType at the requested
+     * security level.
+     *
+     * @param uuid The UUID of the crypto scheme.
+     * @param mimeType The MIME type of the media container, e.g. "video/mp4"
+     *   or "video/webm"
+     * @param securityLevel the security level requested
+     */
+    public static final boolean isCryptoSchemeSupported(
+            @NonNull UUID uuid, @NonNull String mimeType, @SecurityLevel int securityLevel) {
+        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid), mimeType,
+                securityLevel);
     }
 
     private static final byte[] getByteArrayFromUUID(@NonNull UUID uuid) {
@@ -206,7 +225,7 @@ public final class MediaDrm implements AutoCloseable {
     }
 
     private static final native boolean isCryptoSchemeSupportedNative(
-            @NonNull byte[] uuid, @Nullable String mimeType);
+            @NonNull byte[] uuid, @Nullable String mimeType, @SecurityLevel int securityLevel);
 
     private EventHandler createHandler() {
         Looper looper;
