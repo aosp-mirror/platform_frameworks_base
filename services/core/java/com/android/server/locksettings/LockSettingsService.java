@@ -21,10 +21,10 @@ import static android.Manifest.permission.READ_CONTACTS;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
 import static com.android.internal.widget.LockPatternUtils.frpCredentialEnabled;
 import static com.android.internal.widget.LockPatternUtils.userOwnsFrpCredential;
@@ -81,9 +81,9 @@ import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.security.keystore.recovery.KeyChainProtectionParams;
+import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.RecoveryCertPath;
 import android.security.keystore.recovery.WrappedApplicationKey;
-import android.security.keystore.recovery.KeyChainSnapshot;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
@@ -109,9 +109,9 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
-import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationResult;
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationToken;
+import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 import com.android.server.wm.WindowManagerInternal;
 
 import libcore.util.HexEncoding;
@@ -130,8 +130,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -2103,8 +2103,21 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public @Nullable String importKey(@NonNull String alias, byte[] keyBytes) throws RemoteException {
+    public @Nullable String generateKeyWithMetadata(
+            @NonNull String alias, @Nullable byte[] metadata) throws RemoteException {
+        return mRecoverableKeyStoreManager.generateKeyWithMetadata(alias, metadata);
+    }
+
+    @Override
+    public @Nullable String importKey(@NonNull String alias, @NonNull byte[] keyBytes)
+            throws RemoteException {
         return mRecoverableKeyStoreManager.importKey(alias, keyBytes);
+    }
+
+    @Override
+    public @Nullable String importKeyWithMetadata(@NonNull String alias, @NonNull byte[] keyBytes,
+            @Nullable byte[] metadata) throws RemoteException {
+        return mRecoverableKeyStoreManager.importKeyWithMetadata(alias, keyBytes, metadata);
     }
 
     @Override

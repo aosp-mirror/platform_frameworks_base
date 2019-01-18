@@ -5421,7 +5421,8 @@ package android.security.keystore.recovery {
 
   public class RecoveryController {
     method public android.security.keystore.recovery.RecoverySession createRecoverySession();
-    method public java.security.Key generateKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
+    method public deprecated java.security.Key generateKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
+    method public java.security.Key generateKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
     method public java.util.List<java.lang.String> getAliases() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public static android.security.keystore.recovery.RecoveryController getInstance(android.content.Context);
     method public java.security.Key getKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException, java.security.UnrecoverableKeyException;
@@ -5429,7 +5430,8 @@ package android.security.keystore.recovery {
     method public int[] getRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public int getRecoveryStatus(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public java.util.Map<java.lang.String, java.security.cert.X509Certificate> getRootCertificates();
-    method public java.security.Key importKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
+    method public deprecated java.security.Key importKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
+    method public java.security.Key importKey(java.lang.String, byte[], byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
     method public void initRecoveryService(java.lang.String, byte[], byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
     method public static boolean isRecoverableKeyStoreEnabled(android.content.Context);
     method public void removeKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
@@ -5456,6 +5458,7 @@ package android.security.keystore.recovery {
     method public int describeContents();
     method public java.lang.String getAlias();
     method public byte[] getEncryptedKeyMaterial();
+    method public byte[] getMetadata();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.WrappedApplicationKey> CREATOR;
   }
@@ -5465,6 +5468,7 @@ package android.security.keystore.recovery {
     method public android.security.keystore.recovery.WrappedApplicationKey build();
     method public android.security.keystore.recovery.WrappedApplicationKey.Builder setAlias(java.lang.String);
     method public android.security.keystore.recovery.WrappedApplicationKey.Builder setEncryptedKeyMaterial(byte[]);
+    method public android.security.keystore.recovery.WrappedApplicationKey.Builder setMetadata(byte[]);
   }
 
 }

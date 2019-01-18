@@ -55,12 +55,15 @@ public class KeyChainSnapshotSerializerTest {
 
     private static final String TEST_KEY_1_ALIAS = "key1";
     private static final byte[] TEST_KEY_1_BYTES = new byte[] { 66, 77, 88 };
+    private static final byte[] TEST_KEY_1_METADATA = new byte[] { 89, 87 };
 
     private static final String TEST_KEY_2_ALIAS = "key2";
     private static final byte[] TEST_KEY_2_BYTES = new byte[] { 99, 33, 11 };
+    private static final byte[] TEST_KEY_2_METADATA = new byte[] {};
 
     private static final String TEST_KEY_3_ALIAS = "key3";
     private static final byte[] TEST_KEY_3_BYTES = new byte[] { 2, 8, 100 };
+    private static final byte[] TEST_KEY_3_METADATA = new byte[] { 121 };
 
     @Test
     public void roundTrip_persistsCounterId() throws Exception {
@@ -144,6 +147,17 @@ public class KeyChainSnapshotSerializerTest {
     }
 
     @Test
+    public void roundTripKeys_0_persistsKeyMetadata_absent() throws Exception {
+        assertThat(roundTripKeys(/*withKeyMetadata=*/ false).get(0).getMetadata()).isEqualTo(null);
+    }
+
+    @Test
+    public void roundTripKeys_0_persistsKeyMetadata_present() throws Exception {
+        assertThat(roundTripKeys(/*withKeyMetadata=*/ true).get(0).getMetadata())
+                .isEqualTo(TEST_KEY_1_METADATA);
+    }
+
+    @Test
     public void roundTripKeys_1_persistsAlias() throws Exception {
         assertThat(roundTripKeys().get(1).getAlias()).isEqualTo(TEST_KEY_2_ALIAS);
     }
@@ -151,6 +165,17 @@ public class KeyChainSnapshotSerializerTest {
     @Test
     public void roundTripKeys_1_persistsKeyBytes() throws Exception {
         assertThat(roundTripKeys().get(1).getEncryptedKeyMaterial()).isEqualTo(TEST_KEY_2_BYTES);
+    }
+
+    @Test
+    public void roundTripKeys_1_persistsKeyMetadata_absent() throws Exception {
+        assertThat(roundTripKeys(/*withKeyMetadata=*/ false).get(1).getMetadata()).isEqualTo(null);
+    }
+
+    @Test
+    public void roundTripKeys_1_persistsKeyMetadata_present() throws Exception {
+        assertThat(roundTripKeys(/*withKeyMetadata=*/ true).get(1).getMetadata())
+                .isEqualTo(TEST_KEY_2_METADATA);
     }
 
     @Test
@@ -164,28 +189,74 @@ public class KeyChainSnapshotSerializerTest {
     }
 
     @Test
-    public void serialize_doesNotThrowForTestSnapshot() throws Exception {
+    public void roundTripKeys_2_persistsKeyMetadata_absent() throws Exception {
+        assertThat(roundTripKeys(/*withKeyMetadata=*/ false).get(2).getMetadata()).isEqualTo(null);
+    }
+
+    @Test
+    public void roundTripKeys_2_persistsKeyMetadata_present() throws Exception {
+        assertThat(roundTripKeys(/*withKeyMetadata=*/ true).get(2).getMetadata())
+                .isEqualTo(TEST_KEY_3_METADATA);
+    }
+
+    @Test
+    public void serialize_doesNotThrowForTestSnapshotWithoutKeyMetadata() throws Exception {
         KeyChainSnapshotSerializer.serialize(
-                createTestKeyChainSnapshot(), new ByteArrayOutputStream());
+                createTestKeyChainSnapshot(/*withKeyMetadata=*/ false),
+                new ByteArrayOutputStream());
+    }
+
+    @Test
+    public void serialize_doesNotThrowForTestSnapshotWithKeyMetadata() throws Exception {
+        KeyChainSnapshotSerializer.serialize(
+                createTestKeyChainSnapshotWithKeyMetadata(), new ByteArrayOutputStream());
     }
 
     private static List<WrappedApplicationKey> roundTripKeys() throws Exception {
         return roundTrip().getWrappedApplicationKeys();
     }
 
+    private static List<WrappedApplicationKey> roundTripKeys(boolean withKeyMetadata)
+            throws Exception {
+        return roundTrip(withKeyMetadata).getWrappedApplicationKeys();
+    }
+
     private static KeyChainProtectionParams roundTripParams() throws Exception {
-        return roundTrip().getKeyChainProtectionParams().get(0);
+        return roundTrip(/*withKeyMetadata=*/ false).getKeyChainProtectionParams().get(0);
     }
 
     public static KeyChainSnapshot roundTrip() throws Exception {
-        KeyChainSnapshot snapshot = createTestKeyChainSnapshot();
+        return roundTrip(/*withKeyMetadata=*/ false);
+    }
+
+    public static KeyChainSnapshot roundTrip(boolean withKeyMetadata) throws Exception {
+        KeyChainSnapshot snapshot = createTestKeyChainSnapshot(withKeyMetadata);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         KeyChainSnapshotSerializer.serialize(snapshot, byteArrayOutputStream);
         return KeyChainSnapshotDeserializer.deserialize(
                 new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
     }
 
-    private static KeyChainSnapshot createTestKeyChainSnapshot() throws Exception {
+    private static KeyChainSnapshot createTestKeyChainSnapshot(boolean withKeyMetadata)
+            throws Exception {
+        KeyChainSnapshot.Builder builder = new KeyChainSnapshot.Builder()
+                .setCounterId(COUNTER_ID)
+                .setSnapshotVersion(SNAPSHOT_VERSION)
+                .setServerParams(SERVER_PARAMS)
+                .setMaxAttempts(MAX_ATTEMPTS)
+                .setEncryptedRecoveryKeyBlob(KEY_BLOB)
+                .setKeyChainProtectionParams(createKeyChainProtectionParamsList())
+                .setTrustedHardwareCertPath(CERT_PATH);
+        if (withKeyMetadata) {
+            builder.setWrappedApplicationKeys(createKeysWithMetadata());
+        } else {
+            builder.setWrappedApplicationKeys(createKeysWithoutMetadata());
+        }
+        return builder.build();
+    }
+
+    private static KeyChainSnapshot createTestKeyChainSnapshotWithKeyMetadata()
+            throws Exception {
         return new KeyChainSnapshot.Builder()
                 .setCounterId(COUNTER_ID)
                 .setSnapshotVersion(SNAPSHOT_VERSION)
@@ -193,16 +264,24 @@ public class KeyChainSnapshotSerializerTest {
                 .setMaxAttempts(MAX_ATTEMPTS)
                 .setEncryptedRecoveryKeyBlob(KEY_BLOB)
                 .setKeyChainProtectionParams(createKeyChainProtectionParamsList())
-                .setWrappedApplicationKeys(createKeys())
+                .setWrappedApplicationKeys(createKeysWithMetadata())
                 .setTrustedHardwareCertPath(CERT_PATH)
                 .build();
     }
 
-    private static List<WrappedApplicationKey> createKeys() {
+    private static List<WrappedApplicationKey> createKeysWithoutMetadata() {
         ArrayList<WrappedApplicationKey> keyList = new ArrayList<>();
-        keyList.add(createKey(TEST_KEY_1_ALIAS, TEST_KEY_1_BYTES));
-        keyList.add(createKey(TEST_KEY_2_ALIAS, TEST_KEY_2_BYTES));
-        keyList.add(createKey(TEST_KEY_3_ALIAS, TEST_KEY_3_BYTES));
+        keyList.add(createKey(TEST_KEY_1_ALIAS, TEST_KEY_1_BYTES, /*metadata=*/ null));
+        keyList.add(createKey(TEST_KEY_2_ALIAS, TEST_KEY_2_BYTES, /*metadata=*/ null));
+        keyList.add(createKey(TEST_KEY_3_ALIAS, TEST_KEY_3_BYTES, /*metadata=*/ null));
+        return keyList;
+    }
+
+    private static List<WrappedApplicationKey> createKeysWithMetadata() {
+        ArrayList<WrappedApplicationKey> keyList = new ArrayList<>();
+        keyList.add(createKey(TEST_KEY_1_ALIAS, TEST_KEY_1_BYTES, TEST_KEY_1_METADATA));
+        keyList.add(createKey(TEST_KEY_2_ALIAS, TEST_KEY_2_BYTES, TEST_KEY_2_METADATA));
+        keyList.add(createKey(TEST_KEY_3_ALIAS, TEST_KEY_3_BYTES, TEST_KEY_3_METADATA));
         return keyList;
     }
 
@@ -221,10 +300,13 @@ public class KeyChainSnapshotSerializerTest {
         return keyChainProtectionParamsList;
     }
 
-    private static WrappedApplicationKey createKey(String alias, byte[] bytes) {
-        return new WrappedApplicationKey.Builder()
+    private static WrappedApplicationKey createKey(String alias, byte[] bytes, byte[] metadata) {
+        WrappedApplicationKey.Builder builder = new WrappedApplicationKey.Builder()
                 .setAlias(alias)
-                .setEncryptedKeyMaterial(bytes)
-                .build();
+                .setEncryptedKeyMaterial(bytes);
+        if (metadata != null) {
+            builder.setMetadata(metadata);
+        }
+        return builder.build();
     }
 }
