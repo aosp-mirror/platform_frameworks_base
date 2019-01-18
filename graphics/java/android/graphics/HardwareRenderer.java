@@ -20,7 +20,6 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.os.IBinder;
@@ -28,13 +27,16 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.TimeUtils;
 import android.view.FrameMetricsObserver;
 import android.view.IGraphicsStats;
 import android.view.IGraphicsStatsCallback;
 import android.view.NativeVectorDrawableAnimator;
+import android.view.PixelCopy;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.TextureLayer;
+import android.view.animation.AnimationUtils;
 
 import com.android.internal.util.VirtualRefBasePtr;
 
@@ -42,6 +44,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 import sun.misc.Cleaner;
 
@@ -50,13 +53,8 @@ import sun.misc.Cleaner;
  * from {@link RenderNode}'s to an output {@link android.view.Surface}. There can be as many
  * HardwareRenderer instances as desired.</p>
  *
- * <h3>Threading</h3>
- * <p>HardwareRenderer is not thread safe. An instance of a HardwareRenderer must only be
- * created & used from a single thread. It does not matter what thread is used, however
- * it must have a {@link android.os.Looper}. Multiple instances do not have to share the same
- * thread, although they can.</p>
- *
  * <h3>Resources & lifecycle</h3>
+ *
  * <p>All HardwareRenderer instances share a common render thread. The render thread contains
  * the GPU context & resources necessary to do GPU-accelerated rendering. As such, the first
  * HardwareRenderer created comes with the cost of also creating the associated GPU contexts,
@@ -64,6 +62,7 @@ import sun.misc.Cleaner;
  * is to have a HardwareRenderer instance for every active {@link Surface}. For example
  * when an Activity shows a Dialog the system internally will use 2 hardware renderers, both
  * of which may be drawing at the same time.</p>
+ *
  * <p>NOTE: Due to the shared, cooperative nature of the render thread it is critical that
  * any {@link Surface} used must have a prompt, reliable consuming side. System-provided
  * consumers such as {@link android.view.SurfaceView},
@@ -73,8 +72,6 @@ import sun.misc.Cleaner;
  * it is the app's responsibility to ensure that they consume updates promptly and rapidly.
  * Failure to do so will cause the render thread to stall on that surface, blocking all
  * HardwareRenderer instances.</p>
- *
- * @hide
  */
 public class HardwareRenderer {
     private static final String LOG_TAG = "HardwareRenderer";
@@ -89,18 +86,18 @@ public class HardwareRenderer {
      * The renderer is requesting a redraw. This can occur if there's an animation that's running
      * in the RenderNode tree and the hardware renderer is unable to self-animate.
      *
-     * If this is returned from syncAndDrawFrame the expectation is that syncAndDrawFrame
+     * <p>If this is returned from syncAndDraw the expectation is that syncAndDraw
      * will be called again on the next vsync signal.
      */
     public static final int SYNC_REDRAW_REQUESTED = 1 << 0;
 
     /**
      * The hardware renderer no longer has a valid {@link android.view.Surface} to render to.
-     * This can happen if {@link Surface#destroy()} was called. The user should no longer
-     * attempt to call syncAndDrawFrame until a new surface has been provided by calling
+     * This can happen if {@link Surface#release()} was called. The user should no longer
+     * attempt to call syncAndDraw until a new surface has been provided by calling
      * setSurface.
      *
-     * Spoiler: the reward is GPU-accelerated drawing, better find that Surface!
+     * <p>Spoiler: the reward is GPU-accelerated drawing, better find that Surface!
      */
     public static final int SYNC_LOST_SURFACE_REWARD_IF_FOUND = 1 << 1;
 
@@ -119,6 +116,7 @@ public class HardwareRenderer {
      */
     public static final int SYNC_FRAME_DROPPED = 1 << 3;
 
+    /** @hide */
     @IntDef(value = {
             SYNC_OK, SYNC_REDRAW_REQUESTED, SYNC_LOST_SURFACE_REWARD_IF_FOUND,
             SYNC_CONTEXT_IS_STOPPED, SYNC_FRAME_DROPPED})
@@ -153,7 +151,6 @@ public class HardwareRenderer {
     protected RenderNode mRootNode;
     private boolean mOpaque = true;
     private boolean mForceDark = false;
-    private FrameInfo mScratchInfo;
     private boolean mIsWideGamut = false;
 
     /**
@@ -175,14 +172,14 @@ public class HardwareRenderer {
      * Destroys the rendering context of this HardwareRenderer. This destroys the resources
      * associated with this renderer and releases the currently set {@link Surface}.
      *
-     * The renderer may be restored from this state by setting a new {@link Surface}, setting
+     * <p>The renderer may be restored from this state by setting a new {@link Surface}, setting
      * new rendering content with {@link #setContentRoot(RenderNode)}, and resuming
-     * rendering with {@link #syncAndDrawFrame(long)}.
+     * rendering by issuing a new {@link FrameRenderRequest}.
      *
-     * It is suggested to call this in response to callbacks such as
+     * <p>It is suggested to call this in response to callbacks such as
      * {@link android.view.SurfaceHolder.Callback#surfaceDestroyed(SurfaceHolder)}.
      *
-     * Note that if there are any outstanding frame commit callbacks they may end up never being
+     * <p>Note that if there are any outstanding frame commit callbacks they may never being
      * invoked if the frame was deferred to a later vsync.
      */
     public void destroy() {
@@ -204,14 +201,14 @@ public class HardwareRenderer {
      * Sets the center of the light source. The light source point controls the directionality
      * and shape of shadows rendered by RenderNode Z & elevation.
      *
-     * The platform's recommendation is to set lightX to 'displayWidth / 2f - windowLeft', set
+     * <p>The platform's recommendation is to set lightX to 'displayWidth / 2f - windowLeft', set
      * lightY to 0 - windowTop, lightZ set to 600dp, and lightRadius to 800dp.
      *
-     * The light source should be setup both as part of initial configuration, and whenever
+     * <p>The light source should be setup both as part of initial configuration, and whenever
      * the window moves to ensure the light source stays anchored in display space instead
      * of in window space.
      *
-     * This must be set at least once along with {@link #setLightSourceAlpha(float, float)}
+     * <p>This must be set at least once along with {@link #setLightSourceAlpha(float, float)}
      * before shadows will work.
      *
      * @param lightX      The X position of the light source
@@ -233,10 +230,10 @@ public class HardwareRenderer {
      * Configures the ambient & spot shadow alphas. This is the alpha used when the shadow
      * has max alpha, and ramps down from the values provided to zero.
      *
-     * These values are typically provided by the current theme, see
+     * <p>These values are typically provided by the current theme, see
      * {@link android.R.attr#spotShadowAlpha} and {@link android.R.attr#ambientShadowAlpha}.
      *
-     * This must be set at least once along with
+     * <p>This must be set at least once along with
      * {@link #setLightSourceGeometry(float, float, float, float)} before shadows will work.
      *
      * @param ambientShadowAlpha The alpha for the ambient shadow. If unsure, a reasonable default
@@ -254,8 +251,8 @@ public class HardwareRenderer {
     /**
      * Sets the content root to render. It is not necessary to call this whenever the content
      * recording changes. Any mutations to the RenderNode content, or any of the RenderNode's
-     * contained within the content node, will be applied whenever {@link #syncAndDrawFrame(long)}
-     * is called.
+     * contained within the content node, will be applied whenever a new {@link FrameRenderRequest}
+     * is issued via {@link #createRenderRequest()} and {@link FrameRenderRequest#syncAndDraw()}.
      *
      * @param content The content to set as the root RenderNode. If null the content root is removed
      *                and the renderer will draw nothing.
@@ -295,6 +292,126 @@ public class HardwareRenderer {
     }
 
     /**
+     * Sets the parameters that can be used to control a render request for a
+     * {@link HardwareRenderer}. This is not thread-safe and must not be held on to for longer
+     * than a single frame request.
+     */
+    public final class FrameRenderRequest {
+        private FrameInfo mFrameInfo = new FrameInfo();
+        private boolean mWaitForPresent;
+
+        private FrameRenderRequest() { }
+
+        private void reset() {
+            mWaitForPresent = false;
+            // Default to the animation time which, if choreographer is in play, will default to the
+            // current vsync time. Otherwise it will be 'now'.
+            mRenderRequest.setVsyncTime(
+                    AnimationUtils.currentAnimationTimeMillis() * TimeUtils.NANOS_PER_MS);
+        }
+
+        /** @hide */
+        public void setFrameInfo(FrameInfo info) {
+            System.arraycopy(info.frameInfo, 0, mFrameInfo.frameInfo, 0, info.frameInfo.length);
+        }
+
+        /**
+         * Sets the vsync time that represents the start point of this frame. Typically this
+         * comes from {@link android.view.Choreographer.FrameCallback}. Other compatible time
+         * sources include {@link System#nanoTime()}, however if the result is being displayed
+         * on-screen then using {@link android.view.Choreographer} is strongly recommended to
+         * ensure smooth animations.
+         *
+         * <p>If the clock source is not from a CLOCK_MONOTONIC source then any animations driven
+         * directly by RenderThread will not be synchronized properly with the current frame.
+         *
+         * @param vsyncTime The vsync timestamp for this frame. The timestamp is in nanoseconds
+         *                  and should come from a CLOCK_MONOTONIC source.
+         *
+         * @return this instance
+         */
+        public FrameRenderRequest setVsyncTime(long vsyncTime) {
+            mFrameInfo.setVsync(vsyncTime, vsyncTime);
+            mFrameInfo.addFlags(FrameInfo.FLAG_SURFACE_CANVAS);
+            return this;
+        }
+
+        /**
+         * Adds a frame commit callback. This callback will be invoked when the current rendering
+         * content has been rendered into a frame and submitted to the swap chain. The frame may
+         * not currently be visible on the display when this is invoked, but it has been submitted.
+         * This callback is useful in combination with {@link PixelCopy} to capture the current
+         * rendered content of the UI reliably.
+         *
+         * @param executor The executor to run the callback on. It is strongly recommended that
+         *                 this executor post to a different thread, as the calling thread is
+         *                 highly sensitive to being blocked.
+         * @param frameCommitCallback The callback to invoke when the frame content has been drawn.
+         *                            Will be invoked on the given {@link Executor}.
+         *
+         * @return this instance
+         */
+        public FrameRenderRequest setFrameCommitCallback(@NonNull Executor executor,
+                @NonNull Runnable frameCommitCallback) {
+            setFrameCompleteCallback(frameNr -> executor.execute(frameCommitCallback));
+            return this;
+        }
+
+        /**
+         * Sets whether or not {@link #syncAndDraw()} should block until the frame has been
+         * presented. If this is true and {@link #syncAndDraw()} does not return
+         * {@link #SYNC_FRAME_DROPPED} or an error then when {@link #syncAndDraw()} has returned
+         * the frame has been submitted to the {@link Surface}. The default and typically
+         * recommended value is false, as blocking for present will prevent pipelining from
+         * happening, reducing overall throughput. This is useful for situations such as
+         * {@link SurfaceHolder.Callback2#surfaceRedrawNeeded(SurfaceHolder)} where it is desired
+         * to block until a frame has been presented to ensure first-frame consistency with
+         * other Surfaces.
+         *
+         * @param shouldWait If true the next call to {@link #syncAndDraw()} will block until
+         *                   completion.
+         * @return this instance
+         */
+        public FrameRenderRequest setWaitForPresent(boolean shouldWait) {
+            mWaitForPresent = shouldWait;
+            return this;
+        }
+
+        /**
+         * Syncs the RenderNode tree to the render thread and requests a frame to be drawn. This
+         * {@link FrameRenderRequest} instance should no longer be used after calling this method.
+         * The system internally may reuse instances of {@link FrameRenderRequest} to reduce
+         * allocation churn.
+         *
+         * @return The result of the sync operation. See {@link SyncAndDrawResult}.
+         */
+        @SyncAndDrawResult
+        public int syncAndDraw() {
+            int syncResult = syncAndDrawFrame(mFrameInfo);
+            if (mWaitForPresent && (syncResult & SYNC_FRAME_DROPPED) == 0) {
+                fence();
+            }
+            return syncResult;
+        }
+    }
+
+    private FrameRenderRequest mRenderRequest = new FrameRenderRequest();
+
+    /**
+     * Returns a {@link FrameRenderRequest} that can be used to render a new frame. This is used
+     * to synchronize the RenderNode content provided by {@link #setContentRoot(RenderNode)} with
+     * the RenderThread and then renders a single frame to the Surface set with
+     * {@link #setSurface(Surface)}.
+     *
+     * @return An instance of {@link FrameRenderRequest}. The instance may be reused for every
+     * frame, so the caller should not hold onto it for longer than a single render request.
+     */
+    public FrameRenderRequest createRenderRequest() {
+        mRenderRequest.reset();
+        return mRenderRequest;
+    }
+
+    /**
      * Syncs the RenderNode tree to the render thread and requests a frame to be drawn.
      *
      * @hide
@@ -305,54 +422,15 @@ public class HardwareRenderer {
     }
 
     /**
-     * Syncs the RenderNode tree to the render thread and requests a frame to be drawn.
-     *
-     * @param vsyncTime The vsync timestamp for this frame. Typically this comes from
-     *                  {@link android.view.Choreographer.FrameCallback}. Must be set and be valid
-     *                  as the renderer uses this time internally to drive animations.
-     * @return The result of the sync operation. See {@link SyncAndDrawResult}.
-     */
-    @SyncAndDrawResult
-    public int syncAndDrawFrame(long vsyncTime) {
-        if (mScratchInfo == null) {
-            mScratchInfo = new FrameInfo();
-        }
-        mScratchInfo.setVsync(vsyncTime, vsyncTime);
-        mScratchInfo.addFlags(FrameInfo.FLAG_SURFACE_CANVAS);
-        return syncAndDrawFrame(mScratchInfo);
-    }
-
-    /**
-     * Syncs the RenderNode tree to the render thread and requests a frame to be drawn.
-     * frameCommitCallback callback will be invoked when the current rendering content has been
-     * rendered into a frame and submitted to the swap chain.
-     *
-     * @param vsyncTime           The vsync timestamp for this frame. Typically this comes from
-     *                            {@link android.view.Choreographer.FrameCallback}. Must be set and
-     *                            be valid as the renderer uses this time internally to drive
-     *                            animations.
-     * @param frameCommitCallback The callback to invoke when the frame content has been drawn.
-     *                            Will be invoked on the current {@link android.os.Looper} thread.
-     * @return The result of the sync operation. See {@link SyncAndDrawResult}.
-     */
-    @SyncAndDrawResult
-    public int syncAndDrawFrame(long vsyncTime,
-            @Nullable Runnable frameCommitCallback) {
-        if (frameCommitCallback != null) {
-            setFrameCompleteCallback(frameNr -> frameCommitCallback.run());
-        }
-        return syncAndDrawFrame(vsyncTime);
-    }
-
-    /**
      * Suspends any current rendering into the surface but do not do any destruction. This
      * is useful to temporarily suspend using the active Surface in order to do any Surface
      * mutations necessary.
      *
-     * Any subsequent draws will override the pause, resuming normal operation.
+     * <p>Any subsequent draws will override the pause, resuming normal operation.
      *
      * @return true if there was an outstanding render request, false otherwise. If this is true
-     * the caller should ensure that {@link #syncAndDrawFrame(long)} is called at the soonest
+     * the caller should ensure that {@link #createRenderRequest()}
+     * and {@link FrameRenderRequest#syncAndDraw()} is called at the soonest
      * possible time to resume normal operation.
      *
      * TODO Should this be exposed? ViewRootImpl needs it because it destroys the old
@@ -367,14 +445,14 @@ public class HardwareRenderer {
 
     /**
      * Hard stops rendering into the surface. If the renderer is stopped it will
-     * block any attempt to render. Calls to {@link #syncAndDrawFrame(long)} will still
-     * sync over the latest rendering content, however they will not render and instead
+     * block any attempt to render. Calls to {@link FrameRenderRequest#syncAndDraw()} will
+     * still sync over the latest rendering content, however they will not render and instead
      * {@link #SYNC_CONTEXT_IS_STOPPED} will be returned.
      *
-     * If false is passed then rendering will resume as normal. Any pending rendering requests
+     * <p>If false is passed then rendering will resume as normal. Any pending rendering requests
      * will produce a new frame at the next vsync signal.
      *
-     * This is useful in combination with lifecycle events such as {@link Activity#onStop()}
+     * <p>This is useful in combination with lifecycle events such as {@link Activity#onStop()}
      * and {@link Activity#onStart()}.
      *
      * @param stopped true to stop all rendering, false to resume
@@ -384,24 +462,26 @@ public class HardwareRenderer {
     }
 
     /**
-     * Destroys all hardware rendering resources associated with the current rendering content.
+     * Destroys all the display lists associated with the current rendering content.
      * This includes releasing a reference to the current content root RenderNode. It will
      * therefore be necessary to call {@link #setContentRoot(RenderNode)} in order to resume
-     * rendering after calling this.
+     * rendering after calling this, along with re-recording the display lists for the
+     * RenderNode tree.
      *
-     * It is recommended, but not necessary, to use this in combination with lifecycle events
+     * <p>It is recommended, but not necessary, to use this in combination with lifecycle events
      * such as {@link Activity#onStop()} and {@link Activity#onStart()} or in response to
      * {@link android.content.ComponentCallbacks2#onTrimMemory(int)} signals such as
      * {@link android.content.ComponentCallbacks2#TRIM_MEMORY_UI_HIDDEN}
      *
      * See also {@link #setStopped(boolean)}
      */
-    public void destroyHardwareResources() {
+    public void clearContent() {
         nDestroyHardwareResources(mNativeProxy);
     }
 
     /**
      * Whether or not the force-dark feature should be used for this renderer.
+     * @hide
      */
     public boolean setForceDark(boolean enable) {
         if (mForceDark != enable) {
@@ -415,20 +495,24 @@ public class HardwareRenderer {
     /**
      * Allocate buffers ahead of time to avoid allocation delays during rendering.
      *
-     * Typically a Surface will allocate buffers lazily. This is usually fine and reduces the
+     * <p>Typically a Surface will allocate buffers lazily. This is usually fine and reduces the
      * memory usage of Surfaces that render rarely or never hit triple buffering. However
      * for UI it can result in a slight bit of jank on first launch. This hint will
      * tell the HardwareRenderer that now is a good time to allocate the 3 buffers
      * necessary for typical rendering.
      *
-     * Must be called after a {@link Surface} has been set.
+     * <p>Must be called after a {@link Surface} has been set.
+     *
+     * TODO: Figure out if we even need/want this. Should HWUI just be doing this in response
+     * to setSurface anyway? Vulkan swapchain makes this murky, so delay making it public
+     * @hide
      */
     public void allocateBuffers() {
         nAllocateBuffers(mNativeProxy);
     }
 
     /**
-     * Notifies the hardware renderer that a call to {@link #syncAndDrawFrame(long)} will
+     * Notifies the hardware renderer that a call to {@link FrameRenderRequest#syncAndDraw()} will
      * be coming soon. This is used to help schedule when RenderThread-driven animations will
      * happen as the renderer wants to avoid producing more than one frame per vsync signal.
      */
@@ -439,7 +523,7 @@ public class HardwareRenderer {
     /**
      * Change the HardwareRenderer's opacity. Will take effect on the next frame produced.
      *
-     * If the renderer is set to opaque it is the app's responsibility to ensure that the
+     * <p>If the renderer is set to opaque it is the app's responsibility to ensure that the
      * content renders to every pixel of the Surface, otherwise corruption may result. Note that
      * this includes ensuring that the first draw of any given pixel does not attempt to blend
      * against the destination. If this is false then the hardware renderer will clear to
@@ -527,7 +611,7 @@ public class HardwareRenderer {
     }
 
     /**
-     * Prevents any further drawing until {@link #syncAndDrawFrame(long)} is called.
+     * Prevents any further drawing until {@link FrameRenderRequest#syncAndDraw()} is called.
      * This is a signal that the contents of the RenderNode tree are no longer safe to play back.
      * In practice this usually means that there are Functor pointers in the
      * display list that are no longer valid.
@@ -718,10 +802,8 @@ public class HardwareRenderer {
      * Interface for listening to picture captures
      * @hide
      */
-    @TestApi
     public interface PictureCapturedCallback {
         /** @hide */
-        @TestApi
         void onPictureCaptured(Picture picture);
     }
 

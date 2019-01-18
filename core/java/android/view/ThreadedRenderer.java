@@ -453,7 +453,7 @@ public final class ThreadedRenderer extends HardwareRenderer {
      */
     void destroyHardwareResources(View view) {
         destroyResources(view);
-        destroyHardwareResources();
+        clearContent();
     }
 
     private static void destroyResources(View view) {
@@ -735,7 +735,9 @@ public final class ThreadedRenderer extends HardwareRenderer {
             if (callback != null) {
                 setFrameCallback(callback);
             }
-            syncAndDrawFrame(vsync);
+            createRenderRequest()
+                    .setVsyncTime(vsync)
+                    .syncAndDraw();
         }
     }
 }

@@ -25,6 +25,7 @@ import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
 import android.os.Build;
+import android.os.Handler;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.VirtualRefBasePtr;
@@ -84,6 +85,7 @@ public class RenderNodeAnimator extends Animator {
 
     private VirtualRefBasePtr mNativePtr;
 
+    private Handler mHandler;
     private RenderNode mTarget;
     private View mViewTarget;
     private int mRenderProperty = -1;
@@ -222,6 +224,9 @@ public class RenderNodeAnimator extends Animator {
     private void moveToRunningState() {
         mState = STATE_RUNNING;
         if (mNativePtr != null) {
+            if (mHandler == null) {
+                mHandler = new Handler();
+            }
             nStart(mNativePtr.get());
         }
         notifyStartListeners();
@@ -497,7 +502,7 @@ public class RenderNodeAnimator extends Animator {
     // Called by native
     @UnsupportedAppUsage
     private static void callOnFinished(RenderNodeAnimator animator) {
-        animator.onFinished();
+        animator.mHandler.post(animator::onFinished);
     }
 
     @Override
