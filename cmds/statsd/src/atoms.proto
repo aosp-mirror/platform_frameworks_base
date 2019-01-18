@@ -188,6 +188,9 @@ message Atom {
         BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event = 125;
         BluetoothAclConnectionStateChanged bluetooth_acl_connection_state_changed = 126;
         BluetoothScoConnectionStateChanged bluetooth_sco_connection_state_changed = 127;
+        AppDowngraded app_downgraded = 128;
+        AppOptimizedAfterDowngraded app_optimized_after_downgraded = 129;
+        LowStorageStateChanged low_storage_state_changed = 130;
     }
 
     // Pulled events will start at field 10000.
@@ -1784,6 +1787,47 @@ message ActivityForegroundStateChanged {
         FOREGROUND = 1;
     }
     optional State state = 4;
+}
+
+/**
+ * Logs when a volume entered low Storage state.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/storage/DeviceStorageMonitorService.java
+ */
+message LowStorageStateChanged {
+    // Volume that ran out of storage.
+    optional string volume_description = 1;
+
+    enum State {
+        UNKNOWN = 0;
+        OFF = 1;
+        ON = 2;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when an app is downgraded.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/pm/BackgroundDexOptService.java
+ */
+message AppDowngraded {
+    optional string package_name = 1;
+    // Size of the package (all data) before being downgraded.
+    optional int64 size_in_bytes_before = 2;
+    // Size of the package (all data) after being downgraded.
+    optional int64 size_in_bytes_after = 3;
+
+    optional bool aggressive = 4;
+}
+
+/**
+ * Logs when an app is optimized after being downgraded.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/pm/BackgroundDexOptService.java
+ */
+message AppOptimizedAfterDowngraded {
+    optional string package_name = 1;
 }
 
 /**
