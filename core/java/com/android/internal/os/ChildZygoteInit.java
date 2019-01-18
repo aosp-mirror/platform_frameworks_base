@@ -15,6 +15,7 @@
  */
 package com.android.internal.os;
 
+import android.os.Process;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -49,6 +50,22 @@ public class ChildZygoteInit {
         return null;
     }
 
+    static int parseIntFromArg(String[] argv, String desiredArg) {
+        int value = -1;
+        for (String arg : argv) {
+            if (arg.startsWith(desiredArg)) {
+                String valueStr = arg.substring(arg.indexOf('=') + 1);
+                try {
+                    value = Integer.parseInt(valueStr);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid int argument: "
+                            + valueStr, e);
+                }
+            }
+        }
+        return value;
+    }
+
     /**
      * Starts a ZygoteServer and listens for requests
      *
@@ -71,6 +88,27 @@ public class ChildZygoteInit {
         } catch (ErrnoException ex) {
             throw new RuntimeException("Failed to set PR_SET_NO_NEW_PRIVS", ex);
         }
+
+        int uidGidMin = parseIntFromArg(args, Zygote.CHILD_ZYGOTE_UID_RANGE_START);
+        int uidGidMax = parseIntFromArg(args, Zygote.CHILD_ZYGOTE_UID_RANGE_END);
+        if (uidGidMin == -1 || uidGidMax == -1) {
+            throw new RuntimeException("Couldn't parse UID range start/end");
+        }
+        if (uidGidMin > uidGidMax) {
+            throw new RuntimeException("Passed in UID range is invalid, min > max.");
+        }
+
+        // Verify the UIDs are in the isolated UID range, as that's the only thing that we should
+        // be forking right now
+        if (!Process.isIsolated(uidGidMin) || !Process.isIsolated(uidGidMax)) {
+            throw new RuntimeException("Passed in UID range does not map to isolated processes.");
+        }
+
+        /**
+         * Install a seccomp filter that ensure this Zygote can only setuid()/setgid()
+         * to the passed in range.
+         */
+        Zygote.nativeInstallSeccompUidGidFilter(uidGidMin, uidGidMax);
 
         final Runnable caller;
         try {

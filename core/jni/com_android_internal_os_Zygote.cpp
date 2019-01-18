@@ -313,7 +313,7 @@ static void PreApplicationInit() {
   mallopt(M_DECAY_TIME, 1);
 }
 
-static void SetUpSeccompFilter(uid_t uid) {
+static void SetUpSeccompFilter(uid_t uid, bool is_child_zygote) {
   if (!g_is_security_enforced) {
     ALOGI("seccomp disabled by setenforce 0");
     return;
@@ -321,7 +321,14 @@ static void SetUpSeccompFilter(uid_t uid) {
 
   // Apply system or app filter based on uid.
   if (uid >= AID_APP_START) {
-    set_app_seccomp_filter();
+    if (is_child_zygote) {
+      // set_app_zygote_seccomp_filter();
+      // TODO(b/111434506) install the filter; for now, install the app filter
+      // which is more restrictive.
+      set_app_seccomp_filter();
+    } else {
+      set_app_seccomp_filter();
+    }
   } else {
     set_system_seccomp_filter();
   }
@@ -1006,7 +1013,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   // alternative is to call prctl(PR_SET_NO_NEW_PRIVS, 1) afterward, but that
   // breaks SELinux domain transition (see b/71859146).  As the result,
   // privileged syscalls used below still need to be accessible in app process.
-  SetUpSeccompFilter(uid);
+  SetUpSeccompFilter(uid, is_child_zygote);
 
   if (setresuid(uid, uid, uid) == -1) {
     fail_fn(CREATE_ERROR("setresuid(%d) failed: %s", uid, strerror(errno)));
@@ -1305,6 +1312,23 @@ static void com_android_internal_os_Zygote_nativeUnmountStorageOnInit(JNIEnv* en
     UnmountTree("/storage");
 }
 
+static void com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter(
+        JNIEnv* env, jclass, jint uidGidMin, jint uidGidMax) {
+  if (!g_is_security_enforced) {
+    ALOGI("seccomp disabled by setenforce 0");
+    return;
+  }
+
+  // TODO(b/111434506) install the filter
+
+  /*
+  bool installed = install_setuidgid_seccomp_filter(uidGidMin, uidGidMax);
+  if (!installed) {
+      RuntimeAbort(env, __LINE__, "Could not install setuid/setgid seccomp filter.");
+  }
+  */
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeSecurityInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeSecurityInit },
@@ -1318,7 +1342,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeUnmountStorageOnInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit },
     { "nativePreApplicationInit", "()V",
-      (void *) com_android_internal_os_Zygote_nativePreApplicationInit }
+      (void *) com_android_internal_os_Zygote_nativePreApplicationInit },
+    { "nativeInstallSeccompUidGidFilter", "(II)V",
+      (void *) com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {

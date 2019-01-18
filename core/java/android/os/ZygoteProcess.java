@@ -809,6 +809,8 @@ public class ZygoteProcess {
      *                        may be different from <code>abi</code> in case the children
      *                        spawned from this Zygote only communicate using ABI-safe methods.
      * @param instructionSet null-ok the instruction set to use.
+     * @param uidRangeStart The first UID in the range the child zygote may setuid()/setgid() to
+     * @param uidRangeEnd The last UID in the range the child zygote may setuid()/setgid() to
      */
     public ChildZygoteProcess startChildZygote(final String processClass,
                                                final String niceName,
@@ -817,13 +819,17 @@ public class ZygoteProcess {
                                                String seInfo,
                                                String abi,
                                                String acceptedAbiList,
-                                               String instructionSet) {
+                                               String instructionSet,
+                                               int uidRangeStart,
+                                               int uidRangeEnd) {
         // Create an unguessable address in the global abstract namespace.
         final LocalSocketAddress serverAddress = new LocalSocketAddress(
                 processClass + "/" + UUID.randomUUID().toString());
 
         final String[] extraArgs = {Zygote.CHILD_ZYGOTE_SOCKET_NAME_ARG + serverAddress.getName(),
-                                    Zygote.CHILD_ZYGOTE_ABI_LIST_ARG + acceptedAbiList};
+                                    Zygote.CHILD_ZYGOTE_ABI_LIST_ARG + acceptedAbiList,
+                                    Zygote.CHILD_ZYGOTE_UID_RANGE_START + uidRangeStart,
+                                    Zygote.CHILD_ZYGOTE_UID_RANGE_END + uidRangeEnd};
 
         Process.ProcessStartResult result;
         try {
