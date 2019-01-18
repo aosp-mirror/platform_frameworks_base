@@ -42,6 +42,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
+import android.app.Person;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -1585,6 +1586,14 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         intent.setComponent(makeComponent(clazz));
         intent.replaceExtras(makeBundle(bundleKeysAndValues));
         return intent;
+    }
+
+    /**
+     * Make a Person.
+     */
+    protected Person makePerson(CharSequence name, String key, String uri) {
+        final Person.Builder builder = new Person.Builder();
+        return builder.setName(name).setKey(key).setUri(uri).build();
     }
 
     /**

@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
+import android.app.Person;
 import android.app.TaskStackBuilder;
 import android.content.ComponentName;
 import android.content.Context;
@@ -111,6 +112,9 @@ public final class ShortcutInfo implements Parcelable {
     public static final int FLAG_SHADOW = 1 << 12;
 
     /** @hide */
+    public static final int FLAG_LONG_LIVED = 1 << 13;
+
+    /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_DYNAMIC,
             FLAG_PINNED,
@@ -124,6 +128,8 @@ public final class ShortcutInfo implements Parcelable {
             FLAG_ADAPTIVE_BITMAP,
             FLAG_RETURNED_BY_SERVICE,
             FLAG_ICON_FILE_PENDING_SAVE,
+            FLAG_SHADOW,
+            FLAG_LONG_LIVED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutFlags {}
@@ -344,6 +350,9 @@ public final class ShortcutInfo implements Parcelable {
     @Nullable
     private PersistableBundle[] mIntentPersistableExtrases;
 
+    @Nullable
+    private Person[] mPersons;
+
     private int mRank;
 
     /**
@@ -399,6 +408,10 @@ public final class ShortcutInfo implements Parcelable {
         mCategories = cloneCategories(b.mCategories);
         mIntents = cloneIntents(b.mIntents);
         fixUpIntentExtras();
+        mPersons = clonePersons(b.mPersons);
+        if (b.mIsLongLived) {
+            setLongLived();
+        }
         mRank = b.mRank;
         mExtras = b.mExtras;
         updateTimestamp();
@@ -465,6 +478,20 @@ public final class ShortcutInfo implements Parcelable {
         return ret;
     }
 
+    private static Person[] clonePersons(Person[] persons) {
+        if (persons == null) {
+            return null;
+        }
+        final Person[] ret = new Person[persons.length];
+        for (int i = 0; i < ret.length; i++) {
+            if (persons[i] != null) {
+                // Don't need to keep the icon, remove it to save space
+                ret[i] = persons[i].toBuilder().setIcon(null).build();
+            }
+        }
+        return ret;
+    }
+
     /**
      * Throws if any of the mandatory fields is not set.
      *
@@ -511,6 +538,7 @@ public final class ShortcutInfo implements Parcelable {
             mDisabledMessage = source.mDisabledMessage;
             mDisabledMessageResId = source.mDisabledMessageResId;
             mCategories = cloneCategories(source.mCategories);
+            mPersons = clonePersons(source.mPersons);
             if ((cloneFlags & CLONE_REMOVE_INTENT) == 0) {
                 mIntents = cloneIntents(source.mIntents);
                 mIntentPersistableExtrases =
@@ -833,6 +861,9 @@ public final class ShortcutInfo implements Parcelable {
         if (source.mCategories != null) {
             mCategories = cloneCategories(source.mCategories);
         }
+        if (source.mPersons != null) {
+            mPersons = clonePersons(source.mPersons);
+        }
         if (source.mIntents != null) {
             mIntents = cloneIntents(source.mIntents);
             mIntentPersistableExtrases =
@@ -900,6 +931,10 @@ public final class ShortcutInfo implements Parcelable {
         private Set<String> mCategories;
 
         private Intent[] mIntents;
+
+        private Person[] mPersons;
+
+        private boolean mIsLongLived;
 
         private int mRank = RANK_NOT_SET;
 
@@ -1165,6 +1200,53 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
+         * Add a person that is relevant to this shortcut. Alternatively,
+         * {@link #setPersons(Person[])} can be used to add multiple persons to a shortcut.
+         *
+         * <p> This is an optional field, but the addition of person may cause this shortcut to
+         * appear more prominently in the user interface (e.g. ShareSheet).
+         *
+         * <p> A person should usually contain a uri in order to benefit from the ranking boost.
+         * However, even if no uri is provided, it's beneficial to provide people in the shortcut,
+         * such that listeners and voice only devices can announce and handle them properly.
+         *
+         * @see Person
+         * @see #setPersons(Person[])
+         */
+        @NonNull
+        public Builder setPerson(@NonNull Person person) {
+            return setPersons(new Person[]{person});
+        }
+
+        /**
+         * Sets multiple persons instead of a single person.
+         *
+         * @see Person
+         * @see #setPerson(Person)
+         */
+        @NonNull
+        public Builder setPersons(@NonNull Person[] persons) {
+            Preconditions.checkNotNull(persons, "persons cannot be null");
+            Preconditions.checkNotNull(persons.length, "persons cannot be empty");
+            for (Person person : persons) {
+                Preconditions.checkNotNull(person, "persons cannot contain null");
+            }
+            mPersons = clonePersons(persons);
+            return this;
+        }
+
+        /**
+         * Sets if a shortcut would be valid even if it has been unpublished/invisible by the app
+         * (as a dynamic or pinned shortcut). If it is long lived, it can be cached by various
+         * system services even after it has been unpublished as a dynamic shortcut.
+         */
+        @NonNull
+        public Builder setLongLived() {
+            mIsLongLived = true;
+            return this;
+        }
+
+        /**
          * "Rank" of a shortcut, which is a non-negative value that's used by the launcher app
          * to sort shortcuts.
          *
@@ -1395,6 +1477,16 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
+     * Return the Persons set with {@link Builder#setPersons(Person[])}.
+     *
+     * @hide
+     */
+    @Nullable
+    public Person[] getPersons() {
+        return clonePersons(mPersons);
+    }
+
+    /**
      * The extras in the intents.  We convert extras into {@link PersistableBundle} so we can
      * persist them.
      * @hide
@@ -1523,6 +1615,16 @@ public final class ShortcutInfo implements Parcelable {
     /** @hide */
     public void setReturnedByServer() {
         addFlags(FLAG_RETURNED_BY_SERVICE);
+    }
+
+    /** @hide */
+    public boolean isLongLived() {
+        return hasFlags(FLAG_LONG_LIVED);
+    }
+
+    /** @hide */
+    public void setLongLived() {
+        addFlags(FLAG_LONG_LIVED);
     }
 
     /** Return whether a shortcut is dynamic. */
@@ -1893,6 +1995,8 @@ public final class ShortcutInfo implements Parcelable {
                 mCategories.add(source.readString().intern());
             }
         }
+
+        mPersons = source.readParcelableArray(cl, Person.class);
     }
 
     @Override
@@ -1940,6 +2044,8 @@ public final class ShortcutInfo implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+
+        dest.writeParcelableArray(mPersons, flags);
     }
 
     public static final Creator<ShortcutInfo> CREATOR =
@@ -2040,6 +2146,9 @@ public final class ShortcutInfo implements Parcelable {
         if (isReturnedByServer()) {
             sb.append("Rets");
         }
+        if (isLongLived()) {
+            sb.append("Liv");
+        }
         sb.append("]");
 
         addIndentOrComma(sb, indent);
@@ -2091,6 +2200,11 @@ public final class ShortcutInfo implements Parcelable {
 
         sb.append("categories=");
         sb.append(mCategories);
+
+        addIndentOrComma(sb, indent);
+
+        sb.append("persons=");
+        sb.append(mPersons);
 
         addIndentOrComma(sb, indent);
 
