@@ -21,19 +21,24 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.LabeledIntent;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -75,6 +80,7 @@ import com.google.android.collect.Lists;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -91,6 +97,15 @@ public class ChooserActivity extends ResolverActivity {
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
     private static final boolean DEBUG = false;
+
+    /**
+     * If set to true, use ShortcutManager to retrieve the matching direct share targets, instead of
+     * binding to every ChooserTargetService implementation.
+     */
+    // TODO(b/121287573): Replace with a system flag (setprop?)
+    private static final boolean USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS = false;
+    // TODO(b/121287224): Re-evaluate this limit
+    private static final int SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
 
     private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
     private static final int WATCHDOG_TIMEOUT_MILLIS = 2000;
@@ -120,6 +135,7 @@ public class ChooserActivity extends ResolverActivity {
 
     private static final int CHOOSER_TARGET_SERVICE_RESULT = 1;
     private static final int CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT = 2;
+    private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT = 3;
 
     private final Handler mChooserHandler = new Handler() {
         @Override
@@ -154,6 +170,18 @@ public class ChooserActivity extends ResolverActivity {
                         Log.d(TAG, "CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT; unbinding services");
                     }
                     unbindRemainingServices();
+                    sendVoiceChoicesIfNeeded();
+                    mChooserListAdapter.setShowServiceTargets(true);
+                    break;
+
+                case SHORTCUT_MANAGER_SHARE_TARGET_RESULT:
+                    if (DEBUG) Log.d(TAG, "SHORTCUT_MANAGER_SHARE_TARGET_RESULT");
+                    if (isDestroyed()) break;
+                    final ServiceResultInfo resultInfo = (ServiceResultInfo) msg.obj;
+                    if (resultInfo.resultTargets != null) {
+                        mChooserListAdapter.addServiceResults(resultInfo.originalTarget,
+                                resultInfo.resultTargets);
+                    }
                     sendVoiceChoicesIfNeeded();
                     mChooserListAdapter.setShowServiceTargets(true);
                     break;
@@ -552,6 +580,94 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
+    private IntentFilter getTargetIntentFilter() {
+        try {
+            final Intent intent = getTargetIntent();
+            String dataString = intent.getDataString();
+            if (TextUtils.isEmpty(dataString)) {
+                dataString = intent.getType();
+            }
+            return new IntentFilter(intent.getAction(), dataString);
+        } catch (Exception e) {
+            Log.e(TAG, "failed to get target intent filter " + e);
+            return null;
+        }
+    }
+
+    private void queryDirectShareTargets(ChooserListAdapter adapter) {
+        final IntentFilter filter = getTargetIntentFilter();
+        if (filter == null) {
+            return;
+        }
+
+        // Need to keep the original DisplayResolveInfos to be able to reconstruct ServiceResultInfo
+        // and use the old code path. This Ugliness should go away when Sharesheet is refactored.
+        final List<DisplayResolveInfo> driList = new ArrayList<>();
+        int targetsToQuery = 0;
+        for (int i = 0, n = adapter.getDisplayResolveInfoCount(); i < n; i++) {
+            final DisplayResolveInfo dri = adapter.getDisplayResolveInfo(i);
+            if (adapter.getScore(dri) == 0) {
+                // A score of 0 means the app hasn't been used in some time;
+                // don't query it as it's not likely to be relevant.
+                continue;
+            }
+            driList.add(dri);
+            targetsToQuery++;
+            // TODO(b/121287224): Do we need this here? (similar to queryTargetServices)
+            if (targetsToQuery >= SHARE_TARGET_QUERY_PACKAGE_LIMIT) {
+                if (DEBUG) {
+                    Log.d(TAG, "queryTargets hit query target limit "
+                            + SHARE_TARGET_QUERY_PACKAGE_LIMIT);
+                }
+                break;
+            }
+        }
+
+        AsyncTask.execute(() -> {
+            ShortcutManager sm = (ShortcutManager) getSystemService(Context.SHORTCUT_SERVICE);
+            List<ShortcutManager.ShareShortcutInfo> resultList = sm.getShareTargets(filter);
+
+            // Match ShareShortcutInfos with DisplayResolveInfos to be able to use the old code path
+            // for direct share targets. After ShareSheet is refactored we should use the
+            // ShareShortcutInfos directly.
+            for (int i = 0; i < driList.size(); i++) {
+                List<ChooserTarget> chooserTargets = new ArrayList<>();
+                for (int j = 0; j < resultList.size(); j++) {
+                    if (driList.get(i).getResolvedComponentName().equals(
+                            resultList.get(j).getTargetComponent())) {
+                        chooserTargets.add(convertToChooserTarget(resultList.get(j)));
+                    }
+                }
+                if (chooserTargets.isEmpty()) {
+                    continue;
+                }
+
+                final Message msg = Message.obtain();
+                msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
+                msg.obj = new ServiceResultInfo(driList.get(i), chooserTargets, null);
+                mChooserHandler.sendMessage(msg);
+            }
+        });
+    }
+
+    private ChooserTarget convertToChooserTarget(ShortcutManager.ShareShortcutInfo shareShortcut) {
+        ShortcutInfo shortcutInfo = shareShortcut.getShortcutInfo();
+        Bundle extras = new Bundle();
+        extras.putString(Intent.EXTRA_SHORTCUT_ID, shortcutInfo.getId());
+        return new ChooserTarget(
+                // The name of this target.
+                shortcutInfo.getShortLabel(),
+                // Don't load the icon until it is selected to be shown
+                null,
+                // The ranking score for this target (0.0-1.0); the system will omit items with low
+                // scores when there are too many Direct Share items.
+                0.5f,
+                // The name of the component to be launched if this target is chosen.
+                shareShortcut.getTargetComponent().clone(),
+                // The extra values here will be merged into the Intent when this target is chosen.
+                extras);
+    }
+
     private String convertServiceName(String packageName, String serviceName) {
         if (TextUtils.isEmpty(serviceName)) {
             return null;
@@ -765,9 +881,8 @@ public class ChooserActivity extends ResolverActivity {
                     }
                 }
             }
-            final Icon icon = chooserTarget.getIcon();
-            // TODO do this in the background
-            mDisplayIcon = icon != null ? icon.loadDrawable(ChooserActivity.this) : null;
+            // TODO(b/121287224): do this in the background thread, and only for selected targets
+            mDisplayIcon = getChooserTargetIconDrawable(chooserTarget);
 
             if (sourceInfo != null) {
                 mBackupResolveInfo = null;
@@ -789,6 +904,39 @@ public class ChooserActivity extends ResolverActivity {
             mFillInIntent = fillInIntent;
             mFillInFlags = flags;
             mModifiedScore = other.mModifiedScore;
+        }
+
+        /**
+         * Since ShortcutInfos are returned by ShortcutManager, we can cache the shortcuts and skip
+         * the call to LauncherApps#getShortcuts(ShortcutQuery).
+         */
+        // TODO(121287224): Refactor code to apply the suggestion above
+        private Drawable getChooserTargetIconDrawable(ChooserTarget target) {
+            final Icon icon = target.getIcon();
+            if (icon != null) {
+                return icon.loadDrawable(ChooserActivity.this);
+            }
+            if (!USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS) {
+                return null;
+            }
+
+            Bundle extras = target.getIntentExtras();
+            if (extras == null || !extras.containsKey(Intent.EXTRA_SHORTCUT_ID)) {
+                return null;
+            }
+            CharSequence shortcutId = extras.getCharSequence(Intent.EXTRA_SHORTCUT_ID);
+            LauncherApps launcherApps = (LauncherApps) getSystemService(
+                    Context.LAUNCHER_APPS_SERVICE);
+            final LauncherApps.ShortcutQuery q = new LauncherApps.ShortcutQuery();
+            q.setPackage(target.getComponentName().getPackageName());
+            q.setShortcutIds(Arrays.asList(shortcutId.toString()));
+            q.setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC);
+            final List<ShortcutInfo> shortcuts = launcherApps.getShortcuts(q, getUser());
+            if (shortcuts != null && shortcuts.size() > 0) {
+                return launcherApps.getShortcutIconDrawable(shortcuts.get(0), 0);
+            }
+
+            return null;
         }
 
         public float getModifiedScore() {
@@ -1030,8 +1178,15 @@ public class ChooserActivity extends ResolverActivity {
                     mTargetsNeedPruning = true;
                 }
             }
-            if (DEBUG) Log.d(TAG, "List built querying services");
-            queryTargetServices(this);
+            if (USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS) {
+                if (DEBUG) {
+                    Log.d(TAG, "querying direct share targets from ShortcutManager");
+                }
+                queryDirectShareTargets(this);
+            } else {
+                if (DEBUG) Log.d(TAG, "List built querying services");
+                queryTargetServices(this);
+            }
         }
 
         @Override

@@ -33,6 +33,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -1952,6 +1953,17 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String EXTRA_LAUNCHER_EXTRAS = "android.intent.extra.LAUNCHER_EXTRAS";
+
+    /**
+     * Intent extra: ID of the shortcut used to send the share intent.
+     *
+     * @see ShortcutInfo#getId()
+     *
+     * <p>
+     * Type: String
+     * </p>
+     */
+    public static final String EXTRA_SHORTCUT_ID = "android.intent.extra.shortcut.ID";
 
     /**
      * Activity action: Launch UI to manage which apps have a given permission.
