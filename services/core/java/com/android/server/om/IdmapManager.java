@@ -24,11 +24,14 @@ import static com.android.server.om.OverlayManagerService.TAG;
 
 import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
 import android.os.IIdmap2;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Slog;
 
@@ -51,6 +54,13 @@ class IdmapManager {
     private final Installer mInstaller;
     private IIdmap2 mIdmap2Service;
 
+    private static final boolean VENDOR_IS_Q_OR_LATER;
+    static {
+        // STOPSHIP(b/119390857): Check api version once Q sdk version is finalized
+        final String value = SystemProperties.get("ro.vndk.version", "Q");
+        VENDOR_IS_Q_OR_LATER = value.equals("Q") || value.equals("q");
+    }
+
     IdmapManager(final Installer installer) {
         mInstaller = installer;
         if (FEATURE_FLAG_IDMAP2) {
@@ -69,10 +79,13 @@ class IdmapManager {
         final String overlayPath = overlayPackage.applicationInfo.getBaseCodePath();
         try {
             if (FEATURE_FLAG_IDMAP2) {
-                if (mIdmap2Service.verifyIdmap(overlayPath, userId)) {
+                int policies = determineFulfilledPolicies(overlayPackage);
+                boolean enforce = enforceOverlayable(overlayPackage);
+                if (mIdmap2Service.verifyIdmap(overlayPath, policies, enforce, userId)) {
                     return true;
                 }
-                return mIdmap2Service.createIdmap(targetPath, overlayPath, userId) != null;
+                return mIdmap2Service.createIdmap(targetPath, overlayPath, policies, enforce,
+                    userId) != null;
             } else {
                 mInstaller.idmap(targetPath, overlayPath, sharedGid);
                 return true;
@@ -155,5 +168,72 @@ class IdmapManager {
                 connectToIdmap2d();
             }, SECOND_IN_MILLIS);
         }
+    }
+
+    /**
+     * Checks if overlayable and policies should be enforced on the specified overlay for backwards
+     * compatibility with pre-Q overlays.
+     */
+    private boolean enforceOverlayable(@NonNull final PackageInfo overlayPackage) {
+        final ApplicationInfo ai = overlayPackage.applicationInfo;
+        if (ai.targetSdkVersion >= VERSION_CODES.Q) {
+            // Always enforce policies for overlays targeting Q+.
+            return true;
+        }
+
+        if (ai.isVendor() && !VENDOR_IS_Q_OR_LATER) {
+            // If the overlay is on a pre-Q vendor partition, do not enforce overlayable
+            // restrictions on this overlay because the pre-Q platform has no understanding of
+            // overlayable.
+            return false;
+        }
+
+        // Do not enforce overlayable restrictions on pre-Q overlays signed with the
+        // platform signature.
+        return !ai.isSignedWithPlatformKey();
+    }
+
+    /**
+     * Retrieves a bitmask for idmap2 that represents the policies the specified overlay fulfills.
+     * @throws SecurityException if the overlay is not allowed to overlay any resource
+     */
+    private int determineFulfilledPolicies(@NonNull final PackageInfo overlayPackage)
+            throws SecurityException {
+        final ApplicationInfo ai = overlayPackage.applicationInfo;
+        final boolean overlayIsQOrLater = ai.targetSdkVersion >= VERSION_CODES.Q;
+
+        int fulfilledPolicies = 0;
+
+        // TODO(b/119402606) : Add signature policy
+
+        // Vendor partition (/vendor)
+        if (ai.isVendor()) {
+            if (overlayIsQOrLater) {
+                fulfilledPolicies |= IIdmap2.POLICY_VENDOR_PARTITION;
+            } else if (VENDOR_IS_Q_OR_LATER) {
+                throw new SecurityException("Overlay must target Q sdk or higher");
+            }
+        }
+
+        // Product partition (/product)
+        if (ai.isProduct()) {
+            if (overlayIsQOrLater) {
+                fulfilledPolicies |= IIdmap2.POLICY_PRODUCT_PARTITION;
+            } else {
+                throw new SecurityException("Overlay must target Q sdk or higher");
+            }
+        }
+
+        // System partition (/system)
+        if (ai.isSystemApp()) {
+            if (overlayIsQOrLater) {
+                fulfilledPolicies |= IIdmap2.POLICY_SYSTEM_PARTITION;
+            } else {
+                throw new SecurityException("Overlay must target Q sdk or higher");
+            }
+        }
+
+        // All overlays can overlay resources with the public policy
+        return fulfilledPolicies | IIdmap2.POLICY_PUBLIC;
     }
 }

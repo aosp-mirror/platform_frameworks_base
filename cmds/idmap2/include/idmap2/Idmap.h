@@ -57,6 +57,8 @@
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
 
+#include "idmap2/Policies.h"
+
 namespace android::idmap2 {
 
 class Idmap;
@@ -233,11 +235,10 @@ class Idmap {
   // file is used; change this in the next version of idmap to use a named
   // package instead; also update FromApkAssets to take additional parameters:
   // the target and overlay package names
-  static std::unique_ptr<const Idmap> FromApkAssets(const std::string& target_apk_path,
-                                                    const ApkAssets& target_apk_assets,
-                                                    const std::string& overlay_apk_path,
-                                                    const ApkAssets& overlay_apk_assets,
-                                                    std::ostream& out_error);
+  static std::unique_ptr<const Idmap> FromApkAssets(
+      const std::string& target_apk_path, const ApkAssets& target_apk_assets,
+      const std::string& overlay_apk_path, const ApkAssets& overlay_apk_assets,
+      const PolicyBitmask& fulfilled_policies, bool enforce_overlayable, std::ostream& out_error);
 
   inline const std::unique_ptr<const IdmapHeader>& GetHeader() const {
     return header_;

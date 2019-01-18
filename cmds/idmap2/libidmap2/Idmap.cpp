@@ -274,11 +274,23 @@ std::unique_ptr<const Idmap> Idmap::FromBinaryStream(std::istream& stream,
   return std::move(idmap);
 }
 
-std::unique_ptr<const Idmap> Idmap::FromApkAssets(const std::string& target_apk_path,
-                                                  const ApkAssets& target_apk_assets,
-                                                  const std::string& overlay_apk_path,
-                                                  const ApkAssets& overlay_apk_assets,
-                                                  std::ostream& out_error) {
+bool CheckOverlayable(const LoadedPackage& target_package, PolicyBitmask fulfilled_polices,
+                      ResourceId resid) {
+  const OverlayableInfo* info = target_package.GetOverlayableInfo(resid);
+  if (info == nullptr) {
+    // If the resource does not have an overlayable definition, allow the resource to be overlaid.
+    // Once overlayable enforcement is turned on, this check will return false.
+    return true;
+  }
+
+  // Enforce policy restrictions if the resource is declared as overlayable.
+  return (info->policy_flags & fulfilled_polices) != 0;
+}
+
+std::unique_ptr<const Idmap> Idmap::FromApkAssets(
+    const std::string& target_apk_path, const ApkAssets& target_apk_assets,
+    const std::string& overlay_apk_path, const ApkAssets& overlay_apk_assets,
+    const PolicyBitmask& fulfilled_policies, bool enforce_overlayable, std::ostream& out_error) {
   AssetManager2 target_asset_manager;
   if (!target_asset_manager.SetApkAssets({&target_apk_assets}, true, false)) {
     out_error << "error: failed to create target asset manager" << std::endl;
@@ -380,6 +392,15 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(const std::string& target_apk_
     if (target_resid == 0) {
       continue;
     }
+
+    if (enforce_overlayable && !CheckOverlayable(*target_pkg, fulfilled_policies, target_resid)) {
+      // The resources must be defined as overlayable and the overlay must fulfill at least one
+      // policy enforced on the overlayable resource
+      LOG(WARNING) << "overlay \"" << overlay_apk_path << "\" is not allowed to overlay resource \""
+                   << full_name << "\"" << std::endl;
+      continue;
+    }
+
     matching_resources.Add(target_resid, overlay_resid);
   }
 
