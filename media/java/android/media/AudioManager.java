@@ -3802,6 +3802,12 @@ public class AudioManager {
     public static final int DEVICE_IN_HDMI =
                                     AudioSystem.DEVICE_IN_HDMI;
     /** @hide
+     * The audio input device code for HDMI ARC
+     */
+    public static final int DEVICE_IN_HDMI_ARC =
+                                    AudioSystem.DEVICE_IN_HDMI_ARC;
+
+    /** @hide
      * The audio input device code for telephony voice RX path
      */
     public static final int DEVICE_IN_TELEPHONY_RX =
