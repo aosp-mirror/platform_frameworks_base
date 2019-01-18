@@ -846,7 +846,16 @@ public class FileUtils {
         return contains(dir.getAbsolutePath(), file.getAbsolutePath());
     }
 
-    /** {@hide} */
+    /**
+     * Test if a file lives under the given directory, either as a direct child
+     * or a distant grandchild.
+     * <p>
+     * Both files <em>must</em> have been resolved using
+     * {@link File#getCanonicalFile()} to avoid symlink or path traversal
+     * attacks.
+     *
+     * @hide
+     */
     public static boolean contains(String dirPath, String filePath) {
         if (dirPath.equals(filePath)) {
             return true;
