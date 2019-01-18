@@ -16,6 +16,8 @@
 
 package com.android.server.textservices;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -513,8 +515,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     // TODO: Save SpellCheckerService by supported languages. Currently only one spell
     // checker is saved.
     @Override
-    public SpellCheckerInfo getCurrentSpellChecker(String locale) {
-        int userId = UserHandle.getCallingUserId();
+    public SpellCheckerInfo getCurrentSpellChecker(@UserIdInt int userId, String locale) {
+        verifyUser(userId);
         synchronized (mLock) {
             final TextServicesData tsd = getDataFromCallingUserIdLocked(userId);
             if (tsd == null) return null;
@@ -527,11 +529,12 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     // TODO: Save SpellCheckerSubtype by supported languages by looking at "locale".
     @Override
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
-            boolean allowImplicitlySelectedSubtype) {
+            @UserIdInt int userId, boolean allowImplicitlySelectedSubtype) {
+        verifyUser(userId);
+
         final int subtypeHashCode;
         final SpellCheckerInfo sci;
         final Locale systemLocale;
-        final int userId = UserHandle.getCallingUserId();
 
         synchronized (mLock) {
             final TextServicesData tsd = getDataFromCallingUserIdLocked(userId);
@@ -591,17 +594,17 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     @Override
-    public void getSpellCheckerService(String sciId, String locale,
+    public void getSpellCheckerService(@UserIdInt int userId, String sciId, String locale,
             ITextServicesSessionListener tsListener, ISpellCheckerSessionListener scListener,
             Bundle bundle) {
+        verifyUser(userId);
         if (TextUtils.isEmpty(sciId) || tsListener == null || scListener == null) {
             Slog.e(TAG, "getSpellCheckerService: Invalid input.");
             return;
         }
-        int callingUserId = UserHandle.getCallingUserId();
 
         synchronized (mLock) {
-            final TextServicesData tsd = getDataFromCallingUserIdLocked(callingUserId);
+            final TextServicesData tsd = getDataFromCallingUserIdLocked(userId);
             if (tsd == null) return;
 
             HashMap<String, SpellCheckerInfo> spellCheckerMap = tsd.mSpellCheckerMap;
@@ -634,8 +637,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     @Override
-    public boolean isSpellCheckerEnabled() {
-        int userId = UserHandle.getCallingUserId();
+    public boolean isSpellCheckerEnabled(@UserIdInt int userId) {
+        verifyUser(userId);
 
         synchronized (mLock) {
             final TextServicesData tsd = getDataFromCallingUserIdLocked(userId);
@@ -671,11 +674,11 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     @Override
-    public SpellCheckerInfo[] getEnabledSpellCheckers() {
-        int callingUserId = UserHandle.getCallingUserId();
+    public SpellCheckerInfo[] getEnabledSpellCheckers(@UserIdInt int userId) {
+        verifyUser(userId);
 
         synchronized (mLock) {
-            final TextServicesData tsd = getDataFromCallingUserIdLocked(callingUserId);
+            final TextServicesData tsd = getDataFromCallingUserIdLocked(userId);
             if (tsd == null) return null;
 
             ArrayList<SpellCheckerInfo> spellCheckerList = tsd.mSpellCheckerList;
@@ -691,11 +694,12 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     @Override
-    public void finishSpellCheckerService(ISpellCheckerSessionListener listener) {
+    public void finishSpellCheckerService(@UserIdInt int userId,
+            ISpellCheckerSessionListener listener) {
         if (DBG) {
             Slog.d(TAG, "FinishSpellCheckerService");
         }
-        int userId = UserHandle.getCallingUserId();
+        verifyUser(userId);
 
         synchronized (mLock) {
             final TextServicesData tsd = getDataFromCallingUserIdLocked(userId);
@@ -713,6 +717,15 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             for (int i = 0; i < removeSize; ++i) {
                 removeList.get(i).removeListener(listener);
             }
+        }
+    }
+
+    private void verifyUser(@UserIdInt int userId) {
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (userId != callingUserId) {
+            mContext.enforceCallingPermission(INTERACT_ACROSS_USERS_FULL,
+                    "Cross-user interaction requires INTERACT_ACROSS_USERS_FULL. userId=" + userId
+                            + " callingUserId=" + callingUserId);
         }
     }
 
