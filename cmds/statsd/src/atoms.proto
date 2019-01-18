@@ -3152,6 +3152,13 @@ message FlagFlipUpdateOccurred {
     optional int64 order_id = 2;
 }
 
+/**
+ * Potential experiment ids that goes with a train install.
+ */
+message TrainExperimentIds {
+    repeated int64 experiment_id = 1;
+}
+
 /*
  * Logs when a binary push state changes.
  * Logged by the installer via public api.
@@ -3178,8 +3185,14 @@ message BinaryPushStateChanged {
         INSTALL_FAILURE = 6;
         INSTALL_CANCELLED = 7;
         INSTALLER_ROLLBACK_REQUESTED = 8;
+        INSTALLER_ROLLBACK_SUCCESS = 9;
+        INSTALLER_ROLLBACK_FAILURE = 10;
     }
     optional State state = 6;
+    // Possible experiment ids for monitoring this push.
+    optional TrainExperimentIds experiment_ids = 7 [(log_mode) = MODE_BYTES];
+    // user id
+    optional int32 user_id = 8;
 }
 
 /** Represents USB port overheat event. */
@@ -5504,13 +5517,6 @@ message DeviceIdentifierAccessDenied {
 
     // True if the package is privileged.
     optional bool is_priv_app = 4;
-}
-
-/**
- * Potential experiment ids that goes with a train install.
- */
-message TrainExperimentIds {
-    repeated int64 experiment_id = 1;
 }
 
 /**

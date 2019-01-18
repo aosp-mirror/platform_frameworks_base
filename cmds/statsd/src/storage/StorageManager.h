@@ -29,12 +29,27 @@ namespace statsd {
 
 using android::util::ProtoOutputStream;
 
+struct TrainInfo {
+    int64_t trainVersionCode;
+    std::vector<uint8_t> experimentIds;
+};
+
 class StorageManager : public virtual RefBase {
 public:
     /**
      * Writes a given byte array as a file to the specified file path.
      */
     static void writeFile(const char* file, const void* buffer, int numBytes);
+
+    /**
+     * Writes train info.
+     */
+    static bool writeTrainInfo(int64_t trainVersionCode, const std::vector<uint8_t>& experimentIds);
+
+    /**
+     * Reads train info.
+     */
+    static bool readTrainInfo(TrainInfo& trainInfo);
 
     /**
      * Reads the file content to the buffer.
@@ -109,6 +124,8 @@ private:
      * Prints disk usage statistics about a directory related to statsd.
      */
     static void printDirStats(int out, const char* path);
+
+    static std::mutex sTrainInfoMutex;
 };
 
 }  // namespace statsd
