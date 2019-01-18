@@ -19,6 +19,7 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
+import android.apex.ApexSessionInfo;
 import android.apex.IApexService;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -138,7 +139,7 @@ public class StagingManager {
         return success;
     }
 
-    void preRebootVerification(@NonNull PackageInstallerSession session) {
+    private void preRebootVerification(@NonNull PackageInstallerSession session) {
         boolean success = true;
         if ((session.params.installFlags & PackageManager.INSTALL_APEX) != 0) {
 
@@ -170,6 +171,30 @@ public class StagingManager {
         }
     }
 
+    private void resumeSession(@NonNull PackageInstallerSession session) {
+        // Check with apexservice whether the apex
+        // packages have been activated.
+        final IApexService apex = IApexService.Stub.asInterface(
+                ServiceManager.getService("apexservice"));
+        ApexSessionInfo apexSessionInfo;
+        try {
+            apexSessionInfo = apex.getStagedSessionInfo(session.sessionId);
+        } catch (RemoteException re) {
+            Slog.e(TAG, "Unable to contact apexservice", re);
+            // TODO should we retry here? Mark the session as failed?
+            return;
+        }
+        if (apexSessionInfo.isActivationFailed || apexSessionInfo.isUnknown) {
+            session.setStagedSessionFailed(SessionInfo.ACTIVATION_FAILED);
+        }
+        if (apexSessionInfo.isActivated) {
+            session.setStagedSessionApplied();
+            // TODO(b/118865310) if multi-package proceed with the installation of APKs.
+        }
+        // TODO(b/118865310) if (apexSessionInfo.isVerified) { /* mark this as staged in apexd */ }
+        // In every other case apexd will retry to apply the session at next boot.
+    }
+
     void commitSession(@NonNull PackageInstallerSession session) {
         updateStoredSession(session);
         mBgHandler.post(() -> preRebootVerification(session));
@@ -190,8 +215,19 @@ public class StagingManager {
 
     void restoreSession(@NonNull PackageInstallerSession session) {
         updateStoredSession(session);
-        // TODO(b/118865310): This method is called when PackageInstaller is re-instantiated, e.g.
-        // at reboot. Staging manager should at this point recover state from apexd and decide what
-        // to do with the session.
+        // Check the state of the session and decide what to do next.
+        if (session.isStagedSessionFailed() || session.isStagedSessionApplied()) {
+            // Final states, nothing to do.
+            return;
+        }
+        if (!session.isStagedSessionReady()) {
+            // The framework got restarted before the pre-reboot verification could complete,
+            // restart the verification.
+            mBgHandler.post(() -> preRebootVerification(session));
+        } else {
+            // Session had already being marked ready. Start the checks to verify if there is any
+            // follow-up work.
+            mBgHandler.post(() -> resumeSession(session));
+        }
     }
 }
