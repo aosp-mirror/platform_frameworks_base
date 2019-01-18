@@ -111,6 +111,7 @@ static struct {
     jmethodID getKeyboardLayoutOverlay;
     jmethodID getDeviceAlias;
     jmethodID getTouchCalibrationForInputDevice;
+    jmethodID getContextForDisplay;
 } gServiceClassInfo;
 
 static struct {
@@ -260,17 +261,16 @@ public:
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
-    virtual void loadPointerIcon(SpriteIcon* icon);
-    virtual void loadPointerResources(PointerResources* outResources);
+    virtual void loadPointerIcon(SpriteIcon* icon, int32_t displayId);
+    virtual void loadPointerResources(PointerResources* outResources, int32_t displayId);
     virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
-            std::map<int32_t, PointerAnimation>* outAnimationResources);
+            std::map<int32_t, PointerAnimation>* outAnimationResources, int32_t displayId);
     virtual int32_t getDefaultPointerIconId();
     virtual int32_t getCustomPointerIconId();
 
 private:
     sp<InputManager> mInputManager;
 
-    jobject mContextObj;
     jobject mServiceObj;
     sp<Looper> mLooper;
 
@@ -329,7 +329,6 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         mLooper(looper), mInteractive(true) {
     JNIEnv* env = jniEnv();
 
-    mContextObj = env->NewGlobalRef(contextObj);
     mServiceObj = env->NewGlobalRef(serviceObj);
 
     {
@@ -351,7 +350,6 @@ NativeInputManager::NativeInputManager(jobject contextObj,
 NativeInputManager::~NativeInputManager() {
     JNIEnv* env = jniEnv();
 
-    env->DeleteGlobalRef(mContextObj);
     env->DeleteGlobalRef(mServiceObj);
 }
 
@@ -1202,19 +1200,22 @@ bool NativeInputManager::checkInjectEventsPermissionNonReentrant(
     return result;
 }
 
-void NativeInputManager::loadPointerIcon(SpriteIcon* icon) {
+void NativeInputManager::loadPointerIcon(SpriteIcon* icon, int32_t displayId) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
     ScopedLocalRef<jobject> pointerIconObj(env, env->CallObjectMethod(
-            mServiceObj, gServiceClassInfo.getPointerIcon));
+            mServiceObj, gServiceClassInfo.getPointerIcon, displayId));
     if (checkAndClearExceptionFromCallback(env, "getPointerIcon")) {
         return;
     }
 
+    ScopedLocalRef<jobject> displayContext(env, env->CallObjectMethod(
+            mServiceObj, gServiceClassInfo.getContextForDisplay, displayId));
+
     PointerIcon pointerIcon;
     status_t status = android_view_PointerIcon_load(env, pointerIconObj.get(),
-                                                    mContextObj, &pointerIcon);
+            displayContext.get(), &pointerIcon);
     if (!status && !pointerIcon.isNullIcon()) {
         *icon = SpriteIcon(pointerIcon.bitmap, pointerIcon.hotSpotX, pointerIcon.hotSpotY);
     } else {
@@ -1222,28 +1223,34 @@ void NativeInputManager::loadPointerIcon(SpriteIcon* icon) {
     }
 }
 
-void NativeInputManager::loadPointerResources(PointerResources* outResources) {
+void NativeInputManager::loadPointerResources(PointerResources* outResources, int32_t displayId) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
-    loadSystemIconAsSprite(env, mContextObj, POINTER_ICON_STYLE_SPOT_HOVER,
+    ScopedLocalRef<jobject> displayContext(env, env->CallObjectMethod(
+            mServiceObj, gServiceClassInfo.getContextForDisplay, displayId));
+
+    loadSystemIconAsSprite(env, displayContext.get(), POINTER_ICON_STYLE_SPOT_HOVER,
             &outResources->spotHover);
-    loadSystemIconAsSprite(env, mContextObj, POINTER_ICON_STYLE_SPOT_TOUCH,
+    loadSystemIconAsSprite(env, displayContext.get(), POINTER_ICON_STYLE_SPOT_TOUCH,
             &outResources->spotTouch);
-    loadSystemIconAsSprite(env, mContextObj, POINTER_ICON_STYLE_SPOT_ANCHOR,
+    loadSystemIconAsSprite(env, displayContext.get(), POINTER_ICON_STYLE_SPOT_ANCHOR,
             &outResources->spotAnchor);
 }
 
 void NativeInputManager::loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
-        std::map<int32_t, PointerAnimation>* outAnimationResources) {
+        std::map<int32_t, PointerAnimation>* outAnimationResources, int32_t displayId) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
+
+    ScopedLocalRef<jobject> displayContext(env, env->CallObjectMethod(
+            mServiceObj, gServiceClassInfo.getContextForDisplay, displayId));
 
     for (int iconId = POINTER_ICON_STYLE_CONTEXT_MENU; iconId <= POINTER_ICON_STYLE_GRABBING;
              ++iconId) {
         PointerIcon pointerIcon;
         loadSystemIconAsSpriteWithPointerIcon(
-                env, mContextObj, iconId, &pointerIcon, &((*outResources)[iconId]));
+                env, displayContext.get(), iconId, &pointerIcon, &((*outResources)[iconId]));
         if (!pointerIcon.bitmapFrames.empty()) {
             PointerAnimation& animationData = (*outAnimationResources)[iconId];
             size_t numFrames = pointerIcon.bitmapFrames.size() + 1;
@@ -1258,7 +1265,7 @@ void NativeInputManager::loadAdditionalMouseResources(std::map<int32_t, SpriteIc
             }
         }
     }
-    loadSystemIconAsSprite(env, mContextObj, POINTER_ICON_STYLE_NULL,
+    loadSystemIconAsSprite(env, displayContext.get(), POINTER_ICON_STYLE_NULL,
             &((*outResources)[POINTER_ICON_STYLE_NULL]));
 }
 
@@ -1819,7 +1826,7 @@ int register_android_server_InputManager(JNIEnv* env) {
             "getPointerLayer", "()I");
 
     GET_METHOD_ID(gServiceClassInfo.getPointerIcon, clazz,
-            "getPointerIcon", "()Landroid/view/PointerIcon;");
+            "getPointerIcon", "(I)Landroid/view/PointerIcon;");
 
     GET_METHOD_ID(gServiceClassInfo.getPointerDisplayId, clazz,
             "getPointerDisplayId", "()I");
@@ -1834,6 +1841,10 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.getTouchCalibrationForInputDevice, clazz,
             "getTouchCalibrationForInputDevice",
             "(Ljava/lang/String;I)Landroid/hardware/input/TouchCalibration;");
+
+    GET_METHOD_ID(gServiceClassInfo.getContextForDisplay, clazz,
+            "getContextForDisplay",
+            "(I)Landroid/content/Context;")
 
     // InputDevice
 

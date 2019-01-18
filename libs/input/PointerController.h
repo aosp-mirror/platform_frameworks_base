@@ -62,10 +62,10 @@ protected:
     virtual ~PointerControllerPolicyInterface() { }
 
 public:
-    virtual void loadPointerIcon(SpriteIcon* icon) = 0;
-    virtual void loadPointerResources(PointerResources* outResources) = 0;
+    virtual void loadPointerIcon(SpriteIcon* icon, int32_t displayId) = 0;
+    virtual void loadPointerResources(PointerResources* outResources, int32_t displayId) = 0;
     virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
-            std::map<int32_t, PointerAnimation>* outAnimationResources) = 0;
+            std::map<int32_t, PointerAnimation>* outAnimationResources, int32_t displayId) = 0;
     virtual int32_t getDefaultPointerIconId() = 0;
     virtual int32_t getCustomPointerIconId() = 0;
 };
