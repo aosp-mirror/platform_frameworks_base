@@ -14109,7 +14109,7 @@ public final class Settings {
          *     intervalMultiplier    (int)
          * </pre>
          *
-         * Ex: "enabled=true,baseIntervalMillis=1000,intervalMultiplier=10"
+         * Ex: "mode=HISTORICAL_MODE_ENABLED_ACTIVE,baseIntervalMillis=1000,intervalMultiplier=10"
          *
          * @see #APPOP_HISTORY_MODE
          * @see #APPOP_HISTORY_BASE_INTERVAL_MILLIS

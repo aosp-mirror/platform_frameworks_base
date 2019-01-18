@@ -1085,7 +1085,7 @@ final class HistoricalRegistry {
                 throws IOException, XmlPullParserException {
             final int op = XmlUtils.readIntAttribute(parser, ATTR_NAME);
             if (filterOpNames != null && !ArrayUtils.contains(filterOpNames,
-                    AppOpsManager.opToName(op))) {
+                    AppOpsManager.opToPublicName(op))) {
                 XmlUtils.skipCurrentTag(parser);
                 return null;
             }

@@ -1731,6 +1731,15 @@ public class AppOpsManager {
     }
 
     /**
+     * Retrieve a non-localized public name for the operation.
+     *
+     * @hide
+     */
+    public static @NonNull String opToPublicName(int op) {
+        return sOpToString[op];
+    }
+
+    /**
      * @hide
      */
     public static int strDebugOpToOp(String op) {
