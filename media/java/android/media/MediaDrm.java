@@ -1285,7 +1285,7 @@ public final class MediaDrm implements AutoCloseable {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HDCP_LEVEL_UNKNOWN, HDCP_NONE, HDCP_V1, HDCP_V2,
-                        HDCP_V2_1, HDCP_V2_2, HDCP_NO_DIGITAL_OUTPUT})
+                        HDCP_V2_1, HDCP_V2_2, HDCP_V2_3, HDCP_NO_DIGITAL_OUTPUT})
     public @interface HdcpLevel {}
 
 
@@ -1319,6 +1319,11 @@ public final class MediaDrm implements AutoCloseable {
      *  HDCP version 2.2 Type 1.
      */
     public static final int HDCP_V2_2 = 5;
+
+    /**
+     *  HDCP version 2.3 Type 1.
+     */
+    public static final int HDCP_V2_3 = 6;
 
     /**
      * No digital output, implicitly secure

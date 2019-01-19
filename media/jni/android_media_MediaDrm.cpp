@@ -159,6 +159,7 @@ struct HDCPLevels {
     jint kHdcpV2;
     jint kHdcpV2_1;
     jint kHdcpV2_2;
+    jint kHdcpV2_3;
     jint kHdcpNoOutput;
 } gHdcpLevels;
 
@@ -774,6 +775,8 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     gHdcpLevels.kHdcpV2_1 = env->GetStaticIntField(clazz, field);
     GET_STATIC_FIELD_ID(field, clazz, "HDCP_V2_2", "I");
     gHdcpLevels.kHdcpV2_2 = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "HDCP_V2_3", "I");
+    gHdcpLevels.kHdcpV2_3 = env->GetStaticIntField(clazz, field);
     GET_STATIC_FIELD_ID(field, clazz, "HDCP_NO_DIGITAL_OUTPUT", "I");
     gHdcpLevels.kHdcpNoOutput = env->GetStaticIntField(clazz, field);
 
@@ -1390,6 +1393,8 @@ static jint HdcpLevelTojint(DrmPlugin::HdcpLevel level) {
         return gHdcpLevels.kHdcpV2_1;
     case DrmPlugin::kHdcpV2_2:
         return gHdcpLevels.kHdcpV2_2;
+    case DrmPlugin::kHdcpV2_3:
+        return gHdcpLevels.kHdcpV2_3;
     case DrmPlugin::kHdcpNoOutput:
         return gHdcpLevels.kHdcpNoOutput;
     }
