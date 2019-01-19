@@ -485,6 +485,9 @@ message WifiLog {
 
   // Multiple lists of timestamped link layer stats with labels to represent whether wifi is usable
   repeated WifiUsabilityStats wifi_usability_stats_list = 126;
+
+  // Counts the occurrences of each Wifi usability score provided by external app
+  repeated WifiUsabilityScoreCount wifi_usability_score_count = 127;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -670,6 +673,15 @@ message WifiScoreCount {
   optional int32 count = 2;
 }
 
+// Counts the number of instances of a specific Wifi Usability Score
+message WifiUsabilityScoreCount {
+  // Wifi Usability Score
+  optional int32 score = 1;
+
+  // Number of Wifi score reports with this score
+  optional int32 count = 2;
+}
+
 // Number of occurrences of a specific link speed (Mbps)
 // and sum of rssi (dBm) and rssi^2 (dBm^2)
 message LinkSpeedCount {
@@ -826,6 +838,10 @@ message StaEvent {
 
     // Wifi is turned off
     TYPE_WIFI_DISABLED = 19;
+
+    // The NetworkAgent Wifi usability score has changed in a way that may
+    // impact connectivity
+    TYPE_WIFI_USABILITY_SCORE_BREACH = 20;
   }
 
   enum FrameworkDisconnectReason {
@@ -940,6 +956,9 @@ message StaEvent {
 
   // NetworkAgent score of connected wifi
   optional int32 last_score = 14 [default = -1];
+
+  // NetworkAgent Wifi usability score of connected wifi
+  optional int32 last_wifi_usability_score = 15 [default = -1];
 }
 
 // Wi-Fi Aware metrics
@@ -1653,6 +1672,10 @@ message WifiIsUnusableEvent {
 
   // Firmware alert code. Only valid when the event was triggered by a firmware alert, otherwise -1.
   optional int32 firmware_alert_code = 10 [default = -1];
+
+  // NetworkAgent wifi usability score of connected wifi.
+  // Defaults to -1 if the score was never set.
+  optional int32 last_wifi_usability_score = 11 [default = -1];
 }
 
 message PasspointProfileTypeCount {
@@ -1765,6 +1788,15 @@ message WifiUsabilityStatsEntry {
   // The total time spent on hotspot2.0 scans and GAS exchange in ms counted from the last radio
   // chip reset
   optional int64 total_hotspot_2_scan_time_ms = 16;
+
+  // Internal framework Wifi score
+  optional int32 wifi_score = 17;
+
+  // Wifi usability score provided by external system app
+  optional int32 wifi_usability_score = 18;
+
+  // Sequence number from external system app to framework
+  optional int32 seq_num_to_framework = 19;
 }
 
 message WifiUsabilityStats {
