@@ -6467,7 +6467,7 @@ package android.telephony {
   }
 
   public class UiccSlotInfo implements android.os.Parcelable {
-    ctor public UiccSlotInfo(boolean, boolean, String, int, int, boolean);
+    ctor @Deprecated public UiccSlotInfo(boolean, boolean, String, int, int, boolean);
     method public int describeContents();
     method public String getCardId();
     method public int getCardStateInfo();
@@ -6475,6 +6475,7 @@ package android.telephony {
     method public boolean getIsEuicc();
     method public boolean getIsExtendedApduSupported();
     method public int getLogicalSlotIdx();
+    method public boolean isRemovable();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CARD_STATE_INFO_ABSENT = 1; // 0x1
     field public static final int CARD_STATE_INFO_ERROR = 3; // 0x3

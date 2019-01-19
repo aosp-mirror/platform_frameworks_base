@@ -30,6 +30,7 @@ public final class UiccCardInfo implements Parcelable {
     private final String mEid;
     private final String mIccId;
     private final int mSlotIndex;
+    private final boolean mIsRemovable;
 
     public static final Creator<UiccCardInfo> CREATOR = new Creator<UiccCardInfo>() {
         @Override
@@ -49,6 +50,7 @@ public final class UiccCardInfo implements Parcelable {
         mEid = in.readString();
         mIccId = in.readString();
         mSlotIndex = in.readInt();
+        mIsRemovable = in.readByte() != 0;
     }
 
     @Override
@@ -58,6 +60,7 @@ public final class UiccCardInfo implements Parcelable {
         dest.writeString(mEid);
         dest.writeString(mIccId);
         dest.writeInt(mSlotIndex);
+        dest.writeByte((byte) (mIsRemovable ? 1 : 0));
     }
 
     @Override
@@ -65,16 +68,21 @@ public final class UiccCardInfo implements Parcelable {
         return 0;
     }
 
-    public UiccCardInfo(boolean isEuicc, int cardId, String eid, String iccId, int slotIndex) {
+    /**
+     * @hide
+     */
+    public UiccCardInfo(boolean isEuicc, int cardId, String eid, String iccId, int slotIndex,
+            boolean isRemovable) {
         this.mIsEuicc = isEuicc;
         this.mCardId = cardId;
         this.mEid = eid;
         this.mIccId = iccId;
         this.mSlotIndex = slotIndex;
+        this.mIsRemovable = isRemovable;
     }
 
     /**
-     * Return whether the UiccCardInfo is an eUICC.
+     * Return whether the UICC is an eUICC.
      * @return true if the UICC is an eUICC.
      */
     public boolean isEuicc() {
@@ -127,7 +135,17 @@ public final class UiccCardInfo implements Parcelable {
      * @hide
      */
     public UiccCardInfo getUnprivileged() {
-        return new UiccCardInfo(mIsEuicc, mCardId, null, null, mSlotIndex);
+        return new UiccCardInfo(mIsEuicc, mCardId, null, null, mSlotIndex, mIsRemovable);
+    }
+
+    /**
+     * Return whether the UICC or eUICC is removable.
+     * <p>
+     * UICCs are generally removable, but eUICCs may be removable or built in to the device.
+     * @return true if the UICC or eUICC is removable
+     */
+    public boolean isRemovable() {
+        return mIsRemovable;
     }
 
     @Override
@@ -144,12 +162,13 @@ public final class UiccCardInfo implements Parcelable {
                 && (mCardId == that.mCardId)
                 && (Objects.equals(mEid, that.mEid))
                 && (Objects.equals(mIccId, that.mIccId))
-                && (mSlotIndex == that.mSlotIndex));
+                && (mSlotIndex == that.mSlotIndex)
+                && (mIsRemovable == that.mIsRemovable));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mIsEuicc, mCardId, mEid, mIccId, mSlotIndex);
+        return Objects.hash(mIsEuicc, mCardId, mEid, mIccId, mSlotIndex, mIsRemovable);
     }
 
     @Override
@@ -164,6 +183,8 @@ public final class UiccCardInfo implements Parcelable {
                 + mIccId
                 + ", mSlotIndex="
                 + mSlotIndex
+                + ", mIsRemovable="
+                + mIsRemovable
                 + ")";
     }
 }
