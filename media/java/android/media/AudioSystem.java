@@ -140,6 +140,30 @@ public class AudioSystem
         }
     }
 
+    /* Formats for A2DP codecs, must match system/audio-base.h audio_format_t */
+    public static final int AUDIO_FORMAT_INVALID        = 0xFFFFFFFF;
+    public static final int AUDIO_FORMAT_DEFAULT        = 0;
+    public static final int AUDIO_FORMAT_AAC            = 0x04000000;
+    public static final int AUDIO_FORMAT_SBC            = 0x1F000000;
+    public static final int AUDIO_FORMAT_APTX           = 0x20000000;
+    public static final int AUDIO_FORMAT_APTX_HD        = 0x21000000;
+    public static final int AUDIO_FORMAT_LDAC           = 0x23000000;
+
+    /** converts audio format enum to string */
+    public static String audioFormatToString(int audioFormat) {
+        switch (audioFormat) {
+            case AUDIO_FORMAT_INVALID: return "AUDIO_FORMAT_INVALID";
+            case AUDIO_FORMAT_DEFAULT: return "AUDIO_FORMAT_DEFAULT";
+            case AUDIO_FORMAT_AAC: return "AUDIO_FORMAT_AAC";
+            case AUDIO_FORMAT_SBC: return "AUDIO_FORMAT_SBC";
+            case AUDIO_FORMAT_APTX: return "AUDIO_FORMAT_APTX";
+            case AUDIO_FORMAT_APTX_HD: return "AUDIO_FORMAT_APTX_HD";
+            case AUDIO_FORMAT_LDAC: return "AUDIO_FORMAT_LDAC";
+            default: return "unknown audio format (" + audioFormat + ")";
+        }
+    }
+
+
     /* Routing bits for the former setRouting/getRouting API */
     /** @deprecated */
     @Deprecated public static final int ROUTE_EARPIECE          = (1 << 0);
@@ -865,12 +889,14 @@ public class AudioSystem
      */
     @UnsupportedAppUsage
     public static native int setDeviceConnectionState(int device, int state,
-                                                      String device_address, String device_name);
+                                                      String device_address, String device_name,
+                                                      int codecFormat);
     @UnsupportedAppUsage
     public static native int getDeviceConnectionState(int device, String device_address);
     public static native int handleDeviceConfigChange(int device,
                                                       String device_address,
-                                                      String device_name);
+                                                      String device_name,
+                                                      int codecFormat);
     @UnsupportedAppUsage
     public static native int setPhoneState(int state);
     @UnsupportedAppUsage

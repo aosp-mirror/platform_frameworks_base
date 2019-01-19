@@ -487,7 +487,8 @@ android_media_AudioSystem_recording_callback(int event,
 }
 
 static jint
-android_media_AudioSystem_setDeviceConnectionState(JNIEnv *env, jobject thiz, jint device, jint state, jstring device_address, jstring device_name)
+android_media_AudioSystem_setDeviceConnectionState(JNIEnv *env, jobject thiz, jint device, jint state, jstring device_address, jstring device_name,
+                                                   jint codec __unused)
 {
     const char *c_address = env->GetStringUTFChars(device_address, NULL);
     const char *c_name = env->GetStringUTFChars(device_name, NULL);
@@ -510,7 +511,8 @@ android_media_AudioSystem_getDeviceConnectionState(JNIEnv *env, jobject thiz, ji
 }
 
 static jint
-android_media_AudioSystem_handleDeviceConfigChange(JNIEnv *env, jobject thiz, jint device, jstring device_address, jstring device_name)
+android_media_AudioSystem_handleDeviceConfigChange(JNIEnv *env, jobject thiz, jint device, jstring device_address, jstring device_name,
+                                                   jint codec __unused)
 {
     const char *c_address = env->GetStringUTFChars(device_address, NULL);
     const char *c_name = env->GetStringUTFChars(device_name, NULL);
@@ -2142,9 +2144,9 @@ static const JNINativeMethod gMethods[] = {
     {"isSourceActive",      "(I)Z",     (void *)android_media_AudioSystem_isSourceActive},
     {"newAudioSessionId",   "()I",      (void *)android_media_AudioSystem_newAudioSessionId},
     {"newAudioPlayerId",    "()I",      (void *)android_media_AudioSystem_newAudioPlayerId},
-    {"setDeviceConnectionState", "(IILjava/lang/String;Ljava/lang/String;)I", (void *)android_media_AudioSystem_setDeviceConnectionState},
+    {"setDeviceConnectionState", "(IILjava/lang/String;Ljava/lang/String;I)I", (void *)android_media_AudioSystem_setDeviceConnectionState},
     {"getDeviceConnectionState", "(ILjava/lang/String;)I",  (void *)android_media_AudioSystem_getDeviceConnectionState},
-    {"handleDeviceConfigChange", "(ILjava/lang/String;Ljava/lang/String;)I", (void *)android_media_AudioSystem_handleDeviceConfigChange},
+    {"handleDeviceConfigChange", "(ILjava/lang/String;Ljava/lang/String;I)I", (void *)android_media_AudioSystem_handleDeviceConfigChange},
     {"setPhoneState",       "(I)I",     (void *)android_media_AudioSystem_setPhoneState},
     {"setForceUse",         "(II)I",    (void *)android_media_AudioSystem_setForceUse},
     {"getForceUse",         "(I)I",     (void *)android_media_AudioSystem_getForceUse},
