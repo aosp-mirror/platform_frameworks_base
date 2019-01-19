@@ -142,7 +142,7 @@
     <string name="launch_defaults_none" msgid="4241129108140034876">"ਕੋਈ ਡਿਫੌਲਟਸ ਸੈਟ ਨਹੀਂ ਕੀਤੇ"</string>
     <string name="tts_settings" msgid="8186971894801348327">"ਲਿਖਤ ਤੋਂ ਬੋਲੀ ਸੈਟਿੰਗਾਂ"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"ਲਿਖਤ-ਤੋਂ-ਬੋਲੀ ਆਊਟਪੁੱਟ"</string>
-    <string name="tts_default_rate_title" msgid="6030550998379310088">"ਸਪੀਚ ਰੇਟ"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"ਬੋਲਣ ਦੀ ਗਤੀ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ਸਪੀਡ ਜਿਸਤੇ ਟੈਕਸਟ ਬੋਲਿਆ ਜਾਂਦਾ ਹੈ"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ਪਿਚ"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"ਬਣਾਵਟੀ ਬੋਲੀ ਦੇ ਲਹਿਜੇ \'ਤੇ ਅਸਰ ਪਾਉਂਦੀ ਹੈ"</string>

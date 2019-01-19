@@ -144,7 +144,7 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Spraakuitvoer"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Spreeksnelheid"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Snelheid waarmee de tekst wordt gesproken"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Hoogte"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Toonhoogte"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Is van invloed op de toon van de synthetisch gegenereerde spraak"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Taal"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Systeemtaal gebruiken"</string>
