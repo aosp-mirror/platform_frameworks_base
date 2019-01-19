@@ -34,6 +34,7 @@ import libcore.util.EmptyArray;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.function.Predicate;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -994,23 +995,33 @@ public class NetworkStats implements Parcelable {
         if (limitUid == UID_ALL && limitTag == TAG_ALL && limitIfaces == INTERFACES_ALL) {
             return;
         }
+        filter(e -> (limitUid == UID_ALL || limitUid == e.uid)
+            && (limitTag == TAG_ALL || limitTag == e.tag)
+            && (limitIfaces == INTERFACES_ALL
+                    || ArrayUtils.contains(limitIfaces, e.iface)));
+    }
 
+    /**
+     * Only keep entries with {@link #set} value less than {@link #SET_DEBUG_START}.
+     *
+     * <p>This mutates the original structure in place.
+     */
+    public void filterDebugEntries() {
+        filter(e -> e.set < SET_DEBUG_START);
+    }
+
+    private void filter(Predicate<Entry> predicate) {
         Entry entry = new Entry();
         int nextOutputEntry = 0;
         for (int i = 0; i < size; i++) {
             entry = getValues(i, entry);
-            final boolean matches =
-                    (limitUid == UID_ALL || limitUid == entry.uid)
-                    && (limitTag == TAG_ALL || limitTag == entry.tag)
-                    && (limitIfaces == INTERFACES_ALL
-                            || ArrayUtils.contains(limitIfaces, entry.iface));
-
-            if (matches) {
-                setValues(nextOutputEntry, entry);
+            if (predicate.test(entry)) {
+                if (nextOutputEntry != i) {
+                    setValues(nextOutputEntry, entry);
+                }
                 nextOutputEntry++;
             }
         }
-
         size = nextOutputEntry;
     }
 

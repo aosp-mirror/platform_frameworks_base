@@ -57,6 +57,7 @@ import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_PO
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -216,10 +217,15 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectSystemReady();
 
+        assertNull(mService.getTunAdjustedStats());
         mService.systemReady();
+        // Verify that system ready fetches realtime stats and initializes tun adjusted stats.
+        verify(mNetManager).getNetworkStatsUidDetail(UID_ALL, INTERFACES_ALL);
+        assertNotNull("failed to initialize TUN adjusted stats", mService.getTunAdjustedStats());
+        assertEquals(0, mService.getTunAdjustedStats().size());
+
         mSession = mService.openSession();
         assertNotNull("openSession() failed", mSession);
-
 
         // catch INetworkManagementEventObserver during systemReady()
         ArgumentCaptor<INetworkManagementEventObserver> networkObserver =
@@ -733,11 +739,13 @@ public class NetworkStatsServiceTest {
 
         NetworkStats stats = mService.getDetailedUidStats(ifaceFilter);
 
-        verify(mNetManager, times(1)).getNetworkStatsUidDetail(eq(UID_ALL), argThat(ifaces ->
-                ifaces != null && ifaces.length == 2
-                        && ArrayUtils.contains(ifaces, TEST_IFACE)
-                        && ArrayUtils.contains(ifaces, stackedIface)));
-
+        // mNetManager#getNetworkStatsUidDetail(UID_ALL, INTERFACES_ALL) has following invocations:
+        // 1) NetworkStatsService#systemReady from #setUp.
+        // 2) mService#forceUpdateIfaces in the test above.
+        // 3) Finally, mService#getDetailedUidStats.
+        verify(mNetManager, times(3)).getNetworkStatsUidDetail(UID_ALL, INTERFACES_ALL);
+        assertTrue(ArrayUtils.contains(stats.getUniqueIfaces(), TEST_IFACE));
+        assertTrue(ArrayUtils.contains(stats.getUniqueIfaces(), stackedIface));
         assertEquals(2, stats.size());
         assertEquals(uidStats, stats.getValues(0, null));
         assertEquals(tetheredStats1, stats.getValues(1, null));
@@ -1155,6 +1163,134 @@ public class NetworkStatsServiceTest {
         assertUidTotal(sTemplateWifi, UID_VPN, 0L, 0L, 0L, 0L, 0);
         assertUidTotal(buildTemplateMobileWildcard(), UID_RED, 0L, 0L, 0L, 0L, 0);
         assertUidTotal(buildTemplateMobileWildcard(), UID_VPN, 1100L, 100L, 1100L, 100L, 1);
+    }
+
+    @Test
+    public void recordSnapshot_migratesTunTrafficAndUpdatesTunAdjustedStats() throws Exception {
+        assertEquals(0, mService.getTunAdjustedStats().size());
+        // VPN using WiFi (TEST_IFACE).
+        VpnInfo[] vpnInfos = new VpnInfo[] {createVpnInfo(new String[] {TEST_IFACE})};
+        expectBandwidthControlCheck();
+        // create some traffic (assume 10 bytes of MTU for VPN interface and 1 byte encryption
+        // overhead per packet):
+        // 1000 bytes (100 packets) were downloaded by UID_RED over VPN.
+        // VPN received 1100 bytes (100 packets) over WiFi.
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 2)
+              .addValues(TUN_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1000L, 100L, 0L, 0L, 0L)
+              .addValues(TEST_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 1100L, 100L, 0L, 0L, 0L));
+
+        // this should lead to NSS#recordSnapshotLocked
+        mService.forceUpdateIfaces(
+                new Network[0], vpnInfos, new NetworkState[0], null /* activeIface */);
+
+        // Verify TUN adjusted stats have traffic migrated correctly.
+        // Of 1100 bytes VPN received over WiFi, expect 1000 bytes attributed to UID_RED and 100
+        // bytes attributed to UID_VPN.
+        NetworkStats tunAdjStats = mService.getTunAdjustedStats();
+        assertValues(
+                tunAdjStats, TEST_IFACE, UID_RED, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 1000L, 100L, 0L, 0L, 0);
+        assertValues(
+                tunAdjStats, TEST_IFACE, UID_VPN, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 100L, 0L, 0L, 0L, 0);
+    }
+
+    @Test
+    public void getDetailedUidStats_migratesTunTrafficAndUpdatesTunAdjustedStats()
+            throws Exception {
+        assertEquals(0, mService.getTunAdjustedStats().size());
+        // VPN using WiFi (TEST_IFACE).
+        VpnInfo[] vpnInfos = new VpnInfo[] {createVpnInfo(new String[] {TEST_IFACE})};
+        expectBandwidthControlCheck();
+        mService.forceUpdateIfaces(
+                new Network[0], vpnInfos, new NetworkState[0], null /* activeIface */);
+        // create some traffic (assume 10 bytes of MTU for VPN interface and 1 byte encryption
+        // overhead per packet):
+        // 1000 bytes (100 packets) were downloaded by UID_RED over VPN.
+        // VPN received 1100 bytes (100 packets) over WiFi.
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 2)
+              .addValues(TUN_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1000L, 100L, 0L, 0L, 0L)
+              .addValues(TEST_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 1100L, 100L, 0L, 0L, 0L));
+
+        mService.getDetailedUidStats(INTERFACES_ALL);
+
+        // Verify internally maintained TUN adjusted stats
+        NetworkStats tunAdjStats = mService.getTunAdjustedStats();
+        // Verify stats for TEST_IFACE (WiFi):
+        // Of 1100 bytes VPN received over WiFi, expect 1000 bytes attributed to UID_RED and 100
+        // bytes attributed to UID_VPN.
+        assertValues(
+                tunAdjStats, TEST_IFACE, UID_RED, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 1000L, 100L, 0L, 0L, 0);
+        assertValues(
+                tunAdjStats, TEST_IFACE, UID_VPN, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 100L, 0L, 0L, 0L, 0);
+        // Verify stats for TUN_IFACE; only UID_RED should have usage on it.
+        assertValues(
+                tunAdjStats, TUN_IFACE, UID_RED, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 1000L, 100L, 0L, 0L, 0);
+        assertValues(
+                tunAdjStats, TUN_IFACE, UID_VPN, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 0L, 0L, 0L, 0L, 0);
+
+        // lets assume that since last time, VPN received another 1100 bytes (same assumptions as
+        // before i.e. UID_RED downloaded another 1000 bytes).
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        // Note - NetworkStatsFactory returns counters that are monotonically increasing.
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 2)
+              .addValues(TUN_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 2000L, 200L, 0L, 0L, 0L)
+              .addValues(TEST_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 2200L, 200L, 0L, 0L, 0L));
+
+        mService.getDetailedUidStats(INTERFACES_ALL);
+
+        tunAdjStats = mService.getTunAdjustedStats();
+        // verify TEST_IFACE stats:
+        assertValues(
+                tunAdjStats, TEST_IFACE, UID_RED, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 2000L, 200L, 0L, 0L, 0);
+        assertValues(
+                tunAdjStats, TEST_IFACE, UID_VPN, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 200L, 0L, 0L, 0L, 0);
+        // verify TUN_IFACE stats:
+        assertValues(
+                tunAdjStats, TUN_IFACE, UID_RED, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 2000L, 200L, 0L, 0L, 0);
+        assertValues(
+                tunAdjStats, TUN_IFACE, UID_VPN, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 0L, 0L, 0L, 0L, 0);
+    }
+
+    @Test
+    public void getDetailedUidStats_returnsCorrectStatsWithVpnRunning() throws Exception {
+        // VPN using WiFi (TEST_IFACE).
+        VpnInfo[] vpnInfos = new VpnInfo[] {createVpnInfo(new String[] {TEST_IFACE})};
+        expectBandwidthControlCheck();
+        mService.forceUpdateIfaces(
+                new Network[0], vpnInfos, new NetworkState[0], null /* activeIface */);
+        // create some traffic (assume 10 bytes of MTU for VPN interface and 1 byte encryption
+        // overhead per packet):
+        // 1000 bytes (100 packets) were downloaded by UID_RED over VPN.
+        // VPN received 1100 bytes (100 packets) over WiFi.
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 2)
+              .addValues(TUN_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1000L, 100L, 0L, 0L, 0L)
+              .addValues(TEST_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 1100L, 100L, 0L, 0L, 0L));
+
+        // Query realtime stats for TEST_IFACE.
+        NetworkStats queriedStats =
+                mService.getDetailedUidStats(new String[] {TEST_IFACE});
+
+        assertEquals(HOUR_IN_MILLIS, queriedStats.getElapsedRealtime());
+        // verify that returned stats are only for TEST_IFACE and VPN traffic is migrated correctly.
+        assertEquals(new String[] {TEST_IFACE}, queriedStats.getUniqueIfaces());
+        assertValues(
+                queriedStats, TEST_IFACE, UID_RED, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 1000L, 100L, 0L, 0L, 0);
+        assertValues(
+                queriedStats, TEST_IFACE, UID_VPN, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 100L, 0L, 0L, 0L, 0);
     }
 
     @Test
