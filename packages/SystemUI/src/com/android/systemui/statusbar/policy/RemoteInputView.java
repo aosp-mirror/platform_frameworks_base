@@ -187,6 +187,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 LayoutInflater.from(context).inflate(R.layout.remote_input, root, false);
         v.mController = controller;
         v.mEntry = entry;
+        v.mEditText.setRestrictedAcrossUser(true);
         v.setTag(VIEW_TAG);
 
         return v;
