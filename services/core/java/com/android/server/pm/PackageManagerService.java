@@ -311,6 +311,7 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
+import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
@@ -445,6 +446,9 @@ public class PackageManagerService extends IPackageManager.Stub
             SystemProperties.getBoolean("fw.free_cache_v2", true);
 
     private static final long BACKUP_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(60);
+
+    private static final boolean PRECOMPILED_LAYOUT_ENABLED =
+            SystemProperties.getBoolean("view.precompiled_layout_enabled", false);
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
@@ -887,6 +891,8 @@ public class PackageManagerService extends IPackageManager.Stub
     // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
     // is used by other apps).
     private final DexManager mDexManager;
+
+    private final ViewCompiler mViewCompiler;
 
     private AtomicInteger mNextMoveId = new AtomicInteger();
     private final MoveCallbacks mMoveCallbacks;
@@ -2261,6 +2267,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mDexManager = new DexManager(mContext, this, mPackageDexOptimizer, installer, mInstallLock);
         mArtManagerService = new ArtManagerService(mContext, this, installer, mInstallLock);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
+
+        mViewCompiler = new ViewCompiler(mInstallLock, mInstaller);
 
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(
                 FgThread.get().getLooper());
@@ -9104,6 +9112,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkgCompilationReason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
             }
 
+            if (PRECOMPILED_LAYOUT_ENABLED) {
+                mArtManagerService.compileLayouts(pkg);
+            }
+
             // checkProfiles is false to avoid merging profiles during boot which
             // might interfere with background compilation (b/28612421).
             // Unfortunately this will also means that "pm.dexopt.boot=speed-profile" will
@@ -9246,6 +9258,21 @@ public class PackageManagerService extends IPackageManager.Stub
                 DexoptOptions.DEXOPT_BOOT_COMPLETE |
                 (force ? DexoptOptions.DEXOPT_FORCE : 0);
         return performDexOpt(new DexoptOptions(packageName, compilerFilter, flags));
+    }
+
+    /**
+    * Ask the package manager to compile layouts in the given package.
+    */
+    @Override
+    public boolean compileLayouts(String packageName) {
+        PackageParser.Package pkg;
+        synchronized (mPackages) {
+            pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                return false;
+            }
+        }
+        return mViewCompiler.compileLayouts(pkg);
     }
 
     /*package*/ boolean performDexOpt(DexoptOptions options) {
@@ -16143,6 +16170,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     && ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0);
 
             if (performDexopt) {
+                // Compile the layout resources.
+                if (PRECOMPILED_LAYOUT_ENABLED) {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "compileLayouts");
+                    mViewCompiler.compileLayouts(pkg);
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                }
+
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
                 // Do not run PackageDexOptimizer through the local performDexOpt
                 // method because `pkg` may not be in `mPackages` yet.
@@ -23736,6 +23770,21 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void setEnableRollbackCode(int token, int enableRollbackCode) {
             PackageManagerService.this.setEnableRollbackCode(token, enableRollbackCode);
+        }
+
+        /**
+         * Ask the package manager to compile layouts in the given package.
+         */
+        @Override
+        public boolean compileLayouts(String packageName) {
+            PackageParser.Package pkg;
+            synchronized (mPackages) {
+                pkg = mPackages.get(packageName);
+                if (pkg == null) {
+                    return false;
+                }
+            }
+            return mArtManagerService.compileLayouts(pkg);
         }
     }
 
