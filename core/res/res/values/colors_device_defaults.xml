@@ -43,6 +43,6 @@
     <color name="error_color_device_default_dark">@color/error_color_material_dark</color>
     <color name="error_color_device_default_light">@color/error_color_material_light</color>
 
-    <color name="list_divider_color_light">#64000000</color>
+    <color name="list_divider_color_light">#ffdadce0</color>
     <color name="list_divider_color_dark">#85ffffff</color>
 </resources>
