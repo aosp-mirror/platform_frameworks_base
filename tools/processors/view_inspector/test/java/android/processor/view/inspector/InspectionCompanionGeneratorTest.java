@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import android.processor.view.inspector.InspectableClassModel.Property;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.TestCase.fail;
+import static junit.framework.Assert.fail;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
@@ -65,27 +65,28 @@ public class InspectionCompanionGeneratorTest {
 
     @Test
     public void testSimpleProperties() {
-        addProperty("boolean", Property.Type.BOOLEAN, "getBoolean");
-        addProperty("byte", Property.Type.BYTE, "getByte");
-        addProperty("char", Property.Type.CHAR, "getChar");
-        addProperty("double", Property.Type.DOUBLE, "getDouble");
-        addProperty("float", Property.Type.FLOAT, "getFloat");
-        addProperty("int", Property.Type.INT, "getInt");
-        addProperty("long", Property.Type.LONG, "getLong");
-        addProperty("short", Property.Type.SHORT, "getShort");
+        addProperty("boolean", "getBoolean", Property.Type.BOOLEAN);
+        addProperty("byte", "getByte", Property.Type.BYTE);
+        addProperty("char", "getChar", Property.Type.CHAR);
+        addProperty("double", "getDouble", Property.Type.DOUBLE);
+        addProperty("float", "getFloat", Property.Type.FLOAT);
+        addProperty("int", "getInt", Property.Type.INT);
+        addProperty("long", "getLong", Property.Type.LONG);
+        addProperty("short", "getShort", Property.Type.SHORT);
 
-        addProperty("object", Property.Type.OBJECT, "getObject");
-        addProperty("color", Property.Type.COLOR, "getColor");
-        addProperty("gravity", Property.Type.GRAVITY, "getGravity");
+        addProperty("object", "getObject", Property.Type.OBJECT);
+        addProperty("color", "getColor", Property.Type.COLOR);
+        addProperty("gravity", "getGravity", Property.Type.GRAVITY);
 
         assertGeneratedFileEquals("SimpleProperties");
     }
 
     @Test
     public void testNoAttributeId() {
-        final Property property = new Property("noAttributeProperty");
-        property.setType(Property.Type.INT);
-        property.setGetter("getNoAttributeProperty");
+        final Property property = new Property(
+                "noAttributeProperty",
+                "getNoAttributeProperty",
+                Property.Type.INT);
         property.setAttributeIdInferrableFromR(false);
         mModel.putProperty(property);
 
@@ -94,19 +95,18 @@ public class InspectionCompanionGeneratorTest {
 
     @Test
     public void testSuppliedAttributeId() {
-        final Property property = new Property("suppliedAttributeProperty");
-        property.setType(Property.Type.INT);
-        property.setGetter("getSuppliedAttributeProperty");
+        final Property property = new Property(
+                "suppliedAttributeProperty",
+                "getSuppliedAttributeProperty",
+                Property.Type.INT);
         property.setAttributeId(0xdecafbad);
         mModel.putProperty(property);
 
         assertGeneratedFileEquals("SuppliedAttributeId");
     }
 
-    private Property addProperty(String name, Property.Type type, String getter) {
-        final Property property = new Property(name);
-        property.setType(type);
-        property.setGetter(getter);
+    private Property addProperty(String name, String getter, Property.Type type) {
+        final Property property = new Property(name, getter, type);
         mModel.putProperty(property);
         return property;
     }

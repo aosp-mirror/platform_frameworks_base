@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.squareup.javapoet.ClassName;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -70,7 +71,7 @@ public final class InspectableClassModel {
      * @return The property or an empty optional
      */
     public Optional<Property> getProperty(String name) {
-        return Optional.of(mPropertyMap.get(name));
+        return Optional.ofNullable(mPropertyMap.get(name));
     }
 
     /**
@@ -87,13 +88,15 @@ public final class InspectableClassModel {
      */
     public static final class Property {
         private final String mName;
-        private String mGetter;
-        private Type mType;
+        private final String mGetter;
+        private final Type mType;
         private boolean mAttributeIdInferrableFromR = true;
         private int mAttributeId = 0;
 
-        public Property(String name) {
-            mName = name;
+        public Property(String name, String getter, Type type) {
+            mName = Objects.requireNonNull(name, "Name must not be null");
+            mGetter = Objects.requireNonNull(getter, "Getter must not be null");
+            mType = Objects.requireNonNull(type, "Type must not be null");
         }
 
         public int getAttributeId() {
@@ -126,16 +129,8 @@ public final class InspectableClassModel {
             return mGetter;
         }
 
-        public void setGetter(String getter) {
-            mGetter = getter;
-        }
-
         public Type getType() {
             return mType;
-        }
-
-        public void setType(Type type) {
-            mType = type;
         }
 
         public enum Type {
