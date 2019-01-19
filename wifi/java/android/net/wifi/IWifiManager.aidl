@@ -46,7 +46,7 @@ import android.os.WorkSource;
  */
 interface IWifiManager
 {
-    int getSupportedFeatures();
+    long getSupportedFeatures();
 
     WifiActivityEnergyInfo reportActivityInfo();
 

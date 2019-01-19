@@ -64,7 +64,7 @@ public class BaseWifiService extends IWifiManager.Stub {
     private static final String TAG = BaseWifiService.class.getSimpleName();
 
     @Override
-    public int getSupportedFeatures() {
+    public long getSupportedFeatures() {
         throw new UnsupportedOperationException();
     }
 

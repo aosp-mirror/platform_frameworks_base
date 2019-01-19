@@ -2083,7 +2083,7 @@ public class WifiManager {
     /** @hide */
     public static final int WIFI_FEATURE_DPP              = 0x80000000; // DPP (Easy-Connect)
 
-    private int getSupportedFeatures() {
+    private long getSupportedFeatures() {
         try {
             return mService.getSupportedFeatures();
         } catch (RemoteException e) {
@@ -2091,7 +2091,7 @@ public class WifiManager {
         }
     }
 
-    private boolean isFeatureSupported(int feature) {
+    private boolean isFeatureSupported(long feature) {
         return (getSupportedFeatures() & feature) == feature;
     }
     /**
