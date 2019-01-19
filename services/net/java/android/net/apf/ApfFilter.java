@@ -16,8 +16,19 @@
 
 package android.net.apf;
 
-import static android.net.util.NetworkConstants.*;
-import static android.system.OsConstants.*;
+import static android.net.util.NetworkConstants.ICMPV6_ECHO_REQUEST_TYPE;
+import static android.net.util.NetworkConstants.ICMPV6_NEIGHBOR_ADVERTISEMENT;
+import static android.net.util.NetworkConstants.ICMPV6_ROUTER_ADVERTISEMENT;
+import static android.net.util.NetworkConstants.ICMPV6_ROUTER_SOLICITATION;
+import static android.system.OsConstants.AF_PACKET;
+import static android.system.OsConstants.ARPHRD_ETHER;
+import static android.system.OsConstants.ETH_P_ARP;
+import static android.system.OsConstants.ETH_P_IP;
+import static android.system.OsConstants.ETH_P_IPV6;
+import static android.system.OsConstants.IPPROTO_ICMPV6;
+import static android.system.OsConstants.IPPROTO_UDP;
+import static android.system.OsConstants.SOCK_RAW;
+
 import static com.android.internal.util.BitUtils.bytesToBEInt;
 import static com.android.internal.util.BitUtils.getUint16;
 import static com.android.internal.util.BitUtils.getUint32;
@@ -48,10 +59,14 @@ import android.system.PacketSocketAddress;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
+
+import libcore.io.IoBridge;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -63,7 +78,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import libcore.io.IoBridge;
 
 /**
  * For networks that support packet filtering via APF programs, {@code ApfFilter}
@@ -174,7 +188,13 @@ public class ApfFilter {
         private final byte[] mPacket = new byte[1514];
         private final FileDescriptor mSocket;
         private final long mStart = SystemClock.elapsedRealtime();
-        private final ApfStats mStats = new ApfStats();
+
+        private int mReceivedRas = 0;
+        private int mMatchingRas = 0;
+        private int mDroppedRas = 0;
+        private int mParseErrors = 0;
+        private int mZeroLifetimeRas = 0;
+        private int mProgramUpdates = 0;
 
         private volatile boolean mStopped;
 
@@ -207,26 +227,26 @@ public class ApfFilter {
         }
 
         private void updateStats(ProcessRaResult result) {
-            mStats.receivedRas++;
+            mReceivedRas++;
             switch(result) {
                 case MATCH:
-                    mStats.matchingRas++;
+                    mMatchingRas++;
                     return;
                 case DROPPED:
-                    mStats.droppedRas++;
+                    mDroppedRas++;
                     return;
                 case PARSE_ERROR:
-                    mStats.parseErrors++;
+                    mParseErrors++;
                     return;
                 case ZERO_LIFETIME:
-                    mStats.zeroLifetimeRas++;
+                    mZeroLifetimeRas++;
                     return;
                 case UPDATE_EXPIRY:
-                    mStats.matchingRas++;
-                    mStats.programUpdates++;
+                    mMatchingRas++;
+                    mProgramUpdates++;
                     return;
                 case UPDATE_NEW_RA:
-                    mStats.programUpdates++;
+                    mProgramUpdates++;
                     return;
             }
         }
@@ -234,11 +254,19 @@ public class ApfFilter {
         private void logStats() {
             final long nowMs = SystemClock.elapsedRealtime();
             synchronized (this) {
-                mStats.durationMs = nowMs - mStart;
-                mStats.maxProgramSize = mApfCapabilities.maximumApfProgramSize;
-                mStats.programUpdatesAll = mNumProgramUpdates;
-                mStats.programUpdatesAllowingMulticast = mNumProgramUpdatesAllowingMulticast;
-                mMetricsLog.log(mStats);
+                final ApfStats stats = new ApfStats.Builder()
+                        .setReceivedRas(mReceivedRas)
+                        .setMatchingRas(mMatchingRas)
+                        .setDroppedRas(mDroppedRas)
+                        .setParseErrors(mParseErrors)
+                        .setZeroLifetimeRas(mZeroLifetimeRas)
+                        .setProgramUpdates(mProgramUpdates)
+                        .setDurationMs(nowMs - mStart)
+                        .setMaxProgramSize(mApfCapabilities.maximumApfProgramSize)
+                        .setProgramUpdatesAll(mNumProgramUpdates)
+                        .setProgramUpdatesAllowingMulticast(mNumProgramUpdatesAllowingMulticast)
+                        .build();
+                mMetricsLog.log(stats);
                 logApfProgramEventLocked(nowMs / DateUtils.SECOND_IN_MILLIS);
             }
         }
@@ -849,7 +877,7 @@ public class ApfFilter {
     @GuardedBy("this")
     private long mLastInstalledProgramMinLifetime;
     @GuardedBy("this")
-    private ApfProgramEvent mLastInstallEvent;
+    private ApfProgramEvent.Builder mLastInstallEvent;
 
     // For debugging only. The last program installed.
     @GuardedBy("this")
@@ -1281,12 +1309,12 @@ public class ApfFilter {
         }
         mIpClientCallback.installPacketFilter(program);
         logApfProgramEventLocked(now);
-        mLastInstallEvent = new ApfProgramEvent();
-        mLastInstallEvent.lifetime = programMinLifetime;
-        mLastInstallEvent.filteredRas = rasToFilter.size();
-        mLastInstallEvent.currentRas = mRas.size();
-        mLastInstallEvent.programLength = program.length;
-        mLastInstallEvent.flags = ApfProgramEvent.flagsFor(mIPv4Address != null, mMulticastFilter);
+        mLastInstallEvent = new ApfProgramEvent.Builder()
+                .setLifetime(programMinLifetime)
+                .setFilteredRas(rasToFilter.size())
+                .setCurrentRas(mRas.size())
+                .setProgramLength(program.length)
+                .setFlags(mIPv4Address != null, mMulticastFilter);
     }
 
     @GuardedBy("this")
@@ -1294,13 +1322,14 @@ public class ApfFilter {
         if (mLastInstallEvent == null) {
             return;
         }
-        ApfProgramEvent ev = mLastInstallEvent;
+        ApfProgramEvent.Builder ev = mLastInstallEvent;
         mLastInstallEvent = null;
-        ev.actualLifetime = now - mLastTimeInstalledProgram;
-        if (ev.actualLifetime < APF_PROGRAM_EVENT_LIFETIME_THRESHOLD) {
+        final long actualLifetime = now - mLastTimeInstalledProgram;
+        ev.setActualLifetime(actualLifetime);
+        if (actualLifetime < APF_PROGRAM_EVENT_LIFETIME_THRESHOLD) {
             return;
         }
-        mMetricsLog.log(ev);
+        mMetricsLog.log(ev.build());
     }
 
     /**

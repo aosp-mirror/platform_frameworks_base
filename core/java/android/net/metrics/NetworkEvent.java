@@ -17,6 +17,8 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -29,7 +31,9 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * {@hide}
  */
-public final class NetworkEvent implements Parcelable {
+@SystemApi
+@TestApi
+public final class NetworkEvent implements IpConnectivityLog.Event {
 
     public static final int NETWORK_CONNECTED            = 1;
     public static final int NETWORK_VALIDATED            = 2;
@@ -46,6 +50,7 @@ public final class NetworkEvent implements Parcelable {
 
     public static final int NETWORK_CONSECUTIVE_DNS_TIMEOUT_FOUND = 12;
 
+    /** @hide */
     @IntDef(value = {
             NETWORK_CONNECTED,
             NETWORK_VALIDATED,
@@ -63,7 +68,9 @@ public final class NetworkEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}
 
+    /** @hide */
     public final @EventType int eventType;
+    /** @hide */
     public final long durationMs;
 
     public NetworkEvent(@EventType int eventType, long durationMs) {
@@ -80,17 +87,20 @@ public final class NetworkEvent implements Parcelable {
         durationMs = in.readLong();
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(eventType);
         out.writeLong(durationMs);
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
     }
 
+    /** @hide */
     public static final Parcelable.Creator<NetworkEvent> CREATOR
         = new Parcelable.Creator<NetworkEvent>() {
         public NetworkEvent createFromParcel(Parcel in) {

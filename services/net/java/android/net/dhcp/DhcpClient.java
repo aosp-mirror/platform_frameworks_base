@@ -16,28 +16,39 @@
 
 package android.net.dhcp;
 
-import com.android.internal.util.HexDump;
-import com.android.internal.util.Protocol;
-import com.android.internal.util.State;
-import com.android.internal.util.MessageUtils;
-import com.android.internal.util.StateMachine;
-import com.android.internal.util.WakeupMessage;
+import static android.net.dhcp.DhcpPacket.DHCP_BROADCAST_ADDRESS;
+import static android.net.dhcp.DhcpPacket.DHCP_DNS_SERVER;
+import static android.net.dhcp.DhcpPacket.DHCP_DOMAIN_NAME;
+import static android.net.dhcp.DhcpPacket.DHCP_LEASE_TIME;
+import static android.net.dhcp.DhcpPacket.DHCP_MTU;
+import static android.net.dhcp.DhcpPacket.DHCP_REBINDING_TIME;
+import static android.net.dhcp.DhcpPacket.DHCP_RENEWAL_TIME;
+import static android.net.dhcp.DhcpPacket.DHCP_ROUTER;
+import static android.net.dhcp.DhcpPacket.DHCP_SUBNET_MASK;
+import static android.net.dhcp.DhcpPacket.DHCP_VENDOR_INFO;
+import static android.net.dhcp.DhcpPacket.INADDR_ANY;
+import static android.net.dhcp.DhcpPacket.INADDR_BROADCAST;
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_PACKET;
+import static android.system.OsConstants.ETH_P_IP;
+import static android.system.OsConstants.IPPROTO_UDP;
+import static android.system.OsConstants.SOCK_DGRAM;
+import static android.system.OsConstants.SOCK_RAW;
+import static android.system.OsConstants.SOL_SOCKET;
+import static android.system.OsConstants.SO_BINDTODEVICE;
+import static android.system.OsConstants.SO_BROADCAST;
+import static android.system.OsConstants.SO_RCVBUF;
+import static android.system.OsConstants.SO_REUSEADDR;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.DhcpResults;
-import android.net.InterfaceConfiguration;
-import android.net.LinkAddress;
 import android.net.NetworkUtils;
 import android.net.TrafficStats;
-import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.DhcpClientEvent;
 import android.net.metrics.DhcpErrorEvent;
+import android.net.metrics.IpConnectivityLog;
 import android.net.util.InterfaceParams;
 import android.os.Message;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -47,19 +58,22 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 
+import com.android.internal.util.HexDump;
+import com.android.internal.util.MessageUtils;
+import com.android.internal.util.Protocol;
+import com.android.internal.util.State;
+import com.android.internal.util.StateMachine;
+import com.android.internal.util.WakeupMessage;
+
+import libcore.io.IoBridge;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.lang.Thread;
 import java.net.Inet4Address;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
-
-import libcore.io.IoBridge;
-
-import static android.system.OsConstants.*;
-import static android.net.dhcp.DhcpPacket.*;
 
 /**
  * A DHCPv4 client.
@@ -1029,6 +1043,10 @@ public class DhcpClient extends StateMachine {
     }
 
     private void logState(String name, int durationMs) {
-        mMetricsLog.log(mIfaceName, new DhcpClientEvent(name, durationMs));
+        final DhcpClientEvent event = new DhcpClientEvent.Builder()
+                .setMsg(name)
+                .setDurationMs(durationMs)
+                .build();
+        mMetricsLog.log(mIfaceName, event);
     }
 }

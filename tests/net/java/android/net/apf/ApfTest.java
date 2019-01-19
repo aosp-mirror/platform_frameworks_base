@@ -16,10 +16,19 @@
 
 package android.net.apf;
 
-import static android.net.util.NetworkConstants.*;
-import static android.system.OsConstants.*;
+import static android.net.util.NetworkConstants.ICMPV6_ECHO_REQUEST_TYPE;
+import static android.net.util.NetworkConstants.ICMPV6_ROUTER_ADVERTISEMENT;
+import static android.system.OsConstants.AF_UNIX;
+import static android.system.OsConstants.ARPHRD_ETHER;
+import static android.system.OsConstants.ETH_P_ARP;
+import static android.system.OsConstants.ETH_P_IP;
+import static android.system.OsConstants.ETH_P_IPV6;
+import static android.system.OsConstants.IPPROTO_ICMPV6;
+import static android.system.OsConstants.IPPROTO_UDP;
+import static android.system.OsConstants.SOCK_STREAM;
+
 import static com.android.internal.util.BitUtils.bytesToBEInt;
-import static com.android.internal.util.BitUtils.put;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -47,8 +56,20 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.text.format.DateUtils;
 import android.util.Log;
+
 import com.android.frameworks.tests.net.R;
 import com.android.internal.util.HexDump;
+
+import libcore.io.IoUtils;
+import libcore.io.Streams;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -59,14 +80,6 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Random;
-import libcore.io.IoUtils;
-import libcore.io.Streams;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 /**
  * Tests for APF program generator and interpreter.
@@ -1509,7 +1522,8 @@ public class ApfTest {
     }
 
     private void verifyRaEvent(RaEvent expected) {
-        ArgumentCaptor<Parcelable> captor = ArgumentCaptor.forClass(Parcelable.class);
+        ArgumentCaptor<IpConnectivityLog.Event> captor =
+                ArgumentCaptor.forClass(IpConnectivityLog.Event.class);
         verify(mLog, atLeastOnce()).log(captor.capture());
         RaEvent got = lastRaEvent(captor.getAllValues());
         if (!raEventEquals(expected, got)) {
@@ -1517,7 +1531,7 @@ public class ApfTest {
         }
     }
 
-    private RaEvent lastRaEvent(List<Parcelable> events) {
+    private RaEvent lastRaEvent(List<IpConnectivityLog.Event> events) {
         RaEvent got = null;
         for (Parcelable ev : events) {
             if (ev instanceof RaEvent) {
