@@ -20,6 +20,7 @@ import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.READ_WIFI_CREDENTIAL;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -68,6 +69,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 
 /**
  * This class provides the primary API for managing all aspects of Wi-Fi
@@ -4655,8 +4657,7 @@ public class WifiManager {
      * @param selectedNetworkId   Selected network ID to be sent to the peer
      * @param enrolleeNetworkRole The network role of the enrollee
      * @param callback            Callback for status updates
-     * @param handler             The handler on whose thread to execute the callbacks. Null for
-     *                            main thread.
+     * @param executor            The Executor on which to run the callback.
      * @hide
      */
     @SystemApi
@@ -4665,12 +4666,12 @@ public class WifiManager {
             android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public void startEasyConnectAsConfiguratorInitiator(@NonNull String enrolleeUri,
             int selectedNetworkId, @EasyConnectNetworkRole int enrolleeNetworkRole,
-            @Nullable Handler handler, @NonNull EasyConnectStatusCallback callback) {
-        Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull EasyConnectStatusCallback callback) {
         Binder binder = new Binder();
         try {
             mService.startDppAsConfiguratorInitiator(binder, enrolleeUri, selectedNetworkId,
-                    enrolleeNetworkRole, new EasyConnectCallbackProxy(looper, callback));
+                    enrolleeNetworkRole, new EasyConnectCallbackProxy(executor, callback));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4683,8 +4684,7 @@ public class WifiManager {
      *
      * @param configuratorUri URI of the Configurator obtained separately (e.g. QR code scanning)
      * @param callback        Callback for status updates
-     * @param handler         The handler on whose thread to execute the callbacks. Null for main
-     *                        thread.
+     * @param executor        The Executor on which to run the callback.
      * @hide
      */
     @SystemApi
@@ -4692,19 +4692,22 @@ public class WifiManager {
             android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public void startEasyConnectAsEnrolleeInitiator(@NonNull String configuratorUri,
-            @Nullable Handler handler, @NonNull EasyConnectStatusCallback callback) {
-        Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull EasyConnectStatusCallback callback) {
         Binder binder = new Binder();
         try {
             mService.startDppAsEnrolleeInitiator(binder, configuratorUri,
-                    new EasyConnectCallbackProxy(looper, callback));
+                    new EasyConnectCallbackProxy(executor, callback));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Stop or abort a current Easy Connect (DPP) session.
+     * Stop or abort a current Easy Connect (DPP) session. This call, once processed, will
+     * terminate any ongoing transaction, and clean up all associated resources. Caller should not
+     * expect any callbacks once this call is made. However, due to the asynchronous nature of
+     * this call, a callback may be fired if it was already pending in the queue.
      *
      * @hide
      */
@@ -4728,19 +4731,19 @@ public class WifiManager {
      */
     @SystemApi
     private static class EasyConnectCallbackProxy extends IDppCallback.Stub {
-        private final Handler mHandler;
+        private final Executor mExecutor;
         private final EasyConnectStatusCallback mEasyConnectStatusCallback;
 
-        EasyConnectCallbackProxy(Looper looper,
+        EasyConnectCallbackProxy(Executor executor,
                 EasyConnectStatusCallback easyConnectStatusCallback) {
-            mHandler = new Handler(looper);
+            mExecutor = executor;
             mEasyConnectStatusCallback = easyConnectStatusCallback;
         }
 
         @Override
         public void onSuccessConfigReceived(int newNetworkId) {
             Log.d(TAG, "Easy Connect onSuccessConfigReceived callback");
-            mHandler.post(() -> {
+            mExecutor.execute(() -> {
                 mEasyConnectStatusCallback.onEnrolleeSuccess(newNetworkId);
             });
         }
@@ -4748,7 +4751,7 @@ public class WifiManager {
         @Override
         public void onSuccess(int status) {
             Log.d(TAG, "Easy Connect onSuccess callback");
-            mHandler.post(() -> {
+            mExecutor.execute(() -> {
                 mEasyConnectStatusCallback.onConfiguratorSuccess(status);
             });
         }
@@ -4756,7 +4759,7 @@ public class WifiManager {
         @Override
         public void onFailure(int status) {
             Log.d(TAG, "Easy Connect onFailure callback");
-            mHandler.post(() -> {
+            mExecutor.execute(() -> {
                 mEasyConnectStatusCallback.onFailure(status);
             });
         }
@@ -4764,7 +4767,7 @@ public class WifiManager {
         @Override
         public void onProgress(int status) {
             Log.d(TAG, "Easy Connect onProgress callback");
-            mHandler.post(() -> {
+            mExecutor.execute(() -> {
                 mEasyConnectStatusCallback.onProgress(status);
             });
         }

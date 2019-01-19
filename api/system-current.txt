@@ -4182,8 +4182,8 @@ package android.net.wifi {
     method public void save(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
     method public void setDeviceMobilityState(int);
     method public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
-    method public void startEasyConnectAsConfiguratorInitiator(java.lang.String, int, int, android.os.Handler, android.net.wifi.EasyConnectStatusCallback);
-    method public void startEasyConnectAsEnrolleeInitiator(java.lang.String, android.os.Handler, android.net.wifi.EasyConnectStatusCallback);
+    method public void startEasyConnectAsConfiguratorInitiator(java.lang.String, int, int, java.util.concurrent.Executor, android.net.wifi.EasyConnectStatusCallback);
+    method public void startEasyConnectAsEnrolleeInitiator(java.lang.String, java.util.concurrent.Executor, android.net.wifi.EasyConnectStatusCallback);
     method public boolean startScan(android.os.WorkSource);
     method public void startSubscriptionProvisioning(android.net.wifi.hotspot2.OsuProvider, android.net.wifi.hotspot2.ProvisioningCallback, android.os.Handler);
     method public void stopEasyConnectSession();
