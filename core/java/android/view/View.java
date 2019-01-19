@@ -9031,11 +9031,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (session == null) return;
 
         if (appeared) {
-            if (!isLaidOut() || !isVisibleToUser()
+            if (!isLaidOut() || getVisibility() != VISIBLE
                     || (mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0) {
                 if (Log.isLoggable(CONTENT_CAPTURE_LOG_TAG, Log.VERBOSE)) {
                     Log.v(CONTENT_CAPTURE_LOG_TAG, "Ignoring 'appeared' on " + this + ": laid="
-                            + isLaidOut() + ", visible=" + isVisibleToUser()
+                            + isLaidOut() + ", visibleToUser=" + isVisibleToUser()
+                            + ", visible=" + (getVisibility() == VISIBLE)
                             + ": alreadyNotifiedAppeared="
                             + ((mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0));
                 }
