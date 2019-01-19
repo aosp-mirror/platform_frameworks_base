@@ -276,6 +276,7 @@ public class PackageParserTest {
         assertEquals(a.mRestrictedAccountType, b.mRestrictedAccountType);
         assertEquals(a.mRequiredAccountType, b.mRequiredAccountType);
         assertEquals(a.mOverlayTarget, b.mOverlayTarget);
+        assertEquals(a.mOverlayTargetName, b.mOverlayTargetName);
         assertEquals(a.mOverlayCategory, b.mOverlayCategory);
         assertEquals(a.mOverlayPriority, b.mOverlayPriority);
         assertEquals(a.mOverlayIsStatic, b.mOverlayIsStatic);
@@ -545,6 +546,7 @@ public class PackageParserTest {
 
         pkg.mOverlayCategory = "foo24";
         pkg.mOverlayIsStatic = true;
+        pkg.mOverlayTargetName = "foo26";
 
         pkg.baseHardwareAccelerated = true;
         pkg.coreApp = true;

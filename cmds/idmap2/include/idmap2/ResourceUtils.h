@@ -17,6 +17,8 @@
 #ifndef IDMAP2_INCLUDE_IDMAP2_RESOURCEUTILS_H_
 #define IDMAP2_INCLUDE_IDMAP2_RESOURCEUTILS_H_
 
+#include <optional>
+#include <ostream>
 #include <string>
 
 #include "android-base/macros.h"
@@ -24,8 +26,20 @@
 
 #include "idmap2/Idmap.h"
 #include "idmap2/Result.h"
+#include "idmap2/ZipFile.h"
 
 namespace android::idmap2::utils {
+
+struct OverlayManifestInfo {
+  std::string target_package;  // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string target_name;     // NOLINT(misc-non-private-member-variables-in-classes)
+  bool is_static;              // NOLINT(misc-non-private-member-variables-in-classes)
+  int priority = -1;           // NOLINT(misc-non-private-member-variables-in-classes)
+};
+
+Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
+                                                       std::ostream& out_error,
+                                                       bool assert_overlay = true);
 
 Result<std::string> WARN_UNUSED ResToTypeEntryName(const AssetManager2& am, ResourceId resid);
 

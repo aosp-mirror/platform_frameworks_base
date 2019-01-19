@@ -20,10 +20,13 @@
     <string name="policy_system_vendor">policy_system_vendor</string>
     <string name="policy_public">policy_public</string>
 
-    <!-- It also requests to overlay a resource that belongs to a policy the overlay does not
-         fulfill.-->
+    <!-- Requests to overlay a resource that belongs to a policy the overlay does not fulfill. -->
     <string name="policy_product">policy_product</string>
 
-    <!-- It also requests to overlay a resource that is not declared as overlayable.-->
+    <!-- Requests to overlay a resource that is not declared as overlayable. -->
     <string name="not_overlayable">not_overlayable</string>
+
+    <!-- Requests to overlay a resource that is defined in an overlayable with a name other than
+         the targetName in the manifest. -->
+    <string name="other">other</string>
 </resources>

@@ -45,4 +45,8 @@
         <item type="string" name="policy_public" />
     </policy>
 </overlayable>
+
+<overlayable name="OtherResources">
+    <item type="string" name="other" />
+</overlayable>
 </resources>
