@@ -261,6 +261,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private Runnable mAugmentedAutofillDestroyer;
 
     /**
+     * List of {@link MetricsEvent#AUTOFILL_AUGMENTED_REQUEST} metrics.
+     */
+    @GuardedBy("mLock")
+    private ArrayList<LogMaker> mAugmentedRequestsLogs;
+
+    /**
      * Receiver of assist data from the app's {@link Activity}.
      */
     private final IAssistDataReceiver mAssistReceiver = new IAssistDataReceiver.Stub() {
@@ -2541,8 +2547,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         mService.resetLastResponse();
 
-        // The default autofill service cannot fullfill the request, let's check if the intelligence
-        // service can.
+        // The default autofill service cannot fullfill the request, let's check if the augmented
+        // autofill service can.
         mAugmentedAutofillDestroyer = triggerAugmentedAutofillLocked();
         if (mAugmentedAutofillDestroyer == null) {
             if (sVerbose) {
@@ -2605,8 +2611,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         if (sVerbose) {
-            Slog.v(TAG, "calling IntelligenseService on view " + mCurrentViewId
-                    + " using suggestion mode " + smartSuggestionFlagsToString(mode)
+            Slog.v(TAG, "calling Augmented Autofill Service ("
+                    + remoteService.getComponentName().toShortString() + ") on view "
+                    + mCurrentViewId + " using suggestion mode "
+                    + smartSuggestionFlagsToString(mode)
                     + " when server returned null for session " + this.id);
         }
 
@@ -2620,8 +2628,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final AutofillValue currentValue = mViewStates.get(mCurrentViewId).getCurrentValue();
 
         // TODO(b/111330312): we might need to add a new state in the AutofillManager to optimize
-        // furgher AFM -> AFMS calls.
-        // TODO(b/119638958): add CTS tests
+        // further AFM -> AFMS calls.
+
+        if (mAugmentedRequestsLogs == null) {
+            mAugmentedRequestsLogs = new ArrayList<>();
+        }
+        final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_AUGMENTED_REQUEST,
+                remoteService.getComponentName().getPackageName());
+        mAugmentedRequestsLogs.add(log);
+
         remoteService.onRequestAutofillLocked(id, mClient, taskId, mComponentName, mCurrentViewId,
                 currentValue);
 
@@ -2912,6 +2927,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (mAugmentedAutofillDestroyer != null) {
             pw.print(prefix); pw.println("has mAugmentedAutofillDestroyer");
         }
+        if (mAugmentedRequestsLogs != null) {
+            pw.print(prefix); pw.print("number augmented requests: ");
+            pw.println(mAugmentedRequestsLogs.size());
+        }
+
         mRemoteFillService.dump(prefix, pw);
     }
 
@@ -3053,8 +3073,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mMetricsLogger.write(log);
             }
         }
-        mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_FINISHED)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_REQUESTS, totalRequests));
+
+        final int totalAugmentedRequests = mAugmentedRequestsLogs == null ? 0
+                : mAugmentedRequestsLogs.size();
+        if (totalAugmentedRequests > 0) {
+            if (sVerbose) {
+                Slog.v(TAG, "destroyLocked(): logging " + totalRequests + " augmented requests");
+            }
+            for (int i = 0; i < totalAugmentedRequests; i++) {
+                final LogMaker log = mAugmentedRequestsLogs.get(i);
+                mMetricsLogger.write(log);
+            }
+        }
+
+        final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_SESSION_FINISHED)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_REQUESTS, totalRequests);
+        if (totalAugmentedRequests > 0) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_AUGMENTED_REQUESTS,
+                    totalAugmentedRequests);
+        }
+        mMetricsLogger.write(log);
 
         return mRemoteFillService;
     }
