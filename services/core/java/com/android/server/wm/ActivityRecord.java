@@ -1946,30 +1946,84 @@ final class ActivityRecord extends ConfigurationContainer {
         try {
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     WindowVisibilityItem.obtain(true /* showWindow */));
-            if (shouldPauseWhenBecomingVisible()) {
-                // An activity must be in the {@link PAUSING} state for the system to validate
-                // the move to {@link PAUSED}.
-                setState(PAUSING, "makeVisibleIfNeeded");
-                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                        PauseActivityItem.obtain(finishing, false /* userLeaving */,
-                                configChangeFlags, false /* dontReport */));
-            }
+            makeActiveIfNeeded(null /* activeActivity*/);
         } catch (Exception e) {
             Slog.w(TAG, "Exception thrown sending visibility update: " + intent.getComponent(), e);
         }
     }
 
-    /** Check if activity should be moved to PAUSED state when it becomes visible. */
-    private boolean shouldPauseWhenBecomingVisible() {
-        // If the activity is stopped or stopping, cycle to the paused state. We avoid doing
+    /**
+     * Make activity resumed or paused if needed.
+     * @param activeActivity an activity that is resumed or just completed pause action.
+     *                       We won't change the state of this activity.
+     */
+    boolean makeActiveIfNeeded(ActivityRecord activeActivity) {
+        if (shouldResumeActivity(activeActivity)) {
+            if (DEBUG_VISIBILITY) {
+                Slog.v("TAG_VISIBILITY", "Resume visible activity, " + this);
+            }
+            return getActivityStack().resumeTopActivityUncheckedLocked(activeActivity /* prev */,
+                    null /* options */);
+        } else if (shouldPauseActivity(activeActivity)) {
+            if (DEBUG_VISIBILITY) {
+                Slog.v("TAG_VISIBILITY", "Pause visible activity, " + this);
+            }
+            // An activity must be in the {@link PAUSING} state for the system to validate
+            // the move to {@link PAUSED}.
+            setState(PAUSING, "makeVisibleIfNeeded");
+            try {
+                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+                        PauseActivityItem.obtain(finishing, false /* userLeaving */,
+                                configChangeFlags, false /* dontReport */));
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception thrown sending pause: " + intent.getComponent(), e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if activity should be moved to PAUSED state. The activity:
+     * - should be eligible to be made active (see {@link #shouldMakeActive(ActivityRecord)})
+     * - should be non-focusable
+     * - should not be currently pausing or paused
+     * @param activeActivity the activity that is active or just completed pause action. We won't
+     *                       resume if this activity is active.
+     */
+    private boolean shouldPauseActivity(ActivityRecord activeActivity) {
+        return shouldMakeActive(activeActivity) && !isFocusable() && !isState(PAUSING, PAUSED);
+    }
+
+    /**
+     * Check if activity should be moved to RESUMED state. The activity:
+     * - should be eligible to be made active (see {@link #shouldMakeActive(ActivityRecord)})
+     * - should be focusable
+     * @param activeActivity the activity that is active or just completed pause action. We won't
+     *                       resume if this activity is active.
+     */
+    private boolean shouldResumeActivity(ActivityRecord activeActivity) {
+        return shouldMakeActive(activeActivity) && isFocusable() && !isState(RESUMED);
+    }
+
+    /**
+     * Check if activity is eligible to be made active (resumed of paused). The activity:
+     * - should be paused, stopped or stopping
+     * - should not be the currently active one
+     * - should be either the topmost in task, or right below the top activity that is finishing
+     * If all of these conditions are not met at the same time, the activity cannot be made active.
+     */
+    private boolean shouldMakeActive(ActivityRecord activeActivity) {
+        // If the activity is stopped, stopping, cycle to an active state. We avoid doing
         // this when there is an activity waiting to become translucent as the extra binder
         // calls will lead to noticeable jank. A later call to
-        // ActivityStack#ensureActivitiesVisibleLocked will bring the activity to the proper
-        // paused state. We also avoid doing this for the activity the stack supervisor
-        // considers the resumed activity, as normal means will bring the activity from STOPPED
-        // to RESUMED. Adding PAUSING in this scenario will lead to double lifecycles.
-        if (!isState(STOPPED, STOPPING) || getActivityStack().mTranslucentActivityWaiting != null
-                || isResumedActivityOnDisplay()) {
+        // ActivityStack#ensureActivitiesVisibleLocked will bring the activity to a proper
+        // active state.
+        if (!isState(RESUMED, PAUSED, STOPPED, STOPPING)
+                || getActivityStack().mTranslucentActivityWaiting != null) {
+            return false;
+        }
+
+        if (this == activeActivity) {
             return false;
         }
 
@@ -1979,14 +2033,14 @@ final class ActivityRecord extends ConfigurationContainer {
             throw new IllegalStateException("Activity not found in its task");
         }
         if (positionInTask == task.mActivities.size() - 1) {
-            // It's the topmost activity in the task - should become paused now
+            // It's the topmost activity in the task - should become resumed now
             return true;
         }
         // Check if activity above is finishing now and this one becomes the topmost in task.
         final ActivityRecord activityAbove = task.mActivities.get(positionInTask + 1);
         if (activityAbove.finishing && results == null) {
-            // We will only allow pausing if activity above wasn't launched for result. Otherwise it
-            // will cause this activity to resume before getting result.
+            // We will only allow making active if activity above wasn't launched for result.
+            // Otherwise it will cause this activity to resume before getting result.
             return true;
         }
         return false;

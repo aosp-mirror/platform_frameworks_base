@@ -179,7 +179,10 @@ public class ActivityStartController {
                 .setActivityOptions(options.toBundle())
                 .execute();
         mLastHomeActivityStartRecord = tmpOutRecord[0];
-        if (mSupervisor.inResumeTopActivity) {
+        final ActivityDisplay display =
+                mService.mRootActivityContainer.getActivityDisplay(displayId);
+        final ActivityStack homeStack = display != null ? display.getHomeStack() : null;
+        if (homeStack != null && homeStack.mInResumeTopActivity) {
             // If we are in resume section already, home activity will be initialized, but not
             // resumed (to avoid recursive resume) and will stay that way until something pokes it
             // again. We need to schedule another resume.
