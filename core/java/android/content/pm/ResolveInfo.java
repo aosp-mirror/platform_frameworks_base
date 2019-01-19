@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.IntentFilter;
@@ -175,9 +176,12 @@ public class ResolveInfo implements Parcelable {
     public boolean system;
 
     /**
-     * @hide Does the associated IntentFilter comes from a Browser ?
+     * Will be set to {@code true} if the {@link IntentFilter} responsible for intent
+     * resolution is classified as a "browser".
+     *
+     * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public boolean handleAllWebDataURI;
 
     /** {@hide} */
