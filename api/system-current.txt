@@ -5784,6 +5784,11 @@ package android.provider {
     field public static final String NAMESPACE = "runtime_native_boot";
   }
 
+  public static interface DeviceConfig.Scheduler {
+    field public static final String ENABLE_FAST_METRICS_COLLECTION = "enable_fast_metrics_collection";
+    field public static final String NAMESPACE = "scheduler";
+  }
+
   public static interface DeviceConfig.Storage {
     field public static final String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
     field public static final String NAMESPACE = "storage";
