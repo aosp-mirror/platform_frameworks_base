@@ -1740,19 +1740,6 @@
          config_enableGeofenceOverlay is false. -->
     <string name="config_geofenceProviderPackageName" translatable="false">@null</string>
 
-    <!-- Whether to enable Hardware Activity-Recognition overlay which allows Hardware
-         Activity-Recognition to be replaced by an app at run-time. When disabled, only the
-         config_activityRecognitionHardwarePackageName package will be searched for
-         its implementation, otherwise packages whose signature matches the
-         signatures of config_locationProviderPackageNames will be searched, and
-         the service with the highest version number will be picked. Anyone who
-         wants to disable the overlay mechanism can set it to false.
-         -->
-    <bool name="config_enableActivityRecognitionHardwareOverlay" translatable="false">true</bool>
-    <!-- Package name providing Hardware Activity-Recognition API support. Used only when
-         config_enableActivityRecognitionHardwareOverlay is false. -->
-    <string name="config_activityRecognitionHardwarePackageName" translatable="false">@null</string>
-
     <!-- Package name(s) containing location provider support.
          These packages can contain services implementing location providers,
          such as the Geocode Provider, Network Location Provider, and
