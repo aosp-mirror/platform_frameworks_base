@@ -3288,7 +3288,8 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         final int mountMode = mAmInternal.getStorageMountMode(pid, uid);
-        if (mountMode == Zygote.MOUNT_EXTERNAL_FULL) {
+        if (mountMode == Zygote.MOUNT_EXTERNAL_FULL
+                || mountMode == Zygote.MOUNT_EXTERNAL_LEGACY) {
             return path;
         }
 
@@ -3663,8 +3664,7 @@ class StorageManagerService extends IStorageManager.Stub
                 return Zygote.MOUNT_EXTERNAL_FULL;
             } else if (mIAppOpsService.checkOperation(OP_LEGACY_STORAGE, uid,
                     packageName) == MODE_ALLOWED) {
-                // TODO: define a specific "legacy" mount mode
-                return Zygote.MOUNT_EXTERNAL_FULL;
+                return Zygote.MOUNT_EXTERNAL_LEGACY;
             } else if (mIPackageManager.checkUidPermission(INSTALL_PACKAGES, uid)
                     == PERMISSION_GRANTED || mIAppOpsService.checkOperation(
                             OP_REQUEST_INSTALL_PACKAGES, uid, packageName) == MODE_ALLOWED) {

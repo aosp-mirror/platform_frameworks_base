@@ -109,8 +109,9 @@ enum MountExternalKind {
   MOUNT_EXTERNAL_DEFAULT = 1,
   MOUNT_EXTERNAL_READ = 2,
   MOUNT_EXTERNAL_WRITE = 3,
-  MOUNT_EXTERNAL_INSTALLER = 4,
-  MOUNT_EXTERNAL_FULL = 5,
+  MOUNT_EXTERNAL_LEGACY = 4,
+  MOUNT_EXTERNAL_INSTALLER = 5,
+  MOUNT_EXTERNAL_FULL = 6,
 };
 
 // Must match values in com.android.internal.os.Zygote.
@@ -548,8 +549,9 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
     }
 
     if (GetBoolProperty(kIsolatedStorageSnapshot, GetBoolProperty(kIsolatedStorage, false))) {
-        if (mount_mode == MOUNT_EXTERNAL_FULL) {
-            storageSource = "/mnt/runtime/write";
+        if (mount_mode == MOUNT_EXTERNAL_FULL || mount_mode == MOUNT_EXTERNAL_LEGACY) {
+            storageSource = (mount_mode == MOUNT_EXTERNAL_FULL)
+                    ? "/mnt/runtime/full" : "/mnt/runtime/write";
             if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
                     NULL, MS_BIND | MS_REC | MS_SLAVE, NULL)) == -1) {
                 *error_msg = CREATE_ERROR("Failed to mount %s to /storage: %s",
