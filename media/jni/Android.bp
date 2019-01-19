@@ -101,8 +101,7 @@ cc_library_shared {
         "libhidlbase",
         "libhidlmemory",
 
-        "libmediametrics_stable",
-        "libmediametrics",	// until player2 starts calling the stable interface
+        "libmediametrics",
         "libbinder",  // Used by JWakeLock and MediaMetrics.
 
         "libutils",  // Have to use shared lib to make libandroid_runtime behave correctly.

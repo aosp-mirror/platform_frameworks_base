@@ -786,22 +786,17 @@ android_media_MediaPlayer2_native_getMetrics(JNIEnv *env, jobject thiz)
         return 0;
     }
 
-    Parcel p;
-    int key = FOURCC('m','t','r','X');
-    status_t status = mp->getParameter(key, &p);
+    char *buffer = NULL;
+    size_t length = 0;
+    status_t status = mp->getMetrics(&buffer, &length);
     if (status != OK) {
         ALOGD("getMetrics() failed: %d", status);
         return (jobject) NULL;
     }
 
-    p.setDataPosition(0);
-    MediaAnalyticsItem *item = new MediaAnalyticsItem;
-    item->readFromParcel(p);
-    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+    jobject mybundle = MediaMetricsJNI::writeAttributesToBundle(env, NULL, buffer, length);
 
-    // housekeeping
-    delete item;
-    item = NULL;
+    free(buffer);
 
     return mybundle;
 }
