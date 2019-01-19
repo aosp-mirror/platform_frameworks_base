@@ -16,6 +16,7 @@
 
 package com.android.ims.internal;
 
+import android.telephony.CallQuality;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsReasonInfo;
@@ -140,22 +141,29 @@ oneway interface IImsCallSessionListener {
     void callSessionRttModifyRequestReceived(in IImsCallSession session,
             in ImsCallProfile callProfile);
 
-    /* Device issued RTT modify request and inturn received response
+    /**
+     * Device issued RTT modify request and inturn received response
      * from Remote UE
      * @param status Will be one of the following values from:
      * - {@link Connection.RttModifyStatus}
      */
     void callSessionRttModifyResponseReceived(in int status);
 
-    /*
+    /**
      * While in call, device received RTT message from Remote UE
      * @param rttMessage Received RTT message
      */
     void callSessionRttMessageReceived(in String rttMessage);
 
-    /*
+    /**
      * While in call, there has been a change in RTT audio indicator.
      * @param profile updated ImsStreamMediaProfile
      */
     void callSessionRttAudioIndicatorChanged(in ImsStreamMediaProfile profile);
+
+    /**
+     * Notifies of a change to the call quality.
+     * @param callQuality then updated call quality
+     */
+    void callQualityChanged(in CallQuality callQuality);
 }
