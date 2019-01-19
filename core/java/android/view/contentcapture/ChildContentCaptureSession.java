@@ -88,9 +88,8 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
-    void internalNotifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
-            int flags) {
-        getMainCaptureSession().notifyViewTextChanged(mId, id, text, flags);
+    void internalNotifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text) {
+        getMainCaptureSession().notifyViewTextChanged(mId, id, text);
     }
 
     @Override

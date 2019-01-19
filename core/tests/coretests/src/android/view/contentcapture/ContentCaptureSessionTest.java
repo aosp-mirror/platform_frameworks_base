@@ -151,7 +151,7 @@ public class ContentCaptureSessionTest {
         }
 
         @Override
-        void internalNotifyViewTextChanged(AutofillId id, CharSequence text, int flags) {
+        void internalNotifyViewTextChanged(AutofillId id, CharSequence text) {
             throw new UnsupportedOperationException("should not have been called");
         }
     }
