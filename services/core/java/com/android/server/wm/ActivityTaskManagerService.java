@@ -957,9 +957,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         enforceNotIsolatedCaller(reason);
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId, reason);
         // TODO: Switch to user app stacks here.
-        return getActivityStartController().startActivities(caller, -1, callingPackage, intents,
-                resolvedTypes, resultTo, SafeActivityOptions.fromBundle(bOptions), userId, reason,
-                null /* originatingPendingIntent */, false /* allowBackgroundActivityStart */);
+        return getActivityStartController().startActivities(caller, -1, 0, -1, callingPackage,
+                intents, resolvedTypes, resultTo, SafeActivityOptions.fromBundle(bOptions), userId,
+                reason, null /* originatingPendingIntent */,
+                false /* allowBackgroundActivityStart */);
     }
 
     @Override
@@ -5827,14 +5828,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public int startActivitiesInPackage(int uid, String callingPackage, Intent[] intents,
-                String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
-                boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
+        public int startActivitiesInPackage(int uid, int realCallingPid, int realCallingUid,
+                String callingPackage, Intent[] intents, String[] resolvedTypes, IBinder resultTo,
+                SafeActivityOptions options, int userId, boolean validateIncomingUser,
+                PendingIntentRecord originatingPendingIntent,
                 boolean allowBackgroundActivityStart) {
             synchronized (mGlobalLock) {
-                return getActivityStartController().startActivitiesInPackage(uid, callingPackage,
-                        intents, resolvedTypes, resultTo, options, userId, validateIncomingUser,
-                        originatingPendingIntent, allowBackgroundActivityStart);
+                return getActivityStartController().startActivitiesInPackage(uid, realCallingPid,
+                        realCallingUid, callingPackage, intents, resolvedTypes, resultTo, options,
+                        userId, validateIncomingUser, originatingPendingIntent,
+                        allowBackgroundActivityStart);
             }
         }
 

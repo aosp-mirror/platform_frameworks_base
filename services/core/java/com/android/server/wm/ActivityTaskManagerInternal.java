@@ -192,6 +192,8 @@ public abstract class ActivityTaskManagerInternal {
      * Start intents as a package.
      *
      * @param uid Make a call as if this UID did.
+     * @param realCallingPid PID of the real caller.
+     * @param realCallingUid UID of the real caller.
      * @param callingPackage Make a call as if this package did.
      * @param intents Intents to start.
      * @param userId Start the intents on this user.
@@ -201,9 +203,10 @@ public abstract class ActivityTaskManagerInternal {
      * @param allowBackgroundActivityStart Whether the background activity start should be allowed
      *        from originatingPendingIntent
      */
-    public abstract int startActivitiesInPackage(int uid, String callingPackage, Intent[] intents,
-            String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
-            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
+    public abstract int startActivitiesInPackage(int uid, int realCallingPid, int realCallingUid,
+            String callingPackage, Intent[] intents, String[] resolvedTypes, IBinder resultTo,
+            SafeActivityOptions options, int userId, boolean validateIncomingUser,
+            PendingIntentRecord originatingPendingIntent,
             boolean allowBackgroundActivityStart);
 
     public abstract int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
