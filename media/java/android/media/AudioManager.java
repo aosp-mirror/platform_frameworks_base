@@ -28,6 +28,7 @@ import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothCodecConfig;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
@@ -4944,6 +4945,34 @@ public class AudioManager {
         filterTypes.add(AudioDeviceInfo.TYPE_BUILTIN_MIC);
         addMicrophonesFromAudioDeviceInfo(microphones, filterTypes);
         return microphones;
+    }
+
+    /**
+     * Returns a list of audio formats that corresponds to encoding formats
+     * supported on offload path for A2DP playback.
+     *
+     * @return a list of {@link BluetoothCodecConfig} objects containing encoding formats
+     * supported for offload A2DP playback
+     * @hide
+     */
+    public List<BluetoothCodecConfig> getHwOffloadEncodingFormatsSupportedForA2DP() {
+        ArrayList<Integer> formatsList = new ArrayList<Integer>();
+        ArrayList<BluetoothCodecConfig> codecConfigList = new ArrayList<BluetoothCodecConfig>();
+
+        int status = AudioSystem.getHwOffloadEncodingFormatsSupportedForA2DP(formatsList);
+        if (status != AudioManager.SUCCESS) {
+            Log.e(TAG, "getHwOffloadEncodingFormatsSupportedForA2DP failed:" + status);
+            return codecConfigList;
+        }
+
+        for (Integer format : formatsList) {
+            int btSourceCodec = AudioSystem.audioFormatToBluetoothSourceCodec(format);
+            if (btSourceCodec
+                    != BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
+                codecConfigList.add(new BluetoothCodecConfig(btSourceCodec));
+            }
+        }
+        return codecConfigList;
     }
 
     // Since we need to calculate the changes since THE LAST NOTIFICATION, and not since the
