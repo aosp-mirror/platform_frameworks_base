@@ -2901,6 +2901,7 @@ package android.location {
     method public int getConstellationType();
     method public float getExcessPathLengthMeters();
     method public float getExcessPathLengthUncertaintyMeters();
+    method public float getProbSatIsLos();
     method public android.location.GnssReflectingPlane getReflectingPlane();
     method public int getSatId();
     method public int getSingleSatCorrectionFlags();
@@ -2908,13 +2909,12 @@ package android.location {
     method public boolean hasExcessPathLengthUncertainty();
     method public boolean hasReflectingPlane();
     method public boolean hasSatelliteLineOfSight();
-    method public boolean isSatelliteLineOfSight();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssSingleSatCorrection> CREATOR;
     field public static final int HAS_EXCESS_PATH_LENGTH_MASK = 2; // 0x2
     field public static final int HAS_EXCESS_PATH_LENGTH_UNC_MASK = 4; // 0x4
+    field public static final int HAS_PROB_SAT_IS_LOS_MASK = 1; // 0x1
     field public static final int HAS_REFLECTING_PLANE_MASK = 8; // 0x8
-    field public static final int HAS_SAT_IS_LOS_MASK = 1; // 0x1
   }
 
   public static class GnssSingleSatCorrection.Builder {
@@ -2924,9 +2924,9 @@ package android.location {
     method public android.location.GnssSingleSatCorrection.Builder setConstellationType(int);
     method public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthMeters(float);
     method public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthUncertaintyMeters(float);
+    method public android.location.GnssSingleSatCorrection.Builder setProbSatIsLos(float);
     method public android.location.GnssSingleSatCorrection.Builder setReflectingPlane(android.location.GnssReflectingPlane);
     method public android.location.GnssSingleSatCorrection.Builder setSatId(int);
-    method public android.location.GnssSingleSatCorrection.Builder setSatIsLos(boolean);
     method public android.location.GnssSingleSatCorrection.Builder setSingleSatCorrectionFlags(int);
   }
 

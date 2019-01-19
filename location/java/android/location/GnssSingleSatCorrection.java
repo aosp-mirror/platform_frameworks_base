@@ -16,10 +16,13 @@
 
 package android.location;
 
+import android.annotation.FloatRange;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
 
 /**
  * A container with measurement corrections for a single visible satellite
@@ -31,9 +34,9 @@ public final class GnssSingleSatCorrection implements Parcelable {
 
     /**
      * Bit mask for {@link #mSingleSatCorrectionFlags} indicating the presence of {@link
-     * #mSatIsLos}.
+     * #mProbSatIsLos}.
      */
-    public static final int HAS_SAT_IS_LOS_MASK = 1 << 0;
+    public static final int HAS_PROB_SAT_IS_LOS_MASK = 1 << 0;
 
     /**
      * Bit mask for {@link #mSingleSatCorrectionFlags} indicating the presence of {@link
@@ -78,9 +81,11 @@ public final class GnssSingleSatCorrection implements Parcelable {
     private float mCarrierFrequencyHz;
 
     /**
-     * True if the satellite is estimated to be in Line-of-Sight condition at the given location.
+     * The probability that the satellite is estimated to be in Line-of-Sight condition at the given
+     * location.
      */
-    private boolean mSatIsLos;
+    @FloatRange(from = 0f, to = 1f)
+    private float mProbSatIsLos;
 
     /**
      * Excess path length to be subtracted from pseudorange before using it in calculating location.
@@ -103,7 +108,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
         mSatId = builder.mSatId;
         mConstellationType = builder.mConstellationType;
         mCarrierFrequencyHz = builder.mCarrierFrequencyHz;
-        mSatIsLos = builder.mSatIsLos;
+        mProbSatIsLos = builder.mProbSatIsLos;
         mExcessPathLengthMeters = builder.mExcessPathLengthMeters;
         mExcessPathLengthUncertaintyMeters = builder.mExcessPathLengthUncertaintyMeters;
         mReflectingPlane = builder.mReflectingPlane;
@@ -152,9 +157,13 @@ public final class GnssSingleSatCorrection implements Parcelable {
         return mCarrierFrequencyHz;
     }
 
-    /** True if the satellite is line-of-sight */
-    public boolean isSatelliteLineOfSight() {
-        return mSatIsLos;
+    /**
+     * Returns the probability that the satellite is in line-of-sight condition at the given
+     * location.
+     */
+    @FloatRange(from = 0f, to = 1f)
+    public float getProbSatIsLos() {
+        return mProbSatIsLos;
     }
 
     /**
@@ -180,9 +189,9 @@ public final class GnssSingleSatCorrection implements Parcelable {
         return mReflectingPlane;
     }
 
-    /** Returns {@code true} if {@link #isSatelliteLineOfSight()} is valid. */
+    /** Returns {@code true} if {@link #getProbSatIsLos()} is valid. */
     public boolean hasSatelliteLineOfSight() {
-        return (mSingleSatCorrectionFlags & HAS_SAT_IS_LOS_MASK) != 0;
+        return (mSingleSatCorrectionFlags & HAS_PROB_SAT_IS_LOS_MASK) != 0;
     }
 
     /** Returns {@code true} if {@link #getExcessPathLengthMeters()} is valid. */
@@ -215,7 +224,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
                                     .setConstellationType(parcel.readInt())
                                     .setSatId(parcel.readInt())
                                     .setCarrierFrequencyHz(parcel.readFloat())
-                                    .setSatIsLos(parcel.readBoolean())
+                                    .setProbSatIsLos(parcel.readFloat())
                                     .setExcessPathLengthMeters(parcel.readFloat())
                                     .setExcessPathLengthUncertaintyMeters(parcel.readFloat())
                                     .setReflectingPlane(
@@ -239,7 +248,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
         builder.append(String.format(format, "ConstellationType = ", mConstellationType));
         builder.append(String.format(format, "SatId = ", mSatId));
         builder.append(String.format(format, "CarrierFrequencyHz = ", mCarrierFrequencyHz));
-        builder.append(String.format(format, "SatIsLos = ", mSatIsLos));
+        builder.append(String.format(format, "ProbSatIsLos = ", mProbSatIsLos));
         builder.append(String.format(format, "ExcessPathLengthMeters = ", mExcessPathLengthMeters));
         builder.append(
                 String.format(
@@ -256,7 +265,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
         parcel.writeInt(mConstellationType);
         parcel.writeInt(mSatId);
         parcel.writeFloat(mCarrierFrequencyHz);
-        parcel.writeBoolean(mSatIsLos);
+        parcel.writeFloat(mProbSatIsLos);
         parcel.writeFloat(mExcessPathLengthMeters);
         parcel.writeFloat(mExcessPathLengthUncertaintyMeters);
         mReflectingPlane.writeToParcel(parcel, flags);
@@ -274,7 +283,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
         private int mConstellationType;
         private int mSatId;
         private float mCarrierFrequencyHz;
-        private boolean mSatIsLos;
+        private float mProbSatIsLos;
         private float mExcessPathLengthMeters;
         private float mExcessPathLengthUncertaintyMeters;
         private GnssReflectingPlane mReflectingPlane;
@@ -303,10 +312,16 @@ public final class GnssSingleSatCorrection implements Parcelable {
             return this;
         }
 
-        /** Sets the line=of-sight state of the satellite */
-        public Builder setSatIsLos(boolean satIsLos) {
-            mSatIsLos = satIsLos;
-            mSingleSatCorrectionFlags = (byte) (mSingleSatCorrectionFlags | HAS_SAT_IS_LOS_MASK);
+        /**
+         * Sets the line-of-sight probability of the satellite at the given location in the range
+         * between 0 and 1.
+         */
+        public Builder setProbSatIsLos(@FloatRange(from = 0f, to = 1f) float probSatIsLos) {
+            Preconditions.checkArgumentInRange(probSatIsLos, 0, 1,
+                    "probSatIsLos should be between 0 and 1.");
+            mProbSatIsLos = probSatIsLos;
+            mSingleSatCorrectionFlags =
+                    (byte) (mSingleSatCorrectionFlags | HAS_PROB_SAT_IS_LOS_MASK);
             return this;
         }
 
