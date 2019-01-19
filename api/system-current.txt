@@ -5112,6 +5112,30 @@ package android.telephony {
     field public static final java.lang.String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
   }
 
+  public final class CarrierRestrictionRules implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers();
+    method public int getDefaultCarrierRestriction();
+    method public java.util.List<android.service.carrier.CarrierIdentifier> getExcludedCarriers();
+    method public int getMultiSimPolicy();
+    method public boolean isAllCarriersAllowed();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CARRIER_RESTRICTION_DEFAULT_ALLOWED = 1; // 0x1
+    field public static final int CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED = 0; // 0x0
+    field public static final android.os.Parcelable.Creator<android.telephony.CarrierRestrictionRules> CREATOR;
+    field public static final int MULTISIM_POLICY_NONE = 0; // 0x0
+    field public static final int MULTISIM_POLICY_ONE_VALID_SIM_MUST_BE_PRESENT = 1; // 0x1
+  }
+
+  public static class CarrierRestrictionRules.Builder {
+    method public android.telephony.CarrierRestrictionRules build();
+    method public android.telephony.CarrierRestrictionRules.Builder setAllCarriersAllowed();
+    method public android.telephony.CarrierRestrictionRules.Builder setAllowedCarriers(java.util.List<android.service.carrier.CarrierIdentifier>);
+    method public android.telephony.CarrierRestrictionRules.Builder setDefaultCarrierRestriction(int);
+    method public android.telephony.CarrierRestrictionRules.Builder setExcludedCarriers(java.util.List<android.service.carrier.CarrierIdentifier>);
+    method public android.telephony.CarrierRestrictionRules.Builder setMultiSimPolicy(int);
+  }
+
   public final class DataFailCause {
     field public static final int ACTIVATION_REJECT_GGSN = 30; // 0x1e
     field public static final int ACTIVATION_REJECT_UNSPECIFIED = 31; // 0x1f
@@ -5607,10 +5631,11 @@ package android.telephony {
     method public boolean enableDataConnectivity();
     method public void enableVideoCalling(boolean);
     method public java.lang.String getAidForAppType(int);
-    method public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
+    method public deprecated java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
     method public int getCardIdForDefaultEuicc();
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntentAndPhone(android.content.Intent, int);
+    method public android.telephony.CarrierRestrictionRules getCarrierRestrictionRules();
     method public java.lang.String getCdmaMdn();
     method public java.lang.String getCdmaMdn(int);
     method public java.lang.String getCdmaMin();
@@ -5649,8 +5674,9 @@ package android.telephony {
     method public void requestCellInfoUpdate(android.os.WorkSource, java.util.concurrent.Executor, android.telephony.TelephonyManager.CellInfoCallback);
     method public void requestNumberVerification(android.telephony.PhoneNumberRange, long, java.util.concurrent.Executor, android.telephony.NumberVerificationCallback);
     method public boolean resetRadioConfig();
-    method public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
+    method public deprecated int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method public void setCarrierDataEnabled(boolean);
+    method public int setCarrierRestrictionRules(android.telephony.CarrierRestrictionRules);
     method public void setDataActivationState(int);
     method public deprecated void setDataEnabled(int, boolean);
     method public void setDataRoamingEnabled(boolean);
@@ -5724,6 +5750,9 @@ package android.telephony {
     field public static final int RADIO_POWER_OFF = 0; // 0x0
     field public static final int RADIO_POWER_ON = 1; // 0x1
     field public static final int RADIO_POWER_UNAVAILABLE = 2; // 0x2
+    field public static final int SET_CARRIER_RESTRICTION_ERROR = 2; // 0x2
+    field public static final int SET_CARRIER_RESTRICTION_NOT_SUPPORTED = 1; // 0x1
+    field public static final int SET_CARRIER_RESTRICTION_SUCCESS = 0; // 0x0
     field public static final int SIM_ACTIVATION_STATE_ACTIVATED = 2; // 0x2
     field public static final int SIM_ACTIVATION_STATE_ACTIVATING = 1; // 0x1
     field public static final int SIM_ACTIVATION_STATE_DEACTIVATED = 3; // 0x3
