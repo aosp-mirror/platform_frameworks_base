@@ -199,6 +199,7 @@ public class SettingsBackupTest {
                     Settings.Global.DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD,
                     Settings.Global.DATA_STALL_EVALUATION_TYPE,
                     Settings.Global.DATA_STALL_MIN_EVALUATE_INTERVAL,
+                    Settings.Global.DATA_STALL_RECOVERY_ON_BAD_NETWORK,
                     Settings.Global.DATA_STALL_VALID_DNS_TIME_THRESHOLD,
                     Settings.Global.DEBUG_APP,
                     Settings.Global.DEBUG_VIEW_ATTRIBUTES,
@@ -312,6 +313,7 @@ public class SettingsBackupTest {
                     Settings.Global.MDC_INITIAL_MAX_RETRY,
                     Settings.Global.MHL_INPUT_SWITCHING_ENABLED,
                     Settings.Global.MHL_POWER_CHARGE_ENABLED,
+                    Settings.Global.MIN_DURATION_BETWEEN_RECOVERY_STEPS_IN_MS,
                     Settings.Global.MOBILE_DATA, // Candidate for backup?
                     Settings.Global.MOBILE_DATA_ALWAYS_ON,
                     Settings.Global.MODE_RINGER,
