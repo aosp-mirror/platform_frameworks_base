@@ -3656,6 +3656,8 @@ class StorageManagerService extends IStorageManager.Stub
                     == PERMISSION_GRANTED || mIAppOpsService.checkOperation(
                             OP_REQUEST_INSTALL_PACKAGES, uid, packageName) == MODE_ALLOWED) {
                 return Zygote.MOUNT_EXTERNAL_INSTALLER;
+            } else if (mPmInternal.isInstantApp(packageName, UserHandle.getUserId(uid))) {
+                return Zygote.MOUNT_EXTERNAL_NONE;
             } else {
                 return Zygote.MOUNT_EXTERNAL_WRITE;
             }
