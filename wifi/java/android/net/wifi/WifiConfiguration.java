@@ -955,9 +955,12 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
-     * @hide
      * Returns MAC address set to be the local randomized MAC address.
      * Does not guarantee that the returned address is valid for use.
+     * <p>
+     * Information is restricted to Device Owner, Profile Owner, and Carrier apps
+     * (which will only obtain addresses for configurations which they create). Other callers
+     * will receive a default "02:00:00:00:00:00" MAC address.
      */
     public @NonNull MacAddress getRandomizedMacAddress() {
         return mRandomizedMacAddress;
