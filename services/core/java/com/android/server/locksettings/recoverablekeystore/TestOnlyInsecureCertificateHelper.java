@@ -87,13 +87,13 @@ public class TestOnlyInsecureCertificateHelper {
                 || isTestOnlyCertificateAlias(rootCertificateAlias);
     }
 
-    boolean doesCredentialSupportInsecureMode(int credentialType, String credential) {
+    public boolean doesCredentialSupportInsecureMode(int credentialType, String credential) {
         return (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD)
             && (credential != null)
             && credential.startsWith(TrustedRootCertificates.INSECURE_PASSWORD_PREFIX);
     }
 
-    Map<String, Pair<SecretKey, byte[]>> keepOnlyWhitelistedInsecureKeys(
+    public Map<String, Pair<SecretKey, byte[]>> keepOnlyWhitelistedInsecureKeys(
             Map<String, Pair<SecretKey, byte[]>> rawKeys) {
         if (rawKeys == null) {
             return null;
