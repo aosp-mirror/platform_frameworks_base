@@ -17,7 +17,9 @@
 package com.android.server.os;
 
 import android.annotation.RequiresPermission;
+import android.app.AppOpsManager;
 import android.content.Context;
+import android.os.Binder;
 import android.os.BugreportParams;
 import android.os.IDumpstate;
 import android.os.IDumpstateListener;
@@ -46,9 +48,11 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
     private IDumpstate mDs = null;
     private final Context mContext;
+    private final AppOpsManager mAppOps;
 
     BugreportManagerServiceImpl(Context context) {
         mContext = context;
+        mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
     }
 
     @Override
@@ -60,21 +64,24 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         throw new UnsupportedOperationException("setListener is not allowed on this service");
     }
 
-
     @Override
     @RequiresPermission(android.Manifest.permission.DUMP)
-    public void startBugreport(FileDescriptor bugreportFd, FileDescriptor screenshotFd,
+    public void startBugreport(int callingUidUnused, String callingPackage,
+            FileDescriptor bugreportFd, FileDescriptor screenshotFd,
             int bugreportMode, IDumpstateListener listener) throws RemoteException {
-
+        int callingUid = Binder.getCallingUid();
+        // TODO(b/111441001): validate all arguments & ensure primary user
         validate(bugreportMode);
 
+        mAppOps.checkPackage(callingUid, callingPackage);
         mDs = getDumpstateService();
         if (mDs == null) {
             Slog.w(TAG, "Unable to get bugreport service");
             // TODO(b/111441001): pass error on listener
             return;
         }
-        mDs.startBugreport(bugreportFd, screenshotFd, bugreportMode, listener);
+        mDs.startBugreport(callingUid, callingPackage,
+                bugreportFd, screenshotFd, bugreportMode, listener);
     }
 
     private boolean validate(@BugreportParams.BugreportMode int mode) {
