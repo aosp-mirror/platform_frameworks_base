@@ -132,7 +132,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private LayoutListener mLayoutListener;
-    private boolean mDark;
     private boolean mLowPriorityStateUpdated;
     private final NotificationInflater mNotificationInflater;
     private int mIconTransformContentShift;
@@ -146,7 +145,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mNotificationMinHeight;
     private int mNotificationMinHeightLarge;
     private int mNotificationMaxHeight;
-    private int mNotificationAmbientHeight;
     private int mIncreasedPaddingBetweenElements;
     private int mNotificationLaunchHeight;
     private boolean mMustStayOnScreen;
@@ -677,8 +675,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (headsUpWrapper != null) {
             headsUpHeight = Math.max(headsUpHeight, headsUpWrapper.getMinLayoutHeight());
         }
-        layout.setHeights(minHeight, headsUpHeight, mNotificationMaxHeight,
-                mNotificationAmbientHeight);
+        layout.setHeights(minHeight, headsUpHeight, mNotificationMaxHeight, headsUpHeight);
     }
 
     public StatusBarNotification getStatusBarNotification() {
@@ -1647,8 +1644,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 R.dimen.notification_min_height_increased);
         mNotificationMaxHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_height);
-        mNotificationAmbientHeight = NotificationUtils.getFontScaledHeight(mContext,
-                R.dimen.notification_ambient_height);
         mMaxHeadsUpHeightBeforeN = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_heads_up_height_legacy);
         mMaxHeadsUpHeightBeforeP = NotificationUtils.getFontScaledHeight(mContext,
@@ -2008,8 +2003,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public void setDark(boolean dark, boolean fade, long delay) {
+        if (mDark == dark) {
+            return;
+        }
         super.setDark(dark, fade, delay);
-        mDark = dark;
         if (!mIsAmbientPulsing) {
             // Only fade the showing view of the pulsing notification.
             fade = false;
@@ -2017,9 +2014,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         final NotificationContentView showing = getShowingLayout();
         if (showing != null) {
             showing.setDark(dark, fade, delay);
-        }
-        if (mIsSummaryWithChildren) {
-            mChildrenContainer.setDark(dark, fade, delay);
         }
         updateShelfIconColor();
     }

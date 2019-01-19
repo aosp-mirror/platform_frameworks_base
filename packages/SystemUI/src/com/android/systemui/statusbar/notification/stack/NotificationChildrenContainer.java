@@ -316,7 +316,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         StatusBarNotification notification = mContainingNotification.getStatusBarNotification();
         final Notification.Builder builder = Notification.Builder.recoverBuilder(getContext(),
                 notification.getNotification());
-        RemoteViews header = builder.makeNotificationHeader(false /* ambient */);
+        RemoteViews header = builder.makeNotificationHeader();
         if (mNotificationHeader == null) {
             mNotificationHeader = (NotificationHeaderView) header.apply(getContext(), this);
             final View expandButton = mNotificationHeader.findViewById(
@@ -344,7 +344,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             builder = Notification.Builder.recoverBuilder(getContext(),
                     notification.getNotification());
         }
-        header = builder.makeNotificationHeader(true /* ambient */);
+        header = builder.makeNotificationHeader();
         if (mNotificationHeaderAmbient == null) {
             mNotificationHeaderAmbient = (ViewGroup) header.apply(getContext(), this);
             mNotificationHeaderWrapperAmbient = NotificationViewWrapper.wrap(getContext(),
@@ -1171,12 +1171,6 @@ public class NotificationChildrenContainer extends ViewGroup {
         return mIsLowPriority && !mContainingNotification.isExpanded();
     }
 
-    public void setDark(boolean dark, boolean fade, long delay) {
-        if (mOverflowNumber != null) {
-            mHybridGroupManager.setOverflowNumberDark(mOverflowNumber, dark, fade, delay);
-        }
-    }
-
     public void reInflateViews(OnClickListener listener, StatusBarNotification notification) {
         if (mNotificationHeader != null) {
             removeView(mNotificationHeader);
@@ -1227,8 +1221,7 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     public void onNotificationUpdated() {
         mHybridGroupManager.setOverflowNumberColor(mOverflowNumber,
-                mContainingNotification.getNotificationColor(),
-                mContainingNotification.getNotificationColorAmbient());
+                mContainingNotification.getNotificationColor());
     }
 
     public int getPositionInLinearLayout(View childInGroup) {

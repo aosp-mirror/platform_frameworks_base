@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import android.graphics.Color;
 import android.os.Trace;
-import android.util.MathUtils;
 
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
@@ -56,13 +56,6 @@ public enum ScrimState {
             }
             mCurrentBehindAlpha = mScrimBehindAlphaKeyguard;
             mCurrentInFrontAlpha = 0;
-        }
-
-        @Override
-        public float getBehindAlpha(float busynessFactor) {
-            return MathUtils.map(0 /* start */, 1 /* stop */,
-                    mScrimBehindAlphaKeyguard, ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
-                    busynessFactor);
         }
     },
 
@@ -117,7 +110,7 @@ public enum ScrimState {
         }
 
         @Override
-        public float getBehindAlpha(float busyness) {
+        public float getBehindAlpha() {
             return mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
         }
 
@@ -133,16 +126,16 @@ public enum ScrimState {
     PULSING(5) {
         @Override
         public void prepare(ScrimState previousState) {
-            mCurrentInFrontAlpha = 0;
-            mCurrentInFrontTint = Color.BLACK;
-            mCurrentBehindTint = Color.BLACK;
+            mCurrentInFrontAlpha = 0f;
+            if (mPulseReason == DozeLog.PULSE_REASON_NOTIFICATION
+                    || mPulseReason == DozeLog.PULSE_REASON_DOCKING) {
+                mCurrentBehindAlpha = previousState.getBehindAlpha();
+                mCurrentBehindTint = Color.BLACK;
+            } else {
+                mCurrentBehindAlpha = mScrimBehindAlphaKeyguard;
+                mCurrentBehindTint = Color.TRANSPARENT;
+            }
             mBlankScreen = mDisplayRequiresBlanking;
-        }
-
-        @Override
-        public float getBehindAlpha(float busyness) {
-            return mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f
-                    : ScrimController.PULSING_WALLPAPER_SCRIM_ALPHA;
         }
     },
 
@@ -204,6 +197,7 @@ public enum ScrimState {
     int mIndex;
     boolean mHasBackdrop;
     boolean mLaunchingAffordanceWithPreview;
+    int mPulseReason;
 
     ScrimState(int index) {
         mIndex = index;
@@ -235,7 +229,7 @@ public enum ScrimState {
         return mCurrentInFrontAlpha;
     }
 
-    public float getBehindAlpha(float busyness) {
+    public float getBehindAlpha() {
         return mCurrentBehindAlpha;
     }
 
@@ -274,6 +268,10 @@ public enum ScrimState {
 
     public void setAodFrontScrimAlpha(float aodFrontScrimAlpha) {
         mAodFrontScrimAlpha = aodFrontScrimAlpha;
+    }
+
+    public void setPulseReason(int pulseReason) {
+        mPulseReason = pulseReason;
     }
 
     public void setScrimBehindAlphaKeyguard(float scrimBehindAlphaKeyguard) {

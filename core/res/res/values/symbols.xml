@@ -3076,8 +3076,6 @@
 
   <java-symbol type="dimen" name="config_appTransitionAnimationDurationScaleDefault" />
 
-  <java-symbol type="layout" name="notification_template_material_ambient" />
-
   <!-- Network Recommendation -->
   <java-symbol type="string" name="config_defaultNetworkRecommendationProviderPackage" />
 
@@ -3236,8 +3234,6 @@
   <java-symbol type="drawable" name="btn_clock_material"/>
   <java-symbol type="string" name="time_picker_text_input_mode_description"/>
   <java-symbol type="string" name="time_picker_radial_mode_description"/>
-
-  <java-symbol type="layout" name="notification_template_ambient_header" />
 
   <!-- resolver activity -->
   <java-symbol type="drawable" name="resolver_icon_placeholder" />

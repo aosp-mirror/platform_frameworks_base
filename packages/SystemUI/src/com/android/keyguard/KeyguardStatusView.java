@@ -72,7 +72,6 @@ public class KeyguardStatusView extends GridLayout implements
 
     private ArraySet<View> mVisibleInDoze;
     private boolean mPulsing;
-    private boolean mWasPulsing;
     private float mDarkAmount = 0;
     private int mTextColor;
     private int mLastLayoutHeight;
@@ -210,7 +209,7 @@ public class KeyguardStatusView extends GridLayout implements
     private void onSliceContentChanged() {
         LinearLayout.LayoutParams layoutParams =
                 (LinearLayout.LayoutParams) mClockView.getLayoutParams();
-        layoutParams.bottomMargin = mPulsing ? mSmallClockPadding : 0;
+        layoutParams.bottomMargin = mKeyguardSlice.hasHeader() ? mSmallClockPadding : 0;
         mClockView.setLayoutParams(layoutParams);
     }
 
@@ -220,16 +219,16 @@ public class KeyguardStatusView extends GridLayout implements
     @Override
     public void onLayoutChange(View view, int left, int top, int right, int bottom,
             int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        int heightOffset = mPulsing || mWasPulsing ? 0 : getHeight() - mLastLayoutHeight;
+        boolean smallClock = mKeyguardSlice.hasHeader();
+        int heightOffset = smallClock ? 0 : getHeight() - mLastLayoutHeight;
         long duration = KeyguardSliceView.DEFAULT_ANIM_DURATION;
-        long delay = mPulsing || mWasPulsing ? 0 : duration / 4;
-        mWasPulsing = false;
+        long delay = smallClock ? 0 : duration / 4;
 
         boolean shouldAnimate = mKeyguardSlice.getLayoutTransition() != null
                 && mKeyguardSlice.getLayoutTransition().isRunning();
         if (view == mClockView) {
-            float clockScale = mPulsing ? mSmallClockScale : 1;
-            Paint.Style style = mPulsing ? Paint.Style.FILL_AND_STROKE : Paint.Style.FILL;
+            float clockScale = smallClock ? mSmallClockScale : 1;
+            Paint.Style style = smallClock ? Paint.Style.FILL_AND_STROKE : Paint.Style.FILL;
             mClockView.animate().cancel();
             if (shouldAnimate) {
                 mClockView.setY(oldTop + heightOffset);
@@ -434,15 +433,11 @@ public class KeyguardStatusView extends GridLayout implements
         }
     }
 
-    public void setPulsing(boolean pulsing, boolean animate) {
+    public void setPulsing(boolean pulsing) {
         if (mPulsing == pulsing) {
             return;
         }
-        if (mPulsing) {
-            mWasPulsing = true;
-        }
         mPulsing = pulsing;
-        mKeyguardSlice.setPulsing(pulsing, animate);
         updateDozeVisibleViews();
     }
 

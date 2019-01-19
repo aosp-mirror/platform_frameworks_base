@@ -47,8 +47,6 @@
     <dimen name="bottom_text_spacing_digital">0dp</dimen>
     <!-- Slice subtitle -->
     <dimen name="widget_label_font_size">16dp</dimen>
-    <!-- Slice offset when pulsing -->
-    <dimen name="widget_pulsing_bottom_padding">48dp</dimen>
     <!-- Clock without header -->
     <dimen name="widget_big_font_size">64dp</dimen>
     <!-- Clock with header -->

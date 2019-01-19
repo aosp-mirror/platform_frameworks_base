@@ -29,7 +29,10 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
@@ -37,6 +40,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.HashSet;
 
@@ -45,14 +50,18 @@ import java.util.HashSet;
 @RunWithLooper
 public class NotificationRoundnessManagerTest extends SysuiTestCase {
 
-    private NotificationRoundnessManager mRoundnessManager = new NotificationRoundnessManager();
+    private NotificationRoundnessManager mRoundnessManager;
     private HashSet<ExpandableView> mAnimatedChildren = new HashSet<>();
     private Runnable mRoundnessCallback = mock(Runnable.class);
     private ExpandableNotificationRow mFirst;
     private ExpandableNotificationRow mSecond;
+    @Mock
+    private AmbientPulseManager mAmbientPulseManager;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        mRoundnessManager = new NotificationRoundnessManager(mAmbientPulseManager);
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         NotificationTestHelper testHelper = new NotificationTestHelper(getContext());
         mFirst = testHelper.createRow();
@@ -124,6 +133,27 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         });
         Assert.assertEquals(1.0f, mSecond.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(0.0f, mSecond.getCurrentTopRoundness(), 0.0f);
+    }
+
+    @Test
+    public void testRoundnessPulsing() throws Exception {
+        // Let's create a notification that's neither the first or last item of the stack,
+        // this way we'll ensure that it won't have any rounded corners by default.
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mFirst, mSecond),
+                createSection(null, null)
+        });
+        ExpandableNotificationRow row = new NotificationTestHelper(getContext()).createRow();
+        NotificationEntry entry = mock(NotificationEntry.class);
+        when(entry.getRow()).thenReturn(row);
+
+        mRoundnessManager.onAmbientStateChanged(entry, true);
+        Assert.assertEquals(1f, row.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(1f, row.getCurrentTopRoundness(), 0.0f);
+
+        mRoundnessManager.onAmbientStateChanged(entry, false);
+        Assert.assertEquals(0f, row.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(0f, row.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test

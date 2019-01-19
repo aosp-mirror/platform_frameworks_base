@@ -271,9 +271,6 @@ easier.
     <style name="TextAppearance.DeviceDefault.Notification.Info" parent="TextAppearance.Material.Notification.Info">
         <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>
-    <style name="TextAppearance.DeviceDefault.Notification.Info.Ambient" parent="TextAppearance.Material.Notification.Info.Ambient">
-        <item name="fontFamily">@string/config_bodyFontFamily</item>
-    </style>
     <style name="TextAppearance.DeviceDefault.Widget" parent="TextAppearance.Material.Widget">
         <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>

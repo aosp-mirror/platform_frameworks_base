@@ -487,10 +487,6 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Material.Notification.Time" parent="TextAppearance.Material.Notification.Info" />
 
-    <style name="TextAppearance.Material.Notification.Info.Ambient">
-        <item name="textSize">@dimen/notification_text_size</item>
-    </style>
-
     <style name="TextAppearance.Material.Notification.Emphasis">
         <item name="textColor">#66000000</item>
     </style>
@@ -1306,11 +1302,6 @@ please see styles_device_defaults.xml.
         <item name="paddingStart">@dimen/notification_content_margin_start</item>
         <item name="paddingEnd">@dimen/notification_content_margin_end</item>
         <item name="gravity">top</item>
-    </style>
-
-    <style name="Notification.Header.Ambient">
-        <item name="layout_marginTop">@dimen/notification_header_margin_top_ambient</item>
-        <item name="gravity">top|center_horizontal</item>
     </style>
 
 

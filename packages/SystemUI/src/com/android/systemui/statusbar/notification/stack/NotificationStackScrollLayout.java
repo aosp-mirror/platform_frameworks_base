@@ -201,12 +201,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private int mPaddingBetweenElements;
     private int mIncreasedPaddingBetweenElements;
     private int mMaxTopPadding;
-    private int mRegularTopPadding;
-    private int mDarkTopPadding;
-    // Current padding, will be either mRegularTopPadding or mDarkTopPadding
     private int mTopPadding;
-    // Distance between AOD separator and shelf
-    private int mDarkShelfPadding;
     private int mBottomMargin;
     private int mBottomInset = 0;
     private float mQsExpansionFraction;
@@ -318,7 +313,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private HashSet<Pair<ExpandableNotificationRow, Boolean>> mHeadsUpChangeAnimations
             = new HashSet<>();
     private HeadsUpManagerPhone mHeadsUpManager;
-    private NotificationRoundnessManager mRoundnessManager = new NotificationRoundnessManager();
+    private final NotificationRoundnessManager mRoundnessManager;
     private boolean mTrackingHeadsUp;
     private ScrimController mScrimController;
     private boolean mForceNoOverlappingRendering;
@@ -469,7 +464,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     public NotificationStackScrollLayout(
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
-            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress) {
+            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
+            NotificationRoundnessManager notificationRoundnessManager) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -480,6 +476,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
 
         mAmbientState = new AmbientState(context);
+        mRoundnessManager = notificationRoundnessManager;
         mBgColor = context.getColor(R.color.notification_shade_background_color);
         int minHeight = res.getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight = res.getDimensionPixelSize(R.dimen.notification_max_height);
@@ -496,7 +493,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 res.getBoolean(R.bool.config_drawNotificationBackground);
         mFadeNotificationsOnDismiss =
                 res.getBoolean(R.bool.config_fadeNotificationsOnDismiss);
-        mDarkShelfPadding = res.getDimensionPixelSize(R.dimen.widget_bottom_separator_padding);
         mRoundnessManager.setAnimatedChildren(mChildrenToAddAnimated);
         mRoundnessManager.setOnRoundingChangedCallback(this::invalidate);
         addOnExpandedHeightListener(mRoundnessManager::setExpanded);
@@ -685,7 +681,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         int lockScreenTop = mSections[0].getCurrentBounds().top;
         int lockScreenBottom = mSections[NUM_SECTIONS - 1].getCurrentBounds().bottom;
         int darkLeft = getWidth() / 2;
-        int darkTop = mRegularTopPadding;
+        int darkTop = mTopPadding;
 
         float yProgress = 1 - mInterpolatedDarkAmount;
         float xProgress = mDarkXInterpolator.getInterpolation(
@@ -953,8 +949,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
     private void updateAlgorithmHeightAndPadding() {
-        mTopPadding = (int) MathUtils.lerp(mRegularTopPadding, mDarkTopPadding,
-                mInterpolatedDarkAmount);
         mAmbientState.setLayoutHeight(getLayoutHeight());
         updateAlgorithmLayoutMinHeight();
         mAmbientState.setTopPadding(mTopPadding);
@@ -1092,10 +1086,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void setTopPadding(int topPadding, boolean animate) {
-        if (mRegularTopPadding != topPadding) {
-            mRegularTopPadding = topPadding;
-            mDarkTopPadding = topPadding + mDarkShelfPadding;
-            mAmbientState.setDarkTopPadding(mDarkTopPadding);
+        if (mTopPadding != topPadding) {
+            mTopPadding = topPadding;
             updateAlgorithmHeightAndPadding();
             updateContentHeight();
             if (animate && mAnimationsEnabled && mIsExpanded) {
@@ -2060,10 +2052,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         mIntrinsicContentHeight = height;
 
-        // We don't want to use the toppadding since that might be interpolated and we want
-        // to take the final value of the animation.
-        int topPadding = mAmbientState.isFullyDark() ? mDarkTopPadding : mRegularTopPadding;
-        mContentHeight = height + topPadding + mBottomMargin;
+        mContentHeight = height + mTopPadding + mBottomMargin;
         updateScrollability();
         clampScrollPosition();
         mAmbientState.setLayoutMaxHeight(mContentHeight);
@@ -5222,9 +5211,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         // another "changeViewPosition" call is ever added.
         changeViewPosition(mShelf,
                 getChildCount() - offsetFromEnd);
-
-        // Scrim opacity varies based on notification count
-        mScrimController.setNotificationCount(getNotGoneChildCount());
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)

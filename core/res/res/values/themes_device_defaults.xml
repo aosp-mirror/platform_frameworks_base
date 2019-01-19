@@ -1711,8 +1711,4 @@ easier.
         <item name="notificationHeaderTextAppearance">@style/TextAppearance.DeviceDefault.Notification.Info</item>
     </style>
 
-    <style name="Theme.DeviceDefault.Notification.Ambient" parent="@style/Theme.Material.Notification.Ambient">
-        <item name="notificationHeaderTextAppearance">@style/TextAppearance.DeviceDefault.Notification.Info.Ambient</item>
-    </style>
-
 </resources>
