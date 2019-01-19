@@ -20,7 +20,6 @@ import static android.service.autofill.augmented.AugmentedAutofillService.VERBOS
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
-import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -42,8 +41,6 @@ import com.android.internal.util.Preconditions;
 import dalvik.system.CloseGuard;
 
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * Handle to a window used to display the augmented autofill UI.
@@ -71,18 +68,6 @@ import java.lang.annotation.RetentionPolicy;
 public final class FillWindow implements AutoCloseable {
     private static final String TAG = "FillWindow";
 
-    /** Indicates the data being shown is a physical address */
-    public static final long FLAG_METADATA_ADDRESS = 0x1;
-
-    // TODO(b/111330312): add more flags
-
-    /** @hide */
-    @LongDef(prefix = { "FLAG" }, value = {
-            FLAG_METADATA_ADDRESS,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    @interface Flags{}
-
     private final Object mLock = new Object();
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
@@ -108,28 +93,21 @@ public final class FillWindow implements AutoCloseable {
      *
      * @param rootView new root view
      * @param area coordinates to render the view.
-     * @param flags optional flags such as metadata of what will be rendered in the window. The
-     * Smart Suggestion host might decide whether or not to render the UI based on them.
+     * @param flags currently not used.
      *
      * @return boolean whether the window was updated or not.
      *
      * @throws IllegalArgumentException if the area is not compatible with this window
      */
-    public boolean update(@NonNull Area area, @NonNull View rootView, @Flags long flags) {
+    public boolean update(@NonNull Area area, @NonNull View rootView, long flags) {
         if (DEBUG) {
             Log.d(TAG, "Updating " + area + " + with " + rootView);
         }
-        // TODO(b/111330312): add test case for null
+        // TODO(b/123100712): add test case for null
         Preconditions.checkNotNull(area);
         Preconditions.checkNotNull(rootView);
-        // TODO(b/111330312): must check the area is a valid object returned by
+        // TODO(b/123100712): must check the area is a valid object returned by
         // SmartSuggestionParams, throw IAE if not
-
-        // TODO(b/111330312): must some how pass metadata to the SmartSuggestiongs provider
-
-
-        // TODO(b/111330312): use a SurfaceControl approach; for now, we're manually creating
-        // the window underneath the existing view.
 
         final PresentationParams smartSuggestion = area.proxy.getSmartSuggestionParams();
         if (smartSuggestion == null) {
@@ -148,12 +126,12 @@ public final class FillWindow implements AutoCloseable {
 
             mProxy = area.proxy;
 
-            // TODO(b/111330312): once we have the SurfaceControl approach, we should update the
+            // TODO(b/123227534): once we have the SurfaceControl approach, we should update the
             // window instead of destroying. In fact, it might be better to allocate a full window
             // initially, which is transparent (and let touches get through) everywhere but in the
             // rect boundaries.
 
-            // TODO(b/111330312): make sure all touch events are handled, window is always closed,
+            // TODO(b/123099468): make sure all touch events are handled, window is always closed,
             // etc.
 
             mWm = rootView.getContext().getSystemService(WindowManager.class);
@@ -181,7 +159,7 @@ public final class FillWindow implements AutoCloseable {
 
     /** @hide */
     void show() {
-        // TODO(b/111330312): check if updated first / throw exception
+        // TODO(b/123100712): check if updated first / throw exception
         if (DEBUG) Log.d(TAG, "show()");
         synchronized (mLock) {
             checkNotDestroyedLocked();

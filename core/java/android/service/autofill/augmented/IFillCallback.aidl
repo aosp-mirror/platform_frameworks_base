@@ -24,8 +24,7 @@ import android.os.ICancellationSignal;
  * @hide
  */
 interface IFillCallback {
-    // TODO(b/111330312): add cancellation (after we have CTS tests, so we can test it)
+    // TODO(b/123101711): add cancellation (after we have CTS tests, so we can test it)
 //    void onCancellable(in ICancellationSignal cancellation);
-    // TODO(b/111330312): might need to pass the response (once IME implements Smart Suggestions)
     void onSuccess();
 }

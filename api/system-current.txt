@@ -5985,10 +5985,7 @@ package android.service.autofill.augmented {
     method public int getTaskId();
   }
 
-  public final class FillResponse implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.autofill.augmented.FillResponse> CREATOR;
+  public final class FillResponse {
   }
 
   public static final class FillResponse.Builder {
@@ -6002,7 +5999,6 @@ package android.service.autofill.augmented {
     ctor public FillWindow();
     method public void destroy();
     method public boolean update(@NonNull android.service.autofill.augmented.PresentationParams.Area, @NonNull android.view.View, long);
-    field public static final long FLAG_METADATA_ADDRESS = 1L; // 0x1L
   }
 
   public abstract class PresentationParams {
@@ -9032,6 +9028,18 @@ package android.view.accessibility {
   public final class AccessibilityManager {
     method public int getAccessibilityWindowId(android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void performAccessibilityShortcut();
+  }
+
+}
+
+package android.view.autofill {
+
+  public final class AutofillManager {
+    method @NonNull public java.util.Set<android.content.ComponentName> getAugmentedAutofillDisabledActivities();
+    method @NonNull public java.util.Set<java.lang.String> getAugmentedAutofillDisabledPackages();
+    method public void setActivityAugmentedAutofillEnabled(@NonNull android.content.ComponentName, boolean);
+    method public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    method public void setPackageAugmentedAutofillEnabled(@NonNull String, boolean);
   }
 
 }
