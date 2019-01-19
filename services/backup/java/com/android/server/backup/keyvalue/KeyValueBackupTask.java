@@ -489,7 +489,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             throw AgentException.permanent(e);
         }
         ApplicationInfo applicationInfo = packageInfo.applicationInfo;
-        if (!AppBackupUtils.appIsEligibleForBackup(applicationInfo, mPackageManager)) {
+        if (!AppBackupUtils.appIsEligibleForBackup(applicationInfo, mUserId)) {
             mReporter.onPackageNotEligibleForBackup(packageName);
             throw AgentException.permanent();
         }

@@ -549,6 +549,19 @@ interface IBackupManager {
 
     /**
      * Notify the backup manager that a BackupAgent has completed the operation
+     * corresponding to the given token and user id.
+     *
+     * @param userId User id for which the operation has been completed.
+     * @param token The transaction token passed to the BackupAgent method being
+     *        invoked.
+     * @param result In the case of a full backup measure operation, the estimated
+     *        total file size that would result from the operation. Unused in all other
+     *        cases.
+     */
+    void opCompleteForUser(int userId, int token, long result);
+
+    /**
+     * Notify the backup manager that a BackupAgent has completed the operation
      * corresponding to the given token.
      *
      * @param token The transaction token passed to the BackupAgent method being

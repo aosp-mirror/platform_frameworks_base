@@ -116,6 +116,7 @@ import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.testing.shadows.FrameworkShadowLooper;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
+import com.android.server.testing.shadows.ShadowBackupActivityThread;
 import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
 import com.android.server.testing.shadows.ShadowEventLog;
@@ -163,6 +164,7 @@ import java.util.stream.Stream;
             ShadowBackupDataOutput.class,
             ShadowEventLog.class,
             ShadowQueuedWork.class,
+            ShadowBackupActivityThread.class,
         })
 @Presubmit
 public class KeyValueBackupTaskTest {

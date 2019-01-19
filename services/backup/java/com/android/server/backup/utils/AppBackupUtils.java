@@ -18,19 +18,25 @@ package com.android.server.backup.utils;
 
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.PACKAGE_MANAGER_SENTINEL;
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
 import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.app.backup.BackupTransport;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.backup.transport.TransportClient;
@@ -39,7 +45,6 @@ import com.android.server.backup.transport.TransportClient;
  * Utility methods wrapping operations on ApplicationInfo and PackageInfo.
  */
 public class AppBackupUtils {
-
     private static final boolean DEBUG = false;
 
     /**
@@ -54,15 +59,30 @@ public class AppBackupUtils {
      *     <li>it is the special shared-storage backup package used for 'adb backup'
      * </ol>
      */
-    public static boolean appIsEligibleForBackup(ApplicationInfo app, PackageManager pm) {
+    public static boolean appIsEligibleForBackup(ApplicationInfo app, int userId) {
+        return appIsEligibleForBackup(app, AppGlobals.getPackageManager(), userId);
+    }
+
+    @VisibleForTesting
+    static boolean appIsEligibleForBackup(ApplicationInfo app,
+        IPackageManager packageManager, int userId) {
         // 1. their manifest states android:allowBackup="false"
         if ((app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
             return false;
         }
 
-        // 2. they run as a system-level uid but do not supply their own backup agent
-        if ((app.uid < Process.FIRST_APPLICATION_UID) && (app.backupAgentName == null)) {
-            return false;
+        // 2. they run as a system-level uid
+        if ((app.uid < Process.FIRST_APPLICATION_UID)) {
+            // and the backup is happening for non-system user
+            if (userId != UserHandle.USER_SYSTEM && !app.packageName.equals(
+                    PACKAGE_MANAGER_SENTINEL)) {
+                return false;
+            }
+
+            // or do not supply their own backup agent
+            if (app.backupAgentName == null) {
+                return false;
+            }
         }
 
         // 3. it is the special shared-storage backup package used for 'adb backup'
@@ -75,9 +95,7 @@ public class AppBackupUtils {
             return false;
         }
 
-        // Everything else checks out; the only remaining roadblock would be if the
-        // package were disabled
-        return !appIsDisabled(app, pm);
+        return !appIsDisabled(app, packageManager, userId);
     }
 
     /**
@@ -99,9 +117,9 @@ public class AppBackupUtils {
             PackageInfo packageInfo = pm.getPackageInfoAsUser(packageName,
                     PackageManager.GET_SIGNING_CERTIFICATES, userId);
             ApplicationInfo applicationInfo = packageInfo.applicationInfo;
-            if (!appIsEligibleForBackup(applicationInfo, pm)
+            if (!appIsEligibleForBackup(applicationInfo, userId)
                     || appIsStopped(applicationInfo)
-                    || appIsDisabled(applicationInfo, pm)) {
+                    || appIsDisabled(applicationInfo, userId)) {
                 return false;
             }
             if (transportClient != null) {
@@ -123,8 +141,22 @@ public class AppBackupUtils {
     }
 
     /** Avoid backups of 'disabled' apps. */
-    public static boolean appIsDisabled(ApplicationInfo app, PackageManager pm) {
-        switch (pm.getApplicationEnabledSetting(app.packageName)) {
+    static boolean appIsDisabled(ApplicationInfo app, int userId) {
+        return appIsDisabled(app, AppGlobals.getPackageManager(), userId);
+    }
+
+    @VisibleForTesting
+    static boolean appIsDisabled(ApplicationInfo app,
+        IPackageManager packageManager, int userId) {
+        int enabledSetting;
+        try {
+            enabledSetting = packageManager.getApplicationEnabledSetting(app.packageName, userId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to get application enabled setting: " + e);
+            return false;
+        }
+
+        switch (enabledSetting) {
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:

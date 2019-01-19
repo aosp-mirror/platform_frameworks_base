@@ -143,6 +143,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     private final int mBackupRunnerOpToken;
     private final OnTaskFinishedListener mListener;
     private final TransportClient mTransportClient;
+    private final int mUserId;
 
     // This is true when a backup operation for some package is in progress.
     private volatile boolean mIsDoingBackup;
@@ -173,6 +174,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         mAgentTimeoutParameters = Preconditions.checkNotNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
+        mUserId = backupManagerService.getUserId();
 
         if (backupManagerService.isBackupOperationInProgress()) {
             if (DEBUG) {
@@ -187,9 +189,10 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         for (String pkg : whichPackages) {
             try {
                 PackageManager pm = backupManagerService.getPackageManager();
-                PackageInfo info = pm.getPackageInfo(pkg, PackageManager.GET_SIGNING_CERTIFICATES);
+                PackageInfo info = pm.getPackageInfoAsUser(pkg,
+                        PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
                 mCurrentPackage = info;
-                if (!AppBackupUtils.appIsEligibleForBackup(info.applicationInfo, pm)) {
+                if (!AppBackupUtils.appIsEligibleForBackup(info.applicationInfo, mUserId)) {
                     // Cull any packages that have indicated that backups are not permitted,
                     // that run as system-domain uids but do not define their own backup agents,
                     // as well as any explicit mention of the 'special' shared-storage agent
@@ -633,7 +636,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             unregisterTask();
 
             if (mJob != null) {
-                mJob.finishBackupPass(backupManagerService.getUserId());
+                mJob.finishBackupPass(mUserId);
             }
 
             synchronized (backupManagerService.getQueueLock()) {
