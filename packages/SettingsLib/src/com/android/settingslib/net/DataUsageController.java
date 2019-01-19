@@ -66,6 +66,7 @@ public class DataUsageController {
     private INetworkStatsSession mSession;
     private Callback mCallback;
     private NetworkNameProvider mNetworkController;
+    private int mSubscriptionId;
 
     public DataUsageController(Context context) {
         mContext = context;
@@ -75,10 +76,20 @@ public class DataUsageController {
                 ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         mPolicyManager = NetworkPolicyManager.from(mContext);
         mNetworkStatsManager = context.getSystemService(NetworkStatsManager.class);
+        mSubscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     }
 
     public void setNetworkController(NetworkNameProvider networkController) {
         mNetworkController = networkController;
+    }
+
+    /**
+     * By default this class will just get data usage information for the default data subscription,
+     * but this method can be called to require it to use an explicit subscription id which may be
+     * different from the default one (this is useful for the case of multi-SIM devices).
+     */
+    public void setSubscriptionId(int subscriptionId) {
+        mSubscriptionId = subscriptionId;
     }
 
     /**
@@ -99,7 +110,7 @@ public class DataUsageController {
     }
 
     public DataUsageInfo getDataUsageInfo() {
-        final String subscriberId = getActiveSubscriberId(mContext);
+        final String subscriberId = getActiveSubscriberId();
         if (subscriberId == null) {
             return warn("no subscriber id");
         }
@@ -164,7 +175,8 @@ public class DataUsageController {
     private long getUsageLevel(NetworkTemplate template, long start, long end) {
         try {
             final Bucket bucket = mNetworkStatsManager.querySummaryForDevice(
-                getNetworkType(template), getActiveSubscriberId(mContext), start, end);
+                    getNetworkType(template), getActiveSubscriberId(),
+                    start, end);
             if (bucket != null) {
                 return bucket.getRxBytes() + bucket.getTxBytes();
             }
@@ -237,10 +249,13 @@ public class DataUsageController {
         }
     }
 
-    private static String getActiveSubscriberId(Context context) {
-        final TelephonyManager tele = TelephonyManager.from(context);
-        final String actualSubscriberId = tele.getSubscriberId(
-                SubscriptionManager.getDefaultDataSubscriptionId());
+    private String getActiveSubscriberId() {
+        final TelephonyManager tele = TelephonyManager.from(mContext);
+        int subscriptionId = mSubscriptionId;
+        if (subscriptionId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            subscriptionId = SubscriptionManager.getDefaultDataSubscriptionId();
+        }
+        final String actualSubscriberId = tele.getSubscriberId(subscriptionId);
         return actualSubscriberId;
     }
 
