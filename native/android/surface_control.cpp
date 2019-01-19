@@ -14,14 +14,26 @@
  * limitations under the License.
  */
 
+#include <android/hardware/configstore/1.0/ISurfaceFlingerConfigs.h>
 #include <android/native_window.h>
 #include <android/surface_control.h>
 
+#include <configstore/Utils.h>
+
+#include <gui/HdrMetadata.h>
+#include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SurfaceControl.h>
 
+#include <ui/HdrCapabilities.h>
+
+#include <utils/Timers.h>
+
+using namespace android::hardware::configstore;
+using namespace android::hardware::configstore::V1_0;
 using namespace android;
+using android::hardware::configstore::V1_0::ISurfaceFlingerConfigs;
 
 using Transaction = SurfaceComposerClient::Transaction;
 
@@ -95,10 +107,9 @@ ASurfaceControl* ASurfaceControl_create(ASurfaceControl* parent, const char* deb
     return reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
 }
 
-void ASurfaceControl_destroy(ASurfaceControl* aSurfaceControl) {
+void ASurfaceControl_release(ASurfaceControl* aSurfaceControl) {
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
 
-    Transaction().reparent(surfaceControl, nullptr).apply();
     SurfaceControl_release(surfaceControl.get());
 }
 
@@ -120,6 +131,86 @@ void ASurfaceTransaction_apply(ASurfaceTransaction* aSurfaceTransaction) {
     transaction->apply();
 }
 
+typedef struct ASurfaceControlStats {
+    int64_t acquireTime;
+    sp<Fence> previousReleaseFence;
+} ASurfaceControlStats;
+
+struct ASurfaceTransactionStats {
+    std::unordered_map<ASurfaceControl*, ASurfaceControlStats> aSurfaceControlStats;
+    int64_t latchTime;
+    sp<Fence> presentFence;
+};
+
+int64_t ASurfaceTransactionStats_getLatchTime(ASurfaceTransactionStats* aSurfaceTransactionStats) {
+    CHECK_NOT_NULL(aSurfaceTransactionStats);
+    return aSurfaceTransactionStats->latchTime;
+}
+
+int ASurfaceTransactionStats_getPresentFenceFd(ASurfaceTransactionStats* aSurfaceTransactionStats) {
+    CHECK_NOT_NULL(aSurfaceTransactionStats);
+    auto& presentFence = aSurfaceTransactionStats->presentFence;
+    return (presentFence) ? presentFence->dup() : -1;
+}
+
+void ASurfaceTransactionStats_getASurfaceControls(ASurfaceTransactionStats* aSurfaceTransactionStats,
+                                                  ASurfaceControl*** outASurfaceControls,
+                                                  size_t* outASurfaceControlsSize) {
+    CHECK_NOT_NULL(aSurfaceTransactionStats);
+    CHECK_NOT_NULL(outASurfaceControls);
+    CHECK_NOT_NULL(outASurfaceControlsSize);
+
+    size_t size = aSurfaceTransactionStats->aSurfaceControlStats.size();
+
+    SurfaceControl** surfaceControls = new SurfaceControl*[size];
+    ASurfaceControl** aSurfaceControls = reinterpret_cast<ASurfaceControl**>(surfaceControls);
+
+    size_t i = 0;
+    for (auto& [aSurfaceControl, aSurfaceControlStats] : aSurfaceTransactionStats->aSurfaceControlStats) {
+        aSurfaceControls[i] = aSurfaceControl;
+        i++;
+    }
+
+    *outASurfaceControls = aSurfaceControls;
+    *outASurfaceControlsSize = size;
+}
+
+int64_t ASurfaceTransactionStats_getAcquireTime(ASurfaceTransactionStats* aSurfaceTransactionStats,
+                                                ASurfaceControl* aSurfaceControl) {
+    CHECK_NOT_NULL(aSurfaceTransactionStats);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    const auto& aSurfaceControlStats =
+            aSurfaceTransactionStats->aSurfaceControlStats.find(aSurfaceControl);
+    LOG_ALWAYS_FATAL_IF(
+            aSurfaceControlStats == aSurfaceTransactionStats->aSurfaceControlStats.end(),
+            "ASurfaceControl not found");
+
+    return aSurfaceControlStats->second.acquireTime;
+}
+
+int ASurfaceTransactionStats_getPreviousReleaseFenceFd(
+            ASurfaceTransactionStats* aSurfaceTransactionStats, ASurfaceControl* aSurfaceControl) {
+    CHECK_NOT_NULL(aSurfaceTransactionStats);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    const auto& aSurfaceControlStats =
+            aSurfaceTransactionStats->aSurfaceControlStats.find(aSurfaceControl);
+    LOG_ALWAYS_FATAL_IF(
+            aSurfaceControlStats == aSurfaceTransactionStats->aSurfaceControlStats.end(),
+            "ASurfaceControl not found");
+
+    auto& previousReleaseFence = aSurfaceControlStats->second.previousReleaseFence;
+    return (previousReleaseFence) ? previousReleaseFence->dup() : -1;
+}
+
+void ASurfaceTransactionStats_releaseASurfaceControls(ASurfaceControl** aSurfaceControls) {
+    CHECK_NOT_NULL(aSurfaceControls);
+
+    SurfaceControl** surfaceControls = reinterpret_cast<SurfaceControl**>(aSurfaceControls);
+    delete[] surfaceControls;
+}
+
 void ASurfaceTransaction_setOnComplete(ASurfaceTransaction* aSurfaceTransaction, void* context,
                                        ASurfaceTransaction_OnComplete func) {
     CHECK_NOT_NULL(aSurfaceTransaction);
@@ -127,9 +218,23 @@ void ASurfaceTransaction_setOnComplete(ASurfaceTransaction* aSurfaceTransaction,
     CHECK_NOT_NULL(func);
 
     TransactionCompletedCallbackTakesContext callback = [func](void* callback_context,
-                                                               const TransactionStats& stats) {
-        int fence = (stats.presentFence) ? stats.presentFence->dup() : -1;
-        (*func)(callback_context, fence);
+                                                               nsecs_t latchTime,
+                                                               const sp<Fence>& presentFence,
+                                                               const std::vector<SurfaceControlStats>& surfaceControlStats) {
+        ASurfaceTransactionStats aSurfaceTransactionStats;
+
+        aSurfaceTransactionStats.latchTime = latchTime;
+        aSurfaceTransactionStats.presentFence = presentFence;
+
+        auto& aSurfaceControlStats = aSurfaceTransactionStats.aSurfaceControlStats;
+
+        for (const auto& [surfaceControl, acquireTime, previousReleaseFence] : surfaceControlStats) {
+            ASurfaceControl* aSurfaceControl = reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
+            aSurfaceControlStats[aSurfaceControl].acquireTime = acquireTime;
+            aSurfaceControlStats[aSurfaceControl].previousReleaseFence = previousReleaseFence;
+        }
+
+        (*func)(callback_context, &aSurfaceTransactionStats);
     };
 
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
@@ -137,7 +242,23 @@ void ASurfaceTransaction_setOnComplete(ASurfaceTransaction* aSurfaceTransaction,
     transaction->addTransactionCompletedCallback(callback, context);
 }
 
-void ASurfaceTransaction_setVisibility(ASurfaceTransaction* aSurfaceTransaction, ASurfaceControl* aSurfaceControl,
+void ASurfaceTransaction_reparent(ASurfaceTransaction* aSurfaceTransaction,
+                                  ASurfaceControl* aSurfaceControl,
+                                  ASurfaceControl* newParentASurfaceControl) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    sp<SurfaceControl> newParentSurfaceControl = ASurfaceControl_to_SurfaceControl(
+            newParentASurfaceControl);
+    sp<IBinder> newParentHandle = (newParentSurfaceControl)? newParentSurfaceControl->getHandle() : nullptr;
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->reparent(surfaceControl, newParentHandle);
+}
+
+void ASurfaceTransaction_setVisibility(ASurfaceTransaction* aSurfaceTransaction,
+                                       ASurfaceControl* aSurfaceControl,
                                        int8_t visibility) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
@@ -157,7 +278,8 @@ void ASurfaceTransaction_setVisibility(ASurfaceTransaction* aSurfaceTransaction,
     }
 }
 
-void ASurfaceTransaction_setZOrder(ASurfaceTransaction* aSurfaceTransaction, ASurfaceControl* aSurfaceControl,
+void ASurfaceTransaction_setZOrder(ASurfaceTransaction* aSurfaceTransaction,
+                                   ASurfaceControl* aSurfaceControl,
                                    int32_t z_order) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
@@ -168,8 +290,9 @@ void ASurfaceTransaction_setZOrder(ASurfaceTransaction* aSurfaceTransaction, ASu
     transaction->setLayer(surfaceControl, z_order);
 }
 
-void ASurfaceTransaction_setBuffer(ASurfaceTransaction* aSurfaceTransaction, ASurfaceControl* aSurfaceControl,
-                                   AHardwareBuffer* buffer, int fence_fd) {
+void ASurfaceTransaction_setBuffer(ASurfaceTransaction* aSurfaceTransaction,
+                                   ASurfaceControl* aSurfaceControl,
+                                   AHardwareBuffer* buffer, int acquire_fence_fd) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
 
@@ -179,8 +302,8 @@ void ASurfaceTransaction_setBuffer(ASurfaceTransaction* aSurfaceTransaction, ASu
     sp<GraphicBuffer> graphic_buffer(reinterpret_cast<GraphicBuffer*>(buffer));
 
     transaction->setBuffer(surfaceControl, graphic_buffer);
-    if (fence_fd != -1) {
-        sp<Fence> fence = new Fence(fence_fd);
+    if (acquire_fence_fd != -1) {
+        sp<Fence> fence = new Fence(acquire_fence_fd);
         transaction->setAcquireFence(surfaceControl, fence);
     }
 }
@@ -215,7 +338,8 @@ void ASurfaceTransaction_setBufferTransparency(ASurfaceTransaction* aSurfaceTran
     transaction->setFlags(surfaceControl, flags, layer_state_t::eLayerOpaque);
 }
 
-void ASurfaceTransaction_setDamageRegion(ASurfaceTransaction* aSurfaceTransaction, ASurfaceControl* aSurfaceControl,
+void ASurfaceTransaction_setDamageRegion(ASurfaceTransaction* aSurfaceTransaction,
+                                         ASurfaceControl* aSurfaceControl,
                                          const ARect rects[], uint32_t count) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
@@ -229,4 +353,81 @@ void ASurfaceTransaction_setDamageRegion(ASurfaceTransaction* aSurfaceTransactio
     }
 
     transaction->setSurfaceDamageRegion(surfaceControl, region);
+}
+
+void ASurfaceTransaction_setDesiredPresentTime(ASurfaceTransaction* aSurfaceTransaction,
+                                         int64_t desiredPresentTime) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->setDesiredPresentTime(static_cast<nsecs_t>(desiredPresentTime));
+}
+
+void ASurfaceTransaction_setBufferAlpha(ASurfaceTransaction* aSurfaceTransaction,
+                                         ASurfaceControl* aSurfaceControl,
+                                         float alpha) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    LOG_ALWAYS_FATAL_IF(alpha < 0.0 || alpha > 1.0, "invalid alpha");
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->setAlpha(surfaceControl, alpha);
+}
+
+void ASurfaceTransaction_setHdrMetadata_smpte2086(ASurfaceTransaction* aSurfaceTransaction,
+                                                  ASurfaceControl* aSurfaceControl,
+                                                  struct AHdrMetadata_smpte2086* metadata) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    HdrMetadata hdrMetadata;
+
+    if (metadata) {
+        hdrMetadata.smpte2086.displayPrimaryRed.x = metadata->displayPrimaryRed.x;
+        hdrMetadata.smpte2086.displayPrimaryRed.y = metadata->displayPrimaryRed.y;
+        hdrMetadata.smpte2086.displayPrimaryGreen.x = metadata->displayPrimaryGreen.x;
+        hdrMetadata.smpte2086.displayPrimaryGreen.y = metadata->displayPrimaryGreen.y;
+        hdrMetadata.smpte2086.displayPrimaryBlue.x = metadata->displayPrimaryBlue.x;
+        hdrMetadata.smpte2086.displayPrimaryBlue.y = metadata->displayPrimaryBlue.y;
+        hdrMetadata.smpte2086.whitePoint.x = metadata->whitePoint.x;
+        hdrMetadata.smpte2086.whitePoint.y = metadata->whitePoint.y;
+        hdrMetadata.smpte2086.minLuminance = metadata->minLuminance;
+        hdrMetadata.smpte2086.maxLuminance = metadata->maxLuminance;
+
+        hdrMetadata.validTypes |= HdrMetadata::SMPTE2086;
+    } else {
+        hdrMetadata.validTypes &= ~HdrMetadata::SMPTE2086;
+    }
+
+    transaction->setHdrMetadata(surfaceControl, hdrMetadata);
+}
+
+void ASurfaceTransaction_setHdrMetadata_cta861_3(ASurfaceTransaction* aSurfaceTransaction,
+                                                 ASurfaceControl* aSurfaceControl,
+                                                 struct AHdrMetadata_cta861_3* metadata) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    HdrMetadata hdrMetadata;
+
+    if (metadata) {
+        hdrMetadata.cta8613.maxContentLightLevel = metadata->maxContentLightLevel;
+        hdrMetadata.cta8613.maxFrameAverageLightLevel = metadata->maxFrameAverageLightLevel;
+
+        hdrMetadata.validTypes |= HdrMetadata::CTA861_3;
+    } else {
+        hdrMetadata.validTypes &= ~HdrMetadata::CTA861_3;
+    }
+
+    transaction->setHdrMetadata(surfaceControl, hdrMetadata);
 }
