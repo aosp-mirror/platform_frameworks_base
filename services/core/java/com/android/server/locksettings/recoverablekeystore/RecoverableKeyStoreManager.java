@@ -604,7 +604,8 @@ public class RecoverableKeyStoreManager {
 
         try {
             byte[] recoveryKey = decryptRecoveryKey(sessionEntry, encryptedRecoveryKey);
-            Map<String, byte[]> keysByAlias = recoverApplicationKeys(recoveryKey, applicationKeys);
+            Map<String, byte[]> keysByAlias = recoverApplicationKeys(recoveryKey,
+                    applicationKeys);
             return importKeyMaterials(userId, uid, keysByAlias);
         } catch (KeyStoreException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
@@ -623,7 +624,8 @@ public class RecoverableKeyStoreManager {
      * @throws KeyStoreException if an error occurs importing the key or getting the grant.
      */
     private @NonNull Map<String, String> importKeyMaterials(
-            int userId, int uid, Map<String, byte[]> keysByAlias) throws KeyStoreException {
+            int userId, int uid, Map<String, byte[]> keysByAlias)
+            throws KeyStoreException {
         ArrayMap<String, String> grantAliasesByAlias = new ArrayMap<>(keysByAlias.size());
         for (String alias : keysByAlias.keySet()) {
             mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, keysByAlias.get(alias));
@@ -700,8 +702,6 @@ public class RecoverableKeyStoreManager {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
 
-        // TODO: Include metadata in the processes of authentication and storage
-
         PlatformEncryptionKey encryptionKey;
         try {
             encryptionKey = mPlatformKeyManager.getEncryptKey(userId);
@@ -715,8 +715,8 @@ public class RecoverableKeyStoreManager {
         }
 
         try {
-            byte[] secretKey =
-                    mRecoverableKeyGenerator.generateAndStoreKey(encryptionKey, userId, uid, alias);
+            byte[] secretKey = mRecoverableKeyGenerator.generateAndStoreKey(encryptionKey, userId,
+                    uid, alias, metadata);
             mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, secretKey);
             return getAlias(userId, uid, alias);
         } catch (KeyStoreException | InvalidKeyException | RecoverableKeyStorageException e) {
@@ -768,8 +768,6 @@ public class RecoverableKeyStoreManager {
                             + " bits.");
         }
 
-        // TODO: Include metadata in the processes of authentication and storage
-
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
 
@@ -787,7 +785,8 @@ public class RecoverableKeyStoreManager {
 
         try {
             // Wrap the key by the platform key and store the wrapped key locally
-            mRecoverableKeyGenerator.importKey(encryptionKey, userId, uid, alias, keyBytes);
+            mRecoverableKeyGenerator.importKey(encryptionKey, userId, uid, alias, keyBytes,
+                    metadata);
 
             // Import the key to Android KeyStore and get grant
             mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, keyBytes);
@@ -854,17 +853,17 @@ public class RecoverableKeyStoreManager {
      * @return Map from alias to raw key material.
      * @throws RemoteException if an error occurred decrypting the keys.
      */
-    private @NonNull Map<String, byte[]> recoverApplicationKeys(
-            @NonNull byte[] recoveryKey,
+    private @NonNull Map<String, byte[]> recoverApplicationKeys(@NonNull byte[] recoveryKey,
             @NonNull List<WrappedApplicationKey> applicationKeys) throws RemoteException {
         HashMap<String, byte[]> keyMaterialByAlias = new HashMap<>();
         for (WrappedApplicationKey applicationKey : applicationKeys) {
             String alias = applicationKey.getAlias();
             byte[] encryptedKeyMaterial = applicationKey.getEncryptedKeyMaterial();
+            byte[] keyMetadata = applicationKey.getMetadata();
 
             try {
-                byte[] keyMaterial =
-                        KeySyncUtils.decryptApplicationKey(recoveryKey, encryptedKeyMaterial);
+                byte[] keyMaterial = KeySyncUtils.decryptApplicationKey(recoveryKey,
+                        encryptedKeyMaterial, keyMetadata);
                 keyMaterialByAlias.put(alias, keyMaterial);
             } catch (NoSuchAlgorithmException e) {
                 Log.wtf(TAG, "Missing SecureBox algorithm. AOSP required to support this.", e);

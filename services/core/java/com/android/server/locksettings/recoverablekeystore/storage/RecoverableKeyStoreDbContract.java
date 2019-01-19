@@ -67,6 +67,12 @@ class RecoverableKeyStoreDbContract {
          * Status of the key sync {@code RecoveryController#setRecoveryStatus}
          */
         static final String COLUMN_NAME_RECOVERY_STATUS = "recovery_status";
+
+        /**
+         * Data blob that will be authenticated (but encrypted) together with the key when the key
+         * is uploaded to cloud.
+         */
+        static final String COLUMN_NAME_KEY_METADATA = "key_metadata";
     }
 
     /**

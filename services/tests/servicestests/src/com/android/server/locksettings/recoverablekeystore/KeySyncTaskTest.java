@@ -23,6 +23,7 @@ import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FOR
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -91,6 +92,9 @@ public class KeySyncTaskTest {
     private static final byte[] TEST_VAULT_HANDLE =
             new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
     private static final String TEST_APP_KEY_ALIAS = "rcleaver";
+    private static final byte[] TEST_APP_KEY_METADATA_NULL = null;
+    private static final byte[] TEST_APP_KEY_METADATA_NON_NULL =
+            "mdata".getBytes(StandardCharsets.UTF_8);
     private static final int TEST_GENERATION_ID = 2;
     private static final int TEST_CREDENTIAL_TYPE = CREDENTIAL_TYPE_PATTERN;
     private static final String TEST_CREDENTIAL = "pas123";
@@ -251,7 +255,7 @@ public class KeySyncTaskTest {
                 TEST_USER_ID,
                 TEST_RECOVERY_AGENT_UID,
                 TEST_APP_KEY_ALIAS,
-                WrappedKey.fromSecretKey(mEncryptKey, applicationKey));
+                WrappedKey.fromSecretKey(mEncryptKey, applicationKey, TEST_APP_KEY_METADATA_NULL));
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
 
         mKeySyncTask.run();
@@ -267,7 +271,7 @@ public class KeySyncTaskTest {
                 TEST_USER_ID,
                 TEST_RECOVERY_AGENT_UID,
                 TEST_APP_KEY_ALIAS,
-                WrappedKey.fromSecretKey(mEncryptKey, applicationKey));
+                WrappedKey.fromSecretKey(mEncryptKey, applicationKey, TEST_APP_KEY_METADATA_NULL));
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
@@ -545,18 +549,20 @@ public class KeySyncTaskTest {
         assertEquals(TEST_APP_KEY_ALIAS, keyData.getAlias());
         assertThat(keyData.getAlias()).isEqualTo(keyData.getAlias());
         byte[] appKey = KeySyncUtils.decryptApplicationKey(
-                recoveryKey, keyData.getEncryptedKeyMaterial());
+                recoveryKey, keyData.getEncryptedKeyMaterial(), TEST_APP_KEY_METADATA_NULL);
         assertThat(appKey).isEqualTo(applicationKey.getEncoded());
     }
 
     @Test
-    public void run_sendsEncryptedKeysIfAvailableToSync_withCertPath() throws Exception {
+    public void run_sendsEncryptedKeysIfAvailableToSync_withCertPath_withNullKeyMetadata()
+            throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         mRecoverableKeyStoreDb.setServerParams(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
-        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS,
+                TEST_APP_KEY_METADATA_NULL);
 
         mKeySyncTask.run();
 
@@ -564,6 +570,33 @@ public class KeySyncTaskTest {
         verify(mSnapshotListenersStorage).recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID);
         List<WrappedApplicationKey> applicationKeys = keyChainSnapshot.getWrappedApplicationKeys();
         assertThat(applicationKeys).hasSize(1);
+        WrappedApplicationKey keyData = applicationKeys.get(0);
+        assertThat(keyData.getAlias()).isEqualTo(TEST_APP_KEY_ALIAS);
+        assertThat(keyData.getMetadata()).isEqualTo(TEST_APP_KEY_METADATA_NULL);
+        assertThat(keyChainSnapshot.getTrustedHardwareCertPath())
+                .isEqualTo(TestData.CERT_PATH_1);
+    }
+
+    @Test
+    public void run_sendsEncryptedKeysIfAvailableToSync_withCertPath_withNonNullKeyMetadata()
+            throws Exception {
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
+        mRecoverableKeyStoreDb.setServerParams(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS,
+                TEST_APP_KEY_METADATA_NON_NULL);
+
+        mKeySyncTask.run();
+
+        KeyChainSnapshot keyChainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        verify(mSnapshotListenersStorage).recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID);
+        List<WrappedApplicationKey> applicationKeys = keyChainSnapshot.getWrappedApplicationKeys();
+        assertThat(applicationKeys).hasSize(1);
+        WrappedApplicationKey keyData = applicationKeys.get(0);
+        assertThat(keyData.getAlias()).isEqualTo(TEST_APP_KEY_ALIAS);
+        assertThat(keyData.getMetadata()).isEqualTo(TEST_APP_KEY_METADATA_NON_NULL);
         assertThat(keyChainSnapshot.getTrustedHardwareCertPath())
                 .isEqualTo(TestData.CERT_PATH_1);
     }
@@ -788,6 +821,11 @@ public class KeySyncTaskTest {
 
     private SecretKey addApplicationKey(int userId, int recoveryAgentUid, String alias)
             throws Exception{
+        return addApplicationKey(userId, recoveryAgentUid, alias, TEST_APP_KEY_METADATA_NULL);
+    }
+
+    private SecretKey addApplicationKey(int userId, int recoveryAgentUid, String alias,
+            byte[] metadata) throws Exception {
         SecretKey applicationKey = generateKey();
         mRecoverableKeyStoreDb.setServerParams(
                 userId, recoveryAgentUid, TEST_VAULT_HANDLE);
@@ -800,7 +838,7 @@ public class KeySyncTaskTest {
                 userId,
                 recoveryAgentUid,
                 alias,
-                WrappedKey.fromSecretKey(mEncryptKey, applicationKey));
+                WrappedKey.fromSecretKey(mEncryptKey, applicationKey, metadata));
         return applicationKey;
     }
 

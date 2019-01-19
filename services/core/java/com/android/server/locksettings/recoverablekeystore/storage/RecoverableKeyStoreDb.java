@@ -104,6 +104,12 @@ public class RecoverableKeyStoreDb {
         values.put(KeysEntry.COLUMN_NAME_LAST_SYNCED_AT, LAST_SYNCED_AT_UNSYNCED);
         values.put(KeysEntry.COLUMN_NAME_GENERATION_ID, wrappedKey.getPlatformKeyGenerationId());
         values.put(KeysEntry.COLUMN_NAME_RECOVERY_STATUS, wrappedKey.getRecoveryStatus());
+        byte[] keyMetadata = wrappedKey.getKeyMetadata();
+        if (keyMetadata == null) {
+            values.putNull(KeysEntry.COLUMN_NAME_KEY_METADATA);
+        } else {
+            values.put(KeysEntry.COLUMN_NAME_KEY_METADATA, keyMetadata);
+        }
         return db.replace(KeysEntry.TABLE_NAME, /*nullColumnHack=*/ null, values);
     }
 
@@ -119,7 +125,8 @@ public class RecoverableKeyStoreDb {
                 KeysEntry.COLUMN_NAME_NONCE,
                 KeysEntry.COLUMN_NAME_WRAPPED_KEY,
                 KeysEntry.COLUMN_NAME_GENERATION_ID,
-                KeysEntry.COLUMN_NAME_RECOVERY_STATUS};
+                KeysEntry.COLUMN_NAME_RECOVERY_STATUS,
+                KeysEntry.COLUMN_NAME_KEY_METADATA};
         String selection =
                 KeysEntry.COLUMN_NAME_UID + " = ? AND "
                 + KeysEntry.COLUMN_NAME_ALIAS + " = ?";
@@ -155,7 +162,17 @@ public class RecoverableKeyStoreDb {
                     cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_GENERATION_ID));
             int recoveryStatus = cursor.getInt(
                     cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_RECOVERY_STATUS));
-            return new WrappedKey(nonce, keyMaterial, generationId, recoveryStatus);
+
+            // Retrieve the metadata associated with the key
+            byte[] keyMetadata;
+            int metadataIdx = cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_KEY_METADATA);
+            if (cursor.isNull(metadataIdx)) {
+                keyMetadata = null;
+            } else {
+                keyMetadata = cursor.getBlob(metadataIdx);
+            }
+
+            return new WrappedKey(nonce, keyMaterial, keyMetadata, generationId, recoveryStatus);
         }
     }
 
@@ -252,7 +269,8 @@ public class RecoverableKeyStoreDb {
                 KeysEntry.COLUMN_NAME_NONCE,
                 KeysEntry.COLUMN_NAME_WRAPPED_KEY,
                 KeysEntry.COLUMN_NAME_ALIAS,
-                KeysEntry.COLUMN_NAME_RECOVERY_STATUS};
+                KeysEntry.COLUMN_NAME_RECOVERY_STATUS,
+                KeysEntry.COLUMN_NAME_KEY_METADATA};
         String selection =
                 KeysEntry.COLUMN_NAME_USER_ID + " = ? AND "
                 + KeysEntry.COLUMN_NAME_UID + " = ? AND "
@@ -283,8 +301,18 @@ public class RecoverableKeyStoreDb {
                         cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_ALIAS));
                 int recoveryStatus = cursor.getInt(
                         cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_RECOVERY_STATUS));
-                keys.put(alias, new WrappedKey(nonce, keyMaterial, platformKeyGenerationId,
-                        recoveryStatus));
+
+                // Retrieve the metadata associated with the key
+                byte[] keyMetadata;
+                int metadataIdx = cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_KEY_METADATA);
+                if (cursor.isNull(metadataIdx)) {
+                    keyMetadata = null;
+                } else {
+                    keyMetadata = cursor.getBlob(metadataIdx);
+                }
+
+                keys.put(alias, new WrappedKey(nonce, keyMaterial, keyMetadata,
+                        platformKeyGenerationId, recoveryStatus));
             }
             return keys;
         }
