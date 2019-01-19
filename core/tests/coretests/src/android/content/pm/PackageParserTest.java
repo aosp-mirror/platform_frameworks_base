@@ -330,6 +330,28 @@ public class PackageParserTest {
     }
 
     /**
+     * Copies a specified {@code resourceId} to a file. Returns a non-null file if the copy
+     * succeeded, or {@code null} otherwise.
+     */
+    File copyRawResourceToFile(String baseName, int resourceId) throws Exception {
+        // Copy the resource to a file.
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        InputStream is = context.getResources().openRawResource(resourceId);
+        File outFile = null;
+        try {
+            outFile = new File(context.getFilesDir(), baseName);
+            assertTrue(FileUtils.copyToFile(is, outFile));
+            return outFile;
+        } catch (Exception e) {
+            if (outFile != null) {
+                outFile.delete();
+            }
+
+            return null;
+        }
+    }
+
+    /**
      * Attempts to parse a package.
      *
      * APKs are put into coretests/apks/packageparser_*.
@@ -340,14 +362,14 @@ public class PackageParserTest {
     Package parsePackage(String apkFileName, int apkResourceId,
             Function<Package, Package> converter) throws Exception {
         // Copy the resource to a file.
-        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        File outFile = new File(context.getFilesDir(), apkFileName);
+        File outFile = null;
         try {
-            InputStream is = context.getResources().openRawResource(apkResourceId);
-            assertTrue(FileUtils.copyToFile(is, outFile));
+            outFile = copyRawResourceToFile(apkFileName, apkResourceId);
             return converter.apply(new PackageParser().parsePackage(outFile, 0 /* flags */));
         } finally {
-            outFile.delete();
+            if (outFile != null) {
+                outFile.delete();
+            }
         }
     }
 
@@ -497,5 +519,21 @@ public class PackageParserTest {
                         "android.permission.ACCESS_NETWORK_STATE",
                         "android.permission.READ_CONTACTS"),
                 secondChild.requestedPermissions);
+    }
+
+    @Test
+    public void testApexPackageInfoGeneration() throws Exception {
+        File apexFile = copyRawResourceToFile("com.android.tzdata.apex",
+                R.raw.com_android_tzdata);
+        PackageInfo pi = PackageParser.generatePackageInfoFromApex(apexFile, false);
+        assertEquals("com.google.android.tzdata", pi.packageName);
+        assertEquals(1, pi.getLongVersionCode());
+        assertNull(pi.signingInfo);
+
+        pi = PackageParser.generatePackageInfoFromApex(apexFile, true);
+        assertEquals("com.google.android.tzdata", pi.packageName);
+        assertEquals(1, pi.getLongVersionCode());
+        assertNotNull(pi.signingInfo);
+        assertTrue(pi.signingInfo.getApkContentsSigners().length > 0);
     }
 }
