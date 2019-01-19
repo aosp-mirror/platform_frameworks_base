@@ -784,8 +784,11 @@ public abstract class WallpaperService extends Service {
                         // only internal implementations like ImageWallpaper
                         DisplayInfo displayInfo = new DisplayInfo();
                         mDisplay.getDisplayInfo(displayInfo);
-                        mLayout.width = Math.max(displayInfo.logicalWidth, myWidth);
-                        mLayout.height = Math.max(displayInfo.logicalHeight, myHeight);
+                        final float layoutScale = Math.max(
+                                (float) displayInfo.logicalHeight / (float) myHeight,
+                                (float) displayInfo.logicalWidth / (float) myWidth);
+                        mLayout.height = (int) (myHeight * layoutScale);
+                        mLayout.width = (int) (myWidth * layoutScale);
                         mWindowFlags |= WindowManager.LayoutParams.FLAG_SCALED;
                     }
 
