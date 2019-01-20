@@ -1173,7 +1173,7 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"নেটৱৰ্কত ছাইন ইন কৰক"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"ৱাই-ফাইত ইন্টাৰনেট নাই"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"ৱাই-ফাইত ইণ্টাৰনেট নাই"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"অধিক বিকল্পৰ বাবে টিপক"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"আপোনাৰ হটস্পট ছেটিংসমূহত কৰা সালসলনি"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"আপোনাৰ হটস্পটৰ বেণ্ড সলনি কৰা হ’ল।"</string>

@@ -1455,7 +1455,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"‏تغيير إعدادات الشبكة أو الشبكة الافتراضية الخاصة (VPN)"</string>
     <string name="upload_file" msgid="2897957172366730416">"اختيار ملف"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"لم يتم اختيار أي ملف"</string>
-    <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>
+    <string name="reset" msgid="2448168080964209908">"إعادة الضبط"</string>
     <string name="submit" msgid="1602335572089911941">"إرسال"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"تطبيق القيادة قيد التشغيل"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"انقر للخروج من تطبيق القيادة."</string>

@@ -1442,7 +1442,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"మరిన్ని ఎంపికలు"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"అంతర్గత భాగస్వామ్య నిల్వ"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"షేర్ చేయబడిన అంతర్గత నిల్వ"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD కార్డు"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD కార్డ్"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB డ్రైవ్"</string>
