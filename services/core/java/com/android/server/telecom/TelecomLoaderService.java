@@ -44,7 +44,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy;
-import com.android.server.pm.permission.PermissionManagerInternal;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 /**
  * Starts the telecom component by binding to its ITelecomService implementation. Telecom is setup
@@ -133,7 +133,7 @@ public class TelecomLoaderService extends SystemService {
     }
 
     private DefaultPermissionGrantPolicy getDefaultPermissionGrantPolicy() {
-        return LocalServices.getService(PermissionManagerInternal.class)
+        return LocalServices.getService(PermissionManagerServiceInternal.class)
                 .getDefaultPermissionGrantPolicy();
     }
 

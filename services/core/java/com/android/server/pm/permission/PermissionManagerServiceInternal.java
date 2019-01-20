@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,22 @@ package com.android.server.pm.permission;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.PackageManager.PermissionInfoFlags;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
-import android.content.pm.PackageManager.PermissionInfoFlags;
+import android.permission.PermissionManagerInternal;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 /**
- * Internal interfaces to be used by other components within the system server.
+ * Internal interfaces services.
+ *
+ * TODO: Should be merged into PermissionManagerInternal, but currently uses internal classes.
  */
-public abstract class PermissionManagerInternal {
+public abstract class PermissionManagerServiceInternal extends PermissionManagerInternal {
     /**
      * Callbacks invoked when interesting actions have been taken on a permission.
      * <p>

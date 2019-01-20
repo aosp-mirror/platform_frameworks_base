@@ -624,7 +624,7 @@ public final class PermissionControllerManager {
          *
          * <p>Needs to be called when canceling this task as it might be hung.
          */
-        void interruptRead() {
+        void interruptWrite() {
             IoUtils.closeQuietly(mLocalPipe);
         }
 
@@ -806,18 +806,19 @@ public final class PermissionControllerManager {
 
         @Override
         public void run(@NonNull IPermissionController service) {
+            mBackupSender.execute(mBackup);
+
             ParcelFileDescriptor remotePipe = mBackupSender.getRemotePipe();
             try {
                 service.restoreRuntimePermissionBackup(mUser, remotePipe);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error sending runtime permission backup", e);
                 mBackupSender.cancel(false);
+                mBackupSender.interruptWrite();
             } finally {
                 // Remote pipe end is duped by binder call. Local copy is not needed anymore
                 IoUtils.closeQuietly(remotePipe);
             }
-
-            mBackupSender.execute(mBackup);
         }
     }
 
