@@ -16,8 +16,6 @@
 
 package android.net.dhcp;
 
-import static android.net.NetworkUtils.getBroadcastAddress;
-import static android.net.NetworkUtils.getPrefixMaskAsInet4Address;
 import static android.net.TrafficStats.TAG_SYSTEM_DHCP_SERVER;
 import static android.net.dhcp.DhcpPacket.DHCP_CLIENT;
 import static android.net.dhcp.DhcpPacket.DHCP_HOST_NAME;
@@ -25,6 +23,8 @@ import static android.net.dhcp.DhcpPacket.DHCP_SERVER;
 import static android.net.dhcp.DhcpPacket.ENCAP_BOOTP;
 import static android.net.dhcp.IDhcpServer.STATUS_INVALID_ARGUMENT;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
+import static android.net.shared.Inet4AddressUtils.getBroadcastAddress;
+import static android.net.shared.Inet4AddressUtils.getPrefixMaskAsInet4Address;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
