@@ -1,3 +1,4 @@
+// Signature format: 2.0
 package javax.obex {
 
   public class ObexPacket {

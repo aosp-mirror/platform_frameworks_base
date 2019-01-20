@@ -1,14 +1,15 @@
+// Signature format: 2.0
 package android.test.mock {
 
   public class MockContext extends android.content.Context {
     method public android.content.SharedPreferences getSharedPreferences(java.io.File, int);
-    method public java.io.File getSharedPreferencesPath(java.lang.String);
+    method public java.io.File getSharedPreferencesPath(String);
   }
 
-  public deprecated class MockPackageManager extends android.content.pm.PackageManager {
-    method public deprecated java.lang.String getDefaultBrowserPackageName(int);
-    method public deprecated boolean setDefaultBrowserPackageName(java.lang.String, int);
-    method public boolean setInstantAppCookie(byte[]);
+  @Deprecated public class MockPackageManager extends android.content.pm.PackageManager {
+    method @Deprecated public String getDefaultBrowserPackageName(int);
+    method @Deprecated public boolean setDefaultBrowserPackageName(String, int);
+    method public boolean setInstantAppCookie(@NonNull byte[]);
   }
 
 }
