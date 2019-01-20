@@ -29,7 +29,6 @@ import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
 import static android.system.OsConstants.SOL_SOCKET;
-import static android.system.OsConstants.SO_BINDTODEVICE;
 import static android.system.OsConstants.SO_BROADCAST;
 import static android.system.OsConstants.SO_REUSEADDR;
 
@@ -45,6 +44,7 @@ import android.net.MacAddress;
 import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.util.SharedLog;
+import android.net.util.SocketUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -629,14 +629,10 @@ public class DhcpServer extends IDhcpServer.Stub {
             final int oldTag = TrafficStats.getAndSetThreadStatsTag(TAG_SYSTEM_DHCP_SERVER);
             try {
                 mSocket = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+                SocketUtils.bindSocketToInterface(mSocket, mIfName);
                 Os.setsockoptInt(mSocket, SOL_SOCKET, SO_REUSEADDR, 1);
-                // SO_BINDTODEVICE actually takes a string. This works because the first member
-                // of struct ifreq is a NULL-terminated interface name.
-                // TODO: add a setsockoptString()
-                Os.setsockoptIfreq(mSocket, SOL_SOCKET, SO_BINDTODEVICE, mIfName);
                 Os.setsockoptInt(mSocket, SOL_SOCKET, SO_BROADCAST, 1);
                 Os.bind(mSocket, Inet4Address.ANY, DHCP_SERVER);
-                NetworkUtils.protectFromVpn(mSocket);
 
                 return mSocket;
             } catch (IOException | ErrnoException e) {
