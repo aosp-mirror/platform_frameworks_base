@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
@@ -82,6 +83,7 @@ public class IpClientTest {
     private static final int TEST_TIMEOUT_MS = 400;
 
     @Mock private Context mContext;
+    @Mock private ConnectivityManager mCm;
     @Mock private INetworkManagementService mNMService;
     @Mock private INetd mNetd;
     @Mock private Resources mResources;
@@ -98,6 +100,9 @@ public class IpClientTest {
         MockitoAnnotations.initMocks(this);
 
         when(mContext.getSystemService(eq(Context.ALARM_SERVICE))).thenReturn(mAlarm);
+        when(mContext.getSystemServiceName(ConnectivityManager.class))
+                .thenReturn(Context.CONNECTIVITY_SERVICE);
+        when(mContext.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(mCm);
         when(mContext.getResources()).thenReturn(mResources);
         when(mResources.getInteger(R.integer.config_networkAvoidBadWifi))
                 .thenReturn(DEFAULT_AVOIDBADWIFI_CONFIG_VALUE);

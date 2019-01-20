@@ -3183,6 +3183,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return mMultinetworkPolicyTracker.getAvoidBadWifi();
     }
 
+    @Override
+    public boolean getAvoidBadWifi() {
+        if (!checkNetworkStackPermission()) {
+            throw new SecurityException("avoidBadWifi requires NETWORK_STACK permission");
+        }
+        return avoidBadWifi();
+    }
+
+
     private void rematchForAvoidBadWifiUpdate() {
         rematchAllNetworksAndRequests(null, 0);
         for (NetworkAgentInfo nai: mNetworkAgentInfos.values()) {
