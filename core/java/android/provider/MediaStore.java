@@ -2915,7 +2915,7 @@ public final class MediaStore {
         final Set<String> volumeNames = new ArraySet<>();
         volumeNames.add(VOLUME_INTERNAL);
         for (VolumeInfo vi : sm.getVolumes()) {
-            if (vi.isMountedReadable()) {
+            if (vi.isVisibleForUser(UserHandle.myUserId()) && vi.isMountedReadable()) {
                 if (vi.isPrimary()) {
                     volumeNames.add(VOLUME_EXTERNAL);
                 } else {
