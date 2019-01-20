@@ -104,9 +104,14 @@ public final class MediaSessionManager {
      * @return The binder object from the system
      * @hide
      */
-    public @NonNull ISession createSession(@NonNull SessionCallbackLink cbStub,
-            @NonNull String tag, int userId) throws RemoteException {
-        return mService.createSession(mContext.getPackageName(), cbStub, tag, userId);
+    @NonNull
+    public SessionLink createSession(@NonNull SessionCallbackLink cbStub, @NonNull String tag) {
+        try {
+            return mService.createSession(mContext.getPackageName(), cbStub, tag,
+                    UserHandle.myUserId());
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -171,11 +176,10 @@ public final class MediaSessionManager {
             @Nullable ComponentName notificationListener, int userId) {
         ArrayList<MediaController> controllers = new ArrayList<MediaController>();
         try {
-            List<IBinder> binders = mService.getSessions(notificationListener, userId);
+            List<ControllerLink> binders = mService.getSessions(notificationListener, userId);
             int size = binders.size();
             for (int i = 0; i < size; i++) {
-                MediaController controller = new MediaController(mContext, ISessionController.Stub
-                        .asInterface(binders.get(i)));
+                MediaController controller = new MediaController(mContext, binders.get(i));
                 controllers.add(controller);
             }
         } catch (RemoteException e) {

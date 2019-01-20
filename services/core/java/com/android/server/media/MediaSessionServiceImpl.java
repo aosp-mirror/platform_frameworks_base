@@ -45,16 +45,18 @@ import android.media.IRemoteVolumeController;
 import android.media.MediaController2;
 import android.media.Session2CommandGroup;
 import android.media.Session2Token;
+import android.media.session.ControllerLink;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.ICallback;
 import android.media.session.IOnMediaKeyListener;
 import android.media.session.IOnVolumeKeyLongPressListener;
-import android.media.session.ISession;
 import android.media.session.ISession2TokensListener;
+import android.media.session.ISessionController;
 import android.media.session.ISessionManager;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.SessionCallbackLink;
+import android.media.session.SessionLink;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -288,7 +290,9 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
             return;
         }
         try {
-            mRvc.remoteVolumeChanged(session.getControllerBinder(), flags);
+            mRvc.remoteVolumeChanged(
+                    ISessionController.Stub.asInterface(session.getControllerLink().getBinder()),
+                    flags);
         } catch (Exception e) {
             Log.wtf(TAG, "Error sending volume change to system UI.", e);
         }
@@ -614,7 +618,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
             int size = records.size();
             ArrayList<MediaSession.Token> tokens = new ArrayList<MediaSession.Token>();
             for (int i = 0; i < size; i++) {
-                tokens.add(new MediaSession.Token(records.get(i).getControllerBinder()));
+                tokens.add(new MediaSession.Token(records.get(i).getControllerLink()));
             }
             pushRemoteVolumeUpdateLocked(userId);
             for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {
@@ -641,7 +645,9 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                     return;
                 }
                 MediaSessionRecord record = user.mPriorityStack.getDefaultRemoteSession(userId);
-                mRvc.updateRemoteController(record == null ? null : record.getControllerBinder());
+                mRvc.updateRemoteController(record == null ? null
+                        : ISessionController.Stub.asInterface(
+                                record.getControllerLink().getBinder()));
             } catch (RemoteException e) {
                 Log.wtf(TAG, "Error sending default remote volume to sys ui.", e);
             }
@@ -858,7 +864,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                 MediaSessionRecord mediaButtonSession = getMediaButtonSessionLocked();
                 if (mediaButtonSession != null) {
                     mCallback.onAddressedPlayerChangedToMediaSession(
-                            new MediaSession.Token(mediaButtonSession.getControllerBinder()));
+                            new MediaSession.Token(mediaButtonSession.getControllerLink()));
                 } else if (mCurrentFullUserRecord.mLastMediaButtonReceiver != null) {
                     mCallback.onAddressedPlayerChangedToMediaButtonReceiver(
                             mCurrentFullUserRecord.mLastMediaButtonReceiver
@@ -978,7 +984,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         private boolean mVoiceButtonHandled = false;
 
         @Override
-        public ISession createSession(String packageName, SessionCallbackLink cb, String tag,
+        public SessionLink createSession(String packageName, SessionCallbackLink cb, String tag,
                 int userId) throws RemoteException {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
@@ -1023,18 +1029,18 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         }
 
         @Override
-        public List<IBinder> getSessions(ComponentName componentName, int userId) {
+        public List<ControllerLink> getSessions(ComponentName componentName, int userId) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
 
             try {
                 int resolvedUserId = verifySessionsRequest(componentName, userId, pid, uid);
-                ArrayList<IBinder> binders = new ArrayList<IBinder>();
+                ArrayList<ControllerLink> binders = new ArrayList<>();
                 synchronized (mLock) {
                     List<MediaSessionRecord> records = getActiveSessionsLocked(resolvedUserId);
                     for (MediaSessionRecord record : records) {
-                        binders.add(record.getControllerBinder().asBinder());
+                        binders.add(record.getControllerLink());
                     }
                 }
                 return binders;
@@ -1798,7 +1804,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                 if (mCurrentFullUserRecord.mCallback != null) {
                     try {
                         mCurrentFullUserRecord.mCallback.onMediaKeyEventDispatchedToMediaSession(
-                                keyEvent, new MediaSession.Token(session.getControllerBinder()));
+                                keyEvent, new MediaSession.Token(session.getControllerLink()));
                     } catch (RemoteException e) {
                         Log.w(TAG, "Failed to send callback", e);
                     }

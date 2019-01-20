@@ -25,8 +25,8 @@ import android.media.session.ISessionController;
  * @hide
  */
 oneway interface IRemoteVolumeController {
-    void remoteVolumeChanged(ISessionController session, int flags);
+    void remoteVolumeChanged(in ISessionController session, int flags);
     // sets the default session to use with the slider, replaces remoteSliderVisibility
     // on IVolumeController
-    void updateRemoteController(ISessionController session);
+    void updateRemoteController(in ISessionController session);
 }
