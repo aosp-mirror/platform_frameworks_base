@@ -1027,7 +1027,7 @@ public final class MediaStore {
 
         /** @hide */
         public static final Uri getContentUriForPath(String path) {
-            return getContentUri(getVolumeNameForPath(path));
+            return getContentUri(getVolumeName(new File(path)));
         }
 
         /**
@@ -1197,7 +1197,7 @@ public final class MediaStore {
 
         /** @hide */
         public static Uri getContentUriForPath(@NonNull String path) {
-            return getContentUri(getVolumeNameForPath(path));
+            return getContentUri(getVolumeName(new File(path)));
         }
 
         /** @hide */
@@ -1211,10 +1211,11 @@ public final class MediaStore {
         }
     }
 
-    private static String getVolumeNameForPath(@NonNull String path) {
+    /** {@hide} */
+    public static @NonNull String getVolumeName(@NonNull File path) {
         final StorageManager sm = AppGlobals.getInitialApplication()
                 .getSystemService(StorageManager.class);
-        final StorageVolume sv = sm.getStorageVolume(new File(path));
+        final StorageVolume sv = sm.getStorageVolume(path);
         if (sv != null) {
             if (sv.isPrimary()) {
                 return VOLUME_EXTERNAL;
@@ -1991,7 +1992,7 @@ public final class MediaStore {
              *             access this path.
              */
             public static @Nullable Uri getContentUriForPath(@NonNull String path) {
-                return getContentUri(getVolumeNameForPath(path));
+                return getContentUri(getVolumeName(new File(path)));
             }
 
             /**
