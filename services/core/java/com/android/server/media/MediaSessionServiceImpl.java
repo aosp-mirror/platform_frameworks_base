@@ -51,7 +51,6 @@ import android.media.session.ICallback;
 import android.media.session.IOnMediaKeyListener;
 import android.media.session.IOnVolumeKeyLongPressListener;
 import android.media.session.ISession2TokensListener;
-import android.media.session.ISessionController;
 import android.media.session.ISessionManager;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
@@ -290,9 +289,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
             return;
         }
         try {
-            mRvc.remoteVolumeChanged(
-                    ISessionController.Stub.asInterface(session.getControllerLink().getBinder()),
-                    flags);
+            mRvc.remoteVolumeChanged(session.getSessionToken(), flags);
         } catch (Exception e) {
             Log.wtf(TAG, "Error sending volume change to system UI.", e);
         }
@@ -618,7 +615,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
             int size = records.size();
             ArrayList<MediaSession.Token> tokens = new ArrayList<MediaSession.Token>();
             for (int i = 0; i < size; i++) {
-                tokens.add(new MediaSession.Token(records.get(i).getControllerLink()));
+                tokens.add(records.get(i).getSessionToken());
             }
             pushRemoteVolumeUpdateLocked(userId);
             for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {
@@ -645,9 +642,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                     return;
                 }
                 MediaSessionRecord record = user.mPriorityStack.getDefaultRemoteSession(userId);
-                mRvc.updateRemoteController(record == null ? null
-                        : ISessionController.Stub.asInterface(
-                                record.getControllerLink().getBinder()));
+                mRvc.updateRemoteController(record == null ? null : record.getSessionToken());
             } catch (RemoteException e) {
                 Log.wtf(TAG, "Error sending default remote volume to sys ui.", e);
             }
@@ -864,7 +859,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                 MediaSessionRecord mediaButtonSession = getMediaButtonSessionLocked();
                 if (mediaButtonSession != null) {
                     mCallback.onAddressedPlayerChangedToMediaSession(
-                            new MediaSession.Token(mediaButtonSession.getControllerLink()));
+                            mediaButtonSession.getSessionToken());
                 } else if (mCurrentFullUserRecord.mLastMediaButtonReceiver != null) {
                     mCallback.onAddressedPlayerChangedToMediaButtonReceiver(
                             mCurrentFullUserRecord.mLastMediaButtonReceiver
@@ -1804,7 +1799,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                 if (mCurrentFullUserRecord.mCallback != null) {
                     try {
                         mCurrentFullUserRecord.mCallback.onMediaKeyEventDispatchedToMediaSession(
-                                keyEvent, new MediaSession.Token(session.getControllerLink()));
+                                keyEvent, session.getSessionToken());
                     } catch (RemoteException e) {
                         Log.w(TAG, "Failed to send callback", e);
                     }

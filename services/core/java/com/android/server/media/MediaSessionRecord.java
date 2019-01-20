@@ -78,6 +78,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final String mPackageName;
     private final String mTag;
     private final ControllerLink mController;
+    private final MediaSession.Token mSessionToken;
     private final SessionLink mSession;
     private final SessionCb mSessionCb;
     private final MediaSessionService.ServiceImpl mService;
@@ -128,6 +129,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mPackageName = ownerPackageName;
         mTag = tag;
         mController = new ControllerLink(new ControllerStub());
+        mSessionToken = new MediaSession.Token(mController);
         mSession = new SessionLink(new SessionStub());
         mSessionCb = new SessionCb(cb);
         mService = service;
@@ -154,6 +156,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     public ControllerLink getControllerLink() {
         return mController;
+    }
+
+    /**
+     * Get the session token for creating {@link MediaController}.
+     *
+     * @return The session token.
+     */
+    public MediaSession.Token getSessionToken() {
+        return mSessionToken;
     }
 
     /**

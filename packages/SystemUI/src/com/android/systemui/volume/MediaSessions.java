@@ -25,9 +25,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.media.IRemoteVolumeController;
 import android.media.MediaMetadata;
-import android.media.session.ISessionController;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
+import android.media.session.MediaSession;
 import android.media.session.MediaSession.QueueItem;
 import android.media.session.MediaSession.Token;
 import android.media.session.MediaSessionManager;
@@ -113,17 +113,17 @@ public class MediaSessions {
         r.controller.setVolumeTo(level, 0);
     }
 
-    private void onRemoteVolumeChangedH(ISessionController session, int flags) {
-        final MediaController controller = new MediaController(mContext, session);
+    private void onRemoteVolumeChangedH(MediaSession.Token sessionToken, int flags) {
+        final MediaController controller = new MediaController(mContext, sessionToken);
         if (D.BUG) Log.d(TAG, "remoteVolumeChangedH " + controller.getPackageName() + " "
                 + Util.audioManagerFlagsToString(flags));
         final Token token = controller.getSessionToken();
         mCallbacks.onRemoteVolumeChanged(token, flags);
     }
 
-    private void onUpdateRemoteControllerH(ISessionController session) {
-        final MediaController controller = session != null ? new MediaController(mContext, session)
-                : null;
+    private void onUpdateRemoteControllerH(MediaSession.Token sessionToken) {
+        final MediaController controller =
+                sessionToken != null ? new MediaController(mContext, sessionToken) : null;
         final String pkg = controller != null ? controller.getPackageName() : null;
         if (D.BUG) Log.d(TAG, "updateRemoteControllerH " + pkg);
         // this may be our only indication that a remote session is changed, refresh
@@ -332,15 +332,16 @@ public class MediaSessions {
 
     private final IRemoteVolumeController mRvc = new IRemoteVolumeController.Stub() {
         @Override
-        public void remoteVolumeChanged(ISessionController session, int flags)
+        public void remoteVolumeChanged(MediaSession.Token sessionToken, int flags)
                 throws RemoteException {
-            mHandler.obtainMessage(H.REMOTE_VOLUME_CHANGED, flags, 0, session).sendToTarget();
+            mHandler.obtainMessage(H.REMOTE_VOLUME_CHANGED, flags, 0,
+                    sessionToken).sendToTarget();
         }
 
         @Override
-        public void updateRemoteController(final ISessionController session)
+        public void updateRemoteController(final MediaSession.Token sessionToken)
                 throws RemoteException {
-            mHandler.obtainMessage(H.UPDATE_REMOTE_CONTROLLER, session).sendToTarget();
+            mHandler.obtainMessage(H.UPDATE_REMOTE_CONTROLLER, sessionToken).sendToTarget();
         }
     };
 
@@ -360,10 +361,10 @@ public class MediaSessions {
                     onActiveSessionsUpdatedH(mMgr.getActiveSessions(null));
                     break;
                 case REMOTE_VOLUME_CHANGED:
-                    onRemoteVolumeChangedH((ISessionController) msg.obj, msg.arg1);
+                    onRemoteVolumeChangedH((MediaSession.Token) msg.obj, msg.arg1);
                     break;
                 case UPDATE_REMOTE_CONTROLLER:
-                    onUpdateRemoteControllerH((ISessionController) msg.obj);
+                    onUpdateRemoteControllerH((MediaSession.Token) msg.obj);
                     break;
             }
         }
