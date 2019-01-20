@@ -182,9 +182,6 @@ public final class LinkPropertiesParcelableUtil {
         parcel.mtu = lp.getMtu();
         parcel.tcpBufferSizes = lp.getTcpBufferSizes();
         parcel.nat64Prefix = toStableParcelable(lp.getNat64Prefix());
-        parcel.stackedLinks = toParcelableArray(
-                lp.getStackedLinks(), LinkPropertiesParcelableUtil::toStableParcelable,
-                LinkPropertiesParcelable.class);
         return parcel;
     }
 
@@ -216,9 +213,6 @@ public final class LinkPropertiesParcelableUtil {
         lp.setMtu(parcel.mtu);
         lp.setTcpBufferSizes(parcel.tcpBufferSizes);
         lp.setNat64Prefix(fromStableParcelable(parcel.nat64Prefix));
-        for (LinkPropertiesParcelable stackedLink : parcel.stackedLinks) {
-            lp.addStackedLink(fromStableParcelable(stackedLink));
-        }
         return lp;
     }
 }
