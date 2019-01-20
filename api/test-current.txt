@@ -718,6 +718,7 @@ package android.net.metrics {
   public class IpConnectivityLog {
     method public boolean log(long, android.net.metrics.IpConnectivityLog.Event);
     method public boolean log(String, android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(android.net.Network, int[], android.net.metrics.IpConnectivityLog.Event);
     method public boolean log(int, int[], android.net.metrics.IpConnectivityLog.Event);
     method public boolean log(android.net.metrics.IpConnectivityLog.Event);
   }

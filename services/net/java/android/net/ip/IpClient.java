@@ -359,6 +359,9 @@ public class IpClient extends StateMachine {
     private static final int CMD_JUMP_RUNNING_TO_STOPPING         = 101;
     private static final int CMD_JUMP_STOPPING_TO_STOPPED         = 102;
 
+    // IpClient shares a handler with DhcpClient: commands must not overlap
+    public static final int DHCPCLIENT_CMD_BASE = 1000;
+
     private static final int MAX_LOG_RECORDS = 500;
     private static final int MAX_PACKET_RECORDS = 100;
 

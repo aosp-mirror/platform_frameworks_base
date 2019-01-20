@@ -30,10 +30,10 @@ import android.annotation.Nullable;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
-
-import com.google.android.collect.Sets;
+import android.util.ArraySet;
 
 import java.net.Inet4Address;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -208,7 +208,7 @@ public class DhcpServingParams {
          * but it must always be set explicitly before building the {@link DhcpServingParams}.
          */
         public Builder setDefaultRouters(@NonNull Inet4Address... defaultRouters) {
-            return setDefaultRouters(Sets.newArraySet(defaultRouters));
+            return setDefaultRouters(new ArraySet<>(Arrays.asList(defaultRouters)));
         }
 
         /**
@@ -238,7 +238,7 @@ public class DhcpServingParams {
          * building the {@link DhcpServingParams}.
          */
         public Builder setDnsServers(@NonNull Inet4Address... dnsServers) {
-            return setDnsServers(Sets.newArraySet(dnsServers));
+            return setDnsServers(new ArraySet<>(Arrays.asList(dnsServers)));
         }
 
         /**
@@ -268,7 +268,7 @@ public class DhcpServingParams {
          * and do not need to be set here.
          */
         public Builder setExcludedAddrs(@NonNull Inet4Address... excludedAddrs) {
-            return setExcludedAddrs(Sets.newArraySet(excludedAddrs));
+            return setExcludedAddrs(new ArraySet<>(Arrays.asList(excludedAddrs)));
         }
 
         /**
