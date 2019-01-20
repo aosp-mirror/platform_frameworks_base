@@ -5542,6 +5542,8 @@ package android.permission {
     method @NonNull public abstract java.util.List<android.permission.RuntimePermissionUsageInfo> onGetPermissionUsages(boolean, long);
     method public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream);
     method public abstract boolean onIsApplicationQualifiedForRole(@NonNull String, @NonNull String);
+    method @BinderThread public abstract boolean onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle);
+    method @BinderThread public abstract void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream);
     method public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String);
     method @NonNull public abstract java.util.Map<java.lang.String,java.util.List<java.lang.String>> onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String);
     field public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
