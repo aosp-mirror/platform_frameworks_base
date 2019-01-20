@@ -533,11 +533,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"ອະນຸຍາດໃຫ້ແອັບອ່ານສະຖານທີ່ຈາກຄໍເລັກຊັນມີເດຍຂອງທ່ານ."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"ແອັບພລິເຄຊັນ <xliff:g id="APP">%s</xliff:g> ຕ້ອງການກວດຮັບຮອງຄວາມຖືກຕ້ອງ."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ຮາດແວຊີວະມິຕິບໍ່ສາມາດໃຊ້ໄດ້"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"ຍົກເລີກການຮັບຮອງຄວາມຖືກຕ້ອງແລ້ວ"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ບໍ່ຮັບຮູ້"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"ຍົກເລີກການຮັບຮອງຄວາມຖືກຕ້ອງແລ້ວ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ກວດ​ພົບ​ລາຍ​ນີ້ວ​ມື​ບາງ​ສ່ວນ​ແລ້ວ. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ບໍ່​ສາ​ມາດ​ດຳ​ເນີນ​ການ​ລາຍ​ນີ້ວ​ມື​ໄດ້. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ເຊັນ​ເຊີ​ລາຍ​ນີ້ວ​ມື​ເປື້ອນ. ກະ​ລຸ​ນາ​ທຳ​ຄວາມ​ສະ​ອາດ ແລະ​ລອງ​ໃໝ່​ອີກ."</string>
@@ -1979,11 +1977,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"ກ້ອງ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ໄມໂຄຣໂຟນ"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"ສະແດງຜົນບັງແອັບອື່ນຢູ່ໜ້າຈໍຂອງທ່ານ"</string>
-    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
-    <skip />
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"ການແຈ້ງເຕືອນຂໍ້ມູນໂໝດກິດຈະວັດປະຈຳວັນ"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ແບັດເຕີຣີອາດໝົດກ່ອນການສາກຕາມປົກກະຕິ"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ເປີດຕົວປະຢັດແບັດເຕີຣີເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ກຳລັງໂຫລດ"</string>
 </resources>

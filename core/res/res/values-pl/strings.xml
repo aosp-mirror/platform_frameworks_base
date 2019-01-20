@@ -539,11 +539,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Zezwala aplikacji na odczytywanie lokalizacji z kolekcji multimediów."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Aplikacja <xliff:g id="APP">%s</xliff:g> wymaga uwierzytelnienia."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Sprzęt biometryczny niedostępny"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Anulowano uwierzytelnianie"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Nie rozpoznano"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"Anulowano uwierzytelnianie"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Odcisk palca został odczytany tylko częściowo. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Czytnik linii papilarnych jest zabrudzony. Wyczyść go i spróbuj ponownie."</string>

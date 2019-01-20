@@ -533,11 +533,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Дозволува апликацијата да чита локации од вашата збирка на аудиовизуелни содржини."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Апликацијата <xliff:g id="APP">%s</xliff:g> сака да ве провери."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Биометрискиот хардвер е недостапен"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Проверката е откажана"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Непознат"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"Проверката е откажана"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Откриен е делумен отпечаток. Обидете се повторно."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатокот не можеше да се обработи. Обидете се повторно."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорот за отпечатоци е валкан. Исчистете го и обидете се повторно."</string>

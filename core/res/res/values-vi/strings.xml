@@ -533,11 +533,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Cho phép ứng dụng này đọc vị trí từ bộ sưu tập phương tiện của bạn."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Ứng dụng <xliff:g id="APP">%s</xliff:g> muốn xác thực."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Không có phần cứng sinh trắc học"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Đã hủy xác thực"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Không nhận dạng được"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"Đã hủy xác thực"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Đã phát hiện được một phần vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Không thể xử lý vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Cảm biến vân tay bị bẩn. Hãy làm sạch và thử lại."</string>
@@ -1979,11 +1977,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Máy ảnh"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Micrô"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"hiển thị qua các ứng dụng khác trên màn hình của bạn"</string>
-    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
-    <skip />
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Pin có thể hết trước khi sạc bình thường"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Đang tải"</string>
 </resources>

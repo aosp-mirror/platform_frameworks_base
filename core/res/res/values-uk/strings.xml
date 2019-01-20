@@ -539,11 +539,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Додаток зможе розпізнавати геодані з вашої колекції медіа-вмісту."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Для додатка <xliff:g id="APP">%s</xliff:g> потрібна автентифікація."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Біометричне апаратне забезпечення недоступне"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Автентифікацію скасовано"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Не розпізнано"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"Автентифікацію скасовано"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Відбиток розпізнано частково. Повторіть спробу."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не вдалось обробити відбиток. Повторіть спробу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Датчик відбитків забруднився. Очистьте його та повторіть спробу."</string>
@@ -2049,11 +2047,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Мікрофон"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"показ поверх інших додатків на екрані"</string>
-    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
-    <skip />
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Сповіщення про послідовнсть дій"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Режим економії заряду акумулятора активовано для збільшення часу його роботи"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Завантаження"</string>
 </resources>

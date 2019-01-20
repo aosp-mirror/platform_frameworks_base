@@ -533,11 +533,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"એપને તમારા મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવાની મંજૂરી આપે છે."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> ઍપ પ્રમાણીકરણ કરવા માગે છે."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"બાયોમેટ્રિક હાર્ડવેર ઉપલબ્ધ નથી"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"પ્રમાણીકરણ રદ કર્યું"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ઓળખાયેલ નથી"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"પ્રમાણીકરણ રદ કર્યું"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"આંશિક ફિંગરપ્રિન્ટ મળી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ફિંગરપ્રિન્ટ પ્રક્રિયા કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ફિંગરપ્રિન્ટ સેન્સર ગંદું છે. કૃપા કરીને સાફ કરો અને ફરી પ્રયાસ કરો."</string>
@@ -1980,11 +1978,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"કૅમેરા"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"માઇક્રોફોન"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"આ તમારી સ્ક્રીન પર અન્ય ઍપની ઉપર દેખાશે"</string>
-    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
-    <skip />
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"રૂટિન મોડની માહિતીનું નોટિફિકેશન"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"સામાન્ય રીતે ચાર્જ કરવાના સમય પહેલાં બૅટરી સમાપ્ત થઈ શકે છે"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"બૅટરી આવરદા વધારવા માટે બૅટરી સેવર ચાલુ કર્યું"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"લોડિંગ"</string>
 </resources>
