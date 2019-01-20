@@ -533,11 +533,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"यसले अनुप्रयोगलाई तपाईंको मिडिया सङ्ग्रहका स्थानहरू पढ्न दिन्छ।"</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"अनुप्रयोग <xliff:g id="APP">%s</xliff:g> ले प्रमाणीकरण गर्न चाहन्छ।"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"बायोमेट्रिक हार्डवेयर उपलब्ध छैन"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"प्रमाणीकरण रद्द गरियो"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"पहिचान भएन"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"प्रमाणीकरण रद्द गरियो"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक औठाछाप पत्ता लाग्यो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"औठाछाप प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"औँठाछाप सेन्सर फोहोर छ। कृपया सफा गरेर फेरि प्रयास गर्नुहोस्।"</string>
@@ -1985,11 +1983,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"क्यामेरा"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"माइक्रोफोन"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमा प्रदर्शन गरिँदै छ"</string>
-    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
-    <skip />
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"दिनचर्या मोडको जानकारीमूलक सूचना"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"प्रायः चार्ज गर्ने समय हुनुभन्दा पहिले नै ब्याट्री सकिन सक्छ"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ब्याट्रीको आयु बढाउन ब्याट्री सेभर सक्रिय गरियो"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"लोड गर्दै"</string>
 </resources>

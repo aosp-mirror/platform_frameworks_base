@@ -536,11 +536,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Дозвољава апликацији да чита локације из медијске колекције."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Апликација <xliff:g id="APP">%s</xliff:g> жели да потврди ваш идентитет."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Биометријски хардвер није доступан"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Потврда идентитета је отказана"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Није препознато"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"Потврда идентитета је отказана"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Откривен је делимични отисак прста. Пробајте поново."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Није успела обрада отиска прста. Пробајте поново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензор за отиске прстију је прљав. Очистите га и покушајте поново."</string>

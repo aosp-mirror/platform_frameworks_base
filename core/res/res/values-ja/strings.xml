@@ -533,11 +533,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"メディア コレクションの位置情報の読み取りをアプリに許可します。"</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"アプリ <xliff:g id="APP">%s</xliff:g> が認証を求めています。"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"生体認証ハードウェアが利用できません"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"認証をキャンセルしました"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"認識されませんでした"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"認証をキャンセルしました"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"指紋を一部しか検出できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"指紋を処理できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"指紋認証センサーに汚れがあります。汚れを落としてもう一度お試しください。"</string>
@@ -1979,11 +1977,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"カメラ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"マイク"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"画面の他のアプリの上に重ねて表示"</string>
-    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
-    <skip />
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"ルーティン モード情報の通知"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"通常の充電を行う前に電池が切れる可能性があります"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"電池を長持ちさせるため、バッテリー セーバーが有効になりました"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"読み込んでいます"</string>
 </resources>

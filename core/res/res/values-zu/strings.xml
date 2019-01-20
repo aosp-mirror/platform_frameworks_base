@@ -533,11 +533,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Ivumela uhlelo lokusebenza ukuthi lifunde izindawo kusukela kuqoqo lakho lemidiya."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Uhlelo lokusebenza lwe-<xliff:g id="APP">%s</xliff:g> lifuna ukufakazela ubuqiniso."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"I-Biometric hardware ayitholakali"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Ukufakazela ubuqiniso kukhanseliwe"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Akwaziwa"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"Ukufakazela ubuqiniso kukhanseliwe"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Izigxivizo zeminwe ezincane zitholiwe. Sicela uzame futhi."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Ayikwazanga ukucubungula izigxivizo zeminwe. Sicela uzame futhi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Inzwa yezigxivizo zeminwe ingcolile. Sicela uyihlanze uphinde uzame futhi."</string>

@@ -533,11 +533,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Επιτρέπει στην εφαρμογή να διαβάσει τοποθεσίες από τη συλλογή πολυμέσων σας."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Η εφαρμογή <xliff:g id="APP">%s</xliff:g> επιθυμεί έλεγχο ταυτότητας."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Δεν υπάρχει διαθέσιμος βιομετρικός εξοπλισμός"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Ο έλεγχος ταυτότητας ακυρώθηκε"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Δεν αναγνωρίστηκε"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"Ο έλεγχος ταυτότητας ακυρώθηκε"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Εντοπίστηκε μερικό μοναδικό χαρακτηριστικό. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Δεν ήταν δυνατή η επεξεργασία του μοναδικού χαρακτηριστικού. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Ο αισθητήρας μοναδικού χαρακτηριστικού δεν είναι καθαρός. Καθαρίστε τον και δοκιμάστε ξανά."</string>
