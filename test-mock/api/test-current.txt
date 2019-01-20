@@ -1,17 +1,18 @@
+// Signature format: 2.0
 package android.test.mock {
 
-  public deprecated class MockPackageManager extends android.content.pm.PackageManager {
+  @Deprecated public class MockPackageManager extends android.content.pm.PackageManager {
     method public boolean arePermissionsIndividuallyControlled();
-    method public java.lang.String getDefaultBrowserPackageNameAsUser(int);
-    method public int getInstallReason(java.lang.String, android.os.UserHandle);
+    method public String getDefaultBrowserPackageNameAsUser(int);
+    method public int getInstallReason(String, android.os.UserHandle);
     method public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
     method public java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
-    method public java.lang.String[] getNamesForUids(int[]);
-    method public java.lang.String getPermissionControllerPackageName();
-    method public java.lang.String getServicesSystemSharedLibraryPackageName();
-    method public java.lang.String getSharedSystemSharedLibraryPackageName();
-    method public void grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
-    method public void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
+    method public String[] getNamesForUids(int[]);
+    method public String getPermissionControllerPackageName();
+    method @NonNull public String getServicesSystemSharedLibraryPackageName();
+    method @NonNull public String getSharedSystemSharedLibraryPackageName();
+    method public void grantRuntimePermission(String, String, android.os.UserHandle);
+    method public void revokeRuntimePermission(String, String, android.os.UserHandle);
   }
 
 }

@@ -1,31 +1,32 @@
+// Signature format: 2.0
 package android.app {
 
   public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
-    method public deprecated boolean enterPictureInPictureMode(android.app.PictureInPictureArgs);
-    method public deprecated void setPictureInPictureArgs(android.app.PictureInPictureArgs);
+    method @Deprecated public boolean enterPictureInPictureMode(@NonNull android.app.PictureInPictureArgs);
+    method @Deprecated public void setPictureInPictureArgs(@NonNull android.app.PictureInPictureArgs);
   }
 
   public class ActivityManager {
-    method public static deprecated int getMaxNumPictureInPictureActions();
+    method @Deprecated public static int getMaxNumPictureInPictureActions();
   }
 
   public class KeyguardManager {
-    method public deprecated void dismissKeyguard(android.app.Activity, android.app.KeyguardManager.KeyguardDismissCallback, android.os.Handler);
+    method @Deprecated public void dismissKeyguard(@NonNull android.app.Activity, @Nullable android.app.KeyguardManager.KeyguardDismissCallback, @Nullable android.os.Handler);
   }
 
   public class Notification implements android.os.Parcelable {
-    method public deprecated java.lang.String getChannel();
-    method public static java.lang.Class<? extends android.app.Notification.Style> getNotificationStyleClass(java.lang.String);
-    method public deprecated long getTimeout();
-    method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
+    method @Deprecated public String getChannel();
+    method public static Class<? extends android.app.Notification.Style> getNotificationStyleClass(String);
+    method @Deprecated public long getTimeout();
+    method @Deprecated public void setLatestEventInfo(android.content.Context, CharSequence, CharSequence, android.app.PendingIntent);
   }
 
   public static class Notification.Builder {
-    method public deprecated android.app.Notification.Builder setChannel(java.lang.String);
-    method public deprecated android.app.Notification.Builder setTimeout(long);
+    method @Deprecated public android.app.Notification.Builder setChannel(String);
+    method @Deprecated public android.app.Notification.Builder setTimeout(long);
   }
 
-  public final deprecated class PictureInPictureArgs implements android.os.Parcelable {
+  @Deprecated public final class PictureInPictureArgs implements android.os.Parcelable {
     method public static android.app.PictureInPictureArgs convert(android.app.PictureInPictureParams);
     method public static android.app.PictureInPictureParams convert(android.app.PictureInPictureArgs);
     method public int describeContents();
@@ -48,8 +49,8 @@ package android.app {
 package android.app.admin {
 
   public class DevicePolicyManager {
-    method public deprecated android.os.UserHandle createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle);
-    method public deprecated android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
+    method @Deprecated @Nullable public android.os.UserHandle createAndInitializeUser(@NonNull android.content.ComponentName, String, String, @NonNull android.content.ComponentName, android.os.Bundle);
+    method @Deprecated @Nullable public android.os.UserHandle createUser(@NonNull android.content.ComponentName, String);
   }
 
 }
@@ -57,17 +58,17 @@ package android.app.admin {
 package android.app.job {
 
   public class JobInfo implements android.os.Parcelable {
-    method public deprecated long getEstimatedNetworkBytes();
+    method @Deprecated public long getEstimatedNetworkBytes();
   }
 
   public static final class JobInfo.Builder {
-    method public deprecated android.app.job.JobInfo.Builder setEstimatedNetworkBytes(long);
-    method public deprecated android.app.job.JobInfo.Builder setIsPrefetch(boolean);
+    method @Deprecated public android.app.job.JobInfo.Builder setEstimatedNetworkBytes(long);
+    method @Deprecated public android.app.job.JobInfo.Builder setIsPrefetch(boolean);
   }
 
   public final class JobWorkItem implements android.os.Parcelable {
-    ctor public deprecated JobWorkItem(android.content.Intent, long);
-    method public deprecated long getEstimatedNetworkBytes();
+    ctor @Deprecated public JobWorkItem(android.content.Intent, long);
+    method @Deprecated public long getEstimatedNetworkBytes();
   }
 
 }
@@ -75,29 +76,29 @@ package android.app.job {
 package android.app.slice {
 
   public final class Slice implements android.os.Parcelable {
-    field public static final deprecated java.lang.String EXTRA_SLIDER_VALUE = "android.app.slice.extra.SLIDER_VALUE";
-    field public static final deprecated java.lang.String SUBTYPE_SLIDER = "slider";
+    field @Deprecated public static final String EXTRA_SLIDER_VALUE = "android.app.slice.extra.SLIDER_VALUE";
+    field @Deprecated public static final String SUBTYPE_SLIDER = "slider";
   }
 
   public static class Slice.Builder {
-    ctor public deprecated Slice.Builder(android.net.Uri);
-    method public deprecated android.app.slice.Slice.Builder addTimestamp(long, java.lang.String, java.util.List<java.lang.String>);
-    method public deprecated android.app.slice.Slice.Builder setSpec(android.app.slice.SliceSpec);
+    ctor @Deprecated public Slice.Builder(@NonNull android.net.Uri);
+    method @Deprecated public android.app.slice.Slice.Builder addTimestamp(long, @Nullable String, java.util.List<java.lang.String>);
+    method @Deprecated public android.app.slice.Slice.Builder setSpec(android.app.slice.SliceSpec);
   }
 
   public final class SliceItem implements android.os.Parcelable {
-    method public deprecated long getTimestamp();
-    field public static final deprecated java.lang.String FORMAT_TIMESTAMP = "long";
+    method @Deprecated public long getTimestamp();
+    field @Deprecated public static final String FORMAT_TIMESTAMP = "long";
   }
 
   public class SliceManager {
-    method public deprecated android.app.slice.Slice bindSlice(android.net.Uri, java.util.List<android.app.slice.SliceSpec>);
-    method public deprecated android.app.slice.Slice bindSlice(android.content.Intent, java.util.List<android.app.slice.SliceSpec>);
-    method public deprecated void pinSlice(android.net.Uri, java.util.List<android.app.slice.SliceSpec>);
+    method @Deprecated @Nullable public android.app.slice.Slice bindSlice(@NonNull android.net.Uri, @NonNull java.util.List<android.app.slice.SliceSpec>);
+    method @Deprecated @Nullable public android.app.slice.Slice bindSlice(@NonNull android.content.Intent, @NonNull java.util.List<android.app.slice.SliceSpec>);
+    method @Deprecated public void pinSlice(@NonNull android.net.Uri, @NonNull java.util.List<android.app.slice.SliceSpec>);
   }
 
   public abstract class SliceProvider extends android.content.ContentProvider {
-    method public deprecated android.app.slice.Slice onBindSlice(android.net.Uri, java.util.List<android.app.slice.SliceSpec>);
+    method @Deprecated public android.app.slice.Slice onBindSlice(android.net.Uri, java.util.List<android.app.slice.SliceSpec>);
   }
 
 }
@@ -105,17 +106,17 @@ package android.app.slice {
 package android.app.usage {
 
   public final class StorageStats implements android.os.Parcelable {
-    method public deprecated long getCodeBytes();
+    method @Deprecated public long getCodeBytes();
   }
 
   public class StorageStatsManager {
-    method public deprecated long getFreeBytes(java.lang.String) throws java.io.IOException;
-    method public deprecated long getTotalBytes(java.lang.String) throws java.io.IOException;
-    method public deprecated boolean isQuotaSupported(java.lang.String);
-    method public deprecated android.app.usage.ExternalStorageStats queryExternalStatsForUser(java.lang.String, android.os.UserHandle) throws java.io.IOException;
-    method public deprecated android.app.usage.StorageStats queryStatsForPackage(java.lang.String, java.lang.String, android.os.UserHandle) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
-    method public deprecated android.app.usage.StorageStats queryStatsForUid(java.lang.String, int) throws java.io.IOException;
-    method public deprecated android.app.usage.StorageStats queryStatsForUser(java.lang.String, android.os.UserHandle) throws java.io.IOException;
+    method @Deprecated public long getFreeBytes(String) throws java.io.IOException;
+    method @Deprecated public long getTotalBytes(String) throws java.io.IOException;
+    method @Deprecated public boolean isQuotaSupported(String);
+    method @Deprecated public android.app.usage.ExternalStorageStats queryExternalStatsForUser(String, android.os.UserHandle) throws java.io.IOException;
+    method @Deprecated public android.app.usage.StorageStats queryStatsForPackage(String, String, android.os.UserHandle) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated public android.app.usage.StorageStats queryStatsForUid(String, int) throws java.io.IOException;
+    method @Deprecated public android.app.usage.StorageStats queryStatsForUser(String, android.os.UserHandle) throws java.io.IOException;
   }
 
 }
@@ -123,21 +124,21 @@ package android.app.usage {
 package android.content {
 
   public class ClipData implements android.os.Parcelable {
-    method public deprecated void addItem(android.content.ClipData.Item, android.content.ContentResolver);
+    method @Deprecated public void addItem(android.content.ClipData.Item, android.content.ContentResolver);
   }
 
   public abstract class Context {
     method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
-    method public abstract java.io.File getSharedPreferencesPath(java.lang.String);
+    method public abstract java.io.File getSharedPreferencesPath(String);
   }
 
   public class ContextWrapper extends android.content.Context {
     method public android.content.SharedPreferences getSharedPreferences(java.io.File, int);
-    method public java.io.File getSharedPreferencesPath(java.lang.String);
+    method public java.io.File getSharedPreferencesPath(String);
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
-    field public static final deprecated java.lang.String EXTRA_QUICK_VIEW_ADVANCED = "android.intent.extra.QUICK_VIEW_ADVANCED";
+    field @Deprecated public static final String EXTRA_QUICK_VIEW_ADVANCED = "android.intent.extra.QUICK_VIEW_ADVANCED";
   }
 
 }
@@ -145,11 +146,11 @@ package android.content {
 package android.content.pm {
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
-    field public deprecated java.lang.String volumeUuid;
+    field @Deprecated public String volumeUuid;
   }
 
   public class ComponentInfo extends android.content.pm.PackageItemInfo {
-    field public deprecated boolean encryptionAware;
+    field @Deprecated public boolean encryptionAware;
   }
 
   public class PackageInfo implements android.os.Parcelable {
@@ -157,11 +158,11 @@ package android.content.pm {
   }
 
   public abstract class PackageManager {
-    method public abstract boolean setInstantAppCookie(byte[]);
+    method public abstract boolean setInstantAppCookie(@Nullable byte[]);
   }
 
   public class ResolveInfo implements android.os.Parcelable {
-    field public deprecated boolean instantAppAvailable;
+    field @Deprecated public boolean instantAppAvailable;
   }
 
   public final class SharedLibraryInfo implements android.os.Parcelable {
@@ -175,76 +176,74 @@ package android.content.pm {
 package android.database {
 
   public abstract class AbstractCursor implements android.database.CrossProcessCursor {
-    field protected java.lang.Long mCurrentRowID;
+    field protected Long mCurrentRowID;
     field protected int mRowIdColumnIndex;
-    field protected java.util.HashMap<java.lang.Long, java.util.Map<java.lang.String, java.lang.Object>> mUpdatedRows;
+    field protected java.util.HashMap<java.lang.Long,java.util.Map<java.lang.String,java.lang.Object>> mUpdatedRows;
   }
 
 }
 
 package android.graphics {
 
-  public deprecated class AvoidXfermode extends android.graphics.Xfermode {
+  @Deprecated public class AvoidXfermode extends android.graphics.Xfermode {
     ctor public AvoidXfermode(int, int, android.graphics.AvoidXfermode.Mode);
   }
 
-  public static final class AvoidXfermode.Mode extends java.lang.Enum {
-    method public static android.graphics.AvoidXfermode.Mode valueOf(java.lang.String);
-    method public static final android.graphics.AvoidXfermode.Mode[] values();
+  public enum AvoidXfermode.Mode {
     enum_constant public static final android.graphics.AvoidXfermode.Mode AVOID;
     enum_constant public static final android.graphics.AvoidXfermode.Mode TARGET;
   }
 
   public class Canvas {
-    method public deprecated boolean clipRegion(android.graphics.Region, android.graphics.Region.Op);
-    method public deprecated boolean clipRegion(android.graphics.Region);
-    method public deprecated int save(int);
-    field public static final deprecated int CLIP_SAVE_FLAG = 2; // 0x2
-    field public static final deprecated int CLIP_TO_LAYER_SAVE_FLAG = 16; // 0x10
-    field public static final deprecated int FULL_COLOR_LAYER_SAVE_FLAG = 8; // 0x8
-    field public static final deprecated int HAS_ALPHA_LAYER_SAVE_FLAG = 4; // 0x4
-    field public static final deprecated int MATRIX_SAVE_FLAG = 1; // 0x1
+    method @Deprecated public boolean clipRegion(@NonNull android.graphics.Region, @NonNull android.graphics.Region.Op);
+    method @Deprecated public boolean clipRegion(@NonNull android.graphics.Region);
+    method @Deprecated public int save(int);
+    field @Deprecated public static final int CLIP_SAVE_FLAG = 2; // 0x2
+    field @Deprecated public static final int CLIP_TO_LAYER_SAVE_FLAG = 16; // 0x10
+    field @Deprecated public static final int FULL_COLOR_LAYER_SAVE_FLAG = 8; // 0x8
+    field @Deprecated public static final int HAS_ALPHA_LAYER_SAVE_FLAG = 4; // 0x4
+    field @Deprecated public static final int MATRIX_SAVE_FLAG = 1; // 0x1
   }
 
   public final class ImageDecoder implements java.lang.AutoCloseable {
-    method public deprecated boolean getAsAlphaMask();
-    method public deprecated boolean getConserveMemory();
-    method public deprecated boolean getDecodeAsAlphaMask();
-    method public deprecated boolean getMutable();
-    method public deprecated boolean getRequireUnpremultiplied();
-    method public deprecated android.graphics.ImageDecoder setAsAlphaMask(boolean);
-    method public deprecated void setConserveMemory(boolean);
-    method public deprecated android.graphics.ImageDecoder setDecodeAsAlphaMask(boolean);
-    method public deprecated android.graphics.ImageDecoder setMutable(boolean);
-    method public deprecated android.graphics.ImageDecoder setRequireUnpremultiplied(boolean);
-    method public deprecated android.graphics.ImageDecoder setResize(int, int);
-    method public deprecated android.graphics.ImageDecoder setResize(int);
-    field public static final deprecated int ERROR_SOURCE_ERROR = 3; // 0x3
-    field public static final deprecated int ERROR_SOURCE_EXCEPTION = 1; // 0x1
-    field public static final deprecated int ERROR_SOURCE_INCOMPLETE = 2; // 0x2
+    method @Deprecated public boolean getAsAlphaMask();
+    method @Deprecated public boolean getConserveMemory();
+    method @Deprecated public boolean getDecodeAsAlphaMask();
+    method @Deprecated public boolean getMutable();
+    method @Deprecated public boolean getRequireUnpremultiplied();
+    method @Deprecated public android.graphics.ImageDecoder setAsAlphaMask(boolean);
+    method @Deprecated public void setConserveMemory(boolean);
+    method @Deprecated public android.graphics.ImageDecoder setDecodeAsAlphaMask(boolean);
+    method @Deprecated public android.graphics.ImageDecoder setMutable(boolean);
+    method @Deprecated public android.graphics.ImageDecoder setRequireUnpremultiplied(boolean);
+    method @Deprecated public android.graphics.ImageDecoder setResize(int, int);
+    method @Deprecated public android.graphics.ImageDecoder setResize(int);
+    field @Deprecated public static final int ERROR_SOURCE_ERROR = 3; // 0x3
+    field @Deprecated public static final int ERROR_SOURCE_EXCEPTION = 1; // 0x1
+    field @Deprecated public static final int ERROR_SOURCE_INCOMPLETE = 2; // 0x2
   }
 
-  public static deprecated class ImageDecoder.IncompleteException extends java.io.IOException {
+  @Deprecated public static class ImageDecoder.IncompleteException extends java.io.IOException {
     ctor public ImageDecoder.IncompleteException();
   }
 
-  public deprecated class LayerRasterizer extends android.graphics.Rasterizer {
+  @Deprecated public class LayerRasterizer extends android.graphics.Rasterizer {
     ctor public LayerRasterizer();
     method public void addLayer(android.graphics.Paint, float, float);
     method public void addLayer(android.graphics.Paint);
   }
 
   public class Paint {
-    method public deprecated android.graphics.Rasterizer getRasterizer();
-    method public deprecated android.graphics.Rasterizer setRasterizer(android.graphics.Rasterizer);
+    method @Deprecated public android.graphics.Rasterizer getRasterizer();
+    method @Deprecated public android.graphics.Rasterizer setRasterizer(android.graphics.Rasterizer);
   }
 
   public class Picture {
-    method public static deprecated android.graphics.Picture createFromStream(java.io.InputStream);
-    method public deprecated void writeToStream(java.io.OutputStream);
+    method @Deprecated public static android.graphics.Picture createFromStream(java.io.InputStream);
+    method @Deprecated public void writeToStream(java.io.OutputStream);
   }
 
-  public deprecated class PixelXorXfermode extends android.graphics.Xfermode {
+  @Deprecated public class PixelXorXfermode extends android.graphics.Xfermode {
     ctor public PixelXorXfermode(int);
   }
 
@@ -257,9 +256,9 @@ package android.graphics {
 package android.graphics.drawable {
 
   public class AnimatedImageDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Animatable2 {
-    method public deprecated int getLoopCount(int);
-    method public deprecated void setLoopCount(int);
-    field public static final deprecated int LOOP_INFINITE = -1; // 0xffffffff
+    method @Deprecated public int getLoopCount(int);
+    method @Deprecated public void setLoopCount(int);
+    field @Deprecated public static final int LOOP_INFINITE = -1; // 0xffffffff
   }
 
 }
@@ -267,16 +266,16 @@ package android.graphics.drawable {
 package android.hardware {
 
   public final class HardwareBuffer implements java.lang.AutoCloseable android.os.Parcelable {
-    method public deprecated void destroy();
-    method public deprecated boolean isDestroyed();
+    method @Deprecated public void destroy();
+    method @Deprecated public boolean isDestroyed();
   }
 
   public final class SensorDirectChannel implements java.nio.channels.Channel {
-    method public deprecated boolean isValid();
+    method @Deprecated public boolean isValid();
   }
 
   public abstract class SensorManager {
-    method public deprecated int configureDirectChannel(android.hardware.SensorDirectChannel, android.hardware.Sensor, int);
+    method @Deprecated public int configureDirectChannel(android.hardware.SensorDirectChannel, android.hardware.Sensor, int);
   }
 
 }
@@ -284,9 +283,9 @@ package android.hardware {
 package android.location {
 
   public class Location implements android.os.Parcelable {
-    method public deprecated void removeBearingAccuracy();
-    method public deprecated void removeSpeedAccuracy();
-    method public deprecated void removeVerticalAccuracy();
+    method @Deprecated public void removeBearingAccuracy();
+    method @Deprecated public void removeSpeedAccuracy();
+    method @Deprecated public void removeVerticalAccuracy();
   }
 
 }
@@ -310,28 +309,28 @@ package android.media.tv {
 package android.net {
 
   public class ConnectivityManager {
-    method public deprecated boolean requestRouteToHost(int, int);
-    method public deprecated int startUsingNetworkFeature(int, java.lang.String);
-    method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
+    method @Deprecated public boolean requestRouteToHost(int, int);
+    method @Deprecated public int startUsingNetworkFeature(int, String);
+    method @Deprecated public int stopUsingNetworkFeature(int, String);
   }
 
-  public deprecated class NetworkBadging {
-    method public static android.graphics.drawable.Drawable getWifiIcon(int, int, android.content.res.Resources.Theme);
+  @Deprecated public class NetworkBadging {
+    method @NonNull public static android.graphics.drawable.Drawable getWifiIcon(@IntRange(from=0, to=4) int, int, @Nullable android.content.res.Resources.Theme);
     field public static final int BADGING_4K = 30; // 0x1e
     field public static final int BADGING_HD = 20; // 0x14
     field public static final int BADGING_NONE = 0; // 0x0
     field public static final int BADGING_SD = 10; // 0xa
   }
 
-  public static abstract class NetworkBadging.Badging implements java.lang.annotation.Annotation {
+  @IntDef({0x0, 0xa, 0x14, 0x1e}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface NetworkBadging.Badging {
   }
 
   public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
-    method public static deprecated org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
+    method @Deprecated public static org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
   }
 
   public class TrafficStats {
-    method public static deprecated void setThreadStatsUidSelf();
+    method @Deprecated public static void setThreadStatsUidSelf();
   }
 
 }
@@ -344,7 +343,7 @@ package android.os {
 
   public final class PowerManager {
     method public void goToSleep(long);
-    method public deprecated void userActivity(long, boolean);
+    method @Deprecated public void userActivity(long, boolean);
     method public void wakeUp(long);
   }
 
@@ -353,27 +352,27 @@ package android.os {
   }
 
   public static final class StrictMode.ThreadPolicy.Builder {
-    method public android.os.StrictMode.ThreadPolicy.Builder penaltyListener(android.os.StrictMode.OnThreadViolationListener, java.util.concurrent.Executor);
+    method public android.os.StrictMode.ThreadPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnThreadViolationListener, @NonNull java.util.concurrent.Executor);
   }
 
   public static final class StrictMode.VmPolicy.Builder {
-    method public android.os.StrictMode.VmPolicy.Builder penaltyListener(android.os.StrictMode.OnVmViolationListener, java.util.concurrent.Executor);
+    method public android.os.StrictMode.VmPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnVmViolationListener, @NonNull java.util.concurrent.Executor);
   }
 
   public final class SystemClock {
-    method public static java.time.Clock elapsedRealtimeClock();
-    method public static java.time.Clock uptimeClock();
-    method public static deprecated java.time.Clock uptimeMillisClock();
+    method @NonNull public static java.time.Clock elapsedRealtimeClock();
+    method @NonNull public static java.time.Clock uptimeClock();
+    method @Deprecated @NonNull public static java.time.Clock uptimeMillisClock();
   }
 
   public class TestLooperManager {
-    method public deprecated android.os.MessageQueue getQueue();
+    method @Deprecated public android.os.MessageQueue getQueue();
   }
 
   public class UserManager {
     method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
     method public android.graphics.drawable.Drawable getBadgedIconForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
-    method public java.lang.CharSequence getBadgedLabelForUser(java.lang.CharSequence, android.os.UserHandle);
+    method public CharSequence getBadgedLabelForUser(CharSequence, android.os.UserHandle);
   }
 
 }
@@ -381,8 +380,8 @@ package android.os {
 package android.os.storage {
 
   public class StorageManager {
-    method public android.os.storage.StorageVolume getPrimaryVolume();
-    method public android.os.storage.StorageVolume[] getVolumeList();
+    method @NonNull public android.os.storage.StorageVolume getPrimaryVolume();
+    method @NonNull public android.os.storage.StorageVolume[] getVolumeList();
   }
 
 }
@@ -390,20 +389,20 @@ package android.os.storage {
 package android.provider {
 
   public class Browser {
-    method public static final void addSearchUrl(android.content.ContentResolver, java.lang.String);
-    method public static final boolean canClearHistory(android.content.ContentResolver);
-    method public static final void clearHistory(android.content.ContentResolver);
-    method public static final void clearSearches(android.content.ContentResolver);
-    method public static final void deleteFromHistory(android.content.ContentResolver, java.lang.String);
-    method public static final void deleteHistoryTimeFrame(android.content.ContentResolver, long, long);
-    method public static final android.database.Cursor getAllBookmarks(android.content.ContentResolver) throws java.lang.IllegalStateException;
-    method public static final android.database.Cursor getAllVisitedUrls(android.content.ContentResolver) throws java.lang.IllegalStateException;
-    method public static final void requestAllIcons(android.content.ContentResolver, java.lang.String, android.webkit.WebIconDatabase.IconListener);
-    method public static final void saveBookmark(android.content.Context, java.lang.String, java.lang.String);
-    method public static final void truncateHistory(android.content.ContentResolver);
-    method public static final void updateVisitedHistory(android.content.ContentResolver, java.lang.String, boolean);
-    field public static final android.net.Uri BOOKMARKS_URI;
-    field public static final java.lang.String[] HISTORY_PROJECTION;
+    method @RequiresPermission(allOf={"com.android.browser.permission.READ_HISTORY_BOOKMARKS", "com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"}, apis="..22") public static final void addSearchUrl(android.content.ContentResolver, String);
+    method @RequiresPermission(value="com.android.browser.permission.READ_HISTORY_BOOKMARKS", apis="..22") public static final boolean canClearHistory(android.content.ContentResolver);
+    method @RequiresPermission(value="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS", apis="..22") public static final void clearHistory(android.content.ContentResolver);
+    method @RequiresPermission(value="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS", apis="..22") public static final void clearSearches(android.content.ContentResolver);
+    method @RequiresPermission(value="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS", apis="..22") public static final void deleteFromHistory(android.content.ContentResolver, String);
+    method @RequiresPermission(value="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS", apis="..22") public static final void deleteHistoryTimeFrame(android.content.ContentResolver, long, long);
+    method @RequiresPermission(value="com.android.browser.permission.READ_HISTORY_BOOKMARKS", apis="..22") public static final android.database.Cursor getAllBookmarks(android.content.ContentResolver) throws java.lang.IllegalStateException;
+    method @RequiresPermission(value="com.android.browser.permission.READ_HISTORY_BOOKMARKS", apis="..22") public static final android.database.Cursor getAllVisitedUrls(android.content.ContentResolver) throws java.lang.IllegalStateException;
+    method @RequiresPermission(value="com.android.browser.permission.READ_HISTORY_BOOKMARKS", apis="..22") public static final void requestAllIcons(android.content.ContentResolver, String, android.webkit.WebIconDatabase.IconListener);
+    method public static final void saveBookmark(android.content.Context, String, String);
+    method @RequiresPermission(allOf={"com.android.browser.permission.READ_HISTORY_BOOKMARKS", "com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"}, apis="..22") public static final void truncateHistory(android.content.ContentResolver);
+    method @RequiresPermission(allOf={"com.android.browser.permission.READ_HISTORY_BOOKMARKS", "com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"}, apis="..22") public static final void updateVisitedHistory(android.content.ContentResolver, String, boolean);
+    field @RequiresPermission.Read(value="com.android.browser.permission.READ_HISTORY_BOOKMARKS", apis="..22") @RequiresPermission.Write(value="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS", apis="..22") public static final android.net.Uri BOOKMARKS_URI;
+    field public static final String[] HISTORY_PROJECTION;
     field public static final int HISTORY_PROJECTION_BOOKMARK_INDEX = 4; // 0x4
     field public static final int HISTORY_PROJECTION_DATE_INDEX = 3; // 0x3
     field public static final int HISTORY_PROJECTION_FAVICON_INDEX = 6; // 0x6
@@ -411,121 +410,121 @@ package android.provider {
     field public static final int HISTORY_PROJECTION_TITLE_INDEX = 5; // 0x5
     field public static final int HISTORY_PROJECTION_URL_INDEX = 1; // 0x1
     field public static final int HISTORY_PROJECTION_VISITS_INDEX = 2; // 0x2
-    field public static final java.lang.String[] SEARCHES_PROJECTION;
+    field public static final String[] SEARCHES_PROJECTION;
     field public static final int SEARCHES_PROJECTION_DATE_INDEX = 2; // 0x2
     field public static final int SEARCHES_PROJECTION_SEARCH_INDEX = 1; // 0x1
-    field public static final android.net.Uri SEARCHES_URI;
-    field public static final java.lang.String[] TRUNCATE_HISTORY_PROJECTION;
+    field @RequiresPermission.Read(value="com.android.browser.permission.READ_HISTORY_BOOKMARKS", apis="..22") @RequiresPermission.Write(value="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS", apis="..22") public static final android.net.Uri SEARCHES_URI;
+    field public static final String[] TRUNCATE_HISTORY_PROJECTION;
     field public static final int TRUNCATE_HISTORY_PROJECTION_ID_INDEX = 0; // 0x0
     field public static final int TRUNCATE_N_OLDEST = 5; // 0x5
   }
 
   public static class Browser.BookmarkColumns implements android.provider.BaseColumns {
     ctor public Browser.BookmarkColumns();
-    field public static final java.lang.String BOOKMARK = "bookmark";
-    field public static final java.lang.String CREATED = "created";
-    field public static final java.lang.String DATE = "date";
-    field public static final java.lang.String FAVICON = "favicon";
-    field public static final java.lang.String TITLE = "title";
-    field public static final java.lang.String URL = "url";
-    field public static final java.lang.String VISITS = "visits";
-    field public static final java.lang.String _COUNT = "_count";
-    field public static final java.lang.String _ID = "_id";
+    field public static final String BOOKMARK = "bookmark";
+    field public static final String CREATED = "created";
+    field public static final String DATE = "date";
+    field public static final String FAVICON = "favicon";
+    field public static final String TITLE = "title";
+    field public static final String URL = "url";
+    field public static final String VISITS = "visits";
+    field public static final String _COUNT = "_count";
+    field public static final String _ID = "_id";
   }
 
   public static class Browser.SearchColumns implements android.provider.BaseColumns {
     ctor public Browser.SearchColumns();
-    field public static final java.lang.String DATE = "date";
-    field public static final java.lang.String SEARCH = "search";
-    field public static final deprecated java.lang.String URL = "url";
-    field public static final java.lang.String _COUNT = "_count";
-    field public static final java.lang.String _ID = "_id";
+    field public static final String DATE = "date";
+    field public static final String SEARCH = "search";
+    field @Deprecated public static final String URL = "url";
+    field public static final String _COUNT = "_count";
+    field public static final String _ID = "_id";
   }
 
-  public static final deprecated class ContactsContract.Contacts.StreamItems implements android.provider.ContactsContract.StreamItemsColumns {
-    field public static final deprecated java.lang.String CONTENT_DIRECTORY = "stream_items";
+  @Deprecated public static final class ContactsContract.Contacts.StreamItems implements android.provider.ContactsContract.StreamItemsColumns {
+    field @Deprecated public static final String CONTENT_DIRECTORY = "stream_items";
   }
 
-  public static final deprecated class ContactsContract.RawContacts.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
-    field public static final deprecated java.lang.String CONTENT_DIRECTORY = "stream_items";
-    field public static final java.lang.String _COUNT = "_count";
-    field public static final java.lang.String _ID = "_id";
+  @Deprecated public static final class ContactsContract.RawContacts.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
+    field @Deprecated public static final String CONTENT_DIRECTORY = "stream_items";
+    field public static final String _COUNT = "_count";
+    field public static final String _ID = "_id";
   }
 
-  public static final deprecated class ContactsContract.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
-    field public static final deprecated java.lang.String PHOTO = "photo";
-    field public static final java.lang.String _COUNT = "_count";
-    field public static final java.lang.String _ID = "_id";
+  @Deprecated public static final class ContactsContract.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
+    field @Deprecated public static final String PHOTO = "photo";
+    field public static final String _COUNT = "_count";
+    field public static final String _ID = "_id";
   }
 
-  protected static abstract deprecated interface ContactsContract.StreamItemPhotosColumns {
-    field public static final deprecated java.lang.String PHOTO_FILE_ID = "photo_file_id";
-    field public static final deprecated java.lang.String PHOTO_URI = "photo_uri";
-    field public static final deprecated java.lang.String SORT_INDEX = "sort_index";
-    field public static final deprecated java.lang.String STREAM_ITEM_ID = "stream_item_id";
-    field public static final deprecated java.lang.String SYNC1 = "stream_item_photo_sync1";
-    field public static final deprecated java.lang.String SYNC2 = "stream_item_photo_sync2";
-    field public static final deprecated java.lang.String SYNC3 = "stream_item_photo_sync3";
-    field public static final deprecated java.lang.String SYNC4 = "stream_item_photo_sync4";
+  @Deprecated protected static interface ContactsContract.StreamItemPhotosColumns {
+    field @Deprecated public static final String PHOTO_FILE_ID = "photo_file_id";
+    field @Deprecated public static final String PHOTO_URI = "photo_uri";
+    field @Deprecated public static final String SORT_INDEX = "sort_index";
+    field @Deprecated public static final String STREAM_ITEM_ID = "stream_item_id";
+    field @Deprecated public static final String SYNC1 = "stream_item_photo_sync1";
+    field @Deprecated public static final String SYNC2 = "stream_item_photo_sync2";
+    field @Deprecated public static final String SYNC3 = "stream_item_photo_sync3";
+    field @Deprecated public static final String SYNC4 = "stream_item_photo_sync4";
   }
 
-  public static final deprecated class ContactsContract.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
-    field public static final deprecated java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item";
-    field public static final deprecated android.net.Uri CONTENT_LIMIT_URI;
-    field public static final deprecated android.net.Uri CONTENT_PHOTO_URI;
-    field public static final deprecated java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item";
-    field public static final deprecated android.net.Uri CONTENT_URI;
-    field public static final deprecated java.lang.String MAX_ITEMS = "max_items";
-    field public static final java.lang.String _COUNT = "_count";
-    field public static final java.lang.String _ID = "_id";
+  @Deprecated public static final class ContactsContract.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
+    field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item";
+    field @Deprecated public static final android.net.Uri CONTENT_LIMIT_URI;
+    field @Deprecated public static final android.net.Uri CONTENT_PHOTO_URI;
+    field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item";
+    field @Deprecated public static final android.net.Uri CONTENT_URI;
+    field @Deprecated public static final String MAX_ITEMS = "max_items";
+    field public static final String _COUNT = "_count";
+    field public static final String _ID = "_id";
   }
 
-  public static final deprecated class ContactsContract.StreamItems.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
-    field public static final deprecated java.lang.String CONTENT_DIRECTORY = "photo";
-    field public static final deprecated java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item_photo";
-    field public static final deprecated java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item_photo";
-    field public static final java.lang.String _COUNT = "_count";
-    field public static final java.lang.String _ID = "_id";
+  @Deprecated public static final class ContactsContract.StreamItems.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
+    field @Deprecated public static final String CONTENT_DIRECTORY = "photo";
+    field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item_photo";
+    field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item_photo";
+    field public static final String _COUNT = "_count";
+    field public static final String _ID = "_id";
   }
 
-  protected static abstract deprecated interface ContactsContract.StreamItemsColumns {
-    field public static final deprecated java.lang.String ACCOUNT_NAME = "account_name";
-    field public static final deprecated java.lang.String ACCOUNT_TYPE = "account_type";
-    field public static final deprecated java.lang.String COMMENTS = "comments";
-    field public static final deprecated java.lang.String CONTACT_ID = "contact_id";
-    field public static final deprecated java.lang.String CONTACT_LOOKUP_KEY = "contact_lookup";
-    field public static final deprecated java.lang.String DATA_SET = "data_set";
-    field public static final deprecated java.lang.String RAW_CONTACT_ID = "raw_contact_id";
-    field public static final deprecated java.lang.String RAW_CONTACT_SOURCE_ID = "raw_contact_source_id";
-    field public static final deprecated java.lang.String RES_ICON = "icon";
-    field public static final deprecated java.lang.String RES_LABEL = "label";
-    field public static final deprecated java.lang.String RES_PACKAGE = "res_package";
-    field public static final deprecated java.lang.String SYNC1 = "stream_item_sync1";
-    field public static final deprecated java.lang.String SYNC2 = "stream_item_sync2";
-    field public static final deprecated java.lang.String SYNC3 = "stream_item_sync3";
-    field public static final deprecated java.lang.String SYNC4 = "stream_item_sync4";
-    field public static final deprecated java.lang.String TEXT = "text";
-    field public static final deprecated java.lang.String TIMESTAMP = "timestamp";
+  @Deprecated protected static interface ContactsContract.StreamItemsColumns {
+    field @Deprecated public static final String ACCOUNT_NAME = "account_name";
+    field @Deprecated public static final String ACCOUNT_TYPE = "account_type";
+    field @Deprecated public static final String COMMENTS = "comments";
+    field @Deprecated public static final String CONTACT_ID = "contact_id";
+    field @Deprecated public static final String CONTACT_LOOKUP_KEY = "contact_lookup";
+    field @Deprecated public static final String DATA_SET = "data_set";
+    field @Deprecated public static final String RAW_CONTACT_ID = "raw_contact_id";
+    field @Deprecated public static final String RAW_CONTACT_SOURCE_ID = "raw_contact_source_id";
+    field @Deprecated public static final String RES_ICON = "icon";
+    field @Deprecated public static final String RES_LABEL = "label";
+    field @Deprecated public static final String RES_PACKAGE = "res_package";
+    field @Deprecated public static final String SYNC1 = "stream_item_sync1";
+    field @Deprecated public static final String SYNC2 = "stream_item_sync2";
+    field @Deprecated public static final String SYNC3 = "stream_item_sync3";
+    field @Deprecated public static final String SYNC4 = "stream_item_sync4";
+    field @Deprecated public static final String TEXT = "text";
+    field @Deprecated public static final String TIMESTAMP = "timestamp";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
-    field public static final deprecated java.lang.String CONTACT_METADATA_SYNC = "contact_metadata_sync";
+    field @Deprecated public static final String CONTACT_METADATA_SYNC = "contact_metadata_sync";
   }
 
   public static final class Settings.System extends android.provider.Settings.NameValueTable {
-    field public static final java.lang.String APPEND_FOR_LAST_AUDIBLE = "_last_audible";
-    field public static final java.lang.String VOLUME_ALARM = "volume_alarm";
-    field public static final java.lang.String VOLUME_BLUETOOTH_SCO = "volume_bluetooth_sco";
-    field public static final java.lang.String VOLUME_MUSIC = "volume_music";
-    field public static final java.lang.String VOLUME_NOTIFICATION = "volume_notification";
-    field public static final java.lang.String VOLUME_RING = "volume_ring";
-    field public static final java.lang.String[] VOLUME_SETTINGS;
-    field public static final java.lang.String VOLUME_SYSTEM = "volume_system";
-    field public static final java.lang.String VOLUME_VOICE = "volume_voice";
+    field public static final String APPEND_FOR_LAST_AUDIBLE = "_last_audible";
+    field public static final String VOLUME_ALARM = "volume_alarm";
+    field public static final String VOLUME_BLUETOOTH_SCO = "volume_bluetooth_sco";
+    field public static final String VOLUME_MUSIC = "volume_music";
+    field public static final String VOLUME_NOTIFICATION = "volume_notification";
+    field public static final String VOLUME_RING = "volume_ring";
+    field public static final String[] VOLUME_SETTINGS;
+    field public static final String VOLUME_SYSTEM = "volume_system";
+    field public static final String VOLUME_VOICE = "volume_voice";
   }
 
   public static final class Telephony.Sms.Intents {
-    field public static final java.lang.String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+    field public static final String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
   }
 
 }
@@ -533,7 +532,7 @@ package android.provider {
 package android.speech.tts {
 
   public abstract class UtteranceProgressListener {
-    method public deprecated void onUtteranceRangeStart(java.lang.String, int, int);
+    method @Deprecated public void onUtteranceRangeStart(String, int, int);
   }
 
 }
@@ -541,12 +540,12 @@ package android.speech.tts {
 package android.telephony {
 
   public class NetworkScan {
-    method public deprecated void stop() throws android.os.RemoteException;
+    method @Deprecated public void stop() throws android.os.RemoteException;
   }
 
   public class TelephonyManager {
-    method public deprecated java.util.List<android.telephony.NeighboringCellInfo> getNeighboringCellInfo();
-    method public deprecated android.telephony.NetworkScan requestNetworkScan(android.telephony.NetworkScanRequest, android.telephony.TelephonyScanManager.NetworkScanCallback);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) public java.util.List<android.telephony.NeighboringCellInfo> getNeighboringCellInfo();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.NetworkScan requestNetworkScan(android.telephony.NetworkScanRequest, android.telephony.TelephonyScanManager.NetworkScanCallback);
   }
 
 }
@@ -554,19 +553,19 @@ package android.telephony {
 package android.text.format {
 
   public class DateFormat {
-    field public static final deprecated char AM_PM = 97; // 0x0061 'a'
-    field public static final deprecated char CAPITAL_AM_PM = 65; // 0x0041 'A'
-    field public static final deprecated char DATE = 100; // 0x0064 'd'
-    field public static final deprecated char DAY = 69; // 0x0045 'E'
-    field public static final deprecated char HOUR = 104; // 0x0068 'h'
-    field public static final deprecated char HOUR_OF_DAY = 107; // 0x006b 'k'
-    field public static final deprecated char MINUTE = 109; // 0x006d 'm'
-    field public static final deprecated char MONTH = 77; // 0x004d 'M'
-    field public static final deprecated char QUOTE = 39; // 0x0027 '\''
-    field public static final deprecated char SECONDS = 115; // 0x0073 's'
-    field public static final deprecated char STANDALONE_MONTH = 76; // 0x004c 'L'
-    field public static final deprecated char TIME_ZONE = 122; // 0x007a 'z'
-    field public static final deprecated char YEAR = 121; // 0x0079 'y'
+    field @Deprecated public static final char AM_PM = 97; // 0x0061 'a'
+    field @Deprecated public static final char CAPITAL_AM_PM = 65; // 0x0041 'A'
+    field @Deprecated public static final char DATE = 100; // 0x0064 'd'
+    field @Deprecated public static final char DAY = 69; // 0x0045 'E'
+    field @Deprecated public static final char HOUR = 104; // 0x0068 'h'
+    field @Deprecated public static final char HOUR_OF_DAY = 107; // 0x006b 'k'
+    field @Deprecated public static final char MINUTE = 109; // 0x006d 'm'
+    field @Deprecated public static final char MONTH = 77; // 0x004d 'M'
+    field @Deprecated public static final char QUOTE = 39; // 0x0027 '\''
+    field @Deprecated public static final char SECONDS = 115; // 0x0073 's'
+    field @Deprecated public static final char STANDALONE_MONTH = 76; // 0x004c 'L'
+    field @Deprecated public static final char TIME_ZONE = 122; // 0x007a 'z'
+    field @Deprecated public static final char YEAR = 121; // 0x0079 'y'
   }
 
 }
@@ -583,7 +582,7 @@ package android.text.style {
 
 package android.util {
 
-  public deprecated class FloatMath {
+  @Deprecated public class FloatMath {
     method public static float ceil(float);
     method public static float cos(float);
     method public static float exp(float);
@@ -598,7 +597,7 @@ package android.util {
 
 package android.view {
 
-  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+  @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     method protected void initializeFadingEdge(android.content.res.TypedArray);
     method protected void initializeScrollbars(android.content.res.TypedArray);
   }
@@ -623,12 +622,12 @@ package android.webkit {
 
 package android.widget {
 
-  public class ListView extends android.widget.AbsListView {
-    method protected <T extends android.view.View> T findViewTraversal(int);
-    method protected <T extends android.view.View> T findViewWithTagTraversal(java.lang.Object);
+  @android.widget.RemoteViews.RemoteView public class ListView extends android.widget.AbsListView {
+    method protected <T extends android.view.View> T findViewTraversal(@IdRes int);
+    method protected <T extends android.view.View> T findViewWithTagTraversal(Object);
   }
 
-  public class TextView extends android.view.View implements android.view.ViewTreeObserver.OnPreDrawListener {
+  @android.widget.RemoteViews.RemoteView public class TextView extends android.view.View implements android.view.ViewTreeObserver.OnPreDrawListener {
     method public static int getTextColor(android.content.Context, android.content.res.TypedArray, int);
     method public static android.content.res.ColorStateList getTextColors(android.content.Context, android.content.res.TypedArray);
   }
