@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.UserHandle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -79,6 +80,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     @Override
     protected void resetState() {
+        mPasswordEntry.setTextOperationUser(UserHandle.of(KeyguardUpdateMonitor.getCurrentUser()));
         mSecurityMessageDisplay.setMessage("");
         final boolean wasDisabled = mPasswordEntry.isEnabled();
         // Don't set enabled password entry & showSoftInput when PasswordEntry is invisible or in
@@ -174,6 +176,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
                 Context.INPUT_METHOD_SERVICE);
 
         mPasswordEntry = findViewById(getPasswordTextViewId());
+        mPasswordEntry.setTextOperationUser(UserHandle.of(KeyguardUpdateMonitor.getCurrentUser()));
         mPasswordEntryDisabler = new TextViewInputDisabler(mPasswordEntry);
         mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
         mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT

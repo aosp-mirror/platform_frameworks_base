@@ -15,17 +15,23 @@
 package com.android.systemui.statusbar.policy;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
+import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
 import android.os.Handler;
+import android.os.Process;
+import android.os.UserHandle;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -53,6 +59,10 @@ public class RemoteInputViewTest extends SysuiTestCase {
     private static final String TEST_REPLY = "hello";
     private static final String TEST_ACTION = "com.android.REMOTE_INPUT_VIEW_ACTION";
 
+    private static final String DUMMY_MESSAGE_APP_PKG =
+            "com.android.sysuitest.dummynotificationsender";
+    private static final int DUMMY_MESSAGE_APP_ID = Process.LAST_APPLICATION_UID - 1;
+
     @Mock private RemoteInputController mController;
     @Mock private ShortcutManager mShortcutManager;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
@@ -73,9 +83,6 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
         // Avoid SecurityException RemoteInputView#sendRemoteInput().
         mContext.addMockSystemService(ShortcutManager.class, mShortcutManager);
-
-        ExpandableNotificationRow row = new NotificationTestHelper(mContext).createRow();
-        mView = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
     }
 
     @After
@@ -83,19 +90,27 @@ public class RemoteInputViewTest extends SysuiTestCase {
         mContext.unregisterReceiver(mReceiver);
     }
 
-    @Test
-    public void testSendRemoteInput_intentContainsResultsAndSource() throws InterruptedException {
+    private void setTestPendingIntent(RemoteInputView view) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(TEST_ACTION), 0);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).build();
 
-        mView.setPendingIntent(pendingIntent);
-        mView.setRemoteInput(new RemoteInput[]{input}, input);
-        mView.focus();
+        view.setPendingIntent(pendingIntent);
+        view.setRemoteInput(new RemoteInput[]{input}, input);
+    }
 
-        EditText editText = mView.findViewById(R.id.remote_input_text);
+    @Test
+    public void testSendRemoteInput_intentContainsResultsAndSource() throws Exception {
+        ExpandableNotificationRow row = new NotificationTestHelper(mContext).createRow();
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+
+        setTestPendingIntent(view);
+
+        view.focus();
+
+        EditText editText = view.findViewById(R.id.remote_input_text);
         editText.setText(TEST_REPLY);
-        ImageButton sendButton = mView.findViewById(R.id.remote_input_send);
+        ImageButton sendButton = view.findViewById(R.id.remote_input_send);
         sendButton.performClick();
 
         Intent resultIntent = mReceiver.waitForIntent();
@@ -105,10 +120,55 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 RemoteInput.getResultsSource(resultIntent));
     }
 
+    private UserHandle getTargetInputMethodUser(UserHandle fromUser, UserHandle toUser)
+            throws Exception {
+        ExpandableNotificationRow row = new NotificationTestHelper(mContext).createRow(
+                DUMMY_MESSAGE_APP_PKG,
+                UserHandle.getUid(fromUser.getIdentifier(), DUMMY_MESSAGE_APP_ID),
+                toUser);
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+
+        setTestPendingIntent(view);
+
+        view.focus();
+
+        EditText editText = view.findViewById(R.id.remote_input_text);
+        EditorInfo editorInfo = new EditorInfo();
+        editorInfo.packageName = DUMMY_MESSAGE_APP_PKG;
+        editorInfo.fieldId = editText.getId();
+        InputConnection ic = editText.onCreateInputConnection(editorInfo);
+        assertNotNull(ic);
+        return editorInfo.targetInputMethodUser;
+    }
+
     @Test
-    public void testNoCrashWithoutVisibilityListener() {
-        mView.setOnVisibilityChangedListener(null);
-        mView.setVisibility(View.INVISIBLE);
-        mView.setVisibility(View.VISIBLE);
+    public void testEditorInfoTargetInputMethodUserForCallingUser() throws Exception {
+        UserHandle callingUser = Process.myUserHandle();
+        assertEquals(callingUser, getTargetInputMethodUser(callingUser, callingUser));
+    }
+
+    @Test
+    public void testEditorInfoTargetInputMethodUserForDifferentUser() throws Exception {
+        UserHandle differentUser = UserHandle.of(UserHandle.getCallingUserId() + 1);
+        assertEquals(differentUser, getTargetInputMethodUser(differentUser, differentUser));
+    }
+
+    @Test
+    public void testEditorInfoTargetInputMethodUserForAllUser() throws Exception {
+        // For the special pseudo user UserHandle.ALL, EditorInfo#targetInputMethodUser must be
+        // resolved as the current user.
+        UserHandle callingUser = Process.myUserHandle();
+        assertEquals(UserHandle.of(ActivityManager.getCurrentUser()),
+                getTargetInputMethodUser(callingUser, UserHandle.ALL));
+    }
+
+    @Test
+    public void testNoCrashWithoutVisibilityListener() throws Exception {
+        ExpandableNotificationRow row = new NotificationTestHelper(mContext).createRow();
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+
+        view.setOnVisibilityChangedListener(null);
+        view.setVisibility(View.INVISIBLE);
+        view.setVisibility(View.VISIBLE);
     }
 }
