@@ -46,7 +46,6 @@ public class Process {
 
     /**
      * Defines the root UID.
-     * @hide
      */
     public static final int ROOT_UID = 0;
 
@@ -62,7 +61,6 @@ public class Process {
 
     /**
      * Defines the UID/GID for the user shell.
-     * @hide
      */
     public static final int SHELL_UID = 2000;
 
@@ -116,7 +114,6 @@ public class Process {
 
     /**
      * Defines the UID/GID for the Bluetooth service process.
-     * @hide
      */
     public static final int BLUETOOTH_UID = 1002;
 
