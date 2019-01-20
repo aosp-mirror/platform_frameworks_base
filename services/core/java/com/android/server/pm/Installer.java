@@ -621,6 +621,14 @@ public class Installer extends SystemService {
         throw new InstallerException("Invalid instruction set: " + instructionSet);
     }
 
+    public boolean compileLayouts(String apkPath, String packageName, String outDexFile, int uid) {
+        try {
+            return mInstalld.compileLayouts(apkPath, packageName, outDexFile, uid);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     public static class InstallerException extends Exception {
         public InstallerException(String detailMessage) {
             super(detailMessage);

@@ -2790,13 +2790,13 @@ public final class Settings {
                 // dataPath   - path to package's data path
                 // seinfo     - seinfo label for the app (assigned at install time)
                 // gids       - supplementary gids this app launches with
+                // profileableFromShellFlag  - 0 or 1 if the package is profileable from shell.
                 //
                 // NOTE: We prefer not to expose all ApplicationInfo flags for now.
                 //
                 // DO NOT MODIFY THIS FORMAT UNLESS YOU CAN ALSO MODIFY ITS USERS
                 // FROM NATIVE CODE. AT THE MOMENT, LOOK AT THE FOLLOWING SOURCES:
-                //   frameworks/base/libs/packagelistparser
-                //   system/core/run-as/run-as.c
+                //   system/core/libpackagelistparser
                 //
                 sb.setLength(0);
                 sb.append(ai.packageName);
@@ -2816,6 +2816,8 @@ public final class Settings {
                 } else {
                     sb.append("none");
                 }
+                sb.append(" ");
+                sb.append(ai.isProfileableByShell() ? "1" : "0");
                 sb.append("\n");
                 writer.append(sb);
             }

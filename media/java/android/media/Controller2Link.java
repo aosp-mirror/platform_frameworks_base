@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -102,6 +103,15 @@ public final class Controller2Link implements Parcelable {
         }
     }
 
+    /** Interface method for IMediaController2.notifyPlaybackActiveChanged */
+    public void notifyPlaybackActiveChanged(int seq, boolean playbackActive) {
+        try {
+            mIController.notifyPlaybackActiveChanged(seq, playbackActive);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /** Interface method for IMediaController2.sendSessionCommand */
     public void sendSessionCommand(int seq, Session2Command command, Bundle args,
             ResultReceiver resultReceiver) {
@@ -135,6 +145,11 @@ public final class Controller2Link implements Parcelable {
         mController.onDisconnected(seq);
     }
 
+    /** Stub implementation for IMediaController2.notifyPlaybackActiveChanged */
+    public void onPlaybackActiveChanged(int seq, boolean playbackActive) {
+        mController.onPlaybackActiveChanged(seq, playbackActive);
+    }
+
     /** Stub implementation for IMediaController2.sendSessionCommand */
     public void onSessionCommand(int seq, Session2Command command, Bundle args,
             ResultReceiver resultReceiver) {
@@ -149,23 +164,53 @@ public final class Controller2Link implements Parcelable {
     private class Controller2Stub extends IMediaController2.Stub {
         @Override
         public void notifyConnected(int seq, Bundle connectionResult) {
-            Controller2Link.this.onConnected(seq, connectionResult);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Controller2Link.this.onConnected(seq, connectionResult);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void notifyDisconnected(int seq) {
-            Controller2Link.this.onDisconnected(seq);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Controller2Link.this.onDisconnected(seq);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void notifyPlaybackActiveChanged(int seq, boolean playbackActive) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Controller2Link.this.onPlaybackActiveChanged(seq, playbackActive);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void sendSessionCommand(int seq, Session2Command command, Bundle args,
                 ResultReceiver resultReceiver) {
-            Controller2Link.this.onSessionCommand(seq, command, args, resultReceiver);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Controller2Link.this.onSessionCommand(seq, command, args, resultReceiver);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void cancelSessionCommand(int seq) {
-            Controller2Link.this.onCancelCommand(seq);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Controller2Link.this.onCancelCommand(seq);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 }

@@ -82,6 +82,7 @@ import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
+import android.annotation.Size;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -113,11 +114,14 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.AttributeCache;
+import com.android.server.LocalServices;
+import com.android.server.display.ColorDisplayService;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -289,6 +293,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private static final int STARTING_WINDOW_TYPE_SNAPSHOT = 1;
     private static final int STARTING_WINDOW_TYPE_SPLASH_SCREEN = 2;
 
+    private AppSaturationInfo mLastAppSaturationInfo;
+
+    private final ColorDisplayService.ColorTransformController mColorTransformController =
+            (matrix, translation) -> mWmService.mH.post(() -> {
+                synchronized (mWmService.mGlobalLock) {
+                    if (mLastAppSaturationInfo == null) {
+                        mLastAppSaturationInfo = new AppSaturationInfo();
+                    }
+
+                    mLastAppSaturationInfo.setSaturation(matrix, translation);
+                    updateColorTransform();
+                }
+            });
+
     AppWindowToken(WindowManagerService service, IApplicationToken token,
             ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
             long inputDispatchingTimeoutNanos, boolean fullscreen, boolean showForAllUsers,
@@ -311,6 +329,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // Application tokens start out hidden.
         setHidden(true);
         hiddenRequested = true;
+
+        ColorDisplayService.ColorDisplayServiceInternal cds = LocalServices.getService(
+                ColorDisplayService.ColorDisplayServiceInternal.class);
+        cds.attachColorTransformController(activityRecord.packageName, activityRecord.mUserId,
+                new WeakReference<>(mColorTransformController));
     }
 
     AppWindowToken(WindowManagerService service, IApplicationToken token,
@@ -968,6 +991,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 : null;
 
         mLastParent = task;
+
+        updateColorTransform();
     }
 
     void postWindowRemoveStartingWindowCleanup(WindowState win) {
@@ -2814,6 +2839,24 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (isWaitingForTransitionStart() && mDisplayContent != null) {
             mDisplayContent.mOpeningApps.remove(this);
             mDisplayContent.mClosingApps.remove(this);
+        }
+    }
+
+    private void updateColorTransform() {
+        if (mSurfaceControl != null && mLastAppSaturationInfo != null) {
+            mPendingTransaction.setColorTransform(mSurfaceControl, mLastAppSaturationInfo.mMatrix,
+                    mLastAppSaturationInfo.mTranslation);
+            mWmService.scheduleAnimationLocked();
+        }
+    }
+
+    private static class AppSaturationInfo {
+        float[] mMatrix = new float[9];
+        float[] mTranslation = new float[3];
+
+        void setSaturation(@Size(9) float[] matrix, @Size(3) float[] translation) {
+            System.arraycopy(matrix, 0, mMatrix, 0, mMatrix.length);
+            System.arraycopy(translation, 0, mTranslation, 0, mTranslation.length);
         }
     }
 }

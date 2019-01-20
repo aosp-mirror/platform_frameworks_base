@@ -6026,6 +6026,12 @@ public final class Settings {
                 ANY_STRING_VALIDATOR;
 
         /**
+         * Indicates which clock face to show on lock screen and AOD while docked.
+         * @hide
+         */
+        private static final String DOCKED_CLOCK_FACE = "docked_clock_face";
+
+        /**
          * Set by the system to track if the user needs to see the call to action for
          * the lockscreen notification policy.
          * @hide
@@ -10951,6 +10957,21 @@ public final class Settings {
          */
         public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
 
+        /**
+         * Whether to try cellular data recovery when a bad network is reported.
+         *
+         * @hide
+         */
+        public static final String DATA_STALL_RECOVERY_ON_BAD_NETWORK =
+                "data_stall_recovery_on_bad_network";
+
+        /**
+         * Minumim duration in millisecodns between cellular data recovery attempts
+         *
+         * @hide
+         */
+        public static final String MIN_DURATION_BETWEEN_RECOVERY_STEPS_IN_MS =
+                "min_duration_between_recovery_steps";
         /**
          * Whether network service discovery is enabled.
          *

@@ -44,6 +44,8 @@ class CommandLineOptions {
                                       std::vector<std::string>* value);
   CommandLineOptions& OptionalOption(const std::string& name, const std::string& description,
                                      std::string* value);
+  CommandLineOptions& OptionalOption(const std::string& name, const std::string& description,
+                                     std::vector<std::string>* value);
   bool Parse(const std::vector<std::string>& argv, std::ostream& outError) const;
   void Usage(std::ostream& out) const;
 
@@ -56,6 +58,7 @@ class CommandLineOptions {
       COUNT_OPTIONAL,
       COUNT_EXACTLY_ONCE,
       COUNT_ONCE_OR_MORE,
+      COUNT_OPTIONAL_ONCE_OR_MORE,
     } count;
     bool argument;
   };

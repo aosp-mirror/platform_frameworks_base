@@ -84,7 +84,7 @@ public class SensorPrivacyTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public Intent getLongClickIntent() {
-        return null;
+        return new Intent();
     }
 
     @Override

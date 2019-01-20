@@ -252,9 +252,8 @@ public final class AutofillManagerService
     @Override // from AbstractMasterSystemService
     protected AutofillManagerServiceImpl newServiceLocked(@UserIdInt int resolvedUserId,
             boolean disabled) {
-        return new AutofillManagerServiceImpl(this, mLock, mRequestsHistory,
-                mUiLatencyHistory, mWtfHistory, resolvedUserId, mUi, mAutofillCompatState,
-                disabled);
+        return new AutofillManagerServiceImpl(this, mLock, mUiLatencyHistory,
+                mWtfHistory, resolvedUserId, mUi, mAutofillCompatState, disabled);
     }
 
     @Override // AbstractMasterSystemService
@@ -289,6 +288,13 @@ public final class AutofillManagerService
 
     @SmartSuggestionMode int getSupportedSmartSuggestionModesLocked() {
         return mSupportedSmartSuggestionModes;
+    }
+
+    /**
+     * Logs a request so it's dumped later...
+     */
+    void logRequestLocked(@NonNull String historyItem) {
+        mRequestsHistory.log(historyItem);
     }
 
     // Called by AutofillManagerServiceImpl, doesn't need to check permission

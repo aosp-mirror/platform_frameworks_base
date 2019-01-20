@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/*
+ * Disable optimization of this file if we are compiling with the address
+ * sanitizer.  This is a mitigation for b/122921367 and can be removed once the
+ * bug is fixed.
+ */
+#if __has_feature(address_sanitizer)
+#pragma clang optimize off
+#endif
+
 #define LOG_TAG "Zygote"
 
 // sys/mount.h has to come before linux/fs.h due to redefinition of MS_RDONLY, MS_BIND, etc
@@ -53,13 +62,13 @@
 #include <android-base/stringprintf.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
-#include <cutils/sched_policy.h>
 #include <private/android_filesystem_config.h>
 #include <utils/String8.h>
 #include <selinux/android.h>
 #include <seccomp_policy.h>
 #include <stats_event_list.h>
 #include <processgroup/processgroup.h>
+#include <processgroup/sched_policy.h>
 
 #include "core_jni_helpers.h"
 #include <nativehelper/JNIHelp.h>
@@ -86,6 +95,7 @@ using android::base::GetBoolProperty;
 static pid_t gSystemServerPid = 0;
 
 static const char kIsolatedStorage[] = "persist.sys.isolated_storage";
+static const char kIsolatedStorageSnapshot[] = "sys.isolated_storage_snapshot";
 static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
 static jmethodID gCallPostForkSystemServerHooks;
@@ -99,8 +109,9 @@ enum MountExternalKind {
   MOUNT_EXTERNAL_DEFAULT = 1,
   MOUNT_EXTERNAL_READ = 2,
   MOUNT_EXTERNAL_WRITE = 3,
-  MOUNT_EXTERNAL_INSTALLER = 4,
-  MOUNT_EXTERNAL_FULL = 5,
+  MOUNT_EXTERNAL_LEGACY = 4,
+  MOUNT_EXTERNAL_INSTALLER = 5,
+  MOUNT_EXTERNAL_FULL = 6,
 };
 
 // Must match values in com.android.internal.os.Zygote.
@@ -303,7 +314,7 @@ static void PreApplicationInit() {
   mallopt(M_DECAY_TIME, 1);
 }
 
-static void SetUpSeccompFilter(uid_t uid) {
+static void SetUpSeccompFilter(uid_t uid, bool is_child_zygote) {
   if (!g_is_security_enforced) {
     ALOGI("seccomp disabled by setenforce 0");
     return;
@@ -311,7 +322,14 @@ static void SetUpSeccompFilter(uid_t uid) {
 
   // Apply system or app filter based on uid.
   if (uid >= AID_APP_START) {
-    set_app_seccomp_filter();
+    if (is_child_zygote) {
+      // set_app_zygote_seccomp_filter();
+      // TODO(b/111434506) install the filter; for now, install the app filter
+      // which is more restrictive.
+      set_app_seccomp_filter();
+    } else {
+      set_app_seccomp_filter();
+    }
   } else {
     set_system_seccomp_filter();
   }
@@ -530,9 +548,10 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
         return true;
     }
 
-    if (GetBoolProperty(kIsolatedStorage, false)) {
-        if (mount_mode == MOUNT_EXTERNAL_FULL) {
-            storageSource = "/mnt/runtime/write";
+    if (GetBoolProperty(kIsolatedStorageSnapshot, GetBoolProperty(kIsolatedStorage, false))) {
+        if (mount_mode == MOUNT_EXTERNAL_FULL || mount_mode == MOUNT_EXTERNAL_LEGACY) {
+            storageSource = (mount_mode == MOUNT_EXTERNAL_FULL)
+                    ? "/mnt/runtime/full" : "/mnt/runtime/write";
             if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
                     NULL, MS_BIND | MS_REC | MS_SLAVE, NULL)) == -1) {
                 *error_msg = CREATE_ERROR("Failed to mount %s to /storage: %s",
@@ -996,7 +1015,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   // alternative is to call prctl(PR_SET_NO_NEW_PRIVS, 1) afterward, but that
   // breaks SELinux domain transition (see b/71859146).  As the result,
   // privileged syscalls used below still need to be accessible in app process.
-  SetUpSeccompFilter(uid);
+  SetUpSeccompFilter(uid, is_child_zygote);
 
   if (setresuid(uid, uid, uid) == -1) {
     fail_fn(CREATE_ERROR("setresuid(%d) failed: %s", uid, strerror(errno)));
@@ -1295,6 +1314,23 @@ static void com_android_internal_os_Zygote_nativeUnmountStorageOnInit(JNIEnv* en
     UnmountTree("/storage");
 }
 
+static void com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter(
+        JNIEnv* env, jclass, jint uidGidMin, jint uidGidMax) {
+  if (!g_is_security_enforced) {
+    ALOGI("seccomp disabled by setenforce 0");
+    return;
+  }
+
+  // TODO(b/111434506) install the filter
+
+  /*
+  bool installed = install_setuidgid_seccomp_filter(uidGidMin, uidGidMax);
+  if (!installed) {
+      RuntimeAbort(env, __LINE__, "Could not install setuid/setgid seccomp filter.");
+  }
+  */
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeSecurityInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeSecurityInit },
@@ -1308,7 +1344,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeUnmountStorageOnInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit },
     { "nativePreApplicationInit", "()V",
-      (void *) com_android_internal_os_Zygote_nativePreApplicationInit }
+      (void *) com_android_internal_os_Zygote_nativePreApplicationInit },
+    { "nativeInstallSeccompUidGidFilter", "(II)V",
+      (void *) com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {

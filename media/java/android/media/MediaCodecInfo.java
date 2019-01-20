@@ -32,8 +32,10 @@ import android.util.Size;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 /**
  * Provides information about a given media codec available on the device. You can
@@ -61,15 +63,25 @@ import java.util.Set;
  *
  */
 public final class MediaCodecInfo {
-    private boolean mIsEncoder;
+    private static final String TAG = "MediaCodecInfo";
+
+    private static final int FLAG_IS_ENCODER = (1 << 0);
+    private static final int FLAG_IS_VENDOR = (1 << 1);
+    private static final int FLAG_IS_SOFTWARE_ONLY = (1 << 2);
+    private static final int FLAG_IS_HARDWARE_ACCELERATED = (1 << 3);
+
+    private int mFlags;
     private String mName;
+    private String mCanonicalName;
     private Map<String, CodecCapabilities> mCaps;
 
     /* package private */ MediaCodecInfo(
-            String name, boolean isEncoder, CodecCapabilities[] caps) {
+            String name, String canonicalName, int flags, CodecCapabilities[] caps) {
         mName = name;
-        mIsEncoder = isEncoder;
+        mCanonicalName = canonicalName;
+        mFlags = flags;
         mCaps = new HashMap<String, CodecCapabilities>();
+
         for (CodecCapabilities c: caps) {
             mCaps.put(c.getMimeType(), c);
         }
@@ -77,16 +89,69 @@ public final class MediaCodecInfo {
 
     /**
      * Retrieve the codec name.
+     *
+     * <strong>Note:</strong> Implementations may provide multiple aliases (codec
+     * names) for the same underlying codec, any of which can be used to instantiate the same
+     * underlying codec in {@link MediaCodec#createByCodecName}.
+     *
+     * Applications targeting SDK < {@link android.os.Build.VERSION_CODES#Q}, cannot determine if
+     * the multiple codec names listed in MediaCodecList are in-fact for the same codec.
      */
+    @NonNull
     public final String getName() {
         return mName;
+    }
+
+    /**
+     * Retrieve the underlying codec name.
+     *
+     * Device implementations may provide multiple aliases (codec names) for the same underlying
+     * codec to maintain backward app compatibility. This method returns the name of the underlying
+     * codec name, which must not be another alias. For non-aliases this is always the name of the
+     * codec.
+     */
+    @NonNull
+    public final String getCanonicalName() {
+        return mCanonicalName;
+    }
+
+    /**
+     * Query if the codec is an alias for another underlying codec.
+     */
+    public final boolean isAlias() {
+        return !mName.equals(mCanonicalName);
     }
 
     /**
      * Query if the codec is an encoder.
      */
     public final boolean isEncoder() {
-        return mIsEncoder;
+        return (mFlags & FLAG_IS_ENCODER) != 0;
+    }
+
+    /**
+     * Query if the codec is provided by the Android platform (false) or the device manufacturer
+     * (true).
+     */
+    public final boolean isVendor() {
+        return (mFlags & FLAG_IS_VENDOR) != 0;
+    }
+
+    /**
+     * Query if the codec is software only. Software-only codecs are more secure as they run in
+     * a tighter security sandbox. On the other hand, software-only codecs do not provide any
+     * performance guarantees.
+     */
+    public final boolean isSoftwareOnly() {
+        return (mFlags & FLAG_IS_SOFTWARE_ONLY) != 0;
+    }
+
+    /**
+     * Query if the codec is hardware accelerated. This attribute is provided by the device
+     * manufacturer. Note that it cannot be tested for correctness.
+     */
+    public final boolean isHardwareAccelerated() {
+        return (mFlags & FLAG_IS_HARDWARE_ACCELERATED) != 0;
     }
 
     /**
@@ -461,6 +526,26 @@ public final class MediaCodecInfo {
         public static final String FEATURE_TunneledPlayback       = "tunneled-playback";
 
         /**
+         * If true, the timestamp of each output buffer is derived from the timestamp of the input
+         * buffer that produced the output. If false, the timestamp of each output buffer is
+         * derived from the timestamp of the first input buffer.
+         */
+        public static final String FEATURE_DynamicTimestamp = "dynamic-timestamp";
+
+        /**
+         * <b>decoder only</b>If true, the codec supports partial (including multiple) access units
+         * per input buffer.
+         */
+        public static final String FEATURE_FrameParsing = "frame-parsing";
+
+        /**
+         * If true, the codec supports multiple access units (for decoding, or to output for
+         * encoders). If false, the codec only supports single access units. Producing multiple
+         * access units for output is an optional feature.
+         */
+        public static final String FEATURE_MultipleFrames = "multiple-frames";
+
+        /**
          * <b>video decoder only</b>: codec supports queuing partial frames.
          */
         public static final String FEATURE_PartialFrame = "partial-frame";
@@ -496,10 +581,15 @@ public final class MediaCodecInfo {
             new Feature(FEATURE_SecurePlayback,   (1 << 1), false),
             new Feature(FEATURE_TunneledPlayback, (1 << 2), false),
             new Feature(FEATURE_PartialFrame,     (1 << 3), false),
+            new Feature(FEATURE_FrameParsing,     (1 << 4), false),
+            new Feature(FEATURE_MultipleFrames,   (1 << 5), false),
+            new Feature(FEATURE_DynamicTimestamp, (1 << 6), false),
         };
 
         private static final Feature[] encoderFeatures = {
             new Feature(FEATURE_IntraRefresh, (1 << 0), false),
+            new Feature(FEATURE_MultipleFrames, (1 << 1), false),
+            new Feature(FEATURE_DynamicTimestamp, (1 << 2), false),
         };
 
         /** @hide */
@@ -868,7 +958,7 @@ public final class MediaCodecInfo {
 
             CodecCapabilities ret = new CodecCapabilities(
                 new CodecProfileLevel[] { pl }, new int[0], true /* encoder */,
-                0 /* flags */, defaultFormat, new MediaFormat() /* info */);
+                defaultFormat, new MediaFormat() /* info */);
             if (ret.mError != 0) {
                 return null;
             }
@@ -877,10 +967,10 @@ public final class MediaCodecInfo {
 
         /* package private */ CodecCapabilities(
                 CodecProfileLevel[] profLevs, int[] colFmts,
-                boolean encoder, int flags,
+                boolean encoder,
                 Map<String, Object>defaultFormatMap,
                 Map<String, Object>capabilitiesMap) {
-            this(profLevs, colFmts, encoder, flags,
+            this(profLevs, colFmts, encoder,
                     new MediaFormat(defaultFormatMap),
                     new MediaFormat(capabilitiesMap));
         }
@@ -888,11 +978,11 @@ public final class MediaCodecInfo {
         private MediaFormat mCapabilitiesInfo;
 
         /* package private */ CodecCapabilities(
-                CodecProfileLevel[] profLevs, int[] colFmts, boolean encoder, int flags,
+                CodecProfileLevel[] profLevs, int[] colFmts, boolean encoder,
                 MediaFormat defaultFormat, MediaFormat info) {
             final Map<String, Object> map = info.getMap();
             colorFormats = colFmts;
-            mFlagsVerified = flags;
+            mFlagsVerified = 0; // TODO: remove as it is unused
             mDefaultFormat = defaultFormat;
             mCapabilitiesInfo = info;
             mMime = mDefaultFormat.getString(MediaFormat.KEY_MIME);
@@ -1242,6 +1332,7 @@ public final class MediaCodecInfo {
         private Range<Rational> mBlockAspectRatioRange;
         private Range<Long> mBlocksPerSecondRange;
         private Map<Size, Range<Long>> mMeasuredFrameRates;
+        private Vector<PerformancePoint> mPerformancePoints;
         private Range<Integer> mFrameRateRange;
 
         private int mBlockWidth;
@@ -1523,6 +1614,158 @@ public final class MediaCodecInfo {
         }
 
         /**
+         * Video performance points are a set of standard performance points defined by pixel rate.
+         */
+        public static final class PerformancePoint {
+            /**
+             * Frame width in pixels.
+             */
+            public final int width;
+
+            /**
+             * Frame height in pixels.
+             */
+            public final int height;
+
+            /**
+             * Frame rate in frames per second.
+             */
+            public final int frameRate;
+
+            /* package private */
+            PerformancePoint(int width_, int height_, int frameRate_) {
+                width = width_;
+                height = height_;
+                frameRate = frameRate_;
+            }
+
+            /**
+             * Checks whether the performance point covers a media format.
+             *
+             * @param format Stream format considered
+             *
+             * @return {@code true} if the performance point covers the format.
+             */
+            public boolean covers(@NonNull MediaFormat format) {
+                // for simplicity, this code assumes a 16x16 block size.
+                long macroBlocks = ((width + 15) / 16) * (long)((height + 15) / 16);
+                long mbps = macroBlocks * frameRate;
+
+                long formatMacroBlocks =
+                    (long)((format.getInteger(MediaFormat.KEY_WIDTH, 0) + 15) / 16)
+                            * ((format.getInteger(MediaFormat.KEY_HEIGHT, 0) + 15) / 16);
+                double formatMbps =
+                    Math.ceil(formatMacroBlocks
+                              * format.getNumber(MediaFormat.KEY_FRAME_RATE, 0).doubleValue());
+                return formatMacroBlocks > 0 && formatMacroBlocks <= macroBlocks
+                        && formatMbps <= mbps;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (o instanceof PerformancePoint) {
+                    PerformancePoint other = (PerformancePoint)o;
+                    return ((long)width * height) == ((long)other.width * other.height)
+                            && frameRate == other.frameRate;
+                }
+                return false;
+            }
+
+            /** 480p 24fps */
+            public static final PerformancePoint SD_24 = new PerformancePoint(720, 480, 24);
+            /** 576p 25fps */
+            public static final PerformancePoint SD_25 = new PerformancePoint(720, 576, 25);
+            /** 480p 30fps */
+            public static final PerformancePoint SD_30 = new PerformancePoint(720, 480, 30);
+            /** 480p 48fps */
+            public static final PerformancePoint SD_48 = new PerformancePoint(720, 480, 48);
+            /** 576p 50fps */
+            public static final PerformancePoint SD_50 = new PerformancePoint(720, 576, 50);
+            /** 480p 60fps */
+            public static final PerformancePoint SD_60 = new PerformancePoint(720, 480, 60);
+
+            /** 720p 24fps */
+            public static final PerformancePoint HD_24 = new PerformancePoint(1280, 720, 24);
+            /** 720p 25fps */
+            public static final PerformancePoint HD_25 = new PerformancePoint(1280, 720, 25);
+            /** 720p 30fps */
+            public static final PerformancePoint HD_30 = new PerformancePoint(1280, 720, 30);
+            /** 720p 50fps */
+            public static final PerformancePoint HD_50 = new PerformancePoint(1280, 720, 50);
+            /** 720p 60fps */
+            public static final PerformancePoint HD_60 = new PerformancePoint(1280, 720, 60);
+            /** 720p 100fps */
+            public static final PerformancePoint HD_100 = new PerformancePoint(1280, 720, 100);
+            /** 720p 120fps */
+            public static final PerformancePoint HD_120 = new PerformancePoint(1280, 720, 120);
+            /** 720p 200fps */
+            public static final PerformancePoint HD_200 = new PerformancePoint(1280, 720, 200);
+            /** 720p 240fps */
+            public static final PerformancePoint HD_240 = new PerformancePoint(1280, 720, 240);
+
+            /** 1080p 24fps */
+            public static final PerformancePoint FHD_24 = new PerformancePoint(1920, 1080, 24);
+            /** 1080p 25fps */
+            public static final PerformancePoint FHD_25 = new PerformancePoint(1920, 1080, 25);
+            /** 1080p 30fps */
+            public static final PerformancePoint FHD_30 = new PerformancePoint(1920, 1080, 30);
+            /** 1080p 50fps */
+            public static final PerformancePoint FHD_50 = new PerformancePoint(1920, 1080, 50);
+            /** 1080p 60fps */
+            public static final PerformancePoint FHD_60 = new PerformancePoint(1920, 1080, 60);
+            /** 1080p 100fps */
+            public static final PerformancePoint FHD_100 = new PerformancePoint(1920, 1080, 100);
+            /** 1080p 120fps */
+            public static final PerformancePoint FHD_120 = new PerformancePoint(1920, 1080, 120);
+            /** 1080p 200fps */
+            public static final PerformancePoint FHD_200 = new PerformancePoint(1920, 1080, 200);
+            /** 1080p 240fps */
+            public static final PerformancePoint FHD_240 = new PerformancePoint(1920, 1080, 240);
+
+            /** 2160p 24fps */
+            public static final PerformancePoint UHD_24 = new PerformancePoint(3840, 2160, 24);
+            /** 2160p 25fps */
+            public static final PerformancePoint UHD_25 = new PerformancePoint(3840, 2160, 25);
+            /** 2160p 30fps */
+            public static final PerformancePoint UHD_30 = new PerformancePoint(3840, 2160, 30);
+            /** 2160p 50fps */
+            public static final PerformancePoint UHD_50 = new PerformancePoint(3840, 2160, 50);
+            /** 2160p 60fps */
+            public static final PerformancePoint UHD_60 = new PerformancePoint(3840, 2160, 60);
+            /** 2160p 100fps */
+            public static final PerformancePoint UHD_100 = new PerformancePoint(3840, 2160, 100);
+            /** 2160p 120fps */
+            public static final PerformancePoint UHD_120 = new PerformancePoint(3840, 2160, 120);
+            /** 2160p 200fps */
+            public static final PerformancePoint UHD_200 = new PerformancePoint(3840, 2160, 200);
+            /** 2160p 240fps */
+            public static final PerformancePoint UHD_240 = new PerformancePoint(3840, 2160, 240);
+        }
+
+        /**
+         * Returns the supported performance points. May return {@code null} if the codec did not
+         * publish any performance point information (e.g. the vendor codecs have not been updated
+         * to the latest android release). May return an empty list if the codec published that
+         * if does not guarantee any performance points.
+         * <p>
+         * This is a performance guarantee provided by the device manufacturer for hardware codecs
+         * based on hardware capabilities of the device.
+         * <p>
+         * The returned list is sorted first by decreasing number of pixels, then by decreasing
+         * width, and finally by decreasing frame rate.
+         * Performance points assume a single active codec. For use cases where multiple
+         * codecs are active, should use that highest pixel count, and add the frame rates of
+         * each individual codec.
+         */
+        @Nullable
+        public List<PerformancePoint> getSupportedPerformancePoints() {
+            if (mPerformancePoints == null) {
+                return null;
+            }
+            return new ArrayList<PerformancePoint>(mPerformancePoints);
+        }
+
+        /**
          * Returns whether a given video size ({@code width} and
          * {@code height}) and {@code frameRate} combination is supported.
          */
@@ -1658,6 +1901,50 @@ public final class MediaCodecInfo {
             mSmallerDimensionUpperLimit = SIZE_RANGE.getUpper();
         }
 
+        private @Nullable Vector<PerformancePoint> getPerformancePoints(Map<String, Object> map) {
+            Vector<PerformancePoint> ret = new Vector<>();
+            final String prefix = "performance-point-";
+            Set<String> keys = map.keySet();
+            for (String key : keys) {
+                // looking for: performance-point-WIDTHxHEIGHT-range
+                if (!key.startsWith(prefix)) {
+                    continue;
+                }
+                String subKey = key.substring(prefix.length());
+                if (subKey.equals("none") && ret.size() == 0) {
+                    // This means that component knowingly did not publish performance points.
+                    // This is different from when the component forgot to publish performance
+                    // points.
+                    return ret;
+                }
+                String[] temp = key.split("-");
+                if (temp.length != 4) {
+                    continue;
+                }
+                String sizeStr = temp[2];
+                Size size = Utils.parseSize(sizeStr, null);
+                if (size == null || size.getWidth() * size.getHeight() <= 0) {
+                    continue;
+                }
+                Range<Long> range = Utils.parseLongRange(map.get(key), null);
+                if (range == null || range.getLower() < 0 || range.getUpper() < 0) {
+                    continue;
+                }
+                ret.add(new PerformancePoint(
+                        size.getWidth(), size.getHeight(), range.getLower().intValue()));
+            }
+            // check if the component specified no performance point indication
+            if (ret.size() == 0) {
+                return null;
+            }
+
+            // sort reversed by area first, then by frame rate
+            ret.sort((a, b) -> (a.width * a.height != b.width * b.height ?
+                                    (b.width * b.height - a.width * a.height) :
+                                    (b.frameRate - a.frameRate)));
+            return ret;
+        }
+
         private Map<Size, Range<Long>> getMeasuredFrameRates(Map<String, Object> map) {
             Map<Size, Range<Long>> ret = new HashMap<Size, Range<Long>>();
             final String prefix = "measured-frame-rate-";
@@ -1769,6 +2056,7 @@ public final class MediaCodecInfo {
             blockRates =
                 Utils.parseLongRange(map.get("blocks-per-second-range"), null);
             mMeasuredFrameRates = getMeasuredFrameRates(map);
+            mPerformancePoints = getPerformancePoints(map);
             Pair<Range<Integer>, Range<Integer>> sizeRanges =
                 parseWidthHeightRanges(map.get("size-range"));
             if (sizeRanges != null) {
@@ -3172,7 +3460,7 @@ public final class MediaCodecInfo {
         }
 
         return new MediaCodecInfo(
-                mName, mIsEncoder,
+                mName, mCanonicalName, mFlags,
                 caps.toArray(new CodecCapabilities[caps.size()]));
     }
 }

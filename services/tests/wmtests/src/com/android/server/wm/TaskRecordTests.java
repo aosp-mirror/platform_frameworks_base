@@ -90,7 +90,6 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         TaskRecord.setTaskRecordFactory(null);
-        setupActivityTaskManagerService();
         mParentBounds = new Rect(10 /*left*/, 30 /*top*/, 80 /*right*/, 60 /*bottom*/);
     }
 

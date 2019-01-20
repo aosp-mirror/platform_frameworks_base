@@ -229,9 +229,12 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         // Any role for which we have a record are already migrated
         RoleUserState userState = getOrCreateUserState(userId);
         if (!userState.isRoleAvailable(role)) {
-            userState.addRoleName(role);
             List<String> roleHolders = mLegacyRoleResolver.getRoleHolders(role, userId);
+            if (roleHolders.isEmpty()) {
+                return;
+            }
             Slog.i(LOG_TAG, "Migrating " + role + ", legacy holders: " + roleHolders);
+            userState.addRoleName(role);
             int size = roleHolders.size();
             for (int i = 0; i < size; i++) {
                 userState.addRoleHolder(role, roleHolders.get(i));

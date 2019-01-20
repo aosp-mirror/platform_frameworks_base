@@ -55,6 +55,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
@@ -111,6 +112,10 @@ class ActivityTestsBase {
     @Before
     public void setUpBase() {
         mTestInjector.setUp();
+
+        mService = new TestActivityTaskManagerService(mContext);
+        mSupervisor = mService.mStackSupervisor;
+        mRootActivityContainer = mService.mRootActivityContainer;
     }
 
     @After
@@ -120,17 +125,6 @@ class ActivityTestsBase {
             mService.setWindowManager(null);
             mService = null;
         }
-    }
-
-    ActivityTaskManagerService createActivityTaskManagerService() {
-        mService = new TestActivityTaskManagerService(mContext);
-        mSupervisor = mService.mStackSupervisor;
-        mRootActivityContainer = mService.mRootActivityContainer;
-        return mService;
-    }
-
-    void setupActivityTaskManagerService() {
-        createActivityTaskManagerService();
     }
 
     /** Creates a {@link TestActivityDisplay}. */
@@ -432,6 +426,7 @@ class ActivityTestsBase {
             doReturn(mock(IPackageManager.class)).when(this).getPackageManager();
             // allow background activity starts by default
             doReturn(true).when(this).isBackgroundActivityStartsEnabled();
+            doNothing().when(this).updateCpuStats();
         }
 
         void setup(IntentFirewall intentFirewall, PendingIntentController intentController,
@@ -586,6 +581,8 @@ class ActivityTestsBase {
             // unit test version does not handle launch wake lock
             doNothing().when(this).acquireLaunchWakelock();
             doReturn(mKeyguardController).when(this).getKeyguardController();
+
+            mLaunchingActivity = mock(PowerManager.WakeLock.class);
 
             initialize();
         }

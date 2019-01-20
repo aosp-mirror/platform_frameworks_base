@@ -45,6 +45,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowSubscriptionManager;
 
 @RunWith(RobolectricTestRunner.class)
 public class DataUsageControllerTest {
@@ -73,7 +74,9 @@ public class DataUsageControllerTest {
                 new NetworkStatsHistory(DateUtils.DAY_IN_MILLIS /* bucketDuration */));
         doReturn(mNetworkStatsHistory)
                 .when(mSession).getHistoryForNetwork(any(NetworkTemplate.class), anyInt());
-        doReturn(SUB_ID).when(mTelephonyManager).getSubscriberId(anyInt());
+        final int defaultSubscriptionId = 1234;
+        ShadowSubscriptionManager.setDefaultDataSubscriptionId(defaultSubscriptionId);
+        doReturn(SUB_ID).when(mTelephonyManager).getSubscriberId(eq(defaultSubscriptionId));
     }
 
     @Test
@@ -106,5 +109,40 @@ public class DataUsageControllerTest {
 
         assertThat(mController.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard()))
                 .isEqualTo(receivedBytes + transmittedBytes);
+    }
+
+    @Test
+    public void getDataUsageInfo_hasUsageData_shouldReturnCorrectUsageForExplicitSubId()
+            throws Exception {
+        // First setup a stats bucket for the default subscription / subscriber ID.
+        final long defaultSubRx = 1234567L;
+        final long defaultSubTx = 123456L;
+        final NetworkStats.Bucket defaultSubscriberBucket = mock(NetworkStats.Bucket.class);
+        when(defaultSubscriberBucket.getRxBytes()).thenReturn(defaultSubRx);
+        when(defaultSubscriberBucket.getTxBytes()).thenReturn(defaultSubTx);
+        when(mNetworkStatsManager.querySummaryForDevice(eq(ConnectivityManager.TYPE_MOBILE),
+                eq(SUB_ID), eq(0L)/* startTime */, anyLong() /* endTime */)).thenReturn(
+                defaultSubscriberBucket);
+
+        // Now setup a stats bucket for a different, non-default subscription / subscriber ID.
+        final long nonDefaultSubRx = 7654321L;
+        final long nonDefaultSubTx = 654321L;
+        final NetworkStats.Bucket nonDefaultSubscriberBucket = mock(NetworkStats.Bucket.class);
+        when(nonDefaultSubscriberBucket.getRxBytes()).thenReturn(nonDefaultSubRx);
+        when(nonDefaultSubscriberBucket.getTxBytes()).thenReturn(nonDefaultSubTx);
+        final int explictSubscriptionId = 55;
+        final String subscriberId2 = "Test Subscriber 2";
+        when(mNetworkStatsManager.querySummaryForDevice(eq(ConnectivityManager.TYPE_MOBILE),
+                eq(subscriberId2), eq(0L)/* startTime */, anyLong() /* endTime */)).thenReturn(
+                nonDefaultSubscriberBucket);
+        doReturn(subscriberId2).when(mTelephonyManager).getSubscriberId(explictSubscriptionId);
+
+        // Now verify that when we're asking for stats on the non-default subscription, we get
+        // the data back for that subscription and *not* the default one.
+        mController.setSubscriptionId(explictSubscriptionId);
+
+        assertThat(mController.getHistoricalUsageLevel(
+                NetworkTemplate.buildTemplateMobileAll(subscriberId2))).isEqualTo(
+                nonDefaultSubRx + nonDefaultSubTx);
     }
 }

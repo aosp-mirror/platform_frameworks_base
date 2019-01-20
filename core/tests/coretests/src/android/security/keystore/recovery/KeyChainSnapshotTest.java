@@ -45,6 +45,7 @@ public class KeyChainSnapshotTest {
     private static final int USER_SECRET_TYPE = KeyChainProtectionParams.TYPE_LOCKSCREEN;
     private static final String KEY_ALIAS = "steph";
     private static final byte[] KEY_MATERIAL = new byte[] { 3, 5, 7, 9, 1 };
+    private static final byte[] KEY_METADATA = new byte[] { 5, 3, 11, 13 };
     private static final CertPath CERT_PATH = TestData.getThmCertPath();
 
     @Test
@@ -100,6 +101,7 @@ public class KeyChainSnapshotTest {
         WrappedApplicationKey wrappedApplicationKey = snapshot.getWrappedApplicationKeys().get(0);
         assertEquals(KEY_ALIAS, wrappedApplicationKey.getAlias());
         assertArrayEquals(KEY_MATERIAL, wrappedApplicationKey.getEncryptedKeyMaterial());
+        assertArrayEquals(KEY_METADATA, wrappedApplicationKey.getMetadata());
     }
 
     @Test
@@ -166,6 +168,7 @@ public class KeyChainSnapshotTest {
         WrappedApplicationKey wrappedApplicationKey = snapshot.getWrappedApplicationKeys().get(0);
         assertEquals(KEY_ALIAS, wrappedApplicationKey.getAlias());
         assertArrayEquals(KEY_MATERIAL, wrappedApplicationKey.getEncryptedKeyMaterial());
+        assertArrayEquals(KEY_METADATA, wrappedApplicationKey.getMetadata());
     }
 
     private static KeyChainSnapshot createKeyChainSnapshot() throws Exception {
@@ -197,6 +200,7 @@ public class KeyChainSnapshotTest {
         return new WrappedApplicationKey.Builder()
                 .setAlias(KEY_ALIAS)
                 .setEncryptedKeyMaterial(KEY_MATERIAL)
+                .setMetadata(KEY_METADATA)
                 .build();
     }
 

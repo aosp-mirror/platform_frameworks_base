@@ -149,6 +149,11 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
                 "WifiAwareAgentNetworkSpecifier should not be used in network requests");
     }
 
+    @Override
+    public NetworkSpecifier redact() {
+        return null;
+    }
+
     private void initialize() {
         try {
             mDigester = MessageDigest.getInstance("SHA-256");

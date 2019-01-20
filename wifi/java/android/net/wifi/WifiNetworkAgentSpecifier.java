@@ -168,8 +168,9 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("WifiNetworkAgentSpecifier [");
-        sb.append("WifiConfiguration=").append(
-                mWifiConfiguration == null ? null : mWifiConfiguration.configKey())
+        sb.append("WifiConfiguration=")
+                .append(", SSID=").append(mWifiConfiguration.SSID)
+                .append(", BSSID=").append(mWifiConfiguration.BSSID)
                 .append(", mOriginalRequestorUid=").append(mOriginalRequestorUid)
                 .append("]");
         return sb.toString();
@@ -179,5 +180,10 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
     public void assertValidFromUid(int requestorUid) {
         throw new IllegalStateException("WifiNetworkAgentSpecifier should never be used "
                 + "for requests.");
+    }
+
+    @Override
+    public NetworkSpecifier redact() {
+        return null;
     }
 }

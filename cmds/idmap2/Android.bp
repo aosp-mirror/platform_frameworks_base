@@ -20,6 +20,7 @@ cc_defaults {
         "misc-*",
         "modernize-*",
         "readability-*",
+        "-modernize-avoid-c-arrays",
     ],
     tidy_flags: [
         "-system-headers",
@@ -38,6 +39,7 @@ cc_library {
         "libidmap2/CommandLineOptions.cpp",
         "libidmap2/FileUtils.cpp",
         "libidmap2/Idmap.cpp",
+        "libidmap2/Policies.cpp",
         "libidmap2/PrettyPrintVisitor.cpp",
         "libidmap2/RawPrintVisitor.cpp",
         "libidmap2/ResourceUtils.cpp",
@@ -87,6 +89,7 @@ cc_test {
         "tests/Idmap2BinaryTests.cpp",
         "tests/IdmapTests.cpp",
         "tests/Main.cpp",
+        "tests/PoliciesTests.cpp",
         "tests/PrettyPrintVisitorTests.cpp",
         "tests/RawPrintVisitorTests.cpp",
         "tests/ResourceUtilsTests.cpp",

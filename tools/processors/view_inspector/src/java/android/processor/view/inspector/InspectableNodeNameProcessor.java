@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 
 /**
- * Process {InspectableNodeName} annotations
+ * Process {@code @InspectableNodeName} annotations.
  *
  * @see android.view.inspector.InspectableNodeName
  */
@@ -58,7 +58,8 @@ public final class InspectableNodeNameProcessor implements ModelProcessor {
         try {
             final AnnotationMirror mirror =
                     mAnnotationUtils.exactlyOneMirror(mQualifiedName, element);
-            final Optional<String> nodeName = mAnnotationUtils.stringProperty("value", mirror);
+            final Optional<String> nodeName = mAnnotationUtils
+                    .typedValueByName("value", String.class, element, mirror);
 
             if (!model.getNodeName().isPresent() || model.getNodeName().equals(nodeName)) {
                 model.setNodeName(nodeName);

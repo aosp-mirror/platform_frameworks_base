@@ -53,6 +53,31 @@ public final class DeviceConfig {
     public static final Uri CONTENT_URI = Uri.parse("content://" + Settings.AUTHORITY + "/config");
 
     /**
+     * Namespace for all Game Driver features.
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_GAME_DRIVER = "game_driver";
+
+    /**
+     * Namespace for autofill feature that provides suggestions across all apps when
+     * the user interacts with input fields.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_AUTOFILL = "autofill";
+
+    /**
+     * Namespace for content capture feature used by on-device machine intelligence
+     * to provide suggestions in a privacy-safe manner.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
+
+    /**
      * Namespace for all input-related features that are used at the native level.
      * These features are applied at reboot.
      *

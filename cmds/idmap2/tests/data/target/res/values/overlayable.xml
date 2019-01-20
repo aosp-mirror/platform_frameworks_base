@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2019 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+<overlayable name="TestResources">
+    <!-- Publicly overlayable resources -->
+    <item type="string" name="a" />
+    <item type="string" name="b" />
+    <item type="string" name="c" />
+    <item type="string" name="str1" />
+    <item type="string" name="str2" />
+    <item type="string" name="str3" />
+    <item type="string" name="str4" />
+    <item type="string" name="x" />
+    <item type="string" name="y" />
+    <item type="string" name="z" />
+    <item type="integer" name="int1" />
+
+    <!-- Resources with partition restrictins -->
+    <policy type="system">
+        <item type="string" name="policy_system" />
+    </policy>
+
+    <policy type="system|vendor">
+        <item type="string" name="policy_system_vendor" />
+    </policy>
+
+    <policy type="product">
+        <item type="string" name="policy_product" />
+    </policy>
+
+    <policy type="public">
+        <item type="string" name="policy_public" />
+    </policy>
+</overlayable>
+
+<overlayable name="OtherResources">
+    <item type="string" name="other" />
+</overlayable>
+</resources>

@@ -39,14 +39,10 @@ public class HybridGroupManager {
     private final NotificationDozeHelper mDozer;
     private final ViewGroup mParent;
 
-    private float mOverflowNumberSizeDark;
-    private int mOverflowNumberPaddingDark;
     private float mOverflowNumberSize;
     private int mOverflowNumberPadding;
 
     private int mOverflowNumberColor;
-    private int mOverflowNumberColorDark;
-    private float mDarkAmount = 0f;
 
     public HybridGroupManager(Context ctx, ViewGroup parent) {
         mContext = ctx;
@@ -59,12 +55,8 @@ public class HybridGroupManager {
         Resources res = mContext.getResources();
         mOverflowNumberSize = res.getDimensionPixelSize(
                 R.dimen.group_overflow_number_size);
-        mOverflowNumberSizeDark = res.getDimensionPixelSize(
-                R.dimen.group_overflow_number_size_dark);
         mOverflowNumberPadding = res.getDimensionPixelSize(
                 R.dimen.group_overflow_number_padding);
-        mOverflowNumberPaddingDark = mOverflowNumberPadding + res.getDimensionPixelSize(
-                R.dimen.group_overflow_number_extra_padding_dark);
     }
 
     private HybridNotificationView inflateHybridViewWithStyle(int style) {
@@ -86,13 +78,11 @@ public class HybridGroupManager {
     }
 
     private void updateOverFlowNumberColor(TextView numberView) {
-        numberView.setTextColor(NotificationUtils.interpolateColors(
-                mOverflowNumberColor, mOverflowNumberColorDark, mDarkAmount));
+        numberView.setTextColor(mOverflowNumberColor);
     }
 
-    public void setOverflowNumberColor(TextView numberView, int colorRegular, int colorDark) {
+    public void setOverflowNumberColor(TextView numberView, int colorRegular) {
         mOverflowNumberColor = colorRegular;
-        mOverflowNumberColorDark = colorDark;
         if (numberView != null) {
             updateOverFlowNumberColor(numberView);
         }
@@ -107,7 +97,7 @@ public class HybridGroupManager {
     public HybridNotificationView bindAmbientFromNotification(HybridNotificationView reusableView,
             Notification notification) {
         return bindFromNotificationWithStyle(reusableView, notification,
-                R.style.HybridNotification_Ambient);
+                R.style.HybridNotification);
     }
 
     private HybridNotificationView bindFromNotificationWithStyle(
@@ -150,6 +140,11 @@ public class HybridGroupManager {
                 R.plurals.notification_group_overflow_description, number), number);
 
         reusableView.setContentDescription(contentDescription);
+        reusableView.setTextSize(TypedValue.COMPLEX_UNIT_PX, mOverflowNumberSize);
+        reusableView.setPaddingRelative(reusableView.getPaddingStart(),
+                reusableView.getPaddingTop(), mOverflowNumberPadding,
+                reusableView.getPaddingBottom());
+        updateOverFlowNumberColor(reusableView);
         return reusableView;
     }
 
@@ -162,17 +157,5 @@ public class HybridGroupManager {
             titleView.setText(text);
         }
         return titleView;
-    }
-
-    public void setOverflowNumberDark(TextView view, boolean dark, boolean fade, long delay) {
-        mDozer.setIntensityDark((f)->{
-            mDarkAmount = f;
-            updateOverFlowNumberColor(view);
-        }, dark, fade, delay, view);
-        view.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                dark ? mOverflowNumberSizeDark : mOverflowNumberSize);
-        int paddingEnd = dark ? mOverflowNumberPaddingDark : mOverflowNumberPadding;
-        view.setPaddingRelative(view.getPaddingStart(), view.getPaddingTop(), paddingEnd,
-                view.getPaddingBottom());
     }
 }

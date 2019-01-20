@@ -303,9 +303,6 @@ static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item
   if (overlayable_item.policies & OverlayableItem::Policy::kProduct) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::PRODUCT);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kProductServices) {
-    pb_overlayable_item->add_policy(pb::OverlayableItem::PRODUCT_SERVICES);
-  }
   if (overlayable_item.policies & OverlayableItem::Policy::kSystem) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::SYSTEM);
   }

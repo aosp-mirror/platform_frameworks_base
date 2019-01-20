@@ -97,6 +97,22 @@ public class ContentCaptureSessionTest {
         assertThat(structure.getAutofillId()).isEqualTo(childId);
     }
 
+    @Test
+    public void testNotifyViewsDisappeared_invalid() {
+        // Null parent
+        assertThrows(NullPointerException.class,
+                () -> mSession1.notifyViewsDisappeared(null, new int[] {42}));
+        // Null child
+        assertThrows(IllegalArgumentException.class,
+                () -> mSession1.notifyViewsDisappeared(new AutofillId(42), null));
+        // Empty child
+        assertThrows(IllegalArgumentException.class,
+                () -> mSession1.notifyViewsDisappeared(new AutofillId(42), new int[] {}));
+        // Virtual parent
+        assertThrows(IllegalArgumentException.class,
+                () -> mSession1.notifyViewsDisappeared(new AutofillId(42, 108), new int[] {666}));
+    }
+
     // Cannot use @Spy because we need to pass the session id on constructor
     private class MyContentCaptureSession extends ContentCaptureSession {
 
@@ -115,7 +131,7 @@ public class ContentCaptureSessionTest {
         }
 
         @Override
-        void flush() {
+        void flush(int reason) {
             throw new UnsupportedOperationException("should not have been called");
         }
 
@@ -135,7 +151,7 @@ public class ContentCaptureSessionTest {
         }
 
         @Override
-        void internalNotifyViewTextChanged(AutofillId id, CharSequence text, int flags) {
+        void internalNotifyViewTextChanged(AutofillId id, CharSequence text) {
             throw new UnsupportedOperationException("should not have been called");
         }
     }

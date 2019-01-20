@@ -74,6 +74,7 @@ import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.appbinding.AppBindingService;
+import com.android.server.attention.AttentionManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.BiometricService;
 import com.android.server.biometrics.face.FaceService;
@@ -148,9 +149,10 @@ import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
-import com.google.android.startop.iorap.IorapForwardingService;
 
 import dalvik.system.VMRuntime;
+
+import com.google.android.startop.iorap.IorapForwardingService;
 
 import java.io.File;
 import java.io.IOException;
@@ -1229,6 +1231,10 @@ public final class SystemServer {
                         .startService(TextClassificationManagerService.Lifecycle.class);
                 traceEnd();
             }
+
+            traceBeginAndSlog("StartAttentionManagerService");
+            mSystemServiceManager.startService(AttentionManagerService.class);
+            traceEnd();
 
             traceBeginAndSlog("StartNetworkScoreService");
             mSystemServiceManager.startService(NetworkScoreService.Lifecycle.class);

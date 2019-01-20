@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
+import android.bluetooth.BluetoothCodecConfig;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.audiofx.AudioEffect;
@@ -137,6 +138,29 @@ public class AudioSystem
             case MODE_NORMAL: return "MODE_NORMAL";
             case MODE_RINGTONE: return "MODE_RINGTONE";
             default: return "unknown mode (" + mode + ")";
+        }
+    }
+
+    /* Formats for A2DP codecs, must match system/audio-base.h audio_format_t */
+    public static final int AUDIO_FORMAT_INVALID        = 0xFFFFFFFF;
+    public static final int AUDIO_FORMAT_DEFAULT        = 0;
+    public static final int AUDIO_FORMAT_AAC            = 0x04000000;
+    public static final int AUDIO_FORMAT_SBC            = 0x1F000000;
+    public static final int AUDIO_FORMAT_APTX           = 0x20000000;
+    public static final int AUDIO_FORMAT_APTX_HD        = 0x21000000;
+    public static final int AUDIO_FORMAT_LDAC           = 0x23000000;
+
+    /**
+     * Convert audio format enum values to Bluetooth codec values
+     */
+    public static int audioFormatToBluetoothSourceCodec(int audioFormat) {
+        switch (audioFormat) {
+            case AUDIO_FORMAT_AAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC;
+            case AUDIO_FORMAT_SBC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC;
+            case AUDIO_FORMAT_APTX: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX;
+            case AUDIO_FORMAT_APTX_HD: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD;
+            case AUDIO_FORMAT_LDAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC;
+            default: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID;
         }
     }
 
@@ -542,6 +566,7 @@ public class AudioSystem
     public static final int DEVICE_IN_PROXY = DEVICE_BIT_IN | 0x1000000;
     public static final int DEVICE_IN_USB_HEADSET = DEVICE_BIT_IN | 0x2000000;
     public static final int DEVICE_IN_BLUETOOTH_BLE = DEVICE_BIT_IN | 0x4000000;
+    public static final int DEVICE_IN_HDMI_ARC = DEVICE_BIT_IN | 0x8000000;
     public static final int DEVICE_IN_ECHO_REFERENCE = DEVICE_BIT_IN | 0x10000000;
     @UnsupportedAppUsage
     public static final int DEVICE_IN_DEFAULT = DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
@@ -570,6 +595,7 @@ public class AudioSystem
                                              DEVICE_IN_PROXY |
                                              DEVICE_IN_USB_HEADSET |
                                              DEVICE_IN_BLUETOOTH_BLE |
+                                             DEVICE_IN_HDMI_ARC |
                                              DEVICE_IN_ECHO_REFERENCE |
                                              DEVICE_IN_DEFAULT);
     public static final int DEVICE_IN_ALL_SCO = DEVICE_IN_BLUETOOTH_SCO_HEADSET;
@@ -647,6 +673,7 @@ public class AudioSystem
     public static final String DEVICE_IN_USB_HEADSET_NAME = "usb_headset";
     public static final String DEVICE_IN_BLUETOOTH_BLE_NAME = "bt_ble";
     public static final String DEVICE_IN_ECHO_REFERENCE_NAME = "echo_reference";
+    public static final String DEVICE_IN_HDMI_ARC_NAME = "hdmi_arc";
 
     @UnsupportedAppUsage
     public static String getOutputDeviceName(int device)
@@ -767,6 +794,8 @@ public class AudioSystem
             return DEVICE_IN_BLUETOOTH_BLE_NAME;
         case DEVICE_IN_ECHO_REFERENCE:
             return DEVICE_IN_ECHO_REFERENCE_NAME;
+        case DEVICE_IN_HDMI_ARC:
+            return DEVICE_IN_HDMI_ARC_NAME;
         case DEVICE_IN_DEFAULT:
         default:
             return Integer.toString(device);
@@ -860,12 +889,14 @@ public class AudioSystem
      */
     @UnsupportedAppUsage
     public static native int setDeviceConnectionState(int device, int state,
-                                                      String device_address, String device_name);
+                                                      String device_address, String device_name,
+                                                      int codecFormat);
     @UnsupportedAppUsage
     public static native int getDeviceConnectionState(int device, String device_address);
     public static native int handleDeviceConfigChange(int device,
                                                       String device_address,
-                                                      String device_name);
+                                                      String device_name,
+                                                      int codecFormat);
     @UnsupportedAppUsage
     public static native int setPhoneState(int state);
     @UnsupportedAppUsage
@@ -949,6 +980,12 @@ public class AudioSystem
 
     public static native int getSurroundFormats(Map<Integer, Boolean> surroundFormats,
                                                 boolean reported);
+
+    /**
+     * Returns a list of audio formats (codec) supported on the A2DP offload path.
+     */
+    public static native int getHwOffloadEncodingFormatsSupportedForA2DP(
+            ArrayList<Integer> formatList);
 
     public static native int setSurroundFormatEnabled(int audioFormat, boolean enabled);
 

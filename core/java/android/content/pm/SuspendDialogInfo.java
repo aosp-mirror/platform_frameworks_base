@@ -16,7 +16,7 @@
 
 package android.content.pm;
 
-import static android.content.res.ResourceId.ID_NULL;
+import static android.content.res.Resources.ID_NULL;
 
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;

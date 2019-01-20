@@ -17,17 +17,22 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.app.usage.UsageStatsManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
@@ -548,5 +553,86 @@ public class ShortcutManager {
     @VisibleForTesting
     protected int injectMyUserId() {
         return mContext.getUserId();
+    }
+
+    /**
+     * Used by framework's ShareSheet (ChooserActivity.java) to retrieve all of the direct share
+     * targets that match the given IntentFilter.
+     *
+     * @param filter IntentFilter that will be used to retrieve the matching {@link ShortcutInfo}s.
+     * @return List of {@link ShareShortcutInfo}s that match the given IntentFilter.
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public List<ShareShortcutInfo> getShareTargets(@NonNull IntentFilter filter) {
+        try {
+            return mService.getShareTargets(mContext.getPackageName(), filter,
+                    injectMyUserId()).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Represents the result of a query return by {@link #getShareTargets(IntentFilter)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class ShareShortcutInfo implements Parcelable {
+        private final ShortcutInfo mShortcutInfo;
+        private final ComponentName mTargetComponent;
+
+        /**
+         * @hide
+         */
+        public ShareShortcutInfo(@NonNull ShortcutInfo shortcutInfo,
+                @NonNull ComponentName targetComponent) {
+            if (shortcutInfo == null) {
+                throw new NullPointerException("shortcut info is null");
+            }
+            if (targetComponent == null) {
+                throw new NullPointerException("target component is null");
+            }
+
+            mShortcutInfo = shortcutInfo;
+            mTargetComponent = targetComponent;
+        }
+
+        private ShareShortcutInfo(Parcel in) {
+            mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader());
+            mTargetComponent = in.readParcelable(ComponentName.class.getClassLoader());
+        }
+
+        public ShortcutInfo getShortcutInfo() {
+            return mShortcutInfo;
+        }
+
+        public ComponentName getTargetComponent() {
+            return mTargetComponent;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(mShortcutInfo, flags);
+            dest.writeParcelable(mTargetComponent, flags);
+        }
+
+        public static final Parcelable.Creator<ShareShortcutInfo> CREATOR =
+                new Parcelable.Creator<ShareShortcutInfo>() {
+                    public ShareShortcutInfo createFromParcel(Parcel in) {
+                        return new ShareShortcutInfo(in);
+                    }
+
+                    public ShareShortcutInfo[] newArray(int size) {
+                        return new ShareShortcutInfo[size];
+                    }
+                };
     }
 }

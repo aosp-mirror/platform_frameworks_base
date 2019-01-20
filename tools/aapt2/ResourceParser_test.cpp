@@ -935,9 +935,6 @@ TEST_F(ResourceParserTest, ParseOverlayablePolicy) {
         <policy type="product">
           <item type="string" name="bar" />
         </policy>
-        <policy type="product_services">
-          <item type="string" name="baz" />
-        </policy>
         <policy type="system">
           <item type="string" name="fiz" />
         </policy>
@@ -965,14 +962,6 @@ TEST_F(ResourceParserTest, ParseOverlayablePolicy) {
   result_overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
   EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kProduct));
-
-  search_result = table_.FindResource(test::ParseNameOrDie("string/baz"));
-  ASSERT_TRUE(search_result);
-  ASSERT_THAT(search_result.value().entry, NotNull());
-  ASSERT_TRUE(search_result.value().entry->overlayable_item);
-  result_overlayable_item = search_result.value().entry->overlayable_item.value();
-  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
-  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kProductServices));
 
   search_result = table_.FindResource(test::ParseNameOrDie("string/fiz"));
   ASSERT_TRUE(search_result);
@@ -1028,7 +1017,7 @@ TEST_F(ResourceParserTest, ParseOverlayableBadPolicyError) {
 TEST_F(ResourceParserTest, ParseOverlayableMultiplePolicy) {
   std::string input = R"(
       <overlayable name="Name">
-        <policy type="vendor|product_services">
+        <policy type="vendor|public">
           <item type="string" name="foo" />
         </policy>
         <policy type="product|system">
@@ -1044,7 +1033,7 @@ TEST_F(ResourceParserTest, ParseOverlayableMultiplePolicy) {
   OverlayableItem result_overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
   EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kVendor
-                                                   | OverlayableItem::Policy::kProductServices));
+                                                   | OverlayableItem::Policy::kPublic));
 
   search_result = table_.FindResource(test::ParseNameOrDie("string/bar"));
   ASSERT_TRUE(search_result);
@@ -1139,7 +1128,7 @@ TEST_F(ResourceParserTest, NestPolicyInOverlayableError) {
   std::string input = R"(
       <overlayable name="Name">
         <policy type="vendor|product">
-          <policy type="product_services">
+          <policy type="public">
             <item type="string" name="foo" />
           </policy>
         </policy>

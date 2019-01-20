@@ -822,4 +822,9 @@ public abstract class PackageManagerInternal {
      *            PACKAGE_ROLLBACK_AGENT permission.
      */
     public abstract void setEnableRollbackCode(int token, int enableRollbackCode);
+
+    /**
+     * Ask the package manager to compile layouts in the given package.
+     */
+    public abstract boolean compileLayouts(String packageName);
 }

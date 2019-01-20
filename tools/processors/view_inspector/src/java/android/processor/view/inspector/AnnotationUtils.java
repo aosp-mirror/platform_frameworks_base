@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -78,40 +79,126 @@ final class AnnotationUtils {
     }
 
     /**
-     * Extract a string-valued property from an {@link AnnotationMirror}.
+     * Determine if an annotation with the supplied qualified name is present on the element.
      *
-     * @param propertyName The name of the requested property
-     * @param annotationMirror The mirror to search for the property
-     * @return The String value of the annotation or null
+     * @param element The element to check for the presence of an annotation
+     * @param annotationQualifiedName The name of the annotation to check for
+     * @return True if the annotation is present, false otherwise
      */
-    Optional<String> stringProperty(String propertyName, AnnotationMirror annotationMirror) {
-        final AnnotationValue value = valueByName(propertyName, annotationMirror);
-        if (value != null) {
-            return Optional.of((String) value.getValue());
-        } else {
-            return Optional.empty();
+    boolean hasAnnotation(Element element, String annotationQualifiedName) {
+        final TypeElement namedElement = mElementUtils.getTypeElement(annotationQualifiedName);
+
+        if (namedElement != null) {
+            final TypeMirror annotationType = namedElement.asType();
+
+            for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
+                if (mTypeUtils.isSubtype(annotation.getAnnotationType(), annotationType)) {
+                    return true;
+                }
+            }
         }
+
+        return false;
     }
 
+    /**
+     * Get the typed value of an annotation property by name.
+     *
+     * The returned optional will be empty if the value was left at the default, or if the value
+     * of the property is null.
+     *
+     * @param propertyName The name of the property to search for
+     * @param valueClass The expected class of the property value
+     * @param element The element the annotation is on, used for exceptions
+     * @param annotationMirror An annotation mirror to search for the property
+     * @param <T> The type of the value
+     * @return An optional containing the typed value of the named property
+     */
+    <T> Optional<T> typedValueByName(
+            String propertyName,
+            Class<T> valueClass,
+            Element element,
+            AnnotationMirror annotationMirror) {
+        return valueByName(propertyName, annotationMirror).map(annotationValue -> {
+            final Object value = annotationValue.getValue();
+
+            if (value == null) {
+                throw new ProcessingException(
+                        String.format(
+                                "Unexpected null value for annotation property \"%s\".",
+                                propertyName),
+                        element,
+                        annotationMirror,
+                        annotationValue);
+            }
+
+            if (valueClass.isAssignableFrom(value.getClass())) {
+                return valueClass.cast(value);
+            } else {
+                throw new ProcessingException(
+                        String.format(
+                                "Expected annotation property \"%s\" to have type %s, but got %s.",
+                                propertyName,
+                                valueClass.getCanonicalName(),
+                                value.getClass().getCanonicalName()),
+                        element,
+                        annotationMirror,
+                        annotationValue);
+            }
+        });
+    }
+
+    /**
+     * Get the untyped value of an annotation property by name.
+     *
+     * The returned optional will be empty if the value was left at the default, or if the value
+     * of the property is null.
+     *
+     * @param propertyName The name of the property to search for
+     * @param element The element the annotation is on, used for exceptions
+     * @param annotationMirror An annotation mirror to search for the property
+     * @return An optional containing the untyped value of the named property
+     * @see AnnotationValue#getValue()
+     */
+    Optional<Object> untypedValueByName(
+            String propertyName,
+            Element element,
+            AnnotationMirror annotationMirror) {
+        return valueByName(propertyName, annotationMirror).map(annotationValue -> {
+            final Object value = annotationValue.getValue();
+
+            if (value == null) {
+                throw new ProcessingException(
+                        String.format(
+                                "Unexpected null value for annotation property \"%s\".",
+                                propertyName),
+                        element,
+                        annotationMirror,
+                        annotationValue);
+            }
+
+            return value;
+        });
+    }
 
     /**
      * Extract a {@link AnnotationValue} from a mirror by string property name.
      *
      * @param propertyName The name of the property requested property
-     * @param annotationMirror
-     * @return
+     * @param annotationMirror The mirror to search for the property
+     * @return The value of the property
      */
-    AnnotationValue valueByName(String propertyName, AnnotationMirror annotationMirror) {
+    Optional<AnnotationValue> valueByName(String propertyName, AnnotationMirror annotationMirror) {
         final Map<? extends ExecutableElement, ? extends AnnotationValue> valueMap =
                 annotationMirror.getElementValues();
 
         for (ExecutableElement method : valueMap.keySet()) {
             if (method.getSimpleName().contentEquals(propertyName)) {
-                return valueMap.get(method);
+                return Optional.ofNullable(valueMap.get(method));
             }
         }
 
-        return null;
+        // Property not explicitly defined, use default value.
+        return Optional.empty();
     }
-
 }

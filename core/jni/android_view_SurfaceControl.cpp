@@ -642,6 +642,27 @@ static jint nativeGetActiveColorMode(JNIEnv* env, jclass, jobject tokenObj) {
     return static_cast<jint>(SurfaceComposerClient::getActiveColorMode(token));
 }
 
+static jintArray nativeGetCompositionDataspaces(JNIEnv* env, jclass) {
+    ui::Dataspace defaultDataspace, wcgDataspace;
+    ui::PixelFormat defaultPixelFormat, wcgPixelFormat;
+    if (SurfaceComposerClient::getCompositionPreference(&defaultDataspace,
+                                                        &defaultPixelFormat,
+                                                        &wcgDataspace,
+                                                        &wcgPixelFormat) != NO_ERROR) {
+        return nullptr;
+    }
+    jintArray array = env->NewIntArray(2);
+    if (array == nullptr) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
+        return nullptr;
+    }
+    jint* arrayValues = env->GetIntArrayElements(array, 0);
+    arrayValues[0] = static_cast<jint>(defaultDataspace);
+    arrayValues[1] = static_cast<jint>(wcgDataspace);
+    env->ReleaseIntArrayElements(array, arrayValues, 0);
+    return array;
+}
+
 static jboolean nativeSetActiveColorMode(JNIEnv* env, jclass,
         jobject tokenObj, jint colorMode) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
@@ -658,6 +679,10 @@ static void nativeSetDisplayPowerMode(JNIEnv* env, jclass clazz, jobject tokenOb
     android::base::Timer t;
     SurfaceComposerClient::setDisplayPowerMode(token, mode);
     if (t.duration() > 100ms) ALOGD("Excessive delay in setPowerMode()");
+}
+
+static jboolean nativeGetProtectedContentSupport(JNIEnv* env, jclass) {
+    return static_cast<jboolean>(SurfaceComposerClient::getProtectedContentSupport());
 }
 
 static jboolean nativeClearContentFrameStats(JNIEnv* env, jclass clazz, jlong nativeObject) {
@@ -1016,6 +1041,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetActiveColorMode},
     {"nativeSetActiveColorMode", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveColorMode},
+    {"nativeGetCompositionDataspaces", "()[I",
+            (void*)nativeGetCompositionDataspaces},
     {"nativeGetHdrCapabilities", "(Landroid/os/IBinder;)Landroid/view/Display$HdrCapabilities;",
             (void*)nativeGetHdrCapabilities },
     {"nativeClearContentFrameStats", "(J)Z",
@@ -1028,6 +1055,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetAnimationFrameStats },
     {"nativeSetDisplayPowerMode", "(Landroid/os/IBinder;I)V",
             (void*)nativeSetDisplayPowerMode },
+    {"nativeGetProtectedContentSupport", "()Z",
+            (void*)nativeGetProtectedContentSupport },
     {"nativeDeferTransactionUntil", "(JJLandroid/os/IBinder;J)V",
             (void*)nativeDeferTransactionUntil },
     {"nativeDeferTransactionUntilSurface", "(JJJJ)V",

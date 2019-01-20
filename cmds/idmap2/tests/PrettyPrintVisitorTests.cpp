@@ -25,6 +25,7 @@
 #include "androidfw/Idmap.h"
 
 #include "idmap2/Idmap.h"
+#include "idmap2/Policies.h"
 #include "idmap2/PrettyPrintVisitor.h"
 
 #include "TestHelpers.h"
@@ -32,6 +33,7 @@
 using ::testing::NotNull;
 
 using android::ApkAssets;
+using android::idmap2::PolicyBitmask;
 
 namespace android::idmap2 {
 
@@ -46,7 +48,8 @@ TEST(PrettyPrintVisitorTests, CreatePrettyPrintVisitor) {
 
   std::stringstream error;
   std::unique_ptr<const Idmap> idmap =
-      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk, error);
+      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
+                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true, error);
   ASSERT_THAT(idmap, NotNull());
 
   std::stringstream stream;

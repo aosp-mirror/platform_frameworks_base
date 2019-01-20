@@ -1829,8 +1829,13 @@ final public class MediaCodec {
 
         mBufferLock = new Object();
 
+        // save name used at creation
+        mNameAtCreation = nameIsType ? null : name;
+
         native_setup(name, nameIsType, encoder);
     }
+
+    private String mNameAtCreation;
 
     @Override
     protected void finalize() {
@@ -3317,12 +3322,36 @@ final public class MediaCodec {
     private native void native_setAudioPresentation(int presentationId, int programId);
 
     /**
-     * Get the component name. If the codec was created by createDecoderByType
-     * or createEncoderByType, what component is chosen is not known beforehand.
+     * Retrieve the codec name.
+     *
+     * If the codec was created by createDecoderByType or createEncoderByType, what component is
+     * chosen is not known beforehand. This method returns the name of the codec that was
+     * selected by the platform.
+     *
+     * <strong>Note:</strong> Implementations may provide multiple aliases (codec
+     * names) for the same underlying codec, any of which can be used to instantiate the same
+     * underlying codec in {@link MediaCodec#createByCodecName}. This method returns the
+     * name used to create the codec in this case.
+     *
      * @throws IllegalStateException if in the Released state.
      */
     @NonNull
-    public native final String getName();
+    public final String getName() {
+        // get canonical name to handle exception
+        String canonicalName = getCanonicalName();
+        return mNameAtCreation != null ? mNameAtCreation : canonicalName;
+    }
+
+    /**
+     * Retrieve the underlying codec name.
+     *
+     * This method is similar to {@link #getName}, except that it returns the underlying component
+     * name even if an alias was used to create this MediaCodec object by name,
+     *
+     * @throws IllegalStateException if in the Released state.
+     */
+    @NonNull
+    public native final String getCanonicalName();
 
     /**
      *  Return Metrics data about the current codec instance.

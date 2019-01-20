@@ -688,8 +688,10 @@ class ZygoteConnection {
                     mountExternal = Zygote.MOUNT_EXTERNAL_WRITE;
                 } else if (arg.equals("--mount-external-full")) {
                     mountExternal = Zygote.MOUNT_EXTERNAL_FULL;
-                }  else if (arg.equals("--mount-external-installer")) {
+                } else if (arg.equals("--mount-external-installer")) {
                     mountExternal = Zygote.MOUNT_EXTERNAL_INSTALLER;
+                } else if (arg.equals("--mount-external-legacy")) {
+                    mountExternal = Zygote.MOUNT_EXTERNAL_LEGACY;
                 } else if (arg.equals("--query-abi-list")) {
                     abiListQuery = true;
                 } else if (arg.equals("--get-pid")) {

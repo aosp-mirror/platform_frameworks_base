@@ -1643,10 +1643,6 @@ struct ResTable_overlayable_policy_header
     // The overlay must reside of the product partition or must have existed on the product
     // partition before an upgrade to overlay these resources.
     POLICY_PRODUCT_PARTITION = 0x00000008,
-
-    // The overlay must reside of the product services partition or must have existed on the product
-    // services partition before an upgrade to overlay these resources.
-    POLICY_PRODUCT_SERVICES_PARTITION = 0x00000010,
   };
   uint32_t policy_flags;
 

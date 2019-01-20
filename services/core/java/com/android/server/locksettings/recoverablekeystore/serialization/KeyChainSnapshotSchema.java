@@ -52,6 +52,7 @@ class KeyChainSnapshotSchema {
     static final String TAG_APPLICATION_KEY = "applicationKey";
     static final String TAG_ALIAS = "alias";
     static final String TAG_KEY_MATERIAL = "keyMaterial";
+    static final String TAG_KEY_METADATA = "keyMetadata";
 
     // Statics only
     private KeyChainSnapshotSchema() {}

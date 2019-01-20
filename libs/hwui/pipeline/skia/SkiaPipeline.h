@@ -53,7 +53,8 @@ public:
 
     void renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
                      const std::vector<sp<RenderNode>>& nodes, bool opaque,
-                     const Rect& contentDrawBounds, sk_sp<SkSurface> surface);
+                     const Rect& contentDrawBounds, sk_sp<SkSurface> surface,
+                     const SkMatrix& preTransform);
 
     std::vector<VectorDrawableRoot*>* getVectorDrawables() { return &mVectorDrawables; }
 
@@ -116,7 +117,8 @@ protected:
 private:
     void renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
                          const std::vector<sp<RenderNode>>& nodes, bool opaque,
-                         const Rect& contentDrawBounds, SkCanvas* canvas);
+                         const Rect& contentDrawBounds, SkCanvas* canvas,
+                         const SkMatrix& preTransform);
 
     /**
      *  Debugging feature.  Draws a semi-transparent overlay on each pixel, indicating
@@ -124,7 +126,7 @@ private:
      */
     void renderOverdraw(const LayerUpdateQueue& layers, const SkRect& clip,
                         const std::vector<sp<RenderNode>>& nodes, const Rect& contentDrawBounds,
-                        sk_sp<SkSurface>);
+                        sk_sp<SkSurface> surface, const SkMatrix& preTransform);
 
     /**
      *  Render mVectorDrawables into offscreen buffers.

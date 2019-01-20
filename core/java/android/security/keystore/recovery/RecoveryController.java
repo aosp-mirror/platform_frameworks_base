@@ -533,12 +533,56 @@ public class RecoveryController {
      *     service.
      * @throws LockScreenRequiredException if the user does not have a lock screen set. A lock
      *     screen is required to generate recoverable keys.
+     *
+     * @deprecated Use the method {@link #generateKey(String, byte[])} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public @NonNull Key generateKey(@NonNull String alias) throws InternalRecoveryServiceException,
             LockScreenRequiredException {
         try {
             String grantAlias = mBinder.generateKey(alias);
+            if (grantAlias == null) {
+                throw new InternalRecoveryServiceException("null grant alias");
+            }
+            return getKeyFromGrant(grantAlias);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (UnrecoverableKeyException e) {
+            throw new InternalRecoveryServiceException("Failed to get key from keystore", e);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ERROR_INSECURE_USER) {
+                throw new LockScreenRequiredException(e.getMessage());
+            }
+            throw wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Generates a recoverable key with the given {@code alias} and {@code metadata}.
+     *
+     * <p>The metadata should contain any data that needs to be cryptographically bound to the
+     * generated key, but does not need to be encrypted by the key. For example, the metadata can
+     * be a byte string describing the algorithms and non-secret parameters to be used with the
+     * key. The supplied metadata can later be obtained via
+     * {@link WrappedApplicationKey#getMetadata()}.
+     *
+     * <p>During the key recovery process, the same metadata has to be supplied via
+     * {@link WrappedApplicationKey.Builder#setMetadata(byte[])}; otherwise, the recovery process
+     * will fail due to the checking of the cryptographic binding. This can help prevent
+     * potential attacks that try to swap key materials on the backup server and trick the
+     * application to use keys with different algorithms or parameters.
+     *
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     * @throws LockScreenRequiredException if the user does not have a lock screen set. A lock
+     *     screen is required to generate recoverable keys.
+     */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public @NonNull Key generateKey(@NonNull String alias, @Nullable byte[] metadata)
+            throws InternalRecoveryServiceException, LockScreenRequiredException {
+        try {
+            String grantAlias = mBinder.generateKeyWithMetadata(alias, metadata);
             if (grantAlias == null) {
                 throw new InternalRecoveryServiceException("null grant alias");
             }
@@ -564,12 +608,57 @@ public class RecoveryController {
      * @throws LockScreenRequiredException if the user does not have a lock screen set. A lock
      *     screen is required to generate recoverable keys.
      *
+     * @deprecated Use the method {@link #importKey(String, byte[], byte[])} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public @NonNull Key importKey(@NonNull String alias, @NonNull byte[] keyBytes)
             throws InternalRecoveryServiceException, LockScreenRequiredException {
         try {
             String grantAlias = mBinder.importKey(alias, keyBytes);
+            if (grantAlias == null) {
+                throw new InternalRecoveryServiceException("Null grant alias");
+            }
+            return getKeyFromGrant(grantAlias);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (UnrecoverableKeyException e) {
+            throw new InternalRecoveryServiceException("Failed to get key from keystore", e);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ERROR_INSECURE_USER) {
+                throw new LockScreenRequiredException(e.getMessage());
+            }
+            throw wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Imports a recoverable 256-bit AES key with the given {@code alias}, the raw bytes {@code
+     * keyBytes}, and the {@code metadata}.
+     *
+     * <p>The metadata should contain any data that needs to be cryptographically bound to the
+     * imported key, but does not need to be encrypted by the key. For example, the metadata can
+     * be a byte string describing the algorithms and non-secret parameters to be used with the
+     * key. The supplied metadata can later be obtained via
+     * {@link WrappedApplicationKey#getMetadata()}.
+     *
+     * <p>During the key recovery process, the same metadata has to be supplied via
+     * {@link WrappedApplicationKey.Builder#setMetadata(byte[])}; otherwise, the recovery process
+     * will fail due to the checking of the cryptographic binding. This can help prevent
+     * potential attacks that try to swap key materials on the backup server and trick the
+     * application to use keys with different algorithms or parameters.
+     *
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     * @throws LockScreenRequiredException if the user does not have a lock screen set. A lock
+     *     screen is required to generate recoverable keys.
+     */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public @NonNull Key importKey(@NonNull String alias, @NonNull byte[] keyBytes,
+            @Nullable byte[] metadata)
+            throws InternalRecoveryServiceException, LockScreenRequiredException {
+        try {
+            String grantAlias = mBinder.importKeyWithMetadata(alias, keyBytes, metadata);
             if (grantAlias == null) {
                 throw new InternalRecoveryServiceException("Null grant alias");
             }

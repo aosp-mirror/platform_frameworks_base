@@ -27,6 +27,7 @@ import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Size;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -36,8 +37,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.hardware.display.ColorDisplayManager;
 import android.graphics.ColorSpace;
+import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.IColorDisplayManager;
 import android.net.Uri;
 import android.opengl.Matrix;
@@ -50,18 +51,22 @@ import android.provider.Settings.Secure;
 import android.provider.Settings.System;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ColorDisplayController;
+import com.android.internal.util.DumpUtils;
 import com.android.server.DisplayThread;
 import com.android.server.SystemService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -398,7 +403,32 @@ public final class ColorDisplayService extends SystemService {
         }
     };
 
+    /**
+     * Matrix and offset used for converting color to grayscale.
+     */
+    private static final float[] MATRIX_GRAYSCALE = new float[]{
+            .2126f, .2126f, .2126f, 0f,
+            .7152f, .7152f, .7152f, 0f,
+            .0722f, .0722f, .0722f, 0f,
+            0f, 0f, 0f, 1f
+    };
+
+    /**
+     * Matrix and offset used for luminance inversion. Represents a transform from RGB to YIQ color
+     * space, rotation around the Y axis by 180 degrees, transform back to RGB color space, and
+     * subtraction from 1. The last row represents a non-multiplied addition, see surfaceflinger's
+     * ProgramCache for full implementation details.
+     */
+    private static final float[] MATRIX_INVERT_COLOR = new float[] {
+            0.402f, -0.598f, -0.599f, 0f,
+            -1.174f, -0.174f, -1.175f, 0f,
+            -0.228f, -0.228f, 0.772f, 0f,
+            1f, 1f, 1f, 1f
+    };
+
     private final Handler mHandler;
+
+    private final AppSaturationController mAppSaturationController = new AppSaturationController();
 
     private int mCurrentUser = UserHandle.USER_NULL;
     private ContentObserver mUserSetupObserver;
@@ -537,9 +567,16 @@ public final class ColorDisplayService extends SystemService {
                             case System.DISPLAY_COLOR_MODE:
                                 onDisplayColorModeChanged(mNightDisplayController.getColorMode());
                                 break;
-                            case Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED:
                             case Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED:
-                                onAccessibilityTransformChanged();
+                                onAccessibilityInversionChanged();
+                                onAccessibilityActivated();
+                                break;
+                            case Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED:
+                                onAccessibilityDaltonizerChanged();
+                                onAccessibilityActivated();
+                                break;
+                            case Secure.ACCESSIBILITY_DISPLAY_DALTONIZER:
+                                onAccessibilityDaltonizerChanged();
                                 break;
                             case Secure.DISPLAY_WHITE_BALANCE_ENABLED:
                                 updateDisplayWhiteBalanceStatus();
@@ -567,6 +604,9 @@ public final class ColorDisplayService extends SystemService {
                 false /* notifyForDescendants */, mContentObserver, mCurrentUser);
         cr.registerContentObserver(
                 Secure.getUriFor(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED),
+                false /* notifyForDescendants */, mContentObserver, mCurrentUser);
+        cr.registerContentObserver(
+                Secure.getUriFor(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER),
                 false /* notifyForDescendants */, mContentObserver, mCurrentUser);
         cr.registerContentObserver(Secure.getUriFor(Secure.DISPLAY_WHITE_BALANCE_ENABLED),
                 false /* notifyForDescendants */, mContentObserver, mCurrentUser);
@@ -698,10 +738,43 @@ public final class ColorDisplayService extends SystemService {
         dtm.setColorMode(mode, mNightDisplayTintController.getMatrix());
     }
 
-    private void onAccessibilityTransformChanged() {
+    private void onAccessibilityActivated() {
         onDisplayColorModeChanged(mNightDisplayController.getColorMode());
     }
 
+    /**
+     * Apply the accessibility daltonizer transform based on the settings value.
+     */
+    private void onAccessibilityDaltonizerChanged() {
+        final boolean enabled = Secure.getIntForUser(getContext().getContentResolver(),
+                Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, mCurrentUser) != 0;
+        final int daltonizerMode = enabled ? Secure.getIntForUser(getContext().getContentResolver(),
+                Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
+                AccessibilityManager.DALTONIZER_CORRECT_DEUTERANOMALY, mCurrentUser)
+                : AccessibilityManager.DALTONIZER_DISABLED;
+
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+        if (daltonizerMode == AccessibilityManager.DALTONIZER_SIMULATE_MONOCHROMACY) {
+            // Monochromacy isn't supported by the native Daltonizer implementation; use grayscale.
+            dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_GRAYSCALE,
+                    MATRIX_GRAYSCALE);
+            dtm.setDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
+        } else {
+            dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_GRAYSCALE, null);
+            dtm.setDaltonizerMode(daltonizerMode);
+        }
+    }
+
+    /**
+     * Apply the accessibility inversion transform based on the settings value.
+     */
+    private void onAccessibilityInversionChanged() {
+        final boolean enabled = Secure.getIntForUser(getContext().getContentResolver(),
+                Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, mCurrentUser) != 0;
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+        dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_INVERT_COLOR,
+                enabled ? MATRIX_INVERT_COLOR : null);
+    }
 
     /**
      * Applies current color temperature matrix, or removes it if deactivated.
@@ -827,6 +900,22 @@ public final class ColorDisplayService extends SystemService {
             }
         }
         return LocalDateTime.MIN;
+    }
+
+    private boolean setAppSaturationLevelInternal(String packageName, int saturationLevel) {
+        return mAppSaturationController
+                .setSaturationLevel(packageName, mCurrentUser, saturationLevel);
+    }
+
+    private void dumpInternal(PrintWriter pw) {
+        pw.println("COLOR DISPLAY MANAGER dumpsys (color_display)");
+        pw.println("Night Display:");
+        if (ColorDisplayManager.isNightDisplayAvailable(getContext())) {
+            pw.println("    Activated: " + mNightDisplayTintController.isActivated());
+        } else {
+            pw.println("    Not available");
+        }
+        mAppSaturationController.dump(pw);
     }
 
     private abstract class NightDisplayAutoMode {
@@ -1132,6 +1221,16 @@ public final class ColorDisplayService extends SystemService {
         public void dump(PrintWriter pw) {
             mDisplayWhiteBalanceTintController.dump(pw);
         }
+
+        /**
+         * Adds a {@link WeakReference<ColorTransformController>} for a newly started activity, and
+         * invokes {@link ColorTransformController#applyAppSaturation(float[], float[])} if needed.
+         */
+        public boolean attachColorTransformController(String packageName, int uid,
+                WeakReference<ColorTransformController> controller) {
+            return mAppSaturationController
+                    .addColorTransformController(packageName, uid, controller);
+        }
     }
 
     /**
@@ -1161,6 +1260,15 @@ public final class ColorDisplayService extends SystemService {
                     break;
             }
         }
+    }
+
+    /**
+     * Interface for applying transforms to a given AppWindow.
+     */
+    public interface ColorTransformController {
+
+        /** Apply the given saturation (grayscale) matrix to the associated AppWindow. */
+        void applyAppSaturation(@Size(9) float[] matrix, @Size(3) float[] translation);
     }
 
     private final class BinderService extends IColorDisplayManager.Stub {
@@ -1195,6 +1303,31 @@ public final class ColorDisplayService extends SystemService {
                 Binder.restoreCallingIdentity(token);
             }
             return true;
+        }
+
+        @Override
+        public boolean setAppSaturationLevel(String packageName, int level) {
+            getContext().enforceCallingPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
+                    "Permission required to set display saturation level");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return setAppSaturationLevelInternal(packageName, level);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                dumpInternal(pw);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 }

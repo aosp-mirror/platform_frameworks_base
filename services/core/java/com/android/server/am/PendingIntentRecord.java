@@ -389,8 +389,9 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
                         if (key.allIntents != null && key.allIntents.length > 1) {
                             res = controller.mAtmInternal.startActivitiesInPackage(
-                                    uid, key.packageName, allIntents, allResolvedTypes, resultTo,
-                                    mergedOptions, userId, false /* validateIncomingUser */,
+                                    uid, callingPid, callingUid, key.packageName, allIntents,
+                                    allResolvedTypes, resultTo, mergedOptions, userId,
+                                    false /* validateIncomingUser */,
                                     this /* originatingPendingIntent */,
                                     mAllowBgActivityStartsForActivitySender.contains(whitelistToken));
                         } else {

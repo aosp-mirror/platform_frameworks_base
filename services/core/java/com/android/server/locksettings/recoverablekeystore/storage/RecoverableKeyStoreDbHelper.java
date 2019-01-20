@@ -32,7 +32,7 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
 class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
     private static final String TAG = "RecoverableKeyStoreDbHp";
 
-    static final int DATABASE_VERSION = 4;
+    static final int DATABASE_VERSION = 5;
     private static final String DATABASE_NAME = "recoverablekeystore.db";
 
     private static final String SQL_CREATE_KEYS_ENTRY =
@@ -46,6 +46,7 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
                     + KeysEntry.COLUMN_NAME_GENERATION_ID + " INTEGER,"
                     + KeysEntry.COLUMN_NAME_LAST_SYNCED_AT + " INTEGER,"
                     + KeysEntry.COLUMN_NAME_RECOVERY_STATUS + " INTEGER,"
+                    + KeysEntry.COLUMN_NAME_KEY_METADATA + " BLOB,"
                     + "UNIQUE(" + KeysEntry.COLUMN_NAME_UID + ","
                     + KeysEntry.COLUMN_NAME_ALIAS + "))";
 
@@ -135,6 +136,11 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
             oldVersion = 4;
         }
 
+        if (oldVersion < 5 && newVersion >= 5) {
+            upgradeDbForVersion5(db);
+            oldVersion = 5;
+        }
+
         if (oldVersion != newVersion) {
             Log.e(TAG, "Failed to update recoverablekeystore database to the most recent version");
         }
@@ -164,6 +170,13 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
         addColumnToTable(db, RecoveryServiceMetadataEntry.TABLE_NAME,
                 RecoveryServiceMetadataEntry.COLUMN_NAME_ACTIVE_ROOT_OF_TRUST, "TEXT",
                 /*defaultStr=*/ null);
+    }
+
+    private void upgradeDbForVersion5(SQLiteDatabase db) {
+        Log.d(TAG, "Updating recoverable keystore database to version 5");
+        // adds a column to store the metadata for application keys
+        addColumnToTable(db, KeysEntry.TABLE_NAME,
+                KeysEntry.COLUMN_NAME_KEY_METADATA, "BLOB", /*defaultStr=*/ null);
     }
 
     private static void addColumnToTable(

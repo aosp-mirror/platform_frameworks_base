@@ -114,6 +114,19 @@ public final class BluetoothCodecConfig implements Parcelable {
         mCodecSpecific4 = codecSpecific4;
     }
 
+    @UnsupportedAppUsage
+    public BluetoothCodecConfig(int codecType) {
+        mCodecType = codecType;
+        mCodecPriority = BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
+        mSampleRate = BluetoothCodecConfig.SAMPLE_RATE_NONE;
+        mBitsPerSample = BluetoothCodecConfig.BITS_PER_SAMPLE_NONE;
+        mChannelMode = BluetoothCodecConfig.CHANNEL_MODE_NONE;
+        mCodecSpecific1 = 0;
+        mCodecSpecific2 = 0;
+        mCodecSpecific3 = 0;
+        mCodecSpecific4 = 0;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o instanceof BluetoothCodecConfig) {

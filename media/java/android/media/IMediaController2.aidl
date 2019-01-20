@@ -31,8 +31,9 @@ import android.media.Session2Command;
 oneway interface IMediaController2 {
     void notifyConnected(int seq, in Bundle connectionResult) = 0;
     void notifyDisconnected(int seq) = 1;
+    void notifyPlaybackActiveChanged(int seq, boolean playbackActive) = 2;
     void sendSessionCommand(int seq, in Session2Command command, in Bundle args,
-            in ResultReceiver resultReceiver) = 2;
-    void cancelSessionCommand(int seq) = 3;
-    // Next Id : 4
+            in ResultReceiver resultReceiver) = 3;
+    void cancelSessionCommand(int seq) = 4;
+    // Next Id : 5
 }

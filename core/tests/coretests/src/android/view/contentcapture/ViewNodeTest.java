@@ -181,6 +181,14 @@ public class ViewNodeTest {
         structure.setDataIsSensitive(true);
 
         assertThat(structure.getTempRect()).isNull();
+
+        // Graphic properties
+        structure.setElevation(6.66f);
+        assertThat(node.getElevation()).isWithin(1.0e-10f).of(0f);
+        structure.setAlpha(66.6f);
+        assertThat(node.getAlpha()).isWithin(1.0e-10f).of(1.0f);
+        structure.setTransformation(Matrix.IDENTITY_MATRIX);
+        assertThat(node.getTransformation()).isNull();
     }
 
     @Test
@@ -279,11 +287,6 @@ public class ViewNodeTest {
         structure.setAutofillOptions(new String[] { "Maybe" });
         structure.setAutofillValue(AutofillValue.forText("Malkovich"));
 
-        // Graphic properties
-        structure.setElevation(6.66f);
-        structure.setAlpha(66.6f);
-        structure.setTransformation(Matrix.IDENTITY_MATRIX);
-
         // Extra text properties
         structure.setMinTextEms(6);
         structure.setMaxTextLength(66);
@@ -339,11 +342,6 @@ public class ViewNodeTest {
         assertThat(node.getAutofillHints()).asList().containsExactly("Auto", "Man").inOrder();
         assertThat(node.getAutofillOptions()).asList().containsExactly("Maybe").inOrder();
         assertThat(node.getAutofillValue().getTextValue()).isEqualTo("Malkovich");
-
-        // Graphic properties
-        assertThat(node.getElevation()).isWithin(1.0e-10f).of(6.66f);
-        assertThat(node.getAlpha()).isWithin(1.0e-10f).of(66.6f);
-        assertThat(node.getTransformation()).isEqualTo(Matrix.IDENTITY_MATRIX);
 
         // Extra text properties
         assertThat(node.getMinTextEms()).isEqualTo(6);

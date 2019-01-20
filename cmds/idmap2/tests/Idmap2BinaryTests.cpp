@@ -38,6 +38,7 @@
 #include "gtest/gtest.h"
 
 #include "androidfw/PosixUtils.h"
+
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
 
@@ -114,8 +115,9 @@ TEST_F(Idmap2BinaryTests, Dump) {
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
   ASSERT_NE(result->stdout.find("0x7f010000 -> 0x7f010000 integer/int1"), std::string::npos);
-  ASSERT_NE(result->stdout.find("0x7f020003 -> 0x7f020000 string/str1"), std::string::npos);
-  ASSERT_NE(result->stdout.find("0x7f020005 -> 0x7f020001 string/str3"), std::string::npos);
+  ASSERT_NE(result->stdout.find("0x7f020009 -> 0x7f020000 string/str1"), std::string::npos);
+  ASSERT_NE(result->stdout.find("0x7f02000b -> 0x7f020001 string/str3"), std::string::npos);
+  ASSERT_NE(result->stdout.find("0x7f02000c -> 0x7f020002 string/str4"), std::string::npos);
   ASSERT_EQ(result->stdout.find("00000210:     007f  target package id"), std::string::npos);
 
   // clang-format off
@@ -157,7 +159,8 @@ TEST_F(Idmap2BinaryTests, Scan) {
                                "--recursive",
                                "--target-package-name", "test.target",
                                "--target-apk-path", GetTargetApkPath(),
-                               "--output-directory", GetTempDirPath()});
+                               "--output-directory", GetTempDirPath(),
+                               "--override-policy", "public"});
   // clang-format on
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
@@ -190,7 +193,8 @@ TEST_F(Idmap2BinaryTests, Scan) {
                           "--input-directory", GetTestDataPath() + "/overlay",
                           "--target-package-name", "test.target",
                           "--target-apk-path", GetTargetApkPath(),
-                          "--output-directory", GetTempDirPath()});
+                          "--output-directory", GetTempDirPath(),
+                          "--override-policy", "public"});
   // clang-format on
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
@@ -207,7 +211,8 @@ TEST_F(Idmap2BinaryTests, Scan) {
                           "--recursive",
                           "--target-package-name", "test.target",
                           "--target-apk-path", GetTargetApkPath(),
-                          "--output-directory", GetTempDirPath()});
+                          "--output-directory", GetTempDirPath(),
+                          "--override-policy", "public"});
   // clang-format on
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
@@ -222,7 +227,8 @@ TEST_F(Idmap2BinaryTests, Scan) {
                           "--input-directory", GetTempDirPath(),
                           "--target-package-name", "test.target",
                           "--target-apk-path", GetTargetApkPath(),
-                          "--output-directory", GetTempDirPath()});
+                          "--output-directory", GetTempDirPath(),
+                          "--override-policy", "public"});
   // clang-format on
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
@@ -245,7 +251,7 @@ TEST_F(Idmap2BinaryTests, Lookup) {
                           "lookup",
                           "--idmap-path", GetIdmapPath(),
                           "--config", "",
-                          "--resid", "0x7f020003"});  // string/str1
+                          "--resid", "0x7f020009"});  // string/str1
   // clang-format on
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
@@ -307,6 +313,18 @@ TEST_F(Idmap2BinaryTests, InvalidCommandLineOptions) {
                           "--target-apk-path", invalid_target_apk_path,
                           "--overlay-apk-path", GetOverlayApkPath(),
                           "--idmap-path", GetIdmapPath()});
+  // clang-format on
+  ASSERT_THAT(result, NotNull());
+  ASSERT_NE(result->status, EXIT_SUCCESS);
+
+  // unknown policy
+  // clang-format off
+  result = ExecuteBinary({"idmap2",
+                          "create",
+                          "--target-apk-path", GetTargetApkPath(),
+                          "--overlay-apk-path", GetOverlayApkPath(),
+                          "--idmap-path", GetIdmapPath(),
+                          "--policy", "this-does-not-exist"});
   // clang-format on
   ASSERT_THAT(result, NotNull());
   ASSERT_NE(result->status, EXIT_SUCCESS);

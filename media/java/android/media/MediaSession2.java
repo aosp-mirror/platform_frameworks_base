@@ -19,6 +19,7 @@ package android.media;
 import static android.media.MediaConstants.KEY_ALLOWED_COMMANDS;
 import static android.media.MediaConstants.KEY_PACKAGE_NAME;
 import static android.media.MediaConstants.KEY_PID;
+import static android.media.MediaConstants.KEY_PLAYBACK_ACTIVE;
 import static android.media.MediaConstants.KEY_SESSION2LINK;
 import static android.media.Session2Command.RESULT_ERROR_UNKNOWN_ERROR;
 import static android.media.Session2Command.RESULT_INFO_SKIPPED;
@@ -87,6 +88,8 @@ public class MediaSession2 implements AutoCloseable {
 
     //@GuardedBy("mLock")
     private boolean mClosed;
+    //@GuardedBy("mLock")
+    private boolean mPlaybackActive;
 
     MediaSession2(@NonNull Context context, @NonNull String id, PendingIntent sessionActivity,
             @NonNull Executor callbackExecutor, @NonNull SessionCallback callback) {
@@ -215,6 +218,35 @@ public class MediaSession2 implements AutoCloseable {
         controller.cancelSessionCommand(token);
     }
 
+    /**
+     * Sets whether the playback is active (i.e. playing something)
+     *
+     * @param playbackActive {@code true} if the playback active, {@code false} otherwise.
+     **/
+    public void setPlaybackActive(boolean playbackActive) {
+        synchronized (mLock) {
+            if (mPlaybackActive == playbackActive) {
+                return;
+            }
+            mPlaybackActive = playbackActive;
+        }
+        List<ControllerInfo> controllerInfos = getConnectedControllers();
+        for (ControllerInfo controller : controllerInfos) {
+            controller.notifyPlaybackActiveChanged(playbackActive);
+        }
+    }
+
+    /**
+     * Returns whehther the playback is active (i.e. playing something)
+     *
+     * @return {@code true} if the playback active, {@code false} otherwise.
+     */
+    public boolean isPlaybackActive() {
+        synchronized (mLock) {
+            return mPlaybackActive;
+        }
+    }
+
     boolean isClosed() {
         synchronized (mLock) {
             return mClosed;
@@ -239,7 +271,7 @@ public class MediaSession2 implements AutoCloseable {
         final ControllerInfo controllerInfo = new ControllerInfo(remoteUserInfo,
                 mSessionManager.isTrustedForMediaControl(remoteUserInfo), controller);
         mCallbackExecutor.execute(() -> {
-            boolean accept = false;
+            boolean connected = false;
             try {
                 if (isClosed()) {
                     return;
@@ -249,8 +281,7 @@ public class MediaSession2 implements AutoCloseable {
                 // Don't reject connection for the request from trusted app.
                 // Otherwise server will fail to retrieve session's information to dispatch
                 // media keys to.
-                accept = controllerInfo.mAllowedCommands != null || controllerInfo.isTrusted();
-                if (!accept) {
+                if (controllerInfo.mAllowedCommands == null && !controllerInfo.isTrusted()) {
                     return;
                 }
                 if (controllerInfo.mAllowedCommands == null) {
@@ -276,6 +307,7 @@ public class MediaSession2 implements AutoCloseable {
                 connectionResult.putParcelable(KEY_SESSION2LINK, mSessionStub);
                 connectionResult.putParcelable(KEY_ALLOWED_COMMANDS,
                         controllerInfo.mAllowedCommands);
+                connectionResult.putBoolean(KEY_PLAYBACK_ACTIVE, isPlaybackActive());
 
                 // Double check if session is still there, because close() can be called in
                 // another thread.
@@ -283,13 +315,18 @@ public class MediaSession2 implements AutoCloseable {
                     return;
                 }
                 controllerInfo.notifyConnected(connectionResult);
+                connected = true;
             } finally {
-                if (!accept) {
+                if (!connected) {
                     if (DEBUG) {
-                        Log.d(TAG, "Rejecting connection, controllerInfo=" + controllerInfo);
+                        Log.d(TAG, "Rejecting connection or notifying that session is closed"
+                                + ", controllerInfo=" + controllerInfo);
                     }
+                    synchronized (mLock) {
+                        mConnectedControllers.remove(controller);
+                    }
+                    controllerInfo.notifyDisconnected();
                 }
-                controllerInfo.notifyDisconnected();
             }
         });
     }
@@ -582,6 +619,16 @@ public class MediaSession2 implements AutoCloseable {
 
             try {
                 mControllerBinder.notifyDisconnected(getNextSeqNumber());
+            } catch (RuntimeException e) {
+                // Controller may be died prematurely.
+            }
+        }
+
+        void notifyPlaybackActiveChanged(boolean playbackActive) {
+            if (mControllerBinder == null) return;
+
+            try {
+                mControllerBinder.notifyPlaybackActiveChanged(getNextSeqNumber(), playbackActive);
             } catch (RuntimeException e) {
                 // Controller may be died prematurely.
             }

@@ -127,8 +127,10 @@ public final class InputBindResult implements Parcelable {
          */
         int ERROR_IME_NOT_CONNECTED = 8;
         /**
-         * Indicates that the caller is not the foreground user (or does not have
-         * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission).
+         * Indicates that the caller is not the foreground user, does not have
+         * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission, or the user
+         * specified in {@link android.view.inputmethod.EditorInfo#targetInputMethodUser} is not
+         * running.
          */
         int ERROR_INVALID_USER = 9;
         /**

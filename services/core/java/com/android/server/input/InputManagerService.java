@@ -138,6 +138,9 @@ public class InputManagerService extends IInputManager.Stub
     private final Context mContext;
     private final InputManagerHandler mHandler;
 
+    // Context cache used for loading pointer resources.
+    private Context mDisplayContext;
+
     private final File mDoubleTouchGestureEnableFile;
 
     private WindowManagerCallbacks mWindowManagerCallbacks;
@@ -1923,8 +1926,25 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private PointerIcon getPointerIcon() {
-        return PointerIcon.getDefaultIcon(mContext);
+    private PointerIcon getPointerIcon(int displayId) {
+        return PointerIcon.getDefaultIcon(getContextForDisplay(displayId));
+    }
+
+    private Context getContextForDisplay(int displayId) {
+        if (mDisplayContext != null && mDisplayContext.getDisplay().getDisplayId() == displayId) {
+            return mDisplayContext;
+        }
+
+        if (mContext.getDisplay().getDisplayId() == displayId) {
+            mDisplayContext = mContext;
+            return mDisplayContext;
+        }
+
+        // Create and cache context for non-default display.
+        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        final Display display = displayManager.getDisplay(displayId);
+        mDisplayContext = mContext.createDisplayContext(display);
+        return mDisplayContext;
     }
 
     // Native callback.

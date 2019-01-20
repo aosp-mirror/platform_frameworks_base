@@ -45,6 +45,7 @@ import android.view.View;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.utils.os.FakeHandler;
@@ -133,7 +134,8 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Back scrim should be transparent
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
 
-        // Move on to PULSING and check if the back scrim is still transparent
+        // Pulsing notification should conserve AOD wallpaper.
+        mScrimController.setPulseReason(DozeLog.PULSE_REASON_NOTIFICATION);
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
@@ -218,13 +220,14 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
 
+        mScrimController.setPulseReason(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN);
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be semi-transparent so the user can see the wallpaper
         // Pulse callback should have been invoked
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
-        assertScrimTint(mScrimBehind, true /* tinted */);
+        assertScrimTint(mScrimBehind, false /* tinted */);
     }
 
     @Test
@@ -477,12 +480,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testHoldsPulsingWallpaperAnimationLock() {
         // Pre-conditions
-        mScrimController.transitionTo(ScrimState.PULSING, new ScrimController.Callback() {
-            @Override
-            public boolean isFadeOutWallpaper() {
-                return true;
-            }
-        });
+        mScrimController.setPulseReason(DozeLog.PULSE_REASON_NOTIFICATION);
+        mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
         reset(mWakeLock);
 
@@ -491,7 +490,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         verify(mWakeLock, never()).release();
         mScrimController.finishAnimationsImmediately();
         verify(mWakeLock).release();
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
     }
 
     @Test
@@ -504,31 +502,27 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testWillHidePulsingWallpaper_withRequestFadeOut() {
-        mScrimController.setWallpaperSupportsAmbientMode(true);
-        mScrimController.transitionTo(ScrimState.PULSING, new ScrimController.Callback() {
-            @Override
-            public boolean isFadeOutWallpaper() {
-                return true;
-            }
-        });
-        verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
-        mScrimController.transitionTo(ScrimState.KEYGUARD);
-        verify(mAlarmManager).cancel(any(AlarmManager.OnAlarmListener.class));
-    }
-
-    @Test
-    public void testDoesNotHidePulsingWallpaper_withoutRequestFadeOut() {
-        mScrimController.setWallpaperSupportsAmbientMode(true);
-        mScrimController.transitionTo(ScrimState.PULSING, new ScrimController.Callback() {});
-        verify(mAlarmManager, never()).setExact(anyInt(), anyLong(), any(), any(), any());
-    }
-
-    @Test
-    public void testDoesNotHidePulsingWallpaper_withoutCallback() {
-        mScrimController.setWallpaperSupportsAmbientMode(true);
+    public void testWillHidePulsingWallpaper_whenNotification() {
+        mScrimController.setWallpaperSupportsAmbientMode(false);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        mScrimController.setPulseReason(DozeLog.PULSE_REASON_NOTIFICATION);
         mScrimController.transitionTo(ScrimState.PULSING);
-        verify(mAlarmManager, never()).setExact(anyInt(), anyLong(), any(), any(), any());
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+        assertScrimTint(mScrimBehind, true);
+    }
+
+    @Test
+    public void testWillHidePulsingWallpaper_whenDocking() {
+        mScrimController.setWallpaperSupportsAmbientMode(false);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        mScrimController.setPulseReason(DozeLog.PULSE_REASON_DOCKING);
+        mScrimController.transitionTo(ScrimState.PULSING);
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+        assertScrimTint(mScrimBehind, true);
     }
 
     @Test
@@ -558,34 +552,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.finishAnimationsImmediately();
         Assert.assertTrue(mScrimController.wasAnimationJustCancelled());
-    }
-
-    /**
-     * Number of visible notifications affects scrim opacity.
-     */
-    @Test
-    public void testNotificationDensity() {
-        mScrimController.transitionTo(ScrimState.KEYGUARD);
-        mScrimController.finishAnimationsImmediately();
-
-        mScrimController.setNotificationCount(0);
-        mScrimController.finishAnimationsImmediately();
-        Assert.assertEquals("lower density when no notifications",
-                ScrimController.GRADIENT_SCRIM_ALPHA,  mScrimBehind.getViewAlpha(), 0.01f);
-
-        mScrimController.setNotificationCount(3);
-        mScrimController.finishAnimationsImmediately();
-        Assert.assertEquals("stronger density when notifications are visible",
-                ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,  mScrimBehind.getViewAlpha(), 0.01f);
-    }
-
-    /**
-     * Moving from/to states conserves old notification density.
-     */
-    @Test
-    public void testConservesNotificationDensity() {
-        testConservesNotificationDensity(0 /* count */, ScrimController.GRADIENT_SCRIM_ALPHA);
-        testConservesNotificationDensity(3 /* count */, ScrimController.GRADIENT_SCRIM_ALPHA_BUSY);
     }
 
     @Test
@@ -660,24 +626,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront.getDefaultFocusHighlightEnabled());
         Assert.assertFalse("Scrim shouldn't have focus highlight",
                 mScrimBehind.getDefaultFocusHighlightEnabled());
-    }
-
-    /**
-     * Conserves old notification density after leaving state and coming back.
-     *
-     * @param count How many notification.
-     * @param expectedAlpha Expected alpha.
-     */
-    private void testConservesNotificationDensity(int count, float expectedAlpha) {
-        mScrimController.setNotificationCount(count);
-        mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.finishAnimationsImmediately();
-
-        mScrimController.transitionTo(ScrimState.KEYGUARD);
-        mScrimController.finishAnimationsImmediately();
-
-        Assert.assertEquals("Doesn't respect notification busyness after transition",
-                expectedAlpha,  mScrimBehind.getViewAlpha(), 0.01f);
     }
 
     private void assertScrimTint(ScrimView scrimView, boolean tinted) {

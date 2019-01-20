@@ -19,8 +19,10 @@ package com.android.server.wm;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
@@ -29,6 +31,7 @@ import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
+import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
 
@@ -39,6 +42,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityOptions;
+import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.PauseActivityItem;
 import android.content.pm.ActivityInfo;
@@ -69,10 +73,12 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        setupActivityTaskManagerService();
         mStack = (TestActivityStack) new StackBuilder(mRootActivityContainer).build();
         mTask = mStack.getChildAt(0);
         mActivity = mTask.getTopActivity();
+
+        doReturn(false).when(mService).isBooting();
+        doReturn(true).when(mService).isBooted();
     }
 
     @Test
@@ -115,22 +121,23 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped");
 
-        // The activity is in the focused stack so it should not move to paused.
+        // The activity is in the focused stack so it should be resumed.
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
-        assertTrue(mActivity.isState(STOPPED));
+        assertTrue(mActivity.isState(RESUMED));
         assertFalse(pauseFound.value);
 
-        // Clear focused stack
-        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
-        when(display.getFocusedStack()).thenReturn(null);
+        // Make the activity non focusable
+        mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped");
+        doReturn(false).when(mActivity).isFocusable();
 
-        // In the unfocused stack, the activity should move to paused.
+        // If the activity is not focusable, it should move to paused.
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
         assertTrue(mActivity.isState(PAUSING));
         assertTrue(pauseFound.value);
 
         // Make sure that the state does not change for current non-stopping states.
         mActivity.setState(INITIALIZING, "testPausingWhenVisibleFromStopped");
+        doReturn(true).when(mActivity).isFocusable();
 
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
 
@@ -320,5 +327,45 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         assertEquals(ActivityTaskManagerService.RELAUNCH_REASON_NONE,
                 mActivity.mRelaunchReason);
+    }
+
+    @Test
+    public void testSetRequestedOrientationUpdatesConfiguration() throws Exception {
+        mActivity.setState(ActivityStack.ActivityState.RESUMED, "Testing");
+
+        mTask.onRequestedOverrideConfigurationChanged(mTask.getConfiguration());
+        mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
+                mActivity.getConfiguration()));
+
+        mActivity.info.configChanges |= ActivityInfo.CONFIG_ORIENTATION;
+        final Configuration newConfig = new Configuration(mActivity.getConfiguration());
+        newConfig.orientation = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
+                ? Configuration.ORIENTATION_LANDSCAPE
+                : Configuration.ORIENTATION_PORTRAIT;
+
+        // Mimic the behavior that display doesn't handle app's requested orientation.
+        doAnswer(invocation -> {
+            mTask.onConfigurationChanged(newConfig);
+            return null;
+        }).when(mActivity.mAppWindowToken).setOrientation(anyInt(), any(), any());
+
+        final int requestedOrientation;
+        switch (newConfig.orientation) {
+            case Configuration.ORIENTATION_LANDSCAPE:
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                break;
+            case Configuration.ORIENTATION_PORTRAIT:
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                break;
+            default:
+                throw new IllegalStateException("Orientation in new config should be either"
+                        + "landscape or portrait.");
+        }
+        mActivity.setRequestedOrientation(requestedOrientation);
+
+        final ActivityConfigurationChangeItem expected =
+                ActivityConfigurationChangeItem.obtain(newConfig);
+        verify(mService.getLifecycleManager()).scheduleTransaction(eq(mActivity.app.getThread()),
+                eq(mActivity.appToken), eq(expected));
     }
 }

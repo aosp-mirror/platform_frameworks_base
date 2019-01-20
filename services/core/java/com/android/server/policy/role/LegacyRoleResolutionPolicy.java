@@ -62,6 +62,8 @@ public class LegacyRoleResolutionPolicy implements RoleManagerService.RoleHolder
                         mContext.getContentResolver(),
                         Settings.Secure.SMS_DEFAULT_APPLICATION, userId);
 
+                // TODO: STOPSHIP: Remove the following code once we remove default_sms_application
+                // and use the new config_defaultRoleHolders.
                 if (result == null) {
                     Collection<SmsApplication.SmsApplicationData> applications =
                             SmsApplication.getApplicationCollectionAsUser(mContext, userId);

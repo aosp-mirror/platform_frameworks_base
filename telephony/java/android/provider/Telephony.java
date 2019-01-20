@@ -2019,6 +2019,12 @@ public final class Telephony {
 
     /**
      * Helper functions for the "threads" table used by MMS and SMS.
+     *
+     * Thread IDs are determined by the participants in a conversation and can be used to match
+     * both SMS and MMS messages.
+     *
+     * To avoid issues where applications might cache a thread ID, the thread ID of a deleted thread
+     * must not be reused to point at a new thread.
      */
     public static final class Threads implements ThreadsColumns {
 
@@ -2072,14 +2078,10 @@ public final class Telephony {
         }
 
         /**
-         * Given the recipients list and subject of an unsaved message,
-         * return its thread ID.  If the message starts a new thread,
-         * allocate a new thread ID.  Otherwise, use the appropriate
-         * existing thread ID.
-         *
-         * <p>Find the thread ID of the same set of recipients (in any order,
-         * without any additions). If one is found, return it. Otherwise,
-         * return a unique thread ID.</p>
+         * Given a set of recipients return its thread ID.
+         * <p>
+         * If a thread exists containing the provided participants, return its thread ID. Otherwise,
+         * this will create a new thread containing the provided participants and return its ID.
          */
         public static long getOrCreateThreadId(
                 Context context, Set<String> recipients) {

@@ -519,7 +519,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
 
   OverlayableItem overlayable_item_bar(std::make_shared<Overlayable>(
       "TaskBar", "overlay://theme"));
-  overlayable_item_bar.policies |= OverlayableItem::Policy::kProductServices;
+  overlayable_item_bar.policies |= OverlayableItem::Policy::kPublic;
   overlayable_item_bar.policies |= OverlayableItem::Policy::kVendor;
 
   OverlayableItem overlayable_item_baz(std::make_shared<Overlayable>(
@@ -565,7 +565,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(overlayable_item.overlayable->name, Eq("TaskBar"));
   EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
-  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kProductServices
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic
                                               | OverlayableItem::Policy::kVendor));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/baz"));

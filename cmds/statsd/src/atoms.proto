@@ -188,6 +188,11 @@ message Atom {
         BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event = 125;
         BluetoothAclConnectionStateChanged bluetooth_acl_connection_state_changed = 126;
         BluetoothScoConnectionStateChanged bluetooth_sco_connection_state_changed = 127;
+        AppDowngraded app_downgraded = 128;
+        AppOptimizedAfterDowngraded app_optimized_after_downgraded = 129;
+        LowStorageStateChanged low_storage_state_changed = 130;
+        GnssNfwNotificationReported gnss_nfw_notification_reported = 131;
+        GnssConfigurationReported gnss_configuration_reported = 132;
     }
 
     // Pulled events will start at field 10000.
@@ -1787,6 +1792,47 @@ message ActivityForegroundStateChanged {
 }
 
 /**
+ * Logs when a volume entered low Storage state.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/storage/DeviceStorageMonitorService.java
+ */
+message LowStorageStateChanged {
+    // Volume that ran out of storage.
+    optional string volume_description = 1;
+
+    enum State {
+        UNKNOWN = 0;
+        OFF = 1;
+        ON = 2;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when an app is downgraded.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/pm/BackgroundDexOptService.java
+ */
+message AppDowngraded {
+    optional string package_name = 1;
+    // Size of the package (all data) before being downgraded.
+    optional int64 size_in_bytes_before = 2;
+    // Size of the package (all data) after being downgraded.
+    optional int64 size_in_bytes_after = 3;
+
+    optional bool aggressive = 4;
+}
+
+/**
+ * Logs when an app is optimized after being downgraded.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/pm/BackgroundDexOptService.java
+ */
+message AppOptimizedAfterDowngraded {
+    optional string package_name = 1;
+}
+
+/**
  * Logs when an app crashes.
  * Logged from:
  *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
@@ -3331,7 +3377,8 @@ message PackageAssociationSourceProcessStatsProto {
     optional int32 process_uid = 1;
     // Process name.
     optional string process_name = 2;
-
+    // Package name.
+    optional string package_name = 7;
     // Total count of the times this association appeared.
     optional int32 total_count = 3;
 
@@ -3410,11 +3457,29 @@ message ProcessStatsSectionProto {
     }
     repeated Status status = 7;
 
+    // Number of pages available of various types and sizes, representation fragmentation.
+    repeated ProcessStatsAvailablePagesProto available_pages = 10;
+
     // Stats for each process.
     repeated ProcessStatsProto process_stats = 8;
 
     // Stats for each package.
     repeated ProcessStatsPackageProto package_stats = 9;
+}
+
+message ProcessStatsAvailablePagesProto {
+    // Node these pages are in (as per /proc/pagetypeinfo)
+    optional int32 node = 1;
+
+    // Zone these pages are in (as per /proc/pagetypeinfo)
+    optional string zone = 2;
+
+    // Label for the type of these pages (as per /proc/pagetypeinfo)
+    optional string label = 3;
+
+    // Distribution of number of pages available by order size.  First entry in array is
+    // order 0, second is order 1, etc.  Each order increase is a doubling of page size.
+    repeated int32 pages_per_order = 4;
 }
 
 /**
@@ -4069,7 +4134,7 @@ message GnssNiEventReported {
     optional int32 notification_id = 2;
 
     // A type which distinguishes different categories of NI request, such as VOICE, UMTS_SUPL etc.
-    optional int32 ni_type = 3;
+    optional android.server.location.GnssNiType ni_type = 3;
 
     // NI requires notification.
     optional bool need_notify = 4;
@@ -4085,7 +4150,7 @@ message GnssNiEventReported {
     optional int32 timeout = 7;
 
     // Default response when timeout.
-    optional int32 default_response = 8;
+    optional android.server.location.GnssUserResponseType default_response = 8;
 
     // String representing the requester of the network inititated location request.
     optional string requestor_id = 9;
@@ -4095,10 +4160,10 @@ message GnssNiEventReported {
     optional string text = 10;
 
     // requestorId decoding scheme.
-    optional int32 requestor_id_encoding = 11;
+    optional android.server.location.GnssNiEncodingType requestor_id_encoding = 11;
 
     // Notification message text decoding scheme.
-    optional int32 text_encoding = 12;
+    optional android.server.location.GnssNiEncodingType text_encoding = 12;
 
     // True if SUPL ES is enabled.
     optional bool is_supl_es_enabled = 13;
@@ -4107,5 +4172,94 @@ message GnssNiEventReported {
     optional bool is_location_enabled = 14;
 
     // GNSS NI responses which define the response in NI structures.
-    optional int32 user_response = 15;
+    optional android.server.location.GnssUserResponseType user_response = 15;
+}
+
+/**
+ * Logs GNSS non-framework (NFW) location notification.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/location/GnssLocationProvider.java
+ */
+message GnssNfwNotificationReported {
+    // Package name of the Android proxy application representing the non-framework entity that
+    // requested location. Set to empty string if unknown.
+    optional string proxy_app_package_name = 1;
+
+    // Protocol stack that initiated the non-framework location request.
+    optional android.server.location.NfwProtocolStack protocol_stack = 2;
+
+    // Name of the protocol stack if protocol_stack field is set to OTHER_PROTOCOL_STACK. Otherwise,
+    // set to empty string. This field is opaque to the framework and used for logging purposes.
+    optional string other_protocol_stack_name = 3;
+
+    // Source initiating/receiving the location information.
+    optional android.server.location.NfwRequestor requestor = 4;
+
+    // Identity of the endpoint receiving the location information. For example, carrier name, OEM
+    // name, SUPL SLP/E-SLP FQDN, chipset vendor name, etc. This field is opaque to the framework
+    // and used for logging purposes.
+    optional string requestor_id = 5;
+
+    // Indicates whether location information was provided for this request.
+    optional android.server.location.NfwResponseType response_type = 6;
+
+    // True if the device is in user initiated emergency session.
+    optional bool in_emergency_mode = 7;
+
+    // True if cached location is provided.
+    optional bool is_cached_location = 8;
+
+    // True if proxy app permission mismatch between framework and GNSS HAL.
+    optional bool is_permission_mismatched = 9;
+}
+
+/**
+ * Logs GNSS configuration as defined in IGnssConfiguration.hal.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/location/GnssConfiguration.java
+ */
+message GnssConfigurationReported {
+    // SUPL host name.
+    optional string supl_host = 1;
+
+    // SUPL port number.
+    optional int32 supl_port = 2;
+
+    // C2K host name.
+    optional string c2k_host = 3;
+
+    // C2K port number.
+    optional int32 c2k_port = 4;
+
+    // The SUPL version requested by Carrier.
+    optional int32 supl_ver = 5;
+
+    // The SUPL mode.
+    optional android.server.location.SuplMode supl_mode = 6;
+
+    // True if NI emergency SUPL restrictions is enabled.
+    optional bool supl_es = 7;
+
+    // LTE Positioning Profile settings
+    optional android.server.location.LppProfile lpp_profile = 8;
+
+    // Positioning protocol on A-Glonass system.
+    optional android.server.location.GlonassPosProtocol a_glonass_pos_protocol_select = 9;
+
+    // True if emergency PDN is used. Otherwise, regular PDN is used.
+    optional bool use_emergency_pdn_for_emergency_supl= 10;
+
+    // Configurations of how GPS functionalities should be locked when user turns off GPS On setting.
+    optional android.server.location.GpsLock gps_lock = 11;
+
+    // Number of seconds to extend the emergency session duration post emergency call.
+    optional int32 es_extension_sec = 12;
+
+    // The full list of package names of proxy Android applications representing the non-framework
+    // location access entities (on/off the device) for which the framework user has granted
+    // non-framework location access permission. The package names are concatenated in one string
+    // with spaces as separators.
+    optional string enabled_proxy_app_package_name_list = 13;
 }

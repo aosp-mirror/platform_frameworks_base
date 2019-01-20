@@ -101,14 +101,14 @@ class WindowTestsBase {
     public static void setUpOnceBase() {
         AttributeCache.init(getInstrumentation().getTargetContext());
 
-        WmServiceUtils.setUpWindowManagerService();
+        TestSystemServices.setUpWindowManagerService();
 
         sPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
     }
 
     @AfterClass
     public static void tearDonwOnceBase() {
-        WmServiceUtils.tearDownWindowManagerService();
+        TestSystemServices.tearDownWindowManagerService();
     }
 
     @Before
@@ -120,7 +120,7 @@ class WindowTestsBase {
 
             final Context context = getInstrumentation().getTargetContext();
 
-            mWm = WmServiceUtils.getWindowManagerService();
+            mWm = TestSystemServices.getWindowManagerService();
             beforeCreateDisplay();
 
             context.getDisplay().getDisplayInfo(mDisplayInfo);
@@ -198,7 +198,7 @@ class WindowTestsBase {
             }
 
             // Cleaned up everything in Handler.
-            WmServiceUtils.cleanupWindowManagerHandlers();
+            TestSystemServices.cleanupWindowManagerHandlers();
         } catch (Exception e) {
             Log.e(TAG, "Failed to tear down test", e);
             throw e;
@@ -219,7 +219,7 @@ class WindowTestsBase {
      * Waits until the main handler for WM has processed all messages.
      */
     void waitUntilHandlersIdle() {
-        WmServiceUtils.waitUntilWindowManagerHandlersIdle();
+        TestSystemServices.waitUntilWindowManagerHandlersIdle();
     }
 
     private WindowToken createWindowToken(

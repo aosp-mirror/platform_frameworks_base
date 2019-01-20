@@ -18,17 +18,20 @@ package com.android.server.locksettings.recoverablekeystore;
 
 import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_CERTIFICATE;
 
-import com.android.internal.widget.LockPatternUtils;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.security.keystore.recovery.TrustedRootCertificates;
 import android.util.Log;
+import android.util.Pair;
 
-import java.util.HashMap;
+import com.android.internal.widget.LockPatternUtils;
+
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
+
 import javax.crypto.SecretKey;
 
 /**
@@ -90,16 +93,18 @@ public class TestOnlyInsecureCertificateHelper {
             && credential.startsWith(TrustedRootCertificates.INSECURE_PASSWORD_PREFIX);
     }
 
-    public Map<String, SecretKey> keepOnlyWhitelistedInsecureKeys(Map<String, SecretKey> rawKeys) {
+    public Map<String, Pair<SecretKey, byte[]>> keepOnlyWhitelistedInsecureKeys(
+            Map<String, Pair<SecretKey, byte[]>> rawKeys) {
         if (rawKeys == null) {
             return null;
         }
-        Map<String, SecretKey> filteredKeys = new HashMap<>();
-        for (Map.Entry<String, SecretKey> entry : rawKeys.entrySet()) {
+        Map<String, Pair<SecretKey, byte[]>> filteredKeys = new HashMap<>();
+        for (Map.Entry<String, Pair<SecretKey, byte[]>> entry : rawKeys.entrySet()) {
             String alias = entry.getKey();
             if (alias != null
                     && alias.startsWith(TrustedRootCertificates.INSECURE_KEY_ALIAS_PREFIX)) {
-                filteredKeys.put(entry.getKey(), entry.getValue());
+                filteredKeys.put(entry.getKey(),
+                        Pair.create(entry.getValue().first, entry.getValue().second));
                 Log.d(TAG, "adding key with insecure alias " + alias + " to the recovery snapshot");
             }
         }

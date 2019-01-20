@@ -71,7 +71,6 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mService = createActivityTaskManagerService();
         mPersister = new TestLaunchParamsPersister();
         mController = new LaunchParamsController(mService, mPersister);
     }

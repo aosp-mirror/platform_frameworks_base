@@ -45,6 +45,14 @@ public:
 
     sk_sp<SkSurface> getBackBufferSurface() { return mBackbuffer; }
 
+    // The width and height are are the logical width and height for when submitting draws to the
+    // surface. In reality if the window is rotated the underlying VkImage may have the width and
+    // height swapped.
+    int windowWidth() const { return mWindowWidth; }
+    int windowHeight() const { return mWindowHeight; }
+
+    SkMatrix& preTransform() { return mPreTransform; }
+
 private:
     friend class VulkanManager;
     struct BackbufferInfo {
@@ -84,6 +92,8 @@ private:
     sk_sp<SkColorSpace> mColorSpace;
     SkColorSpace::Gamut mColorGamut;
     SkColorType mColorType;
+    VkSurfaceTransformFlagBitsKHR mTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+    SkMatrix mPreTransform;
 };
 
 // This class contains the shared global Vulkan objects, such as VkInstance, VkDevice and VkQueue,

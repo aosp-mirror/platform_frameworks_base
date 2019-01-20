@@ -30,6 +30,7 @@ import static android.view.SurfaceControlProto.NAME;
 import android.annotation.Size;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
+import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -141,6 +142,7 @@ public class SurfaceControl implements Parcelable {
     private static native int nativeGetActiveConfig(IBinder displayToken);
     private static native boolean nativeSetActiveConfig(IBinder displayToken, int id);
     private static native int[] nativeGetDisplayColorModes(IBinder displayToken);
+    private static native int[] nativeGetCompositionDataspaces();
     private static native int nativeGetActiveColorMode(IBinder displayToken);
     private static native boolean nativeSetActiveColorMode(IBinder displayToken,
             int colorMode);
@@ -167,6 +169,7 @@ public class SurfaceControl implements Parcelable {
             InputWindowHandle handle);
     private static native void nativeTransferTouchFocus(long transactionObj, IBinder fromToken,
             IBinder toToken);
+    private static native boolean nativeGetProtectedContentSupport();
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -373,6 +376,13 @@ public class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final int WINDOW_TYPE_DONT_SCREENSHOT = 441731;
+
+    /**
+     * internal representation of how to interpret pixel value, used only to convert to ColorSpace.
+     */
+    private static final int INTERNAL_DATASPACE_SRGB = 142671872;
+    private static final int INTERNAL_DATASPACE_DISPLAY_P3 = 143261696;
+    private static final int INTERNAL_DATASPACE_SCRGB = 411107328;
 
     private void assignNativeObject(long nativeObject) {
         if (mNativeObject != 0) {
@@ -1516,6 +1526,35 @@ public class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Returns an array of color spaces with 2 elements. The first color space is the
+     * default color space and second one is wide color gamut color space.
+     * @hide
+     */
+    public static ColorSpace[] getCompositionColorSpaces() {
+        int[] dataspaces = nativeGetCompositionDataspaces();
+        ColorSpace srgb = ColorSpace.get(ColorSpace.Named.SRGB);
+        ColorSpace[] colorSpaces = { srgb, srgb };
+        if (dataspaces.length == 2) {
+            for (int i = 0; i < 2; ++i) {
+                switch(dataspaces[i]) {
+                    case INTERNAL_DATASPACE_DISPLAY_P3:
+                        colorSpaces[i] = ColorSpace.get(ColorSpace.Named.DISPLAY_P3);
+                        break;
+                    case INTERNAL_DATASPACE_SCRGB:
+                        colorSpaces[i] = ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB);
+                        break;
+                    case INTERNAL_DATASPACE_SRGB:
+                    // Other dataspace is not recognized, use SRGB color space instead,
+                    // the default value of the array is already SRGB, thus do nothing.
+                    default:
+                        break;
+                }
+            }
+        }
+        return colorSpaces;
+    }
+
+    /**
      * @hide
      */
     @UnsupportedAppUsage
@@ -1727,6 +1766,14 @@ public class SurfaceControl implements Parcelable {
     public static GraphicBuffer captureLayers(IBinder layerHandleToken, Rect sourceCrop,
             float frameScale) {
         return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale);
+    }
+
+    /**
+     * Returns whether protected content is supported in GPU composition.
+     * @hide
+     */
+    public static boolean getProtectedContentSupport() {
+        return nativeGetProtectedContentSupport();
     }
 
     /**

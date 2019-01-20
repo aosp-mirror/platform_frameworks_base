@@ -2394,6 +2394,17 @@ public class Editor {
         }
     }
 
+    /**
+     * Called when {@link TextView#mTextOperationUser} has changed.
+     *
+     * <p>Any user-specific resources need to be refreshed here.</p>
+     */
+    final void onTextOperationUserChanged() {
+        if (mSpellChecker != null) {
+            mSpellChecker.resetSession();
+        }
+    }
+
     protected void stopTextActionMode() {
         if (mTextActionMode != null) {
             // This will hide the mSelectionModifierCursorController

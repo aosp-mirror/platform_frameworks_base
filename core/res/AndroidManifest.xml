@@ -1186,6 +1186,7 @@
     <!-- Used for permissions that are associated with activity recognition.
          TODO(zezeozue). STOPSHIP: Add icon -->
     <permission-group android:name="android.permission-group.ACTIVITY_RECOGNITION"
+        android:icon="@drawable/perm_group_activity_recognition"
         android:label="@string/permgrouplab_activityRecognition"
         android:description="@string/permgroupdesc_activityRecognition"
         android:request="@string/permgrouprequest_activityRecognition"
@@ -2209,8 +2210,9 @@
     <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
         android:protectionLevel="signature|installer" />
 
-    <!-- @SystemApi Allows an application to start an activity within its managed profile from
-         the personal profile.
+    <!-- @SystemApi Allows an application to start its own activities, but on a different profile
+         associated with the user. For example, an application running on the main profile of a user
+         can start an activity on a managed profile of that user.
          This permission is not available to third party applications.
          @hide -->
     <permission android:name="android.permission.INTERACT_ACROSS_PROFILES"
@@ -3054,6 +3056,15 @@
     -->
     <permission android:name="android.permission.BIND_TEXT_SERVICE"
         android:protectionLevel="signature" />
+
+    <!-- @SystemApi Must be required by a AttentionService
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_ATTENTION_SERVICE"
+                android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.BIND_ATTENTION_SERVICE" />
 
     <!-- Must be required by a {@link android.net.VpnService},
          to ensure that only the system can bind to it.
@@ -4751,6 +4762,11 @@
 
         <service android:name="com.android.server.MountServiceIdler"
                  android:exported="true"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
+        <service android:name="com.android.server.ZramWriteback"
+                 android:exported="false"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 

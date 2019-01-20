@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
+import android.telephony.CarrierRestrictionRules;
 import android.telephony.CellInfo;
 import android.telephony.ClientRequestStats;
 import android.telephony.IccOpenLogicalChannelResponse;
@@ -41,6 +42,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
+import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsConfigCallback;
@@ -1292,22 +1294,27 @@ interface ITelephony {
     List<TelephonyHistogram> getTelephonyHistograms();
 
     /**
-     * Set the allowed carrier list for slotIndex
-     * Require system privileges. In the future we may add this to carrier APIs.
+     * Set the allowed carrier list and the excluded carrier list, indicating the priority between
+     * the two lists.
      *
-     * @return The number of carriers set successfully. Should match length of
-     * carriers on success.
+     * <p>Requires system privileges. In the future we may add this to carrier APIs.
+     *
+     * @return {@link #SET_CARRIER_RESTRICTION_SUCCESS} in case of success.
+     * {@link #SET_CARRIER_RESTRICTION_NOT_SUPPORTED} if the modem does not support the
+     * configuration. {@link #SET_CARRIER_RESTRICTION_ERROR} in all other error cases.
      */
-    int setAllowedCarriers(int slotIndex, in List<CarrierIdentifier> carriers);
+    int setAllowedCarriers(in CarrierRestrictionRules carrierRestrictionRules);
 
     /**
-     * Get the allowed carrier list for slotIndex.
-     * Require system privileges. In the future we may add this to carrier APIs.
+     * Get the allowed carrier list and the excluded carrier list indicating the priority between
+     * the two lists.
      *
-     * @return List of {@link android.service.carrier.CarrierIdentifier}; empty list
-     * means all carriers are allowed.
+     * <p>Requires system privileges. In the future we may add this to carrier APIs.
+     *
+     * @return {@link CarrierRestrictionRules}; empty lists mean all carriers are allowed. It
+     * returns null in case of error.
      */
-    List<CarrierIdentifier> getAllowedCarriers(int slotIndex);
+    CarrierRestrictionRules getAllowedCarriers();
 
    /**
      * Returns carrier id of the given subscription.
@@ -1776,4 +1783,19 @@ interface ITelephony {
      * Set the String provisioning value for the provisioning key specified.
      */
     int setImsProvisioningString(int subId, int key, String value);
+
+    /**
+     * Update Emergency Number List for Test Mode.
+     */
+    void updateEmergencyNumberListTestMode(int action, in EmergencyNumber num);
+
+    /**
+     * Get the full emergency number list for Test Mode.
+     */
+    List<String> getEmergencyNumberListTestMode();
+
+    /**
+     * Enable or disable a logical modem stack associated with the slotIndex.
+     */
+    boolean enableModemForSlot(int slotIndex, boolean enable);
 }

@@ -426,6 +426,9 @@ public class StackStateAnimator {
                     mTmpState.yTranslation += mPulsingAppearingTranslation;
                     mTmpState.alpha = 0;
                     mTmpState.applyToView(changingView);
+
+                    mTmpState.copyFrom(mShelf.getViewState());
+                    mTmpState.applyToView(mShelf);
                 }
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_PULSE_DISAPPEAR) {

@@ -65,6 +65,8 @@ import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpe
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
+import static com.android.server.wm.AppTransitionProto.APP_TRANSITION_STATE;
+import static com.android.server.wm.AppTransitionProto.LAST_USED_APP_TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -73,8 +75,6 @@ import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
-import static com.android.server.wm.AppTransitionProto.APP_TRANSITION_STATE;
-import static com.android.server.wm.AppTransitionProto.LAST_USED_APP_TRANSITION;
 
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
@@ -84,6 +84,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.ResourceId;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -547,7 +548,7 @@ public class AppTransition implements Dump {
     }
 
     Animation loadAnimationAttr(LayoutParams lp, int animAttr, int transit) {
-        int resId = ResourceId.ID_NULL;
+        int resId = Resources.ID_NULL;
         Context context = mContext;
         if (animAttr >= 0) {
             AttributeCache.Entry ent = getCachedAnimations(lp);

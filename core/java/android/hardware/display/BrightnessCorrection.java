@@ -18,6 +18,7 @@ package android.hardware.display;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.MathUtils;
@@ -41,6 +42,7 @@ import java.io.IOException;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class BrightnessCorrection implements Parcelable {
 
     private static final int SCALE_AND_TRANSLATE_LOG = 1;
@@ -96,6 +98,24 @@ public final class BrightnessCorrection implements Parcelable {
      */
     public String toString() {
         return mImplementation.toString();
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof BrightnessCorrection)) {
+            return false;
+        }
+        BrightnessCorrection other = (BrightnessCorrection) o;
+        return other.mImplementation.equals(mImplementation);
+    }
+
+    @Override
+    public int hashCode() {
+        return mImplementation.hashCode();
     }
 
     public static final Creator<BrightnessCorrection> CREATOR =
@@ -212,6 +232,26 @@ public final class BrightnessCorrection implements Parcelable {
         @Override
         public String toString() {
             return "ScaleAndTranslateLog(" + mScale + ", " + mTranslate + ")";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            if (!(o instanceof ScaleAndTranslateLog)) {
+                return false;
+            }
+            ScaleAndTranslateLog other = (ScaleAndTranslateLog) o;
+            return other.mScale == mScale && other.mTranslate == mTranslate;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 1;
+            result = result * 31 + Float.hashCode(mScale);
+            result = result * 31 + Float.hashCode(mTranslate);
+            return result;
         }
 
         @Override

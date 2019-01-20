@@ -30,9 +30,9 @@ Next, install the resulting APK and run tests as you would normal JUnit tests:
 
   adb install -r ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
   adb shell am instrument -w \
-    com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
+    com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
 
-To run a tests within a specific package, add the following argument AFTER -w:
+To run a tests within a specific package, add -e AFTER -w and before the runner class:
 
     -e package android.content.pm
 

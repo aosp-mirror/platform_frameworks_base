@@ -194,9 +194,6 @@
     <!-- The margin for text at the end of the image view for media notifications -->
     <dimen name="notification_media_image_margin_end">72dp</dimen>
 
-    <!-- The additional margin on the sides of the ambient view. -->
-    <dimen name="notification_extra_margin_ambient">16dp</dimen>
-
     <!-- The height of the notification action list -->
     <dimen name="notification_action_list_height">60dp</dimen>
 
@@ -232,9 +229,6 @@
 
     <!-- The bottom padding for the notification header -->
     <dimen name="notification_header_padding_bottom">16dp</dimen>
-
-    <!-- The margin at the top of the notification header when dozing. -->
-    <dimen name="notification_header_margin_top_ambient">3dp</dimen>
 
     <!-- The margin at the bottom of the notification header. -->
     <dimen name="notification_header_margin_bottom">0dp</dimen>
@@ -400,11 +394,6 @@
     <dimen name="notification_title_text_size">14sp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
     <dimen name="notification_subtext_size">12sp</dimen>
-    <!-- Size of notification text (see TextAppearance.StatusBar.EventContent) -->
-    <dimen name="notification_ambient_text_size">16sp</dimen>
-    <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
-    <dimen name="notification_ambient_title_text_size">24sp</dimen>
-
     <!-- Top padding for notifications in the standard layout. -->
     <dimen name="notification_top_pad">10dp</dimen>
 

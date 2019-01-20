@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.autofill.AutofillId;
 
 import com.android.internal.util.Preconditions;
@@ -28,10 +29,14 @@ import com.android.internal.util.Preconditions;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /** @hide */
 @SystemApi
 public final class ContentCaptureEvent implements Parcelable {
+
+    private static final String TAG = ContentCaptureEvent.class.getSimpleName();
 
     /** @hide */
     public static final int TYPE_SESSION_FINISHED = -2;
@@ -46,9 +51,11 @@ public final class ContentCaptureEvent implements Parcelable {
     public static final int TYPE_VIEW_APPEARED = 1;
 
     /**
-     * Called when a node has been removed from the screen and is not visible to the user anymore.
+     * Called when one or more nodes have been removed from the screen and is not visible to the
+     * user anymore.
      *
-     * <p>The id of the node is available through {@link #getId()}.
+     * <p>To get the id(s), first call {@link #getIds()} - if it returns {@code null}, then call
+     * {@link #getId()}.
      */
     public static final int TYPE_VIEW_DISAPPEARED = 2;
 
@@ -74,34 +81,49 @@ public final class ContentCaptureEvent implements Parcelable {
     private final @NonNull String mSessionId;
     private final int mType;
     private final long mEventTime;
-    private final int mFlags;
     private @Nullable AutofillId mId;
+    private @Nullable ArrayList<AutofillId> mIds;
     private @Nullable ViewNode mNode;
     private @Nullable CharSequence mText;
     private @Nullable String mParentSessionId;
     private @Nullable ContentCaptureContext mClientContext;
 
     /** @hide */
-    public ContentCaptureEvent(@NonNull String sessionId, int type, long eventTime, int flags) {
+    public ContentCaptureEvent(@NonNull String sessionId, int type, long eventTime) {
         mSessionId = sessionId;
         mType = type;
         mEventTime = eventTime;
-        mFlags = flags;
-    }
-
-    /** @hide */
-    public ContentCaptureEvent(@NonNull String sessionId, int type, int flags) {
-        this(sessionId, type, System.currentTimeMillis(), flags);
     }
 
     /** @hide */
     public ContentCaptureEvent(@NonNull String sessionId, int type) {
-        this(sessionId, type, /* flags= */ 0);
+        this(sessionId, type, System.currentTimeMillis());
     }
 
     /** @hide */
     public ContentCaptureEvent setAutofillId(@NonNull AutofillId id) {
         mId = Preconditions.checkNotNull(id);
+        return this;
+    }
+
+    private void setAutofillIds(@NonNull ArrayList<AutofillId> ids) {
+        mIds = Preconditions.checkNotNull(ids);
+    }
+
+    /**
+     * Adds an autofill id to the this event, merging the single id into a list if necessary.
+     * @hide */
+    public ContentCaptureEvent addAutofillId(@NonNull AutofillId id) {
+        if (mIds == null) {
+            mIds = new ArrayList<>();
+            if (mId == null) {
+                Log.w(TAG, "addAutofillId(" + id + ") called without an initial id");
+            } else {
+                mIds.add(mId);
+                mId = null;
+            }
+        }
+        mIds.add(id);
         return this;
     }
 
@@ -183,16 +205,6 @@ public final class ContentCaptureEvent implements Parcelable {
     }
 
     /**
-     * Gets optional flags associated with the event.
-     *
-     * @return either {@code 0} or
-     * {@link android.view.contentcapture.ContentCaptureSession#FLAG_USER_INPUT}.
-     */
-    public int getFlags() {
-        return mFlags;
-    }
-
-    /**
      * Gets the whole metadata of the node associated with the event.
      *
      * <p>Only set on {@link #TYPE_VIEW_APPEARED} events.
@@ -205,11 +217,24 @@ public final class ContentCaptureEvent implements Parcelable {
     /**
      * Gets the {@link AutofillId} of the node associated with the event.
      *
-     * <p>Only set on {@link #TYPE_VIEW_DISAPPEARED} and {@link #TYPE_VIEW_TEXT_CHANGED} events.
+     * <p>Only set on {@link #TYPE_VIEW_DISAPPEARED} (when the event contains just one node - if
+     * it contains more than one, this method returns {@code null} and the actual ids should be
+     * retrived by {@link #getIds()}) and {@link #TYPE_VIEW_TEXT_CHANGED} events.
      */
     @Nullable
     public AutofillId getId() {
         return mId;
+    }
+
+    /**
+     * Gets the {@link AutofillId AutofillIds} of the nodes associated with the event.
+     *
+     * <p>Only set on {@link #TYPE_VIEW_DISAPPEARED}, when the event contains more than one node
+     * (if it contains just one node, it's returned by {@link #getId()} instead.
+     */
+    @Nullable
+    public List<AutofillId> getIds() {
+        return mIds;
     }
 
     /**
@@ -226,11 +251,11 @@ public final class ContentCaptureEvent implements Parcelable {
     public void dump(@NonNull PrintWriter pw) {
         pw.print("type="); pw.print(getTypeAsString(mType));
         pw.print(", time="); pw.print(mEventTime);
-        if (mFlags > 0) {
-            pw.print(", flags="); pw.print(mFlags);
-        }
         if (mId != null) {
             pw.print(", id="); pw.print(mId);
+        }
+        if (mIds != null) {
+            pw.print(", ids="); pw.print(mIds);
         }
         if (mNode != null) {
             pw.print(", mNode.id="); pw.print(mNode.getAutofillId());
@@ -255,11 +280,11 @@ public final class ContentCaptureEvent implements Parcelable {
         if (mType == TYPE_SESSION_STARTED && mParentSessionId != null) {
             string.append(", parent=").append(mParentSessionId);
         }
-        if (mFlags > 0) {
-            string.append(", flags=").append(mFlags);
-        }
         if (mId != null) {
             string.append(", id=").append(mId);
+        }
+        if (mIds != null) {
+            string.append(", ids=").append(mIds);
         }
         if (mNode != null) {
             final String className = mNode.getClassName();
@@ -281,8 +306,8 @@ public final class ContentCaptureEvent implements Parcelable {
         parcel.writeString(mSessionId);
         parcel.writeInt(mType);
         parcel.writeLong(mEventTime);
-        parcel.writeInt(mFlags);
         parcel.writeParcelable(mId, flags);
+        parcel.writeTypedList(mIds);
         ViewNode.writeToParcel(parcel, mNode, flags);
         parcel.writeCharSequence(mText);
         if (mType == TYPE_SESSION_STARTED || mType == TYPE_SESSION_FINISHED) {
@@ -301,12 +326,14 @@ public final class ContentCaptureEvent implements Parcelable {
             final String sessionId = parcel.readString();
             final int type = parcel.readInt();
             final long eventTime  = parcel.readLong();
-            final int flags = parcel.readInt();
-            final ContentCaptureEvent event =
-                    new ContentCaptureEvent(sessionId, type, eventTime, flags);
+            final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, type, eventTime);
             final AutofillId id = parcel.readParcelable(null);
             if (id != null) {
                 event.setAutofillId(id);
+            }
+            final ArrayList<AutofillId> ids = parcel.createTypedArrayList(AutofillId.CREATOR);
+            if (ids != null) {
+                event.setAutofillIds(ids);
             }
             final ViewNode node = ViewNode.readFromParcel(parcel);
             if (node != null) {

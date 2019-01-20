@@ -1,6 +1,5 @@
 package com.android.inspectable;
 
-import android.content.res.ResourceId;
 import android.view.inspector.InspectionCompanion;
 import android.view.inspector.PropertyMapper;
 import android.view.inspector.PropertyReader;
@@ -25,7 +24,7 @@ public final class TestInspectable$$InspectionCompanion implements InspectionCom
 
     @Override
     public void mapProperties(PropertyMapper propertyMapper) {
-        mNoAttributePropertyId = propertyMapper.mapInt("noAttributeProperty", ResourceId.ID_NULL);
+        mNoAttributePropertyId = propertyMapper.mapInt("noAttributeProperty", 0);
         mPropertiesMapped = true;
     }
 

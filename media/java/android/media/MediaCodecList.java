@@ -111,12 +111,14 @@ final public class MediaCodecList {
             caps[typeIx++] = getCodecCapabilities(index, type);
         }
         return new MediaCodecInfo(
-                getCodecName(index), isEncoder(index), caps);
+                getCodecName(index), getCanonicalName(index), getAttributes(index), caps);
     }
 
     /* package private */ static native final String getCodecName(int index);
 
-    /* package private */ static native final boolean isEncoder(int index);
+    /* package private */ static native final String getCanonicalName(int index);
+
+    /* package private */ static native final int getAttributes(int index);
 
     /* package private */ static native final String[] getSupportedTypes(int index);
 

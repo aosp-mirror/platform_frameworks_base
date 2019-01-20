@@ -2947,7 +2947,9 @@ public final class MediaStore {
         for (VolumeInfo vi : sm.getVolumes()) {
             if (Objects.equals(vi.getFsUuid(), volumeName)) {
                 final File path = vi.getPathForUser(UserHandle.myUserId());
-                if (path == null) {
+                if (path != null) {
+                    return path;
+                } else {
                     throw new FileNotFoundException("Failed to find path for " + vi);
                 }
             }

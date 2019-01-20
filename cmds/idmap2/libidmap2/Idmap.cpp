@@ -274,11 +274,30 @@ std::unique_ptr<const Idmap> Idmap::FromBinaryStream(std::istream& stream,
   return std::move(idmap);
 }
 
-std::unique_ptr<const Idmap> Idmap::FromApkAssets(const std::string& target_apk_path,
-                                                  const ApkAssets& target_apk_assets,
-                                                  const std::string& overlay_apk_path,
-                                                  const ApkAssets& overlay_apk_assets,
-                                                  std::ostream& out_error) {
+bool CheckOverlayable(const LoadedPackage& target_package,
+                      const utils::OverlayManifestInfo& overlay_info,
+                      const PolicyBitmask& fulfilled_polices, const ResourceId& resid) {
+  const OverlayableInfo* overlayable_info = target_package.GetOverlayableInfo(resid);
+  if (overlayable_info == nullptr) {
+    // If the resource does not have an overlayable definition, allow the resource to be overlaid.
+    // Once overlayable enforcement is turned on, this check will return false.
+    return true;
+  }
+
+  if (!overlay_info.target_name.empty() && overlay_info.target_name != overlayable_info->name) {
+    // If the overlay supplies a target overlayable name, the resource must belong to the
+    // overlayable defined with the specified name to be overlaid.
+    return false;
+  }
+
+  // Enforce policy restrictions if the resource is declared as overlayable.
+  return (overlayable_info->policy_flags & fulfilled_polices) != 0;
+}
+
+std::unique_ptr<const Idmap> Idmap::FromApkAssets(
+    const std::string& target_apk_path, const ApkAssets& target_apk_assets,
+    const std::string& overlay_apk_path, const ApkAssets& overlay_apk_assets,
+    const PolicyBitmask& fulfilled_policies, bool enforce_overlayable, std::ostream& out_error) {
   AssetManager2 target_asset_manager;
   if (!target_asset_manager.SetApkAssets({&target_apk_assets}, true, false)) {
     out_error << "error: failed to create target asset manager" << std::endl;
@@ -324,6 +343,12 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(const std::string& target_apk_
   const std::unique_ptr<const ZipFile> overlay_zip = ZipFile::Open(overlay_apk_path);
   if (!overlay_zip) {
     out_error << "error: failed to open overlay as zip" << std::endl;
+    return nullptr;
+  }
+
+  Result<utils::OverlayManifestInfo> overlay_info =
+      utils::ExtractOverlayManifestInfo(overlay_apk_path, out_error);
+  if (!overlay_info) {
     return nullptr;
   }
 
@@ -380,6 +405,14 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(const std::string& target_apk_
     if (target_resid == 0) {
       continue;
     }
+
+    if (enforce_overlayable &&
+        !CheckOverlayable(*target_pkg, *overlay_info, fulfilled_policies, target_resid)) {
+      LOG(WARNING) << "overlay \"" << overlay_apk_path << "\" is not allowed to overlay resource \""
+                   << full_name << "\"" << std::endl;
+      continue;
+    }
+
     matching_resources.Add(target_resid, overlay_resid);
   }
 

@@ -19,6 +19,7 @@ import static android.view.contentcapture.ContentCaptureManager.DEBUG;
 import static android.view.contentcapture.ContentCaptureManager.VERBOSE;
 
 import android.annotation.CallSuper;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.DebugUtils;
@@ -30,11 +31,14 @@ import android.view.contentcapture.ViewNode.ViewStructureImpl;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -45,12 +49,6 @@ import java.util.UUID;
 public abstract class ContentCaptureSession implements AutoCloseable {
 
     private static final String TAG = ContentCaptureSession.class.getSimpleName();
-
-    /**
-     * Used on {@link #notifyViewTextChanged(AutofillId, CharSequence, int)} to indicate that the
-     * text change was caused by user input (for example, through IME).
-     */
-    public static final int FLAG_USER_INPUT = 0x1;
 
     /**
      * Initial state, when there is no session.
@@ -124,6 +122,32 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int STATE_INTERNAL_ERROR = 0x100;
 
     private static final int INITIAL_CHILDREN_CAPACITY = 5;
+
+    /** @hide */
+    public static final int FLUSH_REASON_FULL = 1;
+    /** @hide */
+    public static final int FLUSH_REASON_ACTIVITY_PAUSED = 2;
+    /** @hide */
+    public static final int FLUSH_REASON_ACTIVITY_RESUMED = 3;
+    /** @hide */
+    public static final int FLUSH_REASON_SESSION_STARTED = 4;
+    /** @hide */
+    public static final int FLUSH_REASON_SESSION_FINISHED = 5;
+    /** @hide */
+    public static final int FLUSH_REASON_IDLE_TIMEOUT = 6;
+
+    /** @hide */
+    @IntDef(prefix = { "FLUSH_REASON_" }, value = {
+            FLUSH_REASON_FULL,
+            FLUSH_REASON_ACTIVITY_PAUSED,
+            FLUSH_REASON_ACTIVITY_RESUMED,
+            FLUSH_REASON_SESSION_STARTED,
+            FLUSH_REASON_SESSION_FINISHED,
+            FLUSH_REASON_IDLE_TIMEOUT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface FlushReason{}
+
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
@@ -212,7 +236,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /**
      * Flushes the buffered events to the service.
      */
-    abstract void flush();
+    abstract void flush(@FlushReason int reason);
 
     /**
      * Destroys this session, flushing out all pending notifications to the service.
@@ -250,7 +274,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         }
 
         try {
-            flush();
+            flush(FLUSH_REASON_SESSION_FINISHED);
         } finally {
             onDestroy();
         }
@@ -316,12 +340,36 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     abstract void internalNotifyViewDisappeared(@NonNull AutofillId id);
 
     /**
+     * Notifies the Content Capture Service that many nodes has been removed from a virtual view
+     * structure.
+     *
+     * <p>Should only be called by views that handle their own virtual view hierarchy.
+     *
+     * @param hostId id of the view hosting the virtual hierarchy.
+     * @param virtualIds ids of the virtual children.
+     *
+     * @throws IllegalArgumentException if the {@code hostId} is an autofill id for a virtual view.
+     * @throws IllegalArgumentException if {@code virtualIds} is empty
+     */
+    public final void notifyViewsDisappeared(@NonNull AutofillId hostId,
+            @NonNull int[] virtualIds) {
+        Preconditions.checkArgument(!hostId.isVirtual(), "parent cannot be virtual");
+        Preconditions.checkArgument(!ArrayUtils.isEmpty(virtualIds), "virtual ids cannot be empty");
+        if (!isContentCaptureEnabled()) return;
+
+        // TODO(b/123036895): use a internalNotifyViewsDisappeared that optimizes how the event is
+        // parcelized
+        for (int id : virtualIds) {
+            internalNotifyViewDisappeared(new AutofillId(hostId, id, getIdAsInt()));
+        }
+    }
+
+    /**
      * Notifies the Intelligence Service that the value of a text node has been changed.
      *
      * @param id of the node.
      * @param text new text.
-     * @param flags either {@code 0} or {@link #FLAG_USER_INPUT} when the value was explicitly
-     * changed by the user (for example, through the keyboard).
+     * @param flags currently ignored.
      */
     public final void notifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
             int flags) {
@@ -329,11 +377,11 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
         if (!isContentCaptureEnabled()) return;
 
-        internalNotifyViewTextChanged(id, text, flags);
+        internalNotifyViewTextChanged(id, text);
     }
 
-    abstract void internalNotifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
-            int flags);
+    abstract void internalNotifyViewTextChanged(@NonNull AutofillId id,
+            @Nullable CharSequence text);
 
     /**
      * Creates a {@link ViewStructure} for a "standard" view.
@@ -407,12 +455,31 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         return mId;
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @NonNull
     protected static String getStateAsString(int state) {
         return state + " (" + (state == UNKNWON_STATE ? "UNKNOWN"
                 : DebugUtils.flagsToString(ContentCaptureSession.class, "STATE_", state)) + ")";
+    }
+
+    /** @hide */
+    @NonNull
+    static String getflushReasonAsString(@FlushReason int reason) {
+        switch (reason) {
+            case FLUSH_REASON_FULL:
+                return "FULL";
+            case FLUSH_REASON_ACTIVITY_PAUSED:
+                return "PAUSED";
+            case FLUSH_REASON_ACTIVITY_RESUMED:
+                return "RESUMED";
+            case FLUSH_REASON_SESSION_STARTED:
+                return "STARTED";
+            case FLUSH_REASON_SESSION_FINISHED:
+                return "FINISHED";
+            case FLUSH_REASON_IDLE_TIMEOUT:
+                return "IDLE";
+            default:
+                return "UNKOWN-" + reason;
+        }
     }
 }

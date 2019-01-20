@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
@@ -31,6 +32,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
+import android.annotation.RequiresPermission;
 import android.annotation.Size;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
@@ -45,10 +47,10 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.UndoManager;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.content.res.ResourceId;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -74,7 +76,9 @@ import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ParcelableParcel;
+import android.os.Process;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.BoringLayout;
 import android.text.DynamicLayout;
@@ -195,6 +199,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -786,6 +791,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private InputFilter[] mFilters = NO_FILTERS;
 
+    /**
+     * {@link UserHandle} that represents the logical owner of the text. {@code null} when it is
+     * the same as {@link Process#myUserHandle()}.
+     *
+     * <p>Most of applications should not worry about this. Some privileged apps that host UI for
+     * other apps may need to set this so that the system can use right user's resources and
+     * services such as input methods and spell checkers.</p>
+     *
+     * @see #setTextOperationUser(UserHandle)
+     */
+    @Nullable
+    private UserHandle mTextOperationUser;
+
     private volatile Locale mCurrentSpellCheckerLocaleCache;
 
     // It is possible to have a selection even when mEditor is null (programmatically set, like when
@@ -889,7 +907,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // sanitize autofill requests.
     private boolean mTextSetFromXmlOrResourceId = false;
     // Resource id used to set the text.
-    private @StringRes int mTextId = ResourceId.ID_NULL;
+    private @StringRes int mTextId = Resources.ID_NULL;
     //
     // End of autofill-related attributes
 
@@ -1180,7 +1198,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 case com.android.internal.R.styleable.TextView_text:
                     textIsSetFromXml = true;
-                    mTextId = a.getResourceId(attr, ResourceId.ID_NULL);
+                    mTextId = a.getResourceId(attr, Resources.ID_NULL);
                     text = a.getText(attr);
                     break;
 
@@ -8325,6 +8343,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_ENTER_ACTION;
             }
             outAttrs.hintText = mHint;
+            outAttrs.targetInputMethodUser = mTextOperationUser;
             if (mText instanceof Editable) {
                 InputConnection ic = new EditableInputConnection(this);
                 outAttrs.initialSelStart = getSelectionStart();
@@ -10902,6 +10921,55 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Associate {@link UserHandle} who is considered to be the logical owner of the text shown in
+     * this {@link TextView}.
+     *
+     * <p>Most of applications should not worry about this.  Some privileged apps that host UI for
+     * other apps may need to set this so that the system can user right user's resources and
+     * services such as input methods and spell checkers.</p>
+     *
+     * @param user {@link UserHandle} who is considered to be the owner of the text shown in this
+     *        {@link TextView}. {@code null} to reset {@link #mTextOperationUser}.
+     * @hide
+     */
+    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
+    public final void setTextOperationUser(@Nullable UserHandle user) {
+        if (Objects.equals(mTextOperationUser, user)) {
+            return;
+        }
+        if (user != null && !Process.myUserHandle().equals(user)) {
+            // Just for preventing people from accidentally using this hidden API without
+            // the required permission.  The same permission is also checked in the system server.
+            if (getContext().checkSelfPermission(INTERACT_ACROSS_USERS_FULL)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("INTERACT_ACROSS_USERS_FULL is required."
+                        + " userId=" + user.getIdentifier()
+                        + " callingUserId" + UserHandle.myUserId());
+            }
+        }
+        mTextOperationUser = user;
+        // Invalidate some resources
+        mCurrentSpellCheckerLocaleCache = null;
+        if (mEditor != null) {
+            mEditor.onTextOperationUserChanged();
+        }
+    }
+
+    @Nullable
+    final TextServicesManager getTextServicesManagerForUser() {
+        if (mTextOperationUser == null) {
+            return getContext().getSystemService(TextServicesManager.class);
+        }
+        try {
+            return getContext().createPackageContextAsUser(
+                    "android", 0 /* flags */, mTextOperationUser)
+                    .getSystemService(TextServicesManager.class);
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+    }
+
+    /**
      * This is a temporary method. Future versions may support multi-locale text.
      * Caveat: This method may not return the latest text services locale, but this should be
      * acceptable and it's more important to make this method asynchronous.
@@ -10973,8 +11041,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @UnsupportedAppUsage
     private void updateTextServicesLocaleLocked() {
-        final TextServicesManager textServicesManager = (TextServicesManager)
-                mContext.getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
+        final TextServicesManager textServicesManager = getTextServicesManagerForUser();
+        if (textServicesManager == null) {
+            return;
+        }
         final SpellCheckerSubtype subtype = textServicesManager.getCurrentSpellCheckerSubtype(true);
         final Locale locale;
         if (subtype != null) {
@@ -11031,7 +11101,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
                 structure.setDataIsSensitive(!mTextSetFromXmlOrResourceId);
             }
-            if (mTextId != ResourceId.ID_NULL) {
+            if (mTextId != Resources.ID_NULL) {
                 try {
                     structure.setTextIdEntry(getResources().getResourceEntryName(mTextId));
                 } catch (Resources.NotFoundException e) {

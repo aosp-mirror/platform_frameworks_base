@@ -102,8 +102,6 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
         mFolder = new File(cacheFolder, "launch_params_tests");
         deleteRecursively(mFolder);
 
-        setupActivityTaskManagerService();
-
         mDisplayUniqueId = "test:" + Integer.toString(sNextUniqueId++);
         final DisplayInfo info = new DisplayInfo();
         info.uniqueId = mDisplayUniqueId;

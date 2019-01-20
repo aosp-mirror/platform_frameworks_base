@@ -68,8 +68,8 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
-    void flush() {
-        mParent.flush();
+    void flush(@FlushReason int reason) {
+        mParent.flush(reason);
     }
 
     @Override
@@ -88,10 +88,10 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
-    void internalNotifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
-            int flags) {
-        getMainCaptureSession().notifyViewTextChanged(mId, id, text, flags);
+    void internalNotifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text) {
+        getMainCaptureSession().notifyViewTextChanged(mId, id, text);
     }
+
     @Override
     boolean isContentCaptureEnabled() {
         return getMainCaptureSession().isContentCaptureEnabled();

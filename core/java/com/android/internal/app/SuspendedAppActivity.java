@@ -16,7 +16,7 @@
 
 package com.android.internal.app;
 
-import static android.content.res.ResourceId.ID_NULL;
+import static android.content.res.Resources.ID_NULL;
 
 import android.Manifest;
 import android.app.AlertDialog;

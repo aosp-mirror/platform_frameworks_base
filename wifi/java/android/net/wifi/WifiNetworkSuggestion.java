@@ -130,7 +130,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("WifiNetworkSuggestion [")
-                .append(", WifiConfiguration=").append(wifiConfiguration)
+                .append(", SSID=").append(wifiConfiguration.SSID)
+                .append(", BSSID=").append(wifiConfiguration.BSSID)
                 .append(", isAppInteractionRequired=").append(isAppInteractionRequired)
                 .append(", isUserInteractionRequired=").append(isUserInteractionRequired)
                 .append(", suggestorUid=").append(suggestorUid)

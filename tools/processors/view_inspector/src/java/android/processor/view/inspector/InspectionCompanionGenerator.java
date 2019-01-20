@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,12 +51,6 @@ public final class InspectionCompanionGenerator {
     private static final ClassName R_CLASS_NAME = ClassName.get("android", "R");
 
     /**
-     * The class name of {@link android.content.res.ResourceId}.
-     */
-    private static final ClassName RESOURCE_ID_CLASS_NAME = ClassName.get(
-            "android.content.res", "ResourceId");
-
-    /**
      * The class name of {@link android.view.inspector.InspectionCompanion}.
      */
     private static final ClassName INSPECTION_COMPANION = ClassName.get(
@@ -91,11 +85,11 @@ public final class InspectionCompanionGenerator {
     private static final String GENERATED_CLASS_SUFFIX = "$$InspectionCompanion";
 
     /**
-     * The null resource ID.
+     * The null resource ID, copied to avoid a host dependency on platform code.
      *
-     * @see android.content.res.ResourceId#ID_NULL
+     * @see android.content.res.Resources#ID_NULL
      */
-    private static final int NO_ID = 0;
+    private static final int ID_NULL = 0;
 
     /**
      * @param filer A filer to write the generated source to
@@ -289,8 +283,8 @@ public final class InspectionCompanionGenerator {
         if (property.isAttributeIdInferrableFromR()) {
             builder.add("$T.attr.$L", R_CLASS_NAME, property.getName());
         } else {
-            if (property.getAttributeId() == NO_ID) {
-                builder.add("$T.ID_NULL", RESOURCE_ID_CLASS_NAME);
+            if (property.getAttributeId() == ID_NULL) {
+                builder.add("$L", ID_NULL);
             } else {
                 builder.add("$L", String.format("0x%08x", property.getAttributeId()));
             }

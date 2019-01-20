@@ -44,7 +44,7 @@ public class GnssSingleSatCorrectionsTest extends TestCase {
         assertEquals(GnssStatus.CONSTELLATION_GALILEO, singleSatCorrection.getConstellationType());
         assertEquals(12, singleSatCorrection.getSatId());
         assertEquals(1575420000f, singleSatCorrection.getCarrierFrequencyHz());
-        assertEquals(true, singleSatCorrection.isSatelliteLineOfSight());
+        assertEquals(0.1f, singleSatCorrection.getProbSatIsLos());
         assertEquals(10.0f, singleSatCorrection.getExcessPathLengthMeters());
         assertEquals(5.0f, singleSatCorrection.getExcessPathLengthUncertaintyMeters());
         GnssReflectingPlane reflectingPlane = singleSatCorrection.getReflectingPlane();
@@ -58,7 +58,7 @@ public class GnssSingleSatCorrectionsTest extends TestCase {
                 .setConstellationType(singleSatCorr.getConstellationType())
                 .setSatId(singleSatCorr.getSatId())
                 .setCarrierFrequencyHz(singleSatCorr.getCarrierFrequencyHz())
-                .setSatIsLos(singleSatCorr.isSatelliteLineOfSight())
+                .setProbSatIsLos(singleSatCorr.getProbSatIsLos())
                 .setExcessPathLengthMeters(singleSatCorr.getExcessPathLengthMeters())
                 .setExcessPathLengthUncertaintyMeters(
                         singleSatCorr.getExcessPathLengthUncertaintyMeters())
@@ -72,7 +72,7 @@ public class GnssSingleSatCorrectionsTest extends TestCase {
                         .setConstellationType(GnssStatus.CONSTELLATION_GALILEO)
                         .setSatId(12)
                         .setCarrierFrequencyHz(1575420000f)
-                        .setSatIsLos(true)
+                        .setProbSatIsLos(0.1f)
                         .setExcessPathLengthMeters(10.0f)
                         .setExcessPathLengthUncertaintyMeters(5.0f)
                         .setReflectingPlane(GnssReflectingPlaneTest.generateTestReflectingPlane());

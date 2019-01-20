@@ -179,7 +179,10 @@ public class ActivityStartController {
                 .setActivityOptions(options.toBundle())
                 .execute();
         mLastHomeActivityStartRecord = tmpOutRecord[0];
-        if (mSupervisor.inResumeTopActivity) {
+        final ActivityDisplay display =
+                mService.mRootActivityContainer.getActivityDisplay(displayId);
+        final ActivityStack homeStack = display != null ? display.getHomeStack() : null;
+        if (homeStack != null && homeStack.mInResumeTopActivity) {
             // If we are in resume section already, home activity will be initialized, but not
             // resumed (to avoid recursive resume) and will stay that way until something pokes it
             // again. We need to schedule another resume.
@@ -297,6 +300,29 @@ public class ActivityStartController {
             String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
             boolean allowBackgroundActivityStart) {
+        return startActivitiesInPackage(uid, 0 /* realCallingPid */, -1 /* realCallingUid */,
+            callingPackage, intents, resolvedTypes, resultTo, options, userId, validateIncomingUser,
+            originatingPendingIntent, allowBackgroundActivityStart);
+    }
+
+    /**
+     * Start intents as a package.
+     *
+     * @param uid Make a call as if this UID did.
+     * @param realCallingPid PID of the real caller.
+     * @param realCallingUid UID of the real caller.
+     * @param callingPackage Make a call as if this package did.
+     * @param intents Intents to start.
+     * @param userId Start the intents on this user.
+     * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
+     * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
+     *        null if not originated by PendingIntent
+     */
+    final int startActivitiesInPackage(int uid, int realCallingPid, int realCallingUid,
+            String callingPackage, Intent[] intents, String[] resolvedTypes, IBinder resultTo,
+            SafeActivityOptions options, int userId, boolean validateIncomingUser,
+            PendingIntentRecord originatingPendingIntent,
+            boolean allowBackgroundActivityStart) {
 
         final String reason = "startActivityInPackage";
 
@@ -304,12 +330,14 @@ public class ActivityStartController {
                 Binder.getCallingUid(), reason);
 
         // TODO: Switch to user app stacks here.
-        return startActivities(null, uid, callingPackage, intents, resolvedTypes, resultTo, options,
-                userId, reason, originatingPendingIntent, allowBackgroundActivityStart);
+        return startActivities(null, uid, realCallingPid, realCallingUid, callingPackage, intents,
+                resolvedTypes, resultTo, options, userId, reason, originatingPendingIntent,
+                allowBackgroundActivityStart);
     }
 
-    int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options,
+    int startActivities(IApplicationThread caller, int callingUid, int incomingRealCallingPid,
+            int incomingRealCallingUid, String callingPackage, Intent[] intents,
+            String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options,
             int userId, String reason, PendingIntentRecord originatingPendingIntent,
             boolean allowBackgroundActivityStart) {
         if (intents == null) {
@@ -322,8 +350,12 @@ public class ActivityStartController {
             throw new IllegalArgumentException("intents are length different than resolvedTypes");
         }
 
-        final int realCallingPid = Binder.getCallingPid();
-        final int realCallingUid = Binder.getCallingUid();
+        final int realCallingPid = incomingRealCallingPid != 0
+                ? incomingRealCallingPid
+                : Binder.getCallingPid();
+        final int realCallingUid = incomingRealCallingUid != -1
+                ? incomingRealCallingUid
+                : Binder.getCallingUid();
 
         int callingPid;
         if (callingUid >= 0) {

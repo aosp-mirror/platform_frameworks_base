@@ -468,6 +468,9 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         /** @return true if this window desires key events. */
         boolean canReceiveKeys();
 
+        /** @return true if the window can show over keyguard. */
+        boolean canShowWhenLocked();
+
         /**
          * Writes {@link com.android.server.wm.IdentifierProto} to stream.
          */

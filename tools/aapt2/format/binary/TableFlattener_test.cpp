@@ -660,12 +660,10 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayablePolicies) {
   OverlayableItem overlayable_item_zero(overlayable);
   overlayable_item_zero.policies |= OverlayableItem::Policy::kProduct;
   overlayable_item_zero.policies |= OverlayableItem::Policy::kSystem;
-  overlayable_item_zero.policies |= OverlayableItem::Policy::kProductServices;
 
   std::string name_one = "com.app.test:integer/overlayable_one_item";
   OverlayableItem overlayable_item_one(overlayable);
   overlayable_item_one.policies |= OverlayableItem::Policy::kPublic;
-  overlayable_item_one.policies |= OverlayableItem::Policy::kProductServices;
 
   std::string name_two = "com.app.test:integer/overlayable_two_item";
   OverlayableItem overlayable_item_two(overlayable);
@@ -698,16 +696,14 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayablePolicies) {
   ASSERT_TRUE(search_result.value().entry->overlayable_item);
   OverlayableItem& overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_EQ(overlayable_item.policies, OverlayableItem::Policy::kSystem
-                                       | OverlayableItem::Policy::kProduct
-                                       | OverlayableItem::Policy::kProductServices);
+                                       | OverlayableItem::Policy::kProduct);
 
   search_result = output_table.FindResource(test::ParseNameOrDie(name_one));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
   ASSERT_TRUE(search_result.value().entry->overlayable_item);
   overlayable_item = search_result.value().entry->overlayable_item.value();
-  EXPECT_EQ(overlayable_item.policies, OverlayableItem::Policy::kPublic
-                                       | OverlayableItem::Policy::kProductServices);
+  EXPECT_EQ(overlayable_item.policies, OverlayableItem::Policy::kPublic);
 
   search_result = output_table.FindResource(test::ParseNameOrDie(name_two));
   ASSERT_TRUE(search_result);
@@ -735,13 +731,11 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
   OverlayableItem overlayable_item_zero(group);
   overlayable_item_zero.policies |= OverlayableItem::Policy::kProduct;
   overlayable_item_zero.policies |= OverlayableItem::Policy::kSystem;
-  overlayable_item_zero.policies |= OverlayableItem::Policy::kProductServices;
 
   auto group_one = std::make_shared<Overlayable>("OtherName", "overlay://customization");
   std::string name_one = "com.app.test:integer/overlayable_one";
   OverlayableItem overlayable_item_one(group_one);
   overlayable_item_one.policies |= OverlayableItem::Policy::kPublic;
-  overlayable_item_one.policies |= OverlayableItem::Policy::kProductServices;
 
   std::string name_two = "com.app.test:integer/overlayable_two";
   OverlayableItem overlayable_item_two(group);
@@ -773,8 +767,7 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
   EXPECT_EQ(result_overlayable.overlayable->name, "TestName");
   EXPECT_EQ(result_overlayable.overlayable->actor, "overlay://theme");
   EXPECT_EQ(result_overlayable.policies, OverlayableItem::Policy::kSystem
-                                         | OverlayableItem::Policy::kProduct
-                                         | OverlayableItem::Policy::kProductServices);
+                                         | OverlayableItem::Policy::kProduct);
   search_result = output_table.FindResource(test::ParseNameOrDie(name_one));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
@@ -782,8 +775,7 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
   result_overlayable = search_result.value().entry->overlayable_item.value();
   EXPECT_EQ(result_overlayable.overlayable->name, "OtherName");
   EXPECT_EQ(result_overlayable.overlayable->actor, "overlay://customization");
-  EXPECT_EQ(result_overlayable.policies, OverlayableItem::Policy::kPublic
-                                         | OverlayableItem::Policy::kProductServices);
+  EXPECT_EQ(result_overlayable.policies, OverlayableItem::Policy::kPublic);
   search_result = output_table.FindResource(test::ParseNameOrDie(name_two));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());

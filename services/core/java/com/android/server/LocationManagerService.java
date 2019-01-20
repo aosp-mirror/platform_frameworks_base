@@ -46,7 +46,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.hardware.location.ActivityRecognitionHardware;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
@@ -93,7 +92,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.location.AbstractLocationProvider;
-import com.android.server.location.ActivityRecognitionProxy;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceManager;
 import com.android.server.location.GeofenceProxy;
@@ -736,25 +734,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 null);
         if (provider == null) {
             Slog.d(TAG, "Unable to bind FLP Geofence proxy.");
-        }
-
-        // bind to hardware activity recognition
-        boolean activityRecognitionHardwareIsSupported = ActivityRecognitionHardware.isSupported();
-        ActivityRecognitionHardware activityRecognitionHardware = null;
-        if (activityRecognitionHardwareIsSupported) {
-            activityRecognitionHardware = ActivityRecognitionHardware.getInstance(mContext);
-        } else {
-            Slog.d(TAG, "Hardware Activity-Recognition not supported.");
-        }
-        ActivityRecognitionProxy proxy = ActivityRecognitionProxy.createAndBind(
-                mContext,
-                activityRecognitionHardwareIsSupported,
-                activityRecognitionHardware,
-                com.android.internal.R.bool.config_enableActivityRecognitionHardwareOverlay,
-                com.android.internal.R.string.config_activityRecognitionHardwarePackageName,
-                com.android.internal.R.array.config_locationProviderPackageNames);
-        if (proxy == null) {
-            Slog.d(TAG, "Unable to bind ActivityRecognitionProxy.");
         }
 
         String[] testProviderStrings = resources.getStringArray(

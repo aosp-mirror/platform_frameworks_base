@@ -141,6 +141,7 @@ public class NotificationPanelView extends PanelView implements
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private KeyguardStatusBarView mKeyguardStatusBar;
+    private ViewGroup mBigClockContainer;
     private QS mQs;
     private FrameLayout mQsFrame;
     @VisibleForTesting
@@ -348,8 +349,8 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
 
         KeyguardClockSwitch keyguardClockSwitch = findViewById(R.id.keyguard_clock_container);
-        ViewGroup bigClockContainer = findViewById(R.id.big_clock_container);
-        keyguardClockSwitch.setBigClockContainer(bigClockContainer);
+        mBigClockContainer = findViewById(R.id.big_clock_container);
+        keyguardClockSwitch.setBigClockContainer(mBigClockContainer);
 
         mNotificationContainerParent = findViewById(R.id.notification_container_parent);
         mNotificationStackScroller = findViewById(R.id.notification_stack_scroller);
@@ -578,18 +579,23 @@ public class NotificationPanelView extends PanelView implements
                     mKeyguardStatusView.getHeight(),
                     mInterpolatedDarkAmount,
                     mStatusBar.isKeyguardCurrentlySecure(),
-                    mPulsing,
                     mEmptyDragAmount);
             mClockPositionAlgorithm.run(mClockPositionResult);
             PropertyAnimator.setProperty(mKeyguardStatusView, AnimatableProperty.X,
                     mClockPositionResult.clockX, CLOCK_ANIMATION_PROPERTIES, animateClock);
             PropertyAnimator.setProperty(mKeyguardStatusView, AnimatableProperty.Y,
                     mClockPositionResult.clockY, CLOCK_ANIMATION_PROPERTIES, animateClock);
+            // Move big clock up while pulling up the bouncer
+            PropertyAnimator.setProperty(mBigClockContainer, AnimatableProperty.Y,
+                    MathUtils.lerp(-mBigClockContainer.getHeight(), 0,
+                          Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(getExpandedFraction())),
+                    CLOCK_ANIMATION_PROPERTIES, animateClock);
             updateClock();
             stackScrollerPadding = mClockPositionResult.stackScrollerPadding;
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
-        mNotificationStackScroller.setAntiBurnInOffsetX(mClockPositionResult.clockX);
+        int burnInXOffset = mPulsing ? 0 : mClockPositionResult.clockX;
+        mNotificationStackScroller.setAntiBurnInOffsetX(burnInXOffset);
 
         mStackScrollerMeasuringPass++;
         requestScrollerTopPaddingUpdate(animate);
@@ -2824,7 +2830,7 @@ public class NotificationPanelView extends PanelView implements
             mAnimateNextPositionUpdate = false;
         }
         mNotificationStackScroller.setPulsing(pulsing, animatePulse);
-        mKeyguardStatusView.setPulsing(pulsing, animatePulse);
+        mKeyguardStatusView.setPulsing(pulsing);
         mKeyguardBottomArea.setPulsing(pulsing, animatePulse);
     }
 

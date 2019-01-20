@@ -311,6 +311,7 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
+import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
@@ -445,6 +446,9 @@ public class PackageManagerService extends IPackageManager.Stub
             SystemProperties.getBoolean("fw.free_cache_v2", true);
 
     private static final long BACKUP_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(60);
+
+    private static final boolean PRECOMPILED_LAYOUT_ENABLED =
+            SystemProperties.getBoolean("view.precompiled_layout_enabled", false);
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
@@ -887,6 +891,8 @@ public class PackageManagerService extends IPackageManager.Stub
     // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
     // is used by other apps).
     private final DexManager mDexManager;
+
+    private final ViewCompiler mViewCompiler;
 
     private AtomicInteger mNextMoveId = new AtomicInteger();
     private final MoveCallbacks mMoveCallbacks;
@@ -1343,6 +1349,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mWellbeingPackage;
     final @Nullable String mDocumenterPackage;
     final @Nullable String mConfiguratorPackage;
+    final @Nullable String mAppPredictionServicePackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
@@ -1459,8 +1466,9 @@ public class PackageManagerService extends IPackageManager.Stub
                             Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, args.traceMethod,
                                     args.traceCookie);
                         }
-                    } else {
-                        Slog.e(TAG, "Bogus post-install token " + msg.arg1);
+                    } else if (DEBUG_INSTALL) {
+                        // No post-install when we run restore from installExistingPackageForUser
+                        Slog.i(TAG, "Nothing to do for post-install token " + msg.arg1);
                     }
 
                     Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
@@ -2260,6 +2268,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mArtManagerService = new ArtManagerService(mContext, this, installer, mInstallLock);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
+        mViewCompiler = new ViewCompiler(mInstallLock, mInstaller);
+
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(
                 FgThread.get().getLooper());
 
@@ -2868,6 +2878,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mDocumenterPackage = getDocumenterPackageName();
             mConfiguratorPackage =
                     mContext.getString(R.string.config_deviceConfiguratorPackageName);
+            mAppPredictionServicePackage = getAppPredictionServicePackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -3750,7 +3761,7 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Returns whether or not a full application can see an instant application.
      * <p>
-     * Currently, there are three cases in which this can occur:
+     * Currently, there are four cases in which this can occur:
      * <ol>
      * <li>The calling application is a "special" process. Special processes
      *     are those with a UID < {@link Process#FIRST_APPLICATION_UID}.</li>
@@ -3758,6 +3769,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *     {@link android.Manifest.permission#ACCESS_INSTANT_APPS}.</li>
      * <li>The calling application is the default launcher on the
      *     system partition.</li>
+     * <li>The calling application is the default app prediction service.</li>
      * </ol>
      */
     private boolean canViewInstantApps(int callingUid, int userId) {
@@ -3773,6 +3785,11 @@ public class PackageManagerService extends IPackageManager.Stub
             final ComponentName homeComponent = getDefaultHomeActivity(userId);
             if (homeComponent != null
                     && isCallerSameApp(homeComponent.getPackageName(), callingUid)) {
+                return true;
+            }
+            // TODO(b/122900055) Change/Remove this and replace with new permission role.
+            if (mAppPredictionServicePackage != null
+                    && isCallerSameApp(mAppPredictionServicePackage, callingUid)) {
                 return true;
             }
         }
@@ -5490,13 +5507,13 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUserId = UserHandle.getUserId(callingUid);
         final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
         // Map to base uids.
-        uid1 = UserHandle.getAppId(uid1);
-        uid2 = UserHandle.getAppId(uid2);
+        final int appId1 = UserHandle.getAppId(uid1);
+        final int appId2 = UserHandle.getAppId(uid2);
         // reader
         synchronized (mPackages) {
             Signature[] s1;
             Signature[] s2;
-            Object obj = mSettings.getSettingLPr(uid1);
+            Object obj = mSettings.getSettingLPr(appId1);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     if (isCallerInstantApp) {
@@ -5515,7 +5532,7 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
             }
-            obj = mSettings.getSettingLPr(uid2);
+            obj = mSettings.getSettingLPr(appId2);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     if (isCallerInstantApp) {
@@ -5570,11 +5587,11 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         // Map to base uids.
-        uid = UserHandle.getAppId(uid);
+        final int appId = UserHandle.getAppId(uid);
         // reader
         synchronized (mPackages) {
             final PackageParser.SigningDetails signingDetails;
-            final Object obj = mSettings.getSettingLPr(uid);
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
@@ -5690,10 +5707,10 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUid = Binder.getCallingUid();
         final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
         final int userId = UserHandle.getUserId(uid);
-        uid = UserHandle.getAppId(uid);
+        final int appId = UserHandle.getAppId(uid);
         // reader
         synchronized (mPackages) {
-            Object obj = mSettings.getSettingLPr(uid);
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 if (isCallerInstantApp) {
                     return null;
@@ -5728,8 +5745,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+        final int appId = UserHandle.getAppId(uid);
         synchronized (mPackages) {
-            Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 return sus.name + ":" + sus.userId;
@@ -5756,8 +5774,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final String[] names = new String[uids.length];
         synchronized (mPackages) {
             for (int i = uids.length - 1; i >= 0; i--) {
-                final int uid = uids[i];
-                Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
+                final int appId = UserHandle.getAppId(uids[i]);
+                final Object obj = mSettings.getSettingLPr(appId);
                 if (obj instanceof SharedUserSetting) {
                     final SharedUserSetting sus = (SharedUserSetting) obj;
                     names[i] = "shared:" + sus.name;
@@ -5805,8 +5823,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
+        final int appId = UserHandle.getAppId(uid);
         synchronized (mPackages) {
-            Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 return sus.pkgFlags;
@@ -5827,8 +5846,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
+        final int appId = UserHandle.getAppId(uid);
         synchronized (mPackages) {
-            Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 return sus.pkgPrivateFlags;
@@ -5848,10 +5868,10 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;
         }
-        uid = UserHandle.getAppId(uid);
+        final int appId = UserHandle.getAppId(uid);
         // reader
         synchronized (mPackages) {
-            Object obj = mSettings.getSettingLPr(uid);
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 final Iterator<PackageSetting> it = sus.packages.iterator();
@@ -9097,6 +9117,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkgCompilationReason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
             }
 
+            if (PRECOMPILED_LAYOUT_ENABLED) {
+                mArtManagerService.compileLayouts(pkg);
+            }
+
             // checkProfiles is false to avoid merging profiles during boot which
             // might interfere with background compilation (b/28612421).
             // Unfortunately this will also means that "pm.dexopt.boot=speed-profile" will
@@ -9239,6 +9263,21 @@ public class PackageManagerService extends IPackageManager.Stub
                 DexoptOptions.DEXOPT_BOOT_COMPLETE |
                 (force ? DexoptOptions.DEXOPT_FORCE : 0);
         return performDexOpt(new DexoptOptions(packageName, compilerFilter, flags));
+    }
+
+    /**
+    * Ask the package manager to compile layouts in the given package.
+    */
+    @Override
+    public boolean compileLayouts(String packageName) {
+        PackageParser.Package pkg;
+        synchronized (mPackages) {
+            pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                return false;
+            }
+        }
+        return mViewCompiler.compileLayouts(pkg);
     }
 
     /*package*/ boolean performDexOpt(DexoptOptions options) {
@@ -12731,6 +12770,11 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
             int installReason) {
+        if (DEBUG_INSTALL) {
+            Log.v(TAG, "installExistingPackageAsUser package=" + packageName + " userId=" + userId
+                    + " installFlags=" + installFlags + " installReason=" + installReason);
+        }
+
         final int callingUid = Binder.getCallingUid();
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED
@@ -12801,6 +12845,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 synchronized (mPackages) {
                     updateSequenceNumberLP(pkgSetting, new int[]{ userId });
                 }
+                // start async restore with no post-install since we finish install here
+                PackageInstalledInfo res =
+                        createPackageInstalledInfo(PackageManager.INSTALL_SUCCEEDED);
+                res.pkg = pkgSetting.pkg;
+                restoreAndPostInstall(userId, res, null);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -13740,8 +13789,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             for (InstallRequest request : installRequests) {
-                resolvePackageInstalledInfo(request.args,
-                        request.installResult);
+                restoreAndPostInstall(request.args.user.getIdentifier(), request.installResult,
+                        new PostInstallData(request.args, request.installResult));
             }
         });
     }
@@ -13756,7 +13805,14 @@ public class PackageManagerService extends IPackageManager.Stub
         return res;
     }
 
-    private void resolvePackageInstalledInfo(InstallArgs args, PackageInstalledInfo res) {
+    /** @param data Post-install is performed only if this is non-null. */
+    private void restoreAndPostInstall(
+            int userId, PackageInstalledInfo res, @Nullable PostInstallData data) {
+        if (DEBUG_INSTALL) {
+            Log.v(TAG, "restoreAndPostInstall userId=" + userId + " package="
+                    + res.pkg.packageName);
+        }
+
         // A restore should be performed at this point if (a) the install
         // succeeded, (b) the operation is not an update, and (c) the new
         // package has not opted out of backup participation.
@@ -13772,9 +13828,12 @@ public class PackageManagerService extends IPackageManager.Stub
         int token;
         if (mNextInstallToken < 0) mNextInstallToken = 1;
         token = mNextInstallToken++;
+        if (data != null) {
+            mRunningInstalls.put(token, data);
+        } else if (DEBUG_INSTALL) {
+            Log.v(TAG, "No post-install required for " + token);
+        }
 
-        PostInstallData data = new PostInstallData(args, res);
-        mRunningInstalls.put(token, data);
         if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
 
         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED && doRestore) {
@@ -13785,7 +13844,11 @@ public class PackageManagerService extends IPackageManager.Stub
             IBackupManager bm = IBackupManager.Stub.asInterface(
                     ServiceManager.getService(Context.BACKUP_SERVICE));
             if (bm != null) {
-                int userId = args.user.getIdentifier();
+                // For backwards compatibility as USER_ALL previously routed directly to USER_SYSTEM
+                // in the BackupManager. USER_ALL is used in compatibility tests.
+                if (userId == UserHandle.USER_ALL) {
+                    userId = UserHandle.USER_SYSTEM;
+                }
                 if (DEBUG_INSTALL) {
                     Log.v(TAG, "token " + token + " to BM for possible restore for user " + userId);
                 }
@@ -16112,6 +16175,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     && ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0);
 
             if (performDexopt) {
+                // Compile the layout resources.
+                if (PRECOMPILED_LAYOUT_ENABLED) {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "compileLayouts");
+                    mViewCompiler.compileLayouts(pkg);
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                }
+
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
                 // Do not run PackageDexOptimizer through the local performDexOpt
                 // method because `pkg` may not be in `mPackages` yet.
@@ -18952,7 +19022,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mPackages")
     private int getUidTargetSdkVersionLockedLPr(int uid) {
-        Object obj = mSettings.getSettingLPr(uid);
+        final int appId = UserHandle.getAppId(uid);
+        final Object obj = mSettings.getSettingLPr(appId);
         if (obj instanceof SharedUserSetting) {
             final SharedUserSetting sus = (SharedUserSetting) obj;
             int vers = Build.VERSION_CODES.CUR_DEVELOPMENT;
@@ -19143,7 +19214,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // writer
         synchronized (mPackages) {
             PackageParser.Package pkg = mPackages.get(packageName);
-            if (pkg == null || pkg.applicationInfo.uid != callingUid) {
+            if (pkg == null || !isCallerSameApp(packageName, callingUid)) {
                 if (mContext.checkCallingOrSelfPermission(
                         android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
                         != PackageManager.PERMISSION_GRANTED) {
@@ -19816,6 +19887,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         .setPackage(launcherComponent.getPackageName());
                 mContext.sendBroadcastAsUser(launcherIntent, UserHandle.of(launcherUid));
             }
+            // TODO(b/122900055) Change/Remove this and replace with new permission role.
+            if (mAppPredictionServicePackage != null) {
+                Intent predictorIntent = new Intent(PackageInstaller.ACTION_SESSION_COMMITTED)
+                        .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
+                        .putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
+                        .setPackage(mAppPredictionServicePackage);
+                mContext.sendBroadcastAsUser(predictorIntent, UserHandle.of(launcherUid));
+            }
         }
     }
 
@@ -19966,6 +20045,20 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public String getWellbeingPackageName() {
         return mContext.getString(R.string.config_defaultWellbeingPackage);
+    }
+
+    private String getAppPredictionServicePackageName() {
+        String flattenedAppPredictionServiceComponentName =
+                mContext.getString(R.string.config_defaultAppPredictionService);
+        if (flattenedAppPredictionServiceComponentName == null) {
+            return null;
+        }
+        ComponentName appPredictionServiceComponentName =
+                ComponentName.unflattenFromString(flattenedAppPredictionServiceComponentName);
+        if (appPredictionServiceComponentName == null) {
+            return null;
+        }
+        return appPredictionServiceComponentName.getPackageName();
     }
 
     @Override
@@ -23682,6 +23775,21 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void setEnableRollbackCode(int token, int enableRollbackCode) {
             PackageManagerService.this.setEnableRollbackCode(token, enableRollbackCode);
+        }
+
+        /**
+         * Ask the package manager to compile layouts in the given package.
+         */
+        @Override
+        public boolean compileLayouts(String packageName) {
+            PackageParser.Package pkg;
+            synchronized (mPackages) {
+                pkg = mPackages.get(packageName);
+                if (pkg == null) {
+                    return false;
+                }
+            }
+            return mArtManagerService.compileLayouts(pkg);
         }
     }
 

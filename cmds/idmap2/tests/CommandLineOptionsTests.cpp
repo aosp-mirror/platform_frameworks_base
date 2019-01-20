@@ -121,6 +121,56 @@ TEST(CommandLineOptionsTests, OptionalOption) {
   ASSERT_FALSE(success);
 }
 
+TEST(CommandLineOptionsTests, OptionalOptionList) {
+  std::vector<std::string> foo;
+  std::vector<std::string> bar;
+  CommandLineOptions opts = CommandLineOptions("test")
+                                .OptionalOption("--foo", "", &foo)
+                                .OptionalOption("--bar", "", &bar);
+  std::ostream fakeStdErr(nullptr);
+  bool success = opts.Parse({"--foo", "FOO", "--bar", "BAR"}, fakeStdErr);
+  ASSERT_TRUE(success);
+  ASSERT_EQ(foo.size(), 1U);
+  ASSERT_EQ(foo[0], "FOO");
+  ASSERT_EQ(bar.size(), 1U);
+  ASSERT_EQ(bar[0], "BAR");
+
+  foo.clear();
+  bar.clear();
+  success = opts.Parse({"--foo", "BAZ"}, fakeStdErr);
+  ASSERT_TRUE(success);
+  ASSERT_EQ(foo.size(), 1U);
+  ASSERT_EQ(foo[0], "BAZ");
+  ASSERT_EQ(bar.size(), 0U);
+
+  foo.clear();
+  bar.clear();
+  success =
+      opts.Parse({"--foo", "BAZ", "--foo", "BIZ", "--bar", "FIZ", "--bar", "FUZZ"}, fakeStdErr);
+  ASSERT_TRUE(success);
+  ASSERT_EQ(foo.size(), 2U);
+  ASSERT_EQ(foo[0], "BAZ");
+  ASSERT_EQ(foo[1], "BIZ");
+  ASSERT_EQ(bar.size(), 2U);
+  ASSERT_EQ(bar[0], "FIZ");
+  ASSERT_EQ(bar[1], "FUZZ");
+
+  foo.clear();
+  bar.clear();
+  success = opts.Parse({"--foo"}, fakeStdErr);
+  ASSERT_FALSE(success);
+
+  foo.clear();
+  bar.clear();
+  success = opts.Parse({"--foo", "--bar", "BAR"}, fakeStdErr);
+  ASSERT_FALSE(success);
+
+  foo.clear();
+  bar.clear();
+  success = opts.Parse({"--foo", "FOO", "--bar"}, fakeStdErr);
+  ASSERT_FALSE(success);
+}
+
 TEST(CommandLineOptionsTests, CornerCases) {
   std::string foo;
   std::string bar;
@@ -172,6 +222,7 @@ TEST(CommandLineOptionsTests, Usage) {
   bool arg5 = false;
   bool arg6 = false;
   std::vector<std::string> arg7;
+  std::vector<std::string> arg8;
   CommandLineOptions opts = CommandLineOptions("test")
                                 .MandatoryOption("--aa", "description-aa", &arg1)
                                 .OptionalFlag("--bb", "description-bb", &arg5)
@@ -179,12 +230,13 @@ TEST(CommandLineOptionsTests, Usage) {
                                 .OptionalOption("--dd", "description-dd", &arg3)
                                 .MandatoryOption("--ee", "description-ee", &arg4)
                                 .OptionalFlag("--ff", "description-ff", &arg6)
-                                .MandatoryOption("--gg", "description-gg", &arg7);
+                                .MandatoryOption("--gg", "description-gg", &arg7)
+                                .OptionalOption("--hh", "description-hh", &arg8);
   std::stringstream stream;
   opts.Usage(stream);
   const std::string s = stream.str();
   ASSERT_NE(s.find("usage: test --aa arg [--bb] [--cc arg] [--dd arg] --ee arg [--ff] --gg arg "
-                   "[--gg arg [..]]"),
+                   "[--gg arg [..]] [--hh arg [..]]"),
             std::string::npos);
   ASSERT_NE(s.find("--aa arg    description-aa"), std::string::npos);
   ASSERT_NE(s.find("--ff        description-ff"), std::string::npos);

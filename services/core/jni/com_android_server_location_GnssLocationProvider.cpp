@@ -81,7 +81,7 @@ static jmethodID method_correctionSatFlags;
 static jmethodID method_correctionSatConstType;
 static jmethodID method_correctionSatId;
 static jmethodID method_correctionSatCarrierFreq;
-static jmethodID method_correctionSatIsLos;
+static jmethodID method_correctionSatIsLosProb;
 static jmethodID method_correctionSatEpl;
 static jmethodID method_correctionSatEplUnc;
 static jmethodID method_correctionSatRefPlane;
@@ -2277,8 +2277,8 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
                 singleSatCorrClass, "getSatId", "()I");
             method_correctionSatCarrierFreq = env->GetMethodID(
                 singleSatCorrClass, "getCarrierFrequencyHz", "()F");
-            method_correctionSatIsLos = env->GetMethodID(
-                singleSatCorrClass,"getSatIsLos", "()Z");
+            method_correctionSatIsLosProb = env->GetMethodID(
+                singleSatCorrClass,"getProbSatIsLos", "()F");
             method_correctionSatEpl = env->GetMethodID(
                 singleSatCorrClass, "getExcessPathLengthMeters", "()F");
             method_correctionSatEplUnc = env->GetMethodID(
@@ -2296,8 +2296,8 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
             env->CallIntMethod(singleSatCorrectionObj, method_correctionSatId);
         jfloat carrierFreqHz = env->CallFloatMethod(
             singleSatCorrectionObj, method_correctionSatCarrierFreq);
-        jboolean satIsLos = env->CallBooleanMethod(singleSatCorrectionObj,
-            method_correctionSatIsLos);
+        jfloat probSatIsLos = env->CallFloatMethod(singleSatCorrectionObj,
+            method_correctionSatIsLosProb);
         jfloat eplMeters =
             env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEpl);
         jfloat eplUncMeters = env->CallFloatMethod(singleSatCorrectionObj,
@@ -2337,7 +2337,7 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
             .constellation = static_cast<GnssConstellationType>(constType),
             .svid = static_cast<uint16_t>(satId),
             .carrierFrequencyHz = carrierFreqHz,
-            .satIsLos = static_cast<bool>(satIsLos),
+            .probSatIsLos = probSatIsLos,
             .excessPathLengthMeters = eplMeters,
             .excessPathLengthUncertaintyMeters = eplUncMeters,
             .reflectingPlane = reflectingPlane,

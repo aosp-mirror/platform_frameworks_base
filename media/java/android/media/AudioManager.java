@@ -28,6 +28,7 @@ import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothCodecConfig;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
@@ -3802,6 +3803,12 @@ public class AudioManager {
     public static final int DEVICE_IN_HDMI =
                                     AudioSystem.DEVICE_IN_HDMI;
     /** @hide
+     * The audio input device code for HDMI ARC
+     */
+    public static final int DEVICE_IN_HDMI_ARC =
+                                    AudioSystem.DEVICE_IN_HDMI_ARC;
+
+    /** @hide
      * The audio input device code for telephony voice RX path
      */
     public static final int DEVICE_IN_TELEPHONY_RX =
@@ -4045,6 +4052,36 @@ public class AudioManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+     /**
+     * Indicate A2DP source or sink active device change and eventually suppress
+     * the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent.
+     * @param device Bluetooth device connected/disconnected
+     * @param state  new connection state (BluetoothProfile.STATE_xxx)
+     * @param profile profile for the A2DP device
+     * (either {@link android.bluetooth.BluetoothProfile.A2DP} or
+     * {@link android.bluetooth.BluetoothProfile.A2DP_SINK})
+     * @param a2dpVolume New volume for the connecting device. Does nothing if
+     * disconnecting. Pass value -1 in case you want this field to be ignored
+     * @param suppressNoisyIntent if true the
+     * {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent will not be sent.
+     * @return a delay in ms that the caller should wait before broadcasting
+     * BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED intent.
+     * {@hide}
+     */
+    public int handleBluetoothA2dpActiveDeviceChange(
+                BluetoothDevice device, int state, int profile,
+                boolean suppressNoisyIntent, int a2dpVolume) {
+        final IAudioService service = getService();
+        int delay = 0;
+        try {
+            delay = service.handleBluetoothA2dpActiveDeviceChange(device,
+                state, profile, suppressNoisyIntent, a2dpVolume);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return delay;
     }
 
     /** {@hide} */
@@ -4908,6 +4945,34 @@ public class AudioManager {
         filterTypes.add(AudioDeviceInfo.TYPE_BUILTIN_MIC);
         addMicrophonesFromAudioDeviceInfo(microphones, filterTypes);
         return microphones;
+    }
+
+    /**
+     * Returns a list of audio formats that corresponds to encoding formats
+     * supported on offload path for A2DP playback.
+     *
+     * @return a list of {@link BluetoothCodecConfig} objects containing encoding formats
+     * supported for offload A2DP playback
+     * @hide
+     */
+    public List<BluetoothCodecConfig> getHwOffloadEncodingFormatsSupportedForA2DP() {
+        ArrayList<Integer> formatsList = new ArrayList<Integer>();
+        ArrayList<BluetoothCodecConfig> codecConfigList = new ArrayList<BluetoothCodecConfig>();
+
+        int status = AudioSystem.getHwOffloadEncodingFormatsSupportedForA2DP(formatsList);
+        if (status != AudioManager.SUCCESS) {
+            Log.e(TAG, "getHwOffloadEncodingFormatsSupportedForA2DP failed:" + status);
+            return codecConfigList;
+        }
+
+        for (Integer format : formatsList) {
+            int btSourceCodec = AudioSystem.audioFormatToBluetoothSourceCodec(format);
+            if (btSourceCodec
+                    != BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
+                codecConfigList.add(new BluetoothCodecConfig(btSourceCodec));
+            }
+        }
+        return codecConfigList;
     }
 
     // Since we need to calculate the changes since THE LAST NOTIFICATION, and not since the

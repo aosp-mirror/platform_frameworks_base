@@ -43,6 +43,8 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
+        <include layout="@layout/dock_info_overlay" />
+
         <FrameLayout
             android:id="@+id/qs_frame"
             android:layout="@layout/qs_panel"

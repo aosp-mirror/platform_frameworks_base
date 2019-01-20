@@ -248,6 +248,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setRank(123)
+                .setPerson(makePerson("person", "personKey", "personUri"))
+                .setLongLived()
                 .setExtras(pb)
                 .build();
         si.addFlags(ShortcutInfo.FLAG_PINNED);
@@ -267,9 +269,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getRank());
+        assertEquals("person", si.getPersons()[0].getName());
+        assertEquals("personKey", si.getPersons()[0].getKey());
+        assertEquals("personUri", si.getPersons()[0].getUri());
         assertEquals(1, si.getExtras().getInt("k"));
 
-        assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
+        assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_LONG_LIVED, si.getFlags());
         assertEquals("abc", si.getBitmapPath());
         assertEquals(456, si.getIconResourceId());
 
@@ -345,6 +350,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setRank(123)
+                .setPerson(makePerson("person", "personKey", "personUri"))
+                .setLongLived()
                 .setExtras(pb)
                 .build();
         sorig.addFlags(ShortcutInfo.FLAG_PINNED);
@@ -368,9 +375,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getRank());
+        assertEquals("person", si.getPersons()[0].getName());
+        assertEquals("personKey", si.getPersons()[0].getKey());
+        assertEquals("personUri", si.getPersons()[0].getUri());
         assertEquals(1, si.getExtras().getInt("k"));
 
-        assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
+        assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_LONG_LIVED, si.getFlags());
         assertEquals("abc", si.getBitmapPath());
         assertEquals(456, si.getIconResourceId());
         assertEquals("string/r456", si.getIconResName());
@@ -388,9 +398,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getRank());
+        assertEquals("person", si.getPersons()[0].getName());
+        assertEquals("personKey", si.getPersons()[0].getKey());
+        assertEquals("personUri", si.getPersons()[0].getUri());
         assertEquals(1, si.getExtras().getInt("k"));
 
-        assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
+        assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_LONG_LIVED, si.getFlags());
         assertEquals(null, si.getBitmapPath());
 
         assertEquals(456, si.getIconResourceId());
@@ -408,9 +421,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals(null, si.getIntent());
         assertEquals(123, si.getRank());
+        assertEquals("person", si.getPersons()[0].getName());
+        assertEquals("personKey", si.getPersons()[0].getKey());
+        assertEquals("personUri", si.getPersons()[0].getUri());
         assertEquals(1, si.getExtras().getInt("k"));
 
-        assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
+        assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_LONG_LIVED, si.getFlags());
         assertEquals(null, si.getBitmapPath());
 
         assertEquals(456, si.getIconResourceId());
@@ -428,9 +444,11 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getCategories());
         assertEquals(null, si.getIntent());
         assertEquals(0, si.getRank());
+        assertEquals(null, si.getPersons());
         assertEquals(null, si.getExtras());
 
-        assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_KEY_FIELDS_ONLY, si.getFlags());
+        assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_KEY_FIELDS_ONLY
+                | ShortcutInfo.FLAG_LONG_LIVED, si.getFlags());
         assertEquals(null, si.getBitmapPath());
 
         assertEquals(456, si.getIconResourceId());
@@ -689,6 +707,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setCategories(set("x")).build());
         assertEquals("text", si.getText());
         assertEquals(set("x"), si.getCategories());
+
+        si = sorig.clone(/* flags=*/ 0);
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setPerson(makePerson("person", "", "")).build());
+        assertEquals("text", si.getText());
+        assertEquals("person", si.getPersons()[0].getName());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")

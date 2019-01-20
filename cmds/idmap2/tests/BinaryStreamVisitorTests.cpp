@@ -78,7 +78,8 @@ TEST(BinaryStreamVisitorTests, CreateIdmapFromApkAssetsInteropWithLoadedIdmap) {
 
   std::stringstream error;
   std::unique_ptr<const Idmap> idmap =
-      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk, error);
+      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
+                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true, error);
   ASSERT_THAT(idmap, NotNull());
 
   std::stringstream stream;
@@ -101,25 +102,55 @@ TEST(BinaryStreamVisitorTests, CreateIdmapFromApkAssetsInteropWithLoadedIdmap) {
   header = loaded_idmap->GetEntryMapForType(0x02);
   ASSERT_THAT(header, NotNull());
 
-  success = LoadedIdmap::Lookup(header, 0x0002, &entry);
+  success = LoadedIdmap::Lookup(header, 0x0000, &entry);  // string/a
   ASSERT_FALSE(success);
 
-  success = LoadedIdmap::Lookup(header, 0x0003, &entry);
+  success = LoadedIdmap::Lookup(header, 0x0001, &entry);  // string/b
+  ASSERT_FALSE(success);
+
+  success = LoadedIdmap::Lookup(header, 0x0002, &entry);  // string/c
+  ASSERT_FALSE(success);
+
+  success = LoadedIdmap::Lookup(header, 0x0003, &entry);  // string/other
+  ASSERT_FALSE(success);
+
+  success = LoadedIdmap::Lookup(header, 0x0004, &entry);  // string/not_overlayable
+  ASSERT_FALSE(success);
+
+  success = LoadedIdmap::Lookup(header, 0x0005, &entry);  // string/policy_product
+  ASSERT_FALSE(success);
+
+  success = LoadedIdmap::Lookup(header, 0x0006, &entry);  // string/policy_public
+  ASSERT_FALSE(success);
+
+  success = LoadedIdmap::Lookup(header, 0x0007, &entry);  // string/policy_system
+  ASSERT_FALSE(success);
+
+  success = LoadedIdmap::Lookup(header, 0x0008, &entry);  // string/policy_system_vendor
+  ASSERT_FALSE(success);
+
+  success = LoadedIdmap::Lookup(header, 0x0009, &entry);  // string/str1
   ASSERT_TRUE(success);
   ASSERT_EQ(entry, 0x0000);
 
-  success = LoadedIdmap::Lookup(header, 0x0004, &entry);
+  success = LoadedIdmap::Lookup(header, 0x000a, &entry);  // string/str2
   ASSERT_FALSE(success);
 
-  success = LoadedIdmap::Lookup(header, 0x0005, &entry);
+  success = LoadedIdmap::Lookup(header, 0x000b, &entry);  // string/str3
   ASSERT_TRUE(success);
   ASSERT_EQ(entry, 0x0001);
 
-  success = LoadedIdmap::Lookup(header, 0x0006, &entry);
+  success = LoadedIdmap::Lookup(header, 0x000c, &entry);  // string/str4
   ASSERT_TRUE(success);
   ASSERT_EQ(entry, 0x0002);
 
-  success = LoadedIdmap::Lookup(header, 0x0007, &entry);
+  success = LoadedIdmap::Lookup(header, 0x000d, &entry);  // string/x
+  ASSERT_FALSE(success);
+
+  success = LoadedIdmap::Lookup(header, 0x000e, &entry);  // string/y
+  ASSERT_FALSE(success);
+
+  success = LoadedIdmap::Lookup(header, 0x000f, &entry);  // string/z
   ASSERT_FALSE(success);
 }
 

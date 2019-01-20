@@ -18,6 +18,7 @@ package android {
     field public static final java.lang.String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
     field public static final java.lang.String AMBIENT_WALLPAPER = "android.permission.AMBIENT_WALLPAPER";
     field public static final java.lang.String BACKUP = "android.permission.BACKUP";
+    field public static final java.lang.String BIND_ATTENTION_SERVICE = "android.permission.BIND_ATTENTION_SERVICE";
     field public static final java.lang.String BIND_AUGMENTED_AUTOFILL_SERVICE = "android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE";
     field public static final deprecated java.lang.String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
     field public static final java.lang.String BIND_CONTENT_CAPTURE_SERVICE = "android.permission.BIND_CONTENT_CAPTURE_SERVICE";
@@ -197,6 +198,7 @@ package android {
   }
 
   public static final class R.array {
+    field public static final int config_defaultRoleHolders = 17235974; // 0x1070006
     field public static final int config_keySystemUuidMapping = 17235973; // 0x1070005
   }
 
@@ -1334,7 +1336,7 @@ package android.content.pm {
   }
 
   public class CrossProfileApps {
-    method public void startAnyActivity(android.content.ComponentName, android.os.UserHandle);
+    method public void startActivity(android.content.ComponentName, android.os.UserHandle);
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {
@@ -1570,6 +1572,22 @@ package android.content.pm {
     field public int requestRes;
   }
 
+  public class ResolveInfo implements android.os.Parcelable {
+    field public boolean handleAllWebDataURI;
+  }
+
+  public class ShortcutManager {
+    method public java.util.List<android.content.pm.ShortcutManager.ShareShortcutInfo> getShareTargets(android.content.IntentFilter);
+  }
+
+  public static final class ShortcutManager.ShareShortcutInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.content.pm.ShortcutInfo getShortcutInfo();
+    method public android.content.ComponentName getTargetComponent();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.content.pm.ShortcutManager.ShareShortcutInfo> CREATOR;
+  }
+
   public final class SuspendDialogInfo implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
@@ -1757,6 +1775,7 @@ package android.hardware.display {
   }
 
   public final class ColorDisplayManager {
+    method public boolean setAppSaturationLevel(java.lang.String, int);
     method public boolean setSaturationLevel(int);
   }
 
@@ -2886,6 +2905,7 @@ package android.location {
     method public int getConstellationType();
     method public float getExcessPathLengthMeters();
     method public float getExcessPathLengthUncertaintyMeters();
+    method public float getProbSatIsLos();
     method public android.location.GnssReflectingPlane getReflectingPlane();
     method public int getSatId();
     method public int getSingleSatCorrectionFlags();
@@ -2893,13 +2913,12 @@ package android.location {
     method public boolean hasExcessPathLengthUncertainty();
     method public boolean hasReflectingPlane();
     method public boolean hasSatelliteLineOfSight();
-    method public boolean isSatelliteLineOfSight();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssSingleSatCorrection> CREATOR;
     field public static final int HAS_EXCESS_PATH_LENGTH_MASK = 2; // 0x2
     field public static final int HAS_EXCESS_PATH_LENGTH_UNC_MASK = 4; // 0x4
+    field public static final int HAS_PROB_SAT_IS_LOS_MASK = 1; // 0x1
     field public static final int HAS_REFLECTING_PLANE_MASK = 8; // 0x8
-    field public static final int HAS_SAT_IS_LOS_MASK = 1; // 0x1
   }
 
   public static class GnssSingleSatCorrection.Builder {
@@ -2909,9 +2928,9 @@ package android.location {
     method public android.location.GnssSingleSatCorrection.Builder setConstellationType(int);
     method public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthMeters(float);
     method public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthUncertaintyMeters(float);
+    method public android.location.GnssSingleSatCorrection.Builder setProbSatIsLos(float);
     method public android.location.GnssSingleSatCorrection.Builder setReflectingPlane(android.location.GnssReflectingPlane);
     method public android.location.GnssSingleSatCorrection.Builder setSatId(int);
-    method public android.location.GnssSingleSatCorrection.Builder setSatIsLos(boolean);
     method public android.location.GnssSingleSatCorrection.Builder setSingleSatCorrectionFlags(int);
   }
 
@@ -3918,10 +3937,10 @@ package android.net.wifi {
     method public abstract void onEnrolleeSuccess(int);
     method public abstract void onFailure(int);
     method public abstract void onProgress(int);
-    field public static final int EASY_CONNECT_EVENT_FAILURE = -7; // 0xfffffff9
     field public static final int EASY_CONNECT_EVENT_FAILURE_AUTHENTICATION = -2; // 0xfffffffe
     field public static final int EASY_CONNECT_EVENT_FAILURE_BUSY = -5; // 0xfffffffb
     field public static final int EASY_CONNECT_EVENT_FAILURE_CONFIGURATION = -4; // 0xfffffffc
+    field public static final int EASY_CONNECT_EVENT_FAILURE_GENERIC = -7; // 0xfffffff9
     field public static final int EASY_CONNECT_EVENT_FAILURE_INVALID_NETWORK = -9; // 0xfffffff7
     field public static final int EASY_CONNECT_EVENT_FAILURE_INVALID_URI = -1; // 0xffffffff
     field public static final int EASY_CONNECT_EVENT_FAILURE_NOT_COMPATIBLE = -3; // 0xfffffffd
@@ -4143,12 +4162,19 @@ package android.net.wifi {
     field public static final int WPA2_PSK = 4; // 0x4
   }
 
+  public class WifiInfo implements android.os.Parcelable {
+    method public boolean isOsuAp();
+  }
+
   public class WifiManager {
     method public void connect(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
     method public void connect(int, android.net.wifi.WifiManager.ActionListener);
     method public void disable(int, android.net.wifi.WifiManager.ActionListener);
     method public void disableEphemeralNetwork(java.lang.String);
     method public void forget(int, android.net.wifi.WifiManager.ActionListener);
+    method public java.util.List<android.util.Pair<android.net.wifi.WifiConfiguration, java.util.Map<java.lang.Integer, java.util.List<android.net.wifi.ScanResult>>>> getAllMatchingWifiConfigs(java.util.List<android.net.wifi.ScanResult>);
+    method public java.util.Map<android.net.wifi.hotspot2.OsuProvider, java.util.List<android.net.wifi.ScanResult>> getMatchingOsuProviders(java.util.List<android.net.wifi.ScanResult>);
+    method public java.util.Map<android.net.wifi.hotspot2.OsuProvider, android.net.wifi.hotspot2.PasspointConfiguration> getMatchingPasspointConfigsForOsuProviders(java.util.Set<android.net.wifi.hotspot2.OsuProvider>);
     method public java.util.List<android.net.wifi.WifiConfiguration> getPrivilegedConfiguredNetworks();
     method public android.net.wifi.WifiConfiguration getWifiApConfiguration();
     method public int getWifiApState();
@@ -4160,9 +4186,10 @@ package android.net.wifi {
     method public void save(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
     method public void setDeviceMobilityState(int);
     method public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
-    method public void startEasyConnectAsConfiguratorInitiator(java.lang.String, int, int, android.os.Handler, android.net.wifi.EasyConnectStatusCallback);
-    method public void startEasyConnectAsEnrolleeInitiator(java.lang.String, android.os.Handler, android.net.wifi.EasyConnectStatusCallback);
+    method public void startEasyConnectAsConfiguratorInitiator(java.lang.String, int, int, java.util.concurrent.Executor, android.net.wifi.EasyConnectStatusCallback);
+    method public void startEasyConnectAsEnrolleeInitiator(java.lang.String, java.util.concurrent.Executor, android.net.wifi.EasyConnectStatusCallback);
     method public boolean startScan(android.os.WorkSource);
+    method public void startSubscriptionProvisioning(android.net.wifi.hotspot2.OsuProvider, android.net.wifi.hotspot2.ProvisioningCallback, android.os.Handler);
     method public void stopEasyConnectSession();
     method public void unregisterNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback);
     field public static final int CHANGE_REASON_ADDED = 0; // 0x0
@@ -4182,6 +4209,8 @@ package android.net.wifi {
     field public static final java.lang.String EXTRA_WIFI_CONFIGURATION = "wifiConfiguration";
     field public static final java.lang.String EXTRA_WIFI_CREDENTIAL_EVENT_TYPE = "et";
     field public static final java.lang.String EXTRA_WIFI_CREDENTIAL_SSID = "ssid";
+    field public static final int PASSPOINT_HOME_NETWORK = 0; // 0x0
+    field public static final int PASSPOINT_ROAMING_NETWORK = 1; // 0x1
     field public static final java.lang.String WIFI_AP_STATE_CHANGED_ACTION = "android.net.wifi.WIFI_AP_STATE_CHANGED";
     field public static final int WIFI_AP_STATE_DISABLED = 11; // 0xb
     field public static final int WIFI_AP_STATE_DISABLING = 10; // 0xa
@@ -4354,6 +4383,59 @@ package android.net.wifi.aware {
 
   public class WifiAwareSession implements java.lang.AutoCloseable {
     method public android.net.NetworkSpecifier createNetworkSpecifierPmk(int, byte[], byte[]);
+  }
+
+}
+
+package android.net.wifi.hotspot2 {
+
+  public final class OsuProvider implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getFriendlyName();
+    method public android.net.Uri getServerUri();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.net.wifi.hotspot2.OsuProvider> CREATOR;
+  }
+
+  public abstract class ProvisioningCallback {
+    ctor public ProvisioningCallback();
+    method public abstract void onProvisioningComplete();
+    method public abstract void onProvisioningFailure(int);
+    method public abstract void onProvisioningStatus(int);
+    field public static final int OSU_FAILURE_ADD_PASSPOINT_CONFIGURATION = 22; // 0x16
+    field public static final int OSU_FAILURE_AP_CONNECTION = 1; // 0x1
+    field public static final int OSU_FAILURE_INVALID_SERVER_URL = 8; // 0x8
+    field public static final int OSU_FAILURE_NO_AAA_SERVER_TRUST_ROOT_NODE = 17; // 0x11
+    field public static final int OSU_FAILURE_NO_AAA_TRUST_ROOT_CERTIFICATE = 21; // 0x15
+    field public static final int OSU_FAILURE_NO_OSU_ACTIVITY_FOUND = 14; // 0xe
+    field public static final int OSU_FAILURE_NO_POLICY_SERVER_TRUST_ROOT_NODE = 19; // 0x13
+    field public static final int OSU_FAILURE_NO_PPS_MO = 16; // 0x10
+    field public static final int OSU_FAILURE_NO_REMEDIATION_SERVER_TRUST_ROOT_NODE = 18; // 0x12
+    field public static final int OSU_FAILURE_OSU_PROVIDER_NOT_FOUND = 23; // 0x17
+    field public static final int OSU_FAILURE_PROVISIONING_ABORTED = 6; // 0x6
+    field public static final int OSU_FAILURE_PROVISIONING_NOT_AVAILABLE = 7; // 0x7
+    field public static final int OSU_FAILURE_RETRIEVE_TRUST_ROOT_CERTIFICATES = 20; // 0x14
+    field public static final int OSU_FAILURE_SERVER_CONNECTION = 3; // 0x3
+    field public static final int OSU_FAILURE_SERVER_URL_INVALID = 2; // 0x2
+    field public static final int OSU_FAILURE_SERVER_VALIDATION = 4; // 0x4
+    field public static final int OSU_FAILURE_SERVICE_PROVIDER_VERIFICATION = 5; // 0x5
+    field public static final int OSU_FAILURE_SOAP_MESSAGE_EXCHANGE = 11; // 0xb
+    field public static final int OSU_FAILURE_START_REDIRECT_LISTENER = 12; // 0xc
+    field public static final int OSU_FAILURE_TIMED_OUT_REDIRECT_LISTENER = 13; // 0xd
+    field public static final int OSU_FAILURE_UNEXPECTED_COMMAND_TYPE = 9; // 0x9
+    field public static final int OSU_FAILURE_UNEXPECTED_SOAP_MESSAGE_STATUS = 15; // 0xf
+    field public static final int OSU_FAILURE_UNEXPECTED_SOAP_MESSAGE_TYPE = 10; // 0xa
+    field public static final int OSU_STATUS_AP_CONNECTED = 2; // 0x2
+    field public static final int OSU_STATUS_AP_CONNECTING = 1; // 0x1
+    field public static final int OSU_STATUS_INIT_SOAP_EXCHANGE = 6; // 0x6
+    field public static final int OSU_STATUS_REDIRECT_RESPONSE_RECEIVED = 8; // 0x8
+    field public static final int OSU_STATUS_RETRIEVING_TRUST_ROOT_CERTS = 11; // 0xb
+    field public static final int OSU_STATUS_SECOND_SOAP_EXCHANGE = 9; // 0x9
+    field public static final int OSU_STATUS_SERVER_CONNECTED = 5; // 0x5
+    field public static final int OSU_STATUS_SERVER_CONNECTING = 3; // 0x3
+    field public static final int OSU_STATUS_SERVER_VALIDATED = 4; // 0x4
+    field public static final int OSU_STATUS_THIRD_SOAP_EXCHANGE = 10; // 0xa
+    field public static final int OSU_STATUS_WAITING_FOR_REDIRECT_RESPONSE = 7; // 0x7
   }
 
 }
@@ -5028,6 +5110,9 @@ package android.provider {
     method public static void removeOnPropertyChangedListener(android.provider.DeviceConfig.OnPropertyChangedListener);
     method public static void resetToDefaults(int, java.lang.String);
     method public static boolean setProperty(java.lang.String, java.lang.String, java.lang.String, boolean);
+    field public static final java.lang.String NAMESPACE_AUTOFILL = "autofill";
+    field public static final java.lang.String NAMESPACE_CONTENT_CAPTURE = "content_capture";
+    field public static final java.lang.String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final java.lang.String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
   }
 
@@ -5343,7 +5428,8 @@ package android.security.keystore.recovery {
 
   public class RecoveryController {
     method public android.security.keystore.recovery.RecoverySession createRecoverySession();
-    method public java.security.Key generateKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
+    method public deprecated java.security.Key generateKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
+    method public java.security.Key generateKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
     method public java.util.List<java.lang.String> getAliases() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public static android.security.keystore.recovery.RecoveryController getInstance(android.content.Context);
     method public java.security.Key getKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException, java.security.UnrecoverableKeyException;
@@ -5351,7 +5437,8 @@ package android.security.keystore.recovery {
     method public int[] getRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public int getRecoveryStatus(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public java.util.Map<java.lang.String, java.security.cert.X509Certificate> getRootCertificates();
-    method public java.security.Key importKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
+    method public deprecated java.security.Key importKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
+    method public java.security.Key importKey(java.lang.String, byte[], byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
     method public void initRecoveryService(java.lang.String, byte[], byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
     method public static boolean isRecoverableKeyStoreEnabled(android.content.Context);
     method public void removeKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
@@ -5378,6 +5465,7 @@ package android.security.keystore.recovery {
     method public int describeContents();
     method public java.lang.String getAlias();
     method public byte[] getEncryptedKeyMaterial();
+    method public byte[] getMetadata();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.WrappedApplicationKey> CREATOR;
   }
@@ -5387,6 +5475,7 @@ package android.security.keystore.recovery {
     method public android.security.keystore.recovery.WrappedApplicationKey build();
     method public android.security.keystore.recovery.WrappedApplicationKey.Builder setAlias(java.lang.String);
     method public android.security.keystore.recovery.WrappedApplicationKey.Builder setEncryptedKeyMaterial(byte[]);
+    method public android.security.keystore.recovery.WrappedApplicationKey.Builder setMetadata(byte[]);
   }
 
 }
@@ -5405,6 +5494,28 @@ package android.service.appprediction {
     method public void onStartPredictionUpdates();
     method public void onStopPredictionUpdates();
     method public final void updatePredictions(android.app.prediction.AppPredictionSessionId, java.util.List<android.app.prediction.AppTarget>);
+  }
+
+}
+
+package android.service.attention {
+
+  public abstract class AttentionService extends android.app.Service {
+    ctor public AttentionService();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onCancelAttentionCheck(int);
+    method public abstract void onCheckAttention(int, android.service.attention.AttentionService.AttentionCallback);
+    field public static final int ATTENTION_FAILURE_PREEMPTED = 2; // 0x2
+    field public static final int ATTENTION_FAILURE_TIMED_OUT = 3; // 0x3
+    field public static final int ATTENTION_FAILURE_UNKNOWN = 4; // 0x4
+    field public static final int ATTENTION_SUCCESS_ABSENT = 0; // 0x0
+    field public static final int ATTENTION_SUCCESS_PRESENT = 1; // 0x1
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.attention.AttentionService";
+  }
+
+  public static final class AttentionService.AttentionCallback {
+    method public void onFailure(int, int);
+    method public void onSuccess(int, int, long);
   }
 
 }
@@ -5639,6 +5750,7 @@ package android.service.euicc {
     field public static final java.lang.String EUICC_SERVICE_INTERFACE = "android.service.euicc.EuiccService";
     field public static final java.lang.String EXTRA_RESOLUTION_ALLOW_POLICY_RULES = "android.service.euicc.extra.RESOLUTION_ALLOW_POLICY_RULES";
     field public static final java.lang.String EXTRA_RESOLUTION_CALLING_PACKAGE = "android.service.euicc.extra.RESOLUTION_CALLING_PACKAGE";
+    field public static final java.lang.String EXTRA_RESOLUTION_CARD_ID = "android.service.euicc.extra.RESOLUTION_CARD_ID";
     field public static final java.lang.String EXTRA_RESOLUTION_CONFIRMATION_CODE = "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE";
     field public static final java.lang.String EXTRA_RESOLUTION_CONFIRMATION_CODE_RETRIED = "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE_RETRIED";
     field public static final java.lang.String EXTRA_RESOLUTION_CONSENT = "android.service.euicc.extra.RESOLUTION_CONSENT";
@@ -6270,6 +6382,30 @@ package android.telephony {
     field public static final java.lang.String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
   }
 
+  public final class CarrierRestrictionRules implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers();
+    method public int getDefaultCarrierRestriction();
+    method public java.util.List<android.service.carrier.CarrierIdentifier> getExcludedCarriers();
+    method public int getMultiSimPolicy();
+    method public boolean isAllCarriersAllowed();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CARRIER_RESTRICTION_DEFAULT_ALLOWED = 1; // 0x1
+    field public static final int CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED = 0; // 0x0
+    field public static final android.os.Parcelable.Creator<android.telephony.CarrierRestrictionRules> CREATOR;
+    field public static final int MULTISIM_POLICY_NONE = 0; // 0x0
+    field public static final int MULTISIM_POLICY_ONE_VALID_SIM_MUST_BE_PRESENT = 1; // 0x1
+  }
+
+  public static class CarrierRestrictionRules.Builder {
+    method public android.telephony.CarrierRestrictionRules build();
+    method public android.telephony.CarrierRestrictionRules.Builder setAllCarriersAllowed();
+    method public android.telephony.CarrierRestrictionRules.Builder setAllowedCarriers(java.util.List<android.service.carrier.CarrierIdentifier>);
+    method public android.telephony.CarrierRestrictionRules.Builder setDefaultCarrierRestriction(int);
+    method public android.telephony.CarrierRestrictionRules.Builder setExcludedCarriers(java.util.List<android.service.carrier.CarrierIdentifier>);
+    method public android.telephony.CarrierRestrictionRules.Builder setMultiSimPolicy(int);
+  }
+
   public final class DataFailCause {
     field public static final int ACTIVATION_REJECT_GGSN = 30; // 0x1e
     field public static final int ACTIVATION_REJECT_UNSPECIFIED = 31; // 0x1f
@@ -6763,12 +6899,14 @@ package android.telephony {
     method public void dial(java.lang.String);
     method public boolean disableDataConnectivity();
     method public boolean enableDataConnectivity();
+    method public boolean enableModemForSlot(int, boolean);
     method public void enableVideoCalling(boolean);
     method public java.lang.String getAidForAppType(int);
-    method public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
+    method public deprecated java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
     method public int getCardIdForDefaultEuicc();
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntentAndPhone(android.content.Intent, int);
+    method public android.telephony.CarrierRestrictionRules getCarrierRestrictionRules();
     method public java.lang.String getCdmaMdn();
     method public java.lang.String getCdmaMdn(int);
     method public java.lang.String getCdmaMin();
@@ -6807,8 +6945,9 @@ package android.telephony {
     method public void requestCellInfoUpdate(android.os.WorkSource, java.util.concurrent.Executor, android.telephony.TelephonyManager.CellInfoCallback);
     method public void requestNumberVerification(android.telephony.PhoneNumberRange, long, java.util.concurrent.Executor, android.telephony.NumberVerificationCallback);
     method public boolean resetRadioConfig();
-    method public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
+    method public deprecated int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method public void setCarrierDataEnabled(boolean);
+    method public int setCarrierRestrictionRules(android.telephony.CarrierRestrictionRules);
     method public void setDataActivationState(int);
     method public deprecated void setDataEnabled(int, boolean);
     method public void setDataRoamingEnabled(boolean);
@@ -6860,6 +6999,9 @@ package android.telephony {
     field public static final int RADIO_POWER_OFF = 0; // 0x0
     field public static final int RADIO_POWER_ON = 1; // 0x1
     field public static final int RADIO_POWER_UNAVAILABLE = 2; // 0x2
+    field public static final int SET_CARRIER_RESTRICTION_ERROR = 2; // 0x2
+    field public static final int SET_CARRIER_RESTRICTION_NOT_SUPPORTED = 1; // 0x1
+    field public static final int SET_CARRIER_RESTRICTION_SUCCESS = 0; // 0x0
     field public static final int SIM_ACTIVATION_STATE_ACTIVATED = 2; // 0x2
     field public static final int SIM_ACTIVATION_STATE_ACTIVATING = 1; // 0x1
     field public static final int SIM_ACTIVATION_STATE_DEACTIVATED = 3; // 0x3
@@ -7190,6 +7332,7 @@ package android.telephony.ims {
     method public int getServiceType();
     method public static int getVideoStateFromCallType(int);
     method public static int getVideoStateFromImsCallProfile(android.telephony.ims.ImsCallProfile);
+    method public boolean isEmergencyCallTesting();
     method public boolean isVideoCall();
     method public boolean isVideoPaused();
     method public static int presentationToOir(int);
@@ -7198,6 +7341,7 @@ package android.telephony.ims {
     method public void setCallExtraInt(java.lang.String, int);
     method public void setCallRestrictCause(int);
     method public void setEmergencyCallRouting(int);
+    method public void setEmergencyCallTesting(boolean);
     method public void setEmergencyServiceCategories(int);
     method public void setEmergencyUrns(java.util.List<java.lang.String>);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
@@ -7248,6 +7392,7 @@ package android.telephony.ims {
   }
 
   public class ImsCallSessionListener {
+    method public void callQualityChanged(android.telephony.CallQuality);
     method public void callSessionConferenceExtendFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionConferenceExtendReceived(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
     method public void callSessionConferenceExtended(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
@@ -8198,8 +8343,8 @@ package android.view.contentcapture {
   public final class ContentCaptureEvent implements android.os.Parcelable {
     method public int describeContents();
     method public long getEventTime();
-    method public int getFlags();
     method public android.view.autofill.AutofillId getId();
+    method public java.util.List<android.view.autofill.AutofillId> getIds();
     method public java.lang.CharSequence getText();
     method public int getType();
     method public android.view.contentcapture.ViewNode getViewNode();

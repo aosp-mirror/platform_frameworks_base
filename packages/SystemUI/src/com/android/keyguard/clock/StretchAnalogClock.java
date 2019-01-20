@@ -80,6 +80,7 @@ public class StretchAnalogClock extends View {
      */
     public void setMinuteHandColor(int color) {
         mMinutePaint.setColor(color);
+        invalidate();
     }
 
     private void init() {

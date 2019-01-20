@@ -535,7 +535,7 @@ public final class DefaultPermissionGrantPolicy {
         }
 
         // Cell Broadcast Receiver
-        grantPermissionsToSystemPackage(
+        grantSystemFixedPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackage(Intents.SMS_CB_RECEIVED_ACTION, userId),
                 userId, SMS_PERMISSIONS);
 

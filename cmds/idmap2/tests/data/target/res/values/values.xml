@@ -25,4 +25,14 @@
     <string name="y">y</string>
     <string name="z">z</string>
     <integer name="int1">1</integer>
+
+    <!-- This resources is not marked as overlayable -->
+    <string name="not_overlayable">not_overlayable</string>
+
+    <string name="policy_system">policy_system</string>
+    <string name="policy_system_vendor">policy_system_vendor</string>
+    <string name="policy_product">policy_product</string>
+    <string name="policy_public">policy_public</string>
+
+    <item type="string" name="other" />
 </resources>

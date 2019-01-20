@@ -57,5 +57,10 @@
                   android:exported="true"
                   android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density">
         </activity>
+
+        <activity android:name=".ActivityViewVisibilityActivity"
+                  android:label="AV Visibility"
+                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density">
+        </activity>
     </application>
 </manifest>

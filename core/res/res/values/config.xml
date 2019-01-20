@@ -618,15 +618,6 @@
     <!-- Integer indicating wpa_supplicant scan interval when p2p is connected in milliseconds -->
     <integer translatable="false" name="config_wifi_scan_interval_p2p_connected">60000</integer>
 
-    <!-- Integer indicating the framework scan interval in milliseconds. This is used in the scenario
-         where the chipset does not support background scanning (config_wifi_background_scan_suport
-         is false) to set up a periodic wake up scan so that the device can connect to a new access
-         point on the move. A value of 0 means no periodic scans will be used in the framework. -->
-    <integer translatable="false" name="config_wifi_framework_scan_interval">300000</integer>
-
-    <!-- Integer indicating the framework no networks periodic scan interval in milliseconds. -->
-    <integer translatable="false" name="config_wifi_no_network_periodic_scan_interval">300000</integer>
-
     <!-- Integer indicating disconnect mode short scan interval in milliseconds -->
     <integer translatable="false" name="config_wifi_disconnected_short_scan_interval">15000</integer>
 
@@ -647,6 +638,9 @@
 
     <!-- Integer indicating RSSI boost given to current network -->
     <integer translatable="false" name="config_wifi_framework_current_network_boost">16</integer>
+
+    <!-- Integer delay in milliseconds before set wlan interface up during watchdog recovery -->
+    <integer translatable="false" name="config_wifi_framework_recovery_timeout_delay">2000</integer>
 
     <!-- Integer indicating how to handle beacons with uninitialized RSSI value of 0 -->
     <integer translatable="false" name="config_wifi_framework_scan_result_rssi_level_patchup_value">-85</integer>
@@ -692,12 +686,20 @@
     <!-- Wifi driver supports Automatic channel selection (ACS) for softap -->
     <bool translatable="false" name="config_wifi_softap_acs_supported">false</bool>
 
+    <!-- Channel list restriction to Automatic channel selection (ACS) for softap. If the device
+         doesn't want to restrict channels this should be empty. Value is a comma separated channel
+         string and/or channel range string like '1-6,11' -->
+    <string translatable="false" name="config_wifi_softap_acs_supported_channel_list"></string>
+
     <!-- Wifi driver supports IEEE80211AC for softap -->
     <bool translatable="false" name="config_wifi_softap_ieee80211ac_supported">false</bool>
 
     <!-- Indicates that local-only hotspot should be brought up at 5GHz.  This option is
          for automotive builds only (the one that have PackageManager#FEATURE_AUTOMOTIVE) -->
     <bool translatable="false" name="config_wifi_local_only_hotspot_5ghz">false</bool>
+
+    <!-- Indicates that connected MAC randomization is supported on this device -->
+    <bool translatable="false" name="config_wifi_connected_mac_randomization_supported">false</bool>
 
     <!-- Flag indicating whether we should enable the automatic brightness.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
@@ -1741,19 +1743,6 @@
          config_enableGeofenceOverlay is false. -->
     <string name="config_geofenceProviderPackageName" translatable="false">@null</string>
 
-    <!-- Whether to enable Hardware Activity-Recognition overlay which allows Hardware
-         Activity-Recognition to be replaced by an app at run-time. When disabled, only the
-         config_activityRecognitionHardwarePackageName package will be searched for
-         its implementation, otherwise packages whose signature matches the
-         signatures of config_locationProviderPackageNames will be searched, and
-         the service with the highest version number will be picked. Anyone who
-         wants to disable the overlay mechanism can set it to false.
-         -->
-    <bool name="config_enableActivityRecognitionHardwareOverlay" translatable="false">true</bool>
-    <!-- Package name providing Hardware Activity-Recognition API support. Used only when
-         config_enableActivityRecognitionHardwareOverlay is false. -->
-    <string name="config_activityRecognitionHardwarePackageName" translatable="false">@null</string>
-
     <!-- Package name(s) containing location provider support.
          These packages can contain services implementing location providers,
          such as the Geocode Provider, Network Location Provider, and
@@ -1892,6 +1881,8 @@
                cell broadcasting sms, and MMS. -->
     <bool name="config_sms_capable">true</bool>
 
+    <!-- TODO: STOPSHIP(b/110557011): Remove this from framework and overlays as we use
+         config_defaultRoleHolders now. -->
     <!-- Default SMS Application. This will be the default SMS application when
          the phone first boots. The user can then change the default app to one
          of their choosing.
@@ -1909,6 +1900,12 @@
          If this string is empty or the specified package does not exist, then
          the behavior will be as though no app was named as an explicit default. -->
     <string name="default_browser" translatable="false"></string>
+
+    <!-- Default role holders. This will be an array of roles and package names of their default
+         holders, with each item in the format of "ROLE_NAME: PACKAGE_NAME_1, PACKAGE_NAME_2". -->
+    <string-array name="config_defaultRoleHolders" translatable="false">
+        <item>android.app.role.SMS: com.android.messaging</item>
+    </string-array>
 
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
@@ -3442,13 +3439,19 @@
          See android.view.textclassifier.TextClassificationManager.
     -->
     <string name="config_defaultTextClassifierPackage" translatable="false"></string>
-    
+
     <!-- The package name for the default wellbeing app.
          This package must be trusted, as it has the permissions to control other applications
          on the device.
          Example: "com.android.wellbeing"
      -->
     <string name="config_defaultWellbeingPackage" translatable="false"></string>
+
+    <!-- The component name for the default system attention service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         See android.attention.AttentionManagerService.
+    -->
+    <string name="config_defaultAttentionService" translatable="false"></string>
 
     <!-- The package name for the system's content capture service.
          This service must be trusted, as it can be activated without explicit consent of the user.
@@ -3722,4 +3725,7 @@
 
     <!-- If the sensor that silences alerts is available or not. -->
     <bool name="config_silenceSensorAvailable">false</bool>
+
+    <!-- Enable Zram writeback feature to allow unused pages in zram be written to flash. -->
+    <bool name="config_zramWriteback">false</bool>
 </resources>

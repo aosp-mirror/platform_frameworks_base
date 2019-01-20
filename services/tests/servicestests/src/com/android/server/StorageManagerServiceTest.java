@@ -227,6 +227,22 @@ public class StorageManagerServiceTest {
     }
 
     @Test
+    public void testPackageInLegacyMode() throws Exception {
+        setStorageMountMode(PID_RED, UID_COLORS, Zygote.MOUNT_EXTERNAL_LEGACY);
+
+        // Both app and system have the same view
+        assertTranslation(
+                "/storage/emulated/0/Android/data/com.red/foo.jpg",
+                "/storage/emulated/0/Android/data/com.red/foo.jpg",
+                PID_RED, UID_COLORS);
+
+        assertTranslation(
+                "/storage/emulated/0/Android/sandbox/com.grey/bar.jpg",
+                "/storage/emulated/0/Android/sandbox/com.grey/bar.jpg",
+                PID_RED, UID_COLORS);
+    }
+
+    @Test
     public void testInstallerPackage() throws Exception {
         setStorageMountMode(PID_GREY, UID_GREY, Zygote.MOUNT_EXTERNAL_INSTALLER);
 

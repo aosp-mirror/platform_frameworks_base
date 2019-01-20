@@ -27,17 +27,25 @@
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
+#include "idmap2/Policies.h"
+#include "idmap2/Result.h"
 
 using android::ApkAssets;
 using android::idmap2::BinaryStreamVisitor;
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Idmap;
+using android::idmap2::PoliciesToBitmask;
+using android::idmap2::PolicyBitmask;
+using android::idmap2::PolicyFlags;
+using android::idmap2::Result;
 using android::idmap2::utils::kIdmapFilePermissionMask;
 
 bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
   std::string target_apk_path;
   std::string overlay_apk_path;
   std::string idmap_path;
+  std::vector<std::string> policies;
+  bool ignore_overlayable;
 
   const CommandLineOptions opts =
       CommandLineOptions("idmap2 create")
@@ -47,10 +55,26 @@ bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
           .MandatoryOption("--overlay-apk-path",
                            "input: path to apk which contains the new resource values",
                            &overlay_apk_path)
-          .MandatoryOption("--idmap-path", "output: path to where to write idmap file",
-                           &idmap_path);
+          .MandatoryOption("--idmap-path", "output: path to where to write idmap file", &idmap_path)
+          .OptionalOption("--policy",
+                          "input: an overlayable policy this overlay fulfills "
+                          "(if none or supplied, the overlay policy will default to \"public\")",
+                          &policies)
+          .OptionalFlag("--ignore-overlayable", "disables overlayable and policy checks",
+                        &ignore_overlayable);
   if (!opts.Parse(args, out_error)) {
     return false;
+  }
+
+  PolicyBitmask fulfilled_policies = 0;
+  if (auto result = PoliciesToBitmask(policies, out_error)) {
+    fulfilled_policies |= *result;
+  } else {
+    return false;
+  }
+
+  if (fulfilled_policies == 0) {
+    fulfilled_policies |= PolicyFlags::POLICY_PUBLIC;
   }
 
   const std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
@@ -66,7 +90,8 @@ bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
   }
 
   const std::unique_ptr<const Idmap> idmap =
-      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk, out_error);
+      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
+                           fulfilled_policies, !ignore_overlayable, out_error);
   if (!idmap) {
     return false;
   }

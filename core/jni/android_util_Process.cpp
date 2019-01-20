@@ -22,12 +22,12 @@
 #include <utils/Log.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
-#include <cutils/sched_policy.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
 #include <meminfo/procmeminfo.h>
 #include <meminfo/sysmeminfo.h>
 #include <processgroup/processgroup.h>
+#include <processgroup/sched_policy.h>
 
 #include <string>
 #include <vector>

@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
@@ -470,6 +471,7 @@ public class WifiInfo implements Parcelable {
     }
 
     /** {@hide} */
+    @SystemApi
     public boolean isOsuAp() {
         return mOsuAp;
     }

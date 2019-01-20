@@ -82,6 +82,11 @@ public final class Zygote {
     /** Read-write external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_WRITE = IVold.REMOUNT_MODE_WRITE;
     /**
+     * Mount mode for apps that are already installed on the device before the isolated_storage
+     * feature is enabled.
+     */
+    public static final int MOUNT_EXTERNAL_LEGACY = IVold.REMOUNT_MODE_LEGACY;
+    /**
      * Mount mode for package installers which should give them access to
      * all obb dirs in addition to their package sandboxes
      */
@@ -103,6 +108,20 @@ public final class Zygote {
      * requested ABI for the child Zygote.
      */
     public static final String CHILD_ZYGOTE_ABI_LIST_ARG = "--abi-list=";
+
+    /**
+     * An extraArg passed when a zygote process is forking a child-zygote, specifying the
+     * start of the UID range the children of the Zygote may setuid()/setgid() to. This
+     * will be enforced with a seccomp filter.
+     */
+    public static final String CHILD_ZYGOTE_UID_RANGE_START = "--uid-range-start=";
+
+    /**
+     * An extraArg passed when a zygote process is forking a child-zygote, specifying the
+     * end of the UID range the children of the Zygote may setuid()/setgid() to. This
+     * will be enforced with a seccomp filter.
+     */
+    public static final String CHILD_ZYGOTE_UID_RANGE_END = "--uid-range-end=";
 
     private Zygote() {}
 
@@ -220,6 +239,13 @@ public final class Zygote {
      * Lets children of the zygote inherit open file descriptors to this path.
      */
     native protected static void nativeAllowFileAcrossFork(String path);
+
+    /**
+     * Installs a seccomp filter that limits setresuid()/setresgid() to the passed-in range
+     * @param uidGidMin The smallest allowed uid/gid
+     * @param uidGidMax The largest allowed uid/gid
+     */
+    native protected static void nativeInstallSeccompUidGidFilter(int uidGidMin, int uidGidMax);
 
     /**
      * Zygote unmount storage space on initializing.
