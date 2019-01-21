@@ -35,8 +35,8 @@ public class Utils {
     private static final String CURRENT_MODE_KEY = "CURRENT_MODE";
     private static final String NEW_MODE_KEY = "NEW_MODE";
     @VisibleForTesting
-    static final String STORAGE_MANAGER_SHOW_OPT_IN_PROPERTY =
-            "ro.storage_manager.show_opt_in";
+    static final String STORAGE_MANAGER_ENABLED_PROPERTY =
+            "ro.storage_manager.enabled";
 
     private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;
@@ -353,8 +353,7 @@ public class Utils {
     public static boolean isStorageManagerEnabled(Context context) {
         boolean isDefaultOn;
         try {
-            // Turn off by default if the opt-in was shown.
-            isDefaultOn = !SystemProperties.getBoolean(STORAGE_MANAGER_SHOW_OPT_IN_PROPERTY, true);
+            isDefaultOn = SystemProperties.getBoolean(STORAGE_MANAGER_ENABLED_PROPERTY, false);
         } catch (Resources.NotFoundException e) {
             isDefaultOn = false;
         }
