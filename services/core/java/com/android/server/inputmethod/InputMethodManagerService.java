@@ -2446,12 +2446,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 (vis & InputMethodService.IME_VISIBLE) != 0, dismissImeOnBackKeyPressed);
     }
 
-    private void updateSystemUi(IBinder token, int vis, int backDisposition) {
-        synchronized (mMethodMap) {
-            updateSystemUiLocked(token, vis, backDisposition);
-        }
-    }
-
     @BinderThread
     private void reportStartInput(IBinder token, IBinder startInputToken) {
         synchronized (mMethodMap) {
@@ -4049,7 +4043,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             attrs.privateFlags |= PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             attrs.setTitle("Select input method");
             w.setAttributes(attrs);
-            updateSystemUi(mCurToken, mImeWindowVis, mBackDisposition);
+            updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
             mSwitchingDialog.show();
         }
     }
