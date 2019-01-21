@@ -1243,7 +1243,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // Uh oh, current input method is no longer around!
                             // Pick another one...
                             Slog.i(TAG, "Current input method removed: " + curInputMethodId);
-                            updateSystemUiLocked(mCurToken, 0 /* vis */, mBackDisposition);
+                            updateSystemUiLocked(0 /* vis */, mBackDisposition);
                             if (!chooseNewDefaultIMELocked()) {
                                 changed = true;
                                 curIm = null;
@@ -1572,7 +1572,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (mStatusBar != null) {
                     mStatusBar.setIconVisibility(mSlotIme, false);
                 }
-                updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
+                updateSystemUiLocked(mImeWindowVis, mBackDisposition);
                 mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
                         com.android.internal.R.bool.show_ongoing_ime_switcher);
                 if (mShowOngoingImeSwitcherForPhones) {
@@ -2260,7 +2260,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     sessionState.session.finishSession();
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Session failed to close due to remote exception", e);
-                    updateSystemUiLocked(mCurToken, 0 /* vis */, mBackDisposition);
+                    updateSystemUiLocked(0 /* vis */, mBackDisposition);
                 }
                 sessionState.session = null;
             }
@@ -2426,7 +2426,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             mImeWindowVis = vis;
             mBackDisposition = backDisposition;
-            updateSystemUiLocked(mCurToken, vis, backDisposition);
+            updateSystemUiLocked(vis, backDisposition);
         }
 
         final boolean dismissImeOnBackKeyPressed;
@@ -2461,11 +2461,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     // Caution! This method is called in this class. Handle multi-user carefully
-    private void updateSystemUiLocked(IBinder token, int vis, int backDisposition) {
-        if (!calledWithValidTokenLocked(token)) {
+    private void updateSystemUiLocked(int vis, int backDisposition) {
+        if (mCurToken == null) {
             return;
         }
-
         // TODO: Move this clearing calling identity block to setImeWindowStatus after making sure
         // all updateSystemUi happens on system previlege.
         final long ident = Binder.clearCallingIdentity();
@@ -2477,7 +2476,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
             if (mStatusBar != null) {
-                mStatusBar.setImeWindowStatus(token, vis, backDisposition,
+                mStatusBar.setImeWindowStatus(mCurToken, vis, backDisposition,
                         needsToShowImeSwitcher);
             }
             final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
@@ -2667,7 +2666,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true);
                 if (mCurMethod != null) {
                     try {
-                        updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
+                        updateSystemUiLocked(mImeWindowVis, mBackDisposition);
                         mCurMethod.changeInputMethodSubtype(newSubtype);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to call changeInputMethodSubtype");
@@ -3712,7 +3711,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private void handleSetInteractive(final boolean interactive) {
         synchronized (mMethodMap) {
             mIsInteractive = interactive;
-            updateSystemUiLocked(mCurToken, interactive ? mImeWindowVis : 0, mBackDisposition);
+            updateSystemUiLocked(interactive ? mImeWindowVis : 0, mBackDisposition);
 
             // Inform the current client of the change in active status
             if (mCurClient != null && mCurClient.client != null) {
@@ -4043,7 +4042,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             attrs.privateFlags |= PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             attrs.setTitle("Select input method");
             w.setAttributes(attrs);
-            updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
+            updateSystemUiLocked(mImeWindowVis, mBackDisposition);
             mSwitchingDialog.show();
         }
     }
@@ -4103,7 +4102,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingDialogTitleView = null;
         }
 
-        updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
+        updateSystemUiLocked(mImeWindowVis, mBackDisposition);
         mDialogBuilder = null;
         mIms = null;
     }
