@@ -49,18 +49,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.pm.PackageManagerServiceUtils;
 
-import libcore.io.IoUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,32 +99,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @GuardedBy("mLock")
     private List<RollbackInfo> mRecentlyExecutedRollbacks;
 
-    // Data for available rollbacks and recently executed rollbacks is
-    // persisted in storage. Assuming the rollback data directory is
-    // /data/rollback, we use the following directory structure
-    // to store this data:
-    //   /data/rollback/
-    //      available/
-    //          XXX/
-    //              rollback.json
-    //              com.package.A/
-    //                  base.apk
-    //              com.package.B/
-    //                  base.apk
-    //          YYY/
-    //              rollback.json
-    //              com.package.C/
-    //                  base.apk
-    //      recently_executed.json
-    //
-    // * XXX, YYY are random strings from Files.createTempDirectory
-    // * rollback.json contains all relevant metadata for the rollback. This
-    //   file is not written until the rollback is made available.
-    //
-    // TODO: Use AtomicFile for all the .json files?
-    private final File mRollbackDataDir;
-    private final File mAvailableRollbacksDir;
-    private final File mRecentlyExecutedRollbacksFile;
+    private final RollbackStore mRollbackStore;
 
     private final Context mContext;
     private final HandlerThread mHandlerThread;
@@ -143,9 +109,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mHandlerThread = new HandlerThread("RollbackManagerServiceHandler");
         mHandlerThread.start();
 
-        mRollbackDataDir = new File(Environment.getDataDirectory(), "rollback");
-        mAvailableRollbacksDir = new File(mRollbackDataDir, "available");
-        mRecentlyExecutedRollbacksFile = new File(mRollbackDataDir, "recently_executed.json");
+        mRollbackStore = new RollbackStore(new File(Environment.getDataDirectory(), "rollback"));
 
         // Kick off loading of the rollback data from strorage in a background
         // thread.
@@ -445,7 +409,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 for (PackageRollbackInfo info : data.packages) {
                     if (info.packageName.equals(packageName)) {
                         iter.remove();
-                        removeFile(data.backupDir);
+                        mRollbackStore.deleteAvailableRollback(data);
                         break;
                     }
                 }
@@ -484,52 +448,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     @GuardedBy("mLock")
     private void loadAllRollbackDataLocked() {
-        mAvailableRollbacksDir.mkdirs();
-        mAvailableRollbacks = new ArrayList<>();
-        for (File rollbackDir : mAvailableRollbacksDir.listFiles()) {
-            if (rollbackDir.isDirectory()) {
-                try {
-                    RollbackData data = loadRollbackData(rollbackDir);
-                    mAvailableRollbacks.add(data);
-                } catch (IOException e) {
-                    // Note: Deleting the rollbackDir here will cause pending
-                    // rollbacks to be deleted. This should only ever happen
-                    // if reloadPersistedData is called while there are
-                    // pending rollbacks. The reloadPersistedData method is
-                    // currently only for testing, so that should be okay.
-                    Log.e(TAG, "Unable to read rollback data at " + rollbackDir, e);
-                    removeFile(rollbackDir);
-                }
-            }
-        }
-
-        mRecentlyExecutedRollbacks = new ArrayList<>();
-        if (mRecentlyExecutedRollbacksFile.exists()) {
-            try {
-                // TODO: How to cope with changes to the format of this file from
-                // when RollbackStore is updated in the future?
-                String jsonString = IoUtils.readFileAsString(
-                        mRecentlyExecutedRollbacksFile.getAbsolutePath());
-                JSONObject object = new JSONObject(jsonString);
-                JSONArray array = object.getJSONArray("recentlyExecuted");
-                for (int i = 0; i < array.length(); ++i) {
-                    JSONObject element = array.getJSONObject(i);
-                    String packageName = element.getString("packageName");
-                    long higherVersionCode = element.getLong("higherVersionCode");
-                    long lowerVersionCode = element.getLong("lowerVersionCode");
-                    PackageRollbackInfo target = new PackageRollbackInfo(packageName,
-                            new PackageRollbackInfo.PackageVersion(higherVersionCode),
-                            new PackageRollbackInfo.PackageVersion(lowerVersionCode));
-                    RollbackInfo rollback = new RollbackInfo(target);
-                    mRecentlyExecutedRollbacks.add(rollback);
-                }
-            } catch (IOException | JSONException e) {
-                // TODO: What to do here? Surely we shouldn't just forget about
-                // everything after the point of exception?
-                Log.e(TAG, "Failed to read recently executed rollbacks", e);
-            }
-        }
-
+        mAvailableRollbacks = mRollbackStore.loadAvailableRollbacks();
+        mRecentlyExecutedRollbacks = mRollbackStore.loadRecentlyExecutedRollbacks();
         scheduleExpiration(0);
     }
 
@@ -553,7 +473,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     if (info.packageName.equals(packageName)
                             && !info.higherVersion.equals(installedVersion)) {
                         iter.remove();
-                        removeFile(data.backupDir);
+                        mRollbackStore.deleteAvailableRollback(data);
                         break;
                     }
                 }
@@ -581,91 +501,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             }
 
             if (changed) {
-                saveRecentlyExecutedRollbacksLocked();
+                mRollbackStore.saveRecentlyExecutedRollbacks(mRecentlyExecutedRollbacks);
             }
-        }
-    }
-
-    /**
-     * Reads the metadata for a rollback from the given directory.
-     * @throws IOException in case of error reading the data.
-     */
-    private RollbackData loadRollbackData(File backupDir) throws IOException {
-        try {
-            RollbackData data = new RollbackData(backupDir);
-            File rollbackJsonFile = new File(backupDir, "rollback.json");
-            JSONObject dataJson = new JSONObject(
-                    IoUtils.readFileAsString(rollbackJsonFile.getAbsolutePath()));
-            JSONArray packagesJson = dataJson.getJSONArray("packages");
-            for (int i = 0; i < packagesJson.length(); ++i) {
-                JSONObject infoJson = packagesJson.getJSONObject(i);
-                String packageName = infoJson.getString("packageName");
-                long higherVersionCode = infoJson.getLong("higherVersionCode");
-                long lowerVersionCode = infoJson.getLong("lowerVersionCode");
-                data.packages.add(new PackageRollbackInfo(packageName,
-                        new PackageRollbackInfo.PackageVersion(higherVersionCode),
-                        new PackageRollbackInfo.PackageVersion(lowerVersionCode)));
-            }
-
-            data.timestamp = Instant.parse(dataJson.getString("timestamp"));
-            return data;
-        } catch (JSONException | DateTimeParseException e) {
-            throw new IOException(e);
-        }
-    }
-
-    /**
-     * Write the metadata for a rollback to persistent storage.
-     */
-    private void saveRollbackData(RollbackData data) throws IOException {
-        try {
-            JSONObject dataJson = new JSONObject();
-            JSONArray packagesJson = new JSONArray();
-            for (PackageRollbackInfo info : data.packages) {
-                JSONObject infoJson = new JSONObject();
-                infoJson.put("packageName", info.packageName);
-                infoJson.put("higherVersionCode", info.higherVersion.versionCode);
-                infoJson.put("lowerVersionCode", info.lowerVersion.versionCode);
-                packagesJson.put(infoJson);
-            }
-            dataJson.put("packages", packagesJson);
-            dataJson.put("timestamp", data.timestamp.toString());
-
-            PrintWriter pw = new PrintWriter(new File(data.backupDir, "rollback.json"));
-            pw.println(dataJson.toString());
-            pw.close();
-        } catch (JSONException e) {
-            throw new IOException(e);
-        }
-    }
-
-    /**
-     * Write the list of recently executed rollbacks to storage.
-     * Note: This happens while mLock is held, which should be okay because we
-     * expect executed rollbacks to be modified only in exceptional cases.
-     */
-    @GuardedBy("mLock")
-    private void saveRecentlyExecutedRollbacksLocked() {
-        try {
-            JSONObject json = new JSONObject();
-            JSONArray array = new JSONArray();
-            json.put("recentlyExecuted", array);
-
-            for (int i = 0; i < mRecentlyExecutedRollbacks.size(); ++i) {
-                RollbackInfo rollback = mRecentlyExecutedRollbacks.get(i);
-                JSONObject element = new JSONObject();
-                element.put("packageName", rollback.targetPackage.packageName);
-                element.put("higherVersionCode", rollback.targetPackage.higherVersion.versionCode);
-                element.put("lowerVersionCode", rollback.targetPackage.lowerVersion.versionCode);
-                array.put(element);
-            }
-
-            PrintWriter pw = new PrintWriter(mRecentlyExecutedRollbacksFile);
-            pw.println(json.toString());
-            pw.close();
-        } catch (IOException | JSONException e) {
-            // TODO: What to do here?
-            Log.e(TAG, "Failed to save recently executed rollbacks", e);
         }
     }
 
@@ -678,7 +515,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
             mRecentlyExecutedRollbacks.add(rollback);
-            saveRecentlyExecutedRollbacksLocked();
+            mRollbackStore.saveRecentlyExecutedRollbacks(mRecentlyExecutedRollbacks);
         }
     }
 
@@ -729,7 +566,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 RollbackData data = iter.next();
                 if (!now.isBefore(data.timestamp.plusMillis(ROLLBACK_LIFETIME_DURATION_MILLIS))) {
                     iter.remove();
-                    removeFile(data.backupDir);
+                    mRollbackStore.deleteAvailableRollback(data);
                 } else if (oldest == null || oldest.isAfter(data.timestamp)) {
                     oldest = data.timestamp;
                 }
@@ -855,9 +692,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 mChildSessions.put(childSessionId, parentSessionId);
                 data = mPendingRollbacks.get(parentSessionId);
                 if (data == null) {
-                    File backupDir = Files.createTempDirectory(
-                            mAvailableRollbacksDir.toPath(), null).toFile();
-                    data = new RollbackData(backupDir);
+                    data = mRollbackStore.createAvailableRollback();
                     mPendingRollbacks.put(parentSessionId, data);
                 }
                 data.packages.add(info);
@@ -867,14 +702,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return false;
         }
 
-        File packageDir = new File(data.backupDir, packageName);
+        File packageDir = mRollbackStore.packageCodePathForAvailableRollback(data, packageName);
         packageDir.mkdirs();
 
         // TODO: Copy by hard link instead to save on cpu and storage space?
         int status = PackageManagerServiceUtils.copyPackage(installedPackage.codePath, packageDir);
         if (status != PackageManager.INSTALL_SUCCEEDED) {
             Log.e(TAG, "Unable to copy package for rollback for " + packageName);
-            removeFile(packageDir);
             return false;
         }
 
@@ -907,22 +741,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }
-    }
-
-    /**
-     * Deletes a file completely.
-     * If the file is a directory, its contents are deleted as well.
-     * Has no effect if the directory does not exist.
-     */
-    private void removeFile(File file) {
-        if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
-                removeFile(child);
-            }
-        }
-        if (file.exists()) {
-            file.delete();
         }
     }
 
@@ -972,7 +790,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     try {
                         data.timestamp = Instant.now();
 
-                        saveRollbackData(data);
+                        mRollbackStore.saveAvailableRollback(data);
                         synchronized (mLock) {
                             // Note: There is a small window of time between when
                             // the session has been committed by the package
@@ -991,12 +809,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         scheduleExpiration(ROLLBACK_LIFETIME_DURATION_MILLIS);
                     } catch (IOException e) {
                         Log.e(TAG, "Unable to enable rollback", e);
-                        removeFile(data.backupDir);
+                        mRollbackStore.deleteAvailableRollback(data);
                     }
                 } else {
                     // The install session was aborted, clean up the pending
                     // install.
-                    removeFile(data.backupDir);
+                    mRollbackStore.deleteAvailableRollback(data);
                 }
             }
         }
