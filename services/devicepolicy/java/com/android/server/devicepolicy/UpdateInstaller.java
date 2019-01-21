@@ -16,10 +16,13 @@
 
 package com.android.server.devicepolicy;
 
+import android.annotation.Nullable;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -41,7 +44,8 @@ abstract class UpdateInstaller {
     private ParcelFileDescriptor mUpdateFileDescriptor;
     private DevicePolicyConstants mConstants;
     protected Context mContext;
-    protected File mCopiedUpdateFile;
+
+    @Nullable protected File mCopiedUpdateFile;
 
     static final String TAG = "UpdateInstaller";
     private DevicePolicyManagerService.Injector mInjector;
@@ -59,7 +63,8 @@ abstract class UpdateInstaller {
     public abstract void installUpdateInThread();
 
     public void startInstallUpdate() {
-        if (!checkIfBatteryIsSufficient()) {
+        mCopiedUpdateFile = null;
+        if (!isBatteryLevelSufficient()) {
             notifyCallbackOnError(
                     DevicePolicyManager.InstallUpdateCallback.UPDATE_ERROR_BATTERY_LOW,
                     "The battery level must be above "
@@ -81,17 +86,21 @@ abstract class UpdateInstaller {
         thread.start();
     }
 
-    private boolean checkIfBatteryIsSufficient() {
-        BatteryManager batteryManager =
-                (BatteryManager) mContext.getSystemService(Context.BATTERY_SERVICE);
-        if (batteryManager != null) {
-            int chargePercentage = batteryManager
-                    .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-            return batteryManager.isCharging()
-                    ? chargePercentage >= mConstants.BATTERY_THRESHOLD_CHARGING
-                    : chargePercentage >= mConstants.BATTERY_THRESHOLD_NOT_CHARGING;
-        }
-        return false;
+    private boolean isBatteryLevelSufficient() {
+        Intent batteryStatus = mContext.registerReceiver(
+                /* receiver= */ null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        float batteryPercentage = calculateBatteryPercentage(batteryStatus);
+        boolean isBatteryPluggedIn =
+                batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, /* defaultValue= */ -1) > 0;
+        return isBatteryPluggedIn
+                ? batteryPercentage >= mConstants.BATTERY_THRESHOLD_CHARGING
+                : batteryPercentage >= mConstants.BATTERY_THRESHOLD_NOT_CHARGING;
+    }
+
+    private float calculateBatteryPercentage(Intent batteryStatus) {
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, /* defaultValue= */ -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, /* defaultValue= */ -1);
+        return 100 * level / (float) scale;
     }
 
     private File copyUpdateFileToDataOtaPackageDir() {
@@ -127,7 +136,7 @@ abstract class UpdateInstaller {
     }
 
     void cleanupUpdateFile() {
-        if (mCopiedUpdateFile.exists()) {
+        if (mCopiedUpdateFile != null && mCopiedUpdateFile.exists()) {
             mCopiedUpdateFile.delete();
         }
     }
