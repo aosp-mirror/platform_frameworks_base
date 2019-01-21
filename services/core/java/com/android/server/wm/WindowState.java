@@ -246,7 +246,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final boolean mIsWallpaper;
     private final boolean mIsFloatingLayer;
     int mSeq;
-    boolean mEnforceSizeCompat;
     int mViewVisibility;
     int mSystemUiVisibility;
     /**
@@ -505,7 +504,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private PowerManager.WakeLock mDrawLock;
 
-    final private Rect mTmpRect = new Rect();
+    private final Rect mTmpRect = new Rect();
+    private final Point mTmpPoint = new Point();
 
     /**
      * Whether the window was resized by us while it was gone for layout.
@@ -655,7 +655,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mContext = mWmService.mContext;
         DeathRecipient deathRecipient = new DeathRecipient();
         mSeq = seq;
-        mEnforceSizeCompat = (mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
         mPowerManagerWrapper = powerManagerWrapper;
         mForceSeamlesslyRotate = token.mRoundedCornerOverlay;
         if (localLOGV) Slog.v(
@@ -730,6 +729,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void attach() {
         if (localLOGV) Slog.v(TAG, "Attaching " + this + " token=" + mToken);
         mSession.windowAddedLocked(mAttrs.packageName);
+    }
+
+    /**
+     * @return {@code true} if the application runs in size compatibility mode.
+     * @see android.content.res.CompatibilityInfo#supportsScreen
+     * @see ActivityRecord#inSizeCompatMode
+     */
+    boolean inSizeCompatMode() {
+        return (mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0
+                || (mAppToken != null && mAppToken.inSizeCompatMode()
+                        // Exclude starting window because it is not displayed by the application.
+                        && mAttrs.type != TYPE_APPLICATION_STARTING);
     }
 
     /**
@@ -995,7 +1006,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWindowFrames.offsetFrames(-layoutXDiff, -layoutYDiff);
 
         mWindowFrames.mCompatFrame.set(mWindowFrames.mFrame);
-        if (mEnforceSizeCompat) {
+        if (inSizeCompatMode()) {
             // If there is a size compatibility scale being applied to the
             // window, we need to apply this to its insets so that they are
             // reported to the app in its coordinate space.
@@ -1354,8 +1365,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void prelayout() {
-        if (mEnforceSizeCompat) {
-            mGlobalScale = getDisplayContent().mCompatibleScreenScale;
+        if (inSizeCompatMode()) {
+            mGlobalScale = mToken.getSizeCompatScale();
             mInvGlobalScale = 1 / mGlobalScale;
         } else {
             mGlobalScale = mInvGlobalScale = 1;
@@ -2145,6 +2156,30 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     int getSurfaceTouchableRegion(Region region, int flags) {
         final boolean modal = (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
+        if (mAppToken != null && !mAppToken.getResolvedOverrideBounds().isEmpty()) {
+            // There may have touchable letterboxes around the activity, so in order to let the
+            // letterboxes are able to receive touch event and slip to activity, the activity with
+            // compatibility bounds cannot occupy full screen touchable region.
+            if (modal) {
+                // A modal window uses the whole compatibility bounds.
+                flags |= FLAG_NOT_TOUCH_MODAL;
+                mTmpRect.set(mAppToken.getResolvedOverrideBounds());
+                // TODO(b/112288258): Remove the forced offset when the override bounds always
+                // starts from zero (See {@link ActivityRecord#resolveOverrideConfiguration}).
+                mTmpRect.offsetTo(0, 0);
+            } else {
+                // Non-modal uses the application based frame.
+                mTmpRect.set(mWindowFrames.mCompatFrame);
+            }
+            // The offset of compatibility bounds is applied to surface of {@link #AppWindowToken}
+            // and frame, so it is unnecessary to translate twice in surface based coordinates.
+            final int surfaceOffsetX = mAppToken.inSizeCompatMode()
+                    ? mAppToken.getBounds().left : 0;
+            mTmpRect.offset(surfaceOffsetX - mWindowFrames.mFrame.left, -mWindowFrames.mFrame.top);
+            region.set(mTmpRect);
+            return flags;
+        }
+
         if (modal && mAppToken != null) {
             // Limit the outer touch to the activity stack region.
             flags |= FLAG_NOT_TOUCH_MODAL;
@@ -2943,7 +2978,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == DRAW_PENDING)
                 Slog.i(TAG, "Resizing " + this + " WITH DRAW PENDING");
 
-            final Rect frame = mWindowFrames.mFrame;
+            final Rect frame = mWindowFrames.mCompatFrame;
             final Rect overscanInsets = mWindowFrames.mLastOverscanInsets;
             final Rect contentInsets = mWindowFrames.mLastContentInsets;
             final Rect visibleInsets = mWindowFrames.mLastVisibleInsets;
@@ -3353,7 +3388,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         pw.println(prefix + "mHasSurface=" + mHasSurface
                 + " isReadyForDisplay()=" + isReadyForDisplay()
                 + " mWindowRemovalAllowed=" + mWindowRemovalAllowed);
-        if (mEnforceSizeCompat) {
+        if (inSizeCompatMode()) {
             pw.println(prefix + "mCompatFrame=" + mWindowFrames.mCompatFrame.toShortString(sTmpSB));
         }
         if (dumpAll) {
@@ -3477,17 +3512,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         float x, y;
         int w,h;
 
+        final boolean inSizeCompatMode = inSizeCompatMode();
         if ((mAttrs.flags & FLAG_SCALED) != 0) {
             if (mAttrs.width < 0) {
                 w = pw;
-            } else if (mEnforceSizeCompat) {
+            } else if (inSizeCompatMode) {
                 w = (int)(mAttrs.width * mGlobalScale + .5f);
             } else {
                 w = mAttrs.width;
             }
             if (mAttrs.height < 0) {
                 h = ph;
-            } else if (mEnforceSizeCompat) {
+            } else if (inSizeCompatMode) {
                 h = (int)(mAttrs.height * mGlobalScale + .5f);
             } else {
                 h = mAttrs.height;
@@ -3495,21 +3531,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             if (mAttrs.width == MATCH_PARENT) {
                 w = pw;
-            } else if (mEnforceSizeCompat) {
+            } else if (inSizeCompatMode) {
                 w = (int)(mRequestedWidth * mGlobalScale + .5f);
             } else {
                 w = mRequestedWidth;
             }
             if (mAttrs.height == MATCH_PARENT) {
                 h = ph;
-            } else if (mEnforceSizeCompat) {
+            } else if (inSizeCompatMode) {
                 h = (int)(mRequestedHeight * mGlobalScale + .5f);
             } else {
                 h = mRequestedHeight;
             }
         }
 
-        if (mEnforceSizeCompat) {
+        if (inSizeCompatMode) {
             x = mAttrs.x * mGlobalScale;
             y = mAttrs.y * mGlobalScale;
         } else {
@@ -3537,7 +3573,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // We need to make sure we update the CompatFrame as it is used for
         // cropping decisions, etc, on systems where we lack a decor layer.
         mWindowFrames.mCompatFrame.set(mWindowFrames.mFrame);
-        if (mEnforceSizeCompat) {
+        if (inSizeCompatMode) {
             // See comparable block in computeFrameLw.
             mWindowFrames.mCompatFrame.scale(mInvGlobalScale);
         }
@@ -3650,7 +3686,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     float translateToWindowX(float x) {
         float winX = x - mWindowFrames.mFrame.left;
-        if (mEnforceSizeCompat) {
+        if (inSizeCompatMode()) {
             winX *= mGlobalScale;
         }
         return winX;
@@ -3658,7 +3694,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     float translateToWindowY(float y) {
         float winY = y - mWindowFrames.mFrame.top;
-        if (mEnforceSizeCompat) {
+        if (inSizeCompatMode()) {
             winY *= mGlobalScale;
         }
         return winY;
@@ -4233,12 +4269,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void calculatePolicyCrop(Rect policyCrop) {
         final DisplayContent displayContent = getDisplayContent();
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
 
-        if (!isDefaultDisplay()) {
+        if (!displayContent.isDefaultDisplay && !displayContent.supportsSystemDecorations()) {
             // On a different display there is no system decor. Crop the window
             // by the screen boundaries.
-            // TODO(multi-display)
+            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             policyCrop.set(0, 0, mWindowFrames.mCompatFrame.width(),
                     mWindowFrames.mCompatFrame.height());
             policyCrop.intersect(-mWindowFrames.mCompatFrame.left, -mWindowFrames.mCompatFrame.top,
@@ -4304,7 +4339,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // scale function because we want to round things to make the crop
         // always round to a larger rect to ensure we don't crop too
         // much and hide part of the window that should be seen.
-        if (mEnforceSizeCompat && mInvGlobalScale != 1.0f) {
+        if (inSizeCompatMode() && mInvGlobalScale != 1.0f) {
             final float scale = mInvGlobalScale;
             systemDecorRect.left = (int) (systemDecorRect.left * scale - 0.5f);
             systemDecorRect.top = (int) (systemDecorRect.top * scale - 0.5f);
@@ -4664,8 +4699,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Since the parent was outset by its surface insets, we need to undo the outsetting
             // with insetting by the same amount.
             final WindowState parent = getParentWindow();
-            outPoint.offset(-parent.mWindowFrames.mFrame.left + parent.mAttrs.surfaceInsets.left,
-                    -parent.mWindowFrames.mFrame.top + parent.mAttrs.surfaceInsets.top);
+            transformSurfaceInsetsPosition(mTmpPoint, parent.mAttrs.surfaceInsets);
+            outPoint.offset(-parent.mWindowFrames.mFrame.left + mTmpPoint.x,
+                    -parent.mWindowFrames.mFrame.top + mTmpPoint.y);
         } else if (parentWindowContainer != null) {
             final Rect parentBounds = parentWindowContainer.getDisplayedBounds();
             outPoint.offset(-parentBounds.left, -parentBounds.top);
@@ -4683,7 +4719,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         // Expand for surface insets. See WindowState.expandForSurfaceInsets.
-        outPoint.offset(-mAttrs.surfaceInsets.left, -mAttrs.surfaceInsets.top);
+        transformSurfaceInsetsPosition(mTmpPoint, mAttrs.surfaceInsets);
+        outPoint.offset(-mTmpPoint.x, -mTmpPoint.y);
+    }
+
+    /**
+     * The surface insets from layout parameter are in application coordinate. If the window is
+     * scaled, the insets also need to be scaled for surface position in global coordinate.
+     */
+    private void transformSurfaceInsetsPosition(Point outPos, Rect surfaceInsets) {
+        if (!inSizeCompatMode()) {
+            outPos.x = surfaceInsets.left;
+            outPos.y = surfaceInsets.top;
+            return;
+        }
+        outPos.x = (int) (surfaceInsets.left * mGlobalScale + 0.5f);
+        outPos.y = (int) (surfaceInsets.top * mGlobalScale + 0.5f);
     }
 
     boolean needsRelativeLayeringToIme() {
