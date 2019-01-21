@@ -203,6 +203,7 @@ message Atom {
         SeStateChanged se_state_changed = 140;
         SeOmapiReported se_omapi_reported = 141;
         BroadcastDispatchLatencyReported broadcast_dispatch_latency_reported = 142;
+        AttentionManagerServiceResultReported attention_manager_service_result_reported = 143;
     }
 
     // Pulled events will start at field 10000.
@@ -4469,11 +4470,30 @@ message SeOmapiReported {
 }
 
 /**
-  * Logs the dispatch latencey of a broadcast during processing of BOOT_COMPLETED.
-  * The dispatch latencey is the dispatchClockTime - enqueueClockTime.
+  * Logs the dispatch latency of a broadcast during processing of BOOT_COMPLETED.
+  * The dispatch latency is the dispatchClockTime - enqueueClockTime.
   * Logged from:
   *   frameworks/base/services/core/java/com/android/server/am/BroadcastQueue.java
   */
 message BroadcastDispatchLatencyReported {
-  optional int64 dispatch_latency_millis = 1;
+    optional int64 dispatch_latency_millis = 1;
+}
+
+/**
+   * Logs AttentionManagerService attention check result.
+   *
+   * Logged from:
+   *   frameworks/base/services/core/java/com/android/server/attention/AttentionManagerService.java
+   */
+message AttentionManagerServiceResultReported {
+    // See core/java/android/service/attention/AttentionService.java
+    enum AttentionCheckResult {
+        UNKNOWN = 20;
+        ATTENTION_SUCCESS_ABSENT = 0;
+        ATTENTION_SUCCESS_PRESENT = 1;
+        ATTENTION_FAILURE_PREEMPTED = 2;
+        ATTENTION_FAILURE_TIMED_OUT = 3;
+        ATTENTION_FAILURE_UNKNOWN = 4;
+    }
+    optional AttentionCheckResult attention_check_result = 1 [default = UNKNOWN];
 }
