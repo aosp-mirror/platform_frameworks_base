@@ -357,8 +357,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageManager pm = context.getPackageManager();
         try {
             PackageInstaller packageInstaller = pm.getPackageInstaller();
+            String installerPackageName = pm.getInstallerPackageName(targetPackageName);
+            if (installerPackageName == null) {
+                sendFailure(statusReceiver, "Cannot find installer package");
+                return;
+            }
             PackageInstaller.SessionParams parentParams = new PackageInstaller.SessionParams(
                     PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+            parentParams.setInstallerPackageName(installerPackageName);
             parentParams.setAllowDowngrade(true);
             parentParams.setMultiPackage();
             int parentSessionId = packageInstaller.createSession(parentParams);
@@ -367,6 +373,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             for (PackageRollbackInfo info : data.packages) {
                 PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+                params.setInstallerPackageName(installerPackageName);
                 params.setAllowDowngrade(true);
                 int sessionId = packageInstaller.createSession(params);
                 PackageInstaller.Session session = packageInstaller.openSession(sessionId);
