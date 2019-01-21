@@ -16,9 +16,9 @@
 
 package android.net.util;
 
-import static android.net.MacAddress.ALL_ZEROS_ADDRESS;
 import static android.net.util.NetworkConstants.ETHER_MTU;
 import static android.net.util.NetworkConstants.IPV6_MIN_MTU;
+
 import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.net.MacAddress;
@@ -67,7 +67,8 @@ public class InterfaceParams {
         checkArgument((index > 0), "invalid interface index");
         this.name = name;
         this.index = index;
-        this.macAddr = (macAddr != null) ? macAddr : ALL_ZEROS_ADDRESS;
+        this.macAddr = (macAddr != null) ? macAddr : MacAddress.fromBytes(new byte[] {
+                0x02, 0x00, 0x00, 0x00, 0x00, 0x00 });
         this.defaultMtu = (defaultMtu > IPV6_MIN_MTU) ? defaultMtu : IPV6_MIN_MTU;
     }
 

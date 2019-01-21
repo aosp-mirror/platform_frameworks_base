@@ -26,6 +26,7 @@ import static android.system.OsConstants.RT_SCOPE_SITE;
 import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -117,7 +118,8 @@ public class LinkAddress implements Parcelable {
      * @return true if the address is IPv6.
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
+    @SystemApi
     public boolean isIPv6() {
         return address instanceof Inet6Address;
     }
@@ -126,6 +128,8 @@ public class LinkAddress implements Parcelable {
      * @return true if the address is IPv4 or is a mapped IPv4 address.
      * @hide
      */
+    @TestApi
+    @SystemApi
     public boolean isIPv4() {
         return address instanceof Inet4Address;
     }
@@ -263,7 +267,8 @@ public class LinkAddress implements Parcelable {
      * otherwise.
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
+    @SystemApi
     public boolean isSameAddressAs(LinkAddress other) {
         return address.equals(other.address) && prefixLength == other.prefixLength;
     }
@@ -310,6 +315,8 @@ public class LinkAddress implements Parcelable {
      * Returns true if this {@code LinkAddress} is global scope and preferred.
      * @hide
      */
+    @TestApi
+    @SystemApi
     public boolean isGlobalPreferred() {
         /**
          * Note that addresses flagged as IFA_F_OPTIMISTIC are

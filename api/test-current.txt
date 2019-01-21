@@ -602,9 +602,27 @@ package android.net {
     field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
   }
 
+  public class LinkAddress implements android.os.Parcelable {
+    method public boolean isGlobalPreferred();
+    method public boolean isIPv4();
+    method public boolean isIPv6();
+    method public boolean isSameAddressAs(android.net.LinkAddress);
+  }
+
+  public class Network implements android.os.Parcelable {
+    method public android.net.Network getPrivateDnsBypassingCopy();
+  }
+
   public final class NetworkCapabilities implements android.os.Parcelable {
     method public int[] getCapabilities();
     method public int[] getTransportTypes();
+  }
+
+  public final class RouteInfo implements android.os.Parcelable {
+    method public int getType();
+    field public static final int RTN_THROW = 9; // 0x9
+    field public static final int RTN_UNICAST = 1; // 0x1
+    field public static final int RTN_UNREACHABLE = 7; // 0x7
   }
 
   public class TrafficStats {
