@@ -20,6 +20,7 @@ import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.sideBars;
 import static android.view.WindowInsets.Type.topBar;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Insets;
@@ -72,5 +73,30 @@ public class WindowInsetsTest {
         WindowInsets insets = b.build();
         assertEquals(Insets.of(0, 50, 0, 0), insets.getInsets(topBar()));
         assertEquals(Insets.of(0, 0, 30, 10), insets.getInsets(sideBars()));
+    }
+
+    // TODO: Move this to CTS once API made public
+    @Test
+    public void visibility() {
+        Builder b = new WindowInsets.Builder();
+        b.setInsets(sideBars(), Insets.of(0, 0, 0, 100));
+        b.setInsets(ime(), Insets.of(0, 0, 0, 300));
+        b.setVisible(sideBars(), true);
+        b.setVisible(ime(), true);
+        WindowInsets insets = b.build();
+        assertTrue(insets.isVisible(sideBars()));
+        assertTrue(insets.isVisible(sideBars() | ime()));
+        assertFalse(insets.isVisible(sideBars() | topBar()));
+    }
+
+    // TODO: Move this to CTS once API made public
+    @Test
+    public void consume_doesntChangeVisibility() {
+        Builder b = new WindowInsets.Builder();
+        b.setInsets(ime(), Insets.of(0, 0, 0, 300));
+        b.setVisible(ime(), true);
+        WindowInsets insets = b.build();
+        insets = insets.consumeSystemWindowInsets();
+        assertTrue(insets.isVisible(ime()));
     }
 }

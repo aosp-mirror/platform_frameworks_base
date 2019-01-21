@@ -148,6 +148,10 @@ class InsetsStateController {
      *                          and visibility.
      */
     void onBarControllingWindowChanged(@Nullable WindowState controllingWindow) {
+        if (sNewInsetsMode != NEW_INSETS_MODE_FULL) {
+            return;
+        }
+
         // TODO: Apply policy that determines whether controllingWindow is able to control system
         // bars
 

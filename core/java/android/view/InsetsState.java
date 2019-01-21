@@ -16,7 +16,10 @@
 
 package android.view;
 
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
+import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.indexOf;
 
 import android.annotation.IntDef;
@@ -124,9 +127,10 @@ public class InsetsState implements Parcelable {
             @Nullable @InsetSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
+        boolean[] typeVisibilityMap = new boolean[SIZE];
         final Rect relativeFrame = new Rect(frame);
         final Rect relativeFrameMax = new Rect(frame);
-        if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_IME
+        if (ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
                 && legacyContentInsets != null && legacyStableInsets != null) {
             WindowInsets.assignCompatInsets(typeInsetsMap, legacyContentInsets);
             WindowInsets.assignCompatInsets(typeMaxInsetsMap, legacyStableInsets);
@@ -136,22 +140,29 @@ public class InsetsState implements Parcelable {
             if (source == null) {
                 continue;
             }
+            if (ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
+                    && (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR)) {
+                typeVisibilityMap[indexOf(toPublicType(type))] = source.isVisible();
+                continue;
+            }
+
             processSource(source, relativeFrame, false /* ignoreVisibility */, typeInsetsMap,
-                    typeSideMap);
+                    typeSideMap, typeVisibilityMap);
 
             // IME won't be reported in max insets as the size depends on the EditorInfo of the IME
             // target.
             if (source.getType() != TYPE_IME) {
                 processSource(source, relativeFrameMax, true /* ignoreVisibility */,
-                        typeMaxInsetsMap, null /* typeSideMap */);
+                        typeMaxInsetsMap, null /* typeSideMap */, null /* typeVisibilityMap */);
             }
         }
-        return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, isScreenRound,
+        return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
                 alwaysConsumeNavBar, cutout);
     }
 
     private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,
-            Insets[] typeInsetsMap, @Nullable @InsetSide SparseIntArray typeSideMap) {
+            Insets[] typeInsetsMap, @Nullable @InsetSide SparseIntArray typeSideMap,
+            @Nullable boolean[] typeVisibilityMap) {
         Insets insets = source.calculateInsets(relativeFrame, ignoreVisibility);
 
         int index = indexOf(toPublicType(source.getType()));
@@ -160,6 +171,10 @@ public class InsetsState implements Parcelable {
             typeInsetsMap[index] = insets;
         } else {
             typeInsetsMap[index] = Insets.max(existing, insets);
+        }
+
+        if (typeVisibilityMap != null) {
+            typeVisibilityMap[index] = source.isVisible();
         }
 
         if (typeSideMap != null && !Insets.NONE.equals(insets)) {
