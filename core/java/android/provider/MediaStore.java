@@ -46,6 +46,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -86,8 +87,10 @@ public final class MediaStore {
     /** A content:// style uri to the authority for the media provider */
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
-    private static final String VOLUME_INTERNAL = "internal";
-    private static final String VOLUME_EXTERNAL = "external";
+    /** {@hide} */
+    public static final String VOLUME_INTERNAL = "internal";
+    /** {@hide} */
+    public static final String VOLUME_EXTERNAL = "external";
 
     /**
      * The method name used by the media scanner and mtp to tell the media provider to
@@ -1027,7 +1030,7 @@ public final class MediaStore {
 
         /** @hide */
         public static final Uri getContentUriForPath(String path) {
-            return getContentUri(getVolumeNameForPath(path));
+            return getContentUri(getVolumeName(new File(path)));
         }
 
         /**
@@ -1197,7 +1200,7 @@ public final class MediaStore {
 
         /** @hide */
         public static Uri getContentUriForPath(@NonNull String path) {
-            return getContentUri(getVolumeNameForPath(path));
+            return getContentUri(getVolumeName(new File(path)));
         }
 
         /** @hide */
@@ -1211,16 +1214,20 @@ public final class MediaStore {
         }
     }
 
-    private static String getVolumeNameForPath(@NonNull String path) {
-        final StorageManager sm = AppGlobals.getInitialApplication()
-                .getSystemService(StorageManager.class);
-        final StorageVolume sv = sm.getStorageVolume(new File(path));
-        if (sv != null) {
-            if (sv.isPrimary()) {
-                return VOLUME_EXTERNAL;
-            } else {
-                return sv.getUuid();
+    /** {@hide} */
+    public static @NonNull String getVolumeName(@NonNull File path) {
+        if (FileUtils.contains(Environment.getStorageDirectory(), path)) {
+            final StorageManager sm = AppGlobals.getInitialApplication()
+                    .getSystemService(StorageManager.class);
+            final StorageVolume sv = sm.getStorageVolume(path);
+            if (sv != null) {
+                if (sv.isPrimary()) {
+                    return VOLUME_EXTERNAL;
+                } else {
+                    return checkArgumentVolumeName(sv.getUuid());
+                }
             }
+            throw new IllegalStateException("Unknown volume at " + path);
         } else {
             return VOLUME_INTERNAL;
         }
@@ -1991,7 +1998,7 @@ public final class MediaStore {
              *             access this path.
              */
             public static @Nullable Uri getContentUriForPath(@NonNull String path) {
-                return getContentUri(getVolumeNameForPath(path));
+                return getContentUri(getVolumeName(new File(path)));
             }
 
             /**
@@ -2908,7 +2915,7 @@ public final class MediaStore {
         final Set<String> volumeNames = new ArraySet<>();
         volumeNames.add(VOLUME_INTERNAL);
         for (VolumeInfo vi : sm.getVolumes()) {
-            if (vi.isMountedReadable()) {
+            if (vi.isVisibleForUser(UserHandle.myUserId()) && vi.isMountedReadable()) {
                 if (vi.isPrimary()) {
                     volumeNames.add(VOLUME_EXTERNAL);
                 } else {
@@ -2927,14 +2934,41 @@ public final class MediaStore {
         if (uri.getAuthority().equals(AUTHORITY) && segments != null && segments.size() > 0) {
             return segments.get(0);
         } else {
-            throw new IllegalArgumentException("Not a media Uri: " + uri);
+            throw new IllegalArgumentException("Missing volume name: " + uri);
         }
+    }
+
+    /** {@hide} */
+    public static @NonNull String checkArgumentVolumeName(@NonNull String volumeName) {
+        if (TextUtils.isEmpty(volumeName)) {
+            throw new IllegalArgumentException();
+        }
+
+        if (VOLUME_INTERNAL.equals(volumeName)) {
+            return volumeName;
+        } else if (VOLUME_EXTERNAL.equals(volumeName)) {
+            return volumeName;
+        }
+
+        // When not one of the well-known values above, it must be a hex UUID
+        for (int i = 0; i < volumeName.length(); i++) {
+            final char c = volumeName.charAt(i);
+            if (('a' <= c && c <= 'f') || ('A' <= c && c <= 'F')
+                    || ('0' <= c && c <= '9') || (c == '-')) {
+                continue;
+            } else {
+                throw new IllegalArgumentException("Invalid volume name: " + volumeName);
+            }
+        }
+        return volumeName;
     }
 
     /** {@hide} */
     public static @NonNull File getVolumePath(@NonNull String volumeName)
             throws FileNotFoundException {
-        Objects.requireNonNull(volumeName);
+        if (TextUtils.isEmpty(volumeName)) {
+            throw new IllegalArgumentException();
+        }
 
         if (VOLUME_INTERNAL.equals(volumeName)) {
             return Environment.getDataDirectory();

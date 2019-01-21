@@ -54,6 +54,8 @@ public class NotificationTestHelper {
     public static final String PKG = "com.android.systemui";
     /** System UI id for testing purposes. */
     public static final int UID = 1000;
+    /** Current {@link UserHandle} of the system. */
+    public static final UserHandle USER_HANDLE = UserHandle.of(ActivityManager.getCurrentUser());
 
     private static final String GROUP_KEY = "gruKey";
 
@@ -78,7 +80,7 @@ public class NotificationTestHelper {
      * @throws Exception
      */
     public ExpandableNotificationRow createRow() throws Exception {
-        return createRow(PKG, UID);
+        return createRow(PKG, UID, USER_HANDLE);
     }
 
     /**
@@ -89,8 +91,9 @@ public class NotificationTestHelper {
      * @return a row with a notification using the package and user id
      * @throws Exception
      */
-    public ExpandableNotificationRow createRow(String pkg, int uid) throws Exception {
-        return createRow(pkg, uid, false /* isGroupSummary */, null /* groupKey */);
+    public ExpandableNotificationRow createRow(String pkg, int uid, UserHandle userHandle)
+            throws Exception {
+        return createRow(pkg, uid, userHandle, false /* isGroupSummary */, null /* groupKey */);
     }
 
     /**
@@ -101,7 +104,7 @@ public class NotificationTestHelper {
      * @throws Exception
      */
     public ExpandableNotificationRow createRow(Notification notification) throws Exception {
-        return generateRow(notification, PKG, UID, 0 /* extraInflationFlags */);
+        return generateRow(notification, PKG, UID, USER_HANDLE, 0 /* extraInflationFlags */);
     }
 
     /**
@@ -114,7 +117,7 @@ public class NotificationTestHelper {
      */
     public ExpandableNotificationRow createRow(@InflationFlag int extraInflationFlags)
             throws Exception {
-        return generateRow(createNotification(), PKG, UID, extraInflationFlags);
+        return generateRow(createNotification(), PKG, UID, USER_HANDLE, extraInflationFlags);
     }
 
     /**
@@ -136,11 +139,11 @@ public class NotificationTestHelper {
     }
 
     private ExpandableNotificationRow createGroupSummary(String groupkey) throws Exception {
-        return createRow(PKG, UID, true /* isGroupSummary */, groupkey);
+        return createRow(PKG, UID, USER_HANDLE, true /* isGroupSummary */, groupkey);
     }
 
     private ExpandableNotificationRow createGroupChild(String groupkey) throws Exception {
-        return createRow(PKG, UID, false /* isGroupSummary */, groupkey);
+        return createRow(PKG, UID, USER_HANDLE, false /* isGroupSummary */, groupkey);
     }
 
     /**
@@ -149,7 +152,7 @@ public class NotificationTestHelper {
     public ExpandableNotificationRow createBubble() throws Exception {
         Notification n = createNotification(false /* isGroupSummary */,
                 null /* groupKey */, true /* isBubble */);
-        return generateRow(n, PKG, UID, 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+        return generateRow(n, PKG, UID, USER_HANDLE, 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
     }
 
     /**
@@ -166,11 +169,12 @@ public class NotificationTestHelper {
     private ExpandableNotificationRow createRow(
             String pkg,
             int uid,
+            UserHandle userHandle,
             boolean isGroupSummary,
             @Nullable String groupKey)
             throws Exception {
         Notification notif = createNotification(isGroupSummary, groupKey);
-        return generateRow(notif, pkg, uid, 0 /* inflationFlags */);
+        return generateRow(notif, pkg, uid, userHandle, 0 /* inflationFlags */);
     }
 
     /**
@@ -230,15 +234,18 @@ public class NotificationTestHelper {
             Notification notification,
             String pkg,
             int uid,
+            UserHandle userHandle,
             @InflationFlag int extraInflationFlags)
             throws Exception {
-        return generateRow(notification, pkg, uid, extraInflationFlags, IMPORTANCE_DEFAULT);
+        return generateRow(notification, pkg, uid, userHandle, extraInflationFlags,
+                IMPORTANCE_DEFAULT);
     }
 
     private ExpandableNotificationRow generateRow(
             Notification notification,
             String pkg,
             int uid,
+            UserHandle userHandle,
             @InflationFlag int extraInflationFlags,
             int importance)
             throws Exception {
@@ -252,7 +259,6 @@ public class NotificationTestHelper {
         row.setGroupManager(mGroupManager);
         row.setHeadsUpManager(mHeadsUpManager);
         row.setAboveShelfChangedListener(aboveShelf -> {});
-        UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
         StatusBarNotification sbn = new StatusBarNotification(
                 pkg,
                 pkg,
@@ -261,7 +267,7 @@ public class NotificationTestHelper {
                 uid,
                 2000 /* initialPid */,
                 notification,
-                mUser,
+                userHandle,
                 null /* overrideGroupKey */,
                 System.currentTimeMillis());
         NotificationEntry entry = new NotificationEntry(sbn);

@@ -1,27 +1,28 @@
+// Signature format: 2.0
 package com.android.location.provider {
 
-  public abstract deprecated class FusedProvider {
-    ctor public FusedProvider();
-    method public android.os.IBinder getBinder();
+  @Deprecated public abstract class FusedProvider {
+    ctor @Deprecated public FusedProvider();
+    method @Deprecated public android.os.IBinder getBinder();
   }
 
   public abstract class LocationProviderBase {
-    ctor public LocationProviderBase(java.lang.String, com.android.location.provider.ProviderPropertiesUnbundled);
+    ctor public LocationProviderBase(String, com.android.location.provider.ProviderPropertiesUnbundled);
     method public android.os.IBinder getBinder();
     method public boolean isEnabled();
-    method protected deprecated void onDisable();
-    method protected void onDump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
-    method protected deprecated void onEnable();
-    method protected deprecated int onGetStatus(android.os.Bundle);
-    method protected deprecated long onGetStatusUpdateTime();
+    method @Deprecated protected void onDisable();
+    method protected void onDump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
+    method @Deprecated protected void onEnable();
+    method @Deprecated protected int onGetStatus(android.os.Bundle);
+    method @Deprecated protected long onGetStatusUpdateTime();
     method protected void onInit();
-    method protected boolean onSendExtraCommand(java.lang.String, android.os.Bundle);
+    method protected boolean onSendExtraCommand(@Nullable String, @Nullable android.os.Bundle);
     method protected abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
     method public void reportLocation(android.location.Location);
     method public void setEnabled(boolean);
     method public void setProperties(com.android.location.provider.ProviderPropertiesUnbundled);
-    field public static final java.lang.String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
-    field public static final java.lang.String FUSED_PROVIDER = "fused";
+    field public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
+    field public static final String FUSED_PROVIDER = "fused";
   }
 
   public final class LocationRequestUnbundled {

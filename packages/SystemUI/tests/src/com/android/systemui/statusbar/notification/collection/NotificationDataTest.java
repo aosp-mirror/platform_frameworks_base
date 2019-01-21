@@ -44,6 +44,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
 import android.media.session.MediaSession;
 import android.os.Bundle;
+import android.os.Process;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
@@ -140,7 +141,8 @@ public class NotificationDataTest extends SysuiTestCase {
         ExpandableNotificationRow row2 = new NotificationTestHelper(getContext()).createRow();
         mNotificationData.add(row2.getEntry());
         ExpandableNotificationRow diffPkg =
-                new NotificationTestHelper(getContext()).createRow("pkg", 4000);
+                new NotificationTestHelper(getContext()).createRow("pkg", 4000,
+                        Process.myUserHandle());
         mNotificationData.add(diffPkg.getEntry());
 
         ArraySet<Integer> expectedOps = new ArraySet<>();

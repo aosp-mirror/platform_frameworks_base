@@ -533,11 +533,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"നിങ്ങളുടെ മീഡിയ ശേഖരത്തിൽ നിന്നും ലൊക്കേഷനുകൾ റീഡ് ചെയ്യുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> ആപ്പിന് നിങ്ങളെ പരിശോധിച്ചുറപ്പിക്കണം."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ബയോമെട്രിക് ഹാർ‌ഡ്‌വെയർ ലഭ്യമല്ല"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കി"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"തിരിച്ചറിഞ്ഞില്ല"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കി"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"വിരലടയാളം ഭാഗികമായി തിരിച്ചറിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"വിരലടയാളം പ്രോസസ്സ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"വിരലടയാള സെൻസറിന് വൃത്തിയില്ല. അത് ശുചിയാക്കി വീണ്ടും ശ്രമിക്കുക."</string>
@@ -1980,11 +1978,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"ക്യാമറ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"മൈക്രോഫോൺ"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"നിങ്ങളുടെ സ്‌ക്രീനിലെ മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുന്നു"</string>
-    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
-    <skip />
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"ദിനചര്യ മോഡ് വിവരത്തെ കുറിച്ചുള്ള അറിയിപ്പ്"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"സാധാരണയുള്ളതിലും നേരത്തെ ബാറ്ററിയുടെ ചാർജ് തീർന്നേക്കാം"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ബാറ്ററി ലൈഫ് വര്‍ദ്ധിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ സജീവമാക്കി"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ലോഡ് ചെയ്യുന്നു"</string>
 </resources>

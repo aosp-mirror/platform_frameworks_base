@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
@@ -28,6 +29,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.Editable;
 import android.text.SpannedString;
 import android.text.TextWatcher;
@@ -283,6 +285,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         focus();
     }
 
+    private static UserHandle computeTextOperationUser(UserHandle notificationUser) {
+        return UserHandle.ALL.equals(notificationUser)
+                ? UserHandle.of(ActivityManager.getCurrentUser()) : notificationUser;
+    }
+
     public void focus() {
         MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_OPEN,
                 mEntry.notification.getPackageName());
@@ -291,6 +298,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (mWrapper != null) {
             mWrapper.setRemoteInputVisible(true);
         }
+        mEditText.setTextOperationUser(computeTextOperationUser(mEntry.notification.getUser()));
         mEditText.setInnerFocusable(true);
         mEditText.mShowImeOnInputConnection = true;
         mEditText.setText(mEntry.remoteInputText);
@@ -320,6 +328,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mResetting = true;
         mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
 
+        mEditText.setTextOperationUser(null);
         mEditText.getText().clear();
         mEditText.setEnabled(true);
         mSendButton.setVisibility(VISIBLE);

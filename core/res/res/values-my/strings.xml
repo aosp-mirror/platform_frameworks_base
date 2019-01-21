@@ -533,11 +533,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"အက်ပ်အား သင့်မီဒီယာစုစည်းမှုမှ တည်နေရာများကို ဖတ်ခွင့်ပေးသည်။"</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"အပလီကေးရှင်း <xliff:g id="APP">%s</xliff:g> က အထောက်အထားစိစစ်လိုသည်။"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ဇီဝအချက်အလက်သုံး ကွန်ပျူတာစက်ပစ္စည်း မရရှိနိုင်ပါ"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"မသိပါ"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"လက်ဗွေရဦ တစ်ပိုင်းတစ်စ တွေ့ရှိသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"လက်ဗွေရာယူခြင်း မဆောင်ရွက်နိုင်ပါ။ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"လက်ဗွေရာဖတ်ကိရိယာ ညစ်ပေနေသည်။ ကျေးဇူးပြု၍ ရှင်းလင်းကာ ထပ်မံကြိုးစားပါ။"</string>

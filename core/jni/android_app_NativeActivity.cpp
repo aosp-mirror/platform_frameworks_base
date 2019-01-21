@@ -286,6 +286,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
                                      sdkVersion,
                                      pathStr.c_str(),
                                      classLoader,
+                                     nullptr,
                                      libraryPath,
                                      &needs_native_bridge,
                                      &nativeloader_error_msg);

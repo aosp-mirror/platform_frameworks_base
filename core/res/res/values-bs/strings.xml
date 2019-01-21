@@ -155,9 +155,9 @@
     <string name="httpErrorOk" msgid="1191919378083472204">"Uredu"</string>
     <string name="httpError" msgid="7956392511146698522">"Došlo je do greške na mreži."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"Pronalaženje URL-a nije uspjelo."</string>
-    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Shema za provjeru vjerodostojnosti stranice nije podržana."</string>
-    <string name="httpErrorAuth" msgid="1435065629438044534">"Došlo je do greške prilikom provjere vjerodostojnosti."</string>
-    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Došlo je do greške prilikom provjere vjerodostojnosti preko proksi servera."</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Shema za autentifikaciju stranice nije podržana."</string>
+    <string name="httpErrorAuth" msgid="1435065629438044534">"Došlo je do greške prilikom autentifikacije."</string>
+    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Došlo je do greške prilikom autentifikacije preko proksi servera."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"Povezivanje sa serverom nije uspjelo."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"Veza sa serverom nije uspostavljena. Pokušajte ponovo kasnije."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Vrijeme za uspostavljanje veze sa serverom je isteklo."</string>
@@ -519,7 +519,7 @@
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"upravljanje hardverom za otiske prstiju"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Omogućava aplikaciji da koristi metode za dodavanje i brisanje šablona otisaka prstiju za upotrebu."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"korištenje hardvera za otiske prstiju"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Omogućava aplikaciji da za provjeru vjerodostojnosti koristi hardver za otiske prstiju"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Omogućava aplikaciji da za autentifikaciju koristi hardver za otiske prstiju"</string>
     <string name="permlab_audioRead" msgid="6617225220728465565">"čitanje muzičke kolekcije"</string>
     <string name="permdesc_audioRead" msgid="5034032570243484805">"Omogućava aplikaciji da čita vašu muzičku kolekciju."</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"izmjena muzičke kolekcije"</string>
@@ -536,11 +536,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Omogućava aplikaciji da čita lokacije iz vaše kolekcije medija."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Aplikacija <xliff:g id="APP">%s</xliff:g> traži autentifikaciju."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrijski hardver nije dostupan"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Autentifikacija je otkazana"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Nije prepoznato"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"Autentifikacija je otkazana"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Otkriven je djelomičan otisak prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nije uspjela obrada otiska prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Senzor za otisak prsta je prljav. Očistite ga i pokušajte ponovo."</string>
@@ -1645,7 +1643,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Ponovo unesite ispravan PUK kôd. Ponovljeni pokušaji će trajno onemogućiti SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-ovi se ne poklapaju"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Previše pokušaja otključavanja pomoću uzorka"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Da otključate, prijavite se sa svojim Google računom."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Da otključate, prijavite se pomoću svog Google računa."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Korisničko ime (adresa e-pošte)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Lozinka"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Prijava"</string>

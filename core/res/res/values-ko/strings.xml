@@ -533,11 +533,9 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"앱에서 미디어 컬렉션의 위치를 읽도록 허용합니다."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> 애플리케이션에서 인증을 요청합니다"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"생체 인식 하드웨어를 사용할 수 없음"</string>
-    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
-    <skip />
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"인증이 취소되었습니다."</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"인식할 수 없음"</string>
-    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
-    <skip />
+    <string name="biometric_error_canceled" msgid="349665227864885880">"인증이 취소되었습니다."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"지문이 일부만 인식되었습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"지문 센서를 깨끗이 닦고 다시 시도하세요."</string>
@@ -1979,11 +1977,8 @@
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"카메라"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"마이크"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"화면에서 다른 앱 위에 표시"</string>
-    <!-- no translation found for dynamic_mode_notification_channel_name (2348803891571320452) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_title (508815255807182035) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (2541166298550402690) -->
-    <skip />
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"루틴 모드 정보 알림"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"평소에 충전하는 시간 전에 배터리가 소진될 수 있습니다."</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"배터리 수명을 연장하기 위해 배터리 세이버가 활성화되었습니다."</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"로드 중"</string>
 </resources>
