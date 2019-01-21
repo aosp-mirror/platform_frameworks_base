@@ -57,7 +57,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_wifi_mac_randomization", "false");
         DEFAULT_FLAGS.put("settings_wifi_sharing", "false");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
-        DEFAULT_FLAGS.put(SAFETY_HUB, "false");
+        DEFAULT_FLAGS.put(SAFETY_HUB, "true");
         DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
         DEFAULT_FLAGS.put(AOD_IMAGEWALLPAPER_ENABLED, "false");
 
