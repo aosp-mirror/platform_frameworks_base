@@ -232,6 +232,17 @@ message MetricsEvent {
     BLOCKING_HELPER_CLICK_UNDO = 7;
   }
 
+  // The (visual) location of a Notification.
+  enum NotificationLocation {
+    LOCATION_UNKNOWN = 0;
+    LOCATION_FIRST_HEADS_UP = 1; // visible heads-up
+    LOCATION_HIDDEN_TOP = 2; // hidden/scrolled away on the top
+    LOCATION_MAIN_AREA = 3; // visible in the shade
+    LOCATION_BOTTOM_STACK_PEEKING = 4; // in the bottom stack, and peeking
+    LOCATION_BOTTOM_STACK_HIDDEN = 5; // in the bottom stack, and hidden
+    LOCATION_GONE = 6; // the view isn't laid out at all
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -6823,6 +6834,13 @@ message MetricsEvent {
     // OPEN: Settings > Display > Adaptive sleep
     // OS: Q
     SETTINGS_ADAPTIVE_SLEEP = 1628;
+
+    // Tagged data for SMART_REPLY_VISIBLE and NOTIFICATION_ITEM_ACTION.
+    // The UI location of the notification containing the smart suggestions.
+    // This is a NotificationLocation object (see the NotificationLocation
+    // enum).
+    // OS: Q
+    NOTIFICATION_LOCATION = 1629;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
