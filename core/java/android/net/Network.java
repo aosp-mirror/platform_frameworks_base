@@ -16,6 +16,8 @@
 
 package android.net;
 
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -157,6 +159,8 @@ public class Network implements Parcelable {
      *
      * @hide
      */
+    @TestApi
+    @SystemApi
     public Network getPrivateDnsBypassingCopy() {
         return new Network(netId, true);
     }
