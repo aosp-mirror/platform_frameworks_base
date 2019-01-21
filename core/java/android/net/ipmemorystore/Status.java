@@ -18,6 +18,8 @@ package android.net.ipmemorystore;
 
 import android.annotation.NonNull;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * A parcelable status representing the result of an operation.
  * Parcels as StatusParceled.
@@ -26,7 +28,10 @@ import android.annotation.NonNull;
 public class Status {
     public static final int SUCCESS = 0;
 
-    public static final int ERROR_DATABASE_CANNOT_BE_OPENED = -1;
+    public static final int ERROR_GENERIC = -1;
+    public static final int ERROR_ILLEGAL_ARGUMENT = -2;
+    public static final int ERROR_DATABASE_CANNOT_BE_OPENED = -3;
+    public static final int ERROR_STORAGE = -4;
 
     public final int resultCode;
 
@@ -34,7 +39,8 @@ public class Status {
         this.resultCode = resultCode;
     }
 
-    Status(@NonNull final StatusParcelable parcelable) {
+    @VisibleForTesting
+    public Status(@NonNull final StatusParcelable parcelable) {
         this(parcelable.resultCode);
     }
 
@@ -55,7 +61,12 @@ public class Status {
     public String toString() {
         switch (resultCode) {
             case SUCCESS: return "SUCCESS";
+            case ERROR_GENERIC: return "GENERIC ERROR";
+            case ERROR_ILLEGAL_ARGUMENT: return "ILLEGAL ARGUMENT";
             case ERROR_DATABASE_CANNOT_BE_OPENED: return "DATABASE CANNOT BE OPENED";
+            // "DB storage error" is not very helpful but SQLite does not provide specific error
+            // codes upon store failure. Thus this indicates SQLite returned some error upon store
+            case ERROR_STORAGE: return "DATABASE STORAGE ERROR";
             default: return "Unknown value ?!";
         }
     }
