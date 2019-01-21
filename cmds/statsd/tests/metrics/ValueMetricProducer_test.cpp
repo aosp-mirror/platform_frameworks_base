@@ -1508,6 +1508,113 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     EXPECT_EQ(5, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
 }
 
+TEST(ValueMetricProducerTest, TestSkipZeroDiffOutputMultiValue) {
+    ValueMetric metric;
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
+    metric.mutable_value_field()->set_field(tagId);
+    metric.mutable_value_field()->add_child()->set_field(2);
+    metric.mutable_value_field()->add_child()->set_field(3);
+    metric.set_aggregation_type(ValueMetric::MIN);
+    metric.set_use_diff(true);
+
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
+
+    shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
+    event1->write(1);
+    event1->write(10);
+    event1->write(20);
+    event1->init();
+    shared_ptr<LogEvent> event2 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 15);
+    event2->write(1);
+    event2->write(15);
+    event2->write(22);
+    event2->init();
+    valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event1);
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
+    ValueMetricProducer::Interval curInterval0 =
+        valueProducer.mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::Interval curInterval1 =
+        valueProducer.mCurrentSlicedBucket.begin()->second[1];
+    EXPECT_EQ(true, curInterval0.hasBase);
+    EXPECT_EQ(10, curInterval0.base.long_value);
+    EXPECT_EQ(false, curInterval0.hasValue);
+    EXPECT_EQ(true, curInterval1.hasBase);
+    EXPECT_EQ(20, curInterval1.base.long_value);
+    EXPECT_EQ(false, curInterval1.hasValue);
+
+    valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event2);
+
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
+    curInterval0 = valueProducer.mCurrentSlicedBucket.begin()->second[0];
+    curInterval1 = valueProducer.mCurrentSlicedBucket.begin()->second[1];
+    EXPECT_EQ(true, curInterval0.hasValue);
+    EXPECT_EQ(5, curInterval0.value.long_value);
+    EXPECT_EQ(true, curInterval1.hasValue);
+    EXPECT_EQ(2, curInterval1.value.long_value);
+
+    // no change in first value field
+    shared_ptr<LogEvent> event3 = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 10);
+    event3->write(1);
+    event3->write(15);
+    event3->write(25);
+    event3->init();
+    valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event3);
+    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
+    curInterval0 = valueProducer.mCurrentSlicedBucket.begin()->second[0];
+    curInterval1 = valueProducer.mCurrentSlicedBucket.begin()->second[1];
+    EXPECT_EQ(true, curInterval0.hasBase);
+    EXPECT_EQ(15, curInterval0.base.long_value);
+    EXPECT_EQ(true, curInterval0.hasValue);
+    EXPECT_EQ(true, curInterval1.hasBase);
+    EXPECT_EQ(25, curInterval1.base.long_value);
+    EXPECT_EQ(true, curInterval1.hasValue);
+
+    shared_ptr<LogEvent> event4 = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 15);
+    event4->write(1);
+    event4->write(15);
+    event4->write(29);
+    event4->init();
+    valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event4);
+    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
+    curInterval0 = valueProducer.mCurrentSlicedBucket.begin()->second[0];
+    curInterval1 = valueProducer.mCurrentSlicedBucket.begin()->second[1];
+    EXPECT_EQ(true, curInterval0.hasBase);
+    EXPECT_EQ(15, curInterval0.base.long_value);
+    EXPECT_EQ(true, curInterval0.hasValue);
+    EXPECT_EQ(true, curInterval1.hasBase);
+    EXPECT_EQ(29, curInterval1.base.long_value);
+    EXPECT_EQ(true, curInterval1.hasValue);
+
+    valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
+
+    EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
+    EXPECT_EQ(2UL, valueProducer.mPastBuckets.begin()->second.size());
+    EXPECT_EQ(2UL, valueProducer.mPastBuckets.begin()->second[0].values.size());
+    EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second[1].values.size());
+
+    EXPECT_EQ(5, valueProducer.mPastBuckets.begin()->second[0].values[0].long_value);
+    EXPECT_EQ(0, valueProducer.mPastBuckets.begin()->second[0].valueIndex[0]);
+    EXPECT_EQ(2, valueProducer.mPastBuckets.begin()->second[0].values[1].long_value);
+    EXPECT_EQ(1, valueProducer.mPastBuckets.begin()->second[0].valueIndex[1]);
+
+    EXPECT_EQ(3, valueProducer.mPastBuckets.begin()->second[1].values[0].long_value);
+    EXPECT_EQ(1, valueProducer.mPastBuckets.begin()->second[1].valueIndex[0]);
+}
+
 /*
  * Tests zero default base.
  */
