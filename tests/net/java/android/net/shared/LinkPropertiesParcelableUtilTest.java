@@ -18,6 +18,7 @@ package android.net.shared;
 
 import static android.net.shared.LinkPropertiesParcelableUtil.fromStableParcelable;
 import static android.net.shared.LinkPropertiesParcelableUtil.toStableParcelable;
+import static android.net.shared.ParcelableTestUtil.assertFieldCountEquals;
 
 import static org.junit.Assert.assertEquals;
 
@@ -35,7 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -100,8 +100,7 @@ public class LinkPropertiesParcelableUtilTest {
         // Verify that this test does not miss any new field added later.
         // If any added field is not included in LinkProperties#equals, assertLinkPropertiesEquals
         // must also be updated.
-        assertEquals(14, Arrays.stream(LinkProperties.class.getDeclaredFields())
-                .filter(f -> !Modifier.isStatic(f.getModifiers())).count());
+        assertFieldCountEquals(14, LinkProperties.class);
 
         return lp;
     }

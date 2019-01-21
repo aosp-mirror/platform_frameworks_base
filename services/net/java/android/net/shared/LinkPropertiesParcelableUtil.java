@@ -16,11 +16,12 @@
 
 package android.net.shared;
 
+import static android.net.shared.IpConfigurationParcelableUtil.parcelAddress;
+import static android.net.shared.IpConfigurationParcelableUtil.unparcelAddress;
 import static android.net.shared.ParcelableUtil.fromParcelableArray;
 import static android.net.shared.ParcelableUtil.toParcelableArray;
 
 import android.annotation.Nullable;
-import android.net.InetAddresses;
 import android.net.IpPrefix;
 import android.net.IpPrefixParcelable;
 import android.net.LinkAddress;
@@ -33,7 +34,6 @@ import android.net.RouteInfo;
 import android.net.RouteInfoParcelable;
 import android.net.Uri;
 
-import java.net.InetAddress;
 import java.util.Arrays;
 
 /**
@@ -81,7 +81,7 @@ public final class LinkPropertiesParcelableUtil {
             return null;
         }
         final IpPrefixParcelable parcel = new IpPrefixParcelable();
-        parcel.address = ipPrefix.getAddress().getHostAddress();
+        parcel.address = parcelAddress(ipPrefix.getAddress());
         parcel.prefixLength = ipPrefix.getPrefixLength();
         return parcel;
     }
@@ -93,7 +93,7 @@ public final class LinkPropertiesParcelableUtil {
         if (parcel == null) {
             return null;
         }
-        return new IpPrefix(InetAddresses.parseNumericAddress(parcel.address), parcel.prefixLength);
+        return new IpPrefix(unparcelAddress(parcel.address), parcel.prefixLength);
     }
 
     /**
@@ -105,7 +105,7 @@ public final class LinkPropertiesParcelableUtil {
         }
         final RouteInfoParcelable parcel = new RouteInfoParcelable();
         parcel.destination = toStableParcelable(routeInfo.getDestination());
-        parcel.gatewayAddr = routeInfo.getGateway().getHostAddress();
+        parcel.gatewayAddr = parcelAddress(routeInfo.getGateway());
         parcel.ifaceName = routeInfo.getInterface();
         parcel.type = routeInfo.getType();
         return parcel;
@@ -120,7 +120,7 @@ public final class LinkPropertiesParcelableUtil {
         }
         final IpPrefix destination = fromStableParcelable(parcel.destination);
         return new RouteInfo(
-                destination, InetAddresses.parseNumericAddress(parcel.gatewayAddr),
+                destination, unparcelAddress(parcel.gatewayAddr),
                 parcel.ifaceName, parcel.type);
     }
 
@@ -132,7 +132,7 @@ public final class LinkPropertiesParcelableUtil {
             return null;
         }
         final LinkAddressParcelable parcel = new LinkAddressParcelable();
-        parcel.address = la.getAddress().getHostAddress();
+        parcel.address = parcelAddress(la.getAddress());
         parcel.prefixLength = la.getPrefixLength();
         parcel.flags = la.getFlags();
         parcel.scope = la.getScope();
@@ -147,7 +147,7 @@ public final class LinkPropertiesParcelableUtil {
             return null;
         }
         return new LinkAddress(
-                InetAddresses.parseNumericAddress(parcel.address),
+                unparcelAddress(parcel.address),
                 parcel.prefixLength,
                 parcel.flags,
                 parcel.scope);
@@ -167,11 +167,11 @@ public final class LinkPropertiesParcelableUtil {
                 LinkPropertiesParcelableUtil::toStableParcelable,
                 LinkAddressParcelable.class);
         parcel.dnses = toParcelableArray(
-                lp.getDnsServers(), InetAddress::getHostAddress, String.class);
+                lp.getDnsServers(), IpConfigurationParcelableUtil::parcelAddress, String.class);
         parcel.pcscfs = toParcelableArray(
-                lp.getPcscfServers(), InetAddress::getHostAddress, String.class);
-        parcel.validatedPrivateDnses = toParcelableArray(
-                lp.getValidatedPrivateDnsServers(), InetAddress::getHostAddress, String.class);
+                lp.getPcscfServers(), IpConfigurationParcelableUtil::parcelAddress, String.class);
+        parcel.validatedPrivateDnses = toParcelableArray(lp.getValidatedPrivateDnsServers(),
+                IpConfigurationParcelableUtil::parcelAddress, String.class);
         parcel.usePrivateDns = lp.isPrivateDnsActive();
         parcel.privateDnsServerName = lp.getPrivateDnsServerName();
         parcel.domains = lp.getDomains();
@@ -199,11 +199,13 @@ public final class LinkPropertiesParcelableUtil {
         lp.setInterfaceName(parcel.ifaceName);
         lp.setLinkAddresses(fromParcelableArray(parcel.linkAddresses,
                 LinkPropertiesParcelableUtil::fromStableParcelable));
-        lp.setDnsServers(fromParcelableArray(parcel.dnses, InetAddresses::parseNumericAddress));
-        lp.setPcscfServers(fromParcelableArray(parcel.pcscfs, InetAddresses::parseNumericAddress));
+        lp.setDnsServers(fromParcelableArray(
+                parcel.dnses, IpConfigurationParcelableUtil::unparcelAddress));
+        lp.setPcscfServers(fromParcelableArray(
+                parcel.pcscfs, IpConfigurationParcelableUtil::unparcelAddress));
         lp.setValidatedPrivateDnsServers(
                 fromParcelableArray(parcel.validatedPrivateDnses,
-                InetAddresses::parseNumericAddress));
+                IpConfigurationParcelableUtil::unparcelAddress));
         lp.setUsePrivateDns(parcel.usePrivateDns);
         lp.setPrivateDnsServerName(parcel.privateDnsServerName);
         lp.setDomains(parcel.domains);
