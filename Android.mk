@@ -87,14 +87,11 @@ $(INTERNAL_PLATFORM_HIDDENAPI_FLAGS): \
     frameworks/base/config/hiddenapi-greylist-max-p.txt \
     frameworks/base/config/hiddenapi-greylist-max-o.txt \
     frameworks/base/config/hiddenapi-force-blacklist.txt \
-    $(INTERNAL_PLATFORM_HIDDENAPI_PUBLIC_LIST) \
-    $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST) \
+    $(INTERNAL_PLATFORM_HIDDENAPI_STUB_FLAGS) \
     $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE) \
     $(SOONG_HIDDENAPI_FLAGS)
 	frameworks/base/tools/hiddenapi/generate_hiddenapi_lists.py \
-	    --public $(INTERNAL_PLATFORM_HIDDENAPI_PUBLIC_LIST) \
-	    --private $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST) \
-	    --csv $(PRIVATE_FLAGS_INPUTS) \
+	    --csv $(INTERNAL_PLATFORM_HIDDENAPI_STUB_FLAGS) $(PRIVATE_FLAGS_INPUTS) \
 	    --greylist frameworks/base/config/hiddenapi-greylist.txt \
 	    --greylist-ignore-conflicts $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE) \
 	    --greylist-max-p frameworks/base/config/hiddenapi-greylist-max-p.txt \

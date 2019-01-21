@@ -17,6 +17,7 @@
 Generate API lists for non-SDK API enforcement.
 """
 import argparse
+from collections import defaultdict
 import os
 import sys
 import re
@@ -73,8 +74,6 @@ def get_args():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', required=True)
-    parser.add_argument('--public', required=True, help='list of all public entries')
-    parser.add_argument('--private', required=True, help='list of all private entries')
     parser.add_argument('--csv', nargs='*', default=[], metavar='CSV_FILE',
         help='CSV files to be merged into output')
 
@@ -118,26 +117,9 @@ def write_lines(filename, lines):
         f.writelines(lines)
 
 class FlagsDict:
-    def __init__(self, public_api, private_api):
-        # Bootstrap the entries dictionary.
-
-        # Check that the two sets do not overlap.
-        public_api_set = set(public_api)
-        private_api_set = set(private_api)
-        assert public_api_set.isdisjoint(private_api_set), (
-            "Lists of public and private API overlap. " +
-            "This suggests an issue with the `hiddenapi` build tool.")
-
-        # Compute the whole key set
-        self._dict_keyset = public_api_set.union(private_api_set)
-
-        # Create a dict that creates entries for both public and private API,
-        # and assigns public API to the whitelist.
-        self._dict = {}
-        for api in public_api:
-            self._dict[api] = set([ FLAG_WHITELIST ])
-        for api in private_api:
-            self._dict[api] = set()
+    def __init__(self):
+        self._dict_keyset = set()
+        self._dict = defaultdict(set)
 
     def _check_entries_set(self, keys_subset, source):
         assert isinstance(keys_subset, set)
@@ -203,14 +185,13 @@ class FlagsDict:
             source (string): Origin of `csv_lines`. Will be printed in error messages.
 
         Throws:
-            AssertionError if parsed API signatures of flags are invalid.
+            AssertionError if parsed flags are invalid.
         """
         # Split CSV lines into arrays of values.
         csv_values = [ line.split(',') for line in csv_lines ]
 
-        # Check that all entries exist in the dict.
-        csv_keys = set([ csv[0] for csv in csv_values ])
-        self._check_entries_set(csv_keys, source)
+        # Update the full set of API signatures.
+        self._dict_keyset.update([ csv[0] for csv in csv_values ])
 
         # Check that all flags are known.
         csv_flags = set(reduce(lambda x, y: set(x).union(y), [ csv[1:] for csv in csv_values ], []))
@@ -245,17 +226,22 @@ def main(argv):
     # Parse arguments.
     args = vars(get_args())
 
-    flags = FlagsDict(read_lines(args["public"]), read_lines(args["private"]))
+    # Initialize API->flags dictionary.
+    flags = FlagsDict()
+
+    # Merge input CSV files into the dictionary.
+    # Do this first because CSV files produced by parsing API stubs will
+    # contain the full set of APIs. Subsequent additions from text files
+    # will be able to detect invalid entries, and/or filter all as-yet
+    # unassigned entries.
+    for filename in args["csv"]:
+        flags.parse_and_merge_csv(read_lines(filename), filename)
 
     # Combine inputs which do not require any particular order.
     # (1) Assign serialization API to whitelist.
     flags.assign_flag(FLAG_WHITELIST, flags.filter_apis(IS_SERIALIZATION))
 
-    # (2) Merge input CSV files into the dictionary.
-    for filename in args["csv"]:
-        flags.parse_and_merge_csv(read_lines(filename), filename)
-
-    # (3) Merge text files with a known flag into the dictionary.
+    # (2) Merge text files with a known flag into the dictionary.
     for flag in FLAGS:
         for filename in args[flag]:
             flags.assign_flag(flag, read_lines(filename), filename)
