@@ -2426,7 +2426,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             mImeWindowVis = vis;
             mBackDisposition = backDisposition;
-            updateSystemUiLocked(token, vis, backDisposition);
+            updateSystemUiLocked(mCurToken, vis, backDisposition);
         }
 
         final boolean dismissImeOnBackKeyPressed;
