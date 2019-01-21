@@ -1654,16 +1654,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @return true if and only if non-null valid token is specified.
      */
     @GuardedBy("mMethodMap")
-    private boolean calledWithValidTokenLocked(@Nullable IBinder token) {
-        if (token == null && Binder.getCallingPid() == Process.myPid()) {
-            if (DEBUG) {
-                // TODO(b/34851776): Basically it's the caller's fault if we reach here.
-                Slog.d(TAG, "Bug 34851776 is detected callers=" + Debug.getCallers(10));
-            }
-            return false;
+    private boolean calledWithValidTokenLocked(@NonNull IBinder token) {
+        if (token == null) {
+            throw new InvalidParameterException("token must not be null.");
         }
-        if (token == null || token != mCurToken) {
-            // TODO(b/34886274): The semantics of this verification is actually not well-defined.
+        if (token != mCurToken) {
             Slog.e(TAG, "Ignoring " + Debug.getCaller() + " due to an invalid token."
                     + " uid:" + Binder.getCallingUid() + " token:" + token);
             return false;
@@ -2419,7 +2414,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     @SuppressWarnings("deprecation")
-    private void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
+    private void setImeWindowStatus(@NonNull IBinder token, int vis, int backDisposition) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -2447,7 +2442,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void reportStartInput(IBinder token, IBinder startInputToken) {
+    private void reportStartInput(@NonNull IBinder token, IBinder startInputToken) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -3182,7 +3177,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void setInputMethod(IBinder token, String id) {
+    private void setInputMethod(@NonNull IBinder token, String id) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -3192,7 +3187,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
+    private void setInputMethodAndSubtype(@NonNull IBinder token, String id,
+            InputMethodSubtype subtype) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -3221,7 +3217,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private boolean switchToPreviousInputMethod(IBinder token) {
+    private boolean switchToPreviousInputMethod(@NonNull IBinder token) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return false;
@@ -3293,7 +3289,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private boolean switchToNextInputMethod(IBinder token, boolean onlyCurrentIme) {
+    private boolean switchToNextInputMethod(@NonNull IBinder token, boolean onlyCurrentIme) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return false;
@@ -4380,7 +4376,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void reportFullscreenMode(IBinder token, boolean fullscreen) {
+    private void reportFullscreenMode(@NonNull IBinder token, boolean fullscreen) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -4815,8 +4811,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final class InputMethodPrivilegedOperationsImpl
             extends IInputMethodPrivilegedOperations.Stub {
         private final InputMethodManagerService mImms;
+        @NonNull
         private final IBinder mToken;
-        InputMethodPrivilegedOperationsImpl(InputMethodManagerService imms, IBinder token) {
+        InputMethodPrivilegedOperationsImpl(InputMethodManagerService imms,
+                @NonNull IBinder token) {
             mImms = imms;
             mToken = token;
         }
