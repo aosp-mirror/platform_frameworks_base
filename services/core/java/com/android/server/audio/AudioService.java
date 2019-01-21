@@ -4746,12 +4746,18 @@ public class AudioService extends IAudioService.Stub
 
     private int getA2dpCodec(BluetoothDevice device) {
         synchronized (mA2dpAvrcpLock) {
-            if (mA2dp != null) {
-                BluetoothCodecStatus btCodecStatus = mA2dp.getCodecStatus(device);
-                BluetoothCodecConfig btCodecConfig = btCodecStatus.getCodecConfig();
-                return mapBluetoothCodecToAudioFormat(btCodecConfig.getCodecType());
+            if (mA2dp == null) {
+                return AudioSystem.AUDIO_FORMAT_DEFAULT;
             }
-            return AudioSystem.AUDIO_FORMAT_DEFAULT;
+            BluetoothCodecStatus btCodecStatus = mA2dp.getCodecStatus(device);
+            if (btCodecStatus == null) {
+                return AudioSystem.AUDIO_FORMAT_DEFAULT;
+            }
+            BluetoothCodecConfig btCodecConfig = btCodecStatus.getCodecConfig();
+            if (btCodecConfig == null) {
+                return AudioSystem.AUDIO_FORMAT_DEFAULT;
+            }
+            return mapBluetoothCodecToAudioFormat(btCodecConfig.getCodecType());
         }
     }
 
