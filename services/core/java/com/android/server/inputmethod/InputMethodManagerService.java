@@ -4903,7 +4903,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void notifyUserActionAsync() {
+        public void notifyUserAction() {
             mImms.notifyUserAction(mToken);
         }
     }
