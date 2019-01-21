@@ -28,7 +28,6 @@ import static java.nio.ByteOrder.BIG_ENDIAN;
 
 import android.system.OsConstants;
 import android.util.Log;
-import libcore.io.SizeOf;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
