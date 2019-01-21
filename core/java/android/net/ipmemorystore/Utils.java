@@ -17,18 +17,25 @@
 package android.net.ipmemorystore;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 /** {@hide} */
 public class Utils {
     /** Pretty print */
-    public static String blobToString(final Blob blob) {
-        final StringBuilder sb = new StringBuilder("Blob : [");
-        if (blob.data.length <= 24) {
-            appendByteArray(sb, blob.data, 0, blob.data.length);
+    public static String blobToString(@Nullable final Blob blob) {
+        return "Blob : " + byteArrayToString(null == blob ? null : blob.data);
+    }
+
+    /** Pretty print */
+    public static String byteArrayToString(@Nullable final byte[] data) {
+        if (null == data) return "null";
+        final StringBuilder sb = new StringBuilder("[");
+        if (data.length <= 24) {
+            appendByteArray(sb, data, 0, data.length);
         } else {
-            appendByteArray(sb, blob.data, 0, 16);
+            appendByteArray(sb, data, 0, 16);
             sb.append("...");
-            appendByteArray(sb, blob.data, blob.data.length - 8, blob.data.length);
+            appendByteArray(sb, data, data.length - 8, data.length);
         }
         sb.append("]");
         return sb.toString();
