@@ -16,9 +16,9 @@
 
 package android.database.sqlite;
 
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -104,7 +104,7 @@ public class SQLiteQueryBuilder
      *
      * @param inWhere the chunk of text to append to the WHERE clause.
      */
-    public void appendWhere(CharSequence inWhere) {
+    public void appendWhere(@NonNull CharSequence inWhere) {
         if (mWhereClause == null) {
             mWhereClause = new StringBuilder(inWhere.length() + 16);
         }
@@ -121,7 +121,7 @@ public class SQLiteQueryBuilder
      * @param inWhere the chunk of text to append to the WHERE clause. it will be escaped
      * to avoid SQL injection attacks
      */
-    public void appendWhereEscapeString(String inWhere) {
+    public void appendWhereEscapeString(@NonNull String inWhere) {
         if (mWhereClause == null) {
             mWhereClause = new StringBuilder(inWhere.length() + 16);
         }
