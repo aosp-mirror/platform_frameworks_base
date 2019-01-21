@@ -200,9 +200,7 @@ public class NetworkStack {
             return null;
         }
 
-        synchronized (mPendingNetStackRequests) {
-            return INetworkStackConnector.Stub.asInterface(connector);
-        }
+        return INetworkStackConnector.Stub.asInterface(connector);
     }
 
     private void requestConnector(@NonNull NetworkStackCallback request) {
@@ -217,8 +215,11 @@ public class NetworkStack {
         if (!mNetworkStackStartRequested) {
             // The network stack is not being started in this process, e.g. this process is not
             // the system server. Get a remote connector registered by the system server.
-            mConnector = getRemoteConnector();
-            request.onNetworkStackConnected(mConnector);
+            final INetworkStackConnector connector = getRemoteConnector();
+            synchronized (mPendingNetStackRequests) {
+                mConnector = connector;
+            }
+            request.onNetworkStackConnected(connector);
             return;
         }
 
