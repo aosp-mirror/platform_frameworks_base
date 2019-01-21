@@ -27,6 +27,7 @@ import "frameworks/base/core/proto/android/bluetooth/a2dp/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hci/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hfp/enums.proto";
+import "frameworks/base/core/proto/android/bluetooth/smp/enums.proto";
 import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
@@ -152,6 +153,14 @@ message Atom {
         BluetoothDeviceRssiReported bluetooth_device_rssi_reported = 157;
         BluetoothDeviceFailedContactCounterReported bluetooth_device_failed_contact_counter_reported = 158;
         BluetoothDeviceTxPowerLevelReported bluetooth_device_tx_power_level_reported = 159;
+        BluetoothHciTimeoutReported bluetooth_hci_timeout_reported = 160;
+        BluetoothQualityReportReported bluetooth_quality_report_reported = 161;
+        BluetoothManufacturerInfoReported bluetooth_device_info_reported = 162;
+        BluetoothRemoteVersionInfoReported bluetooth_remote_version_info_reported = 163;
+        BluetoothSdpAttributeReported bluetooth_sdp_attribute_reported = 164;
+        BluetoothBondStateChanged bluetooth_bond_state_changed = 165;
+        BluetoothClassicPairingEventReported bluetooth_classic_pairing_event_reported = 166;
+        BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported = 167;
     }
 
     // Pulled events will start at field 10000.
@@ -1429,13 +1438,284 @@ message BluetoothDeviceTxPowerLevelReported {
     // Range: 0x0000 - 0x0EFF (12 bits)
     // Default: 0xFFFF if the handle is unknown
     optional int32 connection_handle = 2;
-    // HCI command status code if this is triggerred by hci_cmd
+    // HCI command status code if this is triggered by hci_cmd
     // Default: STATUS_UNKNOWN
     optional android.bluetooth.hci.StatusEnum hci_status = 3;
     // Range: -30 ≤ N ≤ 20
     // Units: dBm
     // Invalid when an out of range value is reported
     optional int32 transmit_power_level = 4;
+}
+
+/**
+ * Logs when Bluetooth controller failed to reply with command status within a timeout period after
+ * receiving an HCI command from the host
+ *
+ * Logged from: system/bt
+ */
+message BluetoothHciTimeoutReported {
+    // HCI command associated with this event
+    // Default: CMD_UNKNOWN
+    optional android.bluetooth.hci.CommandEnum hci_command = 1;
+}
+
+/**
+ * Logs when we receive Bluetooth Link Quality Report event from the controller
+ * See Android Bluetooth HCI specification for more details
+ *
+ * Note: all count and bytes field are counted since last event
+ *
+ * Logged from: system/bt
+ */
+message BluetoothQualityReportReported {
+    // Quality report ID
+    // Original type: uint8_t
+    // Default: BQR_ID_UNKNOWN
+    optional android.bluetooth.hci.BqrIdEnum quality_report_id = 1;
+    // Packet type of the connection
+    // Original type: uint8_t
+    // Default: BQR_PACKET_TYPE_UNKNOWN
+    optional android.bluetooth.hci.BqrPacketTypeEnum packet_types = 2;
+    // Connection handle of the connection
+    // Original type: uint16_t
+    optional int32 connection_handle = 3;
+    // Performing Role for the connection
+    // Original type: uint8_t
+    optional int32 connection_role = 4;
+    // Current Transmit Power Level for the connection. This value is the same as the controller's
+    // response to the HCI_Read_Transmit_Power_Level HCI command
+    // Original type: uint8_t
+    optional int32 tx_power_level = 5;
+    // Received Signal Strength Indication (RSSI) value for the connection. This value is an
+    // absolute receiver signal strength value
+    // Original type: int8_t
+    optional int32 rssi = 6;
+    // Signal-to-Noise Ratio (SNR) value for the connection. It is the average SNR of all the
+    // channels used by the link currently
+    // Original type: uint8_t
+    optional int32 snr = 7;
+    // Indicates the number of unused channels in AFH_channel_map
+    // Original type: uint8_t
+    optional int32 unused_afh_channel_count = 8;
+    // Indicates the number of the channels which are interfered and quality is bad but are still
+    // selected for AFH
+    // Original type: uint8_t
+    optional int32 afh_select_unideal_channel_count = 9;
+    // Current Link Supervision Timeout Setting
+    // Unit: N * 0.3125 ms (1 Bluetooth Clock)
+    // Original type: uint16_t
+    optional int32 lsto = 10;
+    // Piconet Clock for the specified Connection_Handle. This value is the same as the controller's
+    // response to HCI_Read_Clock HCI command with the parameter "Which_Clock" of
+    // 0x01 (Piconet Clock)
+    // Unit: N * 0.3125 ms (1 Bluetooth Clock)
+    // Original type: uint32_t
+    optional int64 connection_piconet_clock = 11;
+    // The count of retransmission
+    // Original type: uint32_t
+    optional int64 retransmission_count = 12;
+    // The count of no RX
+    // Original type: uint32_t
+    optional int64 no_rx_count = 13;
+    // The count of NAK (Negative Acknowledge)
+    // Original type: uint32_t
+    optional int64 nak_count = 14;
+    // Controller timestamp of last TX ACK
+    // Unit: N * 0.3125 ms (1 Bluetooth Clock)
+    // Original type: uint32_t
+    optional int64 last_tx_ack_timestamp = 15;
+    // The count of Flow-off (STOP)
+    // Original type: uint32_t
+    optional int64 flow_off_count = 16;
+    // Controller timestamp of last Flow-on (GO)
+    // Unit: N * 0.3125 ms (1 Bluetooth Clock)
+    // Original type: uint32_t
+    optional int64 last_flow_on_timestamp = 17;
+    // Buffer overflow count (how many bytes of TX data are dropped) since the last event
+    // Original type: uint32_t
+    optional int64 buffer_overflow_bytes = 18;
+    // Buffer underflow count (in byte) since last event
+    // Original type: uint32_t
+    optional int64 buffer_underflow_bytes = 19;
+}
+
+/**
+ * Logs when a Bluetooth device's manufacturer information is learnt by the Bluetooth stack
+ *
+ * Notes:
+ * - Each event can be partially filled as we might learn different pieces of device
+ *   information at different time
+ * - Multiple device info events can be combined to give more complete picture
+ * - When multiple device info events tries to describe the same information, the
+ *   later one wins
+ *
+ * Logged from:
+ *     packages/apps/Bluetooth
+ */
+message BluetoothManufacturerInfoReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Where is this device info obtained from
+    optional android.bluetooth.DeviceInfoSrcEnum source_type = 2;
+    // Name of the data source
+    // For EXTERNAL: package name of the data source
+    // For INTERNAL: null for general case, component name otherwise
+    optional string source_name = 3;
+    // Name of the manufacturer of this device
+    optional string manufacturer = 4;
+    // Model of this device
+    optional string model = 5;
+    // Hardware version of this device
+    optional string hardware_version = 6;
+    // Software version of this device
+    optional string software_version = 7;
+}
+
+/**
+ * Logs when we receive Bluetooth Read Remote Version Information Complete Event from the remote
+ * device, as documented by the Bluetooth Core HCI specification
+ * Reference: https://www.bluetooth.com/specifications/bluetooth-core-specification
+ * Vol 2, Part E, Page 1118
+ *
+ * Logged from:
+ *     system/bt
+ */
+message BluetoothRemoteVersionInfoReported {
+    // Connection handle of the connection
+    // Original type: uint16_t
+    optional int32 connection_handle = 1;
+    // HCI command status code
+    // Default: STATUS_UNKNOWN
+    optional android.bluetooth.hci.StatusEnum hci_status = 2;
+    // 1 byte Version of current LMP in the remote controller
+    optional int32 lmp_version = 3;
+    // 2 bytes LMP manufacturer code of the remote controller
+    // https://www.bluetooth.com/specifications/assigned-numbers/company-identifiers
+    optional int32 lmp_manufacturer_code = 4;
+    // 4 bytes subversion of the LMP in the remote controller
+    optional int32 lmp_subversion = 5;
+}
+
+/**
+ * Logs when certain Bluetooth SDP attributes are discovered
+ * Constant definitions are from:
+ *     https://www.bluetooth.com/specifications/assigned-numbers/service-discovery
+ *
+ * Current logged attributes:
+ * - BluetoothProfileDescriptorList
+ * - Supported Features Bitmask
+ *
+ * Logged from:
+ *     system/bt
+ */
+message BluetoothSdpAttributeReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Short form UUIDs used to identify Bluetooth protocols, profiles, and service classes
+    // Original type: uint16_t
+    optional int32 protocol_uuid = 2;
+    // Short form UUIDs used to identify Bluetooth SDP attribute types
+    // Original type: uint16_t
+    optional int32 attribute_id = 3;
+    // Attribute value for the particular attribute
+    optional bytes attribute_value = 4 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Logs when bond state of a Bluetooth device changes
+ *
+ * Logged from:
+ *     frameworks/base/core/java/android/bluetooth/BluetoothDevice.java
+ *     packages/apps/Bluetooth/src/com/android/bluetooth/btservice/BondStateMachine.java
+ */
+message BluetoothBondStateChanged {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Preferred transport type to remote dual mode device
+    // Default: TRANSPORT_AUTO means no preference
+    optional android.bluetooth.TransportTypeEnum transport = 2;
+    // The type of this Bluetooth device (Classic, LE, or Dual mode)
+    // Default: UNKNOWN
+    optional android.bluetooth.DeviceTypeEnum type = 3;
+    // Current bond state (NONE, BONDING, BONDED)
+    // Default: BOND_STATE_UNKNOWN
+    optional android.bluetooth.BondStateEnum bond_state = 4;
+    // Bonding sub state
+    // Default: BOND_SUB_STATE_UNKNOWN
+    optional android.bluetooth.BondSubStateEnum bonding_sub_state = 5;
+    // Unbond Reason
+    // Default: UNBOND_REASON_UNKNOWN
+    optional android.bluetooth.UnbondReasonEnum unbond_reason = 6;
+}
+
+/**
+ * Logs there is an event related Bluetooth classic pairing
+ *
+ * Logged from:
+ *     system/bt
+ */
+message BluetoothClassicPairingEventReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Connection handle of this connection if available
+    // Range: 0x0000 - 0x0EFF (12 bits)
+    // Default: 0xFFFF if the handle is unknown
+    optional int32 connection_handle = 2;
+    // HCI command associated with this event
+    // Default: CMD_UNKNOWN
+    optional android.bluetooth.hci.CommandEnum hci_cmd = 3;
+    // HCI event associated with this event
+    // Default: EVT_UNKNOWN
+    optional android.bluetooth.hci.EventEnum hci_event = 4;
+    // HCI command status code if this is triggerred by hci_cmd
+    // Default: STATUS_UNKNOWN
+    optional android.bluetooth.hci.StatusEnum cmd_status = 5;
+    // HCI reason code associated with this event
+    // Default: STATUS_UNKNOWN
+    optional android.bluetooth.hci.StatusEnum reason_code = 6;
+}
+
+/**
+ * Logs when there is an event related to Bluetooth Security Manager Protocol (SMP)
+ *
+ * Logged from:
+ *     system/bt
+ */
+message BluetoothSmpPairingEventReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // SMP command sent or received over L2CAP
+    // Default: CMD_UNKNOWN
+    optional android.bluetooth.smp.CommandEnum smp_command = 2;
+    // Whether this command is sent or received
+    // Default: DIRECTION_UNKNOWN
+    optional android.bluetooth.DirectionEnum direction = 3;
+    // SMP failure reason code
+    // Default: PAIRING_FAIL_REASON_DEFAULT
+    optional android.bluetooth.smp.PairingFailReasonEnum smp_fail_reason = 4;
 }
 
 /**
