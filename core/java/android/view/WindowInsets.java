@@ -387,7 +387,8 @@ public final class WindowInsets {
      */
     @NonNull
     public WindowInsets consumeDisplayCutout() {
-        return new WindowInsets(mTypeInsetsMap, mTypeMaxInsetsMap,
+        return new WindowInsets(mSystemWindowInsetsConsumed ? null : mTypeInsetsMap,
+                mStableInsetsConsumed ? null : mTypeMaxInsetsMap,
                 mIsRound, mAlwaysConsumeNavBar,
                 null /* displayCutout */);
     }
@@ -872,7 +873,7 @@ public final class WindowInsets {
         @NonNull
         public Builder setStableInsets(@NonNull Insets stableInsets) {
             Preconditions.checkNotNull(stableInsets);
-            assignCompatInsets(mTypeInsetsMap, stableInsets.toRect());
+            assignCompatInsets(mTypeMaxInsetsMap, stableInsets.toRect());
             mStableInsetsConsumed = false;
             return this;
         }
