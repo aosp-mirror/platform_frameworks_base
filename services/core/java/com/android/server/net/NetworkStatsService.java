@@ -955,18 +955,64 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public long getIfaceStats(String iface, int type) {
-        // eBPF code doesn't provide per-interface TCP counters. Use xt_qtaguid for now.
-        // TODO: delete getMobileTcp(Rx|Tx)Packets entirely. See b/110443385 .
-        if (type == TYPE_TCP_TX_PACKETS || type == TYPE_TCP_RX_PACKETS) {
-            return nativeGetIfaceStat(iface, type, false);
+        long nativeIfaceStats = nativeGetIfaceStat(iface, type, checkBpfStatsEnable());
+        if (nativeIfaceStats == -1) {
+            return nativeIfaceStats;
         } else {
-            return nativeGetIfaceStat(iface, type, checkBpfStatsEnable());
+            // When tethering offload is in use, nativeIfaceStats does not contain usage from
+            // offload, add it back here.
+            // When tethering offload is not in use, nativeIfaceStats contains tethering usage.
+            // this does not cause double-counting of tethering traffic, because
+            // NetdTetheringStatsProvider returns zero NetworkStats
+            // when called with STATS_PER_IFACE.
+            return nativeIfaceStats + getTetherStats(iface, type);
         }
     }
 
     @Override
     public long getTotalStats(int type) {
-        return nativeGetTotalStat(type, checkBpfStatsEnable());
+        long nativeTotalStats = nativeGetTotalStat(type, checkBpfStatsEnable());
+        if (nativeTotalStats == -1) {
+            return nativeTotalStats;
+        } else {
+            // Refer to comment in getIfaceStats
+            return nativeTotalStats + getTetherStats(IFACE_ALL, type);
+        }
+    }
+
+    private long getTetherStats(String iface, int type) {
+        final NetworkStats tetherSnapshot;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            tetherSnapshot = getNetworkStatsTethering(STATS_PER_IFACE);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Error get TetherStats: " + e);
+            return 0;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        HashSet<String> limitIfaces;
+        if (iface == IFACE_ALL) {
+            limitIfaces = null;
+        } else {
+            limitIfaces = new HashSet<String>();
+            limitIfaces.add(iface);
+        }
+        NetworkStats.Entry entry = tetherSnapshot.getTotal(null, limitIfaces);
+        if (LOGD) Slog.d(TAG, "TetherStats: iface=" + iface + " type=" + type +
+                " entry=" + entry);
+        switch (type) {
+            case 0: // TYPE_RX_BYTES
+                return entry.rxBytes;
+            case 1: // TYPE_RX_PACKETS
+                return entry.rxPackets;
+            case 2: // TYPE_TX_BYTES
+                return entry.txBytes;
+            case 3: // TYPE_TX_PACKETS
+                return entry.txPackets;
+            default:
+                return 0;
+        }
     }
 
     private boolean checkBpfStatsEnable() {
