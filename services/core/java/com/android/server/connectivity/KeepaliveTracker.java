@@ -185,13 +185,13 @@ public class KeepaliveTracker {
         }
 
         void start(int slot) {
+            mSlot = slot;
             int error = isValid();
             if (error == SUCCESS) {
-                mSlot = slot;
                 Log.d(TAG, "Starting keepalive " + mSlot + " on " + mNai.name());
                 mNai.asyncChannel.sendMessage(CMD_START_PACKET_KEEPALIVE, slot, mInterval, mPacket);
             } else {
-                notifyMessenger(NO_KEEPALIVE, error);
+                handleStopKeepalive(mNai, mSlot, error);
                 return;
             }
         }
@@ -277,6 +277,7 @@ public class KeepaliveTracker {
             return;
         }
         ki.stop(reason);
+        Log.d(TAG, "Stopped keepalive " + slot + " on " + networkName);
         networkKeepalives.remove(slot);
         if (networkKeepalives.isEmpty()) {
             mKeepalives.remove(nai);
