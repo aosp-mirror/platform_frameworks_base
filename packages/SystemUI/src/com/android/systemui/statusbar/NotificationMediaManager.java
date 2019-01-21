@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -102,6 +103,7 @@ public class NotificationMediaManager implements Dumpable {
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
     private final ArrayList<MediaListener> mMediaListeners;
+    private final MediaArtworkProcessor mMediaArtworkProcessor;
 
     protected NotificationPresenter mPresenter;
     private MediaController mMediaController;
@@ -133,6 +135,7 @@ public class NotificationMediaManager implements Dumpable {
             if (DEBUG_MEDIA) {
                 Log.v(TAG, "DEBUG_MEDIA: onMetadataChanged: " + metadata);
             }
+            mMediaArtworkProcessor.clearCache();
             mMediaMetadata = metadata;
             dispatchUpdateMediaMetaData(true /* changed */, true /* allowAnimation */);
         }
@@ -143,8 +146,10 @@ public class NotificationMediaManager implements Dumpable {
             Context context,
             Lazy<ShadeController> shadeController,
             Lazy<StatusBarWindowController> statusBarWindowController,
-            NotificationEntryManager notificationEntryManager) {
+            NotificationEntryManager notificationEntryManager,
+            MediaArtworkProcessor mediaArtworkProcessor) {
         mContext = context;
+        mMediaArtworkProcessor = mediaArtworkProcessor;
         mMediaListeners = new ArrayList<>();
         mMediaSessionManager
                 = (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
@@ -366,6 +371,7 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     private void clearCurrentMediaNotificationSession() {
+        mMediaArtworkProcessor.clearCache();
         mMediaMetadata = null;
         if (mMediaController != null) {
             if (DEBUG_MEDIA) {
@@ -418,7 +424,19 @@ public class NotificationMediaManager implements Dumpable {
                 // might still be null
             }
             if (artworkBitmap != null) {
-                artworkDrawable = new BitmapDrawable(mBackdropBack.getResources(), artworkBitmap);
+                int notificationColor;
+                synchronized (mEntryManager.getNotificationData()) {
+                    NotificationEntry entry = mEntryManager.getNotificationData()
+                            .get(mMediaNotificationKey);
+                    if (entry == null || entry.getRow() == null) {
+                        notificationColor = Color.TRANSPARENT;
+                    } else {
+                        notificationColor = entry.getRow().calculateBgColor();
+                    }
+                }
+                Bitmap bmp = mMediaArtworkProcessor.processArtwork(mContext, artworkBitmap,
+                        notificationColor);
+                artworkDrawable = new BitmapDrawable(mBackdropBack.getResources(), bmp);
             }
         }
         boolean allowWhenShade = false;
