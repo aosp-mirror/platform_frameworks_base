@@ -878,7 +878,6 @@ public class NotificationManagerService extends SystemService {
                     if (r.hasBeenVisiblyExpanded()) {
                         logSmartSuggestionsVisible(r);
                     }
-                    final long now = System.currentTimeMillis();
                     if (userAction) {
                         MetricsLogger.action(r.getItemLogMaker()
                                 .setType(expanded ? MetricsEvent.TYPE_DETAIL
@@ -888,9 +887,6 @@ public class NotificationManagerService extends SystemService {
                         r.recordExpanded();
                         reportUserInteraction(r);
                     }
-                    EventLogTags.writeNotificationExpansion(key,
-                            userAction ? 1 : 0, expanded ? 1 : 0,
-                            r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
                     mAssistants.notifyAssistantExpansionChangedLocked(r.sbn, userAction, expanded);
                 }
             }

@@ -159,6 +159,8 @@ public class StatusBarTest extends SysuiTestCase {
     private NotificationFilter mNotificationFilter;
     @Mock
     private NotificationAlertingManager mNotificationAlertingManager;
+    @Mock
+    private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -207,7 +209,8 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mEntryManager = new TestableNotificationEntryManager(mContext);
         mNotificationLogger = new NotificationLogger(mNotificationListener,
-                Dependency.get(UiOffloadThread.class), mEntryManager, mStatusBarStateController);
+                Dependency.get(UiOffloadThread.class), mEntryManager, mStatusBarStateController,
+                mExpansionStateLogger);
         mDependency.injectTestDependency(NotificationLogger.class, mNotificationLogger);
         DozeLog.traceDozing(mContext, false /* dozing */);
 

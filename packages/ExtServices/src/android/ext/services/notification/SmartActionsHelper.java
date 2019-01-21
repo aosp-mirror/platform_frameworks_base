@@ -152,18 +152,26 @@ public class SmartActionsHelper {
         return replies;
     }
 
-    void onNotificationSeen(@NonNull NotificationEntry entry) {
-        if (entry.isExpanded()) {
-            maybeSendActionShownEvent(entry);
-        }
-    }
-
     void onNotificationExpansionChanged(@NonNull NotificationEntry entry, boolean isUserAction,
             boolean isExpanded) {
-        // Notification can be expanded in the background, and thus the isUserAction check.
-        if (isUserAction && isExpanded) {
-            maybeSendActionShownEvent(entry);
+        if (!isExpanded) {
+            return;
         }
+        String resultId = mNotificationKeyToResultIdCache.get(entry.getSbn().getKey());
+        if (resultId == null) {
+            return;
+        }
+        // Only report if this is the first time the user sees these suggestions.
+        if (entry.isShowActionEventLogged()) {
+            return;
+        }
+        entry.setShowActionEventLogged();
+        TextClassifierEvent textClassifierEvent =
+                createTextClassifierEventBuilder(TextClassifierEvent.TYPE_ACTIONS_SHOWN,
+                        resultId)
+                        .build();
+        // TODO: If possible, report which replies / actions are actually seen by user.
+        mTextClassifier.onTextClassifierEvent(textClassifierEvent);
     }
 
     void onNotificationDirectReplied(@NonNull String key) {
@@ -232,26 +240,6 @@ public class SmartActionsHelper {
                                 mContext.getPackageName(), TextClassifier.WIDGET_TYPE_NOTIFICATION)
                         .build())
                 .setResultId(resultId);
-    }
-
-    private void maybeSendActionShownEvent(@NonNull NotificationEntry entry) {
-        if (mTextClassifier == null) {
-            return;
-        }
-        String resultId = mNotificationKeyToResultIdCache.get(entry.getSbn().getKey());
-        if (resultId == null) {
-            return;
-        }
-        // Only report if this is the first time the user sees these suggestions.
-        if (entry.isShowActionEventLogged()) {
-            return;
-        }
-        entry.setShowActionEventLogged();
-        TextClassifierEvent textClassifierEvent =
-                createTextClassifierEventBuilder(TextClassifierEvent.TYPE_ACTIONS_SHOWN, resultId)
-                        .build();
-        // TODO: If possible, report which replies / actions are actually seen by user.
-        mTextClassifier.onTextClassifierEvent(textClassifierEvent);
     }
 
     /**
