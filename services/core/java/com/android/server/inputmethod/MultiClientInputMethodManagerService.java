@@ -53,7 +53,6 @@ import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -1519,20 +1518,6 @@ public final class MultiClientInputMethodManagerService {
         @BinderThread
         @Override
         public boolean isInputMethodPickerShownForTest() {
-            reportNotSupported();
-            return false;
-        }
-
-        @BinderThread
-        @Override
-        public void registerSuggestionSpansForNotification(SuggestionSpan[] suggestionSpans) {
-            reportNotSupported();
-        }
-
-        @BinderThread
-        @Override
-        public boolean notifySuggestionPicked(
-                SuggestionSpan span, String originalString, int index) {
             reportNotSupported();
             return false;
         }

@@ -2513,54 +2513,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public void registerSuggestionSpansForNotification(SuggestionSpan[] spans) {
-        synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
-                return;
-            }
-            final InputMethodInfo currentImi = mMethodMap.get(mCurMethodId);
-            for (int i = 0; i < spans.length; ++i) {
-                SuggestionSpan ss = spans[i];
-                if (!TextUtils.isEmpty(ss.getNotificationTargetClassName())) {
-                    mSecureSuggestionSpans.put(ss, currentImi);
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean notifySuggestionPicked(SuggestionSpan span, String originalString, int index) {
-        synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
-                return false;
-            }
-            final InputMethodInfo targetImi = mSecureSuggestionSpans.get(span);
-            // TODO: Do not send the intent if the process of the targetImi is already dead.
-            if (targetImi != null) {
-                final String[] suggestions = span.getSuggestions();
-                if (index < 0 || index >= suggestions.length) return false;
-                final String className = span.getNotificationTargetClassName();
-                final Intent intent = new Intent();
-                // Ensures that only a class in the original IME package will receive the
-                // notification.
-                intent.setClassName(targetImi.getPackageName(), className);
-                intent.setAction(SuggestionSpan.ACTION_SUGGESTION_PICKED);
-                intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_BEFORE, originalString);
-                intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_AFTER, suggestions[index]);
-                intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_HASHCODE, span.hashCode());
-                final long ident = Binder.clearCallingIdentity();
-                try {
-                    mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
     void updateFromSettingsLocked(boolean enabledMayChange) {
         updateInputMethodsFromSettingsLocked(enabledMayChange);
         updateKeyboardFromSettingsLocked();

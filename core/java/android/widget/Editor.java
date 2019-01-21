@@ -2901,10 +2901,6 @@ public class Editor {
             }
         }
 
-        // Notify source IME of the suggestion pick. Do this before swapping texts.
-        targetSuggestionSpan.notifySelection(
-                mTextView.getContext(), originalText, suggestionInfo.mSuggestionIndex);
-
         // Swap text content between actual text and Suggestion span
         final int suggestionStart = suggestionInfo.mSuggestionStart;
         final int suggestionEnd = suggestionInfo.mSuggestionEnd;
