@@ -2057,6 +2057,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return mStagedSessionFailed;
     }
 
+    /** {@hide} */
+    @StagedSessionErrorCode int getStagedSessionErrorCode() {
+        return mStagedSessionErrorCode;
+    }
+
     private void destroyInternal() {
         synchronized (mLock) {
             mSealed = true;
@@ -2221,35 +2226,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         out.endTag(null, TAG_SESSION);
     }
 
-    private static String[] readGrantedRuntimePermissions(XmlPullParser in)
-            throws IOException, XmlPullParserException {
-        List<String> permissions = null;
-
-        final int outerDepth = in.getDepth();
-        int type;
-        while ((type = in.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || in.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-            if (TAG_GRANTED_RUNTIME_PERMISSION.equals(in.getName())) {
-                String permission = readStringAttribute(in, ATTR_NAME);
-                if (permissions == null) {
-                    permissions = new ArrayList<>();
-                }
-                permissions.add(permission);
-            }
-        }
-
-        if (permissions == null) {
-            return null;
-        }
-
-        String[] permissionsArray = new String[permissions.size()];
-        permissions.toArray(permissionsArray);
-        return permissionsArray;
-    }
-
     // Sanity check to be performed when the session is restored from an external file. Only one
     // of the session states should be true, or none of them.
     private static boolean isStagedSessionStateValid(boolean isReady, boolean isApplied,
@@ -2273,8 +2249,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * @param sessionProvider
      * @return The newly created session
      */
-    // TODO(patb,109941548): modify readFromXml to consume to the next tag session tag so we
-    //                       can have a complete session for the constructor
     public static PackageInstallerSession readFromXml(@NonNull XmlPullParser in,
             @NonNull PackageInstallerService.InternalCallback callback, @NonNull Context context,
             @NonNull PackageManagerService pm, Looper installerThread,
@@ -2314,8 +2288,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
         params.installReason = readIntAttribute(in, ATTR_INSTALL_REASON);
 
-        params.grantedRuntimePermissions = readGrantedRuntimePermissions(in);
-
         final File appIconFile = buildAppIconFile(sessionId, sessionsDir);
         if (appIconFile.exists()) {
             params.appIcon = BitmapFactory.decodeFile(appIconFile.getAbsolutePath());
@@ -2324,16 +2296,51 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isReady = readBooleanAttribute(in, ATTR_IS_READY);
         final boolean isFailed = readBooleanAttribute(in, ATTR_IS_FAILED);
         final boolean isApplied = readBooleanAttribute(in, ATTR_IS_APPLIED);
-        final int stagedSessionErrorCode = readIntAttribute(in, ATTR_STAGED_SESSION_ERROR_CODE);
+        final int stagedSessionErrorCode = readIntAttribute(in, ATTR_STAGED_SESSION_ERROR_CODE,
+                SessionInfo.NO_ERROR);
 
         if (!isStagedSessionStateValid(isReady, isApplied, isFailed)) {
             throw new IllegalArgumentException("Can't restore staged session with invalid state.");
         }
 
+        // Parse sub tags of this session, typically used for repeated values / arrays.
+        // Sub tags can come in any order, therefore we need to keep track of what we find while
+        // parsing and only set the right values at the end.
+
+        // Store the current depth. We should stop parsing when we reach an end tag at the same
+        // depth.
+        List<String> permissions = new ArrayList<>();
+        List<Integer> childSessionIds = new ArrayList<>();
+        int outerDepth = in.getDepth();
+        int type;
+        while ((type = in.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || in.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            if (TAG_GRANTED_RUNTIME_PERMISSION.equals(in.getName())) {
+                permissions.add(readStringAttribute(in, ATTR_NAME));
+            }
+            if (TAG_CHILD_SESSION.equals(in.getName())) {
+                childSessionIds.add(readIntAttribute(in, ATTR_SESSION_ID, SessionInfo.INVALID_ID));
+            }
+        }
+
+        if (permissions.size() > 0) {
+            params.grantedRuntimePermissions = permissions.stream().toArray(String[]::new);
+        }
+
+        int[] childSessionIdsArray;
+        if (childSessionIds.size() > 0) {
+            childSessionIdsArray = childSessionIds.stream().mapToInt(i -> i).toArray();
+        } else {
+            childSessionIdsArray = EMPTY_CHILD_SESSION_ARRAY;
+        }
+
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 installerThread, stagingManager, sessionId, userId, installerPackageName,
                 installerUid, params, createdMillis, stageDir, stageCid, prepared, sealed,
-                EMPTY_CHILD_SESSION_ARRAY, parentSessionId, isReady, isFailed, isApplied,
+                childSessionIdsArray, parentSessionId, isReady, isFailed, isApplied,
                 stagedSessionErrorCode);
     }
 
