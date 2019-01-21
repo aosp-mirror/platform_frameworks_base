@@ -76,6 +76,7 @@ import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -1156,6 +1157,58 @@ public class UserBackupManagerServiceTest {
             ShadowApplicationPackageManager.addInstalledPackage(packageName, packageInfo);
         }
     }
+
+    /**
+     * Test that {@link UserBackupManagerService#getAncestralSerialNumber()} returns {@code -1}
+     * when value not set.
+     */
+    @Test
+    public void testGetAncestralSerialNumber_notSet_returnsMinusOne() {
+        UserBackupManagerService service = createUserBackupManagerServiceAndRunTasks();
+
+        assertThat(service.getAncestralSerialNumber()).isEqualTo(-1L);
+    }
+
+    /**
+     * Test that {@link UserBackupManagerService#getAncestralSerialNumber()} returns correct value
+     * when value set.
+     */
+    @Test
+    public void testGetAncestralSerialNumber_set_returnsCorrectValue() throws Exception {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        UserBackupManagerService service = createUserBackupManagerServiceAndRunTasks();
+        service.setAncestralSerialNumberFile(createTestFile());
+
+        long testSerialNumber = 20L;
+        service.setAncestralSerialNumber(testSerialNumber);
+
+        assertThat(service.getAncestralSerialNumber()).isEqualTo(testSerialNumber);
+    }
+
+    /**
+     * Test that {@link UserBackupManagerService#getAncestralSerialNumber()} returns correct value
+     * when value set.
+     */
+    @Test
+    public void testGetAncestralSerialNumber_setTwice_returnsCorrectValue() throws Exception {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        UserBackupManagerService service = createUserBackupManagerServiceAndRunTasks();
+        service.setAncestralSerialNumberFile(createTestFile());
+
+        long testSerialNumber = 20L;
+        long testSerialNumber2 = 21L;
+        service.setAncestralSerialNumber(testSerialNumber);
+        service.setAncestralSerialNumber(testSerialNumber2);
+
+        assertThat(service.getAncestralSerialNumber()).isEqualTo(testSerialNumber2);
+    }
+
+    private File createTestFile() throws IOException {
+        File testFile = new File(mContext.getFilesDir(), "test");
+        testFile.createNewFile();
+        return testFile;
+    }
+
 
     /**
      * We can't mock the void method {@link #schedule(Context, long, BackupManagerConstants)} so we

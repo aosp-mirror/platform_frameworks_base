@@ -711,6 +711,7 @@ package android.app.backup {
     method @Deprecated public int requestRestore(android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor);
     method @Deprecated @RequiresPermission(android.Manifest.permission.BACKUP) public String selectBackupTransport(String);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void selectBackupTransport(android.content.ComponentName, android.app.backup.SelectBackupTransportCallback);
+    method @RequiresPermission(android.Manifest.permission.BACKUP) public void setAncestralSerialNumber(long);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void setAutoRestore(boolean);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void setBackupEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void updateTransportAttributes(android.content.ComponentName, String, @Nullable android.content.Intent, String, @Nullable android.content.Intent, @Nullable String);

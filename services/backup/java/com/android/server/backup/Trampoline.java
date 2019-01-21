@@ -760,6 +760,21 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
+    @Nullable public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
+        if (mService != null) {
+            return mService.getUserForAncestralSerialNumber(ancestralSerialNumber);
+        }
+        return null;
+    }
+
+    @Override
+    public void setAncestralSerialNumber(long ancestralSerialNumber) {
+        if (mService != null) {
+            mService.setAncestralSerialNumber(ancestralSerialNumber);
+        }
+    }
+
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         int userId = binderGetCallingUserId();

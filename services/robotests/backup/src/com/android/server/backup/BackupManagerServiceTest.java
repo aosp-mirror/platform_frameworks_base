@@ -62,6 +62,7 @@ import org.robolectric.shadows.ShadowContextWrapper;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 /** Tests for the user-aware backup/restore system service {@link BackupManagerService}. */
@@ -1516,8 +1517,7 @@ public class BackupManagerServiceTest {
     public void testDump_onRegisteredUser_callsMethodForUser() throws Exception {
         BackupManagerService backupManagerService =
                 createServiceAndRegisterUser(UserHandle.USER_SYSTEM, mUserOneService);
-        File testFile = new File(mContext.getFilesDir(), "test");
-        testFile.createNewFile();
+        File testFile = createTestFile();
         FileDescriptor fileDescriptor = new FileDescriptor();
         PrintWriter printWriter = new PrintWriter(testFile);
         String[] args = {"1", "2"};
@@ -1531,8 +1531,7 @@ public class BackupManagerServiceTest {
     @Test
     public void testDump_onUnknownUser_doesNotPropagateCall() throws Exception {
         BackupManagerService backupManagerService = createService();
-        File testFile = new File(mContext.getFilesDir(), "test");
-        testFile.createNewFile();
+        File testFile = createTestFile();
         FileDescriptor fileDescriptor = new FileDescriptor();
         PrintWriter printWriter = new PrintWriter(testFile);
         String[] args = {"1", "2"};
@@ -1540,6 +1539,12 @@ public class BackupManagerServiceTest {
         backupManagerService.dump(fileDescriptor, printWriter, args);
 
         verify(mUserOneService, never()).dump(fileDescriptor, printWriter, args);
+    }
+
+    private File createTestFile() throws IOException {
+        File testFile = new File(mContext.getFilesDir(), "test");
+        testFile.createNewFile();
+        return testFile;
     }
 
     private BackupManagerService createService() {
