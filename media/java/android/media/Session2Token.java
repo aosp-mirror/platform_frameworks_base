@@ -48,14 +48,6 @@ import java.util.Objects;
  * <p>
  * It can be also obtained by {@link android.media.session.MediaSessionManager}.
  */
-// New version of MediaSession2.Token for following reasons
-//   - Stop implementing Parcelable for updatable support
-//   - Represent session and library service (formerly browser service) in one class.
-//     Previously MediaSession2.Token was for session and ComponentName was for service.
-//     This helps controller apps to keep target of dispatching media key events in uniform way.
-//     For details about the reason, see following. (Android O+)
-//         android.media.session.MediaSessionManager.Callback#onAddressedPlayerChanged
-// TODO: use @link for MediaSession2Service
 public final class Session2Token implements Parcelable {
     private static final String TAG = "Session2Token";
 
@@ -85,12 +77,13 @@ public final class Session2Token implements Parcelable {
     public static final int TYPE_SESSION = 0;
 
     /**
-     * Type for MediaSession2Service.
+     * Type for {@link MediaSession2Service}.
      */
     public static final int TYPE_SESSION_SERVICE = 1;
 
     private final int mUid;
-    private final @TokenType int mType;
+    @TokenType
+    private final int mType;
     private final String mPackageName;
     private final String mServiceName;
     private final Session2Link mSessionLink;

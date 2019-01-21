@@ -43,9 +43,7 @@ import java.util.Map;
  * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
  * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
  * for consistent behavior across all devices.
- * @hide
  */
-// TODO: Unhide
 public abstract class MediaSession2Service extends Service {
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -108,13 +106,6 @@ public abstract class MediaSession2Service extends Service {
             }
         }
         return null;
-    }
-
-    @CallSuper
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        // TODO: Dispatch media key events to the primary session.
-        return START_STICKY;
     }
 
     /**

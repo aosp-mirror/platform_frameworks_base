@@ -176,7 +176,7 @@ public class MediaController2 implements AutoCloseable {
      * If it is not connected yet, it returns {@code null}.
      * <p>
      * This may differ with the {@link Session2Token} from the constructor. For example, if the
-     * controller is created with the token for MediaSession2Service, this would return
+     * controller is created with the token for {@link MediaSession2Service}, this would return
      * token for the {@link MediaSession2} in the service.
      *
      * @return Session2Token of the connected session, or {@code null} if not connected
