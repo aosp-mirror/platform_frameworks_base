@@ -17,7 +17,6 @@
 package android.net.netlink;
 
 import android.net.netlink.NetlinkConstants;
-import libcore.io.SizeOf;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -117,7 +116,7 @@ public class StructNlAttr {
     public StructNlAttr(short type, short value, ByteOrder order) {
         this(order);
         nla_type = type;
-        setValue(new byte[SizeOf.SHORT]);
+        setValue(new byte[Short.BYTES]);
         getValueAsByteBuffer().putShort(value);
     }
 
@@ -128,7 +127,7 @@ public class StructNlAttr {
     public StructNlAttr(short type, int value, ByteOrder order) {
         this(order);
         nla_type = type;
-        setValue(new byte[SizeOf.INT]);
+        setValue(new byte[Integer.BYTES]);
         getValueAsByteBuffer().putInt(value);
     }
 
@@ -164,7 +163,7 @@ public class StructNlAttr {
 
     public int getValueAsInt(int defaultValue) {
         final ByteBuffer byteBuffer = getValueAsByteBuffer();
-        if (byteBuffer == null || byteBuffer.remaining() != SizeOf.INT) {
+        if (byteBuffer == null || byteBuffer.remaining() != Integer.BYTES) {
             return defaultValue;
         }
         return getValueAsByteBuffer().getInt();

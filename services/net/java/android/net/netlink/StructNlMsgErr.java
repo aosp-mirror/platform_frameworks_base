@@ -18,7 +18,6 @@ package android.net.netlink;
 
 import android.net.netlink.NetlinkConstants;
 import android.net.netlink.StructNlMsgHdr;
-import libcore.io.SizeOf;
 
 import java.nio.ByteBuffer;
 
@@ -31,7 +30,7 @@ import java.nio.ByteBuffer;
  * @hide
  */
 public class StructNlMsgErr {
-    public static final int STRUCT_SIZE = SizeOf.INT + StructNlMsgHdr.STRUCT_SIZE;
+    public static final int STRUCT_SIZE = Integer.BYTES + StructNlMsgHdr.STRUCT_SIZE;
 
     public static boolean hasAvailableSpace(ByteBuffer byteBuffer) {
         return byteBuffer != null && byteBuffer.remaining() >= STRUCT_SIZE;
