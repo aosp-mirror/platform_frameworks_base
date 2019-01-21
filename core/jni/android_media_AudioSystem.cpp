@@ -488,13 +488,14 @@ android_media_AudioSystem_recording_callback(int event,
 
 static jint
 android_media_AudioSystem_setDeviceConnectionState(JNIEnv *env, jobject thiz, jint device, jint state, jstring device_address, jstring device_name,
-                                                   jint codec __unused)
+                                                   jint codec)
 {
     const char *c_address = env->GetStringUTFChars(device_address, NULL);
     const char *c_name = env->GetStringUTFChars(device_name, NULL);
     int status = check_AudioSystem_Command(AudioSystem::setDeviceConnectionState(static_cast <audio_devices_t>(device),
                                           static_cast <audio_policy_dev_state_t>(state),
-                                          c_address, c_name));
+                                          c_address, c_name,
+                                          static_cast <audio_format_t>(codec)));
     env->ReleaseStringUTFChars(device_address, c_address);
     env->ReleaseStringUTFChars(device_name, c_name);
     return (jint) status;
@@ -512,12 +513,12 @@ android_media_AudioSystem_getDeviceConnectionState(JNIEnv *env, jobject thiz, ji
 
 static jint
 android_media_AudioSystem_handleDeviceConfigChange(JNIEnv *env, jobject thiz, jint device, jstring device_address, jstring device_name,
-                                                   jint codec __unused)
+                                                   jint codec)
 {
     const char *c_address = env->GetStringUTFChars(device_address, NULL);
     const char *c_name = env->GetStringUTFChars(device_name, NULL);
     int status = check_AudioSystem_Command(AudioSystem::handleDeviceConfigChange(static_cast <audio_devices_t>(device),
-                                          c_address, c_name));
+                                          c_address, c_name, static_cast <audio_format_t>(codec)));
     env->ReleaseStringUTFChars(device_address, c_address);
     env->ReleaseStringUTFChars(device_name, c_name);
     return (jint) status;
