@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Function;
 
 /**
@@ -36,7 +36,7 @@ public final class ParcelableUtil {
      * converter function.
      */
     public static <ParcelableType, BaseType> ParcelableType[] toParcelableArray(
-            @NonNull List<BaseType> base,
+            @NonNull Collection<BaseType> base,
             @NonNull Function<BaseType, ParcelableType> conv,
             @NonNull Class<ParcelableType> parcelClass) {
         final ParcelableType[] out = (ParcelableType[]) Array.newInstance(parcelClass, base.size());
