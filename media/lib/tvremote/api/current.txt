@@ -1,3 +1,4 @@
+// Signature format: 2.0
 package com.android.media.tv.remoteprovider {
 
   public abstract class TvRemoteProvider {
@@ -7,14 +8,14 @@ package com.android.media.tv.remoteprovider {
     method public android.os.IBinder getBinder();
     method public final android.content.Context getContext();
     method public void onInputBridgeConnected(android.os.IBinder);
-    method public void openRemoteInputBridge(android.os.IBinder, java.lang.String, int, int, int) throws java.lang.RuntimeException;
+    method public void openRemoteInputBridge(android.os.IBinder, String, int, int, int) throws java.lang.RuntimeException;
     method public void sendKeyDown(android.os.IBinder, int) throws java.lang.RuntimeException;
     method public void sendKeyUp(android.os.IBinder, int) throws java.lang.RuntimeException;
     method public void sendPointerDown(android.os.IBinder, int, int, int) throws java.lang.RuntimeException;
     method public void sendPointerSync(android.os.IBinder) throws java.lang.RuntimeException;
     method public void sendPointerUp(android.os.IBinder, int) throws java.lang.RuntimeException;
     method public void sendTimestamp(android.os.IBinder, long) throws java.lang.RuntimeException;
-    field public static final java.lang.String SERVICE_INTERFACE = "com.android.media.tv.remoteprovider.TvRemoteProvider";
+    field public static final String SERVICE_INTERFACE = "com.android.media.tv.remoteprovider.TvRemoteProvider";
   }
 
 }
