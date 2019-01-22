@@ -185,6 +185,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
+
+    private static final int NOTIFICATION_LOCATION_UNKNOWN = 0;
+
     @Mock
     private NotificationListeners mListeners;
     @Mock private NotificationAssistants mAssistants;
@@ -2528,11 +2531,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
 
-        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, true);
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, true,
+                NOTIFICATION_LOCATION_UNKNOWN);
         verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.sbn), eq(true), eq((true)));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
 
-        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, false);
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, false,
+                NOTIFICATION_LOCATION_UNKNOWN);
         verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.sbn), eq(true), eq((false)));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
     }
@@ -2542,11 +2547,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
 
-        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true);
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true,
+                NOTIFICATION_LOCATION_UNKNOWN);
         assertFalse(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
         verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.sbn), eq(false), eq((true)));
 
-        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, false);
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, false,
+                NOTIFICATION_LOCATION_UNKNOWN);
         assertFalse(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
         verify(mAssistants).notifyAssistantExpansionChangedLocked(
                 eq(r.sbn), eq(false), eq((false)));
@@ -3793,7 +3800,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
 
-        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true);
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true,
+                NOTIFICATION_LOCATION_UNKNOWN);
         NotificationVisibility[] notificationVisibility = new NotificationVisibility[] {
                 NotificationVisibility.obtain(r.getKey(), 0, 0, true)
         };
@@ -3808,7 +3816,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
 
-        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true);
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true,
+                NOTIFICATION_LOCATION_UNKNOWN);
 
         assertEquals(0, mService.countLogSmartSuggestionsVisible);
     }
