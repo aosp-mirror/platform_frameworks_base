@@ -20,7 +20,6 @@
 
 #include "SkColor.h"
 #include "SkColorSpace.h"
-#include "SkHalf.h"
 
 using namespace android;
 
@@ -42,6 +41,12 @@ static skcms_Matrix3x3 getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static float halfToFloat(uint16_t bits) {
+  __fp16 h;
+  memcpy(&h, &bits, 2);
+  return (float)h;
+}
+
 SkColor4f GraphicsJNI::convertColorLong(jlong color) {
     if ((color & 0x3f) == 0) {
         // This corresponds to sRGB, which is treated differently than the rest.
@@ -54,9 +59,9 @@ SkColor4f GraphicsJNI::convertColorLong(jlong color) {
     }
 
     // These match the implementation of android.graphics.Color#red(long) etc.
-    float r = SkHalfToFloat((SkHalf)(color >> 48 & 0xffff));
-    float g = SkHalfToFloat((SkHalf)(color >> 32 & 0xffff));
-    float b = SkHalfToFloat((SkHalf)(color >> 16 & 0xffff));
+    float r = halfToFloat((uint16_t)(color >> 48 & 0xffff));
+    float g = halfToFloat((uint16_t)(color >> 32 & 0xffff));
+    float b = halfToFloat((uint16_t)(color >> 16 & 0xffff));
     float a =                       (color >>  6 &  0x3ff) / 1023.0f;
 
     return SkColor4f{r, g, b, a};
