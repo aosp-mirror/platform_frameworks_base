@@ -111,6 +111,16 @@ public:
 
     static jobject getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColorSpace,
             SkColorType decodeColorType);
+
+    /**
+     * Convert from a Java @ColorLong to an SkColor4f that Skia can use directly.
+     *
+     * This ignores the encoded ColorSpace, besides checking to see if it is sRGB,
+     * which is encoded differently. The color space should be passed down separately
+     * via ColorSpace#getNativeInstance(), and converted with getNativeColorSpace(),
+     * above.
+     */
+    static SkColor4f convertColorLong(jlong color);
 };
 
 class HeapAllocator : public SkBRDAllocator {

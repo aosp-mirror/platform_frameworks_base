@@ -18,7 +18,9 @@
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 
+#include "SkColor.h"
 #include "SkColorSpace.h"
+#include "SkHalf.h"
 
 using namespace android;
 
@@ -39,6 +41,26 @@ static skcms_Matrix3x3 getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+SkColor4f GraphicsJNI::convertColorLong(jlong color) {
+    if ((color & 0x3f) == 0) {
+        // This corresponds to sRGB, which is treated differently than the rest.
+        uint8_t a = color >> 56 & 0xff;
+        uint8_t r = color >> 48 & 0xff;
+        uint8_t g = color >> 40 & 0xff;
+        uint8_t b = color >> 32 & 0xff;
+        SkColor c = SkColorSetARGB(a, r, g, b);
+        return SkColor4f::FromColor(c);
+    }
+
+    // These match the implementation of android.graphics.Color#red(long) etc.
+    float r = SkHalfToFloat((SkHalf)(color >> 48 & 0xffff));
+    float g = SkHalfToFloat((SkHalf)(color >> 32 & 0xffff));
+    float b = SkHalfToFloat((SkHalf)(color >> 16 & 0xffff));
+    float a =                       (color >>  6 &  0x3ff) / 1023.0f;
+
+    return SkColor4f{r, g, b, a};
+}
 
 sk_sp<SkColorSpace> GraphicsJNI::getNativeColorSpace(jlong colorSpaceHandle) {
     if (colorSpaceHandle == 0) return nullptr;
