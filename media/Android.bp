@@ -15,17 +15,59 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "mediasession2-srcs",
+    srcs: [
+        "apex/java/android/media/Controller2Link.java",
+        "apex/java/android/media/IMediaController2.aidl",
+        "apex/java/android/media/IMediaSession2.aidl",
+        "apex/java/android/media/IMediaSession2Service.aidl",
+        "apex/java/android/media/MediaConstants.java",
+        "apex/java/android/media/MediaController2.java",
+        "apex/java/android/media/MediaItem2.java",
+        "apex/java/android/media/MediaSession2.java",
+        "apex/java/android/media/MediaSession2Service.java",
+        "apex/java/android/media/Session2Command.java",
+        "apex/java/android/media/Session2CommandGroup.java",
+        "apex/java/android/media/Session2Link.java",
+        "apex/java/android/media/Session2Token.java",
+    ],
+}
+
+filegroup {
+    name: "mediasession2-stubs-srcs",
+    srcs: [
+        ":mediasession2-srcs",
+    ],
+    exclude_srcs: [
+        "apex/java/android/media/IMediaController2.aidl",
+        "apex/java/android/media/IMediaSession2.aidl",
+        "apex/java/android/media/IMediaSession2Service.aidl",
+    ],
+}
+
 java_library {
     name: "updatable-media",
 
     srcs: [
-        ":media2-srcs",
+        ":mediasession2-srcs",
+        ":mediaplayer2-srcs",
         ":framework-media-annotation-srcs",
     ],
 
     static_libs: [
         "mediaplayer2-protos",
     ],
+
+    aidl: {
+        export_include_dirs: [
+            "apex/java",
+        ],
+
+        include_dirs: [
+            "frameworks/base/core/java",
+        ],
+    },
 
     installable: true,
 
@@ -34,7 +76,7 @@ java_library {
 }
 
 filegroup {
-    name: "media2-srcs",
+    name: "mediaplayer2-srcs",
     srcs: [
         "apex/java/android/media/CloseGuard.java",
         "apex/java/android/media/DataSourceCallback.java",
