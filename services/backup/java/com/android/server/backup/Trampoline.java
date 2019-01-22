@@ -18,6 +18,7 @@ package com.android.server.backup;
 
 import static com.android.server.backup.BackupManagerService.TAG;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyManager;
@@ -41,9 +42,10 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.provider.Settings;
+import android.os.UserManager;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 
 import java.io.File;
@@ -75,19 +77,25 @@ import java.io.PrintWriter;
  * system user is unlocked before any other users.
  */
 public class Trampoline extends IBackupManager.Stub {
-    // When this file is present, the backup service is inactive.
+    /**
+     * Name of file that disables the backup service. If this file exists, then backup is disabled
+     * for all users.
+     */
     private static final String BACKUP_SUPPRESS_FILENAME = "backup-suppress";
+
+    /**
+     * Name of file for non-system users that enables the backup service for the user. Backup is
+     * disabled by default in non-system users.
+     */
+    private static final String BACKUP_ACTIVATED_FILENAME = "backup-activated";
 
     // Product-level suppression of backup/restore.
     private static final String BACKUP_DISABLE_PROPERTY = "ro.backup.disable";
 
     private static final String BACKUP_THREAD = "backup";
 
-    /** Values for setting {@link Settings.Global#BACKUP_MULTI_USER_ENABLED} */
-    private static final int MULTI_USER_DISABLED = 0;
-    private static final int MULTI_USER_ENABLED = 1;
-
     private final Context mContext;
+    private final UserManager mUserManager;
 
     private final boolean mGlobalDisable;
     // Lock to write backup suppress files.
@@ -104,18 +112,11 @@ public class Trampoline extends IBackupManager.Stub {
         mHandlerThread = new HandlerThread(BACKUP_THREAD, Process.THREAD_PRIORITY_BACKGROUND);
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
+        mUserManager = UserManager.get(context);
     }
 
     protected boolean isBackupDisabled() {
         return SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false);
-    }
-
-    private boolean isMultiUserEnabled() {
-        return Settings.Global.getInt(
-                mContext.getContentResolver(),
-                Settings.Global.BACKUP_MULTI_USER_ENABLED,
-                MULTI_USER_DISABLED)
-                == MULTI_USER_ENABLED;
     }
 
     protected int binderGetCallingUserId() {
@@ -126,21 +127,65 @@ public class Trampoline extends IBackupManager.Stub {
         return Binder.getCallingUid();
     }
 
-    protected File getSuppressFileForUser(int userId) {
-        return new File(UserBackupManagerFiles.getBaseStateDir(userId),
+    /** Stored in the system user's directory. */
+    protected File getSuppressFileForSystemUser() {
+        return new File(UserBackupManagerFiles.getBaseStateDir(UserHandle.USER_SYSTEM),
                 BACKUP_SUPPRESS_FILENAME);
     }
 
-    protected void createBackupSuppressFileForUser(int userId) throws IOException {
-        synchronized (mStateLock) {
-            getSuppressFileForUser(userId).getParentFile().mkdirs();
-            getSuppressFileForUser(userId).createNewFile();
+    /** Stored in the system user's directory and the file is indexed by the user it refers to. */
+    protected File getActivatedFileForNonSystemUser(int userId) {
+        return new File(UserBackupManagerFiles.getBaseStateDir(UserHandle.USER_SYSTEM),
+                BACKUP_ACTIVATED_FILENAME + "-" + userId);
+    }
+
+    private void createFile(File file) throws IOException {
+        if (file.exists()) {
+            return;
+        }
+
+        file.getParentFile().mkdirs();
+        if (!file.createNewFile()) {
+            Slog.w(TAG, "Failed to create file " + file.getPath());
         }
     }
 
-    private void deleteBackupSuppressFileForUser(int userId) {
-        if (!getSuppressFileForUser(userId).delete()) {
-            Slog.w(TAG, "Failed deleting backup suppressed file for user: " + userId);
+    private void deleteFile(File file) {
+        if (!file.exists()) {
+            return;
+        }
+
+        if (!file.delete()) {
+            Slog.w(TAG, "Failed to delete file " + file.getPath());
+        }
+    }
+
+    /**
+     * Deactivates the backup service for user {@code userId}. If this is the system user, it
+     * creates a suppress file which disables backup for all users. If this is a non-system user, it
+     * only deactivates backup for that user by deleting its activate file.
+     */
+    @GuardedBy("mStateLock")
+    private void deactivateBackupForUserLocked(int userId) throws IOException {
+        if (userId == UserHandle.USER_SYSTEM) {
+            createFile(getSuppressFileForSystemUser());
+        } else {
+            deleteFile(getActivatedFileForNonSystemUser(userId));
+        }
+    }
+
+    /**
+     * Enables the backup service for user {@code userId}. If this is the system user, it deletes
+     * the suppress file. If this is a non-system user, it creates the user's activate file. Note,
+     * deleting the suppress file does not automatically enable backup for non-system users, they
+     * need their own activate file in order to participate in the service.
+     */
+    @GuardedBy("mStateLock")
+    private void activateBackupForUserLocked(int userId) throws IOException {
+        if (userId == UserHandle.USER_SYSTEM) {
+            deleteFile(getSuppressFileForSystemUser());
+        } else {
+            createFile(getActivatedFileForNonSystemUser(userId));
         }
     }
 
@@ -148,22 +193,29 @@ public class Trampoline extends IBackupManager.Stub {
     // admin (device owner or profile owner).
     private boolean isUserReadyForBackup(int userId) {
         return mService != null && mService.getServiceUsers().get(userId) != null
-                && !isBackupSuppressedForUser(userId);
+                && isBackupActivatedForUser(userId);
     }
 
-    private boolean isBackupSuppressedForUser(int userId) {
-        // If backup is disabled for system user, it's disabled for all other users on device.
-        if (getSuppressFileForUser(UserHandle.USER_SYSTEM).exists()) {
-            return true;
+    /**
+     * Backup is activated for the system user if the suppress file does not exist. Backup is
+     * activated for non-system users if the suppress file does not exist AND the user's activated
+     * file exists.
+     */
+    private boolean isBackupActivatedForUser(int userId) {
+        if (getSuppressFileForSystemUser().exists()) {
+            return false;
         }
-        if (userId != UserHandle.USER_SYSTEM) {
-            return getSuppressFileForUser(userId).exists();
-        }
-        return false;
+
+        return userId == UserHandle.USER_SYSTEM
+                || getActivatedFileForNonSystemUser(userId).exists();
     }
 
     protected Context getContext() {
         return mContext;
+    }
+
+    protected UserManager getUserManager() {
+        return mUserManager;
     }
 
     protected BackupManagerService createBackupManagerService() {
@@ -198,23 +250,17 @@ public class Trampoline extends IBackupManager.Stub {
 
     /**
      * Called from {@link BackupManagerService.Lifecycle} when a user {@code userId} is unlocked.
-     * Starts the backup service for this user if it's the system user or if the service supports
-     * multi-user. Offloads work onto the handler thread {@link #mHandlerThread} to keep unlock time
-     * low.
+     * Starts the backup service for this user if backup is active for this user. Offloads work onto
+     * the handler thread {@link #mHandlerThread} to keep unlock time low.
      */
     void unlockUser(int userId) {
-        if (userId != UserHandle.USER_SYSTEM && !isMultiUserEnabled()) {
-            Slog.i(TAG, "Multi-user disabled, cannot start service for user: " + userId);
-            return;
-        }
-
         postToHandler(() -> startServiceForUser(userId));
     }
 
     private void startServiceForUser(int userId) {
         // We know that the user is unlocked here because it is called from setBackupServiceActive
         // and unlockUser which have these guarantees. So we can check if the file exists.
-        if (mService != null && !isBackupSuppressedForUser(userId)) {
+        if (mService != null && isBackupActivatedForUser(userId)) {
             Slog.i(TAG, "Starting service for user: " + userId);
             mService.startServiceForUser(userId);
         }
@@ -225,11 +271,6 @@ public class Trampoline extends IBackupManager.Stub {
      * Offloads work onto the handler thread {@link #mHandlerThread} to keep stopping time low.
      */
     void stopUser(int userId) {
-        if (userId != UserHandle.USER_SYSTEM && !isMultiUserEnabled()) {
-            Slog.i(TAG, "Multi-user disabled, cannot stop service for user: " + userId);
-            return;
-        }
-
         postToHandler(
                 () -> {
                     if (mService != null) {
@@ -240,30 +281,39 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     /**
-     * Only privileged callers should be changing the backup state. This method only acts on {@link
-     * UserHandle#USER_SYSTEM} and is a no-op if passed non-system users. Deactivating backup in the
-     * system user also deactivates backup in all users.
-     *
-     * This call will only work if the calling {@code userID} is unlocked.
+     * The system user and managed profiles can only be acted on by callers in the system or root
+     * processes. Other users can be acted on by callers who have both android.permission.BACKUP and
+     * android.permission.INTERACT_ACROSS_USERS_FULL permissions.
+     */
+    private void enforcePermissionsOnUser(int userId) throws SecurityException {
+        boolean isRestrictedUser =
+                userId == UserHandle.USER_SYSTEM
+                        || getUserManager().getUserInfo(userId).isManagedProfile();
+
+        if (isRestrictedUser) {
+            int caller = binderGetCallingUid();
+            if (caller != Process.SYSTEM_UID && caller != Process.ROOT_UID) {
+                throw new SecurityException("No permission to configure backup activity");
+            }
+        } else {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.BACKUP, "No permission to configure backup activity");
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "No permission to configure backup activity");
+        }
+    }
+
+    /**
+     * Only privileged callers should be changing the backup state. Deactivating backup in the
+     * system user also deactivates backup in all users. We are not guaranteed that {@code userId}
+     * is unlocked at this point yet, so handle both cases.
      */
     public void setBackupServiceActive(int userId, boolean makeActive) {
-        int caller = binderGetCallingUid();
-        if (caller != Process.SYSTEM_UID && caller != Process.ROOT_UID) {
-            throw new SecurityException("No permission to configure backup activity");
-        }
+        enforcePermissionsOnUser(userId);
 
         if (mGlobalDisable) {
             Slog.i(TAG, "Backup service not supported");
-            return;
-        }
-
-        if (userId != UserHandle.USER_SYSTEM) {
-            Slog.i(TAG, "Cannot set backup service activity for non-system user: " + userId);
-            return;
-        }
-
-        if (makeActive == isBackupServiceActive(userId)) {
-            Slog.i(TAG, "No change in backup service activity");
             return;
         }
 
@@ -273,12 +323,21 @@ public class Trampoline extends IBackupManager.Stub {
                 if (mService == null) {
                     mService = createBackupManagerService();
                 }
-                deleteBackupSuppressFileForUser(userId);
-                startServiceForUser(userId);
+                try {
+                    activateBackupForUserLocked(userId);
+                } catch (IOException e) {
+                    Slog.e(TAG, "Unable to persist backup service activity");
+                }
+
+                // If the user is unlocked, we can start the backup service for it. Otherwise we
+                // will start the service when the user is unlocked as part of its unlock callback.
+                if (getUserManager().isUserUnlocked(userId)) {
+                    startServiceForUser(userId);
+                }
             } else {
                 try {
                     //TODO(b/121198006): what if this throws an exception?
-                    createBackupSuppressFileForUser(userId);
+                    deactivateBackupForUserLocked(userId);
                 } catch (IOException e) {
                     Slog.e(TAG, "Unable to persist backup service inactivity");
                 }
