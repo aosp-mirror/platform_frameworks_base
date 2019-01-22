@@ -13008,7 +13008,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 throw new IllegalStateException("logging is not available");
             }
             if (mNetworkLogger != null) {
-                return mNetworkLogger.forceBatchFinalization();
+                final long ident = mInjector.binderClearCallingIdentity();
+                try {
+                    return mNetworkLogger.forceBatchFinalization();
+                } finally {
+                    mInjector.binderRestoreCallingIdentity(ident);
+                }
             }
             return 0;
         }
