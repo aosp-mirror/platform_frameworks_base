@@ -37,9 +37,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.UserHandle;
 import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
 import android.util.Log;
@@ -128,7 +126,7 @@ public final class MediaSession {
 
     private final MediaSession.Token mSessionToken;
     private final MediaController mController;
-    private final ISession mBinder;
+    private final SessionLink mSessionLink;
     private final SessionCallbackLink mCbStub;
 
     // Do not change the name of mCallback. Support lib accesses this by using reflection.
@@ -149,21 +147,6 @@ public final class MediaSession {
      * @param tag A short name for debugging purposes.
      */
     public MediaSession(@NonNull Context context, @NonNull String tag) {
-        this(context, tag, UserHandle.myUserId());
-    }
-
-    /**
-     * Creates a new session as the specified user. To create a session as a
-     * user other than your own you must hold the
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}
-     * permission.
-     *
-     * @param context The context to use to create the session.
-     * @param tag A short name for debugging purposes.
-     * @param userId The user id to create the session as.
-     * @hide
-     */
-    public MediaSession(@NonNull Context context, @NonNull String tag, int userId) {
         if (context == null) {
             throw new IllegalArgumentException("context cannot be null.");
         }
@@ -172,14 +155,14 @@ public final class MediaSession {
         }
         mMaxBitmapSize = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize);
-        mCbStub = new SessionCallbackLink(new CallbackStub(this));
+        mCbStub = new SessionCallbackLink(context, new CallbackStub(this));
         MediaSessionManager manager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         try {
-            mBinder = manager.createSession(mCbStub, tag, userId);
-            mSessionToken = new Token(mBinder.getController());
+            mSessionLink = manager.createSession(mCbStub, tag);
+            mSessionToken = new Token(mSessionLink.getController());
             mController = new MediaController(context, mSessionToken);
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException("Remote error creating session.", e);
         }
     }
@@ -236,8 +219,8 @@ public final class MediaSession {
      */
     public void setSessionActivity(@Nullable PendingIntent pi) {
         try {
-            mBinder.setLaunchPendingIntent(pi);
-        } catch (RemoteException e) {
+            mSessionLink.setLaunchPendingIntent(pi);
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Failure in setLaunchPendingIntent.", e);
         }
     }
@@ -252,8 +235,8 @@ public final class MediaSession {
      */
     public void setMediaButtonReceiver(@Nullable PendingIntent mbr) {
         try {
-            mBinder.setMediaButtonReceiver(mbr);
-        } catch (RemoteException e) {
+            mSessionLink.setMediaButtonReceiver(mbr);
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Failure in setMediaButtonReceiver.", e);
         }
     }
@@ -265,8 +248,8 @@ public final class MediaSession {
      */
     public void setFlags(@SessionFlags int flags) {
         try {
-            mBinder.setFlags(flags);
-        } catch (RemoteException e) {
+            mSessionLink.setFlags(flags);
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Failure in setFlags.", e);
         }
     }
@@ -287,8 +270,8 @@ public final class MediaSession {
             throw new IllegalArgumentException("Attributes cannot be null for local playback.");
         }
         try {
-            mBinder.setPlaybackToLocal(attributes);
-        } catch (RemoteException e) {
+            mSessionLink.setPlaybackToLocal(attributes);
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Failure in setPlaybackToLocal.", e);
         }
     }
@@ -319,10 +302,10 @@ public final class MediaSession {
         });
 
         try {
-            mBinder.setPlaybackToRemote(volumeProvider.getVolumeControl(),
+            mSessionLink.setPlaybackToRemote(volumeProvider.getVolumeControl(),
                     volumeProvider.getMaxVolume());
-            mBinder.setCurrentVolume(volumeProvider.getCurrentVolume());
-        } catch (RemoteException e) {
+            mSessionLink.setCurrentVolume(volumeProvider.getCurrentVolume());
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Failure in setPlaybackToRemote.", e);
         }
     }
@@ -340,9 +323,9 @@ public final class MediaSession {
             return;
         }
         try {
-            mBinder.setActive(active);
+            mSessionLink.setActive(active);
             mActive = active;
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Failure in setActive.", e);
         }
     }
@@ -369,8 +352,8 @@ public final class MediaSession {
             throw new IllegalArgumentException("event cannot be null or empty");
         }
         try {
-            mBinder.sendEvent(event, extras);
-        } catch (RemoteException e) {
+            mSessionLink.sendEvent(event, extras);
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error sending event", e);
         }
     }
@@ -382,8 +365,8 @@ public final class MediaSession {
      */
     public void release() {
         try {
-            mBinder.destroy();
-        } catch (RemoteException e) {
+            mSessionLink.destroySession();
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error releasing session: ", e);
         }
     }
@@ -418,8 +401,8 @@ public final class MediaSession {
     public void setPlaybackState(@Nullable PlaybackState state) {
         mPlaybackState = state;
         try {
-            mBinder.setPlaybackState(state);
-        } catch (RemoteException e) {
+            mSessionLink.setPlaybackState(state);
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Dead object in setPlaybackState.", e);
         }
     }
@@ -447,8 +430,8 @@ public final class MediaSession {
         String metadataDescription = "size=" + fields + ", description=" + description;
 
         try {
-            mBinder.setMetadata(metadata, duration, metadataDescription);
-        } catch (RemoteException e) {
+            mSessionLink.setMetadata(metadata, duration, metadataDescription);
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Dead object in setPlaybackState.", e);
         }
     }
@@ -466,8 +449,8 @@ public final class MediaSession {
      */
     public void setQueue(@Nullable List<QueueItem> queue) {
         try {
-            mBinder.setQueue(queue);
-        } catch (RemoteException e) {
+            mSessionLink.setQueue(queue);
+        } catch (RuntimeException e) {
             Log.wtf("Dead object in setQueue.", e);
         }
     }
@@ -481,8 +464,8 @@ public final class MediaSession {
      */
     public void setQueueTitle(@Nullable CharSequence title) {
         try {
-            mBinder.setQueueTitle(title);
-        } catch (RemoteException e) {
+            mSessionLink.setQueueTitle(title);
+        } catch (RuntimeException e) {
             Log.wtf("Dead object in setQueueTitle.", e);
         }
     }
@@ -502,8 +485,8 @@ public final class MediaSession {
      */
     public void setRatingType(@Rating.Style int type) {
         try {
-            mBinder.setRatingType(type);
-        } catch (RemoteException e) {
+            mSessionLink.setRatingType(type);
+        } catch (RuntimeException e) {
             Log.e(TAG, "Error in setRatingType.", e);
         }
     }
@@ -517,8 +500,8 @@ public final class MediaSession {
      */
     public void setExtras(@Nullable Bundle extras) {
         try {
-            mBinder.setExtras(extras);
-        } catch (RemoteException e) {
+            mSessionLink.setExtras(extras);
+        } catch (RuntimeException e) {
             Log.wtf("Dead object in setExtras.", e);
         }
     }
@@ -553,8 +536,8 @@ public final class MediaSession {
             }
         }
         try {
-            mBinder.setCurrentVolume(provider.getCurrentVolume());
-        } catch (RemoteException e) {
+            mSessionLink.setCurrentVolume(provider.getCurrentVolume());
+        } catch (RuntimeException e) {
             Log.e(TAG, "Error in notifyVolumeChanged", e);
         }
     }
@@ -709,12 +692,12 @@ public final class MediaSession {
      */
     public static final class Token implements Parcelable {
 
-        private ISessionController mBinder;
+        private ControllerLink mBinder;
 
         /**
          * @hide
          */
-        public Token(ISessionController binder) {
+        public Token(ControllerLink binder) {
             mBinder = binder;
         }
 
@@ -725,14 +708,14 @@ public final class MediaSession {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeStrongBinder(mBinder.asBinder());
+            dest.writeParcelable(mBinder, flags);
         }
 
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((mBinder == null) ? 0 : mBinder.asBinder().hashCode());
+            result = prime * result + ((mBinder == null) ? 0 : mBinder.getBinder().hashCode());
             return result;
         }
 
@@ -748,20 +731,22 @@ public final class MediaSession {
             if (mBinder == null) {
                 if (other.mBinder != null)
                     return false;
-            } else if (!mBinder.asBinder().equals(other.mBinder.asBinder()))
+            } else if (!mBinder.getBinder().equals(other.mBinder.getBinder())) {
                 return false;
+            }
             return true;
         }
 
-        ISessionController getBinder() {
+        ControllerLink getBinder() {
             return mBinder;
         }
 
-        public static final Parcelable.Creator<Token> CREATOR
-                = new Parcelable.Creator<Token>() {
+        public static final Parcelable.Creator<Token> CREATOR =
+                new Parcelable.Creator<Token>() {
             @Override
             public Token createFromParcel(Parcel in) {
-                return new Token(ISessionController.Stub.asInterface(in.readStrongBinder()));
+                ControllerLink link = in.readParcelable(null);
+                return new Token(link);
             }
 
             @Override

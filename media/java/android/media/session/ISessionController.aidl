@@ -39,9 +39,8 @@ interface ISessionController {
             String command, in Bundle args, in ResultReceiver cb);
     boolean sendMediaButton(String packageName, in ControllerCallbackLink caller,
             boolean asSystemService, in KeyEvent mediaButton);
-    void registerCallbackListener(String packageName, in ControllerCallbackLink cb);
-    void unregisterCallbackListener(in ControllerCallbackLink cb);
-    boolean isTransportControlEnabled();
+    void registerCallback(String packageName, in ControllerCallbackLink cb);
+    void unregisterCallback(in ControllerCallbackLink cb);
     String getPackageName();
     String getTag();
     PendingIntent getLaunchPendingIntent();

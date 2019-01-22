@@ -3448,7 +3448,20 @@ package android.media.audiopolicy {
 package android.media.session {
 
   public final class ControllerCallbackLink implements android.os.Parcelable {
-    ctor public ControllerCallbackLink(@NonNull android.media.session.ControllerCallbackLink.CallbackStub);
+    ctor public ControllerCallbackLink(@NonNull android.content.Context, @NonNull android.media.session.ControllerCallbackLink.CallbackStub);
+    ctor public ControllerCallbackLink(android.os.IBinder);
+    method public int describeContents();
+    method @NonNull public android.os.IBinder getBinder();
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyEvent(@NonNull String, @Nullable android.os.Bundle);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyExtrasChanged(@Nullable android.os.Bundle);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyMetadataChanged(@Nullable android.media.MediaMetadata);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPlaybackStateChanged(@Nullable android.media.session.PlaybackState);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyQueueChanged(@Nullable java.util.List<android.media.session.MediaSession.QueueItem>);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyQueueTitleChanged(@Nullable CharSequence);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifySessionDestroyed();
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyVolumeInfoChanged(@NonNull android.media.session.MediaController.PlaybackInfo);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.session.ControllerCallbackLink> CREATOR;
   }
 
   public abstract static class ControllerCallbackLink.CallbackStub {
@@ -3463,6 +3476,60 @@ package android.media.session {
     method public void onVolumeInfoChanged(@NonNull android.media.session.MediaController.PlaybackInfo);
   }
 
+  public final class ControllerLink implements android.os.Parcelable {
+    ctor public ControllerLink(@NonNull android.media.session.ControllerLink.ControllerStub);
+    ctor public ControllerLink(android.os.IBinder);
+    method public int describeContents();
+    method @NonNull public android.os.IBinder getBinder();
+    method @Nullable public android.os.Bundle getExtras();
+    method @Nullable public android.media.MediaMetadata getMetadata();
+    method @Nullable public android.media.session.PlaybackState getPlaybackState();
+    method @Nullable public java.util.List<android.media.session.MediaSession.QueueItem> getQueue();
+    method @Nullable public CharSequence getQueueTitle();
+    method public int getRatingType();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.session.ControllerLink> CREATOR;
+  }
+
+  public abstract static class ControllerLink.ControllerStub {
+    ctor public ControllerLink.ControllerStub();
+    method public void adjustVolume(@NonNull String, @NonNull String, @NonNull android.media.session.ControllerCallbackLink, boolean, int, int);
+    method public void fastForward(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
+    method @Nullable public android.os.Bundle getExtras();
+    method public long getFlags();
+    method @Nullable public android.app.PendingIntent getLaunchPendingIntent();
+    method @Nullable public android.media.MediaMetadata getMetadata();
+    method @NonNull public String getPackageName();
+    method @Nullable public android.media.session.PlaybackState getPlaybackState();
+    method @Nullable public java.util.List<android.media.session.MediaSession.QueueItem> getQueue();
+    method @Nullable public CharSequence getQueueTitle();
+    method public int getRatingType();
+    method @NonNull public String getTag();
+    method @NonNull public android.media.session.MediaController.PlaybackInfo getVolumeAttributes();
+    method public void next(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
+    method public void pause(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
+    method public void play(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
+    method public void playFromMediaId(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
+    method public void playFromSearch(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
+    method public void playFromUri(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.net.Uri, @Nullable android.os.Bundle);
+    method public void prepare(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
+    method public void prepareFromMediaId(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
+    method public void prepareFromSearch(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
+    method public void prepareFromUri(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.net.Uri, @Nullable android.os.Bundle);
+    method public void previous(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
+    method public void rate(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.media.Rating);
+    method public void registerCallback(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
+    method public void rewind(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
+    method public void seekTo(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, long);
+    method public void sendCommand(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle, @Nullable android.os.ResultReceiver);
+    method public void sendCustomAction(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
+    method public boolean sendMediaButton(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, boolean, @NonNull android.view.KeyEvent);
+    method public void setVolumeTo(@NonNull String, @NonNull String, @NonNull android.media.session.ControllerCallbackLink, int, int);
+    method public void skipToQueueItem(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, long);
+    method public void stop(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
+    method public void unregisterCallback(@NonNull android.media.session.ControllerCallbackLink);
+  }
+
   public final class MediaSessionManager {
     method @RequiresPermission(android.Manifest.permission.SET_MEDIA_KEY_LISTENER) public void setOnMediaKeyListener(android.media.session.MediaSessionManager.OnMediaKeyListener, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) public void setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, @Nullable android.os.Handler);
@@ -3474,6 +3541,66 @@ package android.media.session {
 
   public static interface MediaSessionManager.OnVolumeKeyLongPressListener {
     method public void onVolumeKeyLongPress(android.view.KeyEvent);
+  }
+
+  public final class SessionCallbackLink implements android.os.Parcelable {
+    ctor public SessionCallbackLink(android.os.IBinder);
+    method public int describeContents();
+    method @NonNull public android.os.IBinder getBinder();
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyAdjustVolume(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, int);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyCommand(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle, @Nullable android.os.ResultReceiver);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyCustomAction(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyFastForward(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyMediaButton(@NonNull String, int, int, @NonNull android.content.Intent, int, @Nullable android.os.ResultReceiver);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyMediaButtonFromController(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.content.Intent);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyNext(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPause(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPlay(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPlayFromMediaId(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPlayFromSearch(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPlayFromUri(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.net.Uri, @Nullable android.os.Bundle);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPrepare(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPrepareFromMediaId(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPrepareFromSearch(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPrepareFromUri(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.net.Uri, @Nullable android.os.Bundle);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPrevious(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyRate(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.media.Rating);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyRewind(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifySeekTo(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, long);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifySetVolumeTo(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, int);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifySkipToTrack(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, long);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyStop(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.session.SessionCallbackLink> CREATOR;
+  }
+
+  public final class SessionLink implements android.os.Parcelable {
+    ctor public SessionLink(@NonNull android.media.session.SessionLink.SessionStub);
+    ctor public SessionLink(android.os.IBinder);
+    method public int describeContents();
+    method @NonNull public android.os.IBinder getBinder();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.session.SessionLink> CREATOR;
+  }
+
+  public abstract static class SessionLink.SessionStub {
+    ctor public SessionLink.SessionStub();
+    method public void destroySession();
+    method @NonNull public android.media.session.ControllerLink getController();
+    method public void sendEvent(@NonNull String, @Nullable android.os.Bundle);
+    method public void setActive(boolean);
+    method public void setCurrentVolume(int);
+    method public void setExtras(@Nullable android.os.Bundle);
+    method public void setFlags(int);
+    method public void setLaunchPendingIntent(@Nullable android.app.PendingIntent);
+    method public void setMediaButtonReceiver(@Nullable android.app.PendingIntent);
+    method public void setMetadata(@Nullable android.media.MediaMetadata, long, @Nullable String);
+    method public void setPlaybackState(@Nullable android.media.session.PlaybackState);
+    method public void setPlaybackToLocal(@NonNull android.media.AudioAttributes);
+    method public void setPlaybackToRemote(int, int);
+    method public void setQueue(@Nullable java.util.List<android.media.session.MediaSession.QueueItem>);
+    method public void setQueueTitle(@Nullable CharSequence);
+    method public void setRatingType(int);
   }
 
 }
