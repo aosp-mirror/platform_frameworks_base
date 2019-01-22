@@ -844,6 +844,8 @@ aidl_interface {
         "core/java/android/net/dhcp/DhcpServingParamsParcel.aidl",
         "core/java/android/net/dhcp/IDhcpServer.aidl",
         "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
+        "core/java/android/net/ip/IIpClient.aidl",
+        "core/java/android/net/ip/IIpClientCallbacks.aidl",
         "core/java/android/net/ipmemorystore/**/*.aidl",
     ],
     api_dir: "aidl/networkstack",

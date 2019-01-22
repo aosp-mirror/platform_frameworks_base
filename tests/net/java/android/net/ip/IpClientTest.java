@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
@@ -40,9 +39,8 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.MacAddress;
 import android.net.RouteInfo;
-import android.net.ip.IpClient.Callback;
-import android.net.ip.IpClient.InitialConfiguration;
-import android.net.ip.IpClient.ProvisioningConfiguration;
+import android.net.shared.InitialConfiguration;
+import android.net.shared.ProvisioningConfiguration;
 import android.net.util.InterfaceParams;
 import android.os.INetworkManagementService;
 import android.provider.Settings;
@@ -50,8 +48,8 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
 
-import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.R;
+import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.net.BaseNetworkObserver;
 
 import org.junit.Before;
@@ -63,8 +61,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -87,7 +85,7 @@ public class IpClientTest {
     @Mock private INetworkManagementService mNMService;
     @Mock private INetd mNetd;
     @Mock private Resources mResources;
-    @Mock private Callback mCb;
+    @Mock private IpClientCallbacks mCb;
     @Mock private AlarmManager mAlarm;
     @Mock private IpClient.Dependencies mDependecies;
     private MockContentResolver mContentResolver;
@@ -179,7 +177,7 @@ public class IpClientTest {
     public void testInterfaceNotFoundFailsImmediately() throws Exception {
         setTestInterfaceParams(null);
         final IpClient ipc = new IpClient(mContext, TEST_IFNAME, mCb, mDependecies);
-        ipc.startProvisioning(new IpClient.ProvisioningConfiguration());
+        ipc.startProvisioning(new ProvisioningConfiguration());
         verify(mCb, times(1)).onProvisioningFailure(any());
         ipc.shutdown();
     }
