@@ -9096,6 +9096,10 @@ package android.webkit {
     field public final android.content.pm.Signature[] signatures;
   }
 
+  public abstract class WebViewRenderer {
+    ctor public WebViewRenderer();
+  }
+
   public final class WebViewUpdateService {
     method public static android.webkit.WebViewProviderInfo[] getAllWebViewPackages();
     method public static String getCurrentWebViewPackageName();

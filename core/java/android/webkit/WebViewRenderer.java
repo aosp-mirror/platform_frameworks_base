@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
+
 /**
  * WebViewRenderer provides an opaque handle to a {@link WebView} renderer.
  */
@@ -40,6 +42,7 @@ public abstract class WebViewRenderer {
      * This class cannot be created by applications.
      * @hide
      */
+    @SystemApi
     public WebViewRenderer() {
     }
 }
