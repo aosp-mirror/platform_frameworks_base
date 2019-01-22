@@ -21,6 +21,10 @@ import android.os.Looper;
 import android.util.SparseIntArray;
 
 import com.android.internal.location.gnssmetrics.GnssMetrics;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 
 import java.util.ArrayList;
 import java.util.Queue;
@@ -43,13 +47,14 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase);
         setExternalStatsSyncLocked(new DummyExternalStatsSync());
 
-        for (int i=0; i< GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
-            mGpsSignalQualityTimer[i] = new StopwatchTimer(clocks, null, -1000-i, null,
-                mOnBatteryTimeBase);
+        for (int i = 0; i < GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i] = new StopwatchTimer(clocks, null, -1000 - i, null,
+                    mOnBatteryTimeBase);
         }
 
         // A no-op handler.
-        mHandler = new Handler(Looper.getMainLooper()) {};
+        mHandler = new Handler(Looper.getMainLooper()) {
+        };
     }
 
     MockBatteryStatsImpl() {
@@ -95,23 +100,26 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         return this;
     }
 
-    public MockBatteryStatsImpl setKernelUidCpuFreqTimeReader(KernelUidCpuFreqTimeReader reader) {
-        mKernelUidCpuFreqTimeReader = reader;
+    public MockBatteryStatsImpl setKernelCpuUidFreqTimeReader(KernelCpuUidFreqTimeReader reader) {
+        mCpuUidFreqTimeReader = reader;
         return this;
     }
 
-    public MockBatteryStatsImpl setKernelUidCpuActiveTimeReader(KernelUidCpuActiveTimeReader reader) {
-        mKernelUidCpuActiveTimeReader = reader;
+    public MockBatteryStatsImpl setKernelCpuUidActiveTimeReader(
+            KernelCpuUidActiveTimeReader reader) {
+        mCpuUidActiveTimeReader = reader;
         return this;
     }
 
-    public MockBatteryStatsImpl setKernelUidCpuClusterTimeReader(KernelUidCpuClusterTimeReader reader) {
-        mKernelUidCpuClusterTimeReader = reader;
+    public MockBatteryStatsImpl setKernelCpuUidClusterTimeReader(
+            KernelCpuUidClusterTimeReader reader) {
+        mCpuUidClusterTimeReader = reader;
         return this;
     }
 
-    public MockBatteryStatsImpl setKernelUidCpuTimeReader(KernelUidCpuTimeReader reader) {
-        mKernelUidCpuTimeReader = reader;
+    public MockBatteryStatsImpl setKernelCpuUidUserSysTimeReader(
+            KernelCpuUidUserSysTimeReader reader) {
+        mCpuUidUserSysTimeReader = reader;
         return this;
     }
 

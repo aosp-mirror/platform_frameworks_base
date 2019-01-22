@@ -96,10 +96,10 @@ import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelCpuThreadReader;
-import com.android.internal.os.KernelUidCpuActiveTimeReader;
-import com.android.internal.os.KernelUidCpuClusterTimeReader;
-import com.android.internal.os.KernelUidCpuFreqTimeReader;
-import com.android.internal.os.KernelUidCpuTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.LooperStats;
@@ -231,14 +231,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final HashMap<Long, String> mDeletedFiles = new HashMap<>();
     private final CompanionHandler mHandler;
 
-    private KernelUidCpuTimeReader mKernelUidCpuTimeReader = new KernelUidCpuTimeReader();
+    // Disables throttler on CPU time readers.
+    private KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader =
+            new KernelCpuUidUserSysTimeReader(false);
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
-    private KernelUidCpuFreqTimeReader mKernelUidCpuFreqTimeReader =
-            new KernelUidCpuFreqTimeReader();
-    private KernelUidCpuActiveTimeReader mKernelUidCpuActiveTimeReader =
-            new KernelUidCpuActiveTimeReader();
-    private KernelUidCpuClusterTimeReader mKernelUidCpuClusterTimeReader =
-            new KernelUidCpuClusterTimeReader();
+    private KernelCpuUidFreqTimeReader mCpuUidFreqTimeReader =
+            new KernelCpuUidFreqTimeReader(false);
+    private KernelCpuUidActiveTimeReader mCpuUidActiveTimeReader =
+            new KernelCpuUidActiveTimeReader(false);
+    private KernelCpuUidClusterTimeReader mCpuUidClusterTimeReader =
+            new KernelCpuUidClusterTimeReader(false);
     private StoragedUidIoStatsReader mStoragedUidIoStatsReader =
             new StoragedUidIoStatsReader();
     @Nullable
@@ -294,12 +296,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     numSpeedSteps);
             firstCpuOfCluster += powerProfile.getNumCoresInCpuCluster(i);
         }
-        // use default throttling in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        mKernelUidCpuFreqTimeReader.setThrottleInterval(0);
-        long[] freqs = mKernelUidCpuFreqTimeReader.readFreqs(powerProfile);
-        mKernelUidCpuClusterTimeReader.setThrottleInterval(0);
-        mKernelUidCpuActiveTimeReader.setThrottleInterval(0);
 
         // Enable push notifications of throttling from vendor thermal
         // management subsystem via thermalservice.
@@ -914,7 +910,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullKernelUidCpuTime(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        mKernelUidCpuTimeReader.readAbsolute((uid, userTimeUs, systemTimeUs) -> {
+        mCpuUidUserSysTimeReader.readAbsolute((uid, timesUs) -> {
+            long userTimeUs = timesUs[0], systemTimeUs = timesUs[1];
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(uid);
             e.writeLong(userTimeUs);
@@ -926,7 +923,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullKernelUidCpuFreqTime(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        mKernelUidCpuFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
+        mCpuUidFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
             for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
                 if (cpuFreqTimeMs[freqIndex] != 0) {
                     StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
@@ -943,7 +940,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullKernelUidCpuClusterTime(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        mKernelUidCpuClusterTimeReader.readAbsolute((uid, cpuClusterTimesMs) -> {
+        mCpuUidClusterTimeReader.readAbsolute((uid, cpuClusterTimesMs) -> {
             for (int i = 0; i < cpuClusterTimesMs.length; i++) {
                 StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
                         wallClockNanos);
@@ -958,7 +955,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullKernelUidCpuActiveTime(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        mKernelUidCpuActiveTimeReader.readAbsolute((uid, cpuActiveTimesMs) -> {
+        mCpuUidActiveTimeReader.readAbsolute((uid, cpuActiveTimesMs) -> {
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(uid);
             e.writeLong((long) cpuActiveTimesMs);
