@@ -302,6 +302,24 @@ public class MagnificationGestureHandlerTest {
         assertZoomsImmediatelyOnSwipeFrom(STATE_SHORTCUT_TRIGGERED);
     }
 
+    @Test
+    public void testMultiTap_outOfDistanceSlop_shouldInIdle() {
+        // All delay motion events should be sent, if multi-tap with out of distance slop.
+        // STATE_IDLE will check if tapCount() < 2.
+        allowEventDelegation();
+        assertStaysIn(STATE_IDLE, () -> {
+            tap();
+            tap(DEFAULT_X * 2, DEFAULT_Y * 2);
+        });
+        assertStaysIn(STATE_IDLE, () -> {
+            tap();
+            tap(DEFAULT_X * 2, DEFAULT_Y * 2);
+            tap();
+            tap(DEFAULT_X * 2, DEFAULT_Y * 2);
+            tap();
+        });
+    }
+
     private void assertZoomsImmediatelyOnSwipeFrom(int state) {
         goFromStateIdleTo(state);
         swipeAndHold();
@@ -525,6 +543,11 @@ public class MagnificationGestureHandlerTest {
         send(upEvent());
     }
 
+    private void tap(float x, float y) {
+        send(downEvent(x, y));
+        send(upEvent(x, y));
+    }
+
     private void swipe() {
         swipeAndHold();
         send(upEvent());
@@ -566,18 +589,26 @@ public class MagnificationGestureHandlerTest {
     }
 
     private MotionEvent downEvent() {
+        return downEvent(DEFAULT_X, DEFAULT_Y);
+    }
+
+    private MotionEvent downEvent(float x, float y) {
         mLastDownTime = mClock.now();
         return fromTouchscreen(MotionEvent.obtain(mLastDownTime, mLastDownTime,
-                ACTION_DOWN, DEFAULT_X, DEFAULT_Y, 0));
+                ACTION_DOWN, x, y, 0));
     }
 
     private MotionEvent upEvent() {
-        return upEvent(mLastDownTime);
+        return upEvent(DEFAULT_X, DEFAULT_Y, mLastDownTime);
     }
 
-    private MotionEvent upEvent(long downTime) {
+    private MotionEvent upEvent(float x, float y) {
+        return upEvent(x, y, mLastDownTime);
+    }
+
+    private MotionEvent upEvent(float x, float y, long downTime) {
         return fromTouchscreen(MotionEvent.obtain(downTime, mClock.now(),
-                MotionEvent.ACTION_UP, DEFAULT_X, DEFAULT_Y, 0));
+                MotionEvent.ACTION_UP, x, y, 0));
     }
 
     private MotionEvent pointerEvent(int action, float x, float y) {
