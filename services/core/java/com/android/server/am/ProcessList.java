@@ -1498,6 +1498,13 @@ public final class ProcessList {
                 // Also turn on CheckJNI for debuggable apps. It's quite
                 // awkward to turn on otherwise.
                 runtimeFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
+
+                // Check if the developer does not want ART verification
+                if (android.provider.Settings.Global.getInt(mService.mContext.getContentResolver(),
+                        android.provider.Settings.Global.ART_VERIFIER_VERIFY_DEBUGGABLE, 1) == 0) {
+                    runtimeFlags |= Zygote.DISABLE_VERIFIER;
+                    Slog.w(TAG_PROCESSES, app + ": ART verification disabled");
+                }
             }
             // Run the app in safe mode if its manifest requests so or the
             // system is booted in safe mode.

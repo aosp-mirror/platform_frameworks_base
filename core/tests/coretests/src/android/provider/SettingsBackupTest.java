@@ -122,6 +122,7 @@ public class SettingsBackupTest {
                     Settings.Global.APP_OPS_CONSTANTS,
                     Settings.Global.APP_STANDBY_ENABLED,
                     Settings.Global.APP_TIME_LIMIT_USAGE_SOURCE,
+                    Settings.Global.ART_VERIFIER_VERIFY_DEBUGGABLE,
                     Settings.Global.ASSISTED_GPS_ENABLED,
                     Settings.Global.AUDIO_SAFE_VOLUME_STATE,
                     Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
