@@ -42,7 +42,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.Locale;
 
 /**
- * Unit test for {@link ViewNode}.
+ * Unit tests for {@link ViewNode}.
  *
  * <p>To run it: {@code atest FrameworksCoreTests:android.view.contentcapture.ViewNodeTest}
  */
