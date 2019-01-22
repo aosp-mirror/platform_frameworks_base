@@ -155,10 +155,10 @@ public class InsetsStateTest {
 
     @Test
     public void testGetDefaultVisibility() {
-        assertTrue(InsetsState.getDefaultVisibly(TYPE_TOP_BAR));
-        assertTrue(InsetsState.getDefaultVisibly(TYPE_SIDE_BAR_1));
-        assertTrue(InsetsState.getDefaultVisibly(TYPE_SIDE_BAR_2));
-        assertTrue(InsetsState.getDefaultVisibly(TYPE_SIDE_BAR_3));
-        assertFalse(InsetsState.getDefaultVisibly(TYPE_IME));
+        assertTrue(InsetsState.getDefaultVisibility(TYPE_TOP_BAR));
+        assertTrue(InsetsState.getDefaultVisibility(TYPE_SIDE_BAR_1));
+        assertTrue(InsetsState.getDefaultVisibility(TYPE_SIDE_BAR_2));
+        assertTrue(InsetsState.getDefaultVisibility(TYPE_SIDE_BAR_3));
+        assertFalse(InsetsState.getDefaultVisibility(TYPE_IME));
     }
 }

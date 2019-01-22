@@ -69,7 +69,7 @@ class InsetsSourceProvider {
 
     InsetsSourceProvider(InsetsSource source, InsetsStateController stateController,
             DisplayContent displayContent) {
-        mClientVisible = InsetsState.getDefaultVisibly(source.getType());
+        mClientVisible = InsetsState.getDefaultVisibility(source.getType());
         mSource = source;
         mDisplayContent = displayContent;
         mStateController = stateController;
@@ -153,6 +153,7 @@ class InsetsSourceProvider {
             return;
         }
         mAdapter = new ControlAdapter();
+        setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
         mWin.startAnimation(mDisplayContent.getPendingTransaction(), mAdapter,
                 !mClientVisible /* hidden */);
         mControllingWin = target;
@@ -219,7 +220,7 @@ class InsetsSourceProvider {
         public void onAnimationCancelled(SurfaceControl animationLeash) {
             if (mAdapter == this) {
                 mStateController.notifyControlRevoked(mControllingWin, InsetsSourceProvider.this);
-                setClientVisible(InsetsState.getDefaultVisibly(mSource.getType()));
+                setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
                 mControl = null;
                 mControllingWin = null;
                 mAdapter = null;
