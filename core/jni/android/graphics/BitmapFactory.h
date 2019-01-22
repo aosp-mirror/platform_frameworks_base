@@ -28,6 +28,4 @@ extern jmethodID gBitmapConfig_nativeToConfigMethodID;
 
 jstring encodedFormatToString(JNIEnv* env, SkEncodedImageFormat format);
 
-jobject decodeBitmap(JNIEnv* env, void* data, size_t size);
-
 #endif  // _ANDROID_GRAPHICS_BITMAP_FACTORY_H_

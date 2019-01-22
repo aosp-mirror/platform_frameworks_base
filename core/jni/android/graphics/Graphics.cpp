@@ -178,23 +178,11 @@ static jclass    gVMRuntime_class;
 static jmethodID gVMRuntime_newNonMovableArray;
 static jmethodID gVMRuntime_addressOf;
 
-static jfieldID gTransferParams_aFieldID;
-static jfieldID gTransferParams_bFieldID;
-static jfieldID gTransferParams_cFieldID;
-static jfieldID gTransferParams_dFieldID;
-static jfieldID gTransferParams_eFieldID;
-static jfieldID gTransferParams_fFieldID;
-static jfieldID gTransferParams_gFieldID;
-
 static jclass gColorSpace_class;
-static jfieldID gColorSpace_IlluminantD50FieldID;
-static jmethodID gColorSpace_adaptMethodID;
 static jmethodID gColorSpace_getMethodID;
 static jmethodID gColorSpace_matchMethodID;
 
 static jclass gColorSpaceRGB_class;
-static jmethodID gColorSpaceRGB_getTransferParametersMethodID;
-static jmethodID gColorSpaceRGB_getTransformMethodID;
 static jmethodID gColorSpaceRGB_constructorMethodID;
 
 static jclass gColorSpace_Named_class;
@@ -423,63 +411,6 @@ jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-skcms_TransferFunction GraphicsJNI::getNativeTransferParameters(JNIEnv* env, jobject transferParams) {
-    skcms_TransferFunction p;
-    p.a = (float) env->GetDoubleField(transferParams, gTransferParams_aFieldID);
-    p.b = (float) env->GetDoubleField(transferParams, gTransferParams_bFieldID);
-    p.c = (float) env->GetDoubleField(transferParams, gTransferParams_cFieldID);
-    p.d = (float) env->GetDoubleField(transferParams, gTransferParams_dFieldID);
-    p.e = (float) env->GetDoubleField(transferParams, gTransferParams_eFieldID);
-    p.f = (float) env->GetDoubleField(transferParams, gTransferParams_fFieldID);
-    p.g = (float) env->GetDoubleField(transferParams, gTransferParams_gFieldID);
-    return p;
-}
-
-skcms_Matrix3x3 GraphicsJNI::getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50) {
-    skcms_Matrix3x3 xyzMatrix;
-    jfloat* array = env->GetFloatArrayElements(xyzD50, NULL);
-    xyzMatrix.vals[0][0] = array[0];
-    xyzMatrix.vals[1][0] = array[1];
-    xyzMatrix.vals[2][0] = array[2];
-    xyzMatrix.vals[0][1] = array[3];
-    xyzMatrix.vals[1][1] = array[4];
-    xyzMatrix.vals[2][1] = array[5];
-    xyzMatrix.vals[0][2] = array[6];
-    xyzMatrix.vals[1][2] = array[7];
-    xyzMatrix.vals[2][2] = array[8];
-    env->ReleaseFloatArrayElements(xyzD50, array, 0);
-    return xyzMatrix;
-}
-
-sk_sp<SkColorSpace> GraphicsJNI::getNativeColorSpace(JNIEnv* env, jobject colorSpace) {
-    if (colorSpace == nullptr) return nullptr;
-    if (!env->IsInstanceOf(colorSpace, gColorSpaceRGB_class)) {
-        doThrowIAE(env, "The color space must be an RGB color space");
-        return nullptr;
-    }
-
-    jobject transferParams = env->CallObjectMethod(colorSpace,
-            gColorSpaceRGB_getTransferParametersMethodID);
-    if (transferParams == nullptr) {
-        doThrowIAE(env, "The color space must use an ICC parametric transfer function");
-        return nullptr;
-    }
-
-    jfloatArray illuminantD50 = (jfloatArray) env->GetStaticObjectField(gColorSpace_class,
-            gColorSpace_IlluminantD50FieldID);
-    jobject colorSpaceD50 = env->CallStaticObjectMethod(gColorSpace_class,
-            gColorSpace_adaptMethodID, colorSpace, illuminantD50);
-
-    jfloatArray xyzD50 = (jfloatArray) env->CallObjectMethod(colorSpaceD50,
-            gColorSpaceRGB_getTransformMethodID);
-
-    skcms_Matrix3x3 xyzMatrix = getNativeXYZMatrix(env, xyzD50);
-    skcms_TransferFunction transferFunction = getNativeTransferParameters(env, transferParams);
-
-    return SkColorSpace::MakeRGB(transferFunction, xyzMatrix);
-}
-
 
 jobject GraphicsJNI::getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColorSpace,
         SkColorType decodeColorType) {
@@ -712,20 +643,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
                                                      "(Ljava/lang/Class;I)Ljava/lang/Object;");
     gVMRuntime_addressOf = GetMethodIDOrDie(env, gVMRuntime_class, "addressOf", "(Ljava/lang/Object;)J");
 
-    jclass transfer_params_class = FindClassOrDie(env, "android/graphics/ColorSpace$Rgb$TransferParameters");
-    gTransferParams_aFieldID = GetFieldIDOrDie(env, transfer_params_class, "a", "D");
-    gTransferParams_bFieldID = GetFieldIDOrDie(env, transfer_params_class, "b", "D");
-    gTransferParams_cFieldID = GetFieldIDOrDie(env, transfer_params_class, "c", "D");
-    gTransferParams_dFieldID = GetFieldIDOrDie(env, transfer_params_class, "d", "D");
-    gTransferParams_eFieldID = GetFieldIDOrDie(env, transfer_params_class, "e", "D");
-    gTransferParams_fFieldID = GetFieldIDOrDie(env, transfer_params_class, "f", "D");
-    gTransferParams_gFieldID = GetFieldIDOrDie(env, transfer_params_class, "g", "D");
-
     gColorSpace_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ColorSpace"));
-    gColorSpace_IlluminantD50FieldID = GetStaticFieldIDOrDie(env,
-            gColorSpace_class, "ILLUMINANT_D50", "[F");
-    gColorSpace_adaptMethodID = GetStaticMethodIDOrDie(env, gColorSpace_class, "adapt",
-            "(Landroid/graphics/ColorSpace;[F)Landroid/graphics/ColorSpace;");
     gColorSpace_getMethodID = GetStaticMethodIDOrDie(env, gColorSpace_class,
             "get", "(Landroid/graphics/ColorSpace$Named;)Landroid/graphics/ColorSpace;");
     gColorSpace_matchMethodID = GetStaticMethodIDOrDie(env, gColorSpace_class, "match",
@@ -735,10 +653,6 @@ int register_android_graphics_Graphics(JNIEnv* env)
             FindClassOrDie(env, "android/graphics/ColorSpace$Rgb"));
     gColorSpaceRGB_constructorMethodID = GetMethodIDOrDie(env, gColorSpaceRGB_class,
             "<init>", "(Ljava/lang/String;[FLandroid/graphics/ColorSpace$Rgb$TransferParameters;)V");
-    gColorSpaceRGB_getTransferParametersMethodID = GetMethodIDOrDie(env, gColorSpaceRGB_class,
-            "getTransferParameters", "()Landroid/graphics/ColorSpace$Rgb$TransferParameters;");
-    gColorSpaceRGB_getTransformMethodID = GetMethodIDOrDie(env, gColorSpaceRGB_class,
-            "getTransform", "()[F");
 
     gColorSpace_Named_class = MakeGlobalRefOrDie(env,
             FindClassOrDie(env, "android/graphics/ColorSpace$Named"));
