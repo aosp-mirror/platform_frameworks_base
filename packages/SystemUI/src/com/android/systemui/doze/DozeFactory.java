@@ -27,8 +27,10 @@ import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AsyncSensorManager;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
@@ -44,6 +46,7 @@ public class DozeFactory {
         Context context = dozeService;
         SensorManager sensorManager = Dependency.get(AsyncSensorManager.class);
         AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
+        DockManager dockManager = SysUiServiceProvider.getComponent(context, DockManager.class);
 
         DozeHost host = getHost(dozeService);
         AmbientDisplayConfiguration config = new AmbientDisplayConfiguration(context);
@@ -63,13 +66,13 @@ public class DozeFactory {
                 new DozePauser(handler, machine, alarmManager, params.getPolicy()),
                 new DozeFalsingManagerAdapter(FalsingManager.getInstance(context)),
                 createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
-                        handler, wakeLock, machine),
+                        handler, wakeLock, machine, dockManager),
                 createDozeUi(context, host, wakeLock, machine, handler, alarmManager, params),
                 new DozeScreenState(wrappedService, handler, params, wakeLock),
                 createDozeScreenBrightness(context, wrappedService, sensorManager, host, params,
                         handler),
                 new DozeWallpaperState(context),
-                new DozeDockHandler(context, machine, host, config, handler)
+                new DozeDockHandler(context, machine, host, config, handler, dockManager)
         });
 
         return machine;
@@ -86,10 +89,11 @@ public class DozeFactory {
 
     private DozeTriggers createDozeTriggers(Context context, SensorManager sensorManager,
             DozeHost host, AlarmManager alarmManager, AmbientDisplayConfiguration config,
-            DozeParameters params, Handler handler, WakeLock wakeLock, DozeMachine machine) {
+            DozeParameters params, Handler handler, WakeLock wakeLock, DozeMachine machine,
+            DockManager dockManager) {
         boolean allowPulseTriggers = true;
         return new DozeTriggers(context, machine, host, alarmManager, config, params,
-                sensorManager, handler, wakeLock, allowPulseTriggers);
+                sensorManager, handler, wakeLock, allowPulseTriggers, dockManager);
     }
 
     private DozeMachine.Part createDozeUi(Context context, DozeHost host, WakeLock wakeLock,
