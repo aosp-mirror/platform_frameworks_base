@@ -44,6 +44,7 @@ import android.content.Context;
 import android.net.DhcpResults;
 import android.net.NetworkUtils;
 import android.net.TrafficStats;
+import android.net.ip.IpClient;
 import android.net.metrics.DhcpClientEvent;
 import android.net.metrics.DhcpErrorEvent;
 import android.net.metrics.IpConnectivityLog;
@@ -56,11 +57,9 @@ import android.system.Os;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TimeUtils;
 
 import com.android.internal.util.HexDump;
 import com.android.internal.util.MessageUtils;
-import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.WakeupMessage;
@@ -118,7 +117,8 @@ public class DhcpClient extends StateMachine {
     // t=0, t=2, t=6, t=14, t=30, allowing for 10% jitter.
     private static final int DHCP_TIMEOUT_MS    =  36 * SECONDS;
 
-    private static final int PUBLIC_BASE = Protocol.BASE_DHCP;
+    // DhcpClient uses IpClient's handler.
+    private static final int PUBLIC_BASE = IpClient.DHCPCLIENT_CMD_BASE;
 
     /* Commands from controller to start/stop DHCP */
     public static final int CMD_START_DHCP                  = PUBLIC_BASE + 1;
@@ -148,7 +148,7 @@ public class DhcpClient extends StateMachine {
     public static final int DHCP_FAILURE = 2;
 
     // Internal messages.
-    private static final int PRIVATE_BASE         = Protocol.BASE_DHCP + 100;
+    private static final int PRIVATE_BASE         = IpClient.DHCPCLIENT_CMD_BASE + 100;
     private static final int CMD_KICK             = PRIVATE_BASE + 1;
     private static final int CMD_RECEIVED_PACKET  = PRIVATE_BASE + 2;
     private static final int CMD_TIMEOUT          = PRIVATE_BASE + 3;
@@ -544,13 +544,13 @@ public class DhcpClient extends StateMachine {
 
         private String messageToString(Message message) {
             long now = SystemClock.uptimeMillis();
-            StringBuilder b = new StringBuilder(" ");
-            TimeUtils.formatDuration(message.getWhen() - now, b);
-            b.append(" ").append(messageName(message.what))
+            return new StringBuilder(" ")
+                    .append(message.getWhen() - now)
+                    .append(messageName(message.what))
                     .append(" ").append(message.arg1)
                     .append(" ").append(message.arg2)
-                    .append(" ").append(message.obj);
-            return b.toString();
+                    .append(" ").append(message.obj)
+                    .toString();
         }
 
         @Override
