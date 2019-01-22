@@ -209,6 +209,14 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER,
          {.puller = new StatsCompanionServicePuller(
                   android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER)}},
+        // DebugElapsedClock.
+        {android::util::DEBUG_ELAPSED_CLOCK,
+         {.additiveFields = {1, 2, 3, 4},
+          .puller = new StatsCompanionServicePuller(android::util::DEBUG_ELAPSED_CLOCK)}},
+        // DebugFailingElapsedClock.
+        {android::util::DEBUG_FAILING_ELAPSED_CLOCK,
+         {.additiveFields = {1, 2, 3, 4},
+          .puller = new StatsCompanionServicePuller(android::util::DEBUG_FAILING_ELAPSED_CLOCK)}},
         // BuildInformation.
         {android::util::BUILD_INFORMATION,
          {.puller = new StatsCompanionServicePuller(android::util::BUILD_INFORMATION)}},
