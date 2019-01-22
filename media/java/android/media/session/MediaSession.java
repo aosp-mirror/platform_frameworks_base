@@ -154,7 +154,7 @@ public final class MediaSession {
             throw new IllegalArgumentException("tag cannot be null or empty");
         }
         mMaxBitmapSize = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize);
+                android.R.dimen.config_mediaMetadataBitmapMaxSize);
         mCbStub = new SessionCallbackLink(context, new CallbackStub(this));
         MediaSessionManager manager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);

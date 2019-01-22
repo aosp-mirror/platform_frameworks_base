@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.media.MediaMetadata;
+import android.media.MediaParceledListSlice;
 import android.media.Rating;
 import android.media.session.MediaController.PlaybackInfo;
 import android.net.Uri;
@@ -544,7 +545,8 @@ public final class ControllerLink implements Parcelable {
     @Nullable
     public List<MediaSession.QueueItem> getQueue() {
         try {
-            return mISessionController.getQueue();
+            MediaParceledListSlice queue = mISessionController.getQueue();
+            return queue == null ? null : queue.getList();
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -961,8 +963,9 @@ public final class ControllerLink implements Parcelable {
         }
 
         @Override
-        public List<MediaSession.QueueItem> getQueue() {
-            return mControllerStub.getQueue();
+        public MediaParceledListSlice getQueue() {
+            List<MediaSession.QueueItem> queue = mControllerStub.getQueue();
+            return queue == null ? null : new MediaParceledListSlice(queue);
         }
 
         @Override

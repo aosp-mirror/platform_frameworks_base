@@ -34,8 +34,8 @@ import android.util.SparseArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Contains metadata about an item, such as the title, artist, etc.
@@ -422,7 +422,7 @@ public final class MediaMetadata implements Parcelable {
     }
 
     private MediaMetadata(Parcel in) {
-        mBundle = Bundle.setDefusable(in.readBundle(), true);
+        mBundle = in.readBundle();
     }
 
     /**

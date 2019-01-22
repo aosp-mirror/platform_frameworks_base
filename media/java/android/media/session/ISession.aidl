@@ -18,6 +18,7 @@ package android.media.session;
 import android.app.PendingIntent;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata;
+import android.media.MediaParceledListSlice;
 import android.media.session.ControllerLink;
 import android.media.session.PlaybackState;
 import android.media.session.MediaSession;
@@ -40,8 +41,7 @@ interface ISession {
     // These commands are for the TransportPerformer
     void setMetadata(in MediaMetadata metadata, long duration, String metadataDescription);
     void setPlaybackState(in PlaybackState state);
-    // TODO(b/122432476): Replace List with MediaParceledListSlice
-    void setQueue(in List<MediaSession.QueueItem> queue);
+    void setQueue(in MediaParceledListSlice queue);
     void setQueueTitle(CharSequence title);
     void setExtras(in Bundle extras);
     void setRatingType(int type);

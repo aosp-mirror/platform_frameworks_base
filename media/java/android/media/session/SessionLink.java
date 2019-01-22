@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata;
+import android.media.MediaParceledListSlice;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.session.MediaSession.QueueItem;
@@ -196,7 +197,7 @@ public final class SessionLink implements Parcelable {
      */
     void setQueue(@Nullable List<QueueItem> queue) {
         try {
-            mISession.setQueue(queue);
+            mISession.setQueue(queue == null ? null : new MediaParceledListSlice(queue));
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -416,8 +417,8 @@ public final class SessionLink implements Parcelable {
         }
 
         @Override
-        public void setQueue(List<QueueItem> queue) {
-            mSessionStub.setQueue(queue);
+        public void setQueue(MediaParceledListSlice queue) {
+            mSessionStub.setQueue(queue == null ? null : queue.getList());
         }
 
         @Override
