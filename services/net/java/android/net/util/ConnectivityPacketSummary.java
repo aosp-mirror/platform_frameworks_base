@@ -16,18 +16,55 @@
 
 package android.net.util;
 
-import android.net.dhcp.DhcpPacket;
+import static android.net.util.NetworkConstants.ARP_HWTYPE_ETHER;
+import static android.net.util.NetworkConstants.ARP_PAYLOAD_LEN;
+import static android.net.util.NetworkConstants.ARP_REPLY;
+import static android.net.util.NetworkConstants.ARP_REQUEST;
+import static android.net.util.NetworkConstants.DHCP4_CLIENT_PORT;
+import static android.net.util.NetworkConstants.ETHER_ADDR_LEN;
+import static android.net.util.NetworkConstants.ETHER_DST_ADDR_OFFSET;
+import static android.net.util.NetworkConstants.ETHER_HEADER_LEN;
+import static android.net.util.NetworkConstants.ETHER_SRC_ADDR_OFFSET;
+import static android.net.util.NetworkConstants.ETHER_TYPE_ARP;
+import static android.net.util.NetworkConstants.ETHER_TYPE_IPV4;
+import static android.net.util.NetworkConstants.ETHER_TYPE_IPV6;
+import static android.net.util.NetworkConstants.ETHER_TYPE_OFFSET;
+import static android.net.util.NetworkConstants.ICMPV6_HEADER_MIN_LEN;
+import static android.net.util.NetworkConstants.ICMPV6_ND_OPTION_LENGTH_SCALING_FACTOR;
+import static android.net.util.NetworkConstants.ICMPV6_ND_OPTION_MIN_LENGTH;
+import static android.net.util.NetworkConstants.ICMPV6_ND_OPTION_MTU;
+import static android.net.util.NetworkConstants.ICMPV6_ND_OPTION_SLLA;
+import static android.net.util.NetworkConstants.ICMPV6_ND_OPTION_TLLA;
+import static android.net.util.NetworkConstants.ICMPV6_NEIGHBOR_ADVERTISEMENT;
+import static android.net.util.NetworkConstants.ICMPV6_NEIGHBOR_SOLICITATION;
+import static android.net.util.NetworkConstants.ICMPV6_ROUTER_ADVERTISEMENT;
+import static android.net.util.NetworkConstants.ICMPV6_ROUTER_SOLICITATION;
+import static android.net.util.NetworkConstants.IPV4_ADDR_LEN;
+import static android.net.util.NetworkConstants.IPV4_DST_ADDR_OFFSET;
+import static android.net.util.NetworkConstants.IPV4_FLAGS_OFFSET;
+import static android.net.util.NetworkConstants.IPV4_FRAGMENT_MASK;
+import static android.net.util.NetworkConstants.IPV4_HEADER_MIN_LEN;
+import static android.net.util.NetworkConstants.IPV4_IHL_MASK;
+import static android.net.util.NetworkConstants.IPV4_PROTOCOL_OFFSET;
+import static android.net.util.NetworkConstants.IPV4_SRC_ADDR_OFFSET;
+import static android.net.util.NetworkConstants.IPV6_ADDR_LEN;
+import static android.net.util.NetworkConstants.IPV6_HEADER_LEN;
+import static android.net.util.NetworkConstants.IPV6_PROTOCOL_OFFSET;
+import static android.net.util.NetworkConstants.IPV6_SRC_ADDR_OFFSET;
+import static android.net.util.NetworkConstants.UDP_HEADER_LEN;
+import static android.net.util.NetworkConstants.asString;
+import static android.net.util.NetworkConstants.asUint;
+import static android.system.OsConstants.IPPROTO_ICMPV6;
+import static android.system.OsConstants.IPPROTO_UDP;
+
 import android.net.MacAddress;
+import android.net.dhcp.DhcpPacket;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.StringJoiner;
-
-import static android.system.OsConstants.*;
-import static android.net.util.NetworkConstants.*;
 
 
 /**

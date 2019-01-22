@@ -16,8 +16,8 @@
 
 package android.net.ip;
 
-import static android.net.netlink.NetlinkConstants.hexify;
 import static android.net.netlink.NetlinkConstants.RTM_DELNEIGH;
+import static android.net.netlink.NetlinkConstants.hexify;
 import static android.net.netlink.NetlinkConstants.stringForNlMsgType;
 
 import android.net.MacAddress;
@@ -26,7 +26,6 @@ import android.net.netlink.NetlinkMessage;
 import android.net.netlink.NetlinkSocket;
 import android.net.netlink.RtNetlinkNeighborMessage;
 import android.net.netlink.StructNdMsg;
-import android.net.netlink.StructNlMsgHdr;
 import android.net.util.PacketReader;
 import android.net.util.SharedLog;
 import android.os.Handler;
