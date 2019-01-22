@@ -1016,9 +1016,8 @@ public class Build {
     /** A string that uniquely identifies this build.  Do not attempt to parse this value. */
     public static final String FINGERPRINT = deriveFingerprint();
 
-    /* @hide */
-    public static final String MAGMA_FINGERPRINT = SystemProperties.get("ro.magma.fingerprint",
-            deriveFingerprint());
+    /** @hide */
+    public static final String MAGMA_FINGERPRINT = getString("ro.build.date");
 
     /**
      * Some devices split the fingerprint components between multiple
