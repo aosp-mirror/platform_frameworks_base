@@ -400,7 +400,7 @@ public class ActivityView extends ViewGroup {
         final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
 
         mRootSurfaceControl = new SurfaceControl.Builder(surfaceSession)
-                .setContainerLayer(true)
+                .setContainerLayer()
                 .setParent(mSurfaceView.getSurfaceControl())
                 .setName(DISPLAY_NAME)
                 .build();
