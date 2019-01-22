@@ -16,10 +16,8 @@
 
 package com.android.server.am;
 
-import com.android.internal.app.procstats.ServiceState;
-import com.android.internal.os.BatteryStatsImpl;
-import com.android.server.LocalServices;
-import com.android.server.notification.NotificationManagerInternal;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -44,6 +42,11 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
+
+import com.android.internal.app.procstats.ServiceState;
+import com.android.internal.os.BatteryStatsImpl;
+import com.android.server.LocalServices;
+import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriPermissionOwner;
 
@@ -51,9 +54,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 /**
  * A running application service.
@@ -103,6 +103,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
     Notification foregroundNoti; // Notification record of foreground state.
+    int foregroundServiceType; // foreground service types.
     long lastActivity;      // last time there was some activity on the service.
     long startingBgTimeout;  // time at which we scheduled this for a delayed start.
     boolean startRequested; // someone explicitly called start?
@@ -722,7 +723,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         // If it gave us a garbage notification, it doesn't
                         // get to be foreground.
                         ams.setServiceForeground(instanceName, ServiceRecord.this,
-                                0, null, 0);
+                                0, null, 0, 0);
                         ams.crashApplication(appUid, appPid, localPackageName, -1,
                                 "Bad notification for startForeground: " + e);
                     }

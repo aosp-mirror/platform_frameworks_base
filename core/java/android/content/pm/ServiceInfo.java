@@ -101,77 +101,73 @@ public class ServiceInfo extends ComponentInfo
     /**
      * The default foreground service type if not been set in manifest file.
      */
-    public static final int FOREGROUND_SERVICE_TYPE_UNSPECIFIED = 0;
+    public static final int FOREGROUND_SERVICE_TYPE_NONE = 0;
 
     /**
-     * Constant corresponding to <code>sync</code> in
+     * Constant corresponding to <code>dataSync</code> in
      * the {@link android.R.attr#foregroundServiceType} attribute.
      * Data(photo, file, account) upload/download, backup/restore, import/export, fetch,
      * transfer over network between device and cloud.
      */
-    public static final int FOREGROUND_SERVICE_TYPE_SYNC = 1;
+    public static final int FOREGROUND_SERVICE_TYPE_DATA_SYNC = 1 << 0;
 
     /**
-     * Constant corresponding to <code>mediaPlay</code> in
+     * Constant corresponding to <code>mediaPlayback</code> in
      * the {@link android.R.attr#foregroundServiceType} attribute.
-     * Music, video, news or other media play.
+     * Music, video, news or other media playback.
      */
-    public static final int FOREGROUND_SERVICE_TYPE_MEDIA_PLAY = 2;
+    public static final int FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK = 1 << 1;
 
     /**
      * Constant corresponding to <code>phoneCall</code> in
      * the {@link android.R.attr#foregroundServiceType} attribute.
      * Ongoing phone call or video conference.
      */
-    public static final int FOREGROUND_SERVICE_TYPE_PHONE_CALL = 3;
+    public static final int FOREGROUND_SERVICE_TYPE_PHONE_CALL = 1 << 2;
 
     /**
      * Constant corresponding to <code>location</code> in
      * the {@link android.R.attr#foregroundServiceType} attribute.
      * GPS, map, navigation location update.
      */
-    public static final int FOREGROUND_SERVICE_TYPE_LOCATION = 4;
+    public static final int FOREGROUND_SERVICE_TYPE_LOCATION = 1 << 3;
 
     /**
-     * Constant corresponding to <code>deviceCompanion</code> in
+     * Constant corresponding to <code>connectedDevice</code> in
      * the {@link android.R.attr#foregroundServiceType} attribute.
      * Auto, bluetooth, TV or other devices connection, monitoring and interaction.
      */
-    public static final int FOREGROUND_SERVICE_TYPE_DEVICE_COMPANION = 5;
+    public static final int FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE = 1 << 4;
 
     /**
-     * Constant corresponding to <code>ongoingProcess</code> in
-     * the {@link android.R.attr#foregroundServiceType} attribute.
-     * Process that should not be interrupted, including installation, setup, photo
-     * compression etc.
+     * A special value indicates to use all types set in manifest file.
      */
-    public static final int FOREGROUND_SERVICE_TYPE_ONGOING_PROCESS = 6;
+    public static final int FOREGROUND_SERVICE_TYPE_MANIFEST = -1;
 
     /**
-     * The enumeration of values for foreground service type.
+     * The set of flags for foreground service type.
      * The foreground service type is set in {@link android.R.attr#foregroundServiceType}
      * attribute.
      * @hide
      */
-    @IntDef(flag = false, prefix = { "FOREGROUND_SERVICE_TYPE_" }, value = {
-            FOREGROUND_SERVICE_TYPE_UNSPECIFIED,
-            FOREGROUND_SERVICE_TYPE_SYNC,
-            FOREGROUND_SERVICE_TYPE_MEDIA_PLAY,
+    @IntDef(flag = true, prefix = { "FOREGROUND_SERVICE_TYPE_" }, value = {
+            FOREGROUND_SERVICE_TYPE_NONE,
+            FOREGROUND_SERVICE_TYPE_DATA_SYNC,
+            FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
             FOREGROUND_SERVICE_TYPE_PHONE_CALL,
             FOREGROUND_SERVICE_TYPE_LOCATION,
-            FOREGROUND_SERVICE_TYPE_DEVICE_COMPANION,
-            FOREGROUND_SERVICE_TYPE_ONGOING_PROCESS
+            FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ForegroundServiceType {}
 
     /**
      * The type of foreground service, set in
-     * {@link android.R.attr#foregroundServiceType} attribute, one value in
+     * {@link android.R.attr#foregroundServiceType} attribute by ORing flags in
      * {@link ForegroundServiceType}
      * @hide
      */
-    public @ForegroundServiceType int mForegroundServiceType = FOREGROUND_SERVICE_TYPE_UNSPECIFIED;
+    public @ForegroundServiceType int mForegroundServiceType = FOREGROUND_SERVICE_TYPE_NONE;
 
     public ServiceInfo() {
     }
@@ -217,6 +213,7 @@ public class ServiceInfo extends ComponentInfo
         super.writeToParcel(dest, parcelableFlags);
         dest.writeString(permission);
         dest.writeInt(flags);
+        dest.writeInt(mForegroundServiceType);
     }
 
     public static final Creator<ServiceInfo> CREATOR =
@@ -233,5 +230,6 @@ public class ServiceInfo extends ComponentInfo
         super(source);
         permission = source.readString();
         flags = source.readInt();
+        mForegroundServiceType = source.readInt();
     }
 }

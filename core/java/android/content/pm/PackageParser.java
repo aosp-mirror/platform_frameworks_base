@@ -5573,7 +5573,7 @@ public class PackageParser {
 
         s.info.mForegroundServiceType = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestService_foregroundServiceType,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_UNSPECIFIED);
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
 
         s.info.flags = 0;
         if (sa.getBoolean(

@@ -16,7 +16,10 @@
 
 package android.app;
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
+
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentCallbacks2;
@@ -685,12 +688,10 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * the permission {@link android.Manifest.permission#FOREGROUND_SERVICE} in order to use
      * this API.</p>
      *
-     * <p>To use this API, apps targeting API {@link android.os.Build.VERSION_CODES#Q} or later must
-     * specify the foreground service type using attribute
-     * {@link android.R.attr#foregroundServiceType} in service element of manifest file, otherwise
-     * a SecurityException is thrown when this API is called. Apps targeting API older than
-     * {@link android.os.Build.VERSION_CODES#Q} do not need to specify the foreground service type
-     * </p>
+     * <p>Apps built with SDK version {@link android.os.Build.VERSION_CODES#Q} or later can specify
+     * the foreground service types using attribute {@link android.R.attr#foregroundServiceType} in
+     * service element of manifest file. The value of attribute
+     * {@link android.R.attr#foregroundServiceType} can be multiple flags ORed together.</p>
      *
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
@@ -703,7 +704,42 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         try {
             mActivityManager.setServiceForeground(
                     new ComponentName(this, mClassName), mToken, id,
-                    notification, 0);
+                    notification, 0, FOREGROUND_SERVICE_TYPE_MANIFEST);
+        } catch (RemoteException ex) {
+        }
+    }
+
+  /**
+   * An overloaded version of {@link #startForeground(int, Notification)} with additional
+   * foregroundServiceType parameter.
+   *
+   * <p>Apps built with SDK version {@link android.os.Build.VERSION_CODES#Q} or later can specify
+   * the foreground service types using attribute {@link android.R.attr#foregroundServiceType} in
+   * service element of manifest file. The value of attribute
+   * {@link android.R.attr#foregroundServiceType} can be multiple flags ORed together.</p>
+   *
+   * <p>The foregroundServiceType parameter must be a subset flags of what is specified in manifest
+   * attribute {@link android.R.attr#foregroundServiceType}, if not, an IllegalArgumentException is
+   * thrown. Specify foregroundServiceType parameter as
+   * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST} to use all flags that
+   * is specified in manifest attribute foregroundServiceType.</p>
+   *
+   * @param id The identifier for this notification as per
+   * {@link NotificationManager#notify(int, Notification)
+   * NotificationManager.notify(int, Notification)}; must not be 0.
+   * @param notification The Notification to be displayed.
+   * @param foregroundServiceType must be a subset flags of manifest attribute
+   * {@link android.R.attr#foregroundServiceType} flags.
+   * @throws IllegalArgumentException if param foregroundServiceType is not subset of manifest
+   *     attribute {@link android.R.attr#foregroundServiceType}.
+   * @see {@link android.content.pm.ServiceInfo} for the set of FOREGROUND_SERVICE_TYPE flags.
+   */
+    public final void startForeground(int id, @NonNull Notification notification,
+            int foregroundServiceType) {
+        try {
+            mActivityManager.setServiceForeground(
+                    new ComponentName(this, mClassName), mToken, id,
+                    notification, 0, foregroundServiceType);
         } catch (RemoteException ex) {
         }
     }
@@ -731,7 +767,8 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     public final void stopForeground(@StopForegroundFlags int flags) {
         try {
             mActivityManager.setServiceForeground(
-                    new ComponentName(this, mClassName), mToken, 0, null, flags);
+                    new ComponentName(this, mClassName), mToken, 0, null,
+                    flags, 0);
         } catch (RemoteException ex) {
         }
     }
