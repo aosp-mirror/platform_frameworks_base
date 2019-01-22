@@ -45,6 +45,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -156,6 +157,9 @@ public final class BroadcastQueue {
 
     static final int BROADCAST_INTENT_MSG = ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG;
     static final int BROADCAST_TIMEOUT_MSG = ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG + 1;
+
+    // log latency metrics for ordered broadcasts during BOOT_COMPLETED processing
+    boolean mLogLatencyMetrics = true;
 
     final BroadcastHandler mHandler;
 
@@ -941,6 +945,12 @@ public final class BroadcastQueue {
                     // adjustments.
                     mService.updateOomAdjLocked();
                 }
+
+                // when we have no more ordered broadcast on this queue, stop logging
+                if (mService.mUserController.mBootCompleted && mLogLatencyMetrics) {
+                    mLogLatencyMetrics = false;
+                }
+
                 return;
             }
             r = mOrderedBroadcasts.get(0);
@@ -1036,6 +1046,13 @@ public final class BroadcastQueue {
         if (recIdx == 0) {
             r.dispatchTime = r.receiverTime;
             r.dispatchClockTime = System.currentTimeMillis();
+
+            if (mLogLatencyMetrics) {
+                StatsLog.write(
+                        StatsLog.BROADCAST_DISPATCH_LATENCY_REPORTED,
+                        r.dispatchClockTime - r.enqueueClockTime);
+            }
+
             if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                 Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                     createBroadcastTraceTitle(r, BroadcastRecord.DELIVERY_PENDING),
