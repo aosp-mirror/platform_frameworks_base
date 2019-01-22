@@ -1598,10 +1598,11 @@ public class NetworkMonitor extends StateMachine {
     private void logValidationProbe(long durationMs, int probeType, int probeResult) {
         int[] transports = mNetworkCapabilities.getTransportTypes();
         boolean isFirstValidation = validationStage().mIsFirstValidation;
-        ValidationProbeEvent ev = new ValidationProbeEvent();
-        ev.probeType = ValidationProbeEvent.makeProbeType(probeType, isFirstValidation);
-        ev.returnCode = probeResult;
-        ev.durationMs = durationMs;
+        ValidationProbeEvent ev = new ValidationProbeEvent.Builder()
+                .setProbeType(probeType, isFirstValidation)
+                .setReturnCode(probeResult)
+                .setDurationMs(durationMs)
+                .build();
         mMetricsLog.log(mNetId, transports, ev);
     }
 
