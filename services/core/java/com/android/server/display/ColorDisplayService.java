@@ -868,6 +868,12 @@ public final class ColorDisplayService extends SystemService {
         if (mDisplayWhiteBalanceListener != null && oldActivated != activated) {
             mDisplayWhiteBalanceListener.onDisplayWhiteBalanceStatusChanged(activated);
         }
+
+        // If disabled, clear the tint. If enabled, do nothing more here and let the next
+        // temperature update set the correct tint.
+        if (!activated) {
+            applyTint(mDisplayWhiteBalanceTintController, false);
+        }
     }
 
     private boolean isDisplayWhiteBalanceSettingEnabled() {
