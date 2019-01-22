@@ -95,4 +95,11 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
     public void testAdd_updatesVisibilityFlags() {
         verify(mStatusBarView).setSystemUiVisibility(anyInt());
     }
+
+    @Test
+    public void testSetForcePluginOpen_beforeStatusBarInitialization() {
+        mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
+                mActivityManager, mDozeParameters);
+        mStatusBarWindowController.setForcePluginOpen(true);
+    }
 }
