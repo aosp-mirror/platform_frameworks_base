@@ -868,7 +868,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onNotificationExpansionChanged(String key,
-                boolean userAction, boolean expanded) {
+                boolean userAction, boolean expanded, int notificationLocation) {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {

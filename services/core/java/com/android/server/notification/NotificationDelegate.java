@@ -42,7 +42,8 @@ public interface NotificationDelegate {
     void onNotificationVisibilityChanged(
             NotificationVisibility[] newlyVisibleKeys,
             NotificationVisibility[] noLongerVisibleKeys);
-    void onNotificationExpansionChanged(String key, boolean userAction, boolean expanded);
+    void onNotificationExpansionChanged(String key, boolean userAction, boolean expanded,
+            int notificationLocation);
     void onNotificationDirectReplied(String key);
     void onNotificationSettingsViewed(String key);
 
