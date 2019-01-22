@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.TaskSnapshotPersister.*;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -92,7 +91,7 @@ class TaskSnapshotLoader {
                     proto.topActivityComponent);
             return new TaskSnapshot(topActivityComponent, buffer, proto.orientation,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
-                    reducedResolution, reducedResolution ? REDUCED_SCALE : 1f,
+                    reducedResolution, reducedResolution ? mPersister.getReducedScale() : 1f,
                     proto.isRealSnapshot, proto.windowingMode, proto.systemUiVisibility,
                     proto.isTranslucent);
         } catch (IOException e) {
