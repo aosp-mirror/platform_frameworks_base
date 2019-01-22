@@ -320,7 +320,7 @@ package android.net {
   @IntDef({0x0, 0xa, 0x14, 0x1e}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface NetworkBadging.Badging {
   }
 
-  public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
+  @Deprecated public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
     method @Deprecated public static org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
   }
 
