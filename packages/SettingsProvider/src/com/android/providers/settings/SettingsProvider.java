@@ -3232,7 +3232,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 172;
+            private static final int SETTINGS_VERSION = 173;
 
             private final int mUserId;
 
@@ -4215,6 +4215,41 @@ public class SettingsProvider extends ContentProvider {
 
                     }
                     currentVersion = 172;
+                }
+
+                if (currentVersion == 172) {
+                    // Version 172: Set the default value for Secure Settings: LOCATION_MODE
+
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+
+                    final Setting locationMode = secureSettings.getSettingLocked(
+                            Secure.LOCATION_MODE);
+
+                    if (locationMode.isNull()) {
+                        final Setting locationProvidersAllowed = secureSettings.getSettingLocked(
+                                Secure.LOCATION_PROVIDERS_ALLOWED);
+
+                        String defLocationMode = Integer.toString(
+                                !TextUtils.isEmpty(locationProvidersAllowed.getValue())
+                                        ? Secure.LOCATION_MODE_HIGH_ACCURACY
+                                        : Secure.LOCATION_MODE_OFF);
+                        secureSettings.insertSettingLocked(
+                                Secure.LOCATION_MODE, defLocationMode,
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+
+                        // also reset LOCATION_PROVIDERS_ALLOWED back to the default value - this
+                        // setting is now only for debug/test purposes, and will likely be removed
+                        // in a later release. LocationManagerService is responsible for adjusting
+                        // these settings to the proper state.
+
+                        String defLocationProvidersAllowed = getContext().getResources().getString(
+                                R.string.def_location_providers_allowed);
+                        secureSettings.insertSettingLocked(
+                                Secure.LOCATION_PROVIDERS_ALLOWED, defLocationProvidersAllowed,
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 173;
                 }
 
                 // vXXX: Add new settings above this point.

@@ -830,6 +830,15 @@ public class LocationManagerService extends ILocationManager.Stub {
             mAllowed = !mIsManagedBySettings;
             mEnabled = false;
             mProperties = null;
+
+            if (mIsManagedBySettings) {
+                // since we assume providers are disabled by default
+                Settings.Secure.putStringForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                        "-" + mName,
+                        mCurrentUserId);
+            }
         }
 
         @GuardedBy("mLock")
@@ -2865,33 +2874,11 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         long identity = Binder.clearCallingIdentity();
         try {
-            boolean enabled;
-            try {
-                enabled = Settings.Secure.getIntForUser(
+            return Settings.Secure.getIntForUser(
                         mContext.getContentResolver(),
                         Settings.Secure.LOCATION_MODE,
+                        Settings.Secure.LOCATION_MODE_OFF,
                         userId) != Settings.Secure.LOCATION_MODE_OFF;
-            } catch (Settings.SettingNotFoundException e) {
-                // OS upgrade case where mode isn't set yet
-                enabled = !TextUtils.isEmpty(Settings.Secure.getStringForUser(
-                        mContext.getContentResolver(),
-                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                        userId));
-
-                try {
-                    Settings.Secure.putIntForUser(
-                            mContext.getContentResolver(),
-                            Settings.Secure.LOCATION_MODE,
-                            enabled
-                                    ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY
-                                    : Settings.Secure.LOCATION_MODE_OFF,
-                            userId);
-                } catch (RuntimeException ex) {
-                    // any problem with writing should not be propagated
-                    Slog.e(TAG, "error updating location mode", ex);
-                }
-            }
-            return enabled;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
