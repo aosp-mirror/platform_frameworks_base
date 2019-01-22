@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.NotificationUpdateHandler;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -160,8 +161,10 @@ public class NotificationEntryManager implements
     public void performRemoveNotification(StatusBarNotification n) {
         final int rank = mNotificationData.getRank(n.getKey());
         final int count = mNotificationData.getActiveNotifications().size();
+        NotificationVisibility.NotificationLocation location =
+                NotificationLogger.getNotificationLocation(getNotificationData().get(n.getKey()));
         final NotificationVisibility nv = NotificationVisibility.obtain(n.getKey(), rank, count,
-                true);
+                true, location);
         removeNotificationInternal(
                 n.getKey(), null, nv, false /* forceRemove */, true /* removedByUser */);
     }
