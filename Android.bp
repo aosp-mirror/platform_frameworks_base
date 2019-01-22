@@ -761,8 +761,6 @@ java_defaults {
     required: [
         // TODO: remove gps_debug when the build system propagates "required" properly.
         "gps_debug.conf",
-        // Loaded with System.loadLibrary by android.view.textclassifier
-        "libmedia2_jni",
     ],
 
     dxflags: [
