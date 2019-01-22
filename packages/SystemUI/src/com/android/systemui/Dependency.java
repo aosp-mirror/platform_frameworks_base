@@ -29,6 +29,7 @@ import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.Preconditions;
+import com.android.keyguard.clock.ClockManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
@@ -283,6 +284,7 @@ public class Dependency extends SystemUI {
     @Inject @Named(TIME_TICK_HANDLER_NAME) Lazy<Handler> mTimeTickHandler;
     @Nullable
     @Inject @Named(LEAK_REPORT_EMAIL_NAME) Lazy<String> mLeakReportEmail;
+    @Inject Lazy<ClockManager> mClockManager;
 
     @Inject
     public Dependency() {
@@ -449,6 +451,7 @@ public class Dependency extends SystemUI {
         mProviders.put(NotificationAlertingManager.class, mNotificationAlertingManager::get);
         mProviders.put(ForegroundServiceNotificationListener.class,
                 mForegroundServiceNotificationListener::get);
+        mProviders.put(ClockManager.class, mClockManager::get);
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add
