@@ -20,7 +20,6 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.app.ActivityView;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Outline;
@@ -367,6 +366,12 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         }
     }
 
+    void collapseStack(Runnable endRunnable) {
+        collapseStack();
+        // TODO - use the runnable at end of animation
+        endRunnable.run();
+    }
+
     /**
      * Expands the stack fo bubbles.
      */
@@ -627,6 +632,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             return;
         }
 
+        mExpandedViewContainer.setEntry(mExpandedBubble.getEntry(), this);
         if (mExpandedBubble.hasAppOverlayIntent()) {
             // Bubble with activity view expanded state
             ActivityView expandedView = mExpandedBubble.getActivityView();
@@ -634,8 +640,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             expandedView.setLayoutParams(new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, mExpandedBubbleHeight));
 
-            final PendingIntent intent = mExpandedBubble.getAppOverlayIntent();
-            mExpandedViewContainer.setHeaderText(intent.getIntent().getComponent().toShortString());
             mExpandedViewContainer.setExpandedView(expandedView);
         } else {
             // Bubble with notification view expanded state
@@ -649,8 +653,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             } else {
                 mExpandedViewContainer.setExpandedView(null);
             }
-            // Bubble with notification as expanded state doesn't need a header / title
-            mExpandedViewContainer.setHeaderText(null);
         }
     }
 

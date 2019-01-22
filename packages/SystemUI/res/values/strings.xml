@@ -2346,4 +2346,12 @@
 
     <!-- What to show on the ambient display player when song doesn't have a title. [CHAR LIMIT=20] -->
     <string name="music_controls_no_title">No title</string>
+
+    <!-- Text used for content description of deep link button in the header of expanded bubble
+         view. [CHAR_LIMIT=NONE] -->
+    <string name="bubbles_deep_link_button_description">Open <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+    <!-- Text used for content description of settings button in the header of expanded bubble
+         view. [CHAR_LIMIT=NONE] -->
+    <string name="bubbles_settings_button_description">Open notification settings for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+
 </resources>
