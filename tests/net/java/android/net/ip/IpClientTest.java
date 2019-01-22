@@ -122,13 +122,14 @@ public class IpClientTest {
     private IpClient makeIpClient(String ifname) throws Exception {
         setTestInterfaceParams(ifname);
         final IpClient ipc = new IpClient(mContext, ifname, mCb, mDependecies);
-        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).disableIpv6(ifname);
-        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).clearInterfaceAddresses(ifname);
+        verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceSetEnableIPv6(ifname, false);
+        verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceClearAddrs(ifname);
         ArgumentCaptor<BaseNetworkObserver> arg =
                 ArgumentCaptor.forClass(BaseNetworkObserver.class);
         verify(mNMService, times(1)).registerObserver(arg.capture());
         mObserver = arg.getValue();
         reset(mNMService);
+        reset(mNetd);
         // Verify IpClient doesn't call onLinkPropertiesChange() when it starts.
         verify(mCb, never()).onLinkPropertiesChange(any());
         reset(mCb);
@@ -200,8 +201,8 @@ public class IpClientTest {
         verify(mCb, never()).onProvisioningFailure(any());
 
         ipc.shutdown();
-        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).disableIpv6(iface);
-        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).clearInterfaceAddresses(iface);
+        verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceSetEnableIPv6(iface, false);
+        verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceClearAddrs(iface);
         verify(mCb, timeout(TEST_TIMEOUT_MS).times(1))
                 .onLinkPropertiesChange(eq(makeEmptyLinkProperties(iface)));
     }
@@ -251,8 +252,8 @@ public class IpClientTest {
         verify(mCb, timeout(TEST_TIMEOUT_MS).times(1)).onProvisioningSuccess(eq(want));
 
         ipc.shutdown();
-        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).disableIpv6(iface);
-        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).clearInterfaceAddresses(iface);
+        verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceSetEnableIPv6(iface, false);
+        verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceClearAddrs(iface);
         verify(mCb, timeout(TEST_TIMEOUT_MS).times(1))
                 .onLinkPropertiesChange(eq(makeEmptyLinkProperties(iface)));
     }

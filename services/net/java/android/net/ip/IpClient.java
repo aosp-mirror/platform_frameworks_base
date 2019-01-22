@@ -479,7 +479,7 @@ public class IpClient extends StateMachine {
 
         // TODO: Consider creating, constructing, and passing in some kind of
         // InterfaceController.Dependencies class.
-        mInterfaceCtrl = new InterfaceController(mInterfaceName, mNwService, deps.getNetd(), mLog);
+        mInterfaceCtrl = new InterfaceController(mInterfaceName, deps.getNetd(), mLog);
 
         mNetlinkTracker = new NetlinkTracker(
                 mInterfaceName,
