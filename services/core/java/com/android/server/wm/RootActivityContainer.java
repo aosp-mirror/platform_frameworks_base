@@ -1108,41 +1108,28 @@ class RootActivityContainer extends ConfigurationContainer
             return false;
         }
 
-        boolean result = false;
         if (targetStack != null && (targetStack.isTopStackOnDisplay()
                 || getTopDisplayFocusedStack() == targetStack)) {
-            result = targetStack.resumeTopActivityUncheckedLocked(target, targetOptions);
+            return targetStack.resumeTopActivityUncheckedLocked(target, targetOptions);
         }
 
+        // Resume all top activities in focused stacks on all displays.
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            boolean resumedOnDisplay = false;
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                final ActivityRecord topRunningActivity = stack.topRunningActivityLocked();
-                if (!stack.isFocusableAndVisible() || topRunningActivity == null) {
-                    continue;
-                }
-                if (topRunningActivity.isState(RESUMED)) {
-                    // Kick off any lingering app transitions form the MoveTaskToFront operation.
-                    stack.executeAppTransition(targetOptions);
-                } else {
-                    resumedOnDisplay |= topRunningActivity.makeActiveIfNeeded(target);
-                }
+            final ActivityStack focusedStack = display.getFocusedStack();
+            if (focusedStack == null) {
+                continue;
             }
-            if (!resumedOnDisplay) {
-                // In cases when there are no valid activities (e.g. device just booted or launcher
-                // crashed) it's possible that nothing was resumed on a display. Requesting resume
-                // of top activity in focused stack explicitly will make sure that at least home
-                // activity is started and resumed, and no recursion occurs.
-                final ActivityStack focusedStack = display.getFocusedStack();
-                if (focusedStack != null) {
-                    focusedStack.resumeTopActivityUncheckedLocked(target, targetOptions);
-                }
+            final ActivityRecord r = focusedStack.topRunningActivityLocked();
+            if (r == null || !r.isState(RESUMED)) {
+                focusedStack.resumeTopActivityUncheckedLocked(null, null);
+            } else if (r.isState(RESUMED)) {
+                // Kick off any lingering app transitions form the MoveTaskToFront operation.
+                focusedStack.executeAppTransition(targetOptions);
             }
         }
 
-        return result;
+        return false;
     }
 
     void applySleepTokens(boolean applyToStacks) {

@@ -55,7 +55,6 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
@@ -433,7 +432,6 @@ class ActivityTestsBase {
             doReturn(mock(IPackageManager.class)).when(this).getPackageManager();
             // allow background activity starts by default
             doReturn(true).when(this).isBackgroundActivityStartsEnabled();
-            doNothing().when(this).updateCpuStats();
         }
 
         void setup(IntentFirewall intentFirewall, PendingIntentController intentController,
@@ -588,8 +586,6 @@ class ActivityTestsBase {
             // unit test version does not handle launch wake lock
             doNothing().when(this).acquireLaunchWakelock();
             doReturn(mKeyguardController).when(this).getKeyguardController();
-
-            mLaunchingActivity = mock(PowerManager.WakeLock.class);
 
             initialize();
         }
