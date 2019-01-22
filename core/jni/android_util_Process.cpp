@@ -22,10 +22,10 @@
 #include <utils/Log.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
-#include <cutils/sched_policy.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
 #include <processgroup/processgroup.h>
+#include <processgroup/sched_policy.h>
 
 #include "core_jni_helpers.h"
 

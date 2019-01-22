@@ -53,13 +53,13 @@
 #include <android-base/stringprintf.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
-#include <cutils/sched_policy.h>
 #include <private/android_filesystem_config.h>
 #include <utils/String8.h>
 #include <selinux/android.h>
 #include <seccomp_policy.h>
 #include <stats_event_list.h>
 #include <processgroup/processgroup.h>
+#include <processgroup/sched_policy.h>
 
 #include "core_jni_helpers.h"
 #include <nativehelper/JNIHelp.h>
