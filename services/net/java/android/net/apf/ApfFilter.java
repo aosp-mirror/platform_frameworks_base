@@ -20,6 +20,7 @@ import static android.net.util.NetworkConstants.ICMPV6_ECHO_REQUEST_TYPE;
 import static android.net.util.NetworkConstants.ICMPV6_NEIGHBOR_ADVERTISEMENT;
 import static android.net.util.NetworkConstants.ICMPV6_ROUTER_ADVERTISEMENT;
 import static android.net.util.NetworkConstants.ICMPV6_ROUTER_SOLICITATION;
+import static android.net.util.SocketUtils.makePacketSocketAddress;
 import static android.system.OsConstants.AF_PACKET;
 import static android.system.OsConstants.ARPHRD_ETHER;
 import static android.system.OsConstants.ETH_P_ARP;
@@ -55,7 +56,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.system.PacketSocketAddress;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -72,6 +72,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
@@ -472,7 +473,7 @@ public class ApfFilter {
                 installNewProgramLocked();
             }
             socket = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IPV6);
-            PacketSocketAddress addr = new PacketSocketAddress(
+            SocketAddress addr = makePacketSocketAddress(
                     (short) ETH_P_IPV6, mInterfaceParams.index);
             Os.bind(socket, addr);
             NetworkUtils.attachRaFilter(socket, mApfCapabilities.apfPacketFormat);
