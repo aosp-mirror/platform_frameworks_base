@@ -19,7 +19,6 @@ package android.net.util;
 import android.net.INetd;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.util.Log;
 
