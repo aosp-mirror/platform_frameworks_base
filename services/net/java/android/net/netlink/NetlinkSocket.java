@@ -16,26 +16,26 @@
 
 package android.net.netlink;
 
+import static android.net.util.SocketUtils.makeNetlinkSocketAddress;
 import static android.system.OsConstants.AF_NETLINK;
 import static android.system.OsConstants.EIO;
 import static android.system.OsConstants.EPROTO;
 import static android.system.OsConstants.ETIMEDOUT;
+import static android.system.OsConstants.SOCK_DGRAM;
+import static android.system.OsConstants.SOL_SOCKET;
 import static android.system.OsConstants.SO_RCVBUF;
 import static android.system.OsConstants.SO_RCVTIMEO;
 import static android.system.OsConstants.SO_SNDTIMEO;
-import static android.system.OsConstants.SOCK_DGRAM;
-import static android.system.OsConstants.SOL_SOCKET;
 
 import android.system.ErrnoException;
-import android.system.NetlinkSocketAddress;
 import android.system.Os;
 import android.system.StructTimeval;
 import android.util.Log;
+
 import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
 import java.io.InterruptedIOException;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -106,7 +106,7 @@ public class NetlinkSocket {
     }
 
     public static void connectToKernel(FileDescriptor fd) throws ErrnoException, SocketException {
-        Os.connect(fd, (SocketAddress) (new NetlinkSocketAddress(0, 0)));
+        Os.connect(fd, makeNetlinkSocketAddress(0, 0));
     }
 
     private static void checkTimeout(long timeoutMs) {
