@@ -119,6 +119,23 @@ interface IStatsManager {
     void removeDataFetchOperation(long configKey, in String packageName);
 
     /**
+     * Registers the given pending intent for this packagename. This intent is invoked when the
+     * active status of any of the configs sent by this package changes and will contain a list of
+     * config ids that are currently active. It also returns the list of configs that are currently
+     * active. There can be at most one active configs changed listener per package.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    long[] setActiveConfigsChangedOperation(in IBinder intentSender, in String packageName);
+
+    /**
+     * Removes the active configs changed operation for the specified package name.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    void removeActiveConfigsChangedOperation(in String packageName);
+
+    /**
      * Removes the configuration with the matching config key. No-op if this config key does not
      * exist.
      *

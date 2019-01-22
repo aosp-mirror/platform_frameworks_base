@@ -989,6 +989,25 @@ Status StatsService::setDataFetchOperation(int64_t key,
     return Status::ok();
 }
 
+Status StatsService::setActiveConfigsChangedOperation(const sp<android::IBinder>& intentSender,
+                                                      const String16& packageName,
+                                                      vector<int64_t>* output) {
+    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+
+    IPCThreadState* ipc = IPCThreadState::self();
+    mConfigManager->SetActiveConfigsChangedReceiver(ipc->getCallingUid(), intentSender);
+    //TODO: Return the list of configs that are already active
+    return Status::ok();
+}
+
+Status StatsService::removeActiveConfigsChangedOperation(const String16& packageName) {
+    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+
+    IPCThreadState* ipc = IPCThreadState::self();
+    mConfigManager->RemoveActiveConfigsChangedReceiver(ipc->getCallingUid());
+    return Status::ok();
+}
+
 Status StatsService::removeConfiguration(int64_t key, const String16& packageName) {
     ENFORCE_DUMP_AND_USAGE_STATS(packageName);
 

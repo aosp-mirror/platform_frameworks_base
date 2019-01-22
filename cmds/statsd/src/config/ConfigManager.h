@@ -82,6 +82,23 @@ public:
     void RemoveConfigReceiver(const ConfigKey& key);
 
     /**
+     * Sets the broadcast receiver that is notified whenever the list of active configs
+     * changes for this uid.
+     */
+    void SetActiveConfigsChangedReceiver(const int uid, const sp<IBinder>& intentSender);
+
+    /**
+     * Returns the broadcast receiver for active configs changed for this uid.
+     */
+
+    const sp<IBinder> GetActiveConfigsChangedReceiver(const int uid) const;
+
+    /**
+     * Erase any active configs changed broadcast receiver associated with this uid.
+     */
+    void RemoveActiveConfigsChangedReceiver(const int uid);
+
+    /**
      * A configuration was removed.
      *
      * Reports this to listeners.
@@ -128,6 +145,12 @@ private:
      * PendingIntent.
      */
     std::map<ConfigKey, sp<android::IBinder>> mConfigReceivers;
+
+    /**
+     * Each uid can be subscribed by up to one receiver to notify that the list of active configs
+     * for this uid has changed. The receiver is specified as IBinder from PendingIntent.
+     */
+     std::map<int, sp<android::IBinder>> mActiveConfigsChangedReceivers;
 
     /**
      * The ConfigListeners that will be told about changes.
