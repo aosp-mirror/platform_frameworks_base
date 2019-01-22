@@ -352,14 +352,14 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * @throws IllegalArgumentException if {@code virtualIds} is empty
      */
     public final void notifyViewsDisappeared(@NonNull AutofillId hostId,
-            @NonNull int[] virtualIds) {
-        Preconditions.checkArgument(!hostId.isVirtual(), "parent cannot be virtual");
+            @NonNull long[] virtualIds) {
+        Preconditions.checkArgument(hostId.isNonVirtual(), "parent cannot be virtual");
         Preconditions.checkArgument(!ArrayUtils.isEmpty(virtualIds), "virtual ids cannot be empty");
         if (!isContentCaptureEnabled()) return;
 
         // TODO(b/123036895): use a internalNotifyViewsDisappeared that optimizes how the event is
         // parcelized
-        for (int id : virtualIds) {
+        for (long id : virtualIds) {
             internalNotifyViewDisappeared(new AutofillId(hostId, id, getIdAsInt()));
         }
     }
@@ -405,9 +405,9 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      *
      * @throws IllegalArgumentException if the {@code parentId} is a virtual child id.
      */
-    public @NonNull AutofillId newAutofillId(@NonNull AutofillId parentId, int virtualChildId) {
+    public @NonNull AutofillId newAutofillId(@NonNull AutofillId parentId, long virtualChildId) {
         Preconditions.checkNotNull(parentId);
-        Preconditions.checkArgument(!parentId.isVirtual(), "virtual ids cannot have children");
+        Preconditions.checkArgument(parentId.isNonVirtual(), "virtual ids cannot have children");
         return new AutofillId(parentId, virtualChildId, getIdAsInt());
     }
 
@@ -423,7 +423,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      */
     @NonNull
     public final ViewStructure newVirtualViewStructure(@NonNull AutofillId parentId,
-            int virtualId) {
+            long virtualId) {
         return new ViewNode.ViewStructureImpl(parentId, virtualId, getIdAsInt());
     }
 

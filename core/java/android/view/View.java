@@ -8203,10 +8203,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link ContentCaptureSession#notifyViewDisappeared(AutofillId)}, and
      * {@link ContentCaptureSession#notifyViewTextChanged(AutofillId, CharSequence, int)}
      * respectively. The structure for the a child must be created using
-     * {@link ContentCaptureSession#newVirtualViewStructure(AutofillId, int)}, and the
+     * {@link ContentCaptureSession#newVirtualViewStructure(AutofillId, long)}, and the
      * {@code autofillId} for a child can be obtained either through
      * {@code childStructure.getAutofillId()} or
-     * {@link ContentCaptureSession#newAutofillId(AutofillId, int)}.
+     * {@link ContentCaptureSession#newAutofillId(AutofillId, long)}.
      *
      * <p><b>Note: </b>the following methods of the {@code structure} will be ignored:
      * <ul>
@@ -8600,7 +8600,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (isAttachedToWindow()) {
             throw new IllegalStateException("Cannot set autofill id when view is attached");
         }
-        if (id != null && id.isVirtual()) {
+        if (id != null && !id.isNonVirtual()) {
             throw new IllegalStateException("Cannot set autofill id assigned to virtual views");
         }
         if (id == null && (mPrivateFlags3 & PFLAG3_AUTOFILLID_EXPLICITLY_SET) == 0) {

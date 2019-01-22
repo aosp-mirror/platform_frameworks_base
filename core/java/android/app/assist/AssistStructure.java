@@ -894,7 +894,7 @@ public class AssistStructure implements Parcelable {
             }
             if (mAutofillId != null) {
                 autofillFlags |= AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID;
-                if (mAutofillId.isVirtual()) {
+                if (mAutofillId.isVirtualInt()) {
                     autofillFlags |= AUTOFILL_FLAGS_HAS_AUTOFILL_VIRTUAL_VIEW_ID;
                 }
             }
@@ -961,8 +961,9 @@ public class AssistStructure implements Parcelable {
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID) != 0) {
                     out.writeInt(mAutofillId.getViewId());
                     if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIRTUAL_VIEW_ID) != 0) {
-                        out.writeInt(mAutofillId.getVirtualChildId());
+                        out.writeInt(mAutofillId.getVirtualChildIntId());
                     }
+                    // TODO(b/113593220): write session id as well
                 }
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_TYPE) != 0) {
                     out.writeInt(mAutofillType);

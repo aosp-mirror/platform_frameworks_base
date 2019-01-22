@@ -8194,10 +8194,10 @@ public class Activity extends ContextThemeWrapper
             final AutofillId autofillId = autofillIds[i];
             final View view = autofillClientFindViewByAutofillIdTraversal(autofillId);
             if (view != null) {
-                if (!autofillId.isVirtual()) {
+                if (!autofillId.isVirtualInt()) {
                     visible[i] = view.isVisibleToUser();
                 } else {
-                    visible[i] = view.isVisibleToUserForAutofill(autofillId.getVirtualChildId());
+                    visible[i] = view.isVisibleToUserForAutofill(autofillId.getVirtualChildIntId());
                 }
             }
         }

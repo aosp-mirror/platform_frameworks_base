@@ -48,17 +48,18 @@ public class ContentCaptureSessionTest {
 
     @Test
     public void testNewAutofillId_invalid() {
-        assertThrows(NullPointerException.class, () -> mSession1.newAutofillId(null, 42));
+        assertThrows(NullPointerException.class, () -> mSession1.newAutofillId(null, 42L));
         assertThrows(IllegalArgumentException.class,
-                () -> mSession1.newAutofillId(new AutofillId(42, 42), 42));
+                () -> mSession1.newAutofillId(new AutofillId(42, 42), 42L));
     }
 
     @Test
     public void testNewAutofillId_valid() {
         final AutofillId parentId = new AutofillId(42);
-        final AutofillId childId = mSession1.newAutofillId(parentId, 108);
+        final AutofillId childId = mSession1.newAutofillId(parentId, 108L);
         assertThat(childId.getViewId()).isEqualTo(42);
-        assertThat(childId.getVirtualChildId()).isEqualTo(108);
+        assertThat(childId.getVirtualChildLongId()).isEqualTo(108L);
+        assertThat(childId.getVirtualChildIntId()).isEqualTo(View.NO_ID);
         assertThat(childId.getSessionId()).isEqualTo(mSession1.getIdAsInt());
     }
 
@@ -66,8 +67,8 @@ public class ContentCaptureSessionTest {
     public void testNewAutofillId_differentSessions() {
         assertThat(mSession1.getIdAsInt()).isNotSameAs(mSession2.getIdAsInt()); //sanity check
         final AutofillId parentId = new AutofillId(42);
-        final AutofillId childId1 = mSession1.newAutofillId(parentId, 108);
-        final AutofillId childId2 = mSession2.newAutofillId(parentId, 108);
+        final AutofillId childId1 = mSession1.newAutofillId(parentId, 108L);
+        final AutofillId childId2 = mSession2.newAutofillId(parentId, 108L);
         assertThat(childId1).isNotEqualTo(childId2);
         assertThat(childId2).isNotEqualTo(childId1);
     }
@@ -91,9 +92,9 @@ public class ContentCaptureSessionTest {
     @Test
     public void testNewVirtualViewStructure() {
         final AutofillId parentId = new AutofillId(42);
-        final ViewStructure structure = mSession1.newVirtualViewStructure(parentId, 108);
+        final ViewStructure structure = mSession1.newVirtualViewStructure(parentId, 108L);
         assertThat(structure).isNotNull();
-        final AutofillId childId = mSession1.newAutofillId(parentId, 108);
+        final AutofillId childId = mSession1.newAutofillId(parentId, 108L);
         assertThat(structure.getAutofillId()).isEqualTo(childId);
     }
 
@@ -101,16 +102,16 @@ public class ContentCaptureSessionTest {
     public void testNotifyViewsDisappeared_invalid() {
         // Null parent
         assertThrows(NullPointerException.class,
-                () -> mSession1.notifyViewsDisappeared(null, new int[] {42}));
+                () -> mSession1.notifyViewsDisappeared(null, new long[] {42}));
         // Null child
         assertThrows(IllegalArgumentException.class,
                 () -> mSession1.notifyViewsDisappeared(new AutofillId(42), null));
         // Empty child
         assertThrows(IllegalArgumentException.class,
-                () -> mSession1.notifyViewsDisappeared(new AutofillId(42), new int[] {}));
+                () -> mSession1.notifyViewsDisappeared(new AutofillId(42), new long[] {}));
         // Virtual parent
         assertThrows(IllegalArgumentException.class,
-                () -> mSession1.notifyViewsDisappeared(new AutofillId(42, 108), new int[] {666}));
+                () -> mSession1.notifyViewsDisappeared(new AutofillId(42, 108), new long[] {666}));
     }
 
     // Cannot use @Spy because we need to pass the session id on constructor
