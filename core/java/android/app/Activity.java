@@ -4736,7 +4736,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * @hide Implement to provide correct calling token.
      */
-    @UnsupportedAppUsage
+    @Override
     public void startActivityAsUser(Intent intent, UserHandle user) {
         startActivityAsUser(intent, null, user);
     }
