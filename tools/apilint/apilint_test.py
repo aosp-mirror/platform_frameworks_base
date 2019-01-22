@@ -143,6 +143,27 @@ class BaseFileTests(unittest.TestCase):
                                       out_classes_with_base=classes_with_base)
         self.assertEquals(map(lambda x: x.fullname, classes_with_base), ["android.app.WallpaperColors"])
 
+class ParseV2Stream(unittest.TestCase):
+    def test_field_kinds(self):
+        api = apilint._parse_stream("""
+// Signature format: 2.0
+package android {
+  public enum SomeEnum {
+    enum_constant public static final android.SomeEnum ENUM_CONST;
+    field public static final int FIELD_CONST;
+    property public final int someProperty;
+    ctor public SomeEnum();
+    method public Object? getObject();
+  }
+}
+        """.strip().split('\n'))
+
+        self.assertEquals(api['android.SomeEnum'].fields[0].split[0], 'enum_constant')
+        self.assertEquals(api['android.SomeEnum'].fields[1].split[0], 'field')
+        self.assertEquals(api['android.SomeEnum'].fields[2].split[0], 'property')
+        self.assertEquals(api['android.SomeEnum'].ctors[0].split[0], 'ctor')
+        self.assertEquals(api['android.SomeEnum'].methods[0].split[0], 'method')
+
 class V2TokenizerTests(unittest.TestCase):
     def _test(self, raw, expected):
         self.assertEquals(apilint.V2Tokenizer(raw).tokenize(), expected)
@@ -210,6 +231,10 @@ class V2ParserTests(unittest.TestCase):
         self.assertEquals('Super', cls.extends)
         self.assertEquals('Interface', cls.implements)
         self.assertEquals('pkg.Some.Name', cls.fullname)
+
+    def test_enum(self):
+        cls = self._cls("public enum Some.Name {")
+        self._field("enum_constant public static final android.ValueType COLOR;")
 
     def test_interface(self):
         cls = self._cls("@Deprecated @IntRange(from=1, to=2) public interface Some.Name extends Interface<Class> {")
