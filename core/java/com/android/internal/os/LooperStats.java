@@ -37,6 +37,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @hide Only for use within the system server.
  */
 public class LooperStats implements Looper.Observer {
+    public static final String DEBUG_ENTRY_PREFIX = "__DEBUG_";
     private static final int SESSION_POOL_SIZE = 50;
 
     @GuardedBy("mLock")
@@ -165,7 +166,7 @@ public class LooperStats implements Looper.Observer {
     }
 
     private ExportedEntry createDebugEntry(String variableName, long value) {
-        final Entry entry = new Entry("__DEBUG_" + variableName);
+        final Entry entry = new Entry(DEBUG_ENTRY_PREFIX + variableName);
         entry.messageCount = 1;
         entry.recordedMessageCount = 1;
         entry.totalLatencyMicro = value;

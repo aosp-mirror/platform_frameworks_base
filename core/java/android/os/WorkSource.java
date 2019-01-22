@@ -140,6 +140,21 @@ public class WorkSource implements Parcelable {
         return mUids[index];
     }
 
+    /**
+     * Return the UID to which this WorkSource should be attributed to, i.e, the UID that
+     * initiated the work and not the UID performing it. If the WorkSource has no UIDs, returns -1
+     * instead.
+     *
+     * @hide
+     */
+    public int getAttributionUid() {
+        if (isEmpty()) {
+            return -1;
+        }
+
+        return mNum > 0 ? mUids[0] : mChains.get(0).getAttributionUid();
+    }
+
     /** @hide */
     @TestApi
     public String getName(int index) {
@@ -912,17 +927,18 @@ public class WorkSource implements Parcelable {
 
         /**
          * Return the UID to which this WorkChain should be attributed to, i.e, the UID that
-         * initiated the work and not the UID performing it.
+         * initiated the work and not the UID performing it. Returns -1 if the chain is empty.
          */
         public int getAttributionUid() {
-            return mUids[0];
+            return mSize > 0 ? mUids[0] : -1;
         }
 
         /**
          * Return the tag associated with the attribution UID. See (@link #getAttributionUid}.
+         * Returns null if the chain is empty.
          */
         public String getAttributionTag() {
-            return mTags[0];
+            return mTags.length > 0 ? mTags[0] : null;
         }
 
         // TODO: The following three trivial getters are purely for testing and will be removed
