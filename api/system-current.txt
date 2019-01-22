@@ -3895,6 +3895,8 @@ package android.metrics {
 package android.net {
 
   public class CaptivePortal implements android.os.Parcelable {
+    ctor public CaptivePortal(android.os.IBinder);
+    method public void useNetwork();
     field public static final int APP_RETURN_DISMISSED = 0; // 0x0
     field public static final int APP_RETURN_UNWANTED = 1; // 0x1
     field public static final int APP_RETURN_WANTED_AS_IS = 2; // 0x2
