@@ -16,18 +16,17 @@
 
 package android.net.util;
 
-import static android.net.util.NetworkConstants.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
-import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.SmallTest;
-
-import org.junit.runner.RunWith;
-import org.junit.Test;
+import android.support.test.runner.AndroidJUnit4;
 
 import libcore.util.HexEncoding;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for ConnectivityPacketSummary.
