@@ -174,7 +174,7 @@ public class IorapForwardingService extends SystemService {
 
             invokeRemote(() ->
                 mIorapRemote.onAppLaunchEvent(RequestId.nextValueForSequence(),
-                        new AppLaunchEvent.ActivityLaunchCancelled(mSequenceId, activity))
+                        new AppLaunchEvent.ActivityLaunchFinished(mSequenceId, activity))
             );
         }
     }

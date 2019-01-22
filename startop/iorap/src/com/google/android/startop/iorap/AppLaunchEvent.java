@@ -24,9 +24,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 
-// TODO: fix this. either move this class into system server or add a dependency on
-// these wm classes to libiorap-java and libiorap-java-tests (somehow).
 import com.android.server.wm.ActivityMetricsLaunchObserver;
 import com.android.server.wm.ActivityMetricsLaunchObserver.ActivityRecordProto;
 import com.android.server.wm.ActivityMetricsLaunchObserver.Temperature;
@@ -113,12 +112,12 @@ public abstract class AppLaunchEvent implements Parcelable {
         @Override
         protected void writeToParcelImpl(Parcel p, int flags) {
             super.writeToParcelImpl(p, flags);
-            intent.writeToParcel(p, flags);
+            IntentProtoParcelable.write(p, intent, flags);
         }
 
         IntentStarted(Parcel p) {
             super(p);
-            intent = Intent.CREATOR.createFromParcel(p);
+            intent = IntentProtoParcelable.create(p);
         }
     }
 
@@ -232,8 +231,7 @@ public abstract class AppLaunchEvent implements Parcelable {
     }
 
      public static class ActivityLaunchCancelled extends AppLaunchEvent {
-        public final @Nullable
-        @ActivityRecordProto byte[] activityRecordSnapshot;
+        public final @Nullable @ActivityRecordProto byte[] activityRecordSnapshot;
 
         public ActivityLaunchCancelled(@SequenceId long sequenceId,
                 @Nullable @ActivityRecordProto byte[] snapshot) {
@@ -352,7 +350,6 @@ public abstract class AppLaunchEvent implements Parcelable {
             ActivityLaunchCancelled.class,
     };
 
-    // TODO: move to @ActivityRecordProto byte[] once we have unit tests.
     public static class ActivityRecordProtoParcelable {
         public static void write(Parcel p, @ActivityRecordProto byte[] activityRecordSnapshot,
                 int flags) {
@@ -363,6 +360,33 @@ public abstract class AppLaunchEvent implements Parcelable {
             byte[] data = p.createByteArray();
 
             return data;
+        }
+    }
+
+    public static class IntentProtoParcelable {
+        private static final int INTENT_PROTO_CHUNK_SIZE = 1024;
+
+        public static void write(Parcel p, @NonNull Intent intent, int flags) {
+            // There does not appear to be a way to 'reset' a ProtoOutputBuffer stream,
+            // so create a new one every time.
+            final ProtoOutputStream protoOutputStream =
+                    new ProtoOutputStream(INTENT_PROTO_CHUNK_SIZE);
+            // Write this data out as the top-most IntentProto (i.e. it is not a sub-object).
+            intent.writeToProto(protoOutputStream);
+            final byte[] bytes = protoOutputStream.getBytes();
+
+            p.writeByteArray(bytes);
+        }
+
+        // TODO: Should be mockable for testing?
+        // We cannot deserialize in the platform because we don't have a 'readFromProto'
+        // code.
+        public static @NonNull Intent create(Parcel p) {
+            // This will "read" the correct amount of data, but then we discard it.
+            byte[] data = p.createByteArray();
+
+            // Never called by real code in a platform, this binder API is implemented only in C++.
+            return new Intent("<cannot deserialize IntentProto>");
         }
     }
 }
