@@ -1125,6 +1125,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         public void onStagedSessionChanged(PackageInstallerSession session) {
             writeSessionsAsync();
+            // TODO(b/118865310): don't send broadcast if system is not ready.
             mPm.sendSessionUpdatedBroadcast(session.generateInfo(false), session.userId);
         }
 
