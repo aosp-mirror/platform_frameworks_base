@@ -2,6 +2,7 @@ service bootanim /system/bin/bootanimation
     class core animation
     user graphics
     group graphics audio
+    updatable
     disabled
     oneshot
     writepid /dev/stune/top-app/tasks
