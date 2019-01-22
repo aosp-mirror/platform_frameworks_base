@@ -1254,6 +1254,31 @@ public abstract class ConnectionService extends Service {
                 mAdapter.removeExtras(id, keys);
             }
         }
+
+        @Override
+        public void onConferenceStateChanged(Conference c, boolean isConference) {
+            String id = mIdByConference.get(c);
+            if (id != null) {
+                mAdapter.setConferenceState(id, isConference);
+            }
+        }
+
+        @Override
+        public void onAddressChanged(Conference c, Uri newAddress, int presentation) {
+            String id = mIdByConference.get(c);
+            if (id != null) {
+                mAdapter.setAddress(id, newAddress, presentation);
+            }
+        }
+
+        @Override
+        public void onCallerDisplayNameChanged(Conference c, String callerDisplayName,
+                int presentation) {
+            String id = mIdByConference.get(c);
+            if (id != null) {
+                mAdapter.setCallerDisplayName(id, callerDisplayName, presentation);
+            }
+        }
     };
 
     private final Connection.Listener mConnectionListener = new Connection.Listener() {
