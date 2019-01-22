@@ -252,6 +252,7 @@ message Atom {
         ProcessMemoryHighWaterMark process_memory_high_water_mark = 10042;
         BatteryLevel battery_level = 10043;
         BuildInformation build_information = 10044;
+        BatteryCycleCount battery_cycle_count = 10045;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -2521,6 +2522,19 @@ message UsbPortOverheatEvent {
     /* Time between hysteresis and active mitigation ending, in seconds. */
     optional int32 time_to_inactive_secs = 5;
 };
+
+/**
+ * Logs total effective full charge and discharge cycles on a battery.
+ * Here are some examples of one effective cycle:
+ *   1) the battery charges from 0% to 100% and drains back to 0%,
+ *   2) charging from 50% to 100% and draining back to 50% twice.
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ */
+message BatteryCycleCount {
+    /* Number of total charge and discharge cycles on the system battery. */
+    optional int32 cycle_count = 1;
+}
 
 /*
  * Logs when a connection becomes available and lost.
