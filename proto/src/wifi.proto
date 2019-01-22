@@ -962,6 +962,10 @@ message StaEvent {
 
   // NetworkAgent Wifi usability score of connected wifi
   optional int32 last_wifi_usability_score = 15 [default = -1];
+
+  // Prediction horizon (in second) of Wifi usability score provided by external
+  // system app
+  optional int32 last_prediction_horizon_sec = 16 [default = -1];
 }
 
 // Wi-Fi Aware metrics
@@ -1679,6 +1683,10 @@ message WifiIsUnusableEvent {
   // NetworkAgent wifi usability score of connected wifi.
   // Defaults to -1 if the score was never set.
   optional int32 last_wifi_usability_score = 11 [default = -1];
+
+  // Prediction horizon (in second) of Wifi usability score provided by external
+  // system app
+  optional int32 last_prediction_horizon_sec = 12 [default = -1];
 }
 
 message PasspointProfileTypeCount {
@@ -1811,6 +1819,10 @@ message WifiUsabilityStatsEntry {
 
   // The total number of beacons received from the last radio chip reset
   optional int64 total_beacon_rx = 22;
+
+  // Prediction horizon (in second) of Wifi usability score provided by external
+  // system app
+  optional int32 prediction_horizon_sec = 23;
 }
 
 message WifiUsabilityStats {
