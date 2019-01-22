@@ -267,8 +267,9 @@ public class BubbleController {
             BubbleView bubble = (BubbleView) mInflater.inflate(
                     R.layout.bubble_view, mStackView, false /* attachToRoot */);
             bubble.setNotif(notif);
-            if (shouldUseActivityView(mContext)) {
-                bubble.setAppOverlayIntent(getAppOverlayIntent(notif));
+            PendingIntent bubbleIntent = getValidBubbleIntent(notif);
+            if (shouldUseActivityView(mContext) || bubbleIntent != null) {
+                bubble.setBubbleIntent(getValidBubbleIntent(notif));
             }
             mBubbles.put(bubble.getKey(), bubble);
             mStackView.addBubble(bubble);
@@ -282,7 +283,7 @@ public class BubbleController {
     }
 
     @Nullable
-    private PendingIntent getAppOverlayIntent(NotificationEntry notif) {
+    private PendingIntent getValidBubbleIntent(NotificationEntry notif) {
         Notification notification = notif.notification.getNotification();
         if (canLaunchInActivityView(notification.getBubbleMetadata() != null
                 ? notification.getBubbleMetadata().getIntent() : null)) {

@@ -38,9 +38,11 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -223,6 +225,19 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         }
         mExpandedBubble.getEntry().setShowInShadeWhenBubble(false);
         notifyExpansionChanged(mExpandedBubble, true /* expanded */);
+    }
+
+    /**
+     * Sets the entry that should be expanded and expands if needed.
+     */
+    @VisibleForTesting
+    public void setExpandedBubble(NotificationEntry entry) {
+        for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
+            BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
+            if (entry.equals(bv.getEntry())) {
+                setExpandedBubble(bv);
+            }
+        }
     }
 
     /**
@@ -456,7 +471,8 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         if (mExpandedBubble.hasAppOverlayIntent()) {
             // Bubble with activity view expanded state
             ActivityView expandedView = mExpandedBubble.getActivityView();
-            expandedView.setLayoutParams(new ViewGroup.LayoutParams(
+            // XXX: gets added to linear layout
+            expandedView.setLayoutParams(new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, mExpandedBubbleHeight));
 
             final PendingIntent intent = mExpandedBubble.getAppOverlayIntent();
