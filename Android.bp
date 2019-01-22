@@ -741,11 +741,7 @@ java_library {
     name: "framework-annotation-proc",
     defaults: ["framework-defaults"],
     // Use UsedByApps annotation processor
-    annotation_processors: ["unsupportedappusage-annotation-processor"],
-    // b/25860419: annotation processors must be explicitly specified for grok
-    annotation_processor_classes: [
-        "android.processor.unsupportedappusage.UsedByAppsProcessor",
-    ],
+    plugins: ["unsupportedappusage-annotation-processor"],
 }
 
 // A host library including just UnsupportedAppUsage.java so that the annotation

@@ -1,6 +1,8 @@
 
-java_library_host {
+java_plugin {
     name: "unsupportedappusage-annotation-processor",
+    processor_class: "android.processor.unsupportedappusage.UnsupportedAppUsageProcessor",
+
     java_resources: [
         "META-INF/**/*",
     ],
