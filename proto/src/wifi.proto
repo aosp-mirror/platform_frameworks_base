@@ -96,11 +96,11 @@ message WifiLog {
 
   message ScanReturnEntry {
 
-     // Return code of the scan.
-     optional ScanReturnCode scan_return_code = 1;
+    // Return code of the scan.
+    optional ScanReturnCode scan_return_code = 1;
 
-     // Number of entries that were found in the scan.
-     optional int32 scan_results_count = 2;
+    // Number of entries that were found in the scan.
+    optional int32 scan_results_count = 2;
   }
 
   // State of the Wifi.
@@ -125,14 +125,14 @@ message WifiLog {
 
   message WifiSystemStateEntry {
 
-     // Current WiFi state.
-     optional WifiState wifi_state = 1;
+    // Current WiFi state.
+    optional WifiState wifi_state = 1;
 
-     // Count of scans in state.
-     optional int32 wifi_state_count = 2;
+    // Count of scans in state.
+    optional int32 wifi_state_count = 2;
 
-     // Is screen on.
-     optional bool is_screen_on = 3;
+    // Is screen on.
+    optional bool is_screen_on = 3;
   }
 
   // Mapping of Error/Success codes to the number of background scans that resulted in it
@@ -494,6 +494,9 @@ message WifiLog {
 
   // Wifi p2p statistics
   optional WifiP2pStats wifi_p2p_stats = 129;
+
+  // Easy Connect (DPP) metrics
+  optional WifiDppLog wifi_dpp_log = 130;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -587,7 +590,7 @@ message ConnectionEvent {
     ROAM_UNKNOWN = 0;
 
     // No roaming.
-    ROAM_NONE  = 1;
+    ROAM_NONE = 1;
 
     // DBDC roaming.
     ROAM_DBDC = 2;
@@ -1486,7 +1489,7 @@ message WifiRttLog {
     repeated HistogramBucket histogram_request_interval_ms = 8;
   }
 
-    // Histogram bucket for Wi-Fi RTT logs. Range is [start, end)
+  // Histogram bucket for Wi-Fi RTT logs. Range is [start, end)
   message HistogramBucket {
     // lower range of the bucket (inclusive)
     optional int64 start = 1;
@@ -1872,6 +1875,7 @@ message DeviceMobilityStatePnoScanStats {
   // The total duration elapsed while in this mobility state, in ms
   optional int64 total_duration_ms = 3;
 
+
   // the total duration elapsed while in this mobility state with PNO scans running, in ms
   optional int64 pno_duration_ms = 4;
 }
@@ -2006,4 +2010,98 @@ message GroupEvent {
 
   // The idle duration. A group without any client is in idle.
   optional int32 idle_duration_millis = 9;
+}
+
+// Easy Connect (DPP)
+message WifiDppLog {
+  // Number of Configurator-Initiator requests
+  optional int32 num_dpp_configurator_initiator_requests = 1;
+
+  // Number of Enrollee-Initiator requests
+  optional int32 num_dpp_enrollee_initiator_requests = 2;
+
+  // Easy Connect (DPP) Enrollee success
+  optional int32 num_dpp_enrollee_success = 3;
+
+  // Easy Connect (DPP) Configurator success code bucket
+  repeated DppConfiguratorSuccessStatusHistogramBucket dpp_configurator_success_code = 4;
+
+  // Easy Connect (DPP) failure code bucket
+  repeated DppFailureStatusHistogramBucket dpp_failure_code = 5;
+
+  // Easy Connect (DPP) operation time bucket
+  repeated HistogramBucket dpp_operation_time = 6;
+
+  // Histogram bucket for Wi-Fi DPP configurator success
+  message DppConfiguratorSuccessStatusHistogramBucket {
+    // status type defining the bucket
+    optional DppConfiguratorSuccessCode dpp_status_type = 1;
+
+    // number of samples in the bucket
+    optional int32 count = 2;
+  }
+
+  // Histogram bucket for Wi-Fi DPP failures
+  message DppFailureStatusHistogramBucket {
+    // status type defining the bucket
+    optional DppFailureCode dpp_status_type = 1;
+
+    // number of samples in the bucket
+    optional int32 count = 2;
+  }
+
+  // Histogram bucket for Wi-Fi DPP logs. Range is [start, end)
+  message HistogramBucket {
+    // lower range of the bucket (inclusive)
+    optional int32 start = 1;
+
+    // upper range of the bucket (exclusive)
+    optional int32 end = 2;
+
+    // number of samples in the bucket
+    optional int32 count = 3;
+  }
+
+  enum DppConfiguratorSuccessCode {
+    // Unknown success code
+    EASY_CONNECT_EVENT_SUCCESS_UNKNOWN = 0;
+
+    // Easy Connect Configurator success event: Configuration sent to enrollee
+    EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_SENT = 1;
+  }
+
+  enum DppFailureCode {
+    // Unknown failure
+    EASY_CONNECT_EVENT_FAILURE_UNKNOWN = 0;
+
+    // Easy Connect Failure event: Scanned QR code is either not a Easy Connect URI, or the Easy
+    // Connect URI has errors.
+    EASY_CONNECT_EVENT_FAILURE_INVALID_URI = 1;
+
+    // Easy Connect Failure event: Bootstrapping/Authentication initialization process failure.
+    EASY_CONNECT_EVENT_FAILURE_AUTHENTICATION = 2;
+
+    // Easy Connect Failure event: Both devices are implementing the same role and are
+    // incompatible.
+    EASY_CONNECT_EVENT_FAILURE_NOT_COMPATIBLE = 3;
+
+    // Easy Connect Failure event: Configuration process has failed due to malformed message.
+    EASY_CONNECT_EVENT_FAILURE_CONFIGURATION = 4;
+
+    // Easy Connect Failure event: Easy Connect request while in another Easy Connect exchange.
+    EASY_CONNECT_EVENT_FAILURE_BUSY = 5;
+
+    // Easy Connect Failure event: No response from the peer.
+    EASY_CONNECT_EVENT_FAILURE_TIMEOUT = 6;
+
+    // Easy Connect Failure event: General protocol failure.
+    EASY_CONNECT_EVENT_FAILURE_GENERIC = 7;
+
+    // Easy Connect Failure event: Feature or option is not supported.
+    EASY_CONNECT_EVENT_FAILURE_NOT_SUPPORTED = 8;
+
+    // Easy Connect Failure event: Invalid network provided to Easy Connect configurator.
+    // Network must either be WPA3-Personal (SAE) or WPA2-Personal (PSK).
+    EASY_CONNECT_EVENT_FAILURE_INVALID_NETWORK = 9;
+  }
 }
