@@ -54,17 +54,17 @@ public class BluetoothMediaDevice extends MediaDevice {
     }
 
     @Override
-    public void connect() {
+    public boolean connect() {
         //TODO(b/117129183): add callback to notify LocalMediaManager connection state.
-        mIsConnected = mCachedDevice.setActive();
-        super.connect();
-        Log.d(TAG, "connect() device : " + getName() + ", is selected : " + mIsConnected);
+        final boolean isConnected = mCachedDevice.setActive();
+        setConnectedRecord();
+        Log.d(TAG, "connect() device : " + getName() + ", is selected : " + isConnected);
+        return isConnected;
     }
 
     @Override
     public void disconnect() {
         //TODO(b/117129183): disconnected last select device
-        mIsConnected = false;
     }
 
     /**

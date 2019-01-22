@@ -25,8 +25,11 @@ import android.content.Context;
 
 import androidx.mediarouter.media.MediaRouter;
 
+import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.bluetooth.HearingAidProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,6 +81,14 @@ public class MediaDeviceTest {
     private MediaRouter.RouteInfo mRouteInfo2;
     @Mock
     private MediaRouter.RouteInfo mRouteInfo3;
+    @Mock
+    private LocalBluetoothProfileManager mProfileManager;
+    @Mock
+    private HearingAidProfile mHapProfile;
+    @Mock
+    private A2dpProfile mA2dpProfile;
+    @Mock
+    private BluetoothDevice mDevice;
 
     private BluetoothMediaDevice mBluetoothMediaDevice1;
     private BluetoothMediaDevice mBluetoothMediaDevice2;
@@ -109,6 +120,10 @@ public class MediaDeviceTest {
         when(mRouteInfo1.getName()).thenReturn(DEVICE_NAME_1);
         when(mRouteInfo2.getName()).thenReturn(DEVICE_NAME_2);
         when(mRouteInfo3.getName()).thenReturn(DEVICE_NAME_3);
+        when(mLocalBluetoothManager.getProfileManager()).thenReturn(mProfileManager);
+        when(mProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
+        when(mProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
+        when(mA2dpProfile.getActiveDevice()).thenReturn(mDevice);
 
         mBluetoothMediaDevice1 = new BluetoothMediaDevice(mContext, mCachedDevice1);
         mBluetoothMediaDevice2 = new BluetoothMediaDevice(mContext, mCachedDevice2);

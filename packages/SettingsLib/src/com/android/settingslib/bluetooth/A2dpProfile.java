@@ -74,6 +74,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
                 device.refresh();
             }
             mIsProfileReady=true;
+            mProfileManager.callServiceConnectedListeners();
         }
 
         public void onServiceDisconnected(int profile) {

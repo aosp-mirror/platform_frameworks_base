@@ -96,7 +96,7 @@ public abstract class MediaManager {
     protected void dispatchDeviceListAdded() {
         synchronized (mCallbacks) {
             for (MediaDeviceCallback callback : mCallbacks) {
-                callback.onDeviceListAdded(mMediaDevices);
+                callback.onDeviceListAdded(new ArrayList<>(mMediaDevices));
             }
         }
     }
@@ -109,10 +109,10 @@ public abstract class MediaManager {
         }
     }
 
-    protected void dispatchDeviceAttributesChanged() {
+    protected void dispatchConnectedDeviceChanged(String id) {
         synchronized (mCallbacks) {
             for (MediaDeviceCallback callback : mCallbacks) {
-                callback.onDeviceAttributesChanged();
+                callback.onConnectedDeviceChanged(id);
             }
         }
     }
@@ -153,5 +153,12 @@ public abstract class MediaManager {
          * Callback for notifying MediaDevice attributes is changed.
          */
         void onDeviceAttributesChanged();
+
+        /**
+         * Callback for notifying connected MediaDevice is changed.
+         *
+         * @param id the id of MediaDevice
+         */
+        void onConnectedDeviceChanged(String id);
     }
 }

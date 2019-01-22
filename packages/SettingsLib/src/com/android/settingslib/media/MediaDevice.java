@@ -41,7 +41,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
 
     private int mConnectedRecord;
 
-    protected boolean mIsConnected = false;
     protected Context mContext;
     protected int mType;
 
@@ -54,15 +53,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         ConnectionRecordManager.getInstance().fetchLastSelectedDevice(mContext);
         mConnectedRecord = ConnectionRecordManager.getInstance().fetchConnectionRecord(mContext,
                 getId());
-    }
-
-    /**
-     * Check the MediaDevice is be connected to transfer.
-     *
-     * @return true if the MediaDevice is be connected to transfer, false otherwise.
-     */
-    public boolean isConnected() {
-        return mIsConnected;
     }
 
     /**
@@ -87,8 +77,12 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
 
     /**
      * Transfer MediaDevice for media
+     *
+     * @return result of transfer media
      */
-    public void connect() {
+    public abstract boolean connect();
+
+    void setConnectedRecord() {
         mConnectedRecord++;
         ConnectionRecordManager.getInstance().setConnectionRecord(mContext, getId(),
                 mConnectedRecord);
