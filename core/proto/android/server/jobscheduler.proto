@@ -31,6 +31,7 @@ import "frameworks/base/core/proto/android/os/persistablebundle.proto";
 import "frameworks/base/core/proto/android/server/forceappstandbytracker.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
+// Next tag: 21
 message JobSchedulerServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -139,9 +140,13 @@ message JobSchedulerServiceDumpProto {
     // The current limit on the number of concurrent JobServiceContext entries
     // we want to keep actively running a job.
     optional int32 max_active_jobs = 13;
+
+    // Dump from JobConcurrencyManager.
+    optional JobConcurrencyManagerProto concurrency_manager = 20;
 }
 
 // A com.android.server.job.JobSchedulerService.Constants object.
+// Next tag: 29
 message ConstantsProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -254,7 +259,39 @@ message ConstantsProto {
     }
     optional QuotaController quota_controller = 24;
 
-    // Next tag: 26
+    // Max number of jobs, when screen is ON.
+    optional MaxJobCountsPerMemoryTrimLevelProto max_job_counts_screen_on = 26;
+
+    // Max number of jobs, when screen is OFF.
+    optional MaxJobCountsPerMemoryTrimLevelProto max_job_counts_screen_off = 27;
+
+    // In this time after screen turns on, we increase job concurrency.
+    optional int32 screen_off_job_concurrency_increase_delay_ms = 28;
+}
+
+// Next tag: 4
+message MaxJobCountsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Total number of jobs to run simultaneously.
+    optional int32 total_jobs = 1;
+
+    // Max number of BG (== owned by non-TOP apps) jobs to run simultaneously.
+    optional int32 max_bg = 2;
+
+    // We try to run at least this many BG (== owned by non-TOP apps) jobs, when there are any
+    // pending, rather than always running the TOTAL number of FG jobs.
+    optional int32 min_bg = 3;
+}
+
+// Next tag: 5
+message MaxJobCountsPerMemoryTrimLevelProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional MaxJobCountsProto normal = 1;
+    optional MaxJobCountsProto moderate = 2;
+    optional MaxJobCountsProto low = 3;
+    optional MaxJobCountsProto critical = 4;
 }
 
 message StateControllerProto {
@@ -787,4 +824,47 @@ message JobStatusDumpProto {
     optional int64 internal_flags = 24;
 
     // Next tag: 28
+}
+
+// Dump from com.android.server.job.JobConcurrencyManager.
+// Next tag: 7
+message JobConcurrencyManagerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Whether the device is interactive (== screen on) now or not.
+    optional bool current_interactive = 1;
+    // Similar to current_interactive, screen on or not, but it takes into account the off timeout.
+    optional bool effective_interactive = 2;
+    // How many milliseconds have passed since the last screen on. (i.e. 1000 == 1 sec ago)
+    optional int64 time_since_last_screen_on_ms = 3;
+    // How many milliseconds have passed since the last screen off. (i.e. 1000 == 1 sec ago)
+    optional int64 time_since_last_screen_off_ms = 4;
+    // Current max number of jobs.
+    optional JobCountTrackerProto job_count_tracker = 5;
+    // Current memory trim level.
+    optional int32 memory_trim_level = 6;
+}
+
+// Dump from com.android.server.job.JobConcurrencyManager.JobCountTracker.
+// Next tag: 8
+message JobCountTrackerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Number of total jos that can run simultaneously.
+    optional int32 config_num_max_total_jobs = 1;
+    // Number of background jos that can run simultaneously.
+    optional int32 config_num_max_bg_jobs = 2;
+    // Out of total jobs, this many background jobs should be guaranteed to be executed, even if
+    // there are the config_num_max_total_jobs count of foreground jobs pending.
+    optional int32 config_num_min_bg_jobs = 3;
+
+    // Number of running foreground jobs.
+    optional int32 num_running_fg_jobs = 4;
+    // Number of running background jobs.
+    optional int32 num_running_bg_jobs = 5;
+
+    // Number of pending foreground jobs.
+    optional int32 num_pending_fg_jobs = 6;
+    // Number of pending background jobs.
+    optional int32 num_pending_bg_jobs = 7;
 }
