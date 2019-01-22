@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.WindowInsets.Type.indexOf;
 
 import android.annotation.IntDef;
@@ -119,11 +120,17 @@ public class InsetsState implements Parcelable {
      */
     public WindowInsets calculateInsets(Rect frame, boolean isScreenRound,
             boolean alwaysConsumeNavBar, DisplayCutout cutout,
+            @Nullable Rect legacyContentInsets, @Nullable Rect legacyStableInsets,
             @Nullable @InsetSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
         final Rect relativeFrame = new Rect(frame);
         final Rect relativeFrameMax = new Rect(frame);
+        if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_IME
+                && legacyContentInsets != null && legacyStableInsets != null) {
+            WindowInsets.assignCompatInsets(typeInsetsMap, legacyContentInsets);
+            WindowInsets.assignCompatInsets(typeMaxInsetsMap, legacyStableInsets);
+        }
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources.get(type);
             if (source == null) {
