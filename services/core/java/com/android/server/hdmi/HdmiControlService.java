@@ -657,9 +657,13 @@ public class HdmiControlService extends SystemService {
         Global.putInt(cr, key, toInt(value));
     }
 
-    void writeStringSetting(String key, String value) {
-        ContentResolver cr = getContext().getContentResolver();
-        Global.putString(cr, key, value);
+    void writeStringSystemProperty(String key, String value) {
+        SystemProperties.set(key, value);
+    }
+
+    @VisibleForTesting
+    boolean readBooleanSystemProperty(String key, boolean defVal) {
+        return SystemProperties.getBoolean(key, defVal);
     }
 
     private void initializeCec(int initiatedBy) {

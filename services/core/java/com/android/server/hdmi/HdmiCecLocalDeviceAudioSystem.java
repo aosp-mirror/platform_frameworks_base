@@ -268,7 +268,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         mTvSystemAudioModeSupport = false;
         // Record the last state of System Audio Control before going to standby
         synchronized (mLock) {
-            mService.writeStringSetting(
+            mService.writeStringSystemProperty(
                     Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL,
                     mSystemAudioActivated ? "true" : "false");
         }
@@ -330,7 +330,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void setPreferredAddress(int addr) {
         assertRunOnServiceThread();
-        mService.writeStringSetting(
+        mService.writeStringSystemProperty(
                 Constants.PROPERTY_PREFERRED_ADDRESS_AUDIO_SYSTEM, String.valueOf(addr));
     }
 
@@ -469,7 +469,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     protected boolean handleRequestArcInitiate(HdmiCecMessage message) {
         assertRunOnServiceThread();
         removeAction(ArcInitiationActionFromAvr.class);
-        if (!mService.readBooleanSetting(Constants.PROPERTY_ARC_SUPPORT, true)) {
+        if (!mService.readBooleanSystemProperty(Constants.PROPERTY_ARC_SUPPORT, true)) {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_UNRECOGNIZED_OPCODE);
         } else if (!isDirectConnectToTv()) {
             HdmiLogger.debug("AVR device is not directly connected with TV");
@@ -829,7 +829,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         boolean currentMuteStatus =
                 mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
         if (currentMuteStatus == newSystemAudioMode) {
-            if (mService.readBooleanSetting(
+            if (mService.readBooleanSystemProperty(
                     Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, true)
                             || newSystemAudioMode) {
                 mService.getAudioManager()
