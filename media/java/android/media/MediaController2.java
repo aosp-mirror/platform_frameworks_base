@@ -316,7 +316,7 @@ public class MediaController2 implements AutoCloseable {
                     MediaController2.this, command, args);
             if (resultReceiver != null) {
                 if (result == null) {
-                    throw new RuntimeException("onSessionCommand shouldn't return null");
+                    resultReceiver.send(Session2Command.RESULT_INFO_SKIPPED, null);
                 } else {
                     resultReceiver.send(result.getResultCode(), result.getResultData());
                 }
@@ -433,8 +433,8 @@ public class MediaController2 implements AutoCloseable {
          * @param controller the controller for this event
          * @param command the session command
          * @param args optional arguments
-         * @return the result for the session command. A runtime exception will be thrown if null
-         *         is returned.
+         * @return the result for the session command. If {@code null}, RESULT_INFO_SKIPPED
+         *         will be sent to the session.
          */
         @Nullable
         public Session2Command.Result onSessionCommand(@NonNull MediaController2 controller,
