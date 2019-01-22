@@ -5764,7 +5764,7 @@ public abstract class PackageManager {
      */
     @RequiresPermission(value = android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE,
             conditional = true)
-    public abstract void setComponentEnabledSetting(ComponentName componentName,
+    public abstract void setComponentEnabledSetting(@NonNull ComponentName componentName,
             @EnabledState int newState, @EnabledFlags int flags);
 
     /**
@@ -5778,7 +5778,7 @@ public abstract class PackageManager {
      * @return Returns the current enabled state for the component.
      */
     public abstract @EnabledState int getComponentEnabledSetting(
-            ComponentName componentName);
+            @NonNull ComponentName componentName);
 
     /**
      * Set the enabled setting for an application
@@ -5793,7 +5793,7 @@ public abstract class PackageManager {
      */
     @RequiresPermission(value = android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE,
             conditional = true)
-    public abstract void setApplicationEnabledSetting(String packageName,
+    public abstract void setApplicationEnabledSetting(@NonNull String packageName,
             @EnabledState int newState, @EnabledFlags int flags);
 
     /**
@@ -5807,7 +5807,7 @@ public abstract class PackageManager {
      * @return Returns the current enabled state for the application.
      * @throws IllegalArgumentException if the named package does not exist.
      */
-    public abstract @EnabledState int getApplicationEnabledSetting(String packageName);
+    public abstract @EnabledState int getApplicationEnabledSetting(@NonNull String packageName);
 
     /**
      * Flush the package restrictions for a given user to disk. This forces the package restrictions
