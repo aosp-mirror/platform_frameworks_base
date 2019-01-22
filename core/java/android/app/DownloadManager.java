@@ -1324,7 +1324,8 @@ public class DownloadManager {
      * @param description the description that would appear for this file in Downloads App.
      * @param isMediaScannerScannable true if the file is to be scanned by MediaScanner. Files
      * scanned by MediaScanner appear in the applications used to view media (for example,
-     * Gallery app).
+     * Gallery app). Starting from {@link android.os.Build.VERSION_CODES#Q}, this argument is
+     * ignored and the file is always scanned by MediaScanner.
      * @param mimeType mimetype of the file.
      * @param path absolute pathname to the file. The file should be world-readable, so that it can
      * be managed by the Downloads App and any other app that is used to read it (for example,
@@ -1353,7 +1354,8 @@ public class DownloadManager {
      * @param description the description that would appear for this file in Downloads App.
      * @param isMediaScannerScannable true if the file is to be scanned by MediaScanner. Files
      * scanned by MediaScanner appear in the applications used to view media (for example,
-     * Gallery app).
+     * Gallery app). Starting from {@link android.os.Build.VERSION_CODES#Q}, this argument is
+     * ignored and the file is always scanned by MediaScanner.
      * @param mimeType mimetype of the file.
      * @param path absolute pathname to the file. The file should be world-readable, so that it can
      * be managed by the Downloads App and any other app that is used to read it (for example,
