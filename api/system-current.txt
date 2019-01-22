@@ -4171,6 +4171,7 @@ package android.net.metrics {
   public class IpConnectivityLog {
     method public boolean log(long, android.net.metrics.IpConnectivityLog.Event);
     method public boolean log(String, android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(android.net.Network, int[], android.net.metrics.IpConnectivityLog.Event);
     method public boolean log(int, int[], android.net.metrics.IpConnectivityLog.Event);
     method public boolean log(android.net.metrics.IpConnectivityLog.Event);
   }
@@ -5080,6 +5081,12 @@ package android.os {
 
   public static interface RemoteCallback.OnResultListener {
     method public void onResult(android.os.Bundle);
+  }
+
+  public class ServiceSpecificException extends java.lang.RuntimeException {
+    ctor public ServiceSpecificException(int, String);
+    ctor public ServiceSpecificException(int);
+    field public final int errorCode;
   }
 
   public final class StatsDimensionsValue implements android.os.Parcelable {

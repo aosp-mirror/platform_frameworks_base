@@ -993,8 +993,6 @@ Landroid/os/ServiceManager;->sServiceManager:Landroid/os/IServiceManager;
 Landroid/os/ServiceManagerNative;->asInterface(Landroid/os/IBinder;)Landroid/os/IServiceManager;
 Landroid/os/ServiceManagerProxy;->getService(Ljava/lang/String;)Landroid/os/IBinder;
 Landroid/os/ServiceManagerProxy;->mRemote:Landroid/os/IBinder;
-Landroid/os/ServiceSpecificException;-><init>(ILjava/lang/String;)V
-Landroid/os/ServiceSpecificException;->errorCode:I
 Landroid/os/SharedMemory;->getFd()I
 Landroid/os/ShellCommand;->peekNextArg()Ljava/lang/String;
 Landroid/os/StatFs;->mStat:Landroid/system/StructStatVfs;
