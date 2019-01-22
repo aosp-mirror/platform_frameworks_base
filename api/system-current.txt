@@ -9040,6 +9040,7 @@ package android.view.accessibility {
 package android.view.contentcapture {
 
   public final class ContentCaptureContext implements android.os.Parcelable {
+    method @Nullable public String getAction();
     method @Nullable public android.content.ComponentName getActivityComponent();
     method public int getDisplayId();
     method @Nullable public android.os.Bundle getExtras();
