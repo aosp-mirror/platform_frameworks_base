@@ -2276,7 +2276,7 @@
          app for debugging. Will not be seen by users. [CHAR LIMIT=20] -->
     <string name="heap_dump_tile_name">Dump SysUI Heap</string>
 
-    <!-- Text on chip for multiple apps using a single app op [CHAR LIMIT=10] -->
+    <!-- Text on chip for multiple apps using a single app op [CHAR LIMIT=12] -->
     <plurals name="ongoing_privacy_chip_multiple_apps">
         <item quantity="one"><xliff:g id="num_apps" example="1">%d</xliff:g> app</item>
         <item quantity="few"><xliff:g id="num_apps" example="3">%d</xliff:g> apps</item>
