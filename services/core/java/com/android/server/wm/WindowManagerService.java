@@ -184,7 +184,6 @@ import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
@@ -857,12 +856,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void onAppTransitionCancelledLocked(int transit) {
-            mH.sendEmptyMessage(H.NOTIFY_APP_TRANSITION_CANCELLED);
+            mAtmInternal.notifyAppTransitionCancelled();
         }
 
         @Override
         public void onAppTransitionFinishedLocked(IBinder token) {
-            mH.sendEmptyMessage(H.NOTIFY_APP_TRANSITION_FINISHED);
+            mAtmInternal.notifyAppTransitionFinished();
             final AppWindowToken atoken = mRoot.getAppWindowToken(token);
             if (atoken == null) {
                 return;
@@ -2602,7 +2601,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void notifyKeyguardTrustedChanged() {
-        mH.sendEmptyMessage(H.NOTIFY_KEYGUARD_TRUSTED_CHANGED);
+        mAtmInternal.notifyKeyguardTrustedChanged();
     }
 
     @Override
@@ -2667,11 +2666,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param callback Runnable to be called when activity manager is done reevaluating visibilities
      */
     void notifyKeyguardFlagsChanged(@Nullable Runnable callback, int displayId) {
-        final Runnable wrappedCallback = callback != null
-                ? () -> { synchronized (mGlobalLock) { callback.run(); } }
-                : null;
-        mH.obtainMessage(H.NOTIFY_KEYGUARD_FLAGS_CHANGED, displayId, 0,
-                wrappedCallback).sendToTarget();
+        mAtmInternal.notifyKeyguardFlagsChanged(callback, displayId);
     }
 
     public boolean isKeyguardTrusted() {
@@ -4363,16 +4358,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
 
-        public static final int NOTIFY_APP_TRANSITION_STARTING = 47;
-        public static final int NOTIFY_APP_TRANSITION_CANCELLED = 48;
-        public static final int NOTIFY_APP_TRANSITION_FINISHED = 49;
         public static final int UPDATE_ANIMATION_SCALE = 51;
         public static final int WINDOW_HIDE_TIMEOUT = 52;
-        public static final int NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED = 53;
         public static final int SEAMLESS_ROTATION_TIMEOUT = 54;
         public static final int RESTORE_POINTER_ICON = 55;
-        public static final int NOTIFY_KEYGUARD_FLAGS_CHANGED = 56;
-        public static final int NOTIFY_KEYGUARD_TRUSTED_CHANGED = 57;
         public static final int SET_HAS_OVERLAY_UI = 58;
         public static final int SET_RUNNING_REMOTE_ANIMATION = 59;
         public static final int ANIMATION_FAILSAFE = 60;
@@ -4708,19 +4697,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 break;
-                case NOTIFY_APP_TRANSITION_STARTING: {
-                    mAtmInternal.notifyAppTransitionStarting((SparseIntArray) msg.obj,
-                            msg.getWhen());
-                }
-                break;
-                case NOTIFY_APP_TRANSITION_CANCELLED: {
-                    mAtmInternal.notifyAppTransitionCancelled();
-                }
-                break;
-                case NOTIFY_APP_TRANSITION_FINISHED: {
-                    mAtmInternal.notifyAppTransitionFinished();
-                }
-                break;
                 case WINDOW_HIDE_TIMEOUT: {
                     final WindowState window = (WindowState) msg.obj;
                     synchronized (mGlobalLock) {
@@ -4742,10 +4718,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 break;
-                case NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED: {
-                    mAtmInternal.notifyDockedStackMinimizedChanged(msg.arg1 == 1);
-                }
-                break;
                 case RESTORE_POINTER_ICON: {
                     synchronized (mGlobalLock) {
                         restorePointerIconLocked((DisplayContent)msg.obj, msg.arg1, msg.arg2);
@@ -4757,14 +4729,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mGlobalLock) {
                         displayContent.onSeamlessRotationTimeout();
                     }
-                }
-                break;
-                case NOTIFY_KEYGUARD_FLAGS_CHANGED: {
-                    mAtmInternal.notifyKeyguardFlagsChanged((Runnable) msg.obj, msg.arg1);
-                }
-                break;
-                case NOTIFY_KEYGUARD_TRUSTED_CHANGED: {
-                    mAtmInternal.notifyKeyguardTrustedChanged();
                 }
                 break;
                 case SET_HAS_OVERLAY_UI: {

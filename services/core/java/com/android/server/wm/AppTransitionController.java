@@ -49,8 +49,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIO
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.NOTIFY_APP_TRANSITION_STARTING;
 
+import android.os.SystemClock;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -191,8 +191,8 @@ public class AppTransitionController {
 
         mDisplayContent.computeImeTarget(true /* updateImeTarget */);
 
-        mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING,
-                mTempTransitionReasons.clone()).sendToTarget();
+        mService.mAtmInternal.notifyAppTransitionStarting(mTempTransitionReasons.clone(),
+                SystemClock.uptimeMillis());
 
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
 

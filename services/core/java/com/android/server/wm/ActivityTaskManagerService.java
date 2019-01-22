@@ -6213,30 +6213,27 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 return;
             }
-            mH.post(() -> {
-                synchronized (mGlobalLock) {
-                    final ActivityDisplay activityDisplay =
-                            mRootActivityContainer.getActivityDisplay(displayId);
-                    if (activityDisplay == null) {
-                        // Call might come when display is not yet added or has been removed.
-                        if (DEBUG_CONFIGURATION) {
-                            Slog.w(TAG, "Trying to update display configuration for non-existing "
-                                    + "displayId=" + displayId);
-                        }
-                        return;
+            synchronized (mGlobalLock) {
+                final ActivityDisplay activityDisplay =
+                        mRootActivityContainer.getActivityDisplay(displayId);
+                if (activityDisplay == null) {
+                    // Call might come when display is not yet added or has been removed.
+                    if (DEBUG_CONFIGURATION) {
+                        Slog.w(TAG, "Trying to update display configuration for non-existing "
+                                + "displayId=" + displayId);
                     }
-                    final WindowProcessController process = mPidMap.get(pid);
-                    if (process == null) {
-                        if (DEBUG_CONFIGURATION) {
-                            Slog.w(TAG, "Trying to update display configuration for invalid "
-                                    + "process, pid=" + pid);
-                        }
-                        return;
-                    }
-                    process.registerDisplayConfigurationListenerLocked(activityDisplay);
+                    return;
                 }
-            });
-
+                final WindowProcessController process = mPidMap.get(pid);
+                if (process == null) {
+                    if (DEBUG_CONFIGURATION) {
+                        Slog.w(TAG, "Trying to update display configuration for invalid "
+                                + "process, pid=" + pid);
+                    }
+                    return;
+                }
+                process.registerDisplayConfigurationListenerLocked(activityDisplay);
+            }
         }
 
         @Override
