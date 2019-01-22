@@ -28,6 +28,7 @@ import static android.net.dhcp.DhcpPacket.DHCP_SUBNET_MASK;
 import static android.net.dhcp.DhcpPacket.DHCP_VENDOR_INFO;
 import static android.net.dhcp.DhcpPacket.INADDR_ANY;
 import static android.net.dhcp.DhcpPacket.INADDR_BROADCAST;
+import static android.net.util.SocketUtils.makePacketSocketAddress;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_PACKET;
 import static android.system.OsConstants.ETH_P_IP;
@@ -35,7 +36,6 @@ import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
 import static android.system.OsConstants.SOCK_RAW;
 import static android.system.OsConstants.SOL_SOCKET;
-import static android.system.OsConstants.SO_BINDTODEVICE;
 import static android.system.OsConstants.SO_BROADCAST;
 import static android.system.OsConstants.SO_RCVBUF;
 import static android.system.OsConstants.SO_REUSEADDR;
@@ -48,11 +48,11 @@ import android.net.metrics.DhcpClientEvent;
 import android.net.metrics.DhcpErrorEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.net.util.InterfaceParams;
+import android.net.util.SocketUtils;
 import android.os.Message;
 import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.system.PacketSocketAddress;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
@@ -70,6 +70,7 @@ import libcore.io.IoBridge;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.Inet4Address;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -204,7 +205,7 @@ public class DhcpClient extends StateMachine {
     private InterfaceParams mIface;
     // TODO: MacAddress-ify more of this class hierarchy.
     private byte[] mHwAddr;
-    private PacketSocketAddress mInterfaceBroadcastAddr;
+    private SocketAddress mInterfaceBroadcastAddr;
     private int mTransactionId;
     private long mTransactionStartMillis;
     private DhcpResults mDhcpLease;
@@ -293,7 +294,7 @@ public class DhcpClient extends StateMachine {
         }
 
         mHwAddr = mIface.macAddr.toByteArray();
-        mInterfaceBroadcastAddr = new PacketSocketAddress(mIface.index, DhcpPacket.ETHER_BROADCAST);
+        mInterfaceBroadcastAddr = makePacketSocketAddress(mIface.index, DhcpPacket.ETHER_BROADCAST);
         return true;
     }
 
@@ -309,7 +310,7 @@ public class DhcpClient extends StateMachine {
     private boolean initPacketSocket() {
         try {
             mPacketSock = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IP);
-            PacketSocketAddress addr = new PacketSocketAddress((short) ETH_P_IP, mIface.index);
+            SocketAddress addr = makePacketSocketAddress((short) ETH_P_IP, mIface.index);
             Os.bind(mPacketSock, addr);
             NetworkUtils.attachDhcpFilter(mPacketSock);
         } catch(SocketException|ErrnoException e) {
@@ -323,12 +324,11 @@ public class DhcpClient extends StateMachine {
         final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_DHCP);
         try {
             mUdpSock = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+            SocketUtils.bindSocketToInterface(mUdpSock, mIfaceName);
             Os.setsockoptInt(mUdpSock, SOL_SOCKET, SO_REUSEADDR, 1);
-            Os.setsockoptIfreq(mUdpSock, SOL_SOCKET, SO_BINDTODEVICE, mIfaceName);
             Os.setsockoptInt(mUdpSock, SOL_SOCKET, SO_BROADCAST, 1);
             Os.setsockoptInt(mUdpSock, SOL_SOCKET, SO_RCVBUF, 0);
             Os.bind(mUdpSock, Inet4Address.ANY, DhcpPacket.DHCP_CLIENT);
-            NetworkUtils.protectFromVpn(mUdpSock);
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error creating UDP socket", e);
             return false;
