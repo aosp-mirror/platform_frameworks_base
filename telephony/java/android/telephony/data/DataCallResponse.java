@@ -52,8 +52,7 @@ public final class DataCallResponse implements Parcelable {
      * @param status Data call fail cause. 0 indicates no error.
      * @param suggestedRetryTime The suggested data retry time in milliseconds.
      * @param cid The unique id of the data connection.
-     * @param active Data connection active status. 0 = inactive, 1 = active/physical link down,
-     *               2 = active/physical link up.
+     * @param active Data connection active status. 0 = inactive, 1 = dormant, 2 = active.
      * @param type The connection protocol, should be one of the PDP_type values in TS 27.007
      *             section 10.1.1. For example, "IP", "IPV6", "IPV4V6", or "PPP".
      * @param ifname The network interface name.
@@ -124,7 +123,7 @@ public final class DataCallResponse implements Parcelable {
     public int getCallId() { return mCid; }
 
     /**
-     * @return 0 = inactive, 1 = active/physical link down, 2 = active/physical link up.
+     * @return 0 = inactive, 1 = dormant, 2 = active.
      */
     public int getActive() { return mActive; }
 
