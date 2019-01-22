@@ -2179,4 +2179,8 @@ enum PageId {
     // OPEN: Settings > Network & internet > Click Mobile network to land on a page with a list of
     // SIM/eSIM subscriptions.
     MOBILE_NETWORK_LIST = 1627;
+
+    // OPEN: Settings > Display > Adaptive sleep
+    // OS: Q
+    SETTINGS_ADAPTIVE_SLEEP = 1628;
 }
