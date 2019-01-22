@@ -72,6 +72,7 @@ public:
      * memory that is provided as an input param.
      */
     static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer,
+                                    SkColorType colorType,
                                     sk_sp<SkColorSpace> colorSpace,
                                     SkAlphaType alphaType = kPremul_SkAlphaType,
                                     BitmapPalette palette = BitmapPalette::Unknown);

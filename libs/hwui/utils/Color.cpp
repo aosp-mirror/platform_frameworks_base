@@ -45,6 +45,20 @@ android::PixelFormat ColorTypeToPixelFormat(SkColorType colorType) {
     }
 }
 
+SkColorType PixelFormatToColorType(android::PixelFormat format) {
+    switch (format) {
+        case PIXEL_FORMAT_RGBX_8888:    return kRGB_888x_SkColorType;
+        case PIXEL_FORMAT_RGBA_8888:    return kRGBA_8888_SkColorType;
+        case PIXEL_FORMAT_RGBA_FP16:    return kRGBA_F16_SkColorType;
+        case PIXEL_FORMAT_RGB_565:      return kRGB_565_SkColorType;
+        case PIXEL_FORMAT_RGBA_1010102: return kRGBA_1010102_SkColorType;
+        case PIXEL_FORMAT_RGBA_4444:    return kARGB_4444_SkColorType;
+        default:
+            ALOGW("Unsupported PixelFormat: %d, return kUnknown_SkColorType by default", format);
+            return kUnknown_SkColorType;
+    }
+}
+
 sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
 
     skcms_Matrix3x3 gamut;

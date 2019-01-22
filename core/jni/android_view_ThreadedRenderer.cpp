@@ -1011,8 +1011,9 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
         // Continue I guess?
     }
 
+    SkColorType ct = uirenderer::PixelFormatToColorType(buffer->getPixelFormat());
     sk_sp<SkColorSpace> cs = uirenderer::DataSpaceToColorSpace(bufferItem.mDataSpace);
-    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, cs);
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, ct, cs);
     return bitmap::createBitmap(env, bitmap.release(),
             android::bitmap::kBitmapCreateFlag_Premultiplied);
 }
