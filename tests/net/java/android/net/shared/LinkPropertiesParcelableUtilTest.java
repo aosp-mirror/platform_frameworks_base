@@ -48,61 +48,52 @@ public class LinkPropertiesParcelableUtilTest {
     private LinkProperties mLinkProperties;
 
     private static final String TEST_LINKPROPS_IFACE = "TEST_IFACE";
-    private static final String TEST_STACKED_LINK_1_IFACE = "TEST_STACKED_IFACE_1";
-    private static final String TEST_STACKED_LINK_2_IFACE = "TEST_STACKED_IFACE_2";
 
     @Before
     public void setUp() {
-        mLinkProperties = makeLinkProperties(TEST_LINKPROPS_IFACE);
-        mLinkProperties.addStackedLink(makeLinkProperties(TEST_STACKED_LINK_1_IFACE));
-        mLinkProperties.addStackedLink(makeLinkProperties(TEST_STACKED_LINK_2_IFACE));
-    }
-
-    private static LinkProperties makeLinkProperties(String iface) {
-        final LinkProperties lp = new LinkProperties();
-        lp.setInterfaceName(iface);
-        lp.setLinkAddresses(Arrays.asList(
+        mLinkProperties = new LinkProperties();
+        mLinkProperties.setInterfaceName(TEST_LINKPROPS_IFACE);
+        mLinkProperties.setLinkAddresses(Arrays.asList(
                 new LinkAddress(InetAddresses.parseNumericAddress("192.168.0.42"), 16),
                 new LinkAddress(InetAddresses.parseNumericAddress("2001:db8::7"), 42)));
-        lp.setDnsServers(Arrays.asList(
+        mLinkProperties.setDnsServers(Arrays.asList(
                 InetAddresses.parseNumericAddress("2001:db8::42"),
                 InetAddresses.parseNumericAddress("192.168.1.1")
         ));
-        lp.setValidatedPrivateDnsServers(Arrays.asList(
+        mLinkProperties.setValidatedPrivateDnsServers(Arrays.asList(
                 InetAddresses.parseNumericAddress("2001:db8::43"),
                 InetAddresses.parseNumericAddress("192.168.42.43")
         ));
-        lp.setPcscfServers(Arrays.asList(
+        mLinkProperties.setPcscfServers(Arrays.asList(
                 InetAddresses.parseNumericAddress("2001:db8::47"),
                 InetAddresses.parseNumericAddress("192.168.42.47")
         ));
-        lp.setUsePrivateDns(true);
-        lp.setPrivateDnsServerName("test.example.com");
-        lp.setDomains("test1.example.com,test2.example.com");
-        lp.addRoute(new RouteInfo(
+        mLinkProperties.setUsePrivateDns(true);
+        mLinkProperties.setPrivateDnsServerName("test.example.com");
+        mLinkProperties.setDomains("test1.example.com,test2.example.com");
+        mLinkProperties.addRoute(new RouteInfo(
                 new IpPrefix(InetAddresses.parseNumericAddress("2001:db8::44"), 45),
                 InetAddresses.parseNumericAddress("2001:db8::45"),
-                iface,
+                TEST_LINKPROPS_IFACE,
                 RouteInfo.RTN_UNICAST
         ));
-        lp.addRoute(new RouteInfo(
+        mLinkProperties.addRoute(new RouteInfo(
                 new IpPrefix(InetAddresses.parseNumericAddress("192.168.44.45"), 16),
                 InetAddresses.parseNumericAddress("192.168.45.1"),
-                iface,
+                TEST_LINKPROPS_IFACE,
                 RouteInfo.RTN_THROW
         ));
-        lp.setHttpProxy(new ProxyInfo("test3.example.com", 8000,
+        mLinkProperties.setHttpProxy(new ProxyInfo("test3.example.com", 8000,
                 "excl1.example.com,excl2.example.com"));
-        lp.setMtu(5000);
-        lp.setTcpBufferSizes("1,2,3,4,5,6");
-        lp.setNat64Prefix(new IpPrefix(InetAddresses.parseNumericAddress("2001:db8::48"), 96));
+        mLinkProperties.setMtu(5000);
+        mLinkProperties.setTcpBufferSizes("1,2,3,4,5,6");
+        mLinkProperties.setNat64Prefix(
+                new IpPrefix(InetAddresses.parseNumericAddress("2001:db8::48"), 96));
 
         // Verify that this test does not miss any new field added later.
         // If any added field is not included in LinkProperties#equals, assertLinkPropertiesEquals
         // must also be updated.
         assertFieldCountEquals(14, LinkProperties.class);
-
-        return lp;
     }
 
     @Test
@@ -186,7 +177,7 @@ public class LinkPropertiesParcelableUtilTest {
     private static void assertLinkPropertiesEquals(LinkProperties expected, LinkProperties actual) {
         assertEquals(expected, actual);
 
-        // LinkProperties equals() does not include stacked links
-        assertEquals(expected.getStackedLinks(), actual.getStackedLinks());
+        // Equality on stacked links is not tested as they should not be passed to processes using
+        // LinkPropertiesParcelable.
     }
 }
