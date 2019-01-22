@@ -44,6 +44,7 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.PowerUI;
+import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
@@ -278,6 +279,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<SensorPrivacyManager> mSensorPrivacyManager;
     @Inject Lazy<AutoHideController> mAutoHideController;
     @Inject Lazy<ForegroundServiceNotificationListener> mForegroundServiceNotificationListener;
+    @Inject Lazy<PrivacyItemController> mPrivacyItemController;
     @Inject @Named(BG_LOOPER_NAME) Lazy<Looper> mBgLooper;
     @Inject @Named(BG_HANDLER_NAME) Lazy<Handler> mBgHandler;
     @Inject @Named(MAIN_HANDLER_NAME) Lazy<Handler> mMainHandler;
@@ -452,6 +454,8 @@ public class Dependency extends SystemUI {
         mProviders.put(ForegroundServiceNotificationListener.class,
                 mForegroundServiceNotificationListener::get);
         mProviders.put(ClockManager.class, mClockManager::get);
+        mProviders.put(PrivacyItemController.class, mPrivacyItemController::get);
+
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add

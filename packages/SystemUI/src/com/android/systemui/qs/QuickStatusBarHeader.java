@@ -180,14 +180,14 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     public QuickStatusBarHeader(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             NextAlarmController nextAlarmController, ZenModeController zenModeController,
             BatteryController batteryController, StatusBarIconController statusBarIconController,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter, PrivacyItemController privacyItemController) {
         super(context, attrs);
         mAlarmController = nextAlarmController;
         mZenController = zenModeController;
         mBatteryController = batteryController;
         mStatusBarIconController = statusBarIconController;
         mActivityStarter = activityStarter;
-        mPrivacyItemController = new PrivacyItemController(context, mPICCallback);
+        mPrivacyItemController = privacyItemController;
         mShownCount = getStoredShownCount();
     }
 
@@ -512,7 +512,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             return;
         }
         mHeaderQsPanel.setListening(listening);
-        mPrivacyItemController.setListening(listening);
         mListening = listening;
 
         if (listening) {
@@ -520,9 +519,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             mAlarmController.addCallback(this);
             mContext.registerReceiver(mRingerReceiver,
                     new IntentFilter(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
+            mPrivacyItemController.addCallback(mPICCallback);
         } else {
             mZenController.removeCallback(this);
             mAlarmController.removeCallback(this);
+            mPrivacyItemController.removeCallback(mPICCallback);
             mContext.unregisterReceiver(mRingerReceiver);
         }
     }
