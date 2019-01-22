@@ -1555,7 +1555,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                     mOsuFailure = mContext.getString(
                             R.string.osu_failure_provisioning_not_available);
                     break;
-                case OSU_FAILURE_INVALID_SERVER_URL:
+                case OSU_FAILURE_INVALID_URL_FORMAT_FOR_OSU:
                     mOsuFailure = mContext.getString(R.string.osu_failure_invalid_server_url);
                     break;
                 case OSU_FAILURE_UNEXPECTED_COMMAND_TYPE:

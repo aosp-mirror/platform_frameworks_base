@@ -65,9 +65,9 @@ public abstract class ProvisioningCallback {
     public static final int OSU_FAILURE_PROVISIONING_NOT_AVAILABLE = 7;
 
     /**
-     * The reason code for provisioning failure due to invalid server url.
+     * The reason code for provisioning failure due to invalid web url format for an OSU web page.
      */
-    public static final int OSU_FAILURE_INVALID_SERVER_URL = 8;
+    public static final int OSU_FAILURE_INVALID_URL_FORMAT_FOR_OSU = 8;
 
     /**
      * The reason code for provisioning failure when a command received is not the expected command
