@@ -28,9 +28,12 @@ import android.content.Context;
 import android.net.ipmemorystore.Blob;
 import android.net.ipmemorystore.IOnBlobRetrievedListener;
 import android.net.ipmemorystore.IOnNetworkAttributesRetrieved;
+import android.net.ipmemorystore.IOnSameNetworkResponseListener;
 import android.net.ipmemorystore.IOnStatusListener;
 import android.net.ipmemorystore.NetworkAttributes;
 import android.net.ipmemorystore.NetworkAttributesParcelable;
+import android.net.ipmemorystore.SameL3NetworkResponse;
+import android.net.ipmemorystore.SameL3NetworkResponseParcelable;
 import android.net.ipmemorystore.Status;
 import android.net.ipmemorystore.StatusParcelable;
 import android.os.IBinder;
@@ -53,7 +56,6 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -64,6 +66,8 @@ import java.util.function.Consumer;
 public class IpMemoryStoreServiceTest {
     private static final String TEST_CLIENT_ID = "testClientId";
     private static final String TEST_DATA_NAME = "testData";
+
+    private static final String[] FAKE_KEYS = { "fakeKey1", "fakeKey2", "fakeKey3", "fakeKey4" };
 
     @Mock
     private Context mMockContext;
@@ -130,11 +134,33 @@ public class IpMemoryStoreServiceTest {
             final OnNetworkAttributesRetrievedListener functor) {
         return new IOnNetworkAttributesRetrieved() {
             @Override
-            public void onL2KeyResponse(final StatusParcelable status, final String l2Key,
-                    final NetworkAttributesParcelable attributes)
+            public void onNetworkAttributesRetrieved(final StatusParcelable status,
+                    final String l2Key, final NetworkAttributesParcelable attributes)
                     throws RemoteException {
                 functor.onNetworkAttributesRetrieved(new Status(status), l2Key,
                         null == attributes ? null : new NetworkAttributes(attributes));
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return null;
+            }
+        };
+    }
+
+    /** Helper method to make an IOnSameNetworkResponseListener */
+    private interface OnSameNetworkResponseListener {
+        void onSameNetworkResponse(Status status, SameL3NetworkResponse answer);
+    }
+    private IOnSameNetworkResponseListener onSameResponse(
+            final OnSameNetworkResponseListener functor) {
+        return new IOnSameNetworkResponseListener() {
+            @Override
+            public void onSameNetworkResponse(final StatusParcelable status,
+                    final SameL3NetworkResponseParcelable sameL3Network)
+                    throws RemoteException {
+                functor.onSameNetworkResponse(new Status(status),
+                        null == sameL3Network ? null : new SameL3NetworkResponse(sameL3Network));
             }
 
             @Override
@@ -155,6 +181,19 @@ public class IpMemoryStoreServiceTest {
         }
     }
 
+    // Helper methods to factorize more boilerplate
+    private void storeAttributes(final String l2Key, final NetworkAttributes na) {
+        storeAttributes("Did not complete storing attributes", l2Key, na);
+    }
+    private void storeAttributes(final String timeoutMessage, final String l2Key,
+            final NetworkAttributes na) {
+        doLatched(timeoutMessage, latch -> mService.storeNetworkAttributes(l2Key, na.toParcelable(),
+                onStatus(status -> {
+                    assertTrue("Store not successful : " + status.resultCode, status.isSuccess());
+                    latch.countDown();
+                })));
+    }
+
     @Test
     public void testNetworkAttributes() {
         final NetworkAttributes.Builder na = new NetworkAttributes.Builder();
@@ -164,15 +203,9 @@ public class IpMemoryStoreServiceTest {
         } catch (UnknownHostException e) { /* Can't happen */ }
         na.setGroupHint("hint1");
         na.setMtu(219);
-        final String l2Key = UUID.randomUUID().toString();
+        final String l2Key = FAKE_KEYS[0];
         NetworkAttributes attributes = na.build();
-        doLatched("Did not complete storing attributes", latch ->
-                mService.storeNetworkAttributes(l2Key, attributes.toParcelable(),
-                        onStatus(status -> {
-                            assertTrue("Store status not successful : " + status.resultCode,
-                                    status.isSuccess());
-                            latch.countDown();
-                        })));
+        storeAttributes(l2Key, attributes);
 
         doLatched("Did not complete retrieving attributes", latch ->
                 mService.retrieveNetworkAttributes(l2Key, onNetworkAttributesRetrieved(
@@ -190,9 +223,7 @@ public class IpMemoryStoreServiceTest {
                     new InetAddress[] {Inet6Address.getByName("0A1C:2E40:480A::1CA6")}));
         } catch (UnknownHostException e) { /* Still can't happen */ }
         final NetworkAttributes attributes2 = na2.build();
-        doLatched("Did not complete storing attributes 2", latch ->
-                mService.storeNetworkAttributes(l2Key, attributes2.toParcelable(),
-                        onStatus(status -> latch.countDown())));
+        storeAttributes("Did not complete storing attributes 2", l2Key, attributes2);
 
         doLatched("Did not complete retrieving attributes 2", latch ->
                 mService.retrieveNetworkAttributes(l2Key, onNetworkAttributesRetrieved(
@@ -268,7 +299,7 @@ public class IpMemoryStoreServiceTest {
     public void testPrivateData() {
         final Blob b = new Blob();
         b.data = new byte[] { -3, 6, 8, -9, 12, -128, 0, 89, 112, 91, -34 };
-        final String l2Key = UUID.randomUUID().toString();
+        final String l2Key = FAKE_KEYS[0];
         doLatched("Did not complete storing private data", latch ->
                 mService.storeBlob(l2Key, TEST_CLIENT_ID, TEST_DATA_NAME, b,
                         onStatus(status -> {
@@ -306,8 +337,50 @@ public class IpMemoryStoreServiceTest {
         // TODO : implement this
     }
 
+    private void assertNetworksSameness(final String key1, final String key2, final int sameness) {
+        doLatched("Did not finish evaluating sameness", latch ->
+                mService.isSameNetwork(key1, key2, onSameResponse((status, answer) -> {
+                    assertTrue("Retrieve network sameness not successful : " + status.resultCode,
+                            status.isSuccess());
+                    assertEquals(sameness, answer.getNetworkSameness());
+                })));
+    }
+
     @Test
-    public void testIsSameNetwork() {
-        // TODO : implement this
+    public void testIsSameNetwork() throws UnknownHostException {
+        final NetworkAttributes.Builder na = new NetworkAttributes.Builder();
+        na.setAssignedV4Address((Inet4Address) Inet4Address.getByAddress(new byte[]{1, 2, 3, 4}));
+        na.setGroupHint("hint1");
+        na.setMtu(219);
+        na.setDnsAddresses(Arrays.asList(Inet6Address.getByName("0A1C:2E40:480A::1CA6")));
+
+        storeAttributes(FAKE_KEYS[0], na.build());
+        // 0 and 1 have identical attributes
+        storeAttributes(FAKE_KEYS[1], na.build());
+
+        // Hopefully only the MTU being different still means it's the same network
+        na.setMtu(200);
+        storeAttributes(FAKE_KEYS[2], na.build());
+
+        // Hopefully different MTU, assigned V4 address and grouphint make a different network,
+        // even with identical DNS addresses
+        na.setAssignedV4Address(null);
+        na.setGroupHint("hint2");
+        storeAttributes(FAKE_KEYS[3], na.build());
+
+        assertNetworksSameness(FAKE_KEYS[0], FAKE_KEYS[1], SameL3NetworkResponse.NETWORK_SAME);
+        assertNetworksSameness(FAKE_KEYS[0], FAKE_KEYS[2], SameL3NetworkResponse.NETWORK_SAME);
+        assertNetworksSameness(FAKE_KEYS[1], FAKE_KEYS[2], SameL3NetworkResponse.NETWORK_SAME);
+        assertNetworksSameness(FAKE_KEYS[0], FAKE_KEYS[3], SameL3NetworkResponse.NETWORK_DIFFERENT);
+        assertNetworksSameness(FAKE_KEYS[0], "neverInsertedKey",
+                SameL3NetworkResponse.NETWORK_NEVER_CONNECTED);
+
+        doLatched("Did not finish evaluating sameness", latch ->
+                mService.isSameNetwork(null, null, onSameResponse((status, answer) -> {
+                    assertFalse("Retrieve network sameness suspiciously successful : "
+                            + status.resultCode, status.isSuccess());
+                    assertEquals(Status.ERROR_ILLEGAL_ARGUMENT, status.resultCode);
+                    assertNull(answer);
+                })));
     }
 }

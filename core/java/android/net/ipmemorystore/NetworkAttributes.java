@@ -37,27 +37,57 @@ import java.util.StringJoiner;
 public class NetworkAttributes {
     private static final boolean DBG = true;
 
+    // Weight cutoff for grouping. To group, a similarity score is computed with the following
+    // algorithm : if both fields are non-null and equals() then add their assigned weight, else if
+    // both are null then add a portion of their assigned weight (see NULL_MATCH_WEIGHT),
+    // otherwise add nothing.
+    // As a guideline, this should be something like 60~75% of the total weights in this class. The
+    // design states "in essence a reader should imagine that if two important columns don't match,
+    // or one important and several unimportant columns don't match then the two records are
+    // considered a different group".
+    private static final float TOTAL_WEIGHT_CUTOFF = 520.0f;
+    // The portion of the weight that is earned when scoring group-sameness by having both columns
+    // being null. This is because some networks rightfully don't have some attributes (e.g. a
+    // V6-only network won't have an assigned V4 address) and both being null should count for
+    // something, but attributes may also be null just because data is unavailable.
+    private static final float NULL_MATCH_WEIGHT = 0.25f;
+
     // The v4 address that was assigned to this device the last time it joined this network.
     // This typically comes from DHCP but could be something else like static configuration.
     // This does not apply to IPv6.
     // TODO : add a list of v6 prefixes for the v6 case.
     @Nullable
     public final Inet4Address assignedV4Address;
+    private static final float WEIGHT_ASSIGNEDV4ADDR = 300.0f;
 
     // Optionally supplied by the client if it has an opinion on L3 network. For example, this
     // could be a hash of the SSID + security type on WiFi.
     @Nullable
     public final String groupHint;
+    private static final float WEIGHT_GROUPHINT = 300.0f;
 
     // The list of DNS server addresses.
     @Nullable
     public final List<InetAddress> dnsAddresses;
+    private static final float WEIGHT_DNSADDRESSES = 200.0f;
 
     // The mtu on this network.
     @Nullable
     public final Integer mtu;
+    private static final float WEIGHT_MTU = 50.0f;
 
-    NetworkAttributes(
+    // The sum of all weights in this class. Tests ensure that this stays equal to the total of
+    // all weights.
+    /** @hide */
+    @VisibleForTesting
+    public static final float TOTAL_WEIGHT = WEIGHT_ASSIGNEDV4ADDR
+            + WEIGHT_GROUPHINT
+            + WEIGHT_DNSADDRESSES
+            + WEIGHT_MTU;
+
+    /** @hide */
+    @VisibleForTesting
+    public NetworkAttributes(
             @Nullable final Inet4Address assignedV4Address,
             @Nullable final String groupHint,
             @Nullable final List<InetAddress> dnsAddresses,
@@ -124,6 +154,34 @@ public class NetworkAttributes {
         parcelable.dnsAddresses = inetAddressListToBlobArray(dnsAddresses);
         parcelable.mtu = (null == mtu) ? -1 : mtu;
         return parcelable;
+    }
+
+    private float samenessContribution(final float weight,
+            @Nullable final Object o1, @Nullable final Object o2) {
+        if (null == o1) {
+            return (null == o2) ? weight * NULL_MATCH_WEIGHT : 0f;
+        }
+        return Objects.equals(o1, o2) ? weight : 0f;
+    }
+
+    /** @hide */
+    public float getNetworkGroupSamenessConfidence(@NonNull final NetworkAttributes o) {
+        final float samenessScore =
+                samenessContribution(WEIGHT_ASSIGNEDV4ADDR, assignedV4Address, o.assignedV4Address)
+                + samenessContribution(WEIGHT_GROUPHINT, groupHint, o.groupHint)
+                + samenessContribution(WEIGHT_DNSADDRESSES, dnsAddresses, o.dnsAddresses)
+                + samenessContribution(WEIGHT_MTU, mtu, o.mtu);
+        // The minimum is 0, the max is TOTAL_WEIGHT and should be represented by 1.0, and
+        // TOTAL_WEIGHT_CUTOFF should represent 0.5, but there is no requirement that
+        // TOTAL_WEIGHT_CUTOFF would be half of TOTAL_WEIGHT (indeed, it should not be).
+        // So scale scores under the cutoff between 0 and 0.5, and the scores over the cutoff
+        // between 0.5 and 1.0.
+        if (samenessScore < TOTAL_WEIGHT_CUTOFF) {
+            return samenessScore / (TOTAL_WEIGHT_CUTOFF * 2);
+        } else {
+            return (samenessScore - TOTAL_WEIGHT_CUTOFF) / (TOTAL_WEIGHT - TOTAL_WEIGHT_CUTOFF) / 2
+                    + 0.5f;
+        }
     }
 
     /** @hide */
