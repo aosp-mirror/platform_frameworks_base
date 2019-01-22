@@ -4775,7 +4775,7 @@ public class ConnectivityServiceTest {
 
         // Clat iface up, expect stack link updated.
         clat.interfaceLinkStateChanged(CLAT_PREFIX + MOBILE_IFNAME, true);
-        waitForIdle();
+        networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
         List<LinkProperties> stackedLps = mCm.getLinkProperties(mCellNetworkAgent.getNetwork())
                 .getStackedLinks();
         assertEquals(makeClatLinkProperties(myIpv4), stackedLps.get(0));
@@ -4783,7 +4783,6 @@ public class ConnectivityServiceTest {
         // Change trivial linkproperties and see if stacked link is preserved.
         cellLp.addDnsServer(InetAddress.getByName("8.8.8.8"));
         mCellNetworkAgent.sendLinkProperties(cellLp);
-        waitForIdle();
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
 
         List<LinkProperties> stackedLpsAfterChange =
@@ -4795,19 +4794,19 @@ public class ConnectivityServiceTest {
         cellLp.addLinkAddress(myIpv4);
         cellLp.addRoute(new RouteInfo(myIpv4, null, MOBILE_IFNAME));
         mCellNetworkAgent.sendLinkProperties(cellLp);
-        waitForIdle();
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
         verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
 
         // Clat iface removed, expect linkproperties revert to original one
         clat.interfaceRemoved(CLAT_PREFIX + MOBILE_IFNAME);
-        waitForIdle();
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
         LinkProperties actualLpAfterIpv4 = mCm.getLinkProperties(mCellNetworkAgent.getNetwork());
         assertEquals(cellLp, actualLpAfterIpv4);
 
         // Clean up
         mCellNetworkAgent.disconnect();
+        networkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+        networkCallback.assertNoCallback();
         mCm.unregisterNetworkCallback(networkCallback);
     }
 
