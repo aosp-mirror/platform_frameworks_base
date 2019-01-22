@@ -73,7 +73,6 @@ public class AttentionManagerService extends SystemService {
 
     private final Context mContext;
     private final PowerManager mPowerManager;
-    private final ActivityManager mActivityManager;
     private final Object mLock;
     @GuardedBy("mLock")
     private final SparseArray<UserState> mUserStates = new SparseArray<>();
@@ -85,7 +84,6 @@ public class AttentionManagerService extends SystemService {
         super(context);
         mContext = Preconditions.checkNotNull(context);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mLock = new Object();
         mAttentionHandler = new AttentionHandler();
     }
@@ -96,7 +94,7 @@ public class AttentionManagerService extends SystemService {
     }
 
     @Override
-    public void onStopUser(int userId) {
+    public void onSwitchUser(int userId) {
         cancelAndUnbindLocked(peekUserStateLocked(userId),
                 AttentionService.ATTENTION_FAILURE_UNKNOWN);
     }
@@ -201,11 +199,20 @@ public class AttentionManagerService extends SystemService {
 
     /** Cancels the specified attention check. */
     public void cancelAttentionCheck(int requestCode) {
-        final UserState userState = getOrCreateCurrentUserStateLocked();
-        try {
-            userState.mService.cancelAttentionCheck(requestCode);
-        } catch (RemoteException e) {
-            Slog.e(LOG_TAG, "Cannot call into the AttentionService");
+        synchronized (mLock) {
+            final UserState userState = getOrCreateCurrentUserStateLocked();
+            if (userState.mService == null) {
+                if (userState.mPendingAttentionCheck != null
+                        && userState.mPendingAttentionCheck.mRequestCode == requestCode) {
+                    userState.mPendingAttentionCheck = null;
+                }
+                return;
+            }
+            try {
+                userState.mService.cancelAttentionCheck(requestCode);
+            } catch (RemoteException e) {
+                Slog.e(LOG_TAG, "Cannot call into the AttentionService");
+            }
         }
     }
 
@@ -224,7 +231,7 @@ public class AttentionManagerService extends SystemService {
 
     @GuardedBy("mLock")
     private UserState getOrCreateCurrentUserStateLocked() {
-        return getOrCreateUserStateLocked(mActivityManager.getCurrentUser());
+        return getOrCreateUserStateLocked(ActivityManager.getCurrentUser());
     }
 
     @GuardedBy("mLock")
@@ -239,7 +246,7 @@ public class AttentionManagerService extends SystemService {
 
     @GuardedBy("mLock")
     UserState peekCurrentUserStateLocked() {
-        return peekUserStateLocked(mActivityManager.getCurrentUser());
+        return peekUserStateLocked(ActivityManager.getCurrentUser());
     }
 
     @GuardedBy("mLock")
