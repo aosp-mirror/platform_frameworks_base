@@ -100,6 +100,7 @@ public final class ColorDisplayManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int AUTO_MODE_DISABLED = 0;
     /**
      * Auto mode value to automatically activate Night display at a specific start and end time.
@@ -110,6 +111,7 @@ public final class ColorDisplayManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int AUTO_MODE_CUSTOM_TIME = 1;
     /**
      * Auto mode value to automatically activate Night display from sunset to sunrise.
@@ -118,6 +120,7 @@ public final class ColorDisplayManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int AUTO_MODE_TWILIGHT = 2;
 
     private final ColorDisplayManagerInternal mManager;
@@ -175,6 +178,8 @@ public final class ColorDisplayManager {
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
     public @AutoMode int getNightDisplayAutoMode() {
         return mManager.getNightDisplayAutoMode();
     }
@@ -199,6 +204,8 @@ public final class ColorDisplayManager {
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
     public boolean setNightDisplayAutoMode(@AutoMode int autoMode) {
         if (autoMode != AUTO_MODE_DISABLED
                 && autoMode != AUTO_MODE_CUSTOM_TIME
@@ -233,6 +240,8 @@ public final class ColorDisplayManager {
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
     public boolean setNightDisplayCustomStartTime(@NonNull LocalTime startTime) {
         if (startTime == null) {
             throw new IllegalArgumentException("startTime cannot be null");
@@ -263,6 +272,8 @@ public final class ColorDisplayManager {
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
     public boolean setNightDisplayCustomEndTime(@NonNull LocalTime endTime) {
         if (endTime == null) {
             throw new IllegalArgumentException("endTime cannot be null");
