@@ -3962,14 +3962,30 @@ package android.net {
 
   public final class LinkProperties implements android.os.Parcelable {
     ctor public LinkProperties();
+    method public boolean addDnsServer(java.net.InetAddress);
     method public boolean addRoute(android.net.RouteInfo);
     method public void clear();
+    method public String getTcpBufferSizes();
+    method public java.util.List<java.net.InetAddress> getValidatedPrivateDnsServers();
+    method public boolean hasGlobalIPv6Address();
+    method public boolean hasIPv4Address();
+    method public boolean hasIPv6DefaultRoute();
+    method public boolean isIPv4Provisioned();
+    method public boolean isIPv6Provisioned();
+    method public boolean isProvisioned();
+    method public boolean isReachable(java.net.InetAddress);
+    method public boolean removeDnsServer(java.net.InetAddress);
+    method public boolean removeRoute(android.net.RouteInfo);
     method public void setDnsServers(java.util.Collection<java.net.InetAddress>);
     method public void setDomains(String);
     method public void setHttpProxy(android.net.ProxyInfo);
     method public void setInterfaceName(String);
     method public void setLinkAddresses(java.util.Collection<android.net.LinkAddress>);
     method public void setMtu(int);
+    method public void setPrivateDnsServerName(@Nullable String);
+    method public void setTcpBufferSizes(String);
+    method public void setUsePrivateDns(boolean);
+    method public void setValidatedPrivateDnsServers(java.util.Collection<java.net.InetAddress>);
   }
 
   public class Network implements android.os.Parcelable {
@@ -3978,6 +3994,8 @@ package android.net {
 
   public final class NetworkCapabilities implements android.os.Parcelable {
     method public int getSignalStrength();
+    method public int[] getTransportTypes();
+    method public boolean satisfiedByNetworkCapabilities(android.net.NetworkCapabilities);
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
   }
 
