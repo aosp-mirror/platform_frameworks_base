@@ -3179,6 +3179,146 @@ package android.net {
 
 }
 
+package android.net.metrics {
+
+  public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
+  }
+
+  public static class ApfProgramEvent.Builder {
+    ctor public ApfProgramEvent.Builder();
+    method public android.net.metrics.ApfProgramEvent build();
+    method public android.net.metrics.ApfProgramEvent.Builder setActualLifetime(long);
+    method public android.net.metrics.ApfProgramEvent.Builder setCurrentRas(int);
+    method public android.net.metrics.ApfProgramEvent.Builder setFilteredRas(int);
+    method public android.net.metrics.ApfProgramEvent.Builder setFlags(boolean, boolean);
+    method public android.net.metrics.ApfProgramEvent.Builder setLifetime(long);
+    method public android.net.metrics.ApfProgramEvent.Builder setProgramLength(int);
+  }
+
+  public final class ApfStats implements android.net.metrics.IpConnectivityLog.Event {
+  }
+
+  public static class ApfStats.Builder {
+    ctor public ApfStats.Builder();
+    method public android.net.metrics.ApfStats build();
+    method public android.net.metrics.ApfStats.Builder setDroppedRas(int);
+    method public android.net.metrics.ApfStats.Builder setDurationMs(long);
+    method public android.net.metrics.ApfStats.Builder setMatchingRas(int);
+    method public android.net.metrics.ApfStats.Builder setMaxProgramSize(int);
+    method public android.net.metrics.ApfStats.Builder setParseErrors(int);
+    method public android.net.metrics.ApfStats.Builder setProgramUpdates(int);
+    method public android.net.metrics.ApfStats.Builder setProgramUpdatesAll(int);
+    method public android.net.metrics.ApfStats.Builder setProgramUpdatesAllowingMulticast(int);
+    method public android.net.metrics.ApfStats.Builder setReceivedRas(int);
+    method public android.net.metrics.ApfStats.Builder setZeroLifetimeRas(int);
+  }
+
+  public final class DhcpClientEvent implements android.net.metrics.IpConnectivityLog.Event {
+  }
+
+  public static class DhcpClientEvent.Builder {
+    ctor public DhcpClientEvent.Builder();
+    method public android.net.metrics.DhcpClientEvent build();
+    method public android.net.metrics.DhcpClientEvent.Builder setDurationMs(int);
+    method public android.net.metrics.DhcpClientEvent.Builder setMsg(String);
+  }
+
+  public final class DhcpErrorEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor public DhcpErrorEvent(int);
+    method public static int errorCodeWithOption(int, int);
+    field public static final int BOOTP_TOO_SHORT;
+    field public static final int BUFFER_UNDERFLOW;
+    field public static final int DHCP_BAD_MAGIC_COOKIE;
+    field public static final int DHCP_ERROR = 4; // 0x4
+    field public static final int DHCP_INVALID_OPTION_LENGTH;
+    field public static final int DHCP_NO_COOKIE;
+    field public static final int DHCP_NO_MSG_TYPE;
+    field public static final int DHCP_UNKNOWN_MSG_TYPE;
+    field public static final int L2_ERROR = 1; // 0x1
+    field public static final int L2_TOO_SHORT;
+    field public static final int L2_WRONG_ETH_TYPE;
+    field public static final int L3_ERROR = 2; // 0x2
+    field public static final int L3_INVALID_IP;
+    field public static final int L3_NOT_IPV4;
+    field public static final int L3_TOO_SHORT;
+    field public static final int L4_ERROR = 3; // 0x3
+    field public static final int L4_NOT_UDP;
+    field public static final int L4_WRONG_PORT;
+    field public static final int MISC_ERROR = 5; // 0x5
+    field public static final int PARSING_ERROR;
+    field public static final int RECEIVE_ERROR;
+  }
+
+  public class IpConnectivityLog {
+    method public boolean log(long, android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(String, android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(int, int[], android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(android.net.metrics.IpConnectivityLog.Event);
+  }
+
+  public static interface IpConnectivityLog.Event extends android.os.Parcelable {
+  }
+
+  public final class IpManagerEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor public IpManagerEvent(int, long);
+    field public static final int COMPLETE_LIFECYCLE = 3; // 0x3
+    field public static final int ERROR_INTERFACE_NOT_FOUND = 8; // 0x8
+    field public static final int ERROR_INVALID_PROVISIONING = 7; // 0x7
+    field public static final int ERROR_STARTING_IPREACHABILITYMONITOR = 6; // 0x6
+    field public static final int ERROR_STARTING_IPV4 = 4; // 0x4
+    field public static final int ERROR_STARTING_IPV6 = 5; // 0x5
+    field public static final int PROVISIONING_FAIL = 2; // 0x2
+    field public static final int PROVISIONING_OK = 1; // 0x1
+  }
+
+  public final class IpReachabilityEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor public IpReachabilityEvent(int);
+    field public static final int NUD_FAILED = 512; // 0x200
+    field public static final int NUD_FAILED_ORGANIC = 1024; // 0x400
+    field public static final int PROBE = 256; // 0x100
+    field public static final int PROVISIONING_LOST = 768; // 0x300
+    field public static final int PROVISIONING_LOST_ORGANIC = 1280; // 0x500
+  }
+
+  public final class NetworkEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor public NetworkEvent(int, long);
+    ctor public NetworkEvent(int);
+    field public static final int NETWORK_CAPTIVE_PORTAL_FOUND = 4; // 0x4
+    field public static final int NETWORK_CONNECTED = 1; // 0x1
+    field public static final int NETWORK_CONSECUTIVE_DNS_TIMEOUT_FOUND = 12; // 0xc
+    field public static final int NETWORK_DISCONNECTED = 7; // 0x7
+    field public static final int NETWORK_FIRST_VALIDATION_PORTAL_FOUND = 10; // 0xa
+    field public static final int NETWORK_FIRST_VALIDATION_SUCCESS = 8; // 0x8
+    field public static final int NETWORK_LINGER = 5; // 0x5
+    field public static final int NETWORK_REVALIDATION_PORTAL_FOUND = 11; // 0xb
+    field public static final int NETWORK_REVALIDATION_SUCCESS = 9; // 0x9
+    field public static final int NETWORK_UNLINGER = 6; // 0x6
+    field public static final int NETWORK_VALIDATED = 2; // 0x2
+    field public static final int NETWORK_VALIDATION_FAILED = 3; // 0x3
+  }
+
+  public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
+    method public static String getProbeName(int);
+    field public static final int DNS_FAILURE = 0; // 0x0
+    field public static final int DNS_SUCCESS = 1; // 0x1
+    field public static final int PROBE_DNS = 0; // 0x0
+    field public static final int PROBE_FALLBACK = 4; // 0x4
+    field public static final int PROBE_HTTP = 1; // 0x1
+    field public static final int PROBE_HTTPS = 2; // 0x2
+    field public static final int PROBE_PAC = 3; // 0x3
+    field public static final int PROBE_PRIVDNS = 5; // 0x5
+  }
+
+  public static class ValidationProbeEvent.Builder {
+    ctor public ValidationProbeEvent.Builder();
+    method public android.net.metrics.ValidationProbeEvent build();
+    method public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
+    method public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
+    method public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
+  }
+
+}
+
 package android.net.wifi {
 
   @Deprecated public class RttManager {
