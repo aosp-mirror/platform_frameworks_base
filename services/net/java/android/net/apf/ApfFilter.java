@@ -16,8 +16,19 @@
 
 package android.net.apf;
 
-import static android.net.util.NetworkConstants.*;
-import static android.system.OsConstants.*;
+import static android.net.util.NetworkConstants.ICMPV6_ECHO_REQUEST_TYPE;
+import static android.net.util.NetworkConstants.ICMPV6_NEIGHBOR_ADVERTISEMENT;
+import static android.net.util.NetworkConstants.ICMPV6_ROUTER_ADVERTISEMENT;
+import static android.net.util.NetworkConstants.ICMPV6_ROUTER_SOLICITATION;
+import static android.system.OsConstants.AF_PACKET;
+import static android.system.OsConstants.ARPHRD_ETHER;
+import static android.system.OsConstants.ETH_P_ARP;
+import static android.system.OsConstants.ETH_P_IP;
+import static android.system.OsConstants.ETH_P_IPV6;
+import static android.system.OsConstants.IPPROTO_ICMPV6;
+import static android.system.OsConstants.IPPROTO_UDP;
+import static android.system.OsConstants.SOCK_RAW;
+
 import static com.android.internal.util.BitUtils.bytesToBEInt;
 import static com.android.internal.util.BitUtils.getUint16;
 import static com.android.internal.util.BitUtils.getUint32;
@@ -34,7 +45,7 @@ import android.net.LinkProperties;
 import android.net.NetworkUtils;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
-import android.net.ip.IpClient;
+import android.net.ip.IpClientCallbacks;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.ApfStats;
 import android.net.metrics.IpConnectivityLog;
@@ -48,10 +59,14 @@ import android.system.PacketSocketAddress;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
+
+import libcore.io.IoBridge;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -63,7 +78,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import libcore.io.IoBridge;
 
 /**
  * For networks that support packet filtering via APF programs, {@code ApfFilter}
@@ -308,7 +322,7 @@ public class ApfFilter {
     private static final int APF_MAX_ETH_TYPE_BLACK_LIST_LEN = 20;
 
     private final ApfCapabilities mApfCapabilities;
-    private final IpClient.Callback mIpClientCallback;
+    private final IpClientCallbacks mIpClientCallback;
     private final InterfaceParams mInterfaceParams;
     private final IpConnectivityLog mMetricsLog;
 
@@ -349,7 +363,7 @@ public class ApfFilter {
 
     @VisibleForTesting
     ApfFilter(Context context, ApfConfiguration config, InterfaceParams ifParams,
-            IpClient.Callback ipClientCallback, IpConnectivityLog log) {
+            IpClientCallbacks ipClientCallback, IpConnectivityLog log) {
         mApfCapabilities = config.apfCapabilities;
         mIpClientCallback = ipClientCallback;
         mInterfaceParams = ifParams;
@@ -1390,7 +1404,7 @@ public class ApfFilter {
      * filtering using APF programs.
      */
     public static ApfFilter maybeCreate(Context context, ApfConfiguration config,
-            InterfaceParams ifParams, IpClient.Callback ipClientCallback) {
+            InterfaceParams ifParams, IpClientCallbacks ipClientCallback) {
         if (context == null || config == null || ifParams == null) return null;
         ApfCapabilities apfCapabilities =  config.apfCapabilities;
         if (apfCapabilities == null) return null;
