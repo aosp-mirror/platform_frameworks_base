@@ -549,8 +549,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         verify(mActivityMetricsLogger, times(1)).logActivityStart(any(), any(), any(),
                 eq(FAKE_CALLING_UID), eq(FAKE_CALLING_PACKAGE), anyInt(), anyBoolean(),
                 eq(FAKE_REAL_CALLING_UID), anyInt(), anyBoolean(), anyInt(),
-                eq(ActivityBuilder.getDefaultComponent().getPackageName()), anyInt(), anyBoolean(),
-                any(), eq(false));
+                any(), anyInt(), anyBoolean(), any(), eq(false));
     }
 
     /**
