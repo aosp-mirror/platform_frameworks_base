@@ -46,18 +46,21 @@ public final class SmartReplyConstants extends ContentObserver {
     private static final String KEY_EDIT_CHOICES_BEFORE_SENDING =
             "edit_choices_before_sending";
     private static final String KEY_SHOW_IN_HEADS_UP = "show_in_heads_up";
+    private static final String KEY_MIN_NUM_REPLIES = "min_num_system_generated_replies";
 
     private final boolean mDefaultEnabled;
     private final boolean mDefaultRequiresP;
     private final int mDefaultMaxSqueezeRemeasureAttempts;
     private final boolean mDefaultEditChoicesBeforeSending;
     private final boolean mDefaultShowInHeadsUp;
+    private final int mDefaultMinNumSystemGeneratedReplies;
 
     private boolean mEnabled;
     private boolean mRequiresTargetingP;
     private int mMaxSqueezeRemeasureAttempts;
     private boolean mEditChoicesBeforeSending;
     private boolean mShowInHeadsUp;
+    private int mMinNumSystemGeneratedReplies;
 
     private final Context mContext;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -78,6 +81,8 @@ public final class SmartReplyConstants extends ContentObserver {
                 R.bool.config_smart_replies_in_notifications_edit_choices_before_sending);
         mDefaultShowInHeadsUp = resources.getBoolean(
                 R.bool.config_smart_replies_in_notifications_show_in_heads_up);
+        mDefaultMinNumSystemGeneratedReplies = resources.getInteger(
+                R.integer.config_smart_replies_in_notifications_min_num_system_generated_replies);
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS),
@@ -105,6 +110,8 @@ public final class SmartReplyConstants extends ContentObserver {
             mEditChoicesBeforeSending = mParser.getBoolean(
                     KEY_EDIT_CHOICES_BEFORE_SENDING, mDefaultEditChoicesBeforeSending);
             mShowInHeadsUp = mParser.getBoolean(KEY_SHOW_IN_HEADS_UP, mDefaultShowInHeadsUp);
+            mMinNumSystemGeneratedReplies =
+                    mParser.getInt(KEY_MIN_NUM_REPLIES, mDefaultMinNumSystemGeneratedReplies);
         }
     }
 
@@ -154,5 +161,13 @@ public final class SmartReplyConstants extends ContentObserver {
      */
     public boolean getShowInHeadsUp() {
         return mShowInHeadsUp;
+    }
+
+    /**
+     * Returns the minimum number of system generated replies to show in a notification.
+     * If we cannot show at least this many system generated replies we should show none.
+     */
+    public int getMinNumSystemGeneratedReplies() {
+        return mMinNumSystemGeneratedReplies;
     }
 }

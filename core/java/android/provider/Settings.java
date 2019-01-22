@@ -13928,11 +13928,12 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
-         * enabled                         (boolean)
-         * requires_targeting_p            (boolean)
-         * max_squeeze_remeasure_attempts  (int)
-         * edit_choices_before_sending     (boolean)
-         * show_in_heads_up                (boolean)
+         * enabled                           (boolean)
+         * requires_targeting_p              (boolean)
+         * max_squeeze_remeasure_attempts    (int)
+         * edit_choices_before_sending       (boolean)
+         * show_in_heads_up                  (boolean)
+         * min_num_system_generated_replies  (int)
          * </pre>
          * @see com.android.systemui.statusbar.policy.SmartReplyConstants
          * @hide
