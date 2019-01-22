@@ -185,6 +185,7 @@ LIBANDROID {
     ASensorManager_getSensorList;
     ASensor_getFifoMaxEventCount; # introduced=21
     ASensor_getFifoReservedEventCount; # introduced=21
+    ASensor_getHandle; # introduced=29
     ASensor_getHighestDirectReportRateLevel; # introduced=26
     ASensor_getMinDelay;
     ASensor_getName;
