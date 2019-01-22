@@ -120,6 +120,8 @@ class DragState {
     // A surface used to catch input events for the drag-and-drop operation.
     SurfaceControl mInputSurface;
 
+    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
+
     private final Rect mTmpClipRect = new Rect();
 
     /**
@@ -240,7 +242,7 @@ class DragState {
 
         // Clear the internal variables.
         if (mSurfaceControl != null) {
-            mSurfaceControl.destroy();
+            mTransaction.reparent(mSurfaceControl, null).apply();
             mSurfaceControl = null;
         }
         if (mAnimator != null && !mAnimationCompleted) {
@@ -500,18 +502,13 @@ class DragState {
         mCurrentY = y;
 
         // Move the surface to the given touch
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
-                TAG_WM, ">>> OPEN TRANSACTION notifyMoveLocked");
-        mService.openSurfaceTransaction();
-        try {
-            mSurfaceControl.setPosition(x - mThumbOffsetX, y - mThumbOffsetY);
-            if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  DRAG "
-                    + mSurfaceControl + ": pos=(" +
-                    (int)(x - mThumbOffsetX) + "," + (int)(y - mThumbOffsetY) + ")");
-        } finally {
-            mService.closeSurfaceTransaction("notifyMoveLw");
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
-                    TAG_WM, "<<< CLOSE TRANSACTION notifyMoveLocked");
+        if (SHOW_LIGHT_TRANSACTIONS) {
+            Slog.i(TAG_WM, ">>> OPEN TRANSACTION notifyMoveLocked");
+        }
+        mTransaction.setPosition(mSurfaceControl, x - mThumbOffsetX, y - mThumbOffsetY).apply();
+        if (SHOW_TRANSACTIONS) {
+            Slog.i(TAG_WM, "  DRAG " + mSurfaceControl + ": pos=(" + (int) (x - mThumbOffsetX) + ","
+                    + (int) (y - mThumbOffsetY) + ")");
         }
         notifyLocationLocked(x, y);
     }
