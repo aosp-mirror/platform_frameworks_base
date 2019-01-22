@@ -55,6 +55,10 @@ bool StatsCompanionServicePuller::PullInternal(vector<shared_ptr<LogEvent> >* da
         Status status = statsCompanionServiceCopy->pullData(mTagId, &returned_value);
         if (!status.isOk()) {
             ALOGW("StatsCompanionServicePuller::pull failed for %d", mTagId);
+            StatsdStats::getInstance().noteStatsCompanionPullFailed(mTagId);
+            if (status.exceptionCode() == Status::Exception::EX_TRANSACTION_FAILED) {
+                StatsdStats::getInstance().noteStatsCompanionPullBinderTransactionFailed(mTagId);
+            }
             return false;
         }
         data->clear();
