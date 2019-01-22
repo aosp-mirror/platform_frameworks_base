@@ -980,24 +980,30 @@ public final class InputMethodManager {
         InputMethodPrivilegedOperationsRegistry.get(imeToken).updateStatusIcon(null, 0);
     }
 
-    /** @hide */
+    /**
+     * This hidden API is deprecated in {@link android.os.Build.VERSION_CODES#Q}. Does nothing.
+     *
+     * @param spans will be ignored.
+     *
+     * @deprecated Do not use.
+     * @hide
+     */
+    @Deprecated
     @UnsupportedAppUsage
     public void registerSuggestionSpansForNotification(SuggestionSpan[] spans) {
-        try {
-            mService.registerSuggestionSpansForNotification(spans);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        Log.w(TAG, "registerSuggestionSpansForNotification() is deprecated.  Does nothing.");
     }
 
-    /** @hide */
+    /**
+     * This hidden API is deprecated in {@link android.os.Build.VERSION_CODES#Q}. Does nothing.
+     *
+     * @deprecated Do not use.
+     * @hide
+     */
+    @Deprecated
     @UnsupportedAppUsage
     public void notifySuggestionPicked(SuggestionSpan span, String originalString, int index) {
-        try {
-            mService.notifySuggestionPicked(span, originalString, index);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        Log.w(TAG, "notifySuggestionPicked() is deprecated.  Does nothing.");
     }
 
     /**

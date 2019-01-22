@@ -591,8 +591,8 @@
     <string name="keep_screen_on_summary">Screen will never sleep while charging</string>
     <!-- Setting Checkbox title whether to enable Bluetooth HCI snoop log -->
     <string name="bt_hci_snoop_log">Enable Bluetooth HCI snoop log</string>
-    <!-- setting Checkbox summary whether to capture all Bluetooth HCI packets in a file -->
-    <string name="bt_hci_snoop_log_summary">Capture all Bluetooth HCI packets in a file (Toggle Bluetooth after changing this setting)</string>
+    <!-- setting Checkbox summary whether to capture all Bluetooth HCI packets in a file [CHAR_LIMIT=100] -->
+    <string name="bt_hci_snoop_log_summary">Capture Bluetooth packets. (Toggle Bluetooth after changing this setting)</string>
     <!-- setting Checkbox title whether to enable OEM unlock [CHAR_LIMIT=35] -->
     <string name="oem_unlock_enable">OEM unlocking</string>
     <!-- setting Checkbox summary whether to enable OEM unlock [CHAR_LIMIT=50] -->

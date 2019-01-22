@@ -16,8 +16,7 @@ filegroup {
 }
 
 java_library {
-    // TODO: include media2.jar in the media apex and add it to the bootclasspath.
-    name: "media2",
+    name: "updatable-media",
 
     srcs: [
         ":media2-srcs",
@@ -28,6 +27,8 @@ java_library {
         "mediaplayer2-protos",
     ],
 
+    installable: true,
+
     // Make sure that the implementaion only relies on SDK or system APIs.
     sdk_version: "system_current",
 }
@@ -35,19 +36,19 @@ java_library {
 filegroup {
     name: "media2-srcs",
     srcs: [
-        "java/android/media/CloseGuard.java",
-        "java/android/media/DataSourceCallback.java",
-        "java/android/media/DataSourceDesc.java",
-        "java/android/media/UriDataSourceDesc.java",
-        "java/android/media/FileDataSourceDesc.java",
-        "java/android/media/CallbackDataSourceDesc.java",
-        "java/android/media/VideoSize.java",
-        "java/android/media/Media2Utils.java",
-        "java/android/media/MediaPlayer2Utils.java",
-        "java/android/media/MediaPlayer2.java",
-        "java/android/media/Media2HTTPService.java",
-        "java/android/media/Media2HTTPConnection.java",
-        "java/android/media/RoutingDelegate.java",
-        "java/android/media/BufferingParams.java",
+        "apex/java/android/media/CloseGuard.java",
+        "apex/java/android/media/DataSourceCallback.java",
+        "apex/java/android/media/DataSourceDesc.java",
+        "apex/java/android/media/UriDataSourceDesc.java",
+        "apex/java/android/media/FileDataSourceDesc.java",
+        "apex/java/android/media/CallbackDataSourceDesc.java",
+        "apex/java/android/media/VideoSize.java",
+        "apex/java/android/media/Media2Utils.java",
+        "apex/java/android/media/MediaPlayer2Utils.java",
+        "apex/java/android/media/MediaPlayer2.java",
+        "apex/java/android/media/Media2HTTPService.java",
+        "apex/java/android/media/Media2HTTPConnection.java",
+        "apex/java/android/media/RoutingDelegate.java",
+        "apex/java/android/media/BufferingParams.java",
     ],
 }

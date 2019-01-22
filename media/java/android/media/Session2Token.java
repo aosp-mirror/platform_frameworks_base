@@ -27,6 +27,7 @@ import android.content.pm.ResolveInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -46,7 +47,6 @@ import java.util.Objects;
  * {@link MediaController2} to communicate with the session.
  * <p>
  * It can be also obtained by {@link android.media.session.MediaSessionManager}.
- *
  */
 // New version of MediaSession2.Token for following reasons
 //   - Stop implementing Parcelable for updatable support
@@ -113,28 +113,15 @@ public final class Session2Token implements Parcelable {
         final PackageManager manager = context.getPackageManager();
         final int uid = getUid(manager, serviceComponent.getPackageName());
 
-        // TODO: Uncomment below to stop hardcode type.
-        final int type = TYPE_SESSION_SERVICE;
-//        final int type;
-//        if (isInterfaceDeclared(manager, MediaLibraryService2.SERVICE_INTERFACE,
-//                serviceComponent)) {
-//            type = TYPE_LIBRARY_SERVICE;
-//        } else if (isInterfaceDeclared(manager, MediaSessionService2.SERVICE_INTERFACE,
-//                    serviceComponent)) {
-//            type = TYPE_SESSION_SERVICE;
-//        } else if (isInterfaceDeclared(manager,
-//                        MediaBrowserServiceCompat.SERVICE_INTERFACE, serviceComponent)) {
-//            type = TYPE_BROWSER_SERVICE_LEGACY;
-//        } else {
-//            throw new IllegalArgumentException(serviceComponent + " doesn't implement none of"
-//                    + " MediaSessionService2, MediaLibraryService2, MediaBrowserService nor"
-//                    + " MediaBrowserServiceCompat. Use service's full name.");
-//        }
+        if (!isInterfaceDeclared(manager, MediaSession2Service.SERVICE_INTERFACE,
+                serviceComponent)) {
+            Log.w(TAG, serviceComponent + " doesn't implement MediaSession2Service.");
+        }
         mComponentName = serviceComponent;
         mPackageName = serviceComponent.getPackageName();
         mServiceName = serviceComponent.getClassName();
         mUid = uid;
-        mType = type;
+        mType = TYPE_SESSION_SERVICE;
         mSessionLink = null;
     }
 
@@ -152,7 +139,7 @@ public final class Session2Token implements Parcelable {
         mType = in.readInt();
         mPackageName = in.readString();
         mServiceName = in.readString();
-        mSessionLink = Session2Link.CREATOR.createFromParcel(in);
+        mSessionLink = in.readParcelable(null);
         mComponentName = ComponentName.unflattenFromString(in.readString());
     }
 
@@ -162,7 +149,7 @@ public final class Session2Token implements Parcelable {
         dest.writeInt(mType);
         dest.writeString(mPackageName);
         dest.writeString(mServiceName);
-        mSessionLink.writeToParcel(dest, flags);
+        dest.writeParcelable(mSessionLink, flags);
         dest.writeString(mComponentName == null ? "" : mComponentName.flattenToString());
     }
 
@@ -245,7 +232,7 @@ public final class Session2Token implements Parcelable {
     private static boolean isInterfaceDeclared(PackageManager manager, String serviceInterface,
             ComponentName serviceComponent) {
         Intent serviceIntent = new Intent(serviceInterface);
-        // Use queryIntentServices to find services with MediaLibraryService2.SERVICE_INTERFACE.
+        // Use queryIntentServices to find services with MediaSession2Service.SERVICE_INTERFACE.
         // We cannot use resolveService with intent specified class name, because resolveService
         // ignores actions if Intent.setClassName() is specified.
         serviceIntent.setPackage(serviceComponent.getPackageName());

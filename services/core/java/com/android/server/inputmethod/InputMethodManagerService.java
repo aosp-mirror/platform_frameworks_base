@@ -1243,7 +1243,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // Uh oh, current input method is no longer around!
                             // Pick another one...
                             Slog.i(TAG, "Current input method removed: " + curInputMethodId);
-                            updateSystemUiLocked(mCurToken, 0 /* vis */, mBackDisposition);
+                            updateSystemUiLocked(0 /* vis */, mBackDisposition);
                             if (!chooseNewDefaultIMELocked()) {
                                 changed = true;
                                 curIm = null;
@@ -1572,7 +1572,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (mStatusBar != null) {
                     mStatusBar.setIconVisibility(mSlotIme, false);
                 }
-                updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
+                updateSystemUiLocked(mImeWindowVis, mBackDisposition);
                 mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
                         com.android.internal.R.bool.show_ongoing_ime_switcher);
                 if (mShowOngoingImeSwitcherForPhones) {
@@ -1654,16 +1654,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @return true if and only if non-null valid token is specified.
      */
     @GuardedBy("mMethodMap")
-    private boolean calledWithValidTokenLocked(@Nullable IBinder token) {
-        if (token == null && Binder.getCallingPid() == Process.myPid()) {
-            if (DEBUG) {
-                // TODO(b/34851776): Basically it's the caller's fault if we reach here.
-                Slog.d(TAG, "Bug 34851776 is detected callers=" + Debug.getCallers(10));
-            }
-            return false;
+    private boolean calledWithValidTokenLocked(@NonNull IBinder token) {
+        if (token == null) {
+            throw new InvalidParameterException("token must not be null.");
         }
-        if (token == null || token != mCurToken) {
-            // TODO(b/34886274): The semantics of this verification is actually not well-defined.
+        if (token != mCurToken) {
             Slog.e(TAG, "Ignoring " + Debug.getCaller() + " due to an invalid token."
                     + " uid:" + Binder.getCallingUid() + " token:" + token);
             return false;
@@ -2260,7 +2255,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     sessionState.session.finishSession();
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Session failed to close due to remote exception", e);
-                    updateSystemUiLocked(mCurToken, 0 /* vis */, mBackDisposition);
+                    updateSystemUiLocked(0 /* vis */, mBackDisposition);
                 }
                 sessionState.session = null;
             }
@@ -2419,14 +2414,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     @SuppressWarnings("deprecation")
-    private void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
+    private void setImeWindowStatus(@NonNull IBinder token, int vis, int backDisposition) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
             }
             mImeWindowVis = vis;
             mBackDisposition = backDisposition;
-            updateSystemUiLocked(token, vis, backDisposition);
+            updateSystemUiLocked(vis, backDisposition);
         }
 
         final boolean dismissImeOnBackKeyPressed;
@@ -2446,14 +2441,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 (vis & InputMethodService.IME_VISIBLE) != 0, dismissImeOnBackKeyPressed);
     }
 
-    private void updateSystemUi(IBinder token, int vis, int backDisposition) {
-        synchronized (mMethodMap) {
-            updateSystemUiLocked(token, vis, backDisposition);
-        }
-    }
-
     @BinderThread
-    private void reportStartInput(IBinder token, IBinder startInputToken) {
+    private void reportStartInput(@NonNull IBinder token, IBinder startInputToken) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -2467,11 +2456,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     // Caution! This method is called in this class. Handle multi-user carefully
-    private void updateSystemUiLocked(IBinder token, int vis, int backDisposition) {
-        if (!calledWithValidTokenLocked(token)) {
+    private void updateSystemUiLocked(int vis, int backDisposition) {
+        if (mCurToken == null) {
             return;
         }
-
         // TODO: Move this clearing calling identity block to setImeWindowStatus after making sure
         // all updateSystemUi happens on system previlege.
         final long ident = Binder.clearCallingIdentity();
@@ -2483,7 +2471,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
             if (mStatusBar != null) {
-                mStatusBar.setImeWindowStatus(token, vis, backDisposition,
+                mStatusBar.setImeWindowStatus(mCurToken, vis, backDisposition,
                         needsToShowImeSwitcher);
             }
             final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
@@ -2523,54 +2511,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-    }
-
-    @Override
-    public void registerSuggestionSpansForNotification(SuggestionSpan[] spans) {
-        synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
-                return;
-            }
-            final InputMethodInfo currentImi = mMethodMap.get(mCurMethodId);
-            for (int i = 0; i < spans.length; ++i) {
-                SuggestionSpan ss = spans[i];
-                if (!TextUtils.isEmpty(ss.getNotificationTargetClassName())) {
-                    mSecureSuggestionSpans.put(ss, currentImi);
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean notifySuggestionPicked(SuggestionSpan span, String originalString, int index) {
-        synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
-                return false;
-            }
-            final InputMethodInfo targetImi = mSecureSuggestionSpans.get(span);
-            // TODO: Do not send the intent if the process of the targetImi is already dead.
-            if (targetImi != null) {
-                final String[] suggestions = span.getSuggestions();
-                if (index < 0 || index >= suggestions.length) return false;
-                final String className = span.getNotificationTargetClassName();
-                final Intent intent = new Intent();
-                // Ensures that only a class in the original IME package will receive the
-                // notification.
-                intent.setClassName(targetImi.getPackageName(), className);
-                intent.setAction(SuggestionSpan.ACTION_SUGGESTION_PICKED);
-                intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_BEFORE, originalString);
-                intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_AFTER, suggestions[index]);
-                intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_HASHCODE, span.hashCode());
-                final long ident = Binder.clearCallingIdentity();
-                try {
-                    mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
-                return true;
-            }
-        }
-        return false;
     }
 
     void updateFromSettingsLocked(boolean enabledMayChange) {
@@ -2673,7 +2613,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true);
                 if (mCurMethod != null) {
                     try {
-                        updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
+                        updateSystemUiLocked(mImeWindowVis, mBackDisposition);
                         mCurMethod.changeInputMethodSubtype(newSubtype);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to call changeInputMethodSubtype");
@@ -3189,7 +3129,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void setInputMethod(IBinder token, String id) {
+    private void setInputMethod(@NonNull IBinder token, String id) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -3199,7 +3139,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
+    private void setInputMethodAndSubtype(@NonNull IBinder token, String id,
+            InputMethodSubtype subtype) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -3228,7 +3169,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private boolean switchToPreviousInputMethod(IBinder token) {
+    private boolean switchToPreviousInputMethod(@NonNull IBinder token) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return false;
@@ -3300,7 +3241,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private boolean switchToNextInputMethod(IBinder token, boolean onlyCurrentIme) {
+    private boolean switchToNextInputMethod(@NonNull IBinder token, boolean onlyCurrentIme) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return false;
@@ -3718,7 +3659,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private void handleSetInteractive(final boolean interactive) {
         synchronized (mMethodMap) {
             mIsInteractive = interactive;
-            updateSystemUiLocked(mCurToken, interactive ? mImeWindowVis : 0, mBackDisposition);
+            updateSystemUiLocked(interactive ? mImeWindowVis : 0, mBackDisposition);
 
             // Inform the current client of the change in active status
             if (mCurClient != null && mCurClient.client != null) {
@@ -4049,7 +3990,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             attrs.privateFlags |= PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             attrs.setTitle("Select input method");
             w.setAttributes(attrs);
-            updateSystemUi(mCurToken, mImeWindowVis, mBackDisposition);
+            updateSystemUiLocked(mImeWindowVis, mBackDisposition);
             mSwitchingDialog.show();
         }
     }
@@ -4109,7 +4050,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingDialogTitleView = null;
         }
 
-        updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
+        updateSystemUiLocked(mImeWindowVis, mBackDisposition);
         mDialogBuilder = null;
         mIms = null;
     }
@@ -4387,7 +4328,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void reportFullscreenMode(IBinder token, boolean fullscreen) {
+    private void reportFullscreenMode(@NonNull IBinder token, boolean fullscreen) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -4822,8 +4763,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final class InputMethodPrivilegedOperationsImpl
             extends IInputMethodPrivilegedOperations.Stub {
         private final InputMethodManagerService mImms;
+        @NonNull
         private final IBinder mToken;
-        InputMethodPrivilegedOperationsImpl(InputMethodManagerService imms, IBinder token) {
+        InputMethodPrivilegedOperationsImpl(InputMethodManagerService imms,
+                @NonNull IBinder token) {
             mImms = imms;
             mToken = token;
         }
@@ -4903,7 +4846,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void notifyUserActionAsync() {
+        public void notifyUserAction() {
             mImms.notifyUserAction(mToken);
         }
     }

@@ -492,7 +492,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     final UsageStatsManagerInternal mUsageStatsManagerInternal;
     final TelephonyManager mTelephonyManager;
     private final LockPatternUtils mLockPatternUtils;
-    private final DevicePolicyConstants mConstants;
     private final DeviceAdminServiceController mDeviceAdminServiceController;
     private final OverlayPackagesProvider mOverlayPackagesProvider;
 
@@ -539,6 +538,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final AtomicBoolean mRemoteBugreportSharingAccepted = new AtomicBoolean();
 
     private final SetupContentObserver mSetupContentObserver;
+    private final DevicePolicyConstantsObserver mConstantsObserver;
+
+    private DevicePolicyConstants mConstants;
 
     private static boolean ENABLE_LOCK_GUARD = Build.IS_ENG
             || true // STOPSHIP Remove it.
@@ -2169,8 +2171,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mInjector = injector;
         mContext = Preconditions.checkNotNull(injector.mContext);
         mHandler = new Handler(Preconditions.checkNotNull(injector.getMyLooper()));
-        mConstants = DevicePolicyConstants.loadFromString(
-                mInjector.settingsGlobalGetString(Global.DEVICE_POLICY_CONSTANTS));
+
+        mConstantsObserver = new DevicePolicyConstantsObserver(mHandler);
+        mConstantsObserver.register();
+        mConstants = loadConstants();
 
         mOwners = Preconditions.checkNotNull(injector.newOwners());
 
@@ -10954,6 +10958,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private class DevicePolicyConstantsObserver extends ContentObserver {
+        final Uri mConstantsUri =
+                Settings.Global.getUriFor(Settings.Global.DEVICE_POLICY_CONSTANTS);
+
+        DevicePolicyConstantsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void register() {
+            mInjector.registerContentObserver(
+                    mConstantsUri, /* notifyForDescendents= */ false, this, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri, int userId) {
+            mConstants = loadConstants();
+        }
+    }
+
     @VisibleForTesting
     final class LocalService extends DevicePolicyManagerInternal {
         private List<OnCrossProfileWidgetProvidersChangeListener> mWidgetProviderListeners;
@@ -14166,5 +14189,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Log.d(LOG_TAG, "Calling package not found", e);
             return false;
         }
+    }
+
+    private DevicePolicyConstants loadConstants() {
+        return DevicePolicyConstants.loadFromString(
+                mInjector.settingsGlobalGetString(Global.DEVICE_POLICY_CONSTANTS));
     }
 }

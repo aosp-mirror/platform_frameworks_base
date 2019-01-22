@@ -145,6 +145,7 @@ public class SettingsBackupTest {
                     Settings.Global.BLOCKED_SLICES,
                     Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT,
                     Settings.Global.BLOCKING_HELPER_STREAK_LIMIT,
+                    Settings.Global.BLUETOOTH_BTSNOOP_DEFAULT_MODE,
                     Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,

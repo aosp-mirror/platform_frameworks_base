@@ -332,16 +332,16 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#notifyUserActionAsync()}
+     * Calls {@link IInputMethodPrivilegedOperations#notifyUserAction()}
      */
     @AnyThread
-    public void notifyUserActionAsync() {
+    public void notifyUserAction() {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            ops.notifyUserActionAsync();
+            ops.notifyUserAction();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

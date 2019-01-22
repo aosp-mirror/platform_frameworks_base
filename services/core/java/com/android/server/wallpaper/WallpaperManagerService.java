@@ -988,14 +988,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             Slog.w(TAG, "Fallback wallpaper connection has not been created yet!!");
             return;
         }
-        if (supportsMultiDisplay(systemConnection)
-                && fallbackConnection.mDisplayConnector.size() != 0) {
-            fallbackConnection.forEachDisplayConnector(connector -> {
-                if (connector.mEngine != null) {
-                    connector.disconnectLocked();
-                }
-            });
-            fallbackConnection.mDisplayConnector.clear();
+        if (supportsMultiDisplay(systemConnection)) {
+            if (fallbackConnection.mDisplayConnector.size() != 0) {
+                fallbackConnection.forEachDisplayConnector(connector -> {
+                    if (connector.mEngine != null) {
+                        connector.disconnectLocked();
+                    }
+                });
+                fallbackConnection.mDisplayConnector.clear();
+            }
         } else {
             fallbackConnection.appendConnectorWithCondition(display ->
                     fallbackConnection.isUsableDisplay(display)

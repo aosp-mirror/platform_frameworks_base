@@ -17,7 +17,6 @@
 package com.android.internal.view;
 
 import android.os.ResultReceiver;
-import android.text.style.SuggestionSpan;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
@@ -65,8 +64,6 @@ interface IInputMethodManager {
             int displayId);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     boolean isInputMethodPickerShownForTest();
-    void registerSuggestionSpansForNotification(in SuggestionSpan[] spans);
-    boolean notifySuggestionPicked(in SuggestionSpan span, String originalString, int index);
     InputMethodSubtype getCurrentInputMethodSubtype();
     boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);

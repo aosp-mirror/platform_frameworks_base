@@ -20,6 +20,7 @@ import static android.net.dhcp.IDhcpServer.STATUS_INVALID_ARGUMENT;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.dhcp.IDhcpServer.STATUS_UNKNOWN_ERROR;
 
+import static com.android.server.util.PermissionUtil.checkDumpPermission;
 import static com.android.server.util.PermissionUtil.checkNetworkStackCallingPermission;
 
 import android.annotation.NonNull;
@@ -139,7 +140,7 @@ public class NetworkStackService extends Service {
         @Override
         protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter fout,
                 @Nullable String[] args) {
-            checkNetworkStackCallingPermission();
+            checkDumpPermission();
             final IndentingPrintWriter pw = new IndentingPrintWriter(fout, "  ");
             pw.println("NetworkStack logs:");
             mLog.dump(fd, pw, args);

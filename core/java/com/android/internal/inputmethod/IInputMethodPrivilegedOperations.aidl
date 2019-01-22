@@ -38,6 +38,5 @@ interface IInputMethodPrivilegedOperations {
     boolean switchToPreviousInputMethod();
     boolean switchToNextInputMethod(boolean onlyCurrentIme);
     boolean shouldOfferSwitchingToNextInputMethod();
-
-    oneway void notifyUserActionAsync();
+    void notifyUserAction();
 }
