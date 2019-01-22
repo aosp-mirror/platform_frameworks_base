@@ -18,8 +18,10 @@ package android.net.wifi;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -58,17 +60,25 @@ public final class WifiNetworkSuggestion implements Parcelable {
      */
     public final int suggestorUid;
 
+    /**
+     * The package name of the process initializing this network suggestion.
+     * @hide
+     */
+    public final String suggestorPackageName;
+
     /** @hide */
-    public WifiNetworkSuggestion(WifiConfiguration wifiConfiguration,
+    public WifiNetworkSuggestion(@NonNull WifiConfiguration wifiConfiguration,
                                  boolean isAppInteractionRequired,
                                  boolean isUserInteractionRequired,
-                                 int suggestorUid) {
+                                 int suggestorUid, @NonNull String suggestorPackageName) {
         checkNotNull(wifiConfiguration);
+        checkNotNull(suggestorPackageName);
 
         this.wifiConfiguration = wifiConfiguration;
         this.isAppInteractionRequired = isAppInteractionRequired;
         this.isUserInteractionRequired = isUserInteractionRequired;
         this.suggestorUid = suggestorUid;
+        this.suggestorPackageName = suggestorPackageName;
     }
 
     public static final Creator<WifiNetworkSuggestion> CREATOR =
@@ -79,7 +89,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
                             in.readParcelable(null), // wifiConfiguration
                             in.readBoolean(), // isAppInteractionRequired
                             in.readBoolean(), // isUserInteractionRequired
-                            in.readInt() // suggestorUid
+                            in.readInt(), // suggestorUid
+                            in.readString() // suggestorPackageName
                     );
                 }
 
@@ -100,12 +111,13 @@ public final class WifiNetworkSuggestion implements Parcelable {
         dest.writeBoolean(isAppInteractionRequired);
         dest.writeBoolean(isUserInteractionRequired);
         dest.writeInt(suggestorUid);
+        dest.writeString(suggestorPackageName);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(wifiConfiguration.SSID, wifiConfiguration.BSSID,
-                wifiConfiguration.allowedKeyManagement, suggestorUid);
+                wifiConfiguration.allowedKeyManagement, suggestorUid, suggestorPackageName);
     }
 
     /**
@@ -124,7 +136,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 && Objects.equals(this.wifiConfiguration.BSSID, lhs.wifiConfiguration.BSSID)
                 && Objects.equals(this.wifiConfiguration.allowedKeyManagement,
                                   lhs.wifiConfiguration.allowedKeyManagement)
-                && suggestorUid == lhs.suggestorUid;
+                && suggestorUid == lhs.suggestorUid
+                && TextUtils.equals(suggestorPackageName, lhs.suggestorPackageName);
     }
 
     @Override
@@ -135,6 +148,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 .append(", isAppInteractionRequired=").append(isAppInteractionRequired)
                 .append(", isUserInteractionRequired=").append(isUserInteractionRequired)
                 .append(", suggestorUid=").append(suggestorUid)
+                .append(", suggestorPackageName=").append(suggestorPackageName)
                 .append("]");
         return sb.toString();
     }
