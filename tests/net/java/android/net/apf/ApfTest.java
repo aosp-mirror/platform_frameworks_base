@@ -1522,7 +1522,8 @@ public class ApfTest {
     }
 
     private void verifyRaEvent(RaEvent expected) {
-        ArgumentCaptor<Parcelable> captor = ArgumentCaptor.forClass(Parcelable.class);
+        ArgumentCaptor<IpConnectivityLog.Event> captor =
+                ArgumentCaptor.forClass(IpConnectivityLog.Event.class);
         verify(mLog, atLeastOnce()).log(captor.capture());
         RaEvent got = lastRaEvent(captor.getAllValues());
         if (!raEventEquals(expected, got)) {
@@ -1530,7 +1531,7 @@ public class ApfTest {
         }
     }
 
-    private RaEvent lastRaEvent(List<Parcelable> events) {
+    private RaEvent lastRaEvent(List<IpConnectivityLog.Event> events) {
         RaEvent got = null;
         for (Parcelable ev : events) {
             if (ev instanceof RaEvent) {

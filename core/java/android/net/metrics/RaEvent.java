@@ -24,7 +24,7 @@ import android.os.Parcelable;
  * An event logged when the APF packet socket receives an RA packet.
  * {@hide}
  */
-public final class RaEvent implements Parcelable {
+public final class RaEvent implements IpConnectivityLog.Event {
 
     public static final long NO_LIFETIME = -1L;
 

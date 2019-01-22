@@ -1043,6 +1043,10 @@ public class DhcpClient extends StateMachine {
     }
 
     private void logState(String name, int durationMs) {
-        mMetricsLog.log(mIfaceName, new DhcpClientEvent(name, durationMs));
+        final DhcpClientEvent event = new DhcpClientEvent.Builder()
+                .setMsg(name)
+                .setDurationMs(durationMs)
+                .build();
+        mMetricsLog.log(mIfaceName, event);
     }
 }
