@@ -32,7 +32,6 @@ package android.test.mock {
 
   public class MockContext extends android.content.Context {
     ctor public MockContext();
-    method public boolean bindIsolatedService(android.content.Intent, android.content.ServiceConnection, int, String);
     method public boolean bindService(android.content.Intent, android.content.ServiceConnection, int);
     method public int checkCallingOrSelfPermission(String);
     method public int checkCallingOrSelfUriPermission(android.net.Uri, int);
@@ -81,7 +80,6 @@ package android.test.mock {
     method public java.io.File getNoBackupFilesDir();
     method public java.io.File getObbDir();
     method public java.io.File[] getObbDirs();
-    method public String getOpPackageName();
     method public String getPackageCodePath();
     method public android.content.pm.PackageManager getPackageManager();
     method public String getPackageName();
@@ -137,7 +135,6 @@ package android.test.mock {
     method public boolean stopService(android.content.Intent);
     method public void unbindService(android.content.ServiceConnection);
     method public void unregisterReceiver(android.content.BroadcastReceiver);
-    method public void updateServiceGroup(android.content.ServiceConnection, int, int);
   }
 
   @Deprecated public class MockCursor implements android.database.Cursor {
