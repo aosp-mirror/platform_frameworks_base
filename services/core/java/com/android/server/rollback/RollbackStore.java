@@ -16,6 +16,7 @@
 
 package com.android.server.rollback;
 
+import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
 import android.util.Log;
@@ -116,9 +117,9 @@ class RollbackStore {
                     String packageName = element.getString("packageName");
                     long higherVersionCode = element.getLong("higherVersionCode");
                     long lowerVersionCode = element.getLong("lowerVersionCode");
-                    PackageRollbackInfo target = new PackageRollbackInfo(packageName,
-                            new PackageRollbackInfo.PackageVersion(higherVersionCode),
-                            new PackageRollbackInfo.PackageVersion(lowerVersionCode));
+                    PackageRollbackInfo target = new PackageRollbackInfo(
+                            new VersionedPackage(packageName, higherVersionCode),
+                            new VersionedPackage(packageName, lowerVersionCode));
                     RollbackInfo rollback = new RollbackInfo(rollbackId, target);
                     recentlyExecutedRollbacks.add(rollback);
                 }
@@ -157,9 +158,11 @@ class RollbackStore {
             JSONArray packagesJson = new JSONArray();
             for (PackageRollbackInfo info : data.packages) {
                 JSONObject infoJson = new JSONObject();
-                infoJson.put("packageName", info.packageName);
-                infoJson.put("higherVersionCode", info.higherVersion.versionCode);
-                infoJson.put("lowerVersionCode", info.lowerVersion.versionCode);
+                infoJson.put("packageName", info.getPackageName());
+                infoJson.put("higherVersionCode",
+                        info.getVersionRolledBackFrom().getLongVersionCode());
+                infoJson.put("lowerVersionCode",
+                        info.getVersionRolledBackTo().getVersionCode());
                 packagesJson.put(infoJson);
             }
             dataJson.put("rollbackId", data.rollbackId);
@@ -197,9 +200,11 @@ class RollbackStore {
                 RollbackInfo rollback = recentlyExecutedRollbacks.get(i);
                 JSONObject element = new JSONObject();
                 element.put("rollbackId", rollback.getRollbackId());
-                element.put("packageName", rollback.targetPackage.packageName);
-                element.put("higherVersionCode", rollback.targetPackage.higherVersion.versionCode);
-                element.put("lowerVersionCode", rollback.targetPackage.lowerVersion.versionCode);
+                element.put("packageName", rollback.targetPackage.getPackageName());
+                element.put("higherVersionCode",
+                        rollback.targetPackage.getVersionRolledBackFrom().getLongVersionCode());
+                element.put("lowerVersionCode",
+                        rollback.targetPackage.getVersionRolledBackTo().getLongVersionCode());
                 array.put(element);
             }
 
@@ -231,9 +236,9 @@ class RollbackStore {
                 String packageName = infoJson.getString("packageName");
                 long higherVersionCode = infoJson.getLong("higherVersionCode");
                 long lowerVersionCode = infoJson.getLong("lowerVersionCode");
-                data.packages.add(new PackageRollbackInfo(packageName,
-                        new PackageRollbackInfo.PackageVersion(higherVersionCode),
-                        new PackageRollbackInfo.PackageVersion(lowerVersionCode)));
+                data.packages.add(new PackageRollbackInfo(
+                        new VersionedPackage(packageName, higherVersionCode),
+                        new VersionedPackage(packageName, lowerVersionCode)));
             }
 
             data.timestamp = Instant.parse(dataJson.getString("timestamp"));
