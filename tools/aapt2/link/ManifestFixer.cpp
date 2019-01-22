@@ -213,27 +213,6 @@ static bool VerifyUsesFeature(xml::Element* el, SourcePathDiagnostics* diag) {
   return true;
 }
 
-static bool AddDeprecatedUsesFeatures(xml::Element* el, SourcePathDiagnostics* diag) {
-  if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name")) {
-    if (attr->value.empty()) {
-      return true;
-    }
-
-    // Add "android.hardware.fingerprint" when "android.hardware.biometric.fingerprint" is found,
-    // since the former is deprecated in Q and the latter is not present pre-Q. (see b/115639644)
-    if (attr->value == "android.hardware.biometrics.fingerprint") {
-      auto element = el->CloneElement([&](const xml::Element& el, xml::Element* out_el) {
-        xml::Attribute* cloned_attr = out_el->FindOrCreateAttribute(xml::kSchemaAndroid, "name");
-        cloned_attr->value = "android.hardware.fingerprint";
-      });
-
-      el->parent->AppendChild(std::move(element));
-    }
-  }
-
-  return true;
-}
-
 bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
                                IDiagnostics* diag) {
   // First verify some options.
@@ -268,7 +247,6 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   // Common <uses-feature> actions.
   xml::XmlNodeAction uses_feature_action;
   uses_feature_action.Action(VerifyUsesFeature);
-  uses_feature_action.Action(AddDeprecatedUsesFeatures);
 
   // Common component actions.
   xml::XmlNodeAction component_action;
