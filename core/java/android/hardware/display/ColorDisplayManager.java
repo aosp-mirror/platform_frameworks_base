@@ -17,6 +17,7 @@
 package android.hardware.display;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -30,6 +31,9 @@ import android.os.ServiceManager.ServiceNotFoundException;
 
 import com.android.internal.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Manages the display's color transforms and modes.
  *
@@ -38,6 +42,44 @@ import com.android.internal.R;
 @SystemApi
 @SystemService(Context.COLOR_DISPLAY_SERVICE)
 public final class ColorDisplayManager {
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({CAPABILITY_NONE, CAPABILITY_PROTECTED_CONTENT, CAPABILITY_HARDWARE_ACCELERATION_GLOBAL,
+            CAPABILITY_HARDWARE_ACCELERATION_PER_APP})
+    public @interface CapabilityType {}
+
+    /**
+     * The device does not support color transforms.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CAPABILITY_NONE = 0x0;
+    /**
+     * The device can properly apply transforms over protected content.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CAPABILITY_PROTECTED_CONTENT = 0x1;
+    /**
+     * The device's hardware can efficiently apply transforms to the entire display.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CAPABILITY_HARDWARE_ACCELERATION_GLOBAL = 0x2;
+    /**
+     * The device's hardware can efficiently apply transforms to a specific Surface (window) so
+     * that apps can be transformed independently of one another.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CAPABILITY_HARDWARE_ACCELERATION_PER_APP = 0x4;
 
     private final ColorDisplayManagerInternal mManager;
 
@@ -114,6 +156,17 @@ public final class ColorDisplayManager {
         return context.getResources().getBoolean(R.bool.config_setColorTransformAccelerated);
     }
 
+    /**
+     * Returns the available software and hardware color transform capabilities of this device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
+    public @CapabilityType int getTransformCapabilities() {
+        return mManager.getTransformCapabilities();
+    }
+
     private static class ColorDisplayManagerInternal {
 
         private static ColorDisplayManagerInternal sInstance;
@@ -158,6 +211,14 @@ public final class ColorDisplayManager {
         boolean setAppSaturationLevel(String packageName, int saturationLevel) {
             try {
                 return mCdm.setAppSaturationLevel(packageName, saturationLevel);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        int getTransformCapabilities() {
+            try {
+                return mCdm.getTransformCapabilities();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
