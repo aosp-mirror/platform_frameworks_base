@@ -205,6 +205,7 @@ package android {
   }
 
   public static final class R.attr {
+    field public static final int allowClearUserDataOnFailedRestore = 16844198; // 0x10105a6
     field public static final int inheritShowWhenLocked = 16844194; // 0x10105a2
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565

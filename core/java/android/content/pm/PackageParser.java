@@ -3747,6 +3747,13 @@ public class PackageParser {
             ai.privateFlags |= PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
         }
 
+        if (sa.getBoolean(
+                com.android.internal.R.styleable
+                        .AndroidManifestApplication_allowClearUserDataOnFailedRestore,
+                true)) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE;
+        }
+
         ai.maxAspectRatio = sa.getFloat(R.styleable.AndroidManifestApplication_maxAspectRatio, 0);
         ai.minAspectRatio = sa.getFloat(R.styleable.AndroidManifestApplication_minAspectRatio, 0);
 
