@@ -22,6 +22,7 @@ import android.net.Network;
 import android.net.ProvisioningConfigurationParcelable;
 import android.net.StaticIpConfiguration;
 import android.net.apf.ApfCapabilities;
+import android.net.ip.IIpClient;
 
 import java.util.Objects;
 import java.util.StringJoiner;
