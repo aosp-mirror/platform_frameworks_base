@@ -46,6 +46,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.storage.StorageManager;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
@@ -55,14 +56,16 @@ import com.android.server.pm.PackageManagerServiceUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -81,6 +84,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     // structures. By convention, methods with the suffix "Locked" require
     // mLock is held when they are called.
     private final Object mLock = new Object();
+
+    // Used for generating rollback IDs.
+    private final Random mRandom = new SecureRandom();
+
+    // Set of allocated rollback ids
+    @GuardedBy("mLock")
+    private final SparseBooleanArray mAllocatedRollbackIds = new SparseBooleanArray();
 
     // Package rollback data for rollback-enabled installs that have not yet
     // been committed. Maps from sessionId to rollback data.
@@ -212,7 +222,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             if (info.packageName.equals(packageName)) {
                 // TODO: Once the RollbackInfo API supports info about
                 // dependant packages, add that info here.
-                return new RollbackInfo(info);
+                return new RollbackInfo(data.rollbackId, info);
             }
         }
         return null;
@@ -282,15 +292,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return;
         }
 
-        // Verify the latest rollback matches the version requested.
-        // TODO: Check dependant packages too once RollbackInfo includes that
-        // information.
-        for (PackageRollbackInfo info : data.packages) {
-            if (info.packageName.equals(targetPackageName)
-                    && !rollback.targetPackage.higherVersion.equals(info.higherVersion)) {
-                sendFailure(statusReceiver, "Rollback is out of date.");
-                return;
-            }
+        if (data.rollbackId != rollback.getRollbackId()) {
+            sendFailure(statusReceiver, "Rollback for package is out of date");
+            return;
         }
 
         // Verify the RollbackData is up to date with what's installed on
@@ -469,7 +473,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @GuardedBy("mLock")
     private void loadAllRollbackDataLocked() {
         mAvailableRollbacks = mRollbackStore.loadAvailableRollbacks();
+        for (RollbackData data : mAvailableRollbacks) {
+            mAllocatedRollbackIds.put(data.rollbackId, true);
+        }
+
         mRecentlyExecutedRollbacks = mRollbackStore.loadRecentlyExecutedRollbacks();
+        for (RollbackInfo info : mRecentlyExecutedRollbacks) {
+            mAllocatedRollbackIds.put(info.getRollbackId(), true);
+        }
+
         scheduleExpiration(0);
     }
 
@@ -732,7 +744,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 mChildSessions.put(childSessionId, parentSessionId);
                 data = mPendingRollbacks.get(parentSessionId);
                 if (data == null) {
-                    data = mRollbackStore.createAvailableRollback();
+                    int rollbackId = allocateRollbackIdLocked();
+                    data = mRollbackStore.createAvailableRollback(rollbackId);
                     mPendingRollbacks.put(parentSessionId, data);
                 }
                 data.packages.add(info);
@@ -911,5 +924,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             }
         }
         return null;
+    }
+
+    @GuardedBy("mLock")
+    private int allocateRollbackIdLocked() throws IOException {
+        int n = 0;
+        int rollbackId;
+        do {
+            rollbackId = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
+            if (!mAllocatedRollbackIds.get(rollbackId, false)) {
+                mAllocatedRollbackIds.put(rollbackId, true);
+                return rollbackId;
+            }
+        } while (n++ < 32);
+
+        throw new IOException("Failed to allocate rollback ID");
     }
 }

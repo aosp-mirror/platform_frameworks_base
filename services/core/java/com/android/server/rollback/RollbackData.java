@@ -29,6 +29,11 @@ import java.util.List;
  */
 class RollbackData {
     /**
+     * A unique identifier for this rollback.
+     */
+    public final int rollbackId;
+
+    /**
      * The per-package rollback information.
      */
     public final List<PackageRollbackInfo> packages = new ArrayList<>();
@@ -44,7 +49,8 @@ class RollbackData {
      */
     public Instant timestamp;
 
-    RollbackData(File backupDir) {
+    RollbackData(int rollbackId, File backupDir) {
+        this.rollbackId = rollbackId;
         this.backupDir = backupDir;
     }
 }

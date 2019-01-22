@@ -1688,6 +1688,7 @@ package android.content.rollback {
 
   public final class RollbackInfo implements android.os.Parcelable {
     method public int describeContents();
+    method public int getRollbackId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.rollback.RollbackInfo> CREATOR;
     field public final android.content.rollback.PackageRollbackInfo targetPackage;
