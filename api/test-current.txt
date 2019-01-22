@@ -780,6 +780,17 @@ package android.media.audiofx {
 
 package android.net {
 
+  public class CaptivePortal implements android.os.Parcelable {
+    field public static final int APP_RETURN_DISMISSED = 0; // 0x0
+    field public static final int APP_RETURN_UNWANTED = 1; // 0x1
+    field public static final int APP_RETURN_WANTED_AS_IS = 2; // 0x2
+  }
+
+  public class ConnectivityManager {
+    field public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC = "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
+    field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
+  }
+
   public final class IpSecManager {
     field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
   }
@@ -1295,6 +1306,21 @@ package android.provider {
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
     field public static final String AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS = "autofill_smart_suggestion_emulation_flags";
     field public static final String AUTOMATIC_POWER_SAVER_MODE = "automatic_power_saver_mode";
+    field public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS = "captive_portal_fallback_probe_specs";
+    field public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
+    field public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
+    field public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
+    field public static final String CAPTIVE_PORTAL_MODE = "captive_portal_mode";
+    field public static final int CAPTIVE_PORTAL_MODE_AVOID = 2; // 0x2
+    field public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0; // 0x0
+    field public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1; // 0x1
+    field public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS = "captive_portal_other_fallback_urls";
+    field public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
+    field public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
+    field public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD = "data_stall_consecutive_dns_timeout_threshold";
+    field public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
+    field public static final String DATA_STALL_MIN_EVALUATE_INTERVAL = "data_stall_min_evaluate_interval";
+    field public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD = "data_stall_valid_dns_time_threshold";
     field public static final String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD = "dynamic_power_savings_disable_threshold";
     field public static final String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";

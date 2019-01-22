@@ -23,6 +23,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -255,6 +256,8 @@ public class ConnectivityManager {
      * portal login activity.
      * {@hide}
      */
+    @SystemApi
+    @TestApi
     public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC =
             "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
 
@@ -262,6 +265,8 @@ public class ConnectivityManager {
      * Key for passing a user agent string to the captive portal login activity.
      * {@hide}
      */
+    @SystemApi
+    @TestApi
     public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT =
             "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
 
