@@ -144,7 +144,7 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Salida de texto a voz"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Velocidad de voz"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Velocidad en la que se habla el texto"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Sonido"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tono"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Afecta el tono de la voz sintetizada"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Idioma"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Usar el idioma del sistema"</string>

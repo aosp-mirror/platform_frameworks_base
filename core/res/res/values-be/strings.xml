@@ -79,7 +79,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Налады ідэнтыфікатару АВН па змаўчанні: не абмяжавана. Наступны выклік: не абмежавана"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Служба не прадастаўляецца."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Вы не можаце змяніць налады ідэнтыфікатара абанента, якi тэлефануе."</string>
-    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Мабільны інтэрнэт недаступны"</string>
+    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Мабільная перадача даных недаступная"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Экстранныя выклікі недаступныя"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Няма сэрвісу галасавых выклікаў"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Галасавыя або экстранныя выклікі недаступныя"</string>
@@ -416,7 +416,7 @@
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Гэтыя сэрвісы вызначэння месцазнаходжання павінны быць уключаны i даступныя на вашым тэлефоне, каб праграма магла іх выкарыстоўваць."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"змяняць налады аудыё"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Дазваляе прыкладанням змяняць глабальныя налады гуку, такія як моц і тое, што дынамік выкарыстоўваецца для выхаду."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"запісваць аўдыё"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"запіс аўдыя"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Гэта праграма можа у любы час запісваць аўдыя, выкарыстоўваючы мікрафон."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"адпраўляць каманды на SIM-карту"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Дазваляе праграме адпраўляць каманды SIM-карце. Гэта вельмі небяспечна."</string>

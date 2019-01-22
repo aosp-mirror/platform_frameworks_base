@@ -604,7 +604,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Anforderung, dass gespeicherte App-Daten verschlüsselt werden"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kameras deaktivieren"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Nutzung sämtlicher Gerätekameras unterbinden"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Einige Funktionen der Displaysperre deaktivieren"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Displaysperre teilweise deaktivieren"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Verwendung einiger Funktionen der Displaysperre verhindern"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
