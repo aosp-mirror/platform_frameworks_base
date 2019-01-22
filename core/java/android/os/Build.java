@@ -1001,18 +1001,8 @@ public class Build {
     /** A string that uniquely identifies this build.  Do not attempt to parse this value. */
     public static final String FINGERPRINT = deriveFingerprint();
 
-    /**
-     * Custom fingerprint
-     * @hide
-     */
-    public static final String PROP_CUSTOM_FINGERPRINT = "org.pixelexperience.fingerprint";
-
-    /**
-     * Custom fingerprint
-     * @hide
-     */
-    public static final String CUSTOM_FINGERPRINT = SystemProperties.get(PROP_CUSTOM_FINGERPRINT,
-            deriveFingerprint());
+    /** @hide */
+    public static final String CUSTOM_FINGERPRINT = getString("ro.build.date");
 
     /**
      * Some devices split the fingerprint components between multiple
