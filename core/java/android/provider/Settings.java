@@ -11103,6 +11103,10 @@ public final class Settings {
           */
         public static final String PRIVATE_DNS_DEFAULT_MODE = "private_dns_default_mode";
 
+
+        /** {@hide} */
+        public static final String
+                BLUETOOTH_BTSNOOP_DEFAULT_MODE = "bluetooth_btsnoop_default_mode";
         /** {@hide} */
         public static final String
                 BLUETOOTH_HEADSET_PRIORITY_PREFIX = "bluetooth_headset_priority_";
