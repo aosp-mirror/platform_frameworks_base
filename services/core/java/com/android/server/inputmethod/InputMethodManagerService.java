@@ -2845,7 +2845,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             int unverifiedTargetSdkVersion) {
         final int callingUserId = UserHandle.getCallingUserId();
         final int userId;
-        if (PER_PROFILE_IME_ENABLED && attribute != null && attribute.targetInputMethodUser != null
+        if (attribute != null && attribute.targetInputMethodUser != null
                 && attribute.targetInputMethodUser.getIdentifier() != callingUserId) {
             mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     "Using EditorInfo.user requires INTERACT_ACROSS_USERS_FULL.");
@@ -2862,9 +2862,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         InputBindResult res = null;
         synchronized (mMethodMap) {
-            // Needs to check the validity before clearing calling identity
-            // Note that cross-profile access is always allowed here to allow profile-switching.
-            final boolean calledFromValidUser = calledFromValidUserLocked(true);
             final int windowDisplayId =
                     mWindowManagerInternal.getDisplayIdForWindow(windowToken);
             final long ident = Binder.clearCallingIdentity();
@@ -2908,10 +2905,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     return InputBindResult.NOT_IME_TARGET_WINDOW;
                 }
 
-                if (!calledFromValidUser) {
+                // cross-profile access is always allowed here to allow profile-switching.
+                if (!mSettings.isCurrentProfile(userId)) {
                     Slog.w(TAG, "A background user is requesting window. Hiding IME.");
-                    Slog.w(TAG, "If you want to interect with IME, you need "
-                            + "android.permission.INTERACT_ACROSS_USERS_FULL");
+                    Slog.w(TAG, "If you need to impersonate a foreground user/profile from"
+                            + " a background user, use EditorInfo.targetInputMethodUser with"
+                            + " INTERACT_ACROSS_USERS_FULL permission.");
                     hideCurrentInputLocked(0, null);
                     return InputBindResult.INVALID_USER;
                 }
