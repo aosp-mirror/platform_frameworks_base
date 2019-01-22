@@ -357,11 +357,6 @@ class ActivityStack extends ConfigurationContainer {
      */
     boolean mForceHidden = false;
 
-    /**
-     * Used to keep resumeTopActivityUncheckedLocked() from being entered recursively
-     */
-    boolean mInResumeTopActivity = false;
-
     private boolean mUpdateBoundsDeferred;
     private boolean mUpdateBoundsDeferredCalled;
     private boolean mUpdateDisplayedBoundsDeferredCalled;
@@ -1737,7 +1732,6 @@ class ActivityStack extends ConfigurationContainer {
             "Activity paused: token=" + token + ", timeout=" + timeout);
 
         final ActivityRecord r = isInStackLocked(token);
-
         if (r != null) {
             mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
             if (mPausingActivity == r) {
@@ -2094,7 +2088,8 @@ class ActivityStack extends ConfigurationContainer {
             boolean aboveTop = top != null;
             final boolean stackShouldBeVisible = shouldBeVisible(starting);
             boolean behindFullscreenActivity = !stackShouldBeVisible;
-            boolean resumeNextActivity = isFocusable() && isInStackLocked(starting) == null;
+            boolean resumeNextActivity = mRootActivityContainer.isTopDisplayFocusedStack(this)
+                    && (isInStackLocked(starting) == null);
             final boolean isTopNotPinnedStack =
                     isAttached() && getDisplay().isTopNotPinnedStack(this);
             for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
@@ -2154,10 +2149,6 @@ class ActivityStack extends ConfigurationContainer {
 
                             if (r.handleAlreadyVisible()) {
                                 resumeNextActivity = false;
-                            }
-
-                            if (notifyClients) {
-                                r.makeActiveIfNeeded(starting);
                             }
                         } else {
                             r.makeVisibleIfNeeded(starting, notifyClients);
@@ -2336,7 +2327,7 @@ class ActivityStack extends ConfigurationContainer {
                 r.setVisible(true);
             }
             if (r != starting) {
-                mStackSupervisor.startSpecificActivityLocked(r, andResume, true /* checkConfig */);
+                mStackSupervisor.startSpecificActivityLocked(r, andResume, false);
                 return true;
             }
         }
@@ -2514,7 +2505,7 @@ class ActivityStack extends ConfigurationContainer {
      */
     @GuardedBy("mService")
     boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
-        if (mInResumeTopActivity) {
+        if (mStackSupervisor.inResumeTopActivity) {
             // Don't even start recursing.
             return false;
         }
@@ -2522,7 +2513,7 @@ class ActivityStack extends ConfigurationContainer {
         boolean result = false;
         try {
             // Protect against recursion.
-            mInResumeTopActivity = true;
+            mStackSupervisor.inResumeTopActivity = true;
             result = resumeTopActivityInnerLocked(prev, options);
 
             // When resuming the top activity, it may be necessary to pause the top activity (for
@@ -2537,7 +2528,7 @@ class ActivityStack extends ConfigurationContainer {
                 checkReadyForSleep();
             }
         } finally {
-            mInResumeTopActivity = false;
+            mStackSupervisor.inResumeTopActivity = false;
         }
 
         return result;
@@ -2570,7 +2561,7 @@ class ActivityStack extends ConfigurationContainer {
         // Find the next top-most activity to resume in this stack that is not finishing and is
         // focusable. If it is not focusable, we will fall into the case below to resume the
         // top activity in the next focusable task.
-        ActivityRecord next = topRunningActivityLocked(true /* focusableOnly */);
+        final ActivityRecord next = topRunningActivityLocked(true /* focusableOnly */);
 
         final boolean hasRunningActivity = next != null;
 
@@ -2658,12 +2649,6 @@ class ActivityStack extends ConfigurationContainer {
         if (!mRootActivityContainer.allPausedActivitiesComplete()) {
             if (DEBUG_SWITCH || DEBUG_PAUSE || DEBUG_STATES) Slog.v(TAG_PAUSE,
                     "resumeTopActivityLocked: Skip resume: some activity pausing.");
-
-            // Adding previous activity to the waiting visible list, or it would be stopped
-            // before top activity being visible.
-            if (prev != null && !next.nowVisible) {
-                mStackSupervisor.mActivitiesWaitingForVisibleActivity.add(prev);
-            }
             return false;
         }
 
@@ -2873,9 +2858,7 @@ class ActivityStack extends ConfigurationContainer {
             // the screen based on the new activity order.
             boolean notUpdated = true;
 
-            // Activity should also be visible if set mLaunchTaskBehind to true (see
-            // ActivityRecord#shouldBeVisibleIgnoringKeyguard()).
-            if (shouldBeVisible(next)) {
+            if (isFocusedStackOnDisplay()) {
                 // We have special rotation behavior when here is some active activity that
                 // requests specific orientation or Keyguard is locked. Make sure all activity
                 // visibilities are set correctly as well as the transition is updated if needed
@@ -4104,12 +4087,6 @@ class ActivityStack extends ConfigurationContainer {
         mStackSupervisor.mFinishingActivities.add(r);
         r.resumeKeyDispatchingLocked();
         mRootActivityContainer.resumeFocusedStacksTopActivities();
-        // If activity was not paused at this point - explicitly pause it to start finishing
-        // process. Finishing will be completed once it reports pause back.
-        if (r.isState(RESUMED) && mPausingActivity != null) {
-            startPausingLocked(false /* userLeaving */, false /* uiSleeping */, next /* resuming */,
-                    false /* dontWait */);
-        }
         return r;
     }
 
