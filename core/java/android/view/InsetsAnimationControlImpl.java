@@ -127,16 +127,18 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         final Insets offset = Insets.subtract(mShownInsets, mPendingInsets);
         ArrayList<SurfaceParams> params = new ArrayList<>();
         if (offset.left != 0) {
-            updateLeashesForSide(INSET_SIDE_LEFT, offset.left, params, state);
+            updateLeashesForSide(INSET_SIDE_LEFT, offset.left, mPendingInsets.left, params, state);
         }
         if (offset.top != 0) {
-            updateLeashesForSide(INSET_SIDE_TOP, offset.top, params, state);
+            updateLeashesForSide(INSET_SIDE_TOP, offset.top, mPendingInsets.top, params, state);
         }
         if (offset.right != 0) {
-            updateLeashesForSide(INSET_SIDE_RIGHT, offset.right, params, state);
+            updateLeashesForSide(INSET_SIDE_RIGHT, offset.right, mPendingInsets.right, params,
+                    state);
         }
         if (offset.bottom != 0) {
-            updateLeashesForSide(INSET_SIDE_BOTTOM, offset.bottom, params, state);
+            updateLeashesForSide(INSET_SIDE_BOTTOM, offset.bottom, mPendingInsets.bottom, params,
+                    state);
         }
         SyncRtSurfaceTransactionApplier applier = mTransactionApplierSupplier.get();
         applier.scheduleApply(params.toArray(new SurfaceParams[params.size()]));
@@ -171,7 +173,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         return Insets.max(Insets.min(insets, mShownInsets), mHiddenInsets);
     }
 
-    private void updateLeashesForSide(@InsetSide int side, int inset,
+    private void updateLeashesForSide(@InsetSide int side, int offset, int inset,
             ArrayList<SurfaceParams> surfaceParams, InsetsState state) {
         ArraySet<InsetsSourceConsumer> items = mSideSourceMap.get(side);
         // TODO: Implement behavior when inset spans over multiple types
@@ -182,10 +184,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             mTmpMatrix.setTranslate(source.getFrame().left, source.getFrame().top);
 
             mTmpFrame.set(source.getFrame());
-            addTranslationToMatrix(side, inset, mTmpMatrix, mTmpFrame);
+            addTranslationToMatrix(side, offset, mTmpMatrix, mTmpFrame);
 
             state.getSource(source.getType()).setFrame(mTmpFrame);
-            surfaceParams.add(new SurfaceParams(leash, 1f, mTmpMatrix, null, 0, 0f));
+            surfaceParams.add(new SurfaceParams(leash, 1f, mTmpMatrix, null, 0, 0f, inset != 0));
         }
     }
 

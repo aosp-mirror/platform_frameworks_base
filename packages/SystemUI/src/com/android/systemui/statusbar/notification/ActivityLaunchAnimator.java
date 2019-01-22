@@ -268,7 +268,7 @@ public class ActivityLaunchAnimator {
             m.postTranslate(0, (float) (mParams.top - app.position.y));
             mWindowCrop.set(mParams.left, 0, mParams.right, mParams.getHeight());
             SurfaceParams params = new SurfaceParams(app.leash, 1f /* alpha */, m, mWindowCrop,
-                    app.prefixOrderIndex, mCornerRadius);
+                    app.prefixOrderIndex, mCornerRadius, true /* visible */);
             mSyncRtTransactionApplier.scheduleApply(params);
         }
 
